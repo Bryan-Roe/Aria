@@ -8,6 +8,8 @@ import torch.nn as nn
 from typing import List, Tuple, Optional
 import yaml
 import logging
+import os
+from pathlib import Path
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
@@ -20,13 +22,18 @@ class QuantumClassifier:
     for binary and multi-class classification tasks.
     """
     
-    def __init__(self, config_path: str = "../config/quantum_config.yaml"):
+    def __init__(self, config_path: str = None):
         """
         Initialize the quantum classifier.
         
         Args:
             config_path: Path to the configuration file
         """
+        if config_path is None:
+            # Get the directory of this file and construct path to config
+            current_dir = Path(__file__).parent
+            config_path = current_dir.parent / "config" / "quantum_config.yaml"
+        
         with open(config_path, 'r') as f:
             self.config = yaml.safe_load(f)
         
@@ -96,6 +103,9 @@ class QuantumClassifier:
         outputs = []
         for inp in inputs:
             result = self.qnode(inp, weights)
+            # Convert list of expectation values to tensor
+            if isinstance(result, list):
+                result = torch.tensor(result, dtype=torch.float32)
             outputs.append(result)
         return torch.stack(outputs)
     
@@ -206,7 +216,7 @@ def train_quantum_model(
     y_train: np.ndarray,
     X_val: Optional[np.ndarray] = None,
     y_val: Optional[np.ndarray] = None,
-    config_path: str = "../config/quantum_config.yaml"
+    config_path: str = None
 ) -> dict:
     """
     Train the hybrid quantum model.
@@ -222,6 +232,11 @@ def train_quantum_model(
     Returns:
         Training history
     """
+    if config_path is None:
+        # Get the directory of this file and construct path to config
+        current_dir = Path(__file__).parent
+        config_path = current_dir.parent / "config" / "quantum_config.yaml"
+    
     with open(config_path, 'r') as f:
         config = yaml.safe_load(f)
     

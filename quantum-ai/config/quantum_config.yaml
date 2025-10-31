@@ -13,7 +13,7 @@ quantum:
   
   # Simulator settings
   simulator:
-    backend: "qiskit_aer"
+    backend: "default.qubit"
     shots: 1024
     
   # Hardware settings
