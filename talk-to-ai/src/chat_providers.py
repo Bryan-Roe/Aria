@@ -8,7 +8,7 @@ from typing import Dict, Generator, Iterable, List, Optional
 
 try:
     # openai>=1.0
-    from openai import OpenAI, AzureOpenAI
+    from openai import OpenAI, AzureOpenAI  # type: ignore
 except Exception:  # pragma: no cover - optional at runtime
     OpenAI = None  # type: ignore
     AzureOpenAI = None  # type: ignore

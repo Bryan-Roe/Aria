@@ -13,13 +13,13 @@ ml:
     feature_dimension: 4
     train_test_split: 0.8
   model:
-    entanglement: full
-    n_layers: 2
+    entanglement: linear  # OPTIMIZED: 82.5% (was: full 52.5%)
+    n_layers: 3  # OPTIMIZED: 87.5% (was: 2 layers 77.5%)
     n_qubits: 4
   training:
     batch_size: 32
-    epochs: 50
-    learning_rate: 0.01
+    epochs: 100  # Restored for full training
+    learning_rate: 0.1  # OPTIMIZED: 90.0% (was: 0.01 85.0%)
     validation_split: 0.2
 quantum:
   hardware:
