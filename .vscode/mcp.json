@@ -1,0 +1,12 @@
+{
+  "servers": {
+    "quantum-ai": {
+      "type": "stdio",
+      "command": "python",
+      "args": [
+        "c:\\Users\\Bryan\\OneDrive\\AI\\quantum-ai\\quantum_mcp_server.py"
+      ]
+    }
+  }
+}
+

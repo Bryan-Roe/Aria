@@ -1,2 +1,1 @@
-# MCP Server requirements (in addition to base quantum-ai requirements)
-mcp>=1.0.0
+mcp>=0.1.0

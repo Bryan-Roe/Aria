@@ -1,26 +1,29 @@
 # Azure Quantum SDK
-azure-quantum>=1.0.0
-qiskit>=1.0.0
-qiskit-aer>=0.13.0
+azure-quantum>=1.0.0,<2.0.0
+qiskit>=1.0.0,<2.0.0
+qiskit-aer>=0.13.0,<1.0.0
 
 # Quantum Machine Learning
-pennylane>=0.35.0
-pennylane-qiskit>=0.35.0
-torch>=2.0.0
-numpy>=1.24.0
-scipy>=1.10.0
+pennylane>=0.35.0,<1.0.0
+pennylane-qiskit>=0.35.0,<1.0.0
+torch>=2.0.0,<3.0.0
+numpy>=1.24.0,<2.0.0
+scipy>=1.10.0,<2.0.0
 
 # Azure Integration
-azure-identity>=1.15.0
-azure-core>=1.29.0
+azure-identity>=1.15.0,<2.0.0
+azure-core>=1.29.0,<2.0.0
 
 # Data Processing & Visualization
-pandas>=2.0.0
-matplotlib>=3.7.0
-scikit-learn>=1.3.0
+pandas>=2.0.0,<3.0.0
+matplotlib>=3.7.0,<4.0.0
+scikit-learn>=1.3.0,<2.0.0
+
+# Configuration & Utilities
+pyyaml>=6.0.0,<7.0.0
 
 # Development Tools
-jupyter>=1.0.0
-ipykernel>=6.25.0
-pytest>=7.4.0
-black>=23.0.0
+jupyter>=1.0.0,<2.0.0
+ipykernel>=6.25.0,<7.0.0
+pytest>=7.4.0,<8.0.0
+black>=23.0.0,<24.0.0

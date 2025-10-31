@@ -106,6 +106,27 @@ If using Azure Quantum:
 1. Update `config/quantum_config.yaml` with your Azure details
 2. Follow the [Azure Deployment Guide](azure/DEPLOYMENT.md)
 
+## MCP Server Setup
+
+To use the Quantum AI MCP server:
+
+```powershell
+# Install MCP dependencies
+pip install -r mcp-requirements.txt
+
+# Run the server
+python quantum_mcp_server.py
+
+# Or use with VS Code MCP support (add to .vscode/mcp.json):
+{
+  "quantum-ai": {
+    "type": "stdio",
+    "command": "python",
+    "args": ["c:\\Users\\Bryan\\OneDrive\\AI\\quantum-ai\\quantum_mcp_server.py"]
+  }
+}
+```
+
 ## 📖 Usage
 
 ### Quick Start - Local Simulation

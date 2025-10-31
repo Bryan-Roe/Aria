@@ -133,3 +133,28 @@ __blobstorage__
 __queuestorage__
 __azurite_db*__.json
 .python_packages
+
+# Project-specific exclusions
+# Quantum AI Results
+quantum-ai/results/
+AI/quantum-ai/results/
+
+# Chat Logs (keep directory structure but ignore logs)
+talk-to-ai/logs/*.jsonl
+talk-to-ai/logs/*.txt
+
+# VS Code temporary files
+talk-to-ai/src/Untitled-*.json
+
+# Model checkpoints and outputs
+*.ckpt
+*.pth
+*.pt
+checkpoints/
+outputs/
+
+# OS-specific
+.DS_Store
+Thumbs.db
+.Trash-*
+$RECYCLE.BIN/
