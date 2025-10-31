@@ -1,0 +1,48 @@
+# Azure Quantum Configuration
+azure:
+  subscription_id: ""  # Add your Azure subscription ID
+  resource_group: "rg-quantum-ai"
+  workspace_name: "quantum-ai-workspace"
+  location: "eastus"
+  storage_account: "quantumstorage"
+
+# Quantum Computing Settings
+quantum:
+  # Default backend provider
+  provider: "ionq"  # Options: ionq, quantinuum, rigetti
+  
+  # Simulator settings
+  simulator:
+    backend: "qiskit_aer"
+    shots: 1024
+    
+  # Hardware settings
+  hardware:
+    shots: 500
+    optimization_level: 2
+
+# Machine Learning Settings
+ml:
+  # Training parameters
+  training:
+    epochs: 100
+    batch_size: 32
+    learning_rate: 0.01
+    validation_split: 0.2
+    
+  # Model architecture
+  model:
+    n_qubits: 4
+    n_layers: 2
+    entanglement: "linear"  # Options: linear, circular, full
+    
+  # Data settings
+  data:
+    feature_dimension: 4
+    train_test_split: 0.8
+
+# Logging
+logging:
+  level: "INFO"  # Options: DEBUG, INFO, WARNING, ERROR
+  save_results: true
+  results_dir: "./results"

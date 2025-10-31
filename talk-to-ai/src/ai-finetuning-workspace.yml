@@ -1,0 +1,9 @@
+$schema: https://azuremlschemas.azureedge.net/latest/workspace.schema.json
+name: ai-finetuning-workspace
+location: eastus2
+display_name: AI Fine-Tuning Workspace
+description: Azure ML workspace for Phi-3.6 model fine-tuning and AI/ML experiments
+tags:
+  purpose: fine-tuning
+  team: ai-research
+  project: phi-silica
