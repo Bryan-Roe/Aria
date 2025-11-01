@@ -245,7 +245,7 @@ def main():
         logging_steps=cfg.logging_steps,
         eval_steps=cfg.eval_steps,
         save_steps=cfg.save_steps,
-        evaluation_strategy="steps",
+        eval_strategy="steps",
         save_strategy="steps",
         save_total_limit=cfg.save_total_limit,
         fp16=cfg.use_fp16 and not cfg.use_bf16,

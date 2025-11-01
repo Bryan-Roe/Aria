@@ -202,6 +202,34 @@ results = azure.get_job_results(job)
 print(results)
 ```
 
+### Visualize hardware test results
+
+You can generate charts from Azure Quantum hardware tests (Bell state, optimized circuits) and job history:
+
+```powershell
+# 1) (Optional) Run non-interactive tests to create JSON results
+python .\quantum-ai\scripts\run_hardware_tests.py --backend rigetti.sim.qvm
+
+# 2) Build charts from saved results and Azure job list
+python .\quantum-ai\scripts\visualize_hardware_results.py
+```
+
+Outputs:
+
+- Per-run charts under `quantum-ai/results/visualizations/`:
+  - `<result>_bar.png` – top measurement states
+  - `<result>_heatmap.png` – 2-qubit heatmap (Bell)
+  - `entanglement_summary.png` – entanglement quality across Bell tests
+
+- If available, Azure job distribution charts:
+  - `azure_jobs_status.png` – counts by job status
+  - `azure_jobs_provider_status.png` – stacked provider × status
+
+Notes:
+
+- Results JSON may be saved to either `quantum-ai/results/` or repo-root `results/` depending on where the test was launched; the visualizer scans both.
+- Use `--optimized` with `run_hardware_tests.py` to also run and save the optimized circuit results.
+
 ### Using the MCP Server
 
 The quantum-ai project includes an MCP server that exposes quantum capabilities to AI agents:

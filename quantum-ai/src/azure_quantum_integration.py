@@ -57,6 +57,7 @@ class AzureQuantumIntegration:
                 subscription_id=self.azure_config['subscription_id'],
                 resource_group=self.azure_config['resource_group'],
                 name=self.azure_config['workspace_name'],
+                location=self.azure_config['location'],
                 credential=credential
             )
             
