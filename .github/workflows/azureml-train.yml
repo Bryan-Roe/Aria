@@ -1,0 +1,55 @@
+name: AzureML LoRA Train
+
+on:
+  workflow_dispatch:
+    inputs:
+      subscriptionId:
+        description: Azure subscription ID
+        required: true
+      resourceGroup:
+        description: Resource group name
+        required: true
+      workspaceName:
+        description: Azure ML workspace name
+        required: true
+      compute:
+        description: Azure ML compute target (e.g., azureml:gpu-cluster)
+        required: true
+        default: azureml:gpu-cluster
+      jobFile:
+        description: Job YAML path (single run or sweep)
+        required: true
+        default: AI/microsoft_phi-silica-3.6_v1/azureml/job-lora-train.yml
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  submit-job:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Azure login
+        uses: azure/login@v2
+        with:
+          # Create an Azure AD app and set its JSON creds in this secret:
+          # { "clientId": "...", "clientSecret": "...", "subscriptionId": "...", "tenantId": "..." }
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Install Azure ML CLI
+        uses: azure/cli@v2
+        with:
+          inlineScript: |
+            az extension add -n ml -y
+            az account set --subscription "${{ github.event.inputs.subscriptionId }}"
+            az configure --defaults group="${{ github.event.inputs.resourceGroup }}" workspace="${{ github.event.inputs.workspaceName }}"
+
+      - name: Submit Azure ML job
+        uses: azure/cli@v2
+        with:
+          inlineScript: |
+            echo "Submitting job from ${{ github.event.inputs.jobFile }} ..."
+            az ml job create -f "${{ github.event.inputs.jobFile }}" --set compute="${{ github.event.inputs.compute }}" --stream

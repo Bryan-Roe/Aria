@@ -186,6 +186,13 @@ def main():
     ap.add_argument("--train-manifest", default=None, help="Path or URL to manifest of training files (txt/json/jsonl)")
     ap.add_argument("--eval-manifest", default=None, help="Path or URL to manifest of eval files (txt/json/jsonl)")
     ap.add_argument("--save-dir", default=None, help="Override output directory (else from config or defaults)")
+    # Optional overrides for HPO/cloud runs
+    ap.add_argument("--learning-rate", type=float, default=None, help="Override learning_rate from config")
+    ap.add_argument("--lora-dropout", type=float, default=None, help="Override lora_dropout from config")
+    ap.add_argument("--epochs", type=int, default=None, help="Override epochs from config")
+    ap.add_argument("--train-batch-size", type=int, default=None, help="Override finetune_train_batch_size from config")
+    ap.add_argument("--eval-batch-size", type=int, default=None, help="Override finetune_test_batch_size from config")
+    ap.add_argument("--seed", type=int, default=None, help="Override seed from config")
     args = ap.parse_args()
 
     cfg_raw = read_yaml(Path(args.config))
@@ -207,6 +214,20 @@ def main():
         gradient_checkpointing=bool(cfg_raw.get("gradient_checkpointing") or False),
         seed=int(cfg_raw.get("seed") or 42),
     )
+
+    # Apply CLI overrides for HPO or cloud jobs
+    if getattr(args, "learning_rate", None) is not None:
+        cfg.learning_rate = float(args.learning_rate)
+    if getattr(args, "lora_dropout", None) is not None:
+        cfg.lora_dropout = float(args.lora_dropout)
+    if getattr(args, "epochs", None) is not None:
+        cfg.epochs = int(args.epochs)
+    if getattr(args, "train_batch_size", None) is not None:
+        cfg.finetune_train_batch_size = int(args.train_batch_size)
+    if getattr(args, "eval_batch_size", None) is not None:
+        cfg.finetune_test_batch_size = int(args.eval_batch_size)
+    if getattr(args, "seed", None) is not None:
+        cfg.seed = int(args.seed)
 
     # Resolve data sources: manifests or local files
     train_files: List[str] = []
