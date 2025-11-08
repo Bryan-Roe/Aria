@@ -1,0 +1,12 @@
+{
+  "name": "Phi-3.x LoRA Adapter",
+  "version": "1.0.0",
+  "description": "LoRA adapter trained for Phi-3.x mini instruct",
+  "tags": {
+    "task": "chat-completions",
+    "method": "LoRA",
+    "base_model": "microsoft/Phi-3.5-mini-instruct"
+  },
+  "license": "mit",
+  "author": "QAI Project"
+}

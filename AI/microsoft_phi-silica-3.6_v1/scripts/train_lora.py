@@ -185,13 +185,14 @@ def main():
     ap.add_argument("--deepspeed", default=None, help="Path to DeepSpeed config JSON to enable ZeRO (multi-GPU)")
     ap.add_argument("--train-manifest", default=None, help="Path or URL to manifest of training files (txt/json/jsonl)")
     ap.add_argument("--eval-manifest", default=None, help="Path or URL to manifest of eval files (txt/json/jsonl)")
+    ap.add_argument("--save-dir", default=None, help="Override output directory (else from config or defaults)")
     args = ap.parse_args()
 
     cfg_raw = read_yaml(Path(args.config))
     cfg = Config(
         model=cfg_raw.get("model") or "Phi-3.6-mini-instruct",
         finetune_dataset=cfg_raw.get("finetune_dataset") or str(Path(args.dataset)),
-        save_dir=cfg_raw.get("save_dir") or str(Path(__file__).resolve().parents[1] / "outputs"),
+        save_dir=(args.save_dir or cfg_raw.get("save_dir") or str(Path(__file__).resolve().parents[1] / "outputs")),
         finetune_train_nsamples=cfg_raw.get("finetune_train_nsamples"),
         finetune_test_nsamples=cfg_raw.get("finetune_test_nsamples"),
         finetune_train_batch_size=int(cfg_raw.get("finetune_train_batch_size") or 2),
