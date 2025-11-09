@@ -5,25 +5,33 @@ This repo contains three independent projects; treat them as separate apps with 
 - `talk-to-ai/` – Minimal CLI chat with local fallback, OpenAI, and Azure OpenAI
 - `AI/microsoft_phi-silica-3.6_v1/` – Phi‑3.6 LoRA/soft‑prompt fine‑tuning (Azure AI Toolkit–style configs)
 
+## Dev Container & Cross-Platform Support
+
+**Environment:** Alpine Linux dev container (3.20) with bash as default shell
+- **Windows host conventions:** Original docs use PowerShell syntax (`.\path\`, `$env:VAR`)
+- **Linux container commands:** Use bash syntax (`./path/`, `export VAR=value`)
+- Commands in this file are **Linux/bash-first** for container compatibility
+- When editing code, maintain PowerShell examples in per-project READMEs for Windows users
+
 ## 🆓 Free Tier Quick Start (No Cloud Costs)
 
 All projects work **100% locally** without any paid services:
 
-```powershell
+```bash
 # 1. Quantum AI - Local simulation (NO Azure required)
 cd quantum-ai
-python -m venv venv; .\venv\Scripts\Activate.ps1
+python -m venv venv && source venv/bin/activate
 pip install -r requirements.txt
-python .\src\quantum_classifier.py          # Free: Qiskit Aer simulator
+python src/quantum_classifier.py          # Free: Qiskit Aer simulator
 
 # 2. Chat - Local mode (NO API keys required)
-cd ..\talk-to-ai
+cd ../talk-to-ai
 pip install -r requirements.txt
-python .\src\chat_cli.py --provider local --once "Test"  # Zero cost, offline-capable
+python src/chat_cli.py --provider local --once "Test"  # Zero cost, offline-capable
 
 # 3. Datasets - All free, open-source
 cd ..
-python .\scripts\quick_setup_datasets.py    # Dolly 15k, UCI datasets (all free)
+python scripts/quick_setup_datasets.py    # Dolly 15k, UCI datasets (all free)
 ```
 
 **💡 Free alternatives to paid services:**
@@ -34,36 +42,49 @@ python .\scripts\quick_setup_datasets.py    # Dolly 15k, UCI datasets (all free)
 
 ## Core conventions
 
-**Platform & paths:**
-- Windows PowerShell is the default shell; use PS syntax (backticks for line continuation, `$env:VAR` for env vars).
-- All paths use backslashes under `c:\Users\Bryan\OneDrive\AI`. Example: `.\quantum-ai\src\quantum_classifier.py`.
-- Virtual environments: Create with `python -m venv venv`; activate with `.\venv\Scripts\Activate.ps1`.
-
 **Configuration philosophy:**
-- YAML-first: Never hardcode models/backends—read `quantum-ai/config/quantum_config.yaml`, `lora/lora.yaml`, `soft_prompt/soft_prompt.yaml`.
-- Config keys cascade: `azure.*` for infra, `quantum.*` for circuits/backends, `ml.*` for training hyperparams.
-- Logs/results: Always write to project-local dirs (`talk-to-ai/logs/*.jsonl`, `quantum-ai/results/*.json`, `AI/microsoft_phi-silica-3.6_v1/data_out/`).
+- **YAML-first**: Never hardcode models/backends—read `quantum-ai/config/quantum_config.yaml`, `lora/lora.yaml`, `soft_prompt/soft_prompt.yaml`.
+- **Config structure**: `azure.*` for infra, `quantum.*` for circuits/backends, `ml.*` for training hyperparams.
+- **Config loading pattern**: All quantum modules use relative paths from script location:
+  ```python
+  current_dir = Path(__file__).parent
+  config_path = current_dir.parent / "config" / "quantum_config.yaml"
+  with open(config_path) as f:
+      config = yaml.safe_load(f)
+  ```
+- **Logs/results**: Always write to project-local dirs (`talk-to-ai/logs/*.jsonl`, `quantum-ai/results/*.json`, `AI/microsoft_phi-silica-3.6_v1/data_out/`).
 
-**Local dev infra:**
-- Azurite files at repo root (`__azurite_db_*.json`, `__blobstorage__/`, `__queuestorage__/`) indicate local Azure Storage emulator for Functions/Storage testing.
-- `local.settings.json`: Azure Functions local config (`AzureWebJobsStorage: UseDevelopmentStorage=true`).
+**Azure Functions integration:**
+- Repo root contains Azure Functions app (`function_app.py`) that serves chat web UI and REST API
+- Provider abstraction: All chat providers inherit `BaseChatProvider` and implement `complete(messages, stream)` method
+- Functions import talk-to-ai modules dynamically: `sys.path.insert(0, "talk-to-ai/src")`
+- Local dev: Azurite emulator files at root (`__azurite_db_*.json`, `__blobstorage__/`, `__queuestorage__/`)
+- Config: `local.settings.json` sets `AzureWebJobsStorage: UseDevelopmentStorage=true`
+
+**Dataset integration:**
+- `datasets/dataset_index.json`: Metadata registry for all datasets (quantum CSVs, chat JSONL, sizes, licenses)
+- Structure: `datasets/{quantum,chat,vision,raw,processed}/` 
+- Quantum training: `train_custom_dataset.py` loads from `datasets/quantum/*.csv` via pandas
+- LLM training: Scripts accept `--dataset path/to/jsonl` or manifest files
+- Quick setup: `scripts/quick_setup_datasets.py` downloads UCI + Dolly 15k (~500MB, auto-validates)
 
 ## Quantum AI (`quantum-ai/`)
 
 **Setup & execution:**
-```powershell
+```bash
 cd quantum-ai
-python -m venv venv; .\venv\Scripts\Activate.ps1
+python -m venv venv && source venv/bin/activate
 pip install -r requirements.txt          # Core: qiskit, pennylane, pytorch
 pip install -r mcp-requirements.txt      # For MCP server: mcp>=0.9.0
-python .\src\quantum_classifier.py       # Local simulation demo
-python .\train_custom_dataset.py         # Train on datasets/quantum/*.csv
+python src/quantum_classifier.py         # Local simulation demo
+python train_custom_dataset.py           # Train on datasets/quantum/*.csv
 ```
 
 **MCP server** (Model Context Protocol for AI agents):
-- Run: `python .\quantum_mcp_server.py` (exposes 8 quantum tools via stdio).
+- Run: `python quantum_mcp_server.py` (exposes 8 quantum tools via stdio).
 - Tools: `create_quantum_circuit`, `simulate_quantum_circuit`, `train_quantum_classifier`, `connect_azure_quantum`, `submit_quantum_job`, `list_quantum_backends`, `estimate_quantum_cost`, `get_quantum_circuit_properties`.
 - Circuit cache: Session-scoped LRU with TTL (100 circuits, 3600s); cleared on server restart.
+- Architecture: ProcessPoolExecutor (2 workers) for CPU-bound quantum ops, ThreadPoolExecutor (4 workers) for I/O
 - VS Code MCP config (`.vscode/mcp.json`):
   ```json
   { "quantum-ai": { "type": "stdio", "command": "python", "args": ["c:\\Users\\Bryan\\OneDrive\\AI\\quantum-ai\\quantum_mcp_server.py"] } }
