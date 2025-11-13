@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quantum AI Training Dashboard</title>
+    <link rel="stylesheet" href="/static/styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <h1>⚛️ Quantum AI Training Dashboard</h1>
+                <p class="subtitle">Interactive quantum machine learning with real-time visualization</p>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Training Configuration Panel -->
+            <div class="panel config-panel">
+                <h2>🎛️ Training Configuration</h2>
+                
+                <div class="form-group">
+                    <label for="dataset-select">Dataset</label>
+                    <select id="dataset-select" class="form-control">
+                        <option value="">Loading datasets...</option>
+                    </select>
+                    <div id="dataset-info" class="info-text"></div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="n-qubits">Qubits</label>
+                        <input type="number" id="n-qubits" class="form-control" value="4" min="2" max="8">
+                    </div>
+                    <div class="form-group">
+                        <label for="n-layers">Layers</label>
+                        <input type="number" id="n-layers" class="form-control" value="2" min="1" max="5">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="learning-rate">Learning Rate</label>
+                        <input type="number" id="learning-rate" class="form-control" value="0.01" step="0.001" min="0.001" max="0.1">
+                    </div>
+                    <div class="form-group">
+                        <label for="duration">Duration (min)</label>
+                        <input type="number" id="duration" class="form-control" value="10" min="1" max="120">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="batch-size">Batch Size</label>
+                        <input type="number" id="batch-size" class="form-control" value="32" min="8" max="128">
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <button id="start-training-btn" class="btn btn-primary">
+                        <span class="btn-icon">🚀</span> Start Training
+                    </button>
+                    <button id="stop-training-btn" class="btn btn-danger" disabled>
+                        <span class="btn-icon">⏹️</span> Stop Training
+                    </button>
+                </div>
+            </div>
+
+            <!-- Training Status Panel -->
+            <div class="panel status-panel">
+                <h2>📊 Training Status</h2>
+                
+                <div id="status-idle" class="status-message">
+                    <div class="status-icon">💤</div>
+                    <p>Ready to train. Configure your model and click "Start Training".</p>
+                </div>
+
+                <div id="status-training" class="status-message" style="display: none;">
+                    <div class="status-icon spinning">⚛️</div>
+                    <div class="status-details">
+                        <div class="status-item">
+                            <span class="label">Status:</span>
+                            <span id="status-text" class="value">Initializing...</span>
+                        </div>
+                        <div class="status-item">
+                            <span class="label">Epoch:</span>
+                            <span id="current-epoch" class="value">0</span>
+                        </div>
+                        <div class="status-item">
+                            <span class="label">Elapsed:</span>
+                            <span id="elapsed-time" class="value">0:00</span>
+                        </div>
+                        <div class="status-item">
+                            <span class="label">Current Loss:</span>
+                            <span id="current-loss" class="value">-</span>
+                        </div>
+                        <div class="status-item">
+                            <span class="label">Best Val Acc:</span>
+                            <span id="best-val-acc" class="value">0.00%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="progress-bar-container" id="progress-container" style="display: none;">
+                    <div class="progress-bar">
+                        <div id="progress-fill" class="progress-fill"></div>
+                    </div>
+                    <div id="progress-text" class="progress-text">0% complete</div>
+                </div>
+            </div>
+
+            <!-- Charts Panel -->
+            <div class="panel charts-panel">
+                <h2>📈 Training Metrics</h2>
+                
+                <div class="chart-container">
+                    <canvas id="loss-chart"></canvas>
+                </div>
+                
+                <div class="chart-container">
+                    <canvas id="accuracy-chart"></canvas>
+                </div>
+            </div>
+
+            <!-- Results History Panel -->
+            <div class="panel results-panel">
+                <h2>📚 Training History</h2>
+                <div id="results-list" class="results-list">
+                    <p class="info-text">No training sessions yet. Start training to see results here.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>Quantum AI Training Dashboard • Built with PennyLane & Flask</p>
+        </footer>
+    </div>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>

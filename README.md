@@ -6,38 +6,59 @@ A comprehensive workspace for quantum computing, AI fine-tuning, and chat applic
 
 This workspace contains **three independent AI/ML projects**:
 
-### 1. **quantum-ai/** - Quantum Machine Learning Platform
+### 1. **quantum-ai/** - Quantum Machine Learning Platform 🆕
 
-Hybrid quantum-classical ML using Azure Quantum + PennyLane + PyTorch with MCP Server support.
+Hybrid quantum-classical ML using Azure Quantum + PennyLane + PyTorch with **Interactive Web Dashboard** and MCP Server support.
+
+**✨ NEW: Web Training Dashboard**
+
+Train and visualize quantum AI models with a beautiful interactive UI:
+
+```bash
+cd quantum-ai
+./start_dashboard.sh
+# Open http://localhost:5000
+```
 
 **Features:**
 
-- Quantum circuit creation and simulation (Bell, GHZ, entanglement states)
-- Azure Quantum integration (IonQ, Quantinuum, Microsoft QC)
-- Hybrid quantum-classical neural networks
-- Model Context Protocol (MCP) server with 8 quantum tools
-- Qiskit + PennyLane + PyTorch stack
+- 🎨 **Interactive Web Dashboard** - Real-time training visualization with live charts
+- ⚛️ Quantum circuit creation and simulation (Bell, GHZ, entanglement states)
+- ☁️ Azure Quantum integration (IonQ, Quantinuum, Microsoft QC)
+- 🧠 Hybrid quantum-classical neural networks
+- 🤖 Model Context Protocol (MCP) server with 8 quantum tools
+- 📊 Live loss/accuracy metrics and session management
+- 🎛️ Interactive hyperparameter tuning (qubits, layers, learning rate)
+- 📚 Training history browser with saved results
 
-**Quick Start:**
+**Quick Start (Web Dashboard):**
 
-```powershell
+```bash
 cd quantum-ai
-python -m venv venv
-.\venv\Scripts\Activate.ps1
-pip install -r requirements.txt
-pip install -r mcp-requirements.txt
-
-# Run example classifier
-python .\src\quantum_classifier.py
-
-# Run MCP server
-python .\quantum_mcp_server.py
-
-# Run MCP client examples
-python .\example_mcp_client.py
+./start_dashboard.sh
+# Open browser to http://localhost:5000
+# Select dataset, configure parameters, click "Start Training"
+# Watch real-time charts update as model trains!
 ```
 
-**Documentation:** See `quantum-ai/README.md` and `quantum-ai/MCP_SERVER_README.md`
+**Quick Start (CLI):**
+
+```bash
+cd quantum-ai
+source venv/bin/activate
+pip install -r requirements.txt
+
+# Run example classifier
+python src/quantum_classifier.py
+
+# Run MCP server
+python quantum_mcp_server.py
+```
+
+**Documentation:** 
+- 🎨 **[Web Dashboard Guide](quantum-ai/WEB_DASHBOARD_README.md)** - Interactive training UI (NEW!)
+- 📖 [Main README](quantum-ai/README.md) - Full project documentation
+- 🤖 [MCP Server Guide](quantum-ai/MCP_SERVER_README.md) - AI agent integration
 
 ---
 
