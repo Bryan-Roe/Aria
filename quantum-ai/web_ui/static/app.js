@@ -4,6 +4,9 @@ let currentSessionId = null;
 let statusUpdateInterval = null;
 let lossChart = null;
 let accuracyChart = null;
+let circuitCanvas = null;
+let circuitCtx = null;
+let particleInterval = null;
 
 // API Base URL
 const API_BASE = window.location.origin;
@@ -11,6 +14,7 @@ const API_BASE = window.location.origin;
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', () => {
     console.log('🚀 Quantum AI Dashboard initializing...');
+    initializeCircuitCanvas();
     initializeCharts();
     loadDatasets();
     loadResults();
@@ -22,6 +26,225 @@ function setupEventListeners() {
     document.getElementById('start-training-btn').addEventListener('click', startTraining);
     document.getElementById('stop-training-btn').addEventListener('click', stopTraining);
     document.getElementById('dataset-select').addEventListener('change', updateDatasetInfo);
+}
+
+// Initialize Circuit Canvas
+function initializeCircuitCanvas() {
+    circuitCanvas = document.getElementById('circuit-canvas');
+    circuitCtx = circuitCanvas.getContext('2d');
+    
+    // Set canvas size
+    const rect = circuitCanvas.getBoundingClientRect();
+    circuitCanvas.width = rect.width;
+    circuitCanvas.height = 300;
+    
+    drawIdleCircuit();
+}
+
+// Draw idle circuit state
+function drawIdleCircuit() {
+    if (!circuitCtx) return;
+    
+    const ctx = circuitCtx;
+    const width = circuitCanvas.width;
+    const height = circuitCanvas.height;
+    
+    ctx.clearRect(0, 0, width, height);
+    
+    // Draw gradient background
+    const gradient = ctx.createLinearGradient(0, 0, width, height);
+    gradient.addColorStop(0, 'rgba(99, 102, 241, 0.1)');
+    gradient.addColorStop(1, 'rgba(139, 92, 246, 0.1)');
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, width, height);
+    
+    // Draw placeholder text
+    ctx.font = 'bold 18px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto';
+    ctx.fillStyle = '#6366f1';
+    ctx.textAlign = 'center';
+    ctx.fillText('⚛️ Quantum Circuit Visualization', width / 2, height / 2 - 15);
+    
+    ctx.font = '14px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto';
+    ctx.fillStyle = '#94a3b8';
+    ctx.fillText('Start training to see live circuit diagram', width / 2, height / 2 + 15);
+    
+    // Update stats
+    document.getElementById('gate-count').textContent = '0';
+    document.getElementById('circuit-depth').textContent = '0';
+}
+
+// Draw active quantum circuit
+function drawQuantumCircuit(nQubits, nLayers, epoch) {
+    if (!circuitCtx) return;
+    
+    const ctx = circuitCtx;
+    const width = circuitCanvas.width;
+    const height = circuitCanvas.height;
+    
+    ctx.clearRect(0, 0, width, height);
+    
+    // Background
+    const gradient = ctx.createLinearGradient(0, 0, width, height);
+    gradient.addColorStop(0, 'rgba(99, 102, 241, 0.05)');
+    gradient.addColorStop(1, 'rgba(139, 92, 246, 0.05)');
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, width, height);
+    
+    const padding = 60;
+    const qubitSpacing = (height - 2 * padding) / (nQubits - 1 || 1);
+    const layerWidth = (width - 2 * padding) / (nLayers + 2);
+    
+    // Draw qubit lines
+    ctx.strokeStyle = '#475569';
+    ctx.lineWidth = 2;
+    for (let i = 0; i < nQubits; i++) {
+        const y = padding + i * qubitSpacing;
+        ctx.beginPath();
+        ctx.moveTo(padding, y);
+        ctx.lineTo(width - padding, y);
+        ctx.stroke();
+        
+        // Qubit label
+        ctx.fillStyle = '#cbd5e1';
+        ctx.font = '14px monospace';
+        ctx.textAlign = 'right';
+        ctx.fillText(`|q${i}⟩`, padding - 10, y + 5);
+    }
+    
+    // Animate based on epoch
+    const pulsePhase = (epoch % 10) / 10;
+    
+    // Draw gates with animation
+    for (let layer = 0; layer < nLayers; layer++) {
+        const x = padding + (layer + 1) * layerWidth;
+        
+        for (let i = 0; i < nQubits; i++) {
+            const y = padding + i * qubitSpacing;
+            
+            // Rotation gate (pulsing)
+            const gateSize = 25 + Math.sin(pulsePhase * Math.PI * 2) * 3;
+            ctx.fillStyle = `rgba(239, 68, 68, ${0.7 + Math.sin(pulsePhase * Math.PI * 2) * 0.3})`;
+            ctx.beginPath();
+            ctx.arc(x, y, gateSize / 2, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Gate label
+            ctx.fillStyle = '#fff';
+            ctx.font = 'bold 11px monospace';
+            ctx.textAlign = 'center';
+            ctx.fillText('Ry', x, y + 4);
+        }
+        
+        // CNOT gates (entanglement)
+        if (nQubits > 1) {
+            const cnotX = x + layerWidth / 2;
+            ctx.strokeStyle = `rgba(16, 185, 129, ${0.7 + Math.sin(pulsePhase * Math.PI * 2 + Math.PI) * 0.3})`;
+            ctx.lineWidth = 3;
+            
+            for (let i = 0; i < nQubits - 1; i++) {
+                const y1 = padding + i * qubitSpacing;
+                const y2 = padding + (i + 1) * qubitSpacing;
+                
+                // Vertical line
+                ctx.beginPath();
+                ctx.moveTo(cnotX, y1);
+                ctx.lineTo(cnotX, y2);
+                ctx.stroke();
+                
+                // Control dot
+                ctx.fillStyle = '#10b981';
+                ctx.beginPath();
+                ctx.arc(cnotX, y1, 5, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Target circle
+                ctx.strokeStyle = '#10b981';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.arc(cnotX, y2, 12, 0, Math.PI * 2);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(cnotX - 8, y2);
+                ctx.lineTo(cnotX + 8, y2);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(cnotX, y2 - 8);
+                ctx.lineTo(cnotX, y2 + 8);
+                ctx.stroke();
+            }
+        }
+    }
+    
+    // Measurement symbols
+    const measX = width - padding - 20;
+    for (let i = 0; i < nQubits; i++) {
+        const y = padding + i * qubitSpacing;
+        
+        // Measurement box
+        ctx.strokeStyle = '#f59e0b';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(measX - 15, y - 15, 30, 30);
+        
+        // Meter symbol
+        ctx.beginPath();
+        ctx.arc(measX, y + 5, 10, Math.PI, 0);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(measX, y + 5);
+        ctx.lineTo(measX + 7, y - 2);
+        ctx.stroke();
+    }
+    
+    // Epoch indicator with glow
+    ctx.save();
+    ctx.shadowColor = '#6366f1';
+    ctx.shadowBlur = 10;
+    ctx.fillStyle = '#6366f1';
+    ctx.font = 'bold 16px monospace';
+    ctx.textAlign = 'left';
+    ctx.fillText(`EPOCH ${epoch}`, 15, 25);
+    ctx.restore();
+    
+    // Update circuit stats
+    const gateCount = nQubits * nLayers + (nQubits - 1) * nLayers;
+    const circuitDepth = nLayers * 2;
+    document.getElementById('gate-count').textContent = gateCount;
+    document.getElementById('circuit-depth').textContent = circuitDepth;
+}
+
+// Create particle effect
+function createParticle(x, y) {
+    const particle = document.createElement('div');
+    particle.className = 'particle';
+    particle.style.left = x + 'px';
+    particle.style.top = y + 'px';
+    particle.style.background = `hsl(${Math.random() * 60 + 200}, 70%, 60%)`;
+    document.body.appendChild(particle);
+    
+    setTimeout(() => particle.remove(), 2000);
+}
+
+// Start particle animation
+function startParticleAnimation() {
+    if (particleInterval) return;
+    
+    particleInterval = setInterval(() => {
+        const canvas = document.getElementById('circuit-canvas');
+        if (!canvas) return;
+        
+        const rect = canvas.getBoundingClientRect();
+        const x = rect.left + Math.random() * rect.width;
+        const y = rect.top + Math.random() * rect.height;
+        createParticle(x, y);
+    }, 300);
+}
+
+// Stop particle animation
+function stopParticleAnimation() {
+    if (particleInterval) {
+        clearInterval(particleInterval);
+        particleInterval = null;
+    }
 }
 
 // Initialize Charts
@@ -201,6 +424,12 @@ async function startTraining() {
         document.getElementById('status-training').style.display = 'block';
         document.getElementById('progress-container').style.display = 'block';
         
+        // Start visual effects
+        const nQubits = parseInt(document.getElementById('n-qubits').value);
+        const nLayers = parseInt(document.getElementById('n-layers').value);
+        drawQuantumCircuit(nQubits, nLayers, 0);
+        startParticleAnimation();
+        
         // Start polling for updates
         startStatusPolling();
         
@@ -243,6 +472,10 @@ function stopStatusPolling() {
         statusUpdateInterval = null;
     }
     
+    // Stop visual effects
+    stopParticleAnimation();
+    drawIdleCircuit();
+    
     // Reset UI
     document.getElementById('start-training-btn').disabled = false;
     document.getElementById('stop-training-btn').disabled = true;
@@ -280,6 +513,16 @@ async function updateTrainingStatus() {
             document.getElementById('progress-fill').style.width = progress + '%';
             document.getElementById('progress-text').textContent = progress.toFixed(0) + '% complete';
         }
+        
+        // Update visual accuracy bar
+        const accuracy = status.best_val_acc * 100;
+        document.getElementById('accuracy-bar').style.width = accuracy + '%';
+        document.getElementById('accuracy-percent').textContent = accuracy.toFixed(1) + '%';
+        
+        // Update circuit visualization
+        const nQubits = parseInt(document.getElementById('n-qubits').value);
+        const nLayers = parseInt(document.getElementById('n-layers').value);
+        drawQuantumCircuit(nQubits, nLayers, status.current_epoch);
         
         // Update charts
         if (status.metrics && status.metrics.epochs.length > 0) {

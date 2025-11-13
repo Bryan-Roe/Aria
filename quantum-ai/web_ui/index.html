@@ -8,20 +8,41 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
 <body>
+    <!-- Background Effects -->
+    <div class="bg-particles"></div>
+    <div class="bg-gradient-orb orb-1"></div>
+    <div class="bg-gradient-orb orb-2"></div>
+    <div class="bg-gradient-orb orb-3"></div>
+    
     <div class="container">
         <!-- Header -->
         <header class="header">
             <div class="header-content">
-                <h1>⚛️ Quantum AI Training Dashboard</h1>
-                <p class="subtitle">Interactive quantum machine learning with real-time visualization</p>
+                <div class="logo-container">
+                    <div class="quantum-logo">
+                        <div class="logo-ring ring-1"></div>
+                        <div class="logo-ring ring-2"></div>
+                        <div class="logo-ring ring-3"></div>
+                        <div class="logo-core">Q</div>
+                    </div>
+                </div>
+                <h1 class="gradient-text">Quantum AI Training Platform</h1>
+                <p class="subtitle">Enterprise-grade quantum machine learning with real-time visualization</p>
+                <div class="status-badge">
+                    <span class="pulse-dot"></span>
+                    <span>System Online</span>
+                </div>
             </div>
         </header>
 
         <!-- Main Content -->
         <div class="main-content">
             <!-- Training Configuration Panel -->
-            <div class="panel config-panel">
-                <h2>🎛️ Training Configuration</h2>
+            <div class="panel config-panel glass-panel">
+                <div class="panel-header">
+                    <h2><span class="icon-gradient">🎛️</span> Training Configuration</h2>
+                    <div class="panel-badge">Advanced</div>
+                </div>
                 
                 <div class="form-group">
                     <label for="dataset-select">Dataset</label>
@@ -70,9 +91,30 @@
                 </div>
             </div>
 
+            <!-- Quantum Circuit Visualization -->
+            <div class="panel circuit-panel glass-panel">
+                <div class="panel-header">
+                    <h2><span class="icon-gradient">⚛️</span> Quantum Circuit</h2>
+                    <div class="circuit-stats">
+                        <span class="stat-item"><span class="stat-label">Gates:</span> <span id="gate-count">0</span></span>
+                        <span class="stat-item"><span class="stat-label">Depth:</span> <span id="circuit-depth">0</span></span>
+                    </div>
+                </div>
+                <div class="canvas-container">
+                    <canvas id="circuit-canvas" width="400" height="300"></canvas>
+                </div>
+                <div id="circuit-info" class="info-text">Circuit will appear when training starts</div>
+            </div>
+
             <!-- Training Status Panel -->
-            <div class="panel status-panel">
-                <h2>📊 Training Status</h2>
+            <div class="panel status-panel glass-panel">
+                <div class="panel-header">
+                    <h2><span class="icon-gradient">📊</span> Training Status</h2>
+                    <div class="live-indicator">
+                        <span class="live-dot"></span>
+                        <span>LIVE</span>
+                    </div>
+                </div>
                 
                 <div id="status-idle" class="status-message">
                     <div class="status-icon">💤</div>
@@ -102,6 +144,13 @@
                             <span class="label">Best Val Acc:</span>
                             <span id="best-val-acc" class="value">0.00%</span>
                         </div>
+                        <div class="status-item metric-large">
+                            <span class="label">Live Accuracy:</span>
+                            <div class="accuracy-display">
+                                <div id="accuracy-bar" class="accuracy-bar"></div>
+                                <span id="accuracy-percent" class="accuracy-percent">0%</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -114,8 +163,14 @@
             </div>
 
             <!-- Charts Panel -->
-            <div class="panel charts-panel">
-                <h2>📈 Training Metrics</h2>
+            <div class="panel charts-panel glass-panel">
+                <div class="panel-header">
+                    <h2><span class="icon-gradient">📈</span> Training Metrics</h2>
+                    <div class="metrics-legend">
+                        <span class="legend-item"><span class="legend-color" style="background: #ef4444;"></span>Training</span>
+                        <span class="legend-item"><span class="legend-color" style="background: #10b981;"></span>Validation</span>
+                    </div>
+                </div>
                 
                 <div class="chart-container">
                     <canvas id="loss-chart"></canvas>
@@ -127,8 +182,11 @@
             </div>
 
             <!-- Results History Panel -->
-            <div class="panel results-panel">
-                <h2>📚 Training History</h2>
+            <div class="panel results-panel glass-panel">
+                <div class="panel-header">
+                    <h2><span class="icon-gradient">📚</span> Training History</h2>
+                    <button class="refresh-btn" onclick="loadResults()">🔄 Refresh</button>
+                </div>
                 <div id="results-list" class="results-list">
                     <p class="info-text">No training sessions yet. Start training to see results here.</p>
                 </div>
@@ -137,7 +195,11 @@
 
         <!-- Footer -->
         <footer class="footer">
-            <p>Quantum AI Training Dashboard • Built with PennyLane & Flask</p>
+            <div class="footer-content">
+                <p class="footer-brand">Quantum AI Platform <span class="version">v2.0</span></p>
+                <p class="footer-tech">Powered by PennyLane • Flask • Chart.js</p>
+                <p class="footer-copyright">© 2025 Quantum Computing Research</p>
+            </div>
         </footer>
     </div>
 
