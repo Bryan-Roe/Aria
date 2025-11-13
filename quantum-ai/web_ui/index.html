@@ -88,7 +88,11 @@
                     <button id="stop-training-btn" class="btn btn-danger" disabled>
                         <span class="btn-icon">⏹️</span> Stop Training
                     </button>
+                    <button id="export-metrics-btn" class="btn btn-secondary" disabled>
+                        <span class="btn-icon">📥</span> Export Metrics
+                    </button>
                 </div>
+                <div id="validation-error" class="error-message" style="display: none;"></div>
             </div>
 
             <!-- Quantum Circuit Visualization -->
@@ -143,6 +147,14 @@
                         <div class="status-item">
                             <span class="label">Best Val Acc:</span>
                             <span id="best-val-acc" class="value">0.00%</span>
+                        </div>
+                        <div class="status-item">
+                            <span class="label">Speed:</span>
+                            <span id="training-speed" class="value">- ep/s</span>
+                        </div>
+                        <div class="status-item">
+                            <span class="label">ETA:</span>
+                            <span id="eta-time" class="value">-</span>
                         </div>
                         <div class="status-item metric-large">
                             <span class="label">Live Accuracy:</span>

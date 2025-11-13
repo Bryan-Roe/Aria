@@ -838,3 +838,66 @@ label {
 .panel {
     animation: fadeIn 0.3s ease;
 }
+
+/* Error and Success Messages */
+.error-message {
+    background: rgba(239, 68, 68, 0.2);
+    border: 1px solid var(--danger-color);
+    border-radius: 8px;
+    padding: 12px;
+    margin-top: 12px;
+    color: var(--danger-color);
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.error-message::before {
+    content: '⚠️';
+}
+
+.success-message {
+    background: rgba(16, 185, 129, 0.2);
+    border: 1px solid var(--success-color);
+    border-radius: 8px;
+    padding: 12px;
+    margin-top: 12px;
+    color: var(--success-color);
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.success-message::before {
+    content: '✅';
+}
+
+/* Input validation states */
+.form-control.invalid {
+    border-color: var(--danger-color) !important;
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+
+.form-control:focus:invalid {
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2);
+}
+
+/* Secondary button styles */
+.btn-secondary {
+    background: linear-gradient(135deg, #475569 0%, #334155 100%);
+    color: var(--text-primary);
+}
+
+.btn-secondary:hover {
+    background: linear-gradient(135deg, #64748b 0%, #475569 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(71, 85, 105, 0.4);
+}
+
+.btn-secondary:disabled {
+    background: linear-gradient(135deg, #334155 0%, #1e293b 100%);
+    opacity: 0.4;
+}
+

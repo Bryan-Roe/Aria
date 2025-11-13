@@ -25,7 +25,15 @@ document.addEventListener('DOMContentLoaded', () => {
 function setupEventListeners() {
     document.getElementById('start-training-btn').addEventListener('click', startTraining);
     document.getElementById('stop-training-btn').addEventListener('click', stopTraining);
+    document.getElementById('export-metrics-btn').addEventListener('click', exportMetrics);
     document.getElementById('dataset-select').addEventListener('change', updateDatasetInfo);
+    
+    // Add input validation
+    const numericInputs = ['n-qubits', 'n-layers', 'learning-rate', 'duration', 'batch-size'];
+    numericInputs.forEach(id => {
+        const input = document.getElementById(id);
+        input.addEventListener('input', () => validateInput(input));
+    });
 }
 
 // Initialize Circuit Canvas
@@ -501,6 +509,24 @@ async function updateTrainingStatus() {
         document.getElementById('current-loss').textContent = status.current_loss.toFixed(4);
         document.getElementById('best-val-acc').textContent = (status.best_val_acc * 100).toFixed(2) + '%';
         
+        // Update performance metrics
+        if (status.epochs_per_second > 0) {
+            document.getElementById('training-speed').textContent = status.epochs_per_second.toFixed(2) + ' ep/s';
+        }
+        
+        if (status.eta_seconds) {
+            const etaMinutes = Math.floor(status.eta_seconds / 60);
+            const etaSeconds = Math.floor(status.eta_seconds % 60);
+            document.getElementById('eta-time').textContent = `${etaMinutes}:${etaSeconds.toString().padStart(2, '0')}`;
+        } else {
+            document.getElementById('eta-time').textContent = '-';
+        }
+        
+        // Enable export button when training has data
+        if (status.metrics && status.metrics.epochs.length > 0) {
+            document.getElementById('export-metrics-btn').disabled = false;
+        }
+        
         // Update elapsed time
         if (status.elapsed_time) {
             const minutes = Math.floor(status.elapsed_time / 60);
@@ -536,7 +562,7 @@ async function updateTrainingStatus() {
             if (status.status === 'completed') {
                 showSuccess('Training completed successfully!');
             } else if (status.status === 'error') {
-                showError('Training failed: ' + (status.metrics.error || 'Unknown error'));
+                showError('Training failed: ' + (status.error_message || 'Unknown error'));
             }
         }
         
@@ -596,6 +622,67 @@ async function loadResults() {
         console.log(`✅ Loaded ${results.length} training results`);
     } catch (error) {
         console.error('Error loading results:', error);
+    }
+}
+
+// Input Validation
+function validateInput(input) {
+    const errorDiv = document.getElementById('validation-error');
+    const value = parseFloat(input.value);
+    let error = null;
+    
+    switch(input.id) {
+        case 'n-qubits':
+            if (value < 1 || value > 10) error = 'Qubits must be between 1 and 10';
+            break;
+        case 'n-layers':
+            if (value < 1 || value > 20) error = 'Layers must be between 1 and 20';
+            break;
+        case 'learning-rate':
+            if (value <= 0 || value > 1) error = 'Learning rate must be between 0 and 1';
+            break;
+        case 'duration':
+            if (value < 1 || value > 120) error = 'Duration must be between 1 and 120 minutes';
+            break;
+        case 'batch-size':
+            if (value < 8 || value > 128) error = 'Batch size must be between 8 and 128';
+            break;
+    }
+    
+    if (error) {
+        input.style.borderColor = '#ef4444';
+        errorDiv.textContent = error;
+        errorDiv.style.display = 'block';
+        document.getElementById('start-training-btn').disabled = true;
+    } else {
+        input.style.borderColor = '';
+        errorDiv.style.display = 'none';
+        document.getElementById('start-training-btn').disabled = false;
+    }
+}
+
+// Export Metrics
+async function exportMetrics() {
+    if (!currentSessionId) return;
+    
+    try {
+        const response = await fetch(`${API_BASE}/api/export/metrics/${currentSessionId}`);
+        const blob = await response.blob();
+        
+        // Create download link
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `metrics_${currentSessionId}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(url);
+        
+        showSuccess('Metrics exported successfully!');
+    } catch (error) {
+        console.error('Error exporting metrics:', error);
+        showError('Failed to export metrics');
     }
 }
 

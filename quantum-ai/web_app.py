@@ -52,6 +52,10 @@ class TrainingSession:
         self.current_loss = 0.0
         self.thread = None
         self.should_stop = False
+        self.epochs_per_second = 0.0
+        self.eta_seconds = None
+        self.last_epoch_time = None
+        self.error_message = None
         
     def to_dict(self):
         """Serialize session state for API"""
@@ -69,7 +73,11 @@ class TrainingSession:
             "elapsed_time": elapsed,
             "best_val_acc": self.best_val_acc,
             "current_loss": self.current_loss,
-            "metrics": self.metrics_history
+            "epochs_per_second": self.epochs_per_second,
+            "eta_seconds": self.eta_seconds,
+            "error_message": self.error_message,
+            "metrics": self.metrics_history,
+            "progress_percent": (self.current_epoch / self.total_epochs * 100) if self.total_epochs > 0 else 0
         }
 
 def load_dataset(name: str):
@@ -232,9 +240,17 @@ def train_model(session: TrainingSession):
             train_loss = np.mean(batch_losses) if batch_losses else 0.0
             
             # Update metrics
+            epoch_time = time.time() - epoch_start
             session.current_epoch = epoch
             session.current_loss = float(train_loss)
             session.best_val_acc = max(session.best_val_acc, float(val_acc))
+            
+            # Calculate performance metrics
+            if session.last_epoch_time:
+                session.epochs_per_second = 1.0 / epoch_time
+                remaining_epochs = (deadline - time.time()) * session.epochs_per_second
+                session.eta_seconds = remaining_epochs / session.epochs_per_second if session.epochs_per_second > 0 else None
+            session.last_epoch_time = epoch_time
             
             session.metrics_history['epochs'].append(epoch)
             session.metrics_history['train_loss'].append(float(train_loss))
@@ -247,7 +263,7 @@ def train_model(session: TrainingSession):
                 for key in session.metrics_history:
                     session.metrics_history[key] = session.metrics_history[key][-1000:]
             
-            logger.info(f"Epoch {epoch}: Loss={train_loss:.4f}, Val Acc={val_acc:.4f}")
+            logger.info(f"Epoch {epoch}: Loss={train_loss:.4f}, Val Acc={val_acc:.4f}, Speed={session.epochs_per_second:.2f} ep/s")
         
         session.status = "completed"
         session.end_time = time.time()
@@ -268,7 +284,8 @@ def train_model(session: TrainingSession):
     except Exception as e:
         logger.error(f"Training error: {e}", exc_info=True)
         session.status = "error"
-        session.metrics_history['error'] = str(e)
+        session.error_message = str(e)
+        session.end_time = time.time()
 
 # ============================================================================
 # API Endpoints
@@ -311,6 +328,14 @@ def start_training():
     for key in required:
         if key not in config:
             return jsonify({"error": f"Missing required field: {key}"}), 400
+    
+    # Validate ranges
+    if not (1 <= config['n_qubits'] <= 10):
+        return jsonify({"error": "n_qubits must be between 1 and 10"}), 400
+    if not (1 <= config['n_layers'] <= 20):
+        return jsonify({"error": "n_layers must be between 1 and 20"}), 400
+    if config.get('learning_rate', 0.01) <= 0 or config.get('learning_rate', 0.01) > 1:
+        return jsonify({"error": "learning_rate must be between 0 and 1"}), 400
     
     # Create session
     session_id = f"session_{int(time.time()*1000)}"
@@ -396,6 +421,61 @@ def get_result_detail(filename):
         data = json.load(f)
     
     return jsonify(data)
+
+@app.route('/api/export/metrics/<session_id>', methods=['GET'])
+def export_metrics(session_id):
+    """Export training metrics as CSV"""
+    from flask import make_response
+    import io
+    
+    with training_lock:
+        session = training_sessions.get(session_id)
+        if not session:
+            return jsonify({"error": "Session not found"}), 404
+        
+        # Create CSV
+        output = io.StringIO()
+        output.write("epoch,train_loss,val_loss,val_accuracy,timestamp\n")
+        
+        metrics = session.metrics_history
+        for i in range(len(metrics['epochs'])):
+            output.write(f"{metrics['epochs'][i]},{metrics['train_loss'][i]:.6f},")
+            output.write(f"{metrics['val_loss'][i]:.6f},{metrics['val_accuracy'][i]:.6f},")
+            output.write(f"{metrics['timestamps'][i]:.2f}\n")
+        
+        # Create response
+        response = make_response(output.getvalue())
+        response.headers["Content-Disposition"] = f"attachment; filename=metrics_{session_id}.csv"
+        response.headers["Content-Type"] = "text/csv"
+        return response
+
+@app.route('/api/compare', methods=['POST'])
+def compare_sessions():
+    """Compare multiple training sessions"""
+    session_ids = request.json.get('session_ids', [])
+    
+    if not session_ids:
+        return jsonify({"error": "No session IDs provided"}), 400
+    
+    comparisons = []
+    with training_lock:
+        for sid in session_ids:
+            session = training_sessions.get(sid)
+            if session:
+                comparisons.append({
+                    "session_id": sid,
+                    "config": session.config,
+                    "best_val_acc": session.best_val_acc,
+                    "total_epochs": session.total_epochs,
+                    "status": session.status,
+                    "final_metrics": {
+                        "train_loss": session.metrics_history['train_loss'][-1] if session.metrics_history['train_loss'] else None,
+                        "val_loss": session.metrics_history['val_loss'][-1] if session.metrics_history['val_loss'] else None,
+                        "val_accuracy": session.metrics_history['val_accuracy'][-1] if session.metrics_history['val_accuracy'] else None
+                    }
+                })
+    
+    return jsonify({"comparisons": comparisons})
 
 if __name__ == '__main__':
     print("\n" + "="*70)
