@@ -25,11 +25,12 @@ document.addEventListener('DOMContentLoaded', () => {
 function setupEventListeners() {
     document.getElementById('start-training-btn').addEventListener('click', startTraining);
     document.getElementById('stop-training-btn').addEventListener('click', stopTraining);
+    document.getElementById('evaluate-btn').addEventListener('click', evaluateNow);
     document.getElementById('export-metrics-btn').addEventListener('click', exportMetrics);
     document.getElementById('dataset-select').addEventListener('change', updateDatasetInfo);
     
     // Add input validation
-    const numericInputs = ['n-qubits', 'n-layers', 'learning-rate', 'duration', 'batch-size'];
+    const numericInputs = ['n-qubits', 'n-layers', 'learning-rate', 'duration', 'batch-size', 'early-stopping', 'checkpoint-every', 'warmup-epochs', 'max-grad-norm'];
     numericInputs.forEach(id => {
         const input = document.getElementById(id);
         input.addEventListener('input', () => validateInput(input));
@@ -410,7 +411,16 @@ async function startTraining() {
         n_layers: parseInt(document.getElementById('n-layers').value),
         learning_rate: parseFloat(document.getElementById('learning-rate').value),
         duration_minutes: parseInt(document.getElementById('duration').value),
-        batch_size: parseInt(document.getElementById('batch-size').value)
+        batch_size: parseInt(document.getElementById('batch-size').value),
+        optimizer: document.getElementById('optimizer-select').value,
+        early_stopping_patience: parseInt(document.getElementById('early-stopping').value),
+        checkpoint_every: parseInt(document.getElementById('checkpoint-every').value),
+        use_parameter_shift: document.getElementById('use-param-shift').checked,
+        use_warmup: document.getElementById('use-warmup').checked,
+        warmup_epochs: parseInt(document.getElementById('warmup-epochs').value),
+        use_lr_decay: document.getElementById('use-lr-decay').checked,
+        use_gradient_clipping: document.getElementById('use-grad-clip').checked,
+        max_grad_norm: parseFloat(document.getElementById('max-grad-norm').value)
     };
     
     console.log('🚀 Starting training with config:', config);
@@ -431,6 +441,8 @@ async function startTraining() {
         document.getElementById('status-idle').style.display = 'none';
         document.getElementById('status-training').style.display = 'block';
         document.getElementById('progress-container').style.display = 'block';
+        document.getElementById('evaluation-section').style.display = 'none';
+        document.getElementById('evaluate-btn').disabled = true;
         
         // Start visual effects
         const nQubits = parseInt(document.getElementById('n-qubits').value);
@@ -490,6 +502,8 @@ function stopStatusPolling() {
     document.getElementById('status-idle').style.display = 'block';
     document.getElementById('status-training').style.display = 'none';
     document.getElementById('progress-container').style.display = 'none';
+    document.getElementById('evaluate-btn').disabled = true;
+    document.getElementById('evaluation-section').style.display = 'none';
     
     currentSessionId = null;
     loadResults(); // Refresh results list
@@ -556,11 +570,17 @@ async function updateTrainingStatus() {
         }
         
         // Check if completed
-        if (status.status === 'completed' || status.status === 'error' || status.status === 'stopped') {
+        if (status.status === 'completed' || status.status === 'early_stopped' || status.status === 'error' || status.status === 'stopped') {
             stopStatusPolling();
             
-            if (status.status === 'completed') {
+            if (status.status === 'completed' || status.status === 'early_stopped') {
                 showSuccess('Training completed successfully!');
+                // Enable evaluation
+                document.getElementById('evaluate-btn').disabled = false;
+                // Auto-evaluate if checkpoint exists
+                if (status.checkpoint_path) {
+                    evaluateNow();
+                }
             } else if (status.status === 'error') {
                 showError('Training failed: ' + (status.error_message || 'Unknown error'));
             }
@@ -684,6 +704,59 @@ async function exportMetrics() {
         console.error('Error exporting metrics:', error);
         showError('Failed to export metrics');
     }
+}
+
+// Evaluation
+async function evaluateNow() {
+    if (!currentSessionId) return;
+    try {
+        const res = await fetch(`${API_BASE}/api/train/evaluate/${currentSessionId}`);
+        const data = await res.json();
+        if (data.error) {
+            showError('Evaluation failed: ' + data.error);
+            return;
+        }
+        renderEvaluation(data);
+        showSuccess('Evaluation complete');
+    } catch (e) {
+        console.error('Evaluation error', e);
+        showError('Failed to evaluate');
+    }
+}
+
+function renderEvaluation(result) {
+    const section = document.getElementById('evaluation-section');
+    const metricsDiv = document.getElementById('eval-metrics');
+    const cmDiv = document.getElementById('confusion-matrix');
+    section.style.display = 'block';
+    
+    const m = result.metrics;
+    metricsDiv.innerHTML = `
+        Accuracy: <b>${(m.accuracy * 100).toFixed(2)}%</b> ·
+        Precision: <b>${(m.precision * 100).toFixed(2)}%</b> ·
+        Recall: <b>${(m.recall * 100).toFixed(2)}%</b> ·
+        F1: <b>${(m.f1 * 100).toFixed(2)}%</b>
+        ${m.roc_auc !== null ? ` · ROC AUC: <b>${m.roc_auc.toFixed(3)}</b>` : ''}
+    `;
+    renderConfusionMatrix(cmDiv, result.confusion_matrix, result.labels);
+}
+
+function renderConfusionMatrix(container, matrix, labels) {
+    if (!matrix || !matrix.length) {
+        container.innerHTML = '<p class="info-text">No confusion matrix available.</p>';
+        return;
+    }
+    const n = matrix.length;
+    let html = '<table class="cm-table"><thead><tr><th></th>';
+    for (let j = 0; j < n; j++) html += `<th>Pred ${labels[j] ?? j}</th>`;
+    html += '</tr></thead><tbody>';
+    for (let i = 0; i < n; i++) {
+        html += `<tr><th>True ${labels[i] ?? i}</th>`;
+        for (let j = 0; j < n; j++) html += `<td>${matrix[i][j]}</td>`;
+        html += '</tr>';
+    }
+    html += '</tbody></table>';
+    container.innerHTML = html;
 }
 
 // View Result Details

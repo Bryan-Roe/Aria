@@ -81,6 +81,43 @@
                     </div>
                 </div>
 
+                <!-- Advanced Settings -->
+                <details class="advanced-settings" id="advanced-settings">
+                    <summary>Advanced Settings</summary>
+                    <div class="advanced-grid">
+                        <div class="form-group">
+                            <label for="optimizer-select">Optimizer</label>
+                            <select id="optimizer-select" class="form-control">
+                                <option value="adam" selected>Adam (default)</option>
+                                <option value="momentum">Momentum</option>
+                                <option value="sgd">SGD</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="early-stopping">Early Stopping Patience</label>
+                            <input type="number" id="early-stopping" class="form-control" value="20" min="5" max="200">
+                        </div>
+                        <div class="form-group">
+                            <label for="checkpoint-every">Checkpoint Every (epochs)</label>
+                            <input type="number" id="checkpoint-every" class="form-control" value="100" min="10" max="1000">
+                        </div>
+                        <div class="form-group">
+                            <label for="warmup-epochs">Warmup Epochs</label>
+                            <input type="number" id="warmup-epochs" class="form-control" value="10" min="0" max="200">
+                        </div>
+                        <div class="form-group">
+                            <label for="max-grad-norm">Max Grad Norm</label>
+                            <input type="number" id="max-grad-norm" class="form-control" value="1.0" step="0.1" min="0.1" max="10">
+                        </div>
+                        <div class="form-group toggles">
+                            <label class="checkbox"><input type="checkbox" id="use-param-shift" checked> Use Parameter-Shift</label>
+                            <label class="checkbox"><input type="checkbox" id="use-warmup" checked> Use LR Warmup</label>
+                            <label class="checkbox"><input type="checkbox" id="use-lr-decay" checked> Use LR Decay</label>
+                            <label class="checkbox"><input type="checkbox" id="use-grad-clip" checked> Gradient Clipping</label>
+                        </div>
+                    </div>
+                </details>
+
                 <div class="button-group">
                     <button id="start-training-btn" class="btn btn-primary">
                         <span class="btn-icon">🚀</span> Start Training
@@ -90,6 +127,9 @@
                     </button>
                     <button id="export-metrics-btn" class="btn btn-secondary" disabled>
                         <span class="btn-icon">📥</span> Export Metrics
+                    </button>
+                    <button id="evaluate-btn" class="btn btn-secondary" disabled>
+                        <span class="btn-icon">🧪</span> Evaluate
                     </button>
                 </div>
                 <div id="validation-error" class="error-message" style="display: none;"></div>
@@ -171,6 +211,15 @@
                         <div id="progress-fill" class="progress-fill"></div>
                     </div>
                     <div id="progress-text" class="progress-text">0% complete</div>
+                </div>
+
+                <!-- Evaluation Results -->
+                <div id="evaluation-section" class="evaluation-section" style="display: none;">
+                    <div class="panel-header small">
+                        <h3><span class="icon-gradient">🧪</span> Evaluation</h3>
+                    </div>
+                    <div id="eval-metrics" class="eval-metrics info-text"></div>
+                    <div id="confusion-matrix" class="confusion-matrix"></div>
                 </div>
             </div>
 
