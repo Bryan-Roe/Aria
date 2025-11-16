@@ -489,28 +489,38 @@ def main():
                     pass
 
     # Remove 'messages' column so only tokenized output is kept
-    train_dataset = train_ds.map(
-        preprocess,
-        batched=True,
-        input_columns=["messages"],
-        load_from_cache_file=False,
-        desc="Tokenizing train",
-    ) if hasattr(train_ds, "map") else train_ds
-    eval_dataset = eval_ds.map(
-        preprocess,
-        batched=True,
-        input_columns=["messages"],
-        load_from_cache_file=False,
-        desc="Tokenizing eval",
-    ) if hasattr(eval_ds, "map") else eval_ds
+    # Note: IterableDataset.map() has limited parameter support compared to Dataset.map()
+    is_streaming = hasattr(train_ds, "__class__") and "Iterable" in train_ds.__class__.__name__
+    
+    map_kwargs_train = {
+        "batched": True,
+        "input_columns": ["messages"],
+    }
+    map_kwargs_eval = {
+        "batched": True,
+        "input_columns": ["messages"],
+    }
+    
+    # Only add these parameters for non-streaming datasets
+    if not is_streaming:
+        map_kwargs_train["load_from_cache_file"] = False
+        map_kwargs_train["desc"] = "Tokenizing train"
+        map_kwargs_eval["load_from_cache_file"] = False
+        map_kwargs_eval["desc"] = "Tokenizing eval"
+    
+    train_dataset = train_ds.map(preprocess, **map_kwargs_train) if hasattr(train_ds, "map") else train_ds
+    eval_dataset = eval_ds.map(preprocess, **map_kwargs_eval) if hasattr(eval_ds, "map") else eval_ds
     # Remove all non-model columns to avoid DataCollator confusion
+    # Note: IterableDataset doesn't support column_names or remove_columns
     keep_cols = {"input_ids", "attention_mask"}
-    drop_train = [c for c in train_dataset.column_names if c not in keep_cols]
-    drop_eval = [c for c in eval_dataset.column_names if c not in keep_cols]
-    if drop_train:
-        train_dataset = train_dataset.remove_columns(drop_train)
-    if drop_eval:
-        eval_dataset = eval_dataset.remove_columns(drop_eval)
+    if hasattr(train_dataset, "column_names") and train_dataset.column_names is not None:
+        drop_train = [c for c in train_dataset.column_names if c not in keep_cols]
+        if drop_train:
+            train_dataset = train_dataset.remove_columns(drop_train)
+    if hasattr(eval_dataset, "column_names") and eval_dataset.column_names is not None:
+        drop_eval = [c for c in eval_dataset.column_names if c not in keep_cols]
+        if drop_eval:
+            eval_dataset = eval_dataset.remove_columns(drop_eval)
     # Debug dataset sizes and sample
     try:
         print(f"[debug] train_dataset len: {len(train_dataset)}")
