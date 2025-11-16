@@ -16,5 +16,6 @@
     ],
     "python.testing.pytestEnabled": false,
     "python.testing.unittestEnabled": true,
-    "powershell.scriptAnalysis.settingsPath": "quantum-ai/.vscode/PSScriptAnalyzerSettings.psd1"
+    "powershell.scriptAnalysis.settingsPath": "quantum-ai/.vscode/PSScriptAnalyzerSettings.psd1",
+    "cmake.sourceDirectory": "C:/Users/Bryan/OneDrive/AI/.venv/Lib/site-packages/pennylane_lightning/core"
 }

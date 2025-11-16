@@ -41,6 +41,22 @@ def chat(req: func.HttpRequest) -> func.HttpResponse:
         messages = req_body.get('messages', [])
         provider_choice = req_body.get('provider', 'auto')
         model_override = req_body.get('model')
+
+        # If LoRA provider selected without a model path, try default path
+        if (provider_choice or '').lower() == 'lora' and not model_override:
+            default_adapter = Path(__file__).resolve().parent.parent / 'data_out' / 'lora_training' / 'lora_adapter'
+            if default_adapter.exists():
+                model_override = str(default_adapter)
+            else:
+                return func.HttpResponse(
+                    json.dumps({
+                        "error": "LoRA provider selected but no adapter path provided and default path not found.",
+                        "hint": "Provide 'model' in request body (e.g., data_out/lora_training/lora_adapter) or create the default adapter directory.",
+                        "defaultTried": str(default_adapter)
+                    }),
+                    status_code=400,
+                    mimetype="application/json"
+                )
         
         if not messages:
             return func.HttpResponse(

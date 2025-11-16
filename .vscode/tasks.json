@@ -93,6 +93,12 @@
 				"$python"
 			],
 			"group": "build"
+		},
+		{
+			"label": "pip install (functions)",
+			"type": "shell",
+			"command": "if (Test-Path '.\\venv\\Scripts\\python.exe') { .\\venv\\Scripts\\python.exe -m pip install -r requirements.txt } else { python -m pip install -r requirements.txt }",
+			"group": "build"
 		}
 	]
 }

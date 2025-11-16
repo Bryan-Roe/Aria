@@ -279,6 +279,15 @@
             cursor: pointer;
         }
 
+        #loraPathInput {
+            display: none;
+            padding: 4px 8px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 12px;
+            width: 260px;
+        }
+
         .model-selector select:focus {
             border-color: #667eea;
         }
@@ -333,11 +342,62 @@
             cursor: not-allowed;
         }
 
+        .cancel-stream-btn {
+            font-size: 13px;
+            font-weight: 500;
+            background: #dc3545;
+            color: #fff;
+            border: none;
+            border-radius: 24px;
+            padding: 12px 20px;
+            cursor: pointer;
+            transition: transform 0.2s, background 0.2s;
+            display: none;
+        }
+        .cancel-stream-btn:hover {
+            background: #b71c1c;
+            transform: translateY(-2px);
+        }
+
         .controls {
             display: flex;
             gap: 8px;
             margin-top: 10px;
             flex-wrap: wrap;
+        }
+
+        .settings-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 8px;
+            font-size: 12px;
+            color: #666;
+            flex-wrap: wrap;
+        }
+
+        .settings-row label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .settings-row input[type="range"] {
+            width: 140px;
+        }
+
+        .system-prompt {
+            margin-top: 8px;
+            display: none;
+        }
+
+        #systemPromptInput {
+            width: 100%;
+            min-height: 48px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 8px 10px;
+            font-family: inherit;
         }
 
         .control-button {
@@ -352,6 +412,10 @@
 
         .control-button:hover {
             background: #e0e0e0;
+        }
+
+        .control-button:active {
+            transform: scale(0.95);
         }
 
         .copy-button {
@@ -395,6 +459,12 @@
             display: flex;
             gap: 4px;
             align-items: center;
+            color: #666;
+        }
+
+        #statusText {
+            font-weight: 600;
+            transition: color 0.3s ease;
         }
 
         /* Scrollbar styling */
@@ -506,13 +576,123 @@
         body.dark-theme .message-content code {
             background: rgba(255, 255, 255, 0.1);
         }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100vw;
+            height: 100vh;
+            overflow: auto;
+            background: rgba(0,0,0,0.35);
+        }
+        .modal-content {
+            background: #fff;
+            margin: 8% auto;
+            padding: 24px 32px 18px 32px;
+            border-radius: 10px;
+            width: 340px;
+            box-shadow: 0 2px 16px rgba(0,0,0,0.18);
+            position: relative;
+        }
+        .close {
+            color: #aaa;
+            position: absolute;
+            top: 12px;
+            right: 18px;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+        .close:hover {
+            color: #333;
+        }
+        .modal-title {
+            margin-top: 0;
+        }
+        .modal-list {
+            margin-left: 1em;
+        }
+        .modal-subtitle {
+            margin-top: 1em;
+        }
+        .modal-footer-note {
+            margin-top: 1.5em;
+            font-size: 0.9em;
+            color: #666;
+        }
+        /* Backend Status Box Styles */
+        .backend-status-box {
+            margin-left: 18px;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .backend-status-text {
+            font-size: 13px;
+            font-weight: 500;
+            color: #ffc107;
+            cursor: pointer;
+            text-decoration: underline;
+            transition: color 0.2s;
+        }
+        .backend-status-text.ok {
+            color: #28a745 !important;
+        }
+        .backend-status-text.fail {
+            color: #dc3545 !important;
+        }
+        .start-backend-btn {
+            font-size: 13px;
+            font-weight: 500;
+            background: #667eea;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            padding: 4px 12px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .start-backend-btn:hover {
+            background: #764ba2;
+        }
+        .max-tokens-input {
+            width: 90px;
+        }
     </style>
 </head>
 <body>
+    <!-- Backend Startup Modal -->
+    <div id="backendModal" class="modal">
+        <div class="modal-content">
+            <span class="close" id="closeBackendModal">&times;</span>
+            <h3 class="modal-title">Start Backend</h3>
+            <p><strong>Command copied to clipboard!</strong> Paste it in your terminal:</p>
+            <ol class="modal-list">
+                <li>Open <b>PowerShell</b> in this folder: <code>C:\Users\Bryan\OneDrive\AI</code></li>
+                <li>Paste and run: <code>func start</code></li>
+            </ol>
+            <p class="modal-subtitle">Or in <b>VS Code</b>:</p>
+            <ol class="modal-list">
+                <li>Open Command Palette (<kbd>Ctrl+Shift+P</kbd>)</li>
+                <li>Type <b>Tasks: Run Task</b> and select <b>func: host start</b>.</li>
+            </ol>
+            <p class="modal-subtitle modal-footer-note">The backend will start on port 7071. Refresh this page once it's running.</p>
+        </div>
+    </div>
+
     <div class="chat-container">
         <div class="chat-header">
             <h1>🤖 AI Chat</h1>
             <div class="provider-info" id="providerInfo">Local</div>
+            <div id="backendStatusBox" class="backend-status-box">
+                <span id="backendStatusText" class="backend-status-text">Backend</span>
+                <button id="startBackendBtn" class="start-backend-btn">▶️ Start</button>
+            </div>
         </div>
 
         <div class="chat-messages" id="chatMessages">
@@ -525,15 +705,6 @@
 
         <div class="chat-input-container">
             <div class="input-toolbar">
-                <div class="model-selector">
-                    <label for="providerSelect">Provider:</label>
-                    <select id="providerSelect">
-                        <option value="auto">Auto-detect</option>
-                        <option value="local">Local (Free)</option>
-                        <option value="openai">OpenAI</option>
-                        <option value="azure">Azure OpenAI</option>
-                    </select>
-                </div>
                 <div class="keyboard-hints">
                     <span>Enter to send • Shift+Enter for new line • Ctrl+K for new chat</span>
                 </div>
@@ -545,13 +716,34 @@
                     autocomplete="off"
                     rows="1"
                 ></textarea>
-                <button id="sendButton">Send</button>
+                <button id="sendButton">📤 Send</button>
+                <button id="cancelStreamBtn" class="cancel-stream-btn">❌ Cancel</button>
+            </div>
+            <div class="settings-row">
+                <label>
+                    Stream
+                    <input id="streamToggle" type="checkbox" checked />
+                </label>
+                <label>
+                    Temp
+                    <input id="tempSlider" type="range" min="0" max="1" step="0.05" value="0.7" />
+                    <span id="tempValue">0.70</span>
+                </label>
+                <label>
+                    Max tokens
+                    <input id="maxTokensInput" type="number" min="64" max="40960" step="64" value="1024" class="max-tokens-input" />
+                </label>
+                <button class="control-button" id="toggleSystemButton">🛠️ System</button>
+            </div>
+            <div class="system-prompt" id="systemPromptBox">
+                <textarea id="systemPromptInput" placeholder="Optional system prompt (behavior, style, constraints)"></textarea>
             </div>
             <div class="controls">
-                <button class="control-button" id="newChatButton">🔄 New Chat</button>
+                <button class="control-button" id="newChatButton">🔄 New</button>
                 <button class="control-button" id="clearButton">🗑️ Clear</button>
                 <button class="control-button" id="exportButton">💾 Export</button>
-                <button class="control-button" id="toggleThemeButton">🌓 Theme</button>
+                <button class="control-button" id="importButton">📥 Import</button>
+                <button class="control-button" id="toggleThemeButton">🌙 Dark</button>
             </div>
         </div>
 
@@ -566,5 +758,99 @@
     </div>
 
     <script src="chat.js"></script>
+    <script>
+    // Backend status check logic
+    document.addEventListener('DOMContentLoaded', function() {
+        var backendStatusText = document.getElementById('backendStatusText');
+        var startBackendBtn = document.getElementById('startBackendBtn');
+        // Auto-check backend status on page load
+        function checkBackendStatus(auto) {
+            if (!backendStatusText) return;
+            backendStatusText.textContent = 'Checking...';
+            backendStatusText.classList.remove('ok', 'fail');
+            fetch('/api/ai/status').then(function(resp) {
+                if (resp.ok) {
+                    backendStatusText.textContent = 'Backend running!';
+                    backendStatusText.classList.add('ok');
+                } else {
+                    backendStatusText.textContent = 'Backend not responding.';
+                    backendStatusText.classList.add('fail');
+                }
+            }).catch(function() {
+                backendStatusText.textContent = 'Backend not responding.';
+                backendStatusText.classList.add('fail');
+            });
+            setTimeout(function() {
+                backendStatusText.textContent = 'Check backend';
+                backendStatusText.classList.remove('ok', 'fail');
+            }, auto ? 6000 : 4000);
+        }
+        // Initial check on load
+        checkBackendStatus(true);
+        if (backendStatusText) {
+            backendStatusText.addEventListener('click', function() {
+                checkBackendStatus(false);
+            });
+        }
+        if (startBackendBtn) {
+            startBackendBtn.addEventListener('click', function() {
+                startBackendBtn.disabled = true;
+                startBackendBtn.textContent = 'Starting...';
+                
+                // First check if backend is already running
+                fetch('/api/ai/status')
+                    .then(function(resp) {
+                        if (resp.ok) {
+                            // Backend already running
+                            startBackendBtn.textContent = 'Already running!';
+                            setTimeout(function() {
+                                startBackendBtn.textContent = '▶️ Start';
+                                startBackendBtn.disabled = false;
+                            }, 2000);
+                            return;
+                        }
+                        throw new Error('Backend not running');
+                    })
+                    .catch(function() {
+                        // Backend not running - show modal with instructions
+                        var modal = document.getElementById('backendModal');
+                        if (modal) {
+                            modal.style.display = 'block';
+                            // Try to open PowerShell with the command (requires user to paste)
+                            var command = 'func start';
+                            // Copy command to clipboard
+                            if (navigator.clipboard) {
+                                navigator.clipboard.writeText(command).then(function() {
+                                    startBackendBtn.textContent = 'Cmd copied!';
+                                }).catch(function() {
+                                    startBackendBtn.textContent = 'See instructions';
+                                });
+                            } else {
+                                startBackendBtn.textContent = 'See instructions';
+                            }
+                        }
+                        setTimeout(function() {
+                            startBackendBtn.textContent = '▶️ Start';
+                            startBackendBtn.disabled = false;
+                        }, 3000);
+                    });
+            });
+        }
+        
+        var closeModalBtn = document.getElementById('closeBackendModal');
+        if (closeModalBtn) {
+            closeModalBtn.addEventListener('click', function() {
+                var modal = document.getElementById('backendModal');
+                if (modal) modal.style.display = 'none';
+            });
+        }
+        window.onclick = function(event) {
+            var modal = document.getElementById('backendModal');
+            if (modal && event.target === modal) {
+                modal.style.display = 'none';
+            }
+        };
+    });
+    </script>
 </body>
 </html>

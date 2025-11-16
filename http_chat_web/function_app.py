@@ -17,7 +17,12 @@ def serve_chat_web(req: func.HttpRequest) -> func.HttpResponse:
             return func.HttpResponse(
                 html_content,
                 status_code=200,
-                mimetype="text/html"
+                mimetype="text/html",
+                headers={
+                    "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
+                    "Pragma": "no-cache",
+                    "Expires": "0"
+                }
             )
         else:
             return func.HttpResponse(
@@ -47,7 +52,12 @@ def serve_chat_js(req: func.HttpRequest) -> func.HttpResponse:
             return func.HttpResponse(
                 js_content,
                 status_code=200,
-                mimetype="application/javascript"
+                mimetype="application/javascript",
+                headers={
+                    "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
+                    "Pragma": "no-cache",
+                    "Expires": "0"
+                }
             )
         else:
             return func.HttpResponse(

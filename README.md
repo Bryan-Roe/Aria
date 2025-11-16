@@ -339,3 +339,36 @@ See individual project directories for license information.
 ---
 
 **Last Updated:** October 31, 2025
+
+## LoRA Provider Usage
+
+Interact with your fine-tuned LoRA model using the CLI or web app:
+
+### CLI Example
+
+```powershell
+python .\src\chat_cli.py --provider lora --model ..\..\data_out\lora_training\lora_adapter
+```
+
+### Web App
+
+- Select "LoRA" in the provider dropdown.
+- Enter the adapter path (e.g., `data_out/lora_training/lora_adapter`) if prompted.
+- The backend will load your LoRA model for chat.
+
+**Requirements:**
+
+- `peft`, `transformers`, and `torch` must be installed in your environment.
+- The adapter directory must contain `adapter_config.json` and `adapter_model.safetensors`.
+
+**Troubleshooting:**
+
+- If you see errors about missing `peft`, run:
+
+```powershell
+pip install peft transformers torch
+```
+
+- If the model fails to load, check that your adapter path is correct and contains the required files.
+
+---
