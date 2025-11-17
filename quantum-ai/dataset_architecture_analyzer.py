@@ -25,29 +25,44 @@ from datetime import datetime
 from sklearn.preprocessing import LabelEncoder
 
 
-# Dataset metadata
+# Dataset metadata (27 working datasets)
 DATASET_INFO = {
     # Original 4
     'ionosphere': {'category': 'physics', 'task_type': 'binary', 'difficulty': 'medium'},
     'banknote': {'category': 'forensics', 'task_type': 'binary', 'difficulty': 'easy'},
     'heart_disease': {'category': 'medical', 'task_type': 'binary', 'difficulty': 'medium'},
     'sonar': {'category': 'geophysics', 'task_type': 'binary', 'difficulty': 'hard'},
-    # Medical
+    # Medical (13 total including statlog_heart)
     'breast_cancer': {'category': 'medical', 'task_type': 'binary', 'difficulty': 'medium'},
     'diabetes': {'category': 'medical', 'task_type': 'binary', 'difficulty': 'medium'},
-    'vertebral_column': {'category': 'medical', 'task_type': 'multiclass', 'difficulty': 'medium'},
     'blood_transfusion': {'category': 'medical', 'task_type': 'binary', 'difficulty': 'hard'},
     'haberman': {'category': 'medical', 'task_type': 'binary', 'difficulty': 'hard'},
-    # Chemistry
+    'parkinsons': {'category': 'medical', 'task_type': 'binary', 'difficulty': 'medium'},
+    'dermatology': {'category': 'medical', 'task_type': 'multiclass', 'difficulty': 'medium'},
+    'liver_disorders': {'category': 'medical', 'task_type': 'binary', 'difficulty': 'medium'},
+    'thyroid': {'category': 'medical', 'task_type': 'multiclass', 'difficulty': 'medium'},
+    'statlog_heart': {'category': 'medical', 'task_type': 'binary', 'difficulty': 'medium'},
+    # Biology (1 - ecoli corrupted)
+    'yeast': {'category': 'biology', 'task_type': 'multiclass', 'difficulty': 'hard'},
+    # Chemistry (3)
     'wine_red': {'category': 'chemistry', 'task_type': 'multiclass', 'difficulty': 'hard'},
     'wine_white': {'category': 'chemistry', 'task_type': 'multiclass', 'difficulty': 'hard'},
-    # Physics
-    'magic_gamma': {'category': 'physics', 'task_type': 'binary', 'difficulty': 'medium'},
-    # Biology
+    'wine_quality_combined': {'category': 'chemistry', 'task_type': 'multiclass', 'difficulty': 'hard'},
+    # Image Features (4)
     'iris': {'category': 'biology', 'task_type': 'multiclass', 'difficulty': 'easy'},
-    # Agriculture
+    'optical_recognition': {'category': 'image', 'task_type': 'multiclass', 'difficulty': 'hard'},
+    'pendigits': {'category': 'image', 'task_type': 'multiclass', 'difficulty': 'medium'},
+    # Agriculture (2)
     'wheat_seeds': {'category': 'agriculture', 'task_type': 'multiclass', 'difficulty': 'medium'},
-    # Forensics
+    'seeds': {'category': 'agriculture', 'task_type': 'multiclass', 'difficulty': 'medium'},
+    # Finance (1)
+    'statlog_australian': {'category': 'finance', 'task_type': 'binary', 'difficulty': 'medium'},
+    # Physics (2 - including balance_scale)
+    'magic_gamma': {'category': 'physics', 'task_type': 'binary', 'difficulty': 'medium'},
+    'balance_scale': {'category': 'physics', 'task_type': 'multiclass', 'difficulty': 'easy'},
+    # Social Science (1)
+    'contraceptive': {'category': 'social', 'task_type': 'multiclass', 'difficulty': 'medium'},
+    # Forensics (1)
     'glass': {'category': 'forensics', 'task_type': 'multiclass', 'difficulty': 'hard'},
 }
 
@@ -56,8 +71,35 @@ def analyze_dataset(dataset_name):
     """Analyze a dataset and recommend architecture"""
     dataset_path = Path(__file__).parent.parent / "datasets" / "quantum" / f"{dataset_name}.csv"
     
-    # Load dataset
-    df = pd.read_csv(dataset_path, na_values=['?', 'NA', '', 'NaN'])
+    # Load dataset with specific strategies
+    try:
+        if dataset_name in ['wine_red', 'wine_white']:
+            df = pd.read_csv(dataset_path, sep=';', na_values=['?', 'NA', '', 'NaN'])
+        elif dataset_name == 'wine_quality_combined':
+            df = pd.read_csv(dataset_path, na_values=['?', 'NA', '', 'NaN'])
+        elif dataset_name in ['wheat_seeds', 'seeds']:
+            df = pd.read_csv(dataset_path, sep=r'\s+', header=None, na_values=['?', 'NA', '', 'NaN'])
+        elif dataset_name == 'yeast':
+            df = pd.read_csv(dataset_path, sep=r'\s+', header=None, na_values=['?', 'NA', '', 'NaN'])
+            df = df.iloc[:, 1:]  # Skip sequence name
+        elif dataset_name == 'parkinsons':
+            df = pd.read_csv(dataset_path, na_values=['?', 'NA', '', 'NaN'])
+            df = df.drop(columns=df.columns[0])  # Skip name column
+        elif dataset_name in ['statlog_australian', 'statlog_heart']:
+            df = pd.read_csv(dataset_path, sep=' ', header=None, na_values=['?', 'NA', '', 'NaN'])
+        elif dataset_name == 'blood_transfusion':
+            df = pd.read_csv(dataset_path, skiprows=1, na_values=['?', 'NA', '', 'NaN'])
+        elif dataset_name == 'breast_cancer':
+            df = pd.read_csv(dataset_path, header=None, na_values=['?', 'NA', '', 'NaN'])
+        elif dataset_name == 'balance_scale':
+            df = pd.read_csv(dataset_path, na_values=['?', 'NA', '', 'NaN'])
+        elif dataset_name in ['optical_recognition', 'pendigits', 'contraceptive', 'dermatology', 
+                               'liver_disorders', 'thyroid']:
+            df = pd.read_csv(dataset_path, header=None, na_values=['?', 'NA', '', 'NaN'])
+        else:
+            df = pd.read_csv(dataset_path, na_values=['?', 'NA', '', 'NaN'])
+    except Exception as e:
+        raise ValueError(f"Failed to load {dataset_name}: {str(e)}")
     
     # Basic statistics
     n_samples = len(df)

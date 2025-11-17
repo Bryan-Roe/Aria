@@ -1,0 +1,71 @@
+{
+  "timestamp": "2025-11-16T22:56:23.658577",
+  "total_datasets": 3,
+  "successful": 3,
+  "failed": 0,
+  "total_time_seconds": 2.953406572341919,
+  "epochs": 1,
+  "workers": 3,
+  "results": [
+    {
+      "dataset": "vehicle_reproduced_44153",
+      "status": "success",
+      "samples": 500,
+      "features": 18,
+      "classes": 2,
+      "variance_explained": 0.8715490746091662,
+      "best_accuracy": 0.7200000286102295,
+      "best_epoch": 1,
+      "final_accuracy": 0.7200000286102295,
+      "epochs_trained": 1,
+      "duration_seconds": 0.6689057350158691,
+      "training_history": [
+        {
+          "epoch": 1,
+          "train_loss": 0.6207253199357253,
+          "val_acc": 0.7200000286102295
+        }
+      ]
+    },
+    {
+      "dataset": "vehicle_54",
+      "status": "success",
+      "samples": 500,
+      "features": 18,
+      "classes": 2,
+      "variance_explained": 0.8715490746091662,
+      "best_accuracy": 0.7200000286102295,
+      "best_epoch": 1,
+      "final_accuracy": 0.7200000286102295,
+      "epochs_trained": 1,
+      "duration_seconds": 0.6699070930480957,
+      "training_history": [
+        {
+          "epoch": 1,
+          "train_loss": 0.6207253199357253,
+          "val_acc": 0.7200000286102295
+        }
+      ]
+    },
+    {
+      "dataset": "vehicle_994",
+      "status": "success",
+      "samples": 500,
+      "features": 18,
+      "classes": 2,
+      "variance_explained": 0.8715490746091662,
+      "best_accuracy": 0.7200000286102295,
+      "best_epoch": 1,
+      "final_accuracy": 0.7200000286102295,
+      "epochs_trained": 1,
+      "duration_seconds": 0.6719074249267578,
+      "training_history": [
+        {
+          "epoch": 1,
+          "train_loss": 0.6207253199357253,
+          "val_acc": 0.7200000286102295
+        }
+      ]
+    }
+  ]
+}

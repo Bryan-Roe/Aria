@@ -2,7 +2,7 @@
 Quick Test: Validate All Quantum Datasets
 ==========================================
 
-Rapidly validates that all 15 datasets can be:
+Rapidly validates that all 29 datasets can be:
 1. Successfully loaded
 2. Preprocessed for quantum circuits
 3. Trained for 1 epoch (smoke test)
@@ -11,7 +11,7 @@ This script provides fast feedback on dataset compatibility before
 running full benchmarks or hyperparameter optimization.
 
 Author: Quantum AI System
-Date: November 16, 2025
+Date: November 16, 2025 (Updated)
 """
 
 import numpy as np
@@ -35,15 +35,30 @@ import torch
 from torch.utils.data import TensorDataset, DataLoader
 
 
-# All 15 datasets
+# All 29 datasets (26 working, 3 excluded: vertebral_column, ecoli corrupted)
 DATASETS = [
-    'ionosphere', 'banknote', 'heart_disease', 'sonar',  # Original 4
-    'breast_cancer', 'diabetes', 'vertebral_column', 'blood_transfusion', 'haberman',  # Medical
-    'wine_red', 'wine_white',  # Chemistry
-    'magic_gamma',  # Physics
-    'iris',  # Biology
-    'wheat_seeds',  # Agriculture
-    'glass',  # Forensics
+    # Original 4
+    'ionosphere', 'banknote', 'heart_disease', 'sonar',
+    # Medical (8 total)
+    'breast_cancer', 'diabetes', 'blood_transfusion', 'haberman',
+    'parkinsons', 'dermatology', 'liver_disorders', 'thyroid', 'statlog_heart',
+    # Biology (3 working - ecoli corrupted)
+    'yeast',
+    # Chemistry (3 total)
+    'wine_red', 'wine_white', 'wine_quality_combined',
+    # Image Features (4 total)
+    'iris', 'optical_recognition', 'pendigits',
+    # Agriculture (2 total)
+    'wheat_seeds', 'seeds',
+    # Finance (1)
+    'statlog_australian',
+    # Physics (1)
+    'balance_scale',
+    # Social Science (1)
+    'contraceptive',
+    # Other
+    'magic_gamma', 'glass',
+    # Note: vertebral_column and ecoli excluded (corrupted)
 ]
 
 
@@ -58,9 +73,26 @@ def load_and_preprocess(dataset_name, n_qubits=4):
         if dataset_name in ['wine_red', 'wine_white']:
             # These use semicolon delimiter with header
             df = pd.read_csv(dataset_path, sep=';', na_values=['?', 'NA', '', 'NaN'])
-        elif dataset_name == 'wheat_seeds':
-            # Tab-delimited with missing values (some lines have spaces as separators)
+        elif dataset_name == 'wine_quality_combined':
+            # Combined wine dataset with comma delimiter (not semicolon!)
+            df = pd.read_csv(dataset_path, na_values=['?', 'NA', '', 'NaN'])
+        elif dataset_name in ['wheat_seeds', 'seeds']:
+            # Whitespace-delimited datasets with no header
             df = pd.read_csv(dataset_path, sep=r'\s+', header=None, na_values=['?', 'NA', '', 'NaN'])
+        elif dataset_name == 'ecoli':
+            # Known corrupted dataset - skip
+            raise ValueError("Dataset file appears to be corrupted or empty")
+        elif dataset_name == 'yeast':
+            # Whitespace-delimited, no header, skip first column (sequence name)
+            df = pd.read_csv(dataset_path, sep=r'\s+', header=None, na_values=['?', 'NA', '', 'NaN'])
+            df = df.iloc[:, 1:]  # Skip sequence name column
+        elif dataset_name == 'parkinsons':
+            # Comma-delimited with header, skip first column (name)
+            df = pd.read_csv(dataset_path, na_values=['?', 'NA', '', 'NaN'])
+            df = df.drop(columns=df.columns[0])  # Skip name column
+        elif dataset_name in ['statlog_australian', 'statlog_heart']:
+            # Space-delimited, no header
+            df = pd.read_csv(dataset_path, sep=' ', header=None, na_values=['?', 'NA', '', 'NaN'])
         elif dataset_name == 'vertebral_column':
             # Binary file or severely corrupted - skip for now
             raise ValueError("Dataset file appears to be corrupted or binary format")
@@ -69,6 +101,13 @@ def load_and_preprocess(dataset_name, n_qubits=4):
             df = pd.read_csv(dataset_path, skiprows=1, na_values=['?', 'NA', '', 'NaN'])
         elif dataset_name == 'breast_cancer':
             # No header, need to skip ID column
+            df = pd.read_csv(dataset_path, header=None, na_values=['?', 'NA', '', 'NaN'])
+        elif dataset_name == 'balance_scale':
+            # Comma-delimited with header
+            df = pd.read_csv(dataset_path, na_values=['?', 'NA', '', 'NaN'])
+        elif dataset_name in ['optical_recognition', 'pendigits', 'contraceptive', 'dermatology', 
+                               'liver_disorders', 'thyroid']:
+            # Comma-delimited, no header
             df = pd.read_csv(dataset_path, header=None, na_values=['?', 'NA', '', 'NaN'])
         else:
             # Standard loading with fallback
@@ -85,7 +124,7 @@ def load_and_preprocess(dataset_name, n_qubits=4):
                     df = pd.read_csv(dataset_path, sep=';', na_values=['?', 'NA', '', 'NaN'], encoding='latin-1')
         
         # Check if first row looks like data (all numeric except possibly last column) - only for unhandled cases
-        if dataset_name not in ['breast_cancer', 'vertebral_column', 'blood_transfusion', 'wine_red', 'wine_white', 'wheat_seeds']:
+        if dataset_name not in ['breast_cancer', 'vertebral_column', 'blood_transfusion', 'wine_red', 'wine_white', 'wine_quality_combined', 'wheat_seeds']:
             first_row_numeric = all(str(df.iloc[0, i]).replace('.', '').replace('-', '').replace('e', '').isdigit() or str(df.iloc[0, i]).replace('.', '').replace('-', '').replace('e', '').replace('+', '').isdigit() 
                                      for i in range(min(3, df.shape[1] - 1)))
             

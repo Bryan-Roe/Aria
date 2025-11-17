@@ -5,17 +5,22 @@ Benchmark Quantum AI on All Available Datasets
 Trains the hybrid quantum-classical neural network on all quantum datasets
 and generates a comprehensive comparison report.
 
-Datasets tested:
+Datasets tested (27 total):
 - Original 4: Ionosphere, Banknote, Heart Disease, Sonar
-- Medical 5: Breast Cancer, Diabetes, Vertebral Column, Blood Transfusion, Haberman
-- Chemistry 2: Red Wine, White Wine
-- Physics: MAGIC Gamma
-- Biology: Iris
-- Agriculture: Wheat Seeds
-- Forensics: Glass
+- Medical 10: Breast Cancer, Diabetes, Blood Transfusion, Haberman, Parkinsons, Dermatology, Liver Disorders, Thyroid, Statlog Heart
+- Chemistry 3: Red Wine, White Wine, Wine Quality Combined
+- Physics 2: MAGIC Gamma, Balance Scale
+- Biology 1: Iris
+- Agriculture 2: Wheat Seeds, Seeds
+- Image Features 2: Optical Recognition, Pendigits
+- Finance 1: Statlog Australian
+- Social Science 1: Contraceptive
+- Forensics 2: Banknote, Glass
+
+Note: Vertebral Column and Ecoli excluded (corrupted)
 
 Author: Quantum AI System
-Date: November 16, 2025
+Date: November 16, 2025 (Updated)
 """
 
 import numpy as np
@@ -137,6 +142,85 @@ DATASETS = {
         'task': 'Multi-class: Glass type classification',
         'category': 'forensics',
     },
+    # New Medical Datasets (Phase 2)
+    'parkinsons': {
+        'file': 'parkinsons.csv',
+        'description': 'Parkinsons Disease Detection',
+        'task': 'Binary: Parkinsons presence prediction',
+        'category': 'medical',
+    },
+    'dermatology': {
+        'file': 'dermatology.csv',
+        'description': 'Dermatology Disease Classification',
+        'task': 'Multi-class: 6 dermatology conditions',
+        'category': 'medical',
+    },
+    'liver_disorders': {
+        'file': 'liver_disorders.csv',
+        'description': 'Liver Disorders Classification',
+        'task': 'Binary: Liver disorder detection',
+        'category': 'medical',
+    },
+    'thyroid': {
+        'file': 'thyroid.csv',
+        'description': 'Thyroid Disease Classification',
+        'task': 'Multi-class: 3 thyroid conditions',
+        'category': 'medical',
+    },
+    'statlog_heart': {
+        'file': 'statlog_heart.csv',
+        'description': 'Statlog Heart Disease',
+        'task': 'Binary: Heart disease presence',
+        'category': 'medical',
+    },
+    # Chemistry (Phase 2)
+    'wine_quality_combined': {
+        'file': 'wine_quality_combined.csv',
+        'description': 'Combined Wine Quality Dataset',
+        'task': 'Multi-class: Wine quality with type feature',
+        'category': 'chemistry',
+    },
+    # Image Features
+    'optical_recognition': {
+        'file': 'optical_recognition.csv',
+        'description': 'Optical Recognition of Handwritten Digits',
+        'task': 'Multi-class: 10 digit classification',
+        'category': 'image',
+    },
+    'pendigits': {
+        'file': 'pendigits.csv',
+        'description': 'Pen-Based Recognition of Handwritten Digits',
+        'task': 'Multi-class: 10 digit classification',
+        'category': 'image',
+    },
+    # Agriculture (Phase 2)
+    'seeds': {
+        'file': 'seeds.csv',
+        'description': 'Seeds Classification',
+        'task': 'Multi-class: Wheat variety classification',
+        'category': 'agriculture',
+    },
+    # Finance
+    'statlog_australian': {
+        'file': 'statlog_australian.csv',
+        'description': 'Australian Credit Approval',
+        'task': 'Binary: Credit approval prediction',
+        'category': 'finance',
+    },
+    # Physics (Phase 2)
+    'balance_scale': {
+        'file': 'balance_scale.csv',
+        'description': 'Balance Scale Weight & Distance',
+        'task': 'Multi-class: 3 balance classes',
+        'category': 'physics',
+    },
+    # Social Science
+    'contraceptive': {
+        'file': 'contraceptive.csv',
+        'description': 'Contraceptive Method Choice',
+        'task': 'Multi-class: 3 contraceptive methods',
+        'category': 'social',
+    },
 }
 
 
@@ -155,9 +239,19 @@ def load_dataset(dataset_name):
     if dataset_name in ['wine_red', 'wine_white']:
         # These use semicolon delimiter with header
         df = pd.read_csv(dataset_path, sep=';', na_values=['?', 'NA', '', 'NaN'])
-    elif dataset_name == 'wheat_seeds':
-        # Tab-delimited with missing values (some lines have spaces as separators)
+    elif dataset_name == 'wine_quality_combined':
+        # Combined wine dataset with comma delimiter
+        df = pd.read_csv(dataset_path, na_values=['?', 'NA', '', 'NaN'])
+    elif dataset_name in ['wheat_seeds', 'seeds']:
+        # Whitespace-delimited datasets with no header
         df = pd.read_csv(dataset_path, sep=r'\s+', header=None, na_values=['?', 'NA', '', 'NaN'])
+    elif dataset_name == 'parkinsons':
+        # Comma-delimited with header, skip first column (name)
+        df = pd.read_csv(dataset_path, na_values=['?', 'NA', '', 'NaN'])
+        df = df.drop(columns=df.columns[0])  # Skip name column
+    elif dataset_name in ['statlog_australian', 'statlog_heart']:
+        # Space-delimited, no header
+        df = pd.read_csv(dataset_path, sep=' ', header=None, na_values=['?', 'NA', '', 'NaN'])
     elif dataset_name == 'vertebral_column':
         # Binary file or severely corrupted - skip
         raise ValueError("Dataset file appears to be corrupted or binary format")
@@ -166,6 +260,13 @@ def load_dataset(dataset_name):
         df = pd.read_csv(dataset_path, skiprows=1, na_values=['?', 'NA', '', 'NaN'])
     elif dataset_name == 'breast_cancer':
         # No header, need to skip ID column
+        df = pd.read_csv(dataset_path, header=None, na_values=['?', 'NA', '', 'NaN'])
+    elif dataset_name == 'balance_scale':
+        # Comma-delimited with header
+        df = pd.read_csv(dataset_path, na_values=['?', 'NA', '', 'NaN'])
+    elif dataset_name in ['optical_recognition', 'pendigits', 'contraceptive', 'dermatology', 
+                           'liver_disorders', 'thyroid']:
+        # Comma-delimited, no header
         df = pd.read_csv(dataset_path, header=None, na_values=['?', 'NA', '', 'NaN'])
     else:
         # Standard loading with fallback
@@ -182,7 +283,7 @@ def load_dataset(dataset_name):
                 df = pd.read_csv(dataset_path, sep=';', na_values=['?', 'NA', '', 'NaN'], encoding='latin-1')
     
     # Check if first row looks like data (all numeric except possibly last column) - only for unhandled cases
-    if dataset_name not in ['breast_cancer', 'vertebral_column', 'blood_transfusion', 'wine_red', 'wine_white', 'wheat_seeds']:
+    if dataset_name not in ['breast_cancer', 'vertebral_column', 'blood_transfusion', 'wine_red', 'wine_white', 'wine_quality_combined', 'wheat_seeds', 'seeds']:
         first_row_numeric = all(str(df.iloc[0, i]).replace('.', '').replace('-', '').replace('e', '').isdigit() or str(df.iloc[0, i]).replace('.', '').replace('-', '').replace('e', '').replace('+', '').isdigit() 
                                  for i in range(min(3, df.shape[1] - 1)))
         
@@ -446,9 +547,10 @@ def main():
     print("="*70)
     print("  QUANTUM AI - COMPREHENSIVE BENCHMARK")
     print("="*70)
-    print(f"\n🔬 Testing on {len(DATASETS)} quantum datasets")
+    print(f"\n🔬 Testing on {len(DATASETS)} quantum datasets (27 total, 26 working)")
     print("   Model: Hybrid Quantum-Classical Neural Network")
-    print("   Configuration: 4 qubits, 2 quantum layers, 25 epochs")
+    print("   Configuration: Variable architecture (4-6 qubits, 2-4 layers per dataset)")
+    print("   Training: 25 epochs with dataset-specific hyperparameters")
     
     results = []
     
