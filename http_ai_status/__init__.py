@@ -5,6 +5,7 @@ import subprocess
 from pathlib import Path
 import importlib.util as _iu
 import azure.functions as func
+import yaml
 
 # Reuse shared chat providers (already copied for performance)
 shared_path = Path(__file__).resolve().parent.parent / "shared"
@@ -118,12 +119,68 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         qautorun_dir = repo_root / "data_out" / "quantum_autorun"
         qautorun_status_path = qautorun_dir / "status.json"
         qautorun_last: dict | None = None
+        quantum_azure: dict | None = None
         if qautorun_status_path.exists():
             try:
                 with qautorun_status_path.open("r", encoding="utf-8") as f:
                     qautorun_last = json.load(f)
             except Exception:
                 qautorun_last = {"error": "failed to parse status.json"}
+
+            # Build Azure Quantum context and job list if metadata present
+            try:
+                cfg_path = repo_root / "quantum-ai" / "config" / "quantum_config.yaml"
+                azure_ctx = None
+                workspace_url = None
+                if cfg_path.exists():
+                    with cfg_path.open("r", encoding="utf-8") as f:
+                        cfg = yaml.safe_load(f) or {}
+                    az = cfg.get("azure", {})
+                    sub = az.get("subscription_id")
+                    rg = az.get("resource_group")
+                    ws = az.get("workspace_name")
+                    loc = az.get("location")
+                    azure_ctx = {
+                        "subscription_id": sub,
+                        "resource_group": rg,
+                        "workspace_name": ws,
+                        "location": loc,
+                    }
+                    if sub and rg and ws:
+                        workspace_url = (
+                            f"https://portal.azure.com/#resource/subscriptions/{sub}/resourceGroups/{rg}"
+                            f"/providers/Microsoft.Quantum/Workspaces/{ws}/overview"
+                        )
+                # Extract azure job metadata from autorun status
+                azure_jobs = []
+                jobs = (qautorun_last or {}).get("jobs", [])
+                for j in jobs:
+                    meta = j.get("meta", {}) if isinstance(j, dict) else {}
+                    job_id = meta.get("azure_job_id")
+                    if job_id:
+                        azure_jobs.append({
+                            "name": j.get("name"),
+                            "mode": j.get("mode"),
+                            "job_id": job_id,
+                            "backend": meta.get("azure_backend") or meta.get("backend") or j.get("mode"),
+                            "success": meta.get("azure_success"),
+                            "counts": meta.get("azure_counts"),
+                            "results_file": meta.get("azure_results_file"),
+                        })
+                if azure_ctx or azure_jobs:
+                    quantum_azure = {
+                        "workspace": azure_ctx,
+                        "workspace_portal_url": workspace_url,
+                        "jobs": azure_jobs,
+                        "portal_job_url_template": (
+                            "https://portal.azure.com/#view/Microsoft_Azure_Quantum/JobDetailsBlade?"
+                            "jobId={job_id}&subscriptionId={subscription_id}&resourceGroup={resource_group}"
+                            "&workspaceName={workspace_name}&location={location}"
+                        ),
+                    }
+            except Exception:
+                # ignore enrichment failures; keep core payload intact
+                pass
 
         payload = {
             "active_provider": info.name,
@@ -148,6 +205,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
             },
             "autotrain": autotrain_last,
             "quantum_autorun": qautorun_last,
+            "quantum_azure": quantum_azure,
             "endpoints": [
                 "/api/chat-web",
                 "/api/chat-web/chat.js",

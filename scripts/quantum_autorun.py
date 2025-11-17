@@ -277,15 +277,65 @@ def run_job(job: QJob, dry_run: bool = False) -> Dict[str, Any]:
     result["duration_sec"] = round(duration, 2)
     result["status"] = "succeeded" if rc == 0 else "failed"
 
+    # Enrich with Azure results if available
+    if rc == 0 and job.mode == MODE_AZURE:
+        try:
+            # Read last lines of log to find results path
+            log_text = Path(log_path).read_text(encoding="utf-8", errors="ignore")
+            marker = "Results saved to: "
+            idx = log_text.rfind(marker)
+            if idx != -1:
+                start = idx + len(marker)
+                # Read path until end-of-line
+                end = log_text.find("\n", start)
+                out_path = log_text[start:end].strip() if end != -1 else log_text[start:].strip()
+                jpath = Path(out_path)
+                if jpath.exists():
+                    import json as _json
+                    with jpath.open("r", encoding="utf-8") as f:
+                        j = _json.load(f)
+                    # Attach to meta
+                    result.setdefault("meta", {})
+                    result["meta"]["azure_results_file"] = str(jpath)
+                    for k in ("job_id", "counts", "success"):
+                        if k in j:
+                            result["meta"][f"azure_{k}"] = j[k]
+        except Exception as e:  # noqa: BLE001
+            # Best-effort enrichment; ignore failures
+            result.setdefault("meta", {})
+            result["meta"].setdefault("azure_parse_error", str(e))
+
     # Persist last_run.json for job
     write_json(DATA_OUT / job.name / "last_run.json", result)
     return result
 
 
 def collect_status(all_results: List[Dict[str, Any]]) -> Dict[str, Any]:
+    # Aggregate simple counts by status and latest run info
+    counts: Dict[str, int] = {}
+    latest: Optional[Dict[str, Any]] = None
+    latest_ts: Optional[str] = None
+    for r in all_results:
+        st = str(r.get("status", "unknown"))
+        counts[st] = counts.get(st, 0) + 1
+        ts = str(r.get("start_time", ""))
+        if ts and (latest_ts is None or ts > latest_ts):
+            latest_ts = ts
+            latest = {
+                "name": r.get("name"),
+                "status": st,
+                "mode": r.get("mode"),
+                "start_time": ts,
+                "log": r.get("log"),
+            }
+
     summary = {
         "generated_at": datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ"),
         "jobs": all_results,
+        "summary": {
+            "counts": counts,
+            "latest": latest,
+        },
     }
     write_json(DATA_OUT / "status.json", summary)
     return summary

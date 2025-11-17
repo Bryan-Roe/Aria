@@ -75,6 +75,37 @@
 			"problemMatcher": []
 		},
 		{
+			"label": "Run: LoRA quick (streaming)",
+			"type": "shell",
+			"options": { "cwd": "${workspaceFolder}\\AI\\microsoft_phi-silica-3.6_v1" },
+			"command": ".\\venv\\Scripts\\python.exe",
+			"args": [
+				".\\scripts\\train_lora.py",
+				"--dataset", "..\\..\\datasets\\chat\\mixed_chat",
+				"--max-train-samples", "64",
+				"--max-eval-samples", "16",
+				"--epochs", "1"
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Run: LoRA quick (non-stream)",
+			"type": "shell",
+			"options": { "cwd": "${workspaceFolder}\\AI\\microsoft_phi-silica-3.6_v1" },
+			"command": ".\\venv\\Scripts\\python.exe",
+			"args": [
+				".\\scripts\\train_lora.py",
+				"--dataset", "..\\..\\datasets\\chat\\mixed_chat",
+				"--max-train-samples", "64",
+				"--max-eval-samples", "16",
+				"--epochs", "1",
+				"--no-stream"
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
 			"label": "Run: Quantum AutoRun (dry-run)",
 			"type": "shell",
 			"options": { "cwd": "${workspaceFolder}" },

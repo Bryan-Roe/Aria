@@ -60,6 +60,10 @@ python scripts/quick_setup_datasets.py    # Dolly 15k, UCI datasets (all free)
 - Functions import talk-to-ai modules dynamically: `sys.path.insert(0, "talk-to-ai/src")`
 - Local dev: Azurite emulator files at root (`__azurite_db_*.json`, `__blobstorage__/`, `__queuestorage__/`)
 - Config: `local.settings.json` sets `AzureWebJobsStorage: UseDevelopmentStorage=true`
+- **Status endpoint** (`/api/ai/status`):
+  - Returns comprehensive JSON with provider info, ML dependencies, LoRA adapter readiness, AutoTrain status, and Quantum AutoRun status.
+  - **Azure Quantum context**: Includes workspace details from `quantum-ai/config/quantum_config.yaml`, direct portal link, and array of Azure jobs with IDs/backends/results.
+  - Portal links: `quantum_azure.workspace_portal_url` for workspace, `portal_job_url_template` for deep-linking to specific jobs.
 
 **Dataset integration:**
 - `datasets/dataset_index.json`: Metadata registry for all datasets (quantum CSVs, chat JSONL, sizes, licenses)
@@ -79,6 +83,22 @@ pip install -r mcp-requirements.txt      # For MCP server: mcp>=0.9.0
 python src/quantum_classifier.py         # Local simulation demo
 python train_custom_dataset.py           # Train on datasets/quantum/*.csv
 ```
+
+**Quantum AutoRun orchestrator** (`scripts/quantum_autorun.py`):
+- **YAML-driven automation**: Define jobs in `quantum_autorun.yaml` with presets, hyperparams, and Azure backends.
+- **Two modes**:
+  - `train_custom_dataset`: Local simulator training (FREE, default)
+  - `azure_hardware`: Submit to Azure Quantum (simulators FREE, QPU paid)
+- **Safety**: Azure QPU jobs require `azure_confirm_cost: true` to prevent accidental charges.
+- **Status tracking**: Generates `data_out/quantum_autorun/status.json` with per-job results, aggregates, and Azure metadata.
+- **Usage**:
+  ```powershell
+  python .\scripts\quantum_autorun.py --dry-run              # Validate all enabled jobs
+  python .\scripts\quantum_autorun.py --job heart_quick      # Run specific job
+  python .\scripts\quantum_autorun.py --list                 # List configured jobs
+  ```
+- **VS Code tasks**: "Run: Quantum AutoRun (dry-run)" and "Run: Quantum AutoRun (all)".
+- **Azure enrichment**: Successful Azure runs parse results and attach `azure_job_id`, `azure_counts`, `azure_success` to status meta.
 
 **MCP server** (Model Context Protocol for AI agents):
 - Run: `python quantum_mcp_server.py` (exposes 8 quantum tools via stdio).
@@ -158,8 +178,11 @@ python .\src\chat_cli.py --provider azure
 cd AI\microsoft_phi-silica-3.6_v1
 pip install -r requirements.txt
 
-# 🆓 CPU-friendly test (no GPU required, 64 samples)
-python .\scripts\train_lora.py --dataset ..\..\datasets\chat\dolly --config .\lora\lora.yaml --max-train-samples 64 --no-stream
+# 🆓 CPU-friendly test (no GPU required, 64 samples) - STREAMING MODE (default, handles large datasets)
+python .\scripts\train_lora.py --dataset ..\..\datasets\chat\dolly --config .\lora\lora.yaml --max-train-samples 64 --max-eval-samples 16 --epochs 1
+
+# 🆓 CPU-friendly test - NON-STREAMING MODE (faster for small datasets)
+python .\scripts\train_lora.py --dataset ..\..\datasets\chat\dolly --config .\lora\lora.yaml --max-train-samples 64 --max-eval-samples 16 --epochs 1 --no-stream
 
 # Dry-run (validate config, no training)
 python .\scripts\train_lora.py --dry-run --dataset .\data --config .\lora\lora.yaml
@@ -167,6 +190,10 @@ python .\scripts\train_lora.py --dry-run --dataset .\data --config .\lora\lora.y
 # 💰 Full training (GPU required - use Colab free tier or Kaggle notebooks for free GPU access)
 python .\scripts\train_lora.py --dataset ..\..\datasets\chat\dolly --config .\lora\lora.yaml
 ```
+
+**VS Code quick tasks:**
+- "Run: LoRA quick (streaming)" – smoke test with streaming dataset (default, memory-efficient)
+- "Run: LoRA quick (non-stream)" – smoke test with non-streaming dataset (faster for small data)
 
 **Free GPU alternatives:**
 - Google Colab (free tier: ~12 hours GPU/day)
@@ -254,9 +281,11 @@ python .\scripts\validate_datasets.py --verbose                                 
 - Common fixes: Remove trailing blank lines, ensure valid JSON per line, verify `messages` array exists.
 
 **LoRA training crashes:**
-- CPU: Use `--max-train-samples 64` for quick tests.
+- **Streaming dataset errors**: Fixed in `train_lora.py` with auto-computed `max_steps` and FilteringDataCollator. Use `--no-stream` flag if issues persist.
+- CPU: Use `--max-train-samples 64 --max-eval-samples 16 --epochs 1` for quick tests.
 - GPU OOM: Reduce `finetune_train_batch_size` (2→1) or `finetune_train_seqlen` (1024→512) in `lora.yaml`.
 - **No GPU?** Use Google Colab free tier (12 hours/day GPU) or Kaggle (30 hours/week GPU).
+- **VS Code tasks**: Use "Run: LoRA quick (streaming)" or "Run: LoRA quick (non-stream)" for one-click smoke tests.
 
 **Cost optimization:**
 - Quantum: Default to `qiskit_aer` or `lightning.qubit` simulators (free, unlimited).
