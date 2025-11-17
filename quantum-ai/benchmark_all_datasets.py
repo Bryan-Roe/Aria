@@ -141,7 +141,9 @@ DATASETS = {
 
 
 def load_dataset(dataset_name):
-    """Load a dataset by name"""
+    """Load a dataset by name with dataset-specific handling"""
+    from sklearn.impute import SimpleImputer
+    
     dataset_config = DATASETS[dataset_name]
     dataset_path = Path(__file__).parent.parent / "datasets" / "quantum" / dataset_config['file']
     
@@ -149,35 +151,77 @@ def load_dataset(dataset_name):
     print(f"   File: {dataset_config['file']}")
     print(f"   Task: {dataset_config['task']}")
     
-    # Read CSV with proper missing value handling
-    df = pd.read_csv(dataset_path, na_values=['?', 'NA', '', 'NaN'])
+    # Dataset-specific loading strategies (matching quick_test_datasets.py)
+    if dataset_name in ['wine_red', 'wine_white']:
+        # These use semicolon delimiter with header
+        df = pd.read_csv(dataset_path, sep=';', na_values=['?', 'NA', '', 'NaN'])
+    elif dataset_name == 'wheat_seeds':
+        # Tab-delimited with missing values (some lines have spaces as separators)
+        df = pd.read_csv(dataset_path, sep=r'\s+', header=None, na_values=['?', 'NA', '', 'NaN'])
+    elif dataset_name == 'vertebral_column':
+        # Binary file or severely corrupted - skip
+        raise ValueError("Dataset file appears to be corrupted or binary format")
+    elif dataset_name == 'blood_transfusion':
+        # Has header with description in first row, skip it
+        df = pd.read_csv(dataset_path, skiprows=1, na_values=['?', 'NA', '', 'NaN'])
+    elif dataset_name == 'breast_cancer':
+        # No header, need to skip ID column
+        df = pd.read_csv(dataset_path, header=None, na_values=['?', 'NA', '', 'NaN'])
+    else:
+        # Standard loading with fallback
+        try:
+            df = pd.read_csv(dataset_path, na_values=['?', 'NA', '', 'NaN'])
+            # Check if it looks like semicolon-delimited
+            if df.shape[1] == 1 and ';' in str(df.iloc[0, 0]):
+                df = pd.read_csv(dataset_path, sep=';', na_values=['?', 'NA', '', 'NaN'])
+        except UnicodeDecodeError:
+            # Try different encoding
+            try:
+                df = pd.read_csv(dataset_path, na_values=['?', 'NA', '', 'NaN'], encoding='latin-1')
+            except:
+                df = pd.read_csv(dataset_path, sep=';', na_values=['?', 'NA', '', 'NaN'], encoding='latin-1')
     
-    # Handle missing values by median imputation for features
-    from sklearn.impute import SimpleImputer
-    imputer = SimpleImputer(strategy='median')
+    # Check if first row looks like data (all numeric except possibly last column) - only for unhandled cases
+    if dataset_name not in ['breast_cancer', 'vertebral_column', 'blood_transfusion', 'wine_red', 'wine_white', 'wheat_seeds']:
+        first_row_numeric = all(str(df.iloc[0, i]).replace('.', '').replace('-', '').replace('e', '').isdigit() or str(df.iloc[0, i]).replace('.', '').replace('-', '').replace('e', '').replace('+', '').isdigit() 
+                                 for i in range(min(3, df.shape[1] - 1)))
+        
+        if first_row_numeric or df.columns[0].replace('.', '').replace('-', '').isdigit():
+            # No header - reload without header
+            try:
+                df = pd.read_csv(dataset_path, header=None, na_values=['?', 'NA', '', 'NaN'])
+            except UnicodeDecodeError:
+                df = pd.read_csv(dataset_path, header=None, na_values=['?', 'NA', '', 'NaN'], encoding='latin-1')
     
     # Separate features and labels (last column is target)
     X = df.iloc[:, :-1]
     y = df.iloc[:, -1].values
     
+    # Dataset-specific feature handling
+    if dataset_name == 'breast_cancer':
+        # Column 0 is ID, Column 1 is diagnosis (M/B), rest are features
+        # We need to use column 1 as label and skip column 0
+        if X.shape[1] > 20:  # Has ID column
+            X = df.iloc[:, 2:-1]  # Skip ID (col 0) and diagnosis (col 1), take features
+            y = df.iloc[:, 1].values  # Diagnosis column
+    
     # Impute missing values in features if any
     if X.isnull().any().any():
         print(f"   ⚠️  Found missing values - imputing with median...")
+        imputer = SimpleImputer(strategy='median')
         X = pd.DataFrame(imputer.fit_transform(X), columns=X.columns)
     
     X = X.values
     
-    # Convert labels to binary if needed
-    if y.dtype == object or len(np.unique(y)) > 2:
-        unique_labels = np.unique(y)
-        if len(unique_labels) > 2:
-            # Multi-class: convert to binary (first class vs rest)
+    # Convert labels to binary
+    unique_labels = np.unique(y)
+    if len(unique_labels) > 2 or y.dtype == object:
+        if y.dtype == object:
             y = (y == unique_labels[0]).astype(int)
         else:
-            # String labels
+            # For multi-class numeric, convert to binary
             y = (y == unique_labels[0]).astype(int)
     else:
-        # Ensure binary 0/1
         y = (y != 0).astype(int)
     
     print(f"   Samples: {len(X)}")
