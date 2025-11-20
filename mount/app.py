@@ -10,6 +10,8 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, HTTPException, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
 import yaml
 
@@ -102,6 +104,11 @@ if config['api']['cors_enabled']:
         allow_headers=["*"],
     )
 
+# Mount static files
+static_path = Path(__file__).parent / "static"
+if static_path.exists():
+    app.mount("/static", StaticFiles(directory=str(static_path)), name="static")
+
 
 # ============================================================================
 # Root & Health Endpoints
@@ -109,7 +116,12 @@ if config['api']['cors_enabled']:
 
 @app.get("/")
 async def root():
-    """Root endpoint with service information"""
+    """Serve the web UI"""
+    static_index = Path(__file__).parent / "static" / "index.html"
+    if static_index.exists():
+        return FileResponse(str(static_index))
+    
+    # Fallback to API info if no UI
     return {
         "service": config['service']['name'],
         "version": config['service']['version'],

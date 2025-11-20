@@ -2,6 +2,8 @@
 
 A unified microservice that integrates and orchestrates all QAI workspace components: Quantum AI, Chat systems, and Training pipelines.
 
+**✨ NEW: Beautiful Web UI included!** See [WEB_UI_GUIDE.md](WEB_UI_GUIDE.md) for details.
+
 ## 🎯 Purpose
 
 This service provides a single REST API to:
@@ -31,21 +33,29 @@ Edit `config.yaml` to customize:
 ### Run the Service
 
 ```powershell
-# Development mode (with auto-reload)
+# Quick start with web UI
+.\start.ps1
+
+# Or manual start
 python app.py
 
 # Production mode
 uvicorn app:app --host 0.0.0.0 --port 8000
 ```
 
-The service will be available at `http://localhost:8000`
+**Access the Web UI**: Open http://localhost:8000 in your browser
+
+**Access the API docs**: http://localhost:8000/docs
 
 ## 📚 API Documentation
 
 Once running, visit:
-- **Interactive docs**: http://localhost:8000/docs
-- **ReDoc**: http://localhost:8000/redoc
-- **OpenAPI JSON**: http://localhost:8000/openapi.json
+- **🎨 Web UI**: <http://localhost:8000> (Main interface)
+- **Interactive API docs**: <http://localhost:8000/docs>
+- **ReDoc**: <http://localhost:8000/redoc>
+- **OpenAPI JSON**: <http://localhost:8000/openapi.json>
+
+**Prefer the Web UI?** See the complete [Web UI Guide](WEB_UI_GUIDE.md)
 
 ## 🔌 Endpoints
 
