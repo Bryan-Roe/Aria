@@ -8,6 +8,7 @@ import subprocess
 import importlib.util as _iu
 import time
 from typing import Optional
+from datetime import datetime
 
 # -----------------------------------------------------------------------------
 # Early Telemetry Initialization (non-fatal if unavailable)
@@ -717,6 +718,31 @@ def ai_status(req: func.HttpRequest) -> func.HttpResponse:
             except Exception as aq_err:  # noqa: BLE001
                 quantum_info["azure_quantum"]["error"] = str(aq_err)
 
+        # Self-Learning System Status
+        learning_info = {
+            "enabled": False,
+            "training_cycles": 0,
+            "total_conversations": 0,
+            "new_conversations": 0,
+            "last_training": None,
+            "best_model_path": None,
+            "model_history": []
+        }
+        try:
+            learning_status_file = Path(__file__).resolve().parent / "data_out" / "self_learning" / "status.json"
+            if learning_status_file.exists():
+                with open(learning_status_file, "r") as lf:
+                    learning_status = json.load(lf)
+                    learning_info["enabled"] = learning_status.get("learning_enabled", True)
+                    learning_info["training_cycles"] = learning_status.get("training_cycles", 0)
+                    learning_info["total_conversations"] = learning_status.get("total_conversations", 0)
+                    learning_info["new_conversations"] = learning_status.get("conversations_since_last_train", 0)
+                    learning_info["last_training"] = learning_status.get("last_training")
+                    learning_info["best_model_path"] = learning_status.get("best_model_path")
+                    learning_info["model_history"] = learning_status.get("model_history", [])[-3:]  # Last 3
+        except Exception as _le:  # noqa: BLE001
+            learning_info["error"] = str(_le)
+
         payload = {
             "active_provider": info.name,
             "model": info.model,
@@ -731,7 +757,8 @@ def ai_status(req: func.HttpRequest) -> func.HttpResponse:
             "cosmos": cosmos_status,
             "telemetry": telemetry_info,
             "quantum": quantum_info,
-            "temperature": os.getenv("CHAT_TEMPERATURE", "0.7"),
+            "self_learning": learning_info,
+            "temperature": float(os.getenv("CHAT_TEMPERATURE", "0.7")),
             "server": {
                 "executable": sys.executable,
                 "python_version": sys.version,

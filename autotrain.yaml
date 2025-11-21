@@ -6,31 +6,18 @@ version: 1
 #   - local: Uses the streamlined local runner scripts/run_local_lora_training.py
 
 jobs:
-  # Mistral 7B v0.3 - latest Mistral Instruct model
-  - name: mistral_7b_mixed_chat
+  # Phi-3.5 Mini (Aug 2024) - Microsoft's latest open model (MOST EFFICIENT)
+  - name: phi35_mixed_chat
     runner: hf
     config: AI/microsoft_phi-silica-3.6_v1/lora/lora.yaml
     dataset: datasets/chat/mixed_chat
-    save_dir: data_out/lora_training/mistral_7b
-    epochs: 1
-    max_train_samples: 64
-    max_eval_samples: 16
+    save_dir: data_out/lora_training/phi35
+    epochs: 3
+    max_train_samples: null
+    max_eval_samples: null
     learning_rate: 0.0002
     lora_dropout: 0.1
-    hf_model_id: mistralai/Mistral-7B-Instruct-v0.3
-
-  # Mixtral 8x7B - Mixture of Experts, very powerful
-  - name: mixtral_8x7b_mixed_chat
-    runner: hf
-    config: AI/microsoft_phi-silica-3.6_v1/lora/lora.yaml
-    dataset: datasets/chat/mixed_chat
-    save_dir: data_out/lora_training/mixtral_8x7b
-    epochs: 1
-    max_train_samples: 64
-    max_eval_samples: 16
-    learning_rate: 0.0001
-    lora_dropout: 0.1
-    hf_model_id: mistralai/Mixtral-8x7B-Instruct-v0.1
+    hf_model_id: microsoft/Phi-3.5-mini-instruct
 
   # Qwen2.5 3B (Sep 2024) - excellent performance, no gating
   - name: qwen25_3b_mixed_chat
@@ -38,25 +25,12 @@ jobs:
     config: AI/microsoft_phi-silica-3.6_v1/lora/lora.yaml
     dataset: datasets/chat/mixed_chat
     save_dir: data_out/lora_training/qwen25_3b
-    epochs: 1
-    max_train_samples: 64
-    max_eval_samples: 16
+    epochs: 3
+    max_train_samples: null
+    max_eval_samples: null
     learning_rate: 0.0002
     lora_dropout: 0.1
     hf_model_id: Qwen/Qwen2.5-3B-Instruct
-
-  # Phi-3.5 Mini (Aug 2024) - Microsoft's latest open model
-  - name: phi35_mixed_chat
-    runner: hf
-    config: AI/microsoft_phi-silica-3.6_v1/lora/lora.yaml
-    dataset: datasets/chat/mixed_chat
-    save_dir: data_out/lora_training/phi35
-    epochs: 1
-    max_train_samples: 64
-    max_eval_samples: 16
-    learning_rate: 0.0002
-    lora_dropout: 0.1
-    hf_model_id: microsoft/Phi-3.5-mini-instruct
 
   # Phi-3.5 MAX PERFORMANCE - Full Dolly dataset, 3 epochs
   - name: phi35_max_performance
@@ -71,19 +45,6 @@ jobs:
     lora_dropout: 0.1
     hf_model_id: microsoft/Phi-3.5-mini-instruct
 
-  # Qwen2.5 7B (Sep 2024) - stronger model, requires more VRAM
-  - name: qwen25_7b_mixed_chat
-    runner: hf
-    config: AI/microsoft_phi-silica-3.6_v1/lora/lora.yaml
-    dataset: datasets/chat/mixed_chat
-    save_dir: data_out/lora_training/qwen25_7b
-    epochs: 1
-    max_train_samples: 64
-    max_eval_samples: 16
-    learning_rate: 0.0002
-    lora_dropout: 0.1
-    hf_model_id: Qwen/Qwen2.5-7B-Instruct
-
   # Example of using the local runner (QLoRA-friendly, simple)
   # - name: local_quickstart
   #   runner: local
@@ -91,3 +52,4 @@ jobs:
   #   epochs: 1
   #   max_train_samples: 10
   #   reinstall: false   # set true to force re-install of venv deps
+

@@ -7,6 +7,7 @@ import json
 import os
 import sys
 import time
+import subprocess
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Dict, List, Optional
@@ -37,7 +38,14 @@ class TrainingMonitor:
         
     def clear_screen(self):
         """Clear terminal screen"""
-        os.system('cls' if os.name == 'nt' else 'clear')
+        try:
+            if os.name == 'nt':
+                subprocess.run(['cmd', '/c', 'cls'], check=False)
+            else:
+                subprocess.run(['clear'], check=False)
+        except Exception:
+            # If clearing fails, just print newlines
+            print('\n' * 50)
     
     def load_status(self) -> Optional[Dict]:
         """Load current status from file"""

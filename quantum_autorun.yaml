@@ -15,7 +15,7 @@ jobs:
     # label_col: class
     # drop_cols: ''                             # comma-separated list
     n_qubits: 4
-    epochs: 1
+    epochs: 50
     batch_size: 16
     learning_rate: 0.001
     test_size: 0.2
@@ -25,7 +25,7 @@ jobs:
     mode: train_custom_dataset
     preset: ionosphere
     n_qubits: 4
-    epochs: 25
+    epochs: 100
     batch_size: 16
     learning_rate: 0.001
     test_size: 0.2

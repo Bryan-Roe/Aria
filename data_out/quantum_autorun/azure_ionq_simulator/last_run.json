@@ -9,10 +9,10 @@
     "--shots",
     "100"
   ],
-  "start_time": "20251121T041329Z",
+  "start_time": "20251121T135021Z",
   "status": "failed",
   "return_code": 1,
-  "log": "C:\\Users\\Bryan\\OneDrive\\AI\\data_out\\quantum_autorun\\azure_ionq_simulator\\20251121T041329Z\\stdout.log",
+  "log": "C:\\Users\\Bryan\\OneDrive\\AI\\data_out\\quantum_autorun\\azure_ionq_simulator\\20251121T135021Z\\stdout.log",
   "meta": {
     "preset": null,
     "csv": null,
@@ -27,5 +27,5 @@
     "azure_shots": 100,
     "azure_confirm_cost": false
   },
-  "duration_sec": 0.12
+  "duration_sec": 1.81
 }

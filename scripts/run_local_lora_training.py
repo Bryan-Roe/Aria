@@ -16,8 +16,22 @@ SENTINEL = VENV_DIR / ".deps_installed"
 
 def run(cmd, cwd=None, env=None):
     print(f"$ {' '.join(str(c) for c in cmd)}")
-    proc = subprocess.run(cmd, cwd=cwd, env=env, capture_output=False, text=True)
-    return proc.returncode
+    try:
+        proc = subprocess.run(
+            cmd, 
+            cwd=cwd, 
+            env=env, 
+            capture_output=False, 
+            text=True,
+            timeout=1800  # 30 minute timeout
+        )
+        return proc.returncode
+    except subprocess.TimeoutExpired:
+        print("Error: Command timed out after 30 minutes")
+        return -1
+    except Exception as e:
+        print(f"Error executing command: {e}")
+        return -1
 
 
 def ensure_venv(python_exe: Path):

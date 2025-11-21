@@ -137,9 +137,9 @@ class LoraLocalProvider(BaseChatProvider):
             stderr = proc.stderr.decode("utf-8", errors="ignore")
             stdout = proc.stdout.decode("utf-8", errors="ignore")
             msg = stderr.strip() or stdout.strip() or f"exit code {proc.returncode}"
-            # Truncate very long errors
+            # Truncate very long errors but keep start and end
             if len(msg) > 1000:
-                msg = msg[:1000] + "..."
+                msg = msg[:500] + "\n...\n" + msg[-500:]
             raise RuntimeError(f"LoRA bridge failed: {msg}")
         text = proc.stdout.decode("utf-8", errors="ignore").strip()
         return text

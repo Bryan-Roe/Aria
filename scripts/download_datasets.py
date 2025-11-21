@@ -23,6 +23,7 @@ import gzip
 import shutil
 from pathlib import Path
 from typing import Dict, List, Optional
+from datetime import datetime
 import sys
 
 # Add progress bar if available

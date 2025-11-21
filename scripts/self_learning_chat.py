@@ -12,8 +12,19 @@ import subprocess
 import sys
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import List, Dict
+from typing import List, Dict, Optional
 import shutil
+import logging
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.StreamHandler(sys.stdout)
+    ]
+)
+logger = logging.getLogger(__name__)
 
 class SelfLearningChat:
     def __init__(self):
@@ -51,9 +62,10 @@ class SelfLearningChat:
             json.dump(self.status, f, indent=2)
     
     def collect_conversations(self) -> int:
-        """Collect new conversations from logs"""
+        """Collect new conversations from logs with quality filtering"""
         if not self.chat_logs_dir.exists():
-            print("No chat logs directory found")
+            print(f"No chat logs directory found at: {self.chat_logs_dir}")
+            print("💡 Start chatting to generate conversation data!")
             return 0
         
         # Find all chat log files
@@ -80,16 +92,24 @@ class SelfLearningChat:
                                     "content": msg.get("content", "")
                                 })
                         
-                        # Group messages into conversation pairs
+                        # Group messages into conversation pairs with quality filtering
                         if len(messages) >= 2:
                             for i in range(0, len(messages) - 1, 2):
                                 if i + 1 < len(messages):
+                                    user_msg = messages[i]
+                                    asst_msg = messages[i + 1]
+                                    
+                                    # Quality filters
+                                    if len(user_msg.get("content", "").strip()) < 10:
+                                        continue  # Skip very short questions
+                                    if len(asst_msg.get("content", "").strip()) < 20:
+                                        continue  # Skip very short answers
+                                    if user_msg.get("content") == asst_msg.get("content"):
+                                        continue  # Skip duplicates
+                                    
                                     # Create training example
                                     training_example = {
-                                        "messages": [
-                                            messages[i],
-                                            messages[i + 1]
-                                        ]
+                                        "messages": [user_msg, asst_msg]
                                     }
                                     out_f.write(json.dumps(training_example) + "\n")
                                     conversation_count += 1
@@ -140,28 +160,48 @@ class SelfLearningChat:
         print(f"Training command: {' '.join(cmd)}")
         
         try:
-            # Run training
+            # Run training with progress monitoring
+            print("\n⏳ Training in progress (this may take several minutes)...")
             result = subprocess.run(
                 cmd,
                 cwd=str(self.repo_root),
                 capture_output=True,
                 text=True,
-                timeout=3600  # 1 hour timeout
+                timeout=3600,  # 1 hour timeout
+                check=False  # We manually check returncode
             )
             
             if result.returncode == 0:
                 print("\n✅ Training completed successfully!")
                 
-                # Update status
-                self.status["training_cycles"] += 1
-                self.status["conversations_since_last_train"] = 0
-                self.status["last_training"] = datetime.now().isoformat()
-                
                 # Check if adapter was created
                 adapter_path = cycle_dir / "lora_adapter"
-                if adapter_path.exists():
+                if adapter_path.exists() and (adapter_path / "adapter_config.json").exists():
+                    # Validate adapter
+                    print(f"✓ Model validated: {adapter_path}")
+                    
+                    # Update status with metrics
+                    self.status["training_cycles"] += 1
+                    self.status["conversations_since_last_train"] = 0
+                    self.status["last_training"] = datetime.now().isoformat()
                     self.status["best_model_path"] = str(adapter_path)
-                    print(f"New model saved: {adapter_path}")
+                    
+                    # Track model history
+                    if "model_history" not in self.status:
+                        self.status["model_history"] = []
+                    self.status["model_history"].append({
+                        "cycle": self.status["training_cycles"],
+                        "timestamp": datetime.now().isoformat(),
+                        "path": str(adapter_path),
+                        "conversations_used": self.status["total_conversations"]
+                    })
+                    
+                    print(f"📊 Cycle #{self.status['training_cycles']} metrics:")
+                    print(f"   Total conversations trained: {self.status['total_conversations']}")
+                    print(f"   Model path: {adapter_path}")
+                else:
+                    print("⚠️ Training completed but adapter not found")
+                    return False
                 
                 self.save_status()
                 return True
@@ -210,6 +250,34 @@ class SelfLearningChat:
             print(f"\n✅ Learning cycle completed successfully!")
             print(f"   Total cycles: {self.status['training_cycles']}")
             print(f"   Latest model: {self.status['best_model_path']}")
+            
+            # Auto-deploy: symlink latest model to default location
+            try:
+                default_adapter = self.repo_root / "data_out" / "lora_training" / "lora_adapter"
+                latest_adapter = Path(self.status['best_model_path'])
+                
+                if latest_adapter.exists():
+                    # Remove old symlink/dir if exists
+                    if default_adapter.exists() or default_adapter.is_symlink():
+                        if default_adapter.is_symlink():
+                            default_adapter.unlink()
+                        else:
+                            import shutil
+                            shutil.rmtree(default_adapter, ignore_errors=True)
+                    
+                    # Create symlink to latest model
+                    try:
+                        default_adapter.symlink_to(latest_adapter, target_is_directory=True)
+                        print(f"\n🚀 Auto-deployed to: {default_adapter}")
+                        print("   Restart chat system to use new model")
+                    except OSError:
+                        # Symlink failed (no admin rights), copy instead
+                        import shutil
+                        shutil.copytree(latest_adapter, default_adapter, dirs_exist_ok=True)
+                        print(f"\n🚀 Deployed (copied) to: {default_adapter}")
+                        print("   Restart chat system to use new model")
+            except Exception as deploy_err:
+                print(f"⚠️ Auto-deployment failed: {deploy_err}")
         
         return success
     

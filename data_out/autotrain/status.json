@@ -1,5 +1,5 @@
 {
-  "generated_at": "2025-11-21T11:09:32Z",
+  "generated_at": "2025-11-21T13:51:02Z",
   "jobs": [
     {
       "name": "mistral_7b_mixed_chat",
@@ -18,18 +18,14 @@
         "--lora-dropout",
         "0.1",
         "--epochs",
-        "1",
-        "--max-train-samples",
-        "64",
-        "--max-eval-samples",
-        "16",
+        "3",
         "--save-dir",
         "data_out/lora_training/mistral_7b"
       ],
-      "start_time": "20251121T110932Z",
+      "start_time": "20251121T135102Z",
       "status": "validated",
       "return_code": null,
-      "log": "C:\\Users\\Bryan\\OneDrive\\AI\\data_out\\autotrain\\mistral_7b_mixed_chat\\20251121T110932Z\\stdout.log",
+      "log": "C:\\Users\\Bryan\\OneDrive\\AI\\data_out\\autotrain\\mistral_7b_mixed_chat\\20251121T135102Z\\stdout.log",
       "output_dir": null
     },
     {
@@ -49,18 +45,14 @@
         "--lora-dropout",
         "0.1",
         "--epochs",
-        "1",
-        "--max-train-samples",
-        "64",
-        "--max-eval-samples",
-        "16",
+        "3",
         "--save-dir",
         "data_out/lora_training/mixtral_8x7b"
       ],
-      "start_time": "20251121T110932Z",
+      "start_time": "20251121T135102Z",
       "status": "validated",
       "return_code": null,
-      "log": "C:\\Users\\Bryan\\OneDrive\\AI\\data_out\\autotrain\\mixtral_8x7b_mixed_chat\\20251121T110932Z\\stdout.log",
+      "log": "C:\\Users\\Bryan\\OneDrive\\AI\\data_out\\autotrain\\mixtral_8x7b_mixed_chat\\20251121T135102Z\\stdout.log",
       "output_dir": null
     },
     {
@@ -80,18 +72,14 @@
         "--lora-dropout",
         "0.1",
         "--epochs",
-        "1",
-        "--max-train-samples",
-        "64",
-        "--max-eval-samples",
-        "16",
+        "3",
         "--save-dir",
         "data_out/lora_training/qwen25_3b"
       ],
-      "start_time": "20251121T110932Z",
+      "start_time": "20251121T135102Z",
       "status": "validated",
       "return_code": null,
-      "log": "C:\\Users\\Bryan\\OneDrive\\AI\\data_out\\autotrain\\qwen25_3b_mixed_chat\\20251121T110932Z\\stdout.log",
+      "log": "C:\\Users\\Bryan\\OneDrive\\AI\\data_out\\autotrain\\qwen25_3b_mixed_chat\\20251121T135102Z\\stdout.log",
       "output_dir": null
     },
     {
@@ -111,18 +99,14 @@
         "--lora-dropout",
         "0.1",
         "--epochs",
-        "1",
-        "--max-train-samples",
-        "64",
-        "--max-eval-samples",
-        "16",
+        "3",
         "--save-dir",
         "data_out/lora_training/phi35"
       ],
-      "start_time": "20251121T110932Z",
+      "start_time": "20251121T135102Z",
       "status": "validated",
       "return_code": null,
-      "log": "C:\\Users\\Bryan\\OneDrive\\AI\\data_out\\autotrain\\phi35_mixed_chat\\20251121T110932Z\\stdout.log",
+      "log": "C:\\Users\\Bryan\\OneDrive\\AI\\data_out\\autotrain\\phi35_mixed_chat\\20251121T135102Z\\stdout.log",
       "output_dir": null
     },
     {
@@ -146,10 +130,10 @@
         "--save-dir",
         "data_out/lora_training/phi35_max_performance"
       ],
-      "start_time": "20251121T110932Z",
+      "start_time": "20251121T135102Z",
       "status": "validated",
       "return_code": null,
-      "log": "C:\\Users\\Bryan\\OneDrive\\AI\\data_out\\autotrain\\phi35_max_performance\\20251121T110932Z\\stdout.log",
+      "log": "C:\\Users\\Bryan\\OneDrive\\AI\\data_out\\autotrain\\phi35_max_performance\\20251121T135102Z\\stdout.log",
       "output_dir": null
     },
     {
@@ -169,18 +153,14 @@
         "--lora-dropout",
         "0.1",
         "--epochs",
-        "1",
-        "--max-train-samples",
-        "64",
-        "--max-eval-samples",
-        "16",
+        "3",
         "--save-dir",
         "data_out/lora_training/qwen25_7b"
       ],
-      "start_time": "20251121T110932Z",
+      "start_time": "20251121T135102Z",
       "status": "validated",
       "return_code": null,
-      "log": "C:\\Users\\Bryan\\OneDrive\\AI\\data_out\\autotrain\\qwen25_7b_mixed_chat\\20251121T110932Z\\stdout.log",
+      "log": "C:\\Users\\Bryan\\OneDrive\\AI\\data_out\\autotrain\\qwen25_7b_mixed_chat\\20251121T135102Z\\stdout.log",
       "output_dir": null
     }
   ]
