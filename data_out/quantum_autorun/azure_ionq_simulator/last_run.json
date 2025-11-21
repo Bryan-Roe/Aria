@@ -2,17 +2,17 @@
   "name": "azure_ionq_simulator",
   "mode": "azure_hardware",
   "cmd": [
-    "C:\\Users\\Bryan\\OneDrive\\AI\\venv\\Scripts\\python.exe",
+    "C:\\Users\\Bryan\\OneDrive\\AI\\quantum-ai\\venv\\Scripts\\python.exe",
     "C:\\Users\\Bryan\\OneDrive\\AI\\quantum-ai\\deploy_to_azure_quantum.py",
     "--backend",
     "ionq.simulator",
     "--shots",
     "100"
   ],
-  "start_time": "20251117T110239Z",
+  "start_time": "20251121T041329Z",
   "status": "failed",
   "return_code": 1,
-  "log": "C:\\Users\\Bryan\\OneDrive\\AI\\data_out\\quantum_autorun\\azure_ionq_simulator\\20251117T110239Z\\stdout.log",
+  "log": "C:\\Users\\Bryan\\OneDrive\\AI\\data_out\\quantum_autorun\\azure_ionq_simulator\\20251121T041329Z\\stdout.log",
   "meta": {
     "preset": null,
     "csv": null,
@@ -27,5 +27,5 @@
     "azure_shots": 100,
     "azure_confirm_cost": false
   },
-  "duration_sec": 1.81
+  "duration_sec": 0.12
 }

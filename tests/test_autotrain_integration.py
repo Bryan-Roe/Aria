@@ -325,7 +325,10 @@ jobs:
         )
         
         # May fail (expected), but should create log
-        job_dirs = list((REPO_ROOT / "data_out" / "autotrain" / "fast_fail").glob("*"))
+        job_dirs = [
+            p for p in (REPO_ROOT / "data_out" / "autotrain" / "fast_fail").glob("*")
+            if p.is_dir()
+        ]
         if job_dirs:
             # Find most recent timestamp dir
             latest = max(job_dirs, key=lambda p: p.name)

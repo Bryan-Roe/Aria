@@ -116,8 +116,17 @@ def _venv_python_default() -> Path:
     return venv_python if venv_python.exists() else Path(sys.executable)
 
 
+def _venv_python_ml() -> Path:
+    # Use project-specific venv with ML dependencies
+    venv_python = REPO_ROOT / "AI" / "microsoft_phi-silica-3.6_v1" / "venv" / "Scripts" / "python.exe"
+    if venv_python.exists():
+        return venv_python
+    # Fallback to root venv
+    return _venv_python_default()
+
+
 def build_hf_command(job: Job) -> List[str]:
-    py = str(_venv_python_default())
+    py = str(_venv_python_ml())  # Use ML venv for HF training
     cmd: List[str] = [py, str(HF_TRAIN_SCRIPT)]
     # Dataset/config
     if job.config:

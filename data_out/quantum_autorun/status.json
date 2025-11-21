@@ -1,11 +1,11 @@
 {
-  "generated_at": "2025-11-19T15:08:40Z",
+  "generated_at": "2025-11-21T11:10:23Z",
   "jobs": [
     {
       "name": "heart_quick",
       "mode": "train_custom_dataset",
       "cmd": [
-        "C:\\Users\\Bryan\\OneDrive\\AI\\venv\\Scripts\\python.exe",
+        "C:\\Users\\Bryan\\OneDrive\\AI\\quantum-ai\\venv\\Scripts\\python.exe",
         "C:\\Users\\Bryan\\OneDrive\\AI\\quantum-ai\\train_custom_dataset.py",
         "--preset",
         "heart",
@@ -20,10 +20,10 @@
         "--test-size",
         "0.2"
       ],
-      "start_time": "20251119T150840Z",
+      "start_time": "20251121T111022Z",
       "status": "failed",
       "return_code": 1,
-      "log": "C:\\Users\\Bryan\\OneDrive\\AI\\data_out\\quantum_autorun\\heart_quick\\20251119T150840Z\\stdout.log",
+      "log": "C:\\Users\\Bryan\\OneDrive\\AI\\data_out\\quantum_autorun\\heart_quick\\20251121T111022Z\\stdout.log",
       "meta": {
         "preset": "heart",
         "csv": null,
@@ -35,7 +35,7 @@
         "learning_rate": 0.001,
         "test_size": 0.2
       },
-      "duration_sec": 0.31
+      "duration_sec": 0.93
     }
   ],
   "summary": {
@@ -46,8 +46,8 @@
       "name": "heart_quick",
       "status": "failed",
       "mode": "train_custom_dataset",
-      "start_time": "20251119T150840Z",
-      "log": "C:\\Users\\Bryan\\OneDrive\\AI\\data_out\\quantum_autorun\\heart_quick\\20251119T150840Z\\stdout.log"
+      "start_time": "20251121T111022Z",
+      "log": "C:\\Users\\Bryan\\OneDrive\\AI\\data_out\\quantum_autorun\\heart_quick\\20251121T111022Z\\stdout.log"
     }
   }
 }

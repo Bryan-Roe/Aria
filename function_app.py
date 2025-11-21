@@ -7,6 +7,25 @@ from pathlib import Path
 import subprocess
 import importlib.util as _iu
 import time
+from typing import Optional
+
+# -----------------------------------------------------------------------------
+# Early Telemetry Initialization (non-fatal if unavailable)
+# -----------------------------------------------------------------------------
+try:  # pragma: no cover - defensive import
+    from shared.telemetry import init_telemetry
+    init_telemetry()
+except Exception as _telemetry_err:  # noqa: BLE001
+    logging.warning(f"[startup] Telemetry init skipped: {_telemetry_err}")
+
+# -----------------------------------------------------------------------------
+# Optional Cosmos Client import (lazy health + persistence)
+# -----------------------------------------------------------------------------
+try:  # pragma: no cover - defensive import
+    from shared import cosmos_client
+except Exception as _cosmos_err:  # noqa: BLE001
+    cosmos_client = None  # type: ignore
+    logging.info(f"[startup] Cosmos client unavailable: {_cosmos_err}")
 
 # Memory / DB logging utilities (fault-tolerant)
 try:
@@ -38,6 +57,13 @@ sys.path.insert(0, str(quantum_ai_path))
 
 from chat_providers import detect_provider, RoleMessage
 from token_utils import prune_messages
+
+# OpenTelemetry tracer (optional)
+try:  # pragma: no cover
+    from opentelemetry import trace  # type: ignore
+    _tracer = trace.get_tracer("qai.functions")
+except Exception:  # pragma: no cover - library optional
+    _tracer = None
 
 app = func.FunctionApp()
 
@@ -141,7 +167,13 @@ def chat(req: func.HttpRequest) -> func.HttpResponse:
     """
     logging.info('Chat function invoked')
 
+    # Telemetry span setup (optional)
+    span_ctx = (
+        _tracer.start_as_current_span("chat_request") if _tracer is not None else None
+    )
     try:
+        if span_ctx:
+            span_ctx.__enter__()
         # Parse request
         req_body = req.get_json()
         messages = req_body.get('messages', [])
@@ -254,6 +286,33 @@ def chat(req: func.HttpRequest) -> func.HttpResponse:
             except Exception as log_err:  # noqa: BLE001
                 logging.warning(f"Chat DB logging failed: {log_err}")
 
+        # Cosmos persistence (feature-flagged)
+        cosmos_written = False
+        user_id = session_id or "anonymous"
+        if cosmos_client and os.getenv("QAI_ENABLE_COSMOS", "false").lower() == "true":
+            try:
+                if os.getenv("QAI_COSMOS_PERSIST_STRATEGY", "messages") == "messages":
+                    # Persist user and assistant messages separately
+                    last_user_msg = next((m for m in reversed(messages) if m.get("role") == "user"), None)
+                    if last_user_msg:
+                        cosmos_client.record_chat_message(user_id, {
+                            "role": "user",
+                            "content": user_message_content,
+                            "timestamp": time.time(),
+                        }, provider=info.name, model=info.model)
+                    cosmos_client.record_chat_message(user_id, {
+                        "role": "assistant",
+                        "content": str(result),
+                        "timestamp": time.time(),
+                    }, provider=info.name, model=info.model)
+                    cosmos_written = True
+                else:
+                    # Session-level persistence
+                    cosmos_client.record_chat_session(user_id, messages, provider=info.name, model=info.model)
+                    cosmos_written = True
+            except Exception as c_err:  # noqa: BLE001
+                logging.warning(f"[cosmos] Persistence failed: {c_err}")
+
         response_data = {
             "response": result,
             "provider": info.name,
@@ -265,8 +324,24 @@ def chat(req: func.HttpRequest) -> func.HttpResponse:
                 "removed_count": stats.removed_count,
                 "budget": stats.budget,
                 "reserve_output_tokens": stats.reserve_output_tokens,
-            }
+            },
+            "telemetry_span": bool(_tracer),
+            "duration_ms": duration_ms,
+            "cosmos_persisted": cosmos_written,
         }
+
+        if span_ctx and hasattr(span_ctx, "__exit__"):
+            try:
+                # Annotate span
+                span = trace.get_current_span() if _tracer else None  # type: ignore
+                if span:
+                    span.set_attribute("provider", info.name)
+                    span.set_attribute("model", info.model)
+                    span.set_attribute("duration_ms", duration_ms)
+                    span.set_attribute("memory_injected", len(memory_messages))
+                    span.set_attribute("cosmos_persisted", cosmos_written)
+            finally:
+                span_ctx.__exit__(None, None, None)
 
         return func.HttpResponse(
             json.dumps(response_data),
@@ -527,6 +602,88 @@ def ai_status(req: func.HttpRequest) -> func.HttpResponse:
         chat_web_html = (repo_root / "chat-web" / "index.html").exists()
         chat_web_js = (repo_root / "chat-web" / "chat.js").exists()
 
+        # Cosmos status (lazy health)
+        cosmos_status = None
+        if cosmos_client:
+            try:
+                cosmos_status = cosmos_client.health()
+            except Exception as cs_err:  # noqa: BLE001
+                cosmos_status = {"enabled": False, "error": str(cs_err)}
+
+        # Telemetry status
+        try:
+            from shared.telemetry import is_enabled as _telemetry_is_enabled  # type: ignore
+            telemetry_info = {"enabled": _telemetry_is_enabled()}
+        except Exception:
+            telemetry_info = {"enabled": False}
+
+        # Quantum environment status (non-blocking, gated by optional env var)
+        quantum_info = {
+            "enabled": False,
+            "qiskit": None,
+            "pennylane": None,
+            "azure_quantum": {
+                "workspace_connected": False,
+                "backends": [],
+                "attempted": False,
+                "error": None,
+            },
+            "conflict": None,
+        }
+        try:  # gather local versions
+            import qiskit  # type: ignore
+            quantum_info["qiskit"] = getattr(qiskit, "__version__", None)
+            quantum_info["enabled"] = True
+        except Exception as _qe:
+            quantum_info["qiskit"] = f"error: {_qe}"  # noqa: BLE001
+        try:
+            import pennylane  # type: ignore
+            quantum_info["pennylane"] = getattr(pennylane, "__version__", None)
+        except Exception:
+            pass
+        # Conflict detection using validate script (import functions defensively)
+        try:
+            from quantum_ai.scripts.validate_qiskit_env import detect_conflict  # type: ignore
+        except Exception:
+            # Fallback manual conflict heuristic
+            def detect_conflict(versions):
+                groups = {"legacy": []}
+                if versions.get("qiskit") and str(versions.get("qiskit")).startswith("1.") and versions.get("qiskit_aer"):
+                    return {"conflict": True}
+                return {"conflict": False}
+        try:
+            # Build synthetic versions map for conflict check
+            versions_map = {}
+            for name in ["qiskit", "qiskit_aer", "qiskit_machine_learning"]:
+                try:
+                    mod = __import__(name)
+                    versions_map[name] = getattr(mod, "__version__", "unknown")
+                except Exception as ie:  # noqa: BLE001
+                    versions_map[name] = f"error: {ie}"
+            conflict_meta = detect_conflict(versions_map)
+            quantum_info["conflict"] = conflict_meta.get("conflict")
+        except Exception as _ce:  # noqa: BLE001
+            quantum_info["conflict"] = f"error: {_ce}"
+
+        # Optional Azure Quantum backend probing (requires env flag to avoid latency)
+        if os.getenv("QAI_STATUS_CONNECT_AZURE_QUANTUM", "false").lower() == "true":
+            quantum_info["azure_quantum"]["attempted"] = True
+            try:
+                from quantum_ai.src.azure_quantum_integration import AzureQuantumIntegration  # type: ignore
+                cfg_path = Path(__file__).resolve().parent / "quantum-ai" / "config" / "quantum_config.yaml"
+                if cfg_path.exists():
+                    aq = AzureQuantumIntegration(str(cfg_path))
+                    aq.connect()
+                    bnames = aq.list_backends()[:8]
+                    quantum_info["azure_quantum"].update({
+                        "workspace_connected": True,
+                        "backends": bnames,
+                    })
+                else:
+                    quantum_info["azure_quantum"]["error"] = "quantum_config.yaml missing"
+            except Exception as aq_err:  # noqa: BLE001
+                quantum_info["azure_quantum"]["error"] = str(aq_err)
+
         payload = {
             "active_provider": info.name,
             "model": info.model,
@@ -538,6 +695,9 @@ def ai_status(req: func.HttpRequest) -> func.HttpResponse:
             "ml_inprocess": inproc_ml,
             "lora": lora_info,
             "venv": venv_info,
+            "cosmos": cosmos_status,
+            "telemetry": telemetry_info,
+            "quantum": quantum_info,
             "temperature": os.getenv("CHAT_TEMPERATURE", "0.7"),
             "server": {
                 "executable": sys.executable,

@@ -124,8 +124,17 @@ def _venv_python_default() -> Path:
     return venv_python if venv_python.exists() else Path(sys.executable)
 
 
+def _venv_python_quantum() -> Path:
+    """Use project-specific venv with quantum dependencies."""
+    venv_python = REPO_ROOT / "quantum-ai" / "venv" / "Scripts" / "python.exe"
+    if venv_python.exists():
+        return venv_python
+    # Fallback to root venv
+    return _venv_python_default()
+
+
 def build_command(job: QJob) -> List[str]:
-    py = str(_venv_python_default())
+    py = str(_venv_python_quantum())  # Use quantum venv for training/submission
     
     if job.mode == MODE_AZURE:
         # Azure hardware submission mode

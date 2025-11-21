@@ -1,6 +1,7 @@
-# Uncomment to enable Azure Monitor OpenTelemetry
-# Ref: aka.ms/functions-azure-monitor-python
-# azure-monitor-opentelemetry
+azure-monitor-opentelemetry>=1.0.0,<2.0.0  # Application Insights telemetry
+opentelemetry-api>=1.23.0,<2.0.0
+opentelemetry-sdk>=1.23.0,<2.0.0
+azure-cosmos>=4.7.0,<5.0.0  # Cosmos DB client
 
 azure-functions
 openai>=1.37.0
@@ -11,3 +12,5 @@ tiktoken>=0.6.0
 pyyaml>=6.0.1
 pyodbc>=5.0.1  # Database logging (Azure SQL / SQL Server)
 sqlalchemy>=2.0.29  # Optional higher-level DB access (future use)
+
+# NOTE: After adding telemetry & cosmos, run task: pip install (functions)

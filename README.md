@@ -300,6 +300,23 @@ Verify SDK version: `pip list | findstr openai` should show `openai>=1.37.0`
 
 ---
 
+## 🔧 Recent Enhancements
+
+**November 2025 Updates:**
+
+- **Quantum Status Integration**: `/api/ai/status` endpoint now includes quantum environment diagnostics
+- **Qiskit 1.x Upgrade Path**: Scripted migration tool with backup/revert capabilities
+- **Telemetry & Cosmos DB**: Production observability with Application Insights and Cosmos persistence
+- **Enhanced Testing**: Unit test coverage for quantum environment validation
+
+📖 **Documentation:**
+- [Enhancements Summary](ENHANCEMENTS_SUMMARY.md) - Overview of all recent improvements
+- [Telemetry & Cosmos Enablement Guide](TELEMETRY_COSMOS_ENABLEMENT.md) - Step-by-step setup for observability
+- [Quantum AutoRun README](QUANTUM_AUTORUN_README.md) - Orchestrated quantum training automation
+- [AutoTrain README](AUTOTRAIN_README.md) - LoRA training orchestration
+
+---
+
 ## 🤝 Contributing
 
 When modifying code, update project README.md if:
@@ -327,7 +344,7 @@ See individual project directories for license information.
 
 ---
 
-**Last Updated:** October 31, 2025
+**Last Updated:** November 20, 2025
 
 ## LoRA Provider Usage
 

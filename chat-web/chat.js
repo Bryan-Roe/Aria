@@ -1,9 +1,9 @@
-// Chat Web Client - Version 2024-11-15 18:31 - Quantum Enhanced
-console.log('chat.js loaded - v2024-11-15-18:31-quantum - Provider: auto-detect with quantum mode');
-const AI_BASE = 'http://127.0.0.1:1234';
-const API_BASE = `${AI_BASE}/v1/chat/completions`;
-const STREAM_API = `${AI_BASE}/v1/chat/completions`;
-const STATUS_API = `${AI_BASE}/v1/models`;
+// Chat Web Client - Version 2025-11-21 - QAI Backend
+console.log('chat.js loaded - v2025-11-21-qai - Provider: QAI auto-detect with quantum mode');
+const AI_BASE = '';
+const API_BASE = `/api/chat`;
+const STREAM_API = `/api/chat/stream`;
+const STATUS_API = `/api/ai/status`;
 const QUANTUM_CLASSIFY_API = '/api/quantum/classify';
 const QUANTUM_CIRCUIT_API = '/api/quantum/circuit';
 const QUANTUM_INFO_API = '/api/quantum/info';
@@ -149,7 +149,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 async function fetchSystemStatus() {
     try {
-        updateStatus('Checking LM Studio...');
+        updateStatus('Checking backend...');
         const response = await fetch(STATUS_API);
         if (response.ok) {
             const data = await response.json();
@@ -157,8 +157,8 @@ async function fetchSystemStatus() {
             updateStatusFromSystem();
         }
     } catch (error) {
-        console.warn('LM Studio not available:', error);
-        updateStatus('LM Studio not responding');
+        console.warn('Backend not available:', error);
+        updateStatus('Backend not responding');
     }
 }
 
@@ -167,10 +167,10 @@ function updateStatusFromSystem() {
 
     // Show success message if everything looks good
     if (systemStatus.status === 'ok') {
-        const modelData = systemStatus.data?.data?.[0];
-        const modelId = modelData?.id || 'unknown';
-        updateStatus(`Ready - LM Studio (${modelId})`);
-        providerInfo.textContent = `LM Studio - ${modelId}`;
+        const provider = systemStatus.data?.active_provider || 'local';
+        const model = systemStatus.data?.model || 'unknown';
+        updateStatus(`Ready - ${provider.toUpperCase()}`);
+        providerInfo.textContent = `${provider.toUpperCase()} - ${model}`;
     }
 }
 
@@ -238,7 +238,7 @@ async function sendMessage() {
             // Max retries exceeded or non-retryable error
             retryCount = 0;
             const errorMsg = error.message.includes('NetworkError') || error.message.includes('Failed to fetch')
-                ? '❌ Network error. Please ensure LM Studio is running on http://127.0.0.1:1234'
+                ? '❌ Network error. Please ensure QAI backend is running on http://localhost:7071'
                 : `❌ Error: ${error.message}`;
             addMessage('system', errorMsg);
             console.error('Full error details:', error);
@@ -284,14 +284,15 @@ async function oneShotResponse(typingIndicator) {
     
     retryCount = 0;
     typingIndicator.remove();
-    const assistantMessage = data.choices?.[0]?.message?.content || 'No response received.';
+    // Handle QAI backend response format
+    const assistantMessage = data.response || data.choices?.[0]?.message?.content || 'No response received.';
     console.log('Assistant message:', assistantMessage);
     
     addMessage('assistant', assistantMessage, true);
     messages.push({ role: 'assistant', content: assistantMessage });
     updateMessageCount();
-    if (data.model) {
-        providerInfo.textContent = `LM Studio - ${data.model}`;
+    if (data.provider && data.model) {
+        providerInfo.textContent = `${data.provider.toUpperCase()} - ${data.model}`;
     }
     updateStatus('Ready');
     saveToStorage();
@@ -347,62 +348,37 @@ async function streamResponse(typingIndicator) {
 
         const reader = response.body.getReader();
         const decoder = new TextDecoder();
-        let buffer = '';
         let fullText = '';
 
         while (true) {
             const { value, done } = await reader.read();
             if (done) break;
-            buffer += decoder.decode(value, { stream: true });
-
-            // Parse SSE chunks split by double newlines
-            let idx;
-            while ((idx = buffer.indexOf('\n\n')) !== -1) {
-                const chunk = buffer.slice(0, idx);
-                buffer = buffer.slice(idx + 2);
-                if (chunk.startsWith('data:')) {
-                    const dataJson = chunk.slice(5).trim();
-                    if (!dataJson || dataJson === '[DONE]') {
-                        console.log('Stream chunk: [DONE]');
-                        continue;
-                    }
-                    try {
-                        const obj = JSON.parse(dataJson);
-                        const delta = obj.choices?.[0]?.delta?.content || '';
-                        if (delta) {
-                            console.log('Stream delta:', delta);
-                            fullText += delta;
-                            // Update plain text during stream for speed
-                            contentDiv.textContent = fullText;
-                            chatMessages.scrollTop = chatMessages.scrollHeight;
-                        }
-                    } catch (e) {
-                        console.error('Parse error:', e, 'Data:', dataJson);
-                    }
-                }
+            
+            // QAI backend sends plain text chunks, not SSE
+            const chunk = decoder.decode(value, { stream: true });
+            if (chunk) {
+                console.log('Stream chunk:', chunk);
+                fullText += chunk;
+                // Update plain text during stream for speed
+                contentDiv.textContent = fullText;
+                chatMessages.scrollTop = chatMessages.scrollHeight;
             }
         }
-
-        // Render final markdown for the whole message
-        console.log('Stream complete. Full text length:', fullText.length);
-        if (typeof marked !== 'undefined') {
-            contentDiv.innerHTML = marked.parse(fullText || '');
-            // Add copy buttons to code blocks
-            const codeBlocks = contentDiv.querySelectorAll('pre');
-            codeBlocks.forEach(block => {
-                const copyBtn = document.createElement('button');
-                copyBtn.className = 'copy-button';
-                copyBtn.textContent = 'Copy';
-                copyBtn.onclick = () => {
-                    const code = block.querySelector('code')?.textContent || block.textContent;
-                    navigator.clipboard.writeText(code).then(() => {
-                        copyBtn.textContent = 'Copied!';
-                        setTimeout(() => copyBtn.textContent = 'Copy', 2000);
-                    });
-                };
-                block.style.position = 'relative';
-                block.appendChild(copyBtn);
-            });
+        
+        // After stream completes, render as markdown
+        if (fullText) {
+            try {
+                const rendered = marked.parse(fullText);
+                contentDiv.innerHTML = rendered;
+                // Highlight code blocks
+                contentDiv.querySelectorAll('pre code').forEach((block) => {
+                    hljs.highlightElement(block);
+                    addCopyButton(block.parentElement);
+                });
+            } catch (e) {
+                console.error('Markdown render error:', e);
+                contentDiv.textContent = fullText;
+            }
         }
 
         // Push to messages history

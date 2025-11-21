@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chat Debug Test</title>
+</head>
+<body>
+    <h1>QAI Chat Debug</h1>
+    <div>
+        <input type="text" id="messageInput" placeholder="Type message..." style="width: 300px; padding: 10px;">
+        <button id="sendButton" style="padding: 10px 20px;">Send</button>
+    </div>
+    <div id="output" style="margin-top: 20px; padding: 10px; border: 1px solid #ccc; min-height: 200px;"></div>
+    
+    <script>
+        const messageInput = document.getElementById('messageInput');
+        const sendButton = document.getElementById('sendButton');
+        const output = document.getElementById('output');
+        
+        function log(msg) {
+            output.innerHTML += msg + '<br>';
+            console.log(msg);
+        }
+        
+        sendButton.addEventListener('click', async () => {
+            const text = messageInput.value.trim();
+            if (!text) return;
+            
+            log('Sending: ' + text);
+            
+            const body = JSON.stringify({
+                messages: [{ role: 'user', content: text }]
+            });
+            
+            log('Request body: ' + body);
+            
+            try {
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: body
+                });
+                
+                log('Response status: ' + response.status);
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    log('Error response: ' + errorText);
+                    throw new Error('HTTP ' + response.status);
+                }
+                
+                const data = await response.json();
+                log('Response data: ' + JSON.stringify(data, null, 2));
+                log('AI Response: ' + data.response);
+                
+                messageInput.value = '';
+            } catch (error) {
+                log('ERROR: ' + error.message);
+                console.error('Full error:', error);
+            }
+        });
+        
+        messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendButton.click();
+            }
+        });
+        
+        log('Debug page loaded - ready to test');
+    </script>
+</body>
+</html>

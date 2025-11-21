@@ -74,26 +74,26 @@
                     <h2>Train Quantum Classifier</h2>
                     <form id="quantumTrainForm">
                         <div class="form-group">
-                            <label>Dataset</label>
-                            <select id="quantumDataset" required>
+                            <label for="quantumDataset">Dataset</label>
+                            <select id="quantumDataset" aria-label="Select quantum dataset" required>
                                 <option value="">Select dataset...</option>
                             </select>
                         </div>
                         <div class="form-group">
-                            <label>Number of Qubits (2-20)</label>
+                            <label for="quantumQubits">Number of Qubits (2-20)</label>
                             <input type="number" id="quantumQubits" value="4" min="2" max="20" required>
                         </div>
                         <div class="form-group">
-                            <label>Number of Layers (1-10)</label>
+                            <label for="quantumLayers">Number of Layers (1-10)</label>
                             <input type="number" id="quantumLayers" value="2" min="1" max="10" required>
                         </div>
                         <div class="form-group">
-                            <label>Epochs (1-1000)</label>
+                            <label for="quantumEpochs">Epochs (1-1000)</label>
                             <input type="number" id="quantumEpochs" value="10" min="1" max="1000" required>
                         </div>
                         <div class="form-group">
-                            <label>Backend</label>
-                            <select id="quantumBackend" required>
+                            <label for="quantumBackend">Backend</label>
+                            <select id="quantumBackend" aria-label="Select quantum backend" required>
                                 <option value="qiskit_aer">Qiskit Aer (Free)</option>
                                 <option value="lightning.qubit">Lightning Qubit (Fast)</option>
                             </select>
@@ -133,8 +133,8 @@
                     <div class="chat-header">
                         <h2>💬 Chat Interface</h2>
                         <div class="form-group">
-                            <label>Provider</label>
-                            <select id="chatProvider">
+                            <label for="chatProvider">Provider</label>
+                            <select id="chatProvider" aria-label="Select chat provider">
                                 <option value="auto">Auto-detect</option>
                                 <option value="local">Local (Free)</option>
                                 <option value="azure">Azure OpenAI</option>
@@ -182,21 +182,21 @@
                     <h2>Train LoRA Adapter</h2>
                     <form id="loraTrainForm">
                         <div class="form-group">
-                            <label>Dataset Path</label>
-                            <select id="loraDataset" required>
+                            <label for="loraDataset">Dataset Path</label>
+                            <select id="loraDataset" aria-label="Select LoRA dataset" required>
                                 <option value="">Select dataset...</option>
                             </select>
                         </div>
                         <div class="form-group">
-                            <label>Max Training Samples</label>
+                            <label for="loraTrainSamples">Max Training Samples</label>
                             <input type="number" id="loraTrainSamples" value="64" min="1" required>
                         </div>
                         <div class="form-group">
-                            <label>Max Eval Samples</label>
+                            <label for="loraEvalSamples">Max Eval Samples</label>
                             <input type="number" id="loraEvalSamples" value="16" min="1" required>
                         </div>
                         <div class="form-group">
-                            <label>Epochs</label>
+                            <label for="loraEpochs">Epochs</label>
                             <input type="number" id="loraEpochs" value="1" min="1" required>
                         </div>
                         <button type="submit" class="btn btn-primary btn-block">🚀 Start Training</button>
@@ -220,7 +220,7 @@
                 <div class="card full-width">
                     <h2>AutoTrain Orchestrator</h2>
                     <div class="form-inline">
-                        <select id="autotrainJob">
+                        <select id="autotrainJob" aria-label="Select autotrain job">
                             <option value="">Select job...</option>
                         </select>
                         <button class="btn btn-secondary" onclick="runAutoTrain(true)">Dry Run</button>

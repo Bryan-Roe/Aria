@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Chat - QAI</title>
+    <title>QAI Chat - Quantum AI System</title>
     <!-- Marked.js for markdown rendering -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <!-- Highlight.js for code syntax highlighting -->
@@ -906,7 +906,7 @@
 
     <div class="chat-container">
         <div class="chat-header">
-            <h1>🤖 AI Chat - LM Studio</h1>
+            <h1>🤖 QAI Chat</h1>
             <div class="provider-info" id="providerInfo">Connecting...</div>
         </div>
 
@@ -1007,14 +1007,14 @@
 
     <script src="chat.js"></script>
     <script>
-    // LM Studio status check logic
+    // QAI Backend status check logic
     document.addEventListener('DOMContentLoaded', function() {
         var providerInfo = document.getElementById('providerInfo');
         
-        // Auto-check LM Studio status on page load
-        function checkLMStudioStatus() {
+        // Auto-check QAI backend status on page load
+        function checkQAIBackendStatus() {
             if (!providerInfo) return;
-            fetch('http://127.0.0.1:1234/v1/models')
+            fetch('/api/ai/status')
                 .then(function(resp) {
                     if (resp.ok) {
                         return resp.json();
@@ -1023,21 +1023,22 @@
                     }
                 })
                 .then(function(data) {
-                    var modelId = data?.data?.[0]?.id || 'Ready';
-                    providerInfo.textContent = 'LM Studio - ' + modelId;
+                    var provider = data?.active_provider || 'local';
+                    var model = data?.model || 'Ready';
+                    providerInfo.textContent = provider.toUpperCase() + ' - ' + model;
                     providerInfo.style.color = '#fff';
                 })
                 .catch(function() {
-                    providerInfo.textContent = 'LM Studio not running';
+                    providerInfo.textContent = 'Backend not running';
                     providerInfo.style.color = '#ffc107';
                 });
         }
         
         // Initial check on load
-        checkLMStudioStatus();
+        checkQAIBackendStatus();
         
         // Check every 30 seconds
-        setInterval(checkLMStudioStatus, 30000);
+        setInterval(checkQAIBackendStatus, 30000);
     });
     </script>
 </body>

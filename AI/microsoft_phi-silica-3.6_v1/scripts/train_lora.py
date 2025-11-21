@@ -302,7 +302,12 @@ def main():
 
     # Real training requires heavy deps
     if AutoTokenizer is None or AutoModelForCausalLM is None or load_dataset is None or torch is None:
-        raise RuntimeError("Training dependencies not installed. Install: transformers, datasets, peft, accelerate, torch")
+        venv_path = Path(__file__).resolve().parents[2] / "venv"
+        raise RuntimeError(
+            f"Training dependencies not installed in current environment.\n"
+            f"Install with: {venv_path / 'Scripts' / 'pip.exe'} install transformers datasets peft accelerate torch\n"
+            f"Or run from project venv: {venv_path / 'Scripts' / 'python.exe'}"
+        )
 
     # Resolve model id
     hf_model_id = args.hf_model_id or os.environ.get("HF_MODEL_ID")

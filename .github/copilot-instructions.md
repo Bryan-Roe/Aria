@@ -1,3 +1,116 @@
+# QAI – AI Agent Quick Instructions (Summary)
+
+Focused guidance for AI coding agents. Keep this lean; extended reference remains below unchanged.
+
+## 1. Core Layout & Execution Boundaries
+- 3 domains with their own venvs: `quantum-ai/` (hybrid quantum + MCP), `talk-to-ai/` (chat providers), `AI/microsoft_phi-silica-3.6_v1/` (LoRA & soft prompt). Root `function_app.py` (Azure Functions) glues them by injecting `src` paths.
+- Orchestrators live in `scripts/` and must be run from repo root to resolve relative datasets & configs.
+
+## 2. High-Priority Security & Cost Guardrails
+- Quantum paid hardware requires explicit `azure_confirm_cost: true`; reject dry-run if missing for QPU backends (`ionq.qpu`, etc.). Always start on simulators (`qiskit_aer`, `ionq.simulator`, `rigetti.sim.qvm`).
+- Never commit secrets: use environment vars (`AZURE_OPENAI_API_KEY`, etc.) or `local.settings.json` (Azure Functions) which stays local. Do not hardcode keys in YAML or Python.
+- Cap exploratory runs: LoRA smoke test `--max-train-samples 64 --epochs 1`; Quantum limit `azure_shots` ≤ 100 initial.
+- Validate with `--dry-run` before any expensive run; parse `status.json` rather than logs for automated gating.
+- Dataset immutability: never write into `datasets/`; all outputs under `data_out/`.
+- MCP server executes controlled quantum ops; avoid sending proprietary data through tool calls (agents operate via stdio).
+
+## 3. Declarative Orchestration Pattern
+- Source of truth: `autotrain.yaml`, `quantum_autorun.yaml` → build commands → run → write `<job>/last_run.json` + global `status.json`.
+- Override order: YAML base < CLI flags < per‑job inline overrides.
+- Dry-run & list: `--dry-run` produces validated command set; `--list` returns JSON job array (for agents to reason).
+- **ALWAYS run `--dry-run` first**: Validates paths, detects missing files, checks cost confirmation flags before execution.
+- **Parse status.json for automation**: Never rely on stdout/stderr parsing; `status.json` has structured `status` field (`validated|succeeded|failed|missing`).
+
+## 4. MCP Server vs Normal Scripts
+- **Normal training scripts** (long-running, artifact-producing):
+  - `train_custom_dataset.py`, `train_lora.py`: 10+ minute runs, write checkpoints, consume datasets.
+  - Invoke via orchestrators (`autotrain.py`, `quantum_autorun.py`) or direct CLI for one-off experiments.
+  - Generate `status.json` + timestamped logs; safe to background or schedule.
+- **MCP server** (`quantum-ai/quantum_mcp_server.py`):
+  - Lightweight stdio server for AI agents (VS Code, Claude Desktop).
+  - Exposes 8 tools: circuit creation, simulation (≤10 qubits, ≤1k shots), backend listing, cost estimation.
+  - Stateless except LRU circuit cache (100 entries, 1h TTL); no persistent state across agent sessions.
+  - **What MCP is for**: Quick circuit prototyping, cost checks, backend discovery, single-shot simulations.
+  - **What MCP is NOT for**: Full dataset training (use orchestrators), hyperparameter sweeps, production runs.
+  - **Critical constraints**: Tools timeout after 60s; circuits >10 qubits fail fast; Azure ops require prior `az login`.
+  - Architecture: ProcessPoolExecutor (CPU-bound ops) + ThreadPoolExecutor (I/O); timeouts prevent runaway agents.
+
+## 5. Chat Provider Chain & Extension
+- Detection hierarchy: Azure OpenAI → OpenAI → LoRA adapter (if directory exists) → Local fallback.
+- **Environment variables per provider**:
+  - Azure OpenAI: `AZURE_OPENAI_API_KEY`, `AZURE_OPENAI_ENDPOINT`, `AZURE_OPENAI_DEPLOYMENT`, `AZURE_OPENAI_API_VERSION`.
+  - OpenAI: `OPENAI_API_KEY`, `OPENAI_MODEL` (optional).
+  - LoRA/Local: No env vars required (adapter path via CLI `--model` or auto-detect from `data_out/lora_training`).
+- **Validation**: Check `/api/ai/status` → `active_provider` field shows which provider is active; missing env vars fall back to next in chain.
+- **Common failure**: Partial Azure OpenAI config (3 of 4 vars) silently falls back to OpenAI or Local—verify all 4 or none.
+- Add provider: subclass `BaseChatProvider` in `talk-to-ai/src/chat_providers.py`, implement `complete()`, insert into `detect_provider()` maintaining priority order.
+- Persist conversations: append JSONL lines (`role`, `content`, `timestamp`) under `talk-to-ai/logs/`.
+
+## 6. Quantum Job Modes & Patterns
+- Modes: `train_custom_dataset` (preset or CSV) vs `azure_hardware` (backend submit).
+- Circuit template: Input RY encoding → variational RY/RZ + chosen entanglement (`linear|circular|full`) → measurement.
+- Cost confirmation only enforced for paid hardware; simulators free & recommended for regression tests.
+- **Validation sequence**: Local `qiskit_aer` → free simulator (`ionq.simulator`) → paid QPU (`ionq.qpu` with `azure_confirm_cost: true`).
+- **Failure prevention**: Dry-run detects missing `azure_confirm_cost` for QPU backends and exits with status `missing` before job execution.
+
+## 7. LoRA Fine-Tuning Runners
+- Runner `hf`: full Trainer (streaming, metrics, DeepSpeed hooks). Runner `local`: minimal QLoRA-friendly CPU/GPU light path.
+- Streaming default autocomputes steps; only use `--no-stream` for very small subsets (<500 records) to reduce overhead.
+- Outputs: `data_out/lora_training/` (adapter, tokenizer, checkpoints, logs). Never modify adapter artifacts manually—create a new job.
+- **Validation**: Check for `adapter_config.json` + `adapter_model.safetensors` in output dir before marking job successful.
+- **Failure mode**: Missing checkpoint due to OOM or early termination leaves incomplete artifacts—parse `status.json` `return_code` field (0=success).
+
+## 8. Dataset Registry & Preprocessing
+- Canonical index: `datasets/dataset_index.json` with metadata & licensing; add new datasets there + run `validate_datasets.py`.
+- Quantum CSV pipeline: PCA → scaling → dimension = qubits; Chat JSONL uses Phi message schema (`messages` array).
+
+## 9. Test Suite Conventions
+- File naming: `test_<component>_unit.py` for pure logic/dataclass/builders; `test_<component>_integration.py` for CLI/subprocess/status I/O; mark slow executions with `@pytest.mark.slow`.
+- Shared pattern: define `REPO_ROOT` and prepend appropriate script path; use fixtures for temporary YAML configs.
+- Add new orchestrator tests following `test_autotrain_unit.py` & `test_quantum_autorun_unit.py` structure; integration tests must assert creation of `status.json` and timestamped run dirs.
+- **Run from repo root**: `pytest tests/` (discovers all); `pytest tests/ -m "not slow"` (skips long-running); `pytest tests/test_autotrain_unit.py -v` (targeted).
+- **CI/CD pattern**: Always run unit tests first (fast feedback), then integration with `--dry-run` validation; skip slow tests in PR checks.
+
+## 10. Deployment Workflows (Agent Hooks)
+- Chat / Functions: local dev `func host start`; production script `deploy-chat-to-azure.ps1` (see `DEPLOY_CHAT_TO_AZURE.md` + `PRODUCTION_DEPLOYMENT_PLAN.md`).
+- **Pre-deploy validation**: (1) Run `pytest tests/` unit tests, (2) orchestrator `--dry-run` passes, (3) `/api/ai/status` returns 200, (4) no secrets in git.
+- **Deployment order**: Azure Functions first → test endpoints → enable Cosmos/App Insights if needed → validate with smoke test traffic.
+- Quantum Azure: provision workspace per `quantum-ai/azure/DEPLOYMENT.md`; validate simulator jobs first; enforce cost flag for hardware.
+- LoRA artifacts can be packaged for serving—ensure latest adapter path from `data_out/lora_training` surfaced in `/api/ai/status` before deployment.
+- **Rollback procedure**: Revert to previous Functions deployment via Azure Portal or `az functionapp deployment` commands; check deployment slots if configured.
+- Telemetry & persistence: optional Cosmos + App Insights (see `TELEMETRY_COSMOS_ENABLEMENT.md`). Avoid enabling outside production contexts.
+
+## 11. Extension & Change Safety
+- **New endpoint**: Update `function_app.py` + extend `/api/ai/status` with non-breaking additive fields.
+  - Example extending `/api/ai/status`:
+    ```python
+    # In http_ai_status/__init__.py:
+    status["my_new_subsystem"] = {
+        "version": "1.0",
+        "health": check_subsystem_health(),
+        "last_run": get_last_run_timestamp()
+    }
+    ```
+- **New quantum backend**: Add YAML job, dry-run, run Bell state quick job, then hardware submit.
+- **New configs**: Comment YAML keys clearly—Python should not introduce hidden defaults.
+- **Cosmos DB modeling** (when integrating with Azure Functions):
+  - Use hierarchical partition keys (`/tenantId/userId`) to overcome 20GB logical partition limit.
+  - Embed related data for single-partition queries; normalize only if items exceed 2MB or update patterns differ.
+  - Capture diagnostic strings on high latency (>100ms) or unexpected status codes for bottleneck analysis.
+  - Prefer Cosmos for: chat history, user context, RAG vector search (low-cost), real-time recommendations, IoT state.
+  - Use Cosmos DB Emulator for local dev; VS Code extension (`ms-azuretools.vscode-cosmosdb`) for data inspection.
+
+## 12. Fast Diagnostics
+- Orchestrators health: parse `data_out/<orchestrator>/status.json` → check `jobs[].status` field (`validated|succeeded|failed|missing`).
+- Active provider & adapter readiness: GET `/api/ai/status` → verify `active_provider` + `lora.adapter_path` fields non-null.
+- Quantum backend availability: `az login` + `az account show` confirms auth; `quantum_config.yaml` workspace fields must match Azure Portal exactly.
+- **Common error patterns**:
+  - `"status": "missing"` + `"missing": [...]` array → fix paths in YAML or create missing files.
+  - `"return_code": 1` → read `stdout.log` in timestamped run dir for Python traceback.
+  - Chat streaming 401/403 → verify all 4 Azure env vars set; test with `curl` + bearer token.
+  - LoRA adapter import fails → ensure `peft`, `transformers`, `torch` in correct venv via `pip list`.
+
+---
 # QAI Workspace – AI Agent Guide
 
 **Three independent AI/ML projects** in one monorepo, each with isolated virtual environments, configs, and workflows:
@@ -19,6 +132,7 @@
 - Always run orchestrators from repo root: `python .\scripts\autotrain.py`
 - Always run project-specific scripts from their directory: `cd quantum-ai; python train_custom_dataset.py`
 - Azure Functions uses root venv and imports from project src dirs via `sys.path.insert(0, ...)`
+- **Orchestrators automatically use correct project venvs**: `autotrain.py` → ML venv, `quantum_autorun.py` → quantum venv
 
 **State/output locations**:
 - `data_out/` – all training outputs, logs, checkpoints, status.json files

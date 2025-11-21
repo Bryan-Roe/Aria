@@ -1,15 +1,21 @@
 # Azure Quantum SDK
-azure-quantum>=1.0.0,<2.0.0
-qiskit>=1.0.0,<2.0.0
-qiskit-aer>=0.13.0,<1.0.0
+azure-quantum[qiskit]>=1.0.0,<2.0.0
+# Qiskit pre-1.0 versions retained for compatibility with qiskit_algorithms &
+# qiskit_machine_learning (VQC components rely on older circuit library symbols).
+# If upgrading to 1.x later, also upgrade qiskit_algorithms when a compatible release
+# is published, then remove this downgrade.
+qiskit==0.46.0
+qiskit-aer==0.12.2
 
 # Quantum Machine Learning
 pennylane>=0.35.0,<1.0.0
+## Pennylane-Qiskit adapter may depend on qiskit-terra APIs. If incompatibility
+## arises with Qiskit 1.x, pin below 0.35 or switch to pennylane-braket / other backends.
 pennylane-qiskit>=0.35.0,<1.0.0
 torch>=2.0.0,<3.0.0
 numpy>=1.24.0,<2.0.0
 scipy>=1.10.0,<2.0.0
-qiskit-machine-learning>=0.7.0,<0.8.0
+qiskit-machine-learning>=0.6.0,<0.7.0  # Compatible with Qiskit 0.46.x
 
 # Azure Integration
 azure-identity>=1.15.0,<2.0.0
@@ -34,3 +40,7 @@ black>=23.0.0,<24.0.0
 mcp>=1.0.0
 pydantic>=2.0.0
 anyio>=3.0.0
+
+# (Removed) pip-check-duplicates was referenced but no distribution exists.
+# If dependency insight is needed, install pipdeptree instead:
+# pipdeptree>=2.16.0
