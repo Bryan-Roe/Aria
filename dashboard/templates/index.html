@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>QAI Automation Dashboard</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 2em; }
+        h1 { color: #2c3e50; }
+        .section { margin-bottom: 2em; }
+        pre { background: #f4f4f4; padding: 1em; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <h1>QAI Automation Dashboard</h1>
+    <div class="section">
+        <h2>Orchestrator Status</h2>
+        <div id="status"></div>
+    </div>
+    <div class="section">
+        <h2>Resource Monitor</h2>
+        <div id="resources"></div>
+    </div>
+    <div class="section">
+        <h2>Results Export</h2>
+        <div id="results"></div>
+    </div>
+    <script>
+        function fetchAndRender(endpoint, elementId) {
+            fetch(endpoint)
+                .then(r => r.json())
+                .then(data => {
+                    document.getElementById(elementId).innerHTML = '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+                });
+        }
+        fetchAndRender('/status', 'status');
+        fetchAndRender('/resources', 'resources');
+        fetchAndRender('/results', 'results');
+    </script>
+</body>
+</html>

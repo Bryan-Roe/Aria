@@ -58,6 +58,11 @@ python .\scripts\autotrain.py --job phi35_mixed_chat  # Run specific job
 python .\scripts\quantum_autorun.py --dry-run  # Validate config
 python .\scripts\quantum_autorun.py --list     # List all jobs
 python .\scripts\quantum_autorun.py --job heart_quick  # Run specific job
+
+# Evaluation AutoRun
+python .\scripts\evaluation_autorun.py --dry-run  # Validate config
+python .\scripts\evaluation_autorun.py --list     # List all jobs
+python .\scripts\evaluation_autorun.py --job eval_smoke_test  # Run specific job
 ```
 
 ### Chat Interaction
@@ -83,6 +88,7 @@ python .\src\chat_cli.py --provider openai
 | `local.settings.json` | Azure Functions local settings (API keys, connection strings) |
 | `autotrain.yaml` | LoRA training job definitions |
 | `quantum_autorun.yaml` | Quantum training job definitions |
+| `evaluation_autorun.yaml` | Model evaluation job definitions |
 | `quantum-ai/config/quantum_config.yaml` | Quantum backend settings |
 | `AI/microsoft_phi-silica-3.6_v1/lora/lora.yaml` | LoRA hyperparameters |
 

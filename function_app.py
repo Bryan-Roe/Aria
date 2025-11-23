@@ -1,3 +1,62 @@
+# =============================================================================
+# Automation Tool Endpoints: Resource Monitor, Model Deployer, Results Exporter, Evaluation
+# =============================================================================
+
+@app.route(route="resource-monitor", methods=["GET"], auth_level=func.AuthLevel.ANONYMOUS)
+def resource_monitor_status(req: func.HttpRequest) -> func.HttpResponse:
+    """Return latest resource monitor snapshot."""
+    try:
+        snap_path = Path(__file__).resolve().parent / "data_out" / "resource_monitor_snapshot.json"
+        if snap_path.exists():
+            with open(snap_path, "r") as f:
+                data = json.load(f)
+            return func.HttpResponse(json.dumps(data), status_code=200, mimetype="application/json", headers=_cors_headers())
+        else:
+            return func.HttpResponse(json.dumps({"error": "No snapshot found"}), status_code=404, mimetype="application/json", headers=_cors_headers())
+    except Exception as e:
+        return func.HttpResponse(json.dumps({"error": str(e)}), status_code=500, mimetype="application/json", headers=_cors_headers())
+
+@app.route(route="model-deployer/status", methods=["GET"], auth_level=func.AuthLevel.ANONYMOUS)
+def model_deployer_status(req: func.HttpRequest) -> func.HttpResponse:
+    """Return model deployer registry status."""
+    try:
+        reg_path = Path(__file__).resolve().parent / "deployed_models" / "model_registry.json"
+        if reg_path.exists():
+            with open(reg_path, "r") as f:
+                data = json.load(f)
+            return func.HttpResponse(json.dumps(data), status_code=200, mimetype="application/json", headers=_cors_headers())
+        else:
+            return func.HttpResponse(json.dumps({"error": "No registry found"}), status_code=404, mimetype="application/json", headers=_cors_headers())
+    except Exception as e:
+        return func.HttpResponse(json.dumps({"error": str(e)}), status_code=500, mimetype="application/json", headers=_cors_headers())
+
+@app.route(route="results-export", methods=["GET"], auth_level=func.AuthLevel.ANONYMOUS)
+def results_export(req: func.HttpRequest) -> func.HttpResponse:
+    """Return latest results export (all orchestrators)."""
+    try:
+        res_path = Path(__file__).resolve().parent / "exports" / "all_orchestrators.json"
+        if res_path.exists():
+            with open(res_path, "r") as f:
+                data = json.load(f)
+            return func.HttpResponse(json.dumps(data), status_code=200, mimetype="application/json", headers=_cors_headers())
+        else:
+            return func.HttpResponse(json.dumps({"error": "No results found"}), status_code=404, mimetype="application/json", headers=_cors_headers())
+    except Exception as e:
+        return func.HttpResponse(json.dumps({"error": str(e)}), status_code=500, mimetype="application/json", headers=_cors_headers())
+
+@app.route(route="evaluation-results", methods=["GET"], auth_level=func.AuthLevel.ANONYMOUS)
+def evaluation_results(req: func.HttpRequest) -> func.HttpResponse:
+    """Return latest batch evaluation results."""
+    try:
+        eval_path = Path(__file__).resolve().parent / "data_out" / "evaluation_results.json"
+        if eval_path.exists():
+            with open(eval_path, "r") as f:
+                data = json.load(f)
+            return func.HttpResponse(json.dumps(data), status_code=200, mimetype="application/json", headers=_cors_headers())
+        else:
+            return func.HttpResponse(json.dumps({"error": "No evaluation results found"}), status_code=404, mimetype="application/json", headers=_cors_headers())
+    except Exception as e:
+        return func.HttpResponse(json.dumps({"error": str(e)}), status_code=500, mimetype="application/json", headers=_cors_headers())
 import azure.functions as func
 import json
 import logging

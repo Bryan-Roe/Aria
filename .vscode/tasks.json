@@ -129,6 +129,78 @@
 			"problemMatcher": []
 		},
 		{
+			"label": "Run: Evaluation AutoRun (dry-run)",
+			"type": "shell",
+			"options": { "cwd": "${workspaceFolder}" },
+			"command": "python",
+			"args": [
+				".\\scripts\\evaluation_autorun.py",
+				"--dry-run"
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Run: Evaluation AutoRun (all)",
+			"type": "shell",
+			"options": { "cwd": "${workspaceFolder}" },
+			"command": "python",
+			"args": [
+				".\\scripts\\evaluation_autorun.py"
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Run: CI Validate All",
+			"type": "shell",
+			"options": { "cwd": "${workspaceFolder}" },
+			"command": "python",
+			"args": [
+				".\\scripts\\ci_orchestrator.py",
+				"--validate-all"
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Run: CI Pipeline",
+			"type": "shell",
+			"options": { "cwd": "${workspaceFolder}" },
+			"command": "python",
+			"args": [
+				".\\scripts\\ci_orchestrator.py",
+				"--ci-pipeline"
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Run: Master Orchestrator - Quick Validation",
+			"type": "shell",
+			"options": { "cwd": "${workspaceFolder}" },
+			"command": "python",
+			"args": [
+				".\\scripts\\master_orchestrator.py",
+				"--workflow",
+				"quick_validation"
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Run: Master Orchestrator - Status",
+			"type": "shell",
+			"options": { "cwd": "${workspaceFolder}" },
+			"command": "python",
+			"args": [
+				".\\scripts\\master_orchestrator.py",
+				"--status"
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
 			"label": "pip install (quantum-ai)",
 			"type": "shell",
 			"windows": {
@@ -176,6 +248,94 @@
 			"type": "shell",
 			"command": "if (Test-Path '.\\venv\\Scripts\\python.exe') { .\\venv\\Scripts\\python.exe -m pip install -r requirements.txt } else { python -m pip install -r requirements.txt }",
 			"group": "build"
+		},
+		{
+			"label": "Run: Model Deployer - Scan",
+			"type": "shell",
+			"options": { "cwd": "${workspaceFolder}" },
+			"command": "python",
+			"args": [
+				".\\scripts\\model_deployer.py",
+				"--scan"
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Run: Model Deployer - Deploy Best",
+			"type": "shell",
+			"options": { "cwd": "${workspaceFolder}" },
+			"command": "python",
+			"args": [
+				".\\scripts\\model_deployer.py",
+				"--deploy", "best",
+				"--strategy", "canary"
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Run: Resource Monitor - Snapshot",
+			"type": "shell",
+			"options": { "cwd": "${workspaceFolder}" },
+			"command": "python",
+			"args": [
+				".\\scripts\\resource_monitor.py",
+				"--snapshot"
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Run: Resource Monitor - Stream",
+			"type": "shell",
+			"options": { "cwd": "${workspaceFolder}" },
+			"command": "python",
+			"args": [
+				".\\scripts\\resource_monitor.py",
+				"--stream",
+				"--duration", "60"
+			],
+			"isBackground": true,
+			"problemMatcher": []
+		},
+		{
+			"label": "Run: Batch Evaluator - Scan",
+			"type": "shell",
+			"options": { "cwd": "${workspaceFolder}" },
+			"command": "python",
+			"args": [
+				".\\scripts\\batch_evaluator.py",
+				"--scan-models",
+				"--evaluate-all"
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Run: Results Exporter - Export to Markdown",
+			"type": "shell",
+			"options": { "cwd": "${workspaceFolder}" },
+			"command": "python",
+			"args": [
+				".\\scripts\\results_exporter.py",
+				"--all",
+				"--format", "markdown"
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Run: Auto Scheduler - List",
+			"type": "shell",
+			"options": { "cwd": "${workspaceFolder}" },
+			"command": "python",
+			"args": [
+				".\\scripts\\auto_scheduler.py",
+				"--list"
+			],
+			"isBackground": false,
+			"problemMatcher": []
 		}
 	]
 }

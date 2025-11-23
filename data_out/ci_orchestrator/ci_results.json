@@ -1,0 +1,45 @@
+{
+  "generated_at": "2025-11-22T17:14:00Z",
+  "total_steps": 3,
+  "succeeded": 3,
+  "failed": 0,
+  "skipped": 0,
+  "results": [
+    {
+      "name": "autotrain",
+      "cmd": [
+        "C:\\Users\\Bryan\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "scripts/autotrain.py",
+        "--dry-run"
+      ],
+      "status": "succeeded",
+      "return_code": 0,
+      "duration_sec": 0.25,
+      "critical": true
+    },
+    {
+      "name": "quantum_autorun",
+      "cmd": [
+        "C:\\Users\\Bryan\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "scripts/quantum_autorun.py",
+        "--dry-run"
+      ],
+      "status": "succeeded",
+      "return_code": 0,
+      "duration_sec": 0.27,
+      "critical": true
+    },
+    {
+      "name": "evaluation_autorun",
+      "cmd": [
+        "C:\\Users\\Bryan\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "scripts/evaluation_autorun.py",
+        "--dry-run"
+      ],
+      "status": "succeeded",
+      "return_code": 0,
+      "duration_sec": 0.27,
+      "critical": true
+    }
+  ]
+}
