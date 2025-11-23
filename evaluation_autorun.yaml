@@ -74,3 +74,60 @@ jobs:
       - determinism
     output_format: json
     save_results: true
+
+  # Hyperparameter variant evaluations (fast, small sample)
+  - name: eval_phi35_lr_low
+    enabled: true
+    model_type: lora
+    model_path: data_out/lora_training/phi35_lr_low
+    dataset: datasets/chat/mixed_chat
+    max_samples: 20
+    metrics:
+      - accuracy
+      - bleu
+      - rouge
+      - response_time
+    output_format: json
+    save_results: true
+
+  - name: eval_phi35_lr_high
+    enabled: true
+    model_type: lora
+    model_path: data_out/lora_training/phi35_lr_high
+    dataset: datasets/chat/mixed_chat
+    max_samples: 20
+    metrics:
+      - accuracy
+      - bleu
+      - rouge
+      - response_time
+    output_format: json
+    save_results: true
+
+  - name: eval_phi35_drop_low
+    enabled: true
+    model_type: lora
+    model_path: data_out/lora_training/phi35_drop_low
+    dataset: datasets/chat/mixed_chat
+    max_samples: 20
+    metrics:
+      - accuracy
+      - bleu
+      - rouge
+      - response_time
+    output_format: json
+    save_results: true
+
+  - name: eval_phi35_drop_high
+    enabled: true
+    model_type: lora
+    model_path: data_out/lora_training/phi35_drop_high
+    dataset: datasets/chat/mixed_chat
+    max_samples: 20
+    metrics:
+      - accuracy
+      - bleu
+      - rouge
+      - response_time
+    output_format: json
+    save_results: true

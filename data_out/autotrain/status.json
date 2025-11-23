@@ -1,8 +1,8 @@
 {
-  "generated_at": "2025-11-22T17:14:09Z",
+  "generated_at": "2025-11-23T06:19:15Z",
   "jobs": [
     {
-      "name": "phi35_mixed_chat",
+      "name": "phi35_mixed_chat_lr_low",
       "runner": "hf",
       "cmd": [
         "C:\\Users\\Bryan\\OneDrive\\AI\\AI\\microsoft_phi-silica-3.6_v1\\venv\\Scripts\\python.exe",
@@ -14,73 +14,24 @@
         "--hf-model-id",
         "microsoft/Phi-3.5-mini-instruct",
         "--learning-rate",
-        "0.0002",
+        "0.0001",
         "--lora-dropout",
         "0.1",
         "--epochs",
-        "3",
+        "1",
+        "--max-train-samples",
+        "64",
+        "--max-eval-samples",
+        "16",
         "--save-dir",
-        "data_out/lora_training/phi35"
+        "data_out/lora_training/phi35_lr_low"
       ],
-      "start_time": "20251122T171409Z",
-      "status": "validated",
-      "return_code": null,
-      "log": "C:\\Users\\Bryan\\OneDrive\\AI\\data_out\\autotrain\\phi35_mixed_chat\\20251122T171409Z\\stdout.log",
-      "output_dir": null
-    },
-    {
-      "name": "qwen25_3b_mixed_chat",
-      "runner": "hf",
-      "cmd": [
-        "C:\\Users\\Bryan\\OneDrive\\AI\\AI\\microsoft_phi-silica-3.6_v1\\venv\\Scripts\\python.exe",
-        "C:\\Users\\Bryan\\OneDrive\\AI\\AI\\microsoft_phi-silica-3.6_v1\\scripts\\train_lora.py",
-        "--config",
-        "AI/microsoft_phi-silica-3.6_v1/lora/lora.yaml",
-        "--dataset",
-        "datasets/chat/mixed_chat",
-        "--hf-model-id",
-        "Qwen/Qwen2.5-3B-Instruct",
-        "--learning-rate",
-        "0.0002",
-        "--lora-dropout",
-        "0.1",
-        "--epochs",
-        "3",
-        "--save-dir",
-        "data_out/lora_training/qwen25_3b"
-      ],
-      "start_time": "20251122T171409Z",
-      "status": "validated",
-      "return_code": null,
-      "log": "C:\\Users\\Bryan\\OneDrive\\AI\\data_out\\autotrain\\qwen25_3b_mixed_chat\\20251122T171409Z\\stdout.log",
-      "output_dir": null
-    },
-    {
-      "name": "phi35_max_performance",
-      "runner": "hf",
-      "cmd": [
-        "C:\\Users\\Bryan\\OneDrive\\AI\\AI\\microsoft_phi-silica-3.6_v1\\venv\\Scripts\\python.exe",
-        "C:\\Users\\Bryan\\OneDrive\\AI\\AI\\microsoft_phi-silica-3.6_v1\\scripts\\train_lora.py",
-        "--config",
-        "AI/microsoft_phi-silica-3.6_v1/lora/lora.yaml",
-        "--dataset",
-        "datasets/chat/dolly",
-        "--hf-model-id",
-        "microsoft/Phi-3.5-mini-instruct",
-        "--learning-rate",
-        "0.0002",
-        "--lora-dropout",
-        "0.1",
-        "--epochs",
-        "3",
-        "--save-dir",
-        "data_out/lora_training/phi35_max_performance"
-      ],
-      "start_time": "20251122T171409Z",
-      "status": "validated",
-      "return_code": null,
-      "log": "C:\\Users\\Bryan\\OneDrive\\AI\\data_out\\autotrain\\phi35_max_performance\\20251122T171409Z\\stdout.log",
-      "output_dir": null
+      "start_time": "20251123T052526Z",
+      "status": "succeeded",
+      "return_code": 0,
+      "log": "C:\\Users\\Bryan\\OneDrive\\AI\\data_out\\autotrain\\phi35_mixed_chat_lr_low\\20251123T052526Z\\stdout.log",
+      "output_dir": "data_out\\lora_training\\phi35_lr_low",
+      "duration_sec": 3229.28
     }
   ]
 }

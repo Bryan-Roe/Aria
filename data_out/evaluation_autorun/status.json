@@ -1,13 +1,13 @@
 {
-  "generated_at": "2025-11-22T17:14:10Z",
-  "total_jobs": 4,
-  "succeeded": 0,
+  "generated_at": "2025-11-23T06:21:04Z",
+  "total_jobs": 1,
+  "succeeded": 1,
   "failed": 0,
-  "validated": 3,
-  "missing": 1,
+  "validated": 0,
+  "missing": 0,
   "jobs": [
     {
-      "name": "eval_smoke_test",
+      "name": "eval_phi35_lr_low",
       "model_type": "lora",
       "cmd": [
         "C:\\Users\\Bryan\\OneDrive\\AI\\venv\\Scripts\\python.exe",
@@ -15,147 +15,34 @@
         "--dataset",
         "datasets/chat/mixed_chat",
         "--model",
-        "data_out/lora_training/phi35",
-        "--max-samples",
-        "10",
-        "--metric",
-        "accuracy",
-        "--metric",
-        "response_time",
-        "--output-format",
-        "json",
-        "--save-dir",
-        "C:\\Users\\Bryan\\OneDrive\\AI\\data_out\\evaluation_autorun\\eval_smoke_test"
-      ],
-      "start_time": "20251122T171410Z",
-      "status": "validated",
-      "return_code": null,
-      "log": "C:\\Users\\Bryan\\OneDrive\\AI\\data_out\\evaluation_autorun\\eval_smoke_test\\20251122T171410Z\\stdout.log",
-      "results_file": "C:\\Users\\Bryan\\OneDrive\\AI\\data_out\\evaluation_autorun\\eval_smoke_test\\20251122T171410Z\\results.json",
-      "metrics_computed": [
-        "accuracy",
-        "response_time"
-      ],
-      "missing": [],
-      "warnings": []
-    },
-    {
-      "name": "eval_lora_phi35_full",
-      "model_type": "lora",
-      "cmd": [
-        "C:\\Users\\Bryan\\OneDrive\\AI\\venv\\Scripts\\python.exe",
-        "C:\\Users\\Bryan\\OneDrive\\AI\\scripts\\evaluate_lora_model.py",
-        "--dataset",
-        "datasets/chat/dolly",
-        "--model",
-        "data_out/lora_training/phi35",
-        "--max-samples",
-        "100",
-        "--batch-size",
-        "4",
-        "--metric",
-        "accuracy",
-        "--metric",
-        "bleu",
-        "--metric",
-        "rouge",
-        "--metric",
-        "response_time",
-        "--metric",
-        "token_efficiency",
-        "--output-format",
-        "json",
-        "--save-dir",
-        "C:\\Users\\Bryan\\OneDrive\\AI\\data_out\\evaluation_autorun\\eval_lora_phi35_full"
-      ],
-      "start_time": "20251122T171410Z",
-      "status": "validated",
-      "return_code": null,
-      "log": "C:\\Users\\Bryan\\OneDrive\\AI\\data_out\\evaluation_autorun\\eval_lora_phi35_full\\20251122T171410Z\\stdout.log",
-      "results_file": "C:\\Users\\Bryan\\OneDrive\\AI\\data_out\\evaluation_autorun\\eval_lora_phi35_full\\20251122T171410Z\\results.json",
-      "metrics_computed": [
-        "accuracy",
-        "bleu",
-        "rouge",
-        "response_time",
-        "token_efficiency"
-      ],
-      "missing": [],
-      "warnings": []
-    },
-    {
-      "name": "eval_quantum_heart",
-      "model_type": "quantum",
-      "cmd": [
-        "C:\\Users\\Bryan\\OneDrive\\AI\\quantum-ai\\venv\\Scripts\\python.exe",
-        "C:\\Users\\Bryan\\OneDrive\\AI\\scripts\\evaluate_quantum_model.py",
-        "--dataset",
-        "datasets/quantum/heart_disease.csv",
-        "--model",
-        "quantum-ai/results/heart_disease_model.json",
-        "--metric",
-        "accuracy",
-        "--metric",
-        "precision",
-        "--metric",
-        "recall",
-        "--metric",
-        "f1_score",
-        "--output-format",
-        "json",
-        "--save-dir",
-        "C:\\Users\\Bryan\\OneDrive\\AI\\data_out\\evaluation_autorun\\eval_quantum_heart"
-      ],
-      "start_time": "20251122T171410Z",
-      "status": "missing",
-      "return_code": null,
-      "log": "C:\\Users\\Bryan\\OneDrive\\AI\\data_out\\evaluation_autorun\\eval_quantum_heart\\20251122T171410Z\\stdout.log",
-      "results_file": "C:\\Users\\Bryan\\OneDrive\\AI\\data_out\\evaluation_autorun\\eval_quantum_heart\\20251122T171410Z\\results.json",
-      "metrics_computed": [
-        "accuracy",
-        "precision",
-        "recall",
-        "f1_score"
-      ],
-      "missing": [
-        "quantum-ai\\results\\heart_disease_model.json"
-      ],
-      "warnings": [
-        "Evaluation script not yet created: C:\\Users\\Bryan\\OneDrive\\AI\\scripts\\evaluate_quantum_model.py"
-      ]
-    },
-    {
-      "name": "eval_local_baseline",
-      "model_type": "local",
-      "cmd": [
-        "C:\\Users\\Bryan\\OneDrive\\AI\\venv\\Scripts\\python.exe",
-        "C:\\Users\\Bryan\\OneDrive\\AI\\scripts\\evaluate_local_model.py",
-        "--dataset",
-        "datasets/chat/mixed_chat",
+        "data_out/lora_training/phi35_lr_low",
         "--max-samples",
         "20",
         "--metric",
-        "response_time",
+        "accuracy",
         "--metric",
-        "determinism",
+        "bleu",
+        "--metric",
+        "rouge",
+        "--metric",
+        "response_time",
         "--output-format",
         "json",
         "--save-dir",
-        "C:\\Users\\Bryan\\OneDrive\\AI\\data_out\\evaluation_autorun\\eval_local_baseline"
+        "C:\\Users\\Bryan\\OneDrive\\AI\\data_out\\evaluation_autorun\\eval_phi35_lr_low"
       ],
-      "start_time": "20251122T171410Z",
-      "status": "validated",
-      "return_code": null,
-      "log": "C:\\Users\\Bryan\\OneDrive\\AI\\data_out\\evaluation_autorun\\eval_local_baseline\\20251122T171410Z\\stdout.log",
-      "results_file": "C:\\Users\\Bryan\\OneDrive\\AI\\data_out\\evaluation_autorun\\eval_local_baseline\\20251122T171410Z\\results.json",
+      "start_time": "20251123T062104Z",
+      "status": "succeeded",
+      "return_code": 0,
+      "log": "C:\\Users\\Bryan\\OneDrive\\AI\\data_out\\evaluation_autorun\\eval_phi35_lr_low\\20251123T062104Z\\stdout.log",
+      "results_file": "C:\\Users\\Bryan\\OneDrive\\AI\\data_out\\evaluation_autorun\\eval_phi35_lr_low\\20251123T062104Z\\results.json",
       "metrics_computed": [
-        "response_time",
-        "determinism"
+        "accuracy",
+        "bleu",
+        "rouge",
+        "response_time"
       ],
-      "missing": [],
-      "warnings": [
-        "Evaluation script not yet created: C:\\Users\\Bryan\\OneDrive\\AI\\scripts\\evaluate_local_model.py"
-      ]
+      "duration_sec": 0.17
     }
   ]
 }

@@ -1,0 +1,44 @@
+name: Auto Validation
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'autotrain.yaml'
+      - 'quantum_autorun.yaml'
+      - 'scripts/autotrain.py'
+      - 'scripts/quantum_autorun.py'
+      - 'AI/**'
+      - 'quantum-ai/**'
+  schedule:
+    - cron: '0 5 * * *'
+  workflow_dispatch:
+
+concurrency: auto-validation
+
+jobs:
+  dry-run:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+      - name: Install root requirements
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          pip install pyyaml
+      - name: Auto bootstrap (env + orchestrator validation)
+        run: python scripts/auto_bootstrap.py
+      - name: Upload status artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: auto-validation-status
+          path: |
+            data_out/autotrain/status.json
+            data_out/quantum_autorun/status.json
+            data_out/auto_bootstrap/status_summary.json

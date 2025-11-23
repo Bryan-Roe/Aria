@@ -1,5 +1,5 @@
 {
-  "generated_at": "2025-11-22T17:14:10Z",
+  "generated_at": "2025-11-23T05:21:19Z",
   "jobs": [
     {
       "name": "heart_quick",
@@ -20,10 +20,10 @@
         "--test-size",
         "0.2"
       ],
-      "start_time": "20251122T171410Z",
+      "start_time": "20251123T052119Z",
       "status": "validated",
       "return_code": null,
-      "log": "C:\\Users\\Bryan\\OneDrive\\AI\\data_out\\quantum_autorun\\heart_quick\\20251122T171410Z\\stdout.log",
+      "log": "C:\\Users\\Bryan\\OneDrive\\AI\\data_out\\quantum_autorun\\heart_quick\\20251123T052119Z\\stdout.log",
       "meta": {
         "preset": "heart",
         "csv": null,
@@ -55,10 +55,10 @@
         "--test-size",
         "0.2"
       ],
-      "start_time": "20251122T171410Z",
+      "start_time": "20251123T052119Z",
       "status": "validated",
       "return_code": null,
-      "log": "C:\\Users\\Bryan\\OneDrive\\AI\\data_out\\quantum_autorun\\ionosphere_quick\\20251122T171410Z\\stdout.log",
+      "log": "C:\\Users\\Bryan\\OneDrive\\AI\\data_out\\quantum_autorun\\ionosphere_quick\\20251123T052119Z\\stdout.log",
       "meta": {
         "preset": "ionosphere",
         "csv": null,
@@ -82,10 +82,10 @@
         "--shots",
         "100"
       ],
-      "start_time": "20251122T171410Z",
+      "start_time": "20251123T052119Z",
       "status": "validated",
       "return_code": null,
-      "log": "C:\\Users\\Bryan\\OneDrive\\AI\\data_out\\quantum_autorun\\azure_ionq_simulator\\20251122T171410Z\\stdout.log",
+      "log": "C:\\Users\\Bryan\\OneDrive\\AI\\data_out\\quantum_autorun\\azure_ionq_simulator\\20251123T052119Z\\stdout.log",
       "meta": {
         "preset": null,
         "csv": null,
@@ -110,8 +110,8 @@
       "name": "heart_quick",
       "status": "validated",
       "mode": "train_custom_dataset",
-      "start_time": "20251122T171410Z",
-      "log": "C:\\Users\\Bryan\\OneDrive\\AI\\data_out\\quantum_autorun\\heart_quick\\20251122T171410Z\\stdout.log"
+      "start_time": "20251123T052119Z",
+      "log": "C:\\Users\\Bryan\\OneDrive\\AI\\data_out\\quantum_autorun\\heart_quick\\20251123T052119Z\\stdout.log"
     }
   }
 }

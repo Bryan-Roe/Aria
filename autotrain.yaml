@@ -53,3 +53,52 @@ jobs:
   #   max_train_samples: 10
   #   reinstall: false   # set true to force re-install of venv deps
 
+  # --- Hyperparameter exploration (small, fast jobs) ---
+  - name: phi35_mixed_chat_lr_low
+    runner: hf
+    config: AI/microsoft_phi-silica-3.6_v1/lora/lora.yaml
+    dataset: datasets/chat/mixed_chat
+    save_dir: data_out/lora_training/phi35_lr_low
+    epochs: 1
+    max_train_samples: 64
+    max_eval_samples: 16
+    learning_rate: 0.0001
+    lora_dropout: 0.1
+    hf_model_id: microsoft/Phi-3.5-mini-instruct
+
+  - name: phi35_mixed_chat_lr_high
+    runner: hf
+    config: AI/microsoft_phi-silica-3.6_v1/lora/lora.yaml
+    dataset: datasets/chat/mixed_chat
+    save_dir: data_out/lora_training/phi35_lr_high
+    epochs: 1
+    max_train_samples: 64
+    max_eval_samples: 16
+    learning_rate: 0.0003
+    lora_dropout: 0.1
+    hf_model_id: microsoft/Phi-3.5-mini-instruct
+
+  - name: phi35_mixed_chat_dropout_low
+    runner: hf
+    config: AI/microsoft_phi-silica-3.6_v1/lora/lora.yaml
+    dataset: datasets/chat/mixed_chat
+    save_dir: data_out/lora_training/phi35_drop_low
+    epochs: 1
+    max_train_samples: 64
+    max_eval_samples: 16
+    learning_rate: 0.0002
+    lora_dropout: 0.05
+    hf_model_id: microsoft/Phi-3.5-mini-instruct
+
+  - name: phi35_mixed_chat_dropout_high
+    runner: hf
+    config: AI/microsoft_phi-silica-3.6_v1/lora/lora.yaml
+    dataset: datasets/chat/mixed_chat
+    save_dir: data_out/lora_training/phi35_drop_high
+    epochs: 1
+    max_train_samples: 64
+    max_eval_samples: 16
+    learning_rate: 0.0002
+    lora_dropout: 0.15
+    hf_model_id: microsoft/Phi-3.5-mini-instruct
+

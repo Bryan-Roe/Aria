@@ -1,0 +1,112 @@
+{
+  "jobs_trained": [
+    "phi35_mixed_chat_lr_low",
+    "phi35_mixed_chat_lr_high",
+    "phi35_mixed_chat_dropout_low",
+    "phi35_mixed_chat_dropout_high"
+  ],
+  "training": {
+    "phi35_mixed_chat_lr_low": {
+      "cmd": [
+        "C:\\Users\\Bryan\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "C:\\Users\\Bryan\\OneDrive\\AI\\scripts\\autotrain.py",
+        "--job",
+        "phi35_mixed_chat_lr_low",
+        "--dry-run"
+      ],
+      "status": "validated"
+    },
+    "phi35_mixed_chat_lr_high": {
+      "cmd": [
+        "C:\\Users\\Bryan\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "C:\\Users\\Bryan\\OneDrive\\AI\\scripts\\autotrain.py",
+        "--job",
+        "phi35_mixed_chat_lr_high",
+        "--dry-run"
+      ],
+      "status": "validated"
+    },
+    "phi35_mixed_chat_dropout_low": {
+      "cmd": [
+        "C:\\Users\\Bryan\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "C:\\Users\\Bryan\\OneDrive\\AI\\scripts\\autotrain.py",
+        "--job",
+        "phi35_mixed_chat_dropout_low",
+        "--dry-run"
+      ],
+      "status": "validated"
+    },
+    "phi35_mixed_chat_dropout_high": {
+      "cmd": [
+        "C:\\Users\\Bryan\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "C:\\Users\\Bryan\\OneDrive\\AI\\scripts\\autotrain.py",
+        "--job",
+        "phi35_mixed_chat_dropout_high",
+        "--dry-run"
+      ],
+      "status": "validated"
+    }
+  },
+  "evaluation": {
+    "eval_phi35_lr_low": {
+      "cmd": [
+        "C:\\Users\\Bryan\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "C:\\Users\\Bryan\\OneDrive\\AI\\scripts\\evaluation_autorun.py",
+        "--job",
+        "eval_phi35_lr_low",
+        "--dry-run"
+      ],
+      "status": "validated"
+    },
+    "eval_phi35_lr_high": {
+      "cmd": [
+        "C:\\Users\\Bryan\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "C:\\Users\\Bryan\\OneDrive\\AI\\scripts\\evaluation_autorun.py",
+        "--job",
+        "eval_phi35_lr_high",
+        "--dry-run"
+      ],
+      "status": "validated"
+    },
+    "eval_phi35_drop_low": {
+      "cmd": [
+        "C:\\Users\\Bryan\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "C:\\Users\\Bryan\\OneDrive\\AI\\scripts\\evaluation_autorun.py",
+        "--job",
+        "eval_phi35_drop_low",
+        "--dry-run"
+      ],
+      "status": "validated"
+    },
+    "eval_phi35_drop_high": {
+      "cmd": [
+        "C:\\Users\\Bryan\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+        "C:\\Users\\Bryan\\OneDrive\\AI\\scripts\\evaluation_autorun.py",
+        "--job",
+        "eval_phi35_drop_high",
+        "--dry-run"
+      ],
+      "status": "validated"
+    }
+  },
+  "evaluation_metrics": {
+    "eval_smoke_test": {
+      "status": "validated",
+      "metrics": {}
+    },
+    "eval_lora_phi35_full": {
+      "status": "validated",
+      "metrics": {}
+    },
+    "eval_quantum_heart": {
+      "status": "missing",
+      "metrics": {}
+    },
+    "eval_local_baseline": {
+      "status": "validated",
+      "metrics": {}
+    }
+  },
+  "ranking": [],
+  "dry_run": true
+}
