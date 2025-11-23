@@ -7,14 +7,8 @@
   ],
   "training": {
     "phi35_mixed_chat_lr_low": {
-      "cmd": [
-        "C:\\Users\\Bryan\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
-        "C:\\Users\\Bryan\\OneDrive\\AI\\scripts\\autotrain.py",
-        "--job",
-        "phi35_mixed_chat_lr_low",
-        "--dry-run"
-      ],
-      "status": "validated"
+      "status": "skipped_existing",
+      "output_dir": "C:\\Users\\Bryan\\OneDrive\\AI\\data_out\\lora_training\\phi35_lr_low"
     },
     "phi35_mixed_chat_lr_high": {
       "cmd": [
@@ -90,23 +84,17 @@
     }
   },
   "evaluation_metrics": {
-    "eval_smoke_test": {
-      "status": "validated",
-      "metrics": {}
-    },
-    "eval_lora_phi35_full": {
-      "status": "validated",
-      "metrics": {}
-    },
-    "eval_quantum_heart": {
-      "status": "missing",
-      "metrics": {}
-    },
-    "eval_local_baseline": {
-      "status": "validated",
+    "eval_phi35_lr_low": {
+      "status": "succeeded",
       "metrics": {}
     }
   },
-  "ranking": [],
+  "ranking": [
+    {
+      "name": "eval_phi35_lr_low",
+      "score": null,
+      "metrics": {}
+    }
+  ],
   "dry_run": true
 }

@@ -41,7 +41,14 @@ func host start
 python .\quantum-ai\quantum_mcp_server.py
 ```
 
+## 9A. GPU Training
+`AI/microsoft_phi-silica-3.6_v1/scripts/train_lora.py` auto-selects the best device (`--device auto`). Override with `--device cuda|cpu|directml|mps`. Install a GPU build of torch first (example NVIDIA CUDA 12.1):
+```powershell
+pip install torch --index-url https://download.pytorch.org/whl/cu121
+```
+Verify: `python -c "import torch; print(torch.cuda.is_available())"`. Training log shows `[device] selection=auto resolved=cuda` when GPU active.
+
 ## 10. References
 See project READMEs + root `README.md`; recover verbose guidance via git history. Cosmos DB modeling: `TELEMETRY_COSMOS_ENABLEMENT.md`.
 
-Last updated: 2025-11-22
+Last updated: 2025-11-23

@@ -186,6 +186,7 @@ def main():
     ap.add_argument("--train-manifest", default=None, help="Path or URL to manifest of training files (txt/json/jsonl)")
     ap.add_argument("--eval-manifest", default=None, help="Path or URL to manifest of eval files (txt/json/jsonl)")
     ap.add_argument("--save-dir", default=None, help="Override output directory (else from config or defaults)")
+    ap.add_argument("--device", default="auto", choices=["auto", "cuda", "cpu", "directml", "mps"], help="Device preference: auto selects best available (cuda>mps>directml>cpu)")
     # Optional overrides for HPO/cloud runs
     ap.add_argument("--learning-rate", type=float, default=None, help="Override learning_rate from config")
     ap.add_argument("--lora-dropout", type=float, default=None, help="Override lora_dropout from config")
@@ -278,12 +279,30 @@ def main():
                 v_use = next((p for p in eval_candidates if p.exists()), None)
                 eval_files = [str(v_use)] if v_use else [str(t_use)]
 
+    # Determine and report device early (even for dry-run)
+    chosen_device = "cpu"
+    if args.device == "auto":
+        if torch is not None and torch.cuda.is_available():
+            chosen_device = "cuda"
+        elif torch is not None and getattr(torch.backends, "mps", None) and torch.backends.mps.is_available():
+            chosen_device = "mps"
+        else:
+            # Optional DirectML detection
+            try:
+                import torch_directml  # type: ignore
+                chosen_device = "directml"
+            except Exception:
+                chosen_device = "cpu"
+    else:
+        chosen_device = args.device
+    print(f"[device] selection={args.device} resolved={chosen_device} cuda_available={(torch.cuda.is_available() if torch else False)}")
+
     # Dry run: count/validate records only (no model/tokenizer downloads)
     if args.dry_run:
-        # For remote manifests we won't fetch all content; just display sources
         if train_manifest or eval_manifest:
             print("Dry run OK.")
             print({
+                "device": chosen_device,
                 "train_files": train_files[:5],
                 "eval_files": eval_files[:5],
                 "note": "Counting skipped for remote manifests"
@@ -294,6 +313,7 @@ def main():
         sample = validate_sample(Path(train_files[0]))
         print("Dry run OK.")
         print({
+            "device": chosen_device,
             "train_examples": n_train,
             "test_examples": n_test,
             "sample": sample,
@@ -430,11 +450,13 @@ def main():
         eval_ds = eval_ds.take(args.max_eval_samples)
 
     # Load base model
-    dtype = torch.bfloat16 if torch.cuda.is_available() else torch.float32
+    # DType selection: prefer bfloat16 on CUDA, else float32. (MPS/directml kept at float32 for stability.)
+    use_cuda = (chosen_device == "cuda" and torch.cuda.is_available())
+    dtype = torch.bfloat16 if use_cuda and hasattr(torch, "bfloat16") else torch.float32
     base_model = AutoModelForCausalLM.from_pretrained(
         hf_model_id,
-        dtype=dtype,
-        device_map="auto",
+        torch_dtype=dtype,
+        device_map="auto",  # Let transformers shard if multiple GPUs
     )
 
     if cfg.gradient_checkpointing:
@@ -485,6 +507,9 @@ def main():
         steps_per_epoch = max(1, math.ceil(target_samples / max(1, cfg.finetune_train_batch_size)))
         max_steps_override = max(1, steps_per_epoch * max(1, cfg.epochs))
 
+    # Precision flags: enable bf16 if supported, otherwise leave fp16 False on CPU to avoid errors
+    bf16_flag = use_cuda and getattr(torch.cuda, "is_bf16_supported", lambda: False)()
+    fp16_flag = use_cuda and not bf16_flag
     training_args = TrainingArguments(
         output_dir=str(out_dir),
         per_device_train_batch_size=cfg.finetune_train_batch_size,
@@ -496,8 +521,8 @@ def main():
         max_steps=(max_steps_override if max_steps_override is not None else -1),
         learning_rate=cfg.learning_rate,
         logging_steps=max(1, cfg.eval_steps // 2),
-        bf16=torch.cuda.is_available(),
-        fp16=not torch.cuda.is_available(),
+        bf16=bf16_flag,
+        fp16=fp16_flag,
         gradient_checkpointing=cfg.gradient_checkpointing,
         remove_unused_columns=False,
         save_total_limit=3,

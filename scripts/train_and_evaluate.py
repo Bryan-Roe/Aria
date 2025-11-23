@@ -11,10 +11,11 @@ Usage (PowerShell):
   python .\scripts\train_and_evaluate.py --all-variants   # run all newly added variant jobs
 
 Flags:
-  --dry-run        Validate commands only (no training/evaluation execution)
-  --jobs           Comma-separated list of job names (must exist in autotrain.yaml)
-  --all-variants   Shortcut to run all hyperparameter exploration jobs
-  --stop-on-fail   Abort remaining jobs if any training fails
+    --dry-run         Validate commands only (no training/evaluation execution)
+    --jobs            Comma-separated list of job names (must exist in autotrain.yaml)
+    --all-variants    Shortcut to run all hyperparameter exploration jobs
+    --stop-on-fail    Abort remaining jobs if any training fails
+    --skip-existing   Skip training when adapter artifacts already exist (still runs evaluation)
 
 Artifacts:
   data_out/train_and_evaluate/summary.json
@@ -133,6 +134,7 @@ def main() -> None:
     ap.add_argument("--all-variants", action="store_true", help="Run all predefined variant jobs")
     ap.add_argument("--dry-run", action="store_true", help="Validate only (no execution)")
     ap.add_argument("--stop-on-fail", action="store_true", help="Abort remaining jobs if a training fails")
+    ap.add_argument("--skip-existing", action="store_true", help="Skip training if output artifacts already exist")
     args = ap.parse_args()
 
     TRAIN_AND_EVAL_OUT.mkdir(parents=True, exist_ok=True)
@@ -156,8 +158,34 @@ def main() -> None:
     training_results: Dict[str, Any] = {}
     evaluation_results: Dict[str, Any] = {}
 
+    # Helper mapping function for training job -> evaluation job name (defined early for skip-existing logic)
+    def map_training_to_eval(job_name: str) -> str:
+        if job_name.startswith("phi35_mixed_chat_"):
+            variant = job_name[len("phi35_mixed_chat_") :]
+            if variant.startswith("dropout_"):
+                variant = variant.replace("dropout_", "drop_")
+            return f"eval_phi35_{variant}"
+        if job_name.startswith("qwen25_3b_"):
+            variant = job_name[len("qwen25_3b_") :]
+            return f"eval_qwen25_{variant}"
+        return f"eval_{job_name}"
+
     # Run training sequentially
     for job in selected:
+        eval_job_name_for_skip = map_training_to_eval(job)
+        output_dir = None
+        if eval_job_name_for_skip in eval_jobs:
+            model_path = eval_jobs[eval_job_name_for_skip].get("model_path")
+            if model_path:
+                output_dir = REPO_ROOT / model_path
+        # Skip logic: adapter exists
+        if args.skip_existing and output_dir and (output_dir / "lora_adapter").exists():
+            # Check for any safetensors file to confirm completeness
+            has_weights = any((output_dir / "lora_adapter").glob("*.safetensors"))
+            if has_weights:
+                print(f"[train_and_evaluate] Skipping existing training for {job} (artifacts found at {output_dir})")
+                training_results[job] = {"status": "skipped_existing", "output_dir": str(output_dir)}
+                continue
         cmd = [sys.executable, str(AUTOTRAIN), "--job", job]
         if args.dry_run:
             cmd.append("--dry-run")
@@ -168,26 +196,10 @@ def main() -> None:
             print(f"[train_and_evaluate] Aborting due to failure in {job}")
             break
 
-    # Helper mapping function for training job -> evaluation job name
-    def map_training_to_eval(job_name: str) -> str:
-        # phi35 LoRA variants: phi35_mixed_chat_<variant>; eval jobs use eval_phi35_<variant>
-        if job_name.startswith("phi35_mixed_chat_"):
-            variant = job_name[len("phi35_mixed_chat_") :]
-            # evaluation jobs shorten 'dropout_' to 'drop_'
-            if variant.startswith("dropout_"):
-                variant = variant.replace("dropout_", "drop_")
-            return f"eval_phi35_{variant}"
-        # Future pattern for qwen25 models (not yet defined in eval YAML)
-        if job_name.startswith("qwen25_3b_"):
-            variant = job_name[len("qwen25_3b_") :]
-            return f"eval_qwen25_{variant}"
-        # Fallback generic mapping
-        return f"eval_{job_name}"
-
     # Run evaluations for successfully trained jobs
     for job in selected:
         t_res = training_results.get(job, {})
-        if not args.dry_run and t_res.get("status") != "succeeded":
+        if not args.dry_run and t_res.get("status") not in {"succeeded", "skipped_existing"}:
             continue
         eval_job_name = map_training_to_eval(job)
         if eval_job_name not in eval_jobs:
