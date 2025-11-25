@@ -399,6 +399,72 @@
 			],
 			"isBackground": true,
 			"problemMatcher": []
+		},
+		{
+			"label": "Automate: Train & Promote (Quick)",
+			"type": "shell",
+			"options": { "cwd": "${workspaceFolder}" },
+			"command": "python",
+			"args": [
+				".\\scripts\\train_and_promote.py",
+				"--quick",
+				"--auto-promote"
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Automate: Train & Promote (Standard)",
+			"type": "shell",
+			"options": { "cwd": "${workspaceFolder}" },
+			"command": "python",
+			"args": [
+				".\\scripts\\train_and_promote.py",
+				"--standard",
+				"--auto-promote"
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Automate: Grid Search",
+			"type": "shell",
+			"options": { "cwd": "${workspaceFolder}" },
+			"command": "python",
+			"args": [
+				".\\scripts\\training_scheduler.py",
+				"--grid-search"
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Automate: Start Nightly Training",
+			"type": "shell",
+			"options": { "cwd": "${workspaceFolder}" },
+			"command": "python",
+			"args": [
+				".\\scripts\\training_scheduler.py",
+				"--start",
+				"nightly"
+			],
+			"isBackground": true,
+			"problemMatcher": []
+		},
+		{
+			"label": "Automate: Full Pipeline (Train + Eval + Deploy)",
+			"type": "shell",
+			"options": { "cwd": "${workspaceFolder}" },
+			"command": "python",
+			"args": [
+				".\\scripts\\train_and_promote.py",
+				"--full",
+				"--auto-promote",
+				"--max-workers",
+				"2"
+			],
+			"isBackground": false,
+			"problemMatcher": []
 		}
 	]
 }

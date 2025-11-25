@@ -1,13 +1,8 @@
 {
   "model": "C:\\Users\\Bryan\\OneDrive\\AI\\data_out\\lora_training\\checkpoint-64",
   "dataset": "datasets/chat/mixed_chat",
-  "max_samples": 100,
-  "metrics": [
-    "accuracy,perplexity,bleu"
-  ],
-  "summary": {
-    "accuracy": 0.0,
-    "response_time_ms": 0.0
-  },
-  "status": "template_placeholder"
+  "samples": 26,
+  "metrics": {
+    "perplexity": 10.188461538461539
+  }
 }

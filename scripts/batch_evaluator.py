@@ -58,6 +58,7 @@ class EvaluationResult:
     dataset: str
     status: str  # succeeded, failed, timeout
     duration: float
+    model_path: str = ""  # Path to the evaluated model
     metrics: Dict[str, float] = field(default_factory=dict)
     error: Optional[str] = None
 
@@ -116,10 +117,13 @@ class BatchEvaluator:
             "--model", task.model_path,
             "--dataset", task.dataset,
             "--max-samples", str(task.max_samples or 1000),
-            "--metric", ",".join(task.metrics),
             "--output-format", "json",
             "--save-dir", str(self.data_out / task.model_id)
         ]
+        
+        # Add metrics (each as separate --metric flag)
+        for metric in task.metrics:
+            cmd.extend(["--metric", metric])
         
         t0 = time.time()
         try:
@@ -138,6 +142,7 @@ class BatchEvaluator:
                 model_id=task.model_id,
                 model_type=task.model_type,
                 dataset=task.dataset,
+                model_path=task.model_path,
                 status="succeeded" if result.returncode == 0 else "failed",
                 duration=duration
             )
@@ -164,6 +169,7 @@ class BatchEvaluator:
                 model_id=task.model_id,
                 model_type=task.model_type,
                 dataset=task.dataset,
+                model_path=task.model_path,
                 status="timeout",
                 duration=1800,
                 error="Evaluation timed out after 30 minutes"
@@ -173,6 +179,7 @@ class BatchEvaluator:
                 model_id=task.model_id,
                 model_type=task.model_type,
                 dataset=task.dataset,
+                model_path=task.model_path,
                 status="failed",
                 duration=0,
                 error=str(e)
@@ -196,7 +203,8 @@ class BatchEvaluator:
                     result = future.result()
                     self.results.append(result)
                     
-                    status_icon = "✓" if result.status == "succeeded" else "✗"
+                    # Use ASCII-safe status indicators
+                    status_icon = "[OK]" if result.status == "succeeded" else "[FAIL]"
                     print(f"{status_icon} {result.model_id}: {result.status} ({result.duration:.1f}s)")
                     
                     if result.metrics:
@@ -204,7 +212,7 @@ class BatchEvaluator:
                             print(f"    {metric}: {value:.4f}")
                 
                 except Exception as e:
-                    print(f"✗ {task.model_id}: Exception - {e}")
+                    print(f"[ERROR] {task.model_id}: Exception - {e}")
         
         print(f"\n[batch_eval] Evaluation complete")
         print(f"[batch_eval] Succeeded: {sum(1 for r in self.results if r.status == 'succeeded')}")
