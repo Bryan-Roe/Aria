@@ -357,6 +357,63 @@ class ParallelTrainer:
         except Exception as c_err:
             result['cleanup'] = f'error: {c_err}'
     
+    def _compute_ranking(self, results: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        """Compute ranking of jobs based on selected metric.
+
+        Supported metrics:
+            - perplexity_improvement: relative reduction (higher better)
+            - post_perplexity: final perplexity (lower better; stored negative for sorting)
+            - diversity_avg: average of distinct-1 and distinct-2 (higher better)
+            - distinct_diversity: alias of diversity_avg
+            - combined_improvement: weighted combo of perplexity_improvement (70%) + diversity_avg (30%)
+        """
+        ranked: List[Dict[str, Any]] = []
+        for r in results:
+            ev = r.get('evaluation') or {}
+            pre_ppl = ev.get('pre_eval_perplexity')
+            post_ppl = ev.get('post_eval_perplexity')
+            diversity = (ev.get('diversity') or {})
+            d1 = diversity.get('distinct_1')
+            d2 = diversity.get('distinct_2')
+            diversity_avg = (d1 + d2) / 2 if (d1 is not None and d2 is not None) else None
+            # Skip jobs without post perplexity for metrics relying on perplexity
+            if self.ranking_metric in ('perplexity_improvement', 'post_perplexity', 'combined_improvement') and post_ppl is None:
+                continue
+            if self.ranking_metric == 'perplexity_improvement' and pre_ppl is not None and post_ppl is not None:
+                ppl_improvement = (pre_ppl - post_ppl) / pre_ppl if pre_ppl and pre_ppl > 0 else 0.0
+                score = ppl_improvement
+            elif self.ranking_metric == 'post_perplexity' and post_ppl is not None:
+                ppl_improvement = (pre_ppl - post_ppl) / pre_ppl if (pre_ppl and post_ppl and pre_ppl > 0) else None
+                score = -post_ppl  # lower is better
+            elif self.ranking_metric in ('diversity_avg', 'distinct_diversity'):
+                if diversity_avg is None:
+                    # Cannot rank this job on diversity; skip it
+                    continue
+                ppl_improvement = (pre_ppl - post_ppl) / pre_ppl if (pre_ppl and post_ppl and pre_ppl > 0) else None
+                score = diversity_avg
+            elif self.ranking_metric == 'combined_improvement':
+                ppl_improvement = (pre_ppl - post_ppl) / pre_ppl if (pre_ppl and post_ppl and pre_ppl > 0) else 0.0
+                div_component = diversity_avg if diversity_avg is not None else 0.0
+                score = 0.7 * ppl_improvement + 0.3 * div_component
+            else:
+                # Fallback to post perplexity if unknown metric
+                ppl_improvement = (pre_ppl - post_ppl) / pre_ppl if (pre_ppl and post_ppl and pre_ppl > 0) else None
+                score = -post_ppl if post_ppl is not None else 0.0
+            ranked.append({
+                'name': r.get('name'),
+                'score': score,
+                'metric': self.ranking_metric,
+                'pre_perplexity': pre_ppl,
+                'post_perplexity': post_ppl,
+                'perplexity_improvement': ppl_improvement,
+                'distinct_1': d1,
+                'distinct_2': d2,
+                'diversity_avg': diversity_avg,
+                'status': r.get('status')
+            })
+        ranked.sort(key=lambda x: x['score'], reverse=True)
+        return ranked
+
     async def run_all_parallel(self, job_filter: str = "*"):
         """
         Run all jobs in parallel with concurrency limit.
@@ -472,61 +529,6 @@ class ParallelTrainer:
             for r in self.results:
                 if r.get('status') == 'skipped':
                     print(f"  - {r['name']}: {r.get('reason', 'min_train_samples threshold')} train_samples={r.get('dataset_train_samples')}")
-    def _compute_ranking(self, results: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-        """Compute ranking of jobs based on selected metric.
-
-        Supported metrics:
-          - perplexity_improvement: relative reduction (higher better)
-          - post_perplexity: final perplexity (lower better; we store negative for sort)
-          - diversity_avg: average of distinct-1 and distinct-2 (higher better)
-          - combined_improvement: weighted combo of perplexity_improvement (70%) + diversity_avg (30%)
-        """
-        ranked: List[Dict[str, Any]] = []
-        for r in results:
-            ev = r.get('evaluation') or {}
-            pre_ppl = ev.get('pre_eval_perplexity')
-            post_ppl = ev.get('post_eval_perplexity')
-            diversity = (ev.get('diversity') or {})
-            d1 = diversity.get('distinct_1')
-            d2 = diversity.get('distinct_2')
-            diversity_avg = (d1 + d2) / 2 if (d1 is not None and d2 is not None) else None
-            # Skip jobs without post perplexity for metrics relying on perplexity
-            if self.ranking_metric in ('perplexity_improvement', 'post_perplexity', 'combined_improvement') and post_ppl is None:
-                continue
-            if self.ranking_metric == 'perplexity_improvement' and pre_ppl is not None and post_ppl is not None:
-                ppl_improvement = (pre_ppl - post_ppl) / pre_ppl if pre_ppl and pre_ppl > 0 else 0.0
-                score = ppl_improvement
-            elif self.ranking_metric == 'post_perplexity' and post_ppl is not None:
-                ppl_improvement = (pre_ppl - post_ppl) / pre_ppl if (pre_ppl and post_ppl and pre_ppl > 0) else None
-                score = -post_ppl  # lower is better
-            elif self.ranking_metric == 'diversity_avg':
-                if diversity_avg is None:
-                    # Cannot rank this job on diversity; skip it
-                    continue
-                ppl_improvement = (pre_ppl - post_ppl) / pre_ppl if (pre_ppl and post_ppl and pre_ppl > 0) else None
-                score = diversity_avg
-            elif self.ranking_metric == 'combined_improvement':
-                ppl_improvement = (pre_ppl - post_ppl) / pre_ppl if (pre_ppl and post_ppl and pre_ppl > 0) else 0.0
-                div_component = diversity_avg if diversity_avg is not None else 0.0
-                score = 0.7 * ppl_improvement + 0.3 * div_component
-            else:
-                # Fallback to post perplexity if unknown metric
-                ppl_improvement = (pre_ppl - post_ppl) / pre_ppl if (pre_ppl and post_ppl and pre_ppl > 0) else None
-                score = -post_ppl if post_ppl is not None else 0.0
-            ranked.append({
-                'name': r.get('name'),
-                'score': score,
-                'metric': self.ranking_metric,
-                'pre_perplexity': pre_ppl,
-                'post_perplexity': post_ppl,
-                'perplexity_improvement': ppl_improvement,
-                'distinct_1': d1,
-                'distinct_2': d2,
-                'diversity_avg': diversity_avg,
-                'status': r.get('status')
-            })
-        ranked.sort(key=lambda x: x['score'], reverse=True)
-        return ranked
 
 def main():
     parser = argparse.ArgumentParser(description="Parallel training launcher with historical status & evaluation")
@@ -538,7 +540,7 @@ def main():
     parser.add_argument("--generate-samples", type=int, default=3, help="Number of sample generations to produce after successful training")
     parser.add_argument("--no-eval", action="store_true", help="Disable post-training evaluation and sample generation entirely")
     parser.add_argument("--cleanup", action="store_true", help="Remove intermediate checkpoint artifacts after successful training")
-    parser.add_argument("--ranking-metric", choices=["perplexity_improvement", "post_perplexity", "diversity_avg", "combined_improvement"], default="perplexity_improvement", help="Metric used to rank jobs in status history")
+    parser.add_argument("--ranking-metric", choices=["perplexity_improvement", "post_perplexity", "diversity_avg", "combined_improvement", "distinct_diversity"], default="perplexity_improvement", help="Metric used to rank jobs in status history (distinct_diversity alias of diversity_avg)")
 
     args = parser.parse_args()
 

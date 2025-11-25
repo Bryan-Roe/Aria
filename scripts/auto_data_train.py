@@ -238,7 +238,7 @@ def create_training_config(dataset_dir: Path, output_name: str, model: str) -> t
     Args:
         dataset_dir: Directory containing generated train/test files
         output_name: Unique run token (timestamp based)
-        model: 'phi' or 'qwen'
+        model: 'phi', 'qwen', or 'tinyllama'
 
     Returns:
         (config_path, job_name)
@@ -250,6 +250,12 @@ def create_training_config(dataset_dir: Path, output_name: str, model: str) -> t
         hf_model_id = 'Qwen/Qwen2.5-3B-Instruct'
         prefix = 'qwen_ultra'
         learning_rate = 0.0003
+        lora_rank = 4
+    elif model == 'tinyllama':
+        config_file = 'AI/microsoft_phi-silica-3.6_v1/lora/lora_tinyllama_ultrafast.yaml'
+        hf_model_id = 'TinyLlama/TinyLlama-1.1B-Chat-v1.0'
+        prefix = 'tinyllama_ultra'
+        learning_rate = 0.00035
         lora_rank = 4
     else:
         config_file = 'AI/microsoft_phi-silica-3.6_v1/lora/lora_ultrafast.yaml'
@@ -399,9 +405,9 @@ def main():
     )
     parser.add_argument(
         "--model",
-        choices=["phi", "qwen"],
+        choices=["phi", "qwen", "tinyllama"],
         default="phi",
-        help="Model family to train (phi or qwen). Default: phi"
+        help="Model family to train (phi, qwen, tinyllama). Default: phi"
     )
     parser.add_argument(
         "--min-train-samples",
@@ -421,7 +427,7 @@ def main():
     )
     parser.add_argument(
         "--ranking-metric",
-        choices=["perplexity_improvement", "post_perplexity"],
+        choices=["perplexity_improvement", "post_perplexity", "diversity_avg", "combined_improvement", "distinct_diversity"],
         default="perplexity_improvement",
         help="Ranking metric for jobs in status history (passes --ranking-metric)"
     )
@@ -537,7 +543,12 @@ def main():
     if args.train_mode != "none":
         print(f"🤖 Model Output Dir: data_out/lora_training/{output_name}")
         print(f"🔧 Job Name: {job_name}")
-        print(f"🧬 Base Model: {'Qwen/Qwen2.5-3B-Instruct' if args.model=='qwen' else 'microsoft/Phi-3.5-mini-instruct'}")
+        base_model_map = {
+            'phi': 'microsoft/Phi-3.5-mini-instruct',
+            'qwen': 'Qwen/Qwen2.5-3B-Instruct',
+            'tinyllama': 'TinyLlama/TinyLlama-1.1B-Chat-v1.0'
+        }
+        print(f"🧬 Base Model: {base_model_map.get(args.model, 'unknown')}")
         if args.filter:
             print(f"🪄 Filter Override: {args.filter}")
         print(f"🛡 Min Train Samples Guard: {args.min_train_samples}")

@@ -160,6 +160,56 @@ class CIOrchestrator:
         }
         self.results.append(result)
         return True
+
+    def azureml_validate(self) -> bool:
+        """Validate latest Azure ML job spec if available using 'az ml job validate'.
+
+        Returns True if validation succeeded or was skipped gracefully (no spec / CLI missing).
+        """
+        print("\n[ci] Azure ML Job Spec Validation")
+        aml_dir = self.repo_root / ".azureml"
+        if not aml_dir.exists():
+            self.results.append({"name": "azureml_validate", "status": "skipped", "message": ".azureml directory missing"})
+            return True
+        job_specs = sorted(aml_dir.glob("job_*.yaml"), key=lambda p: p.stat().st_mtime, reverse=True)
+        if not job_specs:
+            self.results.append({"name": "azureml_validate", "status": "skipped", "message": "No job_*.yaml files found"})
+            return True
+        latest = job_specs[0]
+        # Check az CLI presence
+        try:
+            az_check = subprocess.run(["az", "version"], capture_output=True, text=True, timeout=30)
+        except Exception as e:
+            self.results.append({"name": "azureml_validate", "status": "skipped", "message": f"Azure CLI not available: {e}"})
+            return True
+        if az_check.returncode != 0:
+            self.results.append({"name": "azureml_validate", "status": "skipped", "message": "Azure CLI not installed or not in PATH"})
+            return True
+        # Perform validation
+        try:
+            val_proc = subprocess.run(["az", "ml", "job", "validate", "--file", str(latest)], capture_output=True, text=True, timeout=120)
+            status = "succeeded" if val_proc.returncode == 0 else "failed"
+            self.results.append({
+                "name": "azureml_validate",
+                "status": status,
+                "job_file": str(latest.relative_to(self.repo_root)),
+                "return_code": val_proc.returncode,
+                "stdout_tail": val_proc.stdout[-500:] if val_proc.stdout else "",
+                "stderr_tail": val_proc.stderr[-500:] if val_proc.stderr else "",
+            })
+            if status == "failed":
+                print(f"[ci] ❌ Azure ML validation failed for {latest}")
+                if val_proc.stderr:
+                    print(val_proc.stderr)
+            else:
+                print(f"[ci] ✅ Azure ML validation passed: {latest}")
+            return status == "succeeded"
+        except subprocess.TimeoutExpired:
+            self.results.append({"name": "azureml_validate", "status": "timeout", "job_file": str(latest.relative_to(self.repo_root))})
+            return False
+        except Exception as e:
+            self.results.append({"name": "azureml_validate", "status": "error", "message": str(e)})
+            return False
     
     def run_ci_pipeline(self) -> bool:
         """Run the full CI pipeline."""
@@ -175,6 +225,7 @@ class CIOrchestrator:
             ("Security Scan", self.security_scan),
             ("Integration Tests", self.run_integration_tests),
             ("Prepare Deployment", self.prepare_deployment),
+            ("Azure ML Validate", self.azureml_validate),
         ]
         
         all_passed = True
@@ -325,6 +376,7 @@ def main():
     ap.add_argument("--full-test", action="store_true", help="Run all tests")
     ap.add_argument("--prepare-deployment", action="store_true", help="Prepare deployment artifacts")
     ap.add_argument("--ci-pipeline", action="store_true", help="Run full CI pipeline")
+    ap.add_argument("--validate-azureml", action="store_true", help="Validate latest Azure ML job spec and schema")
     args = ap.parse_args()
     
     ci = CIOrchestrator()
@@ -351,6 +403,11 @@ def main():
     
     if args.ci_pipeline:
         success = ci.run_ci_pipeline()
+        sys.exit(0 if success else 1)
+
+    if args.validate_azureml:
+        success = ci.azureml_validate()
+        ci._save_results()
         sys.exit(0 if success else 1)
     
     # Default: show help

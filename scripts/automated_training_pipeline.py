@@ -65,7 +65,7 @@ def parse_args() -> argparse.Namespace:
     ap.add_argument("--models", type=str, default="phi,qwen", help="Comma list of models: phi, qwen")
     ap.add_argument("--no-eval", action="store_true", help="Disable evaluation and sample generation")
     ap.add_argument("--cleanup", action="store_true", help="Cleanup intermediate checkpoints post-run")
-    ap.add_argument("--ranking-metric", choices=["perplexity_improvement", "post_perplexity"], default="perplexity_improvement", help="Ranking metric used during status aggregation")
+    ap.add_argument("--ranking-metric", choices=["perplexity_improvement", "post_perplexity", "diversity_avg", "combined_improvement", "distinct_diversity"], default="perplexity_improvement", help="Ranking metric used during status aggregation (distinct_diversity alias of diversity_avg)")
     ap.add_argument("--min-train-samples", type=int, default=DEFAULT_MIN_SAMPLES_GUARD, help="Skip training if train samples below threshold")
     ap.add_argument("--generate-only", action="store_true", help="Only generate data (no training)")
     ap.add_argument("--output-name", type=str, default=None, help="Optional run name suffix")
@@ -213,10 +213,10 @@ def main() -> int:
     run_label = args.output_name or f"multi_{timestamp}"
 
     selected_models = [m.strip() for m in args.models.split(',') if m.strip()]
-    valid_models = {"phi", "qwen"}
+    valid_models = {"phi", "qwen", "tinyllama"}
     for m in selected_models:
         if m not in valid_models:
-            print(f"Invalid model specified: {m}. Valid: phi,qwen")
+            print(f"Invalid model specified: {m}. Valid: phi,qwen,tinyllama")
             return 1
 
     base_flags = build_base_flags(args)

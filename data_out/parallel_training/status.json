@@ -479,10 +479,144 @@
           "status": "succeeded"
         }
       ]
+    },
+    {
+      "run_id": "20251124T200442",
+      "total_jobs": 1,
+      "max_parallel": 1,
+      "total_duration_seconds": 28.186541,
+      "timestamp": "2025-11-24T20:04:42.333275",
+      "aggregate_train_samples": 63,
+      "aggregate_test_samples": 7,
+      "jobs": [
+        {
+          "name": "tinyllama_ultra_autogen_20251124_200414",
+          "status": "succeeded",
+          "return_code": 0,
+          "device": 0,
+          "start_time": "2025-11-24T20:04:14.146734",
+          "end_time": "2025-11-24T20:04:27.370200",
+          "duration_seconds": 13.223466,
+          "log_file": "C:\\Users\\Bryan\\OneDrive\\AI\\data_out\\parallel_training\\tinyllama_ultra_autogen_20251124_200414\\20251124T200414Z\\stdout.log",
+          "output_dir": "data_out/lora_training/autogen_20251124_200414",
+          "dataset_path": "C:\\Users\\Bryan\\OneDrive\\AI\\datasets\\chat\\auto_generated",
+          "dataset_train_samples": 63,
+          "dataset_test_samples": 7,
+          "adapter_dir": "C:\\Users\\Bryan\\OneDrive\\AI\\data_out\\lora_training\\autogen_20251124_200414\\lora_adapter",
+          "tokenizer_dir": "C:\\Users\\Bryan\\OneDrive\\AI\\data_out\\lora_training\\autogen_20251124_200414\\tokenizer",
+          "evaluation": {
+            "pre_eval_loss": 1.9670829772949219,
+            "pre_eval_perplexity": 7.14978994029712,
+            "post_eval_loss": 1.8483202457427979,
+            "post_eval_perplexity": 6.349145556013895,
+            "samples": [
+              {
+                "prompt": "Hello! Provide a concise helpful assistant greeting.",
+                "response": "Hello! Provide a concise helpful assistant greeting. Use a friendly and welcoming tone that welcomes the user. Use a clear and concise sentence structure that includes the greeting and the name of the person or thing. Make sure the sentence flows smoothly and naturally. 2. Welcome Message:\n\n- Welcome to our website! Introduce the site and the purpose.\n- We're excited to share our products with you"
+              },
+              {
+                "prompt": "Explain one optimization used in ultrafast fine-tuning.",
+                "response": "Explain one optimization used in ultrafast fine-tuning."
+              },
+              {
+                "prompt": "Summarize the purpose of this training run in one sentence.",
+                "response": "Summarize the purpose of this training run in one sentence."
+              }
+            ],
+            "diversity": {
+              "distinct_1": 0.7142857142857143,
+              "distinct_2": 0.9753086419753086,
+              "avg_response_tokens": 28.0,
+              "avg_echo_ratio": 0.7164179104477612
+            }
+          }
+        }
+      ],
+      "job_ranking": [
+        {
+          "name": "tinyllama_ultra_autogen_20251124_200414",
+          "score": 0.11198152546701994,
+          "metric": "perplexity_improvement",
+          "pre_perplexity": 7.14978994029712,
+          "post_perplexity": 6.349145556013895,
+          "perplexity_improvement": 0.11198152546701994,
+          "distinct_1": 0.7142857142857143,
+          "distinct_2": 0.9753086419753086,
+          "diversity_avg": 0.8447971781305115,
+          "status": "succeeded"
+        }
+      ]
+    },
+    {
+      "run_id": "20251124T200633",
+      "total_jobs": 1,
+      "max_parallel": 1,
+      "total_duration_seconds": 26.558962,
+      "timestamp": "2025-11-24T20:06:33.112925",
+      "aggregate_train_samples": 63,
+      "aggregate_test_samples": 7,
+      "jobs": [
+        {
+          "name": "tinyllama_ultra_autogen_20251124_200606",
+          "status": "succeeded",
+          "return_code": 0,
+          "device": 0,
+          "start_time": "2025-11-24T20:06:06.553963",
+          "end_time": "2025-11-24T20:06:18.267853",
+          "duration_seconds": 11.71389,
+          "log_file": "C:\\Users\\Bryan\\OneDrive\\AI\\data_out\\parallel_training\\tinyllama_ultra_autogen_20251124_200606\\20251124T200606Z\\stdout.log",
+          "output_dir": "data_out/lora_training/autogen_20251124_200606",
+          "dataset_path": "C:\\Users\\Bryan\\OneDrive\\AI\\datasets\\chat\\auto_generated",
+          "dataset_train_samples": 63,
+          "dataset_test_samples": 7,
+          "adapter_dir": "C:\\Users\\Bryan\\OneDrive\\AI\\data_out\\lora_training\\autogen_20251124_200606\\lora_adapter",
+          "tokenizer_dir": "C:\\Users\\Bryan\\OneDrive\\AI\\data_out\\lora_training\\autogen_20251124_200606\\tokenizer",
+          "evaluation": {
+            "pre_eval_loss": 1.9670829772949219,
+            "pre_eval_perplexity": 7.14978994029712,
+            "post_eval_loss": 1.8487951755523682,
+            "post_eval_perplexity": 6.352161670668433,
+            "samples": [
+              {
+                "prompt": "Hello! Provide a concise helpful assistant greeting.",
+                "response": "Hello! Provide a concise helpful assistant greeting. How can I order some snacks for the party?\n\nHostess: Oh, we can order some snacks for the party online! You can visit our website and look for some snacks that you like. Or, you can let us know what you want and we can do the ordering for you.\n\nGuest: That's great! I'd like to order some"
+              },
+              {
+                "prompt": "Explain one optimization used in ultrafast fine-tuning.",
+                "response": "Explain one optimization used in ultrafast fine-tuning."
+              },
+              {
+                "prompt": "Summarize the purpose of this training run in one sentence.",
+                "response": "Summarize the purpose of this training run in one sentence."
+              }
+            ],
+            "diversity": {
+              "distinct_1": 0.7195121951219512,
+              "distinct_2": 0.9113924050632911,
+              "avg_response_tokens": 27.333333333333332,
+              "avg_echo_ratio": 0.7025641025641026
+            }
+          }
+        }
+      ],
+      "job_ranking": [
+        {
+          "name": "tinyllama_ultra_autogen_20251124_200606",
+          "score": 0.8154523000926212,
+          "metric": "distinct_diversity",
+          "pre_perplexity": 7.14978994029712,
+          "post_perplexity": 6.352161670668433,
+          "perplexity_improvement": 0.11155967885617914,
+          "distinct_1": 0.7195121951219512,
+          "distinct_2": 0.9113924050632911,
+          "diversity_avg": 0.8154523000926212,
+          "status": "succeeded"
+        }
+      ]
     }
   ],
-  "total_runs": 10,
-  "last_updated": "2025-11-24T17:22:39.547065",
-  "cumulative_train_samples": 630,
-  "cumulative_test_samples": 70
+  "total_runs": 12,
+  "last_updated": "2025-11-24T20:06:33.112925",
+  "cumulative_train_samples": 756,
+  "cumulative_test_samples": 84
 }
