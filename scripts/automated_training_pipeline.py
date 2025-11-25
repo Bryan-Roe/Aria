@@ -282,6 +282,38 @@ def main() -> int:
         baseline_ids = post_ids
 
     summary_path = SUMMARY_DIR / f"summary_{run_label}.json"
+    # Extract per-model evaluation metrics (graceful if missing)
+    model_metrics: List[Dict[str, Any]] = []
+    for r in all_runs:
+        if r.get("training_skipped"):
+            continue
+        jobs = r.get("jobs") or []
+        # Each run here corresponds to a single job produced by auto_data_train
+        for job in jobs:
+            eval_block = (job or {}).get("evaluation") or {}
+            diversity_block = (eval_block.get("diversity") or {})
+            if not eval_block:
+                continue
+            entry = {
+                "model": r.get("model"),
+                "run_id": r.get("run_id"),
+                "pre_perplexity": eval_block.get("pre_eval_perplexity"),
+                "post_perplexity": eval_block.get("post_eval_perplexity"),
+                "distinct_1": diversity_block.get("distinct_1"),
+                "distinct_2": diversity_block.get("distinct_2"),
+            }
+            # Compute diversity avg if both present
+            d1 = entry["distinct_1"]
+            d2 = entry["distinct_2"]
+            if isinstance(d1, (int, float)) and isinstance(d2, (int, float)):
+                entry["diversity_avg"] = (d1 + d2) / 2.0
+            # Derive perplexity improvement if possible
+            pre = entry["pre_perplexity"]
+            post = entry["post_perplexity"]
+            if isinstance(pre, (int, float)) and isinstance(post, (int, float)) and pre > 0:
+                entry["perplexity_improvement"] = (pre - post) / pre
+            model_metrics.append(entry)
+
     summary_doc = {
         "run_label": run_label,
         "created_at": timestamp,
@@ -291,8 +323,90 @@ def main() -> int:
         "ranking_metric": args.ranking_metric,
         "generate_only": args.generate_only,
         "runs": all_runs,
+        "model_metrics": model_metrics or None,
         "azure_ml_spec_emitted": args.azure_ml_spec,
+        "best_model": None,
     }
+
+    def _select_best_model(metrics: List[Dict[str, Any]], ranking_metric: str) -> Dict[str, Any] | None:
+        if not metrics:
+            return None
+        # Helper extraction with safe defaults
+        def diversity(entry: Dict[str, Any]) -> float | None:
+            return entry.get("diversity_avg")
+        def improvement(entry: Dict[str, Any]) -> float | None:
+            return entry.get("perplexity_improvement")
+        def post_ppl(entry: Dict[str, Any]) -> float | None:
+            return entry.get("post_perplexity")
+
+        ranking = ranking_metric
+        filtered = [m for m in metrics if post_ppl(m) is not None]
+        if ranking in ("perplexity_improvement", "combined_improvement"):
+            # If combined_improvement requested but missing diversity, treat div=0
+            if ranking == "combined_improvement":
+                for m in filtered:
+                    div = diversity(m) or 0.0
+                    imp = improvement(m) or 0.0
+                    m["combined_improvement"] = 0.7 * imp + 0.3 * div
+                filtered = [m for m in filtered if m.get("combined_improvement") is not None]
+                key = lambda x: x.get("combined_improvement", -1)
+            else:
+                filtered = [m for m in filtered if improvement(m) is not None]
+                key = lambda x: improvement(x)
+            candidate = max(filtered, key=key) if filtered else None
+            if candidate:
+                return {
+                    "model": candidate.get("model"),
+                    "run_id": candidate.get("run_id"),
+                    "metric": ranking,
+                    "score": candidate.get(ranking) if ranking == "combined_improvement" else improvement(candidate),
+                    "post_perplexity": post_ppl(candidate),
+                    "pre_perplexity": candidate.get("pre_perplexity"),
+                    "diversity_avg": diversity(candidate),
+                }
+            return None
+        elif ranking in ("diversity_avg", "distinct_diversity"):
+            filtered = [m for m in metrics if diversity(m) is not None]
+            candidate = max(filtered, key=lambda x: diversity(x)) if filtered else None
+            if candidate:
+                return {
+                    "model": candidate.get("model"),
+                    "run_id": candidate.get("run_id"),
+                    "metric": ranking,
+                    "score": diversity(candidate),
+                    "post_perplexity": post_ppl(candidate),
+                    "pre_perplexity": candidate.get("pre_perplexity"),
+                    "perplexity_improvement": improvement(candidate),
+                }
+            return None
+        elif ranking == "post_perplexity":
+            candidate = min(filtered, key=lambda x: post_ppl(x)) if filtered else None
+            if candidate:
+                return {
+                    "model": candidate.get("model"),
+                    "run_id": candidate.get("run_id"),
+                    "metric": ranking,
+                    "score": post_ppl(candidate),
+                    "pre_perplexity": candidate.get("pre_perplexity"),
+                    "perplexity_improvement": improvement(candidate),
+                    "diversity_avg": diversity(candidate),
+                }
+            return None
+        # Fallback unknown metric: choose lowest post perplexity
+        candidate = min(filtered, key=lambda x: post_ppl(x)) if filtered else None
+        if candidate:
+            return {
+                "model": candidate.get("model"),
+                "run_id": candidate.get("run_id"),
+                "metric": "post_perplexity_fallback",
+                "score": post_ppl(candidate),
+                "pre_perplexity": candidate.get("pre_perplexity"),
+                "perplexity_improvement": improvement(candidate),
+                "diversity_avg": diversity(candidate),
+            }
+        return None
+
+    summary_doc["best_model"] = _select_best_model(model_metrics, args.ranking_metric)
     with summary_path.open("w", encoding="utf-8") as sf:
         json.dump(summary_doc, sf, indent=2)
     print(f"\n[wrapper] Summary written: {summary_path}")

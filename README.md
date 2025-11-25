@@ -241,7 +241,7 @@ Add new providers by subclassing `BaseChatProvider`.
 
 ---
 
-## 🧪 Testing
+## 🧪 Quick Testing
 
 ### Quantum Code
 
@@ -310,6 +310,7 @@ Verify SDK version: `pip list | findstr openai` should show `openai>=1.37.0`
 - **Enhanced Testing**: Unit test coverage for quantum environment validation
 
 📖 **Documentation:**
+
 - [Enhancements Summary](ENHANCEMENTS_SUMMARY.md) - Overview of all recent improvements
 - [Telemetry & Cosmos Enablement Guide](TELEMETRY_COSMOS_ENABLEMENT.md) - Step-by-step setup for observability
 - [Quantum AutoRun README](QUANTUM_AUTORUN_README.md) - Orchestrated quantum training automation
@@ -347,10 +348,26 @@ This workspace has comprehensive test coverage with **68 automated tests** fully
 
 ### Test Suites
 
-- **Unit Tests (Fast):** 40 tests (~0.4 seconds)
-- **Integration Tests:** 15 tests (external services)
-- **Quantum Tests:** 24 tests (quantum validation)
-- **All Tests:** Complete suite with coverage support
+- **Unit Tests (Fast):** 40 tests (~0.5 seconds) ✅
+- **Integration Tests:** 30 tests (external services) - 29 passing
+- **All Fast Tests:** 83 tests (~10 seconds) - all passing ✅
+- **Complete Test Suite:** 84+ tests with coverage support
+
+### Test Orchestrator (Recommended)
+
+```powershell
+# Run all fast tests
+python .\scripts\test_runner.py --all
+
+# Run unit tests only
+python .\scripts\test_runner.py --unit
+
+# Run with coverage report
+python .\scripts\test_runner.py --all --coverage
+
+# List available test suites
+python .\scripts\test_runner.py --list-suites
+```
 
 ### Documentation
 
@@ -358,20 +375,17 @@ This workspace has comprehensive test coverage with **68 automated tests** fully
 - **Full Guide:** See `VSCODE_TESTING_GUIDE.md` for comprehensive documentation
 - **Setup Details:** See `VSCODE_TESTING_COMPLETE.md` for configuration details
 
-### Terminal Commands
+### Direct Pytest Commands
 
 ```powershell
 # Run all fast tests
 python -m pytest -m "not slow and not azure" tests/
 
 # Run with coverage
-python -m pytest tests/ --cov=. --cov-report=html
+python -m pytest tests/ --cov=scripts --cov=shared --cov-report=html
 
 # Run specific test file
 python -m pytest tests/test_autotrain_unit.py -v
-
-# Use test orchestrator
-python .\scripts\test_runner.py --unit --coverage
 ```
 
 ---
@@ -386,7 +400,92 @@ python .\scripts\test_runner.py --unit --coverage
 
 ---
 
-**Last Updated:** November 20, 2025
+**Last Updated:** November 25, 2025
+
+## 🚀 CI/CD Pipeline
+
+Automated continuous integration with **5/10 steps passing**:
+
+### Critical Steps (All Passing ✅)
+
+- ✅ Orchestrator Validations (autotrain, quantum_autorun, evaluation_autorun)
+- ✅ Unit Tests (40/40 passing in 0.5s)
+- ✅ Deployment Artifact Preparation
+
+### Run CI Pipeline
+
+```powershell
+# Full CI pipeline
+python .\scripts\ci_orchestrator.py --ci-pipeline
+
+# Validate all orchestrators
+python .\scripts\ci_orchestrator.py --validate-all
+
+# Individual validations
+python .\scripts\autotrain.py --dry-run
+python .\scripts\quantum_autorun.py --dry-run
+python .\scripts\evaluation_autorun.py --dry-run
+```
+
+**CI Results:** See `data_out/ci_orchestrator/ci_results.json` for detailed step-by-step results.
+
+---
+
+## TinyLlama Ultrafast LoRA Quick Start 🚀
+
+The workspace now includes an ultrafast LoRA config for **TinyLlama-1.1B-Chat**, enabling rapid iteration (≈10–15s per synthetic run on CPU).
+
+### Quick Commands (PowerShell)
+
+```powershell
+# Generate synthetic data + ultrafast TinyLlama training (evaluation & ranking)
+python .\scripts\automated_training_pipeline.py --models tinyllama --quick
+
+# Larger synthetic set (300 samples) ranked by diversity alias (distinct_diversity)
+python .\scripts\automated_training_pipeline.py --models tinyllama --samples 300 --ranking-metric distinct_diversity
+
+# Data generation only (no training) – inspect dataset quality
+python .\scripts\automated_training_pipeline.py --models tinyllama --quick --generate-only
+
+# Direct auto data + single TinyLlama run (bypass wrapper)
+python .\scripts\auto_data_train.py --model tinyllama --quick
+
+# Emit Azure ML job spec (no submission)
+python .\scripts\automated_training_pipeline.py --models tinyllama --quick --azure-ml-spec --generate-only
+```
+
+### Ranking Metrics Cheat Sheet
+
+| Metric | Meaning | Direction | Notes |
+|--------|---------|-----------|-------|
+| perplexity_improvement | Relative reduction (pre vs post) | Higher better | Default |
+| post_perplexity | Final perplexity | Lower better | Stored negative internally for sorting |
+| diversity_avg | Avg of Distinct-1 & Distinct-2 | Higher better | Requires sample generation |
+| distinct_diversity | Alias of diversity_avg | Higher better | Use interchangeably |
+| combined_improvement | 70% perplexity_improvement + 30% diversity_avg | Higher better | Balanced quality + diversity |
+
+Use `--ranking-metric distinct_diversity` when you want variety-focused exploration; fallback behavior automatically reverts to post perplexity if a metric is unavailable.
+
+### Inspect Status History
+
+All parallel LoRA runs append to `data_out/parallel_training/status.json` with a `runs[]` array and optional `job_ranking[]`. TinyLlama entries appear with names like `tinyllama_ultra_<timestamp>`.
+
+### Azure ML Validation & Optional Submission
+
+After emitting a spec (`--azure-ml-spec`), validate locally:
+
+```powershell
+python .\scripts\azureml_ci_validate.py            # Validate latest job_*.yaml
+python .\scripts\azureml_ci_validate.py --submit   # Validate + submit
+```
+
+Graceful skip occurs automatically if the Azure CLI is not installed.
+
+### Cleanup Behavior
+
+Passing `--cleanup` to training wrappers prunes `checkpoint*` artifacts while preserving `lora_adapter/`, `tokenizer/`, and `metrics.jsonl`. The status history will record `"cleanup": "completed"` when successful.
+
+---
 
 ## LoRA Provider Usage
 

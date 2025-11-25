@@ -301,6 +301,95 @@ class BatchEvaluator:
                 for r in comparison
             ]
         }
+    
+    def promote_best_model(self, target_dir: Path | None = None, dry_run: bool = False) -> Dict:
+        """
+        Promote the best-ranked model to deployed_models/.
+        
+        Args:
+            target_dir: Target directory (default: deployed_models/)
+            dry_run: If True, only show what would be done
+        
+        Returns:
+            Dict with promotion details (model_id, source, destination, metrics, timestamp)
+        """
+        if not self.results:
+            raise ValueError("No evaluation results available. Run evaluation first.")
+        
+        # Get best model from aggregated results
+        aggregated = self.aggregate_results()
+        best_model_id = aggregated.get("best_model")
+        
+        if not best_model_id:
+            raise ValueError("No best model found (all evaluations may have failed)")
+        
+        best_result = next(r for r in self.results if r.model_id == best_model_id)
+        
+        # Determine target directory
+        if target_dir is None:
+            target_dir = REPO_ROOT / "deployed_models"
+        
+        # Create deployment name with timestamp
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        deployment_name = f"{best_model_id}_{timestamp}"
+        deployment_path = target_dir / deployment_name
+        
+        promotion_info = {
+            "model_id": best_model_id,
+            "source_path": best_result.model_path,
+            "deployment_name": deployment_name,
+            "deployment_path": str(deployment_path),
+            "metrics": best_result.metrics,
+            "promoted_at": datetime.utcnow().isoformat() + "Z",
+            "rank": 1
+        }
+        
+        if dry_run:
+            print(f"[promote] DRY-RUN: Would promote {best_model_id}")
+            print(f"[promote]   Source: {best_result.model_path}")
+            print(f"[promote]   Target: {deployment_path}")
+            print(f"[promote]   Metrics: {json.dumps(best_result.metrics, indent=2)}")
+            return promotion_info
+        
+        # Create deployment directory
+        deployment_path.mkdir(parents=True, exist_ok=True)
+        
+        # Copy adapter files
+        source_path = Path(best_result.model_path)
+        import shutil
+        
+        for file in source_path.iterdir():
+            if file.is_file():
+                shutil.copy2(file, deployment_path / file.name)
+                print(f"[promote] Copied: {file.name}")
+        
+        # Create metadata file
+        metadata_file = deployment_path / "promotion_metadata.json"
+        with metadata_file.open("w") as f:
+            json.dump(promotion_info, f, indent=2)
+        print(f"[promote] Created metadata: {metadata_file}")
+        
+        # Create symlink to latest
+        latest_link = target_dir / "latest"
+        if latest_link.exists():
+            if latest_link.is_symlink():
+                latest_link.unlink()
+            else:
+                print(f"[promote] Warning: 'latest' exists but is not a symlink")
+        
+        # Create relative symlink on Windows (requires admin or developer mode)
+        try:
+            latest_link.symlink_to(deployment_name, target_is_directory=True)
+            print(f"[promote] Updated symlink: {latest_link} -> {deployment_name}")
+        except (OSError, NotImplementedError) as e:
+            print(f"[promote] Warning: Could not create symlink ({e})")
+            # Fallback: write a text file pointing to latest
+            with (target_dir / "LATEST.txt").open("w") as f:
+                f.write(deployment_name)
+            print(f"[promote] Created LATEST.txt instead")
+        
+        print(f"[promote] ✓ Promoted {best_model_id} to {deployment_path}")
+        return promotion_info
 
 
 def main():
@@ -312,6 +401,9 @@ def main():
     ap.add_argument("--export", choices=["json", "markdown", "both"], help="Export results")
     ap.add_argument("--output", type=Path, help="Output file for export")
     ap.add_argument("--max-workers", type=int, default=3, help="Number of parallel workers")
+    ap.add_argument("--promote-best", action="store_true", help="Promote best model to deployed_models/")
+    ap.add_argument("--promote-target", type=Path, help="Target directory for promotion (default: deployed_models/)")
+    ap.add_argument("--dry-run", action="store_true", help="Dry-run mode (show actions without executing)")
     args = ap.parse_args()
     
     evaluator = BatchEvaluator(max_workers=args.max_workers)
@@ -330,6 +422,22 @@ def main():
         # Auto-save results
         results_file = evaluator.data_out / f"results_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
         evaluator.export_json(results_file)
+        
+        # Auto-promote if requested
+        if args.promote_best:
+            try:
+                promotion_info = evaluator.promote_best_model(
+                    target_dir=args.promote_target,
+                    dry_run=args.dry_run
+                )
+                if not args.dry_run:
+                    # Save promotion info
+                    promo_file = evaluator.data_out / f"promotion_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+                    with promo_file.open("w") as f:
+                        json.dump(promotion_info, f, indent=2)
+                    print(f"[promote] Saved promotion info to: {promo_file}")
+            except Exception as e:
+                print(f"[promote] Error: {e}", file=sys.stderr)
     
     if args.compare:
         comparison = evaluator.compare_models(args.compare)

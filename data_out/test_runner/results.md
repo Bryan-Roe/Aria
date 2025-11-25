@@ -1,19 +1,19 @@
 # Test Results
 
-_Generated: 2025-11-24T04:15:29.607590Z_
+_Generated: 2025-11-25T06:27:16.864965Z_
 
 ## Summary
 
 - **Total Suites**: 1
-- **Passed**: 0
+- **Passed**: 1
 - **Failed**: 0
-- **Total Tests**: 0
-- **Total Passed**: 0
+- **Total Tests**: 40
+- **Total Passed**: 40
 - **Total Failed**: 0
-- **Total Duration**: 9.31s
+- **Total Duration**: 0.44s
 
 ## Test Suites
 
 | Suite | Status | Tests | Passed | Failed | Skipped | Duration | Coverage |
 |-------|--------|-------|--------|--------|---------|----------|----------|
-| all_fast | ⚠️ error | 0 | 0 | 0 | 0 | 9.3s | - |
+| unit | [OK] passed | 40 | 40 | 0 | 0 | 0.4s | - |

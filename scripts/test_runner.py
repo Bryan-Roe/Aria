@@ -22,6 +22,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import subprocess
 import sys
 import time
@@ -61,6 +62,8 @@ class TestSuite:
             args.append(str(TESTS_DIR))
         
         # Add marker expressions only if we have markers to filter
+        # Important: The marker expression must be passed as a single argument
+        # to avoid shell parsing issues when subprocess.run splits by spaces
         if self.markers or self.exclude_markers:
             marker_expr = []
             for m in self.markers:
@@ -69,6 +72,8 @@ class TestSuite:
                 marker_expr.append(f"not {m}")
             
             if marker_expr:
+                # Join the expressions with ' and ' to create a single string argument
+                # This ensures pytest receives the complete expression as one value
                 args.extend(["-m", " and ".join(marker_expr)])
         
         return args
@@ -80,13 +85,13 @@ SUITES = {
         name="unit",
         patterns=["test_*_unit.py"],
         markers=[],
-        exclude_markers=[],  # Don't filter by markers for unit tests
+        exclude_markers=[],  # No marker filtering for unit tests
     ),
     "integration": TestSuite(
         name="integration",
         patterns=["test_*_integration.py"],
         markers=[],
-        exclude_markers=[],  # Don't filter by markers for integration tests
+        exclude_markers=[],  # No marker filtering for integration tests
     ),
     "autotrain": TestSuite(
         name="autotrain",
@@ -111,12 +116,12 @@ SUITES = {
     "all_fast": TestSuite(
         name="all_fast",
         patterns=["test_*.py"],
-        exclude_markers=["slow", "azure"],
+        exclude_markers=["slow", "azure"],  # Only exclude explicitly marked tests
     ),
     "all": TestSuite(
         name="all",
         patterns=["test_*.py"],
-        exclude_markers=["azure"],
+        exclude_markers=["azure"],  # Include slow tests, but exclude azure
         timeout=1800,
     ),
 }
@@ -185,37 +190,27 @@ def run_pytest(suite: TestSuite, coverage: bool = False, verbose: int = 1) -> Te
         result.output = proc.stdout + "\n" + proc.stderr
         result.duration_sec = time.time() - start
         
-        # Parse pytest output for stats
-        output_lines = result.output.split("\n")
-        for line in output_lines:
-            if " passed" in line or " failed" in line:
-                # Example: "5 passed, 2 failed in 10.5s"
-                parts = line.split()
-                for i, part in enumerate(parts):
-                    if part == "passed" and i > 0:
-                        try:
-                            result.tests_passed = int(parts[i - 1])
-                        except (ValueError, IndexError):
-                            pass
-                    elif part == "failed" and i > 0:
-                        try:
-                            result.tests_failed = int(parts[i - 1])
-                        except (ValueError, IndexError):
-                            pass
-                    elif part == "skipped" and i > 0:
-                        try:
-                            result.tests_skipped = int(parts[i - 1])
-                        except (ValueError, IndexError):
-                            pass
-            elif " collected" in line:
-                # Example: "10 items collected"
-                parts = line.split()
-                for i, part in enumerate(parts):
-                    if "collected" in part and i > 0:
-                        try:
-                            result.tests_collected = int(parts[i - 1])
-                        except (ValueError, IndexError):
-                            pass
+        # Strip ANSI escape codes for easier parsing
+        ansi_escape = re.compile(r'\x1b\[[0-9;]*m')
+        clean_output = ansi_escape.sub('', result.output)
+        
+        # Parse pytest output for stats using regex for robustness
+        # Look for patterns like "40 passed in 0.13s" or "5 passed, 2 failed in 10.5s"
+        passed_match = re.search(r'(\d+)\s+passed', clean_output)
+        if passed_match:
+            result.tests_passed = int(passed_match.group(1))
+        
+        failed_match = re.search(r'(\d+)\s+failed', clean_output)
+        if failed_match:
+            result.tests_failed = int(failed_match.group(1))
+        
+        skipped_match = re.search(r'(\d+)\s+skipped', clean_output)
+        if skipped_match:
+            result.tests_skipped = int(skipped_match.group(1))
+        
+        collected_match = re.search(r'collected\s+(\d+)\s+items?', clean_output)
+        if collected_match:
+            result.tests_collected = int(collected_match.group(1))
         
         # Parse coverage if present
         if coverage:
@@ -246,8 +241,14 @@ def run_pytest(suite: TestSuite, coverage: bool = False, verbose: int = 1) -> Te
         result.duration_sec = time.time() - start
     
     # Summary
-    status_emoji = {"passed": "✅", "failed": "❌", "error": "⚠️", "timeout": "⏱️"}.get(result.status, "❓")
-    print(f"[test_runner] {status_emoji} {suite.name}: {result.tests_passed} passed, {result.tests_failed} failed in {result.duration_sec:.1f}s")
+    status_symbols = {
+        "passed": "[OK]",
+        "failed": "[FAIL]",
+        "error": "[ERR]",
+        "timeout": "[TIMEOUT]"
+    }
+    status_mark = status_symbols.get(result.status, "[?]")
+    print(f"[test_runner] {status_mark} {suite.name}: {result.tests_passed} passed, {result.tests_failed} failed in {result.duration_sec:.1f}s")
     
     return result
 
@@ -311,10 +312,16 @@ def write_results(results: List[TestResult]) -> None:
     ]
     
     for r in results:
-        status_emoji = {"passed": "✅", "failed": "❌", "error": "⚠️", "timeout": "⏱️"}.get(r.status, "❓")
+        status_symbols = {
+            "passed": "[OK]",
+            "failed": "[FAIL]",
+            "error": "[ERR]",
+            "timeout": "[TIMEOUT]"
+        }
+        status_mark = status_symbols.get(r.status, "[?]")
         cov_str = f"{r.coverage_pct:.1f}%" if r.coverage_pct else "-"
         lines.append(
-            f"| {r.suite} | {status_emoji} {r.status} | {r.tests_collected} | "
+            f"| {r.suite} | {status_mark} {r.status} | {r.tests_collected} | "
             f"{r.tests_passed} | {r.tests_failed} | {r.tests_skipped} | "
             f"{r.duration_sec:.1f}s | {cov_str} |"
         )

@@ -68,15 +68,15 @@ class CIOrchestrator:
         return self._run_parallel_jobs(jobs)
     
     def run_unit_tests(self) -> bool:
-        """Run all unit tests."""
+        """Run all unit tests using test_runner."""
         print("\n[ci] Running Unit Tests")
-        cmd = [sys.executable, "-m", "pytest", "tests/", "-v", "--tb=short", "-m", "not slow"]
+        cmd = [sys.executable, "scripts/test_runner.py", "--unit"]
         return self._run_command("unit_tests", cmd)
     
     def run_integration_tests(self) -> bool:
-        """Run integration tests."""
+        """Run integration tests using test_runner."""
         print("\n[ci] Running Integration Tests")
-        cmd = [sys.executable, "-m", "pytest", "tests/", "-v", "--tb=short", "-m", "integration"]
+        cmd = [sys.executable, "scripts/test_runner.py", "--integration"]
         return self._run_command("integration_tests", cmd, critical=False)
     
     def validate_datasets(self) -> bool:
@@ -198,11 +198,11 @@ class CIOrchestrator:
                 "stderr_tail": val_proc.stderr[-500:] if val_proc.stderr else "",
             })
             if status == "failed":
-                print(f"[ci] ❌ Azure ML validation failed for {latest}")
+                print(f"[ci] [FAIL] Azure ML validation failed for {latest}")
                 if val_proc.stderr:
                     print(val_proc.stderr)
             else:
-                print(f"[ci] ✅ Azure ML validation passed: {latest}")
+                print(f"[ci] [OK] Azure ML validation passed: {latest}")
             return status == "succeeded"
         except subprocess.TimeoutExpired:
             self.results.append({"name": "azureml_validate", "status": "timeout", "job_file": str(latest.relative_to(self.repo_root))})
@@ -233,10 +233,10 @@ class CIOrchestrator:
             print(f"\n[ci] Step: {step_name}")
             if not step_func():
                 all_passed = False
-                print(f"[ci] ❌ Step failed: {step_name}")
+                print(f"[ci] [FAIL] Step failed: {step_name}")
                 # Continue with remaining steps even on failure
             else:
-                print(f"[ci] ✅ Step passed: {step_name}")
+                print(f"[ci] [OK] Step passed: {step_name}")
         
         self._save_results()
         return all_passed

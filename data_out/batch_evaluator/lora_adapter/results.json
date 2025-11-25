@@ -1,0 +1,13 @@
+{
+  "model": "C:\\Users\\Bryan\\OneDrive\\AI\\data_out\\lora_training\\lora_adapter",
+  "dataset": "datasets/chat/mixed_chat",
+  "max_samples": 100,
+  "metrics": [
+    "accuracy,perplexity,bleu"
+  ],
+  "summary": {
+    "accuracy": 0.0,
+    "response_time_ms": 0.0
+  },
+  "status": "template_placeholder"
+}

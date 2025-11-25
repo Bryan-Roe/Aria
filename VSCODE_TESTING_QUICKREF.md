@@ -25,11 +25,12 @@
 
 Quick test configurations accessible from Test Explorer dropdown:
 
-- **Unit Tests (Fast)** - Quick unit tests only (~40 tests in 0.4s)
-- **Integration Tests** - External service tests
-- **All Fast Tests** - Everything except slow/Azure tests
+- **Unit Tests (Fast)** - Quick unit tests only (40 tests in ~0.5s)
+- **Integration Tests** - External service tests (30 tests in ~3s)
+- **All Fast Tests** - Everything except slow/Azure tests (83 tests in ~10s)
+- **AutoTrain Tests** - Training orchestrator tests
 - **Quantum Tests** - Quantum-specific test files
-- **All Tests** - Complete test suite
+- **All Tests** - Complete test suite (84+ tests)
 - **All with Coverage** - Full suite + coverage report
 
 ## 🐛 Debugging Tests
@@ -81,16 +82,17 @@ See **VSCODE_TESTING_GUIDE.md** for comprehensive documentation.
 ---
 
 **Quick Test Commands:**
+
 ```powershell
-# Run all tests
+# Using test_runner (recommended)
+python .\scripts\test_runner.py --all          # All fast tests
+python .\scripts\test_runner.py --unit         # Unit tests only
+python .\scripts\test_runner.py --integration  # Integration tests
+python .\scripts\test_runner.py --coverage     # With coverage report
+
+# Direct pytest commands
 python -m pytest tests/ -v
-
-# Run specific test file
 python -m pytest tests/test_autotrain_unit.py -v
-
-# Run with coverage
-python -m pytest tests/ --cov=. --cov-report=html
-
-# Run specific markers
+python -m pytest tests/ --cov=scripts --cov=shared --cov-report=html
 python -m pytest -m "not slow and not azure" tests/
 ```

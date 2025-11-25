@@ -1,21 +1,93 @@
 {
-  "generated_at": "2025-11-24T04:15:28Z",
+  "generated_at": "2025-11-25T05:15:12Z",
   "jobs": [
     {
-      "name": "another",
+      "name": "heart_quick",
       "mode": "train_custom_dataset",
       "cmd": [
         "C:\\Users\\Bryan\\OneDrive\\AI\\quantum-ai\\venv\\Scripts\\python.exe",
         "C:\\Users\\Bryan\\OneDrive\\AI\\quantum-ai\\train_custom_dataset.py",
         "--preset",
-        "heart"
+        "heart",
+        "--n-qubits",
+        "4",
+        "--epochs",
+        "50",
+        "--batch-size",
+        "16",
+        "--learning-rate",
+        "0.001",
+        "--test-size",
+        "0.2"
       ],
-      "start_time": "20251124T041528Z",
+      "start_time": "20251125T051512Z",
       "status": "validated",
       "return_code": null,
-      "log": "C:\\Users\\Bryan\\OneDrive\\AI\\data_out\\quantum_autorun\\another\\20251124T041528Z\\stdout.log",
+      "log": "C:\\Users\\Bryan\\OneDrive\\AI\\data_out\\quantum_autorun\\heart_quick\\20251125T051512Z\\stdout.log",
       "meta": {
         "preset": "heart",
+        "csv": null,
+        "label_col": null,
+        "drop_cols": null,
+        "n_qubits": 4,
+        "epochs": 50,
+        "batch_size": 16,
+        "learning_rate": 0.001,
+        "test_size": 0.2
+      }
+    },
+    {
+      "name": "ionosphere_quick",
+      "mode": "train_custom_dataset",
+      "cmd": [
+        "C:\\Users\\Bryan\\OneDrive\\AI\\quantum-ai\\venv\\Scripts\\python.exe",
+        "C:\\Users\\Bryan\\OneDrive\\AI\\quantum-ai\\train_custom_dataset.py",
+        "--preset",
+        "ionosphere",
+        "--n-qubits",
+        "4",
+        "--epochs",
+        "100",
+        "--batch-size",
+        "16",
+        "--learning-rate",
+        "0.001",
+        "--test-size",
+        "0.2"
+      ],
+      "start_time": "20251125T051512Z",
+      "status": "validated",
+      "return_code": null,
+      "log": "C:\\Users\\Bryan\\OneDrive\\AI\\data_out\\quantum_autorun\\ionosphere_quick\\20251125T051512Z\\stdout.log",
+      "meta": {
+        "preset": "ionosphere",
+        "csv": null,
+        "label_col": null,
+        "drop_cols": null,
+        "n_qubits": 4,
+        "epochs": 100,
+        "batch_size": 16,
+        "learning_rate": 0.001,
+        "test_size": 0.2
+      }
+    },
+    {
+      "name": "azure_ionq_simulator",
+      "mode": "azure_hardware",
+      "cmd": [
+        "C:\\Users\\Bryan\\OneDrive\\AI\\quantum-ai\\venv\\Scripts\\python.exe",
+        "C:\\Users\\Bryan\\OneDrive\\AI\\quantum-ai\\deploy_to_azure_quantum.py",
+        "--backend",
+        "ionq.simulator",
+        "--shots",
+        "100"
+      ],
+      "start_time": "20251125T051512Z",
+      "status": "validated",
+      "return_code": null,
+      "log": "C:\\Users\\Bryan\\OneDrive\\AI\\data_out\\quantum_autorun\\azure_ionq_simulator\\20251125T051512Z\\stdout.log",
+      "meta": {
+        "preset": null,
         "csv": null,
         "label_col": null,
         "drop_cols": null,
@@ -23,20 +95,23 @@
         "epochs": null,
         "batch_size": null,
         "learning_rate": null,
-        "test_size": null
+        "test_size": null,
+        "azure_backend": "ionq.simulator",
+        "azure_shots": 100,
+        "azure_confirm_cost": false
       }
     }
   ],
   "summary": {
     "counts": {
-      "validated": 1
+      "validated": 3
     },
     "latest": {
-      "name": "another",
+      "name": "heart_quick",
       "status": "validated",
       "mode": "train_custom_dataset",
-      "start_time": "20251124T041528Z",
-      "log": "C:\\Users\\Bryan\\OneDrive\\AI\\data_out\\quantum_autorun\\another\\20251124T041528Z\\stdout.log"
+      "start_time": "20251125T051512Z",
+      "log": "C:\\Users\\Bryan\\OneDrive\\AI\\data_out\\quantum_autorun\\heart_quick\\20251125T051512Z\\stdout.log"
     }
   }
 }
