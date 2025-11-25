@@ -1,0 +1,10 @@
+{
+  "generated_at": "2025-11-25T00:42:10.790644",
+  "total_samples": 1400,
+  "train_samples": 1260,
+  "test_samples": 140,
+  "seed": 42,
+  "sources": [
+    "template_generated"
+  ]
+}
