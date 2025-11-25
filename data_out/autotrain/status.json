@@ -1,5 +1,5 @@
 {
-  "generated_at": "2025-11-25T08:50:03Z",
+  "generated_at": "2025-11-25T10:16:36Z",
   "jobs": [
     {
       "name": "phi35_mega_synthetic_full",
@@ -88,7 +88,7 @@
       "runner": "hf",
       "category": "marathon",
       "status": "running",
-      "start_time": "20251125T085003Z",
+      "start_time": "20251125T101636Z",
       "cmd": null,
       "return_code": null,
       "duration_sec": null

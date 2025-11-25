@@ -1,0 +1,995 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QAI Training Dashboard - Enhanced</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+        
+        header {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            color: #667eea;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .tab {
+            padding: 12px 24px;
+            background: #f8f9fa;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: all 0.3s;
+        }
+        
+        .tab.active {
+            background: #667eea;
+            color: white;
+        }
+        
+        .tab:hover {
+            transform: translateY(-2px);
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .stat-icon {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+        
+        .stat-value {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            color: #666;
+            font-size: 0.85em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .section {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .section-title {
+            font-size: 1.5em;
+            color: #333;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 8px;
+        }
+        
+        .job-card {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-left: 5px solid #667eea;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .job-card:hover {
+            background: #e9ecef;
+            transform: translateX(5px);
+        }
+        
+        .job-card.succeeded {
+            border-left-color: #28a745;
+        }
+        
+        .job-card.failed {
+            border-left-color: #dc3545;
+        }
+        
+        .job-card.running {
+            border-left-color: #ffc107;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+        
+        .job-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .job-name {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .job-status-badge {
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        
+        .badge-succeeded {
+            background: #28a745;
+            color: white;
+        }
+        
+        .badge-running {
+            background: #ffc107;
+            color: #333;
+        }
+        
+        .badge-failed {
+            background: #dc3545;
+            color: white;
+        }
+        
+        .badge-pending {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .job-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .detail-item {
+            padding: 10px;
+            background: white;
+            border-radius: 6px;
+        }
+        
+        .detail-label {
+            font-size: 0.8em;
+            color: #666;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+        
+        .detail-value {
+            font-size: 1.1em;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .job-expanded {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 2px solid #dee2e6;
+        }
+        
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 15px 0;
+        }
+        
+        .metric-card {
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea20 0%, #764ba220 100%);
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .metric-label {
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 5px;
+        }
+        
+        .metric-value {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .improvement {
+            font-size: 0.85em;
+            margin-top: 5px;
+        }
+        
+        .improvement.positive {
+            color: #28a745;
+        }
+        
+        .improvement.negative {
+            color: #dc3545;
+        }
+        
+        .logs-viewer {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.85em;
+            max-height: 400px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        
+        .model-comparison {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        
+        .model-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            border: 2px solid #e9ecef;
+            transition: all 0.3s;
+        }
+        
+        .model-card:hover {
+            border-color: #667eea;
+            box-shadow: 0 5px 15px rgba(102,126,234,0.3);
+        }
+        
+        .model-card.winner {
+            border-color: #28a745;
+            background: linear-gradient(135deg, #28a74510 0%, #28a74520 100%);
+        }
+        
+        .model-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .model-name {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .crown {
+            font-size: 1.5em;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.95em;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+        
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+        }
+        
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+        
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .control-panel {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .form-select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #dee2e6;
+            border-radius: 6px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+        
+        .form-select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .datasets-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 15px;
+        }
+        
+        .dataset-card {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            padding: 20px;
+            border-radius: 10px;
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .dataset-card:hover {
+            border-color: #667eea;
+            transform: translateY(-3px);
+        }
+        
+        .dataset-card.selected {
+            border-color: #667eea;
+            background: linear-gradient(135deg, #667eea20 0%, #764ba220 100%);
+        }
+        
+        .dataset-name {
+            font-weight: bold;
+            font-size: 1.1em;
+            margin-bottom: 10px;
+            color: #333;
+        }
+        
+        .dataset-info {
+            font-size: 0.9em;
+            color: #666;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 25px;
+            background: #e9ecef;
+            border-radius: 12px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 0.85em;
+            transition: width 0.5s;
+        }
+        
+        .refresh-controls {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            margin: 15px 0;
+        }
+        
+        .auto-refresh-toggle {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .last-update {
+            color: #666;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🚀 QAI Training Dashboard</h1>
+            <p style="color: #666; margin-top: 10px;">Advanced AI Training Monitoring & Control</p>
+            
+            <div class="tabs">
+                <button class="tab active" onclick="switchTab('overview')">📊 Overview</button>
+                <button class="tab" onclick="switchTab('jobs')">🏃 Jobs</button>
+                <button class="tab" onclick="switchTab('models')">🤖 Models</button>
+                <button class="tab" onclick="switchTab('datasets')">📁 Datasets</button>
+                <button class="tab" onclick="switchTab('train')">⚡ New Training</button>
+            </div>
+            
+            <div class="refresh-controls">
+                <button class="btn btn-primary" onclick="loadAllData()">🔄 Refresh All</button>
+                <div class="auto-refresh-toggle">
+                    <input type="checkbox" id="autoRefresh" onchange="toggleAutoRefresh()">
+                    <label for="autoRefresh">Auto-refresh (10s)</label>
+                </div>
+                <span class="last-update" id="lastUpdate">Last updated: Never</span>
+            </div>
+        </header>
+
+        <!-- Overview Tab -->
+        <div id="tab-overview" class="tab-content active">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">✅</div>
+                    <div class="stat-value" id="completedJobs">0</div>
+                    <div class="stat-label">Completed</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">🏃</div>
+                    <div class="stat-value" id="runningJobs">0</div>
+                    <div class="stat-label">Running</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">⏳</div>
+                    <div class="stat-value" id="pendingJobs">0</div>
+                    <div class="stat-label">Pending</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">⚡</div>
+                    <div class="stat-value" id="avgDuration">0s</div>
+                    <div class="stat-label">Avg Duration</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">🎯</div>
+                    <div class="stat-value" id="bestModel">--</div>
+                    <div class="stat-label">Best Model</div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2 class="section-title">Overall Progress</h2>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="overallProgress">0%</div>
+                </div>
+                <p style="margin-top: 10px; color: #666;"><span id="jobsCompleted">0</span> of <span id="totalJobs">0</span> jobs completed</p>
+            </div>
+
+            <div class="section">
+                <h2 class="section-title">Recent Jobs</h2>
+                <div id="recentJobsList">Loading...</div>
+            </div>
+        </div>
+
+        <!-- Jobs Tab -->
+        <div id="tab-jobs" class="tab-content">
+            <div class="section">
+                <h2 class="section-title">All Training Jobs</h2>
+                <div id="allJobsList">Loading jobs...</div>
+            </div>
+        </div>
+
+        <!-- Models Tab -->
+        <div id="tab-models" class="tab-content">
+            <div class="section">
+                <h2 class="section-title">Model Comparison</h2>
+                <div class="model-comparison" id="modelComparison">Loading models...</div>
+            </div>
+        </div>
+
+        <!-- Datasets Tab -->
+        <div id="tab-datasets" class="tab-content">
+            <div class="section">
+                <h2 class="section-title">Available Datasets</h2>
+                <div class="datasets-list" id="datasetsList">Loading datasets...</div>
+            </div>
+        </div>
+
+        <!-- Train Tab -->
+        <div id="tab-train" class="tab-content">
+            <div class="section">
+                <h2 class="section-title">Start New Training</h2>
+                <div class="control-panel">
+                    <div>
+                        <div class="form-group">
+                            <label class="form-label">Training Configuration</label>
+                            <select class="form-select" id="configSelect">
+                                <option value="">Loading configs...</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Dataset</label>
+                            <select class="form-select" id="datasetSelect">
+                                <option value="">Loading datasets...</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Model</label>
+                            <select class="form-select" id="modelSelect">
+                                <option value="microsoft/Phi-3.5-mini-instruct">Phi-3.5-mini-instruct</option>
+                                <option value="Qwen/Qwen2.5-3B-Instruct">Qwen2.5-3B-Instruct</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="form-group">
+                            <label class="form-label">Job Name</label>
+                            <input type="text" class="form-select" id="jobNameInput" placeholder="my_training_job">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Epochs</label>
+                            <input type="number" class="form-select" id="epochsInput" value="3" min="1" max="20">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Learning Rate</label>
+                            <input type="number" class="form-select" id="lrInput" value="0.0002" step="0.00001">
+                        </div>
+                    </div>
+                </div>
+                <button class="btn btn-primary" onclick="startTraining()" style="margin-top: 20px; font-size: 1.1em; padding: 15px 40px;">
+                    🚀 Start Training
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let autoRefreshInterval = null;
+        let expandedJobs = new Set();
+
+        async function loadAllData() {
+            await Promise.all([
+                loadStatus(),
+                loadDatasets(),
+                loadModels(),
+                loadConfigs()
+            ]);
+            updateLastUpdate();
+        }
+
+        async function loadStatus() {
+            try {
+                const response = await fetch('/status');
+                const data = await response.json();
+                
+                updateOverviewStats(data);
+                updateRecentJobs(data);
+                updateAllJobs(data);
+                updateModelComparison(data);
+            } catch (error) {
+                console.error('Failed to load status:', error);
+            }
+        }
+
+        async function loadDatasets() {
+            try {
+                const response = await fetch('/api/datasets');
+                const data = await response.json();
+                displayDatasets(data.datasets || []);
+                populateDatasetSelect(data.datasets || []);
+            } catch (error) {
+                console.error('Failed to load datasets:', error);
+            }
+        }
+
+        async function loadModels() {
+            try {
+                const response = await fetch('/api/models');
+                const data = await response.json();
+            } catch (error) {
+                console.error('Failed to load models:', error);
+            }
+        }
+
+        async function loadConfigs() {
+            try {
+                const response = await fetch('/api/configs');
+                const data = await response.json();
+                populateConfigSelect(data.configs || []);
+            } catch (error) {
+                console.error('Failed to load configs:', error);
+            }
+        }
+
+        function updateOverviewStats(data) {
+            const jobs = data.jobs || [];
+            const completed = jobs.filter(j => j.status === 'succeeded').length;
+            const running = jobs.filter(j => j.status === 'running').length;
+            const failed = jobs.filter(j => j.status === 'failed').length;
+            const pending = jobs.length - completed - running - failed;
+
+            document.getElementById('completedJobs').textContent = completed;
+            document.getElementById('runningJobs').textContent = running;
+            document.getElementById('pendingJobs').textContent = failed + pending;
+
+            // Calculate average duration
+            const durations = jobs.filter(j => j.duration_sec).map(j => j.duration_sec);
+            if (durations.length > 0) {
+                const avgDuration = Math.round(durations.reduce((a, b) => a + b, 0) / durations.length);
+                document.getElementById('avgDuration').textContent = formatDuration(avgDuration);
+            }
+
+            // Find best model
+            const completedJobs = jobs.filter(j => j.status === 'succeeded' && j.metrics);
+            if (completedJobs.length > 0) {
+                const best = completedJobs.reduce((prev, curr) => {
+                    const prevPerp = prev.metrics?.post_eval_perplexity || Infinity;
+                    const currPerp = curr.metrics?.post_eval_perplexity || Infinity;
+                    return currPerp < prevPerp ? curr : prev;
+                });
+                document.getElementById('bestModel').textContent = best.name.substring(0, 15) + '...';
+            }
+
+            // Update overall progress
+            const progress = jobs.length > 0 ? Math.round((completed / jobs.length) * 100) : 0;
+            const progressBar = document.getElementById('overallProgress');
+            progressBar.style.width = progress + '%';
+            progressBar.textContent = progress + '%';
+            
+            document.getElementById('jobsCompleted').textContent = completed;
+            document.getElementById('totalJobs').textContent = jobs.length;
+        }
+
+        function updateRecentJobs(data) {
+            const jobs = (data.jobs || []).slice(0, 5);
+            const container = document.getElementById('recentJobsList');
+            
+            if (jobs.length === 0) {
+                container.innerHTML = '<p style="color: #666; padding: 20px;">No jobs yet</p>';
+                return;
+            }
+
+            container.innerHTML = jobs.map(job => createJobCard(job, false)).join('');
+        }
+
+        function updateAllJobs(data) {
+            const jobs = data.jobs || [];
+            const container = document.getElementById('allJobsList');
+            
+            if (jobs.length === 0) {
+                container.innerHTML = '<p style="color: #666; padding: 20px;">No jobs found</p>';
+                return;
+            }
+
+            container.innerHTML = jobs.map(job => createJobCard(job, true)).join('');
+        }
+
+        function createJobCard(job, detailed) {
+            const statusClass = job.status || 'pending';
+            const badgeClass = `badge-${statusClass}`;
+            const statusEmoji = {
+                'succeeded': '✅',
+                'failed': '❌',
+                'running': '⏳',
+                'pending': '⚪'
+            }[statusClass] || '❓';
+
+            let detailsHtml = '';
+            if (job.duration_human || job.metrics) {
+                detailsHtml = `
+                    <div class="job-details">
+                        ${job.duration_human ? `
+                            <div class="detail-item">
+                                <div class="detail-label">Duration</div>
+                                <div class="detail-value">${job.duration_human}</div>
+                            </div>
+                        ` : ''}
+                        ${job.metrics?.post_eval_perplexity ? `
+                            <div class="detail-item">
+                                <div class="detail-label">Perplexity</div>
+                                <div class="detail-value">${job.metrics.post_eval_perplexity.toFixed(2)}</div>
+                            </div>
+                        ` : ''}
+                        ${job.metrics?.pre_eval_perplexity && job.metrics?.post_eval_perplexity ? `
+                            <div class="detail-item">
+                                <div class="detail-label">Improvement</div>
+                                <div class="detail-value improvement positive">
+                                    ${((job.metrics.pre_eval_perplexity - job.metrics.post_eval_perplexity) / job.metrics.pre_eval_perplexity * 100).toFixed(1)}%
+                                </div>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            }
+
+            return `
+                <div class="job-card ${statusClass}" onclick="toggleJobDetails('${job.name}')">
+                    <div class="job-header">
+                        <div class="job-name">${statusEmoji} ${job.name}</div>
+                        <span class="job-status-badge ${badgeClass}">${statusClass}</span>
+                    </div>
+                    ${detailsHtml}
+                    ${detailed ? `
+                        <div class="job-expanded" id="details-${job.name}" style="display: none;">
+                            <h4 style="margin-bottom: 10px;">📊 Detailed Metrics</h4>
+                            ${job.metrics ? `
+                                <div class="metrics-grid">
+                                    <div class="metric-card">
+                                        <div class="metric-label">Pre-Training Loss</div>
+                                        <div class="metric-value">${job.metrics.pre_eval_loss?.toFixed(4) || 'N/A'}</div>
+                                    </div>
+                                    <div class="metric-card">
+                                        <div class="metric-label">Post-Training Loss</div>
+                                        <div class="metric-value">${job.metrics.post_eval_loss?.toFixed(4) || 'N/A'}</div>
+                                    </div>
+                                    <div class="metric-card">
+                                        <div class="metric-label">Pre-Training Perplexity</div>
+                                        <div class="metric-value">${job.metrics.pre_eval_perplexity?.toFixed(2) || 'N/A'}</div>
+                                    </div>
+                                    <div class="metric-card">
+                                        <div class="metric-label">Post-Training Perplexity</div>
+                                        <div class="metric-value">${job.metrics.post_eval_perplexity?.toFixed(2) || 'N/A'}</div>
+                                    </div>
+                                </div>
+                            ` : '<p style="color: #666;">No metrics available yet</p>'}
+                            
+                            <button class="btn btn-secondary" onclick="event.stopPropagation(); loadJobLogs('${job.name}')" style="margin-top: 15px;">
+                                📜 View Logs
+                            </button>
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+        }
+
+        async function toggleJobDetails(jobName) {
+            const detailsDiv = document.getElementById(`details-${jobName}`);
+            if (!detailsDiv) return;
+
+            if (expandedJobs.has(jobName)) {
+                detailsDiv.style.display = 'none';
+                expandedJobs.delete(jobName);
+            } else {
+                detailsDiv.style.display = 'block';
+                expandedJobs.add(jobName);
+            }
+        }
+
+        async function loadJobLogs(jobName) {
+            try {
+                const response = await fetch(`/api/logs/${jobName}`);
+                const data = await response.json();
+                
+                // Create modal or expand section with logs
+                const detailsDiv = document.getElementById(`details-${jobName}`);
+                const logsSection = detailsDiv.querySelector('.logs-viewer') || document.createElement('div');
+                logsSection.className = 'logs-viewer';
+                logsSection.style.marginTop = '15px';
+                logsSection.textContent = data.logs || 'No logs available';
+                
+                if (!detailsDiv.querySelector('.logs-viewer')) {
+                    detailsDiv.appendChild(logsSection);
+                }
+            } catch (error) {
+                console.error('Failed to load logs:', error);
+                alert('Failed to load logs');
+            }
+        }
+
+        function updateModelComparison(data) {
+            const jobs = (data.jobs || []).filter(j => j.status === 'succeeded' && j.metrics);
+            const container = document.getElementById('modelComparison');
+            
+            if (jobs.length === 0) {
+                container.innerHTML = '<p style="color: #666; padding: 40px; text-align: center;">No completed models to compare yet</p>';
+                return;
+            }
+
+            // Sort by perplexity (lower is better)
+            jobs.sort((a, b) => {
+                const aPerp = a.metrics?.post_eval_perplexity || Infinity;
+                const bPerp = b.metrics?.post_eval_perplexity || Infinity;
+                return aPerp - bPerp;
+            });
+
+            container.innerHTML = jobs.map((job, index) => {
+                const isWinner = index === 0;
+                const improvement = job.metrics.pre_eval_perplexity && job.metrics.post_eval_perplexity
+                    ? ((job.metrics.pre_eval_perplexity - job.metrics.post_eval_perplexity) / job.metrics.pre_eval_perplexity * 100).toFixed(1)
+                    : 0;
+
+                return `
+                    <div class="model-card ${isWinner ? 'winner' : ''}">
+                        <div class="model-header">
+                            <div class="model-name">${job.name}</div>
+                            ${isWinner ? '<span class="crown">👑</span>' : ''}
+                        </div>
+                        <div class="metrics-grid">
+                            <div class="metric-card">
+                                <div class="metric-label">Perplexity</div>
+                                <div class="metric-value">${job.metrics.post_eval_perplexity.toFixed(2)}</div>
+                                <div class="improvement positive">↓ ${improvement}%</div>
+                            </div>
+                            <div class="metric-card">
+                                <div class="metric-label">Duration</div>
+                                <div class="metric-value">${job.duration_human || 'N/A'}</div>
+                            </div>
+                        </div>
+                        <button class="btn btn-success" style="width: 100%; margin-top: 15px;">
+                            🚀 Deploy Model
+                        </button>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function displayDatasets(datasets) {
+            const container = document.getElementById('datasetsList');
+            
+            if (datasets.length === 0) {
+                container.innerHTML = '<p style="color: #666; padding: 40px; text-align: center;">No datasets found</p>';
+                return;
+            }
+
+            container.innerHTML = datasets.map(ds => `
+                <div class="dataset-card">
+                    <div class="dataset-name">📁 ${ds.name}</div>
+                    <div class="dataset-info">
+                        <div>Training: ${ds.train_samples} samples</div>
+                        <div>Testing: ${ds.test_samples} samples</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function populateDatasetSelect(datasets) {
+            const select = document.getElementById('datasetSelect');
+            select.innerHTML = '<option value="">Select a dataset...</option>' +
+                datasets.map(ds => `<option value="${ds.path}">${ds.name} (${ds.train_samples} samples)</option>`).join('');
+        }
+
+        function populateConfigSelect(configs) {
+            const select = document.getElementById('configSelect');
+            select.innerHTML = '<option value="">Select a config...</option>' +
+                configs.map(cfg => `<option value="${cfg.path}">${cfg.name} (${cfg.jobs} jobs)</option>`).join('');
+        }
+
+        async function startTraining() {
+            const config = document.getElementById('configSelect').value;
+            const dataset = document.getElementById('datasetSelect').value;
+            const model = document.getElementById('modelSelect').value;
+            const jobName = document.getElementById('jobNameInput').value;
+            const epochs = document.getElementById('epochsInput').value;
+            const lr = document.getElementById('lrInput').value;
+
+            if (!config || !dataset || !jobName) {
+                alert('Please fill in all required fields');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/start-training', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        config, dataset, model, job_name: jobName, epochs, learning_rate: lr
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.status === 'started') {
+                    alert(`✅ Training job "${jobName}" started successfully!`);
+                    switchTab('jobs');
+                    loadAllData();
+                } else {
+                    alert(`❌ Failed to start training: ${result.error}`);
+                }
+            } catch (error) {
+                console.error('Failed to start training:', error);
+                alert('Failed to start training');
+            }
+        }
+
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            
+            document.querySelector(`[onclick="switchTab('${tabName}')"]`).classList.add('active');
+            document.getElementById(`tab-${tabName}`).classList.add('active');
+        }
+
+        function formatDuration(seconds) {
+            if (seconds < 60) return `${seconds}s`;
+            const minutes = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return minutes < 60 ? `${minutes}m ${secs}s` : `${Math.floor(minutes/60)}h ${minutes%60}m`;
+        }
+
+        function updateLastUpdate() {
+            const now = new Date();
+            document.getElementById('lastUpdate').textContent = 
+                `Last updated: ${now.toLocaleTimeString()}`;
+        }
+
+        function toggleAutoRefresh() {
+            const checkbox = document.getElementById('autoRefresh');
+            if (checkbox.checked) {
+                autoRefreshInterval = setInterval(loadAllData, 10000);
+                loadAllData();
+            } else {
+                if (autoRefreshInterval) {
+                    clearInterval(autoRefreshInterval);
+                    autoRefreshInterval = null;
+                }
+            }
+        }
+
+        // Load data on page load
+        loadAllData();
+    </script>
+</body>
+</html>

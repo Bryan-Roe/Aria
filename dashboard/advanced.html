@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QAI Advanced Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            padding: 15px;
+        }
+        
+        .container { max-width: 1800px; margin: 0 auto; }
+        
+        header {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            color: #667eea;
+            font-size: 2.2em;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .live-indicator {
+            width: 12px;
+            height: 12px;
+            background: #28a745;
+            border-radius: 50%;
+            animation: pulse-dot 2s infinite;
+        }
+        
+        @keyframes pulse-dot {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.6; transform: scale(1.1); }
+        }
+        
+        .grid-2col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .grid-3col {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .card-title {
+            font-size: 1.3em;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #333;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 8px;
+        }
+        
+        .gpu-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .gpu-card .card-title {
+            color: white;
+            border-bottom-color: rgba(255,255,255,0.3);
+        }
+        
+        .gpu-metrics {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .gpu-metric {
+            background: rgba(255,255,255,0.15);
+            padding: 12px;
+            border-radius: 8px;
+        }
+        
+        .gpu-metric-label {
+            font-size: 0.85em;
+            opacity: 0.9;
+            margin-bottom: 5px;
+        }
+        
+        .gpu-metric-value {
+            font-size: 1.8em;
+            font-weight: bold;
+        }
+        
+        .progress-bar-container {
+            background: rgba(255,255,255,0.2);
+            border-radius: 8px;
+            height: 20px;
+            margin-top: 8px;
+            overflow: hidden;
+        }
+        
+        .progress-bar-fill {
+            height: 100%;
+            background: rgba(255,255,255,0.9);
+            border-radius: 8px;
+            transition: width 0.5s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75em;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 12px;
+        }
+        
+        .stat-item {
+            text-align: center;
+            padding: 15px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 8px;
+            transition: transform 0.2s;
+        }
+        
+        .stat-item:hover {
+            transform: translateY(-3px);
+        }
+        
+        .stat-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            font-size: 0.8em;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin-top: 15px;
+        }
+        
+        .job-list-compact {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .job-item-compact {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            margin-bottom: 8px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            border-left: 4px solid #667eea;
+            transition: all 0.2s;
+        }
+        
+        .job-item-compact:hover {
+            background: #e9ecef;
+            transform: translateX(5px);
+        }
+        
+        .job-item-compact.succeeded { border-left-color: #28a745; }
+        .job-item-compact.failed { border-left-color: #dc3545; }
+        .job-item-compact.running { 
+            border-left-color: #ffc107;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
+        .job-name-compact {
+            font-weight: 600;
+            color: #333;
+            font-size: 0.95em;
+        }
+        
+        .job-metric-compact {
+            font-size: 0.85em;
+            color: #666;
+        }
+        
+        .job-status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 8px;
+        }
+        
+        .status-succeeded { background: #28a745; }
+        .status-failed { background: #dc3545; }
+        .status-running { background: #ffc107; animation: pulse-dot 2s infinite; }
+        .status-pending { background: #6c757d; }
+        
+        .controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.9em;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+        
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .toggle-switch {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .temperature-warning {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            color: #856404;
+            padding: 10px;
+            border-radius: 6px;
+            margin-top: 10px;
+            font-size: 0.9em;
+        }
+        
+        .system-card {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+        }
+        
+        .system-card .card-title {
+            color: white;
+            border-bottom-color: rgba(255,255,255,0.3);
+        }
+        
+        .last-update {
+            color: #666;
+            font-size: 0.85em;
+            margin-left: auto;
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 1000;
+            display: none;
+            animation: slideIn 0.3s;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateX(400px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        .notification.show {
+            display: block;
+        }
+        
+        .notification.success {
+            border-left: 4px solid #28a745;
+        }
+        
+        .notification.error {
+            border-left: 4px solid #dc3545;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>
+                <span class="live-indicator"></span>
+                QAI Advanced Dashboard
+            </h1>
+            <div class="controls">
+                <button class="btn btn-primary" onclick="refreshAll()">🔄 Refresh</button>
+                <div class="toggle-switch">
+                    <input type="checkbox" id="autoRefresh" onchange="toggleAutoRefresh()">
+                    <label for="autoRefresh">Auto (5s)</label>
+                </div>
+                <button class="btn btn-secondary" onclick="exportReport()">📊 Export Report</button>
+                <span class="last-update" id="lastUpdate">Loading...</span>
+            </div>
+        </header>
+
+        <!-- GPU & System Monitoring -->
+        <div class="grid-2col">
+            <div class="card gpu-card">
+                <div class="card-title">🎮 GPU Status</div>
+                <div id="gpuStatus">Loading...</div>
+            </div>
+            <div class="card system-card">
+                <div class="card-title">💻 System Resources</div>
+                <div id="systemStatus">Loading...</div>
+            </div>
+        </div>
+
+        <!-- Quick Stats -->
+        <div class="card">
+            <div class="card-title">📊 Training Overview</div>
+            <div class="stat-grid" id="quickStats"></div>
+        </div>
+
+        <!-- Charts -->
+        <div class="grid-2col">
+            <div class="card">
+                <div class="card-title">📈 Perplexity Progress</div>
+                <div class="chart-container">
+                    <canvas id="perplexityChart"></canvas>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-title">⏱️ Training Duration</div>
+                <div class="chart-container">
+                    <canvas id="durationChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Job Lists -->
+        <div class="grid-3col">
+            <div class="card">
+                <div class="card-title">🏃 Running Jobs</div>
+                <div class="job-list-compact" id="runningJobs">No jobs running</div>
+            </div>
+            <div class="card">
+                <div class="card-title">✅ Completed Jobs</div>
+                <div class="job-list-compact" id="completedJobs">No completed jobs</div>
+            </div>
+            <div class="card">
+                <div class="card-title">⏳ Queued Jobs</div>
+                <div class="job-list-compact" id="queuedJobs">No queued jobs</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="notification" id="notification">
+        <strong id="notifTitle"></strong>
+        <p id="notifMessage"></p>
+    </div>
+
+    <script>
+        let autoRefreshInterval = null;
+        let perplexityChart = null;
+        let durationChart = null;
+        let lastJobCount = 0;
+
+        async function refreshAll() {
+            await Promise.all([
+                loadGPUStatus(),
+                loadSystemStatus(),
+                loadTrainingStatus(),
+                loadHistory()
+            ]);
+            updateTimestamp();
+        }
+
+        async function loadGPUStatus() {
+            try {
+                const response = await fetch('/api/gpu');
+                const data = await response.json();
+                displayGPUStatus(data);
+            } catch (error) {
+                console.error('Failed to load GPU status:', error);
+            }
+        }
+
+        async function loadSystemStatus() {
+            try {
+                const response = await fetch('/api/system');
+                const data = await response.json();
+                displaySystemStatus(data);
+            } catch (error) {
+                console.error('Failed to load system status:', error);
+            }
+        }
+
+        async function loadTrainingStatus() {
+            try {
+                const response = await fetch('/status');
+                const data = await response.json();
+                updateQuickStats(data);
+                updateJobLists(data);
+                
+                // Check for new completions
+                const completedJobs = (data.jobs || []).filter(j => j.status === 'succeeded').length;
+                if (completedJobs > lastJobCount && lastJobCount > 0) {
+                    showNotification('Job Completed!', 'A training job has finished successfully', 'success');
+                }
+                lastJobCount = completedJobs;
+            } catch (error) {
+                console.error('Failed to load training status:', error);
+            }
+        }
+
+        async function loadHistory() {
+            try {
+                const response = await fetch('/api/history');
+                const data = await response.json();
+                updateCharts(data);
+            } catch (error) {
+                console.error('Failed to load history:', error);
+            }
+        }
+
+        function displayGPUStatus(data) {
+            const container = document.getElementById('gpuStatus');
+            
+            if (!data.available) {
+                container.innerHTML = '<p style="opacity: 0.8;">GPU not available or nvidia-smi not found</p>';
+                return;
+            }
+
+            const gpu = data.gpus[0]; // Primary GPU
+            const tempColor = gpu.temperature > 80 ? '#dc3545' : gpu.temperature > 70 ? '#ffc107' : '#28a745';
+            
+            container.innerHTML = `
+                <div style="margin-bottom: 10px;">
+                    <strong style="font-size: 1.1em;">${gpu.name}</strong>
+                </div>
+                <div class="gpu-metrics">
+                    <div class="gpu-metric">
+                        <div class="gpu-metric-label">GPU Utilization</div>
+                        <div class="gpu-metric-value">${gpu.utilization.toFixed(0)}%</div>
+                        <div class="progress-bar-container">
+                            <div class="progress-bar-fill" style="width: ${gpu.utilization}%"></div>
+                        </div>
+                    </div>
+                    <div class="gpu-metric">
+                        <div class="gpu-metric-label">Memory</div>
+                        <div class="gpu-metric-value">${(gpu.memory_used/1024).toFixed(1)}GB</div>
+                        <div class="progress-bar-container">
+                            <div class="progress-bar-fill" style="width: ${(gpu.memory_used/gpu.memory_total*100).toFixed(0)}%">
+                                ${(gpu.memory_used/gpu.memory_total*100).toFixed(0)}%
+                            </div>
+                        </div>
+                    </div>
+                    <div class="gpu-metric">
+                        <div class="gpu-metric-label">Temperature</div>
+                        <div class="gpu-metric-value" style="color: ${tempColor};">${gpu.temperature.toFixed(0)}°C</div>
+                    </div>
+                    <div class="gpu-metric">
+                        <div class="gpu-metric-label">Power Draw</div>
+                        <div class="gpu-metric-value">${gpu.power_draw.toFixed(0)}W</div>
+                        <div style="font-size: 0.85em; opacity: 0.8; margin-top: 5px;">
+                            / ${gpu.power_limit.toFixed(0)}W
+                        </div>
+                    </div>
+                </div>
+                ${gpu.temperature > 85 ? '<div class="temperature-warning">⚠️ High temperature detected!</div>' : ''}
+            `;
+        }
+
+        function displaySystemStatus(data) {
+            const container = document.getElementById('systemStatus');
+            
+            if (data.error) {
+                container.innerHTML = '<p style="opacity: 0.8;">System info not available</p>';
+                return;
+            }
+
+            container.innerHTML = `
+                <div class="gpu-metrics">
+                    <div class="gpu-metric">
+                        <div class="gpu-metric-label">CPU Usage</div>
+                        <div class="gpu-metric-value">${data.cpu.percent.toFixed(0)}%</div>
+                        <div class="progress-bar-container">
+                            <div class="progress-bar-fill" style="width: ${data.cpu.percent}%"></div>
+                        </div>
+                    </div>
+                    <div class="gpu-metric">
+                        <div class="gpu-metric-label">RAM Usage</div>
+                        <div class="gpu-metric-value">${data.memory.used_gb}GB</div>
+                        <div class="progress-bar-container">
+                            <div class="progress-bar-fill" style="width: ${data.memory.percent}%">
+                                ${data.memory.percent.toFixed(0)}%
+                            </div>
+                        </div>
+                    </div>
+                    <div class="gpu-metric">
+                        <div class="gpu-metric-label">CPU Cores</div>
+                        <div class="gpu-metric-value">${data.cpu.count}</div>
+                    </div>
+                    <div class="gpu-metric">
+                        <div class="gpu-metric-label">Total RAM</div>
+                        <div class="gpu-metric-value">${data.memory.total_gb}GB</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function updateQuickStats(data) {
+            const jobs = data.jobs || [];
+            const completed = jobs.filter(j => j.status === 'succeeded').length;
+            const running = jobs.filter(j => j.status === 'running').length;
+            const failed = jobs.filter(j => j.status === 'failed').length;
+            const pending = jobs.length - completed - running - failed;
+
+            const avgDuration = jobs.filter(j => j.duration_sec).length > 0
+                ? jobs.filter(j => j.duration_sec).reduce((a, b) => a + b.duration_sec, 0) / jobs.filter(j => j.duration_sec).length
+                : 0;
+
+            const bestModel = jobs.filter(j => j.metrics?.post_eval_perplexity)
+                .reduce((best, curr) => !best || curr.metrics.post_eval_perplexity < best.metrics.post_eval_perplexity ? curr : best, null);
+
+            const container = document.getElementById('quickStats');
+            container.innerHTML = `
+                <div class="stat-item">
+                    <div class="stat-value">${completed}</div>
+                    <div class="stat-label">Completed</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">${running}</div>
+                    <div class="stat-label">Running</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">${pending}</div>
+                    <div class="stat-label">Queued</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">${failed}</div>
+                    <div class="stat-label">Failed</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">${formatDuration(Math.round(avgDuration))}</div>
+                    <div class="stat-label">Avg Time</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">${bestModel ? bestModel.metrics.post_eval_perplexity.toFixed(1) : '--'}</div>
+                    <div class="stat-label">Best Perplexity</div>
+                </div>
+            `;
+        }
+
+        function updateJobLists(data) {
+            const jobs = data.jobs || [];
+            const running = jobs.filter(j => j.status === 'running');
+            const completed = jobs.filter(j => j.status === 'succeeded').slice(-10).reverse();
+            const queued = jobs.filter(j => !j.status || j.status === 'pending');
+
+            document.getElementById('runningJobs').innerHTML = running.length > 0
+                ? running.map(createCompactJobItem).join('')
+                : '<p style="color: rgba(255,255,255,0.7); padding: 20px; text-align: center;">No jobs running</p>';
+
+            document.getElementById('completedJobs').innerHTML = completed.length > 0
+                ? completed.map(createCompactJobItem).join('')
+                : '<p style="color: #666; padding: 20px; text-align: center;">No completed jobs</p>';
+
+            document.getElementById('queuedJobs').innerHTML = queued.length > 0
+                ? queued.map(createCompactJobItem).join('')
+                : '<p style="color: #666; padding: 20px; text-align: center;">No queued jobs</p>';
+        }
+
+        function createCompactJobItem(job) {
+            const statusClass = job.status || 'pending';
+            const perplexity = job.metrics?.post_eval_perplexity;
+            
+            return `
+                <div class="job-item-compact ${statusClass}">
+                    <div>
+                        <span class="job-status-dot status-${statusClass}"></span>
+                        <span class="job-name-compact">${job.name}</span>
+                    </div>
+                    <div class="job-metric-compact">
+                        ${perplexity ? `${perplexity.toFixed(2)}` : job.duration_human || ''}
+                    </div>
+                </div>
+            `;
+        }
+
+        function updateCharts(data) {
+            const jobs = data.jobs.filter(j => j.status === 'succeeded');
+            
+            // Perplexity Chart
+            if (perplexityChart) perplexityChart.destroy();
+            
+            const ctx1 = document.getElementById('perplexityChart').getContext('2d');
+            perplexityChart = new Chart(ctx1, {
+                type: 'bar',
+                data: {
+                    labels: jobs.map(j => j.name.substring(0, 20)),
+                    datasets: [{
+                        label: 'Pre-Training',
+                        data: jobs.map(j => j.pre_perplexity),
+                        backgroundColor: 'rgba(108, 117, 125, 0.7)'
+                    }, {
+                        label: 'Post-Training',
+                        data: jobs.map(j => j.post_perplexity),
+                        backgroundColor: 'rgba(102, 126, 234, 0.7)'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            title: { display: true, text: 'Perplexity (lower is better)' }
+                        }
+                    },
+                    plugins: {
+                        legend: { position: 'top' }
+                    }
+                }
+            });
+
+            // Duration Chart
+            if (durationChart) durationChart.destroy();
+            
+            const ctx2 = document.getElementById('durationChart').getContext('2d');
+            durationChart = new Chart(ctx2, {
+                type: 'line',
+                data: {
+                    labels: jobs.map(j => j.name.substring(0, 20)),
+                    datasets: [{
+                        label: 'Training Time (seconds)',
+                        data: jobs.map(j => j.duration),
+                        borderColor: 'rgba(102, 126, 234, 1)',
+                        backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: { display: true, text: 'Duration (seconds)' }
+                        }
+                    },
+                    plugins: {
+                        legend: { position: 'top' }
+                    }
+                }
+            });
+        }
+
+        function formatDuration(seconds) {
+            if (seconds < 60) return `${seconds}s`;
+            const minutes = Math.floor(seconds / 60);
+            return minutes < 60 ? `${minutes}m` : `${Math.floor(minutes/60)}h ${minutes%60}m`;
+        }
+
+        function updateTimestamp() {
+            document.getElementById('lastUpdate').textContent = 
+                `Updated: ${new Date().toLocaleTimeString()}`;
+        }
+
+        function toggleAutoRefresh() {
+            const checkbox = document.getElementById('autoRefresh');
+            if (checkbox.checked) {
+                autoRefreshInterval = setInterval(refreshAll, 5000);
+                refreshAll();
+            } else {
+                if (autoRefreshInterval) {
+                    clearInterval(autoRefreshInterval);
+                    autoRefreshInterval = null;
+                }
+            }
+        }
+
+        function showNotification(title, message, type = 'success') {
+            const notif = document.getElementById('notification');
+            document.getElementById('notifTitle').textContent = title;
+            document.getElementById('notifMessage').textContent = message;
+            notif.className = `notification ${type} show`;
+            
+            setTimeout(() => {
+                notif.classList.remove('show');
+            }, 5000);
+        }
+
+        function exportReport() {
+            // Export training report as JSON
+            fetch('/api/history')
+                .then(r => r.json())
+                .then(data => {
+                    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `training-report-${new Date().toISOString().split('T')[0]}.json`;
+                    a.click();
+                    showNotification('Report Exported', 'Training report downloaded successfully', 'success');
+                });
+        }
+
+        // Initialize
+        refreshAll();
+        
+        // Request notification permission
+        if ('Notification' in window && Notification.permission === 'default') {
+            Notification.requestPermission();
+        }
+    </script>
+</body>
+</html>

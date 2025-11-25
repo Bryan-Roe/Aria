@@ -112,7 +112,7 @@ def parse_autotrain_status() -> OrchestratorStatus:
     if recent_failures:
         status.alerts.append(f"Failed jobs: {', '.join(recent_failures)}")
     
-    slow_jobs = [j["name"] for j in jobs if j.get("duration_sec", 0) > 600]
+    slow_jobs = [j["name"] for j in jobs if (j.get("duration_sec") or 0) > 600]
     if slow_jobs:
         status.alerts.append(f"{len(slow_jobs)} jobs took >10min")
     
