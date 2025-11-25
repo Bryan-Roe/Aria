@@ -13,3 +13,8 @@
 {"step": 64, "eval_loss": 2.379657030105591, "eval_perplexity": 10.80119774294571, "timestamp": "2025-11-25T08:16:06.902607Z"}
 {"step": 64, "eval_loss": 2.379657030105591, "eval_perplexity": 10.80119774294571, "timestamp": "2025-11-25T08:17:36.592826Z"}
 {"phase": "post", "eval_loss": 2.379657030105591, "eval_perplexity": 10.80119774294571, "timestamp": "2025-11-25T08:17:36.593827Z"}
+{"step": 0, "eval_loss": 6.015300273895264, "eval_perplexity": 409.6488272996713, "timestamp": "2025-11-25T12:35:43.471064Z"}
+{"phase": "pre", "eval_loss": 6.015300273895264, "eval_perplexity": 409.6488272996713, "timestamp": "2025-11-25T12:35:43.472080Z"}
+{"step": 64, "eval_loss": 4.1750223317649215e-05, "eval_perplexity": 1.0000417510948703, "timestamp": "2025-11-25T12:36:40.058072Z"}
+{"step": 128, "eval_loss": 9.05678462004289e-06, "eval_perplexity": 1.0000090568256328, "timestamp": "2025-11-25T12:37:37.022249Z"}
+{"step": 192, "eval_loss": 6.419359124265611e-06, "eval_perplexity": 1.0000064193797285, "timestamp": "2025-11-25T12:38:34.066504Z"}
