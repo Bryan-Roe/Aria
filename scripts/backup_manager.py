@@ -5,7 +5,7 @@ import tarfile
 import json
 from pathlib import Path
 from datetime import datetime
-from typing import List, Dict
+from typing import List, Dict, Optional
 import hashlib
 
 class BackupManager:
@@ -45,14 +45,33 @@ class BackupManager:
         include_datasets: bool = False,
         include_logs: bool = True,
         compress: bool = True,
-        description: str = ""
+        description: str = "",
+        incremental: bool = False
     ) -> Dict:
         """Create comprehensive backup"""
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
         backup_name = f"qai_backup_{timestamp}"
+        # Ensure uniqueness if multiple backups created within same second
+        suffix_counter = 2
+        while any(b.get('name') == backup_name for b in self.manifest.get('backups', [])):
+            backup_name = f"qai_backup_{timestamp}_{suffix_counter}"
+            suffix_counter += 1
         backup_path = self.backup_dir / backup_name
         backup_path.mkdir(parents=True, exist_ok=True)
         
+        # Build map of previous file checksums if incremental requested
+        previous_checksums: Dict[str, str] = {}
+        if incremental and self.manifest['backups']:
+            # Use most recent backup entry (last in list) – supports either compressed or directory backups
+            last_backup = self.manifest['backups'][-1]
+            for entry in last_backup.get('files', []):
+                # Legacy entries may be strings (no checksum)
+                if isinstance(entry, dict):
+                    previous_checksums[entry['path']] = entry.get('checksum', '')
+                elif isinstance(entry, str):
+                    # Cannot compute checksum for legacy compressed backup – treat as changed
+                    continue
+
         backup_info = {
             'name': backup_name,
             'timestamp': datetime.now().isoformat(),
@@ -63,9 +82,12 @@ class BackupManager:
                 'datasets': include_datasets,
                 'logs': include_logs
             },
-            'files': [],
+            'files': [],  # list[{'path': str, 'checksum': str, 'unchanged': bool}]
             'size_bytes': 0,
-            'checksum': None
+            'checksum': None,
+            'incremental': incremental,
+            'unchanged_files': 0,
+            'changed_files': 0
         }
         
         print(f"Creating backup: {backup_name}")
@@ -76,7 +98,7 @@ class BackupManager:
             if models_src.exists():
                 models_dst = backup_path / 'models'
                 models_dst.mkdir(parents=True, exist_ok=True)
-                self._copy_directory(models_src, models_dst, backup_info)
+                self._copy_directory(models_src, models_dst, backup_info, previous_checksums, incremental)
                 print(f"  ✓ Backed up models")
         
         # Backup configs
@@ -94,9 +116,9 @@ class BackupManager:
                 config_path = Path(config_file)
                 if config_path.exists():
                     dst = configs_dst / config_file
-                    shutil.copy2(config_path, dst)
-                    backup_info['files'].append(str(config_path))
-                    backup_info['size_bytes'] += config_path.stat().st_size
+                    dst.parent.mkdir(parents=True, exist_ok=True)
+                    # Use unified copy/link logic for incremental detection
+                    self._copy_or_link(config_path, dst, backup_info, previous_checksums, incremental)
             
             print(f"  ✓ Backed up configs")
         
@@ -106,7 +128,7 @@ class BackupManager:
             if datasets_src.exists():
                 datasets_dst = backup_path / 'datasets'
                 datasets_dst.mkdir(parents=True, exist_ok=True)
-                self._copy_directory(datasets_src, datasets_dst, backup_info)
+                self._copy_directory(datasets_src, datasets_dst, backup_info, previous_checksums, incremental)
                 print(f"  ✓ Backed up datasets")
         
         # Backup training logs
@@ -121,9 +143,7 @@ class BackupManager:
                     rel_path = json_file.relative_to(logs_src)
                     dst = logs_dst / rel_path
                     dst.parent.mkdir(parents=True, exist_ok=True)
-                    shutil.copy2(json_file, dst)
-                    backup_info['files'].append(str(json_file))
-                    backup_info['size_bytes'] += json_file.stat().st_size
+                    self._copy_or_link(json_file, dst, backup_info, previous_checksums, incremental)
                 
                 print(f"  ✓ Backed up logs")
         
@@ -170,16 +190,40 @@ class BackupManager:
         print(f"✅ Backup complete: {backup_name}")
         return backup_info
     
-    def _copy_directory(self, src: Path, dst: Path, backup_info: Dict):
-        """Recursively copy directory and track files"""
+    def _copy_directory(self, src: Path, dst: Path, backup_info: Dict, previous_checksums: Dict[str, str], incremental: bool):
+        """Recursively copy directory and track files (supports incremental)"""
         for item in src.rglob('*'):
             if item.is_file():
                 rel_path = item.relative_to(src)
                 dst_path = dst / rel_path
                 dst_path.parent.mkdir(parents=True, exist_ok=True)
-                shutil.copy2(item, dst_path)
-                backup_info['files'].append(str(item))
-                backup_info['size_bytes'] += item.stat().st_size
+                self._copy_or_link(item, dst_path, backup_info, previous_checksums, incremental)
+
+    def _copy_or_link(self, src_file: Path, dst_path: Path, backup_info: Dict, previous_checksums: Dict[str, str], incremental: bool):
+        """Copy file or create hardlink if unchanged in incremental mode"""
+        checksum = self.calculate_checksum(src_file)
+        file_path_str = str(src_file)
+        unchanged = False
+        if incremental and previous_checksums.get(file_path_str) == checksum:
+            # Attempt hardlink for efficiency
+            try:
+                os.link(src_file, dst_path)
+                unchanged = True
+            except Exception:
+                shutil.copy2(src_file, dst_path)  # Fallback
+        else:
+            shutil.copy2(src_file, dst_path)
+        backup_info['files'].append({
+            'path': file_path_str,
+            'checksum': checksum,
+            'unchanged': unchanged
+        })
+        size = src_file.stat().st_size
+        backup_info['size_bytes'] += size
+        if unchanged:
+            backup_info['unchanged_files'] += 1
+        else:
+            backup_info['changed_files'] += 1
     
     def _get_python_version(self) -> str:
         """Get Python version"""
@@ -312,6 +356,7 @@ if __name__ == "__main__":
     parser.add_argument('--no-logs', action='store_true', help='Exclude logs')
     parser.add_argument('--no-compress', action='store_true', help='Skip compression')
     parser.add_argument('--description', default='', help='Backup description')
+    parser.add_argument('--incremental', action='store_true', help='Perform incremental backup (hardlink unchanged files)')
     parser.add_argument('--target-dir', default='.', help='Target directory for restore')
     parser.add_argument('--keep', type=int, default=5, help='Number of backups to keep (cleanup)')
     
@@ -326,10 +371,11 @@ if __name__ == "__main__":
             include_datasets=args.include_datasets,
             include_logs=not args.no_logs,
             compress=not args.no_compress,
-            description=args.description
+            description=args.description,
+            incremental=args.incremental
         )
         print(f"\n📦 Backup ID: {backup_info['name']}")
-        print(f"📁 Files: {len(backup_info['files'])}")
+        print(f"📁 Files: {len(backup_info['files'])} (changed: {backup_info['changed_files']}, unchanged: {backup_info['unchanged_files']})")
         print(f"💾 Size: {backup_info.get('compressed_size', backup_info['size_bytes']) / 1024 / 1024:.2f} MB")
     
     elif args.action == 'list':

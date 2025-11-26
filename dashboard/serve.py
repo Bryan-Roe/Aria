@@ -53,10 +53,10 @@ class MyHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
         # Use the root_dir set by main()
         root_dir = getattr(self.__class__, 'root_dir', Path(__file__).parent.parent)
         
-        # Redirect root to hub
+        # Redirect root to consolidated dashboard
         if self.path == '/' or self.path == '/index.html':
             self.send_response(302)
-            self.send_header('Location', '/hub.html')
+            self.send_header('Location', '/consolidated.html')
             self.end_headers()
             return
         
@@ -95,6 +95,54 @@ class MyHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
         # API: List available datasets
         elif self.path == '/api/datasets':
             self.send_json_response(self.get_datasets())
+            return
+        
+        # API: Profile dataset for hyperparameter recommendations
+        elif self.path.startswith('/api/profile-dataset'):
+            from urllib.parse import parse_qs, urlparse
+            parsed = urlparse(self.path)
+            query_params = parse_qs(parsed.query)
+            dataset_name = query_params.get('dataset', [None])[0]
+            
+            if not dataset_name:
+                self.send_json_response({"error": "Missing dataset parameter"})
+                return
+            
+            # Find dataset path
+            datasets = self.get_datasets()
+            dataset_path = None
+            for ds in datasets.get('datasets', []):
+                if ds.get('name') == dataset_name or ds.get('path', '').endswith(dataset_name):
+                    dataset_path = Path(ds['path'])
+                    break
+            
+            if not dataset_path or not dataset_path.exists():
+                self.send_json_response({"error": f"Dataset not found: {dataset_name}"})
+                return
+            
+            # Run profiler script
+            profiler_script = root_dir / 'scripts' / 'dataset_profiler.py'
+            if not profiler_script.exists():
+                self.send_json_response({"error": "Profiler script not found"})
+                return
+            
+            try:
+                import subprocess
+                result = subprocess.run(
+                    [sys.executable, str(profiler_script), str(dataset_path), '--recommend', '--quiet'],
+                    capture_output=True,
+                    text=True,
+                    timeout=30
+                )
+                if result.returncode == 0:
+                    profile_data = json.loads(result.stdout)
+                    self.send_json_response(profile_data)
+                else:
+                    self.send_json_response({"error": f"Profiler failed: {result.stderr}"})
+            except subprocess.TimeoutExpired:
+                self.send_json_response({"error": "Profiler timed out (30s limit)"})
+            except Exception as e:
+                self.send_json_response({"error": f"Profiler error: {str(e)}"})
             return
         
         # API: List trained models

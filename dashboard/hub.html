@@ -18,6 +18,23 @@
             min-height: 100vh;
             padding: 20px;
         }
+        /* Dark Mode */
+        body.dark-mode {
+            background: #121212 !important;
+            color: #e0e0e0;
+        }
+        body.dark-mode header {
+            background: linear-gradient(135deg, #1f2937 0%, #374151 100%) !important;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.8) !important;
+        }
+        body.dark-mode .system-card,
+        body.dark-mode .status-badge {
+            background: #1e1e1e !important;
+            border-color: #333 !important;
+        }
+        body.dark-mode .btn-primary {
+            background: linear-gradient(135deg,#2563eb 0%, #1d4ed8 100%) !important;
+        }
         
         .container {
             max-width: 1600px;
@@ -32,6 +49,7 @@
             box-shadow: 0 10px 40px rgba(102, 126, 234, 0.4);
             border: 1px solid rgba(255,255,255,0.1);
             text-align: center;
+            position: relative;
         }
         
         h1 {
@@ -64,8 +82,8 @@
             display: flex;
             align-items: center;
             gap: 10px;
-            backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px);
             border: 1px solid rgba(255,255,255,0.2);
         }
         
@@ -102,8 +120,8 @@
             padding: 35px;
             box-shadow: 0 10px 40px rgba(0,0,0,0.4);
             transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px);
             cursor: pointer;
             position: relative;
             overflow: hidden;
@@ -218,8 +236,8 @@
             border-radius: 20px;
             padding: 35px;
             margin-bottom: 40px;
-            backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px);
         }
         
         .quick-actions h2 {
@@ -271,8 +289,8 @@
             justify-content: space-around;
             flex-wrap: wrap;
             gap: 30px;
-            backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px);
         }
         
         .stat-item {
@@ -327,8 +345,11 @@
                 opacity: 1;
             }
         }
+        .dark-toggle { position:absolute;top:20px;right:20px;padding:10px 16px;border:none;border-radius:8px;background:#222;color:#fff;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,0.3); }
+        .status-dot-warning { background:#ffc107 !important; }
+        .clickable-badge { cursor:pointer; border:none; background: rgba(255,255,255,0.1); }
+        .mt-10 { margin-top:10px; }
     </style>
-</head>
 <body>
     <div class="container">
         <header>
@@ -337,6 +358,7 @@
             <div class="system-status">
                 <div class="status-badge online">
                     <div class="status-dot"></div>
+            <button id="darkModeToggleHub" onclick="toggleDarkModeHub()" class="dark-toggle" title="Toggle Dark Mode (Ctrl+D)">🌙</button>
                     <span>Dashboard Server</span>
                 </div>
                 <div class="status-badge online">
@@ -348,9 +370,13 @@
                     <span>API Endpoints</span>
                 </div>
                 <div class="status-badge" id="quantumStatus">
-                    <div class="status-dot" style="background: #ffc107;"></div>
+                    <div class="status-dot status-dot-warning"></div>
                     <span>Quantum MCP</span>
                 </div>
+                <button id="notificationToggle" class="status-badge clickable-badge" onclick="toggleNotifications()">
+                    <span id="notificationIcon">🔕</span>
+                    <span id="notificationText">Notifications Off</span>
+                </button>
             </div>
         </header>
 
@@ -583,7 +609,7 @@
 
         <footer>
             <p>QAI Command Center v2.0 | Hybrid Quantum-AI Training Platform</p>
-            <p style="margin-top: 10px;">Three independent projects, unified experience</p>
+            <p class="mt-10">Three independent projects, unified experience</p>
         </footer>
     </div>
 
@@ -797,6 +823,87 @@
                 toast.style.display = 'none';
             }, 5000);
         }
+        // Dark Mode Hub
+        function applyDarkModePreferenceHub() {
+            if (localStorage.getItem('darkMode') === 'true') {
+                document.body.classList.add('dark-mode');
+                const btn = document.getElementById('darkModeToggleHub');
+                if (btn) btn.textContent = '☀️';
+            }
+        }
+        function toggleDarkModeHub() {
+            const isDark = document.body.classList.toggle('dark-mode');
+            localStorage.setItem('darkMode', isDark ? 'true':'false');
+            const btn = document.getElementById('darkModeToggleHub');
+            if (btn) btn.textContent = isDark ? '☀️' : '🌙';
+            showToast('Dark mode ' + (isDark ? 'enabled':'disabled'));
+        }
+        applyDarkModePreferenceHub();
+        
+        // Desktop notification system
+        let notificationsEnabled = false;
+        try {
+            const storedNotif = localStorage.getItem('qai_notifications_enabled');
+            if (storedNotif === 'true' && "Notification" in window && Notification.permission === 'granted') {
+                notificationsEnabled = true;
+            }
+        } catch(e) { /* ignore */ }
+        
+        function initNotifications() {
+            if ("Notification" in window) {
+                if (Notification.permission === "granted") {
+                    notificationsEnabled = true;
+                    try { localStorage.setItem('qai_notifications_enabled','true'); } catch(e){}
+                    updateNotificationUI();
+                }
+            }
+        }
+        
+        function updateNotificationUI() {
+            const icon = document.getElementById('notificationIcon');
+            const text = document.getElementById('notificationText');
+            if (notificationsEnabled) {
+                icon.textContent = '🔔';
+                text.textContent = 'Notifications On';
+            } else {
+                icon.textContent = '🔕';
+                text.textContent = 'Notifications Off';
+            }
+        }
+        
+        async function toggleNotifications() {
+            if (!("Notification" in window)) {
+                showToast("Desktop notifications not supported in this browser");
+                return;
+            }
+            
+            if (Notification.permission === "denied") {
+                showToast("Notifications are blocked. Please enable them in your browser settings.");
+                return;
+            }
+            
+            if (Notification.permission === "default") {
+                const permission = await Notification.requestPermission();
+                notificationsEnabled = (permission === "granted");
+                try { localStorage.setItem('qai_notifications_enabled', notificationsEnabled ? 'true':'false'); } catch(e){}
+            } else if (Notification.permission === "granted") {
+                notificationsEnabled = !notificationsEnabled;
+                try { localStorage.setItem('qai_notifications_enabled', notificationsEnabled ? 'true':'false'); } catch(e){}
+                
+                if (notificationsEnabled) {
+                    new Notification("🔔 QAI Notifications Enabled", {
+                        body: "You'll receive alerts for training events",
+                        icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y="75" font-size="75">🤖</text></svg>'
+                    });
+                }
+            }
+            
+            updateNotificationUI();
+            showToast(notificationsEnabled ? "Notifications enabled!" : "Notifications disabled");
+        }
+        
+        // Initialize on load
+        initNotifications();
 
         async function viewHistory() {
             try {
@@ -893,6 +1000,10 @@
                 e.preventDefault();
                 loadStats();
                 showToast('Stats refreshed');
+            }
+            if (e.ctrlKey && e.key.toLowerCase() === 'd') {
+                e.preventDefault();
+                toggleDarkModeHub();
             }
         });
 
