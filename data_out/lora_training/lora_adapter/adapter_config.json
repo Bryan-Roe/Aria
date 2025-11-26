@@ -27,10 +27,10 @@
   "target_modules": [
     "fc2",
     "q_proj",
+    "v_proj",
     "o_proj",
     "k_proj",
-    "fc1",
-    "v_proj"
+    "fc1"
   ],
   "target_parameters": null,
   "task_type": "CAUSAL_LM",

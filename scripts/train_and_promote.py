@@ -264,7 +264,7 @@ def main():
     if args.learning_rate:
         additional_args.extend(["--learning-rate", str(args.learning_rate)])
     if args.batch_size:
-        additional_args.extend(["--per-device-train-batch-size", str(args.batch_size)])
+        additional_args.extend(["--train-batch-size", str(args.batch_size)])
     
     # Defaults
     config.setdefault("max_train_samples", 64)
