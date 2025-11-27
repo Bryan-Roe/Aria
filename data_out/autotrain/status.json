@@ -1,12 +1,12 @@
 {
-  "generated_at": "2025-11-27T10:30:03Z",
+  "generated_at": "2025-11-27T10:33:31Z",
   "jobs": [
     {
       "name": "aria_movement_quick",
       "runner": "hf",
       "category": "specialized",
       "status": "running",
-      "start_time": "20251127T103003Z",
+      "start_time": "20251127T103331Z",
       "cmd": null,
       "return_code": null,
       "duration_sec": null
