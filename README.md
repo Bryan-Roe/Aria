@@ -169,6 +169,32 @@ The workspace root contains Azurite database files for local Azure Storage devel
 
 These are used for local testing of Azure Functions and Storage features.
 
+### Remote TTS (chat-web)
+
+To enable server-side TTS (used by the web UI at /api/chat-web -> /api/tts) add your Azure Speech credentials to your local env or Functions settings.
+
+- Add AZURE_SPEECH_KEY and AZURE_SPEECH_REGION to your environment or into `local.settings.json` when running the Functions host locally.
+- See `local.settings.json.example` and `.env.example` in the repo root for templates you can copy and fill in.
+
+### Optional local TTS fallback (no Azure keys)
+
+If you prefer not to configure Azure Speech for local development, the Functions app can optionally synthesize audio locally using pyttsx3 (offline) or gTTS (Google TTS) when Azure credentials are not provided.
+
+To enable local fallback:
+
+1. Set QAI_ENABLE_LOCAL_TTS=true in your `local.settings.json` or `.env` (the example files include this key).
+2. Install the extra packages into your Functions environment:
+
+```powershell
+# From repo root
+pip install -r requirements.txt
+```
+
+3. Restart the Functions host. When you call `/api/tts` the server will try Azure first, then pyttsx3, then gTTS.
+
+Note: pyttsx3 is generally best on Windows (uses SAPI), gTTS uses Google Translate's TTS API and will produce MP3 output if used. The `/api/tts` endpoint returns audio_base64 and the format field (mp3 or wav). The client will use the returned format to play the audio.
+
+
 ---
 
 ## 🚀 Deployment

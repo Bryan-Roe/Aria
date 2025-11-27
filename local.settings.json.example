@@ -1,0 +1,20 @@
+{
+  "IsEncrypted": false,
+  "Values": {
+    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+    "FUNCTIONS_WORKER_RUNTIME": "python",
+
+    "# Remote TTS (Azure Cognitive Services) - set these to enable /api/tts": "",
+    "AZURE_SPEECH_KEY": "<your-azure-speech-key-here>",
+    "AZURE_SPEECH_REGION": "<your-azure-region-here>",
+
+    "# Optional: Azure/OpenAI or OpenAI credentials for streaming/model providers": "",
+    "AZURE_OPENAI_API_KEY": "",
+    "AZURE_OPENAI_ENDPOINT": "",
+    "AZURE_OPENAI_DEPLOYMENT": "",
+    "OPENAI_API_KEY": "",
+
+    "# Optional local fallback for TTS. Set to ""true"" to allow server-side local synthesis when Azure Speech is not configured": "",
+    "QAI_ENABLE_LOCAL_TTS": "true"
+  }
+}

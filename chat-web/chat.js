@@ -1,5 +1,7 @@
 // Chat Web Client - Version 2025-11-21 - QAI Backend
+// Encapsulate chat client in an IIFE to avoid leaking globals when embedded
 console.log('chat.js loaded - v2025-11-21-qai - Provider: QAI auto-detect with quantum mode');
+(function window_qai_chat_client() {
 const AI_BASE = '';
 const API_BASE = `/api/chat`;
 const STREAM_API = `/api/chat/stream`;
@@ -50,6 +52,13 @@ const systemPromptInput = document.getElementById('systemPromptInput');
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
+        // When the Aria interactive page embeds chat, it provides its own
+        // send/receive wiring and should avoid double-wiring the controls
+        // in this script. A page can opt-in by setting window.ARIA_EMBEDDED=true
+        if (window && window.ARIA_EMBEDDED) {
+            console.log('chat.js: ARIA_EMBEDDED detected — skipping default UI wiring');
+            return;
+        }
         if (cancelStreamBtn) {
             cancelStreamBtn.addEventListener('click', function() {
                 if (activeAbortController) {
@@ -806,4 +815,6 @@ function textToFeatures(text) {
     
     return features.slice(0, 8);
 }
+
+})();
 

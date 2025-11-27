@@ -567,11 +567,66 @@ def chat_stream(req: func.HttpRequest) -> func.HttpResponse:
                 }
                 yield (f"event: meta\n" f"data: {json.dumps(pre)}\n\n").encode("utf-8")
 
+                # We'll stream both textual deltas and token-level events when possible
+                import re
+
+                # Try to use tiktoken for token-level tokenization when available
+                enc = None
+                try:
+                    import tiktoken as _tt
+                    try:
+                        from tiktoken import encoding_for_model
+                        enc = encoding_for_model(info.model or "gpt-4o-mini")
+                    except Exception:
+                        enc = _tt.get_encoding("cl100k_base")
+                except Exception:
+                    enc = None
+
+                cumulative_text = ""
+                prev_token_count = 0
+                prev_word_count = 0
+                token_index = 0
+
                 for chunk in gen:
                     if not chunk:
                         continue
+
+                    # Raw textual delta (keep for compatibility)
                     payload = json.dumps({"delta": chunk})
                     yield (f"data: {payload}\n\n").encode("utf-8")
+
+                    # Accumulate for tokenization; note: chunk may be partial
+                    cumulative_text += chunk
+
+                    # Token-level events: prefer byte tokenization (tiktoken) when available
+                    if enc is not None:
+                        try:
+                            tok_ids = enc.encode(cumulative_text)
+                            new_ids = tok_ids[prev_token_count:]
+                            if new_ids:
+                                for tid in new_ids:
+                                    try:
+                                        txt = enc.decode([tid])
+                                    except Exception:
+                                        txt = ''
+                                    evt = json.dumps({"token_index": token_index, "token": txt, "cumulative": cumulative_text})
+                                    yield (f"event: token\n" f"data: {evt}\n\n").encode("utf-8")
+                                    token_index += 1
+                                prev_token_count = len(tok_ids)
+                        except Exception:
+                            # degrade to word-level if full tokenization fails
+                            enc = None
+
+                    if enc is None:
+                        # fallback: emit word-level token events (split by whitespace)
+                        words = list(re.finditer(r"\S+", cumulative_text))
+                        if len(words) > prev_word_count:
+                            for w in words[prev_word_count:]:
+                                token_text = w.group(0)
+                                evt = json.dumps({"token_index": token_index, "token": token_text, "cumulative": cumulative_text})
+                                yield (f"event: token\n" f"data: {evt}\n\n").encode("utf-8")
+                                token_index += 1
+                            prev_word_count = len(words)
 
                 yield b"event: done\ndata: {}\n\n"
             except Exception as e:
@@ -593,6 +648,233 @@ def chat_stream(req: func.HttpRequest) -> func.HttpResponse:
             mimetype="application/json",
             headers=_cors_headers(),
         )
+
+
+@app.route(route="tts", methods=["POST"], auth_level=func.AuthLevel.ANONYMOUS)
+def tts(req: func.HttpRequest) -> func.HttpResponse:
+    """Synthesize text to audio using a remote TTS provider (Azure Speech preferred).
+
+    POST /api/tts
+    Body: { "text": "...", "voice": "Name", "rate": 1.0, "pitch": 1.0, "format": "wav" }
+
+    Response: { "audio_base64": "...", "format": "wav", "timepoints": [{"word":"...","start_ms":0,"end_ms":123}, ...] }
+    If remote TTS provider isn't available, returns 501 with explanation.
+    """
+    try:
+        body = req.get_json() or {}
+        text = (body.get('text') or '').strip()
+        if not text:
+            return func.HttpResponse(json.dumps({"error": "No text provided"}), status_code=400, mimetype="application/json", headers=_cors_headers())
+
+        # Optional voice/rate/pitch params
+        voice = body.get('voice')
+        rate = float(body.get('rate') or 1.0)
+        pitch = float(body.get('pitch') or 1.0)
+        out_format = (body.get('format') or 'wav').lower()
+
+        # Prefer Azure Speech if configured
+        az_key = os.getenv('AZURE_SPEECH_KEY') or os.getenv('AZURE_SPEECH_API_KEY') or os.getenv('AZURE_SPEECH_SUBSCRIPTION')
+        az_region = os.getenv('AZURE_SPEECH_REGION') or os.getenv('AZURE_REGION')
+
+        if az_key and az_region:
+            try:
+                import io, base64, wave, re
+                try:
+                    import azure.cognitiveservices.speech as speechsdk
+                except Exception as e:
+                    return func.HttpResponse(json.dumps({"error": "Azure Speech SDK not available on server (install azure-cognitiveservices-speech)"}), status_code=500, mimetype="application/json", headers=_cors_headers())
+
+                # Configure speech
+                scfg = speechsdk.SpeechConfig(subscription=az_key, region=az_region)
+                # force WAV output for simpler handling
+                scfg.set_speech_synthesis_output_format(speechsdk.SpeechSynthesisOutputFormat.Riff16Khz16BitMonoPcm)
+                if voice:
+                    try:
+                        scfg.speech_synthesis_voice_name = voice
+                    except Exception:
+                        pass
+
+                synthesizer = speechsdk.SpeechSynthesizer(speech_config=scfg, audio_config=None)
+
+                # Do the synthesis
+                result = synthesizer.speak_text_async(text).get()
+
+                if result.reason != speechsdk.ResultReason.SynthesizingAudioCompleted:
+                    # Could be 'Canceled' with details
+                    detail = getattr(result, 'error_details', None) or str(result.reason)
+                    return func.HttpResponse(json.dumps({"error": "Synthesis failed", "detail": str(detail)}), status_code=500, mimetype="application/json", headers=_cors_headers())
+
+                # Extract audio bytes
+                stream = speechsdk.AudioDataStream(result)
+                audio_bytes = stream.readall()
+
+                # Compute approximate word timings by splitting text and sizing by character counts
+                try:
+                    f = io.BytesIO(audio_bytes)
+                    with wave.open(f, 'rb') as wr:
+                        framerate = wr.getframerate()
+                        frames = wr.getnframes()
+                    duration_s = frames / float(framerate) if framerate and frames else max(0.2, len(text) * 0.02)
+                except Exception:
+                    duration_s = max(0.2, len(text) * 0.02)
+
+                words = re.findall(r"\S+", text)
+                total_chars = sum(len(w) for w in words) or 1
+                timepoints = []
+                cursor = 0.0
+                for w in words:
+                    proportion = len(w) / total_chars
+                    dur = duration_s * proportion
+                    start_ms = int(cursor * 1000)
+                    end_ms = int((cursor + dur) * 1000)
+                    timepoints.append({"word": w, "start_ms": start_ms, "end_ms": end_ms})
+                    cursor += dur
+
+                import base64 as _b64
+                audio_b64 = _b64.b64encode(audio_bytes).decode('ascii')
+
+                return func.HttpResponse(json.dumps({"audio_base64": audio_b64, "format": "wav", "timepoints": timepoints}), status_code=200, mimetype="application/json", headers=_cors_headers())
+            except Exception as e:
+                logging.exception(f"TTS (Azure) synth failed: {e}")
+                return func.HttpResponse(json.dumps({"error": f"TTS provider error: {e}"}), status_code=500, mimetype="application/json", headers=_cors_headers())
+
+        # No remote TTS provider is configured. Attempt optional local fallbacks if enabled.
+        enable_local = os.getenv('QAI_ENABLE_LOCAL_TTS', 'true').lower() in ('true', '1', 'yes', 'y')
+
+        if enable_local:
+            # Try pyttsx3 (offline, best on Windows) first
+            try:
+                try:
+                    import tempfile, base64, io, wave, re
+                    import pyttsx3
+                except Exception:  # pyttsx3 not available
+                    pyttsx3 = None
+
+                if pyttsx3 is not None:
+                    tmp = None
+                    try:
+                        tmp = tempfile.NamedTemporaryFile(delete=False, suffix='.wav')
+                        tmp_path = tmp.name
+                        tmp.close()
+
+                        engine = pyttsx3.init()
+                        # Try to set rate (pyttsx3 rate is an int; we scale from given rate)
+                        try:
+                            engine.setProperty('rate', int(200 * (rate or 1.0)))
+                        except Exception:
+                            pass
+                        # Try to select voice by name if provided
+                        try:
+                            if voice:
+                                voices = engine.getProperty('voices') or []
+                                for v in voices:
+                                    try:
+                                        if voice.lower() in (v.name or '').lower():
+                                            engine.setProperty('voice', v.id)
+                                            break
+                                    except Exception:
+                                        continue
+                        except Exception:
+                            pass
+
+                        engine.save_to_file(text, tmp_path)
+                        engine.runAndWait()
+
+                        with open(tmp_path, 'rb') as fh:
+                            audio_bytes = fh.read()
+
+                        # compute approximate duration using wave reader
+                        try:
+                            f = io.BytesIO(audio_bytes)
+                            with wave.open(f, 'rb') as wr:
+                                framerate = wr.getframerate()
+                                frames = wr.getnframes()
+                            duration_s = frames / float(framerate) if framerate and frames else max(0.2, len(text) * 0.02)
+                        except Exception:
+                            duration_s = max(0.2, len(text) * 0.02)
+
+                        words = re.findall(r"\S+", text)
+                        total_chars = sum(len(w) for w in words) or 1
+                        timepoints = []
+                        cursor = 0.0
+                        for w in words:
+                            proportion = len(w) / total_chars
+                            dur = duration_s * proportion
+                            start_ms = int(cursor * 1000)
+                            end_ms = int((cursor + dur) * 1000)
+                            timepoints.append({"word": w, "start_ms": start_ms, "end_ms": end_ms})
+                            cursor += dur
+
+                        audio_b64 = base64.b64encode(audio_bytes).decode('ascii')
+                        return func.HttpResponse(json.dumps({"audio_base64": audio_b64, "format": "wav", "timepoints": timepoints}), status_code=200, mimetype="application/json", headers=_cors_headers())
+                    finally:
+                        try:
+                            if tmp is not None and tmp_path and os.path.exists(tmp_path):
+                                os.unlink(tmp_path)
+                        except Exception:
+                            pass
+
+                # If pyttsx3 not available or failed, try gTTS (mp3 output)
+                try:
+                    import tempfile, base64, re
+                    from gtts import gTTS
+                except Exception:
+                    gTTS = None
+
+                if gTTS is not None:
+                    tmp = None
+                    try:
+                        tmp = tempfile.NamedTemporaryFile(delete=False, suffix='.mp3')
+                        tmp_path = tmp.name
+                        tmp.close()
+
+                        tts_obj = gTTS(text=text)
+                        tts_obj.save(tmp_path)
+
+                        with open(tmp_path, 'rb') as fh:
+                            audio_bytes = fh.read()
+
+                        # approximate duration: fallback to char-count based estimate
+                        duration_s = max(0.2, len(text) * 0.02)
+                        words = re.findall(r"\S+", text)
+                        total_chars = sum(len(w) for w in words) or 1
+                        timepoints = []
+                        cursor = 0.0
+                        for w in words:
+                            proportion = len(w) / total_chars
+                            dur = duration_s * proportion
+                            start_ms = int(cursor * 1000)
+                            end_ms = int((cursor + dur) * 1000)
+                            timepoints.append({"word": w, "start_ms": start_ms, "end_ms": end_ms})
+                            cursor += dur
+
+                        audio_b64 = base64.b64encode(audio_bytes).decode('ascii')
+                        return func.HttpResponse(json.dumps({"audio_base64": audio_b64, "format": "mp3", "timepoints": timepoints}), status_code=200, mimetype="application/json", headers=_cors_headers())
+                    finally:
+                        try:
+                            if tmp is not None and tmp_path and os.path.exists(tmp_path):
+                                os.unlink(tmp_path)
+                        except Exception:
+                            pass
+
+            except Exception as e:
+                logging.exception(f"Local fallback TTS failed: {e}")
+                return func.HttpResponse(json.dumps({"error": f"Local TTS provider failed: {e}"}), status_code=500, mimetype="application/json", headers=_cors_headers())
+
+        # If we reach here remote + local TTS are unavailable
+        return func.HttpResponse(
+            json.dumps({
+                "error": "No remote TTS provider configured and no local fallback available.",
+                "help": "Set AZURE_SPEECH_KEY and AZURE_SPEECH_REGION to enable Azure speech, or install pyttsx3 or gTTS and set QAI_ENABLE_LOCAL_TTS=true in local.settings.json/.env to enable local fallback. See local.settings.json.example and .env.example in the repo for templates."
+            }),
+            status_code=501,
+            mimetype="application/json",
+            headers=_cors_headers()
+        )
+
+    except Exception as e:  # noqa: BLE001
+        logging.exception(f"/tts error: {e}")
+        return func.HttpResponse(json.dumps({"error": str(e)}), status_code=500, mimetype="application/json", headers=_cors_headers())
 
 
 # =============================================================================

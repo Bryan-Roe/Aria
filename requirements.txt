@@ -23,4 +23,10 @@ flask-socketio>=5.3.6
 python-socketio>=5.11.0
 eventlet>=0.35.2  # Optional async server for SocketIO (can fallback to threading)
 
+# Optional TTS fallbacks for local development: pyttsx3 (offline, Windows-friendly) and gTTS
+# If you want server-side TTS without Azure credentials, enable QAI_ENABLE_LOCAL_TTS and
+# install these packages.
+pyttsx3>=2.90
+gTTS>=2.3.0
+
 # NOTE: After adding telemetry & cosmos, run task: pip install (functions)

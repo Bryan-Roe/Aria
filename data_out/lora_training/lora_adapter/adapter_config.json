@@ -25,11 +25,11 @@
   "rank_pattern": {},
   "revision": null,
   "target_modules": [
+    "o_proj",
+    "v_proj",
+    "fc2",
     "k_proj",
     "fc1",
-    "o_proj",
-    "fc2",
-    "v_proj",
     "q_proj"
   ],
   "target_parameters": null,
