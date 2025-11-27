@@ -1,5 +1,5 @@
 {
-  "generated_at": "2025-11-26T23:48:22Z",
+  "generated_at": "2025-11-27T06:35:07Z",
   "jobs": [
     {
       "name": "local_job",
@@ -12,10 +12,10 @@
         "local_config.yaml",
         "--reinstall"
       ],
-      "start_time": "20251126T234822Z",
+      "start_time": "20251127T063507Z",
       "status": "validated",
       "return_code": null,
-      "log": "C:\\Users\\Bryan\\OneDrive\\AI\\data_out\\autotrain\\local_job\\20251126T234822Z\\stdout.log",
+      "log": "C:\\Users\\Bryan\\OneDrive\\AI\\data_out\\autotrain\\local_job\\20251127T063507Z\\stdout.log",
       "output_dir": null,
       "validated_type": "dry-run"
     }

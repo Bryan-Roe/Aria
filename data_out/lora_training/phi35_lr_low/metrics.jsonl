@@ -15,3 +15,5 @@
 {"step": 64, "eval_loss": 2.7930984497070312, "eval_perplexity": 16.331543955677397, "timestamp": "2025-11-24T00:27:38.185097Z"}
 {"step": 64, "eval_loss": 2.7930984497070312, "eval_perplexity": 16.331543955677397, "timestamp": "2025-11-24T00:29:20.703549Z"}
 {"phase": "post", "eval_loss": 2.7930984497070312, "eval_perplexity": 16.331543955677397, "timestamp": "2025-11-24T00:29:20.711549Z"}
+{"step": 0, "eval_loss": 3.2323498725891113, "eval_perplexity": 25.3391307945276, "timestamp": "2025-11-27T10:17:58.237942Z"}
+{"phase": "pre", "eval_loss": 3.2323498725891113, "eval_perplexity": 25.3391307945276, "timestamp": "2025-11-27T10:17:58.239941Z"}

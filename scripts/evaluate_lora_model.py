@@ -98,22 +98,48 @@ def compute_perplexity(model, tokenizer, texts: List[str], device: str = "cpu") 
 
 
 
-def compute_diversity(texts: List[str], tokenizer) -> float:
-    """Compute unique token ratio (diversity metric)."""
+def compute_diversity(texts: List[str], tokenizer) -> Dict[str, float]:
+    """Compute comprehensive diversity metrics.
+    
+    Returns:
+        Dict with diversity metrics:
+        - distinct_1: Ratio of unique unigrams
+        - distinct_2: Ratio of unique bigrams
+        - unique_token_ratio: Overall unique token ratio
+    """
     if not texts:
-        return 0.0
+        return {"distinct_1": 0.0, "distinct_2": 0.0, "unique_token_ratio": 0.0}
     
     all_tokens = []
+    all_unigrams = []
+    all_bigrams = []
+    
     for text in texts:
         tokens = tokenizer.tokenize(text)
         all_tokens.extend(tokens)
+        all_unigrams.extend(tokens)
+        
+        # Generate bigrams
+        for i in range(len(tokens) - 1):
+            all_bigrams.append(f"{tokens[i]}_{tokens[i+1]}")
     
     if not all_tokens:
-        return 0.0
+        return {"distinct_1": 0.0, "distinct_2": 0.0, "unique_token_ratio": 0.0}
     
-    unique_tokens = len(set(all_tokens))
-    total_tokens = len(all_tokens)
-    return unique_tokens / total_tokens
+    # Distinct-1: unique unigrams ratio
+    distinct_1 = len(set(all_unigrams)) / len(all_unigrams) if all_unigrams else 0.0
+    
+    # Distinct-2: unique bigrams ratio
+    distinct_2 = len(set(all_bigrams)) / len(all_bigrams) if all_bigrams else 0.0
+    
+    # Overall unique token ratio
+    unique_token_ratio = len(set(all_tokens)) / len(all_tokens)
+    
+    return {
+        "distinct_1": distinct_1,
+        "distinct_2": distinct_2,
+        "unique_token_ratio": unique_token_ratio,
+    }
 
 
 def compute_response_length(texts: List[str], tokenizer) -> float:
@@ -205,7 +231,11 @@ def evaluate_lora_model(
     
     if "diversity" in metrics:
         print("[eval] Computing diversity...", file=sys.stderr)
-        results["diversity"] = compute_diversity(texts, tokenizer)
+        diversity_metrics = compute_diversity(texts, tokenizer)
+        # Flatten diversity metrics into results
+        results.update(diversity_metrics)
+        # Also keep aggregated diversity score
+        results["diversity"] = (diversity_metrics["distinct_1"] + diversity_metrics["distinct_2"]) / 2
     
     if "response_length" in metrics:
         print("[eval] Computing response length...", file=sys.stderr)

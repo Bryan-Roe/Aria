@@ -1,10 +1,10 @@
 {
-  "generated_at": "2025-11-26T04:06:27Z",
+  "generated_at": "2025-11-27T09:44:53Z",
   "total_jobs": 8,
   "succeeded": 0,
-  "failed": 0,
-  "validated": 7,
-  "missing": 1,
+  "failed": 8,
+  "validated": 0,
+  "missing": 0,
   "jobs": [
     {
       "name": "eval_smoke_test",
@@ -27,17 +27,16 @@
         "--save-dir",
         "C:\\Users\\Bryan\\OneDrive\\AI\\data_out\\evaluation_autorun\\eval_smoke_test"
       ],
-      "start_time": "20251126T040627Z",
-      "status": "validated",
-      "return_code": null,
-      "log": "C:\\Users\\Bryan\\OneDrive\\AI\\data_out\\evaluation_autorun\\eval_smoke_test\\20251126T040627Z\\stdout.log",
-      "results_file": "C:\\Users\\Bryan\\OneDrive\\AI\\data_out\\evaluation_autorun\\eval_smoke_test\\20251126T040627Z\\results.json",
+      "start_time": "20251127T094356Z",
+      "status": "failed",
+      "return_code": 1,
+      "log": "C:\\Users\\Bryan\\OneDrive\\AI\\data_out\\evaluation_autorun\\eval_smoke_test\\20251127T094356Z\\stdout.log",
+      "results_file": "C:\\Users\\Bryan\\OneDrive\\AI\\data_out\\evaluation_autorun\\eval_smoke_test\\20251127T094356Z\\results.json",
       "metrics_computed": [
         "accuracy",
         "response_time"
       ],
-      "missing": [],
-      "warnings": []
+      "duration_sec": 24.42
     },
     {
       "name": "eval_lora_phi35_full",
@@ -68,11 +67,11 @@
         "--save-dir",
         "C:\\Users\\Bryan\\OneDrive\\AI\\data_out\\evaluation_autorun\\eval_lora_phi35_full"
       ],
-      "start_time": "20251126T040627Z",
-      "status": "validated",
-      "return_code": null,
-      "log": "C:\\Users\\Bryan\\OneDrive\\AI\\data_out\\evaluation_autorun\\eval_lora_phi35_full\\20251126T040627Z\\stdout.log",
-      "results_file": "C:\\Users\\Bryan\\OneDrive\\AI\\data_out\\evaluation_autorun\\eval_lora_phi35_full\\20251126T040627Z\\results.json",
+      "start_time": "20251127T094421Z",
+      "status": "failed",
+      "return_code": 2,
+      "log": "C:\\Users\\Bryan\\OneDrive\\AI\\data_out\\evaluation_autorun\\eval_lora_phi35_full\\20251127T094421Z\\stdout.log",
+      "results_file": "C:\\Users\\Bryan\\OneDrive\\AI\\data_out\\evaluation_autorun\\eval_lora_phi35_full\\20251127T094421Z\\results.json",
       "metrics_computed": [
         "accuracy",
         "bleu",
@@ -80,8 +79,7 @@
         "response_time",
         "token_efficiency"
       ],
-      "missing": [],
-      "warnings": []
+      "duration_sec": 6.34
     },
     {
       "name": "eval_quantum_heart",
@@ -106,24 +104,18 @@
         "--save-dir",
         "C:\\Users\\Bryan\\OneDrive\\AI\\data_out\\evaluation_autorun\\eval_quantum_heart"
       ],
-      "start_time": "20251126T040627Z",
-      "status": "missing",
-      "return_code": null,
-      "log": "C:\\Users\\Bryan\\OneDrive\\AI\\data_out\\evaluation_autorun\\eval_quantum_heart\\20251126T040627Z\\stdout.log",
-      "results_file": "C:\\Users\\Bryan\\OneDrive\\AI\\data_out\\evaluation_autorun\\eval_quantum_heart\\20251126T040627Z\\results.json",
+      "start_time": "20251127T094427Z",
+      "status": "failed",
+      "return_code": 2,
+      "log": "C:\\Users\\Bryan\\OneDrive\\AI\\data_out\\evaluation_autorun\\eval_quantum_heart\\20251127T094427Z\\stdout.log",
+      "results_file": "C:\\Users\\Bryan\\OneDrive\\AI\\data_out\\evaluation_autorun\\eval_quantum_heart\\20251127T094427Z\\results.json",
       "metrics_computed": [
         "accuracy",
         "precision",
         "recall",
         "f1_score"
       ],
-      "missing": [
-        "quantum-ai\\results\\heart_disease_model.json"
-      ],
-      "warnings": [
-        "Evaluation script not yet created: C:\\Users\\Bryan\\OneDrive\\AI\\scripts\\evaluate_quantum_model.py"
-      ],
-      "blocker": true
+      "duration_sec": 0.08
     },
     {
       "name": "eval_local_baseline",
@@ -144,19 +136,16 @@
         "--save-dir",
         "C:\\Users\\Bryan\\OneDrive\\AI\\data_out\\evaluation_autorun\\eval_local_baseline"
       ],
-      "start_time": "20251126T040627Z",
-      "status": "validated",
-      "return_code": null,
-      "log": "C:\\Users\\Bryan\\OneDrive\\AI\\data_out\\evaluation_autorun\\eval_local_baseline\\20251126T040627Z\\stdout.log",
-      "results_file": "C:\\Users\\Bryan\\OneDrive\\AI\\data_out\\evaluation_autorun\\eval_local_baseline\\20251126T040627Z\\results.json",
+      "start_time": "20251127T094427Z",
+      "status": "failed",
+      "return_code": 2,
+      "log": "C:\\Users\\Bryan\\OneDrive\\AI\\data_out\\evaluation_autorun\\eval_local_baseline\\20251127T094427Z\\stdout.log",
+      "results_file": "C:\\Users\\Bryan\\OneDrive\\AI\\data_out\\evaluation_autorun\\eval_local_baseline\\20251127T094427Z\\results.json",
       "metrics_computed": [
         "response_time",
         "determinism"
       ],
-      "missing": [],
-      "warnings": [
-        "Evaluation script not yet created: C:\\Users\\Bryan\\OneDrive\\AI\\scripts\\evaluate_local_model.py"
-      ]
+      "duration_sec": 0.05
     },
     {
       "name": "eval_phi35_lr_low",
@@ -183,19 +172,18 @@
         "--save-dir",
         "C:\\Users\\Bryan\\OneDrive\\AI\\data_out\\evaluation_autorun\\eval_phi35_lr_low"
       ],
-      "start_time": "20251126T040627Z",
-      "status": "validated",
-      "return_code": null,
-      "log": "C:\\Users\\Bryan\\OneDrive\\AI\\data_out\\evaluation_autorun\\eval_phi35_lr_low\\20251126T040627Z\\stdout.log",
-      "results_file": "C:\\Users\\Bryan\\OneDrive\\AI\\data_out\\evaluation_autorun\\eval_phi35_lr_low\\20251126T040627Z\\results.json",
+      "start_time": "20251127T094427Z",
+      "status": "failed",
+      "return_code": 1,
+      "log": "C:\\Users\\Bryan\\OneDrive\\AI\\data_out\\evaluation_autorun\\eval_phi35_lr_low\\20251127T094427Z\\stdout.log",
+      "results_file": "C:\\Users\\Bryan\\OneDrive\\AI\\data_out\\evaluation_autorun\\eval_phi35_lr_low\\20251127T094427Z\\results.json",
       "metrics_computed": [
         "accuracy",
         "bleu",
         "rouge",
         "response_time"
       ],
-      "missing": [],
-      "warnings": []
+      "duration_sec": 6.38
     },
     {
       "name": "eval_phi35_lr_high",
@@ -222,19 +210,18 @@
         "--save-dir",
         "C:\\Users\\Bryan\\OneDrive\\AI\\data_out\\evaluation_autorun\\eval_phi35_lr_high"
       ],
-      "start_time": "20251126T040627Z",
-      "status": "validated",
-      "return_code": null,
-      "log": "C:\\Users\\Bryan\\OneDrive\\AI\\data_out\\evaluation_autorun\\eval_phi35_lr_high\\20251126T040627Z\\stdout.log",
-      "results_file": "C:\\Users\\Bryan\\OneDrive\\AI\\data_out\\evaluation_autorun\\eval_phi35_lr_high\\20251126T040627Z\\results.json",
+      "start_time": "20251127T094433Z",
+      "status": "failed",
+      "return_code": 1,
+      "log": "C:\\Users\\Bryan\\OneDrive\\AI\\data_out\\evaluation_autorun\\eval_phi35_lr_high\\20251127T094433Z\\stdout.log",
+      "results_file": "C:\\Users\\Bryan\\OneDrive\\AI\\data_out\\evaluation_autorun\\eval_phi35_lr_high\\20251127T094433Z\\results.json",
       "metrics_computed": [
         "accuracy",
         "bleu",
         "rouge",
         "response_time"
       ],
-      "missing": [],
-      "warnings": []
+      "duration_sec": 6.62
     },
     {
       "name": "eval_phi35_drop_low",
@@ -261,19 +248,18 @@
         "--save-dir",
         "C:\\Users\\Bryan\\OneDrive\\AI\\data_out\\evaluation_autorun\\eval_phi35_drop_low"
       ],
-      "start_time": "20251126T040627Z",
-      "status": "validated",
-      "return_code": null,
-      "log": "C:\\Users\\Bryan\\OneDrive\\AI\\data_out\\evaluation_autorun\\eval_phi35_drop_low\\20251126T040627Z\\stdout.log",
-      "results_file": "C:\\Users\\Bryan\\OneDrive\\AI\\data_out\\evaluation_autorun\\eval_phi35_drop_low\\20251126T040627Z\\results.json",
+      "start_time": "20251127T094440Z",
+      "status": "failed",
+      "return_code": 1,
+      "log": "C:\\Users\\Bryan\\OneDrive\\AI\\data_out\\evaluation_autorun\\eval_phi35_drop_low\\20251127T094440Z\\stdout.log",
+      "results_file": "C:\\Users\\Bryan\\OneDrive\\AI\\data_out\\evaluation_autorun\\eval_phi35_drop_low\\20251127T094440Z\\results.json",
       "metrics_computed": [
         "accuracy",
         "bleu",
         "rouge",
         "response_time"
       ],
-      "missing": [],
-      "warnings": []
+      "duration_sec": 6.55
     },
     {
       "name": "eval_phi35_drop_high",
@@ -300,19 +286,18 @@
         "--save-dir",
         "C:\\Users\\Bryan\\OneDrive\\AI\\data_out\\evaluation_autorun\\eval_phi35_drop_high"
       ],
-      "start_time": "20251126T040627Z",
-      "status": "validated",
-      "return_code": null,
-      "log": "C:\\Users\\Bryan\\OneDrive\\AI\\data_out\\evaluation_autorun\\eval_phi35_drop_high\\20251126T040627Z\\stdout.log",
-      "results_file": "C:\\Users\\Bryan\\OneDrive\\AI\\data_out\\evaluation_autorun\\eval_phi35_drop_high\\20251126T040627Z\\results.json",
+      "start_time": "20251127T094447Z",
+      "status": "failed",
+      "return_code": 1,
+      "log": "C:\\Users\\Bryan\\OneDrive\\AI\\data_out\\evaluation_autorun\\eval_phi35_drop_high\\20251127T094447Z\\stdout.log",
+      "results_file": "C:\\Users\\Bryan\\OneDrive\\AI\\data_out\\evaluation_autorun\\eval_phi35_drop_high\\20251127T094447Z\\results.json",
       "metrics_computed": [
         "accuracy",
         "bleu",
         "rouge",
         "response_time"
       ],
-      "missing": [],
-      "warnings": []
+      "duration_sec": 6.56
     }
   ]
 }

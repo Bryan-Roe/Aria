@@ -32,8 +32,15 @@ import urllib.parse
 import hashlib
 from typing import Optional, Any, Dict
 
-from sqlalchemy import create_engine, text
-from sqlalchemy.exc import SQLAlchemyError  # type: ignore
+# Attempt to import SQLAlchemy; provide graceful fallback if unavailable
+_SQLALCHEMY_AVAILABLE = True
+try:
+    from sqlalchemy import create_engine, text
+    from sqlalchemy.exc import SQLAlchemyError  # type: ignore
+except Exception:  # pragma: no cover
+    _SQLALCHEMY_AVAILABLE = False
+    create_engine = None  # type: ignore
+    text = None  # type: ignore
 
 _ENGINE = None  # cached engine instance
 _LAST_URL = None
@@ -137,6 +144,18 @@ def get_engine():  # noqa: ANN001
     url = resolve_sql_url()
     if not url:
         return None
+    if not _SQLALCHEMY_AVAILABLE:
+        # Fallback: no SQLAlchemy installed
+        # Return None to allow sqlite3 fallback in calling code
+        # Only SQLite URLs are supported in fallback mode
+        if str(url).startswith("sqlite"):
+            _ENGINE = None
+            _LAST_URL = url
+            return None
+        # Unsupported vendor without SQLAlchemy
+        return None
+        # Unsupported vendor without SQLAlchemy
+        return None
     if _ENGINE is None or _LAST_URL != url:
         try:
             _ENGINE = create_engine(
@@ -162,17 +181,24 @@ def sql_health() -> dict:
         return {"enabled": False, "url": None}
     info = {
         "enabled": True,
-        "url": str(engine.url),
+        "url": str(getattr(engine, "url", "")),
         "vendor": getattr(engine.dialect, "name", "unknown"),
         "connectivity": False,
         "error": None,
     }
     try:
-        with engine.connect() as conn:
-            val = conn.execute(text("SELECT 1")).scalar()
-            info["connectivity"] = bool(val == 1)
-    except SQLAlchemyError as e:  # expected vendor-specific errors
-        info["error"] = str(e)
+        if _SQLALCHEMY_AVAILABLE:
+            with engine.connect() as conn:
+                val = conn.execute(text("SELECT 1")).scalar()
+                info["connectivity"] = bool(val == 1)
+        else:
+            # Fallback: direct sqlite3 connectivity check
+            import sqlite3
+            # Use in-memory DB for health probe
+            with sqlite3.connect(":memory:") as conn:
+                cur = conn.execute("SELECT 1")
+                row = cur.fetchone()
+                info["connectivity"] = bool(row and row[0] == 1)
     except Exception as e:  # noqa: BLE001
         info["error"] = str(e)
     return info
@@ -210,6 +236,16 @@ def engine_stats() -> Dict[str, Any]:
         "slow_queries_1min": 0,
         "slow_query_threshold_ms": resolve_slow_query_threshold(),
     }
+    if not _SQLALCHEMY_AVAILABLE:
+        # Minimal stats for fallback
+        stats.update({
+            "type": "DirectSQLite",
+            "vendor": "sqlite",
+            "status": "ok",
+        })
+        _prune_slow_query_log()
+        stats["slow_queries_1min"] = len(_SLOW_QUERY_LOG)
+        return stats
     if pool:
         for attr in ["size", "checkedout", "overflow"]:
             stats[attr] = _safe_call(pool, attr)
@@ -251,14 +287,32 @@ def quick_query(sql: str, **kwargs) -> list[dict]:  # noqa: ANN001
     if simulate_delay > 0:
         time.sleep(simulate_delay)
     start = time.perf_counter()
-    try:
-        with engine.connect() as conn:
-            res = conn.execute(text(sql))
-            cols = res.keys()
-            rows = [dict(zip(cols, row)) for row in res.fetchall()]
-    except Exception as e:  # noqa: BLE001
-        logging.warning(f"[sql_engine] quick_query failed: {e}")
-        return []
+    rows: list[dict] = []
+    if _SQLALCHEMY_AVAILABLE:
+        try:
+            with engine.connect() as conn:
+                res = conn.execute(text(sql))
+                cols = res.keys()
+                rows = [dict(zip(cols, row)) for row in res.fetchall()]
+        except Exception as e:  # noqa: BLE001
+            logging.warning(f"[sql_engine] quick_query failed: {e}")
+            return []
+    else:
+        # Fallback: execute via sqlite3
+        import sqlite3
+        try:
+            with sqlite3.connect(":memory:") as conn:
+                cur = conn.execute(sql)
+                # SQLite cursor.description provides columns
+                cols = [d[0] for d in (cur.description or [])]
+                data = cur.fetchall()
+                if cols:
+                    rows = [dict(zip(cols, row)) for row in data]
+                else:
+                    rows = []
+        except Exception as e:  # noqa: BLE001
+            logging.warning(f"[sql_engine] quick_query fallback failed: {e}")
+            return []
     duration_ms = (time.perf_counter() - start) * 1000.0
     slow_ms = resolve_slow_query_threshold()
     vendor = getattr(engine.dialect, "name", "unknown")

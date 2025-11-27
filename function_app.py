@@ -70,6 +70,10 @@ sys.path.insert(0, str(talk_to_ai_path))
 quantum_ai_path = Path(__file__).resolve().parent / "quantum-ai" / "src"
 sys.path.insert(0, str(quantum_ai_path))
 
+# Add scripts to path for vision inference
+scripts_path = Path(__file__).resolve().parent / "scripts"
+sys.path.insert(0, str(scripts_path))
+
 from chat_providers import detect_provider, RoleMessage
 from token_utils import prune_messages
 
@@ -508,6 +512,44 @@ def evaluation_results(req: func.HttpRequest) -> func.HttpResponse:
 # Streaming Chat API (Server-Sent Events compatible)
 # =============================================================================
 
+def parse_movement_commands(text: str) -> dict:
+    """Parse movement commands from AI response text"""
+    lower_text = text.lower()
+    commands = []
+    
+    # Movement commands
+    if '[aria:walk:left]' in lower_text or 'walk left' in lower_text:
+        commands.append({'action': 'walk', 'direction': 'left', 'distance': 200})
+    if '[aria:walk:right]' in lower_text or 'walk right' in lower_text:
+        commands.append({'action': 'walk', 'direction': 'right', 'distance': 200})
+    if '[aria:walk:up]' in lower_text or 'walk up' in lower_text:
+        commands.append({'action': 'walk', 'direction': 'up', 'distance': 200})
+    if '[aria:walk:down]' in lower_text or 'walk down' in lower_text:
+        commands.append({'action': 'walk', 'direction': 'down', 'distance': 200})
+    
+    if '[aria:move:left]' in lower_text or 'aria move left' in lower_text:
+        commands.append({'action': 'move', 'direction': 'left', 'distance': 100})
+    if '[aria:move:right]' in lower_text or 'aria move right' in lower_text:
+        commands.append({'action': 'move', 'direction': 'right', 'distance': 100})
+    if '[aria:move:up]' in lower_text or 'aria move up' in lower_text:
+        commands.append({'action': 'move', 'direction': 'up', 'distance': 100})
+    if '[aria:move:down]' in lower_text or 'aria move down' in lower_text:
+        commands.append({'action': 'move', 'direction': 'down', 'distance': 100})
+    
+    # Position commands
+    if '[aria:center]' in lower_text or 'go to center' in lower_text or 'move to center' in lower_text:
+        commands.append({'action': 'center'})
+    
+    # Action commands
+    if '[aria:wave]' in lower_text or 'aria wave' in lower_text:
+        commands.append({'action': 'wave'})
+    if '[aria:jump]' in lower_text or 'aria jump' in lower_text:
+        commands.append({'action': 'jump'})
+    if '[aria:dance]' in lower_text or 'aria dance' in lower_text:
+        commands.append({'action': 'dance'})
+    
+    return {'commands': commands} if commands else {}
+
 @app.route(route="chat/stream", methods=["POST"], auth_level=func.AuthLevel.ANONYMOUS)
 def chat_stream(req: func.HttpRequest) -> func.HttpResponse:
     """
@@ -586,6 +628,7 @@ def chat_stream(req: func.HttpRequest) -> func.HttpResponse:
                 prev_token_count = 0
                 prev_word_count = 0
                 token_index = 0
+                movement_commands_sent = False
 
                 for chunk in gen:
                     if not chunk:
@@ -597,6 +640,14 @@ def chat_stream(req: func.HttpRequest) -> func.HttpResponse:
 
                     # Accumulate for tokenization; note: chunk may be partial
                     cumulative_text += chunk
+                    
+                    # Check for movement commands periodically
+                    if not movement_commands_sent and len(cumulative_text) > 20:
+                        movement_data = parse_movement_commands(cumulative_text)
+                        if movement_data.get('commands'):
+                            movement_event = json.dumps(movement_data)
+                            yield (f"event: movement\ndata: {movement_event}\n\n").encode("utf-8")
+                            movement_commands_sent = True
 
                     # Token-level events: prefer byte tokenization (tiktoken) when available
                     if enc is not None:
@@ -1151,6 +1202,9 @@ def ai_status(req: func.HttpRequest) -> func.HttpResponse:
                 "/api/chat",
                 "/api/chat/stream",
                 "/api/ai/status",
+                "/api/vision/infer",
+                "/api/vision/batch-infer",
+                    "/api/image/generate",
             ],
             "status": "ok",
         }
@@ -1170,6 +1224,395 @@ def ai_status(req: func.HttpRequest) -> func.HttpResponse:
             mimetype="application/json",
             headers=_cors_headers(),
         )
+
+
+# =============================================================================
+# Vision AI Endpoints - Expression/emotion classification
+# =============================================================================
+
+@app.route(route="vision/infer", methods=["POST"], auth_level=func.AuthLevel.ANONYMOUS)
+def vision_infer(req: func.HttpRequest) -> func.HttpResponse:
+    """
+    Vision inference endpoint for expression/emotion classification.
+    
+    POST /api/vision/infer
+    Body (option 1 - base64):
+    {
+        "image": "base64_encoded_image_string",
+        "format": "base64"
+    }
+    
+    Body (option 2 - URL):
+    {
+        "image_url": "https://example.com/image.jpg",
+        "format": "url"
+    }
+    
+    Response:
+    {
+        "label": "happy",
+        "confidence": 0.92,
+        "scores": {
+            "happy": 0.92,
+            "sad": 0.05,
+            "neutral": 0.03
+        },
+        "model_info": {
+            "checkpoint": "...",
+            "classes": ["happy", "sad", "neutral"],
+            "device": "cpu"
+        }
+    }
+    """
+    logging.info('Vision infer endpoint invoked')
+    
+    try:
+        # Lazy import vision inference (only loaded when needed)
+        try:
+            from vision_inference import VisionInference
+        except ImportError as e:
+            return func.HttpResponse(
+                json.dumps({"error": f"Vision inference not available: {e}"}),
+                status_code=500,
+                mimetype="application/json",
+                headers=_cors_headers()
+            )
+        
+        # Parse request
+        req_body = req.get_json()
+        image_data = req_body.get('image')
+        image_url = req_body.get('image_url')
+        format_type = req_body.get('format', 'base64')
+        
+        if not image_data and not image_url:
+            return func.HttpResponse(
+                json.dumps({"error": "No image provided. Include 'image' (base64) or 'image_url' in request body."}),
+                status_code=400,
+                mimetype="application/json",
+                headers=_cors_headers()
+            )
+        
+        # Initialize vision inference (loads latest checkpoint)
+        # Cache the instance for performance (singleton pattern)
+        if not hasattr(vision_infer, '_vision_model'):
+            logging.info('Initializing vision model (first request)...')
+            try:
+                vision_infer._vision_model = VisionInference()
+            except FileNotFoundError as e:
+                return func.HttpResponse(
+                    json.dumps({
+                        "error": "No trained model found",
+                        "detail": str(e),
+                        "help": "Train a model first using: python scripts/train_vision.py"
+                    }),
+                    status_code=404,
+                    mimetype="application/json",
+                    headers=_cors_headers()
+                )
+        
+        vi = vision_infer._vision_model
+        
+        # Run inference based on input format
+        if image_url:
+            # Fetch image from URL
+            try:
+                import requests
+                from PIL import Image
+                import io
+                response = requests.get(image_url, timeout=10)
+                response.raise_for_status()
+                img = Image.open(io.BytesIO(response.content))
+                result = vi.predict(img)
+            except Exception as e:
+                return func.HttpResponse(
+                    json.dumps({"error": f"Failed to fetch image from URL: {e}"}),
+                    status_code=400,
+                    mimetype="application/json",
+                    headers=_cors_headers()
+                )
+        elif format_type == 'base64':
+            # Decode base64 image
+            try:
+                result = vi.predict_base64(image_data)
+            except Exception as e:
+                return func.HttpResponse(
+                    json.dumps({"error": f"Failed to decode base64 image: {e}"}),
+                    status_code=400,
+                    mimetype="application/json",
+                    headers=_cors_headers()
+                )
+        else:
+            return func.HttpResponse(
+                json.dumps({"error": f"Unsupported format: {format_type}. Use 'base64' or provide 'image_url'."}),
+                status_code=400,
+                mimetype="application/json",
+                headers=_cors_headers()
+            )
+        
+        # Add model metadata to response
+        response_data = {
+            **result,
+            "model_info": vi.get_model_info()
+        }
+        
+        return func.HttpResponse(
+            json.dumps(response_data),
+            status_code=200,
+            mimetype="application/json",
+            headers=_cors_headers()
+        )
+        
+    except Exception as e:
+        logging.error(f'Vision infer error: {str(e)}')
+        return func.HttpResponse(
+            json.dumps({"error": f"Vision inference failed: {str(e)}"}),
+            status_code=500,
+            mimetype="application/json",
+            headers=_cors_headers()
+        )
+
+
+@app.route(route="vision/infer", methods=["OPTIONS"], auth_level=func.AuthLevel.ANONYMOUS)
+def vision_infer_options(req: func.HttpRequest) -> func.HttpResponse:
+    """Handle CORS preflight for vision inference"""
+    return func.HttpResponse(
+        "",
+        status_code=200,
+        headers=_cors_headers()
+    )
+
+
+@app.route(route="vision/batch-infer", methods=["POST"], auth_level=func.AuthLevel.ANONYMOUS)
+def vision_batch_infer(req: func.HttpRequest) -> func.HttpResponse:
+    """
+    Batch vision inference endpoint for multiple images.
+    
+    POST /api/vision/batch-infer
+    Body:
+    {
+        "images": [
+            {"data": "base64_1", "id": "img1"},
+            {"data": "base64_2", "id": "img2"},
+            ...
+        ]
+    }
+    
+    Response:
+    {
+        "results": [
+            {"id": "img1", "label": "happy", "confidence": 0.92, ...},
+            {"id": "img2", "label": "sad", "confidence": 0.85, ...}
+        ],
+        "total": 2,
+        "model_info": {...}
+    }
+    """
+    logging.info('Vision batch infer endpoint invoked')
+    
+    try:
+        from vision_inference import VisionInference
+        from PIL import Image
+        import io
+        import base64
+    except ImportError as e:
+        return func.HttpResponse(
+            json.dumps({"error": f"Vision inference not available: {e}"}),
+            status_code=500,
+            mimetype="application/json",
+            headers=_cors_headers()
+        )
+    
+    try:
+        req_body = req.get_json()
+        images_data = req_body.get('images', [])
+        
+        if not images_data:
+            return func.HttpResponse(
+                json.dumps({"error": "No images provided"}),
+                status_code=400,
+                mimetype="application/json",
+                headers=_cors_headers()
+            )
+        
+        # Limit batch size to prevent overload
+        max_batch_size = 50
+        if len(images_data) > max_batch_size:
+            return func.HttpResponse(
+                json.dumps({"error": f"Batch size exceeds limit of {max_batch_size} images"}),
+                status_code=400,
+                mimetype="application/json",
+                headers=_cors_headers()
+            )
+        
+        # Initialize vision model
+        if not hasattr(vision_batch_infer, '_vision_model'):
+            try:
+                vision_batch_infer._vision_model = VisionInference()
+            except FileNotFoundError as e:
+                return func.HttpResponse(
+                    json.dumps({"error": "No trained model found", "detail": str(e)}),
+                    status_code=404,
+                    mimetype="application/json",
+                    headers=_cors_headers()
+                )
+        
+        vi = vision_batch_infer._vision_model
+        
+        # Decode all images
+        pil_images = []
+        image_ids = []
+        for idx, img_data in enumerate(images_data):
+            try:
+                img_id = img_data.get('id', f'image_{idx}')
+                b64_data = img_data.get('data')
+                
+                img_bytes = base64.b64decode(b64_data)
+                pil_img = Image.open(io.BytesIO(img_bytes))
+                
+                pil_images.append(pil_img)
+                image_ids.append(img_id)
+            except Exception as e:
+                logging.warning(f'Failed to decode image {idx}: {e}')
+                continue
+        
+        if not pil_images:
+            return func.HttpResponse(
+                json.dumps({"error": "No valid images could be decoded"}),
+                status_code=400,
+                mimetype="application/json",
+                headers=_cors_headers()
+            )
+        
+        # Run batch inference
+        predictions = vi.predict_batch(pil_images)
+        
+        # Combine predictions with IDs
+        results = []
+        for img_id, pred in zip(image_ids, predictions):
+            results.append({
+                'id': img_id,
+                **pred
+            })
+        
+        response_data = {
+            'results': results,
+            'total': len(results),
+            'model_info': vi.get_model_info()
+        }
+        
+        return func.HttpResponse(
+            json.dumps(response_data),
+            status_code=200,
+            mimetype="application/json",
+            headers=_cors_headers()
+        )
+        
+    except Exception as e:
+        logging.error(f'Vision batch infer error: {str(e)}')
+        return func.HttpResponse(
+            json.dumps({"error": f"Batch inference failed: {str(e)}"}),
+            status_code=500,
+            mimetype="application/json",
+            headers=_cors_headers()
+        )
+
+
+    @app.route(route="image/generate", methods=["POST", "OPTIONS"], auth_level=func.AuthLevel.ANONYMOUS)
+    def image_generate(req: func.HttpRequest) -> func.HttpResponse:
+        """
+        AI Image generation endpoint using OpenAI DALL-E.
+    
+        POST /api/image/generate
+        Body:
+        {
+            "prompt": "description of image to generate",
+            "size": "512x512",
+            "style": "anime"
+        }
+    
+        Response:
+        {
+            "image_url": "https://...",
+            "image_data": "base64_encoded_image",
+            "prompt": "original prompt",
+            "model": "dall-e-2"
+        }
+        """
+        if req.method == "OPTIONS":
+            return func.HttpResponse(status_code=200, headers=_cors_headers())
+    
+        logging.info('Image generation endpoint invoked')
+    
+        try:
+            req_body = req.get_json()
+            prompt = req_body.get('prompt', '')
+            size = req_body.get('size', '512x512')
+            style_hint = req_body.get('style', '')
+        
+            if not prompt:
+                return func.HttpResponse(
+                    json.dumps({"error": "Prompt is required"}),
+                    status_code=400,
+                    mimetype="application/json",
+                    headers=_cors_headers()
+                )
+        
+            if style_hint:
+                prompt = f"{prompt}, {style_hint} style"
+        
+            try:
+                from openai import OpenAI
+                import os
+            
+                api_key = os.getenv('OPENAI_API_KEY')
+                if not api_key:
+                    api_key = os.getenv('AZURE_OPENAI_API_KEY')
+                    endpoint = os.getenv('AZURE_OPENAI_ENDPOINT')
+                
+                    if api_key and endpoint:
+                        client = OpenAI(api_key=api_key, base_url=f"{endpoint}/openai/deployments")
+                    else:
+                        raise ValueError("No OpenAI API key configured")
+                else:
+                    client = OpenAI(api_key=api_key)
+            
+                response = client.images.generate(model="dall-e-2", prompt=prompt, size=size if size in ["256x256", "512x512", "1024x1024"] else "512x512", n=1, response_format="url")
+            
+                image_url = response.data[0].url
+            
+                response_data = {'image_url': image_url, 'prompt': prompt, 'model': 'dall-e-2', 'size': size}
+            
+                return func.HttpResponse(json.dumps(response_data), status_code=200, mimetype="application/json", headers=_cors_headers())
+            
+            except Exception as openai_error:
+                logging.warning(f'OpenAI image generation failed: {openai_error}')
+            
+                placeholder_svg = f'''<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+                    <defs>
+                        <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+                            <stop offset="50%" style="stop-color:#764ba2;stop-opacity:1" />
+                            <stop offset="100%" style="stop-color:#f093fb;stop-opacity:1" />
+                        </linearGradient>
+                    </defs>
+                    <rect width="512" height="512" fill="url(#grad)"/>
+                    <text x="256" y="220" font-size="120" text-anchor="middle" fill="white">✨</text>
+                    <text x="256" y="300" font-size="32" text-anchor="middle" fill="white" font-weight="bold">Aria</text>
+                    <text x="256" y="340" font-size="20" text-anchor="middle" fill="rgba(255,255,255,0.9)">AI Assistant</text>
+                    <text x="256" y="380" font-size="16" text-anchor="middle" fill="rgba(255,255,255,0.7)">Image generation unavailable</text>
+                    <text x="256" y="410" font-size="14" text-anchor="middle" fill="rgba(255,255,255,0.6)">{openai_error.__class__.__name__}</text>
+                </svg>'''
+            
+                import base64
+                svg_base64 = base64.b64encode(placeholder_svg.encode()).decode()
+            
+                response_data = {'image_data': svg_base64, 'prompt': prompt, 'model': 'fallback-svg', 'size': '512x512', 'fallback': True, 'error': str(openai_error)}
+            
+                return func.HttpResponse(json.dumps(response_data), status_code=200, mimetype="application/json", headers=_cors_headers())
+    
+        except Exception as e:
+            logging.error(f'Image generation error: {str(e)}')
+            return func.HttpResponse(json.dumps({"error": f"Image generation failed: {str(e)}"}), status_code=500, mimetype="application/json", headers=_cors_headers())
 
 
 # =============================================================================

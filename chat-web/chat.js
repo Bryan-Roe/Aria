@@ -9,6 +9,8 @@ const STATUS_API = `/api/ai/status`;
 const QUANTUM_CLASSIFY_API = '/api/quantum/classify';
 const QUANTUM_CIRCUIT_API = '/api/quantum/circuit';
 const QUANTUM_INFO_API = '/api/quantum/info';
+const VISION_INFER_API = '/api/vision/infer';
+const IMAGE_GEN_API = '/api/image/generate';
 
 let messages = [];
 let isProcessing = false;
@@ -49,6 +51,18 @@ const maxTokensInput = document.getElementById('maxTokensInput');
 const toggleSystemButton = document.getElementById('toggleSystemButton');
 const systemPromptBox = document.getElementById('systemPromptBox');
 const systemPromptInput = document.getElementById('systemPromptInput');
+const visionUploadButton = document.getElementById('visionUploadButton');
+const visionImageInput = document.getElementById('visionImageInput');
+const visionPreview = document.getElementById('visionPreview');
+const visionClearButton = document.getElementById('visionClearButton');
+
+// Vision state
+let uploadedImage = null;
+let uploadedImageBase64 = null;
+
+// Aria avatar state
+let ariaAvatarGenerated = false;
+let ariaAvatarUrl = null;
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
@@ -103,6 +117,42 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     sendButton.addEventListener('click', sendMessage);
+
+    // Vision upload handlers
+    if (visionUploadButton) {
+        visionUploadButton.addEventListener('click', () => {
+            visionImageInput.click();
+        });
+    }
+
+    if (visionImageInput) {
+        visionImageInput.addEventListener('change', handleImageUpload);
+    }
+
+    if (visionClearButton) {
+        visionClearButton.addEventListener('click', clearVisionUpload);
+    }
+
+    // Aria avatar handlers
+    const ariaAvatarContainer = document.getElementById('ariaAvatarContainer');
+    const ariaAvatarClose = document.getElementById('ariaAvatarClose');
+    const ariaAvatarRegenerate = document.getElementById('ariaAvatarRegenerate');
+
+    if (ariaAvatarClose) {
+        ariaAvatarClose.addEventListener('click', hideAriaAvatar);
+    }
+
+    if (ariaAvatarRegenerate) {
+        ariaAvatarRegenerate.addEventListener('click', () => generateAriaAvatar(true));
+    }
+
+    // Auto-generate Aria avatar on page load (after 2 seconds)
+    setTimeout(() => {
+        if (!ariaAvatarGenerated) {
+            generateAriaAvatar(false);
+        }
+    }, 2000);
+
     newChatButton.addEventListener('click', () => {
         console.log('New Chat button clicked');
         newChat();
@@ -589,6 +639,155 @@ function toggleTheme() {
 function updateMessageCount() {
     const userMessages = messages.filter(m => m.role === 'user').length;
     messageCount.textContent = userMessages;
+}
+
+// Aria AI Avatar functions
+async function generateAriaAvatar(regenerate = false) {
+    const ariaAvatarContainer = document.getElementById('ariaAvatarContainer');
+    const ariaAvatarImage = document.getElementById('ariaAvatarImage');
+    
+    if (!regenerate && ariaAvatarGenerated) {
+        ariaAvatarContainer.style.display = 'block';
+        return;
+    }
+
+    updateStatus('🎨 Generating Aria\'s AI avatar...');
+
+    try {
+        // Use a more descriptive prompt for Aria's character
+        const prompt = "Portrait of Aria, anime-style AI assistant character, purple gradient hair, cute anime girl, friendly expression, digital art, high quality, detailed, vibrant colors, soft lighting";
+        
+        const response = await fetch(IMAGE_GEN_API, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                prompt: prompt,
+                size: "512x512",
+                style: "anime"
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error(`Image generation failed: ${response.status}`);
+        }
+
+        const result = await response.json();
+        
+        if (result.image_url || result.image_data) {
+            ariaAvatarUrl = result.image_url || `data:image/png;base64,${result.image_data}`;
+            ariaAvatarImage.src = ariaAvatarUrl;
+            ariaAvatarContainer.style.display = 'block';
+            ariaAvatarGenerated = true;
+            updateStatus('✅ Aria\'s avatar generated!');
+            
+            // Add a chat message from Aria about her new appearance
+            if (regenerate) {
+                addMessage('assistant', '✨ How do I look? I just got a fresh new appearance from the AI! 💜');
+            }
+        } else {
+            throw new Error('No image data received');
+        }
+    } catch (error) {
+        console.error('Avatar generation error:', error);
+        updateStatus(`⚠️ Avatar generation unavailable: ${error.message}`);
+        
+        // Fallback: Use a placeholder or emoji-based avatar
+        const ariaAvatarImage = document.getElementById('ariaAvatarImage');
+        ariaAvatarImage.src = 'data:image/svg+xml,' + encodeURIComponent(`
+            <svg xmlns="http://www.w3.org/2000/svg" width="200" height="250" viewBox="0 0 200 250">
+                <defs>
+                    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+                        <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
+                    </linearGradient>
+                </defs>
+                <rect width="200" height="250" fill="url(#grad)"/>
+                <text x="100" y="125" font-size="80" text-anchor="middle" fill="white">👩‍💻</text>
+                <text x="100" y="180" font-size="20" text-anchor="middle" fill="white" font-weight="bold">Aria</text>
+                <text x="100" y="200" font-size="14" text-anchor="middle" fill="rgba(255,255,255,0.8)">AI Assistant</text>
+            </svg>
+        `);
+        ariaAvatarContainer.style.display = 'block';
+        ariaAvatarGenerated = true;
+    }
+}
+
+function hideAriaAvatar() {
+    const ariaAvatarContainer = document.getElementById('ariaAvatarContainer');
+    ariaAvatarContainer.style.display = 'none';
+    updateStatus('Avatar hidden');
+}
+
+// Vision upload handlers
+async function handleImageUpload(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+        updateStatus('❌ Please select an image file');
+        return;
+    }
+
+    // Show preview
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+        uploadedImageBase64 = e.target.result.split(',')[1]; // Remove data:image/...;base64, prefix
+        uploadedImage = file.name;
+        
+        // Show preview
+        visionPreview.innerHTML = `
+            <img src="${e.target.result}" alt="Preview">
+            <div class="vision-preview-info">
+                <span>${file.name}</span>
+                <button id="visionClearButton">✕</button>
+            </div>
+        `;
+        visionPreview.style.display = 'block';
+
+        // Re-attach clear button listener
+        document.getElementById('visionClearButton').addEventListener('click', clearVisionUpload);
+
+        // Auto-analyze the image
+        updateStatus('🔍 Analyzing image...');
+        try {
+            const response = await fetch(VISION_INFER_API, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ image: uploadedImageBase64 })
+            });
+
+            if (!response.ok) {
+                throw new Error(`Vision API error: ${response.status}`);
+            }
+
+            const result = await response.json();
+            
+            // Add AI message with vision results
+            const visionMessage = `🖼️ **Image Analysis**: ${file.name}\n\n` +
+                `**Expression**: ${result.label} (${(result.confidence * 100).toFixed(1)}% confidence)\n\n` +
+                `**All Scores**:\n${Object.entries(result.scores)
+                    .sort((a, b) => b[1] - a[1])
+                    .map(([label, score]) => `- ${label}: ${(score * 100).toFixed(1)}%`)
+                    .join('\n')}`;
+            
+            addMessage('assistant', visionMessage);
+            updateStatus('✅ Image analyzed successfully');
+        } catch (error) {
+            console.error('Vision inference error:', error);
+            updateStatus(`❌ Vision error: ${error.message}`);
+        }
+    };
+
+    reader.readAsDataURL(file);
+}
+
+function clearVisionUpload() {
+    uploadedImage = null;
+    uploadedImageBase64 = null;
+    visionImageInput.value = '';
+    visionPreview.style.display = 'none';
+    visionPreview.innerHTML = '';
+    updateStatus('Vision upload cleared');
 }
 
 function updateStatus(text) {

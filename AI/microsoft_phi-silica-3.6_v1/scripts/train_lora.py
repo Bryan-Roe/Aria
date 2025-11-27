@@ -23,7 +23,7 @@ try:
         DataCollatorForLanguageModeling,
     )
     from peft import LoraConfig, get_peft_model, PeftModel
-    from transformers import TrainerCallback
+    from transformers import TrainerCallback, EarlyStoppingCallback, EarlyStoppingCallback
 except Exception as e:
     # Provide visibility into which dependency import failed
     import traceback
@@ -55,6 +55,11 @@ class Config:
     save_steps: int
     gradient_checkpointing: bool
     seed: int
+    warmup_steps: int
+    gradient_accumulation_steps: int
+    max_grad_norm: float
+    early_stopping_patience: int
+    early_stopping_threshold: float
 
 
 def read_yaml(yaml_path: Path) -> Dict[str, Any]:
@@ -218,6 +223,11 @@ def main():
         save_steps=int(cfg_raw.get("save_steps") or 64),
         gradient_checkpointing=bool(cfg_raw.get("gradient_checkpointing") or False),
         seed=int(cfg_raw.get("seed") or 42),
+        warmup_steps=int(cfg_raw.get("warmup_steps") or 100),
+        gradient_accumulation_steps=int(cfg_raw.get("gradient_accumulation_steps") or 4),
+        max_grad_norm=float(cfg_raw.get("max_grad_norm") or 1.0),
+        early_stopping_patience=int(cfg_raw.get("early_stopping_patience") or 3),
+        early_stopping_threshold=float(cfg_raw.get("early_stopping_threshold") or 0.01),
     )
 
     # Apply CLI overrides for HPO or cloud jobs
@@ -542,8 +552,16 @@ def main():
         bf16=bf16_flag,
         fp16=fp16_flag,
         gradient_checkpointing=cfg.gradient_checkpointing,
+        gradient_accumulation_steps=cfg.gradient_accumulation_steps,
+        warmup_steps=cfg.warmup_steps,
+        max_grad_norm=cfg.max_grad_norm,
+        lr_scheduler_type="cosine",
+        weight_decay=0.01,
         remove_unused_columns=False,
         save_total_limit=3,
+        load_best_model_at_end=True,
+        metric_for_best_model="eval_loss",
+        greater_is_better=False,
         seed=cfg.seed,
         deepspeed=args.deepspeed if args.deepspeed else None,
         ddp_find_unused_parameters=False,
@@ -612,6 +630,20 @@ def main():
     except Exception as e:
         print(f"[debug] dataset inspection error: {e}")
 
+    # Initialize early stopping callback to prevent overfitting
+    callbacks_list = []
+    if TrainerCallback is not None:
+        try:
+            # Early stopping: stop if eval_loss doesn't improve for 3 eval cycles
+            early_stopping = EarlyStoppingCallback(
+                early_stopping_patience=3,
+                early_stopping_threshold=0.01,
+            )
+            callbacks_list.append(early_stopping)
+            print("[training] Early stopping enabled (patience=3, threshold=0.01)")
+        except Exception as e:
+            print(f"[training] Could not enable early stopping: {e}")
+
     trainer = Trainer(
         model=model,
         args=training_args,
@@ -619,8 +651,10 @@ def main():
         eval_dataset=eval_dataset,
         tokenizer=tokenizer,
         data_collator=data_collator,
+        callbacks=callbacks_list,
     )
     if TrainerCallback is not None:
+        # Add perplexity logging callback
         trainer.add_callback(PerplexityLoggingCallback())
         # Add OpenTelemetry tracing callback if available and compatible
         try:

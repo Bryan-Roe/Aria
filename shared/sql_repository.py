@@ -1,25 +1,68 @@
 """Generic lightweight SQL repository utilities.
 
 Provides a key-value store abstraction for multi-database support using
-SQLAlchemy core. Table auto-creation is vendor-aware and idempotent.
+SQLAlchemy core when available, and a sqlite3-based fallback when SQLAlchemy
+is not installed. Table auto-creation is vendor-aware and idempotent.
 
 Table name: QAI_KeyValue
 Columns:
   k (primary key), v (text/blob), updated_at (timestamp)
 
-Graceful degradation: if engine unavailable operations return fallback values
-instead of raising.
+Graceful degradation: If an engine or driver is unavailable, operations return
+fallback values instead of raising.
 """
 from __future__ import annotations
 
 import logging
+import os
+import sqlite3
 from datetime import datetime
 from typing import Optional
 
-from sqlalchemy import text  # type: ignore
-from .sql_engine import get_engine
+# Conditional SQLAlchemy import
+_SQLALCHEMY_AVAILABLE = True
+try:
+    from sqlalchemy import text  # type: ignore
+except Exception:  # pragma: no cover
+    _SQLALCHEMY_AVAILABLE = False
+    text = None  # type: ignore
+
+from .sql_engine import get_engine, resolve_sql_url
 
 _TABLE_CREATED = False
+_SQLITE_CONN: Optional[sqlite3.Connection] = None
+
+# ----------------------------------------------------------------------------
+# Helpers (fallback)
+# ----------------------------------------------------------------------------
+
+def _sqlite_path_from_url(url: str) -> str:
+    """Resolve sqlite database path from SQLAlchemy-style URL.
+    Supports file paths (sqlite:///path/to.db) and in-memory (:memory:).
+    """
+    if url.endswith(":memory:"):
+        return ":memory:"
+    if url.startswith("sqlite:///"):
+        path = url[len("sqlite:///"):]
+        return os.path.normpath(path)
+    # Default to in-memory if unrecognized format
+    return ":memory:"
+
+
+def _get_sqlite_conn() -> sqlite3.Connection:
+    global _SQLITE_CONN
+    if _SQLITE_CONN is not None:
+        return _SQLITE_CONN
+    url = resolve_sql_url() or "sqlite:///:memory:"
+    db_path = _sqlite_path_from_url(url)
+    # Ensure directory exists for file-based DBs
+    if db_path != ":memory:":
+        try:
+            os.makedirs(os.path.dirname(db_path) or ".", exist_ok=True)
+        except Exception:  # pragma: no cover
+            pass
+    _SQLITE_CONN = sqlite3.connect(db_path, check_same_thread=False)
+    return _SQLITE_CONN
 
 # ----------------------------------------------------------------------------
 # Table Creation (idempotent)
@@ -29,9 +72,26 @@ def _ensure_table():
     global _TABLE_CREATED
     if _TABLE_CREATED:
         return True
+
     engine = get_engine()
+    if not engine and not _SQLALCHEMY_AVAILABLE:
+        # Fallback path: sqlite3 direct
+        try:
+            conn = _get_sqlite_conn()
+            conn.execute(
+                "CREATE TABLE IF NOT EXISTS QAI_KeyValue ("
+                "k TEXT PRIMARY KEY, v TEXT, updated_at TEXT)"
+            )
+            conn.commit()
+            _TABLE_CREATED = True
+            return True
+        except Exception as e:  # noqa: BLE001
+            logging.warning(f"[sql_repository] sqlite fallback table create failed: {e}")
+            return False
+
     if not engine:
         return False
+
     vendor = getattr(engine.dialect, "name", "unknown")
     try:
         if vendor == "sqlite":
@@ -74,9 +134,25 @@ def _ensure_table():
 def put_value(key: str, value: str) -> bool:
     if not _ensure_table():
         return False
+
     engine = get_engine()
+    if not engine and not _SQLALCHEMY_AVAILABLE:
+        # Fallback: sqlite3 direct
+        try:
+            conn = _get_sqlite_conn()
+            conn.execute(
+                "INSERT OR REPLACE INTO QAI_KeyValue (k, v, updated_at) VALUES (?, ?, ?)",
+                (key, value, datetime.utcnow().isoformat()),
+            )
+            conn.commit()
+            return True
+        except Exception as e:  # noqa: BLE001
+            logging.warning(f"[sql_repository] sqlite fallback put_value failed: {e}")
+            return False
+
     if not engine:
         return False
+
     vendor = getattr(engine.dialect, "name", "unknown")
     try:
         with engine.begin() as conn:
@@ -97,9 +173,21 @@ def put_value(key: str, value: str) -> bool:
 def get_value(key: str) -> Optional[str]:
     if not _ensure_table():
         return None
+
     engine = get_engine()
+    if not engine and not _SQLALCHEMY_AVAILABLE:
+        try:
+            conn = _get_sqlite_conn()
+            cur = conn.execute("SELECT v FROM QAI_KeyValue WHERE k=?", (key,))
+            row = cur.fetchone()
+            return None if not row else row[0]
+        except Exception as e:  # noqa: BLE001
+            logging.warning(f"[sql_repository] sqlite fallback get_value failed: {e}")
+            return None
+
     if not engine:
         return None
+
     try:
         with engine.connect() as conn:
             res = conn.execute(text("SELECT v FROM QAI_KeyValue WHERE k=:k"), {"k": key}).fetchone()
@@ -112,9 +200,21 @@ def get_value(key: str) -> Optional[str]:
 def delete_value(key: str) -> bool:
     if not _ensure_table():
         return False
+
     engine = get_engine()
+    if not engine and not _SQLALCHEMY_AVAILABLE:
+        try:
+            conn = _get_sqlite_conn()
+            conn.execute("DELETE FROM QAI_KeyValue WHERE k=?", (key,))
+            conn.commit()
+            return True
+        except Exception as e:  # noqa: BLE001
+            logging.warning(f"[sql_repository] sqlite fallback delete_value failed: {e}")
+            return False
+
     if not engine:
         return False
+
     try:
         with engine.begin() as conn:
             conn.execute(text("DELETE FROM QAI_KeyValue WHERE k=:k"), {"k": key})
@@ -127,9 +227,23 @@ def delete_value(key: str) -> bool:
 def list_values(limit: int = 100) -> list[dict]:  # noqa: ANN001
     if not _ensure_table():
         return []
+
     engine = get_engine()
+    if not engine and not _SQLALCHEMY_AVAILABLE:
+        try:
+            conn = _get_sqlite_conn()
+            cur = conn.execute("SELECT k, v, updated_at FROM QAI_KeyValue ORDER BY updated_at DESC")
+            out = []
+            for row in cur.fetchall()[:limit]:
+                out.append({"k": row[0], "v": row[1], "updated_at": row[2]})
+            return out
+        except Exception as e:  # noqa: BLE001
+            logging.warning(f"[sql_repository] sqlite fallback list_values failed: {e}")
+            return []
+
     if not engine:
         return []
+
     try:
         with engine.connect() as conn:
             res = conn.execute(text("SELECT k, v, updated_at FROM QAI_KeyValue ORDER BY updated_at DESC"))

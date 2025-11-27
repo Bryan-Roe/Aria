@@ -25,5 +25,6 @@
     "python.testing.cwd": "${workspaceFolder}",
     "python.testing.autoTestDiscoverOnSaveEnabled": true,
     "powershell.scriptAnalysis.settingsPath": "quantum-ai/.vscode/PSScriptAnalyzerSettings.psd1",
-    "cmake.sourceDirectory": "C:/Users/Bryan/OneDrive/AI/.venv/Lib/site-packages/pennylane_lightning/core"
+    "cmake.sourceDirectory": "C:/Users/Bryan/OneDrive/AI/.venv/Lib/site-packages/pennylane_lightning/core",
+    "chat.agent.maxRequests": 200
 }

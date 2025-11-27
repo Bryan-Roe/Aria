@@ -29,12 +29,12 @@
   "rank_pattern": {},
   "revision": null,
   "target_modules": [
+    "q_proj",
+    "o_proj",
     "v_proj",
     "fc2",
-    "k_proj",
-    "o_proj",
-    "q_proj",
-    "fc1"
+    "fc1",
+    "k_proj"
   ],
   "target_parameters": null,
   "task_type": "CAUSAL_LM",

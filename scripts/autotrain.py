@@ -252,6 +252,14 @@ def run_job(job: Job, dry_run: bool = False, job_index: int = 0, total_jobs: int
             result["status"] = "missing"
             result["validated_type"] = "preflight"
             result["missing"] = missing
+            # Create log file even for missing files error
+            try:
+                with log_path.open("w", encoding="utf-8") as logf:
+                    logf.write(f"Preflight validation failed - missing files:\n")
+                    for m in missing:
+                        logf.write(f"  - {m}\n")
+            except Exception:
+                pass
             return result
         else:
             result["validated_type"] = "preflight"

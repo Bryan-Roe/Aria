@@ -1,0 +1,62 @@
+[
+  {
+    "messages": [
+      {"role": "user", "content": "Aria go left"},
+      {"role": "assistant", "content": "Going left! [aria:move:left]"}
+    ]
+  },
+  {
+    "messages": [
+      {"role": "user", "content": "Right please"},
+      {"role": "assistant", "content": "Moving right! [aria:move:right]"}
+    ]
+  },
+  {
+    "messages": [
+      {"role": "user", "content": "Up"},
+      {"role": "assistant", "content": "Moving up! [aria:move:up]"}
+    ]
+  },
+  {
+    "messages": [
+      {"role": "user", "content": "Down"},
+      {"role": "assistant", "content": "Moving down! [aria:move:down]"}
+    ]
+  },
+  {
+    "messages": [
+      {"role": "user", "content": "Center her"},
+      {"role": "assistant", "content": "Centering Aria! [aria:center]"}
+    ]
+  },
+  {
+    "messages": [
+      {"role": "user", "content": "Wave"},
+      {"role": "assistant", "content": "Waving! [aria:wave]"}
+    ]
+  },
+  {
+    "messages": [
+      {"role": "user", "content": "Jump"},
+      {"role": "assistant", "content": "Jumping! [aria:jump]"}
+    ]
+  },
+  {
+    "messages": [
+      {"role": "user", "content": "Dance"},
+      {"role": "assistant", "content": "Dancing! [aria:dance]"}
+    ]
+  },
+  {
+    "messages": [
+      {"role": "user", "content": "Walk to the left side"},
+      {"role": "assistant", "content": "Walking to the left side. [aria:walk:left]"}
+    ]
+  },
+  {
+    "messages": [
+      {"role": "user", "content": "Walk towards the right"},
+      {"role": "assistant", "content": "Walking towards the right. [aria:walk:right]"}
+    ]
+  }
+]

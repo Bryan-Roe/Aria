@@ -36,8 +36,12 @@
 
         .chat-container {
             position: fixed;
-            width: 350px;
-            max-height: 450px;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            max-width: 800px;
+            max-height: 500px;
             background: rgba(255, 255, 255, 0.98);
             border-radius: 25px;
             box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2), 0 0 0 3px rgba(147, 51, 234, 0.3);
@@ -45,31 +49,17 @@
             flex-direction: column;
             overflow: hidden;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            opacity: 0;
-            pointer-events: none;
-            transform: scale(0.8) translateY(20px);
-            transform-origin: bottom left;
+            opacity: 1;
+            pointer-events: auto;
             z-index: 10000;
         }
         
-        /* Speech bubble pointer */
-        .chat-container::before {
-            content: '';
-            position: absolute;
-            bottom: -20px;
-            left: 30px;
-            width: 0;
-            height: 0;
-            border-left: 20px solid transparent;
-            border-right: 20px solid transparent;
-            border-top: 25px solid rgba(255, 255, 255, 0.98);
-            filter: drop-shadow(0 3px 8px rgba(0, 0, 0, 0.15));
-        }
+        /* Speech bubble pointer removed - bottom centered chat */
 
         .chat-container.visible {
             opacity: 1;
             pointer-events: auto;
-            transform: scale(1) translateY(0);
+            transform: translateX(-50%);
         }
 
         .chat-container:hover {
@@ -482,6 +472,58 @@
         @keyframes pulse {
             0%, 100% { opacity: 0.6; }
             50% { opacity: 0.4; }
+        }
+
+        /* Vision upload button */
+        #visionUploadButton {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 24px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(240, 147, 251, 0.3);
+            margin-right: 8px;
+        }
+
+        #visionUploadButton:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(240, 147, 251, 0.5);
+        }
+
+        #visionImageInput {
+            display: none;
+        }
+
+        #visionPreview {
+            display: none;
+            margin-top: 8px;
+            text-align: center;
+        }
+
+        #visionPreviewImage {
+            max-width: 100%;
+            max-height: 150px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        #visionClearButton {
+            margin-left: 8px;
+            background: #f44336;
+            color: white;
+            border: none;
+            padding: 4px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        #visionClearButton:hover {
+            background: #d32f2f;
         }
 
         .cancel-stream-btn {
@@ -937,15 +979,57 @@
         /* Anime Character Styles - 3D Model */
         .anime-character {
             position: fixed;
-            width: 140px;
-            height: 180px;
-            z-index: 9999;
-            pointer-events: none;
+            width: 160px;
+            height: 200px;
+            z-index: 10001;
+            pointer-events: auto;
+            cursor: grab;
             transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-            filter: drop-shadow(0 8px 20px rgba(0, 0, 0, 0.3));
+            filter: drop-shadow(0 12px 30px rgba(0, 0, 0, 0.4)) 
+                    drop-shadow(0 0 40px rgba(255, 150, 200, 0.3));
             transform-style: preserve-3d;
+            transform: scale(1.15);
             /* gentle breathing */
             animation: breatheTorso 6s ease-in-out infinite;
+        }
+        
+        /* Walking animations */
+        .anime-character.walking .character-leg.left {
+            animation: legWalkLeft 0.6s ease-in-out infinite !important;
+        }
+        
+        .anime-character.walking .character-leg.right {
+            animation: legWalkRight 0.6s ease-in-out infinite !important;
+        }
+        
+        .anime-character.walking .character-arm.left {
+            animation: armSwingLeft 0.6s ease-in-out infinite !important;
+        }
+        
+        .anime-character.walking .character-arm.right {
+            animation: armSwingRight 0.6s ease-in-out infinite !important;
+        }
+        
+        @keyframes legWalkLeft {
+            0%, 100% { transform: translateX(-12px) translateY(80px) translateZ(5px) rotate(-5deg); }
+            25% { transform: translateX(-12px) translateY(80px) translateZ(5px) rotate(15deg); }
+            75% { transform: translateX(-12px) translateY(80px) translateZ(5px) rotate(-20deg); }
+        }
+        
+        @keyframes legWalkRight {
+            0%, 100% { transform: translateX(12px) translateY(80px) translateZ(5px) rotate(5deg); }
+            25% { transform: translateX(12px) translateY(80px) translateZ(5px) rotate(-20deg); }
+            75% { transform: translateX(12px) translateY(80px) translateZ(5px) rotate(15deg); }
+        }
+        
+        @keyframes armSwingLeft {
+            0%, 100% { transform: translateX(-22px) translateY(32px) translateZ(8px) rotate(-8deg); }
+            50% { transform: translateX(-22px) translateY(32px) translateZ(8px) rotate(20deg); }
+        }
+        
+        @keyframes armSwingRight {
+            0%, 100% { transform: translateX(22px) translateY(32px) translateZ(8px) rotate(8deg); }
+            50% { transform: translateX(22px) translateY(32px) translateZ(8px) rotate(-20deg); }
         }
 
         @keyframes breatheTorso {
@@ -967,11 +1051,12 @@
             width: 80px;
             height: 85px;
             background: radial-gradient(ellipse at 30% 25%, 
-                #fff5f7 0%, 
-                #ffe4e9 15%, 
-                #ffd6e0 35%, 
-                #ffc5d8 60%,
-                #ffb4d0 100%);
+                #fff9fa 0%, 
+                #ffe8ed 10%,
+                #ffd9e3 25%, 
+                #ffcbd9 45%,
+                #ffb8d0 70%,
+                #ffa5c5 100%);
             border-radius: 50% 50% 48% 48%;
             top: 15px;
             left: 30px;
@@ -1081,33 +1166,57 @@
         /* Eyes - Big X anime style */
         .character-eyes {
             position: absolute;
-            top: 28px;
-            left: 15px;
-            width: 50px;
-            height: 30px;
-            display: flex;
+            top: 38px;
+            left: 50%;
+            transform: translateX(-50%) translateZ(10px);
+            width: 60px;
+            height: 26px;
+            display: inline-flex;
+            flex-direction: row;
+            flex-wrap: nowrap;
             justify-content: space-between;
-            transform: translateZ(10px);
+            align-items: center;
+            gap: 6px;
+            cursor: move;
+            pointer-events: auto;
+        }
+        
+        .character-eyes.dragging {
+            cursor: grabbing;
+            opacity: 0.8;
         }
 
         .eye {
-            width: 28px;
-            height: 32px;
+            display: inline-block;
+            width: 26px;
+            height: 26px;
+            min-width: 26px;
+            min-height: 26px;
+            flex-shrink: 0;
+            flex-grow: 0;
             background: radial-gradient(ellipse at 45% 35%, 
-                #ff69b4 0%,
-                #ff1493 15%, 
-                #db0077 35%,
-                #b8006b 60%,
-                #8b0055 100%);
-            border-radius: 50% 50% 48% 48%;
+                #6bb6ff 0%,
+                #4a9ff5 15%, 
+                #2b7cd3 35%,
+                #1e5fa8 60%,
+                #14467d 100%);
+            border-radius: 50%;
             position: relative;
             animation: blink 6s infinite, eyeSparkle 4s ease-in-out infinite;
             overflow: hidden;
             box-shadow: 
                 inset -2px -3px 8px rgba(0, 0, 0, 0.4),
-                0 3px 10px rgba(255, 20, 147, 0.3),
+                0 3px 10px rgba(74, 159, 245, 0.3),
                 inset 0 0 0 1px rgba(255, 255, 255, 0.2),
-                0 0 15px rgba(255, 105, 180, 0.4);
+                0 0 15px rgba(107, 182, 255, 0.4);
+        }
+        
+        .eye.left {
+            order: 1;
+        }
+        
+        .eye.right {
+            order: 2;
         }
 
         @keyframes eyeSparkle {
@@ -1115,19 +1224,35 @@
                 filter: brightness(1) saturate(1);
                 box-shadow: 
                     inset -2px -3px 8px rgba(0, 0, 0, 0.4),
-                    0 3px 10px rgba(255, 20, 147, 0.3),
+                    0 3px 10px rgba(74, 159, 245, 0.3),
                     inset 0 0 0 1px rgba(255, 255, 255, 0.2),
-                    0 0 15px rgba(255, 105, 180, 0.4);
+                    0 0 15px rgba(107, 182, 255, 0.4);
             }
             50% { 
                 filter: brightness(1.2) saturate(1.3);
                 box-shadow: 
                     inset -2px -3px 8px rgba(0, 0, 0, 0.4),
-                    0 3px 10px rgba(255, 20, 147, 0.5),
+                    0 3px 10px rgba(74, 159, 245, 0.5),
                     inset 0 0 0 1px rgba(255, 255, 255, 0.3),
-                    0 0 20px rgba(255, 105, 180, 0.6),
-                    0 0 30px rgba(255, 192, 203, 0.3);
+                    0 0 20px rgba(107, 182, 255, 0.6),
+                    0 0 30px rgba(173, 216, 255, 0.3);
             }
+        }
+
+        .pupil {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background: radial-gradient(circle at 30% 30%, 
+                #1a1a1a 0%, 
+                #000000 60%);
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            transition: transform 0.1s ease-out;
+            z-index: 5;
+            pointer-events: none;
         }
 
         .eye::after {
@@ -1172,8 +1297,8 @@
 
         @keyframes blink {
             0%, 46%, 52%, 100% { 
-                height: 32px;
-                border-radius: 50% 50% 48% 48%;
+                height: 26px;
+                border-radius: 50%;
                 transform: scaleY(1);
             }
             48%, 50% { 
@@ -1281,8 +1406,8 @@
             left: 1px;
         }
 
-        .blush.right {
-            right: 1px;
+        .blush.far-right {
+            right: -8px;
         }
         
         /* Anime cheek highlights */
@@ -1296,205 +1421,6 @@
             top: 3px;
             left: 4px;
             filter: blur(1px);
-        }
-
-        /* Hair - Anime style with accessory */
-        .character-hair {
-            position: absolute;
-            top: 8px;
-            left: 20px;
-            width: 100px;
-            height: 50px;
-            transform-style: preserve-3d;
-            filter: drop-shadow(2px 2px 4px rgba(217, 70, 239, 0.3));
-            z-index: 1;
-        }
-        
-        /* Cute anime hair bow accessory */
-        .character-hair::after {
-            content: '';
-            position: absolute;
-            width: 20px;
-            height: 16px;
-            z-index: 10;
-            background: linear-gradient(135deg, #fef3c7, #fde68a, #fbbf24);
-            border-radius: 50%;
-            top: -5px;
-            right: 10px;
-            box-shadow: 
-                inset -2px -2px 4px rgba(180, 140, 0, 0.3),
-                inset 1px 1px 3px rgba(254, 243, 199, 0.6),
-                0 2px 8px rgba(251, 191, 36, 0.5);
-            transform: translateZ(20px);
-            clip-path: polygon(50% 0%, 0% 40%, 30% 50%, 0% 60%, 50% 100%, 100% 60%, 70% 50%, 100% 40%);
-        }
-
-        .hair-strand {
-            position: absolute;
-            border-radius: 50% 50% 45% 55%;
-            animation: hairFloat 3.5s ease-in-out infinite;
-            transform-style: preserve-3d;
-        }
-
-        /* Back hair layer - full coverage */
-        .hair-strand:nth-child(1) {
-            left: 2px;
-            top: -8px;
-            width: 96px;
-            height: 75px;
-            background: linear-gradient(135deg, 
-                #d946ef 0%, 
-                #c026d3 15%, 
-                #a855f7 35%, 
-                #9333ea 60%,
-                #c026d3 85%,
-                #d946ef 100%);
-            border-radius: 50% 50% 48% 52%;
-            transform: translateZ(-5px);
-            box-shadow: 
-                inset -4px -6px 12px rgba(0, 0, 0, 0.3),
-                inset 3px 4px 8px rgba(233, 213, 255, 0.3),
-                0 3px 8px rgba(217, 70, 239, 0.2);
-            animation-delay: 0s;
-            --base-rotate: 0deg;
-            --base-z: -5px;
-        }
-
-        /* Left front bang - natural curve */
-        .hair-strand:nth-child(2) {
-            left: 6px;
-            top: 8px;
-            width: 22px;
-            height: 58px;
-            background: linear-gradient(160deg, 
-                #f0abfc 0%, 
-                #e879f9 20%, 
-                #d946ef 45%, 
-                #c026d3 75%,
-                #a21caf 100%);
-            border-radius: 55% 45% 40% 60%;
-            transform: rotate(-12deg) translateZ(12px);
-            box-shadow: 
-                inset -2px -3px 6px rgba(0, 0, 0, 0.25),
-                inset 2px 2px 4px rgba(250, 232, 255, 0.5),
-                2px 2px 5px rgba(217, 70, 239, 0.2);
-            animation-delay: 0.2s;
-            z-index: 2;
-            --base-rotate: -12deg;
-            --base-z: 12px;
-        }
-
-        /* Left center strand - flowing */
-        .hair-strand:nth-child(3) {
-            left: 26px;
-            top: 3px;
-            width: 20px;
-            height: 62px;
-            background: linear-gradient(170deg, 
-                #ddd6fe 0%, 
-                #c4b5fd 18%, 
-                #a78bfa 40%, 
-                #8b5cf6 65%,
-                #7c3aed 90%,
-                #6d28d9 100%);
-            border-radius: 52% 48% 42% 58%;
-            transform: rotate(-5deg) translateZ(15px);
-            box-shadow: 
-                inset -1px -2px 5px rgba(0, 0, 0, 0.25),
-                inset 1px 2px 3px rgba(237, 233, 254, 0.5),
-                1px 2px 4px rgba(0, 0, 0, 0.12);
-            animation-delay: 0.35s;
-            z-index: 3;
-            --base-rotate: -5deg;
-            --base-z: 15px;
-        }
-
-        /* Center strand - highlight */
-        .hair-strand:nth-child(4) {
-            left: 44px;
-            top: 0;
-            width: 24px;
-            height: 65px;
-            background: linear-gradient(180deg, 
-                #fef7ff 0%,
-                #faf5ff 12%, 
-                #f5edff 25%, 
-                #f0abfc 40%,
-                #e879f9 60%,
-                #d946ef 80%,
-                #c026d3 100%);
-            border-radius: 50% 50% 45% 55%;
-            transform: translateZ(18px);
-            box-shadow: 
-                inset -1px -2px 4px rgba(0, 0, 0, 0.15),
-                inset 1px 1px 3px rgba(255, 255, 255, 0.7),
-                0 2px 4px rgba(217, 70, 239, 0.15),
-                0 0 8px rgba(240, 171, 252, 0.3);
-            animation-delay: 0.5s;
-            z-index: 4;
-            --base-rotate: 0deg;
-            --base-z: 18px;
-        }
-
-        /* Right center strand - flowing */
-        .hair-strand:nth-child(5) {
-            right: 26px;
-            top: 3px;
-            width: 20px;
-            height: 62px;
-            background: linear-gradient(190deg, 
-                #ddd6fe 0%, 
-                #c4b5fd 18%, 
-                #a78bfa 40%, 
-                #8b5cf6 65%,
-                #7c3aed 90%,
-                #6d28d9 100%);
-            border-radius: 48% 52% 58% 42%;
-            transform: rotate(5deg) translateZ(15px);
-            box-shadow: 
-                inset 1px -2px 5px rgba(0, 0, 0, 0.25),
-                inset -1px 2px 3px rgba(237, 233, 254, 0.5),
-                -1px 2px 4px rgba(0, 0, 0, 0.12);
-            animation-delay: 0.65s;
-            z-index: 3;
-            --base-rotate: 5deg;
-            --base-z: 15px;
-        }
-
-        /* Right front bang - natural curve */
-        .hair-strand:nth-child(6) {
-            right: 6px;
-            top: 8px;
-            width: 22px;
-            height: 58px;
-            background: linear-gradient(200deg, 
-                #c4b5fd 0%, 
-                #a78bfa 20%, 
-                #8b5cf6 45%, 
-                #7c3aed 75%,
-                #6d28d9 100%);
-            border-radius: 45% 55% 60% 40%;
-            transform: rotate(12deg) translateZ(12px);
-            box-shadow: 
-                inset 2px -3px 6px rgba(0, 0, 0, 0.3),
-                inset -2px 2px 4px rgba(220, 215, 254, 0.4),
-                -2px 2px 5px rgba(0, 0, 0, 0.15);
-            animation-delay: 0.8s;
-            z-index: 2;
-            --base-rotate: 12deg;
-            --base-z: 12px;
-        }
-
-        @keyframes hairFloat {
-            0%, 100% { 
-                transform: rotate(var(--base-rotate, 0deg)) translateY(0) translateZ(var(--base-z, 5px)); 
-            }
-            33% { 
-                transform: rotate(calc(var(--base-rotate, 0deg) + 1deg)) translateY(-3px) translateZ(var(--base-z, 5px)); 
-            }
-            66% { 
-                transform: rotate(calc(var(--base-rotate, 0deg) - 1deg)) translateY(-5px) translateZ(var(--base-z, 5px)); 
-            }
         }
 
         /* Body - 3D torso with anime outfit */
@@ -1563,16 +1489,38 @@
             box-shadow: inset -2px 0 5px rgba(0, 0, 0, 0.2);
         }
 
-        .character-torso::after {
-            content: '';
+        }
+
+        /* Body/Torso */
+        .character-torso {
             position: absolute;
-            width: 20px;
-            height: 25px;
-            background: linear-gradient(145deg, #8b7ac7, #9d8cd9);
-            border-radius: 50% 0 0 50%;
-            top: 15px;
-            right: -5px;
-            box-shadow: inset 2px 0 5px rgba(0, 0, 0, 0.2);
+            width: 50px;
+            height: 60px;
+            background: linear-gradient(145deg, 
+                #8b6f47 0%, 
+                #6b5742 30%,
+                #5a4a35 60%, 
+                #4a3d2e 100%);
+            border-radius: 45% 45% 30% 30%;
+            top: 85px;
+            left: 45px;
+            box-shadow: 
+                inset -3px -4px 10px rgba(0, 0, 0, 0.3),
+                inset 2px 3px 8px rgba(200, 180, 150, 0.3),
+                0 4px 10px rgba(0, 0, 0, 0.2);
+            transform-style: preserve-3d;
+        }
+        
+        .torso-joint {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: radial-gradient(circle, #3a3a3a, #1a1a1a);
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
         }
 
         /* Arms - 3D cylindrical */
@@ -1588,19 +1536,22 @@
                 inset -2px 0 6px rgba(0, 0, 0, 0.2),
                 inset 2px 0 4px rgba(255, 255, 255, 0.3),
                 2px 3px 8px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease-out;
         }
 
         .character-arm.left {
             left: 25px;
             transform-origin: top center;
-            transform: rotate(-10deg) translateZ(3px);
+            transform: rotate(calc(var(--left-shoulder-rotate, -10deg))) translateZ(3px);
+            --base-arm-rotate: var(--left-shoulder-rotate, -10deg);
         }
 
         .character-arm.right {
             right: 25px;
             transform-origin: top center;
             animation-delay: 1s;
-            transform: rotate(10deg) translateZ(3px);
+            transform: rotate(calc(var(--right-shoulder-rotate, 10deg))) translateZ(3px);
+            --base-arm-rotate: var(--right-shoulder-rotate, 10deg);
         }
 
         @keyframes armWave {
@@ -1627,10 +1578,46 @@
         }
 
         /* Legs */
+        .elbow-joint {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            background: radial-gradient(circle, #4a4a4a, #2a2a2a);
+            border-radius: 50%;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+            z-index: 2;
+        }
+        
+        .character-forearm {
+            position: absolute;
+            width: 12px;
+            height: 25px;
+            background: linear-gradient(145deg, #8b6f47, #6b5742);
+            border-radius: 6px;
+            bottom: -25px;
+            left: 1px;
+            box-shadow: 
+                inset -1px 0 3px rgba(0, 0, 0, 0.2),
+                1px 1px 4px rgba(0, 0, 0, 0.3);
+            transform-origin: top center;
+            transition: transform 0.3s ease-out;
+        }
+        
+        .character-arm.left .character-forearm {
+            transform: rotate(calc(var(--left-elbow-rotate, 0deg)));
+        }
+        
+        .character-arm.right .character-forearm {
+            transform: rotate(calc(var(--right-elbow-rotate, 0deg)));
+        }
+
         .character-leg {
             position: absolute;
             width: 16px;
-            height: 35px;
+            height: 20px;
             background: linear-gradient(145deg, #7b68ee 0%, #667eea 50%, #5a67d8 100%);
             border-radius: 8px 8px 6px 6px;
             top: 150px;
@@ -1645,6 +1632,32 @@
 
         .character-leg.right {
             left: 68px;
+        }
+        
+        .knee-joint {
+            position: absolute;
+            width: 7px;
+            height: 7px;
+            background: radial-gradient(circle, #5a5a5a, #3a3a3a);
+            border-radius: 50%;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+            z-index: 2;
+        }
+        
+        .character-calf {
+            position: absolute;
+            width: 14px;
+            height: 18px;
+            background: linear-gradient(145deg, #7b68ee 0%, #667eea 50%, #5a67d8 100%);
+            border-radius: 7px 7px 5px 5px;
+            bottom: -18px;
+            left: 1px;
+            box-shadow: 
+                inset -1px 0 4px rgba(0, 0, 0, 0.2),
+                1px 1px 5px rgba(0, 0, 0, 0.3);
         }
 
         /* Shoes */
@@ -1670,6 +1683,63 @@
             opacity: 0;
             box-shadow: 0 0 8px rgba(255, 215, 0, 0.6);
             transform-style: preserve-3d;
+        }
+
+        @keyframes walkCycle {
+            0%, 100% {
+                transform: translateX(0) translateY(0);
+            }
+            25% {
+                transform: translateX(0) translateY(-3px);
+            }
+            50% {
+                transform: translateX(0) translateY(0);
+            }
+            75% {
+                transform: translateX(0) translateY(-3px);
+            }
+        }
+        
+        @keyframes legWalk {
+            0%, 100% {
+                transform: rotate(0deg);
+            }
+            50% {
+                transform: rotate(15deg);
+            }
+        }
+        
+        @keyframes armSwing {
+            0%, 100% {
+                transform: rotate(0deg);
+            }
+            50% {
+                transform: rotate(-10deg);
+            }
+        }
+        
+        .anime-character.walking {
+            animation: walkCycle 0.6s ease-in-out infinite;
+        }
+        
+        .anime-character.walking .character-leg.left {
+            animation: legWalk 0.6s ease-in-out infinite;
+            transform-origin: top center;
+        }
+        
+        .anime-character.walking .character-leg.right {
+            animation: legWalk 0.6s ease-in-out infinite 0.3s;
+            transform-origin: top center;
+        }
+        
+        .anime-character.walking .character-arm.left {
+            animation: armSwing 0.6s ease-in-out infinite 0.3s;
+            transform-origin: top center;
+        }
+        
+        .anime-character.walking .character-arm.right {
+            animation: armSwing 0.6s ease-in-out infinite;
+            transform-origin: top center;
         }
 
         @keyframes sparkleFloat {
@@ -2024,33 +2094,6 @@
             filter: drop-shadow(0 3px 6px rgba(0,0,0,0.12));
         }
 
-        /* Header */
-        .bubble-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 8px;
-        }
-        .bubble-title {
-            font-weight: 700;
-            font-size: 13px;
-            color: #2b0753;
-        }
-        .bubble-actions button {
-            border: none;
-            background: transparent;
-            color: rgba(0,0,0,0.6);
-            cursor: pointer;
-            font-size: 14px;
-            padding: 2px 6px;
-            border-radius: 6px;
-            transition: background 0.12s ease, color 0.12s ease;
-        }
-        .bubble-actions button:hover { background: rgba(0,0,0,0.06); color: rgba(0,0,0,0.85); }
-        .bubble-actions button#bubbleClose { background: rgba(255,255,255,0.06); color: rgba(0,0,0,0.6); }
-        .bubble-actions button#bubbleClose:hover { background: rgba(255,80,80,0.12); color: #b91c1c; }
-        .bubble-actions button#bubbleSize { font-weight: 700; padding: 2px 8px; }
-
         /* Size helpers */
         .chat-bubble.bubble-small.open { width: 260px; }
         .chat-bubble.bubble-medium.open { width: 320px; }
@@ -2114,55 +2157,120 @@
             50% { transform: scale(1.5) rotate(360deg); opacity: 0.7; }
             100% { transform: scale(0); opacity: 0; }
         }
+
+        /* AI-Generated Avatar Styles */
+        .aria-avatar-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            animation: fadeInScale 0.5s ease-out;
+        }
+
+        .aria-avatar-frame {
+            position: relative;
+            width: 200px;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.95), rgba(118, 75, 162, 0.95));
+            border-radius: 20px;
+            padding: 15px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3), 0 0 0 3px rgba(147, 51, 234, 0.5);
+            backdrop-filter: blur(10px);
+        }
+
+        #ariaAvatarImage {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+            border-radius: 12px;
+            display: block;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .aria-avatar-label {
+            color: white;
+            text-align: center;
+            font-weight: 600;
+            font-size: 14px;
+            margin-top: 10px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        #ariaAvatarClose,
+        #ariaAvatarRegenerate {
+            position: absolute;
+            top: 10px;
+            width: 30px;
+            height: 30px;
+            border: none;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.9);
+            cursor: pointer;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            transition: all 0.2s ease;
+        }
+
+        #ariaAvatarClose {
+            right: 10px;
+        }
+
+        #ariaAvatarRegenerate {
+            right: 45px;
+        }
+
+        #ariaAvatarClose:hover,
+        #ariaAvatarRegenerate:hover {
+            transform: scale(1.1);
+            background: white;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        @keyframes fadeInScale {
+            from {
+                opacity: 0;
+                transform: scale(0.8) translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        .aria-avatar-hidden {
+            display: none;
+        }
     </style>
 </head>
 <body>
 
 
+    <!-- AI-Generated Aria Avatar -->
+    <div class="aria-avatar-container" id="ariaAvatarContainer" style="display: none;">
+        <div class="aria-avatar-frame">
+            <img id="ariaAvatarImage" src="" alt="Aria AI Avatar">
+            <div class="aria-avatar-label">Aria (AI-Generated)</div>
+            <button id="ariaAvatarClose" title="Hide avatar">✕</button>
+            <button id="ariaAvatarRegenerate" title="Regenerate avatar">🔄</button>
+        </div>
+    </div>
+
     <!-- Anime Character -->
     <div class="anime-character" id="animeCharacter">
-        <div class="chat-bubble" id="chatBubble" aria-hidden="false">
-            <div class="bubble-header">
-                <div class="bubble-title">Aria</div>
-                <div class="bubble-actions">
-                        <button id="bubbleSize" title="Toggle bubble size">M</button>
-                        <button id="openFullChat" title="Open full chat">⋯</button>
-                        <button id="bubbleClose" title="Close chat">✕</button>
-                    </div>
-            </div>
-            <div class="bubble-messages" id="bubbleMessages" role="log" aria-live="polite"></div>
-            <div class="bubble-input-row">
-                <input id="bubbleInput" class="bubble-input" type="text" placeholder="Say hi to Aria..." aria-label="Chat with Aria" />
-                <button id="bubbleSend" class="bubble-send" aria-label="Send">➤</button>
-            </div>
-            <div class="bubble-tip"></div>
-        </div>
         <div class="character-body">
-            <!-- Anime sparkle particles -->
-            <div class="sparkle"></div>
-            <div class="sparkle"></div>
-            <div class="sparkle"></div>
-            <div class="sparkle"></div>
-            
-            <!-- Hair (6 strands for volume) -->
-            <div class="character-hair">
-                <div class="hair-strand"></div>
-                <div class="hair-strand"></div>
-                <div class="hair-strand"></div>
-                <div class="hair-strand"></div>
-                <div class="hair-strand"></div>
-                <div class="hair-strand"></div>
-            </div>
-            
             <!-- Head -->
             <div class="character-head">
                 <div class="character-eyes">
-                    <div class="eye">
+                    <div class="eye left">
+                        <div class="pupil"></div>
                         <div class="eyelash left"></div>
                         <div class="eyelash center"></div>
                         <div class="eyelash right"></div>
                     </div>
-                    <div class="eye">
+                    <div class="eye right">
+                        <div class="pupil"></div>
                         <div class="eyelash left"></div>
                         <div class="eyelash center"></div>
                         <div class="eyelash right"></div>
@@ -2170,33 +2278,42 @@
                 </div>
                 <div class="character-mouth"></div>
                 <div class="blush left"></div>
-                <div class="blush right"></div>
+                <div class="blush far-right"></div>
             </div>
             
-            <!-- Body -->
-            <div class="character-torso"></div>
+            <!-- Body/Torso -->
+            <div class="character-torso">
+                <div class="torso-joint"></div>
+            </div>
             
-            <!-- Arms with hands -->
+            <!-- Arms with hands and elbows -->
             <div class="character-arm left">
-                <div class="character-hand"></div>
+                <div class="elbow-joint"></div>
+                <div class="character-forearm">
+                    <div class="character-hand"></div>
+                </div>
             </div>
             <div class="character-arm right">
-                <div class="character-hand"></div>
+                <div class="elbow-joint"></div>
+                <div class="character-forearm">
+                    <div class="character-hand"></div>
+                </div>
             </div>
             
-            <!-- Legs with shoes -->
+            <!-- Legs with shoes and knees -->
             <div class="character-leg left">
-                <div class="character-shoe"></div>
+                <div class="knee-joint"></div>
+                <div class="character-calf">
+                    <div class="character-shoe"></div>
+                </div>
             </div>
             <div class="character-leg right">
-                <div class="character-shoe"></div>
+                <div class="knee-joint"></div>
+                <div class="character-calf">
+                    <div class="character-shoe"></div>
+                </div>
             </div>
             
-            <!-- Sparkles -->
-            <div class="sparkle"></div>
-            <div class="sparkle"></div>
-            <div class="sparkle"></div>
-            <div class="sparkle"></div>
             <!-- Dynamic shadow beneath the character for depth -->
             <div class="character-shadow" aria-hidden="true"></div>
             
@@ -2344,14 +2461,105 @@
                     placeholder="Type your message..."
                     rows="2"
                 ></textarea>
+                <input type="file" id="visionImageInput" accept="image/*">
+                <button id="visionUploadButton" title="Upload image for expression analysis">🖼️</button>
                 <button id="sendButton">📤</button>
+            </div>
+            <div id="visionPreview">
+                <img id="visionPreviewImage" alt="Image preview">
+                <button id="visionClearButton">✕ Clear</button>
             </div>
         </div>
     </div>
 
     <!-- Toast for Aria notifications -->
     <div id="ariaToast" class="aria-toast" aria-hidden="true"></div>
-    <script>window.ARIA_EMBEDDED = true;</script>
+    <script>
+        // Allow chat.js to wire up vision and avatar features
+        // The embedded controller will handle streaming chat separately
+        window.ARIA_EMBEDDED = false;
+        
+        // Pupil cursor tracking - both eyes
+        document.addEventListener('DOMContentLoaded', function() {
+            var pupils = document.querySelectorAll('.pupil');
+            var eyes = document.querySelectorAll('.eye');
+            var eyesContainer = document.querySelector('.character-eyes');
+            if (pupils.length === 0 || eyes.length === 0) return;
+            
+            // Make eyes container draggable
+            var isDraggingEyes = false;
+            var eyesDragStartX = 0;
+            var eyesDragStartY = 0;
+            var eyesInitialTop = 32;
+            var eyesInitialLeft = 50;
+            
+            eyesContainer.addEventListener('mousedown', function(e) {
+                isDraggingEyes = true;
+                eyesContainer.classList.add('dragging');
+                eyesDragStartX = e.clientX;
+                eyesDragStartY = e.clientY;
+                
+                // Get current position
+                var currentTop = parseInt(eyesContainer.style.top || 32);
+                var currentLeft = parseFloat(eyesContainer.style.left || 50);
+                eyesInitialTop = currentTop;
+                eyesInitialLeft = currentLeft;
+                
+                e.stopPropagation();
+                e.preventDefault();
+            });
+            
+            document.addEventListener('mousemove', function(e) {
+                if (isDraggingEyes) {
+                    var deltaX = e.clientX - eyesDragStartX;
+                    var deltaY = e.clientY - eyesDragStartY;
+                    
+                    var newTop = eyesInitialTop + deltaY;
+                    var newLeft = eyesInitialLeft + (deltaX / window.innerWidth * 100);
+                    
+                    eyesContainer.style.top = newTop + 'px';
+                    eyesContainer.style.left = newLeft + '%';
+                    
+                    // Log position for user
+                    console.log('Eyes position - top:', newTop + 'px', 'left:', newLeft + '%');
+                    return;
+                }
+                
+                // Pupil tracking
+                eyes.forEach(function(eye, index) {
+                    var pupil = pupils[index];
+                    if (!pupil) return;
+                    
+                    var eyeRect = eye.getBoundingClientRect();
+                    var eyeCenterX = eyeRect.left + eyeRect.width / 2;
+                    var eyeCenterY = eyeRect.top + eyeRect.height / 2;
+                    
+                    var angle = Math.atan2(e.clientY - eyeCenterY, e.clientX - eyeCenterX);
+                    var distance = Math.min(6, Math.hypot(e.clientX - eyeCenterX, e.clientY - eyeCenterY) / 20);
+                    
+                    var pupilX = Math.cos(angle) * distance;
+                    var pupilY = Math.sin(angle) * distance;
+                    
+                    pupil.style.transform = 'translate(calc(-50% + ' + pupilX + 'px), calc(-50% + ' + pupilY + 'px))';
+                });
+            });
+            
+            document.addEventListener('mouseup', function() {
+                if (isDraggingEyes) {
+                    isDraggingEyes = false;
+                    eyesContainer.classList.remove('dragging');
+                    
+                    // Log final position
+                    var finalTop = eyesContainer.style.top;
+                    var finalLeft = eyesContainer.style.left;
+                    console.log('=== FINAL EYES POSITION ===');
+                    console.log('top:', finalTop);
+                    console.log('left:', finalLeft);
+                    console.log('==========================');
+                }
+            });
+        });
+    </script>
     <script src="/api/chat-web/chat.js"></script>
     <script>
     // Anime Character Controller with AI Chat
@@ -2362,6 +2570,10 @@
         var sendButton = document.getElementById('sendButton');
         var chatMessages = document.getElementById('chatMessages');
         var providerInfo = document.getElementById('providerInfo');
+        
+        // ==== Avatar & Vision Handlers ====
+        // Removed duplicate handlers - chat.js module now handles all vision upload and avatar generation
+        // This embedded controller focuses solely on streaming chat and character animation
         
         var characterSpeed = 8;
         var keys = {};
@@ -3242,6 +3454,13 @@
                             try { var meta = JSON.parse(dataStr); handlers.onMeta && handlers.onMeta(meta); } catch(e) {}
                         } else if (event === 'token') {
                             try { var tok = JSON.parse(dataStr); handlers.onToken && handlers.onToken(tok); } catch(e) {}
+                        } else if (event === 'movement') {
+                            try { 
+                                var movement = JSON.parse(dataStr);
+                                if (movement.commands && movement.commands.length > 0) {
+                                    executeMovementCommands(movement.commands);
+                                }
+                            } catch(e) { console.error('Movement parse error:', e); }
                         } else if (event === 'done') {
                             handlers.onDone && handlers.onDone();
                         } else if (event === 'error') {
@@ -3374,7 +3593,19 @@
         function parseAriaCommands(text) {
             var lowerText = text.toLowerCase();
             
-            // Movement commands
+            // Movement commands with walking
+            if (lowerText.includes('[aria:walk:left]') || lowerText.includes('walk left') || lowerText.includes('aria walk left')) {
+                moveAria('left', 200);
+            }
+            if (lowerText.includes('[aria:walk:right]') || lowerText.includes('walk right') || lowerText.includes('aria walk right')) {
+                moveAria('right', 200);
+            }
+            if (lowerText.includes('[aria:walk:up]') || lowerText.includes('walk up') || lowerText.includes('aria walk up')) {
+                moveAria('up', 200);
+            }
+            if (lowerText.includes('[aria:walk:down]') || lowerText.includes('walk down') || lowerText.includes('aria walk down')) {
+                moveAria('down', 200);
+            }
             if (lowerText.includes('[aria:move:left]') || lowerText.includes('aria move left')) {
                 moveAria('left', 100);
             }
@@ -3409,35 +3640,220 @@
             if (lowerText.includes('[aria:dance]') || lowerText.includes('aria dance')) {
                 ariaDance();
             }
+            
+            // Arm joint commands
+            // Raise arms: [aria:arms:raise] or "raise arms" or "aria raise your arms"
+            if (lowerText.includes('[aria:arms:raise]') || lowerText.includes('raise arms') || lowerText.includes('raise your arms')) {
+                raiseArms();
+            }
+            // Lower arms: [aria:arms:lower] or "lower arms" or "aria lower your arms"
+            if (lowerText.includes('[aria:arms:lower]') || lowerText.includes('lower arms') || lowerText.includes('lower your arms')) {
+                lowerArms();
+            }
+            // Wave left arm: [aria:arm:wave:left] or "wave left arm"
+            if (lowerText.includes('[aria:arm:wave:left]') || lowerText.includes('wave left arm') || lowerText.includes('wave your left arm')) {
+                waveArm('left');
+            }
+            // Wave right arm: [aria:arm:wave:right] or "wave right arm"
+            if (lowerText.includes('[aria:arm:wave:right]') || lowerText.includes('wave right arm') || lowerText.includes('wave your right arm')) {
+                waveArm('right');
+            }
+            // Point left: [aria:point:left] or "point left"
+            if (lowerText.includes('[aria:point:left]') || lowerText.includes('point left') || lowerText.includes('aria point left')) {
+                pointDirection('left');
+            }
+            // Point right: [aria:point:right] or "point right"
+            if (lowerText.includes('[aria:point:right]') || lowerText.includes('point right') || lowerText.includes('aria point right')) {
+                pointDirection('right');
+            }
+            // Point up: [aria:point:up] or "point up"
+            if (lowerText.includes('[aria:point:up]') || lowerText.includes('point up') || lowerText.includes('aria point up')) {
+                pointDirection('up');
+            }
+            // Reach: [aria:reach] or "reach up" or "reach high"
+            if (lowerText.includes('[aria:reach]') || lowerText.includes('reach up') || lowerText.includes('reach high')) {
+                reachUp();
+            }
+            // Reset arms: [aria:arms:reset] or "reset arms" or "arms down"
+            if (lowerText.includes('[aria:arms:reset]') || lowerText.includes('reset arms') || lowerText.includes('arms down')) {
+                resetArms();
+            }
         }
         
-        // Aria movement functions
-        function moveAria(direction, distance) {
-            switch(direction) {
-                case 'left':
-                    charX = Math.max(0, charX - distance);
-                    break;
-                case 'right':
-                    charX = Math.min(window.innerWidth - 140, charX + distance);
-                    break;
-                case 'up':
-                    charY = Math.max(50, charY - distance);
-                    break;
-                case 'down':
-                    charY = Math.min(window.innerHeight - 180, charY + distance);
-                    break;
+        // Execute movement commands from API
+        function executeMovementCommands(commands) {
+            if (!commands || commands.length === 0) return;
+            
+            commands.forEach(function(cmd) {
+                switch(cmd.action) {
+                    case 'walk':
+                    case 'move':
+                        if (cmd.direction && cmd.distance) {
+                            moveAria(cmd.direction, cmd.distance);
+                        }
+                        break;
+                    case 'center':
+                        moveAriaToCenter();
+                        break;
+                    case 'wave':
+                        ariaWave();
+                        break;
+                    case 'jump':
+                        ariaJump();
+                        break;
+                    case 'dance':
+                        ariaDance();
+                        break;
+                }
+            });
+        }
+        
+        // AI-driven autonomous movement
+        var aiMovementInterval = null;
+        var aiMovementEnabled = false;
+        
+        function startAIMovement() {
+            if (aiMovementInterval) return;
+            aiMovementEnabled = true;
+            
+            function requestAIMovement() {
+                if (!aiMovementEnabled) return;
+                
+                // Get current screen dimensions and Aria's position
+                var screenInfo = {
+                    width: window.innerWidth,
+                    height: window.innerHeight,
+                    ariaX: Math.round(charX),
+                    ariaY: Math.round(charY),
+                    ariaZone: charX < window.innerWidth / 3 ? 'left' : 
+                             charX > (window.innerWidth * 2 / 3) ? 'right' : 'center'
+                };
+                
+                // Ask AI to decide next movement
+                var movementPrompt = [
+                    {
+                        role: 'system',
+                        content: 'You are controlling an anime character named Aria on screen. Based on her current position, decide her next movement. Respond ONLY with movement commands like [aria:walk:left], [aria:walk:right], [aria:wave], [aria:jump], [aria:dance], or [aria:center]. Make movements natural and varied. Current position: x=' + screenInfo.ariaX + ', zone=' + screenInfo.ariaZone + '. Screen width: ' + screenInfo.width + 'px.'
+                    },
+                    {
+                        role: 'user',
+                        content: 'What should Aria do next? Give a single movement command.'
+                    }
+                ];
+                
+                // Make silent API call
+                fetch('/api/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        messages: movementPrompt,
+                        stream: false,
+                        max_output_tokens: 50
+                    })
+                })
+                .then(function(response) { return response.json(); })
+                .then(function(data) {
+                    if (data.reply) {
+                        // Parse the AI's movement decision
+                        parseAriaCommands(data.reply);
+                    }
+                    
+                    // Schedule next movement decision (5-10 seconds)
+                    if (aiMovementEnabled) {
+                        setTimeout(requestAIMovement, 5000 + Math.random() * 5000);
+                    }
+                })
+                .catch(function(error) {
+                    console.error('AI movement error:', error);
+                    // Retry after longer delay on error
+                    if (aiMovementEnabled) {
+                        setTimeout(requestAIMovement, 10000);
+                    }
+                });
             }
-            // position will be updated smoothly by the main animation loop
+            
+            // Start the AI movement cycle
+            requestAIMovement();
+        }
+        
+        function stopAIMovement() {
+            aiMovementEnabled = false;
+            if (aiMovementInterval) {
+                clearInterval(aiMovementInterval);
+                aiMovementInterval = null;
+            }
+        }
+        
+        // Toggle AI movement with keyboard shortcut (Ctrl+M)
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey && e.key === 'm') {
+                if (aiMovementEnabled) {
+                    stopAIMovement();
+                    console.log('AI movement: OFF');
+                } else {
+                    startAIMovement();
+                    console.log('AI movement: ON');
+                }
+            }
+        });
+        
+        // Aria movement functions
+        var walkingInterval = null;
+        
+        function startWalking() {
+            character.classList.add('walking');
+        }
+        
+        function stopWalking() {
+            character.classList.remove('walking');
+        }
+        
+        function moveAria(direction, distance) {
+            startWalking();
+            var steps = 20;
+            var stepDistance = distance / steps;
+            var stepDelay = 30;
+            var currentStep = 0;
+            
+            if (walkingInterval) clearInterval(walkingInterval);
+            
+            walkingInterval = setInterval(function() {
+                if (currentStep >= steps) {
+                    clearInterval(walkingInterval);
+                    walkingInterval = null;
+                    stopWalking();
+                    return;
+                }
+                
+                switch(direction) {
+                    case 'left':
+                        charX = Math.max(0, charX - stepDistance);
+                        break;
+                    case 'right':
+                        charX = Math.min(window.innerWidth - 140, charX + stepDistance);
+                        break;
+                    case 'up':
+                        charY = Math.max(window.innerHeight - 400, charY - stepDistance);
+                        break;
+                    case 'down':
+                        charY = Math.min(window.innerHeight - 200, charY + stepDistance);
+                        break;
+                }
+                
+                character.style.left = charX + 'px';
+                character.style.top = charY + 'px';
+                currentStep++;
+            }, stepDelay);
         }
         
         function moveAriaTo(x, y) {
             charX = Math.max(0, Math.min(window.innerWidth - 140, x));
-            charY = Math.max(50, Math.min(window.innerHeight - 180, y));
+            charY = Math.max(window.innerHeight - 400, Math.min(window.innerHeight - 200, y));
             // visual position will be updated smoothly by the main animation loop
         }
         
         function moveAriaToCenter() {
-            moveAriaTo(window.innerWidth / 2 - 70, window.innerHeight / 2 - 90);
+            moveAriaTo(window.innerWidth / 2 - 70, window.innerHeight - 200);
         }
         
         function ariaWave() {
@@ -3472,6 +3888,69 @@
                     character.style.transform = '';
                 }
             }, 200);
+        }
+        
+        // Arm joint control functions
+        function setArmRotation(arm, shoulderDeg, elbowDeg) {
+            if (arm === 'left') {
+                character.style.setProperty('--left-shoulder-rotate', shoulderDeg + 'deg');
+                character.style.setProperty('--left-elbow-rotate', elbowDeg + 'deg');
+            } else if (arm === 'right') {
+                character.style.setProperty('--right-shoulder-rotate', shoulderDeg + 'deg');
+                character.style.setProperty('--right-elbow-rotate', elbowDeg + 'deg');
+            }
+        }
+        
+        function raiseArms() {
+            setArmRotation('left', -90, 0);
+            setArmRotation('right', 90, 0);
+        }
+        
+        function lowerArms() {
+            setArmRotation('left', -10, 0);
+            setArmRotation('right', 10, 0);
+        }
+        
+        function waveArm(arm) {
+            var waves = 0;
+            var maxWaves = 3;
+            var waveInterval = setInterval(function() {
+                if (waves >= maxWaves) {
+                    clearInterval(waveInterval);
+                    resetArms();
+                    return;
+                }
+                var phase = waves % 2;
+                if (arm === 'left') {
+                    setArmRotation('left', -60, phase === 0 ? -30 : 30);
+                } else {
+                    setArmRotation('right', 60, phase === 0 ? -30 : 30);
+                }
+                waves++;
+            }, 300);
+        }
+        
+        function pointDirection(direction) {
+            if (direction === 'left') {
+                setArmRotation('left', -90, -10);
+                setArmRotation('right', 10, 0);
+            } else if (direction === 'right') {
+                setArmRotation('left', -10, 0);
+                setArmRotation('right', 90, 10);
+            } else if (direction === 'up') {
+                setArmRotation('left', -90, 0);
+                setArmRotation('right', 90, 0);
+            }
+        }
+        
+        function reachUp() {
+            setArmRotation('left', -120, -20);
+            setArmRotation('right', 120, 20);
+        }
+        
+        function resetArms() {
+            setArmRotation('left', -10, 0);
+            setArmRotation('right', 10, 0);
         }
         
         // Animate character briefly on send, then send message
@@ -3518,18 +3997,29 @@
             applyBubbleSize(next);
         }
         
-        // Initialize character position and enable autonomous movement
-        var charX = Math.max(0, Math.min(window.innerWidth - 140, Math.floor(window.innerWidth / 2 - 70)));
-        var charY = Math.max(50, Math.min(window.innerHeight - 180, Math.floor(window.innerHeight / 2 - 90)));
-        // Clear fixed bottom-right anchoring if present
-        character.style.right = '';
-        character.style.bottom = '';
-        character.style.left = charX + 'px';
-        character.style.top = charY + 'px';
+        // Initialize character position - top area above chat box
+        if (!character) {
+            console.error('Aria character element not found!');
+        } else {
+            console.log('Aria character found, initializing...');
+        }
+        var charX = Math.floor(window.innerWidth / 2 - 70);
+        var charY = window.innerHeight - 200; // Position at bottom of screen
+        // Clear any fixed positioning and ensure visibility
+        if (character) {
+            character.style.display = 'block';
+            character.style.visibility = 'visible';
+            character.style.opacity = '1';
+            character.style.right = '';
+            character.style.bottom = '';
+            character.style.left = charX + 'px';
+            character.style.top = charY + 'px';
+            console.log('Aria positioned at:', charX, charY);
+        }
         
         var autonomousMode = true;
         var targetX = charX;
-        var targetY = charY;
+        var targetY = window.innerHeight - 200; // Keep target at bottom
         var autonomousSpeed = 2;
 
         // Visual smoothing & physics
@@ -3539,6 +4029,61 @@
         var prevCharY = charY;
         var charVX = 0;
         var charVY = 0;
+
+        // ==== Aria Drag Functionality ====
+        var isDraggingAria = false;
+        var ariaDragOffsetX = 0;
+        var ariaDragOffsetY = 0;
+        
+        character.addEventListener('mousedown', function(e) {
+            // Don't drag if clicking on eyes
+            if (e.target.closest('.character-eyes')) return;
+            
+            isDraggingAria = true;
+            character.style.cursor = 'grabbing';
+            
+            // Calculate offset from mouse to character top-left
+            var rect = character.getBoundingClientRect();
+            ariaDragOffsetX = e.clientX - rect.left;
+            ariaDragOffsetY = e.clientY - rect.top;
+            
+            // Disable autonomous movement while dragging
+            autonomousMode = false;
+            
+            e.preventDefault();
+        });
+        
+        document.addEventListener('mousemove', function(e) {
+            if (isDraggingAria) {
+                // Calculate new position
+                var newX = e.clientX - ariaDragOffsetX;
+                var newY = e.clientY - ariaDragOffsetY;
+                
+                // Apply boundaries
+                newX = Math.max(0, Math.min(window.innerWidth - 160, newX));
+                newY = Math.max(0, Math.min(window.innerHeight - 200, newY));
+                
+                // Update position
+                character.style.left = newX + 'px';
+                character.style.top = newY + 'px';
+                charX = newX;
+                charY = newY;
+                visualX = newX;
+                visualY = newY;
+            }
+        });
+        
+        document.addEventListener('mouseup', function() {
+            if (isDraggingAria) {
+                isDraggingAria = false;
+                character.style.cursor = 'grab';
+                
+                // Re-enable autonomous movement after a delay
+                setTimeout(function() {
+                    autonomousMode = true;
+                }, 2000);
+            }
+        });
 
         // hair physics data
         var hairStrandEls = [];
@@ -3604,7 +4149,7 @@
         
         function setNewRandomTarget() {
             targetX = Math.random() * (window.innerWidth - 140);
-            targetY = 50 + Math.random() * (window.innerHeight - 230);
+            targetY = window.innerHeight - 200; // Keep Aria at the bottom of the screen
         }
         
         function updateAutonomousMovement() {
@@ -3613,12 +4158,25 @@
             var dy = targetY - charY;
             var distance = Math.sqrt(dx * dx + dy * dy);
             if (distance < 5) {
+                // Stop walking when reached target
+                character.classList.remove('walking');
                 setTimeout(setNewRandomTarget, 2000 + Math.random() * 3000);
             } else {
+                // Start walking animation
+                character.classList.add('walking');
                 var moveX = (dx / distance) * autonomousSpeed;
                 var moveY = (dy / distance) * autonomousSpeed;
                 charX += moveX;
                 charY += moveY;
+                
+                // Face direction of movement
+                if (Math.abs(dx) > 0.5) {
+                    if (dx > 0) {
+                        character.style.transform = 'scale(1.15) scaleX(1)';
+                    } else {
+                        character.style.transform = 'scale(1.15) scaleX(-1)';
+                    }
+                }
             }
         }
         
@@ -3627,6 +4185,8 @@
         initHairPhysics();
         // init Aria controls & tts/lip-sync UI
         initAriaControls();
+        // Start the movement animation loop
+        updateMovement();
         
         // Character click handler - toggle chat window without pausing movement
         // Position chat next to Aria
@@ -3787,32 +4347,25 @@
         // hook up bubble send events
         if (bubbleSend) bubbleSend.addEventListener('click', sendBubbleMessage);
         if (bubbleInput) bubbleInput.addEventListener('keypress', function(e) { if (e.key === 'Enter') sendBubbleMessage(); });
+        
+        // Click character to open chat interface
         character.addEventListener('click', function(e) {
             e.stopPropagation();
 
-            // Toggle compact bubble open/close
-            var isOpen = chatBubble.classList.contains('open');
-            if (isOpen) {
-                chatBubble.classList.remove('open');
-                chatBubble.setAttribute('aria-expanded','false');
-                chatBubble.setAttribute('aria-hidden','true');
-                try { localStorage.setItem(BUBBLE_OPEN_KEY, '0'); } catch(e) {}
+            // Toggle chat container visibility
+            if (chatContainer.classList.contains('visible')) {
+                chatContainer.classList.remove('visible');
             } else {
-                chatBubble.classList.add('open');
-                chatBubble.setAttribute('aria-expanded','true');
-                chatBubble.setAttribute('aria-hidden','false');
-                try { localStorage.setItem(BUBBLE_OPEN_KEY, '1'); } catch(e) {}
-                refreshBubbleFromHistory();
-                // focus the bubble input so user can type right away
-                if (bubbleInput) setTimeout(function(){ bubbleInput.focus(); }, 50);
+                chatContainer.classList.add('visible');
+                // Focus the input so user can type right away
+                if (messageInput) setTimeout(function(){ messageInput.focus(); }, 100);
             }
 
-            // small highlight animation
-            chatBubble.classList.add('show');
-            if (bubbleTimeout) clearTimeout(bubbleTimeout);
-            bubbleTimeout = setTimeout(function() {
-                chatBubble.classList.remove('show');
-            }, 1200);
+            // Small highlight animation on character
+            character.style.transform = 'scale(1.05)';
+            setTimeout(function() {
+                character.style.transform = '';
+            }, 200);
         });
 
         // Close and size buttons
@@ -3881,11 +4434,20 @@
             }
             if (keys['arrowleft'] || keys['a']) {
                 charX -= characterSpeed;
+                character.style.transform = 'scale(1.15) scaleX(-1)';
                 moved = true;
             }
             if (keys['arrowright'] || keys['d']) {
                 charX += characterSpeed;
+                character.style.transform = 'scale(1.15) scaleX(1)';
                 moved = true;
+            }
+            
+            // Toggle walking animation
+            if (moved) {
+                character.classList.add('walking');
+            } else {
+                character.classList.remove('walking');
             }
             
             charX = Math.max(0, Math.min(window.innerWidth - 140, charX));
@@ -3923,7 +4485,6 @@
 
             requestAnimationFrame(updateMovement);
         }
-        updateMovement()
         
         // Check collisions with chat window
         function checkCollisions() {

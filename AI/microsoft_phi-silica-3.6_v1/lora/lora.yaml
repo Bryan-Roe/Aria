@@ -15,12 +15,14 @@ finetune_test_seqlen: 512
 finetune_train_batch_size: 1
 finetune_train_nsamples: 64
 finetune_train_seqlen: 512
-gradient_accumulation_steps: 1
-gradient_checkpointing: false
+gradient_accumulation_steps: 4  # Effective batch size = 1 * 4 = 4
+gradient_checkpointing: true  # Enable to reduce memory usage
 learning_rate: !!float 0.0002
 lora_dropout: !!float 0.1
-lr_scheduler_type: "linear_with_warmup"
+lr_scheduler_type: "cosine"  # Cosine annealing for better convergence
 max_grad_norm: 1
+warmup_steps: 100  # Warmup for stable training start
+early_stopping_threshold: !!float 0.01  # Stop if improvement < 1%
 model: "microsoft/Phi-3.5-mini-instruct"  # Using publicly available Phi-3.5
 model_path: "model"
 num_training_steps: 100

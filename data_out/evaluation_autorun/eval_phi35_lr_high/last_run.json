@@ -23,16 +23,16 @@
     "--save-dir",
     "C:\\Users\\Bryan\\OneDrive\\AI\\data_out\\evaluation_autorun\\eval_phi35_lr_high"
   ],
-  "start_time": "20251123T135450Z",
-  "status": "succeeded",
-  "return_code": 0,
-  "log": "C:\\Users\\Bryan\\OneDrive\\AI\\data_out\\evaluation_autorun\\eval_phi35_lr_high\\20251123T135450Z\\stdout.log",
-  "results_file": "C:\\Users\\Bryan\\OneDrive\\AI\\data_out\\evaluation_autorun\\eval_phi35_lr_high\\20251123T135450Z\\results.json",
+  "start_time": "20251127T094433Z",
+  "status": "failed",
+  "return_code": 1,
+  "log": "C:\\Users\\Bryan\\OneDrive\\AI\\data_out\\evaluation_autorun\\eval_phi35_lr_high\\20251127T094433Z\\stdout.log",
+  "results_file": "C:\\Users\\Bryan\\OneDrive\\AI\\data_out\\evaluation_autorun\\eval_phi35_lr_high\\20251127T094433Z\\results.json",
   "metrics_computed": [
     "accuracy",
     "bleu",
     "rouge",
     "response_time"
   ],
-  "duration_sec": 0.07
+  "duration_sec": 6.62
 }

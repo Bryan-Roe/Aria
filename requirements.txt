@@ -29,4 +29,16 @@ eventlet>=0.35.2  # Optional async server for SocketIO (can fallback to threadin
 pyttsx3>=2.90
 gTTS>=2.3.0
 
+# Optional evaluation & visualization (confusion-matrix, plots)
+# Install these when you want to produce evaluation artifacts:
+# scikit-learn, matplotlib, seaborn
+scikit-learn>=1.2.0
+matplotlib>=3.7.0
+seaborn>=0.12.0
+
+# Vision inference dependencies
+Pillow>=10.0.0
+torch>=2.0.0
+numpy>=1.24.0
+
 # NOTE: After adding telemetry & cosmos, run task: pip install (functions)

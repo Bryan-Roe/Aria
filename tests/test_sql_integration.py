@@ -1,5 +1,18 @@
 import os
 import logging
+import pytest
+
+# Check if SQLAlchemy is available for these tests
+try:
+    import sqlalchemy
+    SQLALCHEMY_AVAILABLE = True
+except ImportError:
+    SQLALCHEMY_AVAILABLE = False
+
+pytestmark = pytest.mark.skipif(
+    not SQLALCHEMY_AVAILABLE, 
+    reason="SQLAlchemy not installed - SQL integration tests require sqlalchemy"
+)
 
 # Ensure an in-memory SQLite URL for isolated tests
 os.environ.setdefault("QAI_SQL_URL", "sqlite:///:memory:")

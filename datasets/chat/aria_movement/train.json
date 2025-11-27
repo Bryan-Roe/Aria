@@ -1,0 +1,242 @@
+[
+  {
+    "messages": [
+      {"role": "user", "content": "Make Aria move to the left"},
+      {"role": "assistant", "content": "I'll move Aria to the left. [aria:move:left]"}
+    ]
+  },
+  {
+    "messages": [
+      {"role": "user", "content": "Can you move Aria right?"},
+      {"role": "assistant", "content": "Moving Aria to the right now. [aria:move:right]"}
+    ]
+  },
+  {
+    "messages": [
+      {"role": "user", "content": "Move Aria up"},
+      {"role": "assistant", "content": "Moving Aria upward. [aria:move:up]"}
+    ]
+  },
+  {
+    "messages": [
+      {"role": "user", "content": "Aria should go down"},
+      {"role": "assistant", "content": "Moving Aria down. [aria:move:down]"}
+    ]
+  },
+  {
+    "messages": [
+      {"role": "user", "content": "Make Aria walk left"},
+      {"role": "assistant", "content": "Aria is walking to the left. [aria:walk:left]"}
+    ]
+  },
+  {
+    "messages": [
+      {"role": "user", "content": "Have Aria walk to the right"},
+      {"role": "assistant", "content": "Aria will walk to the right. [aria:walk:right]"}
+    ]
+  },
+  {
+    "messages": [
+      {"role": "user", "content": "Aria walk up"},
+      {"role": "assistant", "content": "Walking Aria upward. [aria:walk:up]"}
+    ]
+  },
+  {
+    "messages": [
+      {"role": "user", "content": "Walk Aria down"},
+      {"role": "assistant", "content": "Aria is walking down. [aria:walk:down]"}
+    ]
+  },
+  {
+    "messages": [
+      {"role": "user", "content": "Center Aria on the screen"},
+      {"role": "assistant", "content": "Centering Aria now. [aria:center]"}
+    ]
+  },
+  {
+    "messages": [
+      {"role": "user", "content": "Make Aria wave"},
+      {"role": "assistant", "content": "Aria is waving! [aria:wave]"}
+    ]
+  },
+  {
+    "messages": [
+      {"role": "user", "content": "Can Aria jump?"},
+      {"role": "assistant", "content": "Yes! Aria is jumping! [aria:jump]"}
+    ]
+  },
+  {
+    "messages": [
+      {"role": "user", "content": "Make Aria dance"},
+      {"role": "assistant", "content": "Aria is dancing! [aria:dance]"}
+    ]
+  },
+  {
+    "messages": [
+      {"role": "user", "content": "Move Aria to the left side"},
+      {"role": "assistant", "content": "Moving Aria to the left side. [aria:move:left]"}
+    ]
+  },
+  {
+    "messages": [
+      {"role": "user", "content": "Shift Aria right"},
+      {"role": "assistant", "content": "Shifting Aria to the right. [aria:move:right]"}
+    ]
+  },
+  {
+    "messages": [
+      {"role": "user", "content": "Take Aria up"},
+      {"role": "assistant", "content": "Taking Aria up. [aria:move:up]"}
+    ]
+  },
+  {
+    "messages": [
+      {"role": "user", "content": "Bring Aria down"},
+      {"role": "assistant", "content": "Bringing Aria down. [aria:move:down]"}
+    ]
+  },
+  {
+    "messages": [
+      {"role": "user", "content": "Have Aria walk towards the left"},
+      {"role": "assistant", "content": "Aria is walking towards the left. [aria:walk:left]"}
+    ]
+  },
+  {
+    "messages": [
+      {"role": "user", "content": "Aria needs to walk right"},
+      {"role": "assistant", "content": "Aria is walking to the right. [aria:walk:right]"}
+    ]
+  },
+  {
+    "messages": [
+      {"role": "user", "content": "Walk upwards"},
+      {"role": "assistant", "content": "Walking Aria upwards. [aria:walk:up]"}
+    ]
+  },
+  {
+    "messages": [
+      {"role": "user", "content": "Walk downwards"},
+      {"role": "assistant", "content": "Walking Aria downwards. [aria:walk:down]"}
+    ]
+  },
+  {
+    "messages": [
+      {"role": "user", "content": "Put Aria in the center"},
+      {"role": "assistant", "content": "Putting Aria in the center. [aria:center]"}
+    ]
+  },
+  {
+    "messages": [
+      {"role": "user", "content": "Aria should wave hello"},
+      {"role": "assistant", "content": "Aria is waving hello! [aria:wave]"}
+    ]
+  },
+  {
+    "messages": [
+      {"role": "user", "content": "Jump!"},
+      {"role": "assistant", "content": "Aria is jumping! [aria:jump]"}
+    ]
+  },
+  {
+    "messages": [
+      {"role": "user", "content": "Dance time!"},
+      {"role": "assistant", "content": "It's dance time! [aria:dance]"}
+    ]
+  },
+  {
+    "messages": [
+      {"role": "user", "content": "Slide Aria left"},
+      {"role": "assistant", "content": "Sliding Aria to the left. [aria:move:left]"}
+    ]
+  },
+  {
+    "messages": [
+      {"role": "user", "content": "Slide right"},
+      {"role": "assistant", "content": "Sliding Aria to the right. [aria:move:right]"}
+    ]
+  },
+  {
+    "messages": [
+      {"role": "user", "content": "Go up"},
+      {"role": "assistant", "content": "Moving Aria up. [aria:move:up]"}
+    ]
+  },
+  {
+    "messages": [
+      {"role": "user", "content": "Go down"},
+      {"role": "assistant", "content": "Moving Aria down. [aria:move:down]"}
+    ]
+  },
+  {
+    "messages": [
+      {"role": "user", "content": "Aria walk left please"},
+      {"role": "assistant", "content": "Sure! Aria is walking left. [aria:walk:left]"}
+    ]
+  },
+  {
+    "messages": [
+      {"role": "user", "content": "Walk right please"},
+      {"role": "assistant", "content": "Aria is walking right! [aria:walk:right]"}
+    ]
+  },
+  {
+    "messages": [
+      {"role": "user", "content": "Can you make her walk up?"},
+      {"role": "assistant", "content": "Of course! Aria is walking up. [aria:walk:up]"}
+    ]
+  },
+  {
+    "messages": [
+      {"role": "user", "content": "Make her walk down"},
+      {"role": "assistant", "content": "Aria is walking down now. [aria:walk:down]"}
+    ]
+  },
+  {
+    "messages": [
+      {"role": "user", "content": "Return to center"},
+      {"role": "assistant", "content": "Returning Aria to center. [aria:center]"}
+    ]
+  },
+  {
+    "messages": [
+      {"role": "user", "content": "Wave at me"},
+      {"role": "assistant", "content": "Aria is waving at you! [aria:wave]"}
+    ]
+  },
+  {
+    "messages": [
+      {"role": "user", "content": "Do a jump"},
+      {"role": "assistant", "content": "Watch Aria jump! [aria:jump]"}
+    ]
+  },
+  {
+    "messages": [
+      {"role": "user", "content": "Show me a dance"},
+      {"role": "assistant", "content": "Here's Aria's dance! [aria:dance]"}
+    ]
+  },
+  {
+    "messages": [
+      {"role": "user", "content": "Move her left then make her wave"},
+      {"role": "assistant", "content": "Moving Aria left and then waving. [aria:move:left] [aria:wave]"}
+    ]
+  },
+  {
+    "messages": [
+      {"role": "user", "content": "Walk right and jump"},
+      {"role": "assistant", "content": "Aria will walk right and then jump! [aria:walk:right] [aria:jump]"}
+    ]
+  },
+  {
+    "messages": [
+      {"role": "user", "content": "Go to center and dance"},
+      {"role": "assistant", "content": "Moving Aria to center and starting the dance! [aria:center] [aria:dance]"}
+    ]
+  },
+  {
+    "messages": [
+      {"role": "user", "content": "Move up, then wave"},
+      {"role": "assistant", "content": "Moving Aria up and waving! [aria:move:up] [aria:wave]"}
+    ]
+  }
+]

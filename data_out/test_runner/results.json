@@ -1,14 +1,14 @@
 {
-  "generated_at": "2025-11-25T06:27:16.864965Z",
+  "generated_at": "2025-11-27T06:35:10.161190Z",
   "suites": [
     {
-      "name": "unit",
+      "name": "integration",
       "status": "passed",
-      "duration_sec": 0.44,
-      "tests_collected": 40,
-      "tests_passed": 40,
+      "duration_sec": 7.86,
+      "tests_collected": 31,
+      "tests_passed": 24,
       "tests_failed": 0,
-      "tests_skipped": 0,
+      "tests_skipped": 7,
       "exit_code": 0,
       "coverage_pct": null
     }
@@ -17,9 +17,9 @@
     "total_suites": 1,
     "passed": 1,
     "failed": 0,
-    "total_tests": 40,
-    "total_passed": 40,
+    "total_tests": 31,
+    "total_passed": 24,
     "total_failed": 0,
-    "total_duration_sec": 0.44
+    "total_duration_sec": 7.86
   }
 }
