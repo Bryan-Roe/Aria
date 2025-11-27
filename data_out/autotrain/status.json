@@ -1,23 +1,15 @@
 {
-  "generated_at": "2025-11-27T06:35:07Z",
+  "generated_at": "2025-11-27T10:30:03Z",
   "jobs": [
     {
-      "name": "local_job",
-      "runner": "local",
-      "category": null,
-      "cmd": [
-        "C:\\Users\\Bryan\\OneDrive\\AI\\venv\\Scripts\\python.exe",
-        "C:\\Users\\Bryan\\OneDrive\\AI\\scripts\\run_local_lora_training.py",
-        "--config",
-        "local_config.yaml",
-        "--reinstall"
-      ],
-      "start_time": "20251127T063507Z",
-      "status": "validated",
+      "name": "aria_movement_quick",
+      "runner": "hf",
+      "category": "specialized",
+      "status": "running",
+      "start_time": "20251127T103003Z",
+      "cmd": null,
       "return_code": null,
-      "log": "C:\\Users\\Bryan\\OneDrive\\AI\\data_out\\autotrain\\local_job\\20251127T063507Z\\stdout.log",
-      "output_dir": null,
-      "validated_type": "dry-run"
+      "duration_sec": null
     }
   ]
 }

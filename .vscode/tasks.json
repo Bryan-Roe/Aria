@@ -54,7 +54,9 @@
 		{
 			"label": "Run: AutoTrain (dry-run)",
 			"type": "shell",
-			"options": { "cwd": "${workspaceFolder}" },
+			"options": {
+				"cwd": "${workspaceFolder}"
+			},
 			"command": "python",
 			"args": [
 				".\\scripts\\autotrain.py",
@@ -66,7 +68,9 @@
 		{
 			"label": "Run: AutoTrain (all)",
 			"type": "shell",
-			"options": { "cwd": "${workspaceFolder}" },
+			"options": {
+				"cwd": "${workspaceFolder}"
+			},
 			"command": "python",
 			"args": [
 				".\\scripts\\autotrain.py"
@@ -77,14 +81,20 @@
 		{
 			"label": "Run: LoRA quick (streaming)",
 			"type": "shell",
-			"options": { "cwd": "${workspaceFolder}\\AI\\microsoft_phi-silica-3.6_v1" },
+			"options": {
+				"cwd": "${workspaceFolder}\\AI\\microsoft_phi-silica-3.6_v1"
+			},
 			"command": ".\\venv\\Scripts\\python.exe",
 			"args": [
 				".\\scripts\\train_lora.py",
-				"--dataset", "..\\..\\datasets\\chat\\mixed_chat",
-				"--max-train-samples", "64",
-				"--max-eval-samples", "16",
-				"--epochs", "1"
+				"--dataset",
+				"..\\..\\datasets\\chat\\mixed_chat",
+				"--max-train-samples",
+				"64",
+				"--max-eval-samples",
+				"16",
+				"--epochs",
+				"1"
 			],
 			"isBackground": false,
 			"problemMatcher": []
@@ -92,14 +102,20 @@
 		{
 			"label": "Run: LoRA quick (non-stream)",
 			"type": "shell",
-			"options": { "cwd": "${workspaceFolder}\\AI\\microsoft_phi-silica-3.6_v1" },
+			"options": {
+				"cwd": "${workspaceFolder}\\AI\\microsoft_phi-silica-3.6_v1"
+			},
 			"command": ".\\venv\\Scripts\\python.exe",
 			"args": [
 				".\\scripts\\train_lora.py",
-				"--dataset", "..\\..\\datasets\\chat\\mixed_chat",
-				"--max-train-samples", "64",
-				"--max-eval-samples", "16",
-				"--epochs", "1",
+				"--dataset",
+				"..\\..\\datasets\\chat\\mixed_chat",
+				"--max-train-samples",
+				"64",
+				"--max-eval-samples",
+				"16",
+				"--epochs",
+				"1",
 				"--no-stream"
 			],
 			"isBackground": false,
@@ -108,7 +124,9 @@
 		{
 			"label": "Run: Quantum AutoRun (dry-run)",
 			"type": "shell",
-			"options": { "cwd": "${workspaceFolder}" },
+			"options": {
+				"cwd": "${workspaceFolder}"
+			},
 			"command": "python",
 			"args": [
 				".\\scripts\\quantum_autorun.py",
@@ -120,7 +138,9 @@
 		{
 			"label": "Run: Quantum AutoRun (all)",
 			"type": "shell",
-			"options": { "cwd": "${workspaceFolder}" },
+			"options": {
+				"cwd": "${workspaceFolder}"
+			},
 			"command": "python",
 			"args": [
 				".\\scripts\\quantum_autorun.py"
@@ -131,7 +151,9 @@
 		{
 			"label": "Run: Evaluation AutoRun (dry-run)",
 			"type": "shell",
-			"options": { "cwd": "${workspaceFolder}" },
+			"options": {
+				"cwd": "${workspaceFolder}"
+			},
 			"command": "python",
 			"args": [
 				".\\scripts\\evaluation_autorun.py",
@@ -143,7 +165,9 @@
 		{
 			"label": "Run: Evaluation AutoRun (all)",
 			"type": "shell",
-			"options": { "cwd": "${workspaceFolder}" },
+			"options": {
+				"cwd": "${workspaceFolder}"
+			},
 			"command": "python",
 			"args": [
 				".\\scripts\\evaluation_autorun.py"
@@ -154,7 +178,9 @@
 		{
 			"label": "Run: CI Validate All",
 			"type": "shell",
-			"options": { "cwd": "${workspaceFolder}" },
+			"options": {
+				"cwd": "${workspaceFolder}"
+			},
 			"command": "python",
 			"args": [
 				".\\scripts\\ci_orchestrator.py",
@@ -166,7 +192,9 @@
 		{
 			"label": "Run: CI Pipeline",
 			"type": "shell",
-			"options": { "cwd": "${workspaceFolder}" },
+			"options": {
+				"cwd": "${workspaceFolder}"
+			},
 			"command": "python",
 			"args": [
 				".\\scripts\\ci_orchestrator.py",
@@ -178,7 +206,9 @@
 		{
 			"label": "Run: Master Orchestrator - Quick Validation",
 			"type": "shell",
-			"options": { "cwd": "${workspaceFolder}" },
+			"options": {
+				"cwd": "${workspaceFolder}"
+			},
 			"command": "python",
 			"args": [
 				".\\scripts\\master_orchestrator.py",
@@ -191,7 +221,9 @@
 		{
 			"label": "Run: Master Orchestrator - Status",
 			"type": "shell",
-			"options": { "cwd": "${workspaceFolder}" },
+			"options": {
+				"cwd": "${workspaceFolder}"
+			},
 			"command": "python",
 			"args": [
 				".\\scripts\\master_orchestrator.py",
@@ -252,7 +284,9 @@
 		{
 			"label": "Run: Model Deployer - Scan",
 			"type": "shell",
-			"options": { "cwd": "${workspaceFolder}" },
+			"options": {
+				"cwd": "${workspaceFolder}"
+			},
 			"command": "python",
 			"args": [
 				".\\scripts\\model_deployer.py",
@@ -264,12 +298,16 @@
 		{
 			"label": "Run: Model Deployer - Deploy Best",
 			"type": "shell",
-			"options": { "cwd": "${workspaceFolder}" },
+			"options": {
+				"cwd": "${workspaceFolder}"
+			},
 			"command": "python",
 			"args": [
 				".\\scripts\\model_deployer.py",
-				"--deploy", "best",
-				"--strategy", "canary"
+				"--deploy",
+				"best",
+				"--strategy",
+				"canary"
 			],
 			"isBackground": false,
 			"problemMatcher": []
@@ -277,7 +315,9 @@
 		{
 			"label": "Run: Resource Monitor - Snapshot",
 			"type": "shell",
-			"options": { "cwd": "${workspaceFolder}" },
+			"options": {
+				"cwd": "${workspaceFolder}"
+			},
 			"command": "python",
 			"args": [
 				".\\scripts\\resource_monitor.py",
@@ -289,12 +329,15 @@
 		{
 			"label": "Run: Resource Monitor - Stream",
 			"type": "shell",
-			"options": { "cwd": "${workspaceFolder}" },
+			"options": {
+				"cwd": "${workspaceFolder}"
+			},
 			"command": "python",
 			"args": [
 				".\\scripts\\resource_monitor.py",
 				"--stream",
-				"--duration", "60"
+				"--duration",
+				"60"
 			],
 			"isBackground": true,
 			"problemMatcher": []
@@ -302,7 +345,9 @@
 		{
 			"label": "Run: Batch Evaluator - Scan",
 			"type": "shell",
-			"options": { "cwd": "${workspaceFolder}" },
+			"options": {
+				"cwd": "${workspaceFolder}"
+			},
 			"command": "python",
 			"args": [
 				".\\scripts\\batch_evaluator.py",
@@ -315,12 +360,15 @@
 		{
 			"label": "Run: Results Exporter - Export to Markdown",
 			"type": "shell",
-			"options": { "cwd": "${workspaceFolder}" },
+			"options": {
+				"cwd": "${workspaceFolder}"
+			},
 			"command": "python",
 			"args": [
 				".\\scripts\\results_exporter.py",
 				"--all",
-				"--format", "markdown"
+				"--format",
+				"markdown"
 			],
 			"isBackground": false,
 			"problemMatcher": []
@@ -328,7 +376,9 @@
 		{
 			"label": "Run: Auto Scheduler - List",
 			"type": "shell",
-			"options": { "cwd": "${workspaceFolder}" },
+			"options": {
+				"cwd": "${workspaceFolder}"
+			},
 			"command": "python",
 			"args": [
 				".\\scripts\\auto_scheduler.py",
@@ -340,7 +390,9 @@
 		{
 			"label": "Run: Tests - All Fast",
 			"type": "shell",
-			"options": { "cwd": "${workspaceFolder}" },
+			"options": {
+				"cwd": "${workspaceFolder}"
+			},
 			"command": "python",
 			"args": [
 				".\\scripts\\test_runner.py",
@@ -352,7 +404,9 @@
 		{
 			"label": "Run: Tests - Unit Only",
 			"type": "shell",
-			"options": { "cwd": "${workspaceFolder}" },
+			"options": {
+				"cwd": "${workspaceFolder}"
+			},
 			"command": "python",
 			"args": [
 				".\\scripts\\test_runner.py",
@@ -364,7 +418,9 @@
 		{
 			"label": "Run: Tests - Integration",
 			"type": "shell",
-			"options": { "cwd": "${workspaceFolder}" },
+			"options": {
+				"cwd": "${workspaceFolder}"
+			},
 			"command": "python",
 			"args": [
 				".\\scripts\\test_runner.py",
@@ -376,7 +432,9 @@
 		{
 			"label": "Run: Tests - With Coverage",
 			"type": "shell",
-			"options": { "cwd": "${workspaceFolder}" },
+			"options": {
+				"cwd": "${workspaceFolder}"
+			},
 			"command": "python",
 			"args": [
 				".\\scripts\\test_runner.py",
@@ -389,7 +447,9 @@
 		{
 			"label": "Run: Tests - Watch Mode",
 			"type": "shell",
-			"options": { "cwd": "${workspaceFolder}" },
+			"options": {
+				"cwd": "${workspaceFolder}"
+			},
 			"command": "python",
 			"args": [
 				".\\scripts\\test_runner.py",
@@ -403,7 +463,9 @@
 		{
 			"label": "Automate: Train & Promote (Quick)",
 			"type": "shell",
-			"options": { "cwd": "${workspaceFolder}" },
+			"options": {
+				"cwd": "${workspaceFolder}"
+			},
 			"command": "python",
 			"args": [
 				".\\scripts\\train_and_promote.py",
@@ -416,7 +478,9 @@
 		{
 			"label": "Automate: Train & Promote (Standard)",
 			"type": "shell",
-			"options": { "cwd": "${workspaceFolder}" },
+			"options": {
+				"cwd": "${workspaceFolder}"
+			},
 			"command": "python",
 			"args": [
 				".\\scripts\\train_and_promote.py",
@@ -429,7 +493,9 @@
 		{
 			"label": "Automate: Grid Search",
 			"type": "shell",
-			"options": { "cwd": "${workspaceFolder}" },
+			"options": {
+				"cwd": "${workspaceFolder}"
+			},
 			"command": "python",
 			"args": [
 				".\\scripts\\training_scheduler.py",
@@ -441,7 +507,9 @@
 		{
 			"label": "Automate: Start Nightly Training",
 			"type": "shell",
-			"options": { "cwd": "${workspaceFolder}" },
+			"options": {
+				"cwd": "${workspaceFolder}"
+			},
 			"command": "python",
 			"args": [
 				".\\scripts\\training_scheduler.py",
@@ -454,7 +522,9 @@
 		{
 			"label": "Automate: Full Pipeline (Train + Eval + Deploy)",
 			"type": "shell",
-			"options": { "cwd": "${workspaceFolder}" },
+			"options": {
+				"cwd": "${workspaceFolder}"
+			},
 			"command": "python",
 			"args": [
 				".\\scripts\\train_and_promote.py",
@@ -462,6 +532,20 @@
 				"--auto-promote",
 				"--max-workers",
 				"2"
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "Train: Aria Movement (Quick)",
+			"type": "shell",
+			"command": "python",
+			"args": [
+				".\\scripts\\autotrain.py",
+				"--config",
+				"autotrain_aria.yaml",
+				"--job",
+				"aria_movement_quick"
 			],
 			"isBackground": false,
 			"problemMatcher": []
