@@ -24,6 +24,7 @@ from __future__ import annotations
 import os
 import math
 import struct
+import threading
 from typing import Any, Dict, List, Optional, Sequence
 
 try:
@@ -48,13 +49,19 @@ except ImportError:  # pragma: no cover
 # Cache embedding clients to avoid repeated instantiation overhead
 
 _embedding_clients: Dict[str, Any] = {}
+_embedding_clients_lock = threading.RLock()
 
 
 def _get_embedding_client(provider: str) -> Any:
-    """Get or create a cached embedding client for the given provider."""
+    """Get or create a cached embedding client for the given provider.
+    
+    Thread-safe implementation using double-checked locking pattern.
+    """
+    # Fast path: check cache without lock
     if provider in _embedding_clients:
         return _embedding_clients[provider]
     
+    # Create client outside lock to avoid blocking during I/O
     client = None
     if provider == "azure":
         az_key = os.getenv("AZURE_OPENAI_API_KEY")
@@ -77,7 +84,12 @@ def _get_embedding_client(provider: str) -> Any:
                 pass
     
     if client is not None:
-        _embedding_clients[provider] = client
+        with _embedding_clients_lock:
+            # Double-check: another thread may have created it
+            if provider not in _embedding_clients:
+                _embedding_clients[provider] = client
+            return _embedding_clients[provider]
+    
     return client
 
 
