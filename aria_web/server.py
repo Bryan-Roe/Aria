@@ -73,6 +73,12 @@ def generate_tags_fallback(command: str) -> List[str]:
     cmd = command.lower()
     tags = []
     
+    # Track if limb commands are detected to avoid movement conflicts
+    has_limb_command = any(k in cmd for k in [
+        'left arm', 'arm left', 'left hand', 'right arm', 'arm right', 'right hand',
+        'left leg', 'leg left', 'right leg', 'leg right'
+    ])
+    
     # Expressions
     if 'smile' in cmd or 'happy' in cmd:
         tags.append('[aria:expression:smile]')
@@ -82,6 +88,8 @@ def generate_tags_fallback(command: str) -> List[str]:
         tags.append('[aria:expression:surprised]')
     elif 'confused' in cmd:
         tags.append('[aria:expression:confused]')
+    elif 'thinking' in cmd or 'think' in cmd:
+        tags.append('[aria:expression:thinking]')
     elif 'wink' in cmd:
         tags.append('[aria:expression:wink]')
     
@@ -151,6 +159,10 @@ def generate_tags_fallback(command: str) -> List[str]:
             for p in parts: limb_tag(p, 'raise')
         elif any(k in cmd for k in ['lower', 'down']):
             for p in parts: limb_tag(p, 'lower')
+        elif any(k in cmd for k in ['forward', 'front']):
+            for p in parts: limb_tag(p, 'forward')
+        elif any(k in cmd for k in ['back', 'backward', 'behind']):
+            for p in parts: limb_tag(p, 'back')
         elif angle_val is not None:
             for p in parts: limb_tag(p, angle_val)
 
@@ -172,21 +184,31 @@ def generate_tags_fallback(command: str) -> List[str]:
         elif angle_val is not None:
             for p in parts: limb_tag(p, angle_val)
 
-    # Movement
-    if 'left' in cmd:
-        if 'walk' in cmd:
-            tags.append('[aria:walk:left]')
+    # Movement - only add if not a limb command (to avoid conflicts like "left arm" -> "move:left")
+    if not has_limb_command:
+        # Determine movement style
+        movement_style = None
+        if 'skip' in cmd:
+            movement_style = 'skip'
+        elif 'strut' in cmd or 'swagger' in cmd:
+            movement_style = 'strut'
         elif 'run' in cmd:
-            tags.append('[aria:run:left]')
+            movement_style = 'run'
+        elif 'walk' in cmd:
+            movement_style = 'walk'
         else:
-            tags.append('[aria:move:left]')
-    elif 'right' in cmd:
-        if 'walk' in cmd:
-            tags.append('[aria:walk:right]')
-        elif 'run' in cmd:
-            tags.append('[aria:run:right]')
-        else:
-            tags.append('[aria:move:right]')
+            movement_style = 'move'
+        
+        # Determine direction - exclude if keywords could be part of limb commands
+        has_forward_limb = 'leg' in cmd or 'arm' in cmd
+        if 'left' in cmd:
+            tags.append(f'[aria:{movement_style}:left]')
+        elif 'right' in cmd:
+            tags.append(f'[aria:{movement_style}:right]')
+        elif ('up' in cmd or 'forward' in cmd) and not has_forward_limb:
+            tags.append(f'[aria:{movement_style}:up]')
+        elif ('down' in cmd or 'back' in cmd) and not has_forward_limb:
+            tags.append(f'[aria:{movement_style}:down]')
     
     # Effects
     if 'sparkle' in cmd:
