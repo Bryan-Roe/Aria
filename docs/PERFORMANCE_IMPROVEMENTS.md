@@ -94,8 +94,8 @@ def _cosine(a: Sequence[float], b: Sequence[float]) -> float:
         return 0.0
     
     if _HAS_NUMPY:
-        a_arr = np.asarray(a)
-        b_arr = np.asarray(b)
+        a_arr = np.asarray(a, dtype=np.float32)
+        b_arr = np.asarray(b, dtype=np.float32)
         dot = np.dot(a_arr, b_arr)
         na = np.linalg.norm(a_arr) or 1.0
         nb = np.linalg.norm(b_arr) or 1.0
