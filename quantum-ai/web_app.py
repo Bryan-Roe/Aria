@@ -654,7 +654,8 @@ def get_result_detail(filename):
     try:
         resolved_path = result_file.resolve()
         allowed_dir = results_dir.resolve()
-        if not str(resolved_path).startswith(str(allowed_dir)):
+        # Verify the resolved path has allowed_dir as a parent (path containment check)
+        if allowed_dir not in resolved_path.parents:
             return jsonify({"error": "Invalid file path"}), 403
     except (OSError, RuntimeError):
         return jsonify({"error": "Invalid file path"}), 400
@@ -824,8 +825,8 @@ def load_checkpoint():
         except (OSError, RuntimeError) as e:
             return jsonify({"error": "Invalid checkpoint path"}), 400
         
-        # Ensure the path is within the allowed checkpoint directory
-        if not str(resolved_path).startswith(str(allowed_dir)):
+        # Verify the resolved path has allowed_dir as a parent (path containment check)
+        if allowed_dir not in resolved_path.parents:
             return jsonify({"error": "Invalid checkpoint path: must be within checkpoints directory"}), 403
         
         if not resolved_path.exists():

@@ -68,15 +68,19 @@ class NotificationManager:
     def _send_macos(self, title: str, message: str):
         """Send macOS notification using osascript"""
         import subprocess
-        import shlex
         
-        # Escape special characters to prevent command injection
+        # Escape special AppleScript characters to prevent injection
+        # AppleScript uses backslash for escaping, so we escape backslashes first, then quotes
         safe_title = title.replace('\\', '\\\\').replace('"', '\\"')
         safe_message = message.replace('\\', '\\\\').replace('"', '\\"')
         
         script = f'display notification "{safe_message}" with title "{safe_title}"'
         try:
-            subprocess.run(['osascript', '-e', script], check=False, capture_output=True)
+            # Using subprocess with list arguments prevents shell injection
+            # The script is passed as a single argument to osascript -e
+            result = subprocess.run(['osascript', '-e', script], capture_output=True, text=True)
+            if result.returncode != 0:
+                print(f"macOS notification warning: osascript returned {result.returncode}")
         except Exception as e:
             print(f"macOS notification error: {e}")
     
@@ -93,7 +97,9 @@ class NotificationManager:
         
         # Use subprocess with list arguments to prevent command injection
         try:
-            subprocess.run(['notify-send', '-i', icon_name, title, message], check=False, capture_output=True)
+            result = subprocess.run(['notify-send', '-i', icon_name, title, message], capture_output=True, text=True)
+            if result.returncode != 0:
+                print(f"Linux notification warning: notify-send returned {result.returncode}")
         except Exception as e:
             print(f"Linux notification error: {e}")
     
