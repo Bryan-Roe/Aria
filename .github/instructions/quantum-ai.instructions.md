@@ -1,3 +1,4 @@
+---
 name: "Quantum-AI-workspace"
 description: "Slim instructions for quantum-ai/"
 applyTo: "quantum-ai/**"

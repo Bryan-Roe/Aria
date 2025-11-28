@@ -1,3 +1,4 @@
+---
 name: "Chat-CLI-Python"
 description: "Python-specific guidance for talk-to-ai/"
 applyTo: "talk-to-ai/src/**/*.py"

@@ -1,3 +1,4 @@
+---
 name: "Quantum-AI-Python"
 description: "Python-specific guidance for quantum-ai/"
 applyTo: "quantum-ai/src/**/*.py"

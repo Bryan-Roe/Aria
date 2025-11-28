@@ -1,3 +1,4 @@
+---
 name: "LoRA-Python"
 description: "Python-specific guidance for AI/microsoft_phi-silica-3.6_v1/"
 applyTo: "AI/microsoft_phi-silica-3.6_v1/scripts/**/*.py"
