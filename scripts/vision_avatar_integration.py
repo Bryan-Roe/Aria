@@ -43,7 +43,7 @@ def _preprocess_image(pth: Path, img_size: int):
 
 
 def run_inference(checkpoint: Path, assets_dir: Path, out_json: Path, img_size=64, batch_size=32, save_annotated: bool=False, export_features: bool=False):
-    ck = torch.load(str(checkpoint), map_location='cpu')
+    ck = torch.load(str(checkpoint), map_location='cpu', weights_only=True)
     classes = ck.get('classes')
     if not classes:
         raise RuntimeError('Checkpoint missing classes')

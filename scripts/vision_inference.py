@@ -104,7 +104,7 @@ class VisionInference:
         logging.info(f"Loading vision model from {self.checkpoint_path}")
         
         # Load checkpoint
-        ckpt = torch.load(self.checkpoint_path, map_location=self.device)
+        ckpt = torch.load(self.checkpoint_path, map_location=self.device, weights_only=True)
         self.classes = ckpt.get('classes', ['class_0', 'class_1'])
         
         # Initialize model

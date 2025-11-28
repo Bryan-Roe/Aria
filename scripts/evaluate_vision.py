@@ -51,7 +51,7 @@ from scripts.train_vision import SimpleImageFolder, TinyConvNet
 
 
 def load_checkpoint(ck_path: Path):
-    ck = torch.load(str(ck_path), map_location='cpu')
+    ck = torch.load(str(ck_path), map_location='cpu', weights_only=True)
     model_state = ck.get('model') or ck
     classes = ck.get('classes') or ck.get('class_names') or []
     return model_state, classes

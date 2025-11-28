@@ -1,23 +1,21 @@
 {
-  "generated_at": "2025-11-28T04:57:53Z",
+  "generated_at": "2025-11-28T06:03:10Z",
   "jobs": [
     {
-      "name": "azure_quantinuum_simulator",
-      "mode": "azure_hardware",
+      "name": "another",
+      "mode": "train_custom_dataset",
       "cmd": [
-        "C:\\Users\\Bryan\\OneDrive\\AI\\quantum-ai\\venv\\Scripts\\python.exe",
-        "C:\\Users\\Bryan\\OneDrive\\AI\\quantum-ai\\deploy_to_azure_quantum.py",
-        "--backend",
-        "quantinuum.sim.h2-1sc",
-        "--shots",
-        "100"
+        "/usr/bin/python",
+        "/home/runner/work/QAI/QAI/quantum-ai/train_custom_dataset.py",
+        "--preset",
+        "heart"
       ],
-      "start_time": "20251128T045728Z",
-      "status": "succeeded",
-      "return_code": 0,
-      "log": "C:\\Users\\Bryan\\OneDrive\\AI\\data_out\\quantum_autorun\\azure_quantinuum_simulator\\20251128T045728Z\\stdout.log",
+      "start_time": "20251128T060310Z",
+      "status": "validated",
+      "return_code": null,
+      "log": "/home/runner/work/QAI/QAI/data_out/quantum_autorun/another/20251128T060310Z/stdout.log",
       "meta": {
-        "preset": null,
+        "preset": "heart",
         "csv": null,
         "label_col": null,
         "drop_cols": null,
@@ -25,30 +23,20 @@
         "epochs": null,
         "batch_size": null,
         "learning_rate": null,
-        "test_size": null,
-        "azure_backend": "quantinuum.sim.h2-1sc",
-        "azure_shots": 100,
-        "azure_confirm_cost": false,
-        "azure_results_file": "results\\azure_ghz_results_20251127_205753.json",
-        "azure_job_id": "c5478537-cc16-11f0-8647-c86e08e1c791",
-        "azure_counts": {
-          "000": 100
-        },
-        "azure_success": true
-      },
-      "duration_sec": 24.59
+        "test_size": null
+      }
     }
   ],
   "summary": {
     "counts": {
-      "succeeded": 1
+      "validated": 1
     },
     "latest": {
-      "name": "azure_quantinuum_simulator",
-      "status": "succeeded",
-      "mode": "azure_hardware",
-      "start_time": "20251128T045728Z",
-      "log": "C:\\Users\\Bryan\\OneDrive\\AI\\data_out\\quantum_autorun\\azure_quantinuum_simulator\\20251128T045728Z\\stdout.log"
+      "name": "another",
+      "status": "validated",
+      "mode": "train_custom_dataset",
+      "start_time": "20251128T060310Z",
+      "log": "/home/runner/work/QAI/QAI/data_out/quantum_autorun/another/20251128T060310Z/stdout.log"
     }
   }
 }

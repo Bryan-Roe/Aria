@@ -76,7 +76,7 @@ def load_model():
     model_path = model_dir / "custom_model.pt"
     if not model_path.exists():
         raise FileNotFoundError(f"Model not found: {model_path}")
-    model.load_state_dict(torch.load(model_path))
+    model.load_state_dict(torch.load(model_path, weights_only=True))
     model.eval()  # Set to evaluation mode
     print(f"   ✅ Loaded model weights from {model_path}")
     
