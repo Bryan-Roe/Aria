@@ -386,6 +386,7 @@ function changeExpression(emotion) {
     ariaMouth.style.width = '';
     ariaMouth.style.height = '';
     ariaMouth.style.borderTop = '';
+    ariaMouth.style.transform = '';
     
     switch(emotion) {
         case 'smile':

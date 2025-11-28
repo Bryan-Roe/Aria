@@ -159,6 +159,10 @@ def generate_tags_fallback(command: str) -> List[str]:
             for p in parts: limb_tag(p, 'raise')
         elif any(k in cmd for k in ['lower', 'down']):
             for p in parts: limb_tag(p, 'lower')
+        elif any(k in cmd for k in ['forward', 'front']):
+            for p in parts: limb_tag(p, 'forward')
+        elif any(k in cmd for k in ['back', 'backward', 'behind']):
+            for p in parts: limb_tag(p, 'back')
         elif angle_val is not None:
             for p in parts: limb_tag(p, angle_val)
 
@@ -195,14 +199,15 @@ def generate_tags_fallback(command: str) -> List[str]:
         else:
             movement_style = 'move'
         
-        # Determine direction
+        # Determine direction - exclude if keywords could be part of limb commands
+        has_forward_limb = 'leg' in cmd or 'arm' in cmd
         if 'left' in cmd:
             tags.append(f'[aria:{movement_style}:left]')
         elif 'right' in cmd:
             tags.append(f'[aria:{movement_style}:right]')
-        elif 'up' in cmd or 'forward' in cmd:
+        elif ('up' in cmd or 'forward' in cmd) and not has_forward_limb:
             tags.append(f'[aria:{movement_style}:up]')
-        elif 'down' in cmd or 'back' in cmd:
+        elif ('down' in cmd or 'back' in cmd) and not has_forward_limb:
             tags.append(f'[aria:{movement_style}:down]')
     
     # Effects
