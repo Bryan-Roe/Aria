@@ -88,3 +88,6 @@
 {"phase": "post", "eval_loss": 1.2145791053771973, "eval_perplexity": 3.3688758241584362, "timestamp": "2025-11-26T14:12:47.404058Z"}
 {"step": 0, "eval_loss": 3.1877269744873047, "eval_perplexity": 24.233281925180826, "timestamp": "2025-11-28T05:16:05.562539Z"}
 {"phase": "pre", "eval_loss": 3.1877269744873047, "eval_perplexity": 24.233281925180826, "timestamp": "2025-11-28T05:16:05.563987Z"}
+{"step": 64, "eval_loss": 2.355252742767334, "eval_perplexity": 10.540792634156935, "timestamp": "2025-11-28T06:03:08.530431Z"}
+{"step": 64, "eval_loss": 2.355252742767334, "eval_perplexity": 10.540792634156935, "timestamp": "2025-11-28T06:05:33.979564Z"}
+{"phase": "post", "eval_loss": 2.355252742767334, "eval_perplexity": 10.540792634156935, "timestamp": "2025-11-28T06:05:33.981065Z"}
