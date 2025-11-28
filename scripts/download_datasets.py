@@ -215,24 +215,39 @@ class DatasetDownloader:
                     output_file = output_dir / f"{split}.jsonl"
                     
                     print(f"   Converting {split} split to JSONL...")
-                    with open(output_file, 'w', encoding='utf-8') as f:
+                    # Use buffered I/O with batch writes for better performance
+                    buffer = []
+                    buffer_size = 1000  # Write in batches of 1000 lines
+                    
+                    with open(output_file, 'w', encoding='utf-8', buffering=65536) as f:
                         for example in dataset[split]:
                             # Convert to chat format if needed
                             if "messages" in example:
-                                json.dump({"messages": example["messages"]}, f)
+                                line = json.dumps({"messages": example["messages"]})
                             elif "instruction" in example and "response" in example:
-                                # Alpaca/Dolly format
+                                # Alpaca/Dolly format - build user content
+                                input_text = example.get("input", "").strip()
+                                instruction = example["instruction"]
+                                user_content = f"{input_text}\n\n{instruction}".strip() if input_text else instruction
                                 messages = [
-                                    {"role": "user", "content": example["instruction"]},
+                                    {"role": "user", "content": user_content},
                                     {"role": "assistant", "content": example["response"]}
                                 ]
-                                if example.get("input"):  # Context field
-                                    messages[0]["content"] = f"{example['input']}\n\n{example['instruction']}"
-                                json.dump({"messages": messages}, f)
+                                line = json.dumps({"messages": messages})
                             else:
                                 # Try to preserve original format
-                                json.dump(example, f)
-                            f.write('\n')
+                                line = json.dumps(example)
+                            
+                            buffer.append(line)
+                            
+                            # Flush buffer when it reaches threshold
+                            if len(buffer) >= buffer_size:
+                                f.write('\n'.join(buffer) + '\n')
+                                buffer.clear()
+                        
+                        # Write remaining items
+                        if buffer:
+                            f.write('\n'.join(buffer) + '\n')
                     
                     print(f"   ✓ Saved: {output_file}")
                 

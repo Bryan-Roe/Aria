@@ -109,14 +109,20 @@ class QuantumClassifier:
         Returns:
             Circuit outputs
         """
-        outputs = []
-        for inp in inputs:
+        batch_size = inputs.shape[0]
+        
+        # Pre-allocate output tensor for better memory efficiency
+        outputs = torch.empty(batch_size, self.n_qubits, dtype=torch.float32)
+        
+        for i, inp in enumerate(inputs):
             result = self.qnode(inp, weights)
             # Convert list of expectation values to tensor
             if isinstance(result, list):
-                result = torch.tensor(result, dtype=torch.float32)
-            outputs.append(result)
-        return torch.stack(outputs)
+                outputs[i] = torch.tensor(result, dtype=torch.float32)
+            else:
+                outputs[i] = result
+        
+        return outputs
     
     def initialize_weights(self) -> torch.Tensor:
         """
@@ -144,7 +150,13 @@ class QuantumClassifier:
             Normalized torch tensor
         """
         # Normalize to [0, 2π] for quantum encoding
-        X_normalized = (X - X.min()) / (X.max() - X.min()) * 2 * np.pi
+        # Use in-place operations for better memory efficiency
+        X_min = X.min()
+        X_range = X.max() - X_min
+        # Use small epsilon to avoid division by zero when all values are identical
+        if X_range == 0:
+            X_range = 1e-8
+        X_normalized = (X - X_min) / X_range * (2 * np.pi)
         return torch.FloatTensor(X_normalized)
     
     def predict(self, X: np.ndarray, weights: torch.Tensor) -> np.ndarray:

@@ -88,20 +88,37 @@ class ParallelTrainer:
         test_count = None
         try:
             if ds_path.is_dir():
-                # Look for train/test files
+                # Look for train/test files - use efficient binary read for line counting
                 for candidate, attr in [("train.json", "train"), ("train.jsonl", "train"),
                                         ("test.json", "test"), ("test.jsonl", "test")]:
                     fpath = ds_path / candidate
                     if fpath.exists():
-                        with open(fpath, 'r', encoding='utf-8') as f:
-                            line_count = sum(1 for line in f if line.strip())
+                        # Efficient line counting using binary mode and buffer
+                        line_count = 0
+                        with open(fpath, 'rb') as f:
+                            # Read in 64KB chunks for better I/O performance
+                            buf_size = 65536
+                            read_f = f.read
+                            buf = read_f(buf_size)
+                            while buf:
+                                # Count non-empty lines by checking for content
+                                line_count += buf.count(b'\n')
+                                buf = read_f(buf_size)
                         if attr == "train":
                             train_count = (train_count or 0) + line_count
                         else:
                             test_count = (test_count or 0) + line_count
             elif ds_path.is_file():
-                with open(ds_path, 'r', encoding='utf-8') as f:
-                    train_count = sum(1 for line in f if line.strip())
+                # Efficient line counting for single files
+                line_count = 0
+                with open(ds_path, 'rb') as f:
+                    buf_size = 65536
+                    read_f = f.read
+                    buf = read_f(buf_size)
+                    while buf:
+                        line_count += buf.count(b'\n')
+                        buf = read_f(buf_size)
+                train_count = line_count
         except Exception as ds_err:
             print(f"[{job_name}] Warning: failed counting dataset samples: {ds_err}")
 

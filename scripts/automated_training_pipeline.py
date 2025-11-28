@@ -96,13 +96,24 @@ def build_base_flags(args: argparse.Namespace) -> List[str]:
 
 
 def _count_dataset_samples(ds_root: Path) -> Dict[str, int]:
+    """Count samples in dataset files efficiently using binary mode.
+    
+    Uses buffered binary read for faster line counting compared to text mode.
+    """
     train = test = 0
     if ds_root.is_dir():
         for name, key in [("train.jsonl", "train"), ("train.json", "train"), ("test.jsonl", "test"), ("test.json", "test")]:
             f = ds_root / name
             if f.exists():
-                with f.open("r", encoding="utf-8") as fh:
-                    count = sum(1 for line in fh if line.strip())
+                # Use binary mode with buffer for efficient line counting
+                count = 0
+                with f.open("rb") as fh:
+                    buf_size = 65536
+                    read_f = fh.read
+                    buf = read_f(buf_size)
+                    while buf:
+                        count += buf.count(b'\n')
+                        buf = read_f(buf_size)
                 if key == "train":
                     train += count
                 else:

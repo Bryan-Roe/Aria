@@ -46,17 +46,31 @@ _ENGINE = None  # cached engine instance
 _LAST_URL = None
 
 # Slow query frequency tracking (in-memory, last 60 seconds)
-_SLOW_QUERY_LOG: list[tuple[float, float]] = []  # (timestamp, duration_ms)
+# Use collections.deque for O(1) append and efficient pruning from left
+from collections import deque
+_SLOW_QUERY_LOG: deque[tuple[float, float]] = deque()  # (timestamp, duration_ms)
+_SLOW_QUERY_CACHE_SIZE = 1000  # Maximum entries to prevent unbounded growth
 
 def _prune_slow_query_log() -> None:
-    """Remove slow query entries older than 60 seconds."""
+    """Remove slow query entries older than 60 seconds.
+    
+    Uses efficient deque operations - pops from left since entries are 
+    chronologically ordered.
+    """
     now = time.time()
-    global _SLOW_QUERY_LOG
-    _SLOW_QUERY_LOG = [(ts, dur) for ts, dur in _SLOW_QUERY_LOG if now - ts < 60]
+    cutoff = now - 60
+    # Pop old entries from the left (oldest first)
+    while _SLOW_QUERY_LOG and _SLOW_QUERY_LOG[0][0] < cutoff:
+        _SLOW_QUERY_LOG.popleft()
+    
+    # Also enforce max size to prevent memory growth
+    while len(_SLOW_QUERY_LOG) > _SLOW_QUERY_CACHE_SIZE:
+        _SLOW_QUERY_LOG.popleft()
 
 def _compute_query_hash(sql: str) -> str:
     """Compute SHA256 hash of normalized SQL for tracking."""
-    normalized = sql.strip().replace("\n", " ").replace("\t", " ")
+    # Use faster string operations - avoid multiple replace calls
+    normalized = ' '.join(sql.split())
     return hashlib.sha256(normalized.encode("utf-8")).hexdigest()[:16]
 
 def _track_query_metrics(sql: str, duration_ms: float, vendor: str) -> None:

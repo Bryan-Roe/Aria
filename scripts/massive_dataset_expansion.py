@@ -388,7 +388,7 @@ class MassiveDatasetExpander:
         Phase 3: Validate downloaded datasets.
         
         Args:
-            parallel: Number of parallel validation workers
+            parallel: Number of parallel validation workers (used for future extension)
         """
         print("="*70)
         print(f"✅ VALIDATING DOWNLOADED DATASETS")
@@ -407,22 +407,27 @@ class MassiveDatasetExpander:
         print("\n🔍 Validating...")
         for i, csv_path in enumerate(csv_files, 1):
             try:
-                df = pd.read_csv(csv_path)
+                # Read only necessary columns for validation - more memory efficient
+                # First, read just the header to check for 'target' column
+                df_header = pd.read_csv(csv_path, nrows=0)
+                columns = df_header.columns.tolist()
                 
-                # Basic validation
-                if 'target' not in df.columns:
+                if 'target' not in columns:
                     raise ValueError("Missing 'target' column")
                 
-                n_samples = len(df)
-                n_features = len(df.columns) - 1
-                n_classes = df['target'].nunique()
+                n_features = len(columns) - 1
+                
+                # Read only the target column for class analysis
+                df_target = pd.read_csv(csv_path, usecols=['target'])
+                n_samples = len(df_target)
                 
                 # Check for sufficient data
                 if n_samples < 50:
                     raise ValueError(f"Insufficient samples: {n_samples}")
                 
-                # Check class balance
-                class_counts = df['target'].value_counts()
+                # Efficient class counting using value_counts
+                class_counts = df_target['target'].value_counts()
+                n_classes = len(class_counts)
                 min_class = class_counts.min()
                 minority_pct = (min_class / n_samples) * 100
                 

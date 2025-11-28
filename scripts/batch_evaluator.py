@@ -219,9 +219,21 @@ class BatchEvaluator:
         print(f"[batch_eval] Failed: {sum(1 for r in self.results if r.status == 'failed')}")
     
     def aggregate_results(self) -> Dict:
-        """Aggregate all evaluation results."""
-        succeeded = [r for r in self.results if r.status == "succeeded"]
-        failed = [r for r in self.results if r.status != "succeeded"]
+        """Aggregate all evaluation results.
+        
+        Optimized to iterate results only once for classification and metrics.
+        """
+        succeeded = []
+        failed = []
+        total_duration = 0.0
+        
+        # Single pass through results for classification and duration sum
+        for r in self.results:
+            total_duration += r.duration
+            if r.status == "succeeded":
+                succeeded.append(r)
+            else:
+                failed.append(r)
         
         # Rank by primary metric (accuracy if available)
         ranked = sorted(
@@ -230,18 +242,21 @@ class BatchEvaluator:
             reverse=True
         )
         
+        # Pre-compute ranking list
+        ranking = [
+            {"rank": i + 1, "model_id": r.model_id, "metrics": r.metrics}
+            for i, r in enumerate(ranked)
+        ]
+        
         return {
             "evaluated_at": datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ"),
             "total_models": len(self.results),
             "succeeded": len(succeeded),
             "failed": len(failed),
-            "total_duration": sum(r.duration for r in self.results),
+            "total_duration": total_duration,
             "best_model": ranked[0].model_id if ranked else None,
             "results": [r.__dict__ for r in self.results],
-            "ranking": [
-                {"rank": i+1, "model_id": r.model_id, "metrics": r.metrics}
-                for i, r in enumerate(ranked)
-            ]
+            "ranking": ranking
         }
     
     def export_markdown(self, output_file: Path):

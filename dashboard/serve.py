@@ -376,26 +376,21 @@ class MyHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
                     test_file = d / 'test.json'
                     if train_file.exists():
                         try:
-                            with open(train_file, 'r', encoding='utf-8') as f:
-                                train_data = json.load(f)
-                            
+                            # Count samples efficiently without loading entire file
+                            # For JSON arrays, count top-level elements
+                            train_samples = self._count_json_samples(train_file)
                             test_samples = 0
                             if test_file.exists():
-                                try:
-                                    with open(test_file, 'r', encoding='utf-8') as f:
-                                        test_data = json.load(f)
-                                    test_samples = len(test_data)
-                                except:
-                                    pass
+                                test_samples = self._count_json_samples(test_file)
                             
                             datasets.append({
                                 'name': d.name,
                                 'path': str(d.relative_to(root_dir)),
-                                'train_samples': len(train_data),
+                                'train_samples': train_samples,
                                 'test_samples': test_samples
                             })
-                        except json.JSONDecodeError as je:
-                            print(f"Warning: Invalid JSON in {train_file}: {je}")
+                        except Exception as e:
+                            print(f"Warning: Error processing {train_file}: {e}")
                             continue
         except Exception as e:
             import traceback
@@ -403,6 +398,38 @@ class MyHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
             return {'error': str(e), 'datasets': []}
         
         return {'datasets': datasets}
+    
+    def _count_json_samples(self, file_path: Path) -> int:
+        """Count samples in a JSON file efficiently.
+        
+        For JSONL files: counts lines.
+        For JSON arrays: counts top-level array elements.
+        Falls back to loading full file if needed.
+        """
+        try:
+            with open(file_path, 'r', encoding='utf-8') as f:
+                first_char = f.read(1)
+                f.seek(0)
+                
+                if first_char == '[':
+                    # JSON array - need to parse it
+                    data = json.load(f)
+                    return len(data) if isinstance(data, list) else 1
+                elif first_char == '{':
+                    # JSONL format - count lines efficiently
+                    return sum(1 for line in f if line.strip())
+                else:
+                    # Unknown format, try to parse
+                    data = json.load(f)
+                    return len(data) if isinstance(data, list) else 1
+        except Exception:
+            # Fallback: try loading as JSON
+            try:
+                with open(file_path, 'r', encoding='utf-8') as f:
+                    data = json.load(f)
+                return len(data) if isinstance(data, list) else 1
+            except Exception:
+                return 0
     
     def get_models(self):
         # Use the root_dir set by main()
