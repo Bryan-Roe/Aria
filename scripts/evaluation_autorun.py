@@ -320,7 +320,7 @@ def collect_status(all_results: List[Dict[str, Any]]) -> Dict[str, Any]:
 
 def main() -> None:
     ap = argparse.ArgumentParser(description="Evaluation AutoRun orchestrator")
-    ap.add_argument("--config", default=str(REPO_ROOT / "evaluation_autorun.yaml"), 
+    ap.add_argument("--config", default=str(REPO_ROOT / "config" / "evaluation_autorun.yaml"), 
                     help="Path to evaluation_autorun.yaml")
     ap.add_argument("--job", default=None, help="Run only the named job")
     ap.add_argument("--dry-run", action="store_true", 

@@ -344,7 +344,7 @@ def collect_status(all_results: List[Dict[str, Any]]) -> Dict[str, Any]:
 
 def main() -> None:
     ap = argparse.ArgumentParser(description="AutoTrain orchestrator")
-    ap.add_argument("--config", default=str(REPO_ROOT / "autotrain.yaml"), help="Path to autotrain.yaml")
+    ap.add_argument("--config", default=str(REPO_ROOT / "config" / "training" / "autotrain.yaml"), help="Path to autotrain.yaml")
     ap.add_argument("--job", default=None, help="Run only the named job")
     ap.add_argument("--dry-run", action="store_true", help="Validate and print commands; do not execute")
     ap.add_argument("--list", action="store_true", help="List configured jobs and exit")

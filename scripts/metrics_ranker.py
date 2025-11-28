@@ -37,7 +37,7 @@ except Exception:
     yaml = None  # type: ignore
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-AUTOTRAIN_CFG = REPO_ROOT / "autotrain.yaml"
+AUTOTRAIN_CFG = REPO_ROOT / "config" / "training" / "autotrain.yaml"
 OUT_DIR = REPO_ROOT / "data_out" / "metrics_ranker"
 
 

@@ -167,4 +167,9 @@ $RECYCLE.BIN/
 *.msi
 *.exe
 *.iso
-*.dmgautotrain_testtoken.yaml
+*.dmg
+
+# Auto-generated config files
+config/autogen/
+autotrain_testtoken.yaml
+

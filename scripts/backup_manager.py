@@ -104,10 +104,10 @@ class BackupManager:
         # Backup configs
         if include_configs:
             configs = [
-                'autotrain.yaml',
-                'quantum_autorun.yaml',
-                'evaluation_autorun.yaml',
-                'batch_eval_config.yaml'
+                'config/training/autotrain.yaml',
+                'config/quantum_autorun.yaml',
+                'config/evaluation_autorun.yaml',
+                'config/batch_eval_config.yaml'
             ]
             configs_dst = backup_path / 'configs'
             configs_dst.mkdir(parents=True, exist_ok=True)
