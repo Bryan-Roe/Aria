@@ -165,3 +165,9 @@ $RECYCLE.BIN/
 *.exe
 *.iso
 *.dmg
+
+# Test-generated config files
+autotrain_testtoken.yaml
+
+# Output/build directories
+data_out/
