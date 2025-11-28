@@ -103,8 +103,9 @@ class QuantumChatProvider(BaseChatProvider):
         """
         # Simple sentiment analysis using quantum classifier
         # Convert text to numeric features (simplified for demo)
+        # Using SHA-256 for better security (MD5 is weak)
         import hashlib
-        hash_obj = hashlib.md5(text.encode())
+        hash_obj = hashlib.sha256(text.encode())
         hash_bytes = hash_obj.digest()[:8]  # Use first 8 bytes
         
         # Convert to features in range [0, 1]

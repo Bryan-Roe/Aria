@@ -17,6 +17,8 @@ import time
 from datetime import datetime
 
 BASE_URL = "http://localhost:8080"
+# Use timeout for all requests to prevent hanging
+REQUEST_TIMEOUT = 30  # seconds
 
 def test_health():
     """Test health endpoint"""
@@ -24,7 +26,7 @@ def test_health():
     print("TEST 1: Health Check")
     print("="*70)
     
-    response = requests.get(f"{BASE_URL}/api/health")
+    response = requests.get(f"{BASE_URL}/api/health", timeout=REQUEST_TIMEOUT, timeout=REQUEST_TIMEOUT)
     print(f"Status Code: {response.status_code}")
     print(f"Response: {json.dumps(response.json(), indent=2)}")
     
@@ -38,7 +40,7 @@ def test_model_info():
     print("TEST 2: Model Info")
     print("="*70)
     
-    response = requests.get(f"{BASE_URL}/api/model_info")
+    response = requests.get(f"{BASE_URL}/api/model_info", timeout=REQUEST_TIMEOUT)
     print(f"Status Code: {response.status_code}")
     print(f"Response: {json.dumps(response.json(), indent=2)}")
     
@@ -62,7 +64,8 @@ def test_single_prediction_genuine():
     response = requests.post(
         f"{BASE_URL}/api/predict",
         json=data,
-        headers={"Content-Type": "application/json"}
+        headers={"Content-Type": "application/json"},
+        timeout=REQUEST_TIMEOUT
     )
     
     print(f"Status Code: {response.status_code}")
@@ -91,7 +94,8 @@ def test_single_prediction_forged():
     response = requests.post(
         f"{BASE_URL}/api/predict",
         json=data,
-        headers={"Content-Type": "application/json"}
+        headers={"Content-Type": "application/json"},
+        timeout=REQUEST_TIMEOUT
     )
     
     print(f"Status Code: {response.status_code}")
@@ -122,7 +126,8 @@ def test_batch_prediction():
     response = requests.post(
         f"{BASE_URL}/api/predict_batch",
         json=data,
-        headers={"Content-Type": "application/json"}
+        headers={"Content-Type": "application/json"},
+        timeout=REQUEST_TIMEOUT
     )
     
     print(f"Status Code: {response.status_code}")
@@ -149,7 +154,8 @@ def test_invalid_input():
     response = requests.post(
         f"{BASE_URL}/api/predict",
         json=data,
-        headers={"Content-Type": "application/json"}
+        headers={"Content-Type": "application/json"},
+        timeout=REQUEST_TIMEOUT
     )
     
     print(f"Status Code: {response.status_code}")
@@ -173,7 +179,8 @@ def test_wrong_feature_count():
     response = requests.post(
         f"{BASE_URL}/api/predict",
         json=data,
-        headers={"Content-Type": "application/json"}
+        headers={"Content-Type": "application/json"},
+        timeout=REQUEST_TIMEOUT
     )
     
     print(f"Status Code: {response.status_code}")
@@ -201,7 +208,8 @@ def test_performance():
         response = requests.post(
             f"{BASE_URL}/api/predict",
             json=data,
-            headers={"Content-Type": "application/json"}
+            headers={"Content-Type": "application/json"},
+        timeout=REQUEST_TIMEOUT
         )
         elapsed = time.time() - start
         times.append(elapsed * 1000)  # Convert to ms
@@ -231,7 +239,7 @@ def main():
     
     # Check if API is running
     try:
-        response = requests.get(f"{BASE_URL}/api/health", timeout=5)
+        response = requests.get(f"{BASE_URL}/api/health", timeout=5, timeout=REQUEST_TIMEOUT)
         if response.status_code != 200:
             print("\n❌ API is not responding correctly")
             print("   Make sure the API is running:")

@@ -72,11 +72,11 @@ def load_model():
         dropout=0.2
     )
     
-    # Load trained weights
+    # Load trained weights safely with weights_only=True to prevent arbitrary code execution
     model_path = model_dir / "custom_model.pt"
     if not model_path.exists():
         raise FileNotFoundError(f"Model not found: {model_path}")
-    model.load_state_dict(torch.load(model_path))
+    model.load_state_dict(torch.load(model_path, weights_only=True))
     model.eval()  # Set to evaluation mode
     print(f"   ✅ Loaded model weights from {model_path}")
     
@@ -303,8 +303,10 @@ def main():
     print("   Press Ctrl+C to stop")
     print("=" * 70 + "\n")
     
-    # Start server
-    app.run(host='0.0.0.0', port=8080, debug=False)
+    # Start server - default to localhost for security
+    # Use BANKNOTE_API_HOST environment variable to override if needed
+    host = os.environ.get('BANKNOTE_API_HOST', '127.0.0.1')
+    app.run(host=host, port=8080, debug=False)
 
 if __name__ == '__main__':
     main()

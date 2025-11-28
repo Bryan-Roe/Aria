@@ -61,6 +61,20 @@ def parse_args():
     return parser.parse_args()
 
 
+# Whitelist of allowed table names to prevent SQL injection
+ALLOWED_TABLES = frozenset({
+    "QAI_QueryMetrics",
+    "query_metrics",
+})
+
+
+def validate_table_name(table_name: str) -> str:
+    """Validate table name against whitelist to prevent SQL injection."""
+    if table_name not in ALLOWED_TABLES:
+        raise ValueError(f"Invalid table name: {table_name}. Allowed tables: {', '.join(sorted(ALLOWED_TABLES))}")
+    return table_name
+
+
 def get_retention_days(args_retention):
     """Get retention period from args, env var, or default."""
     if args_retention is not None:
@@ -80,8 +94,11 @@ def count_old_records(engine, table_name, cutoff_timestamp):
     """Count records older than cutoff timestamp."""
     from sqlalchemy import text
     
+    # Validate table name to prevent SQL injection
+    table_name = validate_table_name(table_name)
+    
     try:
-        query = text(f"SELECT COUNT(*) FROM {table_name} WHERE executed_at < :cutoff")
+        query = text(f"SELECT COUNT(*) FROM {table_name} WHERE executed_at < :cutoff")  # nosec B608
         
         with engine.connect() as conn:
             result = conn.execute(query, {"cutoff": cutoff_timestamp})
@@ -96,12 +113,15 @@ def delete_old_records(engine, table_name, cutoff_timestamp, dry_run=False):
     """Delete records older than cutoff timestamp."""
     from sqlalchemy import text
     
+    # Validate table name to prevent SQL injection
+    table_name = validate_table_name(table_name)
+    
     if dry_run:
         logger.info(f"[DRY RUN] Would delete records from {table_name} where executed_at < {cutoff_timestamp}")
         return True
     
     try:
-        delete_query = text(f"DELETE FROM {table_name} WHERE executed_at < :cutoff")
+        delete_query = text(f"DELETE FROM {table_name} WHERE executed_at < :cutoff")  # nosec B608
         
         with engine.begin() as conn:
             result = conn.execute(delete_query, {"cutoff": cutoff_timestamp})
@@ -117,19 +137,22 @@ def get_table_stats(engine, table_name):
     """Get basic statistics about the table."""
     from sqlalchemy import text
     
+    # Validate table name to prevent SQL injection
+    table_name = validate_table_name(table_name)
+    
     try:
-        # Total count
-        count_query = text(f"SELECT COUNT(*) FROM {table_name}")
+        # Total count - table_name validated by validate_table_name() above
+        count_query = text(f"SELECT COUNT(*) FROM {table_name}")  # nosec B608
         with engine.connect() as conn:
             total_count = conn.execute(count_query).scalar()
         
-        # Oldest and newest timestamps
+        # Oldest and newest timestamps - table_name validated by validate_table_name() above
         stats_query = text(f"""
             SELECT 
                 MIN(executed_at) as oldest,
                 MAX(executed_at) as newest
             FROM {table_name}
-        """)
+        """)  # nosec B608
         
         with engine.connect() as conn:
             result = conn.execute(stats_query).fetchone()
