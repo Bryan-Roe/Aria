@@ -212,6 +212,11 @@ function executeLocalCommand(command) {
     const cmd = command.toLowerCase();
     let executed = false;
     
+    // Check if this is a limb command to avoid movement conflicts
+    const isLimbCommand = ['left arm', 'arm left', 'left hand', 'right arm', 'arm right', 'right hand',
+                          'left leg', 'leg left', 'right leg', 'leg right'].some(k => cmd.includes(k));
+    
+    // Expressions
     if (cmd.includes('smile') || cmd.includes('happy')) {
         changeExpression('smile');
         executed = true;
@@ -224,6 +229,20 @@ function executeLocalCommand(command) {
         changeExpression('surprised');
         executed = true;
     }
+    if (cmd.includes('confused')) {
+        changeExpression('confused');
+        executed = true;
+    }
+    if (cmd.includes('thinking') || cmd.includes('think')) {
+        changeExpression('thinking');
+        executed = true;
+    }
+    if (cmd.includes('wink')) {
+        changeExpression('wink');
+        executed = true;
+    }
+    
+    // Animations
     if (cmd.includes('jump')) {
         animate('jumping');
         executed = true;
@@ -240,6 +259,8 @@ function executeLocalCommand(command) {
         animate('waving');
         executed = true;
     }
+    
+    // Effects
     if (cmd.includes('sparkle')) {
         createEffect('sparkle');
         executed = true;
@@ -248,25 +269,39 @@ function executeLocalCommand(command) {
         createEffect('hearts');
         executed = true;
     }
-    if (cmd.includes('left')) {
-        const speed = cmd.includes('run') ? 'run' : 'normal';
-        move('left', speed);
+    if (cmd.includes('glow')) {
+        createEffect('glow');
         executed = true;
     }
-    if (cmd.includes('right')) {
-        const speed = cmd.includes('run') ? 'run' : 'normal';
-        move('right', speed);
-        executed = true;
-    }
-    if (cmd.includes('walk')) {
-        const direction = cmd.includes('left') ? 'left' : cmd.includes('right') ? 'right' : null;
-        if (direction) move(direction, 'normal');
-        executed = true;
-    }
-    if (cmd.includes('run')) {
-        const direction = cmd.includes('left') ? 'left' : cmd.includes('right') ? 'right' : null;
-        if (direction) move(direction, 'run');
-        executed = true;
+    
+    // Movement - only if not a limb command
+    if (!isLimbCommand) {
+        // Determine movement style
+        let movementSpeed = 'normal';
+        if (cmd.includes('skip')) {
+            movementSpeed = 'skip';
+        } else if (cmd.includes('strut') || cmd.includes('swagger')) {
+            movementSpeed = 'strut';
+        } else if (cmd.includes('run')) {
+            movementSpeed = 'run';
+        }
+        
+        if (cmd.includes('left')) {
+            move('left', movementSpeed);
+            executed = true;
+        }
+        if (cmd.includes('right')) {
+            move('right', movementSpeed);
+            executed = true;
+        }
+        if (cmd.includes('up') || (cmd.includes('forward') && !cmd.includes('arm') && !cmd.includes('leg'))) {
+            move('up', movementSpeed);
+            executed = true;
+        }
+        if (cmd.includes('down') || (cmd.includes('back') && !cmd.includes('arm') && !cmd.includes('leg'))) {
+            move('down', movementSpeed);
+            executed = true;
+        }
     }
     
     if (!executed) {
@@ -346,6 +381,12 @@ function executeTags(tags) {
 function changeExpression(emotion) {
     ariaMouth.className = 'aria-mouth';
     
+    // Reset any previous expression modifications
+    ariaMouth.style.borderRadius = '';
+    ariaMouth.style.width = '';
+    ariaMouth.style.height = '';
+    ariaMouth.style.borderTop = '';
+    
     switch(emotion) {
         case 'smile':
         case 'happy':
@@ -359,6 +400,27 @@ function changeExpression(emotion) {
             ariaMouth.style.width = '15px';
             ariaMouth.style.height = '15px';
             ariaMouth.style.borderTop = '2px solid #333';
+            break;
+        case 'confused':
+            // Wavy/uncertain mouth
+            ariaMouth.style.width = '18px';
+            ariaMouth.style.height = '6px';
+            ariaMouth.style.borderRadius = '0 0 50% 50%';
+            ariaMouth.style.transform = 'translateX(-50%) rotate(5deg)';
+            break;
+        case 'thinking':
+            // Side mouth (pondering)
+            ariaMouth.style.width = '12px';
+            ariaMouth.style.height = '8px';
+            ariaMouth.style.borderRadius = '0 0 50% 50%';
+            ariaMouth.style.transform = 'translateX(-30%)';
+            // Also raise one eyebrow (using eye height)
+            if (ariaEyeLeft) {
+                ariaEyeLeft.style.transform = 'translateY(-2px)';
+                setTimeout(() => {
+                    ariaEyeLeft.style.transform = '';
+                }, 2000);
+            }
             break;
         case 'wink':
             document.querySelectorAll('.aria-eye')[1].style.height = '4px';
