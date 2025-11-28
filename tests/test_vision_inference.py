@@ -14,9 +14,13 @@ import sys
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
-import numpy as np
 import pytest
-from PIL import Image
+
+try:
+    import numpy as np
+    from PIL import Image
+except ImportError:
+    pytest.skip("Required modules not available (missing numpy/PIL)", allow_module_level=True)
 
 # Add scripts to path
 scripts_path = Path(__file__).parent.parent / "scripts"

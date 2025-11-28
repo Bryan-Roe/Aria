@@ -5,7 +5,10 @@ from pathlib import Path
 import pytest
 
 
-vision = importlib.import_module('scripts.train_vision')
+try:
+    vision = importlib.import_module('scripts.train_vision')
+except ImportError:
+    pytest.skip("Required modules not available (missing numpy/torch)", allow_module_level=True)
 
 
 @pytest.mark.parametrize('samples_per_class', [6])

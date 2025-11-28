@@ -5,8 +5,11 @@ from pathlib import Path
 import pytest
 
 
-train = importlib.import_module('scripts.train_vision')
-avatar = importlib.import_module('scripts.vision_avatar_integration')
+try:
+    train = importlib.import_module('scripts.train_vision')
+    avatar = importlib.import_module('scripts.vision_avatar_integration')
+except ImportError:
+    pytest.skip("Required modules not available (missing numpy/torch)", allow_module_level=True)
 
 
 def test_avatar_inference_small(tmp_path: Path):
