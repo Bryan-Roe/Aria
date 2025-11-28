@@ -275,51 +275,51 @@ class TestTokenizerCaching:
     """Tests for tokenizer caching optimizations in token_utils.py."""
     
     def test_lru_cache_for_tiktoken(self):
-        """Test that tiktoken encodings are properly cached."""
-        from functools import lru_cache
+        """Test that tiktoken encodings are properly cached using the actual implementation."""
+        import sys
+        sys.path.insert(0, str(Path(__file__).parent.parent / "talk-to-ai" / "src"))
+        from token_utils import _get_tiktoken_encoding
         
-        # Simulate the caching mechanism
-        @lru_cache(maxsize=8)
-        def get_cached_encoding(model: str):
-            return f"encoding_for_{model}"
+        # Clear cache before test to ensure clean state
+        _get_tiktoken_encoding.cache_clear()
         
-        # First call should create entry
-        result1 = get_cached_encoding("gpt-4o-mini")
-        assert result1 == "encoding_for_gpt-4o-mini"
-        
-        # Cache info should show 1 miss
-        info = get_cached_encoding.cache_info()
+        # First call should create entry (cache miss)
+        result1 = _get_tiktoken_encoding("gpt-4o-mini")
+        info = _get_tiktoken_encoding.cache_info()
         assert info.misses == 1
         assert info.hits == 0
         
         # Second call should hit cache
-        result2 = get_cached_encoding("gpt-4o-mini")
-        assert result2 == result1
+        result2 = _get_tiktoken_encoding("gpt-4o-mini")
+        assert result2 is result1  # Same object from cache
         
-        info = get_cached_encoding.cache_info()
+        info = _get_tiktoken_encoding.cache_info()
         assert info.hits == 1
         assert info.misses == 1
     
-    def test_lru_cache_eviction(self):
-        """Test that LRU cache evicts oldest entries when full."""
-        from functools import lru_cache
+    def test_lru_cache_for_hf_tokenizer(self):
+        """Test that HuggingFace tokenizers are properly cached using the actual implementation."""
+        import sys
+        sys.path.insert(0, str(Path(__file__).parent.parent / "talk-to-ai" / "src"))
+        from token_utils import _get_hf_tokenizer
         
-        @lru_cache(maxsize=2)
-        def small_cache(key: str):
-            return f"value_{key}"
+        # Clear cache before test to ensure clean state
+        _get_hf_tokenizer.cache_clear()
         
-        # Fill cache
-        small_cache("a")
-        small_cache("b")
+        # First call - will likely return None if transformers not installed
+        # but we're testing the cache behavior, not the tokenizer itself
+        result1 = _get_hf_tokenizer("test-model")
+        info = _get_hf_tokenizer.cache_info()
+        assert info.misses == 1
+        assert info.hits == 0
         
-        info = small_cache.cache_info()
-        assert info.currsize == 2
+        # Second call should hit cache (even if result is None)
+        result2 = _get_hf_tokenizer("test-model")
+        assert result2 is result1  # Same object from cache
         
-        # Add third entry, should evict oldest
-        small_cache("c")
-        
-        info = small_cache.cache_info()
-        assert info.currsize == 2  # Still at max size
+        info = _get_hf_tokenizer.cache_info()
+        assert info.hits == 1
+        assert info.misses == 1
 
 
 class TestCosineSimOptimizations:
@@ -415,6 +415,24 @@ class TestLMStudioCaching:
         cache["checked_at"] = now - 10  # 10 seconds ago
         is_fresh = (now - cache["checked_at"]) < ttl
         assert is_fresh is True
+    
+    def test_cache_url_invalidation(self):
+        """Test that cache is invalidated when URL changes."""
+        cache = {"available": True, "checked_at": time.time(), "url": "http://127.0.0.1:1234"}
+        ttl = 30
+        
+        # Fresh cache but different URL should be invalid
+        now = time.time()
+        cache["checked_at"] = now - 10  # 10 seconds ago (fresh)
+        
+        # Simulate checking with different URL
+        new_url = "http://127.0.0.1:5678"
+        is_valid = (
+            cache["available"] is not None
+            and cache["url"] == new_url  # This should fail
+            and (now - cache["checked_at"]) < ttl
+        )
+        assert is_valid is False  # Cache should be invalid due to URL mismatch
 
 
 class TestStreamingFileRead:

@@ -63,6 +63,8 @@ def _get_embedding_client(provider: str) -> Any:
             try:
                 client = AzureOpenAI(api_key=az_key, azure_endpoint=az_ep)
             except Exception:
+                # Client initialization failed (e.g., invalid credentials, network error)
+                # Fall through to return None, allowing caller to use fallback
                 pass
     elif provider == "openai":
         oi_key = os.getenv("OPENAI_API_KEY")
@@ -70,6 +72,8 @@ def _get_embedding_client(provider: str) -> Any:
             try:
                 client = OpenAI(api_key=oi_key)
             except Exception:
+                # Client initialization failed (e.g., invalid API key, network error)
+                # Fall through to return None, allowing caller to use fallback
                 pass
     
     if client is not None:
