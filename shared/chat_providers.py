@@ -31,17 +31,7 @@ OpenAIProvider = _canonical_module.OpenAIProvider
 AzureOpenAIProvider = _canonical_module.AzureOpenAIProvider
 detect_provider = _canonical_module.detect_provider
 
-# Conditionally export LoraLocalProvider and LMStudioProvider if available
-try:
-    LoraLocalProvider = _canonical_module.LoraLocalProvider
-except AttributeError:
-    pass
-
-try:
-    LMStudioProvider = _canonical_module.LMStudioProvider
-except AttributeError:
-    pass
-
+# Build __all__ dynamically based on what's exported
 __all__ = [
     "RoleMessage",
     "ProviderChoice",
@@ -51,3 +41,16 @@ __all__ = [
     "AzureOpenAIProvider",
     "detect_provider",
 ]
+
+# Conditionally export LoraLocalProvider and LMStudioProvider if available
+try:
+    LoraLocalProvider = _canonical_module.LoraLocalProvider
+    __all__.append("LoraLocalProvider")
+except AttributeError:
+    pass
+
+try:
+    LMStudioProvider = _canonical_module.LMStudioProvider
+    __all__.append("LMStudioProvider")
+except AttributeError:
+    pass
