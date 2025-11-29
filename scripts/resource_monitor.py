@@ -27,7 +27,7 @@ import sys
 import time
 from collections import deque
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Deque, Dict, List, Optional
 

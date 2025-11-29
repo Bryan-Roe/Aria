@@ -12,7 +12,7 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 from typing import List
-from datetime import datetime
+from datetime import datetime, timezone
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 import sys as _sys

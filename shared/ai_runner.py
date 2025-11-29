@@ -16,7 +16,7 @@ import subprocess
 import sys
 import os
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Tuple, Dict, Optional
 
