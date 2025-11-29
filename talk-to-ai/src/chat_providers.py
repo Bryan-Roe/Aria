@@ -19,9 +19,9 @@ except Exception:  # pragma: no cover - optional at runtime
 
 
 # Thread-safe cache for LM Studio availability checks
-_lmstudio_cache: Dict[str, Any] = {"available": None, "checked_at": 0.0, "url": None}
-_lmstudio_cache_lock = threading.RLock()
-_LMSTUDIO_CACHE_TTL = 30  # seconds
+_lm_studio_availability_cache: Dict[str, Any] = {"available": None, "checked_at": 0.0, "url": None}
+_lm_studio_cache_lock = threading.RLock()
+_LM_STUDIO_CACHE_TTL_SECONDS = 30
 
 
 RoleMessage = Dict[str, str]  # {"role": "system|user|assistant", "content": "..."}
@@ -470,49 +470,49 @@ class AzureOpenAIProvider(BaseChatProvider):
                 return ""
 
 
-def _check_lmstudio_available(url: str) -> bool:
+def _check_lm_studio_available(server_url: str) -> bool:
     """Check if LM Studio server is available at the given URL.
     
     Uses a thread-safe cache to avoid repeated HTTP requests within the TTL period.
     The HTTP request is performed outside the lock to avoid blocking other threads.
     
     Args:
-        url: Base URL for LM Studio API (e.g., "http://127.0.0.1:1234/v1")
+        server_url: Base URL for LM Studio API (e.g., "http://127.0.0.1:1234/v1")
         
     Returns:
         True if LM Studio is available, False otherwise.
     """
     # Check cache under lock
-    with _lmstudio_cache_lock:
-        now = time.time()
+    with _lm_studio_cache_lock:
+        current_time = time.time()
         if (
-            _lmstudio_cache["available"] is not None
-            and _lmstudio_cache["url"] == url
-            and (now - _lmstudio_cache["checked_at"]) < _LMSTUDIO_CACHE_TTL
+            _lm_studio_availability_cache["available"] is not None
+            and _lm_studio_availability_cache["url"] == server_url
+            and (current_time - _lm_studio_availability_cache["checked_at"]) < _LM_STUDIO_CACHE_TTL_SECONDS
         ):
-            return _lmstudio_cache["available"]
+            return _lm_studio_availability_cache["available"]
     
     # Perform HTTP check outside lock to avoid blocking other threads
-    available = False
+    is_available = False
     try:
         import urllib.request
         import urllib.error
         # Remove trailing /v1 if present, then append /v1/models
-        base_url = url.removesuffix("/v1")
-        check_url = base_url + "/v1/models"
-        req = urllib.request.Request(check_url, headers={"User-Agent": "QAI"})
-        urllib.request.urlopen(req, timeout=1)
-        available = True
+        base_url = server_url.removesuffix("/v1")
+        models_endpoint_url = base_url + "/v1/models"
+        request = urllib.request.Request(models_endpoint_url, headers={"User-Agent": "QAI"})
+        urllib.request.urlopen(request, timeout=1)
+        is_available = True
     except Exception:
-        available = False
+        is_available = False
     
     # Update cache under lock
-    with _lmstudio_cache_lock:
-        _lmstudio_cache["available"] = available
-        _lmstudio_cache["checked_at"] = time.time()
-        _lmstudio_cache["url"] = url
+    with _lm_studio_cache_lock:
+        _lm_studio_availability_cache["available"] = is_available
+        _lm_studio_availability_cache["checked_at"] = time.time()
+        _lm_studio_availability_cache["url"] = server_url
     
-    return available
+    return is_available
 
 
 def detect_provider(explicit: Optional[str] = None, model_override: Optional[str] = None, temperature: Optional[float] = None, max_output_tokens: Optional[int] = None) -> tuple[BaseChatProvider, ProviderChoice]:
@@ -527,91 +527,91 @@ def detect_provider(explicit: Optional[str] = None, model_override: Optional[str
       6) Local fallback
       7) LoRA if provider is 'lora' and model_override is set
     """
-    choice = (explicit or "auto").lower()
+    provider_choice = (explicit or "auto").lower()
 
     # LM Studio config
-    lms_url = os.getenv("LMSTUDIO_BASE_URL", "http://127.0.0.1:1234/v1")
-    lms_model = os.getenv("LMSTUDIO_MODEL", "local-model")
+    lm_studio_base_url = os.getenv("LMSTUDIO_BASE_URL", "http://127.0.0.1:1234/v1")
+    lm_studio_model_name = os.getenv("LMSTUDIO_MODEL", "local-model")
 
     # Quantum config
-    if choice == "quantum":
+    if provider_choice == "quantum":
         try:
             from quantum_provider import create_quantum_provider
-            temp_val = float(temperature if temperature is not None else os.getenv("CHAT_TEMPERATURE", "0.7"))
-            max_tokens = int(max_output_tokens) if max_output_tokens is not None else 1024
+            temperature_value = float(temperature if temperature is not None else os.getenv("CHAT_TEMPERATURE", "0.7"))
+            max_tokens_limit = int(max_output_tokens) if max_output_tokens is not None else 1024
             provider, info = create_quantum_provider(
                 model=model_override,
-                temperature=temp_val,
-                max_output_tokens=max_tokens
+                temperature=temperature_value,
+                max_output_tokens=max_tokens_limit
             )
             return provider, ProviderChoice(name=info.name, model=info.model)
-        except ImportError as e:
-            raise RuntimeError(f"Quantum provider selected but quantum_provider module not available: {e}")
+        except ImportError as import_error:
+            raise RuntimeError(f"Quantum provider selected but quantum_provider module not available: {import_error}")
 
     # LoRA config
-    if choice == "lora":
+    if provider_choice == "lora":
         if not model_override:
             raise RuntimeError("LoRA provider selected but model path not provided.")
-        temp_val = float(temperature if temperature is not None else os.getenv("CHAT_TEMPERATURE", "0.7"))
-        max_new = int(max_output_tokens) if max_output_tokens is not None else 256
-        provider = LoraLocalProvider(adapter_dir=model_override, temperature=temp_val, max_new_tokens=max_new)
+        temperature_value = float(temperature if temperature is not None else os.getenv("CHAT_TEMPERATURE", "0.7"))
+        max_new_tokens = int(max_output_tokens) if max_output_tokens is not None else 256
+        provider = LoraLocalProvider(adapter_dir=model_override, temperature=temperature_value, max_new_tokens=max_new_tokens)
         return provider, ProviderChoice(name="lora", model=str(model_override))
 
 
-    # Azure config
-    az_key = os.getenv("AZURE_OPENAI_API_KEY")
-    az_ep = os.getenv("AZURE_OPENAI_ENDPOINT")
-    az_dep = os.getenv("AZURE_OPENAI_DEPLOYMENT")
-    az_ver = os.getenv("AZURE_OPENAI_API_VERSION", "2024-08-01-preview")
+    # Azure OpenAI config
+    azure_openai_api_key = os.getenv("AZURE_OPENAI_API_KEY")
+    azure_openai_endpoint = os.getenv("AZURE_OPENAI_ENDPOINT")
+    azure_openai_deployment = os.getenv("AZURE_OPENAI_DEPLOYMENT")
+    azure_openai_api_version = os.getenv("AZURE_OPENAI_API_VERSION", "2024-08-01-preview")
 
     # OpenAI config
-    oi_key = os.getenv("OPENAI_API_KEY")
-    oi_model = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
+    openai_api_key = os.getenv("OPENAI_API_KEY")
+    openai_model_name = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
 
-    temp = float(temperature if temperature is not None else os.getenv("CHAT_TEMPERATURE", "0.7"))
+    temperature_setting = float(temperature if temperature is not None else os.getenv("CHAT_TEMPERATURE", "0.7"))
 
     # Resolve based on explicit choice first
-    if choice == "lmstudio":
-        model = model_override or lms_model
-        provider = LMStudioProvider(base_url=lms_url, model=model, temperature=temp, max_output_tokens=max_output_tokens)
-        return provider, ProviderChoice(name="lmstudio", model=model)
+    if provider_choice == "lmstudio":
+        selected_model = model_override or lm_studio_model_name
+        provider = LMStudioProvider(base_url=lm_studio_base_url, model=selected_model, temperature=temperature_setting, max_output_tokens=max_output_tokens)
+        return provider, ProviderChoice(name="lmstudio", model=selected_model)
 
-    if choice == "azure":
-        if not (az_key and az_ep and (model_override or az_dep)):
+    if provider_choice == "azure":
+        if not (azure_openai_api_key and azure_openai_endpoint and (model_override or azure_openai_deployment)):
             raise RuntimeError("Azure OpenAI selected but required env vars are missing. Set AZURE_OPENAI_API_KEY, AZURE_OPENAI_ENDPOINT, AZURE_OPENAI_DEPLOYMENT.")
-        model = model_override or az_dep  # deployment name
-        provider = AzureOpenAIProvider(deployment=model, endpoint=az_ep, api_key=az_key, api_version=az_ver, temperature=temp, max_output_tokens=max_output_tokens)
-        return provider, ProviderChoice(name="azure", model=model)
+        selected_model = model_override or azure_openai_deployment  # deployment name
+        provider = AzureOpenAIProvider(deployment=selected_model, endpoint=azure_openai_endpoint, api_key=azure_openai_api_key, api_version=azure_openai_api_version, temperature=temperature_setting, max_output_tokens=max_output_tokens)
+        return provider, ProviderChoice(name="azure", model=selected_model)
 
-    if choice == "openai":
-        if not oi_key:
+    if provider_choice == "openai":
+        if not openai_api_key:
             raise RuntimeError("OpenAI selected but OPENAI_API_KEY is not set.")
-        model = model_override or oi_model
-        provider = OpenAIProvider(model=model, api_key=oi_key, temperature=temp, max_output_tokens=max_output_tokens)
-        return provider, ProviderChoice(name="openai", model=model)
+        selected_model = model_override or openai_model_name
+        provider = OpenAIProvider(model=selected_model, api_key=openai_api_key, temperature=temperature_setting, max_output_tokens=max_output_tokens)
+        return provider, ProviderChoice(name="openai", model=selected_model)
 
-    if choice == "local":
-        model = model_override or "local-echo"
+    if provider_choice == "local":
+        selected_model = model_override or "local-echo"
         provider = LocalEchoProvider()
-        return provider, ProviderChoice(name="local", model=model)
+        return provider, ProviderChoice(name="local", model=selected_model)
 
     # Auto mode - check for LM Studio first using thread-safe cached check
-    if _check_lmstudio_available(lms_url):
-        model = model_override or lms_model
-        provider = LMStudioProvider(base_url=lms_url, model=model, temperature=temp, max_output_tokens=max_output_tokens)
-        return provider, ProviderChoice(name="lmstudio", model=model)
+    if _check_lm_studio_available(lm_studio_base_url):
+        selected_model = model_override or lm_studio_model_name
+        provider = LMStudioProvider(base_url=lm_studio_base_url, model=selected_model, temperature=temperature_setting, max_output_tokens=max_output_tokens)
+        return provider, ProviderChoice(name="lmstudio", model=selected_model)
 
-    if az_key and az_ep and (model_override or az_dep):
-        model = model_override or az_dep
-        provider = AzureOpenAIProvider(deployment=model, endpoint=az_ep, api_key=az_key, api_version=az_ver, temperature=temp, max_output_tokens=max_output_tokens)
-        return provider, ProviderChoice(name="azure", model=model)
+    if azure_openai_api_key and azure_openai_endpoint and (model_override or azure_openai_deployment):
+        selected_model = model_override or azure_openai_deployment
+        provider = AzureOpenAIProvider(deployment=selected_model, endpoint=azure_openai_endpoint, api_key=azure_openai_api_key, api_version=azure_openai_api_version, temperature=temperature_setting, max_output_tokens=max_output_tokens)
+        return provider, ProviderChoice(name="azure", model=selected_model)
 
-    if oi_key:
-        model = model_override or oi_model
-        provider = OpenAIProvider(model=model, api_key=oi_key, temperature=temp, max_output_tokens=max_output_tokens)
-        return provider, ProviderChoice(name="openai", model=model)
+    if openai_api_key:
+        selected_model = model_override or openai_model_name
+        provider = OpenAIProvider(model=selected_model, api_key=openai_api_key, temperature=temperature_setting, max_output_tokens=max_output_tokens)
+        return provider, ProviderChoice(name="openai", model=selected_model)
 
-    # Fallback
-    model = model_override or "local-echo"
+    # Fallback to local echo provider
+    selected_model = model_override or "local-echo"
     provider = LocalEchoProvider()
-    return provider, ProviderChoice(name="local", model=model)
+    return provider, ProviderChoice(name="local", model=selected_model)

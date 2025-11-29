@@ -209,7 +209,7 @@ def chat(req: func.HttpRequest) -> func.HttpResponse:
                 json.dumps({"error": "No messages provided"}),
                 status_code=400,
                 mimetype="application/json",
-                headers=_cors_headers()
+                headers=create_cors_response_headers()
             )
 
         # Validate messages format
@@ -219,7 +219,7 @@ def chat(req: func.HttpRequest) -> func.HttpResponse:
                     json.dumps({"error": "Invalid message format. Expected {role, content}"}),
                     status_code=400,
                     mimetype="application/json",
-                    headers=_cors_headers()
+                    headers=create_cors_response_headers()
                 )
 
         # =============================
@@ -399,7 +399,7 @@ def chat(req: func.HttpRequest) -> func.HttpResponse:
             json.dumps(response_data),
             status_code=200,
             mimetype="application/json",
-            headers=_cors_headers()
+            headers=create_cors_response_headers()
         )
 
     except ValueError as ve:
@@ -408,7 +408,7 @@ def chat(req: func.HttpRequest) -> func.HttpResponse:
             json.dumps({"error": f"Validation error: {str(ve)}"}),
             status_code=400,
             mimetype="application/json",
-            headers=_cors_headers()
+            headers=create_cors_response_headers()
         )
     except RuntimeError as re:
         logging.error(f'Runtime error: {str(re)}')
@@ -416,7 +416,7 @@ def chat(req: func.HttpRequest) -> func.HttpResponse:
             json.dumps({"error": f"Configuration error: {str(re)}"}),
             status_code=500,
             mimetype="application/json",
-            headers=_cors_headers()
+            headers=create_cors_response_headers()
         )
     except Exception as e:
         logging.error(f'Unexpected error: {str(e)}')
@@ -424,7 +424,7 @@ def chat(req: func.HttpRequest) -> func.HttpResponse:
             json.dumps({"error": f"Internal server error: {str(e)}"}),
             status_code=500,
             mimetype="application/json",
-            headers=_cors_headers()
+            headers=create_cors_response_headers()
         )
 
 
@@ -434,12 +434,12 @@ def chat_options(req: func.HttpRequest) -> func.HttpResponse:
     return func.HttpResponse(
         "",
         status_code=200,
-        headers=_cors_headers()
+        headers=create_cors_response_headers()
     )
 
 
-def _cors_headers():
-    """Common CORS headers for all responses"""
+def create_cors_response_headers():
+    """Create common CORS headers for all responses."""
     return {
         "Access-Control-Allow-Origin": "*",
         "Access-Control-Allow-Methods": "POST, GET, OPTIONS",
@@ -459,11 +459,11 @@ def resource_monitor_status(req: func.HttpRequest) -> func.HttpResponse:
         if snap_path.exists():
             with open(snap_path, "r") as f:
                 data = json.load(f)
-            return func.HttpResponse(json.dumps(data), status_code=200, mimetype="application/json", headers=_cors_headers())
+            return func.HttpResponse(json.dumps(data), status_code=200, mimetype="application/json", headers=create_cors_response_headers())
         else:
-            return func.HttpResponse(json.dumps({"error": "No snapshot found"}), status_code=404, mimetype="application/json", headers=_cors_headers())
+            return func.HttpResponse(json.dumps({"error": "No snapshot found"}), status_code=404, mimetype="application/json", headers=create_cors_response_headers())
     except Exception as e:
-        return func.HttpResponse(json.dumps({"error": str(e)}), status_code=500, mimetype="application/json", headers=_cors_headers())
+        return func.HttpResponse(json.dumps({"error": str(e)}), status_code=500, mimetype="application/json", headers=create_cors_response_headers())
 
 @app.route(route="model-deployer/status", methods=["GET"], auth_level=func.AuthLevel.ANONYMOUS)
 def model_deployer_status(req: func.HttpRequest) -> func.HttpResponse:
@@ -473,11 +473,11 @@ def model_deployer_status(req: func.HttpRequest) -> func.HttpResponse:
         if reg_path.exists():
             with open(reg_path, "r") as f:
                 data = json.load(f)
-            return func.HttpResponse(json.dumps(data), status_code=200, mimetype="application/json", headers=_cors_headers())
+            return func.HttpResponse(json.dumps(data), status_code=200, mimetype="application/json", headers=create_cors_response_headers())
         else:
-            return func.HttpResponse(json.dumps({"error": "No registry found"}), status_code=404, mimetype="application/json", headers=_cors_headers())
+            return func.HttpResponse(json.dumps({"error": "No registry found"}), status_code=404, mimetype="application/json", headers=create_cors_response_headers())
     except Exception as e:
-        return func.HttpResponse(json.dumps({"error": str(e)}), status_code=500, mimetype="application/json", headers=_cors_headers())
+        return func.HttpResponse(json.dumps({"error": str(e)}), status_code=500, mimetype="application/json", headers=create_cors_response_headers())
 
 @app.route(route="results-export", methods=["GET"], auth_level=func.AuthLevel.ANONYMOUS)
 def results_export(req: func.HttpRequest) -> func.HttpResponse:
@@ -487,11 +487,11 @@ def results_export(req: func.HttpRequest) -> func.HttpResponse:
         if res_path.exists():
             with open(res_path, "r") as f:
                 data = json.load(f)
-            return func.HttpResponse(json.dumps(data), status_code=200, mimetype="application/json", headers=_cors_headers())
+            return func.HttpResponse(json.dumps(data), status_code=200, mimetype="application/json", headers=create_cors_response_headers())
         else:
-            return func.HttpResponse(json.dumps({"error": "No results found"}), status_code=404, mimetype="application/json", headers=_cors_headers())
+            return func.HttpResponse(json.dumps({"error": "No results found"}), status_code=404, mimetype="application/json", headers=create_cors_response_headers())
     except Exception as e:
-        return func.HttpResponse(json.dumps({"error": str(e)}), status_code=500, mimetype="application/json", headers=_cors_headers())
+        return func.HttpResponse(json.dumps({"error": str(e)}), status_code=500, mimetype="application/json", headers=create_cors_response_headers())
 
 @app.route(route="evaluation-results", methods=["GET"], auth_level=func.AuthLevel.ANONYMOUS)
 def evaluation_results(req: func.HttpRequest) -> func.HttpResponse:
@@ -501,11 +501,11 @@ def evaluation_results(req: func.HttpRequest) -> func.HttpResponse:
         if eval_path.exists():
             with open(eval_path, "r") as f:
                 data = json.load(f)
-            return func.HttpResponse(json.dumps(data), status_code=200, mimetype="application/json", headers=_cors_headers())
+            return func.HttpResponse(json.dumps(data), status_code=200, mimetype="application/json", headers=create_cors_response_headers())
         else:
-            return func.HttpResponse(json.dumps({"error": "No evaluation results found"}), status_code=404, mimetype="application/json", headers=_cors_headers())
+            return func.HttpResponse(json.dumps({"error": "No evaluation results found"}), status_code=404, mimetype="application/json", headers=create_cors_response_headers())
     except Exception as e:
-        return func.HttpResponse(json.dumps({"error": str(e)}), status_code=500, mimetype="application/json", headers=_cors_headers())
+        return func.HttpResponse(json.dumps({"error": str(e)}), status_code=500, mimetype="application/json", headers=create_cors_response_headers())
 
 
 # =============================================================================
@@ -572,7 +572,7 @@ def chat_stream(req: func.HttpRequest) -> func.HttpResponse:
                 json.dumps({"error": "No messages provided"}),
                 status_code=400,
                 mimetype="application/json",
-                headers=_cors_headers(),
+                headers=create_cors_response_headers(),
             )
 
         provider, info = detect_provider(
@@ -688,7 +688,7 @@ def chat_stream(req: func.HttpRequest) -> func.HttpResponse:
             body=sse_iterable(),
             status_code=200,
             mimetype="text/event-stream",
-            headers={**_cors_headers(), "Cache-Control": "no-cache"},
+            headers={**create_cors_response_headers(), "Cache-Control": "no-cache"},
         )
 
     except Exception as e:  # noqa: BLE001
@@ -697,7 +697,7 @@ def chat_stream(req: func.HttpRequest) -> func.HttpResponse:
             json.dumps({"error": str(e)}),
             status_code=500,
             mimetype="application/json",
-            headers=_cors_headers(),
+            headers=create_cors_response_headers(),
         )
 
 
@@ -715,7 +715,7 @@ def tts(req: func.HttpRequest) -> func.HttpResponse:
         body = req.get_json() or {}
         text = (body.get('text') or '').strip()
         if not text:
-            return func.HttpResponse(json.dumps({"error": "No text provided"}), status_code=400, mimetype="application/json", headers=_cors_headers())
+            return func.HttpResponse(json.dumps({"error": "No text provided"}), status_code=400, mimetype="application/json", headers=create_cors_response_headers())
 
         # Optional voice/rate/pitch params
         voice = body.get('voice')
@@ -733,7 +733,7 @@ def tts(req: func.HttpRequest) -> func.HttpResponse:
                 try:
                     import azure.cognitiveservices.speech as speechsdk
                 except Exception as e:
-                    return func.HttpResponse(json.dumps({"error": "Azure Speech SDK not available on server (install azure-cognitiveservices-speech)"}), status_code=500, mimetype="application/json", headers=_cors_headers())
+                    return func.HttpResponse(json.dumps({"error": "Azure Speech SDK not available on server (install azure-cognitiveservices-speech)"}), status_code=500, mimetype="application/json", headers=create_cors_response_headers())
 
                 # Configure speech
                 scfg = speechsdk.SpeechConfig(subscription=az_key, region=az_region)
@@ -753,7 +753,7 @@ def tts(req: func.HttpRequest) -> func.HttpResponse:
                 if result.reason != speechsdk.ResultReason.SynthesizingAudioCompleted:
                     # Could be 'Canceled' with details
                     detail = getattr(result, 'error_details', None) or str(result.reason)
-                    return func.HttpResponse(json.dumps({"error": "Synthesis failed", "detail": str(detail)}), status_code=500, mimetype="application/json", headers=_cors_headers())
+                    return func.HttpResponse(json.dumps({"error": "Synthesis failed", "detail": str(detail)}), status_code=500, mimetype="application/json", headers=create_cors_response_headers())
 
                 # Extract audio bytes
                 stream = speechsdk.AudioDataStream(result)
@@ -784,10 +784,10 @@ def tts(req: func.HttpRequest) -> func.HttpResponse:
                 import base64 as _b64
                 audio_b64 = _b64.b64encode(audio_bytes).decode('ascii')
 
-                return func.HttpResponse(json.dumps({"audio_base64": audio_b64, "format": "wav", "timepoints": timepoints}), status_code=200, mimetype="application/json", headers=_cors_headers())
+                return func.HttpResponse(json.dumps({"audio_base64": audio_b64, "format": "wav", "timepoints": timepoints}), status_code=200, mimetype="application/json", headers=create_cors_response_headers())
             except Exception as e:
                 logging.exception(f"TTS (Azure) synth failed: {e}")
-                return func.HttpResponse(json.dumps({"error": f"TTS provider error: {e}"}), status_code=500, mimetype="application/json", headers=_cors_headers())
+                return func.HttpResponse(json.dumps({"error": f"TTS provider error: {e}"}), status_code=500, mimetype="application/json", headers=create_cors_response_headers())
 
         # No remote TTS provider is configured. Attempt optional local fallbacks if enabled.
         enable_local = os.getenv('QAI_ENABLE_LOCAL_TTS', 'true').lower() in ('true', '1', 'yes', 'y')
@@ -857,7 +857,7 @@ def tts(req: func.HttpRequest) -> func.HttpResponse:
                             cursor += dur
 
                         audio_b64 = base64.b64encode(audio_bytes).decode('ascii')
-                        return func.HttpResponse(json.dumps({"audio_base64": audio_b64, "format": "wav", "timepoints": timepoints}), status_code=200, mimetype="application/json", headers=_cors_headers())
+                        return func.HttpResponse(json.dumps({"audio_base64": audio_b64, "format": "wav", "timepoints": timepoints}), status_code=200, mimetype="application/json", headers=create_cors_response_headers())
                     finally:
                         try:
                             if tmp is not None and tmp_path and os.path.exists(tmp_path):
@@ -900,7 +900,7 @@ def tts(req: func.HttpRequest) -> func.HttpResponse:
                             cursor += dur
 
                         audio_b64 = base64.b64encode(audio_bytes).decode('ascii')
-                        return func.HttpResponse(json.dumps({"audio_base64": audio_b64, "format": "mp3", "timepoints": timepoints}), status_code=200, mimetype="application/json", headers=_cors_headers())
+                        return func.HttpResponse(json.dumps({"audio_base64": audio_b64, "format": "mp3", "timepoints": timepoints}), status_code=200, mimetype="application/json", headers=create_cors_response_headers())
                     finally:
                         try:
                             if tmp is not None and tmp_path and os.path.exists(tmp_path):
@@ -910,7 +910,7 @@ def tts(req: func.HttpRequest) -> func.HttpResponse:
 
             except Exception as e:
                 logging.exception(f"Local fallback TTS failed: {e}")
-                return func.HttpResponse(json.dumps({"error": f"Local TTS provider failed: {e}"}), status_code=500, mimetype="application/json", headers=_cors_headers())
+                return func.HttpResponse(json.dumps({"error": f"Local TTS provider failed: {e}"}), status_code=500, mimetype="application/json", headers=create_cors_response_headers())
 
         # If we reach here remote + local TTS are unavailable
         return func.HttpResponse(
@@ -920,12 +920,12 @@ def tts(req: func.HttpRequest) -> func.HttpResponse:
             }),
             status_code=501,
             mimetype="application/json",
-            headers=_cors_headers()
+            headers=create_cors_response_headers()
         )
 
     except Exception as e:  # noqa: BLE001
         logging.exception(f"/tts error: {e}")
-        return func.HttpResponse(json.dumps({"error": str(e)}), status_code=500, mimetype="application/json", headers=_cors_headers())
+        return func.HttpResponse(json.dumps({"error": str(e)}), status_code=500, mimetype="application/json", headers=create_cors_response_headers())
 
 
 # =============================================================================
@@ -1213,7 +1213,7 @@ def ai_status(req: func.HttpRequest) -> func.HttpResponse:
             json.dumps(payload),
             status_code=200,
             mimetype="application/json",
-            headers=_cors_headers(),
+            headers=create_cors_response_headers(),
         )
 
     except Exception as e:  # noqa: BLE001
@@ -1222,7 +1222,7 @@ def ai_status(req: func.HttpRequest) -> func.HttpResponse:
             json.dumps({"status": "error", "error": str(e)}),
             status_code=500,
             mimetype="application/json",
-            headers=_cors_headers(),
+            headers=create_cors_response_headers(),
         )
 
 
@@ -1275,7 +1275,7 @@ def vision_infer(req: func.HttpRequest) -> func.HttpResponse:
                 json.dumps({"error": f"Vision inference not available: {e}"}),
                 status_code=500,
                 mimetype="application/json",
-                headers=_cors_headers()
+                headers=create_cors_response_headers()
             )
         
         # Parse request
@@ -1289,7 +1289,7 @@ def vision_infer(req: func.HttpRequest) -> func.HttpResponse:
                 json.dumps({"error": "No image provided. Include 'image' (base64) or 'image_url' in request body."}),
                 status_code=400,
                 mimetype="application/json",
-                headers=_cors_headers()
+                headers=create_cors_response_headers()
             )
         
         # Initialize vision inference (loads latest checkpoint)
@@ -1307,7 +1307,7 @@ def vision_infer(req: func.HttpRequest) -> func.HttpResponse:
                     }),
                     status_code=404,
                     mimetype="application/json",
-                    headers=_cors_headers()
+                    headers=create_cors_response_headers()
                 )
         
         vi = vision_infer._vision_model
@@ -1328,7 +1328,7 @@ def vision_infer(req: func.HttpRequest) -> func.HttpResponse:
                     json.dumps({"error": f"Failed to fetch image from URL: {e}"}),
                     status_code=400,
                     mimetype="application/json",
-                    headers=_cors_headers()
+                    headers=create_cors_response_headers()
                 )
         elif format_type == 'base64':
             # Decode base64 image
@@ -1339,14 +1339,14 @@ def vision_infer(req: func.HttpRequest) -> func.HttpResponse:
                     json.dumps({"error": f"Failed to decode base64 image: {e}"}),
                     status_code=400,
                     mimetype="application/json",
-                    headers=_cors_headers()
+                    headers=create_cors_response_headers()
                 )
         else:
             return func.HttpResponse(
                 json.dumps({"error": f"Unsupported format: {format_type}. Use 'base64' or provide 'image_url'."}),
                 status_code=400,
                 mimetype="application/json",
-                headers=_cors_headers()
+                headers=create_cors_response_headers()
             )
         
         # Add model metadata to response
@@ -1359,7 +1359,7 @@ def vision_infer(req: func.HttpRequest) -> func.HttpResponse:
             json.dumps(response_data),
             status_code=200,
             mimetype="application/json",
-            headers=_cors_headers()
+            headers=create_cors_response_headers()
         )
         
     except Exception as e:
@@ -1368,7 +1368,7 @@ def vision_infer(req: func.HttpRequest) -> func.HttpResponse:
             json.dumps({"error": f"Vision inference failed: {str(e)}"}),
             status_code=500,
             mimetype="application/json",
-            headers=_cors_headers()
+            headers=create_cors_response_headers()
         )
 
 
@@ -1378,7 +1378,7 @@ def vision_infer_options(req: func.HttpRequest) -> func.HttpResponse:
     return func.HttpResponse(
         "",
         status_code=200,
-        headers=_cors_headers()
+        headers=create_cors_response_headers()
     )
 
 
@@ -1419,7 +1419,7 @@ def vision_batch_infer(req: func.HttpRequest) -> func.HttpResponse:
             json.dumps({"error": f"Vision inference not available: {e}"}),
             status_code=500,
             mimetype="application/json",
-            headers=_cors_headers()
+            headers=create_cors_response_headers()
         )
     
     try:
@@ -1431,7 +1431,7 @@ def vision_batch_infer(req: func.HttpRequest) -> func.HttpResponse:
                 json.dumps({"error": "No images provided"}),
                 status_code=400,
                 mimetype="application/json",
-                headers=_cors_headers()
+                headers=create_cors_response_headers()
             )
         
         # Limit batch size to prevent overload
@@ -1441,7 +1441,7 @@ def vision_batch_infer(req: func.HttpRequest) -> func.HttpResponse:
                 json.dumps({"error": f"Batch size exceeds limit of {max_batch_size} images"}),
                 status_code=400,
                 mimetype="application/json",
-                headers=_cors_headers()
+                headers=create_cors_response_headers()
             )
         
         # Initialize vision model
@@ -1453,7 +1453,7 @@ def vision_batch_infer(req: func.HttpRequest) -> func.HttpResponse:
                     json.dumps({"error": "No trained model found", "detail": str(e)}),
                     status_code=404,
                     mimetype="application/json",
-                    headers=_cors_headers()
+                    headers=create_cors_response_headers()
                 )
         
         vi = vision_batch_infer._vision_model
@@ -1480,7 +1480,7 @@ def vision_batch_infer(req: func.HttpRequest) -> func.HttpResponse:
                 json.dumps({"error": "No valid images could be decoded"}),
                 status_code=400,
                 mimetype="application/json",
-                headers=_cors_headers()
+                headers=create_cors_response_headers()
             )
         
         # Run batch inference
@@ -1504,7 +1504,7 @@ def vision_batch_infer(req: func.HttpRequest) -> func.HttpResponse:
             json.dumps(response_data),
             status_code=200,
             mimetype="application/json",
-            headers=_cors_headers()
+            headers=create_cors_response_headers()
         )
         
     except Exception as e:
@@ -1513,7 +1513,7 @@ def vision_batch_infer(req: func.HttpRequest) -> func.HttpResponse:
             json.dumps({"error": f"Batch inference failed: {str(e)}"}),
             status_code=500,
             mimetype="application/json",
-            headers=_cors_headers()
+            headers=create_cors_response_headers()
         )
 
 
@@ -1539,7 +1539,7 @@ def vision_batch_infer(req: func.HttpRequest) -> func.HttpResponse:
         }
         """
         if req.method == "OPTIONS":
-            return func.HttpResponse(status_code=200, headers=_cors_headers())
+            return func.HttpResponse(status_code=200, headers=create_cors_response_headers())
     
         logging.info('Image generation endpoint invoked')
     
@@ -1554,7 +1554,7 @@ def vision_batch_infer(req: func.HttpRequest) -> func.HttpResponse:
                     json.dumps({"error": "Prompt is required"}),
                     status_code=400,
                     mimetype="application/json",
-                    headers=_cors_headers()
+                    headers=create_cors_response_headers()
                 )
         
             if style_hint:
@@ -1582,7 +1582,7 @@ def vision_batch_infer(req: func.HttpRequest) -> func.HttpResponse:
             
                 response_data = {'image_url': image_url, 'prompt': prompt, 'model': 'dall-e-2', 'size': size}
             
-                return func.HttpResponse(json.dumps(response_data), status_code=200, mimetype="application/json", headers=_cors_headers())
+                return func.HttpResponse(json.dumps(response_data), status_code=200, mimetype="application/json", headers=create_cors_response_headers())
             
             except Exception as openai_error:
                 logging.warning(f'OpenAI image generation failed: {openai_error}')
@@ -1608,11 +1608,11 @@ def vision_batch_infer(req: func.HttpRequest) -> func.HttpResponse:
             
                 response_data = {'image_data': svg_base64, 'prompt': prompt, 'model': 'fallback-svg', 'size': '512x512', 'fallback': True, 'error': str(openai_error)}
             
-                return func.HttpResponse(json.dumps(response_data), status_code=200, mimetype="application/json", headers=_cors_headers())
+                return func.HttpResponse(json.dumps(response_data), status_code=200, mimetype="application/json", headers=create_cors_response_headers())
     
         except Exception as e:
             logging.error(f'Image generation error: {str(e)}')
-            return func.HttpResponse(json.dumps({"error": f"Image generation failed: {str(e)}"}), status_code=500, mimetype="application/json", headers=_cors_headers())
+            return func.HttpResponse(json.dumps({"error": f"Image generation failed: {str(e)}"}), status_code=500, mimetype="application/json", headers=create_cors_response_headers())
 
 
 # =============================================================================
@@ -1650,7 +1650,7 @@ def quantum_classify(req: func.HttpRequest) -> func.HttpResponse:
                 json.dumps({"error": f"Quantum dependencies not available: {e}"}),
                 status_code=500,
                 mimetype="application/json",
-                headers=_cors_headers()
+                headers=create_cors_response_headers()
             )
         
         # Parse request
@@ -1664,7 +1664,7 @@ def quantum_classify(req: func.HttpRequest) -> func.HttpResponse:
                 json.dumps({"error": "No features provided"}),
                 status_code=400,
                 mimetype="application/json",
-                headers=_cors_headers()
+                headers=create_cors_response_headers()
             )
         
         # Initialize quantum classifier
@@ -1710,7 +1710,7 @@ def quantum_classify(req: func.HttpRequest) -> func.HttpResponse:
             json.dumps(response_data),
             status_code=200,
             mimetype="application/json",
-            headers=_cors_headers()
+            headers=create_cors_response_headers()
         )
         
     except Exception as e:
@@ -1719,7 +1719,7 @@ def quantum_classify(req: func.HttpRequest) -> func.HttpResponse:
             json.dumps({"error": f"Quantum classification failed: {str(e)}"}),
             status_code=500,
             mimetype="application/json",
-            headers=_cors_headers()
+            headers=create_cors_response_headers()
         )
 
 
@@ -1846,7 +1846,7 @@ def quantum_circuit(req: func.HttpRequest) -> func.HttpResponse:
             json.dumps(response_data),
             status_code=200,
             mimetype="application/json",
-            headers=_cors_headers()
+            headers=create_cors_response_headers()
         )
         
     except Exception as e:
@@ -1855,7 +1855,7 @@ def quantum_circuit(req: func.HttpRequest) -> func.HttpResponse:
             json.dumps({"error": f"Circuit creation failed: {str(e)}"}),
             status_code=500,
             mimetype="application/json",
-            headers=_cors_headers()
+            headers=create_cors_response_headers()
         )
 
 
@@ -1913,7 +1913,7 @@ def quantum_info(req: func.HttpRequest) -> func.HttpResponse:
             json.dumps(response_data),
             status_code=200,
             mimetype="application/json",
-            headers=_cors_headers()
+            headers=create_cors_response_headers()
         )
         
     except Exception as e:
@@ -1922,6 +1922,6 @@ def quantum_info(req: func.HttpRequest) -> func.HttpResponse:
             json.dumps({"error": f"Failed to get quantum info: {str(e)}"}),
             status_code=500,
             mimetype="application/json",
-            headers=_cors_headers()
+            headers=create_cors_response_headers()
         )
 
