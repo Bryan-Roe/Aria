@@ -385,7 +385,7 @@ def init():
     global model, scaler
     
     # Load model
-    checkpoint = torch.load('quantum_model.pt')
+    checkpoint = torch.load('quantum_model.pt', weights_only=True)
     model = HybridEnhancedClassifier(input_dim=2, n_qubits=8, n_layers=4)
     model.load_state_dict(checkpoint['model_state_dict'])
     model.eval()

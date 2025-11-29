@@ -20,6 +20,9 @@ parts/
 sdist/
 var/
 wheels/
+# Data output directories (generated artifacts)
+data_out/
+deployed_models/
 pip-wheel-metadata/
 share/python-wheels/
 *.egg-info/
@@ -85,7 +88,7 @@ ipython_config.py
 # pipenv
 #   According to pypa/pipenv#598, it is recommended to include Pipfile.lock in version control.
 #   However, in case of collaboration, if having platform-specific dependencies or dependencies
-#   having no cross-platform support, pipenv may install dependencies that don’t work, or not
+#   having no cross-platform support, pipenv may install dependencies that don't work, or not
 #   install all needed dependencies.
 #Pipfile.lock
 
@@ -160,8 +163,17 @@ Thumbs.db
 $RECYCLE.BIN/
 .fake
 
+# Auto-generated test/status files
+autotrain_testtoken.yaml
+data_out/autotrain/status.json
+data_out/quantum_autorun/status.json
+
 # Large binary installers and archives (avoid exceeding GitHub 100MB limit)
 *.msi
 *.exe
 *.iso
 *.dmg
+
+# Auto-generated config files
+config/autogen/
+autotrain_testtoken.yaml

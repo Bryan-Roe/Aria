@@ -1,9 +1,0 @@
-{"step": 0, "eval_loss": 2.8650498390197754, "eval_perplexity": 17.549927853991946, "timestamp": "2025-11-25T09:02:43.141180Z"}
-{"phase": "pre", "eval_loss": 2.8650498390197754, "eval_perplexity": 17.549927853991946, "timestamp": "2025-11-25T09:02:43.142180Z"}
-{"step": 64, "eval_loss": 1.986924409866333, "eval_perplexity": 7.293068743151862, "timestamp": "2025-11-25T09:18:34.349828Z"}
-{"step": 128, "eval_loss": 1.9718564748764038, "eval_perplexity": 7.184001033608888, "timestamp": "2025-11-25T09:57:24.019368Z"}
-{"step": 0, "eval_loss": 2.8650498390197754, "eval_perplexity": 17.549927853991946, "timestamp": "2025-11-25T10:29:21.441623Z"}
-{"phase": "pre", "eval_loss": 2.8650498390197754, "eval_perplexity": 17.549927853991946, "timestamp": "2025-11-25T10:29:21.443881Z"}
-{"step": 64, "eval_loss": 1.9900449514389038, "eval_perplexity": 7.315862613469643, "timestamp": "2025-11-25T10:45:11.280368Z"}
-{"step": 128, "eval_loss": 1.970563530921936, "eval_perplexity": 7.174718525078371, "timestamp": "2025-11-25T11:00:21.571646Z"}
-{"step": 192, "eval_loss": 1.9592524766921997, "eval_perplexity": 7.094022135731955, "timestamp": "2025-11-25T11:15:38.121751Z"}

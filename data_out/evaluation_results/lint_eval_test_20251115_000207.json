@@ -1,9 +1,0 @@
-{
-  "perplexity": 6.938239557240254,
-  "accuracy": null,
-  "bleu_score": null,
-  "rouge_scores": null,
-  "inference_time_ms": 7558.210399997188,
-  "tokens_per_second": 5.649485491964591,
-  "memory_usage_mb": 0.0
-}

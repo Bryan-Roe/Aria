@@ -2,10 +2,10 @@
 Train Hybrid Quantum-Classical model from a CSV dataset in datasets/.
 
 Usage (PowerShell):
-    python .\scripts\train_from_dataset.py --dataset banknote --epochs 2
-    python .\scripts\train_from_dataset.py --dataset ionosphere --epochs 2
-    python .\scripts\train_from_dataset.py --dataset sonar --epochs 2
-    python .\scripts\train_from_dataset.py --dataset heart_disease --epochs 2
+    python .\\scripts\\train_from_dataset.py --dataset banknote --epochs 2
+    python .\\scripts\\train_from_dataset.py --dataset ionosphere --epochs 2
+    python .\\scripts\\train_from_dataset.py --dataset sonar --epochs 2
+    python .\\scripts\\train_from_dataset.py --dataset heart_disease --epochs 2
 
 This script reads the workspace dataset index at ../../datasets/dataset_index.json,
 loads the selected dataset, preprocesses to match n_qubits from config,

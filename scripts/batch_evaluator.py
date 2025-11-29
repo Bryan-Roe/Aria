@@ -13,10 +13,10 @@ Features:
 - Comparison reports
 
 Usage examples (PowerShell):
-  python .\scripts\batch_evaluator.py --config batch_eval_config.yaml
-  python .\scripts\batch_evaluator.py --scan-models --evaluate-all
-  python .\scripts\batch_evaluator.py --compare lora azure openai
-  python .\scripts\batch_evaluator.py --export markdown --output report.md
+  python .\\scripts\\batch_evaluator.py --config batch_eval_config.yaml
+  python .\\scripts\\batch_evaluator.py --scan-models --evaluate-all
+  python .\\scripts\\batch_evaluator.py --compare lora azure openai
+  python .\\scripts\\batch_evaluator.py --export markdown --output report.md
 """
 
 from __future__ import annotations
@@ -249,7 +249,7 @@ class BatchEvaluator:
         ]
         
         return {
-            "evaluated_at": datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "evaluated_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
             "total_models": len(self.results),
             "succeeded": len(succeeded),
             "failed": len(failed),
@@ -363,7 +363,7 @@ class BatchEvaluator:
             "deployment_name": deployment_name,
             "deployment_path": str(deployment_path),
             "metrics": best_result.metrics,
-            "promoted_at": datetime.utcnow().isoformat() + "Z",
+            "promoted_at": datetime.now(timezone.utc).isoformat() + "Z",
             "rank": 1
         }
         

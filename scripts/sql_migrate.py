@@ -12,7 +12,7 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 from typing import List
-from datetime import datetime
+from datetime import datetime, timezone
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 import sys as _sys
@@ -61,7 +61,7 @@ def apply_migration(engine, path: Path) -> bool:
     sql = path.read_text(encoding="utf-8")
     with engine.begin() as conn:
         conn.execute(text(sql))
-        conn.execute(text("INSERT INTO QAI_Migrations (id, applied_at) VALUES (:id, :ts)"), {"id": path.name, "ts": datetime.utcnow().isoformat()})
+        conn.execute(text("INSERT INTO QAI_Migrations (id, applied_at) VALUES (:id, :ts)"), {"id": path.name, "ts": datetime.now(timezone.utc).isoformat()})
     return True
 
 

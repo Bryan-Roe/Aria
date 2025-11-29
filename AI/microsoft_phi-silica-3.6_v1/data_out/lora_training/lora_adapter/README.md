@@ -1,9 +1,9 @@
 ---
-base_model: microsoft/Phi-3.5-mini-instruct
+base_model: TinyLlama/TinyLlama-1.1B-Chat-v1.0
 library_name: peft
 pipeline_tag: text-generation
 tags:
-- base_model:adapter:microsoft/Phi-3.5-mini-instruct
+- base_model:adapter:TinyLlama/TinyLlama-1.1B-Chat-v1.0
 - lora
 - transformers
 ---

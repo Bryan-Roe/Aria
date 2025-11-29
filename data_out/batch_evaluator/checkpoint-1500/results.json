@@ -1,8 +1,0 @@
-{
-  "model": "C:\\Users\\Bryan\\OneDrive\\AI\\data_out\\lora_training\\checkpoint-1500",
-  "dataset": "datasets/chat/mixed_chat",
-  "samples": 26,
-  "metrics": {
-    "perplexity": 10.188461538461539
-  }
-}

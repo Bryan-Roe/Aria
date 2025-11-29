@@ -1,8 +1,0 @@
-{"step": 0, "eval_loss": 2.9757518768310547, "eval_perplexity": 19.604357772025327, "timestamp": "2025-11-27T12:03:52.884342Z"}
-{"phase": "pre", "eval_loss": 2.9757518768310547, "eval_perplexity": 19.604357772025327, "timestamp": "2025-11-27T12:03:52.884842Z"}
-{"step": 5, "eval_loss": 2.95685076713562, "eval_perplexity": 19.2372935436927, "timestamp": "2025-11-27T12:03:56.553907Z"}
-{"phase": "post", "eval_loss": 2.95685076713562, "eval_perplexity": 19.2372935436927, "timestamp": "2025-11-27T12:03:56.554407Z"}
-{"step": 0, "eval_loss": 2.9757518768310547, "eval_perplexity": 19.604357772025327, "timestamp": "2025-11-27T12:09:17.882258Z"}
-{"phase": "pre", "eval_loss": 2.9757518768310547, "eval_perplexity": 19.604357772025327, "timestamp": "2025-11-27T12:09:17.884774Z"}
-{"step": 5, "eval_loss": 2.951154947280884, "eval_perplexity": 19.128032845192525, "timestamp": "2025-11-27T12:09:21.600923Z"}
-{"phase": "post", "eval_loss": 2.951154947280884, "eval_perplexity": 19.128032845192525, "timestamp": "2025-11-27T12:09:21.601908Z"}

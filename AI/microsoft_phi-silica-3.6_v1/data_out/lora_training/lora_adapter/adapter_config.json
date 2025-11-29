@@ -3,7 +3,7 @@
   "alpha_pattern": {},
   "arrow_config": null,
   "auto_mapping": null,
-  "base_model_name_or_path": "microsoft/Phi-3.5-mini-instruct",
+  "base_model_name_or_path": "TinyLlama/TinyLlama-1.1B-Chat-v1.0",
   "bias": "none",
   "corda_config": null,
   "ensure_weight_tying": false,
@@ -29,12 +29,12 @@
   "rank_pattern": {},
   "revision": null,
   "target_modules": [
-    "q_proj",
-    "o_proj",
+    "k_proj",
     "v_proj",
-    "fc2",
     "fc1",
-    "k_proj"
+    "o_proj",
+    "q_proj",
+    "fc2"
   ],
   "target_parameters": null,
   "task_type": "CAUSAL_LM",

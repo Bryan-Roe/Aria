@@ -12,10 +12,10 @@ Features:
 - Integration with orchestrators
 
 Usage examples (PowerShell):
-  python .\scripts\resource_monitor.py --stream              # Real-time streaming
-  python .\scripts\resource_monitor.py --snapshot            # Single snapshot
-  python .\scripts\resource_monitor.py --history --hours 24  # Last 24 hours
-  python .\scripts\resource_monitor.py --export csv          # Export to CSV
+  python .\\scripts\\resource_monitor.py --stream              # Real-time streaming
+  python .\\scripts\\resource_monitor.py --snapshot            # Single snapshot
+  python .\\scripts\\resource_monitor.py --history --hours 24  # Last 24 hours
+  python .\\scripts\\resource_monitor.py --export csv          # Export to CSV
 """
 
 from __future__ import annotations
@@ -27,7 +27,7 @@ import sys
 import time
 from collections import deque
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Deque, Dict, List, Optional
 
@@ -117,7 +117,7 @@ class ResourceMonitor:
         if psutil is None:
             # Return mock data if psutil not available
             return ResourceSnapshot(
-                timestamp=datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ"),
+                timestamp=datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
                 cpu_percent=0.0,
                 memory_percent=0.0,
                 memory_used_gb=0.0,
@@ -168,7 +168,7 @@ class ResourceMonitor:
                 pass
         
         snapshot = ResourceSnapshot(
-            timestamp=datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ"),
+            timestamp=datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
             cpu_percent=cpu_percent,
             memory_percent=memory_percent,
             memory_used_gb=memory_used_gb,
@@ -284,7 +284,7 @@ class ResourceMonitor:
         if hours is None:
             return list(self.history)
         
-        cutoff = datetime.utcnow() - timedelta(hours=hours)
+        cutoff = datetime.now(timezone.utc) - timedelta(hours=hours)
         cutoff_str = cutoff.strftime("%Y-%m-%dT%H:%M:%SZ")
         
         return [s for s in self.history if s.timestamp >= cutoff_str]

@@ -16,7 +16,6 @@ Environment Variables:
 import argparse
 import logging
 import os
-import re
 import sys
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -27,6 +26,30 @@ repo_root = script_dir.parent
 sys.path.insert(0, str(repo_root))
 
 from shared.sql_engine import get_engine
+
+# Allowlist of valid table names to prevent SQL injection
+ALLOWED_TABLES = frozenset({"QAI_QueryMetrics", "QAI_QueryMetrics_Archive"})
+
+
+def validate_table_name(table_name: str) -> str:
+    """Validate table name against allowlist to prevent SQL injection.
+    
+    Args:
+        table_name: The table name to validate
+        
+    Returns:
+        The validated table name if valid
+        
+    Raises:
+        ValueError: If table name is not in the allowlist
+    """
+    if table_name not in ALLOWED_TABLES:
+        raise ValueError(
+            f"Invalid table name: '{table_name}'. "
+            f"Allowed tables: {', '.join(sorted(ALLOWED_TABLES))}"
+        )
+    return table_name
+
 
 # Configure logging
 logging.basicConfig(
@@ -77,33 +100,20 @@ def get_retention_days(args_retention):
     return 7  # Default to 7 days
 
 
-def _validate_table_name(table_name: str) -> str:
-    """Validate table name to prevent SQL injection.
-    
-    Only allows alphanumeric characters and underscores.
-    Raises ValueError if table name contains invalid characters.
-    """
-    if not re.match(r'^[A-Za-z_][A-Za-z0-9_]*$', table_name):
-        raise ValueError(f"Invalid table name: {table_name}. Table names must start with a letter or underscore and contain only alphanumeric characters and underscores.")
-    return table_name
-
-
 def count_old_records(engine, table_name, cutoff_timestamp):
     """Count records older than cutoff timestamp."""
     from sqlalchemy import text
     
+    # Validate table name against allowlist to prevent SQL injection
+    safe_table = validate_table_name(table_name)
+    
     try:
-        # Validate table name to prevent SQL injection
-        safe_table_name = _validate_table_name(table_name)
-        query = text(f"SELECT COUNT(*) FROM {safe_table_name} WHERE executed_at < :cutoff")
+        query = text(f"SELECT COUNT(*) FROM {safe_table} WHERE executed_at < :cutoff")
         
         with engine.connect() as conn:
             result = conn.execute(query, {"cutoff": cutoff_timestamp})
             count = result.scalar()
             return count
-    except ValueError as ve:
-        logger.error(f"Invalid table name: {ve}")
-        return None
     except Exception as e:
         logger.error(f"Failed to count old records: {e}")
         return None
@@ -113,23 +123,21 @@ def delete_old_records(engine, table_name, cutoff_timestamp, dry_run=False):
     """Delete records older than cutoff timestamp."""
     from sqlalchemy import text
     
+    # Validate table name against allowlist to prevent SQL injection
+    safe_table = validate_table_name(table_name)
+    
     if dry_run:
-        logger.info(f"[DRY RUN] Would delete records from {table_name} where executed_at < {cutoff_timestamp}")
+        logger.info(f"[DRY RUN] Would delete records from {safe_table} where executed_at < {cutoff_timestamp}")
         return True
     
     try:
-        # Validate table name to prevent SQL injection
-        safe_table_name = _validate_table_name(table_name)
-        delete_query = text(f"DELETE FROM {safe_table_name} WHERE executed_at < :cutoff")
+        delete_query = text(f"DELETE FROM {safe_table} WHERE executed_at < :cutoff")
         
         with engine.begin() as conn:
             result = conn.execute(delete_query, {"cutoff": cutoff_timestamp})
             deleted_count = result.rowcount
-            logger.info(f"Deleted {deleted_count} records from {safe_table_name}")
+            logger.info(f"Deleted {deleted_count} records from {safe_table}")
             return deleted_count
-    except ValueError as ve:
-        logger.error(f"Invalid table name: {ve}")
-        return None
     except Exception as e:
         logger.error(f"Failed to delete old records: {e}")
         return None
@@ -139,12 +147,12 @@ def get_table_stats(engine, table_name):
     """Get basic statistics about the table."""
     from sqlalchemy import text
     
+    # Validate table name against allowlist to prevent SQL injection
+    safe_table = validate_table_name(table_name)
+    
     try:
-        # Validate table name to prevent SQL injection
-        safe_table_name = _validate_table_name(table_name)
-        
         # Total count
-        count_query = text(f"SELECT COUNT(*) FROM {safe_table_name}")
+        count_query = text(f"SELECT COUNT(*) FROM {safe_table}")
         with engine.connect() as conn:
             total_count = conn.execute(count_query).scalar()
         
@@ -153,7 +161,7 @@ def get_table_stats(engine, table_name):
             SELECT 
                 MIN(executed_at) as oldest,
                 MAX(executed_at) as newest
-            FROM {safe_table_name}
+            FROM {safe_table}
         """)
         
         with engine.connect() as conn:
@@ -167,9 +175,6 @@ def get_table_stats(engine, table_name):
                 }
         
         return {"total_count": total_count}
-    except ValueError as ve:
-        logger.warning(f"Invalid table name: {ve}")
-        return {"total_count": 0}
     except Exception as e:
         logger.warning(f"Failed to get table stats: {e}")
         return {"total_count": 0}

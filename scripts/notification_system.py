@@ -1,7 +1,7 @@
 """Desktop Notification System for QAI Training Events"""
 import os
 import platform
-import subprocess
+import subprocess  # nosec B404 - subprocess used safely with list arguments, no shell=True
 from datetime import datetime
 from typing import Optional
 from pathlib import Path
@@ -68,10 +68,10 @@ class NotificationManager:
     
     def _send_macos(self, title: str, message: str):
         """Send macOS notification using osascript"""
-        # Escape special AppleScript characters to prevent injection
-        # AppleScript uses backslash for escaping, so we escape backslashes first, then quotes
-        safe_title = title.replace('\\', '\\\\').replace('"', '\\"').replace('\n', ' ').replace('\r', ' ')
-        safe_message = message.replace('\\', '\\\\').replace('"', '\\"').replace('\n', ' ').replace('\r', ' ')
+        # For AppleScript strings, we need to escape backslashes and double quotes
+        # Also replace newlines with spaces to prevent script injection
+        safe_title = title.replace('\\', '\\\\').replace('"', '\\"').replace('\n', ' ')
+        safe_message = message.replace('\\', '\\\\').replace('"', '\\"').replace('\n', ' ')
         
         script = f'display notification "{safe_message}" with title "{safe_title}"'
         try:
@@ -79,7 +79,7 @@ class NotificationManager:
             # The script is passed as a single argument to osascript -e
             result = subprocess.run(['osascript', '-e', script], capture_output=True, text=True, timeout=5)
             if result.returncode != 0:
-                print(f"macOS notification warning: osascript returned {result.returncode}")
+                print(f"macOS notification warning: osascript returned {result.returncode}, stderr: {result.stderr}")
         except subprocess.TimeoutExpired:
             print("macOS notification error: osascript timed out")
         except FileNotFoundError:
@@ -100,7 +100,7 @@ class NotificationManager:
         try:
             result = subprocess.run(['notify-send', '-i', icon_name, title, message], capture_output=True, text=True, timeout=5)
             if result.returncode != 0:
-                print(f"Linux notification warning: notify-send returned {result.returncode}")
+                print(f"Linux notification warning: notify-send returned {result.returncode}, stderr: {result.stderr}")
         except subprocess.TimeoutExpired:
             print("Linux notification error: notify-send timed out")
         except FileNotFoundError:
