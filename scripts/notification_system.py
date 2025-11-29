@@ -97,7 +97,7 @@ class NotificationManager:
         
         # Use subprocess with list arguments to prevent command injection
         try:
-            result = subprocess.run(['notify-send', '-i', icon_name, title, message], capture_output=True, text=True)
+            result = subprocess.run(['notify-send', '-i', icon_name, title, message], capture_output=True, text=True, timeout=5)
             if result.returncode != 0:
                 print(f"Linux notification warning: notify-send returned {result.returncode}")
         except Exception as e:
