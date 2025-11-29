@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""
+r"""
 Quantum AutoRun Orchestrator
 
 Automates local quantum training runs defined in a YAML config.
@@ -31,7 +31,7 @@ import sys
 import time
 from pathlib import Path as _Path  # local alias used for dataset name inference
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
@@ -347,7 +347,7 @@ def collect_status(all_results: List[Dict[str, Any]]) -> Dict[str, Any]:
             }
 
     summary = {
-        "generated_at": datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "generated_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "jobs": all_results,
         "summary": {
             "counts": counts,

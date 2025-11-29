@@ -16,7 +16,7 @@ from __future__ import annotations
 import logging
 import os
 import sqlite3
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Optional
 
 # Conditional SQLAlchemy import
@@ -157,7 +157,7 @@ def put_value(key: str, value: str) -> bool:
     try:
         with engine.begin() as conn:
             if vendor == "sqlite":
-                conn.execute(text("REPLACE INTO QAI_KeyValue (k,v,updated_at) VALUES (:k,:v,:ts)"), {"k": key, "v": value, "ts": datetime.utcnow().isoformat()})
+                conn.execute(text("REPLACE INTO QAI_KeyValue (k,v,updated_at) VALUES (:k,:v,:ts)"), {"k": key, "v": value, "ts": datetime.now(timezone.utc).isoformat()})
             elif vendor in {"postgresql", "postgres"}:
                 conn.execute(text("INSERT INTO QAI_KeyValue (k,v) VALUES (:k,:v) ON CONFLICT (k) DO UPDATE SET v=EXCLUDED.v, updated_at=CURRENT_TIMESTAMP"), {"k": key, "v": value})
             elif vendor == "mysql":

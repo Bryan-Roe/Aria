@@ -60,6 +60,8 @@ def wait_for_object(name, timeout=4.0):
     return None
 
 
+@pytest.mark.playwright
+@pytest.mark.e2e
 @pytest.mark.skipif(
     not os.getenv('CI') and not (shutil.which('chromium-browser') or shutil.which('chrome') or shutil.which('google-chrome')),
     reason='Chromium/Chrome not available'
