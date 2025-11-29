@@ -54,3 +54,10 @@ try:
     __all__.append("LMStudioProvider")
 except AttributeError:
     pass
+
+# Conditionally export AGI provider
+try:
+    from agi_provider import AGIProvider, AGIContext, ReasoningStep, create_agi_provider
+    __all__.extend(["AGIProvider", "AGIContext", "ReasoningStep", "create_agi_provider"])
+except ImportError:
+    pass

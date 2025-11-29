@@ -141,7 +141,7 @@ def one_shot(args: argparse.Namespace) -> int:
 
 def build_arg_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(description="Simple terminal chat app with local/OpenAI/Azure providers")
-    p.add_argument("--provider", choices=["auto", "openai", "azure", "local", "lora"], default="auto", help="Which provider to use (default: auto)")
+    p.add_argument("--provider", choices=["auto", "openai", "azure", "local", "lora", "agi", "quantum", "lmstudio"], default="auto", help="Which provider to use (default: auto)")
     p.add_argument("--system", type=str, help="Custom system prompt")
     p.add_argument("--model", type=str, help="Model/deployment name override")
     p.add_argument("--once", type=str, help="Send a single message then exit")

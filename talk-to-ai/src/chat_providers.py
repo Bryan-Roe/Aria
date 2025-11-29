@@ -521,17 +521,35 @@ def detect_provider(explicit: Optional[str] = None, model_override: Optional[str
     Priority:
       1) explicit selection if provided
       2) LM Studio if LMSTUDIO_BASE_URL is set
-      3) Quantum if selected
-      4) Azure if all required vars present
-      5) OpenAI if OPENAI_API_KEY is present
-      6) Local fallback
-      7) LoRA if provider is 'lora' and model_override is set
+      3) AGI if selected (advanced reasoning capabilities)
+      4) Quantum if selected
+      5) Azure if all required vars present
+      6) OpenAI if OPENAI_API_KEY is present
+      7) Local fallback
+      8) LoRA if provider is 'lora' and model_override is set
     """
     provider_choice = (explicit or "auto").lower()
 
     # LM Studio config
     lm_studio_base_url = os.getenv("LMSTUDIO_BASE_URL", "http://127.0.0.1:1234/v1")
     lm_studio_model_name = os.getenv("LMSTUDIO_MODEL", "local-model")
+
+    # AGI config - advanced reasoning capabilities
+    if provider_choice == "agi":
+        try:
+            from agi_provider import create_agi_provider
+            temperature_value = float(temperature if temperature is not None else os.getenv("CHAT_TEMPERATURE", "0.7"))
+            max_tokens_limit = int(max_output_tokens) if max_output_tokens is not None else 2048
+            verbose = os.getenv("AGI_VERBOSE", "false").lower() == "true"
+            provider, info = create_agi_provider(
+                model=model_override,
+                temperature=temperature_value,
+                max_output_tokens=max_tokens_limit,
+                verbose=verbose
+            )
+            return provider, ProviderChoice(name=info.name, model=info.model)
+        except ImportError as import_error:
+            raise RuntimeError(f"AGI provider selected but agi_provider module not available: {import_error}")
 
     # Quantum config
     if provider_choice == "quantum":
