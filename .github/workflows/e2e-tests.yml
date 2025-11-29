@@ -1,0 +1,83 @@
+name: E2E + Integration Tests
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  integration:
+    name: Unit & Integration tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      - name: Upgrade pip
+        run: python -m pip install --upgrade pip
+      - name: Install test deps
+        run: python -m pip install pytest requests pytest-asyncio
+      - name: Start server and run integration tests
+        run: |
+          python3 aria_web/server.py > /tmp/aria_server.log 2>&1 &
+          for i in $(seq 1 50); do
+            curl -sSf http://127.0.0.1:8080/api/aria/state && break || sleep 0.25
+          done
+          pytest -q tests/test_aria_server.py tests/test_object_api_integration.py
+
+  e2e_playwright:
+    name: E2E (Playwright)
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      - name: Upgrade pip
+        run: python -m pip install --upgrade pip
+      - name: Install Playwright & test deps
+        run: |
+          python -m pip install pytest playwright pytest-asyncio requests
+          python -m playwright install chromium
+      - name: Start server and run Playwright tests
+        run: |
+          python3 aria_web/server.py > /tmp/aria_server.log 2>&1 &
+          for i in $(seq 1 60); do
+            curl -sSf http://127.0.0.1:8080/api/aria/state && break || sleep 0.25
+          done
+          pytest -q tests/test_ui_playwright.py
+
+  containerized_chrome:
+    name: Containerized Chrome (pyppeteer)
+    runs-on: ubuntu-latest
+    container:
+      image: python:3.11-bullseye
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - name: Apt-get update & install dependencies
+        run: |
+          apt-get update
+          apt-get install -y wget gnupg ca-certificates xz-utils fonts-liberation libgtk-3-0 libxss1 libasound2 libnss3 libatk-bridge2.0-0 libx11-xcb1 libgbm1
+      - name: Install Chromium (stable)
+        run: |
+          # Use Debian repo for chromium; package name varies, try both
+          apt-get install -y chromium chromium-driver || apt-get install -y chromium-browser || true
+          which chromium || which chromium-browser || true
+      - name: Install Python test deps
+        run: python -m pip install --upgrade pip && python -m pip install pytest pytest-asyncio pyppeteer requests
+      - name: Start server and run pyppeteer tests
+        env:
+          CHROME_PATH: /usr/bin/chromium
+        run: |
+          python3 aria_web/server.py > /tmp/aria_server.log 2>&1 &
+          for i in $(seq 1 60); do
+            curl -sSf http://127.0.0.1:8080/api/aria/state && break || sleep 0.25
+          done
+          pytest -q tests/test_ui_pyppeteer.py

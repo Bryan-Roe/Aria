@@ -11,7 +11,7 @@ sys.path.insert(0, str(repo_root))
 try:
     import azure.functions as func
 except ImportError:  # pragma: no cover
-    pytest.skip("azure.functions not available")
+    pytest.skip("azure.functions not available", allow_module_level=True)
 
 # Import the function_app module
 import function_app  # noqa: E402

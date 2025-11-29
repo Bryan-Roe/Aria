@@ -1,9 +1,0 @@
-{"step": 0, "eval_loss": 9.357455253601074, "eval_perplexity": 11584.870442594753, "timestamp": "2025-11-27T10:35:53.790656Z"}
-{"phase": "pre", "eval_loss": 9.357455253601074, "eval_perplexity": 11584.870442594753, "timestamp": "2025-11-27T10:35:53.791656Z"}
-{"step": 0, "eval_loss": 9.357455253601074, "eval_perplexity": 11584.870442594753, "timestamp": "2025-11-27T11:50:11.856474Z"}
-{"phase": "pre", "eval_loss": 9.357455253601074, "eval_perplexity": 11584.870442594753, "timestamp": "2025-11-27T11:50:11.857475Z"}
-{"step": 0, "eval_loss": 9.357455253601074, "eval_perplexity": 11584.870442594753, "timestamp": "2025-11-27T11:50:39.073659Z"}
-{"phase": "pre", "eval_loss": 9.357455253601074, "eval_perplexity": 11584.870442594753, "timestamp": "2025-11-27T11:50:39.076162Z"}
-{"step": 64, "eval_loss": 2.132750988006592, "eval_perplexity": 8.438047879916748, "timestamp": "2025-11-27T12:00:54.238122Z"}
-{"step": 80, "eval_loss": 2.132750988006592, "eval_perplexity": 8.438047879916748, "timestamp": "2025-11-27T12:03:20.612296Z"}
-{"phase": "post", "eval_loss": 2.132750988006592, "eval_perplexity": 8.438047879916748, "timestamp": "2025-11-27T12:03:20.612796Z"}

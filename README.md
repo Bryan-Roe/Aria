@@ -287,20 +287,48 @@ python .\src\chat_cli.py --provider local --once "Hello"
 
 ## 📝 File Organization
 
-- **Configuration:** YAML files (`quantum_config.yaml`, `lora.yaml`)
-- **Logs/Results:** Project-specific directories
-- **Infrastructure:** Bicep templates (`.bicep` + `.parameters.json`)
-- **Python Modules:** Descriptive names (`*_integration.py`, `*_classifier.py`)
+```
+├── config/                 # Configuration files
+│   ├── training/           # LoRA training configs (autotrain.yaml, etc.)
+│   ├── quantum/            # Quantum job configs (quantum_autorun.yaml)
+│   ├── evaluation/         # Evaluation configs (evaluation_autorun.yaml)
+│   ├── autogen/            # Auto-generated configs (gitignored)
+│   └── master_orchestrator.yaml
+├── docs/                   # All documentation
+│   ├── guides/             # Feature guides and summaries
+│   ├── quickref/           # Quick reference cards
+│   ├── training/           # Training documentation
+│   ├── quantum/            # Quantum computing docs
+│   ├── database/           # Database setup guides
+│   ├── deployment/         # Azure deployment docs
+│   └── aria/               # ARIA system docs
+├── scripts/                # All orchestrator and utility scripts
+├── shared/                 # Shared Python modules
+├── tests/                  # Test suites
+├── quantum-ai/             # Quantum ML platform
+├── talk-to-ai/             # Chat CLI application
+├── chat-web/               # Web chat interface
+├── datasets/               # Training datasets (read-only)
+└── data_out/               # Generated outputs (git-ignored)
+```
 
 ---
 
 ## 📚 Documentation
 
-Each project has comprehensive documentation:
+All documentation has been organized into the `docs/` directory:
+
+- **[docs/README.md](docs/README.md)** - Documentation index and navigation
+- **[docs/quickref/](docs/quickref/)** - Quick reference cards
+- **[docs/training/](docs/training/)** - LoRA and training guides
+- **[docs/quantum/](docs/quantum/)** - Quantum computing documentation
+- **[docs/database/](docs/database/)** - SQL and database setup
+- **[docs/deployment/](docs/deployment/)** - Azure deployment guides
+
+### Project-Specific Documentation
 
 - **quantum-ai/README.md** - Architecture, quick start, deployment
 - **quantum-ai/MCP_SERVER_README.md** - MCP server usage
-- **quantum-ai/azure/DEPLOYMENT.md** - Azure deployment guide
 - **talk-to-ai/README.md** - Chat CLI usage
 - **.github/copilot-instructions.md** - Development conventions
 
@@ -337,10 +365,10 @@ Verify SDK version: `pip list | findstr openai` should show `openai>=1.37.0`
 
 📖 **Documentation:**
 
-- [Enhancements Summary](ENHANCEMENTS_SUMMARY.md) - Overview of all recent improvements
-- [Telemetry & Cosmos Enablement Guide](TELEMETRY_COSMOS_ENABLEMENT.md) - Step-by-step setup for observability
-- [Quantum AutoRun README](QUANTUM_AUTORUN_README.md) - Orchestrated quantum training automation
-- [AutoTrain README](AUTOTRAIN_README.md) - LoRA training orchestration
+- [Enhancements Summary](docs/guides/ENHANCEMENTS_SUMMARY.md) - Overview of all recent improvements
+- [Telemetry & Cosmos Enablement Guide](docs/database/TELEMETRY_COSMOS_ENABLEMENT.md) - Step-by-step setup for observability
+- [Quantum AutoRun README](docs/quantum/QUANTUM_AUTORUN_README.md) - Orchestrated quantum training automation
+- [AutoTrain README](docs/training/AUTOTRAIN_README.md) - LoRA training orchestration
 
 ---
 

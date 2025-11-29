@@ -9,6 +9,48 @@ const stage = document.getElementById('stage');
 const commandInput = document.getElementById('commandInput');
 const logContainer = document.getElementById('logContainer');
 
+// Track active objects
+const activeObjects = {
+    apple: true,
+    book: true,
+    cup: true,
+    ball: true,
+    flower: true
+};
+
+// Toggle object visibility
+function toggleObject(objectId) {
+    const obj = document.getElementById(objectId);
+    const btn = document.getElementById('btn-' + objectId);
+    
+    if (!obj) {
+        log(`❌ toggleObject: unknown object ${objectId}`, true);
+        return;
+    }
+    // compute last-known position first
+    const lastPos = objectPositionFromElement(obj);
+
+    if (activeObjects[objectId]) {
+        // Remove object
+        obj.style.display = 'none';
+        btn.classList.remove('active');
+        btn.classList.add('inactive');
+        activeObjects[objectId] = false;
+        log('🗑️ Removed ' + objectId);
+        // Sync change to backend
+        sendObjectUpdate('update', objectId, { position: lastPos, state: 'hidden' }).catch(() => {});
+    } else {
+        // Add object back
+        obj.style.display = 'block';
+        btn.classList.add('active');
+        btn.classList.remove('inactive');
+        activeObjects[objectId] = true;
+        log('➕ Added ' + objectId);
+        // Sync change to backend (object is back on stage)
+        sendObjectUpdate('update', objectId, { position: lastPos, state: 'on_table' }).catch(() => {});
+    }
+}
+
 // Additional DOM references (used by idle/poses/expressive moves)
 const ariaHead = document.querySelector('.aria-head');
 const ariaBody = document.querySelector('.aria-body');
@@ -16,22 +58,26 @@ const ariaEyes = document.querySelectorAll('.aria-eye');
 const ariaEyeLeft = ariaEyes[0];
 const ariaEyeRight = ariaEyes[1];
 
-// AI-Controlled Character State
+// AI-Controlled Character State (single combined object)
 let characterState = {
     mood: 'neutral',
     energy: 50,
     personality: 'balanced',
     colors: {
-        hair: '#8B4513',
-        skin: '#FFD4A3',
-        body: '#667eea',
-        legs: '#555',
-        feet: '#8B4513'
+        hair: '#4a3728',
+        skin: '#f5d4b8',
+        body: '#4a90e2',
+        legs: '#3d5a80',
+        feet: '#f5f5f5'
     },
     size: 1.0,
     style: 'default',
     heldObject: null,
-    heldObjectElement: null
+    heldObjectElement: null,
+    position: { x: 20, y: 70, z: 0 },
+    rotation: 0,
+    isMoving: false,
+    currentWaypoint: null
 };
 
 // Visual feedback function
@@ -65,12 +111,12 @@ function analyzeAIResponse(text) {
 
 function generateCharacterFromMood(mood, energy) {
     const moodColors = {
-        happy: { body: '#FFD700', hair: '#FF6B6B', accent: '#4ECDC4' },
-        sad: { body: '#6C7A89', hair: '#34495E', accent: '#95A5A6' },
-        angry: { body: '#E74C3C', hair: '#C0392B', accent: '#8E44AD' },
-        calm: { body: '#3498DB', hair: '#2ECC71', accent: '#1ABC9C' },
-        thinking: { body: '#9B59B6', hair: '#8E44AD', accent: '#E67E22' },
-        neutral: { body: '#667eea', hair: '#8B4513', accent: '#764ba2' }
+        happy: { body: '#5fb3f5', hair: '#6b4f3d', accent: '#7ac5ff' },
+        sad: { body: '#6C7A89', hair: '#4a3728', accent: '#95A5A6' },
+        angry: { body: '#E74C3C', hair: '#4a3728', accent: '#ff6b6b' },
+        calm: { body: '#4a90e2', hair: '#4a3728', accent: '#5a9fe5' },
+        thinking: { body: '#5a7fa8', hair: '#4a3728', accent: '#6b8fb3' },
+        neutral: { body: '#4a90e2', hair: '#4a3728', accent: '#5a9fe5' }
     };
     
     const colors = moodColors[mood] || moodColors.neutral;
@@ -164,6 +210,221 @@ function log(message, isError = false) {
     }
 }
 
+// Chat UI helpers
+function addChatMessage(role, text) {
+    try {
+        const container = document.getElementById('chatMessages');
+        if (!container) return;
+
+        const msgWrap = document.createElement('div');
+        msgWrap.className = 'chat-msg ' + (role === 'user' ? 'user' : (role === 'aria' ? 'aria' : 'system'));
+
+        const bubble = document.createElement('div');
+        bubble.className = 'bubble';
+        bubble.innerText = text;
+
+        const sender = document.createElement('div');
+        sender.className = 'sender';
+        sender.innerText = role === 'user' ? 'You' : role === 'aria' ? 'Aria' : 'System';
+
+        const inner = document.createElement('div');
+        inner.appendChild(sender);
+        inner.appendChild(bubble);
+
+        // For user messages align right
+        if (role === 'user') {
+            msgWrap.appendChild(inner);
+        } else {
+            msgWrap.appendChild(inner);
+        }
+
+        container.appendChild(msgWrap);
+        container.scrollTop = container.scrollHeight;
+    } catch (e) {
+        console.warn('addChatMessage failed', e);
+    }
+}
+
+// Called when Aria reaches a waypoint or finishes a movement
+function arrivalFeedback(waypointKey) {
+    try {
+        let msg = '';
+        if (waypointKey && waypoints3D && waypoints3D[waypointKey]) {
+            msg = `I've arrived at ${waypoints3D[waypointKey].name}.`;
+        } else if (typeof waypointKey === 'string' && waypointKey.includes('%')) {
+            msg = `Arrived at ${waypointKey}.`;
+        } else if (waypointKey) {
+            msg = `Arrived at ${waypointKey}.`;
+        } else {
+            msg = `Arrived.`;
+        }
+
+        // Friendly reply from Aria in chat — pick varied arrival messages
+        const arrivalMessages = [
+            `I'm here! 🎉`,
+            `Made it — ${waypointKey ? waypoints3D[waypointKey]?.name || waypointKey : 'arrived'}!`,
+            `Arrived and ready!`,
+            `That was quick — I'm here.`,
+            `All set. What should we do next?`,
+        ];
+        const chosen = arrivalMessages[Math.floor(Math.random() * arrivalMessages.length)];
+        addChatMessage('aria', chosen);
+
+        // Little celebratory effect and expression
+        createEffect('sparkle');
+        changeExpression('happy');
+
+        // Short arrival animation (small bounce & glow)
+        aria.classList.add('arrived');
+        setTimeout(() => aria.classList.remove('arrived'), 900);
+
+        // Clear current waypoint marker so we don't re-announce
+        characterState.currentWaypoint = null;
+    } catch (e) {
+        console.warn('arrivalFeedback failed', e);
+    }
+}
+
+// Try to resolve a freeform phrase to a waypoint key
+function resolveWaypointFromPhrase(phrase) {
+    if (!phrase || !waypoints3D) return null;
+    const clean = phrase.toLowerCase().replace(/[^a-z0-9\s-]/g, '').trim();
+    if (!clean) return null;
+
+    // direct key match (e.g., front-left)
+    const direct = clean.replace(/\s+/g, '-');
+    if (waypoints3D[direct]) return direct;
+
+    // check by names and partial matches
+    for (const k in waypoints3D) {
+        const v = waypoints3D[k];
+        if (!v) continue;
+        const name = String(v.name || '').toLowerCase();
+        if (name === clean) return k;
+        if (name.includes(clean) || clean.includes(k.replace('-', ' '))) return k;
+    }
+
+    // synonyms mapping for simple words
+    const synonyms = {
+        'front': 'front-center', 'back': 'back-center', 'left': 'stage-left', 'right': 'stage-right', 'center': 'center', 'table': 'table'
+    };
+    if (synonyms[clean]) return synonyms[clean];
+
+    // try matching tokens
+    const tokens = clean.split(/\s+/);
+    for (const t of tokens) {
+        if (synonyms[t]) return synonyms[t];
+    }
+
+    return null;
+}
+
+// Process chat input: supports slash commands and normal commands
+async function sendChat() {
+    const chatBox = document.getElementById('chatInput');
+    if (!chatBox) return;
+
+    const text = chatBox.value.trim();
+    if (!text) return;
+
+    // Show user's message
+    addChatMessage('user', text);
+    chatBox.value = '';
+
+    // check for natural language movements (e.g., "go to front-right" or "walk to table")
+    const nlMove = /(?:go to|move to|walk to|goto)\s+([a-z0-9\-\s]+)/i.exec(text);
+    if (nlMove) {
+        const targetPhrase = nlMove[1].trim();
+        // try to match known waypoint keys or names
+        const candidate = resolveWaypointFromPhrase(targetPhrase);
+        if (candidate) {
+            moveToWaypoint(candidate);
+            addChatMessage('aria', `Moving to ${waypoints3D[candidate].name}`);
+        } else {
+            addChatMessage('aria', `I couldn't identify a waypoint for '${targetPhrase}'. Try /waypoints`);
+        }
+        return;
+    }
+
+    // /say command — speak directly as Aria
+    if (text.startsWith('/say ')) {
+        const sayText = text.slice(5).trim();
+        if (sayText) {
+            // Aria says it in the chat
+            addChatMessage('aria', sayText);
+            // small visual cue
+            createEffect('sparkle');
+            changeExpression('smile');
+        }
+        return;
+    }
+
+    // slash commands handled locally
+    if (text.startsWith('/goto ') || text.startsWith('/move ') || text.startsWith('/moveTo ')) {
+        const parts = text.split(/\s+/, 2);
+        const waypoint = parts[1] ? parts[1].trim() : '';
+        if (waypoints3D && waypoints3D[waypoint]) {
+            moveToWaypoint(waypoint);
+            addChatMessage('aria', `Moving to ${waypoints3D[waypoint].name}`);
+        } else {
+            addChatMessage('aria', `Unknown waypoint '${waypoint}'. Try /waypoints`);
+        }
+        return;
+    }
+
+    if (text === '/waypoints') {
+        const entries = Object.entries(waypoints3D).map(([k, v]) => `${k} — ${v.name}`);
+        addChatMessage('aria', `Available waypoints: ${entries.join(', ')}`);
+        return;
+    }
+
+    if (text === '/circle' || text === '/circle3d') {
+        moveInCircle3D();
+        addChatMessage('aria', 'Starting 3D circle movement');
+        return;
+    }
+
+    if (text === '/spiral' || text === '/spiral3d') {
+        performSpiral3D();
+        addChatMessage('aria', 'Starting 3D spiral');
+        return;
+    }
+
+    if (text === '/stop') {
+        // stop behaviors
+        if (typeof stopContinuousDance === 'function') stopContinuousDance();
+        addChatMessage('aria', 'Stopped continuous actions');
+        return;
+    }
+
+    // Otherwise, send as a command to backend (and display response when available)
+    commandInput.value = text;
+    const result = await sendCommand();
+
+    if (!result) {
+        addChatMessage('aria', 'No response from backend (fallback executed)');
+        return;
+    }
+
+    if (result.error) {
+        addChatMessage('aria', `Error: ${result.error}`);
+        return;
+    }
+
+    // Prefer textual response if available
+    if (result.response) {
+        addChatMessage('aria', result.response);
+    } else if (result.tags && result.tags.length > 0) {
+        addChatMessage('aria', `Executed tags: ${result.tags.join(' ')}`);
+    } else if (result.stage_context) {
+        // Keep stage context short
+        const ctx = result.stage_context.split('\n').slice(0,4).join(' | ');
+        addChatMessage('aria', ctx);
+    } else {
+        addChatMessage('aria', 'Done.');
+    }
+}
+
 async function sendCommand() {
     const command = commandInput.value.trim();
     if (!command) return;
@@ -172,11 +433,46 @@ async function sendCommand() {
     commandInput.value = '';
     
     try {
-        // Call backend API
+        // Gather current stage state for AI to see
+        const stageRect = stage.getBoundingClientRect();
+        const ariaRect = aria.getBoundingClientRect();
+        
+        // Calculate Aria's position as percentages
+        const ariaX = ((ariaRect.left - stageRect.left) / stageRect.width) * 100;
+        const ariaY = 100 - ((ariaRect.bottom - stageRect.top) / stageRect.height) * 100;
+        
+        // Gather object positions
+        const objectPositions = {};
+        ['apple', 'book', 'cup', 'ball', 'flower'].forEach(objId => {
+            const obj = document.getElementById(objId);
+            if (obj) {
+                const objRect = obj.getBoundingClientRect();
+                objectPositions[objId] = {
+                    x: ((objRect.left - stageRect.left) / stageRect.width) * 100,
+                    y: 100 - ((objRect.bottom - stageRect.top) / stageRect.height) * 100,
+                    state: obj.classList.contains('held') ? 'held' : 'on_table'
+                };
+            }
+        });
+        
+        const currentStageState = {
+            aria: {
+                position: { x: Math.round(ariaX), y: Math.round(ariaY) },
+                expression: characterState.mood || 'neutral',
+                held_object: characterState.heldObject,
+                facing: 'right'
+            },
+            objects: objectPositions
+        };
+        
+        // Call backend API with stage state
         const response = await fetch('/api/aria/command', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ command: command })
+            body: JSON.stringify({ 
+                command: command,
+                stage_state: currentStageState
+            })
         });
         
         if (!response.ok) {
@@ -200,11 +496,143 @@ async function sendCommand() {
             log('⚠️ Using fallback parser');
             executeLocalCommand(command);
         }
+        // Return the parsed result so callers (chat UI) can inspect tags / response
+        return data;
     } catch (error) {
         log(`⚠️ Network error, using fallback`, true);
         // Fallback: parse command locally without AI
         executeLocalCommand(command);
+        return { error: String(error) };
     }
+}
+
+function setPosition(xPercent, yPercent, zDepth = 0, rotateY = 0) {
+    // AI-driven animated walking to position in 3D space (not teleporting)
+    const stageRect = stage.getBoundingClientRect();
+    const ariaRect = aria.getBoundingClientRect();
+    
+    // Get current position
+    const currentX = ((ariaRect.left - stageRect.left) / stageRect.width) * 100;
+    const currentY = 100 - ((ariaRect.bottom - stageRect.top) / stageRect.height) * 100;
+    
+    // Clamp target values
+    xPercent = Math.max(5, Math.min(95, xPercent));
+    yPercent = Math.max(5, Math.min(95, yPercent));
+    zDepth = Math.max(-300, Math.min(200, zDepth)); // Z range: -300px (far) to 200px (near)
+    
+    // Calculate distance and direction
+    const deltaX = xPercent - currentX;
+    const deltaY = yPercent - currentY;
+    const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+    
+    // Don't move if already at target
+    if (distance < 2) {
+        log(`📍 Already at position (${Math.round(xPercent)}%, ${Math.round(yPercent)}%, Z:${Math.round(zDepth)}px)`);
+        // If we were moving towards a known waypoint, confirm arrival
+        if (characterState.currentWaypoint) {
+            arrivalFeedback(characterState.currentWaypoint);
+        }
+        return;
+    }
+    
+    // Determine walking speed and style based on distance
+    let duration = Math.min(distance * 40, 2000); // 40ms per percent, max 2s
+    let walkStyle = 'normal';
+    
+    if (distance > 50) {
+        walkStyle = 'run';
+        duration = distance * 20; // Faster for long distances
+    } else if (distance > 30) {
+        walkStyle = 'walk';
+        duration = distance * 30;
+    }
+    
+    // Face the direction of movement in 3D
+    let rotationAngle = rotateY || 0;
+    if (deltaX > 2) {
+        rotationAngle = 0; // Face camera (right)
+    } else if (deltaX < -2) {
+        rotationAngle = 180; // Face away (left)
+    }
+    
+    // Add walking animation
+    aria.classList.add('walking');
+    if (walkStyle === 'run') {
+        aria.classList.add('running');
+    }
+    
+    // Animate legs while moving
+    const walkInterval = setInterval(() => {
+        animateWalkCycle();
+    }, 200);
+    
+    // Smooth 3D transition to target
+    aria.style.transition = `left ${duration}ms ease-in-out, bottom ${duration}ms ease-in-out, transform ${duration}ms ease-in-out`;
+    
+    const leftPercent = xPercent;
+    const bottomPercent = 100 - yPercent;  // Invert Y (CSS bottom increases upward)
+    
+    aria.style.left = leftPercent + '%';
+    aria.style.bottom = bottomPercent + '%';
+    
+    // Apply 3D transform with Z-depth and rotation
+    const scaleX = rotationAngle === 180 ? -1 : 1;
+    aria.style.transform = `translateX(-50%) translateZ(${zDepth}px) rotateY(${rotationAngle}deg) scaleX(${scaleX})`;
+    
+    // Update character state
+    characterState.position = { x: xPercent, y: yPercent, z: zDepth };
+    characterState.rotation = rotationAngle;
+    
+    log(`🚶 Walking to (${Math.round(xPercent)}%, ${Math.round(yPercent)}%, Z:${Math.round(zDepth)}px, Rot:${Math.round(rotationAngle)}°) - ${walkStyle} style`);
+    showFeedback(`🚶 3D WALK: X${Math.round(xPercent)}% Y${Math.round(yPercent)}% Z${Math.round(zDepth)}px`);
+    
+    // Stop walking animation when arrived
+    setTimeout(() => {
+        aria.classList.remove('walking', 'running');
+        aria.style.transition = ''; // Reset transition
+        clearInterval(walkInterval);
+        resetWalkCycle();
+        log(`✅ Arrived at (${Math.round(xPercent)}%, ${Math.round(yPercent)}%)`);
+        // If we were targeting a waypoint, announce in chat
+        if (characterState.currentWaypoint) {
+            arrivalFeedback(characterState.currentWaypoint);
+        }
+    }, duration);
+}
+
+// Walking animation cycle
+function animateWalkCycle() {
+    const leftLeg = document.querySelector('.aria-lower-leg.left');
+    const rightLeg = document.querySelector('.aria-lower-leg.right');
+    const leftArm = document.querySelector('.aria-lower-arm.left');
+    const rightArm = document.querySelector('.aria-lower-arm.right');
+    
+    if (!leftLeg || !rightLeg) return;
+    
+    // Alternate leg swings
+    if (leftLeg.style.transform.includes('rotate')) {
+        leftLeg.style.transform = 'rotate(20deg)';
+        rightLeg.style.transform = 'rotate(-20deg)';
+        if (leftArm) leftArm.style.transform = 'rotate(-15deg)';
+        if (rightArm) rightArm.style.transform = 'rotate(15deg)';
+    } else {
+        leftLeg.style.transform = 'rotate(-20deg)';
+        rightLeg.style.transform = 'rotate(20deg)';
+        if (leftArm) leftArm.style.transform = 'rotate(15deg)';
+        if (rightArm) rightArm.style.transform = 'rotate(-15deg)';
+    }
+}
+
+function resetWalkCycle() {
+    const leftLeg = document.querySelector('.aria-lower-leg.left');
+    const rightLeg = document.querySelector('.aria-lower-leg.right');
+    const leftArm = document.querySelector('.aria-lower-arm.left');
+    const rightArm = document.querySelector('.aria-lower-arm.right');
+    
+    if (leftLeg) leftLeg.style.transform = '';
+    if (rightLeg) rightLeg.style.transform = '';
+    if (leftArm) leftArm.style.transform = '';
+    if (rightArm) rightArm.style.transform = '';
 }
 
 function executeLocalCommand(command) {
@@ -212,6 +640,11 @@ function executeLocalCommand(command) {
     const cmd = command.toLowerCase();
     let executed = false;
     
+    // Check if this is a limb command to avoid movement conflicts
+    const isLimbCommand = ['left arm', 'arm left', 'left hand', 'right arm', 'arm right', 'right hand',
+                          'left leg', 'leg left', 'right leg', 'leg right'].some(k => cmd.includes(k));
+    
+    // Expressions
     if (cmd.includes('smile') || cmd.includes('happy')) {
         changeExpression('smile');
         executed = true;
@@ -224,6 +657,20 @@ function executeLocalCommand(command) {
         changeExpression('surprised');
         executed = true;
     }
+    if (cmd.includes('confused')) {
+        changeExpression('confused');
+        executed = true;
+    }
+    if (cmd.includes('thinking') || cmd.includes('think')) {
+        changeExpression('thinking');
+        executed = true;
+    }
+    if (cmd.includes('wink')) {
+        changeExpression('wink');
+        executed = true;
+    }
+    
+    // Animations
     if (cmd.includes('jump')) {
         animate('jumping');
         executed = true;
@@ -240,6 +687,8 @@ function executeLocalCommand(command) {
         animate('waving');
         executed = true;
     }
+    
+    // Effects
     if (cmd.includes('sparkle')) {
         createEffect('sparkle');
         executed = true;
@@ -248,25 +697,39 @@ function executeLocalCommand(command) {
         createEffect('hearts');
         executed = true;
     }
-    if (cmd.includes('left')) {
-        const speed = cmd.includes('run') ? 'run' : 'normal';
-        move('left', speed);
+    if (cmd.includes('glow')) {
+        createEffect('glow');
         executed = true;
     }
-    if (cmd.includes('right')) {
-        const speed = cmd.includes('run') ? 'run' : 'normal';
-        move('right', speed);
-        executed = true;
-    }
-    if (cmd.includes('walk')) {
-        const direction = cmd.includes('left') ? 'left' : cmd.includes('right') ? 'right' : null;
-        if (direction) move(direction, 'normal');
-        executed = true;
-    }
-    if (cmd.includes('run')) {
-        const direction = cmd.includes('left') ? 'left' : cmd.includes('right') ? 'right' : null;
-        if (direction) move(direction, 'run');
-        executed = true;
+    
+    // Movement - only if not a limb command
+    if (!isLimbCommand) {
+        // Determine movement style
+        let movementSpeed = 'normal';
+        if (cmd.includes('skip')) {
+            movementSpeed = 'skip';
+        } else if (cmd.includes('strut') || cmd.includes('swagger')) {
+            movementSpeed = 'strut';
+        } else if (cmd.includes('run')) {
+            movementSpeed = 'run';
+        }
+        
+        if (cmd.includes('left')) {
+            move('left', movementSpeed);
+            executed = true;
+        }
+        if (cmd.includes('right')) {
+            move('right', movementSpeed);
+            executed = true;
+        }
+        if (cmd.includes('up') || (cmd.includes('forward') && !cmd.includes('arm') && !cmd.includes('leg'))) {
+            move('up', movementSpeed);
+            executed = true;
+        }
+        if (cmd.includes('down') || (cmd.includes('back') && !cmd.includes('arm') && !cmd.includes('leg'))) {
+            move('down', movementSpeed);
+            executed = true;
+        }
     }
     
     if (!executed) {
@@ -313,6 +776,22 @@ function executeTags(tags) {
                 case 'run':
                     move(action, param || 'fast');
                     break;
+                case 'position':
+                    console.log('Executing position:', action, param);
+                    if (action && param) {
+                        // Format: [aria:position:x:y] or [aria:position:x:y:z:rotation]
+                        const parts = tag.match(/\[aria:position:([^:\]]+):([^:\]]+)(?::([^:\]]+))?(?::([^\]]+))?\]/);
+                        if (parts) {
+                            const x = parseInt(parts[1]);
+                            const y = parseInt(parts[2]);
+                            const z = parts[3] ? parseInt(parts[3]) : 0;
+                            const rotation = parts[4] ? parseInt(parts[4]) : 0;
+                            setPosition(x, y, z, rotation);
+                        } else {
+                            setPosition(parseInt(action), parseInt(param));
+                        }
+                    }
+                    break;
                 case 'skip':
                     move(action, 'skip');
                     break;
@@ -327,7 +806,12 @@ function executeTags(tags) {
                     break;
                 case 'interact':
                     console.log('Executing interact:', action, param);
-                    interactWithObject(action, param);
+                    if (action === 'add') {
+                        const [objectName, emoji] = param.split(':');
+                        addObject(objectName, emoji || '🧸');
+                    } else {
+                        interactWithObject(action, param);
+                    }
                     break;
                 case 'effect':
                     createEffect(action);
@@ -338,6 +822,13 @@ function executeTags(tags) {
                 case 'pose':
                     applyPose(action, param);
                     break;
+                case 'say':
+                    // Tag formats either [aria:say:Hello world] or [aria:say:utterance:extra]
+                    const spoken = param || action;
+                    if (spoken) {
+                        addChatMessage('aria', String(spoken));
+                    }
+                    break;
             }
         }, index * 500); // Stagger multiple commands
     });
@@ -345,6 +836,13 @@ function executeTags(tags) {
 
 function changeExpression(emotion) {
     ariaMouth.className = 'aria-mouth';
+    
+    // Reset any previous expression modifications
+    ariaMouth.style.borderRadius = '';
+    ariaMouth.style.width = '';
+    ariaMouth.style.height = '';
+    ariaMouth.style.borderTop = '';
+    ariaMouth.style.transform = '';
     
     switch(emotion) {
         case 'smile':
@@ -359,6 +857,27 @@ function changeExpression(emotion) {
             ariaMouth.style.width = '15px';
             ariaMouth.style.height = '15px';
             ariaMouth.style.borderTop = '2px solid #333';
+            break;
+        case 'confused':
+            // Wavy/uncertain mouth
+            ariaMouth.style.width = '18px';
+            ariaMouth.style.height = '6px';
+            ariaMouth.style.borderRadius = '0 0 50% 50%';
+            ariaMouth.style.transform = 'translateX(-50%) rotate(5deg)';
+            break;
+        case 'thinking':
+            // Side mouth (pondering)
+            ariaMouth.style.width = '12px';
+            ariaMouth.style.height = '8px';
+            ariaMouth.style.borderRadius = '0 0 50% 50%';
+            ariaMouth.style.transform = 'translateX(-30%)';
+            // Also raise one eyebrow (using eye height)
+            if (ariaEyeLeft) {
+                ariaEyeLeft.style.transform = 'translateY(-2px)';
+                setTimeout(() => {
+                    ariaEyeLeft.style.transform = '';
+                }, 2000);
+            }
             break;
         case 'wink':
             document.querySelectorAll('.aria-eye')[1].style.height = '4px';
@@ -597,6 +1116,97 @@ function strutWalk() {
     }, 600);
     
     setTimeout(() => resetLimbs(200), 850);
+}
+
+// 3D Waypoint System - Fixed positions in 3D space
+const waypoints3D = {
+    'center': { x: 50, y: 50, z: 0, rotation: 0, name: 'Center Stage' },
+    'front-left': { x: 25, y: 70, z: 150, rotation: 45, name: 'Front Left' },
+    'front-right': { x: 75, y: 70, z: 150, rotation: -45, name: 'Front Right' },
+    'back-left': { x: 25, y: 30, z: -200, rotation: 135, name: 'Back Left' },
+    'back-right': { x: 75, y: 30, z: -200, rotation: -135, name: 'Back Right' },
+    'front-center': { x: 50, y: 75, z: 180, rotation: 0, name: 'Front Center' },
+    'back-center': { x: 50, y: 25, z: -250, rotation: 180, name: 'Back Center' },
+    'stage-left': { x: 15, y: 50, z: -50, rotation: 90, name: 'Stage Left' },
+    'stage-right': { x: 85, y: 50, z: -50, rotation: -90, name: 'Stage Right' },
+    'table': { x: 60, y: 20, z: -100, rotation: 0, name: 'Near Table' }
+};
+
+function moveToWaypoint(waypointName) {
+    const waypoint = waypoints3D[waypointName];
+    if (!waypoint) {
+        log(`❌ Unknown waypoint: ${waypointName}`, true);
+        return false;
+    }
+    
+    log(`📍 Moving to waypoint: ${waypoint.name}`);
+    showFeedback(`📍 WAYPOINT: ${waypoint.name}`);
+    // Notify in chat that Aria is moving
+    addChatMessage('aria', `Heading to ${waypoint.name}...`);
+    characterState.currentWaypoint = waypointName;
+    setPosition(waypoint.x, waypoint.y, waypoint.z, waypoint.rotation);
+    return true;
+}
+
+function moveInCircle3D(radius = 30, steps = 12, duration = 6000) {
+    let currentStep = 0;
+    const centerX = 50;
+    const centerY = 50;
+    const stepDuration = duration / steps;
+    
+    const circleInterval = setInterval(() => {
+        if (currentStep >= steps) {
+            clearInterval(circleInterval);
+            log('🔄 Circle completed');
+            addChatMessage('aria', 'Finished circular movement.');
+            return;
+        }
+        
+        const angle = (currentStep / steps) * Math.PI * 2;
+        const x = centerX + radius * Math.cos(angle);
+        const y = centerY + radius * Math.sin(angle);
+        const z = 100 * Math.sin(angle * 2); // Wave in/out on Z-axis
+        const rotation = (angle * 180 / Math.PI) + 90; // Face tangent to circle
+        
+        setPosition(x, y, z, rotation);
+        currentStep++;
+    }, stepDuration);
+    
+    log('🔄 Starting 3D circle movement');
+    showFeedback('🔄 3D CIRCLE');
+    addChatMessage('aria', 'Starting circular 3D movement');
+}
+
+function performSpiral3D() {
+    const steps = 20;
+    const duration = 8000;
+    let currentStep = 0;
+    const centerX = 50;
+    const centerY = 50;
+    
+    const spiralInterval = setInterval(() => {
+        if (currentStep >= steps) {
+            clearInterval(spiralInterval);
+            log('🌀 Spiral completed');
+            addChatMessage('aria', 'Finished spiral movement.');
+            return;
+        }
+        
+        const progress = currentStep / steps;
+        const radius = 40 * (1 - progress); // Shrink radius
+        const angle = progress * Math.PI * 6; // Multiple rotations
+        const x = centerX + radius * Math.cos(angle);
+        const y = centerY + radius * Math.sin(angle);
+        const z = -200 + progress * 300; // Move from back to front
+        const rotation = angle * 180 / Math.PI;
+        
+        setPosition(x, y, z, rotation);
+        currentStep++;
+    }, duration / steps);
+    
+    log('🌀 Starting 3D spiral movement');
+    showFeedback('🌀 3D SPIRAL');
+    addChatMessage('aria', 'Starting 3D spiral movement');
 }
 
 function skipMove() {
@@ -964,11 +1574,11 @@ function randomCharacterEvolution() {
     applyCharacterStyle(newStyle);
 }
 
-// Automatic character evolution every 30 seconds
+// Automatic character evolution disabled - keeping neutral human-like appearance
 let evolutionCountdown = 30;
 const timerDisplay = document.getElementById('evolutionTimer');
 
-setInterval(randomCharacterEvolution, 30000);
+// setInterval(randomCharacterEvolution, 30000); // Disabled
 
 // Countdown timer
 setInterval(() => {
@@ -1001,6 +1611,66 @@ log('Type commands or use quick buttons');
 log('⏰ Auto-evolution every 30 seconds');
 
 // Object Interaction System
+// Helper: derive stage-relative percentage position from an element
+function objectPositionFromElement(elem) {
+    if (!elem) return null;
+    const stageRect = stage.getBoundingClientRect();
+    // Prefer explicit CSS left/bottom if present (percent strings)
+    try {
+        if (elem.style && elem.style.left && elem.style.bottom) {
+            const left = parseFloat(elem.style.left || 0);
+            const bottom = parseFloat(elem.style.bottom || 0);
+            // The JS 'y' value used elsewhere equals the CSS bottom percent
+            return { x: Math.round(left), y: Math.round(bottom) };
+        }
+    } catch (e) {
+        // fallthrough to computed rect
+    }
+
+    const rect = elem.getBoundingClientRect();
+    const x = ((rect.left - stageRect.left) / stageRect.width) * 100;
+    const y = 100 - ((rect.bottom - stageRect.top) / stageRect.height) * 100;
+    return { x: Math.round(x), y: Math.round(y) };
+}
+
+// Notify backend of object add/update/remove actions
+async function sendObjectUpdate(action, objectId, extra = {}) {
+    try {
+        if (!objectId) return null;
+        const objEl = document.getElementById(objectId);
+
+        // resolve position and state
+        let position = extra.position || null;
+        if (!position && objEl) position = objectPositionFromElement(objEl);
+
+        const state = extra.state || (objEl ? (objEl.classList.contains('held') ? 'held' : (objEl.style.display === 'none' ? 'hidden' : 'on_table')) : (extra.state || 'unknown'));
+        const emoji = extra.emoji || (objEl ? objEl.textContent : undefined);
+
+        const objPayload = { id: objectId };
+        if (position !== null && position !== undefined) objPayload.position = position;
+        if (state !== null && state !== undefined) objPayload.state = state;
+        if (emoji !== null && emoji !== undefined) objPayload.emoji = emoji;
+        const payload = { action: action, object: objPayload };
+
+        const res = await fetch('/api/aria/object', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+
+        if (!res.ok) {
+            console.warn('Object API returned non-OK status', res.status);
+            return null;
+        }
+
+        const data = await res.json();
+        console.log('object sync:', action, objectId, data);
+        return data;
+    } catch (err) {
+        console.warn('sendObjectUpdate failed:', err);
+        return null;
+    }
+}
 function pickUpObject(objectId) {
     const obj = document.getElementById(objectId);
     if (!obj) {
@@ -1022,6 +1692,9 @@ function pickUpObject(objectId) {
     
     // Visual feedback
     obj.classList.add('held');
+
+    // Sync server side: mark object as held
+    sendObjectUpdate('update', objectId, { state: 'held' }).catch(() => {});
     
     // Position object above character
     positionHeldObject();
@@ -1064,6 +1737,13 @@ function dropObject() {
     // Clear held object
     characterState.heldObject = null;
     characterState.heldObjectElement = null;
+
+    // Sync server side: update object's position/state
+    const finalX = Math.round(dropLeft);
+    const finalY = Math.round(dropBottom + 10);
+    const tableX = 60; // server default table X
+    const isOnTable = Math.abs(finalX - tableX) < 20 && Math.abs(finalY - 35) < 20;
+    sendObjectUpdate('update', obj.id, { position: { x: finalX, y: finalY }, state: isOnTable ? 'on_table' : 'on_stage' }).catch(() => {});
     
     return true;
 }
@@ -1121,6 +1801,13 @@ function throwObject(direction) {
     // Clear held object
     characterState.heldObject = null;
     characterState.heldObjectElement = null;
+
+    // Sync server side after throw completes
+    setTimeout(() => {
+        const left = Math.round(targetLeft);
+        const bottom = Math.round(targetBottom);
+        sendObjectUpdate('update', obj.id, { position: { x: left, y: bottom }, state: 'on_stage' }).catch(() => {});
+    }, 900);
     
     return true;
 }
@@ -1166,6 +1853,9 @@ function initializeObjectInteractions() {
     const objects = document.querySelectorAll('.object');
     
     objects.forEach(obj => {
+        // Prevent adding duplicate event listeners when called multiple times
+        if (obj.__interactionInitialized) return;
+        obj.__interactionInitialized = true;
         obj.addEventListener('click', (e) => {
             e.stopPropagation();
             const objectId = obj.id;
@@ -1213,9 +1903,63 @@ function initializeObjectInteractions() {
             if (isDragging) {
                 isDragging = false;
                 obj.classList.remove('grabbed');
+                // Sync backend with final position
+                const pos = objectPositionFromElement(obj);
+                const state = obj.classList.contains('held') ? 'held' : 'on_table';
+                sendObjectUpdate('update', obj.id, { position: pos, state: state }).catch(() => {});
             }
         });
     });
+}
+
+function addObject(objectName, emoji) {
+    console.log('➕ Adding object:', objectName, emoji);
+    
+    // Check if object already exists
+    const existingObj = document.getElementById(objectName);
+    if (existingObj) {
+        console.log('⚠️ Object already exists:', objectName);
+        showFeedback('✅ ' + objectName + ' already on stage');
+        return;
+    }
+    
+    // Create new object element
+    const newObj = document.createElement('div');
+    newObj.id = objectName;
+    newObj.className = 'object';
+    newObj.textContent = emoji;
+    
+    // Position near Aria
+    const ariaX = characterState.position.x;
+    const ariaY = characterState.position.y;
+    newObj.style.left = Math.max(10, Math.min(90, ariaX + 15)) + '%';
+    newObj.style.bottom = Math.max(10, Math.min(90, ariaY + 5)) + '%';
+    
+    // Add to stage
+    stage.appendChild(newObj);
+    
+    // Update tracking
+    activeObjects[objectName] = true;
+    
+    // Add to object manager if button doesn't exist
+    if (!document.querySelector(`[onclick="toggleObject('${objectName}')"]`)) {
+        const objectManager = document.getElementById('object-manager');
+        const btn = document.createElement('button');
+        btn.className = 'object-btn active';
+        btn.id = 'btn-' + objectName;
+        btn.textContent = emoji + ' ' + objectName;
+        btn.onclick = () => toggleObject(objectName);
+        objectManager.appendChild(btn);
+    }
+    
+    // Initialize interactions for new object (click/drag)
+    initializeObjectInteractions();
+
+    // Sync server: add new object to stage_state
+    sendObjectUpdate('add', objectName, { position: objectPositionFromElement(newObj), state: 'on_stage', emoji: emoji }).catch(() => {});
+    
+    showFeedback('✨ Added ' + objectName + ' to stage!');
+    console.log('✅ Object added successfully:', objectName);
 }
 
 // Initialize object interactions
@@ -1223,15 +1967,74 @@ initializeObjectInteractions();
 log('🎮 Objects: apple, book, cup, ball, flower');
 log('💡 Try: "pick up apple", "drop", "throw ball"');
 
-// Initial random appearance after 2 seconds
+// Auto-behaviors with random timing
+function startAutoBehaviors() {
+    // Random idle movements every 8-15 seconds
+    setInterval(() => {
+        if (Math.random() > 0.6) {
+            const randomActions = ['shift weight', 'look around', 'adjust hair', 'stretch'];
+            const action = randomActions[Math.floor(Math.random() * randomActions.length)];
+            
+            switch(action) {
+                case 'shift weight':
+                    animate('bouncing');
+                    setTimeout(() => aria.style.animation = 'breathe 4s ease-in-out infinite', 800);
+                    break;
+                case 'look around':
+                    const ariaHead = document.querySelector('.aria-head');
+                    ariaHead.style.transform = 'translateX(-50%) rotate(10deg)';
+                    setTimeout(() => ariaHead.style.transform = 'translateX(-50%) rotate(-10deg)', 600);
+                    setTimeout(() => ariaHead.style.transform = 'translateX(-50%)', 1200);
+                    break;
+                case 'adjust hair':
+                    const hand = document.getElementById('ariaHandRight');
+                    hand.style.transform = 'translateY(-30px) rotate(-20deg)';
+                    setTimeout(() => hand.style.transform = '', 1000);
+                    break;
+                case 'stretch':
+                    ariaArmLeft.style.transform = 'rotate(-160deg)';
+                    ariaArmRight.style.transform = 'rotate(160deg)';
+                    setTimeout(() => {
+                        ariaArmLeft.style.transform = '';
+                        ariaArmRight.style.transform = '';
+                    }, 1500);
+                    break;
+            }
+        }
+    }, 8000 + Math.random() * 7000);
+    
+    // Random expressions every 12-20 seconds
+    setInterval(() => {
+        if (Math.random() > 0.5) {
+            const expressions = ['smile', 'thinking', 'neutral', 'surprised'];
+            const expr = expressions[Math.floor(Math.random() * expressions.length)];
+            changeExpression(expr);
+            setTimeout(() => changeExpression('neutral'), 2000 + Math.random() * 3000);
+        }
+    }, 12000 + Math.random() * 8000);
+    
+    // Occasional sparkles every 20-30 seconds
+    setInterval(() => {
+        if (Math.random() > 0.7) {
+            createEffect('sparkle');
+        }
+    }, 20000 + Math.random() * 10000);
+}
+
+// Initial appearance set to neutral human-like style
 setTimeout(() => {
-    log('🎨 Generating initial character...');
-    randomCharacterEvolution();
-}, 2000);
+    log('🎨 Setting initial character appearance...');
+    const neutralStyle = generateCharacterFromMood('neutral', 50);
+    applyCharacterStyle(neutralStyle);
+}, 100);
 
 // Start idle animations
 startIdleAnimation();
 log('👀 Idle animations enabled - watch for breathing and blinking!');
+
+// Start automatic behaviors
+startAutoBehaviors();
+log('✨ Auto-behaviors enabled - Aria will move and react on her own!');
 
 // Expose minimal testing helpers
 window.ariaTest = {

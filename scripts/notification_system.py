@@ -1,6 +1,7 @@
 """Desktop Notification System for QAI Training Events"""
 import os
 import platform
+import subprocess  # nosec B404 - subprocess used safely with list arguments, no shell=True
 from datetime import datetime
 from typing import Optional
 from pathlib import Path
@@ -67,10 +68,24 @@ class NotificationManager:
     
     def _send_macos(self, title: str, message: str):
         """Send macOS notification using osascript"""
-        script = f'''
-        display notification "{message}" with title "{title}"
-        '''
-        os.system(f"osascript -e '{script}'")
+        # For AppleScript strings, we need to escape backslashes and double quotes
+        # Also replace newlines with spaces to prevent script injection
+        safe_title = title.replace('\\', '\\\\').replace('"', '\\"').replace('\n', ' ')
+        safe_message = message.replace('\\', '\\\\').replace('"', '\\"').replace('\n', ' ')
+        
+        script = f'display notification "{safe_message}" with title "{safe_title}"'
+        try:
+            # Using subprocess with list arguments prevents shell injection
+            # The script is passed as a single argument to osascript -e
+            result = subprocess.run(['osascript', '-e', script], capture_output=True, text=True, timeout=5)
+            if result.returncode != 0:
+                print(f"macOS notification warning: osascript returned {result.returncode}, stderr: {result.stderr}")
+        except subprocess.TimeoutExpired:
+            print("macOS notification error: osascript timed out")
+        except FileNotFoundError:
+            print("macOS notification error: osascript not found")
+        except OSError as e:
+            print(f"macOS notification error: {e}")
     
     def _send_linux(self, title: str, message: str, icon: str):
         """Send Linux notification using notify-send"""
@@ -81,7 +96,17 @@ class NotificationManager:
             "error": "dialog-error"
         }.get(icon, "dialog-information")
         
-        os.system(f'notify-send -i {icon_name} "{title}" "{message}"')
+        # Use subprocess with list arguments to prevent command injection
+        try:
+            result = subprocess.run(['notify-send', '-i', icon_name, title, message], capture_output=True, text=True, timeout=5)
+            if result.returncode != 0:
+                print(f"Linux notification warning: notify-send returned {result.returncode}, stderr: {result.stderr}")
+        except subprocess.TimeoutExpired:
+            print("Linux notification error: notify-send timed out")
+        except FileNotFoundError:
+            print("Linux notification error: notify-send not found")
+        except OSError as e:
+            print(f"Linux notification error: {e}")
     
     def notify_job_started(self, job_name: str):
         """Notify when training job starts"""

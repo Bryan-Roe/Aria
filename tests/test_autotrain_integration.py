@@ -1,7 +1,6 @@
 """Integration tests for AutoTrain orchestrator end-to-end flows."""
 import json
 import subprocess
-import tempfile
 from pathlib import Path
 
 import pytest
@@ -353,7 +352,7 @@ jobs:
             encoding="utf-8",
         )
         
-        proc = subprocess.run(
+        result = subprocess.run(
             [
                 "python",
                 str(AUTOTRAIN_SCRIPT),
@@ -366,6 +365,6 @@ jobs:
             text=True,
             cwd=str(REPO_ROOT),
         )
-        assert proc.returncode == 0
+        assert result.returncode == 0
         # Command should include --reinstall flag
-        assert "--reinstall" in proc.stdout
+        assert "--reinstall" in result.stdout

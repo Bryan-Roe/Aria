@@ -52,7 +52,7 @@ def _write_requirements(path: Path, lines: list[str]):
 
 
 def _backup(path: Path) -> Path:
-    ts = _dt.datetime.utcnow().strftime("%Y%m%dT%H%M%SZ")
+    ts = _dt.datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
     backup = path.parent / f"requirements.backup.{ts}.txt"
     shutil.copy2(path, backup)
     return backup

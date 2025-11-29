@@ -8,10 +8,10 @@ This script:
 4. Waits for result and saves JSON compatible with visualize_hardware_results.py
 
 Usage:
-  python .\quantum-ai\scripts\submit_small_stabilizer.py [--backend <name>] [--shots <int>]
+  python .\\quantum-ai\\scripts\\submit_small_stabilizer.py [--backend <name>] [--shots <int>]
 
 Example:
-  python .\quantum-ai\scripts\submit_small_stabilizer.py --backend rigetti.sim.qvm --shots 1000
+  python .\\quantum-ai\\scripts\\submit_small_stabilizer.py --backend rigetti.sim.qvm --shots 1000
 """
 from __future__ import annotations
 
@@ -99,7 +99,7 @@ def main() -> int:
 
     # Submit job
     print(f"\nSubmitting job to {args.backend}...")
-    job_name = f"ghz_{args.n_qubits}q_stabilizer_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}"
+    job_name = f"ghz_{args.n_qubits}q_stabilizer_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')}"
     try:
         job = azure.submit_circuit(qc, backend_name=args.backend, shots=args.shots, job_name=job_name)
         print(f"Job submitted: {job.id()}")
@@ -115,7 +115,7 @@ def main() -> int:
     max_entropy = float(args.n_qubits)
 
     # Save in schema compatible with visualizer
-    ts = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
+    ts = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
     out = {
         "job_id": result_data.get("job_id"),
         "counts": {str(k): int(v) for k, v in counts.items()},

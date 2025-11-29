@@ -5,6 +5,13 @@ from pathlib import Path
 import pytest
 
 
+# Skip entire module if torch/numpy unavailable (required by train_vision)
+try:
+    import torch  # noqa: F401
+    import numpy  # noqa: F401
+except ImportError:
+    pytest.skip("torch or numpy not available", allow_module_level=True)
+
 vision = importlib.import_module('scripts.train_vision')
 
 

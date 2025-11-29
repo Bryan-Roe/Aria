@@ -5,7 +5,7 @@ This script creates GHZ circuits using different gate decompositions optimized
 for specific providers (Rigetti, Quantinuum, IonQ) and compares results.
 
 Usage:
-  python .\quantum-ai\scripts\test_provider_gates.py [--backend <name>] [--shots <int>]
+  python .\\quantum-ai\\scripts\\test_provider_gates.py [--backend <name>] [--shots <int>]
 """
 from __future__ import annotations
 
@@ -224,7 +224,7 @@ def main() -> int:
         print(f"  Circuit depth: {qc.depth()}, gates: {sum(qc.count_ops().values())}")
 
         try:
-            job_name = f"ghz_{args.n_qubits}q_{pattern_name}_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}"
+            job_name = f"ghz_{args.n_qubits}q_{pattern_name}_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')}"
             job = azure.submit_circuit(qc, backend_name=backend_name, shots=args.shots, job_name=job_name)
             print(f"  Job submitted: {job.id()}")
             print("  Waiting for results...")
@@ -235,7 +235,7 @@ def main() -> int:
             max_entropy = float(args.n_qubits)
 
             # Save results
-            ts = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
+            ts = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
             out = {
                 "job_id": result_data.get("job_id"),
                 "counts": {str(k): int(v) for k, v in counts.items()},

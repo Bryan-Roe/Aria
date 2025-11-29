@@ -1,4 +1,0 @@
-{"step": 0, "eval_loss": 2.6422245502471924, "eval_perplexity": 14.044411382044556, "timestamp": "2025-11-26T07:55:31.799794Z"}
-{"phase": "pre", "eval_loss": 2.6422245502471924, "eval_perplexity": 14.044411382044556, "timestamp": "2025-11-26T07:55:31.800293Z"}
-{"step": 3, "eval_loss": 2.625936269760132, "eval_perplexity": 13.817505043869973, "timestamp": "2025-11-26T07:55:42.201386Z"}
-{"phase": "post", "eval_loss": 2.625936269760132, "eval_perplexity": 13.817505043869973, "timestamp": "2025-11-26T07:55:42.201889Z"}

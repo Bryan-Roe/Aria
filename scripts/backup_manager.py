@@ -235,7 +235,7 @@ class BackupManager:
         try:
             import torch
             return torch.__version__
-        except (ImportError, OSError):
+        except ImportError:
             return "Not installed"
     
     def _check_cuda(self) -> bool:
@@ -243,7 +243,7 @@ class BackupManager:
         try:
             import torch
             return torch.cuda.is_available()
-        except (ImportError, OSError):
+        except ImportError:
             return False
     
     def list_backups(self) -> List[Dict]:

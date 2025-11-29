@@ -16,9 +16,9 @@ Outputs:
 - data_out/quantum_autorun/status.json
 
 Usage examples (PowerShell):
-  python .\scripts\quantum_autorun.py --dry-run
-  python .\scripts\quantum_autorun.py --job heart_quick --dry-run
-  python .\scripts\quantum_autorun.py --job heart_quick
+  python .\\scripts\\quantum_autorun.py --dry-run
+  python .\\scripts\\quantum_autorun.py --job heart_quick --dry-run
+  python .\\scripts\\quantum_autorun.py --job heart_quick
 """
 
 from __future__ import annotations
