@@ -14,12 +14,12 @@ Design principles:
 - Deterministic with --seed for reproducibility.
 
 Usage (PowerShell):
-  python .\scripts\generate_repo_training_dataset.py --max-records 300
+  python .\\scripts\\generate_repo_training_dataset.py --max-records 300
 
 Then train (CPU-friendly smoke test):
-  cd AI\microsoft_phi-silica-3.6_v1
-  python .\scripts\train_lora.py --dataset ..\..\datasets\chat\app_repo --dry-run
-  python .\scripts\train_lora.py --dataset ..\..\datasets\chat\app_repo --max-train-samples 64 --max-eval-samples 16
+  cd AI\\microsoft_phi-silica-3.6_v1
+  python .\\scripts\\train_lora.py --dataset ..\\..\\datasets\\chat\\app_repo --dry-run
+  python .\\scripts\\train_lora.py --dataset ..\\..\\datasets\\chat\\app_repo --max-train-samples 64 --max-eval-samples 16
 
 """
 from __future__ import annotations

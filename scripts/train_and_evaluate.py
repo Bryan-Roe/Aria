@@ -6,9 +6,9 @@ jobs (eval_<jobName>) defined in evaluation_autorun.yaml. Produces a consolidate
 summary ranking models by a primary metric (accuracy → bleu → rouge fallback).
 
 Usage (PowerShell):
-  python .\scripts\train_and_evaluate.py --jobs phi35_mixed_chat_lr_low,phi35_mixed_chat_lr_high --dry-run
-  python .\scripts\train_and_evaluate.py --jobs phi35_mixed_chat_lr_low
-  python .\scripts\train_and_evaluate.py --all-variants   # run all newly added variant jobs
+  python .\\scripts\\train_and_evaluate.py --jobs phi35_mixed_chat_lr_low,phi35_mixed_chat_lr_high --dry-run
+  python .\\scripts\\train_and_evaluate.py --jobs phi35_mixed_chat_lr_low
+  python .\\scripts\\train_and_evaluate.py --all-variants   # run all newly added variant jobs
 
 Flags:
     --dry-run         Validate commands only (no training/evaluation execution)

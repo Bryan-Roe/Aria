@@ -12,21 +12,17 @@ The runner returns the raw assistant output as a string plus a metadata dict.
 """
 from __future__ import annotations
 
-import re
 import subprocess
 import sys
 import os
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Tuple, Dict, Optional
 
 ROOT_DIR = Path(__file__).resolve().parent.parent
 CHAT_CLI = ROOT_DIR / "talk-to-ai" / "src" / "chat_cli.py"
 LOG_DIR = ROOT_DIR / "talk-to-ai" / "logs"
-
-# Pre-compiled regex for stripping ANSI escape codes (compiled once at module load)
-_ANSI_ESCAPE_RE = re.compile(r"\x1B\[[0-?]*[ -/]*[@-~]")
 
 
 def run_chat_once(
@@ -67,8 +63,11 @@ def run_chat_once(
 
     raw_output = proc.stdout
 
-    # Strip ANSI color codes using pre-compiled regex
-    output = _ANSI_ESCAPE_RE.sub("", raw_output).strip()
+    # Strip ANSI color codes for easier consumption
+    import re  # local import to avoid overhead if unused at import time
+
+    ansi_escape = re.compile(r"\x1B\[[0-?]*[ -/]*[@-~]")
+    output = ansi_escape.sub("", raw_output).strip()
 
     # Try to extract only the assistant content after the 'assistant> ' prompt
     reply = output
@@ -85,7 +84,7 @@ def run_chat_once(
     if os.getenv("WRITE_AI_RUN_LOG", "1") == "1":
         try:
             LOG_DIR.mkdir(parents=True, exist_ok=True)
-            ts = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
+            ts = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
             log_path = LOG_DIR / f"auto_run_{ts}.txt"
             with log_path.open("w", encoding="utf-8") as f:
                 f.write(f"PROMPT: {prompt}\n")

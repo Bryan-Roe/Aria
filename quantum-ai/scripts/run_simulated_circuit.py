@@ -2,7 +2,7 @@
 Run a local Qiskit Aer simulation of a variational circuit and save results.
 
 Usage example:
-  python .\quantum-ai\scripts\run_simulated_circuit.py --n-qubits 16 --layers 4 --entanglement circular --shots 2000
+  python .\\quantum-ai\\scripts\\run_simulated_circuit.py --n-qubits 16 --layers 4 --entanglement circular --shots 2000
 
 Outputs JSON compatible with visualize_hardware_results.py under quantum-ai/results/.
 """
@@ -294,7 +294,7 @@ def main() -> int:
     print(f"Entropy: {entropy:.3f} / {max_entropy:.3f} ({(entropy/max_entropy*100 if max_entropy>0 else 0):.1f}%)")
 
     # Save JSON in the same schema as Azure results so the visualizer can pick it up
-    ts = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
+    ts = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
     job_id = f"local-aer-{args.n_qubits}q-{ts}"
     out = {
         "job_id": job_id,
