@@ -118,8 +118,15 @@ def _powershell_exe() -> str:
 
 def _venv_python_default() -> Path:
     # Prefer repo root venv if it exists; else system python
-    venv_python = REPO_ROOT / "venv" / "Scripts" / "python.exe"
-    return venv_python if venv_python.exists() else Path(sys.executable)
+    # Try Windows path first, then Linux
+    venv_python_win = REPO_ROOT / "venv" / "Scripts" / "python.exe"
+    venv_python_linux = REPO_ROOT / "venv" / "bin" / "python"
+    if venv_python_win.exists():
+        return venv_python_win
+    elif venv_python_linux.exists():
+        return venv_python_linux
+    else:
+        return Path(sys.executable)
 
 
 def _venv_python_ml() -> Path:
@@ -127,8 +134,15 @@ def _venv_python_ml() -> Path:
 
     Falls back to root venv/system python only if the model venv is missing.
     """
-    model_py = REPO_ROOT / "AI" / "microsoft_phi-silica-3.6_v1" / "venv" / "Scripts" / "python.exe"
-    return model_py if model_py.exists() else _venv_python_default()
+    # Try Windows path first, then Linux
+    model_py_win = REPO_ROOT / "AI" / "microsoft_phi-silica-3.6_v1" / "venv" / "Scripts" / "python.exe"
+    model_py_linux = REPO_ROOT / "AI" / "microsoft_phi-silica-3.6_v1" / "venv" / "bin" / "python"
+    if model_py_win.exists():
+        return model_py_win
+    elif model_py_linux.exists():
+        return model_py_linux
+    else:
+        return _venv_python_default()
 
 
 def build_hf_command(job: Job) -> List[str]:
@@ -344,7 +358,7 @@ def collect_status(all_results: List[Dict[str, Any]]) -> Dict[str, Any]:
 
 def main() -> None:
     ap = argparse.ArgumentParser(description="AutoTrain orchestrator")
-    ap.add_argument("--config", default=str(REPO_ROOT / "autotrain.yaml"), help="Path to autotrain.yaml")
+    ap.add_argument("--config", default=str(REPO_ROOT / "config" / "training" / "autotrain.yaml"), help="Path to autotrain.yaml")
     ap.add_argument("--job", default=None, help="Run only the named job")
     ap.add_argument("--dry-run", action="store_true", help="Validate and print commands; do not execute")
     ap.add_argument("--list", action="store_true", help="List configured jobs and exit")

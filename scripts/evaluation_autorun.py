@@ -19,10 +19,10 @@ Outputs:
 - data_out/evaluation_autorun/status.json
 
 Usage examples (PowerShell):
-  python .\scripts\evaluation_autorun.py --dry-run
-  python .\scripts\evaluation_autorun.py --job eval_smoke_test
-  python .\scripts\evaluation_autorun.py --list
-  python .\scripts\evaluation_autorun.py --job eval_lora_phi35_full
+  python .\\scripts\\evaluation_autorun.py --dry-run
+  python .\\scripts\\evaluation_autorun.py --job eval_smoke_test
+  python .\\scripts\\evaluation_autorun.py --list
+  python .\\scripts\\evaluation_autorun.py --job eval_lora_phi35_full
 """
 
 from __future__ import annotations
@@ -239,7 +239,7 @@ def validate_job(job: EvalJob, parallel: bool = False) -> Dict[str, Any]:
 
 
 def run_job(job: EvalJob, dry_run: bool = False) -> Dict[str, Any]:
-    ts = datetime.utcnow().strftime("%Y%m%dT%H%M%SZ")
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
     job_dir = DATA_OUT / job.name / ts
     ensure_dirs(job_dir)
     log_path = job_dir / "stdout.log"
@@ -306,7 +306,7 @@ def run_job(job: EvalJob, dry_run: bool = False) -> Dict[str, Any]:
 
 def collect_status(all_results: List[Dict[str, Any]]) -> Dict[str, Any]:
     summary = {
-        "generated_at": datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "generated_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "total_jobs": len(all_results),
         "succeeded": sum(1 for r in all_results if r.get("status") == "succeeded"),
         "failed": sum(1 for r in all_results if r.get("status") == "failed"),

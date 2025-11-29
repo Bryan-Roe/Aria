@@ -21,6 +21,8 @@ Table schema created in database/Tables/ChatMessageEmbeddings.sql
 """
 from __future__ import annotations
 
+import hashlib
+import heapq
 import os
 import math
 import struct
@@ -58,19 +60,26 @@ def _hash_embedding(text: str, dim: int = _LOCAL_DIM) -> List[float]:
 
     Not semantically rich but provides some signal for similarity
     within the same workspace when no embedding API is configured.
+    
+    Optimized: Uses module-level hashlib import and single-pass norm calculation.
     """
-    import hashlib
     tokens = [t for t in text.lower().split() if t]
     vec = [0.0] * dim
     if not tokens:
         return vec
+    
+    # Build vector with hash-based indices
     for tok in tokens:
         h = int(hashlib.sha256(tok.encode("utf-8")).hexdigest(), 16)
         idx = h % dim
         vec[idx] += 1.0
-    # L2 normalize
-    norm = math.sqrt(sum(v * v for v in vec)) or 1.0
-    return [v / norm for v in vec]
+    
+    # L2 normalize in single pass
+    sum_sq = sum(v * v for v in vec)
+    if sum_sq > 0:
+        norm = math.sqrt(sum_sq)
+        return [v / norm for v in vec]
+    return vec
 
 
 def generate_embedding(text: str) -> List[float]:  # noqa: ANN001
@@ -169,6 +178,9 @@ def fetch_similar_messages(query_embedding: Sequence[float], top_k: int = 5, ses
 
     If session_id is provided, restrict search to that session's conversation(s).
     For performance we limit to the most recent 500 embeddings.
+    
+    Optimization: Uses heapq.nlargest for O(n log k) top-k selection instead of
+    O(n log n) full sort when top_k is small relative to result set.
     """
     if not query_embedding:
         return []
@@ -192,21 +204,24 @@ def fetch_similar_messages(query_embedding: Sequence[float], top_k: int = 5, ses
                 "ORDER BY e.CreatedAt DESC",
             )
         rows = cursor.fetchall()
+        
+        # Build scored list with only positive similarities
         scored = []
         for r in rows:
             dim = r.EmbeddingDim
             emb = _deserialize_f32(r.EmbeddingVector, dim)
             sim = _cosine(query_embedding, emb)
-            if sim <= 0:
-                continue
-            scored.append({
-                "message_id": r.MessageId,
-                "content": r.Content,
-                "similarity": sim,
-                "embedding_model": r.EmbeddingModel,
-            })
-        scored.sort(key=lambda x: x["similarity"], reverse=True)
-        return scored[:top_k]
+            if sim > 0:
+                scored.append({
+                    "message_id": r.MessageId,
+                    "content": r.Content,
+                    "similarity": sim,
+                    "embedding_model": r.EmbeddingModel,
+                })
+        
+        # Use heapq.nlargest for efficient top-k selection (O(n log k) vs O(n log n))
+        # This is more efficient when top_k << len(scored)
+        return heapq.nlargest(top_k, scored, key=lambda x: x["similarity"])
     except Exception:
         return []
     finally:

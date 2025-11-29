@@ -13,9 +13,9 @@ Features:
 - Fast failure if any job reports missing assets
 
 Usage (PowerShell):
-  python .\scripts\auto_bootstrap.py --dry-run        # Plan only, no installs
-  python .\scripts\auto_bootstrap.py                 # Validate + dry-run orchestrators
-  python .\scripts\auto_bootstrap.py --create-venvs  # Create missing venvs, install minimal deps then dry-runs
+  python .\\scripts\\auto_bootstrap.py --dry-run        # Plan only, no installs
+  python .\\scripts\\auto_bootstrap.py                 # Validate + dry-run orchestrators
+  python .\\scripts\\auto_bootstrap.py --create-venvs  # Create missing venvs, install minimal deps then dry-runs
 
 Exit codes:
   0 = success / all validated

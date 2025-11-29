@@ -18,18 +18,25 @@ def _read_stdin_json() -> dict:
 
 
 def _build_prompt(messages):
-    prompt = ""
+    """Build prompt string from messages.
+    
+    Uses list join instead of string += for O(n) instead of O(n²) complexity.
+    """
+    parts = []
     for msg in messages or []:
         role = msg.get("role", "user")
         content = msg.get("content", "")
         if role == "system":
-            prompt += f"[SYSTEM] {content}\n"
+            parts.append(f"[SYSTEM] {content}")
         elif role == "user":
-            prompt += f"User: {content}\n"
+            parts.append(f"User: {content}")
         elif role == "assistant":
-            prompt += f"Assistant: {content}\n"
-    prompt += "Assistant: "
-    return prompt
+            parts.append(f"Assistant: {content}")
+    
+    # Build final prompt: messages joined by newlines, ending with "Assistant: "
+    if parts:
+        return "\n".join(parts) + "\nAssistant: "
+    return "Assistant: "
 
 
 def main() -> int:

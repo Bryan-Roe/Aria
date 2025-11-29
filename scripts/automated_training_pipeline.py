@@ -16,19 +16,19 @@ Why this script?
 
 Usage Examples (PowerShell):
   # Quick both models with evaluation
-  python .\scripts\automated_training_pipeline.py --quick
+  python .\\scripts\\automated_training_pipeline.py --quick
 
   # Phi only, 300 samples, cleanup checkpoints, rank by post perplexity
-  python .\scripts\automated_training_pipeline.py --models phi --samples 300 --cleanup --ranking-metric post_perplexity
+  python .\\scripts\\automated_training_pipeline.py --models phi --samples 300 --cleanup --ranking-metric post_perplexity
 
   # Qwen only, skip evaluation
-  python .\scripts\automated_training_pipeline.py --models qwen --no-eval
+  python .\\scripts\\automated_training_pipeline.py --models qwen --no-eval
 
   # Generate data only (no training)
-  python .\scripts\automated_training_pipeline.py --generate-only --samples 200
+  python .\\scripts\\automated_training_pipeline.py --generate-only --samples 200
 
   # Emit Azure ML job spec (no training)
-  python .\scripts\automated_training_pipeline.py --azure-ml-spec --quick --models phi,qwen --generate-only
+  python .\\scripts\\automated_training_pipeline.py --azure-ml-spec --quick --models phi,qwen --generate-only
 
 Summary Output:
   data_out/automated_training/summary_<timestamp>.json
@@ -220,7 +220,7 @@ tags:
 def main() -> int:
     args = parse_args()
     SUMMARY_DIR.mkdir(parents=True, exist_ok=True)
-    timestamp = datetime.utcnow().strftime("%Y%m%dT%H%M%SZ")
+    timestamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
     run_label = args.output_name or f"multi_{timestamp}"
 
     selected_models = [m.strip() for m in args.models.split(',') if m.strip()]

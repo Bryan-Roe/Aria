@@ -1,0 +1,101 @@
+version: 1
+
+# Fast training configuration - optimized for speed
+# Uses smaller sample sizes, efficient models, and parallel-friendly settings
+
+jobs:
+  # ===== QUICK VALIDATION (64 samples, ~2-5 min each) =====
+  
+  - name: phi35_quick_test
+    category: fast
+    runner: hf
+    config: AI/microsoft_phi-silica-3.6_v1/lora/lora.yaml
+    dataset: datasets/chat/mixed_chat
+    save_dir: data_out/lora_training/phi35_quick
+    epochs: 1
+    max_train_samples: 64
+    max_eval_samples: 16
+    learning_rate: 0.0003
+    lora_dropout: 0.1
+    lora_rank: 4              # Reduced from 8 for speed
+    hf_model_id: microsoft/Phi-3.5-mini-instruct
+    no_stream: true
+    device: auto
+
+  - name: qwen25_quick_test
+    category: fast
+    runner: hf
+    config: AI/microsoft_phi-silica-3.6_v1/lora/lora.yaml
+    dataset: datasets/chat/mixed_chat
+    save_dir: data_out/lora_training/qwen25_quick
+    epochs: 1
+    max_train_samples: 64
+    max_eval_samples: 16
+    learning_rate: 0.0003
+    lora_dropout: 0.1
+    lora_rank: 4
+    hf_model_id: Qwen/Qwen2.5-3B-Instruct
+    no_stream: true
+    device: auto
+
+  # ===== MEDIUM TRAINING (256 samples, ~10-15 min each) =====
+  
+  - name: phi35_medium_mixed
+    category: fast
+    runner: hf
+    config: AI/microsoft_phi-silica-3.6_v1/lora/lora.yaml
+    dataset: datasets/chat/mixed_chat
+    save_dir: data_out/lora_training/phi35_medium
+    epochs: 1
+    max_train_samples: 256
+    max_eval_samples: 32
+    learning_rate: 0.0002
+    lora_dropout: 0.1
+    lora_rank: 8
+    hf_model_id: microsoft/Phi-3.5-mini-instruct
+    device: auto
+
+  - name: qwen25_medium_mixed
+    category: fast
+    runner: hf
+    config: AI/microsoft_phi-silica-3.6_v1/lora/lora.yaml
+    dataset: datasets/chat/mixed_chat
+    save_dir: data_out/lora_training/qwen25_medium
+    epochs: 1
+    max_train_samples: 256
+    max_eval_samples: 32
+    learning_rate: 0.0002
+    lora_dropout: 0.1
+    lora_rank: 8
+    hf_model_id: Qwen/Qwen2.5-3B-Instruct
+    device: auto
+
+  # ===== FOCUSED TRAINING (500 samples, ~20-30 min each) =====
+  
+  - name: phi35_focused_comprehensive
+    category: fast
+    runner: hf
+    config: AI/microsoft_phi-silica-3.6_v1/lora/lora.yaml
+    dataset: datasets/chat/comprehensive
+    save_dir: data_out/lora_training/phi35_focused
+    epochs: 1
+    max_train_samples: 500
+    max_eval_samples: 50
+    learning_rate: 0.0002
+    lora_dropout: 0.1
+    hf_model_id: microsoft/Phi-3.5-mini-instruct
+    device: auto
+
+  - name: qwen25_focused_comprehensive
+    category: fast
+    runner: hf
+    config: AI/microsoft_phi-silica-3.6_v1/lora/lora.yaml
+    dataset: datasets/chat/comprehensive
+    save_dir: data_out/lora_training/qwen25_focused
+    epochs: 1
+    max_train_samples: 500
+    max_eval_samples: 50
+    learning_rate: 0.0002
+    lora_dropout: 0.1
+    hf_model_id: Qwen/Qwen2.5-3B-Instruct
+    device: auto

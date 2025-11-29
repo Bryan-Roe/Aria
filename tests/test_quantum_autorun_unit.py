@@ -101,9 +101,7 @@ class TestCommandBuilder:
         j = QJob(name="t", preset="heart", epochs=1, n_qubits=4)
         cmd = build_command(j)
         assert len(cmd) >= 2
-        # Accept both 'python' (Unix) and 'python.exe' (Windows) or full paths like /usr/bin/python
-        python_exe = cmd[0].lower()
-        assert python_exe.endswith('python') or python_exe.endswith('python.exe')
+        assert cmd[0].endswith("python.exe") or cmd[0].endswith("python")
         assert "train_custom_dataset.py" in cmd[1]
         assert "--preset" in cmd
         assert "heart" in cmd

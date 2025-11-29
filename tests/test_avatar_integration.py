@@ -5,11 +5,15 @@ from pathlib import Path
 import pytest
 
 
+# Skip entire module if torch/numpy unavailable (required by train_vision)
 try:
-    train = importlib.import_module('scripts.train_vision')
-    avatar = importlib.import_module('scripts.vision_avatar_integration')
+    import torch  # noqa: F401
+    import numpy  # noqa: F401
 except ImportError:
-    pytest.skip("Required modules not available (missing numpy/torch)", allow_module_level=True)
+    pytest.skip("torch or numpy not available", allow_module_level=True)
+
+train = importlib.import_module('scripts.train_vision')
+avatar = importlib.import_module('scripts.vision_avatar_integration')
 
 
 def test_avatar_inference_small(tmp_path: Path):

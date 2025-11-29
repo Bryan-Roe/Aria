@@ -15,11 +15,11 @@ Features:
 - Backup and cleanup automation
 
 Usage examples (PowerShell):
-  python .\scripts\master_orchestrator.py --workflow daily_full_pipeline
-  python .\scripts\master_orchestrator.py --workflow quick_validation
-  python .\scripts\master_orchestrator.py --orchestrator autotrain
-  python .\scripts\master_orchestrator.py --daemon  # Run as background service
-  python .\scripts\master_orchestrator.py --status   # Check status
+  python .\\scripts\\master_orchestrator.py --workflow daily_full_pipeline
+  python .\\scripts\\master_orchestrator.py --workflow quick_validation
+  python .\\scripts\\master_orchestrator.py --orchestrator autotrain
+  python .\\scripts\\master_orchestrator.py --daemon  # Run as background service
+  python .\\scripts\\master_orchestrator.py --status   # Check status
 """
 
 from __future__ import annotations
@@ -163,7 +163,7 @@ class MasterOrchestrator:
         print(f"[master] Running orchestrator: {name}")
         print(f"[master] Command: {' '.join(cmd)}")
         
-        ts = datetime.utcnow().strftime("%Y%m%dT%H%M%SZ")
+        ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
         log_dir = DATA_OUT / name / ts
         log_dir.mkdir(parents=True, exist_ok=True)
         log_file = log_dir / "stdout.log"
@@ -239,7 +239,7 @@ class MasterOrchestrator:
         
         workflow_result = {
             "workflow": name,
-            "start_time": datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "start_time": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
             "status": "succeeded" if all_succeeded else "failed",
             "orchestrators": results,
         }
@@ -319,7 +319,7 @@ class MasterOrchestrator:
     def get_status(self) -> Dict[str, Any]:
         """Get overall status."""
         return {
-            "generated_at": datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "generated_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
             "orchestrators": self.list_orchestrators(),
             "workflows": self.list_workflows(),
             "resource_usage": self._get_resource_usage(),

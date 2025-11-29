@@ -2,12 +2,13 @@ from __future__ import annotations
 
 import os
 import random
+import threading
 import time
 from dataclasses import dataclass
 import json as _json
 import subprocess
 from pathlib import Path
-from typing import Dict, Generator, Iterable, List, Optional
+from typing import Any, Dict, Generator, Iterable, List, Optional
 
 try:
     # openai>=1.0
@@ -17,7 +18,53 @@ except Exception:  # pragma: no cover - optional at runtime
     AzureOpenAI = None  # type: ignore
 
 
+# Thread-safe cache for LM Studio availability checks
+_lmstudio_cache: Dict[str, Any] = {"available": None, "checked_at": 0.0, "url": None}
+_lmstudio_cache_lock = threading.RLock()
+_LMSTUDIO_CACHE_TTL = 30  # seconds
+
+
 RoleMessage = Dict[str, str]  # {"role": "system|user|assistant", "content": "..."}
+
+
+# -------------------------------------------------------------------------
+# LM Studio availability cache to avoid repeated HTTP health checks
+# -------------------------------------------------------------------------
+
+_lmstudio_cache: Dict[str, Any] = {"available": None, "checked_at": 0.0, "url": None}
+_LMSTUDIO_CACHE_TTL = 30  # seconds
+
+
+def _check_lmstudio_available(url: str) -> bool:
+    """Check LM Studio availability with caching to avoid repeated HTTP requests.
+    
+    Results are cached for 30 seconds to prevent latency on every auto-detect call.
+    """
+    now = time.time()
+    # Return cached result if within TTL and URL matches
+    if (
+        _lmstudio_cache["available"] is not None
+        and _lmstudio_cache["url"] == url
+        and (now - _lmstudio_cache["checked_at"]) < _LMSTUDIO_CACHE_TTL
+    ):
+        return _lmstudio_cache["available"]
+    
+    # Perform health check
+    try:
+        import urllib.request
+        import urllib.error
+        req = urllib.request.Request(
+            url.replace("/v1", "") + "/v1/models",
+            headers={"User-Agent": "QAI"}
+        )
+        urllib.request.urlopen(req, timeout=1)
+        _lmstudio_cache["available"] = True
+    except Exception:
+        _lmstudio_cache["available"] = False
+    
+    _lmstudio_cache["checked_at"] = now
+    _lmstudio_cache["url"] = url
+    return _lmstudio_cache["available"]
 
 
 @dataclass
@@ -172,19 +219,25 @@ class LoraLocalProvider(BaseChatProvider):
         return text
 
     def _build_prompt(self, messages: List[RoleMessage]) -> str:
-        # Simple concatenation; can be improved for chat templates
-        prompt = ""
+        """Build prompt string from messages.
+        
+        Uses list join instead of string += for O(n) instead of O(n²) complexity.
+        """
+        parts = []
         for msg in messages:
             role = msg.get("role", "user")
             content = msg.get("content", "")
             if role == "system":
-                prompt += f"[SYSTEM] {content}\n"
+                parts.append(f"[SYSTEM] {content}")
             elif role == "user":
-                prompt += f"User: {content}\n"
+                parts.append(f"User: {content}")
             elif role == "assistant":
-                prompt += f"Assistant: {content}\n"
-        prompt += "Assistant: "
-        return prompt
+                parts.append(f"Assistant: {content}")
+        
+        # Build final prompt: messages joined by newlines, ending with "Assistant: "
+        if parts:
+            return "\n".join(parts) + "\nAssistant: "
+        return "Assistant: "
 
     def _lazy_setup(self) -> None:
         """Import heavy dependencies lazily so that non-LoRA providers don't require them.
@@ -417,6 +470,51 @@ class AzureOpenAIProvider(BaseChatProvider):
                 return ""
 
 
+def _check_lmstudio_available(url: str) -> bool:
+    """Check if LM Studio server is available at the given URL.
+    
+    Uses a thread-safe cache to avoid repeated HTTP requests within the TTL period.
+    The HTTP request is performed outside the lock to avoid blocking other threads.
+    
+    Args:
+        url: Base URL for LM Studio API (e.g., "http://127.0.0.1:1234/v1")
+        
+    Returns:
+        True if LM Studio is available, False otherwise.
+    """
+    # Check cache under lock
+    with _lmstudio_cache_lock:
+        now = time.time()
+        if (
+            _lmstudio_cache["available"] is not None
+            and _lmstudio_cache["url"] == url
+            and (now - _lmstudio_cache["checked_at"]) < _LMSTUDIO_CACHE_TTL
+        ):
+            return _lmstudio_cache["available"]
+    
+    # Perform HTTP check outside lock to avoid blocking other threads
+    available = False
+    try:
+        import urllib.request
+        import urllib.error
+        # Remove trailing /v1 if present, then append /v1/models
+        base_url = url.removesuffix("/v1")
+        check_url = base_url + "/v1/models"
+        req = urllib.request.Request(check_url, headers={"User-Agent": "QAI"})
+        urllib.request.urlopen(req, timeout=1)
+        available = True
+    except Exception:
+        available = False
+    
+    # Update cache under lock
+    with _lmstudio_cache_lock:
+        _lmstudio_cache["available"] = available
+        _lmstudio_cache["checked_at"] = time.time()
+        _lmstudio_cache["url"] = url
+    
+    return available
+
+
 def detect_provider(explicit: Optional[str] = None, model_override: Optional[str] = None, temperature: Optional[float] = None, max_output_tokens: Optional[int] = None) -> tuple[BaseChatProvider, ProviderChoice]:
     """Detect the best provider based on environment variables.
 
@@ -497,18 +595,11 @@ def detect_provider(explicit: Optional[str] = None, model_override: Optional[str
         provider = LocalEchoProvider()
         return provider, ProviderChoice(name="local", model=model)
 
-    # Auto mode - check for LM Studio first
-    try:
-        # Quick health check for LM Studio
-        import urllib.request
-        import urllib.error
-        req = urllib.request.Request(lms_url.replace("/v1", "") + "/v1/models", headers={"User-Agent": "QAI"})
-        urllib.request.urlopen(req, timeout=1)
+    # Auto mode - check for LM Studio first using thread-safe cached check
+    if _check_lmstudio_available(lms_url):
         model = model_override or lms_model
         provider = LMStudioProvider(base_url=lms_url, model=model, temperature=temp, max_output_tokens=max_output_tokens)
         return provider, ProviderChoice(name="lmstudio", model=model)
-    except (urllib.error.URLError, Exception):
-        pass  # LM Studio not available, continue to other providers
 
     if az_key and az_ep and (model_override or az_dep):
         model = model_override or az_dep

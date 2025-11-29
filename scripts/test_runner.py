@@ -11,12 +11,12 @@ Features:
 - CI-friendly exit codes and artifacts
 
 Usage:
-  python .\scripts\test_runner.py --all                  # Run all non-slow tests
-  python .\scripts\test_runner.py --unit                 # Unit tests only
-  python .\scripts\test_runner.py --integration          # Integration tests
-  python .\scripts\test_runner.py --suite autotrain      # Specific suite
-  python .\scripts\test_runner.py --coverage             # With coverage
-  python .\scripts\test_runner.py --watch                # Watch mode (re-run on change)
+  python .\\scripts\\test_runner.py --all                  # Run all non-slow tests
+  python .\\scripts\\test_runner.py --unit                 # Unit tests only
+  python .\\scripts\\test_runner.py --integration          # Integration tests
+  python .\\scripts\\test_runner.py --suite autotrain      # Specific suite
+  python .\\scripts\\test_runner.py --coverage             # With coverage
+  python .\\scripts\\test_runner.py --watch                # Watch mode (re-run on change)
 """
 from __future__ import annotations
 
@@ -259,7 +259,7 @@ def write_results(results: List[TestResult]) -> None:
     
     # JSON
     json_data = {
-        "generated_at": datetime.utcnow().isoformat() + "Z",
+        "generated_at": datetime.now(timezone.utc).isoformat() + "Z",
         "suites": [
             {
                 "name": r.suite,
