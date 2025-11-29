@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""
+r"""
 AutoTrain Orchestrator
 
 Lightweight runner to automate model fine-tuning jobs defined in a YAML config.
@@ -17,9 +17,9 @@ Outputs:
 - data_out/autotrain/status.json                              (summary of all jobs)
 
 Usage examples (PowerShell):
-    python .\\scripts\\autotrain.py --dry-run
-    python .\\scripts\\autotrain.py --job phi36_mixed_chat
-    python .\\scripts\\autotrain.py --job phi36_mixed_chat --reinstall  # when using local runner
+    python .\scripts\autotrain.py --dry-run
+    python .\scripts\autotrain.py --job phi36_mixed_chat
+    python .\scripts\autotrain.py --job phi36_mixed_chat --reinstall  # when using local runner
 """
 
 from __future__ import annotations
