@@ -39,6 +39,18 @@ orchestrators:
     retry_on_failure: -1  # Infinite retries
     timeout_minutes: 0  # No timeout
     dependencies: []
+    
+  - name: aria_automation
+    script: scripts/aria_automation.py
+    enabled: true
+    schedule: "*/30 * * * *"  # Every 30 minutes
+    priority: 5
+    retry_on_failure: 3
+    timeout_minutes: 15
+    dependencies: []
+    flags:
+      mode: training
+      once: true
 
 workflows:
   # Daily full training pipeline
@@ -92,6 +104,33 @@ workflows:
     on_failure:
       - notify_slack
       - create_incident
+      
+  # Aria continuous operation (server + periodic training)
+  - name: aria_full_stack
+    enabled: false  # Enable to run Aria 24/7
+    trigger: "manual"  # Start manually, runs continuously
+    orchestrators:
+      - aria_automation
+    flags:
+      mode: full  # server + training + monitoring
+    on_success:
+      - log_result
+    on_failure:
+      - restart_aria
+      - notify_admin
+      
+  # Aria server only (no training)
+  - name: aria_server_only
+    enabled: false
+    trigger: "manual"
+    orchestrators:
+      - aria_automation
+    flags:
+      mode: server
+    on_success:
+      - log_result
+    on_failure:
+      - restart_aria
 
 automation:
   auto_cleanup:

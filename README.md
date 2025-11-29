@@ -13,6 +13,7 @@
 ## 🎭 About Aria
 
 Aria is an interactive AI character that combines:
+
 - **3D Animated Avatar** - CSS-based character with smooth animations, eye tracking, and expressive gestures
 - **Natural Language Movement** - Tell Aria to "move left", "wave", "dance", or "jump" using plain English
 - **Multi-Provider AI Backend** - Powered by Azure OpenAI, OpenAI, or local models with LoRA fine-tuning
@@ -20,6 +21,63 @@ Aria is an interactive AI character that combines:
 - **Quantum ML Integration** - Experimental quantum-classical hybrid training
 
 ## 🚀 Quick Start
+
+### 🤖 **NEW: Complete Repository Automation**
+
+One command to automate the entire repository:
+
+```bash
+# Start everything (all components)
+./scripts/start_repo_automation.sh full
+
+# Or select specific components
+./scripts/start_repo_automation.sh aria           # Aria character only
+./scripts/start_repo_automation.sh training       # Training pipeline
+./scripts/start_repo_automation.sh                # Interactive menu
+
+# Check status
+./scripts/start_repo_automation.sh status
+
+# Stop all
+./scripts/start_repo_automation.sh stop
+```
+
+**Automated Components:**
+
+- ✅ **Aria Character** - Web server + continuous training
+- ✅ **LoRA Training** - Automated fine-tuning pipelines
+- ✅ **Quantum ML** - Quantum computing workflows
+- ✅ **Evaluation** - Model evaluation system
+- ✅ **Datasets** - Auto-discovery & downloads
+- ✅ **Monitoring** - Health checks & alerts
+- ✅ **Backups** - Daily automated backups
+
+See [REPO_AUTOMATION_GUIDE.md](REPO_AUTOMATION_GUIDE.md) for full documentation.
+
+### 🎭 Aria Character Only
+
+If you only want Aria automation:
+
+```bash
+# Interactive menu
+./scripts/start_aria.sh
+
+# Direct start
+./scripts/start_aria.sh full
+
+# Background mode
+./scripts/start_aria.sh full --background
+
+# Check status
+./scripts/start_aria.sh status
+```
+
+See [ARIA_AUTOMATION_GUIDE.md](ARIA_AUTOMATION_GUIDE.md) for details
+
+📖 **Full Guide:** [ARIA_AUTOMATION_GUIDE.md](ARIA_AUTOMATION_GUIDE.md)  
+📋 **Quick Ref:** [ARIA_QUICKREF.txt](ARIA_QUICKREF.txt)
+
+---
 
 ### Chat with Aria (Web Interface)
 
@@ -71,6 +129,7 @@ python server.py
 ```
 
 **API Endpoints:**
+
 - `GET /api/aria/state` - Get current stage state
 - `POST /api/aria/command` - Send movement commands
 - `POST /api/aria/object` - Manage objects
@@ -132,6 +191,7 @@ Fine-tuning workspace for training Aria's language understanding using LoRA and 
 - 🔧 Azure AI Toolkit integration
 
 **Aria Training Datasets:**
+
 - `datasets/chat/aria_movement/` - Movement command training data
 - `datasets/chat/aria_expanded/` - Extended Aria interactions
 - `datasets/chat/aria_simple/` - Basic Aria commands
@@ -237,7 +297,6 @@ pip install -r requirements.txt
 3. Restart the Functions host. When you call `/api/tts` the server will try Azure first, then pyttsx3, then gTTS.
 
 Note: pyttsx3 is generally best on Windows (uses SAPI), gTTS uses Google Translate's TTS API and will produce MP3 output if used. The `/api/tts` endpoint returns audio_base64 and the format field (mp3 or wav). The client will use the returned format to play the audio.
-
 
 ---
 

@@ -1,0 +1,32 @@
+[Unit]
+Description=Aria AI Character Automation Service
+After=network.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=YOUR_USERNAME
+Group=YOUR_USERNAME
+WorkingDirectory=/workspaces/Aria
+Environment="PATH=/usr/local/bin:/usr/bin:/bin"
+Environment="PYTHONUNBUFFERED=1"
+
+# Change mode to: full, server, or training
+ExecStart=/usr/bin/python3 /workspaces/Aria/scripts/aria_automation.py --mode full
+
+# Restart policy
+Restart=on-failure
+RestartSec=10
+StartLimitInterval=200
+StartLimitBurst=5
+
+# Logging
+StandardOutput=append:/workspaces/Aria/data_out/aria_automation/service.log
+StandardError=append:/workspaces/Aria/data_out/aria_automation/service_error.log
+
+# Resource limits (optional)
+MemoryLimit=4G
+CPUQuota=200%
+
+[Install]
+WantedBy=multi-user.target

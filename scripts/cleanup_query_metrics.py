@@ -13,6 +13,7 @@ Environment Variables:
     QAI_QUERY_RETENTION_DAYS: Override retention period (default: 7)
 """
 
+from shared.sql_engine import get_engine
 import argparse
 import logging
 import os
@@ -25,7 +26,6 @@ script_dir = Path(__file__).parent
 repo_root = script_dir.parent
 sys.path.insert(0, str(repo_root))
 
-from shared.sql_engine import get_engine
 
 # Allowlist of valid table names to prevent SQL injection
 ALLOWED_TABLES = frozenset({"QAI_QueryMetrics", "QAI_QueryMetrics_Archive"})
@@ -33,13 +33,13 @@ ALLOWED_TABLES = frozenset({"QAI_QueryMetrics", "QAI_QueryMetrics_Archive"})
 
 def validate_table_name(table_name: str) -> str:
     """Validate table name against allowlist to prevent SQL injection.
-    
+
     Args:
         table_name: The table name to validate
-        
+
     Returns:
         The validated table name if valid
-        
+
     Raises:
         ValueError: If table name is not in the allowlist
     """
@@ -95,35 +95,45 @@ ALLOWED_TABLES = frozenset({
 def validate_table_name(table_name: str) -> str:
     """Validate table name against whitelist to prevent SQL injection."""
     if table_name not in ALLOWED_TABLES:
-        raise ValueError(f"Invalid table name: {table_name}. Allowed tables: {', '.join(sorted(ALLOWED_TABLES))}")
+        raise ValueError(
+            f"Invalid table name: {table_name}. Allowed tables: {', '.join(sorted(ALLOWED_TABLES))}")
     return table_name
+
+# Backward-compatible alias used by unit tests
+# (tests import _validate_table_name, which maps to validate_table_name)
+
+
+def _validate_table_name(table_name: str) -> str:
+    return validate_table_name(table_name)
 
 
 def get_retention_days(args_retention):
     """Get retention period from args, env var, or default."""
     if args_retention is not None:
         return args_retention
-    
+
     env_retention = os.getenv("QAI_QUERY_RETENTION_DAYS")
     if env_retention:
         try:
             return int(env_retention)
         except ValueError:
-            logger.warning(f"Invalid QAI_QUERY_RETENTION_DAYS value: {env_retention}, using default")
-    
+            logger.warning(
+                f"Invalid QAI_QUERY_RETENTION_DAYS value: {env_retention}, using default")
+
     return 7  # Default to 7 days
 
 
 def count_old_records(engine, table_name, cutoff_timestamp):
     """Count records older than cutoff timestamp."""
     from sqlalchemy import text
-    
+
     # Validate table name against allowlist to prevent SQL injection
     safe_table = validate_table_name(table_name)
-    
+
     try:
-        query = text(f"SELECT COUNT(*) FROM {safe_table} WHERE executed_at < :cutoff")
-        
+        query = text(
+            f"SELECT COUNT(*) FROM {safe_table} WHERE executed_at < :cutoff")
+
         with engine.connect() as conn:
             result = conn.execute(query, {"cutoff": cutoff_timestamp})
             count = result.scalar()
@@ -136,17 +146,19 @@ def count_old_records(engine, table_name, cutoff_timestamp):
 def delete_old_records(engine, table_name, cutoff_timestamp, dry_run=False):
     """Delete records older than cutoff timestamp."""
     from sqlalchemy import text
-    
+
     # Validate table name against allowlist to prevent SQL injection
     safe_table = validate_table_name(table_name)
-    
+
     if dry_run:
-        logger.info(f"[DRY RUN] Would delete records from {safe_table} where executed_at < {cutoff_timestamp}")
+        logger.info(
+            f"[DRY RUN] Would delete records from {safe_table} where executed_at < {cutoff_timestamp}")
         return True
-    
+
     try:
-        delete_query = text(f"DELETE FROM {safe_table} WHERE executed_at < :cutoff")
-        
+        delete_query = text(
+            f"DELETE FROM {safe_table} WHERE executed_at < :cutoff")
+
         with engine.begin() as conn:
             result = conn.execute(delete_query, {"cutoff": cutoff_timestamp})
             deleted_count = result.rowcount
@@ -160,16 +172,16 @@ def delete_old_records(engine, table_name, cutoff_timestamp, dry_run=False):
 def get_table_stats(engine, table_name):
     """Get basic statistics about the table."""
     from sqlalchemy import text
-    
+
     # Validate table name against allowlist to prevent SQL injection
     safe_table = validate_table_name(table_name)
-    
+
     try:
         # Total count
         count_query = text(f"SELECT COUNT(*) FROM {safe_table}")
         with engine.connect() as conn:
             total_count = conn.execute(count_query).scalar()
-        
+
         # Oldest and newest timestamps - table_name validated by validate_table_name() above
         stats_query = text(f"""
             SELECT 
@@ -177,7 +189,7 @@ def get_table_stats(engine, table_name):
                 MAX(executed_at) as newest
             FROM {safe_table}
         """)
-        
+
         with engine.connect() as conn:
             result = conn.execute(stats_query).fetchone()
             if result:
@@ -187,7 +199,7 @@ def get_table_stats(engine, table_name):
                     "oldest": oldest,
                     "newest": newest,
                 }
-        
+
         return {"total_count": total_count}
     except Exception as e:
         logger.warning(f"Failed to get table stats: {e}")
@@ -197,84 +209,92 @@ def get_table_stats(engine, table_name):
 def main():
     """Main cleanup execution."""
     args = parse_args()
-    
+
     logger.info("========================================")
     logger.info("Query Metrics Retention Cleanup")
     logger.info("========================================")
-    
+
     # Get retention period
     retention_days = get_retention_days(args.retention_days)
     logger.info(f"Retention period: {retention_days} days")
     logger.info(f"Target table: {args.table}")
     logger.info(f"Mode: {'DRY RUN' if args.dry_run else 'LIVE'}")
-    
+
     # Get database engine
     engine = get_engine()
     if not engine:
-        logger.error("Database engine not available. Set QAI_SQL_URL or QAI_DB_CONN environment variable.")
+        logger.error(
+            "Database engine not available. Set QAI_SQL_URL or QAI_DB_CONN environment variable.")
         return 1
-    
+
     # Calculate cutoff timestamp
     cutoff = datetime.now() - timedelta(days=retention_days)
     cutoff_timestamp = cutoff.timestamp()
     logger.info(f"Cutoff date: {cutoff.strftime('%Y-%m-%d %H:%M:%S')}")
-    
+
     # Get current table stats
     logger.info("")
     logger.info("Current table statistics:")
     stats = get_table_stats(engine, args.table)
     logger.info(f"  Total records: {stats.get('total_count', 'unknown')}")
-    
+
     if stats.get("oldest"):
-        logger.info(f"  Oldest record: {datetime.fromtimestamp(stats['oldest']).strftime('%Y-%m-%d %H:%M:%S')}")
+        logger.info(
+            f"  Oldest record: {datetime.fromtimestamp(stats['oldest']).strftime('%Y-%m-%d %H:%M:%S')}")
     if stats.get("newest"):
-        logger.info(f"  Newest record: {datetime.fromtimestamp(stats['newest']).strftime('%Y-%m-%d %H:%M:%S')}")
-    
+        logger.info(
+            f"  Newest record: {datetime.fromtimestamp(stats['newest']).strftime('%Y-%m-%d %H:%M:%S')}")
+
     # Count records to delete
     logger.info("")
     logger.info("Analyzing records for deletion...")
     old_count = count_old_records(engine, args.table, cutoff_timestamp)
-    
+
     if old_count is None:
         logger.error("Failed to count old records")
         return 1
-    
+
     if old_count == 0:
-        logger.info("No records found older than retention period. Nothing to delete.")
+        logger.info(
+            "No records found older than retention period. Nothing to delete.")
         return 0
-    
+
     logger.info(f"Found {old_count} records older than {retention_days} days")
-    
+
     if stats.get("total_count", 0) > 0:
         percentage = (old_count / stats["total_count"]) * 100
         logger.info(f"Will delete {percentage:.1f}% of total records")
-    
+
     # Delete old records
     logger.info("")
-    deleted = delete_old_records(engine, args.table, cutoff_timestamp, dry_run=args.dry_run)
-    
+    deleted = delete_old_records(
+        engine, args.table, cutoff_timestamp, dry_run=args.dry_run)
+
     if deleted is None:
         logger.error("Cleanup failed")
         return 1
-    
+
     # Final stats
     if not args.dry_run:
         logger.info("")
         logger.info("Final table statistics:")
         final_stats = get_table_stats(engine, args.table)
-        logger.info(f"  Total records: {final_stats.get('total_count', 'unknown')}")
-        
+        logger.info(
+            f"  Total records: {final_stats.get('total_count', 'unknown')}")
+
         if final_stats.get("oldest"):
-            logger.info(f"  Oldest record: {datetime.fromtimestamp(final_stats['oldest']).strftime('%Y-%m-%d %H:%M:%S')}")
-    
+            logger.info(
+                f"  Oldest record: {datetime.fromtimestamp(final_stats['oldest']).strftime('%Y-%m-%d %H:%M:%S')}")
+
     logger.info("")
     logger.info("========================================")
     logger.info("Cleanup Complete")
     logger.info("========================================")
-    
+
     if args.dry_run:
-        logger.info("This was a DRY RUN. Re-run without --dry-run to delete records.")
-    
+        logger.info(
+            "This was a DRY RUN. Re-run without --dry-run to delete records.")
+
     return 0
 
 
