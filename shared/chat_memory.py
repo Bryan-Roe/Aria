@@ -57,9 +57,10 @@ def _get_embedding_client(provider: str) -> Any:
     
     Thread-safe implementation using double-checked locking pattern.
     """
-    # Fast path: check cache without lock
-    if provider in _embedding_clients:
-        return _embedding_clients[provider]
+    # Always check cache under lock for thread safety
+    with _embedding_clients_lock:
+        if provider in _embedding_clients:
+            return _embedding_clients[provider]
     
     # Create client outside lock to avoid blocking during I/O
     client = None
