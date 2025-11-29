@@ -12,10 +12,10 @@ Features:
 - Customizable templates
 
 Usage examples (PowerShell):
-  python .\scripts\results_exporter.py --source autotrain --format csv
-  python .\scripts\results_exporter.py --source quantum_autorun --format markdown
-  python .\scripts\results_exporter.py --all --format excel
-  python .\scripts\results_exporter.py --compare autotrain quantum_autorun --format html
+  python .\\scripts\\results_exporter.py --source autotrain --format csv
+  python .\\scripts\\results_exporter.py --source quantum_autorun --format markdown
+  python .\\scripts\\results_exporter.py --all --format excel
+  python .\\scripts\\results_exporter.py --compare autotrain quantum_autorun --format html
 """
 
 from __future__ import annotations
@@ -267,7 +267,7 @@ class ResultsExporter:
     def export_comparison(self, orchestrators: List[str], format: str, output_file: Path):
         """Export comparison of multiple orchestrators."""
         comparison = {
-            "generated_at": datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "generated_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
             "orchestrators": []
         }
         

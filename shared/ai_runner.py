@@ -84,7 +84,7 @@ def run_chat_once(
     if os.getenv("WRITE_AI_RUN_LOG", "1") == "1":
         try:
             LOG_DIR.mkdir(parents=True, exist_ok=True)
-            ts = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
+            ts = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
             log_path = LOG_DIR / f"auto_run_{ts}.txt"
             with log_path.open("w", encoding="utf-8") as f:
                 f.write(f"PROMPT: {prompt}\n")

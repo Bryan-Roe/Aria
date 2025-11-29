@@ -142,7 +142,7 @@ def put_value(key: str, value: str) -> bool:
             conn = _get_sqlite_conn()
             conn.execute(
                 "INSERT OR REPLACE INTO QAI_KeyValue (k, v, updated_at) VALUES (?, ?, ?)",
-                (key, value, datetime.utcnow().isoformat()),
+                (key, value, datetime.now(timezone.utc).isoformat()),
             )
             conn.commit()
             return True

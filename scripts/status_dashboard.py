@@ -11,10 +11,10 @@ Features:
 - Export to multiple formats (terminal, JSON, markdown, HTML)
 
 Usage:
-  python .\scripts\status_dashboard.py                    # Terminal view
-  python .\scripts\status_dashboard.py --watch            # Auto-refresh every 10s
-  python .\scripts\status_dashboard.py --export markdown  # Generate report
-  python .\scripts\status_dashboard.py --alerts           # Show only problems
+  python .\\scripts\\status_dashboard.py                    # Terminal view
+  python .\\scripts\\status_dashboard.py --watch            # Auto-refresh every 10s
+  python .\\scripts\\status_dashboard.py --export markdown  # Generate report
+  python .\\scripts\\status_dashboard.py --alerts           # Show only problems
 """
 from __future__ import annotations
 
@@ -300,7 +300,7 @@ def render_markdown(statuses: List[OrchestratorStatus], resources: Dict[str, Any
     lines = [
         "# QAI Status Dashboard",
         "",
-        f"_Generated: {datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')} UTC_",
+        f"_Generated: {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S')} UTC_",
         "",
         "## Orchestrators",
         "",
@@ -341,7 +341,7 @@ def render_markdown(statuses: List[OrchestratorStatus], resources: Dict[str, Any
 def render_json(statuses: List[OrchestratorStatus], resources: Dict[str, Any]) -> str:
     """Render dashboard as JSON"""
     data = {
-        "generated_at": datetime.utcnow().isoformat() + "Z",
+        "generated_at": datetime.now(timezone.utc).isoformat() + "Z",
         "orchestrators": [
             {
                 "name": s.name,
