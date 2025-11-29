@@ -354,33 +354,31 @@ class TestCosineSimOptimizations:
         assert abs(numpy_result - python_result) < 1e-6
     
     def test_cosine_edge_cases(self):
-        """Test cosine similarity edge cases."""
+        """Test cosine similarity edge cases using the actual production implementation."""
+        import sys
+        sys.path.insert(0, str(Path(__file__).parent.parent / "shared"))
+        from chat_memory import _cosine
+        
         # Empty vectors
-        assert _cosine_pure_python([], []) == 0.0
+        assert _cosine([], []) == 0.0
         
         # Mismatched lengths
-        assert _cosine_pure_python([1, 2], [1, 2, 3]) == 0.0
+        assert _cosine([1, 2], [1, 2, 3]) == 0.0
         
         # Identical vectors (should be 1.0)
         a = [1.0, 2.0, 3.0]
-        result = _cosine_pure_python(a, a)
+        result = _cosine(a, a)
         assert abs(result - 1.0) < 1e-6
         
         # Orthogonal vectors (should be 0.0)
         a = [1.0, 0.0]
         b = [0.0, 1.0]
-        result = _cosine_pure_python(a, b)
+        result = _cosine(a, b)
         assert abs(result) < 1e-6
-
-
-def _cosine_pure_python(a, b) -> float:
-    """Pure Python cosine similarity for testing."""
-    if not a or not b or len(a) != len(b):
-        return 0.0
-    dot = sum(x * y for x, y in zip(a, b))
-    na = math.sqrt(sum(x * x for x in a)) or 1.0
-    nb = math.sqrt(sum(y * y for y in b)) or 1.0
-    return dot / (na * nb)
+        
+        # Zero vectors (should be 0.0)
+        result = _cosine([0.0, 0.0], [1.0, 1.0])
+        assert result == 0.0
 
 
 class TestLMStudioCaching:
