@@ -28,3 +28,4 @@ updates:
       github-actions:
         patterns:
           - "*"
+
