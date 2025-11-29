@@ -10,6 +10,52 @@ A lightweight, local-first chat app you can talk to from your terminal. It works
 - Auto-selects provider based on available environment variables
 - Saves conversations to `logs/*.jsonl`
 - One-shot mode for quick prompts
+- **AGI Provider** with advanced reasoning capabilities
+
+## AGI Provider (Advanced Reasoning)
+
+The AGI provider adds advanced reasoning capabilities to Aria:
+
+### Features
+
+- **Chain-of-Thought Reasoning**: Breaks down complex queries into logical steps
+- **Task Decomposition**: Identifies sub-goals for complex tasks
+- **Self-Reflection**: Evaluates and improves responses before delivery
+- **Context Management**: Maintains relevant memory across interactions
+- **Aria Movement Integration**: Automatic movement tag generation
+
+### Quick Start
+
+```powershell
+# Use AGI provider (wraps best available underlying provider)
+python .\talk-to-ai\src\chat_cli.py --provider agi --once "Explain quantum computing step by step"
+
+# Interactive AGI chat
+python .\talk-to-ai\src\chat_cli.py --provider agi
+
+# Verbose mode (shows reasoning steps)
+$env:AGI_VERBOSE = "true"
+python .\talk-to-ai\src\chat_cli.py --provider agi
+```
+
+### How It Works
+
+The AGI provider wraps an underlying provider (Azure OpenAI, OpenAI, or Local) and enhances responses through:
+
+1. **Query Analysis**: Determines complexity, intent, and domain
+2. **Task Decomposition**: Breaks complex queries into manageable subtasks
+3. **Chain-of-Thought**: Generates step-by-step reasoning
+4. **Response Generation**: Produces enhanced responses with context
+5. **Self-Reflection**: Evaluates and improves the response
+
+### Aria Movement Commands
+
+When using AGI with Aria movement requests, the provider automatically generates movement tags:
+
+```powershell
+python .\talk-to-ai\src\chat_cli.py --provider agi --once "Move Aria left"
+# Response: I'll move to the left! [aria:walk:left]
+```
 
 ## Quick start (no keys required)
 
@@ -71,7 +117,7 @@ python .\talk-to-ai\src\chat_cli.py
 
 Useful flags:
 
-- `--provider [auto|openai|azure|local]` – default: `auto`
+- `--provider [auto|openai|azure|local|agi|quantum|lmstudio|lora]` – default: `auto`
 - `--system "..."` – set a custom system prompt
 - `--model <name>` – override model/deployment name (provider-specific)
 - `--once "message"` – run one message and exit
