@@ -570,4 +570,6 @@ def _start_progress_emitter(interval_sec: int = 5):
 _start_progress_emitter()
 
 if __name__ == "__main__":
-    socketio.run(app, debug=True)
+    import os
+    debug_mode = os.environ.get("FLASK_DEBUG", "false").lower() == "true"
+    socketio.run(app, debug=debug_mode)

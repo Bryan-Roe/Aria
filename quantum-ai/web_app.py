@@ -920,4 +920,7 @@ if __name__ == '__main__':
     print("📊 API Documentation: http://localhost:5000/api/health")
     print("\n" + "="*70 + "\n")
     
-    app.run(host='0.0.0.0', port=5000, debug=True, threaded=True)
+    import os
+    debug_mode = os.environ.get("FLASK_DEBUG", "false").lower() == "true"
+    host = os.environ.get("FLASK_HOST", "127.0.0.1")  # Default to localhost for security
+    app.run(host=host, port=5000, debug=debug_mode, threaded=True)

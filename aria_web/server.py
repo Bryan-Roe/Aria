@@ -1195,7 +1195,9 @@ def main():
     os.chdir(web_dir)
     
     port = 8080
-    server = HTTPServer(('0.0.0.0', port), AriaRequestHandler)
+    # Default to localhost for security; use environment variable to override if needed
+    host = os.environ.get('ARIA_HOST', '127.0.0.1')
+    server = HTTPServer((host, port), AriaRequestHandler)
     
     print("\n" + "=" * 70)
     print("🎨 Aria Visual Command System - Web Server")

@@ -85,6 +85,20 @@ def parse_args():
     return parser.parse_args()
 
 
+# Whitelist of allowed table names to prevent SQL injection
+ALLOWED_TABLES = frozenset({
+    "QAI_QueryMetrics",
+    "query_metrics",
+})
+
+
+def validate_table_name(table_name: str) -> str:
+    """Validate table name against whitelist to prevent SQL injection."""
+    if table_name not in ALLOWED_TABLES:
+        raise ValueError(f"Invalid table name: {table_name}. Allowed tables: {', '.join(sorted(ALLOWED_TABLES))}")
+    return table_name
+
+
 def get_retention_days(args_retention):
     """Get retention period from args, env var, or default."""
     if args_retention is not None:
@@ -156,7 +170,7 @@ def get_table_stats(engine, table_name):
         with engine.connect() as conn:
             total_count = conn.execute(count_query).scalar()
         
-        # Oldest and newest timestamps
+        # Oldest and newest timestamps - table_name validated by validate_table_name() above
         stats_query = text(f"""
             SELECT 
                 MIN(executed_at) as oldest,

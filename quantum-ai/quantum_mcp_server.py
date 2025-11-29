@@ -382,9 +382,9 @@ async def create_circuit_handler(args: Dict) -> List[TextContent]:
     if circuit is None:
         return [TextContent(type="text", text="Invalid circuit type or missing gates for custom type")]
     
-    # Generate circuit ID
+    # Generate circuit ID using SHA-256 (MD5 is weak for security)
     import hashlib
-    circuit_id = hashlib.md5(str(circuit).encode()).hexdigest()[:12]
+    circuit_id = hashlib.sha256(str(circuit).encode()).hexdigest()[:12]
     
     # Cache the circuit with TTL
     quantum_state["circuit_cache"].put(circuit_id, circuit)

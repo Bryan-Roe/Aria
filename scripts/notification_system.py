@@ -89,6 +89,7 @@ class NotificationManager:
     
     def _send_linux(self, title: str, message: str, icon: str):
         """Send Linux notification using notify-send"""
+        import subprocess
         icon_name = {
             "info": "dialog-information",
             "success": "dialog-ok",
