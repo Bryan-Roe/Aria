@@ -10,6 +10,7 @@ import numpy as np
 import pandas as pd
 from pathlib import Path
 import json
+import re
 import time
 import threading
 from datetime import datetime
@@ -641,12 +642,35 @@ def list_results():
 def get_result_detail(filename):
     """Get detailed results for a training session"""
     results_dir = Path(__file__).parent / "results"
+    
+    # Validate filename to prevent path traversal attacks
+    # Only allow alphanumeric, underscores, dashes, and .json extension
+    if not re.match(r'^[A-Za-z0-9_\-]+\.json$', filename):
+        return jsonify({"error": "Invalid filename"}), 400
+    
     result_file = results_dir / filename
     
-    if not result_file.exists():
+    # Ensure path is within results directory (additional protection)
+    try:
+        resolved_path = result_file.resolve()
+        allowed_dir = results_dir.resolve()
+        # Verify the resolved path is within allowed_dir (path containment check)
+        # Python 3.9+: use is_relative_to; fallback for earlier versions
+        if hasattr(resolved_path, "is_relative_to"):
+            if not resolved_path.is_relative_to(allowed_dir):
+                return jsonify({"error": "Invalid file path"}), 403
+        else:
+            try:
+                resolved_path.relative_to(allowed_dir)
+            except ValueError:
+                return jsonify({"error": "Invalid file path"}), 403
+    except (OSError, RuntimeError):
+        return jsonify({"error": "Invalid file path"}), 400
+    
+    if not resolved_path.exists():
         return jsonify({"error": "Result file not found"}), 404
     
-    with open(result_file) as f:
+    with open(resolved_path) as f:
         data = json.load(f)
     
     return jsonify(data)
@@ -797,7 +821,32 @@ def load_checkpoint():
         return jsonify({"error": "No checkpoint path provided"}), 400
     
     try:
-        checkpoint = np.load(checkpoint_path, allow_pickle=True)
+        # Validate path to prevent path traversal attacks
+        checkpoint_path = Path(checkpoint_path)
+        checkpoint_dir = Path(__file__).parent / "checkpoints"
+        
+        # Resolve to absolute paths to prevent traversal
+        try:
+            resolved_path = checkpoint_path.resolve()
+            allowed_dir = checkpoint_dir.resolve()
+        except (OSError, RuntimeError) as e:
+            return jsonify({"error": "Invalid checkpoint path"}), 400
+        
+        # Verify the resolved path is within allowed_dir (path containment check)
+        # Python 3.9+: use is_relative_to; fallback for earlier versions
+        if hasattr(resolved_path, "is_relative_to"):
+            if not resolved_path.is_relative_to(allowed_dir):
+                return jsonify({"error": "Invalid checkpoint path: must be within checkpoints directory"}), 403
+        else:
+            try:
+                resolved_path.relative_to(allowed_dir)
+            except ValueError:
+                return jsonify({"error": "Invalid checkpoint path: must be within checkpoints directory"}), 403
+        
+        if not resolved_path.exists():
+            return jsonify({"error": "Checkpoint file not found"}), 404
+        
+        checkpoint = np.load(str(resolved_path), allow_pickle=True)
         weights = checkpoint['weights']
         epoch = int(checkpoint['epoch'])
         config = checkpoint['config'].item() if isinstance(checkpoint['config'], np.ndarray) else checkpoint['config']

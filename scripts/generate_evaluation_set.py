@@ -4,7 +4,7 @@ By default selects a stratified sample across provided source datasets ensuring
 hashes are not reused in training splits.
 
 Usage (PowerShell):
-  python .\scripts\generate_evaluation_set.py --sources datasets/chat/app_repo datasets/chat/chat_logs datasets/chat/dolly \
+  python .\\scripts\\generate_evaluation_set.py --sources datasets/chat/app_repo datasets/chat/chat_logs datasets/chat/dolly \
       --out-dir datasets/chat/eval_mixed --per-source 50
 
 Result:

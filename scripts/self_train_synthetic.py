@@ -9,8 +9,8 @@ Iterative self-improvement loop:
 5. Repeat for N iterations
 
 Usage:
-  python .\scripts\self_train_synthetic.py --model microsoft/Phi-3.5-mini-instruct --iterations 3 --samples-per-iter 100
-  python .\scripts\self_train_synthetic.py --base-adapter data_out/lora_training/phi35_lr_low --iterations 2
+  python .\\scripts\\self_train_synthetic.py --model microsoft/Phi-3.5-mini-instruct --iterations 3 --samples-per-iter 100
+  python .\\scripts\\self_train_synthetic.py --base-adapter data_out/lora_training/phi35_lr_low --iterations 2
 """
 from __future__ import annotations
 

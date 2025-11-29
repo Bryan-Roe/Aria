@@ -27,6 +27,30 @@ sys.path.insert(0, str(repo_root))
 
 from shared.sql_engine import get_engine
 
+# Allowlist of valid table names to prevent SQL injection
+ALLOWED_TABLES = frozenset({"QAI_QueryMetrics", "QAI_QueryMetrics_Archive"})
+
+
+def validate_table_name(table_name: str) -> str:
+    """Validate table name against allowlist to prevent SQL injection.
+    
+    Args:
+        table_name: The table name to validate
+        
+    Returns:
+        The validated table name if valid
+        
+    Raises:
+        ValueError: If table name is not in the allowlist
+    """
+    if table_name not in ALLOWED_TABLES:
+        raise ValueError(
+            f"Invalid table name: '{table_name}'. "
+            f"Allowed tables: {', '.join(sorted(ALLOWED_TABLES))}"
+        )
+    return table_name
+
+
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
@@ -94,11 +118,11 @@ def count_old_records(engine, table_name, cutoff_timestamp):
     """Count records older than cutoff timestamp."""
     from sqlalchemy import text
     
-    # Validate table name to prevent SQL injection
-    table_name = validate_table_name(table_name)
+    # Validate table name against allowlist to prevent SQL injection
+    safe_table = validate_table_name(table_name)
     
     try:
-        query = text(f"SELECT COUNT(*) FROM {table_name} WHERE executed_at < :cutoff")  # nosec B608
+        query = text(f"SELECT COUNT(*) FROM {safe_table} WHERE executed_at < :cutoff")
         
         with engine.connect() as conn:
             result = conn.execute(query, {"cutoff": cutoff_timestamp})
@@ -113,20 +137,20 @@ def delete_old_records(engine, table_name, cutoff_timestamp, dry_run=False):
     """Delete records older than cutoff timestamp."""
     from sqlalchemy import text
     
-    # Validate table name to prevent SQL injection
-    table_name = validate_table_name(table_name)
+    # Validate table name against allowlist to prevent SQL injection
+    safe_table = validate_table_name(table_name)
     
     if dry_run:
-        logger.info(f"[DRY RUN] Would delete records from {table_name} where executed_at < {cutoff_timestamp}")
+        logger.info(f"[DRY RUN] Would delete records from {safe_table} where executed_at < {cutoff_timestamp}")
         return True
     
     try:
-        delete_query = text(f"DELETE FROM {table_name} WHERE executed_at < :cutoff")  # nosec B608
+        delete_query = text(f"DELETE FROM {safe_table} WHERE executed_at < :cutoff")
         
         with engine.begin() as conn:
             result = conn.execute(delete_query, {"cutoff": cutoff_timestamp})
             deleted_count = result.rowcount
-            logger.info(f"Deleted {deleted_count} records from {table_name}")
+            logger.info(f"Deleted {deleted_count} records from {safe_table}")
             return deleted_count
     except Exception as e:
         logger.error(f"Failed to delete old records: {e}")
@@ -137,12 +161,12 @@ def get_table_stats(engine, table_name):
     """Get basic statistics about the table."""
     from sqlalchemy import text
     
-    # Validate table name to prevent SQL injection
-    table_name = validate_table_name(table_name)
+    # Validate table name against allowlist to prevent SQL injection
+    safe_table = validate_table_name(table_name)
     
     try:
-        # Total count - table_name validated by validate_table_name() above
-        count_query = text(f"SELECT COUNT(*) FROM {table_name}")  # nosec B608
+        # Total count
+        count_query = text(f"SELECT COUNT(*) FROM {safe_table}")
         with engine.connect() as conn:
             total_count = conn.execute(count_query).scalar()
         
@@ -151,8 +175,8 @@ def get_table_stats(engine, table_name):
             SELECT 
                 MIN(executed_at) as oldest,
                 MAX(executed_at) as newest
-            FROM {table_name}
-        """)  # nosec B608
+            FROM {safe_table}
+        """)
         
         with engine.connect() as conn:
             result = conn.execute(stats_query).fetchone()

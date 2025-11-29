@@ -1,0 +1,51 @@
+version: 1
+
+# Ultra-fast training - maximum speed optimization
+# 32 samples, batch_size 4, reduced sequence length, Phi-3.5 only (proven stable)
+
+jobs:
+  # ===== ULTRA QUICK (32 samples, 1-2 min) =====
+  
+  - name: phi35_ultra_quick
+    category: ultrafast
+    runner: hf
+    config: AI/microsoft_phi-silica-3.6_v1/lora/lora_ultrafast.yaml
+    dataset: datasets/chat/mixed_chat
+    save_dir: data_out/lora_training/phi35_ultra
+    epochs: 1
+    max_train_samples: 32
+    max_eval_samples: 8
+    learning_rate: 0.0005
+    lora_dropout: 0.05
+    lora_rank: 4
+    hf_model_id: microsoft/Phi-3.5-mini-instruct
+    
+  # ===== RAPID TEST (64 samples, 3-4 min) =====
+  
+  - name: phi35_rapid_mixed
+    category: ultrafast
+    runner: hf
+    config: AI/microsoft_phi-silica-3.6_v1/lora/lora_ultrafast.yaml
+    dataset: datasets/chat/mixed_chat
+    save_dir: data_out/lora_training/phi35_rapid_mixed
+    epochs: 1
+    max_train_samples: 64
+    max_eval_samples: 16
+    learning_rate: 0.0004
+    lora_dropout: 0.05
+    lora_rank: 4
+    hf_model_id: microsoft/Phi-3.5-mini-instruct
+
+  - name: phi35_rapid_comprehensive
+    category: ultrafast
+    runner: hf
+    config: AI/microsoft_phi-silica-3.6_v1/lora/lora_ultrafast.yaml
+    dataset: datasets/comprehensive
+    save_dir: data_out/lora_training/phi35_rapid_comprehensive
+    epochs: 1
+    max_train_samples: 64
+    max_eval_samples: 16
+    learning_rate: 0.0004
+    lora_dropout: 0.05
+    lora_rank: 4
+    hf_model_id: microsoft/Phi-3.5-mini-instruct

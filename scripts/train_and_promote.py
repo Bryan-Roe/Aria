@@ -185,7 +185,7 @@ Duration: {summary['total_duration']:.1f}s
 Best Model: {summary.get('best_model', 'N/A')}
 """
         
-        response = requests.post(webhook_url, json={"text": message}, timeout=30)
+        response = requests.post(webhook_url, json={"text": message})
         log(f"Notification sent: {response.status_code}")
     except Exception as e:
         log(f"Notification failed: {e}", "WARNING")

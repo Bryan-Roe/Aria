@@ -1,8 +1,8 @@
 {
-  "best_global_step": null,
-  "best_metric": null,
-  "best_model_checkpoint": null,
-  "epoch": 1.0,
+  "best_global_step": 64,
+  "best_metric": 1.9412118196487427,
+  "best_model_checkpoint": "data_out/lora_training/checkpoint-64",
+  "epoch": 3.25,
   "eval_steps": 64,
   "global_step": 64,
   "is_hyper_param_search": false,
@@ -10,26 +10,26 @@
   "is_world_process_zero": true,
   "log_history": [
     {
-      "epoch": 0.5,
-      "grad_norm": 2.623917818069458,
-      "learning_rate": 0.000103125,
-      "loss": 2.7563,
+      "epoch": 1.25,
+      "grad_norm": 0.8077470064163208,
+      "learning_rate": 6.2e-05,
+      "loss": 2.0982,
       "step": 32
     },
     {
-      "epoch": 1.0,
-      "grad_norm": 0.6834685206413269,
-      "learning_rate": 3.125e-06,
-      "loss": 2.2652,
+      "epoch": 3.25,
+      "grad_norm": 0.9677475094795227,
+      "learning_rate": 0.000126,
+      "loss": 1.8387,
       "step": 64
     },
     {
-      "epoch": 1.0,
-      "eval_loss": 2.429543972015381,
-      "eval_model_preparation_time": 0.004,
-      "eval_runtime": 73.436,
-      "eval_samples_per_second": 0.218,
-      "eval_steps_per_second": 0.027,
+      "epoch": 3.25,
+      "eval_loss": 1.9412118196487427,
+      "eval_model_preparation_time": 0.005,
+      "eval_runtime": 46.1401,
+      "eval_samples_per_second": 0.564,
+      "eval_steps_per_second": 0.087,
       "step": 64
     }
   ],
@@ -39,6 +39,15 @@
   "num_train_epochs": 9223372036854775807,
   "save_steps": 64,
   "stateful_callbacks": {
+    "EarlyStoppingCallback": {
+      "args": {
+        "early_stopping_patience": 3,
+        "early_stopping_threshold": 0.01
+      },
+      "attributes": {
+        "early_stopping_patience_counter": 0
+      }
+    },
     "TrainerControl": {
       "args": {
         "should_epoch_stop": false,
@@ -50,7 +59,7 @@
       "attributes": {}
     }
   },
-  "total_flos": 199383639496704.0,
+  "total_flos": 245987054616576.0,
   "train_batch_size": 1,
   "trial_name": null,
   "trial_params": null
