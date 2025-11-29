@@ -11,19 +11,20 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO_ROOT / "quantum-ai"))
 
 
+@pytest.fixture
+def client():
+    """Create Flask test client."""
+    from web_app import app
+    app.config['TESTING'] = True
+    with app.test_client() as client:
+        yield client
+
+
 class TestGetResultDetailSecurity:
     """Test path traversal prevention in get_result_detail endpoint."""
 
-    @pytest.fixture
-    def client(self):
-        """Create Flask test client."""
-        from web_app import app
-        app.config['TESTING'] = True
-        with app.test_client() as client:
-            yield client
-
     def test_valid_filename_format(self, client):
-        """Verify valid filename format passes validation."""
+        """Verify valid filename format is accepted."""
         # This will return 404 since file doesn't exist, but shouldn't return 400
         response = client.get('/api/results/training_20250101_120000.json')
         # Should not be 400 (invalid format) - filename format is valid
@@ -95,7 +96,7 @@ class TestLoadCheckpointSecurity:
 
     def test_rejects_missing_checkpoint_path(self, client):
         """Verify missing checkpoint path is rejected."""
-        response = client.post('/api/load_checkpoint', 
+        response = client.post('/api/load_checkpoint',
                                json={},
                                content_type='application/json')
         assert response.status_code == 400
@@ -129,9 +130,9 @@ class TestLoadCheckpointSecurity:
     def test_valid_checkpoint_path_returns_404_if_not_exists(self, client):
         """Verify valid checkpoint path within directory returns 404 if file doesn't exist."""
         # Create checkpoints dir path
-        checkpoint_dir = Path(__file__).resolve().parents[1] / "quantum-ai" / "checkpoints"
+        checkpoint_dir = REPO_ROOT / "quantum-ai" / "checkpoints"
         valid_path = str(checkpoint_dir / "nonexistent_checkpoint.npz")
-        
+
         response = client.post('/api/load_checkpoint',
                                json={"checkpoint_path": valid_path},
                                content_type='application/json')
@@ -145,11 +146,11 @@ class TestPathContainmentFallback:
     def test_is_relative_to_fallback_logic(self):
         """Test the fallback logic for Python < 3.9."""
         from pathlib import Path
-        
+
         # Test case: valid relative path
         allowed_dir = Path("/app/results")
         valid_path = Path("/app/results/file.json")
-        
+
         # Simulate is_relative_to check with fallback
         if hasattr(valid_path, "is_relative_to"):
             assert valid_path.is_relative_to(allowed_dir)
@@ -164,10 +165,10 @@ class TestPathContainmentFallback:
     def test_fallback_rejects_traversal(self):
         """Test that fallback correctly rejects path traversal."""
         from pathlib import Path
-        
+
         allowed_dir = Path("/app/results")
-        invalid_path = Path("/app/other/file.json")
-        
+        invalid_path = Path("/etc/passwd")
+
         # Simulate is_relative_to check with fallback
         if hasattr(invalid_path, "is_relative_to"):
             assert not invalid_path.is_relative_to(allowed_dir)

@@ -19,6 +19,7 @@ import logging
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Tuple, Dict, Optional
+import re
 
 ROOT_DIR = Path(__file__).resolve().parent.parent
 CHAT_CLI = ROOT_DIR / "talk-to-ai" / "src" / "chat_cli.py"
@@ -48,7 +49,8 @@ def run_chat_once(
     provider = provider or os.getenv("DEFAULT_AI_PROVIDER", "local")
     system = system or os.getenv("SYSTEM_PROMPT")
 
-    cmd = [sys.executable, str(CHAT_CLI), "--provider", provider, "--once", prompt]
+    cmd = [sys.executable, str(CHAT_CLI), "--provider",
+           provider, "--once", prompt]
     if model:
         cmd.extend(["--model", model])
     if system:
@@ -63,11 +65,17 @@ def run_chat_once(
 
     raw_output = proc.stdout
 
-    # Strip ANSI color codes for easier consumption
-    import re  # local import to avoid overhead if unused at import time
+    # Strip ANSI color codes for easier consumption (module-level cached regex)
+    output = _ANSI_ESCAPE_RE.sub("", raw_output).strip()
 
-    ansi_escape = re.compile(r"\x1B\[[0-?]*[ -/]*[@-~]")
-    output = ansi_escape.sub("", raw_output).strip()
+
+# Export ANSI escape regex for testing purposes
+_ANSI_ESCAPE_RE = None
+try:
+    import re
+    _ANSI_ESCAPE_RE = re.compile(r"\x1B\[[0-?]*[ -/]*[@-~]")
+except ImportError:
+    pass
 
     # Try to extract only the assistant content after the 'assistant> ' prompt
     reply = output
@@ -97,3 +105,6 @@ def run_chat_once(
             logging.warning("Failed to write AI run log: %s", e)
 
     return reply, metadata
+
+# Cached ANSI escape regex for performance across imports
+_ANSI_ESCAPE_RE = re.compile(r"\x1B\[[0-?]*[ -/]*[@-~]")

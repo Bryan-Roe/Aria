@@ -1,69 +1,70 @@
 #!/usr/bin/env python3
 """
 Repository-Wide Automation System
+        pid_map = self._get_pid_map()
+        status = None
+        if STATUS_FILE.exists():
+            try:
+                with open(STATUS_FILE, "r") as f:
+                    status = json.load(f)
+            except Exception:
+                status = None
 
-Complete automation for the entire Aria repository including:
-- All AI training pipelines
-- Aria character automation
-- Quantum computing workflows
-- Dataset management
-- Health monitoring
-- Backup & cleanup
-- CI/CD integration
+        print("\n" + "=" * 80)
+        print("🤖 Repository Automation Status")
+        print("=" * 80)
 
-Usage:
-    # Start full repo automation
-    python scripts/repo_automation.py --start
+        if status:
+            print(f"Started: {status.get('started', 'unknown')}")
+            print(f"Uptime: {timedelta(seconds=int(status.get('uptime_seconds', 0)))}")
+            print(f"Health Checks: {status.get('total_cycles', 0)}")
+        else:
+            print("Started: unknown (status file missing)")
+            print("Uptime: n/a")
+            print("Health Checks: n/a")
 
-    # Start specific components
-    python scripts/repo_automation.py --start --components aria,training,quantum
+        print("\n📊 Components:")
+        # Build a dynamic running map using PID file and psutil
+        dynamic_running: Dict[str, bool] = {}
+        if psutil is not None:
+            # First, use PID file if available
+            for name, pid in pid_map.items():
+                try:
+                    p = psutil.Process(pid)
+                    dynamic_running[name] = p.is_running() and p.status() != psutil.STATUS_ZOMBIE
+                except Exception:
+                    dynamic_running[name] = False
+            # Fallback: if PID not recorded, try discovering existing processes by script name
+            for name, component in self.components.items():
+                if name not in dynamic_running:
+                    try:
+                        proc = self._find_existing_process(component)
+                        dynamic_running[name] = proc is not None
+                    except Exception:
+                        dynamic_running[name] = False
 
-    # Check status
-    python scripts/repo_automation.py --status
+        # Prefer dynamic running info; fall back to status file content
+        components_running = status.get("components_running", {}) if status else {}
+        for name in self.components.keys():
+            running = dynamic_running.get(name, components_running.get(name, False))
+            component = self.components.get(name)
+            if component:
+                status_icon = "✅" if running else "❌"
+                dep_ok = (status.get("dependency_status", {}).get(name, True) if status else True)
+                dep_icon = "🧩" if dep_ok else "⚠️"
+                pid_info = f" (PID {pid_map.get(name)})" if name in pid_map else ""
+                print(f"  {status_icon} {component.name}{pid_info} ({dep_icon} deps)")
 
-    # Stop all automation
-    python scripts/repo_automation.py --stop
+        # Recent errors
+        if status and status.get("errors"):
+            print(f"\n⚠️  Recent Errors ({len(status['errors'])}):")
+            for error in status["errors"][-5:]:
+                print(f"  - {error}")
 
-    # Run as daemon
-    python scripts/repo_automation.py --daemon
+        if not status and not pid_map:
+            print("\nℹ️  No status or PID information found. If automation is running in another session, it may not have written status yet.")
 
-Features:
-    ✅ Aria character automation (server + training)
-    ✅ LoRA training pipelines
-    ✅ Quantum computing workflows
-    ✅ Dataset auto-discovery & downloads
-    ✅ Evaluation & metrics
-    ✅ Health monitoring & auto-recovery
-    ✅ Resource management
-    ✅ Backup & cleanup
-    ✅ Notification system
-"""
-
-import argparse
-import json
-import subprocess
-import sys
-import time
-import threading
-from dataclasses import dataclass, field
-import importlib
-from datetime import datetime, timedelta
-from pathlib import Path
-from typing import Dict, List, Optional, Any
-import signal
-
-try:
-    import psutil
-except ImportError:
-    psutil = None
-
-REPO_ROOT = Path(__file__).resolve().parents[1]
-DATA_OUT = REPO_ROOT / "data_out" / "repo_automation"
-STATUS_FILE = DATA_OUT / "status.json"
-PID_FILE = DATA_OUT / "processes.json"
-
-DATA_OUT.mkdir(parents=True, exist_ok=True)
-
+        print("=" * 80 + "\n")
 
 class _ExistingProcessWrapper:
     """Lightweight wrapper to mimic subprocess.Popen interface for existing processes"""
@@ -154,7 +155,13 @@ class RepoAutomation:
                 command=["python3", "scripts/autonomous_training_orchestrator.py"],
                 auto_restart=True,
                 health_check_interval=300,
-                required_packages=["pandas", "torch", "numpy", "yaml"],
+                # Use proper pip/import mapping for PyYAML
+                required_packages=[
+                    "pandas",
+                    "torch",
+                    "numpy",
+                    "PyYAML:yaml",
+                ],
             ),
             "quantum": ComponentConfig(
                 name="Quantum Computing Workflows",
@@ -191,8 +198,12 @@ class RepoAutomation:
                 auto_restart=False,
                 health_check_interval=60,
                 enabled=False,
+                # Correct pip/import names
                 required_packages=[
-                    "Flask", "flask_socketio", "python_socketio"],
+                    "Flask",
+                    "Flask-SocketIO:flask_socketio",
+                    "python-socketio:socketio",
+                ],
             ),
             "backup": ComponentConfig(
                 name="Backup Manager",
@@ -240,6 +251,29 @@ class RepoAutomation:
         self.running = False
         self.stop_all()
         sys.exit(0)
+
+    def _get_pid_map(self) -> Dict[str, int]:
+        """Load PID mapping from file if present"""
+        if not PID_FILE.exists():
+            return {}
+        try:
+            with open(PID_FILE, "r") as f:
+                data = json.load(f)
+                # Ensure only int PIDs
+                return {k: int(v) for k, v in data.items() if v is not None}
+        except Exception:
+            return {}
+
+    def _remove_pid_entry(self, name: str):
+        """Remove a single component entry from PID file"""
+        try:
+            mapping = self._get_pid_map()
+            if name in mapping:
+                mapping.pop(name, None)
+                with open(PID_FILE, "w") as f:
+                    json.dump(mapping, f, indent=2)
+        except Exception:
+            pass
 
     def save_status(self):
         """Save current status to JSON"""
@@ -304,6 +338,8 @@ class RepoAutomation:
             self.dependency_status[name] = True
             self.save_status()
             self._save_process_pids()
+            # Enforce single-instance: terminate any duplicates beyond the attached one
+            self._enforce_single_instance(component, keep_pid=existing.pid)
             return True
 
         # Ensure dependencies (auto-install if missing)
@@ -319,9 +355,8 @@ class RepoAutomation:
             proc = subprocess.Popen(
                 component.command,
                 cwd=REPO_ROOT,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                text=True,
+                stdout=subprocess.DEVNULL,  # Avoid pipe blocking
+                stderr=subprocess.DEVNULL,
             )
 
             self.processes[name] = proc
@@ -330,6 +365,8 @@ class RepoAutomation:
             if self._is_component_running(name):
                 print(f"✅ {component.name} started (PID {proc.pid})")
                 self._save_process_pids()
+                # Enforce single-instance: ensure no stray duplicates remain
+                self._enforce_single_instance(component, keep_pid=proc.pid)
                 return True
             else:
                 print(f"❌ {component.name} failed to start")
@@ -352,17 +389,36 @@ class RepoAutomation:
         print(f"🛑 Stopping {component.name}...")
 
         try:
-            proc.terminate()
-            proc.wait(timeout=10)
+            # Handle both subprocess.Popen and _ExistingProcessWrapper
+            if hasattr(proc, "terminate"):
+                proc.terminate()
+                proc.wait(timeout=10)
+            elif psutil is not None and hasattr(proc, "pid"):
+                p = psutil.Process(proc.pid)
+                p.terminate()
+                try:
+                    p.wait(timeout=10)
+                except Exception:
+                    pass
             print(f"✅ {component.name} stopped")
         except subprocess.TimeoutExpired:
             print(f"⚠️  Force killing {component.name}...")
-            proc.kill()
-            proc.wait()
+            try:
+                if hasattr(proc, "kill"):
+                    proc.kill()
+                    proc.wait()
+                elif psutil is not None and hasattr(proc, "pid"):
+                    p = psutil.Process(proc.pid)
+                    p.kill()
+            except Exception:
+                pass
         except Exception as e:
             print(f"⚠️  Error stopping {component.name}: {e}")
 
         self.processes[name] = None
+        # Update PID file to reflect stop
+        self._remove_pid_entry(name)
+        self._save_process_pids()
 
     def start_all(self, components: Optional[List[str]] = None):
         """Start all or specified components"""
@@ -409,6 +465,39 @@ class RepoAutomation:
                 self.start_component(name)
 
         return health
+
+    def _enforce_single_instance(self, component: ComponentConfig, keep_pid: Optional[int] = None):
+        """Ensure only one process for the given component's script is running.
+        Terminates any extra instances beyond keep_pid.
+        """
+        if psutil is None or not component.script:
+            return
+        script_name = Path(component.script).name
+        duplicates = []
+        try:
+            for proc in psutil.process_iter(['pid', 'cmdline', 'create_time']):
+                cmd = proc.info.get('cmdline') or []
+                if any(script_name in part for part in cmd):
+                    if keep_pid is not None and proc.pid == keep_pid:
+                        continue
+                    duplicates.append(proc)
+        except Exception:
+            return
+        if len(duplicates) > 0:
+            print(
+                f"\n⚖️  Enforcing single-instance for {component.name}: {len(duplicates)} duplicate(s) found")
+            for p in duplicates:
+                try:
+                    p.terminate()
+                    p.wait(timeout=5)
+                    print(f"   • Terminated duplicate PID {p.pid}")
+                except Exception:
+                    try:
+                        p.kill()
+                        print(f"   • Killed duplicate PID {p.pid}")
+                    except Exception:
+                        print(
+                            f"   • Unable to terminate duplicate PID {p.pid}")
 
     def _find_existing_process(self, component: ComponentConfig):
         """Attempt to find an already-running process for the component's script"""
@@ -504,41 +593,75 @@ class RepoAutomation:
 
     def show_status(self):
         """Display current status"""
-        if not STATUS_FILE.exists():
-            print("❌ No automation currently running")
-            return
+        pid_map = self._get_pid_map()
+        status = None
+        if STATUS_FILE.exists():
+            try:
+                with open(STATUS_FILE, "r") as f:
+                    status = json.load(f)
+            except Exception:
+                status = None
 
-        try:
-            with open(STATUS_FILE, "r") as f:
-                status = json.load(f)
+        print("\n" + "=" * 80)
+        print("🤖 Repository Automation Status")
+        print("=" * 80)
 
-            print("\n" + "=" * 80)
-            print("🤖 Repository Automation Status")
-            print("=" * 80)
-            print(f"Started: {status['started']}")
+        if status:
+            print(f"Started: {status.get('started', 'unknown')}")
             print(
-                f"Uptime: {timedelta(seconds=int(status['uptime_seconds']))}")
-            print(f"Health Checks: {status['total_cycles']}")
+                f"Uptime: {timedelta(seconds=int(status.get('uptime_seconds', 0)))}")
+            print(f"Health Checks: {status.get('total_cycles', 0)}")
+        else:
+            print("Started: unknown (status file missing)")
+            print("Uptime: n/a")
+            print("Health Checks: n/a")
 
-            print("\n📊 Components:")
-            for name, running in status["components_running"].items():
-                component = self.components.get(name)
-                if component:
-                    status_icon = "✅" if running else "❌"
-                    dep_ok = status.get(
-                        "dependency_status", {}).get(name, True)
-                    dep_icon = "🧩" if dep_ok else "⚠️"
-                    print(f"  {status_icon} {component.name} ({dep_icon} deps)")
+        print("\n📊 Components:")
+        # Build a dynamic running map using PID file and psutil
+        dynamic_running: Dict[str, bool] = {}
+        if psutil is not None:
+            for name, pid in pid_map.items():
+                try:
+                    p = psutil.Process(pid)
+                    dynamic_running[name] = p.is_running(
+                    ) and p.status() != psutil.STATUS_ZOMBIE
+                except Exception:
+                    dynamic_running[name] = False
 
-            if status["errors"]:
-                print(f"\n⚠️  Recent Errors ({len(status['errors'])}):")
-                for error in status["errors"][-5:]:
-                    print(f"  - {error}")
+        # Prefer dynamic running info; fall back to status file content
+        components_running = status.get(
+            "components_running", {}) if status else {}
+        for name in self.components.keys():
+            running = dynamic_running.get(
+                name, components_running.get(name, False))
+            component = self.components.get(name)
+            if component:
+                status_icon = "✅" if running else "❌"
+                dep_ok = (status.get("dependency_status", {}).get(
+                    # Fallback: if PID not recorded, try discovering existing processes
+                    for name, component in self.components.items():
+                        if name not in dynamic_running:
+                            try:
+                                proc=self._find_existing_process(component)
+                                dynamic_running[name]=proc is not None
+                            except Exception:
+                                dynamic_running[name]=False
+                    name, True) if status else True)
+                dep_icon = "🧩" if dep_ok else "⚠️"
+                pid_info = f" (PID {pid_map.get(name)})" if name in pid_map else ""
+                print(
+                    f"  {status_icon} {component.name}{pid_info} ({dep_icon} deps)")
 
-            print("=" * 80 + "\n")
+        # Recent errors
+        if status and status.get("errors"):
+            print(f"\n⚠️  Recent Errors ({len(status['errors'])}):")
+            for error in status["errors"][-5:]:
+                print(f"  - {error}")
 
-        except Exception as e:
-            print(f"❌ Error reading status: {e}")
+        if not status and not pid_map:
+            print("\nℹ️  No status or PID information found. If automation is running in another session, it may not have written status yet.")
+
+        print("=" * 80 + "\n")
 
     def run_daemon(self):
         """Run as background daemon"""

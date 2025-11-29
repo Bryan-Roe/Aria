@@ -13,6 +13,7 @@ Environment Variables:
     QAI_QUERY_RETENTION_DAYS: Override retention period (default: 7)
 """
 
+import re
 from shared.sql_engine import get_engine
 import argparse
 import logging
@@ -27,12 +28,20 @@ repo_root = script_dir.parent
 sys.path.insert(0, str(repo_root))
 
 
-# Allowlist of valid table names to prevent SQL injection
-ALLOWED_TABLES = frozenset({"QAI_QueryMetrics", "QAI_QueryMetrics_Archive"})
+# Table name validation pattern (SQL identifier-like):
+# - Start with a letter or underscore
+# - Followed by letters, digits, or underscores
+# This intentionally allows SQL keywords (e.g., SELECT) and single underscore "_",
+# but rejects dangerous characters and patterns used in injection attempts.
+_TABLE_NAME_RE = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
 
 
 def validate_table_name(table_name: str) -> str:
-    """Validate table name against allowlist to prevent SQL injection.
+    """Validate table name using a strict identifier pattern to prevent injection.
+
+    Accepts typical SQL identifiers including uppercase, lowercase, digits and underscores,
+    starting with a letter or underscore. Rejects characters commonly used in injection:
+    spaces, quotes, semicolons, comments, parentheses, dots, hyphens, etc.
 
     Args:
         table_name: The table name to validate
@@ -41,13 +50,14 @@ def validate_table_name(table_name: str) -> str:
         The validated table name if valid
 
     Raises:
-        ValueError: If table name is not in the allowlist
+        ValueError: If table name is invalid
     """
-    if table_name not in ALLOWED_TABLES:
-        raise ValueError(
-            f"Invalid table name: '{table_name}'. "
-            f"Allowed tables: {', '.join(sorted(ALLOWED_TABLES))}"
-        )
+    if not isinstance(table_name, str) or not table_name:
+        raise ValueError("Invalid table name: empty or non-string")
+
+    if not _TABLE_NAME_RE.match(table_name):
+        raise ValueError("Invalid table name")
+
     return table_name
 
 
@@ -85,6 +95,9 @@ def parse_args():
     return parser.parse_args()
 
 
+# Regex pattern for valid SQL table names (alphanumeric and underscore, must start with letter or underscore)
+TABLE_NAME_PATTERN = re.compile(r'^[a-zA-Z_][a-zA-Z0-9_]*$')
+
 # Whitelist of allowed table names to prevent SQL injection
 ALLOWED_TABLES = frozenset({
     "QAI_QueryMetrics",
@@ -93,10 +106,14 @@ ALLOWED_TABLES = frozenset({
 
 
 def validate_table_name(table_name: str) -> str:
-    """Validate table name against whitelist to prevent SQL injection."""
-    if table_name not in ALLOWED_TABLES:
+    """Validate table name against regex pattern to prevent SQL injection.
+
+    Allows any valid SQL identifier (letters, numbers, underscores).
+    Rejects special characters that could be used for SQL injection.
+    """
+    if not TABLE_NAME_PATTERN.match(table_name):
         raise ValueError(
-            f"Invalid table name: {table_name}. Allowed tables: {', '.join(sorted(ALLOWED_TABLES))}")
+            f"Invalid table name: {table_name}. Table names must contain only letters, numbers, and underscores, and start with a letter or underscore.")
     return table_name
 
 # Backward-compatible alias used by unit tests
@@ -147,19 +164,19 @@ def delete_old_records(engine, table_name, cutoff_timestamp, dry_run=False):
     """Delete records older than cutoff timestamp."""
     from sqlalchemy import text
 
-    # Validate table name against allowlist to prevent SQL injection
+    # Validate table name against pattern to prevent SQL injection
     safe_table = validate_table_name(table_name)
 
-    if dry_run:
-        logger.info(
-            f"[DRY RUN] Would delete records from {safe_table} where executed_at < {cutoff_timestamp}")
-        return True
-
     try:
+        if dry_run:
+            logger.info(
+                f"DRY RUN: Would delete records from {safe_table} older than {cutoff_timestamp}")
+            return 0
+
         delete_query = text(
             f"DELETE FROM {safe_table} WHERE executed_at < :cutoff")
 
-        with engine.begin() as conn:
+        with engine.connect() as conn:
             result = conn.execute(delete_query, {"cutoff": cutoff_timestamp})
             deleted_count = result.rowcount
             logger.info(f"Deleted {deleted_count} records from {safe_table}")
