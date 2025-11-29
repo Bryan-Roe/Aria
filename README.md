@@ -1,79 +1,96 @@
-# AI Workspace
+# Aria - Interactive AI Character Platform
 
-A comprehensive workspace for quantum computing, AI fine-tuning, and chat applications.
+<div align="center">
 
-## 📁 Project Structure
+✨ **Meet Aria** ✨
 
-This workspace contains **three independent AI/ML projects**:
+*An intelligent, animated AI character with movement, gestures, and natural language interaction*
 
-### 1. **quantum-ai/** - Quantum Machine Learning Platform 🆕
-
-Hybrid quantum-classical ML using Azure Quantum + PennyLane + PyTorch with **Interactive Web Dashboard** and MCP Server support.
-
-#### ✨ NEW: Web Training Dashboard
-
-Train and visualize quantum AI models with a beautiful interactive UI:
-
-```bash
-cd quantum-ai
-./start_dashboard.sh
-# Open http://localhost:5000
-```
-
-**Features:**
-
-- 🎨 **Interactive Web Dashboard** - Real-time training visualization with live charts
-- ⚛️ Quantum circuit creation and simulation (Bell, GHZ, entanglement states)
-- ☁️ Azure Quantum integration (IonQ, Quantinuum, Microsoft QC)
-- 🧠 Hybrid quantum-classical neural networks
-- 🤖 Model Context Protocol (MCP) server with 8 quantum tools
-- 📊 Live loss/accuracy metrics and session management
-- 🎛️ Interactive hyperparameter tuning (qubits, layers, learning rate)
-- 📚 Training history browser with saved results
-
-**Quick Start (Web Dashboard):**
-
-```bash
-cd quantum-ai
-./start_dashboard.sh
-# Open browser to http://localhost:5000
-# Select dataset, configure parameters, click "Start Training"
-# Watch real-time charts update as model trains!
-```
-
-**Quick Start (CLI):**
-
-```bash
-cd quantum-ai
-source venv/bin/activate
-pip install -r requirements.txt
-
-# Run example classifier
-python src/quantum_classifier.py
-
-# Run MCP server
-python quantum_mcp_server.py
-```
-
-**Documentation:**
-
-- 🎨 **[Web Dashboard Guide](quantum-ai/WEB_DASHBOARD_README.md)** - Interactive training UI (NEW!)
-- 📖 [Main README](quantum-ai/README.md) - Full project documentation
-- 🤖 [MCP Server Guide](quantum-ai/MCP_SERVER_README.md) - AI agent integration
+</div>
 
 ---
 
-### 2. **talk-to-ai/** - Lightweight CLI Chat Application
+## 🎭 About Aria
 
-Multi-provider chat CLI with local fallback, OpenAI, and Azure OpenAI support.
+Aria is an interactive AI character that combines:
+- **3D Animated Avatar** - CSS-based character with smooth animations, eye tracking, and expressive gestures
+- **Natural Language Movement** - Tell Aria to "move left", "wave", "dance", or "jump" using plain English
+- **Multi-Provider AI Backend** - Powered by Azure OpenAI, OpenAI, or local models with LoRA fine-tuning
+- **Real-time Object Interaction** - Add, pickup, drop, and throw objects on a virtual stage
+- **Quantum ML Integration** - Experimental quantum-classical hybrid training
+
+## 🚀 Quick Start
+
+### Chat with Aria (Web Interface)
+
+```bash
+# Start the Aria web server
+cd aria_web
+python server.py
+
+# Open http://localhost:8000 in your browser
+```
+
+### Chat with Aria (CLI)
+
+```bash
+cd talk-to-ai
+pip install -r requirements.txt
+python src/chat_cli.py --provider local --once "Hello Aria!"
+```
+
+### Aria Character Demo
+
+```bash
+# Open the animated character page
+# Navigate to: chat-web/aria.html
+```
+
+## 📁 Project Structure
+
+This workspace is organized around Aria with supporting AI/ML infrastructure:
+
+### 🎭 **aria_web/** - Aria Character Interface
+
+The main Aria character controller with 3D animations and object interactions.
 
 **Features:**
 
-- Provider auto-detection (Azure OpenAI → OpenAI → Local)
-- Streaming responses
-- Conversation persistence (JSONL format)
-- Zero-dependency local mode for offline development
-- Minimal footprint (2 dependencies)
+- 🎨 **3D Character Control** - Move Aria around the stage using waypoints
+- 📦 **Object Management** - Add, pickup, drop, and throw objects
+- 🔄 **Server Sync** - All client actions synchronized to Python backend
+- 💬 **Chat Interface** - Send natural language commands
+- 🌍 **World Generation** - LLM-powered themed environment creation
+
+**Quick Start:**
+
+```bash
+cd aria_web
+python server.py
+# Open http://localhost:8000
+```
+
+**API Endpoints:**
+- `GET /api/aria/state` - Get current stage state
+- `POST /api/aria/command` - Send movement commands
+- `POST /api/aria/object` - Manage objects
+- `POST /api/aria/world` - Generate themed worlds
+
+**Documentation:** [aria_web/README.md](aria_web/README.md)
+
+---
+
+### 💬 **talk-to-ai/** - Aria Chat CLI
+
+Multi-provider chat CLI for interacting with Aria using natural language.
+
+**Features:**
+
+- 🤖 Provider auto-detection (Azure OpenAI → OpenAI → Local)
+- 🎯 Aria movement command generation
+- 💾 Conversation persistence (JSONL format)
+- 🔌 Zero-dependency local mode for offline development
+- ⚡ Streaming responses
 
 **Quick Start:**
 
@@ -97,35 +114,62 @@ python .\src\chat_cli.py --provider azure
 
 **Interactive Commands:** `/new`, `/save`, `/exit`
 
-**Documentation:** See `talk-to-ai/README.md`
+**Aria Movement Commands:** Try saying "Move Aria left", "Wave", "Dance", or "Jump"!
+
+**Documentation:** See [talk-to-ai/README.md](talk-to-ai/README.md)
 
 ---
 
-### 3. **AI/microsoft_phi-silica-3.6_v1/** - Phi-3.6 Fine-Tuning Workspace
+### 🧠 **AI/microsoft_phi-silica-3.6_v1/** - Aria Model Fine-Tuning
 
-Fine-tuning workspace for Microsoft Phi-3.6 models using LoRA and soft prompt techniques.
+Fine-tuning workspace for training Aria's language understanding using LoRA and soft prompt techniques.
 
 **Features:**
 
-- LoRA fine-tuning (low-rank adaptation)
-- Soft prompt tuning
-- Azure ML deployment infrastructure
-- Azure AI Toolkit integration
+- 🎯 LoRA fine-tuning for Aria movement commands
+- 📊 Aria-specific training datasets in `datasets/chat/aria_*`
+- ☁️ Azure ML deployment infrastructure
+- 🔧 Azure AI Toolkit integration
 
-**Configuration:**
+**Aria Training Datasets:**
+- `datasets/chat/aria_movement/` - Movement command training data
+- `datasets/chat/aria_expanded/` - Extended Aria interactions
+- `datasets/chat/aria_simple/` - Basic Aria commands
 
-- **LoRA:** `AI/microsoft_phi-silica-3.6_v1/lora/lora.yaml`
-- **Soft Prompt:** `AI/microsoft_phi-silica-3.6_v1/soft_prompt/soft_prompt.yaml`
-- **Infrastructure:** `AI/microsoft_phi-silica-3.6_v1/lora/infra/provision/finetuning.bicep`
+**Quick Training:**
 
-**Key Hyperparameters (LoRA):**
+```bash
+# Quick Aria movement training
+python scripts/train_aria_direct.py
 
-- Training: 8000 samples, batch size 2, seq length 1024
-- Model: Phi-3.6-mini-instruct
-- Optimizer: AdamW (lr=0.0002, warmup=400 steps)
-- LoRA: dropout=0.1
+# Validate Aria dataset
+python scripts/test_aria_dataset.py --validate-only
+```
 
-**Note:** This project uses Azure AI Toolkit workspace configurations.
+**Documentation:** See [docs/aria/](docs/aria/) for comprehensive Aria training guides
+
+---
+
+### ⚛️ **quantum-ai/** - Quantum ML Platform (Experimental)
+
+Hybrid quantum-classical ML for advanced Aria capabilities.
+
+**Features:**
+
+- 🎨 Interactive Web Dashboard for training visualization
+- ⚛️ Quantum circuit creation and simulation
+- ☁️ Azure Quantum integration (IonQ, Quantinuum)
+- 🤖 MCP server with 8 quantum tools
+
+**Quick Start:**
+
+```bash
+cd quantum-ai
+./start_dashboard.sh
+# Open http://localhost:5000
+```
+
+**Documentation:** [quantum-ai/README.md](quantum-ai/README.md)
 
 ---
 
@@ -269,18 +313,27 @@ Add new providers by subclassing `BaseChatProvider`.
 
 ## 🧪 Quick Testing
 
-### Quantum Code
+### Aria Web Interface
 
 ```powershell
-cd quantum-ai
-python .\src\quantum_classifier.py
+cd aria_web
+python server.py
+# Open http://localhost:8000
 ```
 
-### Chat CLI
+### Aria Chat CLI
 
 ```powershell
 cd talk-to-ai
-python .\src\chat_cli.py --provider local --once "Hello"
+python .\src\chat_cli.py --provider local --once "Move Aria left"
+```
+
+### Aria Character Animation
+
+```powershell
+# Open chat-web/aria.html in your browser
+# Click on Aria to see walking animation
+# Press 'W' to wave, 'R' to raise arms
 ```
 
 ---
@@ -288,27 +341,31 @@ python .\src\chat_cli.py --provider local --once "Hello"
 ## 📝 File Organization
 
 ```
+├── aria_web/               # 🎭 Main Aria character controller
+│   ├── server.py           # Python backend API
+│   ├── aria_controller.js  # Frontend character logic
+│   └── index.html          # Interactive stage UI
+├── chat-web/               # 💬 Web chat interface
+│   ├── aria.html           # Animated Aria character page
+│   └── index.html          # Chat with Aria web UI
+├── datasets/chat/          # 📊 Aria training datasets
+│   ├── aria_movement/      # Movement command training
+│   ├── aria_expanded/      # Extended interactions
+│   └── aria_simple/        # Basic commands
+├── docs/aria/              # 📖 Aria documentation
+│   ├── ARIA_MOVEMENT_COMPLETE.md
+│   ├── ARIA_MOVEMENT_TRAINING.md
+│   └── ARIA_VISUAL_SYSTEM.md
+├── scripts/                # 🔧 Aria training & utility scripts
+│   ├── train_aria_direct.py
+│   ├── automate_aria_movement.py
+│   └── test_aria_dataset.py
+├── talk-to-ai/             # Chat CLI for Aria
+├── quantum-ai/             # Quantum ML platform
+├── AI/                     # Model fine-tuning workspace
 ├── config/                 # Configuration files
-│   ├── training/           # LoRA training configs (autotrain.yaml, etc.)
-│   ├── quantum/            # Quantum job configs (quantum_autorun.yaml)
-│   ├── evaluation/         # Evaluation configs (evaluation_autorun.yaml)
-│   ├── autogen/            # Auto-generated configs (gitignored)
-│   └── master_orchestrator.yaml
-├── docs/                   # All documentation
-│   ├── guides/             # Feature guides and summaries
-│   ├── quickref/           # Quick reference cards
-│   ├── training/           # Training documentation
-│   ├── quantum/            # Quantum computing docs
-│   ├── database/           # Database setup guides
-│   ├── deployment/         # Azure deployment docs
-│   └── aria/               # ARIA system docs
-├── scripts/                # All orchestrator and utility scripts
 ├── shared/                 # Shared Python modules
 ├── tests/                  # Test suites
-├── quantum-ai/             # Quantum ML platform
-├── talk-to-ai/             # Chat CLI application
-├── chat-web/               # Web chat interface
-├── datasets/               # Training datasets (read-only)
 └── data_out/               # Generated outputs (git-ignored)
 ```
 
@@ -316,25 +373,33 @@ python .\src\chat_cli.py --provider local --once "Hello"
 
 ## 📚 Documentation
 
-All documentation has been organized into the `docs/` directory:
+### Aria Documentation
 
-- **[docs/README.md](docs/README.md)** - Documentation index and navigation
-- **[docs/quickref/](docs/quickref/)** - Quick reference cards
+- **[docs/aria/](docs/aria/)** - Complete Aria system documentation
+  - [ARIA_MOVEMENT_COMPLETE.md](docs/aria/ARIA_MOVEMENT_COMPLETE.md) - Implementation guide
+  - [ARIA_MOVEMENT_TRAINING.md](docs/aria/ARIA_MOVEMENT_TRAINING.md) - Training reference
+  - [ARIA_VISUAL_SYSTEM.md](docs/aria/ARIA_VISUAL_SYSTEM.md) - Visual system design
+- **[aria_web/README.md](aria_web/README.md)** - Web interface and API docs
+- **[aria_web/TESTING.md](aria_web/TESTING.md)** - Testing guide
+
+### Supporting Documentation
+
+- **[docs/README.md](docs/README.md)** - Documentation index
 - **[docs/training/](docs/training/)** - LoRA and training guides
 - **[docs/quantum/](docs/quantum/)** - Quantum computing documentation
 - **[docs/database/](docs/database/)** - SQL and database setup
-- **[docs/deployment/](docs/deployment/)** - Azure deployment guides
-
-### Project-Specific Documentation
-
-- **quantum-ai/README.md** - Architecture, quick start, deployment
-- **quantum-ai/MCP_SERVER_README.md** - MCP server usage
-- **talk-to-ai/README.md** - Chat CLI usage
-- **.github/copilot-instructions.md** - Development conventions
 
 ---
 
 ## ⚠️ Common Issues
+
+### Aria Not Moving
+
+If Aria commands aren't working:
+
+1. Ensure the aria_web server is running: `python aria_web/server.py`
+2. Check browser console for JavaScript errors
+3. Verify API responses: `curl http://localhost:8000/api/aria/state`
 
 ### Azure Quantum Authentication
 
@@ -343,10 +408,6 @@ If you see "Failed to connect to Azure Quantum":
 1. Run `az login`
 2. Verify `quantum_config.yaml` has correct subscription_id and resource_group
 3. Check workspace exists: `az quantum workspace show -g rg-quantum-ai -n quantum-ai-workspace`
-
-### Missing Quantum Providers
-
-Some providers require manual registration. Check `list_backends()` output.
 
 ### Chat Streaming Issues
 
@@ -358,17 +419,17 @@ Verify SDK version: `pip list | findstr openai` should show `openai>=1.37.0`
 
 **November 2025 Updates:**
 
-- **Quantum Status Integration**: `/api/ai/status` endpoint now includes quantum environment diagnostics
-- **Qiskit 1.x Upgrade Path**: Scripted migration tool with backup/revert capabilities
-- **Telemetry & Cosmos DB**: Production observability with Application Insights and Cosmos persistence
-- **Enhanced Testing**: Unit test coverage for quantum environment validation
+- **🎭 Aria Character System**: Complete 3D animated character with movement, gestures, and object interaction
+- **📊 Aria Training Pipeline**: Movement command datasets and training automation
+- **🌍 LLM World Generation**: Dynamic themed environment creation via `/api/aria/world`
+- **🎯 Movement Command Parser**: Natural language to `[aria:action:direction]` tag conversion
+- **✨ Visual Enhancements**: Eye tracking, breathing animations, and character expressions
 
-📖 **Documentation:**
+📖 **Aria Documentation:**
 
-- [Enhancements Summary](docs/guides/ENHANCEMENTS_SUMMARY.md) - Overview of all recent improvements
-- [Telemetry & Cosmos Enablement Guide](docs/database/TELEMETRY_COSMOS_ENABLEMENT.md) - Step-by-step setup for observability
-- [Quantum AutoRun README](docs/quantum/QUANTUM_AUTORUN_README.md) - Orchestrated quantum training automation
-- [AutoTrain README](docs/training/AUTOTRAIN_README.md) - LoRA training orchestration
+- [ARIA_MOVEMENT_COMPLETE.md](docs/aria/ARIA_MOVEMENT_COMPLETE.md) - Full implementation guide
+- [ARIA_MOVEMENT_TRAINING.md](docs/aria/ARIA_MOVEMENT_TRAINING.md) - Training reference
+- [aria_web/TESTING.md](aria_web/TESTING.md) - Testing strategies
 
 ---
 
@@ -446,15 +507,19 @@ python -m pytest tests/test_autotrain_unit.py -v
 
 ## 🔍 Quick Navigation
 
-| Project | Path | Purpose |
-|---------|------|---------|
-| Quantum AI | `quantum-ai/` | Quantum ML + MCP Server |
-| Chat CLI | `talk-to-ai/` | Multi-provider chat |
-| Fine-tuning | `AI/microsoft_phi-silica-3.6_v1/` | Phi-3.6 model tuning |
+| Component | Path | Purpose |
+|-----------|------|---------|
+| **Aria Web** | `aria_web/` | 🎭 Main character controller |
+| **Aria Character** | `chat-web/aria.html` | ✨ Animated avatar demo |
+| **Chat with Aria** | `talk-to-ai/` | 💬 CLI chat interface |
+| **Aria Training** | `datasets/chat/aria_*` | 📊 Training datasets |
+| **Aria Docs** | `docs/aria/` | 📖 Documentation |
+| **Quantum ML** | `quantum-ai/` | ⚛️ Experimental quantum features |
+| **Fine-tuning** | `AI/` | 🧠 LoRA model training |
 
 ---
 
-**Last Updated:** November 25, 2025
+**Last Updated:** November 29, 2025
 
 ## 🚀 CI/CD Pipeline
 
@@ -541,21 +606,25 @@ Passing `--cleanup` to training wrappers prunes `checkpoint*` artifacts while pr
 
 ---
 
-## LoRA Provider Usage
+## LoRA Provider Usage for Aria
 
-Interact with your fine-tuned LoRA model using the CLI or web app:
+Train and use fine-tuned Aria models using LoRA adapters:
 
 ### CLI Example
 
 ```powershell
-python .\src\chat_cli.py --provider lora --model ..\..\data_out\lora_training\lora_adapter
+# Chat with a trained Aria adapter
+python ./talk-to-ai/src/chat_cli.py --provider lora --model data_out/aria_models/aria_direct
+
+# Or use the default adapter location
+python ./talk-to-ai/src/chat_cli.py --provider lora --model data_out/lora_training/lora_adapter
 ```
 
 ### Web App
 
 - Select "LoRA" in the provider dropdown.
-- Enter the adapter path (e.g., `data_out/lora_training/lora_adapter`) if prompted.
-- The backend will load your LoRA model for chat.
+- Enter the adapter path (e.g., `data_out/aria_models/aria_direct`) if prompted.
+- The backend will load your trained Aria model for chat.
 
 **Requirements:**
 

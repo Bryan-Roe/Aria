@@ -415,7 +415,7 @@ def main() -> None:
                 "runner": j.runner,
                 "category": j.category,
                 "status": "running",
-                "start_time": datetime.utcnow().strftime("%Y%m%dT%H%M%SZ"),
+                "start_time": datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ"),
                 "cmd": None,
                 "return_code": None,
                 "duration_sec": None,

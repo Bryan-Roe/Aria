@@ -163,6 +163,11 @@ Thumbs.db
 $RECYCLE.BIN/
 .fake
 
+# Auto-generated test/status files
+autotrain_testtoken.yaml
+data_out/autotrain/status.json
+data_out/quantum_autorun/status.json
+
 # Large binary installers and archives (avoid exceeding GitHub 100MB limit)
 *.msi
 *.exe

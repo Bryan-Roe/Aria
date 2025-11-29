@@ -112,6 +112,9 @@ def prune_messages(
     """Prune conversation to fit within model context budget.
 
     Returns: (pruned_messages, stats, system_message)
+    
+    Performance: Uses O(n) algorithm by pre-computing token counts per message
+    and maintaining a running total, avoiding repeated tokenization.
     """
     budget = max_context_tokens or _match_model_default(model)
     enc = _get_text_encoder(provider, model)
@@ -131,20 +134,30 @@ def prune_messages(
     if budget <= reserve_output_tokens + 256:  # ensure minimal space
         reserve_output_tokens = max(128, budget // 4)
 
-    # Start with entire message list, then drop from the oldest non-system messages
-    pruned = list(non_system)
-
-    def current_total_tokens() -> int:
-        total = (enc(system_text) + 4) if system_text else 0
-        for mm in pruned:
-            total += enc(mm.get("role", "")) + enc(mm.get("content", "")) + 4
-        return total
-
-    while pruned and (current_total_tokens() + reserve_output_tokens) > budget:
-        pruned.pop(0)  # remove oldest
-
-    pruned_tokens = current_total_tokens()
-    removed_count = len(non_system) - len(pruned)
+    # Pre-compute token counts for each message (O(n) - done once)
+    # Each message costs: role tokens + content tokens + 4 (framing)
+    message_token_counts = [
+        enc(m.get("role", "")) + enc(m.get("content", "")) + 4
+        for m in non_system
+    ]
+    
+    # Calculate base system token cost (done once)
+    system_tokens = (enc(system_text) + 4) if system_text else 0
+    
+    # Calculate initial total tokens
+    total_tokens = system_tokens + sum(message_token_counts)
+    
+    # Prune from front (oldest messages) while over budget
+    # Uses running total instead of recalculating each iteration (O(n) total)
+    start_idx = 0
+    while start_idx < len(non_system) and (total_tokens + reserve_output_tokens) > budget:
+        total_tokens -= message_token_counts[start_idx]
+        start_idx += 1
+    
+    # Get pruned messages
+    pruned = non_system[start_idx:]
+    pruned_tokens = total_tokens
+    removed_count = start_idx
 
     # Reassemble with system (if any)
     final_messages = []

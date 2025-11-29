@@ -1,4 +1,5 @@
 import datetime
+from datetime import timezone
 import logging
 import os
 import sys
@@ -12,7 +13,7 @@ from chat_providers import detect_provider  # noqa: E402
 
 
 def main(myTimer: func.TimerRequest) -> None:
-    utc_timestamp = datetime.datetime.utcnow().isoformat()
+    utc_timestamp = datetime.datetime.now(timezone.utc).isoformat()
     if myTimer.past_due:
         logging.warning("The timer is past due!")
 

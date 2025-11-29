@@ -77,10 +77,14 @@ class NotificationManager:
         try:
             # Using subprocess with list arguments prevents shell injection
             # The script is passed as a single argument to osascript -e
-            result = subprocess.run(['osascript', '-e', script], capture_output=True, text=True)
+            result = subprocess.run(['osascript', '-e', script], capture_output=True, text=True, timeout=5)
             if result.returncode != 0:
                 print(f"macOS notification warning: osascript returned {result.returncode}, stderr: {result.stderr}")
-        except Exception as e:
+        except subprocess.TimeoutExpired:
+            print("macOS notification error: osascript timed out")
+        except FileNotFoundError:
+            print("macOS notification error: osascript not found")
+        except OSError as e:
             print(f"macOS notification error: {e}")
     
     def _send_linux(self, title: str, message: str, icon: str):
@@ -94,10 +98,14 @@ class NotificationManager:
         
         # Use subprocess with list arguments to prevent command injection
         try:
-            result = subprocess.run(['notify-send', '-i', icon_name, title, message], capture_output=True, text=True)
+            result = subprocess.run(['notify-send', '-i', icon_name, title, message], capture_output=True, text=True, timeout=5)
             if result.returncode != 0:
                 print(f"Linux notification warning: notify-send returned {result.returncode}, stderr: {result.stderr}")
-        except Exception as e:
+        except subprocess.TimeoutExpired:
+            print("Linux notification error: notify-send timed out")
+        except FileNotFoundError:
+            print("Linux notification error: notify-send not found")
+        except OSError as e:
             print(f"Linux notification error: {e}")
     
     def notify_job_started(self, job_name: str):

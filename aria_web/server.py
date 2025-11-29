@@ -335,7 +335,7 @@ def generate_world_fallback(theme: str, count: int) -> dict:
         }
     environment = {
         'theme': theme,
-        'generated_at': datetime.datetime.utcnow().isoformat() + 'Z',
+        'generated_at': datetime.datetime.now(timezone.utc).isoformat() + 'Z',
         'seed': random.randint(100000, 999999),
         'stage_bounds': {'width': 100, 'height': 100}
     }
@@ -394,7 +394,7 @@ def generate_world_with_llm(theme: str, count: int, provider) -> dict:
         if not sanitized_objects:
             return generate_world_fallback(theme, count)
         env.setdefault('theme', theme)
-        env.setdefault('generated_at', datetime.datetime.utcnow().isoformat() + 'Z')
+        env.setdefault('generated_at', datetime.datetime.now(timezone.utc).isoformat() + 'Z')
         env.setdefault('stage_bounds', {'width': 100, 'height': 100})
         return {
             'objects': sanitized_objects,
