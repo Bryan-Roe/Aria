@@ -1,6 +1,7 @@
 """Desktop Notification System for QAI Training Events"""
 import os
 import platform
+import subprocess  # nosec B404 - subprocess used safely with list arguments, no shell=True
 from datetime import datetime
 from typing import Optional
 from pathlib import Path
@@ -67,10 +68,20 @@ class NotificationManager:
     
     def _send_macos(self, title: str, message: str):
         """Send macOS notification using osascript"""
-        script = f'''
-        display notification "{message}" with title "{title}"
-        '''
-        os.system(f"osascript -e '{script}'")
+        # Escape special AppleScript characters to prevent injection
+        # AppleScript uses backslash for escaping, so we escape backslashes first, then quotes
+        safe_title = title.replace('\\', '\\\\').replace('"', '\\"')
+        safe_message = message.replace('\\', '\\\\').replace('"', '\\"')
+        
+        script = f'display notification "{safe_message}" with title "{safe_title}"'
+        try:
+            # Using subprocess with list arguments prevents shell injection
+            # The script is passed as a single argument to osascript -e
+            result = subprocess.run(['osascript', '-e', script], capture_output=True, text=True)
+            if result.returncode != 0:
+                print(f"macOS notification warning: osascript returned {result.returncode}")
+        except Exception as e:
+            print(f"macOS notification error: {e}")
     
     def _send_linux(self, title: str, message: str, icon: str):
         """Send Linux notification using notify-send"""
@@ -81,7 +92,13 @@ class NotificationManager:
             "error": "dialog-error"
         }.get(icon, "dialog-information")
         
-        os.system(f'notify-send -i {icon_name} "{title}" "{message}"')
+        # Use subprocess with list arguments to prevent command injection
+        try:
+            result = subprocess.run(['notify-send', '-i', icon_name, title, message], capture_output=True, text=True)
+            if result.returncode != 0:
+                print(f"Linux notification warning: notify-send returned {result.returncode}")
+        except Exception as e:
+            print(f"Linux notification error: {e}")
     
     def notify_job_started(self, job_name: str):
         """Notify when training job starts"""
