@@ -1,7 +1,87 @@
 # QAI – Copilot Instructions
+# QAI – Copilot Instructions
 
-Essential knowledge for AI agents working in this hybrid quantum-AI/ML workspace. Focus: immediate productivity, safe execution, and cost awareness.
+**Quick reference for AI agents** working in the Aria hybrid quantum‑AI/ML workspace. Focus on the essentials you need to be productive **today** while staying safe and cost‑aware.
 
+---
+
+## 1️⃣ Core Architecture
+- **Projects (isolated venvs)**:
+  - `quantum-ai/` – quantum‑ML pipelines, MCP server, web dashboard.
+  - `talk-to-ai/` – multi‑provider chat CLI (Azure OpenAI, OpenAI, LoRA, local fallback).
+  - `AI/microsoft_phi-silica-3.6_v1/` – Phi‑3.5 LoRA fine‑tuning.
+- **Integration layer**: `function_app.py` (Azure Functions) exposing:
+  - `/api/chat` – streaming chat.
+  - `/api/chat-web` – web UI.
+  - `/api/tts` – Azure Speech TTS (local fallback).
+  - `/api/quantum/*` – quantum job submission/monitoring.
+  - `/api/ai/status` – health & config summary.
+- **Shared services** (`shared/`):
+  - `chat_providers.py` – detection order **Azure OpenAI → OpenAI → LoRA → Local**.
+  - `sql_engine.py` / `cosmos_client.py` – optional persistence (feature‑flagged).
+  - `chat_memory.py` – embeddings + similarity search.
+  - `telemetry.py` – Application Insights.
+
+---
+
+## 2️⃣ Data Conventions
+- **Immutable source**: `datasets/` (read‑only).
+- **Write‑only output**: `data_out/` – orchestrators write `status.json` and model artefacts.
+- **Chat dataset schema** (`datasets/chat/<name>/`):
+  ```json
+  [{"messages": [{"role": "user|assistant", "content": "..."}]}]
+  ```
+- Validate with `python scripts/validate_datasets.py --category chat`.
+- LoRA adapters are ready when both `adapter_config.json` **and** `adapter_model.safetensors` exist.
+
+---
+
+## 3️⃣ Core Workflows & Commands
+| Goal | Command (repo root) | Notes |
+|------|--------------------|-------|
+| Dry‑run any orchestrator | `python scripts/autotrain.py --dry-run`<br>`python scripts/quantum_autorun.py --dry-run`<br>`python scripts/evaluation_autorun.py --dry-run` | Validate config only |
+| Quick LoRA train & auto‑deploy | `python scripts/train_and_promote.py --quick --auto-promote` | Uses TinyLlama by default |
+| Full multi‑model pipeline | `python scripts/automated_training_pipeline.py --quick` | Data → train → eval → ranking |
+| Start Functions host | `func host start` | Serves all `/api/*` endpoints |
+| Open web chat UI | Open `http://localhost:7071/api/chat-web` after host starts |
+| Run unit tests | `python scripts/test_runner.py --unit` |
+| Run full test suite with coverage | `python scripts/test_runner.py --all --coverage` |
+
+---
+
+## 4️⃣ Quantum‑AI Guardrails
+- Simulate locally first: `python scripts/quantum_autorun.py --job local_simulator`.
+- Real QPU jobs require `azure_confirm_cost: true` in `quantum_autorun.yaml` **and** a cost estimate via `estimate_quantum_cost`.
+- MCP server entry point: `python quantum-ai/quantum_mcp_server.py` (tools: `create_quantum_circuit`, `simulate_quantum_circuit`, `submit_quantum_job`, `estimate_quantum_cost`).
+
+---
+
+## 5️⃣ Provider Detection & Health
+- Detection order in `shared/chat_providers.py`: Azure OpenAI → OpenAI → LoRA → Local.
+- Missing any Azure env var falls back to the next provider.
+- Quick health check: `curl http://localhost:7071/api/ai/status | jq` (shows active provider, missing env vars, LoRA readiness, DB pool saturation, telemetry).
+
+---
+
+## 6️⃣ Safety & Cost Awareness
+- **Dry‑run** all orchestrators before GPU/QPU usage.
+- Limit QPU shots to ≤ 100 for first runs; increase only after a cost estimate.
+- Monitor DB pool saturation via `/api/ai/status` (warning at 80 %).
+- Cosmos DB is optional; enable with `QAI_ENABLE_COSMOS=true` and configure TTL for cheap cleanup.
+
+---
+
+## 7️⃣ Where to Look First
+- `function_app.py` – HTTP routing and dynamic imports.
+- `shared/chat_providers.py` – provider logic.
+- Orchestrator scripts in `scripts/` (`autotrain.py`, `quantum_autorun.py`, `evaluation_autorun.py`).
+- YAML job specs: `autotrain.yaml`, `quantum_autorun.yaml`, `evaluation_autorun.yaml`.
+- Root `README.md` – high‑level overview.
+- `scripts/README.md` – list of automation commands.
+
+---
+
+*Keep this file up‑to‑date. Add notes for any missing pieces.*
 ## Copilot Quickstart for QAI (condensed)
 
 - Architecture in one breath: three independent projects — `quantum-ai/` (quantum ML + MCP server), `talk-to-ai/` (CLI chat), and `AI/microsoft_phi-silica-3.6_v1/` (LoRA fine-tuning) — unified by `function_app.py` (Azure Functions) and shared infra in `shared/`.
