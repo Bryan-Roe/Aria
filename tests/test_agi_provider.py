@@ -11,6 +11,7 @@ Tests cover:
 """
 import sys
 from pathlib import Path
+from typing import Iterable
 import pytest
 
 # Add talk-to-ai/src to path
@@ -35,9 +36,13 @@ class MockBaseProvider(BaseChatProvider):
         self.call_count = 0
         self.last_messages = None
     
-    def complete(self, messages: list[RoleMessage], stream: bool = True) -> str:
+    def complete(self, messages: list[RoleMessage], stream: bool = True) -> Iterable[str] | str:
         self.call_count += 1
         self.last_messages = messages
+        if stream:
+            def gen():
+                yield self.response
+            return gen()
         return self.response
 
 

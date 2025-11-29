@@ -139,8 +139,8 @@ class AGIProvider(BaseChatProvider):
     def _get_base_provider(self) -> BaseChatProvider:
         """Lazily initialize and return the base provider."""
         if self.base_provider is None:
-            # Auto-detect best available provider, excluding 'agi' to avoid recursion
-            provider, choice = detect_provider(explicit="auto")
+            # Use 'local' as default to avoid recursion - 'auto' could select 'agi'
+            provider, choice = detect_provider(explicit="local")
             self.base_provider = provider
             self._base_provider_choice = choice
         return self.base_provider
@@ -156,10 +156,12 @@ class AGIProvider(BaseChatProvider):
         Returns:
             Response string or generator of response chunks.
         """
-        # Update context with new messages
+        # Update context with new messages (use content comparison to avoid duplicates)
+        existing_contents = {m.get("content", "") for m in self.context.conversation_history}
         for msg in messages:
-            if msg not in self.context.conversation_history:
+            if msg.get("content", "") not in existing_contents:
                 self.context.add_message(msg)
+                existing_contents.add(msg.get("content", ""))
         
         # Extract the latest user query
         user_query = ""
@@ -635,14 +637,17 @@ class AGIProvider(BaseChatProvider):
         return "\n".join(parts)
     
     def _stream_text(self, text: str) -> Generator[str, None, None]:
-        """Stream text word by word with natural pacing."""
+        """Stream text word by word with adaptive pacing based on response length."""
         words = text.split()
+        word_count = len(words)
+        # Adaptive delay: faster for long responses (min 0.002), slower for short ones (max 0.02)
+        delay = max(0.002, min(0.02, 1.0 / (word_count + 10)))
         for i, word in enumerate(words):
             if i == 0:
                 yield word
             else:
                 yield " " + word
-            time.sleep(0.01)  # Small delay for streaming effect
+            time.sleep(delay)
     
     def set_goal(self, goal: str) -> None:
         """Add a goal to the active goals list."""
@@ -685,14 +690,14 @@ def create_agi_provider(
     Returns:
         Tuple of (provider instance, provider info).
     """
-    # Get base provider first
+    # Get base provider first - use 'local' to avoid selecting 'agi' recursively
     base_provider = None
     base_choice = None
     
     if model:
-        # Try to use specified model with auto-detected provider
+        # Try to use specified model with a non-agi provider
         try:
-            base_provider, base_choice = detect_provider(explicit="auto", model_override=model)
+            base_provider, base_choice = detect_provider(explicit="local", model_override=model)
         except Exception:
             pass
     

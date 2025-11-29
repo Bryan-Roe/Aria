@@ -55,9 +55,18 @@ try:
 except AttributeError:
     pass
 
-# Conditionally export AGI provider
+# Conditionally export AGI provider using the same dynamic import pattern
 try:
-    from agi_provider import AGIProvider, AGIContext, ReasoningStep, create_agi_provider
-    __all__.extend(["AGIProvider", "AGIContext", "ReasoningStep", "create_agi_provider"])
-except ImportError:
+    _agi_path = Path(__file__).resolve().parent.parent / "talk-to-ai" / "src" / "agi_provider.py"
+    if _agi_path.exists():
+        _agi_spec = importlib.util.spec_from_file_location("_agi_provider_module", _agi_path)
+        _agi_module = importlib.util.module_from_spec(_agi_spec)
+        sys.modules["_agi_provider_module"] = _agi_module
+        _agi_spec.loader.exec_module(_agi_module)
+        AGIProvider = _agi_module.AGIProvider
+        AGIContext = _agi_module.AGIContext
+        ReasoningStep = _agi_module.ReasoningStep
+        create_agi_provider = _agi_module.create_agi_provider
+        __all__.extend(["AGIProvider", "AGIContext", "ReasoningStep", "create_agi_provider"])
+except (ImportError, AttributeError):
     pass
