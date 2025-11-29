@@ -832,8 +832,8 @@ def load_checkpoint():
         except (OSError, RuntimeError) as e:
             return jsonify({"error": "Invalid checkpoint path"}), 400
         
-        # Verify the resolved path has allowed_dir as a parent (path containment check)
-        if allowed_dir not in resolved_path.parents:
+        # Verify the resolved path is within allowed_dir (path containment check)
+        if not resolved_path.is_relative_to(allowed_dir):
             return jsonify({"error": "Invalid checkpoint path: must be within checkpoints directory"}), 403
         
         if not resolved_path.exists():
