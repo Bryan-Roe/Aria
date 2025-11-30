@@ -82,21 +82,32 @@ def init_tracing(service_name: Optional[str] = None, enable_auto_instrumentation
         # Try OTLP exporter (gRPC proto exporter recommended)
         otlp_endpoint = os.getenv("OTEL_EXPORTER_OTLP_TRACES_ENDPOINT") or os.getenv(
             "OTEL_EXPORTER_OTLP_ENDPOINT")
-        try:
-            # Prefer modern gRPC exporter module
-            from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter  # type: ignore
 
-            exporter = OTLPSpanExporter(
-                endpoint=otlp_endpoint) if otlp_endpoint else OTLPSpanExporter()
-        except Exception:
+        # Avoid attempting to connect to a local OTLP collector in CI/test
+        # environments when no explicit endpoint is provided. This prevents
+        # noisy connection-refused warnings during automated test runs. To
+        # force the default local exporter behavior, set OTEL_EXPORTER_OTLP_TRACES_ENDPOINT
+        # (or OTEL_EXPORTER_OTLP_ENDPOINT) or set QAI_ALLOW_DEFAULT_OTLP=true.
+        if not otlp_endpoint and (os.getenv("CI") or os.getenv("PYTEST_CURRENT_TEST") or os.getenv("GITHUB_ACTIONS")) and not os.getenv("QAI_ALLOW_DEFAULT_OTLP"):
+            logging.info(
+                "[tracing] Skipping OTLP exporter default in CI/test environment; set OTEL_EXPORTER_OTLP_TRACES_ENDPOINT to enable.")
+            exporter = None
+        else:
             try:
-                # Fallback to HTTP exporter (older package layout)
-                from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter  # type: ignore
+                # Prefer modern gRPC exporter module
+                from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter  # type: ignore
 
                 exporter = OTLPSpanExporter(
                     endpoint=otlp_endpoint) if otlp_endpoint else OTLPSpanExporter()
             except Exception:
-                exporter = None
+                try:
+                    # Fallback to HTTP exporter (older package layout)
+                    from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter  # type: ignore
+
+                    exporter = OTLPSpanExporter(
+                        endpoint=otlp_endpoint) if otlp_endpoint else OTLPSpanExporter()
+                except Exception:
+                    exporter = None
 
         # Initialize tracer provider and attach exporter (if found)
         resource = Resource.create({"service.name": svc})

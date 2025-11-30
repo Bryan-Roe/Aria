@@ -246,6 +246,41 @@ python .\src\chat_cli.py --provider azure
 
 ---
 
+## 🛠️ Local dev adapter & telemetry (OTLP)
+
+- Local development helper: `local_dev_adapter.py` is a tiny Flask-based adapter that
+  lets you call a subset of the Azure Functions handlers (notably `/api/ai/status`) locally
+  without running the full Functions host. It also includes a lightweight `azure.functions`
+  shim so the `function_app` module can be imported in minimal containers or CI environments.
+
+  Quick start:
+
+  ```bash
+  # Start the local adapter (serves /api/ai/status on port 7071)
+  python local_dev_adapter.py
+  # Open http://localhost:7071/api/ai/status
+  ```
+
+- OTLP exporter warnings during tests: you may see connection refused errors from
+  OpenTelemetry's OTLP exporter (typically trying to reach localhost:4318). These are
+  benign if you don't run an OTLP collector locally. To quiet them during tests you can
+  either run a local collector (on port 4318) or disable OTLP exporting for the test run:
+
+  ```bash
+  # Prefer disabling tracing exporters for fast, local test runs
+  export OTEL_TRACES_EXPORTER=none
+  # or clear the OTLP endpoint
+  export OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=""
+  pytest -q
+  ```
+
+  Note: `OTEL_TRACES_EXPORTER=none` is supported by many OpenTelemetry SDKs to disable
+  remote exporting; alternatively clearing `APPLICATIONINSIGHTS_CONNECTION_STRING` will
+  prevent the repo's Azure Monitor instrumentation from initializing.
+
+  The local dev adapter is useful for quick health checks and debugging function handlers
+  without the overhead of the Functions Core Tools host.
+
 ### 🧠 **AI/microsoft_phi-silica-3.6_v1/** - Aria Model Fine-Tuning
 
 Fine-tuning workspace for training Aria's language understanding using LoRA and soft prompt techniques.
