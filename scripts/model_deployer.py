@@ -1,5 +1,3 @@
-import smtplib
-from email.message import EmailMessage
 #!/usr/bin/env python
 """
 Model Deployer
@@ -15,10 +13,10 @@ Features:
 - Model registry integration
 
 Usage examples (PowerShell):
-  python .\scripts\model_deployer.py --scan                    # Scan for deployable models
-  python .\scripts\model_deployer.py --deploy best --strategy canary
-  python .\scripts\model_deployer.py --status                  # Show deployment status
-  python .\scripts\model_deployer.py --rollback <version>      # Rollback to version
+  python .\\scripts\\model_deployer.py --scan                    # Scan for deployable models
+  python .\\scripts\\model_deployer.py --deploy best --strategy canary
+  python .\\scripts\\model_deployer.py --status                  # Show deployment status
+  python .\\scripts\\model_deployer.py --rollback <version>      # Rollback to version
 """
 
 from __future__ import annotations
@@ -26,10 +24,12 @@ from __future__ import annotations
 import argparse
 import json
 import shutil
+import smtplib
 import subprocess
 import sys
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timezone
+from email.message import EmailMessage
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
@@ -68,53 +68,6 @@ class DeploymentRecord:
 
 
 class ModelDeployer:
-            def auto_rollback_if_needed(self):
-                """Check for failed deploys or bad quality and rollback automatically."""
-                # Find last active deployment
-                active_versions = [v for v, rec in self.registry.items() if rec.status == "active"]
-                if not active_versions:
-                    return False
-                active_version = active_versions[0]
-                rec = self.registry[active_version]
-                # Check for quality drop
-                min_acc = self.quality_gates.get("min_accuracy", 0.75)
-                if rec.metadata.get("accuracy", 1.0) < min_acc:
-                    self.rollback_to_last_good()
-                    self.send_notification("Auto-rollback triggered", f"Model {active_version} accuracy dropped below {min_acc}")
-                    return True
-                return False
-
-            def rollback_to_last_good(self):
-                """Rollback to last good deployment (highest score, passes quality gates)."""
-                valid = [rec for rec in self.registry.values() if rec.status != "active" and rec.score >= 70]
-                if not valid:
-                    self.send_notification("Rollback failed", "No valid previous deployment found.")
-                    return False
-                best = sorted(valid, key=lambda r: r.score, reverse=True)[0]
-                self.rollback(best.version)
-                return True
-        def send_notification(self, subject, body, config=None):
-            import yaml
-            cfg_path = Path(__file__).resolve().parents[1] / "config" / "notification_config.yaml"
-            if cfg_path.exists():
-                with open(cfg_path) as f:
-                    config = yaml.safe_load(f)
-            notif_log = Path(config.get('log_file', DATA_OUT / "notifications.log"))
-            with open(notif_log, 'a') as f:
-                f.write(f"[{datetime.now()}] {subject}: {body}\n")
-            if config.get('email_enabled'):
-                try:
-                    msg = EmailMessage()
-                    msg.set_content(body)
-                    msg['Subject'] = subject
-                    msg['From'] = config.get('email_from')
-                    msg['To'] = config.get('email_to')
-                    with smtplib.SMTP(config.get('smtp_server', 'localhost')) as s:
-                        s.send_message(msg)
-                except Exception as e:
-                    print(f"Email notification failed: {e}")
-            if config.get('local_alert'):
-                print(f"ALERT: {subject} - {body}")
     """Manages model deployment with quality gates."""
     
     def __init__(self):
@@ -130,6 +83,55 @@ class ModelDeployer:
             "min_f1_score": 0.70,
             "min_validation_accuracy": 0.70,
         }
+
+    def auto_rollback_if_needed(self):
+        """Check for failed deploys or bad quality and rollback automatically."""
+        # Find last active deployment
+        active_versions = [v for v, rec in self.registry.items() if rec.status == "active"]
+        if not active_versions:
+            return False
+        active_version = active_versions[0]
+        rec = self.registry[active_version]
+        # Check for quality drop
+        min_acc = self.quality_gates.get("min_accuracy", 0.75)
+        if rec.metadata.get("accuracy", 1.0) < min_acc:
+            self.rollback_to_last_good()
+            self.send_notification("Auto-rollback triggered", f"Model {active_version} accuracy dropped below {min_acc}")
+            return True
+        return False
+
+    def rollback_to_last_good(self):
+        """Rollback to last good deployment (highest score, passes quality gates)."""
+        valid = [rec for rec in self.registry.values() if rec.status != "active" and rec.score >= 70]
+        if not valid:
+            self.send_notification("Rollback failed", "No valid previous deployment found.")
+            return False
+        best = sorted(valid, key=lambda r: r.score, reverse=True)[0]
+        self.rollback(best.version)
+        return True
+
+    def send_notification(self, subject, body, config=None):
+        import yaml
+        cfg_path = Path(__file__).resolve().parents[1] / "config" / "notification_config.yaml"
+        if cfg_path.exists():
+            with open(cfg_path) as f:
+                config = yaml.safe_load(f)
+        notif_log = Path(config.get('log_file', DATA_OUT / "notifications.log"))
+        with open(notif_log, 'a') as f:
+            f.write(f"[{datetime.now()}] {subject}: {body}\n")
+        if config.get('email_enabled'):
+            try:
+                msg = EmailMessage()
+                msg.set_content(body)
+                msg['Subject'] = subject
+                msg['From'] = config.get('email_from')
+                msg['To'] = config.get('email_to')
+                with smtplib.SMTP(config.get('smtp_server', 'localhost')) as s:
+                    s.send_message(msg)
+            except Exception as e:
+                print(f"Email notification failed: {e}")
+        if config.get('local_alert'):
+            print(f"ALERT: {subject} - {body}")
     
     def _load_registry(self):
         """Load deployment registry from disk."""
@@ -143,7 +145,7 @@ class ModelDeployer:
     def _save_registry(self):
         """Save deployment registry to disk."""
         data = {
-            "updated_at": datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "updated_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
             "deployments": [rec.__dict__ for rec in self.registry.values()],
         }
         with REGISTRY_FILE.open("w") as f:
@@ -311,7 +313,7 @@ class ModelDeployer:
         record = DeploymentRecord(
             version=version,
             model_path=str(deploy_path),
-            deployed_at=datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ"),
+            deployed_at=datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
             strategy=strategy,
             status=status,
             score=model.total_score,
@@ -334,7 +336,7 @@ class ModelDeployer:
         self._save_registry()
         
         print(f"[deployer] Deployment successful: {version}")
-            self.send_notification("Model deployed", f"Model {model.model_path} deployed as {version}")
+        self.send_notification("Model deployed", f"Model {model.model_path} deployed as {version}")
         return version
     
     def deploy_best(self, strategy: str = "direct") -> Optional[str]:

@@ -16,9 +16,9 @@ Outputs:
   data_out/env_autofix/status.json
 
 Usage:
-  python .\scripts\env_autofix.py                # one-shot repair attempt
-  python .\scripts\env_autofix.py --dry-run      # only diagnose
-  python .\scripts\env_autofix.py --force        # force rebuild even if healthy
+  python .\\scripts\\env_autofix.py                # one-shot repair attempt
+  python .\\scripts\\env_autofix.py --dry-run      # only diagnose
+  python .\\scripts\\env_autofix.py --force        # force rebuild even if healthy
 """
 from __future__ import annotations
 
@@ -103,7 +103,7 @@ def torch_health(python_exe: Path) -> Dict[str, Any]:
 
 def mark_status(obj: Dict[str, Any]) -> None:
     DATA_OUT.mkdir(parents=True, exist_ok=True)
-    obj["timestamp"] = datetime.utcnow().isoformat() + "Z"
+    obj["timestamp"] = datetime.now(timezone.utc).isoformat() + "Z"
     with (DATA_OUT / "status.json").open("w", encoding="utf-8") as f:
         json.dump(obj, f, indent=2)
 
@@ -127,7 +127,7 @@ def install_requirements(python_exe: Path) -> Dict[str, Any]:
     return {"step": "install_requirements", "details": steps}
 
 def safe_rename(path: Path) -> Dict[str, Any]:
-    ts = datetime.utcnow().strftime("%Y%m%dT%H%M%SZ")
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
     new_name = path.parent / f"{path.name}.corrupt.{ts}"
     try:
         path.rename(new_name)

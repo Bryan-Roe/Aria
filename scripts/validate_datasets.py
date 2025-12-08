@@ -33,7 +33,11 @@ class DatasetValidator:
         self.warnings = []
     
     def validate_csv(self, filepath: Path, verbose: bool = False) -> Dict:
-        """Validate CSV dataset."""
+        """Validate CSV dataset.
+        
+        Uses efficient line counting and iterator-based reading for
+        memory efficiency and better performance on large files.
+        """
         stats = {
             "valid": False,
             "samples": 0,
@@ -43,25 +47,41 @@ class DatasetValidator:
         }
         
         try:
-            with open(filepath, 'r', encoding='utf-8') as f:
-                lines = f.readlines()
-            
-            if not lines:
+            # Check if file is empty first
+            if filepath.stat().st_size == 0:
                 stats["errors"].append("File is empty")
                 return stats
             
-            # Count samples and features
-            stats["samples"] = len(lines)
-            first_line = lines[0].strip()
-            stats["features"] = len(first_line.split(','))
+            # Efficient line count using binary mode (fastest method)
+            with open(filepath, 'rb') as f:
+                line_count = sum(1 for _ in f)
+            stats["samples"] = line_count
             
-            # Check consistency
-            for i, line in enumerate(lines[:100], 1):  # Check first 100 lines
-                num_cols = len(line.strip().split(','))
+            # Read first line for feature count, validate first 100 lines
+            with open(filepath, 'r', encoding='utf-8') as f:
+                first_line = f.readline().strip()
+                if not first_line:
+                    stats["errors"].append("First line is empty")
+                    return stats
+                    
+                stats["features"] = len(first_line.split(','))
+                
+                # Check consistency of first 100 lines (including the one we read)
+                num_cols = len(first_line.split(','))
                 if num_cols != stats["features"]:
                     stats["warnings"].append(
-                        f"Line {i}: Expected {stats['features']} columns, got {num_cols}"
+                        f"Line 1: Expected {stats['features']} columns, got {num_cols}"
                     )
+                
+                # Continue checking lines 2-100
+                for i, line in enumerate(f, 2):
+                    if i > 100:
+                        break
+                    num_cols = len(line.strip().split(','))
+                    if num_cols != stats["features"]:
+                        stats["warnings"].append(
+                            f"Line {i}: Expected {stats['features']} columns, got {num_cols}"
+                        )
             
             stats["valid"] = len(stats["errors"]) == 0
             
@@ -75,7 +95,11 @@ class DatasetValidator:
         return stats
     
     def validate_jsonl(self, filepath: Path, verbose: bool = False) -> Dict:
-        """Validate JSONL dataset (chat format)."""
+        """Validate JSONL dataset (chat format).
+        
+        Uses iterator-based file reading instead of readlines() to avoid
+        loading entire file into memory at once.
+        """
         stats = {
             "valid": False,
             "samples": 0,
@@ -86,48 +110,50 @@ class DatasetValidator:
         }
         
         try:
-            with open(filepath, 'r', encoding='utf-8') as f:
-                lines = f.readlines()
-            
-            if not lines:
+            # Check if file is empty first
+            if filepath.stat().st_size == 0:
                 stats["format_errors"].append("File is empty")
                 return stats
             
-            # Validate each line
-            for i, line in enumerate(lines, 1):
-                line = line.strip()
-                if not line:
-                    stats["warnings"].append(f"Line {i}: Empty line (should be removed)")
-                    continue
-                
-                try:
-                    data = json.loads(line)
+            # Use iterator-based reading (memory efficient for large files)
+            with open(filepath, 'r', encoding='utf-8') as f:
+                for i, line in enumerate(f, 1):
+                    line = line.strip()
+                    if not line:
+                        stats["warnings"].append(f"Line {i}: Empty line (should be removed)")
+                        continue
                     
-                    # Check for messages field (Phi-3 format)
-                    if "messages" in data:
-                        messages = data["messages"]
-                        if not isinstance(messages, list):
-                            stats["format_errors"].append(
-                                f"Line {i}: 'messages' should be a list"
-                            )
-                        else:
-                            stats["total_messages"] += len(messages)
-                            
-                            # Validate message structure
-                            for msg_idx, msg in enumerate(messages):
-                                if not isinstance(msg, dict):
-                                    stats["format_errors"].append(
-                                        f"Line {i}, message {msg_idx}: Should be a dict"
-                                    )
-                                elif "role" not in msg or "content" not in msg:
-                                    stats["format_errors"].append(
-                                        f"Line {i}, message {msg_idx}: Missing 'role' or 'content'"
-                                    )
+                    try:
+                        data = json.loads(line)
+                        
+                        # Check for messages field (Phi-3 format)
+                        if "messages" in data:
+                            messages = data["messages"]
+                            if not isinstance(messages, list):
+                                stats["format_errors"].append(
+                                    f"Line {i}: 'messages' should be a list"
+                                )
+                            else:
+                                stats["total_messages"] += len(messages)
+                                
+                                # Validate message structure
+                                for msg_idx, msg in enumerate(messages):
+                                    if not isinstance(msg, dict):
+                                        stats["format_errors"].append(
+                                            f"Line {i}, message {msg_idx}: Should be a dict"
+                                        )
+                                    elif "role" not in msg or "content" not in msg:
+                                        stats["format_errors"].append(
+                                            f"Line {i}, message {msg_idx}: Missing 'role' or 'content'"
+                                        )
+                        
+                        stats["samples"] += 1
                     
-                    stats["samples"] += 1
-                
-                except json.JSONDecodeError as e:
-                    stats["format_errors"].append(f"Line {i}: Invalid JSON - {e}")
+                    except json.JSONDecodeError as e:
+            
+            # Check if file was empty or contained only blank lines
+            if stats["samples"] == 0 and not stats["format_errors"]:
+                stats["format_errors"].append("File is empty or contains no valid data")
             
             # Calculate statistics
             if stats["samples"] > 0:

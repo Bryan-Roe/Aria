@@ -1,7 +1,7 @@
 """Backfill existing chat JSONL logs into the SQL memory store.
 
 Usage (PowerShell):
-  python .\scripts\ingest_chat_logs_to_sql.py --logs-dir talk-to-ai\logs --limit 10
+  python .\\scripts\\ingest_chat_logs_to_sql.py --logs-dir talk-to-ai\\logs --limit 10
 
 Environment:
   QAI_DB_CONN must be set for inserts to succeed.

@@ -15,8 +15,8 @@ Outputs:
   datasets/chat/chat_logs/metadata.json
 
 Usage (PowerShell):
-  python .\scripts\extract_chat_logs_dataset.py --max-records 500
-  python AI\microsoft_phi-silica-3.6_v1\scripts\train_lora.py --dataset .\datasets\chat\chat_logs --dry-run
+  python .\\scripts\\extract_chat_logs_dataset.py --max-records 500
+  python AI\\microsoft_phi-silica-3.6_v1\\scripts\\train_lora.py --dataset .\\datasets\\chat\\chat_logs --dry-run
 """
 from __future__ import annotations
 import argparse

@@ -1,12 +1,25 @@
 {
   "servers": {
-    "quantum-ai": {
+    "quantum-mcp-server": {
       "type": "stdio",
-      "command": "python",
+      "command": "${workspaceFolder}/quantum-ai/venv/bin/python",
       "args": [
-        "c:\\Users\\Bryan\\OneDrive\\AI\\quantum-ai\\quantum_mcp_server.py"
+        "${workspaceFolder}/quantum-ai/quantum_mcp_server.py"
+      ]
+    },
+    "phi-model-server": {
+      "type": "stdio",
+      "command": "${workspaceFolder}/AI/microsoft_phi-silica-3.6_v1/venv/bin/python",
+      "args": [
+        "${workspaceFolder}/AI/microsoft_phi-silica-3.6_v1/scripts/model_server.py"
+      ]
+    },
+    "phi-mcp-client": {
+      "type": "stdio",
+      "command": "${workspaceFolder}/AI/microsoft_phi-silica-3.6_v1/venv/bin/python",
+      "args": [
+        "${workspaceFolder}/AI/microsoft_phi-silica-3.6_v1/mcp.py"
       ]
     }
   }
 }
-

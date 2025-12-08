@@ -44,7 +44,10 @@ config = {
     "batch_size": 16
 }
 
-response = requests.post(f"{BASE_URL}/api/train/start", json=config)
+# Use timeout for all requests to prevent hanging
+REQUEST_TIMEOUT = 30  # seconds
+
+response = requests.post(f"{BASE_URL}/api/train/start", json=config, timeout=REQUEST_TIMEOUT)
 if response.status_code != 200:
     print(f"   ❌ Failed to start training: {response.text}")
     exit(1)
@@ -59,7 +62,7 @@ print("   (Press Ctrl+C to stop)\n")
 
 try:
     for i in range(60):  # Monitor for up to 60 seconds
-        response = requests.get(f"{BASE_URL}/api/train/status/{session_id}")
+        response = requests.get(f"{BASE_URL}/api/train/status/{session_id}", timeout=REQUEST_TIMEOUT)
         status = response.json()
         
         epoch = status['current_epoch']
@@ -81,12 +84,12 @@ try:
         time.sleep(1)
 except KeyboardInterrupt:
     print("\n\n   ⏹️  Stopping training...")
-    requests.post(f"{BASE_URL}/api/train/stop/{session_id}")
+    requests.post(f"{BASE_URL}/api/train/stop/{session_id}", timeout=REQUEST_TIMEOUT)
     print("   ✅ Training stopped")
 
 # Test 5: List results
 print("\n5. Checking training history...")
-response = requests.get(f"{BASE_URL}/api/results")
+response = requests.get(f"{BASE_URL}/api/results", timeout=REQUEST_TIMEOUT)
 results = response.json()
 print(f"   ✅ Found {len(results)} training sessions in history")
 

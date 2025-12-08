@@ -41,4 +41,7 @@ Pillow>=10.0.0
 torch>=2.0.0
 numpy>=1.24.0
 
+# JSON schema validation library used by tests and cooking-ai utilities
+jsonschema>=4.18.0
+
 # NOTE: After adding telemetry & cosmos, run task: pip install (functions)

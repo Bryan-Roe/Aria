@@ -301,7 +301,7 @@ class TrainingMonitor:
         
         if status is None:
             print(f"{Colors.WARNING}⚠️  Status file not found. Is the orchestrator running?{Colors.ENDC}")
-            print(f"\nStart it with: python .\\scripts\\autonomous_training_orchestrator.py")
+            print(f"\\nStart it with: python .\\scripts\\autonomous_training_orchestrator.py")
             return
         
         self.print_overview(status)

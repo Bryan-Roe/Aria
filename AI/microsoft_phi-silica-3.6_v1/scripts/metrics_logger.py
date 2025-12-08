@@ -81,7 +81,7 @@ class MetricsLogger:
 
     def log(self, record: Dict[str, Any]) -> None:
         record = dict(record)
-        record["timestamp"] = dt.datetime.utcnow().isoformat() + "Z"
+        record["timestamp"] = dt.datetime.now(timezone.utc).isoformat() + "Z"
         # Write locally
         with self.file_path.open("a", encoding="utf-8") as f:
             f.write(json.dumps(record, ensure_ascii=False) + "\n")
@@ -140,7 +140,7 @@ class MetricsLogger:
 
     def _post_to_azure(self, record: Dict[str, Any]) -> None:
         body = json.dumps([record]).encode("utf-8")
-        rfc1123date = dt.datetime.utcnow().strftime("%a, %d %b %Y %H:%M:%S GMT")
+        rfc1123date = dt.datetime.now(timezone.utc).strftime("%a, %d %b %Y %H:%M:%S GMT")
         signature = self._build_signature(len(body), rfc1123date)
         url = f"https://{self.workspace_id}.ods.opinsights.azure.com/api/logs?api-version=2016-04-01"
         headers = {

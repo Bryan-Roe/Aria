@@ -19,10 +19,10 @@ Outputs:
 - data_out/evaluation_autorun/status.json
 
 Usage examples (PowerShell):
-  python .\scripts\evaluation_autorun.py --dry-run
-  python .\scripts\evaluation_autorun.py --job eval_smoke_test
-  python .\scripts\evaluation_autorun.py --list
-  python .\scripts\evaluation_autorun.py --job eval_lora_phi35_full
+  python .\\scripts\\evaluation_autorun.py --dry-run
+  python .\\scripts\\evaluation_autorun.py --job eval_smoke_test
+  python .\\scripts\\evaluation_autorun.py --list
+  python .\\scripts\\evaluation_autorun.py --job eval_lora_phi35_full
 """
 
 from __future__ import annotations
@@ -33,8 +33,9 @@ import os
 import subprocess
 import sys
 import time
+import logging
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
@@ -140,14 +141,14 @@ def build_eval_command(job: EvalJob) -> List[str]:
         py = str(_venv_python_quantum())
     else:
         py = str(_venv_python_default())
-    
+
     # Get evaluation script for model type
     script = EVAL_SCRIPTS.get(job.model_type)
     if not script:
         raise ValueError(f"Unknown model_type: {job.model_type}")
-    
+
     cmd: List[str] = [py, str(script)]
-    
+
     # Common args
     cmd += ["--dataset", str(job.dataset)]
     if job.model_path:
@@ -156,26 +157,26 @@ def build_eval_command(job: EvalJob) -> List[str]:
         cmd += ["--max-samples", str(job.max_samples)]
     if job.batch_size is not None:
         cmd += ["--batch-size", str(job.batch_size)]
-    
+
     # Metrics
     for metric in job.metrics:
         cmd += ["--metric", metric]
-    
+
     # Output format
     cmd += ["--output-format", job.output_format]
-    
+
     # Azure-specific
     if job.model_type == "azure" and job.azure_deployment:
         cmd += ["--deployment", job.azure_deployment]
-    
+
     # Results directory
     if job.save_results:
         results_dir = DATA_OUT / job.name
         cmd += ["--save-dir", str(results_dir)]
-    
+
     # Pass through extra args
     cmd += list(job.extra_args)
-    
+
     return cmd
 
 
@@ -191,45 +192,46 @@ def write_json(path: Path, obj: Dict[str, Any]) -> None:
 
 def validate_job(job: EvalJob, parallel: bool = False) -> Dict[str, Any]:
     """Validate job configuration and paths without executing.
-    
+
     Args:
         job: The evaluation job to validate
         parallel: If True, skip expensive checks for faster batch validation
     """
     missing: List[str] = []
     warnings: List[str] = []
-    
+
     # Check evaluation script exists
     script = EVAL_SCRIPTS.get(job.model_type)
     if script and not script.exists():
         # Note: Scripts don't exist yet, so we'll create placeholder validation
         warnings.append(f"Evaluation script not yet created: {script}")
-    
+
     # Check dataset exists
     if job.dataset:
         dataset_path = Path(job.dataset)
         if not dataset_path.exists():
             missing.append(str(dataset_path))
-    
+
     # Check model path exists (if specified)
     if job.model_path:
         model_path = Path(job.model_path)
         if not model_path.exists():
             missing.append(str(model_path))
-    
+
     # Validate metrics for model type
     supported = SUPPORTED_METRICS.get(job.model_type, [])
     unsupported = [m for m in job.metrics if m not in supported]
     if unsupported:
-        warnings.append(f"Unsupported metrics for {job.model_type}: {unsupported}")
-    
+        warnings.append(
+            f"Unsupported metrics for {job.model_type}: {unsupported}")
+
     # Check Azure credentials if needed
     if job.model_type == "azure":
         required_vars = ["AZURE_OPENAI_API_KEY", "AZURE_OPENAI_ENDPOINT"]
         missing_vars = [v for v in required_vars if not os.getenv(v)]
         if missing_vars:
             warnings.append(f"Missing Azure env vars: {missing_vars}")
-    
+
     result = {
         "status": "validated" if not missing else "missing",
         "missing": missing,
@@ -239,14 +241,14 @@ def validate_job(job: EvalJob, parallel: bool = False) -> Dict[str, Any]:
 
 
 def run_job(job: EvalJob, dry_run: bool = False) -> Dict[str, Any]:
-    ts = datetime.utcnow().strftime("%Y%m%dT%H%M%SZ")
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
     job_dir = DATA_OUT / job.name / ts
     ensure_dirs(job_dir)
     log_path = job_dir / "stdout.log"
     results_path = job_dir / "results.json"
-    
+
     cmd = build_eval_command(job)
-    
+
     result: Dict[str, Any] = {
         "name": job.name,
         "model_type": job.model_type,
@@ -258,7 +260,7 @@ def run_job(job: EvalJob, dry_run: bool = False) -> Dict[str, Any]:
         "results_file": str(results_path) if job.save_results else None,
         "metrics_computed": job.metrics,
     }
-    
+
     if dry_run:
         # Validate without execution (fast mode for batch)
         validation = validate_job(job, parallel=True)
@@ -267,11 +269,11 @@ def run_job(job: EvalJob, dry_run: bool = False) -> Dict[str, Any]:
         if validation.get("missing"):
             result["blocker"] = True
         return result
-    
+
     # Execute evaluation
     env = os.environ.copy()
     t0 = time.time()
-    
+
     with log_path.open("w", encoding="utf-8") as logf:
         logf.write(f"$ {' '.join(str(x) for x in cmd)}\n\n")
         logf.flush()
@@ -284,12 +286,12 @@ def run_job(job: EvalJob, dry_run: bool = False) -> Dict[str, Any]:
             text=True
         )
         rc = proc.wait()
-    
+
     duration = time.time() - t0
     result["return_code"] = rc
     result["duration_sec"] = round(duration, 2)
     result["status"] = "succeeded" if rc == 0 else "failed"
-    
+
     # Try to load results if saved
     if job.save_results and results_path.exists():
         try:
@@ -298,7 +300,7 @@ def run_job(job: EvalJob, dry_run: bool = False) -> Dict[str, Any]:
                 result["evaluation_summary"] = eval_results.get("summary", {})
         except Exception as e:
             result["evaluation_summary"] = {"error": str(e)}
-    
+
     # Persist last_run.json
     write_json(DATA_OUT / job.name / "last_run.json", result)
     return result
@@ -306,7 +308,7 @@ def run_job(job: EvalJob, dry_run: bool = False) -> Dict[str, Any]:
 
 def collect_status(all_results: List[Dict[str, Any]]) -> Dict[str, Any]:
     summary = {
-        "generated_at": datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "generated_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "total_jobs": len(all_results),
         "succeeded": sum(1 for r in all_results if r.get("status") == "succeeded"),
         "failed": sum(1 for r in all_results if r.get("status") == "failed"),
@@ -320,57 +322,70 @@ def collect_status(all_results: List[Dict[str, Any]]) -> Dict[str, Any]:
 
 def main() -> None:
     ap = argparse.ArgumentParser(description="Evaluation AutoRun orchestrator")
-    ap.add_argument("--config", default=str(REPO_ROOT / "evaluation_autorun.yaml"), 
+    # Default config lives under config/evaluation/ to match other orchestrators
+    ap.add_argument("--config", default=str(REPO_ROOT / "config" / "evaluation" / "evaluation_autorun.yaml"),
                     help="Path to evaluation_autorun.yaml")
     ap.add_argument("--job", default=None, help="Run only the named job")
-    ap.add_argument("--dry-run", action="store_true", 
+    ap.add_argument("--dry-run", action="store_true",
                     help="Validate and print commands; do not execute")
-    ap.add_argument("--list", action="store_true", 
+    ap.add_argument("--list", action="store_true",
                     help="List configured jobs and exit")
     args = ap.parse_args()
-    
+
+    # Initialize optional tracing (best-effort)
+    try:
+        from shared.tracing import init_tracing
+
+        init_tracing(service_name="evaluation_autorun")
+    except Exception as _e:  # pragma: no cover - non-fatal
+        logging.debug(f"[tracing] init skipped in evaluation_autorun: {_e}")
+
     cfg_path = Path(args.config)
     if not cfg_path.exists():
         raise SystemExit(f"Config not found: {cfg_path}")
-    
+
     jobs = load_jobs(cfg_path)
-    
+
     # Filter to enabled jobs
     jobs = [j for j in jobs if j.enabled]
-    
+
     if args.list:
         print(json.dumps([j.__dict__ for j in jobs], indent=2, default=str))
         return
-    
+
     # Filter to specific job if requested
     if args.job:
         jobs = [j for j in jobs if j.name == args.job]
         if not jobs:
             raise SystemExit(f"Job not found in config: {args.job}")
-    
+
     ensure_dirs(DATA_OUT)
     results: List[Dict[str, Any]] = []
-    
+
     for idx, j in enumerate(jobs):
         progress = int(((idx + 1) / len(jobs)) * 100)
-        print(f"[evaluation_autorun] [{progress}%] Job {idx + 1}/{len(jobs)}: {j.name} (model_type={j.model_type})")
+        print(
+            f"[evaluation_autorun] [{progress}%] Job {idx + 1}/{len(jobs)}: {j.name} (model_type={j.model_type})")
         res = run_job(j, dry_run=args.dry_run)
         results.append(res)
         print(json.dumps(res, indent=2, default=str))
-        
+
         # DB Logging (only on successful real runs)
         if not args.dry_run and res.get("status") == "succeeded":
             log_info = log_evaluation_run_safe(j, res)
             if log_info.get("success"):
-                print(f"[evaluation_autorun] Logged to DB (run_id={log_info.get('run_id')})")
+                print(
+                    f"[evaluation_autorun] Logged to DB (run_id={log_info.get('run_id')})")
             elif log_info.get("skipped"):
                 print("[evaluation_autorun] DB logging skipped (not configured)")
             else:
-                print(f"[evaluation_autorun] DB logging failed: {log_info.get('error')}")
-    
+                print(
+                    f"[evaluation_autorun] DB logging failed: {log_info.get('error')}")
+
     status = collect_status(results)
-    print(f"\n[evaluation_autorun] Summary: {status['succeeded']}/{status['total_jobs']} succeeded")
-    
+    print(
+        f"\n[evaluation_autorun] Summary: {status['succeeded']}/{status['total_jobs']} succeeded")
+
     # Non-zero exit if any job failed
     if not args.dry_run and status["failed"] > 0:
         raise SystemExit(1)

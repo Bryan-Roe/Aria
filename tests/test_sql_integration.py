@@ -3,14 +3,16 @@ import logging
 import pytest
 
 # Check if SQLAlchemy is available for these tests
+
 try:
-    import sqlalchemy
-    SQLALCHEMY_AVAILABLE = True
+    # import sqlalchemy (unused)
+    _sqlalchemy_available = True
 except ImportError:
-    SQLALCHEMY_AVAILABLE = False
+    _sqlalchemy_available = False
+SQLALCHEMY_AVAILABLE = _sqlalchemy_available
 
 pytestmark = pytest.mark.skipif(
-    not SQLALCHEMY_AVAILABLE, 
+    not SQLALCHEMY_AVAILABLE,
     reason="SQLAlchemy not installed - SQL integration tests require sqlalchemy"
 )
 
@@ -20,7 +22,8 @@ os.environ.setdefault("QAI_SQL_URL", "sqlite:///:memory:")
 
 def test_sql_engine_health():
     from shared.sql_engine import sql_health, get_engine
-    info = sql_health()
+    from typing import Dict, Any
+    info: Dict[str, Any] = sql_health()  # Explicit type annotation for clarity
     assert info["enabled"] is True
     assert info["vendor"] == "sqlite"
     assert info["connectivity"] is True
@@ -63,7 +66,7 @@ def test_engine_stats_presence():
 
 def test_slow_query_warning(caplog):
     """Validate slow query warning emitted when threshold exceeded.
-    
+
     Note: caplog may not capture logging.warning() calls from shared.sql_engine
     in all test environments; this test primarily confirms no crash occurs.
     Integration verification can also rely on manual review of function logs.
@@ -101,25 +104,25 @@ def test_saturation_detection():
 def test_environment_aware_threshold():
     """Validate slow query threshold resolution based on environment."""
     from shared.sql_engine import resolve_slow_query_threshold
-    
+
     # Explicit override takes precedence
     os.environ["QAI_SQL_SLOW_MS"] = "250"
     os.environ.pop("AZURE_FUNCTIONS_ENVIRONMENT", None)
     assert resolve_slow_query_threshold() == 250.0
-    
+
     # Environment profile fallback (dev)
     os.environ.pop("QAI_SQL_SLOW_MS", None)
     os.environ["AZURE_FUNCTIONS_ENVIRONMENT"] = "development"
     assert resolve_slow_query_threshold() == 100.0
-    
+
     # Staging
     os.environ["AZURE_FUNCTIONS_ENVIRONMENT"] = "staging"
     assert resolve_slow_query_threshold() == 300.0
-    
+
     # Production
     os.environ["AZURE_FUNCTIONS_ENVIRONMENT"] = "production"
     assert resolve_slow_query_threshold() == 500.0
-    
+
     # Clean up for other tests
     os.environ.pop("QAI_SQL_SLOW_MS", None)
     os.environ.pop("AZURE_FUNCTIONS_ENVIRONMENT", None)

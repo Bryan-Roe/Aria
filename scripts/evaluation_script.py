@@ -21,7 +21,7 @@ def evaluate_model(model_path, dataset_path):
         "accuracy": 0.85,
         "loss": 0.35,
         "f1_score": 0.82,
-        "eval_time": str(datetime.utcnow()),
+        "eval_time": str(datetime.now(timezone.utc)),
     }
 
 def main():

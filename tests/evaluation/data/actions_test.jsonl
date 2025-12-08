@@ -1,0 +1,1 @@
+{"command": "pick up the apple", "expected_actions": [{"action": "move", "target": {"x": 55, "y": 35}, "speed": "normal"}, {"action": "pickup", "object_id": "apple"}]}

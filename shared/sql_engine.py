@@ -48,30 +48,30 @@ _LAST_URL = None
 # Slow query frequency tracking (in-memory, last 60 seconds)
 # Use collections.deque for O(1) append and efficient pruning from left
 from collections import deque
-_SLOW_QUERY_LOG: deque[tuple[float, float]] = deque()  # (timestamp, duration_ms)
-_SLOW_QUERY_CACHE_SIZE = 1000  # Maximum entries to prevent unbounded growth
+_recent_slow_queries: deque[tuple[float, float]] = deque()  # (timestamp, duration_ms)
+_SLOW_QUERY_CACHE_MAX_SIZE = 1000  # Maximum entries to prevent unbounded growth
 
-def _prune_slow_query_log() -> None:
+def _prune_recent_slow_queries() -> None:
     """Remove slow query entries older than 60 seconds.
     
     Uses efficient deque operations - pops from left since entries are 
     chronologically ordered.
     """
-    now = time.time()
-    cutoff = now - 60
+    current_time = time.time()
+    cutoff_time = current_time - 60
     # Pop old entries from the left (oldest first)
-    while _SLOW_QUERY_LOG and _SLOW_QUERY_LOG[0][0] < cutoff:
-        _SLOW_QUERY_LOG.popleft()
+    while _recent_slow_queries and _recent_slow_queries[0][0] < cutoff_time:
+        _recent_slow_queries.popleft()
     
     # Also enforce max size to prevent memory growth
-    while len(_SLOW_QUERY_LOG) > _SLOW_QUERY_CACHE_SIZE:
-        _SLOW_QUERY_LOG.popleft()
+    while len(_recent_slow_queries) > _SLOW_QUERY_CACHE_MAX_SIZE:
+        _recent_slow_queries.popleft()
 
 def _compute_query_hash(sql: str) -> str:
     """Compute SHA256 hash of normalized SQL for tracking."""
     # Use faster string operations - avoid multiple replace calls
-    normalized = ' '.join(sql.split())
-    return hashlib.sha256(normalized.encode("utf-8")).hexdigest()[:16]
+    normalized_sql = ' '.join(sql.split())
+    return hashlib.sha256(normalized_sql.encode("utf-8")).hexdigest()[:16]
 
 def _track_query_metrics(sql: str, duration_ms: float, vendor: str) -> None:
     """Persist query metrics to QAI_QueryMetrics table if tracking enabled."""
@@ -257,8 +257,8 @@ def engine_stats() -> Dict[str, Any]:
             "vendor": "sqlite",
             "status": "ok",
         })
-        _prune_slow_query_log()
-        stats["slow_queries_1min"] = len(_SLOW_QUERY_LOG)
+        _prune_recent_slow_queries()
+        stats["slow_queries_1min"] = len(_recent_slow_queries)
         return stats
     if pool:
         for attr in ["size", "checkedout", "overflow"]:
@@ -270,17 +270,17 @@ def engine_stats() -> Dict[str, Any]:
         
         # Saturation detection
         pool_size = stats["size"]
-        checked_out = stats["checkedout"]
-        if pool_size and checked_out is not None:
-            saturation_pct = (checked_out / pool_size) * 100
-            stats["saturation_pct"] = round(saturation_pct, 1)
-            if saturation_pct > 80:
-                stats["saturation_alert"] = f"Pool {saturation_pct:.1f}% saturated ({checked_out}/{pool_size})"
+        checked_out_connections = stats["checkedout"]
+        if pool_size and checked_out_connections is not None:
+            saturation_percentage = (checked_out_connections / pool_size) * 100
+            stats["saturation_pct"] = round(saturation_percentage, 1)
+            if saturation_percentage > 80:
+                stats["saturation_alert"] = f"Pool {saturation_percentage:.1f}% saturated ({checked_out_connections}/{pool_size})"
                 logging.warning(f"[sql_engine] {stats['saturation_alert']} vendor={stats['vendor']}")
     
     # Slow query frequency
-    _prune_slow_query_log()
-    stats["slow_queries_1min"] = len(_SLOW_QUERY_LOG)
+    _prune_recent_slow_queries()
+    stats["slow_queries_1min"] = len(_recent_slow_queries)
     
     return stats
 
@@ -297,51 +297,51 @@ def quick_query(sql: str, **kwargs) -> list[dict]:  # noqa: ANN001
     engine = get_engine()
     if not engine:
         return []
-    simulate_delay = float(kwargs.get("simulate_delay", 0) or 0)
-    if simulate_delay > 0:
-        time.sleep(simulate_delay)
-    start = time.perf_counter()
-    rows: list[dict] = []
+    simulated_delay_seconds = float(kwargs.get("simulate_delay", 0) or 0)
+    if simulated_delay_seconds > 0:
+        time.sleep(simulated_delay_seconds)
+    start_time = time.perf_counter()
+    result_rows: list[dict] = []
     if _SQLALCHEMY_AVAILABLE:
         try:
-            with engine.connect() as conn:
-                res = conn.execute(text(sql))
-                cols = res.keys()
-                rows = [dict(zip(cols, row)) for row in res.fetchall()]
-        except Exception as e:  # noqa: BLE001
-            logging.warning(f"[sql_engine] quick_query failed: {e}")
+            with engine.connect() as connection:
+                query_result = connection.execute(text(sql))
+                column_names = query_result.keys()
+                result_rows = [dict(zip(column_names, row)) for row in query_result.fetchall()]
+        except Exception as execution_error:  # noqa: BLE001
+            logging.warning(f"[sql_engine] quick_query failed: {execution_error}")
             return []
     else:
         # Fallback: execute via sqlite3
         import sqlite3
         try:
-            with sqlite3.connect(":memory:") as conn:
-                cur = conn.execute(sql)
+            with sqlite3.connect(":memory:") as connection:
+                cursor = connection.execute(sql)
                 # SQLite cursor.description provides columns
-                cols = [d[0] for d in (cur.description or [])]
-                data = cur.fetchall()
-                if cols:
-                    rows = [dict(zip(cols, row)) for row in data]
+                column_names = [description[0] for description in (cursor.description or [])]
+                data = cursor.fetchall()
+                if column_names:
+                    result_rows = [dict(zip(column_names, row)) for row in data]
                 else:
-                    rows = []
-        except Exception as e:  # noqa: BLE001
-            logging.warning(f"[sql_engine] quick_query fallback failed: {e}")
+                    result_rows = []
+        except Exception as execution_error:  # noqa: BLE001
+            logging.warning(f"[sql_engine] quick_query fallback failed: {execution_error}")
             return []
-    duration_ms = (time.perf_counter() - start) * 1000.0
-    slow_ms = resolve_slow_query_threshold()
-    vendor = getattr(engine.dialect, "name", "unknown")
+    execution_duration_ms = (time.perf_counter() - start_time) * 1000.0
+    slow_query_threshold_ms = resolve_slow_query_threshold()
+    database_vendor = getattr(engine.dialect, "name", "unknown")
     
     # Track all queries if enabled (not just slow ones)
-    _track_query_metrics(sql, duration_ms, vendor)
+    _track_query_metrics(sql, execution_duration_ms, database_vendor)
     
-    if duration_ms > slow_ms:
+    if execution_duration_ms > slow_query_threshold_ms:
         truncated_sql = sql[:120].replace("\n", " ")
         logging.warning(
-            f"[sql_engine] slow query ({duration_ms:.1f} ms > {slow_ms} ms) vendor={vendor} sql={truncated_sql}"
+            f"[sql_engine] slow query ({execution_duration_ms:.1f} ms > {slow_query_threshold_ms} ms) vendor={database_vendor} sql={truncated_sql}"
         )
         # Track slow query frequency
-        global _SLOW_QUERY_LOG
-        _SLOW_QUERY_LOG.append((time.time(), duration_ms))
-    return rows
+        global _recent_slow_queries
+        _recent_slow_queries.append((time.time(), execution_duration_ms))
+    return result_rows
 
 __all__ = ["resolve_sql_url", "get_engine", "sql_health", "quick_query", "engine_stats", "resolve_slow_query_threshold"]

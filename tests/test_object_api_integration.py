@@ -3,7 +3,6 @@ import time
 import subprocess
 import socket
 from pathlib import Path
-import pytest
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 ARIA_WEB = REPO_ROOT / 'aria_web'
@@ -24,7 +23,8 @@ def is_port_open(port=8080, host='127.0.0.1'):
 def ensure_server_running():
     if is_port_open(8080):
         return None
-    proc = subprocess.Popen(["python3", "server.py"], cwd=str(ARIA_WEB), stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    proc = subprocess.Popen(["python3", "server.py"], cwd=str(
+        ARIA_WEB), stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     for _ in range(30):
         if is_port_open(8080):
             return proc
@@ -41,19 +41,24 @@ def test_add_update_remove_object_integration():
         name = f'integ_obj_{int(time.time()*1000)}'
 
         # Add
-        payload = {'action': 'add', 'object': {'id': name, 'position': {'x': 42, 'y': 42}, 'state': 'on_table', 'emoji': '🧸'}}
-        r = requests.post(SERVER_URL + '/api/aria/object', json=payload, timeout=3.0)
-        assert r.ok and r.json().get('status') in ('added','ok')
+        payload: dict[str, object] = {'action': 'add', 'object': {
+            'id': name, 'position': {'x': 42, 'y': 42}, 'state': 'on_table', 'emoji': '🧸'}}
+        r = requests.post(SERVER_URL + '/api/aria/object',
+                          json=payload, timeout=3.0)
+        assert r.ok and r.json().get('status') in ('added', 'ok')
 
         # Read back
         r2 = requests.get(SERVER_URL + '/api/aria/state', timeout=2.0)
         assert r2.ok
         j = r2.json()
-        assert name in j.get('objects', {}), f"object {name} not present: {j.get('objects')}"
+        assert name in j.get(
+            'objects', {}), f"object {name} not present: {j.get('objects')}"
 
         # Update
-        payload2 = {'action': 'update', 'object': {'id': name, 'position': {'x': 12, 'y': 26}, 'state': 'on_stage'}}
-        r3 = requests.post(SERVER_URL + '/api/aria/object', json=payload2, timeout=3.0)
+        payload2: dict[str, object] = {'action': 'update', 'object': {
+            'id': name, 'position': {'x': 12, 'y': 26}, 'state': 'on_stage'}}
+        r3 = requests.post(SERVER_URL + '/api/aria/object',
+                           json=payload2, timeout=3.0)
         assert r3.ok and r3.json().get('status') == 'updated'
 
         # Verify update
@@ -63,7 +68,10 @@ def test_add_update_remove_object_integration():
         assert obj and obj.get('position', {}).get('x') == 12
 
         # Remove
-        r5 = requests.post(SERVER_URL + '/api/aria/object', json={'action': 'remove', 'object': {'id': name}}, timeout=3.0)
+        payload3: dict[str, object] = {
+            'action': 'remove', 'object': {'id': name}}
+        r5 = requests.post(SERVER_URL + '/api/aria/object',
+                           json=payload3, timeout=3.0)
         assert r5.ok and r5.json().get('status') == 'removed'
 
     finally:

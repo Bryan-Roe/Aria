@@ -16,10 +16,10 @@ Features:
 - Email/Slack notifications
 
 Usage examples (PowerShell):
-  python .\scripts\auto_scheduler.py --start  # Start scheduler daemon
-  python .\scripts\auto_scheduler.py --schedule "daily_full_pipeline" --cron "0 2 * * *"
-  python .\scripts\auto_scheduler.py --list   # List scheduled jobs
-  python .\scripts\auto_scheduler.py --status # Show scheduler status
+  python .\\scripts\\auto_scheduler.py --start  # Start scheduler daemon
+  python .\\scripts\\auto_scheduler.py --schedule "daily_full_pipeline" --cron "0 2 * * *"
+  python .\\scripts\\auto_scheduler.py --list   # List scheduled jobs
+  python .\\scripts\\auto_scheduler.py --status # Show scheduler status
 """
 
 from __future__ import annotations
@@ -107,7 +107,7 @@ class AutoScheduler:
     def _save_schedule(self):
         """Save scheduled jobs to disk."""
         data = {
-            "updated_at": datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "updated_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
             "jobs": [job.__dict__ for job in self.jobs.values()],
         }
         with SCHEDULE_FILE.open("w") as f:
@@ -129,7 +129,7 @@ class AutoScheduler:
     def _save_state(self):
         """Save scheduler state to disk."""
         state = {
-            "updated_at": datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "updated_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
             "jobs": {
                 name: {
                     "last_run": job.last_run,
@@ -221,7 +221,7 @@ class AutoScheduler:
             duration = time.time() - t0
             success = result.returncode == 0
             # Update job state
-            job.last_run = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
+            job.last_run = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
             job.last_status = "succeeded" if success else "failed"
             job.run_count += 1
             if success:
@@ -259,6 +259,7 @@ class AutoScheduler:
     
     def _send_notification(self, job: ScheduledJob, message: str):
         # Method removed; replaced by send_notification
+        pass
     
     def start_daemon(self):
         """Start the scheduler daemon."""

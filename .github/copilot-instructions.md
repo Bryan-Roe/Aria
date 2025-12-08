@@ -1,821 +1,332 @@
-# QAI – Copilot Instructions
-
-Essential knowledge for AI agents working in this hybrid quantum-AI/ML workspace. Focus: immediate productivity, safe execution, and cost awareness.
-
-## Copilot Quickstart for QAI (condensed)
-
-- Architecture in one breath: three independent projects — `quantum-ai/` (quantum ML + MCP server), `talk-to-ai/` (CLI chat), and `AI/microsoft_phi-silica-3.6_v1/` (LoRA fine-tuning) — unified by `function_app.py` (Azure Functions) and shared infra in `shared/`.
-- Key endpoints (served by Functions): `/api/chat`, `/api/chat-web`, `/api/tts`, `/api/quantum/*`, `/api/ai/status`. Check runtime health at `/api/ai/status`.
-- Provider detection order (see `shared/chat_providers.py:detect_provider()`): Azure OpenAI → OpenAI → LoRA → Local. Azure needs all 4 env vars: `AZURE_OPENAI_API_KEY`, `AZURE_OPENAI_ENDPOINT`, `AZURE_OPENAI_DEPLOYMENT`, `AZURE_OPENAI_API_VERSION`.
-- Immutable data model: read-only `datasets/`; write-only `data_out/`. Orchestrators run from repo root and emit machine-readable status JSON under `data_out/<orchestrator>/status.json`.
-- Orchestrators you’ll use most (PowerShell):
-  - Dry-run safety first: `python .\scripts\autotrain.py --dry-run`; `python .\scripts\quantum_autorun.py --dry-run`; `python .\scripts\evaluation_autorun.py --dry-run`.
-  - Quick LoRA train+deploy: `python .\scripts\train_and_promote.py --quick --auto-promote`.
-  - Ultrafast TinyLlama: `python .\scripts\automated_training_pipeline.py --models tinyllama --quick`.
-- LoRA readiness: adapter must contain `adapter_config.json` and `adapter_model.safetensors`. Use CLI: `python .\talk-to-ai\src\chat_cli.py --provider lora --model <adapter_dir>`.
-- Dataset convention (chat): `datasets/chat/<name>/{train.json,test.json}` with `[{"messages": [{"role": "user|assistant", "content": "..."}]}]`. Validate with `python .\scripts\validate_datasets.py --category chat`.
-- Quantum guardrails: always simulate locally (Qiskit Aer) before cloud; real QPU runs require `azure_confirm_cost: true` in `quantum_autorun.yaml`. Use `python .\scripts\quantum_autorun.py --job azure_ionq_simulator` first.
-- MCP server (quantum tools): `python .\quantum-ai\quantum_mcp_server.py`. Tools include `create_quantum_circuit`, `simulate_quantum_circuit`, `submit_quantum_job`, `estimate_quantum_cost` (see `quantum-ai/quantum_mcp_server.py`).
-- Testing workflow: prefer `python .\scripts\test_runner.py --all` (fast) or VS Code Test Explorer (🧪). Pytest markers: `not slow and not azure` for local runs.
-- Azure storage/dev: Azurite databases present at root; Functions host can run offline. Configure speech TTS via `AZURE_SPEECH_KEY`/`AZURE_SPEECH_REGION` or enable local fallback with `QAI_ENABLE_LOCAL_TTS=true`.
-- Config precedence: YAML base < CLI flags < per-job YAML overrides < environment variables. Never hardcode secrets; use `local.settings.json` (dev) or Azure App Settings (prod).
-- High-signal files to read first:
-  - `function_app.py` — HTTP endpoints and dynamic imports.
-  - `shared/chat_providers.py` — provider abstraction and detection logic.
-  - `scripts/autotrain.py`, `scripts/quantum_autorun.py`, `scripts/evaluation_autorun.py` — orchestrators and status writing.
-  - `autotrain.yaml`, `quantum_autorun.yaml`, `evaluation_autorun.yaml` — declarative job specs.
-- Health and observability: Application Insights integrates via `shared/telemetry.py`; optional Cosmos persistence via `shared/cosmos_client.py` (feature-flagged). Failures are non-blocking; check `/api/ai/status` for env and pool saturation.
-- Safety habits that save money: dry-run orchestrators; start QPU shots ≤100; prefer simulator backends; enable TTL for ephemeral Cosmos items; watch connection pool saturation alerts.
-
-For full details and workflows, see the extended guide below (preserved). This quickstart is designed for immediate agent productivity and aligns with VS Code’s custom instructions guidance.
-
-## 🚀 Getting Started (New Contributors)
-
-### First-Time Setup (5 minutes)
-
-```powershell
-# 1. Clone and navigate to workspace
-cd c:\Users\Bryan\OneDrive\AI
-
-# 2. Verify Python 3.9+ installed
-python --version
-
-# 3. Run health check
-python .\scripts\system_health_check.py
-
-# 4. Test basic functionality (no API keys needed)
-python .\talk-to-ai\src\chat_cli.py --provider local --once "Hello"
-
-# 5. Run fast unit tests to verify setup
-python .\scripts\test_runner.py --unit
-```
-
-### Your First Training Run (2 minutes)
-
-```powershell
-# Quick LoRA training with TinyLlama (CPU-friendly, ~15 seconds)
-python .\scripts\automated_training_pipeline.py --models tinyllama --quick
-
-# Results will be in: data_out/lora_training/tinyllama_ultra_<timestamp>/
-```
-
-### Essential Files to Read First
-
-1. **This file** (`.github/copilot-instructions.md`) - Architecture & conventions
-2. **Root README.md** - Project overviews & quick starts
-3. **AUTOMATION_QUICKREF.md** - One-command training pipelines
-4. **scripts/README.md** - All available automation tools
-
-### Common First Tasks
-
-- **Add a dataset**: Place `train.json` + `test.json` in `datasets/chat/<name>/`
-- **Run existing job**: `python .\scripts\autotrain.py --job phi35_mixed_chat`
-- **Check system status**: `GET http://localhost:7071/api/ai/status` (after `func host start`)
-- **Debug a test**: Open Test Explorer (🧪), right-click test → "Debug Test"
-
-## Architecture Overview
-
-**Three Independent Projects** (isolated venvs):
-- `quantum-ai/` – Hybrid quantum-classical ML (PennyLane + Azure Quantum) with interactive web dashboard + MCP Server (8 quantum tools for AI agents)
-- `talk-to-ai/` – Multi-provider chat CLI (Azure OpenAI, OpenAI, LoRA, Local fallback)
-- `AI/microsoft_phi-silica-3.6_v1/` – Phi-3.5 LoRA fine-tuning workspace (shared by all orchestrators)
-
-**Integration Layer**: Root `function_app.py` (Azure Functions) dynamically imports from all three via `sys.path` injection:
-- `/api/chat` - Multi-provider chat with memory/embeddings (streaming support)
-- `/api/chat-web` - Web UI serving (HTML/JS frontend)
-- `/api/tts` - Azure Speech + local fallback (pyttsx3/gTTS)
-- `/api/quantum/*` - Quantum job submission/monitoring
-- `/api/ai/status` - Unified health endpoint (providers, SQL, Cosmos, Quantum, AutoTrain status)
-- `/api/vision/inference` - Image analysis (anime avatar generation)
-
-**Shared Infrastructure** (`shared/`):
-- **Provider abstraction**: `chat_providers.py` - `BaseChatProvider.complete()` interface with auto-detection (Azure OpenAI → OpenAI → LoRA → Local)
-- **Persistence**: `sql_engine.py` (unified multi-DB engine: Azure SQL/PostgreSQL/MySQL/SQLite), `cosmos_client.py` (feature-flagged), `db_logging.py` (safe wrappers)
-- **Memory**: `chat_memory.py` - Embeddings + similarity search for chat context
-- **Observability**: `telemetry.py` - Application Insights integration (non-fatal init)
-
-## Orchestrator-Driven Workflow
-
-**Critical Pattern**: All training/quantum jobs are YAML-driven orchestrators in `scripts/`:
-- `autotrain.py` → `autotrain.yaml` (LoRA fine-tuning jobs)
-- `quantum_autorun.py` → `quantum_autorun.yaml` (quantum ML training)
-- `evaluation_autorun.py` → `evaluation_autorun.yaml` (model evaluation)
-
-**Advanced Automation** (multi-model orchestration):
-- `automated_training_pipeline.py`: Single entry point for data gen + training + eval + ranking
-- `parallel_train.py`: Concurrent multi-model training with shared evaluation
-- `train_and_promote.py`: Full pipeline (train → evaluate → auto-deploy best model)
-
-**Execution Protocol**:
-1. **Always dry-run first**: `python .\scripts\autotrain.py --dry-run` (validates paths, config, dataset metadata without GPU/QPU execution)
-2. **Consume status.json**: Read `data_out/<orchestrator>/status.json` for job states (never parse stdout/stderr for state)
-3. **Respect data immutability**: Read-only from `datasets/`, write-only to `data_out/` (orchestrators run from repo root)
-4. **Config precedence**: YAML base config < CLI flags < per-job YAML overrides < environment variables
-5. **Status aggregation**: Use `master_orchestrator.py --status` for unified view across all orchestrators
-
-**Example Status JSON**:
-```json
-{
-  "jobs": [{"name": "phi35_mixed_chat", "status": "validated", "dataset_samples": 1000}],
-  "errors": [],
-  "timestamp": "2025-11-24T10:30:00Z"
-}
-```
-
-**Ranking Metrics** (parallel_train.py, automated_training_pipeline.py):
-- `perplexity_improvement`: Relative reduction (higher is better, default)
-- `post_perplexity`: Final perplexity (lower is better, stored as negative for sorting)
-- `diversity_avg` / `distinct_diversity`: Average of Distinct-1 & Distinct-2 (higher is better)
-- `combined_improvement`: 70% perplexity + 30% diversity (balanced quality + variety)
-
-## Provider Auto-Detection
-
-**Detection Order** (see `shared/chat_providers.py:detect_provider()`):
-1. **Azure OpenAI**: Requires ALL 4 env vars (`AZURE_OPENAI_API_KEY`, `ENDPOINT`, `DEPLOYMENT`, `API_VERSION`)
-2. **OpenAI**: Requires `OPENAI_API_KEY`
-3. **LoRA**: Auto-detect if `adapter_model.safetensors` exists in adapter dir
-4. **Local Echo**: Zero-dependency fallback (no API calls)
-
-**Health Check**: `GET /api/ai/status` shows `active_provider`, missing env vars, LoRA readiness (`adapter_config.json` + `adapter_model.safetensors`), and SQL/Cosmos/Telemetry status.
-
-**Adding Providers**: Subclass `BaseChatProvider.complete(messages, stream)`, add detection logic to `detect_provider()`, test with `chat_cli.py --provider <name>`.
-
-## MCP Server Integration (Quantum Tools for AI Agents)
-
-**Location**: `quantum-ai/quantum_mcp_server.py` (8 quantum computing tools via Model Context Protocol)
-
-### Available Tools
-
-#### Circuit Creation & Simulation
-- `create_quantum_circuit` - Build circuits (bell, ghz, entanglement, random, custom gate sequences)
-- `simulate_quantum_circuit` - Local Qiskit Aer simulation (up to 100k shots, ~10 qubits practical limit)
-- `get_quantum_circuit_properties` - Analyze circuit depth, gate counts, qubit connectivity
-
-#### Azure Quantum Integration
-- `connect_azure_quantum` - Authenticate to workspace (requires `az login` + valid `quantum_config.yaml`)
-- `list_quantum_backends` - Enumerate available hardware/simulators with cost info
-- `submit_quantum_job` - Execute on real quantum computers (IonQ, Quantinuum, Rigetti)
-- `estimate_quantum_cost` - Calculate costs before running (gate-shot pricing)
-
-#### Machine Learning
-- `train_quantum_classifier` - Train hybrid quantum-classical models on iris/wine/breast_cancer/synthetic datasets
-
-### VS Code Integration
-
-**Method 1: MCP Settings** (if VS Code supports `.vscode/mcp.json`):
-```json
-{
-  "mcpServers": {
-    "quantum-ai": {
-      "type": "stdio",
-      "command": "python",
-      "args": ["c:\\Users\\Bryan\\OneDrive\\AI\\quantum-ai\\quantum_mcp_server.py"],
-      "env": {}
-    }
-  }
-}
-```
-
-**Method 2: Direct Invocation**:
-```powershell
-# Start MCP server in stdio mode
-python .\quantum-ai\quantum_mcp_server.py
-
-# Example client interaction (see example_mcp_client.py)
-import json
-request = {"jsonrpc": "2.0", "id": 1, "method": "tools/call",
-           "params": {"name": "create_quantum_circuit", "arguments": {"circuit_type": "bell", "n_qubits": 2}}}
-```
-
-### Tool Usage Examples
-
-**Example 1: Create and simulate Bell state**
-```python
-# Tool: create_quantum_circuit
-{"circuit_type": "bell", "n_qubits": 2}
-# Returns: Circuit definition with entangled |00⟩ + |11⟩ state
-
-# Tool: simulate_quantum_circuit
-{"circuit_qasm": "<from_previous>", "shots": 1000, "backend": "qiskit_aer"}
-# Returns: {"00": 503, "11": 497}  # ~50/50 distribution
-```
-
-**Example 2: Cost estimation for real hardware**
-```python
-# Tool: estimate_quantum_cost
-{"circuit_qasm": "<circuit>", "backend": "ionq.qpu", "shots": 500}
-# Returns: {"estimated_cost_usd": 0.045, "gate_count": 3, "warning": "Real hardware execution"}
-```
-
-**Example 3: Train quantum ML model**
-```python
-# Tool: train_quantum_classifier
-{"dataset": "iris", "n_qubits": 4, "n_layers": 2, "epochs": 10}
-# Returns: {"final_accuracy": 0.94, "training_time_s": 45.2, "model_path": "..."}
-```
-
-### CircuitCache (Performance Optimization)
-
-- **LRU Eviction**: Max 100 circuits cached (oldest evicted first)
-- **TTL**: Cached results expire after 3600 seconds (1 hour)
-- **Cache Key**: SHA256 hash of (circuit_qasm, shots, backend)
-- **Bypass**: Set `use_cache=false` in tool arguments to force fresh execution
-
-### Safety Limits
-
-- **Max Qubits**: 10 (local simulator), 20 (Azure with approval)
-- **Max Shots**: 1000 (default), 100000 (with `high_shots=true`)
-- **Timeout**: 60 seconds per tool call
-- **Cost Gate**: Azure QPU jobs require explicit `confirm_cost=true` parameter (simulators are FREE)
-
-## Quantum Computing Boundaries
-
-**Three Modes**:
-- **Training**: `quantum-ai/train_custom_dataset.py` (long-running, local/Azure simulator, epochs/batching)
-- **MCP Server**: `quantum-ai/quantum_mcp_server.py` (8 tools, ≤10 qubits, ≤1k shots, 60s timeout, CircuitCache with LRU+TTL)
-- **Web Dashboard**: `quantum-ai/start_dashboard.sh` (interactive training UI at http://localhost:5000, real-time charts, session management)
-
-**Cost Gates**:
-- Local simulators (qiskit_aer, pennylane default.qubit): **FREE**
-- Azure simulators (ionq.simulator, quantinuum.sim.*): **FREE**
-- **Paid QPU** (ionq.qpu, quantinuum.qpu.*): ~$0.00003-$0.00015 per gate-shot
-  - Safety: YAML jobs require `azure_confirm_cost: true`
-  - Always test on FREE Azure simulator first: `quantum_autorun.py --job azure_ionq_simulator`
-
-**Auth**: `az login` + valid `quantum-ai/config/quantum_config.yaml` (subscription_id, resource_group, workspace).
-
-**Hardware Validation**: See `quantum-ai/HARDWARE_TEST_RESULTS.md` for multi-backend testing (Rigetti ✅ validated for production, Quantinuum ⚠️ has known bugs).
-
-## Testing Strategy
-
-**Fast Unit Tests** (40 tests, ~0.5s):
-```powershell
-pytest tests/ -m "not slow and not azure"
-# Or via orchestrator (recommended): python .\scripts\test_runner.py --unit
-```
-
-**Integration Tests** (30 tests, external services):
-```powershell
-pytest tests/ -m "integration"  # 29/30 passing (requires external services)
-```
-
-**VS Code Test Explorer**: Native UI integration (🧪 sidebar) with breakpoint debugging. See `VSCODE_TESTING_QUICKREF.md` for keyboard shortcuts.
-- `Ctrl+; Ctrl+A` - Run all tests
-- `Ctrl+; Ctrl+F` - Run failed tests only
-- Right-click test → "Debug Test" for breakpoint debugging
-
-**Test Profiles** (configured in `.vscode/settings.json`):
-- Unit Tests (Fast) - Quick feedback loop
-- Integration Tests - External service validation
-- All Fast Tests - Everything except slow/Azure (83 tests, ~10s)
-- All with Coverage - Full suite + HTML report
-
-**CI Pipeline**: `python .\scripts\ci_orchestrator.py --ci-pipeline` (5/10 critical steps passing: orchestrator validation + unit tests + artifact prep).
-
-**Test Discovery**: `pytest.ini` configures `testpaths`, markers (`azure`, `slow`, `integration`, `unit`), and exclusions. Tests auto-discover from `tests/`, `quantum-ai/tests/`, `cooking-ai/tests/`.
-
-## Dataset & Training Conventions
-
-**Dataset Structure** (immutable):
-- Location: `datasets/<category>/<name>/train.json` + `test.json`
-- Categories: `chat/`, `quantum/`, `vision/`, `massive_quantum/`
-- Format (chat): `[{"messages": [{"role": "user|assistant", "content": "..."}]}]`
-- Index: `datasets/dataset_index.json` tracks all available datasets
-
-**Dataset Validation**:
-```powershell
-python .\scripts\validate_datasets.py --category chat  # Validate chat datasets
-python .\scripts\validate_datasets.py --category all   # Validate everything
-```
-
-**GPU Training**: `train_lora.py --device auto` (auto-detects cuda/directml/mps). Verify CUDA: `python -c "import torch; print(torch.cuda.is_available())"`. Install GPU build first: `pip install torch --index-url https://download.pytorch.org/whl/cu121`.
-
-**Quick Smoke Test**:
-```powershell
-python .\AI\microsoft_phi-silica-3.6_v1\scripts\train_lora.py --dataset datasets/chat/mixed_chat --max-train-samples 64 --epochs 1
-```
-
-**LoRA Readiness Check**: Adapter ready when both exist:
-- `data_out/lora_training/<job_name>/lora_adapter/adapter_config.json`
-- `data_out/lora_training/<job_name>/lora_adapter/adapter_model.safetensors`
-
-**Model Selection** (defined in `autotrain.yaml`):
-- Phi-3.5: `microsoft/Phi-3.5-mini-instruct` (most efficient, 3.8B params)
-- Qwen2.5: `Qwen/Qwen2.5-3B-Instruct` (excellent performance, no gating)
-- TinyLlama: `TinyLlama/TinyLlama-1.1B-Chat-v1.0` (ultrafast CPU iteration, ~10-15s per run)
-
-## Common Workflows
-
-### Workflow 1: Full Training Pipeline (Data → Training → Evaluation → Deployment)
-
-```powershell
-# Step 1: Validate dataset exists
-python .\scripts\validate_datasets.py --category chat
-
-# Step 2: Dry-run to check config
-python .\scripts\autotrain.py --dry-run
-
-# Step 3: Train with auto-promote (deploys best model)
-python .\scripts\train_and_promote.py --quick --auto-promote
-# Output: deployed_models/<model_id>_<timestamp>/
-# Status: deployed_models/LATEST.txt points to newest
-
-# Step 4: Verify deployment
-python .\talk-to-ai\src\chat_cli.py --provider lora --model deployed_models/$(cat deployed_models/LATEST.txt)
-```
-
-### Workflow 2: Multi-Model Comparison
-
-```powershell
-# Train Phi-3.5 and Qwen2.5 in parallel
-python .\scripts\parallel_train.py --models phi,qwen --quick --ranking-metric combined_improvement
-
-# Results ranked by 70% perplexity + 30% diversity
-# View rankings: cat data_out/parallel_training/status.json | jq '.job_ranking'
-
-# Deploy winner automatically
-python .\scripts\model_deployer.py --deploy best --strategy canary
-```
-
-### Workflow 3: Hyperparameter Tuning
-
-```powershell
-# Grid search across learning rates and batch sizes
-python .\scripts\training_scheduler.py --grid-search \
-    --learning-rates 1e-5 2e-5 5e-5 \
-    --batch-sizes 4 8 16 \
-    --epochs-list 2 3
-
-# Review results
-python .\scripts\training_analytics.py --compare phi qwen tinyllama
-```
-
-### Workflow 4: Quantum ML Training
-
-```powershell
-# Step 1: Test on local simulator (FREE)
-python .\scripts\quantum_autorun.py --job local_simulator --dry-run
-python .\scripts\quantum_autorun.py --job local_simulator
-
-# Step 2: Validate on Azure simulator (FREE)
-python .\scripts\quantum_autorun.py --job azure_ionq_simulator
-
-# Step 3: Run on real hardware (PAID - requires azure_confirm_cost: true)
-# Edit quantum_autorun.yaml, add: azure_confirm_cost: true
-python .\scripts\quantum_autorun.py --job azure_ionq_qpu
-
-# Monitor results: data_out/quantum_autorun/<job>/results.json
-```
-
-### Workflow 5: Continuous Integration
-
-```powershell
-# Full CI pipeline (5/10 steps passing)
-python .\scripts\ci_orchestrator.py --ci-pipeline
-
-# Review results
-cat data_out/ci_orchestrator/ci_results.json | jq '.steps[] | select(.status != "passed")'
-
-# Fix failing steps and re-run
-python .\scripts\ci_orchestrator.py --validate-all
-```
-
-### Workflow 6: Adding a New Dataset
-
-```powershell
-# Step 1: Create dataset directory
-mkdir datasets/chat/my_dataset
-
-# Step 2: Add train.json and test.json (see existing datasets for format)
-# Format: [{"messages": [{"role": "user|assistant", "content": "..."}]}]
-
-# Step 3: Update dataset index
-python .\scripts\validate_datasets.py --category chat --update-index
-
-# Step 4: Add job to autotrain.yaml
-# - name: my_custom_job
-#   dataset: datasets/chat/my_dataset
-#   ...
-
-# Step 5: Dry-run to validate
-python .\scripts\autotrain.py --job my_custom_job --dry-run
-
-# Step 6: Execute training
-python .\scripts\autotrain.py --job my_custom_job
-```
-
-### Workflow 7: Web Dashboard (Quantum Training)
+<!-- Concise, practical instructions for AI agents working in this repo. Keep this file short — use the full archive (.github/copilot-instructions.full.md) for details. -->
+
+# Aria — Copilot Quick Guide
+
+*Last updated: November 29, 2025*
+
+Short & actionable summary for AI agents editing Aria — an interactive AI character platform with autonomous learning, quantum ML integration, and multi-provider chat backends.
+
+## Architecture
+
+- **Interactive AI Character Platform** with 3D animated avatar, natural language movement commands, and real-time object interaction
+- **Three isolated projects + Functions integration layer:**
+  - `quantum-ai/` — MCP server, web dashboard, quantum ML pipelines (separate venv)
+  - `talk-to-ai/` — chat CLI with multi-provider support (separate venv)
+  - `AI/microsoft_phi-silica-3.6_v1/` — Phi-3.5 LoRA fine-tuning (separate venv)
+  - `function_app.py` — Azure Functions integration exposing all APIs
+- **Integration points:**
+  - `function_app.py` dynamically imports from talk-to-ai/src and quantum-ai/src (adds to sys.path)
+  - Shared infra in `shared/`: re-exports chat providers, DB engines, telemetry, Cosmos client
+- **Web Interfaces:**
+  - `aria_web/` — Interactive Aria character interface with CSS animations, eye tracking, gestures
+  - `chat-web/` — Streaming chat UI with SSE support
+- **API endpoints** (via `function_app.py`):
+  - `/api/chat` — streaming chat SSE
+  - `/api/chat-web` — web UI HTML
+  - `/api/tts` — Azure Speech TTS (falls back to local if enabled)
+  - `/api/quantum/*` — quantum job submission/monitoring
+  - `/api/ai/status` — health check showing active provider, env vars, DB pool, Cosmos status
+- **Aria Web API endpoints** (via `aria_web/server.py` on port 8080):
+  - `GET /api/aria/state` — current stage state (position, objects, expressions)
+  - `POST /api/aria/command` — process natural language commands
+  - `POST /api/aria/execute` — auto-execute action sequences (plan or execute mode)
+  - `POST /api/aria/object` — manage objects (add, update, remove)
+  - `POST /api/aria/world` — LLM-powered themed world generation
+
+## Key Features
+
+**Interactive Character System:**
+- 3D CSS-animated character with smooth transitions and physics-based movement
+- Natural language command processing ("move left", "wave at me", "dance", "jump", "pickup ball")
+- **Auto-Execute System**: LLM-powered action parser converts natural language to structured action sequences
+  - 8 core actions: move, say, pickup, drop, throw, gesture, look, wait
+  - Plan mode (preview actions) and execute mode (run sequences)
+  - Dual-mode parsing: LLM-powered + rule-based fallback
+- Object interaction system (add, pickup, drop, throw with trajectory physics)
+- **World Generation**: LLM-powered themed environment creation
+- Eye tracking and attention system (follows mouse cursor)
+- Emotion/gesture system (wave, dance, jump, idle animations)
+- Real-time speech synthesis via Azure TTS or local fallback
+- Server-synchronized state management (character position, objects, expressions)
+
+**Autonomous Learning:**
+- Self-discovering dataset collection from multiple sources
+- Adaptive epoch selection based on performance history
+- Automatic model promotion when accuracy thresholds met
+- Performance degradation detection and alerting
+- Continuous 30-minute training cycles with graceful error recovery
+
+**Multi-Provider Chat:**
+- Azure OpenAI, OpenAI, LMStudio, local models
+- LoRA adapter support for fine-tuned models
+- Automatic provider fallback chain
+- SSE-based streaming responses
+
+## Quick Commands (from repo root)
 
 ```bash
-# Start interactive dashboard
-cd quantum-ai
-./start_dashboard.sh
+# === AUTONOMOUS SYSTEMS (Self-Managing) ===
+# Start autonomous training (continuous 30-min cycles)
+nohup python scripts/autonomous_training_orchestrator.py > data_out/autonomous_training.log 2>&1 &
 
-# Open browser: http://localhost:5000
-# 1. Select dataset (iris/wine/breast_cancer)
-# 2. Configure: qubits (2-10), layers (1-5), learning rate
-# 3. Click "Start Training"
-# 4. Watch real-time loss/accuracy charts
-# 5. Download trained model or view session history
+# Trigger immediate cycle (skip 30-min wait)
+pkill -USR1 -f autonomous_training
+
+# Full repo automation (Aria + training + quantum + monitoring)
+python scripts/repo_automation.py --start
+python scripts/repo_automation.py --status
+./scripts/start_repo_automation.sh full          # Bash wrapper with menu
+./scripts/start_repo_automation.sh stop          # Stop all components
+
+# Aria character automation (server + continuous training)
+python scripts/aria_automation.py --mode full
+python scripts/aria_automation.py --status
+
+# === ARIA CHARACTER WEB UI ===
+cd aria_web && python server.py                  # Start Aria web interface (port 8080)
+# Access at: http://localhost:8080
+# Auto-Execute UI: http://localhost:8080/auto-execute.html
+# Commands: "move left", "wave", "dance", "jump", "pickup ball", "throw"
+# Complex: "Walk to the table and pick up the apple", "Say hello and wave"
+
+# === AZURE FUNCTIONS & APIs ===
+func host start                                # Start Functions host (serves all APIs)
+curl http://localhost:7071/api/ai/status | jq # Health check
+
+# === TESTING & VALIDATION ===
+python scripts/test_runner.py --unit          # Fast unit tests
+python scripts/test_runner.py --all           # All tests
+python talk-to-ai/src/chat_cli.py --provider local --once "Hello"  # Smoke test
+python scripts/fast_validate.py              # Quick validation across all components
+
+# === ORCHESTRATORS (Manual Execution) ===
+python scripts/autotrain.py --dry-run         # Validate training config (12 jobs)
+python scripts/quantum_autorun.py --dry-run   # Validate quantum config
+python scripts/evaluation_autorun.py --dry-run # Validate evaluation config
+
+# === TRAINING PIPELINES ===
+python scripts/automated_training_pipeline.py --quick  # Quick LoRA (TinyLlama)
+python scripts/train_and_promote.py --quick --auto-promote  # Train + auto-deploy
+
+# === MCP & TOOLS ===
+python quantum-ai/quantum_mcp_server.py       # Start quantum MCP server
+
+# === MONITORING & DIAGNOSTICS ===
+curl http://localhost:7071/api/ai/status | jq # Comprehensive health check
+python scripts/status_dashboard.py            # Unified orchestrator status
+python scripts/status_dashboard.py --watch    # Auto-refresh every 10s
+python scripts/resource_monitor.py --snapshot # CPU/memory/disk/GPU snapshot
+python scripts/system_health_check.py         # Full system health report
+python scripts/training_analytics.py          # Performance trends & insights
+tail -f data_out/autonomous_training.log      # Live autonomous training logs
+watch -n 5 'cat data_out/autonomous_training_status.json | python -m json.tool' # Live status
 ```
 
-## Database & Observability (Optional)
+## Critical Patterns
 
-**SQL Logging** (unified engine supports Azure SQL, PostgreSQL, MySQL, SQLite):
+**Autonomous/self-managing systems:**
+- `scripts/autonomous_training_orchestrator.py` — Continuous learning with 30-min cycles (infinite by default)
+  - Self-discovers datasets (scans `datasets/quantum`, `datasets/chat`, `datasets/massive_quantum`)
+  - Self-optimizes: Adaptive epochs `[25, 50, 100, 200]` based on performance history
+  - Self-heals: Graceful error handling, continues on failure, logs to `data_out/autonomous_training.log`
+  - State: `data_out/autonomous_training_status.json` (cycles_completed, best_accuracy, dataset_inventory)
+  - Config: `config/autonomous_training.yaml` (cycle_interval_minutes, epochs_progression, min_datasets)
+  - Trigger: Time-based (30min) OR signal-based (`pkill -USR1 -f autonomous_training`)
+- `scripts/repo_automation.py` — Full repo automation (all components: Aria + training + quantum + datasets)
+- `scripts/aria_automation.py` — Aria-specific automation (server on port 8080 + continuous training)
+- `scripts/master_orchestrator.py` — Coordinates all sub-orchestrators with schedules/dependencies
+  - Config: `config/master_orchestrator.yaml` (cron schedules, priorities, retry logic, timeouts)
 
-**Setup**:
-```powershell
-# Azure SQL (recommended for production)
-$env:QAI_DB_CONN = "Driver={ODBC Driver 18 for SQL Server};Server=tcp:myserver.database.windows.net,1433;Database=qai;Uid=myuser;Pwd=mypass;Encrypt=yes;TrustServerCertificate=no;"
+**Data conventions:**
+- `datasets/` is **read-only** — never modify existing datasets
+- All outputs go to `data_out/<orchestrator>/` with `status.json` as source of truth
+- Chat datasets: `[{"messages": [{"role": "user|assistant", "content": "..."}]}]`
+- LoRA adapters need both `adapter_config.json` + `adapter_model.safetensors`
 
-# PostgreSQL
-$env:QAI_DB_CONN = "postgresql://user:pass@localhost:5432/qai"
+**Provider detection chain** (in `shared/chat_providers.py`):
+1. Explicit choice (--provider flag)
+2. LMStudio (if `LMSTUDIO_BASE_URL` configured)
+3. Azure OpenAI (needs all 4: `AZURE_OPENAI_API_KEY`, `AZURE_OPENAI_ENDPOINT`, `AZURE_OPENAI_DEPLOYMENT`, `AZURE_OPENAI_API_VERSION`)
+4. OpenAI (needs `OPENAI_API_KEY`)
+5. LoRA (explicit --provider lora with adapter path)
+6. Local fallback (zero-dependency echo)
 
-# SQLite (local dev - no setup needed)
-$env:QAI_DB_CONN = "sqlite:///c:/Users/Bryan/OneDrive/AI/data_out/qai.db"
+**Config precedence:**
+`YAML base` < `CLI flags` < `per-job YAML` < `env vars`
 
-# Run migrations
-python .\scripts\sql_migrate.py
+**YAML orchestrators:**
+- All in `scripts/` with matching root YAMLs (e.g., `autotrain.yaml`, `quantum_autorun.yaml`)
+- Write `data_out/<name>/status.json` with machine-readable job status
+- Support `--dry-run` to validate before execution
+
+**Autonomous training implementation patterns:**
+```python
+# State machine: discovery → collection → training → analysis → optimization → deployment
+async def run_single_cycle(cycle_number):
+    await discover_datasets()           # Scan datasets/, catalog by category
+    await download_new_datasets()       # Download if below min_datasets threshold
+    epochs = await select_optimal_epochs()  # Adaptive: increase if accuracy < 0.70 or plateau
+    results = await train_cycle(epochs) # Distributed training with multiprocessing
+    await analyze_performance(results)  # Track metrics, detect degradation
+    await optimization_cycle()          # Hyperparameter tuning (if enabled)
+    await deployment_cycle()            # Auto-deploy if accuracy > 0.90 (if enabled)
 ```
 
-**Tables Created**:
-- `ChatConversations` - Message history with embeddings
-- `QuantumTrainingRuns` - Quantum job metadata and results
-- `LoRATrainingRuns` - Fine-tuning metrics and hyperparameters
-- `EmbeddingCache` - Vector similarity cache
-
-**Connection Pooling**:
-- Pool size: 5-20 connections (auto-scales)
-- Saturation threshold: 80% (triggers warning in `/api/ai/status`)
-- Idle timeout: 300 seconds
-- Monitor: `python .\scripts\sql_health_monitor.py`
-
-**Graceful Degradation**: All `log_*_safe()` functions no-op if DB unavailable (chat endpoints remain functional)
-
-**Health Check**: `GET /api/ai/status` → `sql.pool.saturation_alert` (≥80% = warning)
-
-**Cosmos DB Persistence** (feature-flagged):
-
-**Setup**:
-```powershell
-# Required environment variables
-$env:QAI_ENABLE_COSMOS = "true"
-$env:COSMOS_ENDPOINT = "https://myaccount.documents.azure.com:443/"
-$env:COSMOS_KEY = "<your-primary-key>"
-$env:COSMOS_DATABASE = "qai"
-$env:COSMOS_CONTAINER = "chat_sessions"
-
-# Persistence strategy
-$env:QAI_COSMOS_PERSIST_STRATEGY = "messages"  # or "sessions"
-```
-
-**Strategies**:
-- `messages`: Store each message individually (better for large conversations, supports TTL)
-- `sessions`: Store entire conversation as one document (better for retrieval, simpler queries)
-
-**Container Requirements**:
-- Partition key: `/session_id` (recommended) or `/user_id`
-- Indexing policy: Include `/timestamp` and `/role` for efficient queries
-- TTL: Enable with default `-1` (inherit from documents)
-
-**Cost Optimization**:
-- Use autoscale RU/s (min 1000, max 4000 for development)
-- Set TTL on messages: 30 days for ephemeral, unlimited for important
-- Query pattern: Point reads (1 RU) > queries (3-5 RU) > cross-partition (10+ RU)
-
-**Graceful Degradation**: Cosmos failures logged to Application Insights but don't block `/api/chat` endpoint
-
-**Telemetry Integration**: All Cosmos operations tracked in Application Insights with `cosmos_persisted=true/false` span attributes
-
-**Telemetry** (Application Insights):
-- Enable: `APPLICATIONINSIGHTS_CONNECTION_STRING` env var
-- Spans: `/api/chat` annotated with provider, model, duration_ms, memory_injected, cosmos_persisted
-- See `TELEMETRY_COSMOS_ENABLEMENT.md` for setup
-
-## Key Commands Reference
-
-```powershell
-# Orchestrator dry-runs (validation only)
-python .\scripts\autotrain.py --dry-run
-python .\scripts\quantum_autorun.py --dry-run
-python .\scripts\evaluation_autorun.py --dry-run
-
-# Run specific job
-python .\scripts\autotrain.py --job phi35_mixed_chat
-
-# Advanced automation (NEW)
-python .\scripts\automated_training_pipeline.py --quick  # Multi-model training + eval
-python .\scripts\parallel_train.py --models phi,qwen --quick  # Parallel execution
-python .\scripts\train_and_promote.py --quick --auto-promote  # Train + deploy best
-
-# Azure Functions local dev
-func host start  # Serves /api/chat, /api/ai/status, /api/quantum/*, /api/chat-web
-
-# Chat CLI (multi-provider)
-python .\talk-to-ai\src\chat_cli.py --provider azure --once "Test"
-python .\talk-to-ai\src\chat_cli.py --provider lora --model data_out/lora_training/lora_adapter
-
-# MCP Server (quantum tools for AI agents)
-python .\quantum-ai\quantum_mcp_server.py
-
-# Quantum Web Dashboard
-cd quantum-ai; ./start_dashboard.sh  # Opens http://localhost:5000
-
-# Testing
-pytest tests/ -m "not slow and not azure"  # Fast unit tests
-python .\scripts\test_runner.py --all --coverage  # Full suite + HTML report
-python .\scripts\ci_orchestrator.py --ci-pipeline  # Full CI validation
-
-# Dataset validation
-python .\scripts\validate_datasets.py --category chat
-
-# Status checks
-python .\scripts\master_orchestrator.py --status  # All orchestrators
-curl http://localhost:7071/api/ai/status | jq  # Runtime health
-
-# VS Code Tasks (Ctrl+Shift+P → "Run Task")
-# Available: AutoTrain (dry-run/all), LoRA quick, Quantum AutoRun, CI Pipeline,
-# Master Orchestrator, Train & Promote, Resource Monitor, Batch Evaluator, Tests
-```
-
-## Troubleshooting Guide
-
-### Provider Detection Issues
-
-**Problem**: Chat endpoint returns "Local Echo" instead of Azure/OpenAI
-
-**Solution**:
-```powershell
-# Check which env vars are missing
-curl http://localhost:7071/api/ai/status | jq '.env'
-
-# Azure OpenAI requires ALL 4:
-$env:AZURE_OPENAI_API_KEY = "your-key"
-$env:AZURE_OPENAI_ENDPOINT = "https://your-resource.openai.azure.com/"
-$env:AZURE_OPENAI_DEPLOYMENT = "gpt-4o-mini"
-$env:AZURE_OPENAI_API_VERSION = "2024-08-01-preview"
-
-# Restart Functions host
-func host start
-```
-
-### LoRA Model Won't Load
-
-**Problem**: `FileNotFoundError: adapter_model.safetensors not found`
-
-**Diagnosis**:
-```powershell
-# Check adapter directory exists
-ls data_out/lora_training/<job_name>/lora_adapter/
-
-# Must contain BOTH files:
-# - adapter_config.json
-# - adapter_model.safetensors
-```
-
-**Solutions**:
-1. **Training didn't complete**: Check `data_out/autotrain/<job>/last_run.json` for errors
-2. **Wrong path**: Use absolute path or ensure working directory is repo root
-3. **Base model mismatch**: Verify `adapter_config.json` → `base_model_name_or_path` matches your local model
-
-### CUDA Not Available
-
-**Problem**: `torch.cuda.is_available()` returns `False`
-
-**Solutions**:
-```powershell
-# 1. Check GPU is visible
-nvidia-smi
-
-# 2. Reinstall PyTorch with CUDA support
-pip uninstall torch torchvision torchaudio
-pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
-
-# 3. Verify installation
-python -c "import torch; print(f'CUDA: {torch.cuda.is_available()}, Device: {torch.cuda.get_device_name(0) if torch.cuda.is_available() else "N/A"}')"
-```
-
-### Test Discovery Failures
-
-**Problem**: VS Code Test Explorer shows "No tests found"
-
-**Solutions**:
-1. **Check pytest.ini exists in repo root**:
-   ```powershell
-   cat pytest.ini
-   ```
-
-2. **Verify Python interpreter**: Select correct venv in VS Code (Ctrl+Shift+P → "Python: Select Interpreter")
-
-3. **Clear test cache**:
-   ```powershell
-   Remove-Item -Recurse -Force .pytest_cache, __pycache__
-   ```
-
-4. **Reload window**: Ctrl+Shift+P → "Developer: Reload Window"
-
-### Quantum Job Stuck "Running"
-
-**Problem**: Azure Quantum job status never updates
-
-**Diagnosis**:
-```powershell
-# Check job status directly
-az quantum job show -g <resource-group> -w <workspace> -j <job-id> --query "status"
-```
-
-**Common Causes**:
-- **Backend offline**: Check `az quantum workspace show` for provider status
-- **Queue backlog**: IonQ/Quantinuum may have 30min+ wait times
-- **Job failed silently**: Check Azure portal → Quantum workspace → Jobs for error details
-
-**Workaround**: Use simulator first to validate circuit:
-```powershell
-python .\scripts\quantum_autorun.py --job azure_ionq_simulator
-```
-
-### SQL Connection Pool Saturation
-
-**Problem**: `/api/ai/status` shows `saturation_alert: true`
-
-**Immediate Fix**:
-```powershell
-# Increase pool size (temporary)
-$env:QAI_SQL_POOL_SIZE = "20"  # Default: 10
-
-# Restart app
-func host start
-```
-
-**Long-term Solutions**:
-1. **Add connection timeout**: Set `pool_timeout=30` in connection string
-2. **Reduce query frequency**: Cache frequent lookups (embeddings, user profiles)
-3. **Scale database tier**: Upgrade Azure SQL to higher DTU/vCore
-
-### Streaming Chat Returns Gibberish
-
-**Problem**: Chat response contains `data: [DONE]` or JSON fragments
-
-**Cause**: Client not handling Server-Sent Events (SSE) correctly
-
-**Solution** (JavaScript example):
-```javascript
-const response = await fetch('/api/chat', {
-    method: 'POST',
-    body: JSON.stringify({messages, stream: true}),
-    headers: {'Content-Type': 'application/json'}
-});
-
-const reader = response.body.getReader();
-const decoder = new TextDecoder();
-
-while (true) {
-    const {done, value} = await reader.read();
-    if (done) break;
-    
-    const chunk = decoder.decode(value);
-    const lines = chunk.split('\n').filter(line => line.startsWith('data: '));
-    
-    for (const line of lines) {
-        if (line === 'data: [DONE]') continue;
-        const data = JSON.parse(line.slice(6));
-        console.log(data.content);  // Actual message content
-    }
-}
-```
-
-### Dataset Validation Fails
-
-**Problem**: `validate_datasets.py` reports "Invalid format"
-
-**Check Format**:
-```powershell
-# Valid chat dataset structure
-cat datasets/chat/example/train.json | jq '.[0]'
-# Output should be:
-# {
-#   "messages": [
-#     {"role": "user", "content": "Hello"},
-#     {"role": "assistant", "content": "Hi there!"}
-#   ]
-# }
-```
-
-**Common Issues**:
-- Missing `messages` key (should not be `conversations` or `data`)
-- Wrong role names (`human/ai` should be `user/assistant`)
-- Empty content fields
-- Invalid JSON (trailing commas, unquoted keys)
-
-**Auto-fix script**:
-```powershell
-python .\scripts\env_autofix.py --fix-datasets --category chat
-```
-
-## Common Pitfalls
-
-1. **Azure OpenAI not detected**: Missing any of 4 required env vars (check `/api/ai/status` → `env.azure_openai`)
-2. **LoRA fails to load**: Missing `adapter_model.safetensors` or base model mismatch in `adapter_config.json`
-3. **Quantum job cost surprises**: Forgot `azure_confirm_cost: true` in YAML (safety gate prevents execution)
-4. **Status JSON outdated**: Each orchestrator writes independent status files; use master_orchestrator for unified view
-5. **Dataset not found**: Orchestrators run from repo root; relative paths in YAML assume `datasets/` prefix
-6. **Parallel training conflicts**: `parallel_train.py` uses ThreadPoolExecutor; avoid running concurrent instances manually
-7. **VS Code tasks not found**: Ensure `.vscode/tasks.json` exists; tasks auto-register from workspace config
-8. **Import errors in function_app.py**: Check `sys.path` injections point to correct venv for each sub-project
-9. **Test discovery failures**: `pytest.ini` must be in repo root; virtual envs excluded via `norecursedirs`
-10. **Streaming chat broken**: Verify `openai>=1.37.0` installed; streaming requires async iteration support
-
-## Safety & Secrets
-
-- **No secrets in git**: Use `local.settings.json` (dev) or Azure App Settings (prod)
-- **Dry-run everything first**: Prevents costly GPU/QPU runs with bad configs
-- **Initial QPU shots ≤100**: Incremental cost validation before scaling
-- **SQL connection pooling**: Monitor saturation alerts in `/api/ai/status` (threshold: 80% of max connections)
-
-## References
-
-- **AUTOTRAIN_README.md**: LoRA training orchestration details
-- **QUANTUM_AUTORUN_README.md**: Quantum job configuration & Azure submission
-- **TELEMETRY_COSMOS_ENABLEMENT.md**: Observability stack setup
-- **VSCODE_TESTING_QUICKREF.md**: Test Explorer keyboard shortcuts
-- **ADVANCED_AUTOMATION.md**: Multi-level orchestration architecture
-- **AUTOMATION_QUICKREF.md**: One-command training pipelines
-- **scripts/README.md**: Comprehensive script documentation
-- **Root README.md**: Project overviews, quick starts, deployment guides
-- **quantum-ai/WEB_DASHBOARD_README.md**: Interactive training UI guide
-- **quantum-ai/HARDWARE_TEST_RESULTS.md**: Multi-backend validation results
-- **quantum-ai/MCP_SERVER_README.md**: Quantum tools for AI agents
-
-## Workspace Structure Quick Reference
-
-```
-AI/                                  # Root workspace
-├── .github/
-│   └── copilot-instructions.md     # This file (AI agent guidance)
-├── shared/                          # Cross-project shared modules
-│   ├── chat_providers.py            # Multi-provider abstraction (Azure/OpenAI/LoRA/Local)
-│   ├── sql_engine.py                # Unified DB engine (Azure SQL/PostgreSQL/MySQL/SQLite)
-│   ├── cosmos_client.py             # Feature-flagged Cosmos persistence
-│   ├── chat_memory.py               # Embeddings + similarity search
-│   ├── telemetry.py                 # Application Insights integration
-│   └── db_logging.py                # Safe database logging wrappers
-├── scripts/                         # Automation & orchestration
-│   ├── autotrain.py                 # LoRA training orchestrator
-│   ├── quantum_autorun.py           # Quantum ML job runner
-│   ├── evaluation_autorun.py        # Model evaluation pipeline
-│   ├── parallel_train.py            # Concurrent multi-model training
-│   ├── automated_training_pipeline.py  # Single-entry multi-model automation
-│   ├── train_and_promote.py         # Full train→eval→deploy pipeline
-│   ├── test_runner.py               # Centralized test orchestrator
-│   ├── ci_orchestrator.py           # CI/CD pipeline coordinator
-│   ├── master_orchestrator.py       # High-level workflow coordinator
-│   └── README.md                    # Comprehensive script documentation
-├── datasets/                        # Immutable training data
-│   ├── chat/                        # Chat conversation datasets
-│   ├── quantum/                     # Quantum ML datasets
-│   ├── vision/                      # Image/vision datasets
-│   ├── massive_quantum/             # Large-scale quantum datasets
-│   └── dataset_index.json           # Dataset catalog
-├── data_out/                        # All training outputs (write-only)
-│   ├── lora_training/               # LoRA adapter outputs
-│   ├── autotrain/                   # AutoTrain job logs/status
-│   ├── quantum_autorun/             # Quantum training results
-│   ├── evaluation_autorun/          # Evaluation metrics
-│   └── parallel_training/           # Parallel job aggregated results
-├── deployed_models/                 # Production-ready model snapshots
-│   └── LATEST.txt                   # Symlink to most recent deployment
-├── quantum-ai/                      # Quantum ML project (isolated venv)
-│   ├── src/                         # Quantum ML source code
-│   ├── quantum_mcp_server.py        # MCP server (8 quantum tools)
-│   ├── start_dashboard.sh           # Web dashboard launcher
-│   ├── config/quantum_config.yaml   # Quantum workspace configuration
-│   └── tests/                       # Quantum-specific tests
-├── talk-to-ai/                      # Chat CLI project (isolated venv)
-│   └── src/
-│       ├── chat_cli.py              # Multi-provider chat interface
-│       └── token_utils.py           # Token management
-├── AI/microsoft_phi-silica-3.6_v1/  # LoRA fine-tuning workspace
-│   ├── scripts/train_lora.py        # HuggingFace LoRA trainer
-│   └── lora/lora.yaml               # LoRA configuration
-├── function_app.py                  # Azure Functions entry point
-├── autotrain.yaml                   # AutoTrain job definitions
-├── quantum_autorun.yaml             # Quantum job configurations
-├── evaluation_autorun.yaml          # Evaluation job specs
-├── pytest.ini                       # Test configuration
-├── .vscode/
-│   ├── tasks.json                   # 30+ predefined VS Code tasks
-│   └── settings.json                # Test profiles & editor config
-└── tests/                           # Root test suite (68+ tests)
-    ├── test_autotrain_unit.py       # AutoTrain unit tests
-    ├── test_quantum_integration.py   # Quantum integration tests
-    └── test_chat_providers.py       # Provider detection tests
-```
-
-**Key Principles**:
-- **Immutable datasets**: Never modify files in `datasets/` - always write to `data_out/`
-- **Isolated venvs**: Each sub-project (quantum-ai, talk-to-ai, AI/*) has its own venv
-- **Shared infrastructure**: Common code in `shared/` used by all projects via `sys.path` injection
-- **YAML-driven**: All training/quantum jobs defined declaratively in YAML files
-- **Status files**: Machine-readable JSON status in `data_out/<orchestrator>/status.json`
-
-Last updated: 2025-11-27
+**Process management:**
+- Autonomous systems run via `nohup` in background, logs to `data_out/*.log`
+- Check status: `ps aux | grep -E "(autonomous|aria)" | grep -v grep`
+- Manual trigger: `pkill -USR1 -f autonomous_training` forces immediate cycle
+- Graceful shutdown: `pkill -TERM -f autonomous_training`
+
+**Performance monitoring & observability:**
+- **Health endpoint**: `GET /api/ai/status` — Comprehensive system diagnostics
+  - Active provider detection (azure|openai|local|lora)
+  - Environment variable presence (Azure OpenAI, OpenAI, Cosmos, SQL)
+  - ML library availability (torch, transformers, peft) — in-process & venv
+  - SQL pool metrics with saturation alerts (warns at ≥80%)
+  - Cosmos DB health check (lazy connection)
+  - Quantum environment status (qiskit, pennylane, Azure Quantum backends)
+  - LoRA adapter readiness (adapter_config.json, tokenizer)
+- **Status files**: All orchestrators write `data_out/<name>/status.json`
+  - Schema: `{total_jobs, succeeded, failed, running, last_updated, avg_duration}`
+  - Autonomous training: `{cycles_completed, best_accuracy, performance_history[], dataset_inventory}`
+- **Monitoring scripts**:
+  - `scripts/status_dashboard.py` — Unified view of all orchestrators (supports --watch, --export)
+  - `scripts/resource_monitor.py` — CPU/memory/disk/GPU with threshold alerts
+  - `scripts/system_health_check.py` — Comprehensive health report (venvs, Azure Functions, datasets)
+  - `scripts/training_analytics.py` — Performance trends, improvement rates, plateau detection
+- **Performance degradation alerts**: Auto-detect >5% accuracy drops between cycles
+- **Metrics tracked**: mean_accuracy, median_accuracy, max_accuracy, successful_count, exceptional_models
+- **Notification config**: `config/notification_config.yaml` (email/SMTP/local alerts)
+
+## Where to Edit
+
+| Change | File(s) |
+|--------|---------|
+| Add/modify API endpoint | `function_app.py` |
+| Chat provider logic | `talk-to-ai/src/chat_providers.py` (re-exported by `shared/chat_providers.py`) |
+| Training orchestration | `scripts/autotrain.py` + root `autotrain.yaml` |
+| Autonomous training behavior | `scripts/autonomous_training_orchestrator.py` + `config/autonomous_training.yaml` |
+| Master orchestrator (schedules/coordination) | `scripts/master_orchestrator.py` + `config/master_orchestrator.yaml` |
+| Aria automation | `scripts/aria_automation.py` (server + training + health monitoring) |
+| Full repo automation | `scripts/repo_automation.py` (all components + backups + notifications) |
+| Quantum jobs | `scripts/quantum_autorun.py` + root `quantum_autorun.yaml` |
+| MCP server tools | `quantum-ai/quantum_mcp_server.py` |
+| Shared DB/telemetry | `shared/sql_engine.py`, `shared/telemetry.py`, `shared/cosmos_client.py` |
+| Aria character interface | `aria_web/index.html`, `aria_web/aria_controller.js`, `aria_web/server.py` |
+| Aria movement/gestures | `aria_web/aria_controller.js` (command parsing & animation triggers) |
+
+## Safety Rules
+
+- Always `--dry-run` orchestrators before GPU/QPU execution
+- Quantum: simulate locally first, then use `azure_ionq_simulator`, only then real QPU
+- Real QPU jobs require `azure_confirm_cost: true` in YAML + cost estimate review
+- Never hardcode secrets — use `local.settings.json` (dev) or Azure App Settings (prod)
+- Monitor DB pool via `/api/ai/status` (warns at ≥80% saturation)
+
+## Testing & Validation
+
+- **Unit tests:** `pytest tests/ -m "not slow and not azure"` or `python scripts/test_runner.py --unit`
+- **Integration tests:** `python scripts/test_runner.py --integration`
+- **All tests:** `python scripts/test_runner.py --all`
+- **VS Code Test Explorer:** Use 🧪 icon for interactive test running
+- **Markers:** `@pytest.mark.slow`, `@pytest.mark.azure`, `@pytest.mark.integration`
+- **Chat dataset validation:** `python scripts/validate_datasets.py --category chat`
+
+## Optional Services
+
+**SQL persistence** (optional):
+- Enable via `QAI_DB_CONN` env var (SQLite, PostgreSQL, Azure SQL)
+- Pool size: `QAI_SQL_POOL_SIZE` (default: 10)
+- Health: Check `/api/ai/status` for pool saturation (warns ≥80%)
+
+**Cosmos DB** (optional, feature-flagged):
+- Enable: `QAI_ENABLE_COSMOS=true`
+- Config: `COSMOS_ENDPOINT`, `COSMOS_KEY`, `COSMOS_DATABASE`, `COSMOS_CONTAINER`
+- Partition key: `/session_id`, enable TTL for cost savings
+
+**Telemetry** (optional):
+- Application Insights via `APPLICATIONINSIGHTS_CONNECTION_STRING`
+- Non-blocking, gracefully degrades if unavailable
+
+## Modular Instructions
+
+This repo uses component-specific instruction files in `.github/instructions/`:
+- `functions.instructions.md` — Azure Functions API endpoints
+- `shared-python.instructions.md` — Shared infrastructure patterns
+- `quantum-ai*.instructions.md` — Quantum ML workflows
+- `talk-to-ai*.instructions.md` — Chat CLI patterns
+- `lora*.instructions.md` — LoRA fine-tuning patterns
+- `chat-web.instructions.md` — Frontend SSE integration
+
+These are automatically applied by VS Code based on file paths. Check attachment indicators to see which rules are active.
+
+## Custom Coding Agents
+
+**QAI Specialist Agent** (`.github/agents/my-agent.agent.md`):
+- Expert in quantum-AI/ML hybrid development, training orchestration, and Azure Functions integration
+- Understands provider detection chain, orchestrator-driven workflows, and quantum cost awareness
+- Enforces safety protocols: dry-runs before execution, cost warnings for QPU, dataset immutability
+- Quick commands: orchestrator validation, LoRA training, chat CLI testing, MCP server operations
+- Access via GitHub Copilot agent selection or direct reference
+
+**Chat Modes** (`.github/chatmodes/`):
+- `Azure_function_codegen_and_deployment.chatmode.md` — Enterprise Azure Functions workflow with IaC
+- `Azure_Static_Web_App.chatmode.md` — Static web app deployment patterns
+
+**Usage**: These agents are invoked automatically based on context or can be explicitly selected in GitHub Copilot interfaces.
+
+## Coding Agent Best Practices
+
+**For AI Coding Agents working in this repository:**
+
+1. **Always Check Context**
+   - Read `.github/copilot-instructions.md` (this file) first
+   - Check for relevant `.github/instructions/*.instructions.md` files based on file paths
+   - Reference `.github/agents/my-agent.agent.md` for QAI-specific patterns
+
+2. **Safety-First Approach**
+   - `--dry-run` all orchestrators before GPU/QPU execution
+   - Never modify files in `datasets/` (read-only)
+   - Check `/api/ai/status` before making provider-dependent changes
+   - Verify test suite passes: `python scripts/test_runner.py --unit`
+
+3. **Follow Established Patterns**
+   - Provider detection chain: Azure OpenAI → OpenAI → LMStudio → Local
+   - Config precedence: `YAML base` < `CLI flags` < `per-job YAML` < `env vars`
+   - Status files: Always write to `data_out/<orchestrator>/status.json`
+   - Autonomous systems: Use signal-based triggers (`pkill -USR1`) for immediate execution
+
+4. **Testing & Validation**
+   - Run unit tests before committing: `python scripts/test_runner.py --unit`
+   - Use `scripts/fast_validate.py` for quick cross-component validation
+   - Check health endpoint: `curl http://localhost:7071/api/ai/status | jq`
+   - Monitor logs: `tail -f data_out/autonomous_training.log`
+
+5. **Documentation Updates**
+   - Update this file when adding major features or changing workflows
+   - Keep component-specific instructions in `.github/instructions/` in sync
+   - Update PR checklist if adding new safety requirements
+   - Document new orchestrators in "Where to Edit" table
+
+6. **Cost & Resource Awareness**
+   - Quantum: Simulate locally first, then Azure simulator, only then real QPU
+   - Monitor DB pool saturation via `/api/ai/status` (warns at ≥80%)
+   - Check GPU/CPU usage: `python scripts/resource_monitor.py --snapshot`
+   - Review training analytics: `python scripts/training_analytics.py`
+
+## PR Checklist for AI Agents & Reviewers
+
+Before submitting or approving PRs, verify:
+
+- [ ] **Dry-run orchestrators**: If modifying YAML configs or orchestrators, run `--dry-run` to validate changes before committing
+- [ ] **Provider detection intact**: Changes to `shared/chat_providers.py` or `function_app.py` don't break detection chain (test with `/api/ai/status`)
+- [ ] **Dataset immutability**: No modifications to `datasets/` — all outputs written to `data_out/`
+- [ ] **Status.json compliance**: Orchestrator changes maintain status JSON writes to `data_out/<orchestrator>/status.json`
+- [ ] **Test suite passes**: Run `python scripts/test_runner.py --unit` (or `--all` for integration tests)
+- [ ] **No hardcoded secrets**: All API keys/connection strings use env vars or `local.settings.json`
+- [ ] **Quantum cost gates**: QPU jobs include `azure_confirm_cost: true` in YAML configs
+- [ ] **LoRA adapter validity**: If modifying training scripts, verify output includes both `adapter_config.json` + `adapter_model.safetensors`
+- [ ] **Documentation sync**: Update relevant READMEs/instruction files if changing core workflows or adding features
+
+Full/verbose guidance and advanced examples are preserved at `.github/copilot-instructions.full.md`. Ask me to expand any area or add examples for a specific change.

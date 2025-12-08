@@ -52,6 +52,8 @@ def wait_for_object(name, timeout=4.0):
     return None
 
 
+@pytest.mark.pyppeteer
+@pytest.mark.e2e
 @pytest.mark.asyncio
 async def test_pyppeteer_add_pickup_drop():
     try:

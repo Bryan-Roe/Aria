@@ -14,10 +14,10 @@ Features:
 - Automatic rollback on critical failures
 
 Usage:
-  python .\scripts\smart_orchestrator.py --pipeline full        # Train + eval + deploy
-  python .\scripts\smart_orchestrator.py --pipeline variants    # Just hyperparameter variants
-  python .\scripts\smart_orchestrator.py --watch                # Monitor active jobs
-  python .\scripts\smart_orchestrator.py --optimize             # Suggest pipeline improvements
+  python .\\scripts\\smart_orchestrator.py --pipeline full        # Train + eval + deploy
+  python .\\scripts\\smart_orchestrator.py --pipeline variants    # Just hyperparameter variants
+  python .\\scripts\\smart_orchestrator.py --watch                # Monitor active jobs
+  python .\\scripts\\smart_orchestrator.py --optimize             # Suggest pipeline improvements
 
 Workflows:
   full: Environment check → Train all → Evaluate all → Deploy best → Verify
@@ -40,7 +40,7 @@ import sys
 import time
 from collections import defaultdict
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Set
 
@@ -396,7 +396,7 @@ def run_pipeline(pipeline: Pipeline, dry_run: bool = False) -> None:
             "retries": job.retries,
             "dependencies": list(job.dependencies),
         } for name, job in pipeline.jobs.items()},
-        "generated_at": datetime.utcnow().isoformat() + "Z",
+        "generated_at": datetime.now(timezone.utc).isoformat() + "Z",
     }
     
     out_file = DATA_OUT / f"{pipeline.name}_summary.json"

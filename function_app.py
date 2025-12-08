@@ -1,6 +1,8 @@
 # =============================================================================
 # QAI Azure Functions Application
 # =============================================================================
+from token_utils import prune_messages
+from chat_providers import detect_provider, RoleMessage
 import azure.functions as func
 import json
 import logging
@@ -21,6 +23,7 @@ try:  # pragma: no cover - defensive import
 except Exception:  # noqa: BLE001
     def sql_health():  # type: ignore
         return {"enabled": False, "error": "sql_engine_import_failed"}
+
     def engine_stats():  # type: ignore
         return {"enabled": False, "error": "engine_stats_import_failed"}
 
@@ -32,6 +35,14 @@ try:  # pragma: no cover - defensive import
     init_telemetry()
 except Exception as _telemetry_err:  # noqa: BLE001
     logging.warning(f"[startup] Telemetry init skipped: {_telemetry_err}")
+
+# Try to initialize generic OpenTelemetry tracing (best-effort)
+try:  # pragma: no cover - optional
+    from shared.tracing import init_tracing
+
+    init_tracing(service_name="qai.functions")
+except Exception as _trace_err:  # noqa: BLE001 - don't fail on missing libs
+    logging.debug(f"[startup] Tracing init skipped: {_trace_err}")
 
 # -----------------------------------------------------------------------------
 # Optional Cosmos Client import (lazy health + persistence)
@@ -57,8 +68,10 @@ except Exception:
     # Provide graceful degradations so endpoint still works
     def generate_embedding(text: str):  # type: ignore
         return []
+
     def fetch_similar_messages(query_emb, top_k=5, session_id=None):  # type: ignore
         return []
+
     def store_embedding(message_id, embedding, model):  # type: ignore
         return False
 
@@ -74,8 +87,6 @@ sys.path.insert(0, str(quantum_ai_path))
 scripts_path = Path(__file__).resolve().parent / "scripts"
 sys.path.insert(0, str(scripts_path))
 
-from chat_providers import detect_provider, RoleMessage
-from token_utils import prune_messages
 
 # OpenTelemetry tracer (optional)
 try:  # pragma: no cover
@@ -96,11 +107,11 @@ def serve_chat_web(req: func.HttpRequest) -> func.HttpResponse:
     """Serve the chat web interface HTML"""
     try:
         html_path = Path(__file__).resolve().parent / "chat-web" / "index.html"
-        
+
         if html_path.exists():
             with open(html_path, 'r', encoding='utf-8') as f:
                 html_content = f.read()
-            
+
             return func.HttpResponse(
                 html_content,
                 status_code=200,
@@ -131,11 +142,11 @@ def serve_chat_js(req: func.HttpRequest) -> func.HttpResponse:
     """Serve the chat JavaScript file"""
     try:
         js_path = Path(__file__).resolve().parent / "chat-web" / "chat.js"
-        
+
         if js_path.exists():
             with open(js_path, 'r', encoding='utf-8') as f:
                 js_content = f.read()
-            
+
             return func.HttpResponse(
                 js_content,
                 status_code=200,
@@ -169,7 +180,7 @@ def serve_chat_js(req: func.HttpRequest) -> func.HttpResponse:
 def chat(req: func.HttpRequest) -> func.HttpResponse:
     """
     HTTP endpoint for chat interactions.
-    
+
     POST /api/chat
     Body: {
         "messages": [{"role": "user|assistant|system", "content": "..."}],
@@ -177,7 +188,7 @@ def chat(req: func.HttpRequest) -> func.HttpResponse:
         "model": "model-name" (optional),
         "stream": false (optional, streaming not implemented in HTTP yet)
     }
-    
+
     Response: {
         "response": "assistant's reply",
         "provider": "azure|openai|local",
@@ -188,7 +199,8 @@ def chat(req: func.HttpRequest) -> func.HttpResponse:
 
     # Telemetry span setup (optional)
     span_ctx = (
-        _tracer.start_as_current_span("chat_request") if _tracer is not None else None
+        _tracer.start_as_current_span(
+            "chat_request") if _tracer is not None else None
     )
     try:
         if span_ctx:
@@ -196,42 +208,47 @@ def chat(req: func.HttpRequest) -> func.HttpResponse:
         # Parse request
         req_body = req.get_json()
         messages = req_body.get('messages', [])
-        session_id = req_body.get('session_id')  # Optional client-provided session identifier
-        provider_choice = req_body.get('provider', os.getenv('QAI_PROVIDER', 'auto'))
+        # Optional client-provided session identifier
+        session_id = req_body.get('session_id')
+        provider_choice = req_body.get(
+            'provider', os.getenv('QAI_PROVIDER', 'auto'))
         model_override = req_body.get('model', os.getenv('QAI_LORA_MODEL'))
         temperature = req_body.get('temperature')
         max_output_tokens = req_body.get('max_output_tokens')
         max_context_tokens = req_body.get('max_context_tokens')
         system_prompt = req_body.get('system_prompt')
-        
+
         if not messages:
             return func.HttpResponse(
                 json.dumps({"error": "No messages provided"}),
                 status_code=400,
                 mimetype="application/json",
-                headers=_cors_headers()
+                headers=create_cors_response_headers()
             )
 
         # Validate messages format
         for msg in messages:
             if not isinstance(msg, dict) or 'role' not in msg or 'content' not in msg:
                 return func.HttpResponse(
-                    json.dumps({"error": "Invalid message format. Expected {role, content}"}),
+                    json.dumps(
+                        {"error": "Invalid message format. Expected {role, content}"}),
                     status_code=400,
                     mimetype="application/json",
-                    headers=_cors_headers()
+                    headers=create_cors_response_headers()
                 )
 
         # =============================
         # Memory Retrieval (SQL-backed)
         # =============================
-        user_message_content = next((m['content'] for m in reversed(messages) if m.get('role') == 'user'), None)
+        user_message_content = next(
+            (m['content'] for m in reversed(messages) if m.get('role') == 'user'), None)
         memory_messages: list[dict] = []
         user_embedding = None
         if user_message_content:
             try:
                 user_embedding = generate_embedding(user_message_content)
-                similar = fetch_similar_messages(user_embedding, top_k=5, session_id=session_id)
+                similar = fetch_similar_messages(
+                    user_embedding, top_k=5, session_id=session_id)
                 for idx, sm in enumerate(similar):
                     # Inject prior memory as system messages (helps provider summarize past context)
                     memory_messages.append({
@@ -260,13 +277,14 @@ def chat(req: func.HttpRequest) -> func.HttpResponse:
             provider=info.name,
             model=info.model,
             max_context_tokens=max_context_tokens,
-            reserve_output_tokens=int(max_output_tokens) if max_output_tokens else 1024,
+            reserve_output_tokens=int(
+                max_output_tokens) if max_output_tokens else 1024,
             system_prompt=system_prompt,
         )
         # Completion (non-streaming for HTTP simplicity)
         result = provider.complete(pruned_messages, stream=False)
         duration_ms = int((time.perf_counter() - start_time) * 1000)
-        
+
         # If result is still a generator, consume it
         if hasattr(result, '__iter__') and not isinstance(result, str):
             result = ''.join(result)
@@ -277,11 +295,12 @@ def chat(req: func.HttpRequest) -> func.HttpResponse:
         try:
             logs_dir = Path(__file__).resolve().parent / "talk-to-ai" / "logs"
             logs_dir.mkdir(parents=True, exist_ok=True)
-            
+
             # Create timestamped log file
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            log_file = logs_dir / f"chat_{timestamp}_{session_id or 'anonymous'}.jsonl"
-            
+            log_file = logs_dir / \
+                f"chat_{timestamp}_{session_id or 'anonymous'}.jsonl"
+
             # Append conversation to log
             with open(log_file, "a", encoding="utf-8") as f:
                 # Log user message
@@ -302,7 +321,8 @@ def chat(req: func.HttpRequest) -> func.HttpResponse:
                     "model": info.model
                 }) + "\n")
         except Exception as log_err:
-            logging.warning(f"Self-learning conversation logging failed: {log_err}")
+            logging.warning(
+                f"Self-learning conversation logging failed: {log_err}")
 
         # =============================
         # Logging + Embedding Storage
@@ -322,7 +342,8 @@ def chat(req: func.HttpRequest) -> func.HttpResponse:
                     )
                     if user_log.get("success") and user_embedding:
                         try:
-                            store_embedding(user_log.get("message_id"), user_embedding, model=info.model)
+                            store_embedding(user_log.get(
+                                "message_id"), user_embedding, model=info.model)
                         except Exception as se:  # noqa: BLE001
                             logging.warning(f"Store embedding failed: {se}")
                 # Log assistant message
@@ -345,7 +366,8 @@ def chat(req: func.HttpRequest) -> func.HttpResponse:
             try:
                 if os.getenv("QAI_COSMOS_PERSIST_STRATEGY", "messages") == "messages":
                     # Persist user and assistant messages separately
-                    last_user_msg = next((m for m in reversed(messages) if m.get("role") == "user"), None)
+                    last_user_msg = next((m for m in reversed(
+                        messages) if m.get("role") == "user"), None)
                     if last_user_msg:
                         cosmos_client.record_chat_message(user_id, {
                             "role": "user",
@@ -360,7 +382,8 @@ def chat(req: func.HttpRequest) -> func.HttpResponse:
                     cosmos_written = True
                 else:
                     # Session-level persistence
-                    cosmos_client.record_chat_session(user_id, messages, provider=info.name, model=info.model)
+                    cosmos_client.record_chat_session(
+                        user_id, messages, provider=info.name, model=info.model)
                     cosmos_written = True
             except Exception as c_err:  # noqa: BLE001
                 logging.warning(f"[cosmos] Persistence failed: {c_err}")
@@ -399,7 +422,7 @@ def chat(req: func.HttpRequest) -> func.HttpResponse:
             json.dumps(response_data),
             status_code=200,
             mimetype="application/json",
-            headers=_cors_headers()
+            headers=create_cors_response_headers()
         )
 
     except ValueError as ve:
@@ -408,7 +431,7 @@ def chat(req: func.HttpRequest) -> func.HttpResponse:
             json.dumps({"error": f"Validation error: {str(ve)}"}),
             status_code=400,
             mimetype="application/json",
-            headers=_cors_headers()
+            headers=create_cors_response_headers()
         )
     except RuntimeError as re:
         logging.error(f'Runtime error: {str(re)}')
@@ -416,7 +439,7 @@ def chat(req: func.HttpRequest) -> func.HttpResponse:
             json.dumps({"error": f"Configuration error: {str(re)}"}),
             status_code=500,
             mimetype="application/json",
-            headers=_cors_headers()
+            headers=create_cors_response_headers()
         )
     except Exception as e:
         logging.error(f'Unexpected error: {str(e)}')
@@ -424,7 +447,7 @@ def chat(req: func.HttpRequest) -> func.HttpResponse:
             json.dumps({"error": f"Internal server error: {str(e)}"}),
             status_code=500,
             mimetype="application/json",
-            headers=_cors_headers()
+            headers=create_cors_response_headers()
         )
 
 
@@ -434,12 +457,12 @@ def chat_options(req: func.HttpRequest) -> func.HttpResponse:
     return func.HttpResponse(
         "",
         status_code=200,
-        headers=_cors_headers()
+        headers=create_cors_response_headers()
     )
 
 
-def _cors_headers():
-    """Common CORS headers for all responses"""
+def create_cors_response_headers():
+    """Create common CORS headers for all responses."""
     return {
         "Access-Control-Allow-Origin": "*",
         "Access-Control-Allow-Methods": "POST, GET, OPTIONS",
@@ -455,57 +478,64 @@ def _cors_headers():
 def resource_monitor_status(req: func.HttpRequest) -> func.HttpResponse:
     """Return latest resource monitor snapshot."""
     try:
-        snap_path = Path(__file__).resolve().parent / "data_out" / "resource_monitor_snapshot.json"
+        snap_path = Path(__file__).resolve().parent / \
+            "data_out" / "resource_monitor_snapshot.json"
         if snap_path.exists():
             with open(snap_path, "r") as f:
                 data = json.load(f)
-            return func.HttpResponse(json.dumps(data), status_code=200, mimetype="application/json", headers=_cors_headers())
+            return func.HttpResponse(json.dumps(data), status_code=200, mimetype="application/json", headers=create_cors_response_headers())
         else:
-            return func.HttpResponse(json.dumps({"error": "No snapshot found"}), status_code=404, mimetype="application/json", headers=_cors_headers())
+            return func.HttpResponse(json.dumps({"error": "No snapshot found"}), status_code=404, mimetype="application/json", headers=create_cors_response_headers())
     except Exception as e:
-        return func.HttpResponse(json.dumps({"error": str(e)}), status_code=500, mimetype="application/json", headers=_cors_headers())
+        return func.HttpResponse(json.dumps({"error": str(e)}), status_code=500, mimetype="application/json", headers=create_cors_response_headers())
+
 
 @app.route(route="model-deployer/status", methods=["GET"], auth_level=func.AuthLevel.ANONYMOUS)
 def model_deployer_status(req: func.HttpRequest) -> func.HttpResponse:
     """Return model deployer registry status."""
     try:
-        reg_path = Path(__file__).resolve().parent / "deployed_models" / "model_registry.json"
+        reg_path = Path(__file__).resolve().parent / \
+            "deployed_models" / "model_registry.json"
         if reg_path.exists():
             with open(reg_path, "r") as f:
                 data = json.load(f)
-            return func.HttpResponse(json.dumps(data), status_code=200, mimetype="application/json", headers=_cors_headers())
+            return func.HttpResponse(json.dumps(data), status_code=200, mimetype="application/json", headers=create_cors_response_headers())
         else:
-            return func.HttpResponse(json.dumps({"error": "No registry found"}), status_code=404, mimetype="application/json", headers=_cors_headers())
+            return func.HttpResponse(json.dumps({"error": "No registry found"}), status_code=404, mimetype="application/json", headers=create_cors_response_headers())
     except Exception as e:
-        return func.HttpResponse(json.dumps({"error": str(e)}), status_code=500, mimetype="application/json", headers=_cors_headers())
+        return func.HttpResponse(json.dumps({"error": str(e)}), status_code=500, mimetype="application/json", headers=create_cors_response_headers())
+
 
 @app.route(route="results-export", methods=["GET"], auth_level=func.AuthLevel.ANONYMOUS)
 def results_export(req: func.HttpRequest) -> func.HttpResponse:
     """Return latest results export (all orchestrators)."""
     try:
-        res_path = Path(__file__).resolve().parent / "exports" / "all_orchestrators.json"
+        res_path = Path(__file__).resolve().parent / \
+            "exports" / "all_orchestrators.json"
         if res_path.exists():
             with open(res_path, "r") as f:
                 data = json.load(f)
-            return func.HttpResponse(json.dumps(data), status_code=200, mimetype="application/json", headers=_cors_headers())
+            return func.HttpResponse(json.dumps(data), status_code=200, mimetype="application/json", headers=create_cors_response_headers())
         else:
-            return func.HttpResponse(json.dumps({"error": "No results found"}), status_code=404, mimetype="application/json", headers=_cors_headers())
+            return func.HttpResponse(json.dumps({"error": "No results found"}), status_code=404, mimetype="application/json", headers=create_cors_response_headers())
     except Exception as e:
-        return func.HttpResponse(json.dumps({"error": str(e)}), status_code=500, mimetype="application/json", headers=_cors_headers())
+        return func.HttpResponse(json.dumps({"error": str(e)}), status_code=500, mimetype="application/json", headers=create_cors_response_headers())
+
 
 @app.route(route="evaluation-results", methods=["GET"], auth_level=func.AuthLevel.ANONYMOUS)
 def evaluation_results(req: func.HttpRequest) -> func.HttpResponse:
     """Return latest batch evaluation results."""
     try:
-        eval_path = Path(__file__).resolve().parent / "data_out" / "evaluation_results.json"
+        eval_path = Path(__file__).resolve().parent / \
+            "data_out" / "evaluation_results.json"
         if eval_path.exists():
             with open(eval_path, "r") as f:
                 data = json.load(f)
-            return func.HttpResponse(json.dumps(data), status_code=200, mimetype="application/json", headers=_cors_headers())
+            return func.HttpResponse(json.dumps(data), status_code=200, mimetype="application/json", headers=create_cors_response_headers())
         else:
-            return func.HttpResponse(json.dumps({"error": "No evaluation results found"}), status_code=404, mimetype="application/json", headers=_cors_headers())
+            return func.HttpResponse(json.dumps({"error": "No evaluation results found"}), status_code=404, mimetype="application/json", headers=create_cors_response_headers())
     except Exception as e:
-        return func.HttpResponse(json.dumps({"error": str(e)}), status_code=500, mimetype="application/json", headers=_cors_headers())
+        return func.HttpResponse(json.dumps({"error": str(e)}), status_code=500, mimetype="application/json", headers=create_cors_response_headers())
 
 
 # =============================================================================
@@ -516,30 +546,36 @@ def parse_movement_commands(text: str) -> dict:
     """Parse movement commands from AI response text"""
     lower_text = text.lower()
     commands = []
-    
+
     # Movement commands
     if '[aria:walk:left]' in lower_text or 'walk left' in lower_text:
-        commands.append({'action': 'walk', 'direction': 'left', 'distance': 200})
+        commands.append(
+            {'action': 'walk', 'direction': 'left', 'distance': 200})
     if '[aria:walk:right]' in lower_text or 'walk right' in lower_text:
-        commands.append({'action': 'walk', 'direction': 'right', 'distance': 200})
+        commands.append(
+            {'action': 'walk', 'direction': 'right', 'distance': 200})
     if '[aria:walk:up]' in lower_text or 'walk up' in lower_text:
         commands.append({'action': 'walk', 'direction': 'up', 'distance': 200})
     if '[aria:walk:down]' in lower_text or 'walk down' in lower_text:
-        commands.append({'action': 'walk', 'direction': 'down', 'distance': 200})
-    
+        commands.append(
+            {'action': 'walk', 'direction': 'down', 'distance': 200})
+
     if '[aria:move:left]' in lower_text or 'aria move left' in lower_text:
-        commands.append({'action': 'move', 'direction': 'left', 'distance': 100})
+        commands.append(
+            {'action': 'move', 'direction': 'left', 'distance': 100})
     if '[aria:move:right]' in lower_text or 'aria move right' in lower_text:
-        commands.append({'action': 'move', 'direction': 'right', 'distance': 100})
+        commands.append(
+            {'action': 'move', 'direction': 'right', 'distance': 100})
     if '[aria:move:up]' in lower_text or 'aria move up' in lower_text:
         commands.append({'action': 'move', 'direction': 'up', 'distance': 100})
     if '[aria:move:down]' in lower_text or 'aria move down' in lower_text:
-        commands.append({'action': 'move', 'direction': 'down', 'distance': 100})
-    
+        commands.append(
+            {'action': 'move', 'direction': 'down', 'distance': 100})
+
     # Position commands
     if '[aria:center]' in lower_text or 'go to center' in lower_text or 'move to center' in lower_text:
         commands.append({'action': 'center'})
-    
+
     # Action commands
     if '[aria:wave]' in lower_text or 'aria wave' in lower_text:
         commands.append({'action': 'wave'})
@@ -547,8 +583,9 @@ def parse_movement_commands(text: str) -> dict:
         commands.append({'action': 'jump'})
     if '[aria:dance]' in lower_text or 'aria dance' in lower_text:
         commands.append({'action': 'dance'})
-    
+
     return {'commands': commands} if commands else {}
+
 
 @app.route(route="chat/stream", methods=["POST"], auth_level=func.AuthLevel.ANONYMOUS)
 def chat_stream(req: func.HttpRequest) -> func.HttpResponse:
@@ -572,7 +609,7 @@ def chat_stream(req: func.HttpRequest) -> func.HttpResponse:
                 json.dumps({"error": "No messages provided"}),
                 status_code=400,
                 mimetype="application/json",
-                headers=_cors_headers(),
+                headers=create_cors_response_headers(),
             )
 
         provider, info = detect_provider(
@@ -587,7 +624,8 @@ def chat_stream(req: func.HttpRequest) -> func.HttpResponse:
             provider=info.name,
             model=info.model,
             max_context_tokens=max_context_tokens,
-            reserve_output_tokens=int(max_output_tokens) if max_output_tokens else 1024,
+            reserve_output_tokens=int(
+                max_output_tokens) if max_output_tokens else 1024,
             system_prompt=system_prompt,
         )
 
@@ -640,10 +678,11 @@ def chat_stream(req: func.HttpRequest) -> func.HttpResponse:
 
                     # Accumulate for tokenization; note: chunk may be partial
                     cumulative_text += chunk
-                    
+
                     # Check for movement commands periodically
                     if not movement_commands_sent and len(cumulative_text) > 20:
-                        movement_data = parse_movement_commands(cumulative_text)
+                        movement_data = parse_movement_commands(
+                            cumulative_text)
                         if movement_data.get('commands'):
                             movement_event = json.dumps(movement_data)
                             yield (f"event: movement\ndata: {movement_event}\n\n").encode("utf-8")
@@ -660,7 +699,8 @@ def chat_stream(req: func.HttpRequest) -> func.HttpResponse:
                                         txt = enc.decode([tid])
                                     except Exception:
                                         txt = ''
-                                    evt = json.dumps({"token_index": token_index, "token": txt, "cumulative": cumulative_text})
+                                    evt = json.dumps(
+                                        {"token_index": token_index, "token": txt, "cumulative": cumulative_text})
                                     yield (f"event: token\n" f"data: {evt}\n\n").encode("utf-8")
                                     token_index += 1
                                 prev_token_count = len(tok_ids)
@@ -674,7 +714,8 @@ def chat_stream(req: func.HttpRequest) -> func.HttpResponse:
                         if len(words) > prev_word_count:
                             for w in words[prev_word_count:]:
                                 token_text = w.group(0)
-                                evt = json.dumps({"token_index": token_index, "token": token_text, "cumulative": cumulative_text})
+                                evt = json.dumps(
+                                    {"token_index": token_index, "token": token_text, "cumulative": cumulative_text})
                                 yield (f"event: token\n" f"data: {evt}\n\n").encode("utf-8")
                                 token_index += 1
                             prev_word_count = len(words)
@@ -688,7 +729,8 @@ def chat_stream(req: func.HttpRequest) -> func.HttpResponse:
             body=sse_iterable(),
             status_code=200,
             mimetype="text/event-stream",
-            headers={**_cors_headers(), "Cache-Control": "no-cache"},
+            headers={**create_cors_response_headers(),
+                     "Cache-Control": "no-cache"},
         )
 
     except Exception as e:  # noqa: BLE001
@@ -697,7 +739,7 @@ def chat_stream(req: func.HttpRequest) -> func.HttpResponse:
             json.dumps({"error": str(e)}),
             status_code=500,
             mimetype="application/json",
-            headers=_cors_headers(),
+            headers=create_cors_response_headers(),
         )
 
 
@@ -715,7 +757,7 @@ def tts(req: func.HttpRequest) -> func.HttpResponse:
         body = req.get_json() or {}
         text = (body.get('text') or '').strip()
         if not text:
-            return func.HttpResponse(json.dumps({"error": "No text provided"}), status_code=400, mimetype="application/json", headers=_cors_headers())
+            return func.HttpResponse(json.dumps({"error": "No text provided"}), status_code=400, mimetype="application/json", headers=create_cors_response_headers())
 
         # Optional voice/rate/pitch params
         voice = body.get('voice')
@@ -724,36 +766,45 @@ def tts(req: func.HttpRequest) -> func.HttpResponse:
         out_format = (body.get('format') or 'wav').lower()
 
         # Prefer Azure Speech if configured
-        az_key = os.getenv('AZURE_SPEECH_KEY') or os.getenv('AZURE_SPEECH_API_KEY') or os.getenv('AZURE_SPEECH_SUBSCRIPTION')
-        az_region = os.getenv('AZURE_SPEECH_REGION') or os.getenv('AZURE_REGION')
+        az_key = os.getenv('AZURE_SPEECH_KEY') or os.getenv(
+            'AZURE_SPEECH_API_KEY') or os.getenv('AZURE_SPEECH_SUBSCRIPTION')
+        az_region = os.getenv(
+            'AZURE_SPEECH_REGION') or os.getenv('AZURE_REGION')
 
         if az_key and az_region:
             try:
-                import io, base64, wave, re
+                import io
+                import base64
+                import wave
+                import re
                 try:
                     import azure.cognitiveservices.speech as speechsdk
                 except Exception as e:
-                    return func.HttpResponse(json.dumps({"error": "Azure Speech SDK not available on server (install azure-cognitiveservices-speech)"}), status_code=500, mimetype="application/json", headers=_cors_headers())
+                    return func.HttpResponse(json.dumps({"error": "Azure Speech SDK not available on server (install azure-cognitiveservices-speech)"}), status_code=500, mimetype="application/json", headers=create_cors_response_headers())
 
                 # Configure speech
-                scfg = speechsdk.SpeechConfig(subscription=az_key, region=az_region)
+                scfg = speechsdk.SpeechConfig(
+                    subscription=az_key, region=az_region)
                 # force WAV output for simpler handling
-                scfg.set_speech_synthesis_output_format(speechsdk.SpeechSynthesisOutputFormat.Riff16Khz16BitMonoPcm)
+                scfg.set_speech_synthesis_output_format(
+                    speechsdk.SpeechSynthesisOutputFormat.Riff16Khz16BitMonoPcm)
                 if voice:
                     try:
                         scfg.speech_synthesis_voice_name = voice
                     except Exception:
                         pass
 
-                synthesizer = speechsdk.SpeechSynthesizer(speech_config=scfg, audio_config=None)
+                synthesizer = speechsdk.SpeechSynthesizer(
+                    speech_config=scfg, audio_config=None)
 
                 # Do the synthesis
                 result = synthesizer.speak_text_async(text).get()
 
                 if result.reason != speechsdk.ResultReason.SynthesizingAudioCompleted:
                     # Could be 'Canceled' with details
-                    detail = getattr(result, 'error_details', None) or str(result.reason)
-                    return func.HttpResponse(json.dumps({"error": "Synthesis failed", "detail": str(detail)}), status_code=500, mimetype="application/json", headers=_cors_headers())
+                    detail = getattr(result, 'error_details',
+                                     None) or str(result.reason)
+                    return func.HttpResponse(json.dumps({"error": "Synthesis failed", "detail": str(detail)}), status_code=500, mimetype="application/json", headers=create_cors_response_headers())
 
                 # Extract audio bytes
                 stream = speechsdk.AudioDataStream(result)
@@ -765,7 +816,9 @@ def tts(req: func.HttpRequest) -> func.HttpResponse:
                     with wave.open(f, 'rb') as wr:
                         framerate = wr.getframerate()
                         frames = wr.getnframes()
-                    duration_s = frames / float(framerate) if framerate and frames else max(0.2, len(text) * 0.02)
+                    duration_s = frames / \
+                        float(framerate) if framerate and frames else max(
+                            0.2, len(text) * 0.02)
                 except Exception:
                     duration_s = max(0.2, len(text) * 0.02)
 
@@ -778,25 +831,31 @@ def tts(req: func.HttpRequest) -> func.HttpResponse:
                     dur = duration_s * proportion
                     start_ms = int(cursor * 1000)
                     end_ms = int((cursor + dur) * 1000)
-                    timepoints.append({"word": w, "start_ms": start_ms, "end_ms": end_ms})
+                    timepoints.append(
+                        {"word": w, "start_ms": start_ms, "end_ms": end_ms})
                     cursor += dur
 
                 import base64 as _b64
                 audio_b64 = _b64.b64encode(audio_bytes).decode('ascii')
 
-                return func.HttpResponse(json.dumps({"audio_base64": audio_b64, "format": "wav", "timepoints": timepoints}), status_code=200, mimetype="application/json", headers=_cors_headers())
+                return func.HttpResponse(json.dumps({"audio_base64": audio_b64, "format": "wav", "timepoints": timepoints}), status_code=200, mimetype="application/json", headers=create_cors_response_headers())
             except Exception as e:
                 logging.exception(f"TTS (Azure) synth failed: {e}")
-                return func.HttpResponse(json.dumps({"error": f"TTS provider error: {e}"}), status_code=500, mimetype="application/json", headers=_cors_headers())
+                return func.HttpResponse(json.dumps({"error": f"TTS provider error: {e}"}), status_code=500, mimetype="application/json", headers=create_cors_response_headers())
 
         # No remote TTS provider is configured. Attempt optional local fallbacks if enabled.
-        enable_local = os.getenv('QAI_ENABLE_LOCAL_TTS', 'true').lower() in ('true', '1', 'yes', 'y')
+        enable_local = os.getenv('QAI_ENABLE_LOCAL_TTS', 'true').lower() in (
+            'true', '1', 'yes', 'y')
 
         if enable_local:
             # Try pyttsx3 (offline, best on Windows) first
             try:
                 try:
-                    import tempfile, base64, io, wave, re
+                    import tempfile
+                    import base64
+                    import io
+                    import wave
+                    import re
                     import pyttsx3
                 except Exception:  # pyttsx3 not available
                     pyttsx3 = None
@@ -804,14 +863,16 @@ def tts(req: func.HttpRequest) -> func.HttpResponse:
                 if pyttsx3 is not None:
                     tmp = None
                     try:
-                        tmp = tempfile.NamedTemporaryFile(delete=False, suffix='.wav')
+                        tmp = tempfile.NamedTemporaryFile(
+                            delete=False, suffix='.wav')
                         tmp_path = tmp.name
                         tmp.close()
 
                         engine = pyttsx3.init()
                         # Try to set rate (pyttsx3 rate is an int; we scale from given rate)
                         try:
-                            engine.setProperty('rate', int(200 * (rate or 1.0)))
+                            engine.setProperty(
+                                'rate', int(200 * (rate or 1.0)))
                         except Exception:
                             pass
                         # Try to select voice by name if provided
@@ -840,7 +901,9 @@ def tts(req: func.HttpRequest) -> func.HttpResponse:
                             with wave.open(f, 'rb') as wr:
                                 framerate = wr.getframerate()
                                 frames = wr.getnframes()
-                            duration_s = frames / float(framerate) if framerate and frames else max(0.2, len(text) * 0.02)
+                            duration_s = frames / \
+                                float(framerate) if framerate and frames else max(
+                                    0.2, len(text) * 0.02)
                         except Exception:
                             duration_s = max(0.2, len(text) * 0.02)
 
@@ -853,11 +916,13 @@ def tts(req: func.HttpRequest) -> func.HttpResponse:
                             dur = duration_s * proportion
                             start_ms = int(cursor * 1000)
                             end_ms = int((cursor + dur) * 1000)
-                            timepoints.append({"word": w, "start_ms": start_ms, "end_ms": end_ms})
+                            timepoints.append(
+                                {"word": w, "start_ms": start_ms, "end_ms": end_ms})
                             cursor += dur
 
-                        audio_b64 = base64.b64encode(audio_bytes).decode('ascii')
-                        return func.HttpResponse(json.dumps({"audio_base64": audio_b64, "format": "wav", "timepoints": timepoints}), status_code=200, mimetype="application/json", headers=_cors_headers())
+                        audio_b64 = base64.b64encode(
+                            audio_bytes).decode('ascii')
+                        return func.HttpResponse(json.dumps({"audio_base64": audio_b64, "format": "wav", "timepoints": timepoints}), status_code=200, mimetype="application/json", headers=create_cors_response_headers())
                     finally:
                         try:
                             if tmp is not None and tmp_path and os.path.exists(tmp_path):
@@ -867,7 +932,9 @@ def tts(req: func.HttpRequest) -> func.HttpResponse:
 
                 # If pyttsx3 not available or failed, try gTTS (mp3 output)
                 try:
-                    import tempfile, base64, re
+                    import tempfile
+                    import base64
+                    import re
                     from gtts import gTTS
                 except Exception:
                     gTTS = None
@@ -875,7 +942,8 @@ def tts(req: func.HttpRequest) -> func.HttpResponse:
                 if gTTS is not None:
                     tmp = None
                     try:
-                        tmp = tempfile.NamedTemporaryFile(delete=False, suffix='.mp3')
+                        tmp = tempfile.NamedTemporaryFile(
+                            delete=False, suffix='.mp3')
                         tmp_path = tmp.name
                         tmp.close()
 
@@ -896,11 +964,13 @@ def tts(req: func.HttpRequest) -> func.HttpResponse:
                             dur = duration_s * proportion
                             start_ms = int(cursor * 1000)
                             end_ms = int((cursor + dur) * 1000)
-                            timepoints.append({"word": w, "start_ms": start_ms, "end_ms": end_ms})
+                            timepoints.append(
+                                {"word": w, "start_ms": start_ms, "end_ms": end_ms})
                             cursor += dur
 
-                        audio_b64 = base64.b64encode(audio_bytes).decode('ascii')
-                        return func.HttpResponse(json.dumps({"audio_base64": audio_b64, "format": "mp3", "timepoints": timepoints}), status_code=200, mimetype="application/json", headers=_cors_headers())
+                        audio_b64 = base64.b64encode(
+                            audio_bytes).decode('ascii')
+                        return func.HttpResponse(json.dumps({"audio_base64": audio_b64, "format": "mp3", "timepoints": timepoints}), status_code=200, mimetype="application/json", headers=create_cors_response_headers())
                     finally:
                         try:
                             if tmp is not None and tmp_path and os.path.exists(tmp_path):
@@ -910,7 +980,7 @@ def tts(req: func.HttpRequest) -> func.HttpResponse:
 
             except Exception as e:
                 logging.exception(f"Local fallback TTS failed: {e}")
-                return func.HttpResponse(json.dumps({"error": f"Local TTS provider failed: {e}"}), status_code=500, mimetype="application/json", headers=_cors_headers())
+                return func.HttpResponse(json.dumps({"error": f"Local TTS provider failed: {e}"}), status_code=500, mimetype="application/json", headers=create_cors_response_headers())
 
         # If we reach here remote + local TTS are unavailable
         return func.HttpResponse(
@@ -920,12 +990,12 @@ def tts(req: func.HttpRequest) -> func.HttpResponse:
             }),
             status_code=501,
             mimetype="application/json",
-            headers=_cors_headers()
+            headers=create_cors_response_headers()
         )
 
     except Exception as e:  # noqa: BLE001
         logging.exception(f"/tts error: {e}")
-        return func.HttpResponse(json.dumps({"error": str(e)}), status_code=500, mimetype="application/json", headers=_cors_headers())
+        return func.HttpResponse(json.dumps({"error": str(e)}), status_code=500, mimetype="application/json", headers=create_cors_response_headers())
 
 
 # =============================================================================
@@ -936,7 +1006,7 @@ def tts(req: func.HttpRequest) -> func.HttpResponse:
 def start_backend(req: func.HttpRequest) -> func.HttpResponse:
     """Start the Azure Functions backend (already running if this endpoint responds)"""
     logging.info('Backend start request received')
-    
+
     # If this endpoint responds, the backend is already running
     return func.HttpResponse(
         json.dumps({
@@ -989,7 +1059,8 @@ def ai_status(req: func.HttpRequest) -> func.HttpResponse:
 
         repo_root = Path(__file__).resolve().parent
         venv_python = repo_root / "venv" / "Scripts" / "python.exe"
-        venv_info = {"path": str(venv_python), "exists": venv_python.exists(), "packages": {}, "error": None}
+        venv_info = {"path": str(
+            venv_python), "exists": venv_python.exists(), "packages": {}, "error": None}
 
         if venv_info["exists"]:
             try:
@@ -1002,12 +1073,14 @@ def ai_status(req: func.HttpRequest) -> func.HttpResponse:
                     "\n\ttry:\n\t\tvers[m]=md.version(m)\n\texcept Exception:\n\t\tvers[m]=None;"
                     "print(json.dumps({'available':avail,'versions':vers}))"
                 )
-                proc = subprocess.run([str(venv_python), "-c", code], capture_output=True, text=True, timeout=12)
+                proc = subprocess.run(
+                    [str(venv_python), "-c", code], capture_output=True, text=True, timeout=12)
                 if proc.returncode == 0:
                     data = json.loads(proc.stdout.strip() or "{}")
                     venv_info["packages"] = data
                 else:
-                    venv_info["error"] = proc.stderr.strip() or f"exit {proc.returncode}"
+                    venv_info["error"] = proc.stderr.strip(
+                    ) or f"exit {proc.returncode}"
             except Exception as e:  # noqa: BLE001
                 venv_info["error"] = str(e)
 
@@ -1131,7 +1204,8 @@ def ai_status(req: func.HttpRequest) -> func.HttpResponse:
             quantum_info["azure_quantum"]["attempted"] = True
             try:
                 from quantum_ai.src.azure_quantum_integration import AzureQuantumIntegration  # type: ignore
-                cfg_path = Path(__file__).resolve().parent / "quantum-ai" / "config" / "quantum_config.yaml"
+                cfg_path = Path(__file__).resolve().parent / \
+                    "quantum-ai" / "config" / "quantum_config.yaml"
                 if cfg_path.exists():
                     aq = AzureQuantumIntegration(str(cfg_path))
                     aq.connect()
@@ -1156,17 +1230,25 @@ def ai_status(req: func.HttpRequest) -> func.HttpResponse:
             "model_history": []
         }
         try:
-            learning_status_file = Path(__file__).resolve().parent / "data_out" / "self_learning" / "status.json"
+            learning_status_file = Path(__file__).resolve(
+            ).parent / "data_out" / "self_learning" / "status.json"
             if learning_status_file.exists():
                 with open(learning_status_file, "r") as lf:
                     learning_status = json.load(lf)
-                    learning_info["enabled"] = learning_status.get("learning_enabled", True)
-                    learning_info["training_cycles"] = learning_status.get("training_cycles", 0)
-                    learning_info["total_conversations"] = learning_status.get("total_conversations", 0)
-                    learning_info["new_conversations"] = learning_status.get("conversations_since_last_train", 0)
-                    learning_info["last_training"] = learning_status.get("last_training")
-                    learning_info["best_model_path"] = learning_status.get("best_model_path")
-                    learning_info["model_history"] = learning_status.get("model_history", [])[-3:]  # Last 3
+                    learning_info["enabled"] = learning_status.get(
+                        "learning_enabled", True)
+                    learning_info["training_cycles"] = learning_status.get(
+                        "training_cycles", 0)
+                    learning_info["total_conversations"] = learning_status.get(
+                        "total_conversations", 0)
+                    learning_info["new_conversations"] = learning_status.get(
+                        "conversations_since_last_train", 0)
+                    learning_info["last_training"] = learning_status.get(
+                        "last_training")
+                    learning_info["best_model_path"] = learning_status.get(
+                        "best_model_path")
+                    learning_info["model_history"] = learning_status.get(
+                        "model_history", [])[-3:]  # Last 3
         except Exception as _le:  # noqa: BLE001
             learning_info["error"] = str(_le)
 
@@ -1204,7 +1286,7 @@ def ai_status(req: func.HttpRequest) -> func.HttpResponse:
                 "/api/ai/status",
                 "/api/vision/infer",
                 "/api/vision/batch-infer",
-                    "/api/image/generate",
+                "/api/image/generate",
             ],
             "status": "ok",
         }
@@ -1213,7 +1295,7 @@ def ai_status(req: func.HttpRequest) -> func.HttpResponse:
             json.dumps(payload),
             status_code=200,
             mimetype="application/json",
-            headers=_cors_headers(),
+            headers=create_cors_response_headers(),
         )
 
     except Exception as e:  # noqa: BLE001
@@ -1222,7 +1304,7 @@ def ai_status(req: func.HttpRequest) -> func.HttpResponse:
             json.dumps({"status": "error", "error": str(e)}),
             status_code=500,
             mimetype="application/json",
-            headers=_cors_headers(),
+            headers=create_cors_response_headers(),
         )
 
 
@@ -1234,20 +1316,20 @@ def ai_status(req: func.HttpRequest) -> func.HttpResponse:
 def vision_infer(req: func.HttpRequest) -> func.HttpResponse:
     """
     Vision inference endpoint for expression/emotion classification.
-    
+
     POST /api/vision/infer
     Body (option 1 - base64):
     {
         "image": "base64_encoded_image_string",
         "format": "base64"
     }
-    
+
     Body (option 2 - URL):
     {
         "image_url": "https://example.com/image.jpg",
         "format": "url"
     }
-    
+
     Response:
     {
         "label": "happy",
@@ -1265,7 +1347,7 @@ def vision_infer(req: func.HttpRequest) -> func.HttpResponse:
     }
     """
     logging.info('Vision infer endpoint invoked')
-    
+
     try:
         # Lazy import vision inference (only loaded when needed)
         try:
@@ -1275,23 +1357,24 @@ def vision_infer(req: func.HttpRequest) -> func.HttpResponse:
                 json.dumps({"error": f"Vision inference not available: {e}"}),
                 status_code=500,
                 mimetype="application/json",
-                headers=_cors_headers()
+                headers=create_cors_response_headers()
             )
-        
+
         # Parse request
         req_body = req.get_json()
         image_data = req_body.get('image')
         image_url = req_body.get('image_url')
         format_type = req_body.get('format', 'base64')
-        
+
         if not image_data and not image_url:
             return func.HttpResponse(
-                json.dumps({"error": "No image provided. Include 'image' (base64) or 'image_url' in request body."}),
+                json.dumps(
+                    {"error": "No image provided. Include 'image' (base64) or 'image_url' in request body."}),
                 status_code=400,
                 mimetype="application/json",
-                headers=_cors_headers()
+                headers=create_cors_response_headers()
             )
-        
+
         # Initialize vision inference (loads latest checkpoint)
         # Cache the instance for performance (singleton pattern)
         if not hasattr(vision_infer, '_vision_model'):
@@ -1307,11 +1390,11 @@ def vision_infer(req: func.HttpRequest) -> func.HttpResponse:
                     }),
                     status_code=404,
                     mimetype="application/json",
-                    headers=_cors_headers()
+                    headers=create_cors_response_headers()
                 )
-        
+
         vi = vision_infer._vision_model
-        
+
         # Run inference based on input format
         if image_url:
             # Fetch image from URL
@@ -1325,10 +1408,11 @@ def vision_infer(req: func.HttpRequest) -> func.HttpResponse:
                 result = vi.predict(img)
             except Exception as e:
                 return func.HttpResponse(
-                    json.dumps({"error": f"Failed to fetch image from URL: {e}"}),
+                    json.dumps(
+                        {"error": f"Failed to fetch image from URL: {e}"}),
                     status_code=400,
                     mimetype="application/json",
-                    headers=_cors_headers()
+                    headers=create_cors_response_headers()
                 )
         elif format_type == 'base64':
             # Decode base64 image
@@ -1336,39 +1420,41 @@ def vision_infer(req: func.HttpRequest) -> func.HttpResponse:
                 result = vi.predict_base64(image_data)
             except Exception as e:
                 return func.HttpResponse(
-                    json.dumps({"error": f"Failed to decode base64 image: {e}"}),
+                    json.dumps(
+                        {"error": f"Failed to decode base64 image: {e}"}),
                     status_code=400,
                     mimetype="application/json",
-                    headers=_cors_headers()
+                    headers=create_cors_response_headers()
                 )
         else:
             return func.HttpResponse(
-                json.dumps({"error": f"Unsupported format: {format_type}. Use 'base64' or provide 'image_url'."}),
+                json.dumps(
+                    {"error": f"Unsupported format: {format_type}. Use 'base64' or provide 'image_url'."}),
                 status_code=400,
                 mimetype="application/json",
-                headers=_cors_headers()
+                headers=create_cors_response_headers()
             )
-        
+
         # Add model metadata to response
         response_data = {
             **result,
             "model_info": vi.get_model_info()
         }
-        
+
         return func.HttpResponse(
             json.dumps(response_data),
             status_code=200,
             mimetype="application/json",
-            headers=_cors_headers()
+            headers=create_cors_response_headers()
         )
-        
+
     except Exception as e:
         logging.error(f'Vision infer error: {str(e)}')
         return func.HttpResponse(
             json.dumps({"error": f"Vision inference failed: {str(e)}"}),
             status_code=500,
             mimetype="application/json",
-            headers=_cors_headers()
+            headers=create_cors_response_headers()
         )
 
 
@@ -1378,7 +1464,7 @@ def vision_infer_options(req: func.HttpRequest) -> func.HttpResponse:
     return func.HttpResponse(
         "",
         status_code=200,
-        headers=_cors_headers()
+        headers=create_cors_response_headers()
     )
 
 
@@ -1386,7 +1472,7 @@ def vision_infer_options(req: func.HttpRequest) -> func.HttpResponse:
 def vision_batch_infer(req: func.HttpRequest) -> func.HttpResponse:
     """
     Batch vision inference endpoint for multiple images.
-    
+
     POST /api/vision/batch-infer
     Body:
     {
@@ -1396,7 +1482,7 @@ def vision_batch_infer(req: func.HttpRequest) -> func.HttpResponse:
             ...
         ]
     }
-    
+
     Response:
     {
         "results": [
@@ -1408,7 +1494,7 @@ def vision_batch_infer(req: func.HttpRequest) -> func.HttpResponse:
     }
     """
     logging.info('Vision batch infer endpoint invoked')
-    
+
     try:
         from vision_inference import VisionInference
         from PIL import Image
@@ -1419,45 +1505,47 @@ def vision_batch_infer(req: func.HttpRequest) -> func.HttpResponse:
             json.dumps({"error": f"Vision inference not available: {e}"}),
             status_code=500,
             mimetype="application/json",
-            headers=_cors_headers()
+            headers=create_cors_response_headers()
         )
-    
+
     try:
         req_body = req.get_json()
         images_data = req_body.get('images', [])
-        
+
         if not images_data:
             return func.HttpResponse(
                 json.dumps({"error": "No images provided"}),
                 status_code=400,
                 mimetype="application/json",
-                headers=_cors_headers()
+                headers=create_cors_response_headers()
             )
-        
+
         # Limit batch size to prevent overload
         max_batch_size = 50
         if len(images_data) > max_batch_size:
             return func.HttpResponse(
-                json.dumps({"error": f"Batch size exceeds limit of {max_batch_size} images"}),
+                json.dumps(
+                    {"error": f"Batch size exceeds limit of {max_batch_size} images"}),
                 status_code=400,
                 mimetype="application/json",
-                headers=_cors_headers()
+                headers=create_cors_response_headers()
             )
-        
+
         # Initialize vision model
         if not hasattr(vision_batch_infer, '_vision_model'):
             try:
                 vision_batch_infer._vision_model = VisionInference()
             except FileNotFoundError as e:
                 return func.HttpResponse(
-                    json.dumps({"error": "No trained model found", "detail": str(e)}),
+                    json.dumps(
+                        {"error": "No trained model found", "detail": str(e)}),
                     status_code=404,
                     mimetype="application/json",
-                    headers=_cors_headers()
+                    headers=create_cors_response_headers()
                 )
-        
+
         vi = vision_batch_infer._vision_model
-        
+
         # Decode all images
         pil_images = []
         image_ids = []
@@ -1465,27 +1553,27 @@ def vision_batch_infer(req: func.HttpRequest) -> func.HttpResponse:
             try:
                 img_id = img_data.get('id', f'image_{idx}')
                 b64_data = img_data.get('data')
-                
+
                 img_bytes = base64.b64decode(b64_data)
                 pil_img = Image.open(io.BytesIO(img_bytes))
-                
+
                 pil_images.append(pil_img)
                 image_ids.append(img_id)
             except Exception as e:
                 logging.warning(f'Failed to decode image {idx}: {e}')
                 continue
-        
+
         if not pil_images:
             return func.HttpResponse(
                 json.dumps({"error": "No valid images could be decoded"}),
                 status_code=400,
                 mimetype="application/json",
-                headers=_cors_headers()
+                headers=create_cors_response_headers()
             )
-        
+
         # Run batch inference
         predictions = vi.predict_batch(pil_images)
-        
+
         # Combine predictions with IDs
         results = []
         for img_id, pred in zip(image_ids, predictions):
@@ -1493,126 +1581,146 @@ def vision_batch_infer(req: func.HttpRequest) -> func.HttpResponse:
                 'id': img_id,
                 **pred
             })
-        
+
         response_data = {
             'results': results,
             'total': len(results),
             'model_info': vi.get_model_info()
         }
-        
+
         return func.HttpResponse(
             json.dumps(response_data),
             status_code=200,
             mimetype="application/json",
-            headers=_cors_headers()
+            headers=create_cors_response_headers()
         )
-        
+
     except Exception as e:
         logging.error(f'Vision batch infer error: {str(e)}')
         return func.HttpResponse(
             json.dumps({"error": f"Batch inference failed: {str(e)}"}),
             status_code=500,
             mimetype="application/json",
-            headers=_cors_headers()
+            headers=create_cors_response_headers()
         )
 
 
-    @app.route(route="image/generate", methods=["POST", "OPTIONS"], auth_level=func.AuthLevel.ANONYMOUS)
-    def image_generate(req: func.HttpRequest) -> func.HttpResponse:
-        """
-        AI Image generation endpoint using OpenAI DALL-E.
-    
-        POST /api/image/generate
-        Body:
-        {
-            "prompt": "description of image to generate",
-            "size": "512x512",
-            "style": "anime"
-        }
-    
-        Response:
-        {
-            "image_url": "https://...",
-            "image_data": "base64_encoded_image",
-            "prompt": "original prompt",
-            "model": "dall-e-2"
-        }
-        """
-        if req.method == "OPTIONS":
-            return func.HttpResponse(status_code=200, headers=_cors_headers())
-    
-        logging.info('Image generation endpoint invoked')
-    
+@app.route(route="image/generate", methods=["POST", "OPTIONS"], auth_level=func.AuthLevel.ANONYMOUS)
+def image_generate(req: func.HttpRequest) -> func.HttpResponse:
+    """
+    AI Image generation endpoint using OpenAI DALL-E.
+
+    POST /api/image/generate
+    Body:
+    {
+        "prompt": "description of image to generate",
+        "size": "512x512",
+        "style": "anime"
+    }
+
+    Response:
+    {
+        "image_url": "https://...",
+        "image_data": "base64_encoded_image",
+        "prompt": "original prompt",
+        "model": "dall-e-2"
+    }
+    """
+    if req.method == "OPTIONS":
+        return func.HttpResponse(status_code=200, headers=create_cors_response_headers())
+
+    logging.info('Image generation endpoint invoked')
+
+    try:
+        req_body = req.get_json()
+        prompt = req_body.get('prompt', '')
+        size = req_body.get('size', '512x512')
+        style_hint = req_body.get('style', '')
+
+        if not prompt:
+            return func.HttpResponse(
+                json.dumps({"error": "Prompt is required"}),
+                status_code=400,
+                mimetype="application/json",
+                headers=create_cors_response_headers()
+            )
+
+        if style_hint:
+            prompt = f"{prompt}, {style_hint} style"
+
         try:
-            req_body = req.get_json()
-            prompt = req_body.get('prompt', '')
-            size = req_body.get('size', '512x512')
-            style_hint = req_body.get('style', '')
-        
-            if not prompt:
-                return func.HttpResponse(
-                    json.dumps({"error": "Prompt is required"}),
-                    status_code=400,
-                    mimetype="application/json",
-                    headers=_cors_headers()
-                )
-        
-            if style_hint:
-                prompt = f"{prompt}, {style_hint} style"
-        
-            try:
-                from openai import OpenAI
-                import os
-            
-                api_key = os.getenv('OPENAI_API_KEY')
-                if not api_key:
-                    api_key = os.getenv('AZURE_OPENAI_API_KEY')
-                    endpoint = os.getenv('AZURE_OPENAI_ENDPOINT')
-                
-                    if api_key and endpoint:
-                        client = OpenAI(api_key=api_key, base_url=f"{endpoint}/openai/deployments")
-                    else:
-                        raise ValueError("No OpenAI API key configured")
+            from openai import OpenAI
+            import os
+
+            api_key = os.getenv('OPENAI_API_KEY')
+            if not api_key:
+                api_key = os.getenv('AZURE_OPENAI_API_KEY')
+                endpoint = os.getenv('AZURE_OPENAI_ENDPOINT')
+
+                if api_key and endpoint:
+                    client = OpenAI(
+                        api_key=api_key, base_url=f"{endpoint}/openai/deployments")
                 else:
-                    client = OpenAI(api_key=api_key)
-            
-                response = client.images.generate(model="dall-e-2", prompt=prompt, size=size if size in ["256x256", "512x512", "1024x1024"] else "512x512", n=1, response_format="url")
-            
-                image_url = response.data[0].url
-            
-                response_data = {'image_url': image_url, 'prompt': prompt, 'model': 'dall-e-2', 'size': size}
-            
-                return func.HttpResponse(json.dumps(response_data), status_code=200, mimetype="application/json", headers=_cors_headers())
-            
-            except Exception as openai_error:
-                logging.warning(f'OpenAI image generation failed: {openai_error}')
-            
-                placeholder_svg = f'''<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
-                    <defs>
-                        <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
-                            <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
-                            <stop offset="50%" style="stop-color:#764ba2;stop-opacity:1" />
-                            <stop offset="100%" style="stop-color:#f093fb;stop-opacity:1" />
-                        </linearGradient>
-                    </defs>
-                    <rect width="512" height="512" fill="url(#grad)"/>
-                    <text x="256" y="220" font-size="120" text-anchor="middle" fill="white">✨</text>
-                    <text x="256" y="300" font-size="32" text-anchor="middle" fill="white" font-weight="bold">Aria</text>
-                    <text x="256" y="340" font-size="20" text-anchor="middle" fill="rgba(255,255,255,0.9)">AI Assistant</text>
-                    <text x="256" y="380" font-size="16" text-anchor="middle" fill="rgba(255,255,255,0.7)">Image generation unavailable</text>
-                    <text x="256" y="410" font-size="14" text-anchor="middle" fill="rgba(255,255,255,0.6)">{openai_error.__class__.__name__}</text>
-                </svg>'''
-            
-                import base64
-                svg_base64 = base64.b64encode(placeholder_svg.encode()).decode()
-            
-                response_data = {'image_data': svg_base64, 'prompt': prompt, 'model': 'fallback-svg', 'size': '512x512', 'fallback': True, 'error': str(openai_error)}
-            
-                return func.HttpResponse(json.dumps(response_data), status_code=200, mimetype="application/json", headers=_cors_headers())
-    
-        except Exception as e:
-            logging.error(f'Image generation error: {str(e)}')
-            return func.HttpResponse(json.dumps({"error": f"Image generation failed: {str(e)}"}), status_code=500, mimetype="application/json", headers=_cors_headers())
+                    raise ValueError("No OpenAI API key configured")
+            else:
+                client = OpenAI(api_key=api_key)
+
+            response = client.images.generate(model="dall-e-2", prompt=prompt, size=size if size in [
+                                              "256x256", "512x512", "1024x1024"] else "512x512", n=1, response_format="url")
+
+            image_url = response.data[0].url
+
+            response_data = {'image_url': image_url,
+                             'prompt': prompt, 'model': 'dall-e-2', 'size': size}
+
+            return func.HttpResponse(json.dumps(response_data), status_code=200, mimetype="application/json", headers=create_cors_response_headers())
+
+        except Exception as openai_error:
+            logging.warning(
+                f'OpenAI image generation failed: {openai_error}')
+            # Detect Azure/OpenAI quota/premium allowance errors and provide
+            # a clearer fallback message for users.
+            try:
+                from shared.azure_utils import is_quota_error, format_quota_message
+            except Exception:
+                is_quota_error = None
+                format_quota_message = None
+
+            placeholder_svg = f'''<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+                <defs>
+                    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+                        <stop offset="50%" style="stop-color:#764ba2;stop-opacity:1" />
+                        <stop offset="100%" style="stop-color:#f093fb;stop-opacity:1" />
+                    </linearGradient>
+                </defs>
+                <rect width="512" height="512" fill="url(#grad)"/>
+                <text x="256" y="220" font-size="120" text-anchor="middle" fill="white">✨</text>
+                <text x="256" y="300" font-size="32" text-anchor="middle" fill="white" font-weight="bold">Aria</text>
+                <text x="256" y="340" font-size="20" text-anchor="middle" fill="rgba(255,255,255,0.9)">AI Assistant</text>
+                <text x="256" y="380" font-size="16" text-anchor="middle" fill="rgba(255,255,255,0.7)">Image generation unavailable</text>
+                <text x="256" y="410" font-size="14" text-anchor="middle" fill="rgba(255,255,255,0.6)">{openai_error.__class__.__name__}</text>
+            </svg>'''
+
+            import base64
+            svg_base64 = base64.b64encode(
+                placeholder_svg.encode()).decode()
+
+            # Prefer a helpful quota message when available
+            err_text = str(openai_error)
+            if is_quota_error is not None and is_quota_error(openai_error):
+                if format_quota_message is not None:
+                    err_text = format_quota_message(
+                        openai_error, service_name="OpenAI / Azure Images API")
+
+            response_data = {'image_data': svg_base64, 'prompt': prompt,
+                             'model': 'fallback-svg', 'size': '512x512', 'fallback': True, 'error': err_text}
+
+            return func.HttpResponse(json.dumps(response_data), status_code=200, mimetype="application/json", headers=create_cors_response_headers())
+
+    except Exception as e:
+        logging.error(f'Image generation error: {str(e)}')
+        return func.HttpResponse(json.dumps({"error": f"Image generation failed: {str(e)}"}), status_code=500, mimetype="application/json", headers=create_cors_response_headers())
 
 
 # =============================================================================
@@ -1623,14 +1731,14 @@ def vision_batch_infer(req: func.HttpRequest) -> func.HttpResponse:
 def quantum_classify(req: func.HttpRequest) -> func.HttpResponse:
     """
     Quantum classification endpoint.
-    
+
     POST /api/quantum/classify
     Body: {
         "features": [0.1, 0.5, 0.3, ...],  // Feature vector
         "n_qubits": 4,  // Optional
         "n_layers": 2   // Optional
     }
-    
+
     Response: {
         "classification": "positive|negative|neutral",
         "confidence": 0.85,
@@ -1638,7 +1746,7 @@ def quantum_classify(req: func.HttpRequest) -> func.HttpResponse:
     }
     """
     logging.info('Quantum classify endpoint invoked')
-    
+
     try:
         # Import quantum modules
         try:
@@ -1647,54 +1755,56 @@ def quantum_classify(req: func.HttpRequest) -> func.HttpResponse:
             import numpy as np
         except ImportError as e:
             return func.HttpResponse(
-                json.dumps({"error": f"Quantum dependencies not available: {e}"}),
+                json.dumps(
+                    {"error": f"Quantum dependencies not available: {e}"}),
                 status_code=500,
                 mimetype="application/json",
-                headers=_cors_headers()
+                headers=create_cors_response_headers()
             )
-        
+
         # Parse request
         req_body = req.get_json()
         features = req_body.get('features', [])
         n_qubits = req_body.get('n_qubits', 4)
         n_layers = req_body.get('n_layers', 2)
-        
+
         if not features:
             return func.HttpResponse(
                 json.dumps({"error": "No features provided"}),
                 status_code=400,
                 mimetype="application/json",
-                headers=_cors_headers()
+                headers=create_cors_response_headers()
             )
-        
+
         # Initialize quantum classifier
         classifier = QuantumClassifier()
-        
+
         # Prepare features
         feature_array = np.array(features[:n_qubits])
         if len(feature_array) < n_qubits:
-            feature_array = np.pad(feature_array, (0, n_qubits - len(feature_array)))
-        
+            feature_array = np.pad(
+                feature_array, (0, n_qubits - len(feature_array)))
+
         # Convert to torch tensor and scale to [0, 2π]
         inputs = torch.tensor(feature_array, dtype=torch.float32) * 2 * np.pi
-        
+
         # Create random weights (in production, use trained weights)
         weights = torch.randn(n_layers, n_qubits, 2, dtype=torch.float32) * 0.1
-        
+
         # Run quantum circuit
         output = classifier.forward(inputs.unsqueeze(0), weights)
-        
+
         # Interpret results
         avg_value = float(output.mean())
         confidence = abs(avg_value)
-        
+
         if avg_value > 0.3:
             classification = "positive"
         elif avg_value < -0.3:
             classification = "negative"
         else:
             classification = "neutral"
-        
+
         response_data = {
             "classification": classification,
             "confidence": confidence,
@@ -1705,21 +1815,21 @@ def quantum_classify(req: func.HttpRequest) -> func.HttpResponse:
                 "n_layers": n_layers
             }
         }
-        
+
         return func.HttpResponse(
             json.dumps(response_data),
             status_code=200,
             mimetype="application/json",
-            headers=_cors_headers()
+            headers=create_cors_response_headers()
         )
-        
+
     except Exception as e:
         logging.error(f'Quantum classify error: {str(e)}')
         return func.HttpResponse(
             json.dumps({"error": f"Quantum classification failed: {str(e)}"}),
             status_code=500,
             mimetype="application/json",
-            headers=_cors_headers()
+            headers=create_cors_response_headers()
         )
 
 
@@ -1727,14 +1837,14 @@ def quantum_classify(req: func.HttpRequest) -> func.HttpResponse:
 def quantum_circuit(req: func.HttpRequest) -> func.HttpResponse:
     """
     Create and visualize a quantum circuit.
-    
+
     POST /api/quantum/circuit
     Body: {
         "n_qubits": 4,
         "n_layers": 2,
         "entanglement": "linear|circular|full"
     }
-    
+
     Response: {
         "circuit_info": {...},
         "gates": [...],
@@ -1742,16 +1852,16 @@ def quantum_circuit(req: func.HttpRequest) -> func.HttpResponse:
     }
     """
     logging.info('Quantum circuit endpoint invoked')
-    
+
     try:
         req_body = req.get_json()
         n_qubits = req_body.get('n_qubits', 4)
         n_layers = req_body.get('n_layers', 2)
         entanglement = req_body.get('entanglement', 'linear')
-        
+
         # Create circuit description
         gates = []
-        
+
         # Input encoding layer
         for i in range(n_qubits):
             gates.append({
@@ -1760,7 +1870,7 @@ def quantum_circuit(req: func.HttpRequest) -> func.HttpResponse:
                 "layer": 0,
                 "parameter": "input[i]"
             })
-        
+
         # Variational layers
         for layer in range(n_layers):
             # Rotation gates
@@ -1777,7 +1887,7 @@ def quantum_circuit(req: func.HttpRequest) -> func.HttpResponse:
                     "layer": layer + 1,
                     "parameter": f"θ_{layer}_{i}_1"
                 })
-            
+
             # Entanglement gates
             if entanglement == 'linear':
                 for i in range(n_qubits - 1):
@@ -1804,7 +1914,7 @@ def quantum_circuit(req: func.HttpRequest) -> func.HttpResponse:
                             "target": j,
                             "layer": layer + 1
                         })
-        
+
         # Measurements
         for i in range(n_qubits):
             gates.append({
@@ -1813,11 +1923,11 @@ def quantum_circuit(req: func.HttpRequest) -> func.HttpResponse:
                 "layer": n_layers + 1,
                 "observable": "PauliZ"
             })
-        
+
         # Create text visualization
         visualization = f"Quantum Circuit ({n_qubits} qubits, {n_layers} layers, {entanglement} entanglement)\n"
         visualization += "=" * 60 + "\n\n"
-        
+
         for layer in range(n_layers + 2):
             visualization += f"Layer {layer}:\n"
             layer_gates = [g for g in gates if g.get('layer') == layer]
@@ -1829,7 +1939,7 @@ def quantum_circuit(req: func.HttpRequest) -> func.HttpResponse:
                 elif gate['type'] == 'Measure':
                     visualization += f"  Measure qubit {gate['qubit']} ({gate['observable']})\n"
             visualization += "\n"
-        
+
         response_data = {
             "circuit_info": {
                 "n_qubits": n_qubits,
@@ -1841,21 +1951,21 @@ def quantum_circuit(req: func.HttpRequest) -> func.HttpResponse:
             "gates": gates,
             "visualization": visualization
         }
-        
+
         return func.HttpResponse(
             json.dumps(response_data),
             status_code=200,
             mimetype="application/json",
-            headers=_cors_headers()
+            headers=create_cors_response_headers()
         )
-        
+
     except Exception as e:
         logging.error(f'Quantum circuit error: {str(e)}')
         return func.HttpResponse(
             json.dumps({"error": f"Circuit creation failed: {str(e)}"}),
             status_code=500,
             mimetype="application/json",
-            headers=_cors_headers()
+            headers=create_cors_response_headers()
         )
 
 
@@ -1863,9 +1973,9 @@ def quantum_circuit(req: func.HttpRequest) -> func.HttpResponse:
 def quantum_info(req: func.HttpRequest) -> func.HttpResponse:
     """
     Get quantum computing capabilities and status.
-    
+
     GET /api/quantum/info
-    
+
     Response: {
         "available": true,
         "backends": [...],
@@ -1873,21 +1983,24 @@ def quantum_info(req: func.HttpRequest) -> func.HttpResponse:
     }
     """
     logging.info('Quantum info endpoint invoked')
-    
+
     try:
         # Check if quantum modules are available
         try:
             from quantum_classifier import QuantumClassifier
             import pennylane as qml
             quantum_available = True
-            
+
             # Get available backends
             backends = [
-                {"name": "default.qubit", "description": "PennyLane default simulator", "type": "simulator"},
-                {"name": "lightning.qubit", "description": "Fast C++ simulator", "type": "simulator"},
-                {"name": "qiskit.aer", "description": "Qiskit Aer simulator", "type": "simulator"}
+                {"name": "default.qubit",
+                    "description": "PennyLane default simulator", "type": "simulator"},
+                {"name": "lightning.qubit",
+                    "description": "Fast C++ simulator", "type": "simulator"},
+                {"name": "qiskit.aer", "description": "Qiskit Aer simulator",
+                    "type": "simulator"}
             ]
-            
+
             capabilities = {
                 "max_qubits": 20,
                 "supports_gpu": False,
@@ -1895,12 +2008,12 @@ def quantum_info(req: func.HttpRequest) -> func.HttpResponse:
                 "hybrid_models": True,
                 "azure_quantum_ready": True
             }
-            
+
         except ImportError as e:
             quantum_available = False
             backends = []
             capabilities = {}
-        
+
         response_data = {
             "available": quantum_available,
             "backends": backends,
@@ -1908,20 +2021,19 @@ def quantum_info(req: func.HttpRequest) -> func.HttpResponse:
             "quantum_provider": "quantum-enhanced-local",
             "version": "1.0.0"
         }
-        
+
         return func.HttpResponse(
             json.dumps(response_data),
             status_code=200,
             mimetype="application/json",
-            headers=_cors_headers()
+            headers=create_cors_response_headers()
         )
-        
+
     except Exception as e:
         logging.error(f'Quantum info error: {str(e)}')
         return func.HttpResponse(
             json.dumps({"error": f"Failed to get quantum info: {str(e)}"}),
             status_code=500,
             mimetype="application/json",
-            headers=_cors_headers()
+            headers=create_cors_response_headers()
         )
-

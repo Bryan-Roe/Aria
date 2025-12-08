@@ -275,9 +275,19 @@ class BackupManager:
                 if current_checksum != backup_info['checksum']:
                     raise ValueError("Backup checksum mismatch! File may be corrupted.")
             
-            # Extract archive
+            # Extract archive safely - filter to prevent path traversal attacks
             with tarfile.open(archive_path, 'r:gz') as tar:
-                tar.extractall(target_dir)
+                # Python 3.12+ has built-in filter, for older versions we validate manually
+                target_path = Path(target_dir).resolve()
+                safe_members = []
+                for member in tar.getmembers():
+                    member_path = (target_path / member.name).resolve()
+                    # Ensure extraction stays within target directory
+                    if not str(member_path).startswith(str(target_path) + os.sep) and member_path != target_path:
+                        raise ValueError(f"Attempted path traversal in tarfile: {member.name}")
+                    safe_members.append(member)
+                # Extract only validated members
+                tar.extractall(target_dir, members=safe_members)  # nosec B202 - members validated above
             
             print(f"✅ Backup restored to: {target_dir}")
         else:

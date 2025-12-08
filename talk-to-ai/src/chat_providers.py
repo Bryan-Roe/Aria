@@ -2,12 +2,39 @@ from __future__ import annotations
 
 import os
 import random
+import threading
 import time
 from dataclasses import dataclass
 import json as _json
 import subprocess
 from pathlib import Path
-from typing import Dict, Generator, Iterable, List, Optional
+from typing import Any, Dict, Generator, Iterable, List, Optional
+import logging
+
+# Helpers for Azure quota/rate-limit detection
+try:  # shared package may not be importable in all contexts (tests add paths)
+    from shared.azure_utils import (
+        is_quota_error,
+        is_transient_rate_error,
+        format_quota_message,
+    )
+except Exception:  # pragma: no cover - best-effort import
+    # Provide fallbacks if shared module isn't available in runtime/test harness
+    def is_quota_error(e: Any) -> bool:
+        txt = str(e).lower() if e is not None else ""
+        return any(k in txt for k in ("quota", "premium", "exceed", "allowance", "insufficient", "billing"))
+
+    def is_transient_rate_error(e: Any) -> bool:
+        txt = str(e).lower() if e is not None else ""
+        return any(k in txt for k in ("rate limit", "429", "too many requests", "rate_limit"))
+
+    def format_quota_message(exc: Any, service_name: str = "Azure OpenAI") -> str:
+        return (
+            f"{service_name} quota/premium limit reached. Check billing/limits or use another provider."
+            f" Details: {str(exc)}"
+        )
+
+_LOGGER = logging.getLogger(__name__)
 
 try:
     # openai>=1.0
@@ -17,14 +44,59 @@ except Exception:  # pragma: no cover - optional at runtime
     AzureOpenAI = None  # type: ignore
 
 
-RoleMessage = Dict[str, str]  # {"role": "system|user|assistant", "content": "..."}
+# Thread-safe cache for LM Studio availability checks
+_lm_studio_availability_cache: Dict[str, Any] = {
+    "available": None, "checked_at": 0.0, "url": None}
+_lm_studio_cache_lock = threading.RLock()
+# Backward-compatible alias for tests expecting _lmstudio_cache_lock
+_lmstudio_cache_lock = _lm_studio_cache_lock
+_LM_STUDIO_CACHE_TTL_SECONDS = 30
+
+
+# {"role": "system|user|assistant", "content": "..."}
+RoleMessage = Dict[str, str]
+
+
+# -------------------------------------------------------------------------
+# LM Studio availability cache to avoid repeated HTTP health checks
+# -------------------------------------------------------------------------
+
+_lmstudio_cache: Dict[str, Any] = {
+    "available": None, "checked_at": 0.0, "url": None}
+_LMSTUDIO_CACHE_TTL = 30  # seconds
+
+
+def _check_lmstudio_available(url: str) -> bool:
+    """Backward-compatible alias for the newer `_check_lm_studio_available` function.
+
+    Older parts of the codebase call `_check_lmstudio_available` (no underscore
+    between `lm` and `studio`) so keep a tiny wrapper here that delegates to the
+    canonical implementation defined later in this module. This avoids import
+    time IndentationError and keeps the two names consistent.
+    """
+    # Delegate to the canonical implementation which is defined below.
+    try:
+        return _check_lm_studio_available(url)
+    except NameError:
+        # If the canonical implementation isn't available for some reason,
+        # perform a conservative HTTP ping.
+        try:
+            import urllib.request
+            import urllib.error
+            base_url = url.removesuffix("/v1")
+            models_endpoint_url = base_url + "/v1/models"
+            request = urllib.request.Request(
+                models_endpoint_url, headers={"User-Agent": "QAI"})
+            urllib.request.urlopen(request, timeout=1)
+            return True
+        except Exception:
+            return False
 
 
 @dataclass
 class ProviderChoice:
     name: str  # 'azure' | 'openai' | 'local'
     model: str
-
 
 
 class BaseChatProvider:
@@ -40,6 +112,7 @@ class LoraLocalProvider(BaseChatProvider):
     falls back to a subprocess bridge that uses the workspace venv
     (./venv/Scripts/python.exe) to perform inference.
     """
+
     def __init__(
         self,
         adapter_dir: str,
@@ -51,7 +124,7 @@ class LoraLocalProvider(BaseChatProvider):
         repetition_penalty: float = 1.1
     ):
         """Initialize LoRA provider with enhanced generation parameters.
-        
+
         Args:
             adapter_dir: Path to LoRA adapter
             device: Device for inference (cuda/cpu)
@@ -72,7 +145,8 @@ class LoraLocalProvider(BaseChatProvider):
         # Lazy import heavy deps on demand
         self._lazy_setup()
         if not self.use_subprocess:
-            self.device = device or ("cuda" if self.torch.cuda.is_available() else "cpu")
+            self.device = device or (
+                "cuda" if self.torch.cuda.is_available() else "cpu")
             self.model, self.tokenizer = self._load_model_and_tokenizer()
         else:
             # In subprocess mode we keep state minimal here
@@ -83,10 +157,12 @@ class LoraLocalProvider(BaseChatProvider):
         import json as _json
         adapter_config_path = self.adapter_dir / "adapter_config.json"
         if not adapter_config_path.exists():
-            raise RuntimeError(f"adapter_config.json not found in {self.adapter_dir}")
+            raise RuntimeError(
+                f"adapter_config.json not found in {self.adapter_dir}")
         with open(adapter_config_path, "r", encoding="utf-8") as f:
             adapter_cfg = _json.load(f)
-        base_model_id = adapter_cfg.get("base_model_name_or_path", "microsoft/Phi-3.5-mini-instruct")
+        base_model_id = adapter_cfg.get(
+            "base_model_name_or_path", "microsoft/Phi-3.5-mini-instruct")
         # Fallback mapping for Phi-3.6
         if base_model_id == "Phi-3.6-mini-instruct":
             base_model_id = "microsoft/Phi-3.5-mini-instruct"
@@ -109,6 +185,7 @@ class LoraLocalProvider(BaseChatProvider):
             response = self._complete_via_subprocess(messages)
             if not stream:
                 return response
+
             def gen():
                 for ch in response:
                     yield ch
@@ -129,9 +206,11 @@ class LoraLocalProvider(BaseChatProvider):
                 pad_token_id=self.tokenizer.eos_token_id,
                 eos_token_id=self.tokenizer.eos_token_id,
             )
-        response = self.tokenizer.decode(output[0][inputs["input_ids"].shape[-1]:], skip_special_tokens=True)
+        response = self.tokenizer.decode(
+            output[0][inputs["input_ids"].shape[-1]:], skip_special_tokens=True)
         if not stream:
             return response
+
         def gen():
             for ch in response:
                 yield ch
@@ -140,8 +219,10 @@ class LoraLocalProvider(BaseChatProvider):
 
     def _complete_via_subprocess(self, messages: List[RoleMessage]) -> str:
         if not self.bridge_python:
-            raise RuntimeError("Subprocess bridge not configured for LoRA provider.")
-        bridge_script = Path(__file__).resolve().parent / "lora_infer_bridge.py"
+            raise RuntimeError(
+                "Subprocess bridge not configured for LoRA provider.")
+        bridge_script = Path(__file__).resolve().parent / \
+            "lora_infer_bridge.py"
         if not bridge_script.exists():
             raise RuntimeError(f"Bridge script not found at {bridge_script}")
         payload = {
@@ -163,7 +244,8 @@ class LoraLocalProvider(BaseChatProvider):
         if proc.returncode != 0:
             stderr = proc.stderr.decode("utf-8", errors="ignore")
             stdout = proc.stdout.decode("utf-8", errors="ignore")
-            msg = stderr.strip() or stdout.strip() or f"exit code {proc.returncode}"
+            msg = stderr.strip() or stdout.strip(
+            ) or f"exit code {proc.returncode}"
             # Truncate very long errors but keep start and end
             if len(msg) > 1000:
                 msg = msg[:500] + "\n...\n" + msg[-500:]
@@ -172,19 +254,25 @@ class LoraLocalProvider(BaseChatProvider):
         return text
 
     def _build_prompt(self, messages: List[RoleMessage]) -> str:
-        # Simple concatenation; can be improved for chat templates
-        prompt = ""
+        """Build prompt string from messages.
+
+        Uses list join instead of string += for O(n) instead of O(n²) complexity.
+        """
+        parts = []
         for msg in messages:
             role = msg.get("role", "user")
             content = msg.get("content", "")
             if role == "system":
-                prompt += f"[SYSTEM] {content}\n"
+                parts.append(f"[SYSTEM] {content}")
             elif role == "user":
-                prompt += f"User: {content}\n"
+                parts.append(f"User: {content}")
             elif role == "assistant":
-                prompt += f"Assistant: {content}\n"
-        prompt += "Assistant: "
-        return prompt
+                parts.append(f"Assistant: {content}")
+
+        # Build final prompt: messages joined by newlines, ending with "Assistant: "
+        if parts:
+            return "\n".join(parts) + "\nAssistant: "
+        return "Assistant: "
 
     def _lazy_setup(self) -> None:
         """Import heavy dependencies lazily so that non-LoRA providers don't require them.
@@ -264,7 +352,8 @@ class LocalEchoProvider(BaseChatProvider):
         self.rng = random.Random(seed)
 
     def _craft_reply(self, messages: List[RoleMessage]) -> str:
-        last_user = next((m["content"] for m in reversed(messages) if m.get("role") == "user"), "")
+        last_user = next((m["content"] for m in reversed(
+            messages) if m.get("role") == "user"), "")
         lead_ins = [
             "Here's a concise take:",
             "Quick thoughts:",
@@ -316,7 +405,8 @@ class LocalEchoProvider(BaseChatProvider):
 class OpenAIProvider(BaseChatProvider):
     def __init__(self, model: str, api_key: Optional[str] = None, temperature: float = 0.7, max_output_tokens: Optional[int] = None):
         if OpenAI is None:
-            raise RuntimeError("openai package not installed. Install 'openai' to use this provider.")
+            raise RuntimeError(
+                "openai package not installed. Install 'openai' to use this provider.")
         self.client = OpenAI(api_key=api_key)
         self.model = model
         self.temperature = temperature
@@ -358,9 +448,11 @@ class OpenAIProvider(BaseChatProvider):
 
 class LMStudioProvider(BaseChatProvider):
     """Provider for LM Studio local server (compatible with OpenAI API)."""
+
     def __init__(self, base_url: str = "http://127.0.0.1:1234/v1", model: str = "local-model", temperature: float = 0.7, max_output_tokens: Optional[int] = None):
         if OpenAI is None:
-            raise RuntimeError("openai package not installed. Install 'openai' to use this provider.")
+            raise RuntimeError(
+                "openai package not installed. Install 'openai' to use this provider.")
         self.client = OpenAI(
             base_url=base_url,
             api_key="lm-studio"  # LM Studio doesn't require real key
@@ -405,7 +497,8 @@ class LMStudioProvider(BaseChatProvider):
 class AzureOpenAIProvider(BaseChatProvider):
     def __init__(self, deployment: str, endpoint: str, api_key: str, api_version: str = "2024-08-01-preview", temperature: float = 0.7, max_output_tokens: Optional[int] = None):
         if AzureOpenAI is None:
-            raise RuntimeError("openai package not installed. Install 'openai' to use this provider.")
+            raise RuntimeError(
+                "openai package not installed. Install 'openai' to use this provider.")
         self.client = AzureOpenAI(
             api_key=api_key,
             api_version=api_version,
@@ -416,36 +509,140 @@ class AzureOpenAIProvider(BaseChatProvider):
         self.max_output_tokens = max_output_tokens
 
     def complete(self, messages: List[RoleMessage], stream: bool = True) -> Iterable[str] | str:
-        if stream:
-            resp = self.client.chat.completions.create(
+        """Complete with Azure OpenAI and handle quota/rate-limit errors gracefully.
+
+        Behavior:
+          - If a quota/premium allowance error is detected, return a friendly
+            message instead of raising an exception.
+          - Retry transient rate-limit style errors a small number of times with
+            exponential backoff.
+
+        Returns either a string (non-stream) or a generator yielding string chunks.
+        """
+        # Internal helper: attempt the SDK call with small retry/backoff for
+        # transient rate-limit style errors. If we detect a quota/premium error
+        # we return the exception directly for caller to handle.
+        def _attempt_create(**kwargs):
+            max_retries = 3
+            base_backoff = 0.4
+            attempt = 0
+            while True:
+                try:
+                    return self.client.chat.completions.create(**kwargs)
+                except Exception as e:  # pragma: no cover - depends on runtime
+                    # If this looks like a quota/premium allowance error, bail out
+                    if is_quota_error(e):
+                        raise
+                    # Retry transient rate-limit errors a few times
+                    if is_transient_rate_error(e) and attempt < max_retries:
+                        sleep_time = base_backoff * (2 ** attempt)
+                        jitter = min(sleep_time * 0.1, 0.5)
+                        import time
+
+                        _LOGGER.info(
+                            "Azure rate-limit detected, retrying in %.2fs (attempt %d)", sleep_time + jitter, attempt + 1)
+                        time.sleep(sleep_time + jitter)
+                        attempt += 1
+                        continue
+                    # Propagate other exceptions
+                    raise
+
+        try:
+            resp = _attempt_create(
                 model=self.deployment,  # In Azure, 'model' is your deployment name
                 messages=messages,
                 temperature=self.temperature,
                 max_tokens=self.max_output_tokens,
-                stream=True,
+                stream=stream,
             )
+        except Exception as e:
+            # If quota/premium, return a friendly message instead of bubbling an
+            # exception to callers (better UX for local & CLI users)
+            if is_quota_error(e):
+                friendly = format_quota_message(e, service_name="Azure OpenAI")
+                if stream:
+                    def gen_err() -> Generator[str, None, None]:
+                        yield friendly
 
+                    return gen_err()
+                return friendly
+            # Not a quota error -> re-raise so upstream can observe generic failures
+            raise
+
+        if stream:
             def gen() -> Generator[str, None, None]:
-                for chunk in resp:
-                    try:
-                        delta = chunk.choices[0].delta
-                        if delta and delta.content:
-                            yield delta.content
-                    except Exception:
-                        pass
+                # resp can be an iterator/generator from the SDK. We iterate and
+                # guard against runtime errors that may occur during streaming.
+                try:
+                    for chunk in resp:
+                        try:
+                            delta = chunk.choices[0].delta
+                            if delta and delta.content:
+                                yield delta.content
+                        except Exception:
+                            # Resilient: skip unexpected chunk shapes
+                            continue
+                except Exception as e:
+                    # Catch runtime errors during iteration and turn them into
+                    # a short user-friendly message (quota or otherwise).
+                    if is_quota_error(e):
+                        yield format_quota_message(e, service_name="Azure OpenAI")
+                    else:
+                        yield f"[AzureOpenAI error: {str(e)}]"
+
             return gen()
+
         else:
-            resp = self.client.chat.completions.create(
-                model=self.deployment,
-                messages=messages,
-                temperature=self.temperature,
-                max_tokens=self.max_output_tokens,
-                stream=False,
-            )
             try:
                 return resp.choices[0].message.content or ""
             except Exception:
                 return ""
+
+
+def _check_lm_studio_available(server_url: str) -> bool:
+    """Check if LM Studio server is available at the given URL.
+
+    Uses a thread-safe cache to avoid repeated HTTP requests within the TTL period.
+    The HTTP request is performed outside the lock to avoid blocking other threads.
+
+    Args:
+        server_url: Base URL for LM Studio API (e.g., "http://127.0.0.1:1234/v1")
+
+    Returns:
+        True if LM Studio is available, False otherwise.
+    """
+    # Check cache under lock
+    with _lm_studio_cache_lock:
+        current_time = time.time()
+        if (
+            _lm_studio_availability_cache["available"] is not None
+            and _lm_studio_availability_cache["url"] == server_url
+            and (current_time - _lm_studio_availability_cache["checked_at"]) < _LM_STUDIO_CACHE_TTL_SECONDS
+        ):
+            return _lm_studio_availability_cache["available"]
+
+    # Perform HTTP check outside lock to avoid blocking other threads
+    is_available = False
+    try:
+        import urllib.request
+        import urllib.error
+        # Remove trailing /v1 if present, then append /v1/models
+        base_url = server_url.removesuffix("/v1")
+        models_endpoint_url = base_url + "/v1/models"
+        request = urllib.request.Request(
+            models_endpoint_url, headers={"User-Agent": "QAI"})
+        urllib.request.urlopen(request, timeout=1)
+        is_available = True
+    except Exception:
+        is_available = False
+
+    # Update cache under lock
+    with _lm_studio_cache_lock:
+        _lm_studio_availability_cache["available"] = is_available
+        _lm_studio_availability_cache["checked_at"] = time.time()
+        _lm_studio_availability_cache["url"] = server_url
+
+    return is_available
 
 
 def detect_provider(explicit: Optional[str] = None, model_override: Optional[str] = None, temperature: Optional[float] = None, max_output_tokens: Optional[int] = None) -> tuple[BaseChatProvider, ProviderChoice]:
@@ -454,104 +651,132 @@ def detect_provider(explicit: Optional[str] = None, model_override: Optional[str
     Priority:
       1) explicit selection if provided
       2) LM Studio if LMSTUDIO_BASE_URL is set
-      3) Quantum if selected
-      4) Azure if all required vars present
-      5) OpenAI if OPENAI_API_KEY is present
-      6) Local fallback
-      7) LoRA if provider is 'lora' and model_override is set
+      3) AGI if selected (advanced reasoning capabilities)
+      4) Quantum if selected
+      5) Azure if all required vars present
+      6) OpenAI if OPENAI_API_KEY is present
+      7) Local fallback
+      8) LoRA if provider is 'lora' and model_override is set
     """
-    choice = (explicit or "auto").lower()
+    provider_choice = (explicit or "auto").lower()
 
     # LM Studio config
-    lms_url = os.getenv("LMSTUDIO_BASE_URL", "http://127.0.0.1:1234/v1")
-    lms_model = os.getenv("LMSTUDIO_MODEL", "local-model")
+    lm_studio_base_url = os.getenv(
+        "LMSTUDIO_BASE_URL", "http://127.0.0.1:1234/v1")
+    lm_studio_model_name = os.getenv("LMSTUDIO_MODEL", "local-model")
 
-    # Quantum config
-    if choice == "quantum":
+    # AGI config - advanced reasoning capabilities
+    if provider_choice == "agi":
         try:
-            from quantum_provider import create_quantum_provider
-            temp_val = float(temperature if temperature is not None else os.getenv("CHAT_TEMPERATURE", "0.7"))
-            max_tokens = int(max_output_tokens) if max_output_tokens is not None else 1024
-            provider, info = create_quantum_provider(
+            from agi_provider import create_agi_provider
+            temperature_value = float(temperature if temperature is not None else os.getenv("CHAT_TEMPERATURE", "0.7"))
+            max_tokens_limit = int(max_output_tokens) if max_output_tokens is not None else 2048
+            verbose = os.getenv("AGI_VERBOSE", "false").lower() == "true"
+            provider, info = create_agi_provider(
                 model=model_override,
-                temperature=temp_val,
-                max_output_tokens=max_tokens
+                temperature=temperature_value,
+                max_output_tokens=max_tokens_limit,
+                verbose=verbose
             )
             return provider, ProviderChoice(name=info.name, model=info.model)
-        except ImportError as e:
-            raise RuntimeError(f"Quantum provider selected but quantum_provider module not available: {e}")
+        except ImportError as import_error:
+            raise RuntimeError(f"AGI provider selected but agi_provider module not available: {import_error}")
+
+    # Quantum config
+    if provider_choice == "quantum":
+        try:
+            from quantum_provider import create_quantum_provider
+            temperature_value = float(
+                temperature if temperature is not None else os.getenv("CHAT_TEMPERATURE", "0.7"))
+            max_tokens_limit = int(
+                max_output_tokens) if max_output_tokens is not None else 1024
+            provider, info = create_quantum_provider(
+                model=model_override,
+                temperature=temperature_value,
+                max_output_tokens=max_tokens_limit
+            )
+            return provider, ProviderChoice(name=info.name, model=info.model)
+        except ImportError as import_error:
+            raise RuntimeError(
+                f"Quantum provider selected but quantum_provider module not available: {import_error}")
 
     # LoRA config
-    if choice == "lora":
+    if provider_choice == "lora":
         if not model_override:
-            raise RuntimeError("LoRA provider selected but model path not provided.")
-        temp_val = float(temperature if temperature is not None else os.getenv("CHAT_TEMPERATURE", "0.7"))
-        max_new = int(max_output_tokens) if max_output_tokens is not None else 256
-        provider = LoraLocalProvider(adapter_dir=model_override, temperature=temp_val, max_new_tokens=max_new)
+            raise RuntimeError(
+                "LoRA provider selected but model path not provided.")
+        temperature_value = float(
+            temperature if temperature is not None else os.getenv("CHAT_TEMPERATURE", "0.7"))
+        max_new_tokens = int(
+            max_output_tokens) if max_output_tokens is not None else 256
+        provider = LoraLocalProvider(
+            adapter_dir=model_override, temperature=temperature_value, max_new_tokens=max_new_tokens)
         return provider, ProviderChoice(name="lora", model=str(model_override))
 
-
-    # Azure config
-    az_key = os.getenv("AZURE_OPENAI_API_KEY")
-    az_ep = os.getenv("AZURE_OPENAI_ENDPOINT")
-    az_dep = os.getenv("AZURE_OPENAI_DEPLOYMENT")
-    az_ver = os.getenv("AZURE_OPENAI_API_VERSION", "2024-08-01-preview")
+    # Azure OpenAI config
+    azure_openai_api_key = os.getenv("AZURE_OPENAI_API_KEY")
+    azure_openai_endpoint = os.getenv("AZURE_OPENAI_ENDPOINT")
+    azure_openai_deployment = os.getenv("AZURE_OPENAI_DEPLOYMENT")
+    azure_openai_api_version = os.getenv(
+        "AZURE_OPENAI_API_VERSION", "2024-08-01-preview")
 
     # OpenAI config
-    oi_key = os.getenv("OPENAI_API_KEY")
-    oi_model = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
+    openai_api_key = os.getenv("OPENAI_API_KEY")
+    openai_model_name = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
 
-    temp = float(temperature if temperature is not None else os.getenv("CHAT_TEMPERATURE", "0.7"))
+    temperature_setting = float(
+        temperature if temperature is not None else os.getenv("CHAT_TEMPERATURE", "0.7"))
 
     # Resolve based on explicit choice first
-    if choice == "lmstudio":
-        model = model_override or lms_model
-        provider = LMStudioProvider(base_url=lms_url, model=model, temperature=temp, max_output_tokens=max_output_tokens)
-        return provider, ProviderChoice(name="lmstudio", model=model)
+    if provider_choice == "lmstudio":
+        selected_model = model_override or lm_studio_model_name
+        provider = LMStudioProvider(base_url=lm_studio_base_url, model=selected_model,
+                                    temperature=temperature_setting, max_output_tokens=max_output_tokens)
+        return provider, ProviderChoice(name="lmstudio", model=selected_model)
 
-    if choice == "azure":
-        if not (az_key and az_ep and (model_override or az_dep)):
-            raise RuntimeError("Azure OpenAI selected but required env vars are missing. Set AZURE_OPENAI_API_KEY, AZURE_OPENAI_ENDPOINT, AZURE_OPENAI_DEPLOYMENT.")
-        model = model_override or az_dep  # deployment name
-        provider = AzureOpenAIProvider(deployment=model, endpoint=az_ep, api_key=az_key, api_version=az_ver, temperature=temp, max_output_tokens=max_output_tokens)
-        return provider, ProviderChoice(name="azure", model=model)
+    if provider_choice == "azure":
+        if not (azure_openai_api_key and azure_openai_endpoint and (model_override or azure_openai_deployment)):
+            raise RuntimeError(
+                "Azure OpenAI selected but required env vars are missing. Set AZURE_OPENAI_API_KEY, AZURE_OPENAI_ENDPOINT, AZURE_OPENAI_DEPLOYMENT.")
+        selected_model = model_override or azure_openai_deployment  # deployment name
+        provider = AzureOpenAIProvider(deployment=selected_model, endpoint=azure_openai_endpoint, api_key=azure_openai_api_key,
+                                       api_version=azure_openai_api_version, temperature=temperature_setting, max_output_tokens=max_output_tokens)
+        return provider, ProviderChoice(name="azure", model=selected_model)
 
-    if choice == "openai":
-        if not oi_key:
-            raise RuntimeError("OpenAI selected but OPENAI_API_KEY is not set.")
-        model = model_override or oi_model
-        provider = OpenAIProvider(model=model, api_key=oi_key, temperature=temp, max_output_tokens=max_output_tokens)
-        return provider, ProviderChoice(name="openai", model=model)
+    if provider_choice == "openai":
+        if not openai_api_key:
+            raise RuntimeError(
+                "OpenAI selected but OPENAI_API_KEY is not set.")
+        selected_model = model_override or openai_model_name
+        provider = OpenAIProvider(model=selected_model, api_key=openai_api_key,
+                                  temperature=temperature_setting, max_output_tokens=max_output_tokens)
+        return provider, ProviderChoice(name="openai", model=selected_model)
 
-    if choice == "local":
-        model = model_override or "local-echo"
+    if provider_choice == "local":
+        selected_model = model_override or "local-echo"
         provider = LocalEchoProvider()
-        return provider, ProviderChoice(name="local", model=model)
+        return provider, ProviderChoice(name="local", model=selected_model)
 
-    # Auto mode - check for LM Studio first
-    try:
-        # Quick health check for LM Studio
-        import urllib.request
-        import urllib.error
-        req = urllib.request.Request(lms_url.replace("/v1", "") + "/v1/models", headers={"User-Agent": "QAI"})
-        urllib.request.urlopen(req, timeout=1)
-        model = model_override or lms_model
-        provider = LMStudioProvider(base_url=lms_url, model=model, temperature=temp, max_output_tokens=max_output_tokens)
-        return provider, ProviderChoice(name="lmstudio", model=model)
-    except (urllib.error.URLError, Exception):
-        pass  # LM Studio not available, continue to other providers
+    # Auto mode - check for LM Studio first using thread-safe cached check
+    if _check_lm_studio_available(lm_studio_base_url):
+        selected_model = model_override or lm_studio_model_name
+        provider = LMStudioProvider(base_url=lm_studio_base_url, model=selected_model,
+                                    temperature=temperature_setting, max_output_tokens=max_output_tokens)
+        return provider, ProviderChoice(name="lmstudio", model=selected_model)
 
-    if az_key and az_ep and (model_override or az_dep):
-        model = model_override or az_dep
-        provider = AzureOpenAIProvider(deployment=model, endpoint=az_ep, api_key=az_key, api_version=az_ver, temperature=temp, max_output_tokens=max_output_tokens)
-        return provider, ProviderChoice(name="azure", model=model)
+    if azure_openai_api_key and azure_openai_endpoint and (model_override or azure_openai_deployment):
+        selected_model = model_override or azure_openai_deployment
+        provider = AzureOpenAIProvider(deployment=selected_model, endpoint=azure_openai_endpoint, api_key=azure_openai_api_key,
+                                       api_version=azure_openai_api_version, temperature=temperature_setting, max_output_tokens=max_output_tokens)
+        return provider, ProviderChoice(name="azure", model=selected_model)
 
-    if oi_key:
-        model = model_override or oi_model
-        provider = OpenAIProvider(model=model, api_key=oi_key, temperature=temp, max_output_tokens=max_output_tokens)
-        return provider, ProviderChoice(name="openai", model=model)
+    if openai_api_key:
+        selected_model = model_override or openai_model_name
+        provider = OpenAIProvider(model=selected_model, api_key=openai_api_key,
+                                  temperature=temperature_setting, max_output_tokens=max_output_tokens)
+        return provider, ProviderChoice(name="openai", model=selected_model)
 
-    # Fallback
-    model = model_override or "local-echo"
+    # Fallback to local echo provider
+    selected_model = model_override or "local-echo"
     provider = LocalEchoProvider()
-    return provider, ProviderChoice(name="local", model=model)
+    return provider, ProviderChoice(name="local", model=selected_model)

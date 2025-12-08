@@ -132,7 +132,7 @@ def _compute_training_progress():
             if avg_dur:
                 try:
                     start_dt = datetime.strptime(rec["start_time"], "%Y%m%dT%H%M%SZ")
-                    elapsed = (datetime.utcnow() - start_dt).total_seconds()
+                    elapsed = (datetime.now(timezone.utc) - start_dt).total_seconds()
                     remaining = max(0, avg_dur - elapsed)
                     job_eta_sec = round(remaining, 1)
                 except Exception:
@@ -160,7 +160,7 @@ def _compute_training_progress():
         avg = sum(succeeded_durations) / len(succeeded_durations)
         remaining_jobs = total_jobs - succeeded
         eta_seconds = avg * remaining_jobs
-        eta_iso = (datetime.utcnow() + timedelta(seconds=eta_seconds)).isoformat() + "Z"
+        eta_iso = (datetime.now(timezone.utc) + timedelta(seconds=eta_seconds)).isoformat() + "Z"
     else:
         avg = None
         eta_seconds = None
@@ -228,7 +228,7 @@ def _compute_training_progress():
                 job_rec["metrics"] = metrics
 
     payload = {
-        "generated_at": datetime.utcnow().isoformat() + "Z",
+        "generated_at": datetime.now(timezone.utc).isoformat() + "Z",
         "total_jobs": total_jobs,
         "succeeded": succeeded,
         "validated": validated,
@@ -315,9 +315,9 @@ def retry_job(job_name: str):
         target_entry.update({
             "status": "retry_running",
             "retry_count": retry_count,
-            "retry_start_time": datetime.utcnow().strftime("%Y%m%dT%H%M%SZ"),
+            "retry_start_time": datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ"),
         })
-        status_obj["generated_at"] = datetime.utcnow().isoformat() + "Z"
+        status_obj["generated_at"] = datetime.now(timezone.utc).isoformat() + "Z"
         _write_status(status_obj)
         ACTIVE_RETRY = job_name
 
@@ -342,13 +342,13 @@ def retry_job(job_name: str):
                     preserved_retry = entry.get("retry_count", retry_num)
                     result["retry_count"] = preserved_retry
                     result["status"] = result.get("status")
-                    result["retry_completed_time"] = datetime.utcnow().strftime("%Y%m%dT%H%M%SZ")
+                    result["retry_completed_time"] = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
                     # Mark as succeeded/failed (no special retry_running state anymore)
                     for k in ["status","return_code","duration_sec","duration_human","log","metrics","output_dir","cmd","start_time","retry_count","retry_completed_time"]:
                         v = result.get(k)
                         if v is not None:
                             entry[k] = v
-                    current_status["generated_at"] = datetime.utcnow().isoformat() + "Z"
+                    current_status["generated_at"] = datetime.now(timezone.utc).isoformat() + "Z"
                     _write_status(current_status)
                 ACTIVE_RETRY = None
         threading.Thread(target=_do_retry, args=(job_obj, retry_count), daemon=True).start()
@@ -387,16 +387,16 @@ def cancel_job(job_name: str):
             
             # Update status to cancelled
             target_entry["status"] = "cancelled"
-            target_entry["cancelled_time"] = datetime.utcnow().strftime("%Y%m%dT%H%M%SZ")
+            target_entry["cancelled_time"] = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
             if "start_time" in target_entry:
                 try:
                     start = datetime.strptime(target_entry["start_time"], "%Y%m%dT%H%M%SZ")
-                    elapsed = (datetime.utcnow() - start).total_seconds()
+                    elapsed = (datetime.now(timezone.utc) - start).total_seconds()
                     target_entry["duration_sec"] = round(elapsed, 2)
                 except Exception:
                     pass
             
-            status_obj["generated_at"] = datetime.utcnow().isoformat() + "Z"
+            status_obj["generated_at"] = datetime.now(timezone.utc).isoformat() + "Z"
             _write_status(status_obj)
             
             # Remove from active tracking
@@ -570,4 +570,6 @@ def _start_progress_emitter(interval_sec: int = 5):
 _start_progress_emitter()
 
 if __name__ == "__main__":
-    socketio.run(app, debug=True)
+    import os
+    debug_mode = os.environ.get("FLASK_DEBUG", "false").lower() == "true"
+    socketio.run(app, debug=debug_mode)

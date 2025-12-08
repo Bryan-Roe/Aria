@@ -268,3 +268,150 @@ class TestJsonSampleCounting:
                 count = 0
         
         assert count == 100
+
+
+class TestPruneMessagesOptimization:
+    """Tests for the O(n) prune_messages optimization."""
+    
+    def test_prune_messages_complexity(self):
+        """Test that prune_messages correctly prunes messages within budget."""
+        import sys
+        sys.path.insert(0, 'talk-to-ai/src')
+        from token_utils import prune_messages
+        
+        # Create many messages to test pruning
+        messages = [{'role': 'user', 'content': f'Message {i}' * 50} for i in range(30)]
+        
+        result, stats, _ = prune_messages(
+            messages=messages,
+            provider='openai',
+            model='gpt-4o-mini',
+            max_context_tokens=2000,
+            reserve_output_tokens=500
+        )
+        
+        # Verify pruning happened correctly
+        assert stats.removed_count > 0
+        assert stats.pruned_tokens <= stats.budget - stats.reserve_output_tokens
+        assert len(result) < len(messages)
+        
+    def test_prune_messages_no_pruning_needed(self):
+        """Test prune_messages when all messages fit within budget."""
+        import sys
+        sys.path.insert(0, 'talk-to-ai/src')
+        from token_utils import prune_messages
+        
+        # Small number of short messages
+        messages = [{'role': 'user', 'content': 'Hi'}]
+        
+        result, stats, _ = prune_messages(
+            messages=messages,
+            provider='openai',
+            model='gpt-4o-mini',
+            max_context_tokens=10000,
+            reserve_output_tokens=500
+        )
+        
+        assert stats.removed_count == 0
+        assert len(result) == 1
+
+
+class TestStringBuildOptimization:
+    """Tests for string building optimizations."""
+    
+    def test_build_prompt_uses_join(self):
+        """Test that _build_prompt produces correct output with optimized join."""
+        import sys
+        sys.path.insert(0, 'talk-to-ai/src')
+        from lora_infer_bridge import _build_prompt
+        
+        messages = [
+            {'role': 'system', 'content': 'System prompt'},
+            {'role': 'user', 'content': 'User message'},
+            {'role': 'assistant', 'content': 'Assistant reply'},
+        ]
+        
+        prompt = _build_prompt(messages)
+        
+        assert '[SYSTEM] System prompt' in prompt
+        assert 'User: User message' in prompt
+        assert 'Assistant: Assistant reply' in prompt
+        assert prompt.endswith('Assistant: ')
+        
+    def test_build_prompt_empty_messages(self):
+        """Test _build_prompt with empty messages."""
+        import sys
+        sys.path.insert(0, 'talk-to-ai/src')
+        from lora_infer_bridge import _build_prompt
+        
+        prompt = _build_prompt([])
+        assert prompt == 'Assistant: '
+
+
+class TestRegexCachingOptimization:
+    """Tests for regex caching optimization."""
+    
+    def test_ansi_escape_regex_cached(self):
+        """Test that ANSI escape regex is compiled at module level."""
+        import sys
+        sys.path.insert(0, 'shared')
+        from ai_runner import _ANSI_ESCAPE_RE
+        import re
+        
+        # Verify it's a compiled pattern
+        assert isinstance(_ANSI_ESCAPE_RE, re.Pattern)
+        
+        # Verify it works correctly
+        test_str = '\x1B[31mRed\x1B[0m'
+        clean = _ANSI_ESCAPE_RE.sub('', test_str)
+        assert clean == 'Red'
+
+
+class TestHeapTopKOptimization:
+    """Tests for heapq-based top-k selection optimization."""
+    
+    def test_heapq_nlargest(self):
+        """Test that heapq.nlargest correctly selects top-k items."""
+        import heapq
+        
+        # Simulate similarity scores
+        scored = [{'id': i, 'similarity': i * 0.01} for i in range(100)]
+        
+        # Get top 5
+        top5 = heapq.nlargest(5, scored, key=lambda x: x['similarity'])
+        
+        # Verify order (highest first)
+        assert top5[0]['id'] == 99
+        assert top5[4]['id'] == 95
+        
+        # Verify all 5 are present
+        assert len(top5) == 5
+
+
+class TestHashEmbeddingOptimization:
+    """Tests for hash embedding optimization."""
+    
+    def test_hash_embedding_normalized(self):
+        """Test that hash embedding produces L2-normalized vectors."""
+        import sys
+        import math
+        sys.path.insert(0, 'shared')
+        from chat_memory import _hash_embedding
+        
+        text = "Hello world test"
+        embedding = _hash_embedding(text)
+        
+        # Check L2 norm is 1.0
+        norm = math.sqrt(sum(x*x for x in embedding))
+        assert abs(norm - 1.0) < 1e-6
+        
+    def test_hash_embedding_empty_text(self):
+        """Test hash embedding with empty text."""
+        import sys
+        sys.path.insert(0, 'shared')
+        from chat_memory import _hash_embedding
+        
+        embedding = _hash_embedding("")
+        
+        # Should return zero vector
+        assert all(x == 0.0 for x in embedding)

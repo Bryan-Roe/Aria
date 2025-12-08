@@ -11,7 +11,6 @@ from __future__ import annotations
 
 import argparse
 import math
-import os
 import random
 import shutil
 import sys
@@ -46,7 +45,8 @@ def generate_toy_shapes_dataset(path: Path, classes=('circle', 'square'), sample
     path = Path(path)
     if path.exists():
         # if already present and non-empty, skip
-        non_empty = any(p.is_dir() and any(p.iterdir()) for p in path.iterdir())
+        non_empty = any(p.is_dir() and any(p.iterdir())
+                        for p in path.iterdir())
         if non_empty:
             return path
     # remove and recreate clean dataset
@@ -65,7 +65,8 @@ def generate_toy_shapes_dataset(path: Path, classes=('circle', 'square'), sample
         elif shape == 'square':
             draw.rectangle(bbox, fill=tuple(color))
         else:
-            draw.polygon([(w//2, pad), (w-pad, h-pad), (pad, h-pad)], fill=tuple(color))
+            draw.polygon([(w//2, pad), (w-pad, h-pad),
+                         (pad, h-pad)], fill=tuple(color))
 
     for cl in classes:
         cl_dir = path / cl
@@ -79,7 +80,8 @@ def generate_toy_shapes_dataset(path: Path, classes=('circle', 'square'), sample
             draw_shape(img, cl)
             # jitter rotation/resize
             if random.random() < 0.5:
-                img = img.rotate(random.uniform(-10, 10), resample=Image.BILINEAR, expand=False)
+                img = img.rotate(random.uniform(-10, 10),
+                                 resample=Image.BILINEAR, expand=False)
             p = cl_dir / f"{cl}_{i:03d}.png"
             img.save(p, format='PNG')
 
@@ -180,13 +182,20 @@ def eval_one_epoch(model, loader, device):
 
 def main(argv=None):
     p = argparse.ArgumentParser()
-    p.add_argument('--dataset', type=str, default='datasets/vision/toy_shapes', help='dataset root (class subfolders)')
-    p.add_argument('--img-size', type=int, default=64, help='image size (square)')
-    p.add_argument('--augment', action='store_true', help='Apply online data augmentation for training')
-    p.add_argument('--augment-policy', type=str, default='simple', choices=('simple', 'strong', 'torchvision'), help='Augmentation policy to use')
-    p.add_argument('--seed', type=int, default=42, help='random seed for reproducible splits and augmentation')
-    p.add_argument('--val-split', type=float, default=0.2, help='Fraction of dataset to reserve for validation (overrides default 80/20)')
-    p.add_argument('--export-onnx', type=str, default='', help='Optional path to export ONNX snapshot of the trained model')
+    p.add_argument('--dataset', type=str, default='datasets/vision/toy_shapes',
+                   help='dataset root (class subfolders)')
+    p.add_argument('--img-size', type=int, default=64,
+                   help='image size (square)')
+    p.add_argument('--augment', action='store_true',
+                   help='Apply online data augmentation for training')
+    p.add_argument('--augment-policy', type=str, default='simple', choices=(
+        'simple', 'strong', 'torchvision'), help='Augmentation policy to use')
+    p.add_argument('--seed', type=int, default=42,
+                   help='random seed for reproducible splits and augmentation')
+    p.add_argument('--val-split', type=float, default=0.2,
+                   help='Fraction of dataset to reserve for validation (overrides default 80/20)')
+    p.add_argument('--export-onnx', type=str, default='',
+                   help='Optional path to export ONNX snapshot of the trained model')
     p.add_argument('--epochs', type=int, default=3)
     p.add_argument('--batch-size', type=int, default=8)
     p.add_argument('--lr', type=float, default=1e-3)
@@ -198,7 +207,8 @@ def main(argv=None):
     dataset = Path(args.dataset)
     if not dataset.exists() or not any(dataset.iterdir()):
         print('Dataset not found or empty; generating toy_shapes at', dataset)
-        generate_toy_shapes_dataset(dataset, samples_per_class=args.samples_per_class, size=(args.img_size, args.img_size))
+        generate_toy_shapes_dataset(
+            dataset, samples_per_class=args.samples_per_class, size=(args.img_size, args.img_size))
 
     # create train/test split
     classes = [d.name for d in sorted(dataset.iterdir()) if d.is_dir()]
@@ -247,7 +257,8 @@ def main(argv=None):
                 tr.extend([
                     T.RandomResizedCrop(img_size, scale=(0.8, 1.0)),
                     T.RandomHorizontalFlip(),
-                    T.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2, hue=0.05),
+                    T.ColorJitter(brightness=0.2, contrast=0.2,
+                                  saturation=0.2, hue=0.05),
                 ])
             tr.extend([T.Resize(img_size), T.ToTensor()])
             return T.Compose(tr)
@@ -283,13 +294,18 @@ def main(argv=None):
 
         return transform_fn
 
-    train_transform = make_transform(args.img_size, augment=args.augment, policy=args.augment_policy)
-    test_transform = make_transform(args.img_size, augment=False, policy=args.augment_policy)
+    train_transform = make_transform(
+        args.img_size, augment=args.augment, policy=args.augment_policy)
+    test_transform = make_transform(
+        args.img_size, augment=False, policy=args.augment_policy)
 
-    train_ds = SimpleImageFolder(tmp_root, img_size=(args.img_size, args.img_size), transform=train_transform)
-    test_ds = SimpleImageFolder(tmp_test, img_size=(args.img_size, args.img_size), transform=test_transform)
+    train_ds = SimpleImageFolder(tmp_root, img_size=(
+        args.img_size, args.img_size), transform=train_transform)
+    test_ds = SimpleImageFolder(tmp_test, img_size=(
+        args.img_size, args.img_size), transform=test_transform)
 
-    train_loader = DataLoader(train_ds, batch_size=args.batch_size, shuffle=True)
+    train_loader = DataLoader(
+        train_ds, batch_size=args.batch_size, shuffle=True)
     test_loader = DataLoader(test_ds, batch_size=args.batch_size)
 
     num_classes = len(train_ds.classes)
@@ -297,7 +313,8 @@ def main(argv=None):
     opt = torch.optim.Adam(model.parameters(), lr=args.lr)
 
     if args.dry_run:
-        print('Dry run: ready to train model with', len(train_ds), 'train samples and', len(test_ds), 'test samples')
+        print('Dry run: ready to train model with', len(train_ds),
+              'train samples and', len(test_ds), 'test samples')
         return 0
 
     epochs = args.epochs
@@ -307,7 +324,8 @@ def main(argv=None):
     for e in range(epochs):
         loss, acc = train_one_epoch(model, train_loader, opt, device)
         val_acc = eval_one_epoch(model, test_loader, device)
-        print(f"Epoch {e+1}/{epochs}  loss={loss:.4f}  train_acc={acc:.3f}  val_acc={val_acc:.3f}")
+        print(
+            f"Epoch {e+1}/{epochs}  loss={loss:.4f}  train_acc={acc:.3f}  val_acc={val_acc:.3f}")
 
     ck = out_dir / f"vision_model_epoch{epochs}.pt"
     torch.save({'model': model.state_dict(), 'classes': train_ds.classes}, ck)
@@ -316,7 +334,8 @@ def main(argv=None):
     # optionally export a simple ONNX snapshot for interop
     if args.export_onnx:
         try:
-            dummy = torch.randn(1, 3, args.img_size, args.img_size, device=device)
+            dummy = torch.randn(1, 3, args.img_size,
+                                args.img_size, device=device)
             onnx_path = Path(args.export_onnx)
             model.cpu()
             torch.onnx.export(model, dummy, str(onnx_path), opset_version=12)

@@ -23,10 +23,15 @@ lr_scheduler_type: "cosine"  # Cosine annealing for better convergence
 max_grad_norm: 1
 warmup_steps: 100  # Warmup for stable training start
 early_stopping_threshold: !!float 0.01  # Stop if improvement < 1%
-model: "microsoft/Phi-3.5-mini-instruct"  # Using publicly available Phi-3.5
+model: "gpt2"  # For LoRA training with GPT-2
 model_path: "model"
 num_training_steps: 100
 num_warmup_steps: 10
 save_steps: 64
 seed: 42
 weight_decay: 0
+
+# LoRA/PEFT target modules for GPT-2
+target_modules:
+  - "c_attn"
+  - "c_proj"

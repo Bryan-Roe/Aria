@@ -18,10 +18,10 @@ def run(cmd, cwd=None, env=None):
     print(f"$ {' '.join(str(c) for c in cmd)}")
     try:
         proc = subprocess.run(
-            cmd, 
-            cwd=cwd, 
-            env=env, 
-            capture_output=False, 
+            cmd,
+            cwd=cwd,
+            env=env,
+            capture_output=False,
             text=True,
             timeout=1800  # 30 minute timeout
         )
@@ -45,7 +45,8 @@ def ensure_venv(python_exe: Path):
 def install_requirements(venv_python: Path, force: bool = False):
     if force or not SENTINEL.exists():
         print("Installing requirements into venv...")
-        rc = run([str(venv_python), "-m", "pip", "install", "-r", str(REQUIREMENTS)])
+        rc = run([str(venv_python), "-m", "pip",
+                 "install", "-r", str(REQUIREMENTS)])
         if rc != 0:
             sys.exit(rc)
         SENTINEL.touch()
@@ -54,20 +55,29 @@ def install_requirements(venv_python: Path, force: bool = False):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Run local LoRA training (auto-setup).")
-    parser.add_argument("--config", default="local_config.yaml", help="Config YAML under local_train (default: local_config.yaml)")
-    parser.add_argument("--max-samples", type=int, default=10, help="Limit training samples for quick runs")
-    parser.add_argument("--epochs", type=int, default=1, help="Number of epochs for training")
-    parser.add_argument("--reinstall", action="store_true", help="Force reinstall of requirements")
-    parser.add_argument("--dry-run", action="store_true", help="Print steps without executing the train step")
+    parser = argparse.ArgumentParser(
+        description="Run local LoRA training (auto-setup).")
+    parser.add_argument("--config", default="local_config.yaml",
+                        help="Config YAML under local_train (default: local_config.yaml)")
+    parser.add_argument("--max-samples", type=int, default=10,
+                        help="Limit training samples for quick runs")
+    parser.add_argument("--epochs", type=int, default=1,
+                        help="Number of epochs for training")
+    parser.add_argument("--reinstall", action="store_true",
+                        help="Force reinstall of requirements")
+    parser.add_argument("--dry-run", action="store_true",
+                        help="Print steps without executing the train step")
     args = parser.parse_args()
 
     # Resolve Python to create venv
     system_python = Path(sys.executable)
     ensure_venv(system_python)
 
-    # Venv executables
-    venv_python = VENV_DIR / "Scripts" / "python.exe"
+    # Venv executables (cross-platform)
+    venv_python = VENV_DIR / "bin" / "python"
+    # Windows path fallback
+    if not venv_python.exists():
+        venv_python = VENV_DIR / "Scripts" / "python.exe"
     if not venv_python.exists():
         print(f"Error: venv python not found at {venv_python}")
         sys.exit(1)

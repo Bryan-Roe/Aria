@@ -12,7 +12,6 @@ from __future__ import annotations
 import argparse
 import json
 import math
-import os
 import random
 import shutil
 from pathlib import Path
@@ -85,7 +84,8 @@ def run_eval(argv=None):
     ap.add_argument('--img-size', type=int, default=64)
     ap.add_argument('--out-dir', type=str, default='data_out/vision_eval')
     ap.add_argument('--batch-size', type=int, default=16)
-    ap.add_argument('--show-examples', type=int, default=8, help='Number of example images to save (random sample)')
+    ap.add_argument('--show-examples', type=int, default=8,
+                    help='Number of example images to save (random sample)')
     args = ap.parse_args(argv)
 
     ck_path = Path(args.checkpoint)
@@ -142,7 +142,8 @@ def run_eval(argv=None):
     if _HAS_SKLEARN:
         cm = skm.confusion_matrix(gts, preds, labels=list(range(len(classes))))
         results['confusion_matrix'] = cm.tolist()
-        results['classification_report'] = skm.classification_report(gts, preds, target_names=classes, output_dict=True)
+        results['classification_report'] = skm.classification_report(
+            gts, preds, target_names=classes, output_dict=True)
     else:
         # simple confusion matrix fallback
         k = len(classes)
@@ -159,8 +160,10 @@ def run_eval(argv=None):
     # plotting
     if _HAS_PLOTTING and _HAS_SKLEARN:
         try:
-            plt.figure(figsize=(max(6, len(classes) * 0.6), max(4, len(classes) * 0.35)))
-            sns.heatmap(skm.confusion_matrix(gts, preds), annot=True, fmt='d', cmap='Blues', xticklabels=classes, yticklabels=classes)
+            plt.figure(figsize=(max(6, len(classes) * 0.6),
+                       max(4, len(classes) * 0.35)))
+            sns.heatmap(skm.confusion_matrix(gts, preds), annot=True, fmt='d',
+                        cmap='Blues', xticklabels=classes, yticklabels=classes)
             plt.xlabel('Predicted')
             plt.ylabel('Actual')
             plt.title(f'Confusion matrix (acc={acc:.3f})')
@@ -170,7 +173,8 @@ def run_eval(argv=None):
             plt.close()
             print('Saved confusion matrix to', plt_path)
         except Exception as e:
-            print('Warning: failed to plot confusion matrix (matplotlib/seaborn issue):', e)
+            print(
+                'Warning: failed to plot confusion matrix (matplotlib/seaborn issue):', e)
 
     # Save example predictions (random sample)
     sample_n = min(args.show_examples, total)

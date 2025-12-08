@@ -13,17 +13,27 @@ except Exception as e:
 
 # Optional imports for real training
 try:
-    import torch
-    from datasets import load_dataset
-    from transformers import (
-        AutoModelForCausalLM,
-        AutoTokenizer,
-        Trainer,
-        TrainingArguments,
-        DataCollatorForLanguageModeling,
-    )
-    from peft import LoraConfig, get_peft_model, PeftModel
-    from transformers import TrainerCallback, EarlyStoppingCallback, EarlyStoppingCallback
+    # Optional: install torch if missing
+    try:
+        import torch  # pip install torch  # type: ignore[reportMissingImports]
+    except ImportError:
+        raise SystemExit(
+            "PyTorch is required. Install with: pip install torch")
+    from datasets import load_dataset  # type: ignore[import]
+    try:
+        from transformers import (
+            AutoModelForCausalLM,
+            AutoTokenizer,
+            Trainer,
+            TrainingArguments,
+            DataCollatorForLanguageModeling,
+        )
+        from peft import LoraConfig, get_peft_model, PeftModel
+        from transformers import TrainerCallback, EarlyStoppingCallback
+    except ImportError:
+        raise SystemExit(
+            "Transformers is required. Install with: pip install transformers"
+        )
 except Exception as e:
     # Provide visibility into which dependency import failed
     import traceback
@@ -35,6 +45,7 @@ except Exception as e:
     AutoModelForCausalLM = AutoTokenizer = Trainer = TrainingArguments = DataCollatorForLanguageModeling = None  # type: ignore
     LoraConfig = get_peft_model = PeftModel = None  # type: ignore
     TrainerCallback = None  # type: ignore
+    EarlyStoppingCallback = None  # type: ignore
 
 
 @dataclass
@@ -115,7 +126,8 @@ def build_text_from_messages(messages: List[Dict[str, str]]) -> str:
 
 def make_hf_dataset_from_files(train_files: List[str], eval_files: List[str], streaming: bool = True):
     if load_dataset is None:
-        raise RuntimeError("HuggingFace datasets not available. Install 'datasets' to load datasets.")
+        raise RuntimeError(
+            "HuggingFace datasets not available. Install 'datasets' to load datasets.")
     data_files = {"train": train_files, "validation": eval_files}
     ds = load_dataset("json", data_files=data_files, streaming=streaming)
     return ds
@@ -183,51 +195,88 @@ def parse_manifest(path_or_url: str) -> List[str]:
 
 
 def main():
-    ap = argparse.ArgumentParser(description="Train LoRA on chat dataset using lora.yaml config")
-    ap.add_argument("--config", default=str(Path(__file__).resolve().parents[1] / "lora" / "lora.yaml"))
-    ap.add_argument("--dataset", default=str(Path(__file__).resolve().parents[1] / "data"))
-    ap.add_argument("--dry-run", action="store_true", help="Validate dataset/config only; no model download")
-    ap.add_argument("--max-train-samples", type=int, default=None, help="Limit train examples (for smoke test)")
-    ap.add_argument("--max-eval-samples", type=int, default=None, help="Limit eval examples (for smoke test)")
-    ap.add_argument("--hf-model-id", default=None, help="Override HF model id (e.g., microsoft/Phi-3.5-mini-instruct)")
-    ap.add_argument("--no-stream", action="store_true", help="Disable streaming mode for datasets")
-    ap.add_argument("--deepspeed", default=None, help="Path to DeepSpeed config JSON to enable ZeRO (multi-GPU)")
-    ap.add_argument("--train-manifest", default=None, help="Path or URL to manifest of training files (txt/json/jsonl)")
-    ap.add_argument("--eval-manifest", default=None, help="Path or URL to manifest of eval files (txt/json/jsonl)")
-    ap.add_argument("--save-dir", default=None, help="Override output directory (else from config or defaults)")
-    ap.add_argument("--device", default="auto", choices=["auto", "cuda", "cpu", "directml", "mps"], help="Device preference: auto selects best available (cuda>mps>directml>cpu)")
+    ap = argparse.ArgumentParser(
+        description="Train LoRA on chat dataset using lora.yaml config")
+    ap.add_argument(
+        "--config", default=str(Path(__file__).resolve().parents[1] / "lora" / "lora.yaml"))
+    ap.add_argument(
+        "--dataset", default=str(Path(__file__).resolve().parents[1] / "data"))
+    ap.add_argument("--dry-run", action="store_true",
+                    help="Validate dataset/config only; no model download")
+    ap.add_argument("--max-train-samples", type=int, default=None,
+                    help="Limit train examples (for smoke test)")
+    ap.add_argument("--max-eval-samples", type=int, default=None,
+                    help="Limit eval examples (for smoke test)")
+    ap.add_argument("--hf-model-id", default=None,
+                    help="Override HF model id (e.g., microsoft/Phi-3.5-mini-instruct)")
+    ap.add_argument("--no-stream", action="store_true",
+                    help="Disable streaming mode for datasets")
+    ap.add_argument("--deepspeed", default=None,
+                    help="Path to DeepSpeed config JSON to enable ZeRO (multi-GPU)")
+    ap.add_argument("--train-manifest", default=None,
+                    help="Path or URL to manifest of training files (txt/json/jsonl)")
+    ap.add_argument("--eval-manifest", default=None,
+                    help="Path or URL to manifest of eval files (txt/json/jsonl)")
+    ap.add_argument("--save-dir", default=None,
+                    help="Override output directory (else from config or defaults)")
+    ap.add_argument("--device", default="auto", choices=["auto", "cuda", "cpu", "directml", "mps"],
+                    help="Device preference: auto selects best available (cuda>mps>directml>cpu)")
     # Optional overrides for HPO/cloud runs
-    ap.add_argument("--learning-rate", type=float, default=None, help="Override learning_rate from config")
-    ap.add_argument("--lora-dropout", type=float, default=None, help="Override lora_dropout from config")
-    ap.add_argument("--epochs", type=int, default=None, help="Override epochs from config")
-    ap.add_argument("--train-batch-size", type=int, default=None, help="Override finetune_train_batch_size from config")
-    ap.add_argument("--eval-batch-size", type=int, default=None, help="Override finetune_test_batch_size from config")
-    ap.add_argument("--seed", type=int, default=None, help="Override seed from config")
+    ap.add_argument("--learning-rate", type=float, default=None,
+                    help="Override learning_rate from config")
+    ap.add_argument("--lora-dropout", type=float, default=None,
+                    help="Override lora_dropout from config")
+    ap.add_argument("--epochs", type=int, default=None,
+                    help="Override epochs from config")
+    ap.add_argument("--train-batch-size", type=int, default=None,
+                    help="Override finetune_train_batch_size from config")
+    ap.add_argument("--eval-batch-size", type=int, default=None,
+                    help="Override finetune_test_batch_size from config")
+    ap.add_argument("--seed", type=int, default=None,
+                    help="Override seed from config")
     args = ap.parse_args()
+
+    # Initialize tracing (best-effort). This allows the optional
+    # OpenTelemetryTrainerCallback to get an active tracer if available.
+    # Optional tracing import (ignore if missing)
+    try:
+        from shared.tracing import init_tracing  # type: ignore
+        init_tracing(service_name="train_lora")
+    except Exception as _e:
+        print(f"[tracing] init skipped in train_lora: {_e}")
 
     cfg_raw = read_yaml(Path(args.config))
     cfg = Config(
         model=cfg_raw.get("model") or "Phi-3.6-mini-instruct",
-        finetune_dataset=cfg_raw.get("finetune_dataset") or str(Path(args.dataset)),
-        save_dir=(args.save_dir or cfg_raw.get("save_dir") or str(Path(__file__).resolve().parents[1] / "outputs")),
+        finetune_dataset=cfg_raw.get(
+            "finetune_dataset") or str(Path(args.dataset)),
+        save_dir=(args.save_dir or cfg_raw.get("save_dir") or str(
+            Path(__file__).resolve().parents[1] / "outputs")),
         finetune_train_nsamples=cfg_raw.get("finetune_train_nsamples"),
         finetune_test_nsamples=cfg_raw.get("finetune_test_nsamples"),
-        finetune_train_batch_size=int(cfg_raw.get("finetune_train_batch_size") or 2),
-        finetune_test_batch_size=int(cfg_raw.get("finetune_test_batch_size") or 2),
-        finetune_train_seqlen=int(cfg_raw.get("finetune_train_seqlen") or 1024),
+        finetune_train_batch_size=int(
+            cfg_raw.get("finetune_train_batch_size") or 2),
+        finetune_test_batch_size=int(
+            cfg_raw.get("finetune_test_batch_size") or 2),
+        finetune_train_seqlen=int(cfg_raw.get(
+            "finetune_train_seqlen") or 1024),
         finetune_test_seqlen=int(cfg_raw.get("finetune_test_seqlen") or 2048),
         learning_rate=float(cfg_raw.get("learning_rate") or 2e-4),
         lora_dropout=float(cfg_raw.get("lora_dropout") or 0.1),
         epochs=int(cfg_raw.get("epochs") or 1),
-        eval_steps=int(cfg_raw.get("eval_steps") or cfg_raw.get("eval_steps", 64)),
+        eval_steps=int(cfg_raw.get("eval_steps", 64)),
         save_steps=int(cfg_raw.get("save_steps") or 64),
-        gradient_checkpointing=bool(cfg_raw.get("gradient_checkpointing") or False),
+        gradient_checkpointing=bool(cfg_raw.get(
+            "gradient_checkpointing") or False),
         seed=int(cfg_raw.get("seed") or 42),
         warmup_steps=int(cfg_raw.get("warmup_steps") or 100),
-        gradient_accumulation_steps=int(cfg_raw.get("gradient_accumulation_steps") or 4),
+        gradient_accumulation_steps=int(
+            cfg_raw.get("gradient_accumulation_steps") or 4),
         max_grad_norm=float(cfg_raw.get("max_grad_norm") or 1.0),
-        early_stopping_patience=int(cfg_raw.get("early_stopping_patience") or 3),
-        early_stopping_threshold=float(cfg_raw.get("early_stopping_threshold") or 0.01),
+        early_stopping_patience=int(
+            cfg_raw.get("early_stopping_patience") or 3),
+        early_stopping_threshold=float(
+            cfg_raw.get("early_stopping_threshold") or 0.01),
     )
 
     # Apply CLI overrides for HPO or cloud jobs
@@ -261,14 +310,16 @@ def main():
             # Fallback: use a small subset of train for eval
             eval_files = train_files[:1]
     else:
-        dataset_path = Path(args.dataset) if args.dataset else resolve_path(cfg.finetune_dataset)
+        dataset_path = Path(args.dataset) if args.dataset else resolve_path(
+            cfg.finetune_dataset)
         if dataset_path.is_file():
             # Allow direct file usage (.json or .jsonl)
             if dataset_path.suffix.lower() in (".json", ".jsonl"):
                 train_files = [str(dataset_path)]
                 eval_files = [str(dataset_path)]
             else:
-                raise FileNotFoundError(f"Unsupported dataset file type: {dataset_path}")
+                raise FileNotFoundError(
+                    f"Unsupported dataset file type: {dataset_path}")
         else:
             # Directory: accept train.json/test.json or train.jsonl/test.jsonl; fallback to single train file present
             candidates = [
@@ -284,21 +335,24 @@ def main():
                     break
             if not found:
                 # Fallbacks: if any train.* exists, use it for both train/val
-                t_candidates = [dataset_path / "train.json", dataset_path / "train.jsonl"]
+                t_candidates = [dataset_path / "train.json",
+                                dataset_path / "train.jsonl"]
                 t_use = next((p for p in t_candidates if p.exists()), None)
                 if t_use is None:
-                    raise FileNotFoundError(f"Expected dataset files at: {dataset_path}/train.json[.l] and optionally test.json[.l]")
+                    raise FileNotFoundError(
+                        f"Expected dataset files at: {dataset_path}/train.json[.l] and optionally test.json[.l]")
                 train_files = [str(t_use)]
-                eval_candidates = [dataset_path / "test.json", dataset_path / "test.jsonl"]
+                eval_candidates = [dataset_path /
+                                   "test.json", dataset_path / "test.jsonl"]
                 v_use = next((p for p in eval_candidates if p.exists()), None)
                 eval_files = [str(v_use)] if v_use else [str(t_use)]
 
     # Determine and report device early (even for dry-run)
     chosen_device = "cpu"
     if args.device == "auto":
-        if torch is not None and torch.cuda.is_available():
+        if torch is not None and getattr(torch, "cuda", None) and getattr(torch.cuda, "is_available", lambda: False)():
             chosen_device = "cuda"
-        elif torch is not None and getattr(torch.backends, "mps", None) and torch.backends.mps.is_available():
+        elif torch is not None and getattr(torch, "backends", None) and getattr(torch.backends, "mps", None) and getattr(torch.backends.mps, "is_available", lambda: False)():
             chosen_device = "mps"
         else:
             # Optional DirectML detection
@@ -309,7 +363,8 @@ def main():
                 chosen_device = "cpu"
     else:
         chosen_device = args.device
-    print(f"[device] selection={args.device} resolved={chosen_device} cuda_available={(torch.cuda.is_available() if torch else False)}")
+    print(
+        f"[device] selection={args.device} resolved={chosen_device} cuda_available={(getattr(torch, 'cuda', None) and getattr(torch.cuda, 'is_available', lambda: False)() if torch else False)}")
 
     # Dry run: count/validate records only (no model/tokenizer downloads)
     if args.dry_run:
@@ -376,26 +431,33 @@ def main():
             try:
                 print(f"[preprocess] messages type: {type(msgs)}")
                 if isinstance(msgs, dict):
-                    print(f"[preprocess] messages dict keys: {list(msgs.keys())}")
+                    print(
+                        f"[preprocess] messages dict keys: {list(msgs.keys())}")
                     # Attempt to reconstruct per-sample conversations if messages is a dict of lists
                     # Expect shape: msgs[key][i] gives ith sample's list of that field
                     keys = list(msgs.keys())
-                    batch_size = len(msgs[keys[0]]) if keys and isinstance(msgs[keys[0]], list) else 0
-                    print(f"[preprocess] inferred batch_size from dict: {batch_size}")
+                    batch_size = len(msgs[keys[0]]) if keys and isinstance(
+                        msgs[keys[0]], list) else 0
+                    print(
+                        f"[preprocess] inferred batch_size from dict: {batch_size}")
                     for i in range(batch_size):
                         # Reconstruct sample i as list of dicts using available fields
                         sample_messages = []
                         # Try common fields 'role' and 'content'
-                        roles = msgs.get('role', [])[i] if 'role' in msgs else None
-                        contents = msgs.get('content', [])[i] if 'content' in msgs else None
+                        roles = msgs.get('role', [])[
+                            i] if 'role' in msgs else None
+                        contents = msgs.get('content', [])[
+                            i] if 'content' in msgs else None
                         if isinstance(roles, list) and isinstance(contents, list) and len(roles) == len(contents):
                             for r, c in zip(roles, contents):
-                                sample_messages.append({"role": r, "content": c})
+                                sample_messages.append(
+                                    {"role": r, "content": c})
                         else:
                             # Fallback: try to rebuild from a generic list of dicts if present
                             # msgs may have a single key representing the full objects
                             for k in keys:
-                                candidate = msgs[k][i] if isinstance(msgs[k], list) else None
+                                candidate = msgs[k][i] if isinstance(
+                                    msgs[k], list) else None
                                 if isinstance(candidate, list) and candidate and isinstance(candidate[0], dict):
                                     sample_messages = candidate
                                     break
@@ -443,17 +505,20 @@ def main():
             # Return empty dict for batch
             print("[preprocess] empty texts batch")
             return {"input_ids": [], "attention_mask": []}
-        tokenized = tokenizer(texts, truncation=True, max_length=cfg.finetune_train_seqlen, padding=False)
+        tokenized = tokenizer(
+            texts, truncation=True, max_length=cfg.finetune_train_seqlen, padding=False)
         try:
             n_in = len(texts)
             n_out = len(tokenized.get("input_ids", []))
-            print(f"[preprocess] batch texts={n_in} -> tokenized input_ids={n_out}")
+            print(
+                f"[preprocess] batch texts={n_in} -> tokenized input_ids={n_out}")
         except Exception:
             pass
         # Return as dict of lists for batched mapping
         return tokenized
 
-    ds = make_hf_dataset_from_files(train_files, eval_files, streaming=not args.no_stream)
+    ds = make_hf_dataset_from_files(
+        train_files, eval_files, streaming=not args.no_stream)
 
     # For streaming datasets, map with batched=False
     train_ds = ds["train"]
@@ -464,9 +529,11 @@ def main():
         sample0 = train_ds[0]
         print(f"[debug] raw train sample0 keys: {list(sample0.keys())}")
         if "messages" in sample0:
-            print(f"[debug] raw train sample0 messages type: {type(sample0['messages'])}")
+            print(
+                f"[debug] raw train sample0 messages type: {type(sample0['messages'])}")
             if isinstance(sample0["messages"], list) and sample0["messages"]:
-                print(f"[debug] raw train sample0 messages[0] type: {type(sample0['messages'][0])}")
+                print(
+                    f"[debug] raw train sample0 messages[0] type: {type(sample0['messages'][0])}")
     except Exception as e:
         print(f"[debug] error inspecting raw dataset: {e}")
 
@@ -478,7 +545,8 @@ def main():
     # Load base model
     # DType selection: prefer bfloat16 on CUDA, else float32. (MPS/directml kept at float32 for stability.)
     use_cuda = (chosen_device == "cuda" and torch.cuda.is_available())
-    dtype = torch.bfloat16 if use_cuda and hasattr(torch, "bfloat16") else torch.float32
+    dtype = torch.bfloat16 if use_cuda and hasattr(
+        torch, "bfloat16") else torch.float32
     # Use explicit device for single GPU to avoid meta device issues with device_map="auto"
     device_map_param = "cuda:0" if use_cuda and torch.cuda.device_count() == 1 else "auto"
     base_model = AutoModelForCausalLM.from_pretrained(
@@ -492,10 +560,14 @@ def main():
         if hasattr(base_model.config, "use_cache"):
             base_model.config.use_cache = False
 
+    # Use target_modules from config if present, else default to Phi-3.5 list
+    default_target_modules = ["q_proj", "v_proj",
+                              "k_proj", "o_proj", "fc1", "fc2"]
+    config_target_modules = getattr(cfg, "target_modules", None)
     lora_config = LoraConfig(
         r=8,
         lora_alpha=16,
-        target_modules=["q_proj", "v_proj", "k_proj", "o_proj", "fc1", "fc2"],
+        target_modules=config_target_modules if config_target_modules else default_target_modules,
         lora_dropout=cfg.lora_dropout,
         bias="none",
         task_type="CAUSAL_LM",
@@ -508,7 +580,8 @@ def main():
             filtered = []
             for f in features:
                 if isinstance(f, dict):
-                    filtered.append({k: v for k, v in f.items() if k in ("input_ids", "attention_mask", "labels")})
+                    filtered.append({k: v for k, v in f.items() if k in (
+                        "input_ids", "attention_mask", "labels")})
                 else:
                     filtered.append(f)
             return super().torch_call(filtered)
@@ -519,24 +592,35 @@ def main():
     out_dir.mkdir(parents=True, exist_ok=True)
 
     # Determine if dataset is streaming (IterableDataset) which lacks __len__
-    def _is_iterable_dataset(ds) -> bool:
+    def is_iterable_dataset(ds) -> bool:
+        # Robustly check for streaming dataset
         try:
-            # Many IterableDataset types don't define __len__
-            return (not hasattr(ds, "__len__")) or ("iterable" in ds.__class__.__name__.lower())
-        except Exception:
-            return True
+            from datasets import IterableDataset
+            if isinstance(ds, IterableDataset):
+                return True
+        except ImportError:
+            pass  # datasets not installed, fallback to attribute check
+        # Fallback: has __iter__ but not __len__ (common for streaming datasets)
+        return hasattr(ds, "__iter__") and not hasattr(ds, "__len__")
 
-    streaming_train = _is_iterable_dataset(train_ds)
+    streaming_train = is_iterable_dataset(train_ds)
     # If streaming, Trainer requires max_steps for LR scheduler. Heuristic: derive from max-train-samples if provided.
     max_steps_override = None
     if streaming_train:
         # Steps per epoch based on desired sample count and batch size
-        target_samples = args.max_train_samples or cfg.finetune_train_batch_size
-        steps_per_epoch = max(1, math.ceil(target_samples / max(1, cfg.finetune_train_batch_size)))
+        # Use max_train_samples if provided, else finetune_train_nsamples from config, else fallback to 1000
+        target_samples = (
+            args.max_train_samples
+            or getattr(cfg, "finetune_train_nsamples", None)
+            or 1000
+        )
+        steps_per_epoch = max(1, math.ceil(
+            target_samples / max(1, cfg.finetune_train_batch_size)))
         max_steps_override = max(1, steps_per_epoch * max(1, cfg.epochs))
 
     # Precision flags: enable bf16 if supported, otherwise leave fp16 False on CPU to avoid errors
-    bf16_flag = use_cuda and getattr(torch.cuda, "is_bf16_supported", lambda: False)()
+    bf16_flag = use_cuda and getattr(
+        torch.cuda, "is_bf16_supported", lambda: False)()
     fp16_flag = use_cuda and not bf16_flag
     training_args = TrainingArguments(
         output_dir=str(out_dir),
@@ -569,24 +653,39 @@ def main():
 
     # Metrics logger
     from metrics_logger import MetricsLogger  # local import
-    out_dir = Path(cfg.save_dir).expanduser()
-    out_dir.mkdir(parents=True, exist_ok=True)
+
     logger = MetricsLogger(out_dir)
 
-    class PerplexityLoggingCallback(TrainerCallback if TrainerCallback else object):  # type: ignore
-        def on_evaluate(self, args, state, control, metrics=None, **kwargs):  # type: ignore[no-redef]
-            if metrics and "eval_loss" in metrics and metrics["eval_loss"] is not None:
-                try:
-                    ppl = math.exp(float(metrics["eval_loss"]))
-                    rec = {"step": int(getattr(state, "global_step", 0)), "eval_loss": float(metrics["eval_loss"]), "eval_perplexity": float(ppl)}
-                    logger.log(rec)
-                except Exception:
-                    pass
+    # Callback to log evaluation perplexity records
+    class PerplexityLoggingCallback(TrainerCallback if TrainerCallback else object):
+        # type: ignore[no-redef]
+        def __init__(self, logger_obj):
+            self._logger = logger_obj
 
+        def on_evaluate(self, args, state, control, metrics=None, **kwargs):
+            if not metrics:
+                return
+            try:
+                if "eval_loss" in metrics and metrics["eval_loss"] is not None:
+                    ppl = math.exp(float(metrics["eval_loss"]))
+                    rec = {
+                        "step": int(getattr(state, "global_step", 0)),
+                        "eval_loss": float(metrics["eval_loss"]),
+                        "eval_perplexity": float(ppl),
+                    }
+                    try:
+                        self._logger.log(rec)
+                    except Exception:
+                        # Don't allow logging issues to break training
+                        pass
+            except Exception:
+                # Swallow unexpected callback errors
+    is_streaming = is_iterable_dataset(train_ds)
     # Remove 'messages' column so only tokenized output is kept
     # Note: IterableDataset.map() has limited parameter support compared to Dataset.map()
-    is_streaming = hasattr(train_ds, "__class__") and "Iterable" in train_ds.__class__.__name__
-    
+    is_streaming = hasattr(
+        train_ds, "__class__") and "Iterable" in train_ds.__class__.__name__
+
     map_kwargs_train = {
         "batched": True,
         "input_columns": ["messages"],
@@ -595,25 +694,29 @@ def main():
         "batched": True,
         "input_columns": ["messages"],
     }
-    
+
     # Only add these parameters for non-streaming datasets
     if not is_streaming:
         map_kwargs_train["load_from_cache_file"] = False
         map_kwargs_train["desc"] = "Tokenizing train"
         map_kwargs_eval["load_from_cache_file"] = False
         map_kwargs_eval["desc"] = "Tokenizing eval"
-    
-    train_dataset = train_ds.map(preprocess, **map_kwargs_train) if hasattr(train_ds, "map") else train_ds
-    eval_dataset = eval_ds.map(preprocess, **map_kwargs_eval) if hasattr(eval_ds, "map") else eval_ds
+
+    train_dataset = train_ds.map(
+        preprocess, **map_kwargs_train) if hasattr(train_ds, "map") else train_ds
+    eval_dataset = eval_ds.map(
+        preprocess, **map_kwargs_eval) if hasattr(eval_ds, "map") else eval_ds
     # Remove all non-model columns to avoid DataCollator confusion
     # Note: IterableDataset doesn't support column_names or remove_columns
     keep_cols = {"input_ids", "attention_mask"}
     if hasattr(train_dataset, "column_names") and train_dataset.column_names is not None:
-        drop_train = [c for c in train_dataset.column_names if c not in keep_cols]
+        drop_train = [
+            c for c in train_dataset.column_names if c not in keep_cols]
         if drop_train:
             train_dataset = train_dataset.remove_columns(drop_train)
     if hasattr(eval_dataset, "column_names") and eval_dataset.column_names is not None:
-        drop_eval = [c for c in eval_dataset.column_names if c not in keep_cols]
+        drop_eval = [
+            c for c in eval_dataset.column_names if c not in keep_cols]
         if drop_eval:
             eval_dataset = eval_dataset.remove_columns(drop_eval)
     # Debug dataset sizes and sample
@@ -626,7 +729,8 @@ def main():
             print(f"[debug] first train sample keys: {list(first.keys())}")
             for k in ("input_ids", "attention_mask"):
                 if k in first:
-                    print(f"[debug] first train sample {k} len: {len(first[k])}")
+                    print(
+                        f"[debug] first train sample {k} len: {len(first[k])}")
     except Exception as e:
         print(f"[debug] dataset inspection error: {e}")
 
@@ -634,15 +738,16 @@ def main():
     callbacks_list = []
     if TrainerCallback is not None:
         try:
-            # Early stopping: stop if eval_loss doesn't improve for 3 eval cycles
+            # Early stopping: configured via YAML/config values
             early_stopping = EarlyStoppingCallback(
-                early_stopping_patience=3,
-                early_stopping_threshold=0.01,
+                early_stopping_patience=cfg.early_stopping_patience,
+                early_stopping_threshold=cfg.early_stopping_threshold,
             )
             callbacks_list.append(early_stopping)
-            print("[training] Early stopping enabled (patience=3, threshold=0.01)")
+            print(
+                f"[training] Early stopping enabled (patience={cfg.early_stopping_patience}, threshold={cfg.early_stopping_threshold})")
         except Exception as e:
-            print(f"[training] Could not enable early stopping: {e}")
+            print(f"[debug] Failed to configure EarlyStoppingCallback: {e}")
 
     trainer = Trainer(
         model=model,
@@ -655,14 +760,15 @@ def main():
     )
     if TrainerCallback is not None:
         # Add perplexity logging callback
-        trainer.add_callback(PerplexityLoggingCallback())
+        trainer.add_callback(PerplexityLoggingCallback(logger))
         # Add OpenTelemetry tracing callback if available and compatible
         try:
             from otel_callback import OpenTelemetryTrainerCallback  # type: ignore
             if hasattr(OpenTelemetryTrainerCallback, "on_prediction_step"):
                 trainer.add_callback(OpenTelemetryTrainerCallback())
             else:
-                print("[debug] Skipping OpenTelemetryTrainerCallback: missing on_prediction_step")
+                print(
+                    "[debug] Skipping OpenTelemetryTrainerCallback: missing on_prediction_step")
         except Exception as e:
             print(f"[debug] Skipping OpenTelemetryTrainerCallback: {e}")
 
@@ -671,7 +777,8 @@ def main():
     if "eval_loss" in pre_metrics and pre_metrics["eval_loss"] is not None:
         try:
             ppl = math.exp(float(pre_metrics["eval_loss"]))
-            rec = {"phase": "pre", "eval_loss": float(pre_metrics["eval_loss"]), "eval_perplexity": float(ppl)}
+            rec = {"phase": "pre", "eval_loss": float(
+                pre_metrics["eval_loss"]), "eval_perplexity": float(ppl)}
             print(rec)
             logger.log(rec)
         except Exception:
@@ -683,7 +790,8 @@ def main():
     if "eval_loss" in post_metrics and post_metrics["eval_loss"] is not None:
         try:
             ppl = math.exp(float(post_metrics["eval_loss"]))
-            rec = {"phase": "post", "eval_loss": float(post_metrics["eval_loss"]), "eval_perplexity": float(ppl)}
+            rec = {"phase": "post", "eval_loss": float(
+                post_metrics["eval_loss"]), "eval_perplexity": float(ppl)}
             print(rec)
             logger.log(rec)
         except Exception:

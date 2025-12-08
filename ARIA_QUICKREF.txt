@@ -1,0 +1,183 @@
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                  🤖 ARIA AUTOMATION - QUICK REFERENCE 🤖                     ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ 🚀 QUICK START                                                               │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+  Interactive Menu:
+    ./scripts/start_aria.sh
+
+  Full Stack (Production):
+    ./scripts/start_aria.sh full
+
+  Background Mode:
+    ./scripts/start_aria.sh full --background
+
+  Server Only (Dev):
+    ./scripts/start_aria.sh server
+
+  Training Once:
+    ./scripts/start_aria.sh training --once
+
+  Check Status:
+    ./scripts/start_aria.sh status
+
+  Stop All:
+    ./scripts/start_aria.sh stop
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ 📊 MONITORING                                                                │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+  Status Check:
+    python3 scripts/aria_automation.py --status
+
+  View Logs:
+    tail -f data_out/aria_automation/aria_automation.log
+
+  Service Status (systemd):
+    sudo systemctl status aria_automation
+
+  Service Logs:
+    sudo journalctl -u aria_automation -f
+
+  Check Ports:
+    lsof -i :8080  # Aria server
+    lsof -i :7071  # Functions backend
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ 🌐 ACCESS POINTS                                                             │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+  Aria Web Interface:
+    http://localhost:8080
+
+  Auto-Execute Page:
+    http://localhost:8080/auto-execute.html
+
+  Backend Health:
+    http://localhost:7071/api/ai/status
+
+  Status JSON:
+    cat data_out/aria_automation/status.json
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ 🔧 SYSTEMD SERVICE (Linux)                                                   │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+  Install:
+    sudo cp config/aria_automation.service /etc/systemd/system/
+    sudo systemctl daemon-reload
+
+  Enable & Start:
+    sudo systemctl enable aria_automation
+    sudo systemctl start aria_automation
+
+  Control:
+    sudo systemctl stop aria_automation
+    sudo systemctl restart aria_automation
+    sudo systemctl status aria_automation
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ ⏰ CRON SCHEDULING                                                           │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+  Edit Cron:
+    crontab -e
+
+  Training Every 30 Minutes:
+    */30 * * * * cd /workspaces/Aria && python3 scripts/aria_automation.py --mode training --once
+
+  Start Server on Boot:
+    @reboot cd /workspaces/Aria && python3 scripts/aria_automation.py --mode server
+
+  View Cron Jobs:
+    crontab -l
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ 🎼 MASTER ORCHESTRATOR                                                       │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+  Start Aria Workflow:
+    python3 scripts/master_orchestrator.py --workflow aria_full_stack
+
+  Check All Status:
+    python3 scripts/master_orchestrator.py --status
+
+  Run as Daemon:
+    python3 scripts/master_orchestrator.py --daemon
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ 🆘 TROUBLESHOOTING                                                           │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+  Stop All Processes:
+    python3 scripts/aria_automation.py --stop
+
+  Kill by Port:
+    sudo kill $(sudo lsof -t -i:8080)
+
+  Check Dataset:
+    python3 scripts/validate_datasets.py --category chat
+
+  Test Training:
+    python3 scripts/aria_quick_train.py
+
+  Clean PIDs:
+    rm data_out/aria_automation/processes.json
+
+  View Errors:
+    cat data_out/aria_automation/status.json | grep -A 10 errors
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ 📖 DOCUMENTATION                                                             │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+  Quick Summary:        ARIA_AUTOMATION_SUMMARY.md
+  Complete Guide:       ARIA_AUTOMATION_GUIDE.md
+  Aria Web Docs:        aria_web/README.md
+  Auto-Execute:         aria_web/AUTO-EXECUTE.md
+  Main README:          README.md
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ 🎯 AUTOMATION MODES                                                          │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+  full      → Server + Backend + Training + Monitoring (Production)
+  server    → Web Interface Only (Development)
+  training  → Background Training Only (Batch Processing)
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ ✅ HEALTH CHECKS                                                             │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+  Component Health:
+    • Aria Server: curl http://localhost:8080
+    • Backend API: curl http://localhost:7071/api/ai/status
+    • Status File: cat data_out/aria_automation/status.json | jq
+
+  Process Check:
+    ps aux | grep aria
+
+  Resource Usage:
+    htop -p $(pgrep -f aria_automation)
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ 🔐 FILES & PATHS                                                             │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+  Main Script:          scripts/aria_automation.py
+  Start Script:         scripts/start_aria.sh
+  Test Suite:           scripts/test_aria_automation.py
+  Service File:         config/aria_automation.service
+  Config:               config/master_orchestrator.yaml
+  Status JSON:          data_out/aria_automation/status.json
+  PID File:             data_out/aria_automation/processes.json
+  Logs:                 data_out/aria_automation/*.log
+
+╔══════════════════════════════════════════════════════════════════════════════╗
+║  Need Help? Check ARIA_AUTOMATION_GUIDE.md for detailed instructions        ║
+║  All tests passing ✅ • Ready for production deployment • v1.0.0            ║
+╚══════════════════════════════════════════════════════════════════════════════╝

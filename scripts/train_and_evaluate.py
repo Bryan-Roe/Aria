@@ -6,9 +6,9 @@ jobs (eval_<jobName>) defined in evaluation_autorun.yaml. Produces a consolidate
 summary ranking models by a primary metric (accuracy → bleu → rouge fallback).
 
 Usage (PowerShell):
-  python .\scripts\train_and_evaluate.py --jobs phi35_mixed_chat_lr_low,phi35_mixed_chat_lr_high --dry-run
-  python .\scripts\train_and_evaluate.py --jobs phi35_mixed_chat_lr_low
-  python .\scripts\train_and_evaluate.py --all-variants   # run all newly added variant jobs
+  python .\\scripts\\train_and_evaluate.py --jobs phi35_mixed_chat_lr_low,phi35_mixed_chat_lr_high --dry-run
+  python .\\scripts\\train_and_evaluate.py --jobs phi35_mixed_chat_lr_low
+  python .\\scripts\\train_and_evaluate.py --all-variants   # run all newly added variant jobs
 
 Flags:
     --dry-run         Validate commands only (no training/evaluation execution)
@@ -31,13 +31,14 @@ import subprocess
 import sys
 from pathlib import Path
 from typing import List, Dict, Any
+import logging
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 AUTOTRAIN = REPO_ROOT / "scripts" / "autotrain.py"
 EVAL_AUTORUN = REPO_ROOT / "scripts" / "evaluation_autorun.py"
 TRAIN_AND_EVAL_OUT = REPO_ROOT / "data_out" / "train_and_evaluate"
-AUTOTRAIN_CFG = REPO_ROOT / "autotrain.yaml"
-EVAL_CFG = REPO_ROOT / "evaluation_autorun.yaml"
+AUTOTRAIN_CFG = REPO_ROOT / "config" / "training" / "autotrain.yaml"
+EVAL_CFG = REPO_ROOT / "config" / "evaluation" / "evaluation_autorun.yaml"
 
 VARIANT_JOBS = [
     "phi35_mixed_chat_lr_low",
@@ -129,13 +130,27 @@ def rank_models(eval_results: Dict[str, Dict[str, Any]]) -> List[Dict[str, Any]]
 
 
 def main() -> None:
-    ap = argparse.ArgumentParser(description="Train and evaluate selected AutoTrain jobs")
-    ap.add_argument("--jobs", help="Comma-separated list of autotrain job names", default=None)
-    ap.add_argument("--all-variants", action="store_true", help="Run all predefined variant jobs")
-    ap.add_argument("--dry-run", action="store_true", help="Validate only (no execution)")
-    ap.add_argument("--stop-on-fail", action="store_true", help="Abort remaining jobs if a training fails")
-    ap.add_argument("--skip-existing", action="store_true", help="Skip training if output artifacts already exist")
+    ap = argparse.ArgumentParser(
+        description="Train and evaluate selected AutoTrain jobs")
+    ap.add_argument(
+        "--jobs", help="Comma-separated list of autotrain job names", default=None)
+    ap.add_argument("--all-variants", action="store_true",
+                    help="Run all predefined variant jobs")
+    ap.add_argument("--dry-run", action="store_true",
+                    help="Validate only (no execution)")
+    ap.add_argument("--stop-on-fail", action="store_true",
+                    help="Abort remaining jobs if a training fails")
+    ap.add_argument("--skip-existing", action="store_true",
+                    help="Skip training if output artifacts already exist")
     args = ap.parse_args()
+
+    # Initialize optional tracing (best-effort)
+    try:
+        from shared.tracing import init_tracing
+
+        init_tracing(service_name="train_and_evaluate")
+    except Exception as _e:  # pragma: no cover - non-fatal
+        logging.debug(f"[tracing] init skipped in train_and_evaluate: {_e}")
 
     TRAIN_AND_EVAL_OUT.mkdir(parents=True, exist_ok=True)
 
@@ -161,12 +176,12 @@ def main() -> None:
     # Helper mapping function for training job -> evaluation job name (defined early for skip-existing logic)
     def map_training_to_eval(job_name: str) -> str:
         if job_name.startswith("phi35_mixed_chat_"):
-            variant = job_name[len("phi35_mixed_chat_") :]
+            variant = job_name[len("phi35_mixed_chat_"):]
             if variant.startswith("dropout_"):
                 variant = variant.replace("dropout_", "drop_")
             return f"eval_phi35_{variant}"
         if job_name.startswith("qwen25_3b_"):
-            variant = job_name[len("qwen25_3b_") :]
+            variant = job_name[len("qwen25_3b_"):]
             return f"eval_qwen25_{variant}"
         return f"eval_{job_name}"
 
@@ -181,10 +196,13 @@ def main() -> None:
         # Skip logic: adapter exists
         if args.skip_existing and output_dir and (output_dir / "lora_adapter").exists():
             # Check for any safetensors file to confirm completeness
-            has_weights = any((output_dir / "lora_adapter").glob("*.safetensors"))
+            has_weights = any(
+                (output_dir / "lora_adapter").glob("*.safetensors"))
             if has_weights:
-                print(f"[train_and_evaluate] Skipping existing training for {job} (artifacts found at {output_dir})")
-                training_results[job] = {"status": "skipped_existing", "output_dir": str(output_dir)}
+                print(
+                    f"[train_and_evaluate] Skipping existing training for {job} (artifacts found at {output_dir})")
+                training_results[job] = {
+                    "status": "skipped_existing", "output_dir": str(output_dir)}
                 continue
         cmd = [sys.executable, str(AUTOTRAIN), "--job", job]
         if args.dry_run:
@@ -203,7 +221,8 @@ def main() -> None:
             continue
         eval_job_name = map_training_to_eval(job)
         if eval_job_name not in eval_jobs:
-            print(f"[train_and_evaluate] No matching evaluation job for {job} (expected {eval_job_name})")
+            print(
+                f"[train_and_evaluate] No matching evaluation job for {job} (expected {eval_job_name})")
             continue
         cmd = [sys.executable, str(EVAL_AUTORUN), "--job", eval_job_name]
         if args.dry_run:
@@ -225,12 +244,14 @@ def main() -> None:
         "ranking": ranking,
         "dry_run": args.dry_run,
     }
-    (TRAIN_AND_EVAL_OUT / "summary.json").write_text(json.dumps(summary, indent=2), encoding="utf-8")
+    (TRAIN_AND_EVAL_OUT /
+     "summary.json").write_text(json.dumps(summary, indent=2), encoding="utf-8")
     print(json.dumps(summary, indent=2))
 
     # Non-zero exit if any training failed (in real run)
     if not args.dry_run:
-        failed = [j for j, r in training_results.items() if r.get("status") == "failed"]
+        failed = [j for j, r in training_results.items()
+                  if r.get("status") == "failed"]
         if failed:
             print(f"[train_and_evaluate] Training failures: {failed}")
             sys.exit(1)

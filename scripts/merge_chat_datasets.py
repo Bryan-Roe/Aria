@@ -5,7 +5,7 @@ Input directories must each contain train.json and test.json in Phi-3 style
 hash of concatenated message text.
 
 Usage (PowerShell):
-  python .\scripts\merge_chat_datasets.py --out-dir datasets/chat/mixed_chat \
+  python .\\scripts\\merge_chat_datasets.py --out-dir datasets/chat/mixed_chat \
       --source datasets/chat/app_repo datasets/chat/chat_logs datasets/chat/dolly
 
 Optional:

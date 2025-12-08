@@ -1,0 +1,3 @@
+{"command": "wave at me", "expected_tags": ["[aria:gesture:wave]"]}
+{"command": "jump high", "expected_tags": ["[aria:animate:jump]"]}
+{"command": "say hello to everyone", "expected_tags": ["[aria:say:hello to everyone]", "[aria:expression:happy]"]}

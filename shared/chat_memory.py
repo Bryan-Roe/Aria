@@ -21,6 +21,8 @@ Table schema created in database/Tables/ChatMessageEmbeddings.sql
 """
 from __future__ import annotations
 
+import hashlib
+import heapq
 import os
 import math
 import struct
@@ -37,7 +39,21 @@ except Exception:  # pragma: no cover
     OpenAI = None  # type: ignore
     AzureOpenAI = None  # type: ignore
 
+try:
+    from shared.azure_utils import is_quota_error, format_quota_message
+except Exception:  # pragma: no cover - best effort import
+    # Provide simple fallbacks if helper isn't available
+    def is_quota_error(e: Exception) -> bool:  # noqa: D401
+        if e is None:
+            return False
+        txt = str(e).lower()
+        return any(k in txt for k in ("quota", "premium", "exceed", "allowance", "insufficient", "billing"))
+
+    def format_quota_message(e: Exception, service_name: str = "Azure OpenAI") -> str:  # noqa: D401
+        return f"{service_name} quota/premium limit reached. Details: {str(e)}"
+
 # ------------------------- DB Helpers -------------------------
+
 
 def _get_conn():  # noqa: ANN001
     conn_str = os.getenv("QAI_DB_CONN")
@@ -50,6 +66,7 @@ def _get_conn():  # noqa: ANN001
 
 # ------------------------- Embedding Generation -------------------------
 
+
 _LOCAL_DIM = 256  # dimension for lightweight local fallback
 
 
@@ -58,19 +75,26 @@ def _hash_embedding(text: str, dim: int = _LOCAL_DIM) -> List[float]:
 
     Not semantically rich but provides some signal for similarity
     within the same workspace when no embedding API is configured.
+
+    Optimized: Uses module-level hashlib import and single-pass norm calculation.
     """
-    import hashlib
     tokens = [t for t in text.lower().split() if t]
     vec = [0.0] * dim
     if not tokens:
         return vec
+
+    # Build vector with hash-based indices
     for tok in tokens:
         h = int(hashlib.sha256(tok.encode("utf-8")).hexdigest(), 16)
         idx = h % dim
         vec[idx] += 1.0
-    # L2 normalize
-    norm = math.sqrt(sum(v * v for v in vec)) or 1.0
-    return [v / norm for v in vec]
+
+    # L2 normalize in single pass
+    sum_sq = sum(v * v for v in vec)
+    if sum_sq > 0:
+        norm = math.sqrt(sum_sq)
+        return [v / norm for v in vec]
+    return vec
 
 
 def generate_embedding(text: str) -> List[float]:  # noqa: ANN001
@@ -88,14 +112,29 @@ def generate_embedding(text: str) -> List[float]:  # noqa: ANN001
             client = AzureOpenAI(api_key=az_key, azure_endpoint=az_ep)
             resp = client.embeddings.create(model=az_emb, input=[text])
             return resp.data[0].embedding  # type: ignore[attr-defined]
-        except Exception:
+        except Exception as e:
+            # If this looks like a quota/premium issue, log and fall back to
+            # the lightweight local hash embedding so the app remains usable.
+            if is_quota_error(e):
+                try:
+                    import logging
+
+                    logging.getLogger(__name__).warning(
+                        "Azure embedding call detected quota/premium error: %s", str(
+                            e)
+                    )
+                except Exception:
+                    pass
+                return _hash_embedding(text)
+            # Otherwise continue to try public OpenAI or local fallback
             pass
     # Public OpenAI
     oi_key = os.getenv("OPENAI_API_KEY")
     if oi_key and OpenAI is not None:
         try:
             client = OpenAI(api_key=oi_key)
-            resp = client.embeddings.create(model="text-embedding-3-small", input=[text])
+            resp = client.embeddings.create(
+                model="text-embedding-3-small", input=[text])
             return resp.data[0].embedding  # type: ignore[attr-defined]
         except Exception:
             pass
@@ -137,6 +176,7 @@ def store_embedding(message_id: Optional[str], embedding: Sequence[float], model
 
 # ------------------------- Similarity Search -------------------------
 
+
 def _deserialize_f32(blob: bytes, dim: int) -> List[float]:
     if not blob:
         return [0.0] * dim
@@ -147,7 +187,7 @@ def _deserialize_f32(blob: bytes, dim: int) -> List[float]:
         # Fallback slice-based
         out = []
         for i in range(dim):
-            chunk = blob[i * 4 : (i + 1) * 4]
+            chunk = blob[i * 4: (i + 1) * 4]
             if len(chunk) == 4:
                 out.append(struct.unpack("<f", chunk)[0])
             else:
@@ -169,6 +209,9 @@ def fetch_similar_messages(query_embedding: Sequence[float], top_k: int = 5, ses
 
     If session_id is provided, restrict search to that session's conversation(s).
     For performance we limit to the most recent 500 embeddings.
+
+    Optimization: Uses heapq.nlargest for O(n log k) top-k selection instead of
+    O(n log n) full sort when top_k is small relative to result set.
     """
     if not query_embedding:
         return []
@@ -192,21 +235,24 @@ def fetch_similar_messages(query_embedding: Sequence[float], top_k: int = 5, ses
                 "ORDER BY e.CreatedAt DESC",
             )
         rows = cursor.fetchall()
+
+        # Build scored list with only positive similarities
         scored = []
         for r in rows:
             dim = r.EmbeddingDim
             emb = _deserialize_f32(r.EmbeddingVector, dim)
             sim = _cosine(query_embedding, emb)
-            if sim <= 0:
-                continue
-            scored.append({
-                "message_id": r.MessageId,
-                "content": r.Content,
-                "similarity": sim,
-                "embedding_model": r.EmbeddingModel,
-            })
-        scored.sort(key=lambda x: x["similarity"], reverse=True)
-        return scored[:top_k]
+            if sim > 0:
+                scored.append({
+                    "message_id": r.MessageId,
+                    "content": r.Content,
+                    "similarity": sim,
+                    "embedding_model": r.EmbeddingModel,
+                })
+
+        # Use heapq.nlargest for efficient top-k selection (O(n log k) vs O(n log n))
+        # This is more efficient when top_k << len(scored)
+        return heapq.nlargest(top_k, scored, key=lambda x: x["similarity"])
     except Exception:
         return []
     finally:
@@ -214,6 +260,7 @@ def fetch_similar_messages(query_embedding: Sequence[float], top_k: int = 5, ses
             conn.close()
         except Exception:
             pass
+
 
 __all__ = [
     "generate_embedding",

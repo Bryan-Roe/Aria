@@ -27,7 +27,7 @@ import math
 import re
 import sys
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
@@ -121,7 +121,7 @@ def build_ranking(models: List[ModelMetrics]) -> Dict[str, Any]:
 
     ranked = sorted(models, key=lambda x: (x.delta is not None, x.delta if x.delta is not None else -math.inf), reverse=True)
     data = {
-        "generated_at": datetime.utcnow().isoformat() + "Z",
+        "generated_at": datetime.now(timezone.utc).isoformat() + "Z",
         "models": [
             {
                 "job": m.job,

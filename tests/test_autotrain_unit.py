@@ -1,16 +1,4 @@
 """Unit tests for AutoTrain orchestrator components."""
-import json
-import tempfile
-from pathlib import Path
-from unittest.mock import Mock, patch
-
-import pytest
-
-# Import the module under test
-import sys
-REPO_ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(REPO_ROOT / "scripts"))
-
 from autotrain import (
     Job,
     read_yaml,
@@ -18,6 +6,22 @@ from autotrain import (
     build_hf_command,
     build_local_command,
 )
+import pytest
+from unittest.mock import Mock, patch
+from pathlib import Path
+import tempfile
+import json
+import sys
+from pathlib import Path
+REPO_ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(REPO_ROOT / "scripts"))
+REPO_ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(REPO_ROOT / "scripts"))
+
+
+# Import the module under test
+REPO_ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(REPO_ROOT / "scripts"))
 
 
 class TestJobDataclass:
@@ -101,11 +105,9 @@ jobs:
     def test_load_jobs_missing_name_raises(self, tmp_path):
         cfg = tmp_path / "autotrain.yaml"
         cfg.write_text("jobs:\n  - runner: hf\n", encoding="utf-8")
-        # Empty name gets converted to string 'None' (current behavior)
-        jobs = load_jobs(cfg)
-        assert len(jobs) == 1
-        # The name will be string 'None' not falsy
-        assert jobs[0].name == "None"
+        with pytest.raises(ValueError) as excinfo:
+            load_jobs(cfg)
+        assert "name" in str(excinfo.value).lower()
 
 
 class TestHFCommandBuilder:
@@ -276,11 +278,11 @@ class TestStatusJSON:
                 "return_code": 1,
             },
         ]
-        
+
         with tempfile.TemporaryDirectory() as tmpdir:
             with patch("autotrain.DATA_OUT", Path(tmpdir)):
                 status = collect_status(results)
-        
+
         assert "generated_at" in status
         assert "jobs" in status
         assert len(status["jobs"]) == 2
@@ -304,12 +306,12 @@ jobs:
 """,
             encoding="utf-8",
         )
-        
+
         # We can't easily test main() with sys.exit, but we can test load_jobs
         jobs = load_jobs(cfg)
         job_dicts = [j.__dict__ for j in jobs]
         json_str = json.dumps(job_dicts, indent=2)
-        
+
         assert "test1" in json_str
         assert "test2" in json_str
         parsed = json.loads(json_str)

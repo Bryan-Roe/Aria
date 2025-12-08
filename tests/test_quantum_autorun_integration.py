@@ -28,13 +28,17 @@ jobs:
 
 class TestCLI:
     def test_help(self):
-        proc = subprocess.run(["python", str(Q_SCRIPT), "--help"], capture_output=True, text=True)
+        import sys
+        proc = subprocess.run([sys.executable, str(
+            Q_SCRIPT), "--help"], capture_output=True, text=True)
         assert proc.returncode == 0
         assert "Quantum AutoRun" in proc.stdout or "usage" in proc.stdout.lower()
 
     def test_list(self, sample_qconfig):
+        import sys
         proc = subprocess.run(
-            ["python", str(Q_SCRIPT), "--config", str(sample_qconfig), "--list"],
+            [sys.executable, str(Q_SCRIPT), "--config",
+             str(sample_qconfig), "--list"],
             capture_output=True,
             text=True,
             cwd=str(REPO_ROOT),
@@ -47,8 +51,10 @@ class TestCLI:
 
 class TestDryRun:
     def test_dry_run_validates(self, sample_qconfig):
+        import sys
         proc = subprocess.run(
-            ["python", str(Q_SCRIPT), "--config", str(sample_qconfig), "--dry-run"],
+            [sys.executable, str(Q_SCRIPT), "--config",
+             str(sample_qconfig), "--dry-run"],
             capture_output=True,
             text=True,
             cwd=str(REPO_ROOT),
@@ -71,9 +77,10 @@ class TestDryRun:
     preset: heart
 """
             )
+        import sys
         proc = subprocess.run(
             [
-                "python",
+                sys.executable,
                 str(Q_SCRIPT),
                 "--config",
                 str(cfg),
@@ -90,9 +97,10 @@ class TestDryRun:
         assert "heart_quick" not in proc.stdout
 
     def test_nonexistent_job_fails(self, sample_qconfig):
+        import sys
         proc = subprocess.run(
             [
-                "python",
+                sys.executable,
                 str(Q_SCRIPT),
                 "--config",
                 str(sample_qconfig),

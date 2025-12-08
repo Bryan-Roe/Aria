@@ -6,7 +6,7 @@ This tests whether hardware can reproduce the entropy and state distribution
 patterns we observed in MPS simulations at different layer depths.
 
 Usage:
-  python .\quantum-ai\scripts\submit_variational_hardware.py --backend rigetti.sim.qvm --n-qubits 4 --layers 2
+  python .\\quantum-ai\\scripts\\submit_variational_hardware.py --backend rigetti.sim.qvm --n-qubits 4 --layers 2
 """
 from __future__ import annotations
 
@@ -122,7 +122,7 @@ def main() -> int:
             return 1
 
     print(f"\nSubmitting to {args.backend}...")
-    job_name = f"variational_{args.n_qubits}q_L{args.layers}_{args.entanglement}_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}"
+    job_name = f"variational_{args.n_qubits}q_L{args.layers}_{args.entanglement}_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')}"
     
     try:
         job = azure.submit_circuit(qc, backend_name=args.backend, shots=args.shots, job_name=job_name)
@@ -143,7 +143,7 @@ def main() -> int:
     print(f"  Entropy: {entropy:.3f} / {max_entropy:.3f} ({(entropy/max_entropy*100 if max_entropy>0 else 0):.1f}%)")
 
     # Save in same format as local simulations
-    ts = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
+    ts = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
     out = {
         "job_id": result_data.get("job_id"),
         "counts": {str(k): int(v) for k, v in counts.items()},
