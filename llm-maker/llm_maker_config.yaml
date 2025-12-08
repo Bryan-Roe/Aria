@@ -2,7 +2,7 @@
 
 tool_maker:
   # AI provider for tool generation (azure, openai, local)
-  provider: azure
+  provider: local  # Changed to local for demo/testing
   
   # Maximum number of tools to store
   max_tools: 1000
