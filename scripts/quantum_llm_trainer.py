@@ -347,7 +347,7 @@ class QuantumEnhancedLLMTrainer:
         
         for batch_idx in range(num_batches):
             # Simulate forward pass
-            batch_loss = np.random.uniform(2.0, 0.5)  # Mock decreasing loss
+            batch_loss = np.random.uniform(0.5, 2.0)  # Mock decreasing loss (low, high)
             
             # Apply quantum optimization every N steps
             if batch_idx % 10 == 0:
@@ -407,7 +407,8 @@ class QuantumEnhancedLLMTrainer:
                     
                     if dataset_files:
                         # Train on a random dataset
-                        dataset_path = np.random.choice(dataset_files)
+                        import random
+                        dataset_path = random.choice(dataset_files)
                         logger.info(f"Selected dataset: {dataset_path}")
                         
                         output_dir = Path("data_out/quantum_llm_training") / f"cycle_{cycle_count}"
