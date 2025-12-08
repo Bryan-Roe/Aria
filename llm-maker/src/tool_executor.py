@@ -98,7 +98,7 @@ class ToolExecutor:
         def timeout_handler(signum, frame):
             raise ExecutionTimeout(f"Execution exceeded {seconds} seconds")
         
-        # Only use signal on Unix-like systems
+        # Use signal on Unix-like systems
         if hasattr(signal, 'SIGALRM'):
             old_handler = signal.signal(signal.SIGALRM, timeout_handler)
             signal.alarm(seconds)
@@ -108,9 +108,23 @@ class ToolExecutor:
                 signal.alarm(0)
                 signal.signal(signal.SIGALRM, old_handler)
         else:
-            # On Windows, just yield without timeout
-            # (timeout would need threading which we want to avoid)
-            yield
+            # On Windows, use threading-based timeout
+            import threading
+            timer = None
+            timed_out = [False]
+            
+            def timeout_callback():
+                timed_out[0] = True
+            
+            try:
+                timer = threading.Timer(seconds, timeout_callback)
+                timer.start()
+                yield
+                if timed_out[0]:
+                    raise ExecutionTimeout(f"Execution exceeded {seconds} seconds")
+            finally:
+                if timer:
+                    timer.cancel()
     
     def execute(
         self, 

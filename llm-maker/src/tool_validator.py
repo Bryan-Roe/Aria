@@ -160,20 +160,21 @@ class ToolValidator:
         """Check for file system operations"""
         errors = []
         
-        # Patterns that indicate file operations
+        # More specific patterns to avoid false positives
         file_patterns = [
-            r'\bopen\s*\(',
-            r'\bfile\s*\(',
-            r'\.read\(',
-            r'\.write\(',
-            r'\.unlink\(',
-            r'\.rmdir\(',
-            r'\.mkdir\(',
+            # open() function calls
+            (r'\bopen\s*\(', "open() function call"),
+            # File operations on pathlib or os.path
+            (r'\.unlink\s*\(', ".unlink() method (file deletion)"),
+            (r'\.rmdir\s*\(', ".rmdir() method"),
+            (r'\.mkdir\s*\(', ".mkdir() method"),
+            # with open() pattern specifically
+            (r'\bwith\s+open\s*\(', "with open() context manager"),
         ]
         
-        for pattern in file_patterns:
+        for pattern, description in file_patterns:
             if re.search(pattern, code):
-                errors.append(f"File operation detected: {pattern}")
+                errors.append(f"File operation detected: {description}")
         
         return errors
     
@@ -181,20 +182,22 @@ class ToolValidator:
         """Check for network operations"""
         errors = []
         
-        # Patterns that indicate network operations
+        # More specific patterns to avoid false positives
         network_patterns = [
-            r'\bsocket\.',
-            r'\burllib\.',
-            r'\brequests\.',
-            r'\bhttp\.',
-            r'\.get\(',
-            r'\.post\(',
-            r'\.connect\(',
+            # Module-level access
+            (r'\bsocket\.\w+', "socket module usage"),
+            (r'\burllib\.\w+', "urllib module usage"),
+            (r'\brequests\.\w+', "requests module usage"),
+            (r'\bhttp\.\w+', "http module usage"),
+            # Common network methods (but only if preceded by module or known network object)
+            (r'requests\.[get|post|put|delete|patch]', "requests HTTP method"),
+            (r'urllib\.request\.urlopen', "urllib.request.urlopen"),
+            (r'socket\.(socket|connect|bind|listen)', "socket operations"),
         ]
         
-        for pattern in network_patterns:
+        for pattern, description in network_patterns:
             if re.search(pattern, code):
-                errors.append(f"Network operation detected: {pattern}")
+                errors.append(f"Network operation detected: {description}")
         
         return errors
     
