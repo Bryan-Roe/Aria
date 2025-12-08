@@ -1,0 +1,22 @@
+# LLM Maker Dependencies
+
+# AI Provider Integration (reuse existing)
+# Already installed in parent: openai, azure-openai
+
+# Code Safety and Analysis
+ast-grep>=0.5.0
+astroid>=3.0.0
+
+# Sandboxed Execution
+RestrictedPython>=6.0
+
+# MCP Server (Model Context Protocol)
+mcp>=0.9.0
+
+# Utilities
+pyyaml>=6.0
+pydantic>=2.0.0
+
+# Testing
+pytest>=7.4.0
+pytest-asyncio>=0.21.0
