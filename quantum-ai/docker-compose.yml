@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  quantum-ai-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: quantum-ai-api
+    ports:
+      - "${PORT:-5050}:5050"
+    environment:
+      - HOST=0.0.0.0
+      - PORT=5050
+      - WORKERS=${WORKERS:-2}
+    volumes:
+      - ./results:/app/results:ro
+      - ./logs:/app/logs
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5050/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    networks:
+      - quantum-net
+
+networks:
+  quantum-net:
+    driver: bridge

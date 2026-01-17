@@ -1,0 +1,69 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+venv_azure/
+ENV/
+env/
+*.egg-info/
+dist/
+build/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Logs
+logs/
+*.log
+nohup.out
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Documentation
+*.md
+!README.md
+docs/
+
+# Notebooks
+notebooks/
+*.ipynb
+.ipynb_checkpoints/
+
+# Config
+*.yaml
+*.yml
+!docker-compose.yml
+.env
+local.settings.json
+
+# Data (exclude large datasets, keep models)
+datasets/
+data_out/
+checkpoints/
+
+# Deployment
+.api.pid
+*.service
+
+# Azure
+azure/
+.azure/
+
+# Misc
+.DS_Store
+Thumbs.db
