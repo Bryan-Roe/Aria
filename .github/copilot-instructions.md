@@ -73,14 +73,14 @@ nohup python scripts/autonomous_training_orchestrator.py > data_out/autonomous_t
 pkill -USR1 -f autonomous_training
 
 # Full repo automation (Aria + training + quantum + monitoring)
-python scripts/repo_automation.py --start
-python scripts/repo_automation.py --status
+python scripts/automation/repo_automation.py --start
+python scripts/automation/repo_automation.py --status
 ./scripts/start_repo_automation.sh full          # Bash wrapper with menu
 ./scripts/start_repo_automation.sh stop          # Stop all components
 
 # Aria character automation (server + continuous training)
-python scripts/aria_automation.py --mode full
-python scripts/aria_automation.py --status
+python scripts/automation/aria_automation.py --mode full
+python scripts/automation/aria_automation.py --status
 
 # === ARIA CHARACTER WEB UI ===
 cd aria_web && python server.py                  # Start Aria web interface (port 8080)
@@ -122,6 +122,69 @@ tail -f data_out/autonomous_training.log      # Live autonomous training logs
 watch -n 5 'cat data_out/autonomous_training_status.json | python -m json.tool' # Live status
 ```
 
+## Development Environment Setup
+
+**Dev Container (Recommended):**
+- Based on `mcr.microsoft.com/devcontainers/python:2-3.14-trixie`
+- Pre-configured with Python 3.14 and Windows AI Studio extension
+- Opens automatically in VS Code with Docker installed
+
+**Quick setup:**
+```bash
+# 1. Clone and open in VS Code (dev container auto-starts)
+# 2. Install core dependencies
+pip install -r requirements.txt
+pip install -r dev-requirements.txt
+
+# 3. Setup project-specific venvs (isolated environments)
+cd quantum-ai && python -m venv venv && source venv/bin/activate && pip install -r requirements.txt && deactivate
+cd talk-to-ai && python -m venv venv && source venv/bin/activate && pip install -r requirements.txt && deactivate
+cd AI/microsoft_phi-silica-3.6_v1 && python -m venv venv && source venv/bin/activate && pip install -r requirements.txt && deactivate
+
+# 4. Configure environment (copy and edit)
+cp local.settings.json.example local.settings.json
+# Edit local.settings.json with your API keys (Azure OpenAI, Speech, etc.)
+
+# 5. Validate setup
+python scripts/fast_validate.py  # Quick validation (instant)
+python scripts/test_runner.py --unit  # Run unit tests (~30s)
+```
+
+**Environment variables** (in `local.settings.json` for dev):
+- `AZURE_OPENAI_API_KEY`, `AZURE_OPENAI_ENDPOINT`, `AZURE_OPENAI_DEPLOYMENT` — Azure OpenAI provider
+- `OPENAI_API_KEY` — OpenAI provider fallback
+- `LMSTUDIO_BASE_URL` — LMStudio local provider
+- `QAI_ENABLE_LOCAL_TTS=true` — Enable local TTS fallback (no Azure Speech needed)
+- `QAI_DB_CONN` — Optional SQL persistence (SQLite/PostgreSQL/Azure SQL)
+- `QAI_ENABLE_COSMOS=true` — Enable Cosmos DB integration
+
+## GPU Training Support
+
+**GPU detection and configuration:**
+- Training scripts auto-detect CUDA availability via PyTorch
+- Force GPU: Set `device: cuda` in YAML configs
+- Check availability: `python -c "import torch; print(torch.cuda.is_available())"`
+- Monitor usage: `watch -n 1 nvidia-smi`
+
+**Progressive training workflow** (see [GPU_TRAINING_SUMMARY.md](GPU_TRAINING_SUMMARY.md)):
+```bash
+# Phase 1: Quick test (5-15 min, 1 job)
+python scripts/training/progressive_training.py --phase quick
+
+# Phase 2: Standard (30-60 min, 2 baseline models)
+python scripts/training/progressive_training.py --phase standard
+
+# Phase 3: Full (2-8 hours, all 12 jobs)
+python scripts/training/progressive_training.py --phase full
+
+# All phases with auto-deployment
+python scripts/training/progressive_training.py --all --auto-promote
+```
+
+**GPU training configs:**
+- `config/training/autotrain.yaml` — All 12 jobs configured for `device: cuda`
+- `config/autonomous_training.yaml` — `device: cuda`, `max_cpu_cores: 0`, `max_gpu_memory_gb: 0` (use all)
+
 ## Critical Patterns
 
 **Autonomous/self-managing systems:**
@@ -132,9 +195,9 @@ watch -n 5 'cat data_out/autonomous_training_status.json | python -m json.tool' 
   - State: `data_out/autonomous_training_status.json` (cycles_completed, best_accuracy, dataset_inventory)
   - Config: `config/autonomous_training.yaml` (cycle_interval_minutes, epochs_progression, min_datasets)
   - Trigger: Time-based (30min) OR signal-based (`pkill -USR1 -f autonomous_training`)
-- `scripts/repo_automation.py` — Full repo automation (all components: Aria + training + quantum + datasets)
-- `scripts/aria_automation.py` — Aria-specific automation (server on port 8080 + continuous training)
-- `scripts/master_orchestrator.py` — Coordinates all sub-orchestrators with schedules/dependencies
+- `scripts/automation/repo_automation.py` — Full repo automation (all components: Aria + training + quantum + datasets)
+- `scripts/automation/aria_automation.py` — Aria-specific automation (server on port 8080 + continuous training)
+- `scripts/automation/master_orchestrator.py` — Coordinates all sub-orchestrators with schedules/dependencies
   - Config: `config/master_orchestrator.yaml` (cron schedules, priorities, retry logic, timeouts)
 
 **Data conventions:**
@@ -207,9 +270,9 @@ async def run_single_cycle(cycle_number):
 | Chat provider logic | `talk-to-ai/src/chat_providers.py` (re-exported by `shared/chat_providers.py`) |
 | Training orchestration | `scripts/autotrain.py` + `config/training/autotrain.yaml` |
 | Autonomous training behavior | `scripts/autonomous_training_orchestrator.py` + `config/autonomous_training.yaml` |
-| Master orchestrator (schedules/coordination) | `scripts/master_orchestrator.py` + `config/master_orchestrator.yaml` |
-| Aria automation | `scripts/aria_automation.py` (server + training + health monitoring) |
-| Full repo automation | `scripts/repo_automation.py` (all components + backups + notifications) |
+| Master orchestrator (schedules/coordination) | `scripts/automation/master_orchestrator.py` + `config/master_orchestrator.yaml` |
+| Aria automation | `scripts/automation/aria_automation.py` (server + training + health monitoring) |
+| Full repo automation | `scripts/automation/repo_automation.py` (all components + backups + notifications) |
 | Quantum jobs | `scripts/quantum_autorun.py` + `quantum_autorun.yaml` (root) or `config/quantum/quantum_autorun.yaml` |
 | MCP server tools | `quantum-ai/quantum_mcp_server.py` |
 | Shared DB/telemetry | `shared/sql_engine.py`, `shared/telemetry.py`, `shared/cosmos_client.py` |
@@ -248,6 +311,91 @@ async def run_single_cycle(cycle_number):
 **Telemetry** (optional):
 - Application Insights via `APPLICATIONINSIGHTS_CONNECTION_STRING`
 - Non-blocking, gracefully degrades if unavailable
+
+## Deployment Patterns
+
+**Azure Functions (function_app.py):**
+- Local dev: `func host start` (runs on port 7071)
+- Deploy: `func azure functionapp publish <app-name>`
+- Verify: `curl http://localhost:7071/api/ai/status | jq`
+
+**Aria Web Server (aria_web/server.py):**
+- Local: `cd aria_web && python server.py` (port 8080)
+- Production: Deploy behind nginx/Apache with WSGI (gunicorn/uvicorn)
+- Systemd service: Use `config/aria_automation.service` template
+
+**Static Web Apps:**
+- `chat-web/` — Pure HTML/JS, deploy to Azure Static Web Apps or any CDN
+- No build step required, serves static assets
+
+**Container deployment:**
+- Dev container config at `.devcontainer/devcontainer.json`
+- For production containers, consider multi-stage Docker builds with separate venvs
+
+## Common Workflows & Troubleshooting
+
+**Rapid validation workflow:**
+```bash
+# Step 1: Fast validation (instant, no imports)
+python scripts/fast_validate.py
+
+# Step 2: Unit tests (30-60s)
+python scripts/test_runner.py --unit
+
+# Step 3: Integration tests (if needed, 2-5 min)
+python scripts/test_runner.py --integration
+
+# Step 4: Check system health
+curl http://localhost:7071/api/ai/status | jq
+```
+
+**Provider troubleshooting:**
+```bash
+# Check provider detection
+curl http://localhost:7071/api/ai/status | jq '.provider'
+
+# Test chat CLI with explicit provider
+python talk-to-ai/src/chat_cli.py --provider local --once "test"
+python talk-to-ai/src/chat_cli.py --provider azure --once "test"  # Needs Azure creds
+
+# Debug LoRA adapter loading
+python talk-to-ai/src/chat_cli.py --provider lora --adapter-path deployed_models/best_model --once "test"
+```
+
+**Training troubleshooting:**
+```bash
+# Validate config without execution
+python scripts/autotrain.py --dry-run
+
+# Check for GPU availability
+python -c "import torch; print(f'CUDA available: {torch.cuda.is_available()}')"
+
+# Monitor active training
+tail -f data_out/autotrain/job_*.log
+watch -n 5 'cat data_out/autonomous_training_status.json | python -m json.tool'
+
+# Check disk space (training writes large checkpoints)
+df -h | grep -E '(Filesystem|/workspaces)'
+```
+
+**Database connection issues:**
+```bash
+# Check SQL pool status
+curl http://localhost:7071/api/ai/status | jq '.database'
+
+# Verify connection string format
+python -c "import os; print(os.environ.get('QAI_DB_CONN', 'Not set'))"
+
+# Test Cosmos DB (if enabled)
+curl http://localhost:7071/api/ai/status | jq '.cosmos'
+```
+
+**Common error patterns:**
+- `ModuleNotFoundError` → Ensure correct venv activated or `sys.path` adjusted in `function_app.py`
+- `CUDA out of memory` → Reduce batch size in YAML configs or use `device: cpu`
+- `Provider detection failed` → Check `/api/ai/status` and verify env vars in `local.settings.json`
+- `Dataset not found` → Verify `datasets/` subdirectories exist (`chat/`, `quantum/`, `vision/`)
+- `LoRA adapter invalid` → Must have both `adapter_config.json` + `adapter_model.safetensors`
 
 ## Modular Instructions
 

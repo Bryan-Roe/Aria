@@ -620,6 +620,99 @@
 				"reveal": "always",
 				"panel": "dedicated"
 			}
+		},
+		{
+			"label": "GGUF: Quick Training",
+			"type": "shell",
+			"command": "python",
+			"args": [
+				"scripts/gguf_training_automation.py",
+				"--quick"
+			],
+			"isBackground": false,
+			"options": {
+				"cwd": "${workspaceFolder}"
+			},
+			"problemMatcher": [],
+			"presentation": {
+				"reveal": "always",
+				"panel": "dedicated"
+			}
+		},
+		{
+			"label": "GGUF: Full Pipeline",
+			"type": "shell",
+			"command": "python",
+			"args": [
+				"scripts/gguf_training_automation.py",
+				"--full"
+			],
+			"isBackground": false,
+			"options": {
+				"cwd": "${workspaceFolder}"
+			},
+			"problemMatcher": [],
+			"presentation": {
+				"reveal": "always",
+				"panel": "dedicated"
+			}
+		},
+		{
+			"label": "GGUF: Dry-Run",
+			"type": "shell",
+			"command": "python",
+			"args": [
+				"scripts/gguf_training_automation.py",
+				"--quick",
+				"--dry-run"
+			],
+			"isBackground": false,
+			"options": {
+				"cwd": "${workspaceFolder}"
+			},
+			"problemMatcher": [],
+			"presentation": {
+				"reveal": "always",
+				"panel": "dedicated"
+			}
+		},
+		{
+			"label": "GGUF: Convert Existing Model",
+			"type": "shell",
+			"command": "python",
+			"args": [
+				"scripts/gguf_training_automation.py",
+				"--convert-only",
+				"${input:loraModelPath}"
+			],
+			"isBackground": false,
+			"options": {
+				"cwd": "${workspaceFolder}"
+			},
+			"problemMatcher": [],
+			"presentation": {
+				"reveal": "always",
+				"panel": "dedicated"
+			}
+		},
+		{
+			"label": "GGUF: Validate Model",
+			"type": "shell",
+			"command": "python",
+			"args": [
+				"scripts/gguf_training_automation.py",
+				"--validate",
+				"${input:ggufFile}"
+			],
+			"isBackground": false,
+			"options": {
+				"cwd": "${workspaceFolder}"
+			},
+			"problemMatcher": [],
+			"presentation": {
+				"reveal": "always",
+				"panel": "dedicated"
+			}
 		}
 	],
 	"inputs": [
@@ -628,6 +721,12 @@
 			"type": "promptString",
 			"description": "Path to GGUF file",
 			"default": "data_out/quantum_banknote_perfect_model.gguf"
+		},
+		{
+			"id": "loraModelPath",
+			"type": "promptString",
+			"description": "Path to LoRA model directory",
+			"default": "data_out/lora_training/phi35/checkpoint-100"
 		}
 	]
 }

@@ -82,6 +82,16 @@ class OpenTelemetryTrainerCallback(TrainerCallback):
         except Exception:
             pass
 
+    def on_epoch_begin(self, args: Any, state: Any, control: Any, **kwargs: Any) -> None:  # type: ignore
+        """Called at the beginning of each epoch."""
+        try:
+            if not self._tracer:
+                return
+            # No-op span for epoch tracking
+            pass
+        except Exception:
+            pass
+
     def on_prediction_step(self, args: Any, state: Any, control: Any, **kwargs: Any) -> None:  # type: ignore
         # Called for prediction-related steps (if supported). We create a
         # short-lived span around prediction work so that prediction latencies

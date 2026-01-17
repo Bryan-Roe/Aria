@@ -1,0 +1,92 @@
+version: 1
+description: GGUF Training Configuration
+
+# Global settings
+global:
+  quantization_default: q4_0
+  validate_default: true
+  deploy_default: false
+  export_type: safetensors  # safetensors or pickle
+
+# GGUF training jobs
+jobs:
+  # Quick training job (for testing)
+  - name: phi35_quick_gguf
+    base_model: microsoft/Phi-3.5-mini-instruct
+    quantization_type: q4_0
+    validate: true
+    deploy: false
+    export_type: safetensors
+
+  # Qwen 2.5 model
+  - name: qwen25_quick_gguf
+    base_model: Qwen/Qwen2.5-3B-Instruct
+    quantization_type: q4_0
+    validate: true
+    deploy: false
+    export_type: safetensors
+
+  # High-quality production models
+  - name: phi35_prod_gguf
+    base_model: microsoft/Phi-3.5-mini-instruct
+    quantization_type: q5_0
+    validate: true
+    deploy: true
+    export_type: safetensors
+
+  - name: phi35_hq_gguf
+    base_model: microsoft/Phi-3.5-mini-instruct
+    quantization_type: f16
+    validate: true
+    deploy: true
+    export_type: safetensors
+
+  # Quantum model exports
+  - name: quantum_banknote_gguf
+    base_model: microsoft/Phi-3.5-mini-instruct
+    quantization_type: q4_0
+    validate: true
+    deploy: false
+    export_type: safetensors
+
+# Quantization presets
+quantization_presets:
+  q4_0:
+    description: "Highest compression (q4)"
+    reduction: 0.4
+    inference_speed: "⚡⚡⚡"
+    quality: "★★☆☆☆"
+    
+  q5_0:
+    description: "Good balance (q5)"
+    reduction: 0.6
+    inference_speed: "⚡⚡"
+    quality: "★★★☆☆"
+    
+  f16:
+    description: "High quality (fp16)"
+    reduction: 0.8
+    inference_speed: "⚡"
+    quality: "★★★★☆"
+    
+  f32:
+    description: "Full precision (fp32)"
+    reduction: 1.0
+    inference_speed: "🐌"
+    quality: "★★★★★"
+
+# Deployment options
+deployment:
+  target_dir: deployed_models
+  naming_pattern: "{name}-latest.gguf"
+  backup_previous: true
+  create_symlink: true
+  metadata_file: true
+
+# Validation checks
+validation:
+  check_magic_number: true
+  check_version: true
+  check_tensor_count: true
+  check_file_integrity: true
+  benchmark_inference: false  # Requires llama.cpp
