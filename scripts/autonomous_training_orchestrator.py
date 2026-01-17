@@ -383,6 +383,68 @@ class AutonomousTrainingOrchestrator:
         
         logger.info("  Deployment cycle completed")
     
+    async def run_quantum_llm_training(self, cycle_number: int):
+        """Execute quantum-enhanced LLM training cycle"""
+        if not self.config.get("quantum_llm", {}).get("enabled", False):
+            return
+        
+        logger.info("⚛️ Starting quantum-enhanced LLM training...")
+        self.status["current_phase"] = "quantum_llm_training"
+        self.save_status()
+        
+        quantum_script = Path("scripts/quantum_llm_trainer.py")
+        if not quantum_script.exists():
+            logger.warning("Quantum LLM trainer script not found, skipping")
+            return
+        
+        try:
+            # Check if it's time for quantum LLM training
+            interval_minutes = self.config.get("quantum_llm", {}).get("training_interval_minutes", 60)
+            last_quantum_cycle = self.status.get("last_quantum_llm_cycle", 0)
+            
+            # Run quantum training every N cycles based on interval
+            cycles_per_quantum = max(1, interval_minutes // self.config["autonomous_mode"]["cycle_interval_minutes"])
+            
+            if (cycle_number - last_quantum_cycle) >= cycles_per_quantum:
+                config_file = self.config.get("quantum_llm", {}).get("config_file", "config/quantum_llm_config.yaml")
+                
+                cmd = [
+                    sys.executable,
+                    str(quantum_script),
+                    "--config", config_file,
+                    "--interval", "0"  # Single run, orchestrator handles timing
+                ]
+                
+                logger.info(f"  Executing: {' '.join(cmd)}")
+                
+                process = await asyncio.create_subprocess_exec(
+                    *cmd,
+                    stdout=asyncio.subprocess.PIPE,
+                    stderr=asyncio.subprocess.PIPE
+                )
+                
+                # Set timeout for quantum training (10 minutes max)
+                try:
+                    stdout, stderr = await asyncio.wait_for(
+                        process.communicate(),
+                        timeout=600
+                    )
+                    
+                    if process.returncode == 0:
+                        logger.info("✅ Quantum LLM training completed successfully")
+                        self.status["last_quantum_llm_cycle"] = cycle_number
+                        self.status["quantum_llm_last_run"] = datetime.now().isoformat()
+                    else:
+                        logger.warning(f"⚠️ Quantum LLM training failed: {stderr.decode()}")
+                
+                except asyncio.TimeoutError:
+                    logger.warning("⚠️ Quantum LLM training timed out, killing process")
+                    process.kill()
+                    await process.wait()
+        
+        except Exception as e:
+            logger.error(f"❌ Error in quantum LLM training: {e}")
+    
     async def run_single_cycle(self, cycle_number: int):
         """Execute one complete autonomous cycle"""
         logger.info(f"\n{'='*80}")
@@ -410,11 +472,14 @@ class AutonomousTrainingOrchestrator:
         # 5. Analyze performance
         await self.analyze_performance(results)
         
-        # 6. Run optimization
+        # 6. Run quantum-enhanced LLM training (NEW)
+        await self.run_quantum_llm_training(cycle_number)
+        
+        # 7. Run optimization
         if self.config["optimization"]["auto_tune"]:
             await self.optimization_cycle()
         
-        # 7. Deploy if ready
+        # 8. Deploy if ready
         if self.config["deployment"]["auto_deploy_best"]:
             await self.deployment_cycle()
         

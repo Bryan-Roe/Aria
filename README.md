@@ -19,6 +19,7 @@ Aria is an interactive AI character that combines:
 - **Multi-Provider AI Backend** - Powered by Azure OpenAI, OpenAI, or local models with LoRA fine-tuning
 - **Real-time Object Interaction** - Add, pickup, drop, and throw objects on a virtual stage
 - **Quantum ML Integration** - Experimental quantum-classical hybrid training
+- **⚛️ Quantum-Enhanced Passive LLM Training** - Background training with quantum computing optimization
 - **🆕 LLM Tool Maker** - Autonomous tool creation system where LLMs create, validate, and execute Python tools
 
 ## 🚀 Quick Start
@@ -221,6 +222,7 @@ Hybrid quantum-classical ML for advanced Aria capabilities.
 - ⚛️ Quantum circuit creation and simulation
 - ☁️ Azure Quantum integration (IonQ, Quantinuum)
 - 🤖 MCP server with 8 quantum tools
+- **⚡ NEW: Quantum-Enhanced Passive LLM Training**
 
 **Quick Start:**
 
@@ -230,7 +232,22 @@ cd quantum-ai
 # Open http://localhost:5000
 ```
 
-**Documentation:** [quantum-ai/README.md](quantum-ai/README.md)
+**Quantum LLM Training:**
+
+```bash
+# Active training
+python scripts/quantum_llm_trainer.py --dataset datasets/chat/aria_chat --quantum-backend local
+
+# Passive mode (continuous background training)
+python scripts/quantum_llm_trainer.py --passive --interval 3600
+
+# Integrated with autonomous orchestrator
+python scripts/autonomous_training_orchestrator.py
+```
+
+**Documentation:** 
+- [quantum-ai/README.md](quantum-ai/README.md)
+- **[QUANTUM_LLM_TRAINING.md](QUANTUM_LLM_TRAINING.md)** ⚡ NEW
 
 ---
 

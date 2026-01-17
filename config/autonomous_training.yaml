@@ -49,6 +49,18 @@ deployment:
   min_accuracy_for_deployment: 0.90
   azure_quantum_enabled: false  # Deploy to Azure Quantum
 
+# Quantum-Enhanced LLM Training
+quantum_llm:
+  enabled: true  # Enable quantum-enhanced LLM training
+  passive_mode: true  # Run in background with autonomous orchestrator
+  backend: "local"  # Options: "local" (simulator), "azure" (Azure Quantum)
+  n_qubits: 4  # Number of qubits
+  n_quantum_layers: 2  # Depth of quantum circuits
+  training_interval_minutes: 60  # Run quantum LLM training every hour
+  optimize_attention: true  # Apply quantum optimization to attention
+  quantum_feature_encoding: true  # Use quantum feature encoding
+  config_file: "config/quantum_llm_config.yaml"  # Detailed configuration
+
 # Advanced Settings
 learning_strategy:
   curriculum_learning: false  # Start with easier datasets
