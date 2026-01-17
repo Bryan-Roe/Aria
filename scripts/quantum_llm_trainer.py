@@ -45,7 +45,7 @@ if str(quantum_ai_path) not in sys.path:
 
 try:
     from src.quantum_classifier import QuantumClassifier
-    from src.hybrid_qnn import QuantumLayer, HybridQNN
+    from src.hybrid_qnn import QuantumLayer
     QUANTUM_AVAILABLE = True
 except ImportError as e:
     logging.warning(f"Quantum modules not available: {e}")
