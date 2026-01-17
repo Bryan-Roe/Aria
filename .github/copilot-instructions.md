@@ -2,7 +2,7 @@
 
 # Aria — Copilot Quick Guide
 
-*Last updated: November 29, 2025*
+*Last updated: January 17, 2026*
 
 Short & actionable summary for AI agents editing Aria — an interactive AI character platform with autonomous learning, quantum ML integration, and multi-provider chat backends.
 
@@ -155,7 +155,7 @@ watch -n 5 'cat data_out/autonomous_training_status.json | python -m json.tool' 
 `YAML base` < `CLI flags` < `per-job YAML` < `env vars`
 
 **YAML orchestrators:**
-- All in `scripts/` with matching root YAMLs (e.g., `autotrain.yaml`, `quantum_autorun.yaml`)
+- Scripts in `scripts/`, configs in both root and `config/` subdirectories (e.g., `config/training/autotrain.yaml`, `quantum_autorun.yaml`)
 - Write `data_out/<name>/status.json` with machine-readable job status
 - Support `--dry-run` to validate before execution
 
@@ -205,12 +205,12 @@ async def run_single_cycle(cycle_number):
 |--------|---------|
 | Add/modify API endpoint | `function_app.py` |
 | Chat provider logic | `talk-to-ai/src/chat_providers.py` (re-exported by `shared/chat_providers.py`) |
-| Training orchestration | `scripts/autotrain.py` + root `autotrain.yaml` |
+| Training orchestration | `scripts/autotrain.py` + `config/training/autotrain.yaml` |
 | Autonomous training behavior | `scripts/autonomous_training_orchestrator.py` + `config/autonomous_training.yaml` |
 | Master orchestrator (schedules/coordination) | `scripts/master_orchestrator.py` + `config/master_orchestrator.yaml` |
 | Aria automation | `scripts/aria_automation.py` (server + training + health monitoring) |
 | Full repo automation | `scripts/repo_automation.py` (all components + backups + notifications) |
-| Quantum jobs | `scripts/quantum_autorun.py` + root `quantum_autorun.yaml` |
+| Quantum jobs | `scripts/quantum_autorun.py` + `quantum_autorun.yaml` (root) or `config/quantum/quantum_autorun.yaml` |
 | MCP server tools | `quantum-ai/quantum_mcp_server.py` |
 | Shared DB/telemetry | `shared/sql_engine.py`, `shared/telemetry.py`, `shared/cosmos_client.py` |
 | Aria character interface | `aria_web/index.html`, `aria_web/aria_controller.js`, `aria_web/server.py` |
