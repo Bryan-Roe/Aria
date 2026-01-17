@@ -1,10 +1,14 @@
-.PHONY: help run stop logs status restart healthcheck clean install
+.PHONY: help run stop logs status restart healthcheck clean install docker-build docker-run docker-stop docker-logs docker-shell
 
 PORT ?= 5050
 WORKERS ?= 2
+IMAGE_NAME ?= quantum-ai-api
+CONTAINER_NAME ?= quantum-ai-api
 
 help:
 	@echo "Quantum AI API - Makefile targets:"
+	@echo ""
+	@echo "Local (Gunicorn):"
 	@echo "  make run         - Start API with Gunicorn on port $(PORT)"
 	@echo "  make stop        - Stop running API"
 	@echo "  make logs        - Tail API logs"
@@ -13,6 +17,13 @@ help:
 	@echo "  make healthcheck - Run health check"
 	@echo "  make clean       - Remove PID and log files"
 	@echo "  make install     - Install dependencies"
+	@echo ""
+	@echo "Docker:"
+	@echo "  make docker-build - Build Docker image"
+	@echo "  make docker-run   - Run API in Docker"
+	@echo "  make docker-stop  - Stop Docker container"
+	@echo "  make docker-logs  - Tail Docker logs"
+	@echo "  make docker-shell - Shell into container"
 	@echo ""
 	@echo "Environment variables:"
 	@echo "  PORT=$(PORT)     - API port"
@@ -85,3 +96,29 @@ install:
 	@echo "📦 Installing dependencies..."
 	@pip install -q gunicorn flask torch scikit-learn pennylane
 	@echo "✅ Dependencies installed"
+
+# Docker targets
+docker-build:
+	@echo "🐳 Building Docker image: $(IMAGE_NAME)..."
+	@docker build -t $(IMAGE_NAME):latest .
+	@echo "✅ Docker image built"
+
+docker-run:
+	@echo "🐳 Starting Docker container on port $(PORT)..."
+	@docker-compose up -d
+	@sleep 3
+	@docker-compose ps
+	@echo "✅ Container started. Run 'make docker-logs' to view logs"
+
+docker-stop:
+	@echo "🐳 Stopping Docker container..."
+	@docker-compose down
+	@echo "✅ Container stopped"
+
+docker-logs:
+	@echo "📋 Tailing Docker logs (Ctrl+C to exit)..."
+	@docker-compose logs -f
+
+docker-shell:
+	@echo "🐚 Opening shell in container..."
+	@docker exec -it $(CONTAINER_NAME) /bin/bash
