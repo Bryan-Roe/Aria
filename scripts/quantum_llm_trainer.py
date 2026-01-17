@@ -346,7 +346,7 @@ class QuantumEnhancedLLMTrainer:
         
         for batch_idx in range(num_batches):
             # Simulate forward pass
-            batch_loss = np.random.uniform(0.5, 2.0)  # Mock decreasing loss (low, high)
+            batch_loss = np.random.uniform(0.5, 2.0)  # Mock random loss (low, high)
             
             # Apply quantum optimization every N steps
             if batch_idx % 10 == 0:
