@@ -46,7 +46,7 @@ except Exception:
     sns = None
     _HAS_PLOTTING = False
 
-from scripts.train_vision import SimpleImageFolder, TinyConvNet
+from scripts.training.train_vision import SimpleImageFolder, TinyConvNet
 
 
 def load_checkpoint(ck_path: Path):
@@ -108,7 +108,7 @@ def run_eval(argv=None):
         return 4
 
     # Use the simple loader without augmentation
-    from scripts.train_vision import SimpleImageFolder
+    from scripts.training.train_vision import SimpleImageFolder
 
     loader_ds = SimpleImageFolder(ds, img_size=(args.img_size, args.img_size))
     loader = torch.utils.data.DataLoader(loader_ds, batch_size=args.batch_size)

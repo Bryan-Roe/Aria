@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aria - AI Character</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            background-size: 200% 200%;
+            animation: gradientShift 15s ease infinite;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .anime-character {
+            position: fixed;
+            width: 140px;
+            height: 180px;
+            z-index: 9999;
+            pointer-events: none;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            filter: drop-shadow(0 8px 20px rgba(0, 0, 0, 0.3));
+            transform-style: preserve-3d;
+            animation: breatheTorso 6s ease-in-out infinite;
+        }
+
+        @keyframes breatheTorso {
+            0% { transform: translateZ(0) translateY(0) scaleY(1); }
+            50% { transform: translateZ(1px) translateY(-3px) scaleY(0.985); }
+            100% { transform: translateZ(0) translateY(0) scaleY(1); }
+        }
+
+        .anime-character {
+            pointer-events: auto;
+            cursor: pointer;
+        }
+
+        .character-body {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transform-style: preserve-3d;
+        }
+
+        /* Head */
+        .character-head {
+            position: absolute;
+            width: 80px;
+            height: 85px;
+            background: radial-gradient(ellipse at 30% 25%, 
+                #fff5f7 0%, 
+                #ffe4e9 15%, 
+                #ffd6e0 35%, 
+                #ffc5d8 60%,
+                #ffb4d0 100%);
+            border-radius: 50% 50% 48% 48%;
+            top: 15px;
+            left: 30px;
+            box-shadow: 
+                inset -8px -8px 18px rgba(255, 180, 200, 0.3),
+                inset 6px 6px 18px rgba(255, 255, 255, 0.9),
+                0 4px 12px rgba(255, 150, 180, 0.15),
+                0 0 0 1px rgba(255, 255, 255, 0.5);
+            transform-style: preserve-3d;
+            will-change: transform;
+        }
+
+        .character-head::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            background: radial-gradient(circle at 35% 25%, rgba(255,255,255,0.35), rgba(255,255,255,0.06) 12%, transparent 30%);
+            mix-blend-mode: overlay;
+            pointer-events: none;
+            opacity: 0.95;
+            filter: blur(0.6px);
+            z-index: 11;
+        }
+
+        /* Eye */
+        .character-eyes {
+            position: absolute;
+            top: 32px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 56px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 5;
+        }
+
+        .eye {
+            width: 26px;
+            height: 26px;
+            background: radial-gradient(ellipse at 45% 35%, 
+                #6bb6ff 0%,
+                #4a9ff5 15%, 
+                #2b7cd3 35%,
+                #1e5fa8 60%,
+                #14467d 100%);
+            border-radius: 50%;
+            position: relative;
+            animation: blink 6s infinite, eyeSparkle 4s ease-in-out infinite;
+            overflow: hidden;
+            box-shadow: 
+                inset -2px -3px 8px rgba(0, 0, 0, 0.4),
+                0 3px 10px rgba(74, 159, 245, 0.3),
+                inset 0 0 0 1px rgba(255, 255, 255, 0.2),
+                0 0 15px rgba(107, 182, 255, 0.4);
+        }
+        
+        .eye.left {
+            margin-right: 2px;
+        }
+        
+        .eye.right {
+            margin-left: 2px;
+        }
+
+        @keyframes blink {
+            0%, 98%, 100% { transform: scaleY(1); }
+            99% { transform: scaleY(0.1); }
+        }
+
+        @keyframes eyeSparkle {
+            0%, 100% { box-shadow: 
+                inset -2px -3px 8px rgba(0, 0, 0, 0.4),
+                0 3px 10px rgba(74, 159, 245, 0.3),
+                inset 0 0 0 1px rgba(255, 255, 255, 0.2),
+                0 0 15px rgba(107, 182, 255, 0.4); }
+            50% { box-shadow: 
+                inset -2px -3px 8px rgba(0, 0, 0, 0.4),
+                0 5px 20px rgba(74, 159, 245, 0.6),
+                inset 0 0 0 1px rgba(255, 255, 255, 0.3),
+                0 0 25px rgba(107, 182, 255, 0.8); }
+        }
+
+        .eye::before {
+            content: '';
+            position: absolute;
+            top: 25%;
+            left: 25%;
+            width: 8px;
+            height: 8px;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.85) 0%, rgba(255, 255, 255, 0.4) 60%, transparent 100%);
+            border-radius: 50%;
+            filter: blur(1px);
+        }
+
+        .pupil {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 10px;
+            height: 10px;
+            background: radial-gradient(circle at 35% 35%, #2a2a2a, #000);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: transform 0.12s ease-out;
+            box-shadow: 
+                0 0 4px rgba(0, 0, 0, 0.6),
+                inset -1px -1px 2px rgba(255, 255, 255, 0.1);
+        }
+
+        .eyelash {
+            position: absolute;
+            width: 2px;
+            height: 6px;
+            background: linear-gradient(to bottom, rgba(50, 50, 50, 0.8), transparent);
+            border-radius: 1px;
+            top: -4px;
+        }
+
+        .eyelash.left {
+            left: 3px;
+            transform: rotate(-15deg);
+        }
+
+        .eyelash.center {
+            left: 13px;
+        }
+
+        .eyelash.right {
+            right: 3px;
+            transform: rotate(15deg);
+        }
+
+        /* Mouth */
+        .character-mouth {
+            position: absolute;
+            width: 18px;
+            height: 10px;
+            background: linear-gradient(to bottom, #ff8fab 0%, #e77d98 100%);
+            border-radius: 0 0 50% 50%;
+            bottom: 22px;
+            left: 50%;
+            transform: translateX(-50%);
+            box-shadow: 
+                inset 0 -2px 4px rgba(0, 0, 0, 0.15),
+                0 1px 2px rgba(255, 255, 255, 0.3);
+            z-index: 4;
+        }
+
+        /* Blush marks */
+        .blush {
+            position: absolute;
+            width: 16px;
+            height: 12px;
+            background: radial-gradient(ellipse, rgba(255, 182, 193, 0.55), transparent 70%);
+            border-radius: 50%;
+            bottom: 28px;
+            filter: blur(3px);
+            animation: blushPulse 3s ease-in-out infinite;
+        }
+
+        .blush.left {
+            left: 4px;
+        }
+
+        .blush.right {
+            right: 4px;
+        }
+
+        @keyframes blushPulse {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 0.85; }
+        }
+
+        /* Body/Torso */
+        .character-torso {
+            position: absolute;
+            width: 50px;
+            height: 45px;
+            background: linear-gradient(135deg, 
+                #b794f6 0%, 
+                #9f7aea 25%, 
+                #805ad5 60%,
+                #6b46c1 100%);
+            border-radius: 45% 45% 48% 52%;
+            top: 90px;
+            left: 45px;
+            box-shadow: 
+                inset -4px -5px 10px rgba(107, 70, 193, 0.4),
+                inset 3px 4px 10px rgba(183, 148, 246, 0.6),
+                0 3px 8px rgba(107, 70, 193, 0.25);
+            transform-style: preserve-3d;
+            z-index: 1;
+        }
+
+        .torso-joint {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.4), rgba(107, 70, 193, 0.5));
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 0 4px rgba(255, 255, 255, 0.4);
+        }
+
+        /* Arms */
+        .character-arm {
+            position: absolute;
+            width: 12px;
+            height: 35px;
+            background: linear-gradient(to bottom, 
+                #ffd6e0 0%, 
+                #ffc5d8 50%, 
+                #ffb4d0 100%);
+            border-radius: 6px 6px 8px 8px;
+            top: 95px;
+            box-shadow: 
+                inset -2px -3px 6px rgba(255, 180, 208, 0.3),
+                inset 1px 2px 4px rgba(255, 255, 255, 0.5),
+                1px 2px 4px rgba(0, 0, 0, 0.1);
+            transform-origin: top center;
+            transform-style: preserve-3d;
+            z-index: 2;
+            transition: transform 0.3s ease-out;
+        }
+
+        .character-arm.left {
+            left: 32px;
+            transform: rotate(calc(var(--left-shoulder-rotate, -10deg))) translateZ(3px);
+            --base-arm-rotate: var(--left-shoulder-rotate, -10deg);
+        }
+
+        .character-arm.right {
+            right: 32px;
+            transform: rotate(calc(var(--right-shoulder-rotate, 10deg))) translateZ(3px);
+            --base-arm-rotate: var(--right-shoulder-rotate, 10deg);
+        }
+
+        .elbow-joint {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 6px;
+            height: 6px;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.4), rgba(255, 180, 208, 0.5));
+            border-radius: 50%;
+            box-shadow: 0 0 3px rgba(255, 255, 255, 0.3);
+        }
+
+        .character-forearm {
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%) rotate(calc(var(--left-elbow-rotate, 0deg)));
+            width: 12px;
+            height: 30px;
+            background: linear-gradient(to bottom, 
+                #ffd6e0 0%, 
+                #ffc5d8 50%, 
+                #ffb4d0 100%);
+            border-radius: 6px 6px 8px 8px;
+            box-shadow: 
+                inset -2px -3px 6px rgba(255, 180, 208, 0.3),
+                inset 1px 2px 4px rgba(255, 255, 255, 0.5),
+                1px 2px 4px rgba(0, 0, 0, 0.1);
+            transform-origin: top center;
+            transition: transform 0.3s ease-out;
+        }
+
+        .character-arm.right .character-forearm {
+            transform: translateX(-50%) rotate(calc(var(--right-elbow-rotate, 0deg)));
+        }
+
+        .character-hand {
+            position: absolute;
+            bottom: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 14px;
+            height: 14px;
+            background: radial-gradient(circle at 40% 40%, 
+                #ffd6e0 0%, 
+                #ffc5d8 50%, 
+                #ffb4d0 100%);
+            border-radius: 50%;
+            box-shadow: 
+                inset -2px -2px 4px rgba(255, 180, 208, 0.3),
+                inset 1px 1px 3px rgba(255, 255, 255, 0.6),
+                0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Legs */
+        .character-leg {
+            position: absolute;
+            width: 16px;
+            height: 35px;
+            background: linear-gradient(to bottom, 
+                #b794f6 0%, 
+                #9f7aea 50%, 
+                #805ad5 100%);
+            border-radius: 8px 8px 10px 10px;
+            top: 132px;
+            box-shadow: 
+                inset -2px -3px 6px rgba(107, 70, 193, 0.4),
+                inset 1px 2px 4px rgba(183, 148, 246, 0.6),
+                1px 2px 4px rgba(0, 0, 0, 0.15);
+            transform-origin: top center;
+            transform-style: preserve-3d;
+            z-index: 1;
+        }
+
+        .character-leg.left {
+            left: 46px;
+        }
+
+        .character-leg.right {
+            right: 46px;
+        }
+
+        .knee-joint {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 6px;
+            height: 6px;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.4), rgba(107, 70, 193, 0.5));
+            border-radius: 50%;
+            box-shadow: 0 0 3px rgba(255, 255, 255, 0.3);
+        }
+
+        .character-calf {
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 16px;
+            height: 28px;
+            background: linear-gradient(to bottom, 
+                #b794f6 0%, 
+                #9f7aea 50%, 
+                #805ad5 100%);
+            border-radius: 8px 8px 10px 10px;
+            box-shadow: 
+                inset -2px -3px 6px rgba(107, 70, 193, 0.4),
+                inset 1px 2px 4px rgba(183, 148, 246, 0.6),
+                1px 2px 4px rgba(0, 0, 0, 0.15);
+        }
+
+        .character-shoe {
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 22px;
+            height: 12px;
+            background: linear-gradient(135deg, 
+                #4a5568 0%, 
+                #2d3748 50%, 
+                #1a202c 100%);
+            border-radius: 40% 40% 20% 20%;
+            box-shadow: 
+                inset -1px -2px 4px rgba(0, 0, 0, 0.4),
+                inset 1px 1px 2px rgba(255, 255, 255, 0.2),
+                0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .character-shoe::before {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 3px;
+            width: 10px;
+            height: 2px;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 1px;
+        }
+
+        /* Shadow */
+        .character-shadow {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%) scale(1);
+            bottom: -12px;
+            width: 60px;
+            height: 16px;
+            background: radial-gradient(ellipse at center, rgba(0,0,0,0.28) 0%, rgba(0,0,0,0.08) 50%, transparent 100%);
+            border-radius: 50%;
+            filter: blur(6px);
+            opacity: 0.7;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* Message bubble */
+        .character-message {
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-100%) scale(0);
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.95), rgba(118, 75, 162, 0.95));
+            color: white;
+            padding: 12px 20px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+            white-space: nowrap;
+            box-shadow: 
+                0 8px 20px rgba(0, 0, 0, 0.25),
+                0 0 0 3px rgba(147, 51, 234, 0.3);
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            z-index: 10001;
+        }
+
+        .character-message::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 8px solid transparent;
+            border-right: 8px solid transparent;
+            border-top: 10px solid rgba(102, 126, 234, 0.95);
+        }
+
+        .anime-character:hover .character-message {
+            opacity: 1;
+            transform: translateX(-50%) translateY(-100%) scale(1);
+        }
+
+        /* Walking animation */
+        .anime-character.walking {
+            animation: walkCycle 0.8s ease-in-out infinite, breatheTorso 6s ease-in-out infinite;
+        }
+
+        .anime-character.walking .character-leg.left {
+            animation: legWalk 0.8s ease-in-out infinite;
+        }
+
+        .anime-character.walking .character-leg.right {
+            animation: legWalk 0.8s ease-in-out infinite reverse;
+        }
+
+        .anime-character.walking .character-arm.left {
+            animation: armSwing 0.8s ease-in-out infinite reverse;
+        }
+
+        .anime-character.walking .character-arm.right {
+            animation: armSwing 0.8s ease-in-out infinite;
+        }
+
+        @keyframes walkCycle {
+            0%, 100% { transform: translateY(0); }
+            25% { transform: translateY(-4px); }
+            75% { transform: translateY(-2px); }
+        }
+
+        @keyframes legWalk {
+            0%, 100% { transform: rotate(0deg); }
+            50% { transform: rotate(15deg); }
+        }
+
+        @keyframes armSwing {
+            0%, 100% { transform: rotate(-10deg) translateZ(3px); }
+            50% { transform: rotate(10deg) translateZ(3px); }
+        }
+
+        .anime-character.moving {
+            transition: left 2s ease-in-out, top 2s ease-in-out;
+        }
+
+        /* Link to chat */
+        .chat-link {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 16px 32px;
+            border-radius: 24px;
+            font-size: 16px;
+            font-weight: 600;
+            text-decoration: none;
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+            transition: all 0.3s ease;
+            z-index: 10000;
+        }
+
+        .chat-link:hover {
+            transform: translateX(-50%) translateY(-2px);
+            box-shadow: 0 12px 30px rgba(102, 126, 234, 0.6);
+        }
+    </style>
+</head>
+<body>
+    <div class="anime-character" id="animeCharacter">
+        <div class="character-body">
+            <!-- Head -->
+            <div class="character-head">
+                <div class="character-eyes">
+                    <div class="eye left">
+                        <div class="pupil"></div>
+                        <div class="eyelash left"></div>
+                        <div class="eyelash center"></div>
+                        <div class="eyelash right"></div>
+                    </div>
+                    <div class="eye right">
+                        <div class="pupil"></div>
+                        <div class="eyelash left"></div>
+                        <div class="eyelash center"></div>
+                        <div class="eyelash right"></div>
+                    </div>
+                </div>
+                <div class="character-mouth"></div>
+                <div class="blush left"></div>
+                <div class="blush right"></div>
+            </div>
+            
+            <!-- Body/Torso -->
+            <div class="character-torso">
+                <div class="torso-joint"></div>
+            </div>
+            
+            <!-- Arms with hands and elbows -->
+            <div class="character-arm left">
+                <div class="elbow-joint"></div>
+                <div class="character-forearm">
+                    <div class="character-hand"></div>
+                </div>
+            </div>
+            <div class="character-arm right">
+                <div class="elbow-joint"></div>
+                <div class="character-forearm">
+                    <div class="character-hand"></div>
+                </div>
+            </div>
+            
+            <!-- Legs with shoes and knees -->
+            <div class="character-leg left">
+                <div class="knee-joint"></div>
+                <div class="character-calf">
+                    <div class="character-shoe"></div>
+                </div>
+            </div>
+            <div class="character-leg right">
+                <div class="knee-joint"></div>
+                <div class="character-calf">
+                    <div class="character-shoe"></div>
+                </div>
+            </div>
+            
+            <!-- Dynamic shadow beneath the character for depth -->
+            <div class="character-shadow" aria-hidden="true"></div>
+            
+            <!-- Message bubble -->
+            <div class="character-message">Hi! I'm Aria! ✨</div>
+        </div>
+    </div>
+
+    <a href="index.html" class="chat-link">💬 Chat with Aria</a>
+
+    <script>
+        // Pupil cursor tracking - both eyes
+        document.addEventListener('DOMContentLoaded', function() {
+            var pupils = document.querySelectorAll('.pupil');
+            var eyes = document.querySelectorAll('.eye');
+            var character = document.querySelector('.anime-character');
+            
+            if (pupils.length === 0 || eyes.length === 0 || !character) return;
+
+            // Position character at center
+            character.style.left = '50%';
+            character.style.top = '50%';
+            character.style.transform = 'translate(-50%, -50%)';
+            
+            // Pupil tracking for both eyes
+            document.addEventListener('mousemove', function(e) {
+                eyes.forEach(function(eye, index) {
+                    var pupil = pupils[index];
+                    if (!pupil) return;
+                    
+                    var eyeRect = eye.getBoundingClientRect();
+                    var eyeCenterX = eyeRect.left + eyeRect.width / 2;
+                    var eyeCenterY = eyeRect.top + eyeRect.height / 2;
+                    
+                    var angle = Math.atan2(e.clientY - eyeCenterY, e.clientX - eyeCenterX);
+                    var distance = Math.min(6, Math.hypot(e.clientX - eyeCenterX, e.clientY - eyeCenterY) / 20);
+                    
+                    var pupilX = Math.cos(angle) * distance;
+                    var pupilY = Math.sin(angle) * distance;
+                    
+                    pupil.style.transform = 'translate(calc(-50% + ' + pupilX + 'px), calc(-50% + ' + pupilY + 'px))';
+                });
+            });
+
+            // Click to walk
+            character.addEventListener('click', function() {
+                if (!character.classList.contains('walking')) {
+                    character.classList.add('walking');
+                    setTimeout(function() {
+                        character.classList.remove('walking');
+                    }, 2000);
+                }
+            });
+        });
+
+        // Arm control functions
+        function setArmRotation(arm, shoulderDeg, elbowDeg) {
+            var character = document.querySelector('.anime-character');
+            if (arm === 'left') {
+                character.style.setProperty('--left-shoulder-rotate', shoulderDeg + 'deg');
+                character.style.setProperty('--left-elbow-rotate', elbowDeg + 'deg');
+            } else if (arm === 'right') {
+                character.style.setProperty('--right-shoulder-rotate', shoulderDeg + 'deg');
+                character.style.setProperty('--right-elbow-rotate', elbowDeg + 'deg');
+            }
+        }
+
+        function raiseArms() {
+            setArmRotation('left', -90, 0);
+            setArmRotation('right', 90, 0);
+        }
+
+        function lowerArms() {
+            setArmRotation('left', -10, 0);
+            setArmRotation('right', 10, 0);
+        }
+
+        function waveArm(arm) {
+            var waves = 0;
+            var maxWaves = 3;
+            var waveInterval = setInterval(function() {
+                if (waves >= maxWaves) {
+                    clearInterval(waveInterval);
+                    resetArms();
+                    return;
+                }
+                var phase = waves % 2;
+                if (arm === 'left') {
+                    setArmRotation('left', -60, phase === 0 ? -30 : 30);
+                } else {
+                    setArmRotation('right', 60, phase === 0 ? -30 : 30);
+                }
+                waves++;
+            }, 300);
+        }
+
+        function pointDirection(direction) {
+            if (direction === 'left') {
+                setArmRotation('left', -90, -10);
+                setArmRotation('right', 10, 0);
+            } else if (direction === 'right') {
+                setArmRotation('left', -10, 0);
+                setArmRotation('right', 90, 10);
+            } else if (direction === 'up') {
+                setArmRotation('left', -90, 0);
+                setArmRotation('right', 90, 0);
+            }
+        }
+
+        function reachUp() {
+            setArmRotation('left', -120, -20);
+            setArmRotation('right', 120, 20);
+        }
+
+        function resetArms() {
+            setArmRotation('left', -10, 0);
+            setArmRotation('right', 10, 0);
+        }
+
+        // Keyboard controls
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'w' || e.key === 'W') {
+                waveArm('right');
+            } else if (e.key === 'r' || e.key === 'R') {
+                raiseArms();
+            } else if (e.key === 'l' || e.key === 'L') {
+                lowerArms();
+            }
+        });
+    </script>
+</body>
+</html>

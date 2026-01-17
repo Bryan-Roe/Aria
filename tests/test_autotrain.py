@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pytest
 
-from scripts.autotrain import load_jobs, Job
+from scripts.training.autotrain import load_jobs, Job
 
 
 def write_yaml(path: Path, obj: dict) -> None:

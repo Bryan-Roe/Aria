@@ -18,9 +18,10 @@ from src.hybrid_qnn import HybridQNN
 app = Flask(__name__)
 
 # Load model and scaler
-# Use ionosphere model as demo (91.43% accuracy, binary classification)
-MODEL_PATH = 'results/ionosphere_model.pt'
-SCALER_PATH = 'results/ionosphere_scaler.pkl'
+# Load retrained ionosphere model (compatible with current HybridQNN)
+MODEL_PATH = 'results/custom_model.pt'
+SCALER_PATH = 'results/custom_scaler.pkl'
+PCA_PATH = 'results/custom_pca.pkl'
 
 if not os.path.exists(MODEL_PATH):
     raise FileNotFoundError(f"Model not found: {MODEL_PATH}")
@@ -29,7 +30,11 @@ if not os.path.exists(MODEL_PATH):
 checkpoint = torch.load(MODEL_PATH, map_location='cpu')
 input_dim = checkpoint['encoder.0.weight'].shape[1]
 hidden_dim = checkpoint['encoder.0.weight'].shape[0]
-output_dim = checkpoint['decoder.4.weight'].shape[0]
+
+# Find final decoder layer (might be decoder.6 or decoder.8 depending on architecture)
+final_decoder_keys = [k for k in checkpoint.keys() if 'decoder' in k and 'weight' in k]
+final_decoder_key = final_decoder_keys[-1]
+output_dim = checkpoint[final_decoder_key].shape[0]
 
 model = HybridQNN(
     input_dim=input_dim,
@@ -41,11 +46,25 @@ model = HybridQNN(
 model.load_state_dict(checkpoint)
 model.eval()
 
-if os.path.exists(SCALER_PATH):
-    with open(SCALER_PATH, 'rb') as f:
-        scaler = pickle.load(f)
-else:
-    scaler = None
+# Try loading scaler/PCA (gracefully skip if corrupted)
+scaler = None
+pca = None
+
+try:
+    if os.path.exists(SCALER_PATH):
+        with open(SCALER_PATH, 'rb') as f:
+            scaler = pickle.load(f)
+except Exception as e:
+    print(f"⚠️ Warning: Could not load scaler: {e}")
+
+try:
+    if os.path.exists(PCA_PATH):
+        with open(PCA_PATH, 'rb') as f:
+            pca = pickle.load(f)
+except Exception as e:
+    print(f"⚠️ Warning: Could not load PCA: {e}")
+
+print(f"✅ Model loaded: input_dim={input_dim}, output_dim={output_dim}")
 
 @app.route('/health', methods=['GET'])
 def health():
@@ -87,7 +106,14 @@ def predict():
             return jsonify({'error': 'Expected 4 features: variance, skewness, curtosis, entropy'}), 400
         
         # Preprocess
-        features_scaled = scaler.transform(features)
+        if scaler:
+            features_scaled = scaler.transform(features)
+        else:
+            features_scaled = features
+        
+        if pca:
+            features_scaled = pca.transform(features_scaled)
+        
         features_tensor = torch.FloatTensor(features_scaled)
         
         # Predict
@@ -97,13 +123,13 @@ def predict():
             prediction = int(torch.argmax(output, dim=1).item())
         
         result = {
-            'prediction': 'authentic' if prediction == 0 else 'fraudulent',
+            'prediction': 'Class 0' if prediction == 0 else 'Class 1',
             'confidence': float(probabilities[prediction]),
             'probability': {
-                'authentic': float(probabilities[0]),
-                'fraudulent': float(probabilities[1])
+                'class_0': float(probabilities[0]),
+                'class_1': float(probabilities[1])
             },
-            'model': 'Quantum ML - Banknote (100% accuracy)'
+            'model': 'Quantum ML - Ionosphere (Hybrid QNN)'
         }
         
         return jsonify(result)

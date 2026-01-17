@@ -18,22 +18,34 @@ from src.hybrid_qnn import HybridQNN
 app = Flask(__name__)
 
 # Load model and scaler
-MODEL_PATH = 'results/custom_model__banknote.pt'
-SCALER_PATH = 'results/custom_scaler__banknote.pkl'
+# Use ionosphere model as demo (91.43% accuracy, binary classification)
+MODEL_PATH = 'results/ionosphere_model.pt'
+SCALER_PATH = 'results/ionosphere_scaler.pkl'
 
-checkpoint = torch.load(MODEL_PATH)
+if not os.path.exists(MODEL_PATH):
+    raise FileNotFoundError(f"Model not found: {MODEL_PATH}")
+
+# Auto-detect architecture from checkpoint
+checkpoint = torch.load(MODEL_PATH, map_location='cpu')
+input_dim = checkpoint['encoder.0.weight'].shape[1]
+hidden_dim = checkpoint['encoder.0.weight'].shape[0]
+output_dim = checkpoint['decoder.4.weight'].shape[0]
+
 model = HybridQNN(
-    input_dim=16,
-    hidden_dim=16,
+    input_dim=input_dim,
+    hidden_dim=hidden_dim,
     n_qubits=4,
     n_quantum_layers=2,
-    output_dim=2  # Binary: authentic vs fraudulent
+    output_dim=output_dim
 )
 model.load_state_dict(checkpoint)
 model.eval()
 
-with open(SCALER_PATH, 'rb') as f:
-    scaler = pickle.load(f)
+if os.path.exists(SCALER_PATH):
+    with open(SCALER_PATH, 'rb') as f:
+        scaler = pickle.load(f)
+else:
+    scaler = None
 
 @app.route('/health', methods=['GET'])
 def health():

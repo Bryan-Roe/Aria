@@ -1,0 +1,4581 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QAI Chat - Quantum AI System</title>
+    <!-- Marked.js for markdown rendering -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <!-- Highlight.js for code syntax highlighting -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            background-size: 200% 200%;
+            animation: gradientShift 15s ease infinite;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .chat-container {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            max-width: 800px;
+            max-height: 500px;
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: 25px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2), 0 0 0 3px rgba(147, 51, 234, 0.3);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            opacity: 1;
+            pointer-events: auto;
+            z-index: 10000;
+        }
+        
+        /* Speech bubble pointer removed - bottom centered chat */
+
+        .chat-container.visible {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateX(-50%);
+        }
+
+        .chat-container:hover {
+            box-shadow: 0 30px 90px rgba(102, 126, 234, 0.4), 0 0 0 2px rgba(102, 126, 234, 0.5);
+        }
+
+        .chat-container.dragging {
+            cursor: grabbing;
+            box-shadow: 0 35px 100px rgba(102, 126, 234, 0.5), 0 0 0 3px rgba(102, 126, 234, 0.8);
+        }
+
+        .chat-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .chat-header::before {
+            /* shimmer disabled */
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255,255,255,0.05);
+        }
+
+        /* shimmer animation removed */
+        /* @keyframes shimmer {} */
+
+        .chat-header h1 {
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .provider-info {
+            font-size: 12px;
+            opacity: 0.9;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 5px 10px;
+            border-radius: 12px;
+        }
+
+        .chat-messages {
+            flex: 1;
+            min-height: 0;
+            overflow-y: auto;
+            padding: 24px;
+            background: linear-gradient(180deg, #f8f9fa 0%, #ffffff 100%);
+            scroll-behavior: smooth;
+        }
+
+        .message {
+            margin-bottom: 16px;
+            display: flex;
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .message.user {
+            justify-content: flex-end;
+        }
+
+        .message-content {
+            max-width: 70%;
+            padding: 12px 16px;
+            border-radius: 18px;
+            word-wrap: break-word;
+            line-height: 1.5;
+        }
+
+        .message-actions {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-left: 8px;
+        }
+
+        .msg-speak-btn {
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            font-size: 14px;
+            padding: 4px 6px;
+            border-radius: 6px;
+            transition: background 0.12s ease, transform 0.08s ease;
+            opacity: 0.95;
+        }
+        .msg-speak-btn:hover { background: rgba(0,0,0,0.06); transform: translateY(-1px); }
+
+        /* Markdown content styling */
+        .message-content p {
+            margin: 0.5em 0;
+        }
+
+        .message-content p:first-child {
+            margin-top: 0;
+        }
+
+        .message-content p:last-child {
+            margin-bottom: 0;
+        }
+
+        .message-content pre {
+            background: #1e1e1e;
+            padding: 12px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 8px 0;
+        }
+
+        .message-content code {
+            background: rgba(0, 0, 0, 0.1);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+
+        .message-content pre code {
+            background: none;
+            padding: 0;
+            display: block;
+            color: #e6e6e6;
+        }
+
+        .message-content ul, .message-content ol {
+            margin: 8px 0;
+            padding-left: 24px;
+        }
+
+        .message-content li {
+            margin: 4px 0;
+        }
+
+        .message-content blockquote {
+            border-left: 4px solid #667eea;
+            padding-left: 12px;
+            margin: 8px 0;
+            color: #666;
+        }
+
+        .message-content a {
+            color: #667eea;
+            text-decoration: none;
+        }
+
+        .message-content a:hover {
+            text-decoration: underline;
+        }
+
+        .message-content h1, .message-content h2, .message-content h3 {
+            margin: 12px 0 8px 0;
+            font-weight: 600;
+        }
+
+        .message-content h1 {
+            font-size: 1.5em;
+        }
+
+        .message-content h2 {
+            font-size: 1.3em;
+        }
+
+        .message-content h3 {
+            font-size: 1.1em;
+        }
+
+        .message-content table {
+            border-collapse: collapse;
+            margin: 8px 0;
+            width: 100%;
+        }
+
+        .message-content th, .message-content td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        .message-content th {
+            background: #f5f5f5;
+            font-weight: 600;
+        }
+
+        .message.user .message-content {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-bottom-right-radius: 4px;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+            transform: scale(1);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .message.user .message-content:hover {
+            transform: scale(1.02);
+            box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+        }
+
+        .message.assistant .message-content {
+            background: white;
+            color: #333;
+            border: 1px solid #e8e8e8;
+            border-bottom-left-radius: 4px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            transform: scale(1);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .message.assistant .message-content:hover {
+            transform: scale(1.01);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+        }
+
+        .message.system .message-content {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+            max-width: 90%;
+            font-size: 14px;
+            text-align: center;
+            margin: 0 auto;
+        }
+
+        .typing-indicator {
+            display: none;
+            padding: 12px 16px;
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 18px;
+            border-bottom-left-radius: 4px;
+            width: fit-content;
+        }
+
+        .typing-indicator.active {
+            display: block;
+        }
+
+        .typing-indicator span {
+            height: 10px;
+            width: 10px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            display: inline-block;
+            margin: 0 3px;
+            animation: bounce 1.4s infinite ease-in-out both;
+            box-shadow: 0 2px 4px rgba(102, 126, 234, 0.3);
+        }
+
+        .typing-indicator span:nth-child(1) {
+            animation-delay: -0.32s;
+        }
+
+        .typing-indicator span:nth-child(2) {
+            animation-delay: -0.16s;
+        }
+
+        @keyframes bounce {
+            0%, 80%, 100% { 
+                transform: scale(0);
+            } 
+            40% { 
+                transform: scale(1);
+            }
+        }
+
+        .chat-input-container {
+            padding: 20px;
+            background: white;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .input-toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+            font-size: 12px;
+            color: #666;
+        }
+
+        .model-selector {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .model-selector select {
+            padding: 4px 8px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 12px;
+            outline: none;
+            cursor: pointer;
+        }
+
+        #loraPathInput {
+            display: none;
+            padding: 4px 8px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 12px;
+            width: 260px;
+        }
+
+        .model-selector select:focus {
+            border-color: #667eea;
+        }
+
+        .keyboard-hints {
+            opacity: 0.7;
+        }
+
+        .chat-input-wrapper {
+            display: flex;
+            gap: 10px;
+            align-items: flex-end;
+        }
+
+        #messageInput {
+            flex: 1;
+            padding: 14px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 24px;
+            font-size: 15px;
+            outline: none;
+            transition: all 0.3s ease;
+            resize: none;
+            max-height: 150px;
+            min-height: 48px;
+            font-family: inherit;
+            background: white;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        #messageInput:focus {
+            border-color: #667eea;
+            box-shadow: 0 4px 16px rgba(102, 126, 234, 0.2);
+            transform: translateY(-1px);
+        }
+
+        #messageInput::placeholder {
+            color: #999;
+            transition: color 0.3s;
+        }
+
+        #messageInput:focus::placeholder {
+            color: #bbb;
+        }
+
+        #sendButton {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 28px;
+            border-radius: 24px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        #sendButton::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        #sendButton:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        #sendButton:hover:not(:disabled) {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.5);
+        }
+
+        #sendButton:active:not(:disabled) {
+            transform: translateY(-1px) scale(1.02);
+        }
+
+        #sendButton:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 0.4; }
+        }
+
+        /* Vision upload button */
+        #visionUploadButton {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 24px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(240, 147, 251, 0.3);
+            margin-right: 8px;
+        }
+
+        #visionUploadButton:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(240, 147, 251, 0.5);
+        }
+
+        #visionImageInput {
+            display: none;
+        }
+
+        #visionPreview {
+            display: none;
+            margin-top: 8px;
+            text-align: center;
+        }
+
+        #visionPreviewImage {
+            max-width: 100%;
+            max-height: 150px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        #visionClearButton {
+            margin-left: 8px;
+            background: #f44336;
+            color: white;
+            border: none;
+            padding: 4px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        #visionClearButton:hover {
+            background: #d32f2f;
+        }
+
+        .cancel-stream-btn {
+            font-size: 13px;
+            font-weight: 500;
+            background: #dc3545;
+            color: #fff;
+            border: none;
+            border-radius: 24px;
+            padding: 12px 20px;
+            cursor: pointer;
+            transition: transform 0.2s, background 0.2s;
+            display: none;
+        }
+        .cancel-stream-btn:hover {
+            background: #b71c1c;
+            transform: translateY(-2px);
+        }
+
+        .controls {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+
+        .settings-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 8px;
+            font-size: 12px;
+            color: #666;
+            flex-wrap: wrap;
+        }
+
+        .settings-row label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .settings-row input[type="range"] {
+            width: 140px;
+        }
+
+        .system-prompt {
+            margin-top: 8px;
+            display: none;
+        }
+
+        #systemPromptInput {
+            width: 100%;
+            min-height: 48px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 8px 10px;
+            font-family: inherit;
+        }
+
+        .control-button {
+            background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%);
+            border: 1px solid #e0e0e0;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+        }
+
+        .control-button:hover {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: transparent;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .control-button:active {
+            transform: translateY(0) scale(0.98);
+        }
+
+        .copy-button {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: rgba(255, 255, 255, 0.9);
+            border: none;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .message-content pre {
+            position: relative;
+        }
+
+        .message-content pre:hover .copy-button {
+            opacity: 1;
+        }
+
+        .copy-button:hover {
+            background: white;
+        }
+
+        .stats-bar {
+            padding: 8px 20px;
+            background: #f8f9fa;
+            border-top: 1px solid #e0e0e0;
+            font-size: 11px;
+            color: #666;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .stat-item {
+            display: flex;
+            gap: 4px;
+            align-items: center;
+            color: #666;
+        }
+
+        #statusText {
+            font-weight: 600;
+            transition: color 0.3s ease;
+        }
+
+        /* Scrollbar styling */
+        .chat-messages::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .chat-messages::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        .chat-messages::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 4px;
+        }
+
+        .chat-messages::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+
+        @media (max-width: 600px) {
+            .chat-container {
+                height: 100vh;
+                border-radius: 0;
+            }
+
+            .message-content {
+                max-width: 85%;
+            }
+            
+            .keyboard-hints {
+                display: none;
+            }
+        }
+
+        /* Dark Theme */
+        body.dark-theme {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            background-size: 200% 200%;
+            animation: gradientShift 15s ease infinite;
+        }
+
+        body.dark-theme .chat-container {
+            background: rgba(30, 30, 30, 0.95);
+            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 25px 80px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.1);
+        }
+
+        body.dark-theme .browser-container {
+            background: rgba(30, 30, 30, 0.95);
+            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 25px 80px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.1);
+        }
+
+        body.dark-theme .chat-header {
+            background: linear-gradient(135deg, #2d3561 0%, #1f2937 100%);
+        }
+
+        body.dark-theme .chat-messages {
+            background: #2a2a2a;
+        }
+
+        body.dark-theme .message.assistant .message-content {
+            background: #3a3a3a;
+            color: #e0e0e0;
+            border-color: #4a4a4a;
+        }
+
+        body.dark-theme .chat-input-container {
+            background: #1e1e1e;
+            border-top-color: #3a3a3a;
+        }
+
+        body.dark-theme #messageInput {
+            background: #2a2a2a;
+            color: #e0e0e0;
+            border-color: #4a4a4a;
+        }
+
+        body.dark-theme #messageInput:focus {
+            border-color: #667eea;
+        }
+
+        body.dark-theme .control-button {
+            background: #3a3a3a;
+            color: #e0e0e0;
+        }
+
+        body.dark-theme .control-button:hover {
+            background: #4a4a4a;
+        }
+
+        body.dark-theme .stats-bar {
+            background: #1a1a1a;
+            border-top-color: #3a3a3a;
+            color: #999;
+        }
+
+        body.dark-theme .model-selector select {
+            background: #2a2a2a;
+            color: #e0e0e0;
+            border-color: #4a4a4a;
+        }
+
+        body.dark-theme .input-toolbar {
+            color: #999;
+        }
+
+        body.dark-theme .message.system .message-content {
+            background: #3a3a3a;
+            color: #e0e0e0;
+            border-color: #4a4a4a;
+        }
+
+        body.dark-theme .message-content th {
+            background: #3a3a3a;
+        }
+
+        body.dark-theme .message-content code {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100vw;
+            height: 100vh;
+            overflow: auto;
+            background: rgba(0,0,0,0.35);
+        }
+        .modal-content {
+            background: #fff;
+            margin: 8% auto;
+            padding: 24px 32px 18px 32px;
+            border-radius: 10px;
+            width: 340px;
+            box-shadow: 0 2px 16px rgba(0,0,0,0.18);
+            position: relative;
+        }
+        .close {
+            color: #aaa;
+            position: absolute;
+            top: 12px;
+            right: 18px;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+        .close:hover {
+            color: #333;
+        }
+        .modal-title {
+            margin-top: 0;
+        }
+        .modal-list {
+            margin-left: 1em;
+        }
+        .modal-subtitle {
+            margin-top: 1em;
+        }
+        .modal-footer-note {
+            margin-top: 1.5em;
+            font-size: 0.9em;
+            color: #666;
+        }
+        /* Backend Status Box Styles */
+        .backend-status-box {
+            margin-left: 18px;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .backend-status-text {
+            font-size: 13px;
+            font-weight: 500;
+            color: #ffc107;
+            cursor: pointer;
+            text-decoration: underline;
+            transition: color 0.2s;
+        }
+        .backend-status-text.ok {
+            color: #28a745 !important;
+        }
+        .backend-status-text.fail {
+            color: #dc3545 !important;
+        }
+        .quantum-mode-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            transition: all 0.3s;
+        }
+        .quantum-mode-btn:hover:not(:disabled) {
+            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+        .quantum-mode-btn.active {
+            background: linear-gradient(135deg, #00d2ff 0%, #3a7bd5 100%);
+        }
+        .quantum-indicator {
+            color: #667eea;
+            font-weight: bold;
+            animation: quantumPulse 2s infinite;
+            display: none;
+        }
+        @keyframes quantumPulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+        .quantum-panel {
+            position: fixed;
+            right: 20px;
+            top: 80px;
+            width: 320px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            z-index: 1000;
+            overflow: hidden;
+            display: none;
+        }
+        .quantum-panel-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .quantum-panel-header h3 {
+            margin: 0;
+            font-size: 18px;
+        }
+        .quantum-panel-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            transition: background 0.2s;
+        }
+        .quantum-panel-close:hover {
+            background: rgba(255,255,255,0.2);
+        }
+        .quantum-panel-content {
+            padding: 20px;
+        }
+        .quantum-stat {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #eee;
+        }
+        .quantum-label {
+            font-weight: 600;
+            color: #555;
+        }
+        .quantum-value {
+            color: #667eea;
+            font-weight: bold;
+        }
+        .quantum-circuit-viz {
+            margin-top: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .circuit-display {
+            margin: 0;
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            line-height: 1.4;
+            white-space: pre;
+            color: #333;
+        }
+        body.dark-theme .quantum-panel {
+            background: #2a2a2a;
+        }
+        body.dark-theme .quantum-stat {
+            border-bottom-color: #444;
+        }
+        body.dark-theme .quantum-label {
+            color: #aaa;
+        }
+        body.dark-theme .quantum-circuit-viz {
+            background: #1a1a1a;
+        }
+        body.dark-theme .circuit-display {
+            color: #ccc;
+        }
+        .start-backend-btn {
+            font-size: 13px;
+            font-weight: 500;
+            background: #667eea;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            padding: 4px 12px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .start-backend-btn:hover {
+            background: #764ba2;
+        }
+        .max-tokens-input {
+            width: 90px;
+        }
+
+        /* Anime Character Styles - 3D Model */
+        .anime-character {
+            position: fixed;
+            width: 160px;
+            height: 200px;
+            z-index: 10001;
+            pointer-events: auto;
+            cursor: grab;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            filter: drop-shadow(0 12px 30px rgba(0, 0, 0, 0.4)) 
+                    drop-shadow(0 0 40px rgba(255, 150, 200, 0.3));
+            transform-style: preserve-3d;
+            transform: scale(1.15);
+            /* gentle breathing */
+            animation: breatheTorso 6s ease-in-out infinite;
+        }
+        
+        /* Walking animations */
+        .anime-character.walking .character-leg.left {
+            animation: legWalkLeft 0.6s ease-in-out infinite !important;
+        }
+        
+        .anime-character.walking .character-leg.right {
+            animation: legWalkRight 0.6s ease-in-out infinite !important;
+        }
+        
+        .anime-character.walking .character-arm.left {
+            animation: armSwingLeft 0.6s ease-in-out infinite !important;
+        }
+        
+        .anime-character.walking .character-arm.right {
+            animation: armSwingRight 0.6s ease-in-out infinite !important;
+        }
+        
+        @keyframes legWalkLeft {
+            0%, 100% { transform: translateX(-12px) translateY(80px) translateZ(5px) rotate(-5deg); }
+            25% { transform: translateX(-12px) translateY(80px) translateZ(5px) rotate(15deg); }
+            75% { transform: translateX(-12px) translateY(80px) translateZ(5px) rotate(-20deg); }
+        }
+        
+        @keyframes legWalkRight {
+            0%, 100% { transform: translateX(12px) translateY(80px) translateZ(5px) rotate(5deg); }
+            25% { transform: translateX(12px) translateY(80px) translateZ(5px) rotate(-20deg); }
+            75% { transform: translateX(12px) translateY(80px) translateZ(5px) rotate(15deg); }
+        }
+        
+        @keyframes armSwingLeft {
+            0%, 100% { transform: translateX(-22px) translateY(32px) translateZ(8px) rotate(-8deg); }
+            50% { transform: translateX(-22px) translateY(32px) translateZ(8px) rotate(20deg); }
+        }
+        
+        @keyframes armSwingRight {
+            0%, 100% { transform: translateX(22px) translateY(32px) translateZ(8px) rotate(8deg); }
+            50% { transform: translateX(22px) translateY(32px) translateZ(8px) rotate(-20deg); }
+        }
+
+        @keyframes breatheTorso {
+            0% { transform: translateZ(0) translateY(0) scaleY(1); }
+            50% { transform: translateZ(1px) translateY(-3px) scaleY(0.985); }
+            100% { transform: translateZ(0) translateY(0) scaleY(1); }
+        }
+
+        .character-body {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transform-style: preserve-3d;
+        }
+
+        /* Head - 3D sphere with vibrant X-style colors */
+        .character-head {
+            position: absolute;
+            width: 80px;
+            height: 85px;
+            background: radial-gradient(ellipse at 30% 25%, 
+                #fff9fa 0%, 
+                #ffe8ed 10%,
+                #ffd9e3 25%, 
+                #ffcbd9 45%,
+                #ffb8d0 70%,
+                #ffa5c5 100%);
+            border-radius: 50% 50% 48% 48%;
+            top: 15px;
+            left: 30px;
+            box-shadow: 
+                inset -8px -8px 18px rgba(255, 180, 200, 0.3),
+                inset 6px 6px 18px rgba(255, 255, 255, 0.9),
+                0 4px 12px rgba(255, 150, 180, 0.15),
+                0 0 0 1px rgba(255, 255, 255, 0.5);
+            /* animation removed to stop back-and-forth motion */
+            transform-style: preserve-3d;
+            will-change: transform;
+        }
+
+        /* head highlight overlay for depth */
+        .character-head::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            background: radial-gradient(circle at 35% 25%, rgba(255,255,255,0.35), rgba(255,255,255,0.06) 12%, transparent 30%);
+            mix-blend-mode: overlay;
+            pointer-events: none;
+            opacity: 0.95;
+            filter: blur(0.6px);
+            z-index: 11;
+        }
+
+        /* Soft dynamic shadow under the character (updated by JS) */
+        .character-shadow {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%) scale(1);
+            bottom: -12px;
+            width: 60px;
+            height: 16px;
+            background: radial-gradient(ellipse at center, rgba(0,0,0,0.28) 0%, rgba(0,0,0,0.08) 50%, transparent 100%);
+            border-radius: 50%;
+            filter: blur(6px);
+            opacity: 0.7;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* Aria controls overlay */
+        .aria-controls {
+            position: fixed;
+            right: 18px;
+            bottom: 18px;
+            z-index: 9999;
+            display: flex;
+            align-items: flex-end;
+            gap: 8px;
+            pointer-events: none;
+        }
+
+        .aria-controls-toggle {
+            pointer-events: auto;
+            width: 44px;
+            height: 44px;
+            border-radius: 10px;
+            border: none;
+            background: linear-gradient(180deg,#7c3aed,#9f7aea);
+            color: white;
+            font-weight: 700;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.06);
+            cursor: pointer;
+            display:flex;align-items:center;justify-content:center;
+        }
+
+        .aria-panel {
+            pointer-events: auto;
+            width: 320px;
+            max-width: calc(100vw - 48px);
+            background: rgba(255,255,255,0.98);
+            color: #111;
+            border-radius: 12px;
+            padding: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            transform-origin: bottom right;
+            display: none;
+            flex-direction: column;
+            gap: 8px;
+            font-size: 13px;
+            line-height: 1.2;
+        }
+
+        .aria-panel.visible { display: flex; }
+
+        .aria-panel h4 { margin: 0 0 6px 0; font-size: 13px; color: #333; }
+        .aria-panel label { display:block; margin: 8px 0; font-size: 12px; color: #222; }
+        .aria-panel input[type=range] { width: 100%; }
+        .aria-panel select, .aria-panel input[type=text] { width: 100%; padding: 6px 8px; border-radius: 6px; border: 1px solid rgba(0,0,0,0.08); }
+
+        .aria-panel .control-section { padding: 6px 0; border-bottom: 1px solid rgba(0,0,0,0.06); }
+        .aria-panel .control-section:last-child { border-bottom: none; }
+
+        .aria-panel .panel-actions { display:flex; gap:6px; margin-top:8px; }
+        .aria-panel .panel-actions button { flex:1; padding:6px 8px; border-radius:6px; border: none; background: linear-gradient(90deg,#667eea,#764ba2); color:white; cursor:pointer; }
+        .aria-panel .aria-controls-footer { text-align: right; margin-top: 6px; }
+        .aria-panel .aria-controls-footer button { padding:6px 10px; border-radius:8px; border: none; background: #eee; cursor: pointer; }
+            transition: transform 160ms ease, width 160ms ease, opacity 160ms ease;
+        }
+
+        /* headBob animation disabled */
+        /* @keyframes headBob {} */
+
+        /* Eyes - Big X anime style */
+        .character-eyes {
+            position: absolute;
+            top: 38px;
+            left: 50%;
+            transform: translateX(-50%) translateZ(10px);
+            width: 60px;
+            height: 26px;
+            display: inline-flex;
+            flex-direction: row;
+            flex-wrap: nowrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 6px;
+            cursor: move;
+            pointer-events: auto;
+        }
+        
+        .character-eyes.dragging {
+            cursor: grabbing;
+            opacity: 0.8;
+        }
+
+        .eye {
+            display: inline-block;
+            width: 26px;
+            height: 26px;
+            min-width: 26px;
+            min-height: 26px;
+            flex-shrink: 0;
+            flex-grow: 0;
+            background: radial-gradient(ellipse at 45% 35%, 
+                #6bb6ff 0%,
+                #4a9ff5 15%, 
+                #2b7cd3 35%,
+                #1e5fa8 60%,
+                #14467d 100%);
+            border-radius: 50%;
+            position: relative;
+            animation: blink 6s infinite, eyeSparkle 4s ease-in-out infinite;
+            overflow: hidden;
+            box-shadow: 
+                inset -2px -3px 8px rgba(0, 0, 0, 0.4),
+                0 3px 10px rgba(74, 159, 245, 0.3),
+                inset 0 0 0 1px rgba(255, 255, 255, 0.2),
+                0 0 15px rgba(107, 182, 255, 0.4);
+        }
+        
+        .eye.left {
+            order: 1;
+        }
+        
+        .eye.right {
+            order: 2;
+        }
+
+        @keyframes eyeSparkle {
+            0%, 100% { 
+                filter: brightness(1) saturate(1);
+                box-shadow: 
+                    inset -2px -3px 8px rgba(0, 0, 0, 0.4),
+                    0 3px 10px rgba(74, 159, 245, 0.3),
+                    inset 0 0 0 1px rgba(255, 255, 255, 0.2),
+                    0 0 15px rgba(107, 182, 255, 0.4);
+            }
+            50% { 
+                filter: brightness(1.2) saturate(1.3);
+                box-shadow: 
+                    inset -2px -3px 8px rgba(0, 0, 0, 0.4),
+                    0 3px 10px rgba(74, 159, 245, 0.5),
+                    inset 0 0 0 1px rgba(255, 255, 255, 0.3),
+                    0 0 20px rgba(107, 182, 255, 0.6),
+                    0 0 30px rgba(173, 216, 255, 0.3);
+            }
+        }
+
+        .pupil {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background: radial-gradient(circle at 30% 30%, 
+                #1a1a1a 0%, 
+                #000000 60%);
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            transition: transform 0.1s ease-out;
+            z-index: 5;
+            pointer-events: none;
+        }
+
+        .eye::after {
+            content: '';
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            background: radial-gradient(circle at 35% 30%, 
+                rgba(255, 255, 255, 1) 0%, 
+                rgba(255, 255, 255, 0.95) 25%,
+                rgba(255, 240, 255, 0.7) 50%,
+                rgba(255, 200, 230, 0.4) 75%, 
+                transparent 100%);
+            border-radius: 50%;
+            top: 5px;
+            left: 5px;
+            box-shadow: 0 0 12px rgba(255, 255, 255, 1);
+            animation: highlightShimmer 3s ease-in-out infinite;
+        }
+
+        @keyframes highlightShimmer {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.85; transform: scale(1.08); }
+        }
+
+        .eye::before {
+            content: '';
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: radial-gradient(circle, 
+                rgba(255, 255, 255, 1) 0%, 
+                rgba(255, 240, 255, 0.8) 40%,
+                rgba(255, 255, 255, 0.4) 70%, 
+                transparent 100%);
+            border-radius: 50%;
+            bottom: 7px;
+            right: 5px;
+            box-shadow: 0 0 6px rgba(255, 255, 255, 0.9);
+            filter: blur(0.3px);
+        }
+
+        @keyframes blink {
+            0%, 46%, 52%, 100% { 
+                height: 26px;
+                border-radius: 50%;
+                transform: scaleY(1);
+            }
+            48%, 50% { 
+                height: 4px;
+                border-radius: 50%;
+                transform: scaleY(0.1);
+            }
+        }
+
+        /* Eyelashes - X-style anime */
+        .eyelash {
+            position: absolute;
+            width: 2px;
+            height: 8px;
+            background: linear-gradient(to bottom, #2a1505 0%, #2a1505 70%, transparent 100%);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+        /* Eyelash placement helpers - avoid inline styles */
+        .eyelash.left { top: -4px; left: 3px; transform: rotate(-25deg); }
+        .eyelash.center { top: -5px; left: 10px; height: 10px; transform: rotate(0deg); }
+        .eyelash.right { top: -4px; right: 3px; transform: rotate(25deg); }
+
+        /* Mouth - X-style anime: Small, cute, expressive */
+        .character-mouth {
+            position: absolute;
+            top: 58px;
+            left: 32px;
+            width: 16px;
+            height: 10px;
+            border: none;
+            border-radius: 50%;
+            background: linear-gradient(135deg, 
+                #ffadd2 0%, 
+                #ff8dc7 50%,
+                #ff6bb5 100%);
+            clip-path: ellipse(50% 40% at 50% 30%);
+            animation: smile 3s ease-in-out infinite;
+            transform: translateZ(8px);
+            box-shadow: 
+                0 2px 4px rgba(255, 107, 180, 0.4),
+                0 0 6px rgba(255, 173, 210, 0.3),
+                inset 0 -1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        .character-mouth::after {
+            content: '';
+            position: absolute;
+            width: 8px;
+            height: 3px;
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 50%;
+            left: 50%;
+            top: 2px;
+            transform: translateX(-50%);
+            opacity: 0.8;
+            filter: blur(1px);
+        }
+
+        @keyframes smile {
+            0%, 100% { 
+                transform: translateZ(8px) translateY(0) scale(1); 
+            }
+            50% { 
+                transform: translateZ(8px) translateY(-1px) scale(1.1); 
+            }
+        }
+
+        /* speaking mouth animation */
+        .character-mouth.speaking {
+            animation: mouthTalk 180ms linear infinite;
+            transform-origin: center top;
+        }
+
+        @keyframes mouthTalk {
+            0% { transform: translateZ(8px) translateY(0) scaleY(1); }
+            50% { transform: translateZ(8px) translateY(-2px) scaleY(0.5); }
+            100% { transform: translateZ(8px) translateY(0) scaleY(1); }
+        }
+
+        /* Blush - Vibrant X-style anime blush */
+        .blush {
+            position: absolute;
+            width: 24px;
+            height: 16px;
+            background: radial-gradient(ellipse at center, 
+                rgba(255, 120, 160, 1) 0%, 
+                rgba(255, 140, 180, 0.8) 30%,
+                rgba(255, 160, 190, 0.5) 60%,
+                rgba(255, 180, 200, 0.2) 85%,
+                transparent 100%);
+            border-radius: 50%;
+            top: 50px;
+            filter: blur(2px);
+            transform: translateZ(5px);
+            animation: blushPulse 4s ease-in-out infinite;
+        }
+
+        @keyframes blushPulse {
+            0%, 100% { opacity: 0.95; transform: translateZ(5px) scale(1); }
+            50% { opacity: 1; transform: translateZ(5px) scale(1.05); }
+        }
+
+        .blush.left {
+            left: 1px;
+        }
+
+        .blush.far-right {
+            right: -8px;
+        }
+        
+        /* Anime cheek highlights */
+        .blush::after {
+            content: '';
+            position: absolute;
+            width: 8px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 50%;
+            top: 3px;
+            left: 4px;
+            filter: blur(1px);
+        }
+
+        /* Body - 3D torso with anime outfit */
+        .character-torso {
+            position: absolute;
+            width: 60px;
+            height: 65px;
+            background: linear-gradient(145deg, 
+                #a78bfa 0%, 
+                #8b5cf6 20%,
+                #7c3aed 50%, 
+                #6d28d9 80%,
+                #5b21b6 100%);
+            border-radius: 45% 45% 28% 28%;
+            top: 92px;
+            left: 40px;
+            box-shadow: 
+                inset -4px -6px 12px rgba(0, 0, 0, 0.25),
+                inset 3px 4px 8px rgba(200, 180, 255, 0.3),
+                0 4px 12px rgba(124, 58, 237, 0.2);
+            transform-style: preserve-3d;
+        }
+        
+        /* Anime outfit collar */
+        .character-torso::before {
+            content: '';
+            position: absolute;
+            width: 50px;
+            height: 12px;
+            background: linear-gradient(145deg, #fef3c7, #fde68a);
+            border-radius: 50% 50% 45% 45%;
+            top: 2px;
+            left: 5px;
+            box-shadow: 
+                inset 0 -2px 4px rgba(180, 140, 0, 0.2),
+                0 2px 4px rgba(253, 224, 71, 0.3);
+            z-index: 1;
+        }
+        
+        /* Cute bow on outfit */
+        .character-torso::after {
+            content: '';
+            position: absolute;
+            width: 16px;
+            height: 12px;
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            border-radius: 40% 40% 50% 50%;
+            top: 8px;
+            left: 22px;
+            box-shadow: 
+                inset -2px -2px 4px rgba(180, 100, 0, 0.3),
+                inset 1px 1px 2px rgba(254, 243, 199, 0.5),
+                0 2px 6px rgba(251, 191, 36, 0.4);
+            z-index: 2;
+        }
+
+        .character-torso::before {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 25px;
+            background: linear-gradient(145deg, #8b7ac7, #9d8cd9);
+            border-radius: 0 50% 50% 0;
+            top: 15px;
+            left: -5px;
+            box-shadow: inset -2px 0 5px rgba(0, 0, 0, 0.2);
+        }
+
+        }
+
+        /* Body/Torso */
+        .character-torso {
+            position: absolute;
+            width: 50px;
+            height: 60px;
+            background: linear-gradient(145deg, 
+                #8b6f47 0%, 
+                #6b5742 30%,
+                #5a4a35 60%, 
+                #4a3d2e 100%);
+            border-radius: 45% 45% 30% 30%;
+            top: 85px;
+            left: 45px;
+            box-shadow: 
+                inset -3px -4px 10px rgba(0, 0, 0, 0.3),
+                inset 2px 3px 8px rgba(200, 180, 150, 0.3),
+                0 4px 10px rgba(0, 0, 0, 0.2);
+            transform-style: preserve-3d;
+        }
+        
+        .torso-joint {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: radial-gradient(circle, #3a3a3a, #1a1a1a);
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Arms - 3D cylindrical */
+        .character-arm {
+            position: absolute;
+            width: 14px;
+            height: 45px;
+            background: linear-gradient(145deg, #ffd4e5 0%, #ffb6c1 40%, #ff9fb0 100%);
+            border-radius: 10px;
+            top: 95px;
+            animation: armWave 2s ease-in-out infinite;
+            box-shadow: 
+                inset -2px 0 6px rgba(0, 0, 0, 0.2),
+                inset 2px 0 4px rgba(255, 255, 255, 0.3),
+                2px 3px 8px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease-out;
+        }
+
+        .character-arm.left {
+            left: 25px;
+            transform-origin: top center;
+            transform: rotate(calc(var(--left-shoulder-rotate, -10deg))) translateZ(3px);
+            --base-arm-rotate: var(--left-shoulder-rotate, -10deg);
+        }
+
+        .character-arm.right {
+            right: 25px;
+            transform-origin: top center;
+            animation-delay: 1s;
+            transform: rotate(calc(var(--right-shoulder-rotate, 10deg))) translateZ(3px);
+            --base-arm-rotate: var(--right-shoulder-rotate, 10deg);
+        }
+
+        @keyframes armWave {
+            0%, 100% { 
+                transform: rotate(var(--base-arm-rotate, 0deg)) translateZ(3px); 
+            }
+            50% { 
+                transform: rotate(calc(var(--base-arm-rotate, 0deg) + 20deg)) translateZ(3px); 
+            }
+        }
+
+        /* Hands */
+        .character-hand {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: radial-gradient(circle at 30% 30%, #ffd4e5, #ffb6c1);
+            border-radius: 50%;
+            bottom: -5px;
+            left: 2px;
+            box-shadow: 
+                inset -1px -1px 3px rgba(0, 0, 0, 0.2),
+                1px 1px 3px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Legs */
+        .elbow-joint {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            background: radial-gradient(circle, #4a4a4a, #2a2a2a);
+            border-radius: 50%;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+            z-index: 2;
+        }
+        
+        .character-forearm {
+            position: absolute;
+            width: 12px;
+            height: 25px;
+            background: linear-gradient(145deg, #8b6f47, #6b5742);
+            border-radius: 6px;
+            bottom: -25px;
+            left: 1px;
+            box-shadow: 
+                inset -1px 0 3px rgba(0, 0, 0, 0.2),
+                1px 1px 4px rgba(0, 0, 0, 0.3);
+            transform-origin: top center;
+            transition: transform 0.3s ease-out;
+        }
+        
+        .character-arm.left .character-forearm {
+            transform: rotate(calc(var(--left-elbow-rotate, 0deg)));
+        }
+        
+        .character-arm.right .character-forearm {
+            transform: rotate(calc(var(--right-elbow-rotate, 0deg)));
+        }
+
+        .character-leg {
+            position: absolute;
+            width: 16px;
+            height: 20px;
+            background: linear-gradient(145deg, #7b68ee 0%, #667eea 50%, #5a67d8 100%);
+            border-radius: 8px 8px 6px 6px;
+            top: 150px;
+            box-shadow: 
+                inset -2px 0 5px rgba(0, 0, 0, 0.2),
+                2px 2px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        .character-leg.left {
+            left: 48px;
+        }
+
+        .character-leg.right {
+            left: 68px;
+        }
+        
+        .knee-joint {
+            position: absolute;
+            width: 7px;
+            height: 7px;
+            background: radial-gradient(circle, #5a5a5a, #3a3a3a);
+            border-radius: 50%;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+            z-index: 2;
+        }
+        
+        .character-calf {
+            position: absolute;
+            width: 14px;
+            height: 18px;
+            background: linear-gradient(145deg, #7b68ee 0%, #667eea 50%, #5a67d8 100%);
+            border-radius: 7px 7px 5px 5px;
+            bottom: -18px;
+            left: 1px;
+            box-shadow: 
+                inset -1px 0 4px rgba(0, 0, 0, 0.2),
+                1px 1px 5px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Shoes */
+        .character-shoe {
+            position: absolute;
+            width: 18px;
+            height: 8px;
+            background: linear-gradient(145deg, #ff69b4, #ff1493);
+            border-radius: 40% 40% 30% 30%;
+            bottom: -4px;
+            left: -1px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+        }
+
+        /* Sparkles - 3D particles */
+        .sparkle {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: radial-gradient(circle at 30% 30%, #ffffff, #ffd700 60%, #ffed4e);
+            clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+            animation: sparkleFloat 3s ease-in-out infinite;
+            opacity: 0;
+            box-shadow: 0 0 8px rgba(255, 215, 0, 0.6);
+            transform-style: preserve-3d;
+        }
+
+        @keyframes walkCycle {
+            0%, 100% {
+                transform: translateX(0) translateY(0);
+            }
+            25% {
+                transform: translateX(0) translateY(-3px);
+            }
+            50% {
+                transform: translateX(0) translateY(0);
+            }
+            75% {
+                transform: translateX(0) translateY(-3px);
+            }
+        }
+        
+        @keyframes legWalk {
+            0%, 100% {
+                transform: rotate(0deg);
+            }
+            50% {
+                transform: rotate(15deg);
+            }
+        }
+        
+        @keyframes armSwing {
+            0%, 100% {
+                transform: rotate(0deg);
+            }
+            50% {
+                transform: rotate(-10deg);
+            }
+        }
+        
+        .anime-character.walking {
+            animation: walkCycle 0.6s ease-in-out infinite;
+        }
+        
+        .anime-character.walking .character-leg.left {
+            animation: legWalk 0.6s ease-in-out infinite;
+            transform-origin: top center;
+        }
+        
+        .anime-character.walking .character-leg.right {
+            animation: legWalk 0.6s ease-in-out infinite 0.3s;
+            transform-origin: top center;
+        }
+        
+        .anime-character.walking .character-arm.left {
+            animation: armSwing 0.6s ease-in-out infinite 0.3s;
+            transform-origin: top center;
+        }
+        
+        .anime-character.walking .character-arm.right {
+            animation: armSwing 0.6s ease-in-out infinite;
+            transform-origin: top center;
+        }
+
+        @keyframes sparkleFloat {
+            0%, 100% { 
+                opacity: 0;
+                transform: translateY(0) scale(0.5) rotateZ(0deg);
+            }
+            50% { 
+                opacity: 1;
+                transform: translateY(-25px) scale(1.2) rotateZ(180deg);
+            }
+        }
+
+        .sparkle:nth-child(1) {
+            top: 25px;
+            left: 15px;
+            animation-delay: 0s;
+        }
+
+        .sparkle:nth-child(2) {
+            top: 35px;
+            right: 15px;
+            animation-delay: 1s;
+        }
+
+        .sparkle:nth-child(3) {
+            top: 55px;
+            left: 10px;
+            animation-delay: 2s;
+        }
+
+        .sparkle:nth-child(4) {
+            top: 45px;
+            right: 10px;
+            animation-delay: 1.5s;
+        }
+
+        /* Set CSS variables for arm rotation */
+        .character-arm.left {
+            --base-arm-rotate: -10deg;
+        }
+
+        .character-arm.right {
+            --base-arm-rotate: 10deg;
+        }
+
+        /* Movement animations */
+        @keyframes floatAround {
+            0% { 
+                transform: translate(0, 0) rotate(0deg);
+            }
+            25% { 
+                transform: translate(100px, -50px) rotate(5deg);
+            }
+            50% { 
+                transform: translate(200px, 0px) rotate(0deg);
+            }
+            75% { 
+                transform: translate(100px, 50px) rotate(-5deg);
+            }
+            100% { 
+                transform: translate(0, 0) rotate(0deg);
+            }
+        }
+
+        .anime-character.moving {
+            animation: floatAround 15s ease-in-out infinite;
+        }
+
+        /* Hover effect */
+        .anime-character {
+            pointer-events: auto;
+            cursor: pointer;
+        }
+
+        .anime-character:hover .character-head {
+            /* hover head bob disabled */
+        }
+
+        .anime-character:hover .sparkle {
+            animation-duration: 1.5s;
+        }
+
+        /* Message bubble */
+        .character-message {
+            position: absolute;
+            top: -40px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: white;
+            padding: 8px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            white-space: nowrap;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+            z-index: 10000;
+        }
+
+        .character-message::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 8px solid transparent;
+            border-right: 8px solid transparent;
+            border-top: 8px solid white;
+        }
+
+        .anime-character:hover .character-message {
+            opacity: 1;
+        }
+
+        body.dark-theme .character-message {
+            background: #3a3a3a;
+            color: #e0e0e0;
+        }
+
+        body.dark-theme .character-message::after {
+            border-top-color: #3a3a3a;
+        }
+
+        /* Interactive Objects */
+        .game-object {
+            position: fixed;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+            z-index: 5;
+        }
+
+        .game-object:hover {
+            transform: scale(1.1);
+            filter: brightness(1.2);
+        }
+
+        .star-object {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #ffd700 0%, #ffed4e 50%, #ffa500 100%);
+            clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+            animation: starRotate 4s linear infinite, starGlow 2s ease-in-out infinite;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.6);
+        }
+
+        @keyframes starRotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes starGlow {
+            0%, 100% { box-shadow: 0 0 20px rgba(255, 215, 0, 0.6); }
+            50% { box-shadow: 0 0 30px rgba(255, 215, 0, 1); }
+        }
+
+        .heart-object {
+            width: 35px;
+            height: 35px;
+            background: linear-gradient(135deg, #ff69b4 0%, #ff1493 100%);
+            transform: rotate(-45deg);
+            animation: heartBeat 1.5s ease-in-out infinite;
+            box-shadow: 0 0 15px rgba(255, 105, 180, 0.5);
+        }
+
+        .heart-object::before,
+        .heart-object::after {
+            content: "";
+            width: 35px;
+            height: 35px;
+            background: linear-gradient(135deg, #ff69b4 0%, #ff1493 100%);
+            border-radius: 50%;
+            position: absolute;
+        }
+
+        .heart-object::before {
+            top: -17.5px;
+            left: 0;
+        }
+
+        .heart-object::after {
+            left: 17.5px;
+            top: 0;
+        }
+
+        @keyframes heartBeat {
+            0%, 100% { transform: rotate(-45deg) scale(1); }
+            50% { transform: rotate(-45deg) scale(1.15); }
+        }
+
+        .crystal-object {
+            width: 0;
+            height: 0;
+            border-left: 20px solid transparent;
+            border-right: 20px solid transparent;
+            border-bottom: 40px solid #9333ea;
+            position: relative;
+            animation: crystalFloat 3s ease-in-out infinite;
+            filter: drop-shadow(0 0 15px rgba(147, 51, 234, 0.6));
+        }
+
+        .crystal-object::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 0;
+            border-left: 20px solid transparent;
+            border-right: 20px solid transparent;
+            border-top: 40px solid #c084fc;
+            top: 0;
+            left: -20px;
+        }
+
+        @keyframes crystalFloat {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-10px) rotate(5deg); }
+        }
+
+        .coin-object {
+            width: 35px;
+            height: 35px;
+            background: linear-gradient(135deg, #ffd700 0%, #ffed4e 50%, #ff9800 100%);
+            border-radius: 50%;
+            position: relative;
+            animation: coinSpin 2s linear infinite;
+            box-shadow: 
+                inset -3px -3px 8px rgba(0, 0, 0, 0.3),
+                inset 3px 3px 8px rgba(255, 255, 255, 0.8),
+                0 0 20px rgba(255, 215, 0, 0.5);
+        }
+
+        .coin-object::before {
+            content: '$';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 20px;
+            font-weight: bold;
+            color: #ff9800;
+            text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
+        }
+
+        @keyframes coinSpin {
+            0%, 100% { transform: rotateY(0deg); }
+            50% { transform: rotateY(180deg); }
+        }
+
+        .flower-object {
+            width: 40px;
+            height: 40px;
+            position: relative;
+            animation: flowerSway 3s ease-in-out infinite;
+        }
+
+        .flower-object::before {
+            content: '';
+            position: absolute;
+            width: 15px;
+            height: 15px;
+            background: #ff69b4;
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            box-shadow: 
+                -15px 0 0 #ff69b4,
+                15px 0 0 #ff69b4,
+                0 -15px 0 #ff69b4,
+                0 15px 0 #ff69b4,
+                -10px -10px 0 #ffc0cb,
+                10px -10px 0 #ffc0cb,
+                -10px 10px 0 #ffc0cb,
+                10px 10px 0 #ffc0cb;
+        }
+
+        .flower-object::after {
+            content: '';
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: #ffd700;
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        @keyframes flowerSway {
+            0%, 100% { transform: rotate(-5deg); }
+            50% { transform: rotate(5deg); }
+        }
+
+
+
+        /* Chat Bubble */
+        .chat-bubble {
+            position: absolute;
+            background: white;
+            border-radius: 16px;
+            padding: 8px 12px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
+            font-size: 13px;
+            color: #333;
+            width: 180px;
+            max-width: 320px;
+            pointer-events: auto; /* interactive */
+            opacity: 1;
+            transform: translate(-50%, -120%) scale(1);
+            transition: width 0.18s ease, height 0.18s ease, transform 0.18s ease;
+            z-index: 10000;
+            left: 50%;
+            top: -10px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            overflow: visible;
+        }
+
+        /* default collapsed view: only header */
+        .chat-bubble .bubble-messages,
+        .chat-bubble .bubble-input-row {
+            display: none;
+        }
+
+        /* open/expanded chat bubble */
+        .chat-bubble.open {
+            width: 320px;
+            max-height: 320px;
+            padding: 10px 12px;
+        }
+
+        .chat-bubble.open .bubble-messages,
+        .chat-bubble.open .bubble-input-row {
+            display: block;
+        }
+
+        /* triangle tip (small) */
+        .bubble-tip {
+            position: absolute;
+            bottom: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 10px solid transparent;
+            border-right: 10px solid transparent;
+            border-top: 10px solid white;
+            filter: drop-shadow(0 3px 6px rgba(0,0,0,0.12));
+        }
+
+        /* Size helpers */
+        .chat-bubble.bubble-small.open { width: 260px; }
+        .chat-bubble.bubble-medium.open { width: 320px; }
+        .chat-bubble.bubble-large.open { width: 420px; }
+
+        /* Messages list */
+        .bubble-messages {
+            display: block;
+            max-height: 160px;
+            overflow-y: auto;
+            padding: 6px 6px 0 6px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .bubble-msg { max-width: 80%; padding: 6px 8px; border-radius: 10px; font-size: 12px; line-height: 1.2; }
+        .bubble-msg.user { background: linear-gradient(135deg,#667eea,#764ba2); color: white; align-self: flex-end; }
+        .bubble-msg.assistant { background: rgba(240,240,255,0.95); color: #111; align-self: flex-start; }
+        .bubble-msg { display: flex; align-items: center; gap: 6px; }
+        .bubble-msg .bubble-speak-btn { border: none; background: transparent; cursor: pointer; font-size: 12px; padding: 2px 6px; border-radius: 6px; }
+        .bubble-msg .bubble-speak-btn:hover { background: rgba(0,0,0,0.06); }
+
+        /* Remote TTS status indicator */
+        .tts-status { font-size: 12px; margin-left: 8px; padding: 2px 8px; border-radius: 10px; display: inline-block; vertical-align: middle; font-weight: 600; }
+        .tts-status.checking { background: #fff7ed; color: #92400e; border: 1px solid rgba(153, 80, 0, 0.08); }
+        .tts-status.available { background: #ecfdf5; color: #065f46; border: 1px solid rgba(6,95,70,0.06); }
+        .tts-status.unavailable { background: #fff1f2; color: #b91c1c; border: 1px solid rgba(185,28,28,0.06); }
+
+        /* small test button for remote tts */
+        .tts-test-btn { margin-left: 8px; border: none; background: rgba(0,0,0,0.06); padding: 4px 8px; border-radius: 8px; cursor: pointer; font-size: 12px; }
+        .tts-test-btn:hover { background: rgba(0,0,0,0.12); }
+
+        /* Toast / transient feedback */
+        .aria-toast { position: fixed; right: 20px; bottom: 28px; z-index: 12000; background: rgba(0,0,0,0.85); color: #fff; padding: 10px 14px; border-radius: 10px; opacity: 0; transform: translateY(8px); pointer-events: none; transition: opacity 180ms ease, transform 180ms ease; font-size: 13px; }
+        .aria-toast.visible { opacity: 1; transform: translateY(0); pointer-events: auto; }
+
+        /* Input row */
+        .bubble-input-row { display: flex; gap: 8px; align-items: center; padding-top: 6px; }
+        .bubble-input { flex: 1; padding: 8px 10px; border-radius: 8px; border: 1px solid rgba(0,0,0,0.08); background: #fff; font-size: 13px; }
+        .bubble-send { padding: 8px 10px; border-radius: 8px; border: none; background: linear-gradient(135deg,#667eea,#764ba2); color: #fff; cursor: pointer; }
+
+        body.dark-theme .chat-bubble {
+            background: #2a2a2a;
+            color: #e0e0e0;
+        }
+
+        body.dark-theme .bubble-tip {
+            border-top-color: #2a2a2a;
+        }
+
+        .anime-character {
+            cursor: pointer;
+        }
+
+        .collected {
+            animation: collectEffect 0.5s ease-out forwards;
+        }
+
+        @keyframes collectEffect {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.5) rotate(360deg); opacity: 0.7; }
+            100% { transform: scale(0); opacity: 0; }
+        }
+
+        /* AI-Generated Avatar Styles */
+        .aria-avatar-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            animation: fadeInScale 0.5s ease-out;
+        }
+
+        .aria-avatar-frame {
+            position: relative;
+            width: 200px;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.95), rgba(118, 75, 162, 0.95));
+            border-radius: 20px;
+            padding: 15px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3), 0 0 0 3px rgba(147, 51, 234, 0.5);
+            backdrop-filter: blur(10px);
+        }
+
+        #ariaAvatarImage {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+            border-radius: 12px;
+            display: block;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .aria-avatar-label {
+            color: white;
+            text-align: center;
+            font-weight: 600;
+            font-size: 14px;
+            margin-top: 10px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        #ariaAvatarClose,
+        #ariaAvatarRegenerate {
+            position: absolute;
+            top: 10px;
+            width: 30px;
+            height: 30px;
+            border: none;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.9);
+            cursor: pointer;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            transition: all 0.2s ease;
+        }
+
+        #ariaAvatarClose {
+            right: 10px;
+        }
+
+        #ariaAvatarRegenerate {
+            right: 45px;
+        }
+
+        #ariaAvatarClose:hover,
+        #ariaAvatarRegenerate:hover {
+            transform: scale(1.1);
+            background: white;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        @keyframes fadeInScale {
+            from {
+                opacity: 0;
+                transform: scale(0.8) translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        .aria-avatar-hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+
+    <!-- AI-Generated Aria Avatar -->
+    <div class="aria-avatar-container" id="ariaAvatarContainer" style="display: none;">
+        <div class="aria-avatar-frame">
+            <img id="ariaAvatarImage" src="" alt="Aria AI Avatar">
+            <div class="aria-avatar-label">Aria (AI-Generated)</div>
+            <button id="ariaAvatarClose" title="Hide avatar">✕</button>
+            <button id="ariaAvatarRegenerate" title="Regenerate avatar">🔄</button>
+        </div>
+    </div>
+
+    <!-- Anime Character -->
+    <div class="anime-character" id="animeCharacter">
+        <div class="character-body">
+            <!-- Head -->
+            <div class="character-head">
+                <div class="character-eyes">
+                    <div class="eye left">
+                        <div class="pupil"></div>
+                        <div class="eyelash left"></div>
+                        <div class="eyelash center"></div>
+                        <div class="eyelash right"></div>
+                    </div>
+                    <div class="eye right">
+                        <div class="pupil"></div>
+                        <div class="eyelash left"></div>
+                        <div class="eyelash center"></div>
+                        <div class="eyelash right"></div>
+                    </div>
+                </div>
+                <div class="character-mouth"></div>
+                <div class="blush left"></div>
+                <div class="blush far-right"></div>
+            </div>
+            
+            <!-- Body/Torso -->
+            <div class="character-torso">
+                <div class="torso-joint"></div>
+            </div>
+            
+            <!-- Arms with hands and elbows -->
+            <div class="character-arm left">
+                <div class="elbow-joint"></div>
+                <div class="character-forearm">
+                    <div class="character-hand"></div>
+                </div>
+            </div>
+            <div class="character-arm right">
+                <div class="elbow-joint"></div>
+                <div class="character-forearm">
+                    <div class="character-hand"></div>
+                </div>
+            </div>
+            
+            <!-- Legs with shoes and knees -->
+            <div class="character-leg left">
+                <div class="knee-joint"></div>
+                <div class="character-calf">
+                    <div class="character-shoe"></div>
+                </div>
+            </div>
+            <div class="character-leg right">
+                <div class="knee-joint"></div>
+                <div class="character-calf">
+                    <div class="character-shoe"></div>
+                </div>
+            </div>
+            
+            <!-- Dynamic shadow beneath the character for depth -->
+            <div class="character-shadow" aria-hidden="true"></div>
+            
+            <!-- Message bubble -->
+            <div class="character-message">Hi! I'm Aria! ✨</div>
+        </div>
+    </div>
+
+    <!-- Aria control panel (TTS, lip-sync, hair physics tuning) -->
+    <div class="aria-controls" id="ariaControls">
+        <button class="aria-controls-toggle" id="ariaControlsToggle" title="Aria Controls">⚙️</button>
+        <div class="aria-panel" id="ariaPanel" aria-hidden="true">
+            <div class="control-section">
+                <h4>Speech / Lip-sync</h4>
+                <label><input type="checkbox" id="ttsAutoSpeak" /> Auto-speak assistant replies</label>
+                <label>Voice
+                    <select id="ttsVoice"></select>
+                </label>
+                <label>Rate: <span id="ttsRateValue">1.00</span>
+                    <input id="ttsRate" type="range" min="0.6" max="1.6" step="0.05" value="1" />
+                </label>
+                <label>Pitch: <span id="ttsPitchValue">1.00</span>
+                    <input id="ttsPitch" type="range" min="0.5" max="2" step="0.05" value="1" />
+                </label>
+                <label>Lip-sync mode
+                    <select id="lipSyncMode">
+                        <option value="onboundary">onboundary (browser)</option>
+                        <option value="per-word">per-word (fallback)</option>
+                        <option value="token">token (streaming from backend)</option>
+                        <option value="none">none</option>
+                    </select>
+                </label>
+                <label>Mouth strength: <span id="mouthStrengthValue">1.0</span>
+                    <input id="mouthStrength" type="range" min="0.3" max="1.8" step="0.05" value="1" />
+                </label>
+                <label><input type="checkbox" id="ttsRemote" /> Use remote TTS (Azure) if available <span id="ttsRemoteStatus" class="tts-status" aria-hidden="true"></span> <button id="ttsTestButton" class="tts-test-btn" type="button">Test</button> <button id="ttsDetailsButton" class="tts-test-btn" type="button">Details</button></label>
+            </div>
+            <div class="control-section">
+                <h4>Hair physics</h4>
+                <label>Sway factor: <span id="hairSwayValue">1.0</span>
+                    <input id="hairSway" type="range" min="0" max="3" step="0.05" value="1.2" />
+                </label>
+                <label>Noise factor: <span id="hairNoiseValue">1.0</span>
+                    <input id="hairNoise" type="range" min="0" max="3" step="0.05" value="1" />
+                </label>
+                <label>Bob amplitude: <span id="hairBobValue">2.0</span>
+                    <input id="hairBob" type="range" min="0" max="6" step="0.1" value="2" />
+                </label>
+                <label>Damping: <span id="hairDampingValue">0.82</span>
+                    <input id="hairDamping" type="range" min="0.6" max="0.98" step="0.01" value="0.82" />
+                </label>
+                <div class="panel-actions">
+                    <button id="applyPresetCute">Cute</button>
+                    <button id="applyPresetEnergetic">Energetic</button>
+                    <button id="applyPresetZen">Zen</button>
+                </div>
+            </div>
+            <div class="aria-controls-footer">
+                <button id="ariaClosePanel">Close</button>
+            </div>
+        </div>
+    </div>
+    <!-- Backend Startup Modal -->
+    <div id="backendModal" class="modal">
+        <div class="modal-content">
+            <span class="close" id="closeBackendModal">&times;</span>
+            <h3 class="modal-title">Start Backend</h3>
+            <p><strong>Command copied to clipboard!</strong> Paste it in your terminal:</p>
+            <ol class="modal-list">
+                <li>Open <b>PowerShell</b> in this folder: <code>C:\Users\Bryan\OneDrive\AI</code></li>
+                <li>Paste and run: <code>func start</code></li>
+            </ol>
+            <p class="modal-subtitle">Or in <b>VS Code</b>:</p>
+            <ol class="modal-list">
+                <li>Open Command Palette (<kbd>Ctrl+Shift+P</kbd>)</li>
+                <li>Type <b>Tasks: Run Task</b> and select <b>func: host start</b>.</li>
+            </ol>
+            <p class="modal-subtitle modal-footer-note">The backend will start on port 7071. Refresh this page once it's running.</p>
+        </div>
+    </div>
+
+        <!-- Remote TTS Diagnostics Modal -->
+        <div id="ttsDiagModal" class="modal">
+            <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="ttsDiagTitle">
+                <span class="close" id="closeTtsDiagModal">&times;</span>
+                <h3 id="ttsDiagTitle" class="modal-title">Remote TTS Diagnostics</h3>
+                <div style="margin-bottom:8px;color:#333;font-size:13px">This diagnostic tool checks whether the backend has remote TTS configured and will attempt a small synthesis. Useful when remote audio fails.</div>
+
+                <div style="display:flex;gap:10px;align-items:center;margin-bottom:10px">
+                    <div id="ttsDiagStatus" class="tts-status checking">Idle</div>
+                    <button id="ttsDiagRun" class="tts-test-btn" type="button">Run test</button>
+                    <button id="ttsDiagPlay" class="tts-test-btn" disabled type="button">Play</button>
+                    <a id="ttsDiagDownload" style="display:none;font-size:12px;color:#667eea;text-decoration:underline;cursor:pointer">Download</a>
+                </div>
+
+                <h4 style="margin:6px 0 4px 0">Server environment</h4>
+                <div id="ttsDiagEnv" style="font-size:12px;color:#444;background:#fafafa;padding:10px;border-radius:8px;border:1px solid rgba(0,0,0,0.04);max-height:160px;overflow:auto"></div>
+
+                <h4 style="margin:8px 0 4px 0">Full diagnostic log</h4>
+                <pre id="ttsDiagLog" style="background:#111;color:#eee;padding:10px;border-radius:6px;max-height:220px;overflow:auto;font-size:12px">No diagnostics run yet.</pre>
+                <div style="margin-top:10px;font-size:12px;color:#666">If remote TTS isn't available, the backend needs AZURE_SPEECH_KEY & AZURE_SPEECH_REGION configured in the environment or local.settings.json for Functions.</div>
+
+                <h4 style="margin:8px 0 4px 0">Quick terminal test commands</h4>
+                <div style="font-size:12px;color:#444;background:#fafafa;padding:10px;border-radius:8px;border:1px solid rgba(0,0,0,0.04);max-height:220px;overflow:auto">
+                    <div style="margin-bottom:8px;display:flex;gap:8px;align-items:flex-start;">
+                        <div style="flex:1;">
+                            <div style="font-weight:600;margin-bottom:6px">PowerShell (recommended on Windows)</div>
+                            <pre id="ttsTestPS" style="white-space:pre-wrap;word-break:break-word;background:#fff;padding:8px;border-radius:6px;border:1px solid rgba(0,0,0,0.06);">$body = @{text='Diagnostic test from Aria'; format='wav'} | ConvertTo-Json; Invoke-RestMethod -Uri 'http://localhost:7071/api/tts' -Method Post -ContentType 'application/json' -Body $body</pre>
+                        </div>
+                        <div style="width:80px;display:flex;align-items:center;justify-content:center">
+                            <button class="copyBtn" onclick="copyToClipboard('ttsTestPS', this)">Copy</button>
+                        </div>
+                    </div>
+                    <div style="display:flex;gap:8px;align-items:flex-start;">
+                        <div style="flex:1;">
+                            <div style="font-weight:600;margin-bottom:6px">curl (Linux/macOS / or curl.exe on Windows)</div>
+                            <pre id="ttsTestCurl" style="white-space:pre-wrap;word-break:break-word;background:#fff;padding:8px;border-radius:6px;border:1px solid rgba(0,0,0,0.06);">curl.exe -X POST http://localhost:7071/api/tts -H "Content-Type: application/json" -d "{\"text\":\"Diagnostic test from Aria\",\"format\":\"wav\"}"</pre>
+                        </div>
+                        <div style="width:80px;display:flex;align-items:center;justify-content:center">
+                            <button class="copyBtn" onclick="copyToClipboard('ttsTestCurl', this)">Copy</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    <div class="chat-container">
+        <div class="chat-header">
+            <h1>🤖 QAI Chat</h1>
+            <div class="provider-info" id="providerInfo">Connecting...</div>
+        </div>
+
+        <div class="chat-messages" id="chatMessages">
+            <div class="message system">
+                <div class="message-content">
+                    Welcome! Ask me anything. Type your message below.
+                </div>
+            </div>
+        </div>
+
+        <div class="chat-input-container">
+            <div class="chat-input-wrapper">
+                <textarea 
+                    id="messageInput" 
+                    placeholder="Type your message..."
+                    rows="2"
+                ></textarea>
+                <input type="file" id="visionImageInput" accept="image/*">
+                <button id="visionUploadButton" title="Upload image for expression analysis">🖼️</button>
+                <button id="sendButton">📤</button>
+            </div>
+            <div id="visionPreview">
+                <img id="visionPreviewImage" alt="Image preview">
+                <button id="visionClearButton">✕ Clear</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast for Aria notifications -->
+    <div id="ariaToast" class="aria-toast" aria-hidden="true"></div>
+    <script>
+        // Allow chat.js to wire up vision and avatar features
+        // The embedded controller will handle streaming chat separately
+        window.ARIA_EMBEDDED = false;
+        
+        // Pupil cursor tracking - both eyes
+        document.addEventListener('DOMContentLoaded', function() {
+            var pupils = document.querySelectorAll('.pupil');
+            var eyes = document.querySelectorAll('.eye');
+            var eyesContainer = document.querySelector('.character-eyes');
+            if (pupils.length === 0 || eyes.length === 0) return;
+            
+            // Make eyes container draggable
+            var isDraggingEyes = false;
+            var eyesDragStartX = 0;
+            var eyesDragStartY = 0;
+            var eyesInitialTop = 32;
+            var eyesInitialLeft = 50;
+            
+            eyesContainer.addEventListener('mousedown', function(e) {
+                isDraggingEyes = true;
+                eyesContainer.classList.add('dragging');
+                eyesDragStartX = e.clientX;
+                eyesDragStartY = e.clientY;
+                
+                // Get current position
+                var currentTop = parseInt(eyesContainer.style.top || 32);
+                var currentLeft = parseFloat(eyesContainer.style.left || 50);
+                eyesInitialTop = currentTop;
+                eyesInitialLeft = currentLeft;
+                
+                e.stopPropagation();
+                e.preventDefault();
+            });
+            
+            document.addEventListener('mousemove', function(e) {
+                if (isDraggingEyes) {
+                    var deltaX = e.clientX - eyesDragStartX;
+                    var deltaY = e.clientY - eyesDragStartY;
+                    
+                    var newTop = eyesInitialTop + deltaY;
+                    var newLeft = eyesInitialLeft + (deltaX / window.innerWidth * 100);
+                    
+                    eyesContainer.style.top = newTop + 'px';
+                    eyesContainer.style.left = newLeft + '%';
+                    
+                    // Log position for user
+                    console.log('Eyes position - top:', newTop + 'px', 'left:', newLeft + '%');
+                    return;
+                }
+                
+                // Pupil tracking
+                eyes.forEach(function(eye, index) {
+                    var pupil = pupils[index];
+                    if (!pupil) return;
+                    
+                    var eyeRect = eye.getBoundingClientRect();
+                    var eyeCenterX = eyeRect.left + eyeRect.width / 2;
+                    var eyeCenterY = eyeRect.top + eyeRect.height / 2;
+                    
+                    var angle = Math.atan2(e.clientY - eyeCenterY, e.clientX - eyeCenterX);
+                    var distance = Math.min(6, Math.hypot(e.clientX - eyeCenterX, e.clientY - eyeCenterY) / 20);
+                    
+                    var pupilX = Math.cos(angle) * distance;
+                    var pupilY = Math.sin(angle) * distance;
+                    
+                    pupil.style.transform = 'translate(calc(-50% + ' + pupilX + 'px), calc(-50% + ' + pupilY + 'px))';
+                });
+            });
+            
+            document.addEventListener('mouseup', function() {
+                if (isDraggingEyes) {
+                    isDraggingEyes = false;
+                    eyesContainer.classList.remove('dragging');
+                    
+                    // Log final position
+                    var finalTop = eyesContainer.style.top;
+                    var finalLeft = eyesContainer.style.left;
+                    console.log('=== FINAL EYES POSITION ===');
+                    console.log('top:', finalTop);
+                    console.log('left:', finalLeft);
+                    console.log('==========================');
+                }
+            });
+        });
+    </script>
+    <script src="/api/chat-web/chat.js"></script>
+    <script>
+    // Anime Character Controller with AI Chat
+    (function() {
+        var character = document.getElementById('animeCharacter');
+        var chatContainer = document.querySelector('.chat-container');
+        var messageInput = document.getElementById('messageInput');
+        var sendButton = document.getElementById('sendButton');
+        var chatMessages = document.getElementById('chatMessages');
+        var providerInfo = document.getElementById('providerInfo');
+        
+        // ==== Avatar & Vision Handlers ====
+        // Removed duplicate handlers - chat.js module now handles all vision upload and avatar generation
+        // This embedded controller focuses solely on streaming chat and character animation
+        
+        var characterSpeed = 8;
+        var keys = {};
+        var isDraggingChat = false;
+        var dragOffsetX = 0;
+        var dragOffsetY = 0;
+        
+        var messageTexts = [
+            "Hi! I'm Aria! ✨",
+            "Let's chat! 🌸",
+            "Drag me around! 💫",
+            "So many features! ◕‿◕",
+            "Ganbatte! 💪",
+            "Share your screen! 📺",
+            "Having fun! ⭐",
+            "Touched it! 🎉",
+            "Interactive! 💖"
+        ];
+        var currentMessageIndex = 0;
+        
+        // AI Chat functionality
+        var conversationHistory = [];
+        // mouth animation control
+        var mouthEl = null;
+        var mouthSpeakTimeoutId = null;
+        function startMouthTalking() {
+            try {
+                if (!mouthEl && character) mouthEl = character.querySelector('.character-mouth');
+                if (!mouthEl) return;
+                mouthEl.classList.add('speaking');
+                if (mouthSpeakTimeoutId) { clearTimeout(mouthSpeakTimeoutId); mouthSpeakTimeoutId = null; }
+            } catch (e) { /* ignore */ }
+        }
+        function stopMouthTalking(delayMs) {
+            try {
+                if (!mouthEl && character) mouthEl = character.querySelector('.character-mouth');
+                if (!mouthEl) return;
+                if (mouthSpeakTimeoutId) { clearTimeout(mouthSpeakTimeoutId); mouthSpeakTimeoutId = null; }
+                if (typeof delayMs === 'number' && delayMs > 0) {
+                    mouthSpeakTimeoutId = setTimeout(function() { mouthEl.classList.remove('speaking'); mouthSpeakTimeoutId = null; }, delayMs);
+                } else {
+                    mouthEl.classList.remove('speaking');
+                }
+            } catch (e) { /* ignore */ }
+        }
+
+        // ---- Aria speech + lip-sync controller ----
+        var ariaSettings = Object.assign({
+            autoSpeak: true,
+            lipSyncMode: 'onboundary', // 'onboundary' | 'per-word' | 'none'
+            voice: null,
+            rate: 1.0,
+            pitch: 1.0,
+            mouthStrength: 1.05,
+            // Use server-side remote TTS (if backend configured)
+            remoteTTS: false,
+            hairSway: 1.2,
+            hairNoise: 1.0,
+            hairBob: 2.0,
+            hairDamping: 0.82
+        }, JSON.parse(localStorage.getItem('ariaSettings') || '{}'));
+
+        var currentSpeech = { utterance: null, fallbackTimers: [], audio: null };
+
+        function persistAriaSettings() {
+            try { localStorage.setItem('ariaSettings', JSON.stringify(ariaSettings)); } catch(e) {}
+        }
+
+        // Inline transient runtime flag for remote TTS availability (not persisted)
+        if (typeof ariaSettings.remoteTTSAvailable === 'undefined') ariaSettings.remoteTTSAvailable = undefined;
+
+        // Simple UI toast for user-visible transient messages
+        function showToast(msg, durationMs) {
+            try {
+                var t = document.getElementById('ariaToast');
+                if (!t) return;
+                t.textContent = msg || '';
+                t.classList.add('visible');
+                t.setAttribute('aria-hidden', 'false');
+                try { clearTimeout(t._hideTimer); } catch (e) {}
+                t._hideTimer = setTimeout(function() {
+                    try { t.classList.remove('visible'); t.setAttribute('aria-hidden', 'true'); } catch(e) {}
+                }, (typeof durationMs === 'number' ? durationMs : 3800));
+            } catch (e) { /* ignore toast faults */ }
+        }
+
+        function updateRemoteTTSUI(status, message) {
+            try {
+                var el = document.getElementById('ttsRemoteStatus');
+                if (!el) return;
+                el.className = 'tts-status ' + (status || '');
+                if (message !== undefined) el.textContent = message;
+                else if (status === 'available') el.textContent = 'Available';
+                else if (status === 'checking') el.textContent = 'Checking...';
+                else if (status === 'unavailable') el.textContent = 'Unavailable';
+                else el.textContent = '';
+            } catch (e) { /* ignore UI faults */ }
+        }
+
+        // Do a lightweight availability check for remote TTS by attempting a tiny synthesis
+        async function checkRemoteTTSAvailability(showToastOnResult) {
+            try {
+                updateRemoteTTSUI('checking');
+                // Small test phrase — server will return 501 if remote not configured
+                var resp = await fetch('/api/tts', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text: 'ping', format: 'wav' }),
+                });
+
+                if (!resp.ok) {
+                    var txt = '';
+                    var help = null;
+                    try { var j = await resp.json(); txt = j && j.error ? j.error : await resp.text(); help = j && j.help; } catch (e) { txt = await resp.text().catch(function(){return ''}); }
+                    ariaSettings.remoteTTSAvailable = false;
+                    updateRemoteTTSUI('unavailable', 'Unavailable');
+                    if (showToastOnResult) {
+                        var message = 'Remote TTS not available: ' + (txt || resp.statusText || 'server response');
+                        if (resp.status === 501 && help) message += ' — ' + help;
+                        showToast(message);
+                    }
+                    return false;
+                }
+
+                var j = await resp.json();
+                if (j && j.audio_base64) {
+                    ariaSettings.remoteTTSAvailable = true;
+                    updateRemoteTTSUI('available', 'Available');
+                    if (showToastOnResult) showToast('Remote TTS available — using server voice');
+                    return true;
+                }
+
+                ariaSettings.remoteTTSAvailable = false;
+                updateRemoteTTSUI('unavailable', 'Unavailable');
+                if (showToastOnResult) showToast('Remote TTS not available (no audio returned)');
+                return false;
+            } catch (err) {
+                ariaSettings.remoteTTSAvailable = false;
+                updateRemoteTTSUI('unavailable', 'Unavailable');
+                if (showToastOnResult) showToast('Remote TTS check failed. Using local TTS.');
+                return false;
+            }
+        }
+
+        // Open diagnostics modal and populate environment info
+        async function showTTSDiagnosticsModal() {
+            try {
+                var modal = document.getElementById('ttsDiagModal');
+                var logEl = document.getElementById('ttsDiagLog');
+                var envEl = document.getElementById('ttsDiagEnv');
+                var statusEl = document.getElementById('ttsDiagStatus');
+                var playBtn = document.getElementById('ttsDiagPlay');
+                var downloadLink = document.getElementById('ttsDiagDownload');
+
+                if (!modal) return;
+                // reset
+                if (logEl) logEl.textContent = 'Running status query...';
+                if (statusEl) { statusEl.className = 'tts-status checking'; statusEl.textContent = 'Checking...'; }
+                if (playBtn) { playBtn.disabled = true; }
+                if (downloadLink) { downloadLink.style.display = 'none'; downloadLink.href = '#'; }
+
+                try {
+                    // fetch server status
+                    var resp = await fetch('/api/ai/status');
+                    var statusJson = {};
+                    if (resp.ok) statusJson = await resp.json(); else statusJson = { error: 'status fetch failed', code: resp.status };
+                    // pretty-print a subset of useful env items
+                    var env = statusJson.env || {};
+                    var provider = statusJson.active_provider || statusJson.data?.active_provider || 'unknown';
+                    var model = statusJson.model || statusJson.data?.model || 'unknown';
+                    var lines = [];
+                    lines.push('Provider: ' + provider + ' (model: ' + model + ')');
+                    lines.push('\nEnvironment flags:');
+                    ['AZURE_SPEECH_KEY','AZURE_SPEECH_REGION','AZURE_OPENAI_API_KEY','OPENAI_API_KEY'].forEach(function(k){ lines.push(' - ' + k + ': ' + (!!env[k] ? 'SET' : 'unset'); });
+                    if (env && env.AZURE_SPEECH_KEY && env.AZURE_SPEECH_REGION) {
+                        if (statusEl) { statusEl.className = 'tts-status available'; statusEl.textContent = 'Available (env)'; }
+                    } else {
+                        if (statusEl) { statusEl.className = 'tts-status unavailable'; statusEl.textContent = 'Not configured'; }
+                    }
+
+                    if (envEl) envEl.textContent = lines.join('\n');
+                    if (logEl) {
+                        logEl.textContent = 'Last check result:\n' + JSON.stringify(statusJson, null, 2);
+                    }
+                } catch (ex) {
+                    try { if (logEl) logEl.textContent = 'Status error: ' + String(ex); } catch(e) {}
+                    if (statusEl) { statusEl.className = 'tts-status unavailable'; statusEl.textContent = 'Error'; }
+                }
+
+                // open modal
+                modal.style.display = 'block';
+                modal.setAttribute('aria-hidden', 'false');
+
+            } catch (err) {
+                console.warn('showTTSDiagnosticsModal failed', err);
+            }
+        }
+
+        function copyToClipboard(elId, btn) {
+            try {
+                var el = document.getElementById(elId);
+                if (!el) return;
+                var text = el.textContent || el.innerText || '';
+                navigator.clipboard.writeText(text);
+                if (btn && typeof btn.innerText !== 'undefined') { var orig = btn.innerText; btn.innerText = 'Copied'; setTimeout(function(){ btn.innerText = orig; }, 1200); }
+                showToast('Copied to clipboard', 1500);
+            } catch (e) {
+                try { window.prompt('Copy to clipboard: Ctrl+C, Enter', el.textContent || el.innerText || ''); } catch (_) {}
+            }
+        }
+
+        async function runTTSDiagnostic() {
+            try {
+                var logEl = document.getElementById('ttsDiagLog');
+                var statusEl = document.getElementById('ttsDiagStatus');
+                var playBtn = document.getElementById('ttsDiagPlay');
+                var downloadLink = document.getElementById('ttsDiagDownload');
+
+                if (statusEl) { updateRemoteTTSUI('checking','Running detailed TTS test...'); }
+                if (logEl) { logEl.textContent = 'Executing /api/tts test...'; }
+                if (playBtn) playBtn.disabled = true;
+
+                // Execute a server TTS test (small phrase) — server may return 501 or 500 if not configured
+                var resp = await fetch('/api/tts', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text: 'Diagnostic test from Aria. If you hear this, remote TTS works.', format: 'wav' })
+                });
+
+                var text = '';
+                try { text = await resp.text(); } catch (e) { text = '<no-body>'; }
+
+                var j = null;
+                try { j = JSON.parse(text); } catch (e) { j = { error: 'Failed to parse response', raw: text, status: resp.status }; }
+
+                if (!resp.ok) {
+                    // show details and suggestion
+                    if (resp.status === 501 && j && j.help) {
+                        if (logEl) logEl.textContent = 'TTS not configured: HTTP ' + resp.status + '\n' + JSON.stringify(j, null, 2) + '\n\nSuggested action: ' + j.help;
+                        if (statusEl) { updateRemoteTTSUI('unavailable','Not configured'); }
+                        showToast('Remote TTS not configured. Open the diagnostics for steps', 6000);
+                        return { success: false, detail: j };
+                    }
+
+                    if (logEl) logEl.textContent = 'TTS request failed: HTTP ' + resp.status + '\n' + JSON.stringify(j, null, 2);
+                    if (statusEl) { updateRemoteTTSUI('unavailable','Unavailable'); }
+                    showToast('Remote TTS test failed — see diagnostics', 5000);
+                    return { success: false, detail: j };
+                }
+
+                // successful — j should include audio_base64
+                    if (j && j.audio_base64) {
+                    if (logEl) logEl.textContent = 'TTS test succeeded — audio returned (format: ' + (j.format || 'wav') + '). ' + JSON.stringify(j.timepoints || [], null, 2);
+                    if (statusEl) { updateRemoteTTSUI('available','Available'); }
+                    showToast('Remote TTS returned audio — you can play or download it', 4000);
+
+                    // prepare blob + link
+                    try {
+                        var bin = atob(j.audio_base64);
+                        var len = bin.length;
+                        var ab = new Uint8Array(len);
+                        for (var i=0;i<len;i++) ab[i] = bin.charCodeAt(i);
+                        var mime = 'audio/' + (j.format || 'wav');
+                        var blob = new Blob([ab], { type: mime });
+                        var url = URL.createObjectURL(blob);
+                        if (playBtn) {
+                            playBtn.disabled = false;
+                            playBtn.onclick = function() { try { var a = new Audio(url); a.play(); } catch (e) { showToast('Playback failed: ' + e.message, 3000); } };
+                        }
+                        if (downloadLink) {
+                            downloadLink.style.display = 'inline-block';
+                            downloadLink.href = url;
+                            downloadLink.download = 'aria_tts_diagnostic.wav';
+                            downloadLink.textContent = 'Download audio';
+                        }
+                    } catch (e) {
+                        if (logEl) logEl.textContent += '\nAudio decode error: ' + String(e);
+                    }
+
+                    return { success: true, result: j };
+                }
+
+                if (logEl) logEl.textContent = 'TTS response lacked audio: ' + JSON.stringify(j, null, 2);
+                if (statusEl) { updateRemoteTTSUI('unavailable','Unavailable'); }
+                showToast('Remote TTS test returned no audio; see diagnostics', 5000);
+                return { success: false, detail: j };
+            } catch (err) {
+                try { if (document.getElementById('ttsDiagLog')) document.getElementById('ttsDiagLog').textContent = 'Error: ' + String(err); } catch(e) {}
+                try { updateRemoteTTSUI('unavailable','Error'); } catch(e) {}
+                showToast('TTS diagnostic failed: ' + (err && err.message || ''), 5000);
+                return { success: false, error: err };
+            }
+        }
+
+        function setMouthOpen(openness) {
+            try {
+                if (!mouthEl && character) mouthEl = character.querySelector('.character-mouth');
+                if (!mouthEl) return;
+                // openness 0..1 -> map to scaleY range and translateY for depth
+                var strength = parseFloat(ariaSettings.mouthStrength || 1);
+                var scaleY = (0.45 + (openness * 0.9)) * strength; // keep it cute and small
+                var translateY = -2 * openness; // small vertical motion
+                mouthEl.style.transition = 'transform 80ms linear';
+                mouthEl.style.transform = 'translateZ(8px) translateY(' + translateY + 'px) scaleY(' + scaleY.toFixed(3) + ')';
+            } catch (e) { /* ignore */ }
+        }
+
+        function cancelSpeak() {
+            // cancel WebSpeech if active
+            try {
+                if (currentSpeech && currentSpeech.utterance) {
+                    try { speechSynthesis.cancel(); } catch(e) {}
+                    currentSpeech.utterance = null;
+                }
+                // stop any remote audio playback
+                try {
+                    if (currentSpeech && currentSpeech.audio) {
+                        try { currentSpeech.audio.pause(); } catch(e) {}
+                        try { currentSpeech.audio.currentTime = 0; } catch(e) {}
+                        currentSpeech.audio = null;
+                    }
+                } catch(e) { /* ignore */ }
+                // clear fallback timers
+                if (currentSpeech.fallbackTimers && currentSpeech.fallbackTimers.length) {
+                    currentSpeech.fallbackTimers.forEach(function(t) { clearTimeout(t); });
+                    currentSpeech.fallbackTimers = [];
+                }
+            } catch (e) { /* ignore */ }
+            try { if (mouthEl) { mouthEl.style.transform = ''; mouthEl.style.animation = ''; } } catch(e) {}
+            stopMouthTalking(20);
+        }
+
+        async function speakWithLipSync(text) {
+            if (!text || !text.trim()) { return; }
+            // cancel any existing speech
+            cancelSpeak();
+
+            var mode = ariaSettings.lipSyncMode || 'onboundary';
+            var rate = parseFloat(ariaSettings.rate) || 1.0;
+            var pitch = parseFloat(ariaSettings.pitch) || 1.0;
+
+            // Helper to compute word indices
+            function wordIndicesFor(text) {
+                var indices = [];
+                var re = /\S+/g;
+                var m;
+                while ((m = re.exec(text)) !== null) {
+                    indices.push({ start: m.index, length: m[0].length, text: m[0] });
+                }
+                return indices;
+            }
+
+            // Start mouth thinking/idle if not already
+            startMouthTalking();
+            try { if (!mouthEl && character) mouthEl = character.querySelector('.character-mouth'); if (mouthEl) mouthEl.style.animation = 'none'; } catch(e) {}
+
+            // Try server-side TTS when user opted in
+            if (ariaSettings.remoteTTS) {
+                // if we've previously detected remote to be unavailable, skip trying again here
+                if (ariaSettings.remoteTTSAvailable === false) {
+                    // don't attempt remote, fall through to local
+                } else {
+                try {
+                    var resp = await fetch('/api/tts', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ text: text, voice: ariaSettings.voice, rate: ariaSettings.rate, pitch: ariaSettings.pitch, format: 'wav' })
+                    });
+                    if (resp.ok) {
+                        var j = await resp.json();
+                        if (j && j.audio_base64) {
+                            // mark remote as available for future attempts
+                            ariaSettings.remoteTTSAvailable = true;
+                            try { updateRemoteTTSUI('available', 'Available'); } catch(e) {}
+                            // decode base64 to blob
+                            try {
+                                var bin = atob(j.audio_base64);
+                                var len = bin.length;
+                                var ab = new Uint8Array(len);
+                                for (var i = 0; i < len; i++) ab[i] = bin.charCodeAt(i);
+                                var mime = 'audio/' + (j.format || 'wav');
+                                var blob = new Blob([ab], { type: mime });
+                                var url = URL.createObjectURL(blob);
+                                var audioEl = new Audio(url);
+                                audioEl.playbackRate = parseFloat(ariaSettings.rate) || 1.0;
+                                currentSpeech.audio = audioEl;
+
+                                var timers = [];
+                                var startedAt = null;
+
+                                function clearTimers() { timers.forEach(function(t) { clearTimeout(t); }); timers = []; }
+
+                                audioEl.addEventListener('playing', function() {
+                                    startedAt = Date.now();
+                                    // schedule word timepoints if provided
+                                    try {
+                                        var tps = j.timepoints || [];
+                                        tps.forEach(function(tp) {
+                                            try {
+                                                var s = Math.max(0, parseInt(tp.start_ms || 0));
+                                                var e = Math.max(s + 40, parseInt(tp.end_ms || (s + 120)));
+                                                var openness = Math.min(1, Math.max(0.3, (tp.word || '').length / 6)) * (parseFloat(ariaSettings.mouthStrength) || 1);
+                                                var t1 = setTimeout(function() { setMouthOpen(openness + (Math.random() * 0.15)); }, s);
+                                                var t2 = setTimeout(function() { setMouthOpen(0.12); }, e + 10);
+                                                timers.push(t1, t2);
+                                            } catch (e) { /* ignore schedule faults */ }
+                                        });
+                                        currentSpeech.fallbackTimers = timers;
+                                    } catch(e) { /* ignore */ }
+                                });
+
+                                var playPromise = new Promise(function(res, rej) {
+                                    audioEl.addEventListener('ended', function() {
+                                        clearTimers();
+                                        currentSpeech.fallbackTimers = [];
+                                        currentSpeech.audio = null;
+                                        stopMouthTalking(200);
+                                        res();
+                                    });
+                                    audioEl.addEventListener('error', function(err) {
+                                        clearTimers();
+                                        currentSpeech.fallbackTimers = [];
+                                        currentSpeech.audio = null;
+                                        rej(err || new Error('audio playback error'));
+                                    });
+                                });
+
+                                try { await audioEl.play(); } catch(e) { /* autoplay blocked, still supply fallback */ }
+                                // wait for audio to finish
+                                await playPromise;
+                                return;
+                            } catch (e) {
+                                // decoding or playback failed — fall through and use local method
+                            }
+                        }
+                    }
+                } catch (e) {
+                    // remote TTS failed — notify and fall back to local
+                    ariaSettings.remoteTTSAvailable = false;
+                    try { updateRemoteTTSUI('unavailable', 'Unavailable'); } catch (uiEx) {}
+                    try { showToast('Remote TTS failed — falling back to local TTS'); } catch (t) {}
+                }
+            }
+
+            // Local: try Web Speech API, otherwise fallback to per-word timing
+            return new Promise(function(resolve, reject) {
+                // if local TTS requested
+                if ('speechSynthesis' in window && typeof SpeechSynthesisUtterance !== 'undefined') {
+                    try {
+                        var utter = new SpeechSynthesisUtterance(text);
+                        utter.rate = rate;
+                        utter.pitch = pitch;
+                        if (ariaSettings.voice) {
+                            var vo = speechSynthesis.getVoices().find(function(v) { return v.name === ariaSettings.voice; });
+                            if (vo) utter.voice = vo;
+                        }
+
+                        var words = wordIndicesFor(text);
+
+                        utter.onstart = function() { startMouthTalking(); };
+                        utter.onend = function() {
+                            currentSpeech.utterance = null;
+                            stopMouthTalking(200);
+                            try { if (mouthEl) { mouthEl.style.transform = ''; mouthEl.style.animation = ''; } } catch (e) {}
+                            resolve();
+                        };
+                        utter.onerror = function(e) { currentSpeech.utterance = null; stopMouthTalking(); reject(e || new Error('Speech error')); };
+
+                        utter.onboundary = function(ev) {
+                            try {
+                                if (mode === 'none') return;
+                                var charIndex = ev.charIndex || 0;
+                                var idx = 0;
+                                for (var i = 0; i < words.length; i++) {
+                                    if (charIndex >= words[i].start && charIndex < (words[i].start + words[i].length)) { idx = i; break; }
+                                }
+                                var w = words[idx];
+                                var maxLen = Math.max(3, Math.min(12, w.length));
+                                var openness = Math.min(1, Math.max(0.3, w.length / (maxLen * 1.5)));
+                                openness = openness * (0.8 + Math.random() * 0.5);
+                                setMouthOpen(openness);
+                            } catch (e) {}
+                        };
+
+                        if (mode === 'per-word') {
+                            var totalWords = words.length || 1;
+                            var msPerWord = Math.max(60, 180 / rate);
+                            currentSpeech.fallbackTimers = [];
+                            var cursor = 0;
+                            for (var wi = 0; wi < words.length; wi++) {
+                                (function(i) {
+                                    var w = words[i];
+                                    var dur = msPerWord * Math.max(0.6, Math.min(2, w.length / 4));
+                                    var t1 = setTimeout(function() { setMouthOpen(0.5 + Math.random() * 0.6); }, cursor);
+                                    var t2 = setTimeout(function() { setMouthOpen(0.15); }, cursor + dur * 0.6);
+                                    currentSpeech.fallbackTimers.push(t1, t2);
+                                    cursor += dur;
+                                })(wi);
+                            }
+                        }
+
+                        currentSpeech.utterance = utter;
+                        try { speechSynthesis.speak(utter); } catch (e) { /* fallback below */ }
+                    } catch (e) {
+                        // fallback scheduling
+                    }
+
+                    var safety = setTimeout(function() { if (!currentSpeech.utterance) return; }, Math.max(5000, text.length * 50));
+                } else {
+                    // fallback per-word
+                    if (ariaSettings.lipSyncMode === 'none') { stopMouthTalking(200); try { if (mouthEl) mouthEl.style.animation = ''; } catch(e) {} resolve(); return; }
+                    var words2 = text.match(/\S+/g) || [];
+                    var msPerWord2 = Math.max(80, 220 / ariaSettings.rate);
+                    var t = 0;
+                    currentSpeech.fallbackTimers = [];
+                    words2.forEach(function(w, idx) {
+                        var wlen = Math.max(1, w.length);
+                        var dur = msPerWord2 * Math.max(0.5, Math.min(2, wlen / 4));
+                        var t1 = setTimeout(function() { setMouthOpen(0.5 + Math.random() * 0.6); }, t);
+                        var t2 = setTimeout(function() { setMouthOpen(0.2); }, t + dur * 0.6);
+                        currentSpeech.fallbackTimers.push(t1, t2);
+                        t += dur;
+                    });
+                    var tEnd = setTimeout(function() { stopMouthTalking(200); try { if (mouthEl) mouthEl.style.transform = ''; } catch(e) {} currentSpeech.fallbackTimers = []; resolve(); }, t + 120);
+                    currentSpeech.fallbackTimers.push(tEnd);
+                }
+            });
+        }
+
+                // Use Web Speech API when available
+                if ('speechSynthesis' in window && typeof SpeechSynthesisUtterance !== 'undefined') {
+                    try {
+                        var utter = new SpeechSynthesisUtterance(text);
+                        utter.rate = rate;
+                        utter.pitch = pitch;
+                        // select voice if user picked one
+                        if (ariaSettings.voice) {
+                            var vo = speechSynthesis.getVoices().find(function(v) { return v.name === ariaSettings.voice; });
+                            if (vo) utter.voice = vo;
+                        }
+
+                        var words = wordIndicesFor(text);
+
+                        utter.onstart = function() {
+                            // ensure mouth is active
+                            startMouthTalking();
+                        };
+
+                        utter.onend = function() {
+                            currentSpeech.utterance = null;
+                            // small tail for mouth
+                            stopMouthTalking(200);
+                            try { if (mouthEl) { mouthEl.style.transform = ''; mouthEl.style.animation = ''; } } catch (e) {}
+                            resolve();
+                        };
+
+                        utter.onerror = function(e) {
+                            currentSpeech.utterance = null;
+                            stopMouthTalking();
+                            reject(e || new Error('Speech error'));
+                        };
+
+                        // if browser supports onboundary events (word boundaries) use them
+                        utter.onboundary = function(ev) {
+                            try {
+                                if (mode === 'none') return;
+                                var charIndex = ev.charIndex || 0;
+                                // find which word we're on
+                                var idx = 0;
+                                for (var i=0;i<words.length;i++) {
+                                    if (charIndex >= words[i].start && charIndex < (words[i].start + words[i].length)) { idx = i; break; }
+                                }
+                                var w = words[idx];
+                                // openness based on word length (longer words -> larger openness)
+                                var maxLen = Math.max(3, Math.min(12, w.length));
+                                var openness = Math.min(1, Math.max(0.3, w.length / (maxLen * 1.5)));
+                                // slightly randomize and scale by mouth strength
+                                openness = openness * (0.8 + Math.random() * 0.5);
+                                setMouthOpen(openness);
+                            } catch (e) {}
+                        };
+
+                        // Some browsers don't fire onboundary reliably — provide a fallback schedule when user set per-word mode
+                        if (mode === 'per-word') {
+                            // schedule fallback based on words
+                            var totalWords = words.length || 1;
+                            var msPerWord = Math.max(60, 180 / rate);
+                            currentSpeech.fallbackTimers = [];
+                            var cursor = 0;
+                            for (var wi=0; wi<words.length; wi++) {
+                                (function(i) {
+                                    var w = words[i];
+                                    var dur = msPerWord * Math.max(0.6, Math.min(2, w.length / 4));
+                                    var t1 = setTimeout(function() { setMouthOpen(0.5 + Math.random() * 0.6); }, cursor);
+                                    var t2 = setTimeout(function() { setMouthOpen(0.15); }, cursor + dur * 0.6);
+                                    currentSpeech.fallbackTimers.push(t1, t2);
+                                    cursor += dur;
+                                })(wi);
+                            }
+                        }
+
+                        currentSpeech.utterance = utter;
+                        try { speechSynthesis.speak(utter); } catch (e) { /* fallback handled below */ }
+                    } catch (e) {
+                        // fallthrough to fallback scheduling
+                    }
+                    // Ensure we still resolve even if onend wasn't fired (safety)
+                    var safety = setTimeout(function(){ if (!currentSpeech.utterance) return; /* let onend handle */ }, Math.max(5000, text.length * 50));
+                } else {
+                    // fallback — simple per-word timing, no audio
+                    if (ariaSettings.lipSyncMode === 'none') { stopMouthTalking(200); try { if (mouthEl) mouthEl.style.animation = ''; } catch(e) {} resolve(); return; }
+                    var words2 = text.match(/\S+/g) || [];
+                    var msPerWord2 = Math.max(80, 220 / ariaSettings.rate);
+                    var t = 0;
+                    currentSpeech.fallbackTimers = [];
+                    words2.forEach(function(w, idx) {
+                        var wlen = Math.max(1, w.length);
+                        var dur = msPerWord2 * Math.max(0.5, Math.min(2, wlen / 4));
+                        var t1 = setTimeout(function() { setMouthOpen(0.5 + Math.random() * 0.6); }, t);
+                        var t2 = setTimeout(function() { setMouthOpen(0.2); }, t + dur * 0.6);
+                        currentSpeech.fallbackTimers.push(t1, t2);
+                        t += dur;
+                    });
+                    // stop at end
+                    var tEnd = setTimeout(function() { stopMouthTalking(200); try { if (mouthEl) mouthEl.style.transform = ''; } catch(e) {} currentSpeech.fallbackTimers = []; resolve(); }, t + 120);
+                    currentSpeech.fallbackTimers.push(tEnd);
+                }
+            });
+        }
+
+        // Initialize control panel UI, populate voice list, and wire settings
+        function initAriaControls() {
+            try {
+                var toggle = document.getElementById('ariaControlsToggle');
+                var panel = document.getElementById('ariaPanel');
+                var closeBtn = document.getElementById('ariaClosePanel');
+
+                var ttsAuto = document.getElementById('ttsAutoSpeak');
+                var ttsVoice = document.getElementById('ttsVoice');
+                var ttsRate = document.getElementById('ttsRate');
+                var ttsPitch = document.getElementById('ttsPitch');
+                var lipMode = document.getElementById('lipSyncMode');
+                var mouthStrengthEl = document.getElementById('mouthStrength');
+                var ttsRemote = document.getElementById('ttsRemote');
+                var ttsRemoteStatus = document.getElementById('ttsRemoteStatus');
+                var ttsTestBtn = document.getElementById('ttsTestButton');
+                var ttsDetailsBtn = document.getElementById('ttsDetailsButton');
+                var ttsRateValue = document.getElementById('ttsRateValue');
+                var ttsPitchValue = document.getElementById('ttsPitchValue');
+                var mouthStrengthValue = document.getElementById('mouthStrengthValue');
+
+                var hairSwayEl = document.getElementById('hairSway');
+                var hairNoiseEl = document.getElementById('hairNoise');
+                var hairBobEl = document.getElementById('hairBob');
+                var hairDampingEl = document.getElementById('hairDamping');
+                var hairSwayValue = document.getElementById('hairSwayValue');
+                var hairNoiseValue = document.getElementById('hairNoiseValue');
+                var hairBobValue = document.getElementById('hairBobValue');
+                var hairDampingValue = document.getElementById('hairDampingValue');
+
+                // populate existing settings
+                if (ttsAuto) { ttsAuto.checked = !!ariaSettings.autoSpeak; }
+                if (ttsRate) { ttsRate.value = ariaSettings.rate || 1; ttsRateValue.textContent = parseFloat(ttsRate.value).toFixed(2); }
+                if (ttsPitch) { ttsPitch.value = ariaSettings.pitch || 1; ttsPitchValue.textContent = parseFloat(ttsPitch.value).toFixed(2); }
+                if (mouthStrengthEl) { mouthStrengthEl.value = ariaSettings.mouthStrength || 1; mouthStrengthValue.textContent = parseFloat(mouthStrengthEl.value).toFixed(2); }
+                if (ttsRemote) { ttsRemote.checked = !!ariaSettings.remoteTTS; }
+                // If user requested remote TTS previously, check availability now (no toast)
+                if (ttsRemote && ariaSettings.remoteTTS) {
+                    updateRemoteTTSUI('checking','Checking...');
+                    checkRemoteTTSAvailability(false).catch(function(){});
+                }
+                // reflect known availability if we've detected it previously
+                if (ttsRemoteStatus) {
+                    if (ariaSettings.remoteTTSAvailable === true) updateRemoteTTSUI('available');
+                    else if (ariaSettings.remoteTTSAvailable === false) updateRemoteTTSUI('unavailable');
+                    else updateRemoteTTSUI('', '');
+                }
+                if (lipMode) { lipMode.value = ariaSettings.lipSyncMode || 'onboundary'; }
+
+                if (hairSwayEl) { hairSwayEl.value = ariaSettings.hairSway || 1.2; hairSwayValue.textContent = parseFloat(hairSwayEl.value).toFixed(2); }
+                if (hairNoiseEl) { hairNoiseEl.value = ariaSettings.hairNoise || 1.0; hairNoiseValue.textContent = parseFloat(hairNoiseEl.value).toFixed(2); }
+                if (hairBobEl) { hairBobEl.value = ariaSettings.hairBob || 2.0; hairBobValue.textContent = parseFloat(hairBobEl.value).toFixed(2); }
+                if (hairDampingEl) { hairDampingEl.value = ariaSettings.hairDamping || 0.82; hairDampingValue.textContent = parseFloat(hairDampingEl.value).toFixed(2); }
+
+                function populateVoices() {
+                    try {
+                        var voices = (speechSynthesis && speechSynthesis.getVoices && speechSynthesis.getVoices()) || [];
+                        if (!ttsVoice) return;
+                        ttsVoice.innerHTML = '';
+                        voices.forEach(function(v) {
+                            var opt = document.createElement('option');
+                            opt.value = v.name || v.lang || v.default || v.voiceURI;
+                            opt.textContent = v.name + ' (' + (v.lang || '') + (v.default ? ' • default' : '') + ')';
+                            ttsVoice.appendChild(opt);
+                        });
+                        // select user choice if set
+                        if (ariaSettings.voice) {
+                            ttsVoice.value = ariaSettings.voice;
+                        }
+                    } catch (e) { /* ignore */ }
+                }
+
+                if ('speechSynthesis' in window) {
+                    populateVoices();
+                    if (typeof speechSynthesis.onvoiceschanged !== 'undefined') {
+                        speechSynthesis.onvoiceschanged = function() { populateVoices(); };
+                    }
+                }
+
+                // UI events
+                if (toggle) toggle.addEventListener('click', function(e) { e.stopPropagation(); panel.classList.toggle('visible'); panel.setAttribute('aria-hidden', panel.classList.contains('visible') ? 'false' : 'true'); });
+                if (closeBtn) closeBtn.addEventListener('click', function(e){ e.stopPropagation(); panel.classList.remove('visible'); panel.setAttribute('aria-hidden','true'); });
+
+                // Diagnostics modal close wiring
+                var closeTtsDiag = document.getElementById('closeTtsDiagModal');
+                if (closeTtsDiag) {
+                    closeTtsDiag.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        var m = document.getElementById('ttsDiagModal'); if (m) { m.style.display = 'none'; m.setAttribute('aria-hidden', 'true'); }
+                    });
+                }
+                // close when clicking the overlay
+                var ttsModal = document.getElementById('ttsDiagModal');
+                if (ttsModal) ttsModal.addEventListener('click', function(e) { if (e.target === ttsModal) { ttsModal.style.display = 'none'; ttsModal.setAttribute('aria-hidden','true'); } });
+
+                if (ttsAuto) ttsAuto.addEventListener('change', function() { ariaSettings.autoSpeak = !!ttsAuto.checked; persistAriaSettings(); });
+                if (ttsVoice) ttsVoice.addEventListener('change', function() { ariaSettings.voice = ttsVoice.value; persistAriaSettings(); });
+                if (ttsRate) ttsRate.addEventListener('input', function() { ariaSettings.rate = parseFloat(ttsRate.value); ttsRateValue.textContent = ariaSettings.rate.toFixed(2); persistAriaSettings(); });
+                if (ttsPitch) ttsPitch.addEventListener('input', function() { ariaSettings.pitch = parseFloat(ttsPitch.value); ttsPitchValue.textContent = ariaSettings.pitch.toFixed(2); persistAriaSettings(); });
+                if (lipMode) lipMode.addEventListener('change', function() { ariaSettings.lipSyncMode = lipMode.value; persistAriaSettings(); });
+                if (mouthStrengthEl) mouthStrengthEl.addEventListener('input', function() { ariaSettings.mouthStrength = parseFloat(mouthStrengthEl.value); mouthStrengthValue.textContent = ariaSettings.mouthStrength.toFixed(2); persistAriaSettings(); });
+                if (ttsRemote) ttsRemote.addEventListener('change', function() {
+                    ariaSettings.remoteTTS = !!ttsRemote.checked; persistAriaSettings();
+                    if (ariaSettings.remoteTTS) {
+                        updateRemoteTTSUI('checking','Checking...');
+                        // do a real check and notify
+                        checkRemoteTTSAvailability(true).catch(function(){});
+                    } else {
+                        updateRemoteTTSUI('', '');
+                    }
+                });
+
+                if (ttsTestBtn) {
+                    ttsTestBtn.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        updateRemoteTTSUI('checking', 'Checking...');
+                        // run quick check and also open the modal to show details
+                        checkRemoteTTSAvailability(true).then(function(ok){
+                            if (ttsDetailsBtn) { showTTSDiagnosticsModal().catch ? showTTSDiagnosticsModal().catch(function(){}) : showTTSDiagnosticsModal(); }
+                        }).catch(function(){});
+                    });
+                }
+
+                var ttsDiagRunBtn = document.getElementById('ttsDiagRun');
+                if (ttsDiagRunBtn) {
+                    ttsDiagRunBtn.addEventListener('click', function(e){
+                        e.stopPropagation();
+                        // run the diagnostic and update UI
+                        ttsDiagRunBtn.disabled = true;
+                        runTTSDiagnostic().finally(function(){ try { ttsDiagRunBtn.disabled = false; } catch(e){} });
+                    });
+                }
+
+                if (ttsDetailsBtn) {
+                    ttsDetailsBtn.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        showTTSDiagnosticsModal().catch ? showTTSDiagnosticsModal().catch(function(){}) : showTTSDiagnosticsModal();
+                    });
+                }
+
+                if (hairSwayEl) hairSwayEl.addEventListener('input', function() { ariaSettings.hairSway = parseFloat(hairSwayEl.value); hairSwayValue.textContent = ariaSettings.hairSway; persistAriaSettings(); });
+                if (hairNoiseEl) hairNoiseEl.addEventListener('input', function() { ariaSettings.hairNoise = parseFloat(hairNoiseEl.value); hairNoiseValue.textContent = ariaSettings.hairNoise; persistAriaSettings(); });
+                if (hairBobEl) hairBobEl.addEventListener('input', function() { ariaSettings.hairBob = parseFloat(hairBobEl.value); hairBobValue.textContent = ariaSettings.hairBob; persistAriaSettings(); });
+                if (hairDampingEl) hairDampingEl.addEventListener('input', function() { ariaSettings.hairDamping = parseFloat(hairDampingEl.value); hairDampingValue.textContent = ariaSettings.hairDamping; persistAriaSettings(); });
+
+                // preset buttons
+                var pCute = document.getElementById('applyPresetCute');
+                var pEner = document.getElementById('applyPresetEnergetic');
+                var pZen = document.getElementById('applyPresetZen');
+                function applyPreset(p) {
+                    if (!p) return;
+                    ariaSettings.hairSway = p.hairSway; ariaSettings.hairNoise = p.hairNoise; ariaSettings.hairBob = p.hairBob; ariaSettings.hairDamping = p.hairDamping; ariaSettings.mouthStrength = p.mouthStrength || ariaSettings.mouthStrength;
+                    persistAriaSettings();
+                    // reflect into UI
+                    if (hairSwayEl) { hairSwayEl.value = ariaSettings.hairSway; hairSwayValue.textContent = ariaSettings.hairSway; }
+                    if (hairNoiseEl) { hairNoiseEl.value = ariaSettings.hairNoise; hairNoiseValue.textContent = ariaSettings.hairNoise; }
+                    if (hairBobEl) { hairBobEl.value = ariaSettings.hairBob; hairBobValue.textContent = ariaSettings.hairBob; }
+                    if (hairDampingEl) { hairDampingEl.value = ariaSettings.hairDamping; hairDampingValue.textContent = ariaSettings.hairDamping; }
+                    if (mouthStrengthEl) { mouthStrengthEl.value = ariaSettings.mouthStrength; mouthStrengthValue.textContent = ariaSettings.mouthStrength.toFixed(2); }
+                }
+                if (pCute) pCute.addEventListener('click', function(){ applyPreset({hairSway:1.0, hairNoise:0.9, hairBob:1.8, hairDamping:0.9, mouthStrength:0.95}); });
+                if (pEner) pEner.addEventListener('click', function(){ applyPreset({hairSway:1.8, hairNoise:1.6, hairBob:3.5, hairDamping:0.72, mouthStrength:1.4}); });
+                if (pZen) pZen.addEventListener('click', function(){ applyPreset({hairSway:0.5, hairNoise:0.6, hairBob:0.9, hairDamping:0.94, mouthStrength:0.8}); });
+
+                // quick keyboard to toggle panel
+                document.addEventListener('keydown', function(e) { if (e.key === 'm' && (e.ctrlKey || e.metaKey)) { panel.classList.toggle('visible'); panel.setAttribute('aria-hidden', panel.classList.contains('visible') ? 'false' : 'true'); } });
+
+            } catch (e) { /* ignore */ }
+        }
+        
+        function addMessage(role, content, mirrorToBubble = true) {
+            var messageDiv = document.createElement('div');
+            messageDiv.className = 'message ' + role;
+            var contentDiv = document.createElement('div');
+            contentDiv.className = 'message-content';
+            contentDiv.textContent = content;
+            messageDiv.appendChild(contentDiv);
+
+            // actions for assistant messages (e.g., speak button)
+            if (role === 'assistant') {
+                try {
+                    var actions = document.createElement('div');
+                    actions.className = 'message-actions';
+                    var speakBtn = document.createElement('button');
+                    speakBtn.className = 'msg-speak-btn';
+                    speakBtn.title = 'Speak';
+                    speakBtn.textContent = '🔊';
+                    speakBtn.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        try { speakWithLipSync((contentDiv && contentDiv.textContent) ? contentDiv.textContent : content).catch(function(){}); } catch (err) {}
+                    });
+                    actions.appendChild(speakBtn);
+                    messageDiv.appendChild(actions);
+                } catch (e) { /* ignore UI niceties */ }
+            }
+
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            // Mirror to compact bubble if present
+            try {
+                if (mirrorToBubble && typeof addBubbleMessage === 'function') addBubbleMessage(role === 'assistant' ? 'assistant' : 'user', content);
+            } catch (e) { /* ignore */ }
+
+            return messageDiv;
+        }
+        
+        // Stream helper: posts to /api/chat/stream and parses SSE events (data/meta/token/done/error)
+        function streamChat(messages, handlers) {
+            handlers = handlers || {};
+            var controller = new AbortController();
+            var signal = controller.signal;
+
+            (async function() {
+                try {
+                    var resp = await fetch('/api/chat/stream', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ messages: messages, stream: true }),
+                        signal: signal
+                    });
+
+                    if (!resp.ok) {
+                        var txt = '';
+                        try { txt = await resp.text(); } catch (e) {}
+                        handlers.onError && handlers.onError({ error: 'Stream fetch failed', detail: txt });
+                        return;
+                    }
+
+                    var reader = resp.body.getReader();
+                    var decoder = new TextDecoder('utf-8');
+                    var buf = '';
+
+                    function processBlock(block) {
+                        if (!block) return;
+                        var lines = block.split('\n');
+                        var event = null;
+                        var dataLines = [];
+                        for (var i=0;i<lines.length;i++) {
+                            var line = lines[i];
+                            if (line.startsWith('event:')) { event = line.slice(6).trim(); }
+                            else if (line.startsWith('data:')) { dataLines.push(line.slice(5).trim()); }
+                        }
+                        var dataStr = dataLines.join('\n');
+                        if (!event) {
+                            // default data block
+                            try { var obj = JSON.parse(dataStr); if (obj && obj.delta !== undefined) { handlers.onData && handlers.onData(obj); } } catch(e) {}
+                        } else if (event === 'meta') {
+                            try { var meta = JSON.parse(dataStr); handlers.onMeta && handlers.onMeta(meta); } catch(e) {}
+                        } else if (event === 'token') {
+                            try { var tok = JSON.parse(dataStr); handlers.onToken && handlers.onToken(tok); } catch(e) {}
+                        } else if (event === 'movement') {
+                            try { 
+                                var movement = JSON.parse(dataStr);
+                                if (movement.commands && movement.commands.length > 0) {
+                                    executeMovementCommands(movement.commands);
+                                }
+                            } catch(e) { console.error('Movement parse error:', e); }
+                        } else if (event === 'done') {
+                            handlers.onDone && handlers.onDone();
+                        } else if (event === 'error') {
+                            try { var err = JSON.parse(dataStr); handlers.onError && handlers.onError(err); } catch(e) { handlers.onError && handlers.onError({ error: dataStr }); }
+                        }
+                    }
+
+                    while (true) {
+                        var r = await reader.read();
+                        if (r.done) break;
+                        buf += decoder.decode(r.value, { stream: true });
+                        // parse blocks separated by double newline
+                        var idx = buf.indexOf('\n\n');
+                        while (idx !== -1) {
+                            var block = buf.slice(0, idx);
+                            buf = buf.slice(idx + 2);
+                            processBlock(block.trim());
+                            idx = buf.indexOf('\n\n');
+                        }
+                    }
+
+                    // Process any leftover
+                    if (buf && buf.trim().length) processBlock(buf.trim());
+                    // completed stream
+                    handlers.onDone && handlers.onDone();
+                } catch (e) {
+                    if (e && e.name === 'AbortError') {
+                        handlers.onError && handlers.onError({ error: 'aborted' });
+                    } else {
+                        handlers.onError && handlers.onError({ error: (e && e.message) || String(e) });
+                    }
+                }
+            })();
+
+            return {
+                cancel: function() { try { controller.abort(); } catch(e) {} }
+            };
+        }
+
+        async function sendMessage() {
+            var message = messageInput.value.trim();
+            if (!message) return;
+            
+            // interrupt any current speech/audio when user sends input
+            cancelSpeak();
+            addMessage('user', message);
+            messageInput.value = '';
+            conversationHistory.push({role: 'user', content: message});
+            
+            try {
+                providerInfo.textContent = 'Thinking...';
+                // If token-mode lip-sync is chosen, stream the response and use token events to drive mouth
+                if (ariaSettings.lipSyncMode === 'token') {
+                    var assistantEl = addMessage('assistant', '', false); // create placeholder without mirroring
+                    var contentDiv = assistantEl.querySelector('.message-content');
+                    var replyAccum = '';
+                    var streamHandle = streamChat(conversationHistory, {
+                        onMeta: function(meta) { try { providerInfo.textContent = meta.provider || (meta.model ? meta.model : 'Connected'); } catch(e) {} },
+                        onData: function(obj) { try { var delta = obj.delta || ''; replyAccum += delta; contentDiv.textContent = replyAccum; chatMessages.scrollTop = chatMessages.scrollHeight; } catch(e) {} },
+                        onToken: function(tok) { try {
+                            if (ariaSettings.lipSyncMode === 'token') {
+                                var tokenText = (tok.token || '') + '';
+                                var len = Math.max(1, tokenText.length);
+                                var openness = Math.min(1, Math.max(0.18, len / 8)) * (parseFloat(ariaSettings.mouthStrength) || 1);
+                                setMouthOpen(openness + (Math.random() * 0.18));
+                                // schedule quick close
+                                var closetime = 60 + Math.floor(Math.random() * 160);
+                                var ttmp = setTimeout(function() { setMouthOpen(0.12); }, closetime);
+                                currentSpeech.fallbackTimers.push(ttmp);
+                            }
+                        } catch(e) {} },
+                        onDone: function() {
+                            try {
+                                // finalize
+                                addBubbleMessage('assistant', replyAccum);
+                                conversationHistory.push({role: 'assistant', content: replyAccum});
+                                // speak if auto-speak enabled
+                                if (ariaSettings.autoSpeak) {
+                                    try { speakWithLipSync(replyAccum).catch(function(){}); } catch(e) {}
+                                } else {
+                                    stopMouthTalking(350);
+                                }
+                                parseAriaCommands(replyAccum);
+                            } catch (e) { /* ignore */ }
+                        },
+                        onError: function(err) {
+                            addMessage('system', 'Error (stream): ' + (err && (err.error || err.message) || 'stream error'));
+                            stopMouthTalking();
+                            cancelSpeak();
+                        }
+                    });
+                } else {
+                    // start mouth animation while waiting for assistant reply
+                    startMouthTalking();
+                    var response = await fetch('/api/chat', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({
+                            messages: conversationHistory,
+                            stream: false
+                        })
+                    });
+
+                    var data = await response.json();
+                    var reply = data.choices?.[0]?.message?.content || data.response || '';
+                    addMessage('assistant', reply);
+                    conversationHistory.push({role: 'assistant', content: reply});
+                    // speak with lip-sync if enabled, otherwise give the mouth a brief tail
+                    if (ariaSettings.autoSpeak) {
+                        try { speakWithLipSync(reply).catch(function(){}); } catch (e) { stopMouthTalking(350); }
+                    } else {
+                        stopMouthTalking(350);
+                    }
+                    providerInfo.textContent = data.provider || 'Connected';
+
+                    // Parse AI commands for Aria control
+                    parseAriaCommands(reply);
+                }
+            } catch(e) {
+                addMessage('system', 'Error: ' + e.message);
+                providerInfo.textContent = 'Error';
+                // stop mouth if request failed
+                stopMouthTalking();
+                // cancel any running speech
+                cancelSpeak();
+            }
+        }
+        
+        // Parse AI responses for Aria movement commands
+        function parseAriaCommands(text) {
+            var lowerText = text.toLowerCase();
+            
+            // Movement commands with walking
+            if (lowerText.includes('[aria:walk:left]') || lowerText.includes('walk left') || lowerText.includes('aria walk left')) {
+                moveAria('left', 200);
+            }
+            if (lowerText.includes('[aria:walk:right]') || lowerText.includes('walk right') || lowerText.includes('aria walk right')) {
+                moveAria('right', 200);
+            }
+            if (lowerText.includes('[aria:walk:up]') || lowerText.includes('walk up') || lowerText.includes('aria walk up')) {
+                moveAria('up', 200);
+            }
+            if (lowerText.includes('[aria:walk:down]') || lowerText.includes('walk down') || lowerText.includes('aria walk down')) {
+                moveAria('down', 200);
+            }
+            if (lowerText.includes('[aria:move:left]') || lowerText.includes('aria move left')) {
+                moveAria('left', 100);
+            }
+            if (lowerText.includes('[aria:move:right]') || lowerText.includes('aria move right')) {
+                moveAria('right', 100);
+            }
+            if (lowerText.includes('[aria:move:up]') || lowerText.includes('aria move up')) {
+                moveAria('up', 100);
+            }
+            if (lowerText.includes('[aria:move:down]') || lowerText.includes('aria move down')) {
+                moveAria('down', 100);
+            }
+            
+            // Position commands
+            var centerMatch = lowerText.match(/\[aria:center\]|aria (?:go to|move to) center/);
+            if (centerMatch) {
+                moveAriaToCenter();
+            }
+            
+            var posMatch = lowerText.match(/\[aria:pos:(\d+),(\d+)\]/);
+            if (posMatch) {
+                moveAriaTo(parseInt(posMatch[1]), parseInt(posMatch[2]));
+            }
+            
+            // Action commands
+            if (lowerText.includes('[aria:wave]') || lowerText.includes('aria wave')) {
+                ariaWave();
+            }
+            if (lowerText.includes('[aria:jump]') || lowerText.includes('aria jump')) {
+                ariaJump();
+            }
+            if (lowerText.includes('[aria:dance]') || lowerText.includes('aria dance')) {
+                ariaDance();
+            }
+            
+            // Arm joint commands
+            // Raise arms: [aria:arms:raise] or "raise arms" or "aria raise your arms"
+            if (lowerText.includes('[aria:arms:raise]') || lowerText.includes('raise arms') || lowerText.includes('raise your arms')) {
+                raiseArms();
+            }
+            // Lower arms: [aria:arms:lower] or "lower arms" or "aria lower your arms"
+            if (lowerText.includes('[aria:arms:lower]') || lowerText.includes('lower arms') || lowerText.includes('lower your arms')) {
+                lowerArms();
+            }
+            // Wave left arm: [aria:arm:wave:left] or "wave left arm"
+            if (lowerText.includes('[aria:arm:wave:left]') || lowerText.includes('wave left arm') || lowerText.includes('wave your left arm')) {
+                waveArm('left');
+            }
+            // Wave right arm: [aria:arm:wave:right] or "wave right arm"
+            if (lowerText.includes('[aria:arm:wave:right]') || lowerText.includes('wave right arm') || lowerText.includes('wave your right arm')) {
+                waveArm('right');
+            }
+            // Point left: [aria:point:left] or "point left"
+            if (lowerText.includes('[aria:point:left]') || lowerText.includes('point left') || lowerText.includes('aria point left')) {
+                pointDirection('left');
+            }
+            // Point right: [aria:point:right] or "point right"
+            if (lowerText.includes('[aria:point:right]') || lowerText.includes('point right') || lowerText.includes('aria point right')) {
+                pointDirection('right');
+            }
+            // Point up: [aria:point:up] or "point up"
+            if (lowerText.includes('[aria:point:up]') || lowerText.includes('point up') || lowerText.includes('aria point up')) {
+                pointDirection('up');
+            }
+            // Reach: [aria:reach] or "reach up" or "reach high"
+            if (lowerText.includes('[aria:reach]') || lowerText.includes('reach up') || lowerText.includes('reach high')) {
+                reachUp();
+            }
+            // Reset arms: [aria:arms:reset] or "reset arms" or "arms down"
+            if (lowerText.includes('[aria:arms:reset]') || lowerText.includes('reset arms') || lowerText.includes('arms down')) {
+                resetArms();
+            }
+        }
+        
+        // Execute movement commands from API
+        function executeMovementCommands(commands) {
+            if (!commands || commands.length === 0) return;
+            
+            commands.forEach(function(cmd) {
+                switch(cmd.action) {
+                    case 'walk':
+                    case 'move':
+                        if (cmd.direction && cmd.distance) {
+                            moveAria(cmd.direction, cmd.distance);
+                        }
+                        break;
+                    case 'center':
+                        moveAriaToCenter();
+                        break;
+                    case 'wave':
+                        ariaWave();
+                        break;
+                    case 'jump':
+                        ariaJump();
+                        break;
+                    case 'dance':
+                        ariaDance();
+                        break;
+                }
+            });
+        }
+        
+        // AI-driven autonomous movement
+        var aiMovementInterval = null;
+        var aiMovementEnabled = false;
+        
+        function startAIMovement() {
+            if (aiMovementInterval) return;
+            aiMovementEnabled = true;
+            
+            function requestAIMovement() {
+                if (!aiMovementEnabled) return;
+                
+                // Get current screen dimensions and Aria's position
+                var screenInfo = {
+                    width: window.innerWidth,
+                    height: window.innerHeight,
+                    ariaX: Math.round(charX),
+                    ariaY: Math.round(charY),
+                    ariaZone: charX < window.innerWidth / 3 ? 'left' : 
+                             charX > (window.innerWidth * 2 / 3) ? 'right' : 'center'
+                };
+                
+                // Ask AI to decide next movement
+                var movementPrompt = [
+                    {
+                        role: 'system',
+                        content: 'You are controlling an anime character named Aria on screen. Based on her current position, decide her next movement. Respond ONLY with movement commands like [aria:walk:left], [aria:walk:right], [aria:wave], [aria:jump], [aria:dance], or [aria:center]. Make movements natural and varied. Current position: x=' + screenInfo.ariaX + ', zone=' + screenInfo.ariaZone + '. Screen width: ' + screenInfo.width + 'px.'
+                    },
+                    {
+                        role: 'user',
+                        content: 'What should Aria do next? Give a single movement command.'
+                    }
+                ];
+                
+                // Make silent API call
+                fetch('/api/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        messages: movementPrompt,
+                        stream: false,
+                        max_output_tokens: 50
+                    })
+                })
+                .then(function(response) { return response.json(); })
+                .then(function(data) {
+                    if (data.reply) {
+                        // Parse the AI's movement decision
+                        parseAriaCommands(data.reply);
+                    }
+                    
+                    // Schedule next movement decision (5-10 seconds)
+                    if (aiMovementEnabled) {
+                        setTimeout(requestAIMovement, 5000 + Math.random() * 5000);
+                    }
+                })
+                .catch(function(error) {
+                    console.error('AI movement error:', error);
+                    // Retry after longer delay on error
+                    if (aiMovementEnabled) {
+                        setTimeout(requestAIMovement, 10000);
+                    }
+                });
+            }
+            
+            // Start the AI movement cycle
+            requestAIMovement();
+        }
+        
+        function stopAIMovement() {
+            aiMovementEnabled = false;
+            if (aiMovementInterval) {
+                clearInterval(aiMovementInterval);
+                aiMovementInterval = null;
+            }
+        }
+        
+        // Toggle AI movement with keyboard shortcut (Ctrl+M)
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey && e.key === 'm') {
+                if (aiMovementEnabled) {
+                    stopAIMovement();
+                    console.log('AI movement: OFF');
+                } else {
+                    startAIMovement();
+                    console.log('AI movement: ON');
+                }
+            }
+        });
+        
+        // Aria movement functions
+        var walkingInterval = null;
+        
+        function startWalking() {
+            character.classList.add('walking');
+        }
+        
+        function stopWalking() {
+            character.classList.remove('walking');
+        }
+        
+        function moveAria(direction, distance) {
+            startWalking();
+            var steps = 20;
+            var stepDistance = distance / steps;
+            var stepDelay = 30;
+            var currentStep = 0;
+            
+            if (walkingInterval) clearInterval(walkingInterval);
+            
+            walkingInterval = setInterval(function() {
+                if (currentStep >= steps) {
+                    clearInterval(walkingInterval);
+                    walkingInterval = null;
+                    stopWalking();
+                    return;
+                }
+                
+                switch(direction) {
+                    case 'left':
+                        charX = Math.max(0, charX - stepDistance);
+                        break;
+                    case 'right':
+                        charX = Math.min(window.innerWidth - 140, charX + stepDistance);
+                        break;
+                    case 'up':
+                        charY = Math.max(window.innerHeight - 400, charY - stepDistance);
+                        break;
+                    case 'down':
+                        charY = Math.min(window.innerHeight - 200, charY + stepDistance);
+                        break;
+                }
+                
+                character.style.left = charX + 'px';
+                character.style.top = charY + 'px';
+                currentStep++;
+            }, stepDelay);
+        }
+        
+        function moveAriaTo(x, y) {
+            charX = Math.max(0, Math.min(window.innerWidth - 140, x));
+            charY = Math.max(window.innerHeight - 400, Math.min(window.innerHeight - 200, y));
+            // visual position will be updated smoothly by the main animation loop
+        }
+        
+        function moveAriaToCenter() {
+            moveAriaTo(window.innerWidth / 2 - 70, window.innerHeight - 200);
+        }
+        
+        function ariaWave() {
+            character.style.animation = 'wave 0.5s ease';
+            setTimeout(function() {
+                character.style.animation = '';
+            }, 500);
+        }
+        
+        function ariaJump() {
+            character.style.transform = 'translateY(-50px)';
+            setTimeout(function() {
+                character.style.transform = 'translateY(0)';
+            }, 400);
+        }
+        
+        function ariaDance() {
+            var danceFrames = [
+                {transform: 'rotate(-5deg) translateY(-10px)'},
+                {transform: 'rotate(5deg) translateY(-10px)'},
+                {transform: 'rotate(-5deg) translateY(-10px)'},
+                {transform: 'rotate(5deg) translateY(-10px)'},
+                {transform: 'rotate(0deg) translateY(0)'}
+            ];
+            var frameIndex = 0;
+            var danceInterval = setInterval(function() {
+                if (frameIndex < danceFrames.length) {
+                    Object.assign(character.style, danceFrames[frameIndex]);
+                    frameIndex++;
+                } else {
+                    clearInterval(danceInterval);
+                    character.style.transform = '';
+                }
+            }, 200);
+        }
+        
+        // Arm joint control functions
+        function setArmRotation(arm, shoulderDeg, elbowDeg) {
+            if (arm === 'left') {
+                character.style.setProperty('--left-shoulder-rotate', shoulderDeg + 'deg');
+                character.style.setProperty('--left-elbow-rotate', elbowDeg + 'deg');
+            } else if (arm === 'right') {
+                character.style.setProperty('--right-shoulder-rotate', shoulderDeg + 'deg');
+                character.style.setProperty('--right-elbow-rotate', elbowDeg + 'deg');
+            }
+        }
+        
+        function raiseArms() {
+            setArmRotation('left', -90, 0);
+            setArmRotation('right', 90, 0);
+        }
+        
+        function lowerArms() {
+            setArmRotation('left', -10, 0);
+            setArmRotation('right', 10, 0);
+        }
+        
+        function waveArm(arm) {
+            var waves = 0;
+            var maxWaves = 3;
+            var waveInterval = setInterval(function() {
+                if (waves >= maxWaves) {
+                    clearInterval(waveInterval);
+                    resetArms();
+                    return;
+                }
+                var phase = waves % 2;
+                if (arm === 'left') {
+                    setArmRotation('left', -60, phase === 0 ? -30 : 30);
+                } else {
+                    setArmRotation('right', 60, phase === 0 ? -30 : 30);
+                }
+                waves++;
+            }, 300);
+        }
+        
+        function pointDirection(direction) {
+            if (direction === 'left') {
+                setArmRotation('left', -90, -10);
+                setArmRotation('right', 10, 0);
+            } else if (direction === 'right') {
+                setArmRotation('left', -10, 0);
+                setArmRotation('right', 90, 10);
+            } else if (direction === 'up') {
+                setArmRotation('left', -90, 0);
+                setArmRotation('right', 90, 0);
+            }
+        }
+        
+        function reachUp() {
+            setArmRotation('left', -120, -20);
+            setArmRotation('right', 120, 20);
+        }
+        
+        function resetArms() {
+            setArmRotation('left', -10, 0);
+            setArmRotation('right', 10, 0);
+        }
+        
+        // Animate character briefly on send, then send message
+        sendButton.addEventListener('click', function() {
+            try {
+                character.style.transform = 'translateY(-20px)';
+                setTimeout(function() { character.style.transform = 'translateY(0)'; }, 300);
+            } catch(e) {
+                // character might not exist in some contexts
+            }
+            sendMessage();
+        });
+        messageInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+        
+        // Character variables
+        var chatBubble = document.getElementById('chatBubble');
+        var bubbleMessagesEl = document.getElementById('bubbleMessages');
+        var bubbleInput = document.getElementById('bubbleInput');
+        var bubbleSend = document.getElementById('bubbleSend');
+        var openFullChatBtn = document.getElementById('openFullChat');
+        var bubbleCloseBtn = document.getElementById('bubbleClose');
+        var bubbleSizeBtn = document.getElementById('bubbleSize');
+
+        // Bubble UI state (persisted)
+        var BUBBLE_OPEN_KEY = 'ariaBubbleOpen';
+        var BUBBLE_SIZE_KEY = 'ariaBubbleSize';
+        var bubbleSizes = ['small','medium','large'];
+        var bubbleSize = localStorage.getItem(BUBBLE_SIZE_KEY) || 'medium';
+        function applyBubbleSize(sz) {
+            chatBubble && chatBubble.classList.remove('bubble-small','bubble-medium','bubble-large');
+            chatBubble && chatBubble.classList.add('bubble-' + sz);
+            bubbleSize = sz;
+            try { localStorage.setItem(BUBBLE_SIZE_KEY, sz); } catch(e) {}
+            if (bubbleSizeBtn) bubbleSizeBtn.textContent = (sz === 'small' ? 'S' : sz === 'medium' ? 'M' : 'L');
+        }
+        function cycleBubbleSize() {
+            var i = bubbleSizes.indexOf(bubbleSize);
+            var next = bubbleSizes[(i + 1) % bubbleSizes.length];
+            applyBubbleSize(next);
+        }
+        
+        // Initialize character position - top area above chat box
+        if (!character) {
+            console.error('Aria character element not found!');
+        } else {
+            console.log('Aria character found, initializing...');
+        }
+        var charX = Math.floor(window.innerWidth / 2 - 70);
+        var charY = window.innerHeight - 200; // Position at bottom of screen
+        // Clear any fixed positioning and ensure visibility
+        if (character) {
+            character.style.display = 'block';
+            character.style.visibility = 'visible';
+            character.style.opacity = '1';
+            character.style.right = '';
+            character.style.bottom = '';
+            character.style.left = charX + 'px';
+            character.style.top = charY + 'px';
+            console.log('Aria positioned at:', charX, charY);
+        }
+        
+        var autonomousMode = true;
+        var targetX = charX;
+        var targetY = window.innerHeight - 200; // Keep target at bottom
+        var autonomousSpeed = 2;
+
+        // Visual smoothing & physics
+        var visualX = charX;
+        var visualY = charY;
+        var prevCharX = charX;
+        var prevCharY = charY;
+        var charVX = 0;
+        var charVY = 0;
+
+        // ==== Aria Drag Functionality ====
+        var isDraggingAria = false;
+        var ariaDragOffsetX = 0;
+        var ariaDragOffsetY = 0;
+        
+        character.addEventListener('mousedown', function(e) {
+            // Don't drag if clicking on eyes
+            if (e.target.closest('.character-eyes')) return;
+            
+            isDraggingAria = true;
+            character.style.cursor = 'grabbing';
+            
+            // Calculate offset from mouse to character top-left
+            var rect = character.getBoundingClientRect();
+            ariaDragOffsetX = e.clientX - rect.left;
+            ariaDragOffsetY = e.clientY - rect.top;
+            
+            // Disable autonomous movement while dragging
+            autonomousMode = false;
+            
+            e.preventDefault();
+        });
+        
+        document.addEventListener('mousemove', function(e) {
+            if (isDraggingAria) {
+                // Calculate new position
+                var newX = e.clientX - ariaDragOffsetX;
+                var newY = e.clientY - ariaDragOffsetY;
+                
+                // Apply boundaries
+                newX = Math.max(0, Math.min(window.innerWidth - 160, newX));
+                newY = Math.max(0, Math.min(window.innerHeight - 200, newY));
+                
+                // Update position
+                character.style.left = newX + 'px';
+                character.style.top = newY + 'px';
+                charX = newX;
+                charY = newY;
+                visualX = newX;
+                visualY = newY;
+            }
+        });
+        
+        document.addEventListener('mouseup', function() {
+            if (isDraggingAria) {
+                isDraggingAria = false;
+                character.style.cursor = 'grab';
+                
+                // Re-enable autonomous movement after a delay
+                setTimeout(function() {
+                    autonomousMode = true;
+                }, 2000);
+            }
+        });
+
+        // hair physics data
+        var hairStrandEls = [];
+        var hairData = [];
+        function initHairPhysics() {
+            try {
+                hairStrandEls = Array.from(character.querySelectorAll('.hair-strand')) || [];
+                hairData = hairStrandEls.map(function(el, i) {
+                    var cs = getComputedStyle(el);
+                    var baseRotateRaw = cs.getPropertyValue('--base-rotate') || '0deg';
+                    var baseZRaw = cs.getPropertyValue('--base-z') || '8px';
+                    var baseRotate = parseFloat(baseRotateRaw) || 0;
+                    var baseZ = parseFloat(baseZRaw) || 8;
+                    el.style.animation = 'none';
+                    return { el: el, baseRotate: baseRotate, baseZ: baseZ, angle: baseRotate, vel: 0, offset: i * 0.7, swayMult: 1 + (i - hairStrandEls.length / 2) * 0.15 };
+                });
+            } catch (e) { hairStrandEls = []; hairData = []; }
+        }
+
+        function updateHairPhysics(t) {
+            if (!hairData || !hairData.length) return;
+            var now = t || (Date.now() / 1000);
+            hairData.forEach(function(h, idx) {
+                // compute desired rotation based on velocity and a soft noise term
+                // use tunable settings
+                var swaySetting = parseFloat(ariaSettings.hairSway || 1.0);
+                var noiseSetting = parseFloat(ariaSettings.hairNoise || 1.0);
+                var bobSetting = parseFloat(ariaSettings.hairBob || 2.0);
+                var dampingSetting = parseFloat(ariaSettings.hairDamping || 0.82);
+
+                var sway = -charVX * ((1.6 * swaySetting) + idx * (0.08 * swaySetting)) - charVY * (0.6 * swaySetting + idx * 0.02 * swaySetting);
+                var noise = Math.sin(now * (1.6 + idx * 0.2) + h.offset) * (2.5 * noiseSetting);
+                var desired = h.baseRotate + sway + noise;
+                // velocity damping + spring-like attraction to desired
+                h.vel = h.vel * dampingSetting + (desired - h.angle) * (1 - dampingSetting) * 0.9;
+                h.angle += h.vel;
+                var bob = Math.sin(now * (2 + idx * 0.2) + h.offset) * (bobSetting + Math.abs(charVY) * 0.8);
+                var z = h.baseZ + Math.max(0, Math.abs(charVX)) * (h.baseZ >= 0 ? 1.5 : -0.6) + Math.abs(charVY) * 0.3;
+                h.el.style.transform = 'rotate(' + h.angle.toFixed(2) + 'deg) translateY(' + bob.toFixed(1) + 'px) translateZ(' + z.toFixed(2) + 'px)';
+            });
+            // head tilt responds subtly to velocity
+            try {
+                var headEl = character.querySelector('.character-head');
+                if (headEl) {
+                    var tiltY = Math.max(-12, Math.min(12, -charVX * 5));
+                    var tiltX = Math.max(-10, Math.min(10, charVY * 3));
+                    headEl.style.transform = 'translateZ(10px) rotate(' + tiltY.toFixed(2) + 'deg) rotateX(' + tiltX.toFixed(2) + 'deg)';
+                }
+            } catch (e) { /* ignore */ }
+            // update shadow
+            try {
+                var shadow = character.querySelector('.character-shadow');
+                if (shadow) {
+                    var speed = Math.sqrt(charVX * charVX + charVY * charVY);
+                    var sX = Math.max(0.7, 1 + Math.min(0.6, speed * 0.07));
+                    var sY = Math.max(0.5, 1 - Math.min(0.5, speed * 0.02));
+                    var op = Math.max(0.25, Math.min(0.95, 0.6 + speed * 0.05));
+                    shadow.style.transform = 'translateX(-50%) scale(' + sX.toFixed(2) + ',' + sY.toFixed(2) + ')';
+                    shadow.style.opacity = op.toFixed(2);
+                }
+            } catch (e) {}
+        }
+        
+        function setNewRandomTarget() {
+            targetX = Math.random() * (window.innerWidth - 140);
+            targetY = window.innerHeight - 200; // Keep Aria at the bottom of the screen
+        }
+        
+        function updateAutonomousMovement() {
+            if (!autonomousMode) return;
+            var dx = targetX - charX;
+            var dy = targetY - charY;
+            var distance = Math.sqrt(dx * dx + dy * dy);
+            if (distance < 5) {
+                // Stop walking when reached target
+                character.classList.remove('walking');
+                setTimeout(setNewRandomTarget, 2000 + Math.random() * 3000);
+            } else {
+                // Start walking animation
+                character.classList.add('walking');
+                var moveX = (dx / distance) * autonomousSpeed;
+                var moveY = (dy / distance) * autonomousSpeed;
+                charX += moveX;
+                charY += moveY;
+                
+                // Face direction of movement
+                if (Math.abs(dx) > 0.5) {
+                    if (dx > 0) {
+                        character.style.transform = 'scale(1.15) scaleX(1)';
+                    } else {
+                        character.style.transform = 'scale(1.15) scaleX(-1)';
+                    }
+                }
+            }
+        }
+        
+        setNewRandomTarget();
+        // initialize hair physics and visual smoothing
+        initHairPhysics();
+        // init Aria controls & tts/lip-sync UI
+        initAriaControls();
+        // Start the movement animation loop
+        updateMovement();
+        
+        // Character click handler - toggle chat window without pausing movement
+        // Position chat next to Aria
+        function positionChat() {
+            if (chatContainer.classList.contains('visible')) {
+                var rect = character.getBoundingClientRect();
+                var bubbleWidth = chatContainer.offsetWidth;
+                var spaceRight = window.innerWidth - rect.right;
+                if (spaceRight > bubbleWidth + 20) {
+                    chatContainer.style.left = (rect.right + 20) + 'px'; // place to the right
+                } else {
+                    var leftPos = Math.max(10, rect.left - bubbleWidth - 20); // place to the left
+                    chatContainer.style.left = leftPos + 'px';
+                }
+                chatContainer.style.bottom = (window.innerHeight - rect.bottom + 30) + 'px';
+            }
+        }
+        
+        var bubbleTimeout;
+        var bubbleOpenTimeout;
+
+        // small helper to scroll bubble messages
+        function scrollBubbleToBottom() {
+            if (!bubbleMessagesEl) return;
+            bubbleMessagesEl.scrollTop = bubbleMessagesEl.scrollHeight;
+        }
+
+        function addBubbleMessage(role, text) {
+            if (!bubbleMessagesEl) return;
+            var el = document.createElement('div');
+            el.className = 'bubble-msg ' + role;
+            var txt = document.createElement('div');
+            txt.className = 'bubble-msg-text';
+            txt.textContent = text;
+            el.appendChild(txt);
+            // add a small speak button for assistant messages
+            if (role === 'assistant') {
+                try {
+                    var bbtn = document.createElement('button');
+                    bbtn.className = 'bubble-speak-btn';
+                    bbtn.title = 'Speak';
+                    bbtn.textContent = '🔊';
+                    bbtn.addEventListener('click', function(e) { e.stopPropagation(); try { speakWithLipSync(text).catch(function(){}); } catch(err){} });
+                    el.appendChild(bbtn);
+                } catch (e) { /* ignore */ }
+            }
+
+            bubbleMessagesEl.appendChild(el);
+            // Keep only last 12 messages to avoid overflow
+            while (bubbleMessagesEl.children.length > 12) bubbleMessagesEl.removeChild(bubbleMessagesEl.firstChild);
+            scrollBubbleToBottom();
+        }
+
+        function refreshBubbleFromHistory() {
+            if (!bubbleMessagesEl) return;
+            bubbleMessagesEl.innerHTML = '';
+            var last = conversationHistory.slice(-10);
+            last.forEach(function(m) {
+                addBubbleMessage(m.role === 'assistant' ? 'assistant' : 'user', m.content);
+            });
+        }
+
+        async function sendBubbleMessage() {
+            if (!bubbleInput) return;
+            var txt = bubbleInput.value.trim();
+            if (!txt) return;
+            // cancel any running speech/audio
+            cancelSpeak();
+            // add to main chat history & UI (main addMessage will mirror to compact bubble)
+            addMessage('user', txt);
+            conversationHistory.push({role: 'user', content: txt});
+            bubbleInput.value = '';
+
+            // send to backend
+            try {
+                providerInfo.textContent = 'Thinking...';
+                // start mouth animation while waiting for assistant reply
+                // start mouth animation while waiting for assistant reply
+                if (ariaSettings.lipSyncMode === 'token') {
+                    var assistantEl = addMessage('assistant', '', false);
+                    var contentDiv = assistantEl.querySelector('.message-content');
+                    var replyAccum = '';
+                    streamChat(conversationHistory, {
+                        onMeta: function(meta) { try { providerInfo.textContent = meta.provider || (meta.model ? meta.model : 'Connected'); } catch(e) {} },
+                        onData: function(obj) { try { var delta = obj.delta || ''; replyAccum += delta; contentDiv.textContent = replyAccum; scrollBubbleToBottom(); } catch(e) {} },
+                        onToken: function(tok) { try {
+                            if (ariaSettings.lipSyncMode === 'token') {
+                                var tokenText = (tok.token || '') + '';
+                                var len = Math.max(1, tokenText.length);
+                                var openness = Math.min(1, Math.max(0.18, len / 8)) * (parseFloat(ariaSettings.mouthStrength) || 1);
+                                setMouthOpen(openness + (Math.random() * 0.18));
+                                var closetime = 60 + Math.floor(Math.random() * 160);
+                                var ttmp = setTimeout(function() { setMouthOpen(0.12); }, closetime);
+                                currentSpeech.fallbackTimers.push(ttmp);
+                            }
+                        } catch(e) {} },
+                        onDone: function() {
+                            try {
+                                var reply = replyAccum || '...';
+                                addMessage('assistant', reply);
+                                conversationHistory.push({role: 'assistant', content: reply});
+                                addBubbleMessage('assistant', reply);
+                                providerInfo.textContent = 'Connected';
+                                if (ariaSettings.autoSpeak) { try { speakWithLipSync(reply).catch(function(){}); } catch(e) {} } else { stopMouthTalking(350); }
+                                parseAriaCommands(reply);
+                            } catch(e) {}
+                        },
+                        onError: function(err) { addMessage('system', 'Error: ' + (err && (err.error || err.message) || 'stream failure')); stopMouthTalking(); cancelSpeak(); }
+                    });
+                } else {
+                    startMouthTalking();
+                    var response = await fetch('/api/chat', {
+                        method: 'POST', headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({ messages: conversationHistory, stream: false })
+                    });
+                    var data = await response.json();
+                    var reply = data.choices?.[0]?.message?.content || '...';
+                    addMessage('assistant', reply);
+                    conversationHistory.push({role: 'assistant', content: reply});
+                    providerInfo.textContent = data.provider || 'Connected';
+                    // speak with lip-sync if enabled
+                    if (ariaSettings.autoSpeak) {
+                        try { speakWithLipSync(reply).catch(function(){}); } catch(e) { stopMouthTalking(350); }
+                    } else {
+                        // brief mouth tail
+                        stopMouthTalking(350);
+                    }
+                }
+                // allow Aria to respond to commands in reply
+                parseAriaCommands(reply);
+            } catch (err) {
+                addMessage('assistant', 'Error: ' + (err.message || 'request failed'));
+                providerInfo.textContent = 'Error';
+                // stop any speaking animation on error
+                stopMouthTalking();
+                cancelSpeak();
+            }
+        }
+
+        // open full chat from bubble
+        if (openFullChatBtn) {
+            openFullChatBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                if (chatContainer) {
+                        chatContainer.classList.add('visible');
+                        positionChat();
+                        messageInput && messageInput.focus();
+                        if (chatBubble) {
+                            chatBubble.classList.remove('open');
+                            chatBubble.setAttribute('aria-expanded','false');
+                            chatBubble.setAttribute('aria-hidden','true');
+                        }
+                        try { localStorage.setItem(BUBBLE_OPEN_KEY, '0'); } catch(e) {}
+                    }
+            });
+        }
+
+        // hook up bubble send events
+        if (bubbleSend) bubbleSend.addEventListener('click', sendBubbleMessage);
+        if (bubbleInput) bubbleInput.addEventListener('keypress', function(e) { if (e.key === 'Enter') sendBubbleMessage(); });
+        
+        // Click character to open chat interface
+        character.addEventListener('click', function(e) {
+            e.stopPropagation();
+
+            // Toggle chat container visibility
+            if (chatContainer.classList.contains('visible')) {
+                chatContainer.classList.remove('visible');
+            } else {
+                chatContainer.classList.add('visible');
+                // Focus the input so user can type right away
+                if (messageInput) setTimeout(function(){ messageInput.focus(); }, 100);
+            }
+
+            // Small highlight animation on character
+            character.style.transform = 'scale(1.05)';
+            setTimeout(function() {
+                character.style.transform = '';
+            }, 200);
+        });
+
+        // Close and size buttons
+        if (bubbleCloseBtn) {
+            bubbleCloseBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                chatBubble.classList.remove('open');
+                chatBubble.setAttribute('aria-expanded','false');
+                chatBubble.setAttribute('aria-hidden','true');
+                try { localStorage.setItem(BUBBLE_OPEN_KEY, '0'); } catch(e) {}
+            });
+        }
+        if (bubbleSizeBtn) {
+            bubbleSizeBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                cycleBubbleSize();
+            });
+        }
+
+        // Apply persisted size
+        try { applyBubbleSize(localStorage.getItem(BUBBLE_SIZE_KEY) || bubbleSize); } catch(e) {}
+
+        // Restore persisted open state on startup
+        try {
+            var persistedOpen = localStorage.getItem(BUBBLE_OPEN_KEY);
+            if (persistedOpen === '1') {
+                chatBubble.classList.add('open');
+                chatBubble.setAttribute('aria-expanded','true');
+                chatBubble.setAttribute('aria-hidden','false');
+                refreshBubbleFromHistory();
+            } else {
+                if (chatBubble) { chatBubble.setAttribute('aria-expanded','false'); chatBubble.setAttribute('aria-hidden','true'); }
+            }
+        } catch(e) {}
+        
+        // Update chat position when character moves
+        setInterval(positionChat, 100);
+        
+        // Make chat container draggable
+        // Chat is now attached to character as a speech bubble
+        
+        // Keyboard controls for character
+        document.addEventListener('keydown', function(e) {\n            if (e.target === messageInput) return;
+            keys[e.key.toLowerCase()] = true;
+            if (e.target.tagName !== 'TEXTAREA' && e.target.tagName !== 'INPUT') {
+                e.preventDefault();
+            }
+        });
+        
+        document.addEventListener('keyup', function(e) {
+            keys[e.key.toLowerCase()] = false;
+        });
+        
+        // Movement loop
+        function updateMovement() {
+            var moved = false;
+            
+            // Manual keyboard controls (override autonomous)
+            if (keys['arrowup'] || keys['w']) {
+                charY -= characterSpeed;
+                moved = true;
+            }
+            if (keys['arrowdown'] || keys['s']) {
+                charY += characterSpeed;
+                moved = true;
+            }
+            if (keys['arrowleft'] || keys['a']) {
+                charX -= characterSpeed;
+                character.style.transform = 'scale(1.15) scaleX(-1)';
+                moved = true;
+            }
+            if (keys['arrowright'] || keys['d']) {
+                charX += characterSpeed;
+                character.style.transform = 'scale(1.15) scaleX(1)';
+                moved = true;
+            }
+            
+            // Toggle walking animation
+            if (moved) {
+                character.classList.add('walking');
+            } else {
+                character.classList.remove('walking');
+            }
+            
+            charX = Math.max(0, Math.min(window.innerWidth - 140, charX));
+            charY = Math.max(50, Math.min(window.innerHeight - 180, charY));
+            
+            if (moved) {
+                checkCollisions();
+                autonomousMode = false;
+                clearTimeout(window.autonomousResumeTimer);
+                window.autonomousResumeTimer = setTimeout(function() {
+                    autonomousMode = true;
+                    setNewRandomTarget();
+                }, 3000);
+            }
+
+            // Update autonomous movement (updates charX/charY targets)
+            updateAutonomousMovement();
+
+            // update velocity (based on target position deltas)
+            var dx = charX - prevCharX;
+            var dy = charY - prevCharY;
+            charVX = charVX * 0.82 + dx * 0.18;
+            charVY = charVY * 0.82 + dy * 0.18;
+            prevCharX = charX;
+            prevCharY = charY;
+
+            // smooth visual position toward logical position
+            visualX += (charX - visualX) * 0.16;
+            visualY += (charY - visualY) * 0.16;
+            character.style.left = Math.round(visualX) + 'px';
+            character.style.top = Math.round(visualY) + 'px';
+
+            // hair physics, head tilt and dynamic shadow
+            updateHairPhysics(Date.now() / 1000);
+
+            requestAnimationFrame(updateMovement);
+        }
+        
+        // Check collisions with chat window
+        function checkCollisions() {
+            var charCenterX = charX + 70;
+            var charCenterY = charY + 90;
+            
+            if (chatContainer.classList.contains('visible')) {
+                var chatRect = chatContainer.getBoundingClientRect();
+                if (charCenterX >= chatRect.left && charCenterX <= chatRect.right &&
+                    charCenterY >= chatRect.top && charCenterY <= chatRect.bottom) {
+                    chatContainer.style.boxShadow = '0 35px 100px rgba(102, 126, 234, 0.6), 0 0 0 3px rgba(102, 126, 234, 1)';
+                    setTimeout(function() {
+                        chatContainer.style.boxShadow = '';
+                    }, 200);
+                }
+            }
+        }
+        
+        // Change message on hover
+        character.addEventListener('mouseenter', function() {
+            var messageBubble = character.querySelector('.character-message');
+            currentMessageIndex = (currentMessageIndex + 1) % messageTexts.length;
+            messageBubble.textContent = messageTexts[currentMessageIndex];
+        });
+
+        // Helper — ask Aria to set a new target periodically
+        function moveToRandomPosition() {
+            // Reuse the existing random target generation
+            try {
+                setNewRandomTarget();
+                autonomousMode = true;
+            } catch (e) {
+                // ignore if functions not in scope
+            }
+        }
+
+        // Periodically nudge Aria to a new random place
+        setInterval(moveToRandomPosition, 20000);
+
+        // Watch for assistant messages and briefly celebrate
+        if (chatMessages) {
+            var observer = new MutationObserver(function(mutations) {
+                mutations.forEach(function(mutation) {
+                    mutation.addedNodes.forEach(function(node) {
+                        if (node.classList && node.classList.contains('assistant')) {
+                            // Celebrate when assistant responds
+                            character.style.animation = 'none';
+                            setTimeout(function() {
+                                character.style.animation = '';
+                            }, 10);
+                        }
+                    });
+                });
+            });
+            observer.observe(chatMessages, { childList: true, subtree: true });
+        }
+    })();
+    
+    // QAI Backend status check logic
+    document.addEventListener('DOMContentLoaded', function() {
+        var providerInfo = document.getElementById('providerInfo');
+        
+        // Auto-check QAI backend status on page load
+        function checkQAIBackendStatus() {
+            if (!providerInfo) return;
+            fetch('/api/ai/status')
+                .then(function(resp) {
+                    if (resp.ok) {
+                        return resp.json();
+                    } else {
+                        throw new Error('Not running');
+                    }
+                })
+                .then(function(data) {
+                    var provider = data?.active_provider || 'local';
+                    var model = data?.model || 'Ready';
+                    providerInfo.textContent = provider.toUpperCase() + ' - ' + model;
+                    providerInfo.style.color = '#fff';
+                })
+                .catch(function() {
+                    providerInfo.textContent = 'Backend not running';
+                    providerInfo.style.color = '#ffc107';
+                });
+        }
+        
+        // Initial check on load
+        checkQAIBackendStatus();
+        
+        // Check every 30 seconds
+        setInterval(checkQAIBackendStatus, 30000);
+    });
+    </script>
+</body>
+</html>

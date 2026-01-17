@@ -1,0 +1,1035 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QAI Hub - Command Center</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            color: #eee;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        /* Dark Mode */
+        body.dark-mode {
+            background: #121212 !important;
+            color: #e0e0e0;
+        }
+        body.dark-mode header {
+            background: linear-gradient(135deg, #1f2937 0%, #374151 100%) !important;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.8) !important;
+        }
+        body.dark-mode .system-card,
+        body.dark-mode .status-badge {
+            background: #1e1e1e !important;
+            border-color: #333 !important;
+        }
+        body.dark-mode .btn-primary {
+            background: linear-gradient(135deg,#2563eb 0%, #1d4ed8 100%) !important;
+        }
+        
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 20px;
+            padding: 50px;
+            margin-bottom: 40px;
+            box-shadow: 0 10px 40px rgba(102, 126, 234, 0.4);
+            border: 1px solid rgba(255,255,255,0.1);
+            text-align: center;
+            position: relative;
+        }
+        
+        h1 {
+            color: #fff;
+            font-size: 3.5em;
+            margin-bottom: 15px;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.3);
+            letter-spacing: 2px;
+        }
+        
+        .subtitle {
+            color: rgba(255,255,255,0.95);
+            font-size: 1.3em;
+            margin-bottom: 25px;
+        }
+        
+        .system-status {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 25px;
+        }
+        
+        .status-badge {
+            background: rgba(255,255,255,0.15);
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-size: 0.95em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        
+        .status-badge.online {
+            background: rgba(40, 167, 69, 0.25);
+            border: 1px solid rgba(40, 167, 69, 0.5);
+        }
+        
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #28a745;
+            animation: pulse-dot 2s infinite;
+            box-shadow: 0 0 10px rgba(40, 167, 69, 0.8);
+        }
+        
+        @keyframes pulse-dot {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.6; transform: scale(1.1); }
+        }
+        
+        .systems-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        
+        .system-card {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 20px;
+            padding: 35px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .system-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            transform: scaleX(0);
+            transition: transform 0.4s ease;
+        }
+        
+        .system-card:hover::before {
+            transform: scaleX(1);
+        }
+        
+        .system-card:hover {
+            transform: translateY(-12px) scale(1.02);
+            box-shadow: 0 15px 60px rgba(102, 126, 234, 0.5);
+            border-color: rgba(102, 126, 234, 0.6);
+            background: rgba(255,255,255,0.08);
+        }
+        
+        .system-icon {
+            font-size: 3.5em;
+            margin-bottom: 20px;
+            display: block;
+            text-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+        
+        .system-title {
+            font-size: 1.8em;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 12px;
+        }
+        
+        .system-description {
+            color: rgba(255,255,255,0.7);
+            line-height: 1.6;
+            margin-bottom: 20px;
+            font-size: 0.95em;
+        }
+        
+        .system-features {
+            list-style: none;
+            margin-bottom: 20px;
+        }
+        
+        .system-features li {
+            padding: 6px 0;
+            color: rgba(255,255,255,0.8);
+            font-size: 0.9em;
+        }
+        
+        .system-features li::before {
+            content: '✓';
+            color: #28a745;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        
+        .system-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 0.95em;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+        
+        .btn-secondary {
+            background: rgba(255,255,255,0.1);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        
+        .btn-secondary:hover {
+            background: rgba(255,255,255,0.15);
+            border-color: rgba(255,255,255,0.3);
+        }
+        
+        .quick-actions {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 20px;
+            padding: 35px;
+            margin-bottom: 40px;
+            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px);
+        }
+        
+        .quick-actions h2 {
+            color: #fff;
+            font-size: 2em;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+        
+        .actions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        
+        .action-btn {
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: white;
+        }
+        
+        .action-btn:hover {
+            background: rgba(255,255,255,0.12);
+            transform: translateY(-4px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        }
+        
+        .action-icon {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .action-label {
+            font-size: 1.1em;
+            font-weight: 500;
+        }
+        
+        .stats-bar {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 20px;
+            padding: 30px;
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 30px;
+            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px);
+        }
+        
+        .stat-item {
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 3em;
+            font-weight: bold;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .stat-label {
+            color: rgba(255,255,255,0.7);
+            font-size: 1em;
+            margin-top: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 30px;
+            color: rgba(255,255,255,0.5);
+            margin-top: 40px;
+        }
+        
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: rgba(40, 167, 69, 0.95);
+            color: white;
+            padding: 18px 28px;
+            border-radius: 12px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+            display: none;
+            animation: slideIn 0.4s ease;
+            z-index: 1000;
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        .dark-toggle { position:absolute;top:20px;right:20px;padding:10px 16px;border:none;border-radius:8px;background:#222;color:#fff;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,0.3); }
+        .status-dot-warning { background:#ffc107 !important; }
+        .clickable-badge { cursor:pointer; border:none; background: rgba(255,255,255,0.1); }
+        .mt-10 { margin-top:10px; }
+    </style>
+<body>
+    <div class="container">
+        <header>
+            <h1>🌌 QAI Command Center</h1>
+            <p class="subtitle">Quantum-AI Hybrid Training & Deployment Hub</p>
+            <div class="system-status">
+                <div class="status-badge online">
+                    <div class="status-dot"></div>
+            <button id="darkModeToggleHub" onclick="toggleDarkModeHub()" class="dark-toggle" title="Toggle Dark Mode (Ctrl+D)">🌙</button>
+                    <span>Dashboard Server</span>
+                </div>
+                <div class="status-badge online">
+                    <div class="status-dot"></div>
+                    <span>Training Pipeline</span>
+                </div>
+                <div class="status-badge online">
+                    <div class="status-dot"></div>
+                    <span>API Endpoints</span>
+                </div>
+                <div class="status-badge" id="quantumStatus">
+                    <div class="status-dot status-dot-warning"></div>
+                    <span>Quantum MCP</span>
+                </div>
+                <button id="notificationToggle" class="status-badge clickable-badge" onclick="toggleNotifications()">
+                    <span id="notificationIcon">🔕</span>
+                    <span id="notificationText">Notifications Off</span>
+                </button>
+            </div>
+        </header>
+
+        <div class="stats-bar">
+            <div class="stat-item">
+                <div class="stat-value" id="totalJobs">--</div>
+                <div class="stat-label">Training Jobs</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="totalDatasets">--</div>
+                <div class="stat-label">Datasets</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="totalModels">--</div>
+                <div class="stat-label">Trained Models</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="gpuUtil">--</div>
+                <div class="stat-label">GPU Usage</div>
+            </div>
+        </div>
+
+        <div class="quick-actions">
+            <h2>⚡ Quick Actions</h2>
+            <div class="actions-grid">
+                <div class="action-btn" onclick="quickAction('training')">
+                    <div class="action-icon">🚀</div>
+                    <div class="action-label">Start Training</div>
+                </div>
+                <div class="action-btn" onclick="quickAction('datasets')">
+                    <div class="action-icon">📊</div>
+                    <div class="action-label">View Datasets</div>
+                </div>
+                <div class="action-btn" onclick="quickAction('models')">
+                    <div class="action-icon">🤖</div>
+                    <div class="action-label">Browse Models</div>
+                </div>
+                <div class="action-btn" onclick="quickAction('monitor')">
+                    <div class="action-icon">📈</div>
+                    <div class="action-label">Monitor GPU</div>
+                </div>
+                <div class="action-btn" onclick="quickAction('quantum')">
+                    <div class="action-icon">⚛️</div>
+                    <div class="action-label">Quantum Jobs</div>
+                </div>
+                <div class="action-btn" onclick="quickAction('chat')">
+                    <div class="action-icon">💬</div>
+                    <div class="action-label">Chat Interface</div>
+                </div>
+                <div class="action-btn" onclick="quickAction('analytics')">
+                    <div class="action-icon">📈</div>
+                    <div class="action-label">Analytics</div>
+                </div>
+                <div class="action-btn" onclick="quickAction('queue')">
+                    <div class="action-icon">📋</div>
+                    <div class="action-label">Job Queue</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="systems-grid">
+            <!-- Training Dashboard -->
+            <div class="system-card" onclick="openSystem('unified.html')">
+                <div class="system-icon">🎯</div>
+                <h2 class="system-title">Training Dashboard</h2>
+                <p class="system-description">
+                    Comprehensive LoRA fine-tuning interface with real-time monitoring,
+                    advanced configuration, and automated job management.
+                </p>
+                <ul class="system-features">
+                    <li>20+ training parameters</li>
+                    <li>Real-time GPU monitoring</li>
+                    <li>4 preset configurations</li>
+                    <li>Config save/load (JSON)</li>
+                    <li>Live job tracking</li>
+                </ul>
+                <div class="system-actions">
+                    <a href="unified.html" class="btn btn-primary">Open Dashboard</a>
+                    <button class="btn btn-secondary" onclick="event.stopPropagation(); showInfo('training')">Learn More</button>
+                </div>
+            </div>
+
+            <!-- Quantum AI -->
+            <div class="system-card" onclick="openSystem('quantum')">
+                <div class="system-icon">⚛️</div>
+                <h2 class="system-title">Quantum ML Pipeline</h2>
+                <p class="system-description">
+                    Hybrid quantum-classical machine learning with PennyLane,
+                    Azure Quantum integration, and circuit optimization.
+                </p>
+                <ul class="system-features">
+                    <li>Quantum circuit training</li>
+                    <li>Azure Quantum jobs</li>
+                    <li>8 MCP server tools</li>
+                    <li>Local & cloud simulators</li>
+                    <li>Cost estimation</li>
+                </ul>
+                <div class="system-actions">
+                    <button class="btn btn-primary" onclick="event.stopPropagation(); runQuantum()">Run Quantum Job</button>
+                    <button class="btn btn-secondary" onclick="event.stopPropagation(); showInfo('quantum')">Learn More</button>
+                </div>
+            </div>
+
+            <!-- Chat Interface -->
+            <div class="system-card" onclick="openSystem('chat')">
+                <div class="system-icon">💬</div>
+                <h2 class="system-title">Multi-Provider Chat</h2>
+                <p class="system-description">
+                    Unified chat CLI supporting Azure OpenAI, OpenAI, LoRA adapters,
+                    and local echo with automatic provider detection.
+                </p>
+                <ul class="system-features">
+                    <li>4 provider backends</li>
+                    <li>Auto-detection & fallback</li>
+                    <li>Streaming responses</li>
+                    <li>Memory persistence (SQL/Cosmos)</li>
+                    <li>CLI & API interfaces</li>
+                </ul>
+                <div class="system-actions">
+                    <button class="btn btn-primary" onclick="event.stopPropagation(); openChat()">Open Chat</button>
+                    <button class="btn btn-secondary" onclick="event.stopPropagation(); showInfo('chat')">Learn More</button>
+                </div>
+            </div>
+
+            <!-- Model Evaluation -->
+            <div class="system-card">
+                <div class="system-icon">📊</div>
+                <h2 class="system-title">Evaluation Suite</h2>
+                <p class="system-description">
+                    Automated model evaluation with perplexity metrics, loss tracking,
+                    and comparison tools for iterative improvement.
+                </p>
+                <ul class="system-features">
+                    <li>Perplexity calculation</li>
+                    <li>Loss comparison</li>
+                    <li>Batch evaluation</li>
+                    <li>Model ranking</li>
+                    <li>Export reports (MD/JSON)</li>
+                </ul>
+                <div class="system-actions">
+                    <button class="btn btn-primary" onclick="runEvaluation()">Run Evaluation</button>
+                    <button class="btn btn-secondary" onclick="showInfo('eval')">Learn More</button>
+                </div>
+            </div>
+
+            <!-- Dataset Manager -->
+            <div class="system-card" onclick="openSystem('datasets')">
+                <div class="system-icon">🗃️</div>
+                <h2 class="system-title">Dataset Manager</h2>
+                <p class="system-description">
+                    Browse, validate, and manage training datasets with automatic
+                    sample counting and format validation.
+                </p>
+                <ul class="system-features">
+                    <li>Auto-discovery</li>
+                    <li>Sample counting</li>
+                    <li>Format validation</li>
+                    <li>Train/test splits</li>
+                    <li>Dataset generation</li>
+                </ul>
+                <div class="system-actions">
+                    <button class="btn btn-primary" onclick="viewDatasets()">View Datasets</button>
+                    <button class="btn btn-secondary" onclick="showInfo('datasets')">Learn More</button>
+                </div>
+            </div>
+
+            <!-- API Gateway -->
+            <div class="system-card">
+                <div class="system-icon">🔌</div>
+                <h2 class="system-title">API Gateway</h2>
+                <p class="system-description">
+                    Azure Functions unified API with /chat, /quantum, and /ai/status
+                    endpoints. Dynamic imports from all three projects.
+                </p>
+                <ul class="system-features">
+                    <li>Multi-project integration</li>
+                    <li>SQL/Cosmos persistence</li>
+                    <li>Telemetry (App Insights)</li>
+                    <li>Rate limiting</li>
+                    <li>CORS enabled</li>
+                </ul>
+                <div class="system-actions">
+                    <button class="btn btn-primary" onclick="testAPI()">Test API</button>
+                    <button class="btn btn-secondary" onclick="showInfo('api')">Documentation</button>
+                </div>
+            </div>
+
+            <!-- Resource Monitor -->
+            <div class="system-card">
+                <div class="system-icon">📈</div>
+                <h2 class="system-title">Resource Monitor</h2>
+                <p class="system-description">
+                    Real-time GPU, CPU, memory, and disk monitoring with historical
+                    tracking and alert thresholds.
+                </p>
+                <ul class="system-features">
+                    <li>GPU utilization & VRAM</li>
+                    <li>CPU & RAM usage</li>
+                    <li>Process tracking</li>
+                    <li>Historical graphs</li>
+                    <li>Alert system</li>
+                </ul>
+                <div class="system-actions">
+                    <button class="btn btn-primary" onclick="openMonitor()">Open Monitor</button>
+                    <button class="btn btn-secondary" onclick="showInfo('monitor')">Learn More</button>
+                </div>
+            </div>
+
+            <!-- CI/CD Pipeline -->
+            <div class="system-card">
+                <div class="system-icon">🔄</div>
+                <h2 class="system-title">CI/CD Pipeline</h2>
+                <p class="system-description">
+                    Automated testing, validation, and deployment orchestration
+                    with master scheduler and job coordination.
+                </p>
+                <ul class="system-features">
+                    <li>40 unit tests</li>
+                    <li>30 integration tests</li>
+                    <li>Orchestrator validation</li>
+                    <li>Artifact packaging</li>
+                    <li>Deployment automation</li>
+                </ul>
+                <div class="system-actions">
+                    <button class="btn btn-primary" onclick="runCI()">Run CI Pipeline</button>
+                    <button class="btn btn-secondary" onclick="showInfo('ci')">Learn More</button>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>QAI Command Center v2.0 | Hybrid Quantum-AI Training Platform</p>
+            <p class="mt-10">Three independent projects, unified experience</p>
+        </footer>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        // Load stats on page load
+        async function loadStats() {
+            try {
+                // Get training jobs count
+                const statusResponse = await fetch('/status');
+                const statusData = await statusResponse.json();
+                const jobs = statusData.jobs || [];
+                document.getElementById('totalJobs').textContent = jobs.length;
+
+                // Update quantum status based on running jobs
+                const hasQuantumJobs = jobs.some(j => j.name && j.name.includes('quantum'));
+                const quantumBadge = document.getElementById('quantumStatus');
+                if (hasQuantumJobs) {
+                    quantumBadge.classList.add('online');
+                    quantumBadge.querySelector('.status-dot').style.background = '#28a745';
+                }
+
+                // Get datasets count
+                const datasetsResponse = await fetch('/api/datasets');
+                const datasetsData = await datasetsResponse.json();
+                document.getElementById('totalDatasets').textContent = (datasetsData.datasets || []).length;
+
+                // Get models count
+                const modelsResponse = await fetch('/api/models');
+                const modelsData = await modelsResponse.json();
+                document.getElementById('totalModels').textContent = (modelsData.models || []).length;
+
+                // Get GPU usage
+                const gpuResponse = await fetch('/api/gpu');
+                const gpuData = await gpuResponse.json();
+                if (gpuData.gpus && gpuData.gpus.length > 0) {
+                    const util = gpuData.gpus[0].utilization_gpu;
+                    document.getElementById('gpuUtil').textContent = util + '%';
+                    
+                    // Color code GPU usage
+                    const gpuStat = document.getElementById('gpuUtil');
+                    if (util > 80) {
+                        gpuStat.style.color = '#dc3545'; // Red - high usage
+                    } else if (util > 50) {
+                        gpuStat.style.color = '#ffc107'; // Yellow - moderate
+                    } else {
+                        gpuStat.style.color = '#28a745'; // Green - low
+                    }
+                } else {
+                    document.getElementById('gpuUtil').textContent = '0%';
+                }
+            } catch (error) {
+                console.error('Failed to load stats:', error);
+                // Show user-friendly error
+                document.getElementById('totalJobs').textContent = 'N/A';
+                document.getElementById('totalDatasets').textContent = 'N/A';
+                document.getElementById('totalModels').textContent = 'N/A';
+                document.getElementById('gpuUtil').textContent = 'N/A';
+            }
+        }
+
+        function openSystem(page) {
+            if (page) {
+                window.location.href = page;
+            }
+        }
+
+        function quickAction(action) {
+            const actions = {
+                training: 'unified.html#train',
+                datasets: 'unified.html#datasets',
+                models: 'unified.html#models',
+                monitor: 'unified.html#monitor',
+                analytics: 'analytics.html',
+                queue: () => showJobQueue(),
+                quantum: () => showToast('Quantum interface: Use quantum_mcp_server.py or quantum_autorun.py'),
+                chat: () => showToast('Chat interface: Run python talk-to-ai/src/chat_cli.py')
+            };
+
+            const handler = actions[action];
+            if (typeof handler === 'function') {
+                handler();
+            } else {
+                window.location.href = handler;
+            }
+        }
+        
+        async function showJobQueue() {
+            try {
+                const response = await fetch('/api/job-queue');
+                const data = await response.json();
+                
+                const modal = document.createElement('div');
+                modal.style.cssText = `
+                    position: fixed;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    background: white;
+                    padding: 30px;
+                    border-radius: 15px;
+                    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+                    z-index: 10000;
+                    max-width: 800px;
+                    max-height: 80vh;
+                    overflow-y: auto;
+                    color: #333;
+                `;
+                
+                modal.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
+                        <h2 style="margin: 0; color: #667eea;">📋 Job Queue Status</h2>
+                        <button id="closeQueueBtn" style="background: #f87171; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer;">Close</button>
+                    </div>
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px;">
+                        <div style="background: #f0f9ff; padding: 15px; border-radius: 8px; text-align: center;">
+                            <div style="font-size: 2em; font-weight: bold; color: #0ea5e9;">${data.pending || 0}</div>
+                            <div style="color: #666; font-size: 0.9em;">Pending</div>
+                        </div>
+                        <div style="background: #f0fdf4; padding: 15px; border-radius: 8px; text-align: center;">
+                            <div style="font-size: 2em; font-weight: bold; color: #10b981;">${data.running || 0}</div>
+                            <div style="color: #666; font-size: 0.9em;">Running</div>
+                        </div>
+                        <div style="background: #fef3c7; padding: 15px; border-radius: 8px; text-align: center;">
+                            <div style="font-size: 2em; font-weight: bold; color: #f59e0b;">${data.blocked || 0}</div>
+                            <div style="color: #666; font-size: 0.9em;">Blocked</div>
+                        </div>
+                    </div>
+                    <div style="font-size: 0.9em; color: #666; text-align: center;">
+                        Total: ${data.total_jobs || 0} jobs | Estimated time: ${Math.round((data.estimated_total_time || 0) / 60)} min
+                    </div>
+                `;
+                
+                const overlay = document.createElement('div');
+                overlay.style.cssText = `
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    background: rgba(0,0,0,0.7);
+                    z-index: 9999;
+                `;
+                
+                document.body.appendChild(overlay);
+                document.body.appendChild(modal);
+                
+                document.getElementById('closeQueueBtn').onclick = () => {
+                    modal.remove();
+                    overlay.remove();
+                };
+                overlay.onclick = () => {
+                    modal.remove();
+                    overlay.remove();
+                };
+                
+            } catch (error) {
+                console.error('Error loading job queue:', error);
+                showToast('Job queue unavailable. Start with: python scripts/job_queue.py', 'warning');
+            }
+        }
+
+        function showInfo(system) {
+            const info = {
+                training: 'Training Dashboard provides comprehensive LoRA fine-tuning with 20+ parameters, presets, and real-time monitoring.',
+                quantum: 'Quantum ML Pipeline uses PennyLane for hybrid quantum-classical training with Azure Quantum integration.',
+                chat: 'Multi-Provider Chat supports Azure OpenAI, OpenAI, LoRA adapters, and local models with auto-detection.',
+                eval: 'Evaluation Suite provides automated model assessment with perplexity, loss tracking, and comparison tools.',
+                datasets: 'Dataset Manager helps browse, validate, and manage training datasets with automatic discovery.',
+                api: 'API Gateway unifies all three projects (quantum-ai, talk-to-ai, lora training) through Azure Functions.',
+                monitor: 'Resource Monitor tracks GPU, CPU, memory usage with historical data and alert thresholds.',
+                ci: 'CI/CD Pipeline automates testing (70 tests), validation, and deployment with orchestrator coordination.'
+            };
+            showToast(info[system] || 'No information available');
+        }
+
+        function openChat() {
+            showToast('To use chat: python talk-to-ai/src/chat_cli.py --provider azure');
+        }
+
+        function runQuantum() {
+            showToast('To run quantum jobs: python ./scripts/quantum_autorun.py --dry-run');
+        }
+
+        function runEvaluation() {
+            window.location.href = 'unified.html#evaluation';
+        }
+
+        function viewDatasets() {
+            window.location.href = 'unified.html#datasets';
+        }
+
+        function testAPI() {
+            window.open('/api/ai/status', '_blank');
+        }
+
+        function openMonitor() {
+            window.location.href = 'unified.html#monitor';
+        }
+
+        function runCI() {
+            showToast('To run CI: python ./scripts/ci_orchestrator.py --ci-pipeline');
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.style.display = 'block';
+            setTimeout(() => {
+                toast.style.display = 'none';
+            }, 5000);
+        }
+        // Dark Mode Hub
+        function applyDarkModePreferenceHub() {
+            if (localStorage.getItem('darkMode') === 'true') {
+                document.body.classList.add('dark-mode');
+                const btn = document.getElementById('darkModeToggleHub');
+                if (btn) btn.textContent = '☀️';
+            }
+        }
+        function toggleDarkModeHub() {
+            const isDark = document.body.classList.toggle('dark-mode');
+            localStorage.setItem('darkMode', isDark ? 'true':'false');
+            const btn = document.getElementById('darkModeToggleHub');
+            if (btn) btn.textContent = isDark ? '☀️' : '🌙';
+            showToast('Dark mode ' + (isDark ? 'enabled':'disabled'));
+        }
+        applyDarkModePreferenceHub();
+        
+        // Desktop notification system
+        let notificationsEnabled = false;
+        try {
+            const storedNotif = localStorage.getItem('qai_notifications_enabled');
+            if (storedNotif === 'true' && "Notification" in window && Notification.permission === 'granted') {
+                notificationsEnabled = true;
+            }
+        } catch(e) { /* ignore */ }
+        
+        function initNotifications() {
+            if ("Notification" in window) {
+                if (Notification.permission === "granted") {
+                    notificationsEnabled = true;
+                    try { localStorage.setItem('qai_notifications_enabled','true'); } catch(e){}
+                    updateNotificationUI();
+                }
+            }
+        }
+        
+        function updateNotificationUI() {
+            const icon = document.getElementById('notificationIcon');
+            const text = document.getElementById('notificationText');
+            if (notificationsEnabled) {
+                icon.textContent = '🔔';
+                text.textContent = 'Notifications On';
+            } else {
+                icon.textContent = '🔕';
+                text.textContent = 'Notifications Off';
+            }
+        }
+        
+        async function toggleNotifications() {
+            if (!("Notification" in window)) {
+                showToast("Desktop notifications not supported in this browser");
+                return;
+            }
+            
+            if (Notification.permission === "denied") {
+                showToast("Notifications are blocked. Please enable them in your browser settings.");
+                return;
+            }
+            
+            if (Notification.permission === "default") {
+                const permission = await Notification.requestPermission();
+                notificationsEnabled = (permission === "granted");
+                try { localStorage.setItem('qai_notifications_enabled', notificationsEnabled ? 'true':'false'); } catch(e){}
+            } else if (Notification.permission === "granted") {
+                notificationsEnabled = !notificationsEnabled;
+                try { localStorage.setItem('qai_notifications_enabled', notificationsEnabled ? 'true':'false'); } catch(e){}
+                
+                if (notificationsEnabled) {
+                    new Notification("🔔 QAI Notifications Enabled", {
+                        body: "You'll receive alerts for training events",
+                        icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y="75" font-size="75">🤖</text></svg>'
+                    });
+                }
+            }
+            
+            updateNotificationUI();
+            showToast(notificationsEnabled ? "Notifications enabled!" : "Notifications disabled");
+        }
+        
+        // Initialize on load
+        initNotifications();
+
+        async function viewHistory() {
+            try {
+                const response = await fetch('/api/history');
+                const data = await response.json();
+                
+                if (data.error) {
+                    showToast('No training history available yet');
+                    return;
+                }
+
+                const jobs = data.jobs || [];
+                if (jobs.length === 0) {
+                    showToast('No completed jobs found');
+                    return;
+                }
+
+                // Create modal
+                const modal = document.createElement('div');
+                modal.style.cssText = `
+                    position: fixed;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    background: white;
+                    padding: 30px;
+                    border-radius: 15px;
+                    box-shadow: 0 10px 50px rgba(0,0,0,0.5);
+                    max-width: 800px;
+                    max-height: 80vh;
+                    overflow-y: auto;
+                    z-index: 10000;
+                    color: #333;
+                `;
+
+                const overlay = document.createElement('div');
+                overlay.style.cssText = `
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    background: rgba(0,0,0,0.7);
+                    z-index: 9999;
+                `;
+
+                let html = '<h2 style="margin-bottom: 20px; color: #667eea;">📊 Training History</h2>';
+                html += '<table style="width: 100%; border-collapse: collapse;">';
+                html += '<tr style="background: #f5f5f5; font-weight: bold;">';
+                html += '<td style="padding: 10px; border: 1px solid #ddd;">Job</td>';
+                html += '<td style="padding: 10px; border: 1px solid #ddd;">Duration</td>';
+                html += '<td style="padding: 10px; border: 1px solid #ddd;">Pre Loss</td>';
+                html += '<td style="padding: 10px; border: 1px solid #ddd;">Post Loss</td>';
+                html += '<td style="padding: 10px; border: 1px solid #ddd;">Improvement</td>';
+                html += '</tr>';
+
+                jobs.forEach(job => {
+                    const improvement = job.pre_loss && job.post_loss 
+                        ? ((job.pre_loss - job.post_loss) / job.pre_loss * 100).toFixed(1)
+                        : 'N/A';
+                    
+                    html += '<tr>';
+                    html += `<td style="padding: 10px; border: 1px solid #ddd;">${job.name}</td>`;
+                    html += `<td style="padding: 10px; border: 1px solid #ddd;">${Math.round(job.duration / 60)}m</td>`;
+                    html += `<td style="padding: 10px; border: 1px solid #ddd;">${job.pre_loss ? job.pre_loss.toFixed(3) : 'N/A'}</td>`;
+                    html += `<td style="padding: 10px; border: 1px solid #ddd;">${job.post_loss ? job.post_loss.toFixed(3) : 'N/A'}</td>`;
+                    html += `<td style="padding: 10px; border: 1px solid #ddd; color: ${improvement !== 'N/A' && improvement > 0 ? '#28a745' : '#666'};">${improvement}%</td>`;
+                    html += '</tr>';
+                });
+
+                html += '</table>';
+                html += '<button onclick="this.parentElement.remove(); document.querySelector(\'div[style*=\\"z-index: 9999\\"]\'').remove();" style="margin-top: 20px; padding: 10px 20px; background: #667eea; color: white; border: none; border-radius: 8px; cursor: pointer;">Close</button>';
+
+                modal.innerHTML = html;
+                document.body.appendChild(overlay);
+                document.body.appendChild(modal);
+
+                overlay.onclick = () => {
+                    modal.remove();
+                    overlay.remove();
+                };
+            } catch (error) {
+                showToast('Failed to load history: ' + error.message);
+            }
+        }
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.ctrlKey && e.key === 'h') {
+                e.preventDefault();
+                viewHistory();
+            }
+            if (e.ctrlKey && e.key === 'r') {
+                e.preventDefault();
+                loadStats();
+                showToast('Stats refreshed');
+            }
+            if (e.ctrlKey && e.key.toLowerCase() === 'd') {
+                e.preventDefault();
+                toggleDarkModeHub();
+            }
+        });
+
+        // Load stats on page load
+        loadStats();
+
+        // Refresh stats every 30 seconds
+        setInterval(loadStats, 30000);
+
+        // Check for running jobs every 10 seconds
+        setInterval(async () => {
+            try {
+                const response = await fetch('/status');
+                const data = await response.json();
+                const runningJobs = (data.jobs || []).filter(j => j.status === 'running');
+                
+                if (runningJobs.length > 0) {
+                    // Show subtle indicator
+                    document.title = `(${runningJobs.length}) QAI Hub - Training Active`;
+                } else {
+                    document.title = 'QAI Hub - Command Center';
+                }
+            } catch (error) {
+                console.error('Failed to check jobs:', error);
+            }
+        }, 10000);
+    </script>
+</body>
+</html>

@@ -1,5 +1,5 @@
 """Unit tests for AutoTrain orchestrator components."""
-from autotrain import (
+from scripts.training.autotrain import (
     Job,
     read_yaml,
     load_jobs,
@@ -14,9 +14,8 @@ import json
 import sys
 from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(REPO_ROOT / "scripts"))
-REPO_ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(REPO_ROOT / "scripts"))
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
 
 
 # Import the module under test

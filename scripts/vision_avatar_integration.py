@@ -23,7 +23,7 @@ except Exception as e:  # pragma: no cover
 from PIL import Image, ImageDraw, ImageFont
 import numpy as np
 
-from scripts.train_vision import TinyConvNet
+from scripts.training.train_vision import TinyConvNet
 
 
 def _gather_image_files(root: Path) -> List[Path]:

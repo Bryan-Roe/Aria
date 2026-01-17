@@ -12,7 +12,7 @@ try:
 except ImportError:
     pytest.skip("torch or numpy not available", allow_module_level=True)
 
-train = importlib.import_module('scripts.train_vision')
+train = importlib.import_module('scripts.training.train_vision')
 avatar = importlib.import_module('scripts.vision_avatar_integration')
 
 

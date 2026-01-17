@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Start Backend - QAI</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background: rgba(0,0,0,0.5);
+            border-radius: 18px;
+            padding: 32px 40px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.25);
+            text-align: center;
+        }
+        h1 {
+            font-size: 2em;
+            margin-bottom: 12px;
+        }
+        .desc {
+            font-size: 1.1em;
+            margin-bottom: 24px;
+        }
+        .steps {
+            background: rgba(255,255,255,0.08);
+            border-radius: 12px;
+            padding: 18px;
+            margin-bottom: 18px;
+            text-align: left;
+        }
+        .steps code {
+            background: #222;
+            color: #fff;
+            padding: 2px 6px;
+            border-radius: 6px;
+            font-size: 1em;
+        }
+        .status {
+            margin-top: 18px;
+            font-size: 1.1em;
+            font-weight: 600;
+        }
+        .check-btn {
+            background: #667eea;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 24px;
+            font-size: 1em;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: background 0.2s;
+        }
+        .check-btn:hover {
+            background: #764ba2;
+        }
+        .ok {
+            color: #28a745;
+        }
+        .fail {
+            color: #dc3545;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Start Backend</h1>
+        <div class="desc">To use the chat app, start the Azure Functions backend. You only need to do this once per session.</div>
+        <div class="steps">
+            <strong>Quick Start (Windows):</strong>
+            <ol>
+                <li>Open PowerShell in this folder.</li>
+                <li>Run:<br>
+                    <code>func start</code>
+                </li>
+            </ol>
+            <strong>Or use VS Code:</strong>
+            <ol>
+                <li>Open the Command Palette (<code>Ctrl+Shift+P</code>).</li>
+                <li>Type <code>Tasks: Run Task</code> and select <code>func: host start</code>.</li>
+            </ol>
+        </div>
+        <button class="check-btn" onclick="checkStatus()">Check Backend Status</button>
+        <div class="status" id="statusMsg">Status: <span id="statusResult">Unknown</span></div>
+    </div>
+    <script>
+        async function checkStatus() {
+            const statusMsg = document.getElementById('statusMsg');
+            const statusResult = document.getElementById('statusResult');
+            statusResult.textContent = 'Checking...';
+            statusResult.className = '';
+            try {
+                const resp = await fetch('/api/ai/status');
+                if (resp.ok) {
+                    const data = await resp.json();
+                    statusResult.textContent = 'Backend running!';
+                    statusResult.className = 'ok';
+                } else {
+                    statusResult.textContent = 'Backend not responding.';
+                    statusResult.className = 'fail';
+                }
+            } catch (e) {
+                statusResult.textContent = 'Backend not responding.';
+                statusResult.className = 'fail';
+            }
+        }
+    </script>
+</body>
+</html>

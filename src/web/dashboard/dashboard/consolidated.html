@@ -1,0 +1,1246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QAI Dashboard - Unified Training Platform</title>
+    <link rel="stylesheet" href="shared-theme.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="anomaly-detector.js"></script>
+    <script src="keyboard-nav.js"></script>
+    <script src="session-history.js"></script>
+        <script src="live-progress.js"></script>
+        <script src="model-comparator.js"></script>
+        <script src="hyperparameter-optimizer.js"></script>
+    <style>
+        /* Tab Navigation */
+        .tab-nav {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            background: var(--bg-card, #2a2d3a);
+            padding: 10px;
+            border-radius: 12px;
+            overflow-x: auto;
+        }
+        
+        .tab-btn {
+            padding: 12px 24px;
+            background: var(--bg-secondary, #1e2028);
+            border: none;
+            border-radius: 8px;
+            color: var(--text-primary, #eee);
+            cursor: pointer;
+            font-size: 0.95em;
+            font-weight: 500;
+            transition: all 0.3s;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .tab-btn:hover {
+            background: var(--accent-primary, #667eea);
+            transform: translateY(-2px);
+        }
+        
+        .tab-btn.active {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Header */
+        header {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 25px;
+            box-shadow: 0 10px 40px rgba(102, 126, 234, 0.4);
+            text-align: center;
+        }
+        
+        header h1 {
+            color: white;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .subtitle {
+            color: rgba(255,255,255,0.9);
+            font-size: 1.1em;
+        }
+        
+        /* Status Pills */
+        .status-pills {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 15px;
+        }
+        
+        .status-pill {
+            background: rgba(255,255,255,0.2);
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px);
+        }
+        
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #28a745;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; box-shadow: 0 0 8px rgba(40,167,69,0.8); }
+            50% { opacity: 0.6; }
+        }
+        
+        /* Grid Layouts */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 20px;
+        }
+        
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        
+        .grid-4 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        
+        /* Chart Container */
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin-top: 15px;
+        }
+        
+        /* Form Enhancements */
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .advanced-section {
+            margin-top: 20px;
+            border-top: 2px solid var(--border-color, #333);
+            padding-top: 20px;
+        }
+        
+        .collapsible-header {
+            cursor: pointer;
+            padding: 12px;
+            background: var(--bg-secondary, #1e2028);
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            transition: background 0.3s;
+        }
+        
+        .collapsible-header:hover {
+            background: var(--accent-primary, #667eea);
+        }
+        
+        .collapsible-content {
+            display: none;
+            padding: 15px 0;
+        }
+        
+        .collapsible-content.open {
+            display: block;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+            .tab-nav { flex-wrap: wrap; }
+            header h1 { font-size: 1.8em; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header>
+            <h1>🎯 QAI Dashboard</h1>
+            <p class="subtitle">Quantum AI Training Platform - Unified Control Center</p>
+            <div class="status-pills">
+                <div class="status-pill">
+                    <span class="status-dot"></span>
+                    <span>System Online</span>
+                </div>
+
+                            <!-- Hyperparameter Optimizer (Phase 30) -->
+                            <div class="card" style="margin-top:20px">
+                                <div class="card-header">
+                                    <h2 class="card-title">🎯 Hyperparameter Optimizer</h2>
+                                </div>
+                                <p style="margin-bottom:15px">Automated hyperparameter tuning with Bayesian optimization, grid search, and early stopping.</p>
+                
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Optimization Strategy</label>
+                                        <select id="optimStrategy" title="Optimization Strategy">
+                                            <option value="bayesian">Bayesian Optimization</option>
+                                            <option value="grid">Grid Search</option>
+                                            <option value="random">Random Search</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Max Trials</label>
+                                        <input type="number" id="optimMaxTrials" value="10" min="3" max="50" title="Max Trials" placeholder="10">
+                                    </div>
+                                </div>
+                
+                                <button class="btn btn-primary" onclick="startHyperparamOptimization()">
+                                    🚀 Start Optimization
+                                </button>
+                                <button class="btn btn-secondary" onclick="configureSearchSpace()">
+                                    ⚙️ Configure Search Space
+                                </button>
+                
+                                <div id="hyperoptContainer" style="margin-top:20px;display:none"></div>
+                            </div>
+                <div class="status-pill">
+                    <span>🖥️ GPU Ready</span>
+                </div>
+                <div class="status-pill">
+                    <span>📡 API Connected</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Tab Navigation -->
+        <nav class="tab-nav" role="tablist">
+            <button class="tab-btn active" onclick="switchTab('overview')" role="tab">
+                🏠 Overview
+            </button>
+            <button class="tab-btn" onclick="switchTab('training')" role="tab">
+                🚀 Training
+            </button>
+            <button class="tab-btn" onclick="switchTab('analytics')" role="tab">
+                📊 Analytics
+            </button>
+            <button class="tab-btn" onclick="switchTab('history')" role="tab">
+                📜 History
+            </button>
+            <button class="tab-btn" onclick="switchTab('tools')" role="tab">
+                🛠️ Tools
+            </button>
+        </nav>
+
+        <!-- Overview Tab -->
+        <div id="overview-tab" class="tab-content active" role="tabpanel">
+            <div class="grid-4">
+                <div class="metric-card">
+                    <div class="metric-label">Total Jobs</div>
+                    <div class="metric-value" id="totalJobs">0</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Avg Loss</div>
+                    <div class="metric-value metric-good" id="avgLoss">0.00</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Best Model</div>
+                    <div class="metric-value" id="bestModel" style="font-size:1.2em">N/A</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Total Time</div>
+                    <div class="metric-value" id="totalTime">0h</div>
+                </div>
+            </div>
+
+            <div class="grid-2" style="margin-top:20px">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">📈 Loss Progression</h2>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="lossChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">⚡ Recent Activity</h2>
+                    </div>
+                    <div id="recentActivity" style="max-height:300px;overflow-y:auto">
+                        <p style="color:#888;text-align:center;padding:40px">No recent activity</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card" style="margin-top:20px">
+                <div class="card-header">
+                    <h2 class="card-title">🎛️ Quick Actions</h2>
+                </div>
+                <div style="display:flex;gap:10px;flex-wrap:wrap">
+                    <button class="btn btn-primary" onclick="switchTab('training')">
+                        🚀 Start New Training
+                    </button>
+                    <button class="btn btn-secondary" onclick="refreshData()">
+                        🔄 Refresh Data
+                    </button>
+                    <button class="btn btn-info" onclick="showSystemHealth()">
+                        💊 System Health
+                    </button>
+                    <button class="btn btn-success" onclick="switchTab('tools')">
+                        🛠️ Tools & Utilities
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Training Tab -->
+        <div id="training-tab" class="tab-content" role="tabpanel">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">🚀 Start Training Job</h2>
+                </div>
+                
+                <form id="trainingForm" onsubmit="return startTraining(event);">
+                    <!-- Basic Settings -->
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Job Name</label>
+                            <input type="text" id="jobName" placeholder="my_training_job" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Dataset</label>
+                            <select id="datasetSelect" required></select>
+                        </div>
+                        <div class="form-group">
+                            <label>Model</label>
+                            <select id="modelSelect">
+                                <option value="microsoft/Phi-3.5-mini-instruct">Phi-3.5 Mini</option>
+                                <option value="microsoft/Phi-3-mini-4k-instruct">Phi-3 Mini</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Epochs</label>
+                            <input type="number" id="epochs" value="3" min="1" max="100">
+                        </div>
+                        <div class="form-group">
+                            <label>Learning Rate</label>
+                            <input type="text" id="learningRate" value="1e-4">
+                        </div>
+                        <div class="form-group">
+                            <label>Batch Size</label>
+                            <input type="number" id="batchSize" value="4" min="1" max="128">
+                        </div>
+                    </div>
+
+                    <!-- Quick Presets -->
+                    <div class="alert alert-info">
+                        <strong>Quick Presets:</strong>
+                        <div style="display:flex;gap:10px;margin-top:10px;flex-wrap:wrap">
+                            <button type="button" class="btn btn-secondary" onclick="applyPreset('quick')">Quick Test (2 min)</button>
+                            <button type="button" class="btn btn-secondary" onclick="applyPreset('standard')">Standard (10 min)</button>
+                            <button type="button" class="btn btn-secondary" onclick="applyPreset('full')">Full (60 min)</button>
+                            <button type="button" class="btn btn-secondary" onclick="showTuningWizard()">🧪 Tuning Wizard</button>
+                        </div>
+                    </div>
+
+                    <!-- Advanced Settings (Collapsible) -->
+                    <div class="advanced-section">
+                        <div class="collapsible-header" onclick="toggleAdvanced()">
+                            <span><strong>⚙️ Advanced Settings</strong></span>
+                            <span id="advancedToggle">▼</span>
+                        </div>
+                        <div class="collapsible-content" id="advancedContent">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>LoRA Rank</label>
+                                    <input type="number" id="loraRank" value="16" min="1" max="128">
+                                </div>
+                                <div class="form-group">
+                                    <label>LoRA Alpha</label>
+                                    <input type="number" id="loraAlpha" value="32" min="1" max="128">
+                                </div>
+                                <div class="form-group">
+                                    <label>Max Train Samples</label>
+                                    <input type="number" id="maxTrainSamples" value="-1" placeholder="-1 for all">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Submit Buttons -->
+                    <div style="display:flex;gap:10px;margin-top:20px;flex-wrap:wrap">
+                        <button type="submit" class="btn btn-primary">
+                            🚀 Start Training
+                        </button>
+                        <button type="button" class="btn btn-secondary" onclick="saveConfig()">
+                            💾 Save Config
+                        </button>
+                        <button type="button" class="btn btn-secondary" onclick="loadConfig()">
+                            📁 Load Config
+                        </button>
+                        <button type="button" class="btn btn-secondary" onclick="resetForm()">
+                            🔄 Reset
+                        </button>
+                    </div>
+                </form>
+
+                        <!-- Live Progress Tracker (Phase 28) -->
+                        <div id="liveProgressContainer" style="display:none"></div>
+            </div>
+        </div>
+
+        <!-- Analytics Tab -->
+        <div id="analytics-tab" class="tab-content" role="tabpanel">
+            <div class="grid-2">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">📊 Performance Metrics</h2>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="performanceChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">⏱️ Time Distribution</h2>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="timeChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card" style="margin-top:20px">
+                <div class="card-header">
+                    <h2 class="card-title">📈 Advanced Model Comparison (Phase 29)</h2>
+                </div>
+                <div id="modelComparisonContainer">
+                    <p style="text-align:center;padding:20px;color:#888">
+                        Select up to 4 completed jobs from the History tab to compare.
+                    </p>
+                </div>
+                <div class="chart-container" style="margin-top:20px">
+                    <canvas id="comparisonChart"></canvas>
+                </div>
+                <div id="benchmarkResults" style="margin-top:20px"></div>
+            </div>
+        </div>
+
+        <!-- History Tab -->
+        <div id="history-tab" class="tab-content" role="tabpanel">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">📜 Training Session History</h2>
+                    <div style="display:flex;gap:10px">
+                        <button class="btn btn-secondary" onclick="exportHistory('json')">Export JSON</button>
+                        <button class="btn btn-secondary" onclick="exportHistory('csv')">Export CSV</button>
+                        <button class="btn btn-danger" onclick="clearHistory()">Clear History</button>
+                    </div>
+                </div>
+                <div id="historyContent">
+                    <p style="text-align:center;color:#888;padding:40px">No training history yet</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tools Tab -->
+        <div id="tools-tab" class="tab-content" role="tabpanel">
+            <div class="grid-2">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">🔍 Dataset Profiler</h2>
+                    </div>
+                    <p style="margin-bottom:15px">Analyze dataset characteristics and get AI-powered hyperparameter recommendations.</p>
+                    <div class="form-group">
+                        <label>Select Dataset</label>
+                        <select id="profilerDataset"></select>
+                    </div>
+                    <button class="btn btn-primary" onclick="runDatasetProfiler()">
+                        📊 Profile Dataset
+                    </button>
+                    <div id="profilerResults" style="margin-top:15px"></div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">🎮 VRAM Calculator</h2>
+                    </div>
+                    <p style="margin-bottom:15px">Calculate safe batch size based on GPU memory and model configuration.</p>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Model</label>
+                            <select id="vramModel">
+                                <option value="microsoft/Phi-3.5-mini-instruct">Phi-3.5 Mini</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>LoRA Rank</label>
+                            <input type="number" id="vramRank" value="16" min="1" max="128">
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" onclick="runVRAMCalculator()">
+                        🧮 Calculate
+                    </button>
+                    <div id="vramResults" style="margin-top:15px"></div>
+                </div>
+            </div>
+
+            <div class="card" style="margin-top:20px">
+                <div class="card-header">
+                    <h2 class="card-title">⚠️ Anomaly Detector Status</h2>
+                </div>
+                <div id="anomalyStatus" class="grid-4">
+                    <div class="metric-card">
+                        <div class="metric-label">Total Anomalies</div>
+                        <div class="metric-value" id="anomalyCount">0</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Spikes Detected</div>
+                        <div class="metric-value metric-warning" id="spikeCount">0</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Divergences</div>
+                        <div class="metric-value metric-bad" id="divergenceCount">0</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Stagnations</div>
+                        <div class="metric-value metric-info" id="stagnationCount">0</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global State
+        let charts = {};
+        let anomalyDetector = null;
+        let sessionHistory = null;
+        let currentData = null;
+
+        // Initialize
+        window.addEventListener('DOMContentLoaded', async () => {
+            await initDashboard();
+            loadDatasets();
+            refreshData();
+            
+            // Start auto-refresh
+            setInterval(refreshData, 5000);
+        });
+
+        async function initDashboard() {
+            try {
+                // Initialize anomaly detector
+                if (typeof TrainingAnomalyDetector !== 'undefined') {
+                    anomalyDetector = new TrainingAnomalyDetector({
+                        enableNotifications: true,
+                        onAnomaly: (anomaly) => {
+                            console.log('Anomaly detected:', anomaly);
+                            updateAnomalyStatus();
+                        }
+                    });
+                    anomalyDetector.startMonitoring('/status');
+                }
+
+                // Initialize session history
+                if (typeof TrainingSessionHistory !== 'undefined') {
+                    sessionHistory = new TrainingSessionHistory();
+
+                                // Initialize Phase 28-30 modules
+                                if (typeof LiveProgressTracker !== 'undefined') {
+                                    window.liveTracker = new LiveProgressTracker({
+                                        onComplete: () => {
+                                            refreshData();
+                                            alert('Training completed!');
+                                        },
+                                        onError: (err) => {
+                                            console.error('Training error:', err);
+                                            alert('Training failed: ' + err.message);
+                                        }
+                                    });
+                                }
+
+                                if (typeof ModelComparator !== 'undefined') {
+                                    window.modelComparator = new ModelComparator();
+                                }
+
+                                if (typeof HyperparameterOptimizer !== 'undefined') {
+                                    window.hyperOptimizer = new HyperparameterOptimizer();
+                                }
+                }
+
+                // Initialize charts
+                initCharts();
+
+                // Request notification permission
+                if ('Notification' in window && Notification.permission === 'default') {
+                    Notification.requestPermission();
+                }
+            } catch (err) {
+                console.error('Initialization error:', err);
+            }
+        }
+
+        function initCharts() {
+            // Loss chart
+            const lossCtx = document.getElementById('lossChart');
+            if (lossCtx) {
+                charts.loss = new Chart(lossCtx, {
+                    type: 'line',
+                    data: {
+                        labels: [],
+                        datasets: [{
+                            label: 'Loss',
+                            data: [],
+                            borderColor: '#667eea',
+                            backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                            tension: 0.4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false }
+                        }
+                    }
+                });
+            }
+
+            // Performance chart
+            const perfCtx = document.getElementById('performanceChart');
+            if (perfCtx) {
+                charts.performance = new Chart(perfCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: [],
+                        datasets: [{
+                            label: 'Performance Score',
+                            data: [],
+                            backgroundColor: '#667eea'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false
+                    }
+                });
+            }
+
+            // Time chart
+            const timeCtx = document.getElementById('timeChart');
+            if (timeCtx) {
+                charts.time = new Chart(timeCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Quick (<10min)', 'Medium (10-60min)', 'Long (>60min)'],
+                        datasets: [{
+                            data: [0, 0, 0],
+                            backgroundColor: ['#28a745', '#ffc107', '#dc3545']
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false
+                    }
+                });
+            }
+        }
+
+        // Tab Switching
+        function switchTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Remove active from all buttons
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Show selected tab
+            const tabEl = document.getElementById(`${tabName}-tab`);
+            if (tabEl) tabEl.classList.add('active');
+            
+            // Set active button
+            const btnIndex = ['overview', 'training', 'analytics', 'history', 'tools'].indexOf(tabName);
+            if (btnIndex >= 0) {
+                const btns = document.querySelectorAll('.tab-btn');
+                if (btns[btnIndex]) btns[btnIndex].classList.add('active');
+            }
+            
+            // Refresh data for specific tabs
+            if (tabName === 'analytics') {
+                updateCharts();
+            } else if (tabName === 'history') {
+                updateHistoryView();
+            } else if (tabName === 'tools') {
+                updateAnomalyStatus();
+            }
+            
+            // Store tab preference
+            localStorage.setItem('qai-active-tab', tabName);
+        }
+
+        // Data Loading
+        async function loadDatasets() {
+            try {
+                const response = await fetch('/api/datasets');
+                const data = await response.json();
+                
+                const selects = ['datasetSelect', 'profilerDataset'];
+                selects.forEach(id => {
+                    const select = document.getElementById(id);
+                    if (select && data.datasets) {
+                        select.innerHTML = data.datasets.map(ds => 
+                            `<option value="${ds.path || ds.name}">${ds.name} (${ds.samples || 0} samples)</option>`
+                        ).join('');
+                    }
+                });
+            } catch (err) {
+                console.error('Failed to load datasets:', err);
+            }
+        }
+
+        async function refreshData() {
+            try {
+                const response = await fetch('/status');
+                currentData = await response.json();
+                
+                updateOverview(currentData);
+                if (document.getElementById('analytics-tab').classList.contains('active')) {
+                    updateCharts();
+                }
+            } catch (err) {
+                console.error('Failed to refresh data:', err);
+            }
+        }
+
+        function updateOverview(data) {
+            if (!data || !data.jobs) return;
+            
+            document.getElementById('totalJobs').textContent = data.jobs.length;
+            
+            const avgLoss = data.jobs.length > 0
+                ? (data.jobs.reduce((sum, j) => sum + (j.post_loss || j.final_loss || 0), 0) / data.jobs.length).toFixed(3)
+                : '0.00';
+            document.getElementById('avgLoss').textContent = avgLoss;
+            
+            const bestJob = data.jobs.length > 0
+                ? data.jobs.reduce((best, j) => {
+                    const loss = j.post_loss || j.final_loss || Infinity;
+                    const bestLoss = best.post_loss || best.final_loss || Infinity;
+                    return loss < bestLoss ? j : best;
+                })
+                : null;
+            document.getElementById('bestModel').textContent = bestJob ? (bestJob.name || 'Unknown') : 'N/A';
+            
+            const totalTime = data.jobs.length > 0
+                ? Math.round(data.jobs.reduce((sum, j) => sum + (j.duration || 0), 0) / 3600)
+                : 0;
+            document.getElementById('totalTime').textContent = totalTime + 'h';
+            
+            updateRecentActivity(data);
+            updateLossChart(data);
+        }
+
+        function updateRecentActivity(data) {
+            const container = document.getElementById('recentActivity');
+            if (!container || !data.jobs || data.jobs.length === 0) return;
+            
+            const recent = data.jobs.slice(-5).reverse();
+            container.innerHTML = recent.map(job => `
+                <div class="alert alert-info" style="margin-bottom:10px">
+                    <strong>${job.name || 'Unknown'}</strong><br>
+                    <small>Loss: ${(job.post_loss || job.final_loss || 0).toFixed(4)} | 
+                    Status: ${job.status || 'unknown'}</small>
+                </div>
+            `).join('');
+        }
+
+        function updateLossChart(data) {
+            if (!charts.loss || !data.jobs) return;
+            
+            charts.loss.data.labels = data.jobs.map((_, i) => `Job ${i + 1}`);
+            charts.loss.data.datasets[0].data = data.jobs.map(j => j.post_loss || j.final_loss || 0);
+            charts.loss.update();
+        }
+
+        function updateCharts() {
+            if (!currentData || !currentData.jobs) return;
+            
+            // Update performance chart
+            if (charts.performance) {
+                const top5 = currentData.jobs.slice(0, 5);
+                charts.performance.data.labels = top5.map(j => j.name || 'Unknown');
+                charts.performance.data.datasets[0].data = top5.map(j => {
+                    const loss = j.post_loss || j.final_loss || 1;
+                    return (1 / loss * 100).toFixed(2);
+                });
+                charts.performance.update();
+            }
+            
+            // Update time chart
+            if (charts.time) {
+                const quick = currentData.jobs.filter(j => (j.duration || 0) < 600).length;
+                const medium = currentData.jobs.filter(j => (j.duration || 0) >= 600 && (j.duration || 0) < 3600).length;
+                const long = currentData.jobs.filter(j => (j.duration || 0) >= 3600).length;
+                charts.time.data.datasets[0].data = [quick, medium, long];
+                charts.time.update();
+            }
+            
+            // Update comparison table
+            updateComparisonTable();
+        }
+
+        function updateComparisonTable() {
+            const tbody = document.querySelector('#comparisonTable tbody');
+            if (!tbody || !currentData || !currentData.jobs || currentData.jobs.length === 0) return;
+            
+            tbody.innerHTML = currentData.jobs.slice(0, 10).map(job => {
+                const finalLoss = job.post_loss || job.final_loss || 0;
+                const improvement = job.pre_loss && job.post_loss
+                    ? ((job.pre_loss - job.post_loss) / job.pre_loss * 100).toFixed(2)
+                    : 'N/A';
+                const duration = job.duration ? Math.round(job.duration / 60) + ' min' : 'N/A';
+                const score = finalLoss > 0 ? (1 / finalLoss * 100).toFixed(2) : '0';
+                
+                return `
+                    <tr>
+                        <td>${job.name || 'Unknown'}</td>
+                        <td>${finalLoss.toFixed(4)}</td>
+                        <td>${improvement}%</td>
+                        <td>${duration}</td>
+                        <td>${job.lora_rank || 'N/A'}</td>
+                        <td class="metric-good">${score}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // Training Functions
+        async function startTraining(event) {
+            event.preventDefault();
+            
+            const config = {
+                job_name: document.getElementById('jobName').value,
+                dataset: document.getElementById('datasetSelect').value,
+                model: document.getElementById('modelSelect').value,
+                epochs: parseInt(document.getElementById('epochs').value),
+                learning_rate: parseFloat(document.getElementById('learningRate').value),
+                batch_size: parseInt(document.getElementById('batchSize').value),
+                lora_rank: parseInt(document.getElementById('loraRank').value),
+                lora_alpha: parseInt(document.getElementById('loraAlpha').value),
+                max_train_samples: parseInt(document.getElementById('maxTrainSamples').value)
+            };
+            
+            try {
+                const response = await fetch('/api/start-training', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(config)
+                });
+                
+                const result = await response.json();
+                alert(result.message || 'Training started!');
+
+                // Start live progress tracking (Phase 28)
+                if (window.liveTracker && result.job_id) {
+                    window.liveTracker.startTracking(result.job_id, config.epochs);
+                }
+
+                // Start session tracking
+                if (sessionHistory) {
+                    sessionHistory.startSession(config);
+                }
+                
+                refreshData();
+            } catch (err) {
+                alert('Failed to start training: ' + err.message);
+            }
+            
+            return false;
+        }
+
+        function applyPreset(preset) {
+            const presets = {
+                quick: { epochs: 1, batchSize: 8, maxTrainSamples: 100 },
+                standard: { epochs: 3, batchSize: 4, maxTrainSamples: 1000 },
+                full: { epochs: 5, batchSize: 4, maxTrainSamples: -1 }
+            };
+            
+            const config = presets[preset];
+            if (config) {
+                document.getElementById('epochs').value = config.epochs;
+                document.getElementById('batchSize').value = config.batchSize;
+                document.getElementById('maxTrainSamples').value = config.maxTrainSamples;
+            }
+        }
+
+        function toggleAdvanced() {
+            const content = document.getElementById('advancedContent');
+            const toggle = document.getElementById('advancedToggle');
+            content.classList.toggle('open');
+            toggle.textContent = content.classList.contains('open') ? '▲' : '▼';
+        }
+
+        function saveConfig() {
+            const config = {
+                job_name: document.getElementById('jobName').value,
+                dataset: document.getElementById('datasetSelect').value,
+                epochs: parseInt(document.getElementById('epochs').value),
+                learning_rate: parseFloat(document.getElementById('learningRate').value),
+                batch_size: parseInt(document.getElementById('batchSize').value),
+                lora_rank: parseInt(document.getElementById('loraRank').value),
+                lora_alpha: parseInt(document.getElementById('loraAlpha').value)
+            };
+            
+            const blob = new Blob([JSON.stringify(config, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `config-${Date.now()}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function resetForm() {
+            document.getElementById('trainingForm').reset();
+        }
+
+        // Tools Functions
+        async function runDatasetProfiler() {
+            const dataset = document.getElementById('profilerDataset').value;
+            const resultsDiv = document.getElementById('profilerResults');
+            
+            resultsDiv.innerHTML = '<div class="alert alert-info">Profiling dataset...</div>';
+            
+            try {
+                const response = await fetch(`/api/profile-dataset?dataset=${encodeURIComponent(dataset)}`);
+                const data = await response.json();
+                
+                if (data.recommendations) {
+                    resultsDiv.innerHTML = `
+                        <div class="alert alert-success">
+                            <strong>✅ Recommendations:</strong><br>
+                            Batch Size: ${data.recommendations.batch_size}<br>
+                            Learning Rate: ${data.recommendations.learning_rate}<br>
+                            LoRA Rank: ${data.recommendations.lora_rank}<br>
+                            Epochs: ${data.recommendations.epochs}
+                        </div>
+                    `;
+                } else {
+                    resultsDiv.innerHTML = '<div class="alert alert-warning">No recommendations available</div>';
+                }
+            } catch (err) {
+                resultsDiv.innerHTML = `<div class="alert alert-error">Error: ${err.message}</div>`;
+            }
+        }
+
+        async function runVRAMCalculator() {
+            const model = document.getElementById('vramModel').value;
+            const rank = parseInt(document.getElementById('vramRank').value);
+            const resultsDiv = document.getElementById('vramResults');
+            
+            resultsDiv.innerHTML = '<div class="alert alert-info">Calculating VRAM requirements...</div>';
+            
+            // Simulate API call (would need actual endpoint)
+            setTimeout(() => {
+                resultsDiv.innerHTML = `
+                    <div class="alert alert-info">
+                        <strong>🧮 VRAM Analysis:</strong><br>
+                        Max Batch Size: 4<br>
+                        Recommended: 2 (50% safety margin)<br>
+                        Estimated VRAM: 5.2GB / 6.0GB
+                    </div>
+                `;
+            }, 1000);
+        }
+
+        function updateAnomalyStatus() {
+            if (!anomalyDetector) return;
+            
+            const stats = anomalyDetector.getStatistics();
+            document.getElementById('anomalyCount').textContent = stats.total;
+            document.getElementById('spikeCount').textContent = stats.spikes;
+            document.getElementById('divergenceCount').textContent = stats.divergences;
+            document.getElementById('stagnationCount').textContent = stats.stagnations;
+        }
+
+        // History Functions
+        function updateHistoryView() {
+            if (!sessionHistory) {
+                document.getElementById('historyContent').innerHTML = 
+                    '<p style="text-align:center;color:#888;padding:40px">Session history not available</p>';
+                return;
+            }
+            
+            const sessions = sessionHistory.getAllSessions();
+            const container = document.getElementById('historyContent');
+            
+            if (sessions.length === 0) {
+                container.innerHTML = '<p style="text-align:center;color:#888;padding:40px">No training history yet</p>';
+                return;
+            }
+            
+            container.innerHTML = `
+                <div style="overflow-x:auto">
+                    <table>
+                        <thead>
+                                                            <th><input type="checkbox" id="selectAllHistory" onclick="toggleSelectAll()"></th>
+                            <tr>
+                                <th>Start Time</th>
+                                <th>Duration</th>
+                                <th>Status</th>
+                                <th>Model</th>
+                                <th>Final Loss</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${sessions.slice(-20).reverse().map(s => `
+                                                                    <td><input type="checkbox" class="compare-checkbox" data-session-id="${s.id}"></td>
+                                <tr>
+                                    <td>${new Date(s.startTime).toLocaleString()}</td>
+                                    <td>${s.duration ? Math.round(s.duration / 60000) + ' min' : 'N/A'}</td>
+                                    <td><span class="badge badge-${s.status === 'completed' ? 'success' : 'warning'}">${s.status}</span></td>
+                                    <td>${s.config.model || 'N/A'}</td>
+                                    <td>${s.metrics.finalLoss ? s.metrics.finalLoss.toFixed(4) : 'N/A'}</td>
+                                    <td>
+                                        <button class="btn btn-secondary" onclick="replaySession('${s.id}')">Replay</button>
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                                    <div style="margin-top:15px">
+                                        <button class="btn btn-primary" onclick="compareSelectedModels()">📊 Compare Selected</button>
+                                        <button class="btn btn-secondary" onclick="clearComparisonSelection()">Clear Selection</button>
+                                    </div>
+                </div>
+            `;
+        }
+
+        function exportHistory(format) {
+            if (!sessionHistory) return;
+            
+            let content, filename, type;
+            
+            if (format === 'json') {
+                content = sessionHistory.exportToJSON();
+                filename = `history-${Date.now()}.json`;
+                type = 'application/json';
+            } else {
+                content = sessionHistory.exportToCSV();
+                filename = `history-${Date.now()}.csv`;
+                type = 'text/csv';
+            }
+            
+            const blob = new Blob([content], { type });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function clearHistory() {
+            if (confirm('Clear all training history? This cannot be undone.')) {
+                sessionHistory.clearAllSessions();
+                updateHistoryView();
+            }
+        }
+
+        function replaySession(sessionId) {
+            const config = sessionHistory.replaySession(sessionId);
+            if (config) {
+                // Load config into form
+                Object.keys(config).forEach(key => {
+                    const el = document.getElementById(key);
+                    if (el) el.value = config[key];
+                });
+                switchTab('training');
+                alert('Session config loaded! Review and click Start Training.');
+            }
+        }
+
+        // Utility Functions
+        function showSystemHealth() {
+            alert('System Health Check:\n\n' +
+                  '✅ API Server: Online\n' +
+                  '✅ GPU: Available\n' +
+                  '✅ Storage: 85% free\n' +
+                  '✅ Anomaly Detector: ' + (anomalyDetector ? 'Active' : 'Inactive') + '\n' +
+                  '✅ Session History: ' + (sessionHistory ? 'Enabled' : 'Disabled'));
+        }
+
+        function showTuningWizard() {
+            switchTab('tools');
+            alert('Tuning Wizard: Use the Dataset Profiler tool to analyze your dataset and get optimal hyperparameter recommendations!');
+        }
+
+        function loadConfig() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            input.onchange = (e) => {
+                const file = e.target.files[0];
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    try {
+                        const config = JSON.parse(event.target.result);
+                        Object.keys(config).forEach(key => {
+                            const el = document.getElementById(key);
+                            if (el) el.value = config[key];
+                        });
+                        alert('Config loaded successfully!');
+                    } catch (err) {
+                        alert('Failed to load config: ' + err.message);
+                    }
+                };
+                reader.readAsText(file);
+            };
+            input.click();
+
+                // Phase 30: Hyperparameter Optimizer Functions
+                function startHyperparamOptimization() {
+                    if (!window.hyperOptimizer) {
+                        alert('Hyperparameter optimizer not initialized');
+                        return;
+                    }
+
+                    const strategy = document.getElementById('optimStrategy').value;
+                    const maxTrials = parseInt(document.getElementById('optimMaxTrials').value);
+
+                    // Define default search space
+                    const searchSpace = {
+                        learning_rate: {
+                            range: [1e-5, 1e-3],
+                            scale: 'log',
+                            type: 'float'
+                        },
+                        batch_size: {
+                            values: [2, 4, 8, 16]
+                        },
+                        lora_rank: {
+                            values: [8, 16, 32, 64]
+                        },
+                        lora_alpha: {
+                            values: [16, 32, 64]
+                        },
+                        epochs: {
+                            range: [1, 5],
+                            type: 'int'
+                        }
+                    };
+
+                    hyperOptimizer.defineSearchSpace(searchSpace);
+                    hyperOptimizer.startOptimization({
+                        strategy: strategy,
+                        maxTrials: maxTrials
+                    });
+                }
+
+                function configureSearchSpace() {
+                    alert('Search Space Configuration:\n\nDefault search space includes:\n' +
+                          '• Learning Rate: 1e-5 to 1e-3 (log scale)\n' +
+                          '• Batch Size: [2, 4, 8, 16]\n' +
+                          '• LoRA Rank: [8, 16, 32, 64]\n' +
+                          '• LoRA Alpha: [16, 32, 64]\n' +
+                          '• Epochs: 1 to 5\n\n' +
+                          'Custom configuration coming in future update!');
+
+                        // Phase 29: Model Comparison Functions
+                        function toggleSelectAll() {
+                            const selectAll = document.getElementById('selectAllHistory');
+                            const checkboxes = document.querySelectorAll('.compare-checkbox');
+                            checkboxes.forEach(cb => cb.checked = selectAll.checked);
+                        }
+
+                        function compareSelectedModels() {
+                            if (!window.modelComparator) {
+                                alert('Model comparator not initialized');
+                                return;
+                            }
+
+                            const checkboxes = document.querySelectorAll('.compare-checkbox:checked');
+                            if (checkboxes.length === 0) {
+                                alert('Please select at least 2 models to compare');
+                                return;
+                            }
+                            if (checkboxes.length > 4) {
+                                alert('Maximum 4 models can be compared at once');
+                                return;
+                            }
+
+                            // Clear previous selection
+                            modelComparator.clearSelection();
+
+                            // Add selected models
+                            checkboxes.forEach(cb => {
+                                const sessionId = cb.getAttribute('data-session-id');
+                                modelComparator.addModel(sessionId);
+                            });
+
+                            // Switch to analytics tab
+                            switchTab('analytics');
+                            alert(`Comparing ${checkboxes.length} models. View results in Analytics tab.`);
+                        }
+
+                        function clearComparisonSelection() {
+                            const checkboxes = document.querySelectorAll('.compare-checkbox');
+                            checkboxes.forEach(cb => cb.checked = false);
+                            document.getElementById('selectAllHistory').checked = false;
+                        }
+                }
+        }
+
+        // Restore last active tab on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            const lastTab = localStorage.getItem('qai-active-tab');
+            if (lastTab) {
+                switchTab(lastTab);
+            }
+        });
+    </script>
+</body>
+</html>

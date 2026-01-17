@@ -12,7 +12,7 @@ try:
 except ImportError:
     pytest.skip("torch or numpy not available", allow_module_level=True)
 
-vision = importlib.import_module('scripts.train_vision')
+vision = importlib.import_module('scripts.training.train_vision')
 
 
 @pytest.mark.parametrize('samples_per_class', [6])

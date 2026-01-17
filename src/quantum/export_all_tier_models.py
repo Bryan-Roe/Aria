@@ -31,28 +31,46 @@ MODELS_TO_EXPORT = [
 def export_model(dataset_name, display_name, accuracy, application):
     """Export a single model to GGUF"""
     
-    # Try dataset-specific model first, fallback to generic
-    model_path = f'results/custom_model__{dataset_name}.pt'
-    if not os.path.exists(model_path):
-        model_path = 'results/custom_model.pt'
+    # Try multiple naming patterns
+    model_paths = [
+        f'results/{dataset_name}_model.pt',  # Standard pattern
+        f'results/custom_model__{dataset_name}.pt',
+        'results/custom_model.pt'
+    ]
     
-    if not os.path.exists(model_path):
-        print(f"   ❌ Model not found: {model_path}")
+    model_path = None
+    for path in model_paths:
+        if os.path.exists(path):
+            model_path = path
+            break
+    
+    if not model_path:
+        print(f"   ❌ Model not found for {dataset_name}")
         return False
     
     try:
-        # Load model - need to get architecture from saved model
-        checkpoint = torch.load(model_path)
+        # Load checkpoint
+        checkpoint = torch.load(model_path, map_location='cpu')
         
-        # Create model with default architecture (adjust based on dataset)
+        # Checkpoint is already a state dict (not wrapped in dict)
+        state_dict = checkpoint
+        
+        # Infer output_dim from final layer
+        final_weight_key = 'decoder.4.weight'
+        if final_weight_key in state_dict:
+            output_dim = state_dict[final_weight_key].shape[0]
+        else:
+            output_dim = 2  # Default binary
+        
+        # Create model with inferred architecture
         model = HybridQNN(
-            input_dim=16,  # Encoded dimension
+            input_dim=16,
             hidden_dim=16,
             n_qubits=4,
             n_quantum_layers=2,
-            output_dim=2  # Adjust for multi-class
+            output_dim=output_dim
         )
-        model.load_state_dict(checkpoint)
+        model.load_state_dict(state_dict)
         model.eval()
         
         # Output path

@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>QAI Automation Dashboard</title>
+    <style>
+        :root {
+            --bg-color: #f5f7fa;
+            --text-color: #1f2933;
+            --card-bg: #ffffff;
+            --border-color: #d0d7de;
+            --muted-text: #5d6d7e;
+            --accent: #4caf50;
+            --accent2: #2196f3;
+            --danger: #c62828;
+            --warn: #ff9800;
+            --shadow: 0 1px 2px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.06);
+        }
+        [data-theme="dark"] {
+            --bg-color: #121417;
+            --text-color: #e3e8ef;
+            --card-bg: #1d2228;
+            --border-color: #30363d;
+            --muted-text: #8899a6;
+            --accent: #52d273;
+            --accent2: #4fa3ff;
+            --danger: #ff5f56;
+            --warn: #ffb347;
+            --shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+        body { font-family: system-ui, Arial, sans-serif; margin: 1.5rem; background: var(--bg-color); color: var(--text-color); transition: background .3s, color .3s; }
+        h1 { margin-top:0; font-size:1.9rem; letter-spacing:.5px; }
+        .section { margin-bottom: 2.2rem; }
+        pre { background: var(--card-bg); padding: 1em; border-radius: 8px; border:1px solid var(--border-color); box-shadow: var(--shadow); overflow:auto; }
+        #theme-toggle { cursor:pointer; padding:6px 10px; font-size:13px; border:1px solid var(--border-color); background: var(--card-bg); border-radius:6px; box-shadow: var(--shadow); }
+        #theme-toggle:hover { filter: brightness(1.05); }
+        /* Progress Styles */
+        #progress-wrapper { max-width:680px; }
+        #progress-bar-container { background:var(--border-color); border-radius:10px; overflow:hidden; height:26px; position:relative; box-shadow: inset 0 1px 2px rgba(0,0,0,0.15); }
+        #progress-bar { background:linear-gradient(90deg,var(--accent) 0%, var(--accent2) 100%); height:100%; width:0%; transition:width 0.6s ease; }
+        #progress-label { position:absolute; left:50%; top:0; transform:translateX(-50%); line-height:26px; font-size:13px; font-weight:600; color:var(--text-color); text-shadow:0 1px 2px rgba(255,255,255,0.4); }
+        #jobs-table { width:100%; margin-top:1em; border-collapse:collapse; background:var(--card-bg); border:1px solid var(--border-color); border-radius:8px; overflow:hidden; box-shadow: var(--shadow); }
+        #jobs-table th { text-align:left; border-bottom:1px solid var(--border-color); padding:6px 10px; font-size:12px; background:linear-gradient(#f0f4f8,#e8edf2); }
+        [data-theme="dark"] #jobs-table th { background:#252b31; }
+        #jobs-table td { padding:6px 10px; font-size:13px; border-bottom:1px solid var(--border-color); }
+        #jobs-table tbody tr:last-child td { border-bottom:none; }
+        .badge { padding:3px 7px; border-radius:14px; font-size:11px; font-weight:600; color:#fff; display:inline-block; letter-spacing:.3px; box-shadow:0 1px 2px rgba(0,0,0,0.2); }
+        .badge-succeeded { background:var(--accent); }
+        .badge-failed { background:var(--danger); }
+        .badge-running { background:var(--accent2); }
+        .badge-pending { background:#666; }
+        .badge-validated { background:#9c27b0; }
+        .badge-cancelled { background:#ff9800; }
+        .cancel-btn { font-size:11px; padding:3px 7px; border:1px solid var(--danger); background:transparent; color:var(--danger); border-radius:6px; cursor:pointer; }
+        .cancel-btn:hover { background:var(--danger); color:#fff; }
+        #progress-timestamp { color:var(--muted-text); font-size:12px; display:block; margin-top:8px; }
+        .running-job-wrapper { margin-top:12px; background:var(--card-bg); padding:10px 12px; border:1px solid var(--border-color); border-radius:8px; box-shadow: var(--shadow); }
+        .hidden { display:none; }
+        .current-job-bar-container { background:var(--border-color); border-radius:6px; overflow:hidden; height:18px; position:relative; margin-top:6px; }
+        .current-job-bar { background:linear-gradient(90deg,var(--accent2),var(--accent)); height:100%; width:0%; transition:width .6s; }
+        .current-job-label { position:absolute; left:50%; top:0; transform:translateX(-50%); font-size:11px; line-height:18px; font-weight:600; color:var(--text-color); }
+        .current-job-meta { color:var(--muted-text); font-size:11px; }
+        .job-filter-bar { margin-bottom:10px; display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
+        .job-filter-input { padding:6px 10px; border:1px solid var(--border-color); border-radius:6px; background:var(--card-bg); color:var(--text-color); }
+        .job-filter-input:focus { outline:2px solid var(--accent2); }
+        .job-filter-label { font-size:12px; -webkit-user-select:none; user-select:none; }
+        .csv-download-link { font-size:12px; text-decoration:none; padding:6px 9px; border:1px solid var(--border-color); border-radius:6px; background:var(--card-bg); color:var(--text-color); box-shadow: var(--shadow); }
+        .csv-download-link:hover { filter:brightness(1.07); }
+        .category-group { margin:14px 0; background:var(--card-bg); border:1px solid var(--border-color); border-radius:8px; box-shadow: var(--shadow); padding:4px 8px 10px; }
+        .category-group > summary { cursor:pointer; font-weight:600; font-size:14px; padding:6px 4px; list-style:none; }
+        .category-group > summary::-webkit-details-marker { display:none; }
+        .category-table { width:100%; border-collapse:collapse; margin-top:6px; }
+        .category-table th { text-align:left; font-size:11px; padding:4px 6px; border-bottom:1px solid var(--border-color); background:linear-gradient(#eef2f6,#e2e8ee); }
+        [data-theme="dark"] .category-table th { background:#252b31; }
+        .category-table td { padding:4px 6px; font-size:12px; border-bottom:1px solid var(--border-color); }
+        .category-table tbody tr:last-child td { border-bottom:none; }
+        /* Card layout for narrow screens */
+        @media (max-width: 640px) {
+            .category-table { display:none; }
+            .category-group { padding:6px 6px 10px; }
+            .job-card { display:flex; flex-direction:column; gap:4px; border:1px solid var(--border-color); border-radius:8px; padding:8px 10px; margin:6px 0; background:var(--card-bg); box-shadow: var(--shadow); }
+            .job-card-header { display:flex; justify-content:space-between; align-items:center; }
+            .job-card-name { font-weight:600; font-size:14px; }
+            .job-card-metrics { font-size:11px; color:var(--muted-text); }
+            .job-card-meta { font-size:11px; color:var(--muted-text); }
+            .retry-btn { font-size:11px; padding:4px 7px; border:1px solid var(--border-color); background:var(--card-bg); border-radius:6px; cursor:pointer; }
+            .retry-btn:hover { filter:brightness(1.07); }
+        }
+        /* Responsive: hide legacy table and use category grouping / cards on narrow screens */
+        @media (max-width: 780px) {
+            #jobs-table { display:none; }
+            .job-filter-bar { gap:8px; }
+            body { margin: 0.8rem; }
+        }
+        .fade-in { animation: fade .4s ease; }
+        @keyframes fade { from { opacity:0; transform:translateY(4px); } to { opacity:1; transform:translateY(0); } }
+    </style>
+</head>
+<body>
+    <h1>QAI Automation Dashboard <button id="theme-toggle" title="Toggle theme">🌙</button></h1>
+    <div class="section">
+        <h2>Orchestrator Status</h2>
+        <div id="status"></div>
+    </div>
+    <div class="section">
+        <h2>Training Progress</h2>
+        <div class="job-filter-bar">
+            <input id="job-filter" type="text" placeholder="Filter jobs..." class="job-filter-input" />
+            <label class="job-filter-label"><input type="checkbox" id="toggle-succeeded" checked /> Show succeeded</label>
+            <label class="job-filter-label"><input type="checkbox" id="toggle-failed" checked /> Show failed</label>
+            <label class="job-filter-label"><input type="checkbox" id="toggle-pending" checked /> Show pending/validated</label>
+            <a href="/api/training_progress_history_csv" target="_blank" class="csv-download-link">Download History CSV</a>
+        </div>
+        <div id="progress-wrapper">
+            <div id="progress-bar-container">
+                <div id="progress-bar"></div>
+                <span id="progress-label"></span>
+            </div>
+        </div>
+        <div id="running-job-wrapper" class="running-job-wrapper hidden">
+            <strong>Current Job: <span id="current-job-name"></span></strong>
+            <div class="current-job-bar-container">
+                <div id="current-job-bar" class="current-job-bar"></div>
+                <span id="current-job-label" class="current-job-label"></span>
+            </div>
+            <small id="current-job-meta" class="current-job-meta"></small>
+        </div>
+        <table id="jobs-table">
+            <thead>
+                <tr>
+                    <th>Job</th>
+                    <th>Status</th>
+                    <th>Type</th>
+                    <th>Metrics (PPL)</th>
+                    <th>Duration (s)</th>
+                    <th>ETA (s)</th>
+                    <th>Return Code</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+        <div id="category-sections"></div>
+        <small id="progress-timestamp"></small>
+    </div>
+    <div class="section">
+        <h2>Resource Monitor</h2>
+        <div id="resources"></div>
+    </div>
+    <div class="section">
+        <h2>Results Export</h2>
+        <div id="results"></div>
+    </div>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        // Theme toggle persistence
+        const bodyEl = document.body;
+        const storedTheme = localStorage.getItem('qai_theme');
+        if (storedTheme === 'dark') { bodyEl.setAttribute('data-theme','dark'); }
+        document.getElementById('theme-toggle').addEventListener('click', () => {
+            const isDark = bodyEl.getAttribute('data-theme') === 'dark';
+            bodyEl.setAttribute('data-theme', isDark ? 'light' : 'dark');
+            localStorage.setItem('qai_theme', isDark ? 'light' : 'dark');
+            document.getElementById('theme-toggle').textContent = isDark ? '🌙' : '☀️';
+        });
+        function fetchAndRender(endpoint, elementId) {
+            fetch(endpoint)
+                .then(r => r.json())
+                .then(data => {
+                    document.getElementById(elementId).innerHTML = '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+                });
+        }
+        fetchAndRender('/status', 'status');
+        fetchAndRender('/resources', 'resources');
+        fetchAndRender('/results', 'results');
+
+        let lastProgress = null;
+        function renderProgress(data) {
+            const bar = document.getElementById('progress-bar');
+            const label = document.getElementById('progress-label');
+            const tbody = document.querySelector('#jobs-table tbody');
+            const ts = document.getElementById('progress-timestamp');
+            bar.style.width = (data.percent_complete || 0) + '%';
+            label.textContent = (data.percent_complete || 0) + '%';
+            ts.textContent = 'Updated: ' + data.generated_at + ' | Succeeded ' + data.succeeded + '/' + data.total_jobs + ' (Running: ' + data.running + ', Failed: ' + data.failed + ', Pending: ' + data.pending + ', Validated: ' + (data.validated || 0) + ')';
+            if (data.eta_iso) {
+                ts.textContent += ' | ETA: ' + data.eta_iso + (data.eta_seconds ? ' (≈ ' + Math.round(data.eta_seconds) + 's remaining)' : '');
+            }
+            // Running job sub-progress
+            const rWrap = document.getElementById('running-job-wrapper');
+            if (data.current_job_name && (data.current_job_percent !== null && data.current_job_percent !== undefined)) {
+                rWrap.classList.remove('hidden');
+                document.getElementById('current-job-name').textContent = data.current_job_name;
+                const cjBar = document.getElementById('current-job-bar');
+                const cjLabel = document.getElementById('current-job-label');
+                cjBar.style.width = data.current_job_percent + '%';
+                cjLabel.textContent = (data.current_job_percent) + '%';
+                const meta = [];
+                if (data.current_epoch && data.total_epochs) meta.push('Epoch ' + data.current_epoch + '/' + data.total_epochs);
+                if (data.current_step && data.total_steps) meta.push('Step ' + data.current_step + '/' + data.total_steps);
+                document.getElementById('current-job-meta').textContent = meta.join(' | ');
+            } else {
+                rWrap.classList.add('hidden');
+            }
+            tbody.innerHTML = '';
+            (data.jobs || []).forEach(j => {
+                const tr = document.createElement('tr');
+                const badgeClass = 'badge-' + (['succeeded','failed','running','pending','validated','cancelled'].includes(j.status) ? j.status : 'pending');
+                let metricsCell = '';
+                if (j.metrics) {
+                    const pre = j.metrics.pre_eval_perplexity;
+                    const post = j.metrics.post_eval_perplexity;
+                    metricsCell = ((pre!==undefined && pre!==null)?('pre:'+pre.toFixed(2)):'') + ((post!==undefined && post!==null)?(' '+ 'post:'+post.toFixed(2)):'');
+                }
+                const validatedTypeCell = j.validated_type ? '<small>' + j.validated_type + '</small>' : '';
+                const etaCell = (j.eta_sec !== null && j.eta_sec !== undefined) ? j.eta_sec : '';
+                tr.dataset.status = j.status;
+                tr.innerHTML = '<td>' + j.name + '</td>' +
+                               '<td><span class="badge ' + badgeClass + '">' + j.status + '</span></td>' +
+                               '<td>' + validatedTypeCell + '</td>' +
+                               '<td>' + metricsCell + '</td>' +
+                               '<td>' + (j.duration_sec ?? '') + '</td>' +
+                               '<td>' + etaCell + '</td>' +
+                               '<td>' + (j.return_code ?? '') + '</td>';
+                tbody.appendChild(tr);
+            });
+            lastProgress = data;
+            applyJobFilter();
+        }
+        function applyJobFilter(){
+            const q = document.getElementById('job-filter').value.toLowerCase();
+            const showSucceeded = document.getElementById('toggle-succeeded').checked;
+            const showFailed = document.getElementById('toggle-failed').checked;
+            const showPending = document.getElementById('toggle-pending').checked;
+            // Table filter
+            document.querySelectorAll('#jobs-table tbody tr').forEach(tr => {
+                const name = tr.children[0].textContent.toLowerCase();
+                const status = tr.dataset.status;
+                let visible = true;
+                if (q && !name.includes(q)) visible = false;
+                if (status === 'succeeded' && !showSucceeded) visible = false;
+                if (status === 'failed' && !showFailed) visible = false;
+                if ((status === 'pending' || status === 'validated' || status === 'running' || status === 'cancelled') && !showPending) visible = false;
+                tr.style.display = visible ? '' : 'none';
+            });
+            // Category sections rebuild (filtered dataset)
+            if (!lastProgress) return;
+            const jobs = lastProgress.jobs || [];
+            const filtered = jobs.filter(j => {
+                const name = (j.name||'').toLowerCase();
+                const status = j.status;
+                if (q && !name.includes(q)) return false;
+                if (status === 'succeeded' && !showSucceeded) return false;
+                if (status === 'failed' && !showFailed) return false;
+                if ((status === 'pending' || status === 'validated' || status === 'running' || status === 'cancelled') && !showPending) return false;
+                return true;
+            });
+            const categories = {};
+            filtered.forEach(j => {
+                const cat = j.category || 'uncategorized';
+                (categories[cat] = categories[cat] || []).push(j);
+            });
+            let html = '';
+            Object.keys(categories).sort().forEach(cat => {
+                const group = categories[cat];
+                html += '<details open class="category-group"><summary>' + cat + ' (' + group.length + ')</summary>';
+                // Table view (desktop)
+                html += '<table class="category-table"><thead><tr><th>Job</th><th>Status</th><th>Type</th><th>Metrics</th><th>Duration</th><th>ETA</th><th>Code</th><th>Actions</th></tr></thead><tbody>';
+                group.forEach(j => {
+                    const badgeClass = 'badge-' + (['succeeded','failed','running','pending','retry_running','validated','cancelled'].includes(j.status) ? j.status.replace('retry_running','running') : 'pending');
+                    let metricsCell = '';
+                    if (j.metrics) {
+                        const pre = j.metrics.pre_eval_perplexity;
+                        const post = j.metrics.post_eval_perplexity;
+                        metricsCell = ((pre!==undefined && pre!==null)?('pre:'+Number(pre).toFixed(2)):'') + ((post!==undefined && post!==null)?(' '+ 'post:'+Number(post).toFixed(2)):'');
+                    }
+                    const canRetry = ['failed','succeeded','cancelled'].includes(j.status);
+                    const canCancel = ['running','retry_running'].includes(j.status);
+                    const validatedTypeCell = j.validated_type ? '<small>' + j.validated_type + '</small>' : '';
+                    const etaCell = (j.eta_sec !== null && j.eta_sec !== undefined) ? j.eta_sec : '';
+                    let actionsCell = '';
+                    if (canRetry) actionsCell += '<button class="retry-btn" data-retry="' + j.name + '">Retry</button> ';
+                    if (canCancel) actionsCell += '<button class="cancel-btn" data-cancel="' + j.name + '">Cancel</button>';
+                    html += '<tr data-job="' + j.name + '">' +
+                        '<td>' + j.name + '</td>' +
+                        '<td><span class="badge ' + badgeClass + '">' + j.status + '</span></td>' +
+                        '<td>' + validatedTypeCell + '</td>' +
+                        '<td>' + metricsCell + '</td>' +
+                        '<td>' + (j.duration_sec ?? '') + '</td>' +
+                        '<td>' + etaCell + '</td>' +
+                        '<td>' + (j.return_code ?? '') + '</td>' +
+                        '<td>' + actionsCell + '</td>' +
+                        '</tr>';
+                });
+                html += '</tbody></table>';
+                // Card view (mobile)
+                group.forEach(j => {
+                    const badgeClass = 'badge-' + (['succeeded','failed','running','pending','retry_running','validated','cancelled'].includes(j.status) ? j.status.replace('retry_running','running') : 'pending');
+                    let metricsCell = '';
+                    if (j.metrics) {
+                        const pre = j.metrics.pre_eval_perplexity;
+                        const post = j.metrics.post_eval_perplexity;
+                        metricsCell = ((pre!==undefined && pre!==null)?('pre:'+Number(pre).toFixed(2)):'') + ((post!==undefined && post!==null)?(' '+ 'post:'+Number(post).toFixed(2)):'');
+                    }
+                    const canRetry = ['failed','succeeded','cancelled'].includes(j.status);
+                    const canCancel = ['running','retry_running'].includes(j.status);
+                    const validatedType = j.validated_type ? ' | Type: ' + j.validated_type : '';
+                    const etaDisplay = (j.eta_sec !== null && j.eta_sec !== undefined) ? (' | ETA: ' + j.eta_sec + 's') : '';
+                    html += '<div class="job-card" data-job="' + j.name + '">' +
+                        '<div class="job-card-header"><span class="job-card-name">' + j.name + '</span><span class="badge ' + badgeClass + '">' + j.status + '</span></div>' +
+                        (metricsCell?('<div class="job-card-metrics">' + metricsCell + '</div>'):'') +
+                        '<div class="job-card-meta">' + (j.duration_sec?('Duration: ' + j.duration_sec + 's'):'') + etaDisplay + validatedType + (j.return_code!==undefined && j.return_code!==null?(' | RC: ' + j.return_code):'') + '</div>' +
+                        '<div>' + (canRetry ? '<button class="retry-btn" data-retry="' + j.name + '">Retry</button> ' : '') + (canCancel ? '<button class="cancel-btn" data-cancel="' + j.name + '">Cancel</button>' : '') + '</div>' +
+                        '</div>';
+                });
+                html += '</details>';
+            });
+            document.getElementById('category-sections').innerHTML = html || '<em>No jobs match filters.</em>';
+            if (html) document.getElementById('category-sections').classList.add('fade-in');
+        }
+                document.getElementById('job-filter').addEventListener('input', applyJobFilter);
+                ['toggle-succeeded','toggle-failed','toggle-pending'].forEach(id => document.getElementById(id).addEventListener('change', applyJobFilter));
+        let socketConnected = false;
+        try {
+            const socket = io();
+            socket.on('connect', () => { socketConnected = true; console.log('WebSocket connected'); });
+            socket.on('training_progress', data => renderProgress(data));
+            socket.on('disconnect', () => { socketConnected = false; console.log('WebSocket disconnected'); });
+        } catch(e) {
+            console.error('Socket init error', e);
+        }
+        // Fallback polling if socket not connected after 3 seconds
+        setTimeout(() => { if (!socketConnected) { fetch('/api/training_progress').then(r=>r.json()).then(renderProgress); setInterval(()=>{fetch('/api/training_progress').then(r=>r.json()).then(renderProgress);}, 10000); } }, 3000);
+        // Retry button delegation
+        document.addEventListener('click', (e) => {
+            const btn = e.target.closest('button.retry-btn');
+            if (!btn) return;
+            const jobName = btn.getAttribute('data-retry');
+            if (!jobName) return;
+            if (!confirm('Retry job ' + jobName + '?')) return;
+            btn.disabled = true;
+            btn.textContent = 'Retrying...';
+            fetch('/api/retry_job/' + encodeURIComponent(jobName), { method:'POST' })
+                .then(r => r.json())
+                .then(resp => {
+                    if (resp.accepted) {
+                        btn.textContent = 'Queued';
+                    } else {
+                        btn.disabled = false;
+                        btn.textContent = 'Retry';
+                        alert('Retry failed: ' + (resp.error||'unknown'));
+                    }
+                })
+                .catch(err => {
+                    console.error('Retry error', err);
+                    btn.disabled = false;
+                    btn.textContent = 'Retry';
+                    alert('Retry request error');
+                });
+        });
+        
+        // Cancel button delegation
+        document.addEventListener('click', (e) => {
+            const btn = e.target.closest('button.cancel-btn');
+            if (!btn) return;
+            const jobName = btn.getAttribute('data-cancel');
+            if (!jobName) return;
+            if (!confirm('Cancel running job ' + jobName + '? This will terminate the process.')) return;
+            btn.disabled = true;
+            btn.textContent = 'Cancelling...';
+            fetch('/api/cancel_job/' + encodeURIComponent(jobName), { method:'POST' })
+                .then(r => r.json())
+                .then(resp => {
+                    if (resp.cancelled) {
+                        btn.textContent = 'Cancelled';
+                    } else {
+                        btn.disabled = false;
+                        btn.textContent = 'Cancel';
+                        alert('Cancel failed: ' + (resp.error||'unknown'));
+                    }
+                })
+                .catch(err => {
+                    console.error('Cancel error', err);
+                    btn.disabled = false;
+                    btn.textContent = 'Cancel';
+                    alert('Cancel request error');
+                });
+        });
+    </script>
+</body>
+</html>

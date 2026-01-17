@@ -1,8 +1,8 @@
-from scripts.automated_training_pipeline import REPO_ROOT
+from scripts.training.automated_training_pipeline import REPO_ROOT
 import importlib
 
 def test_best_model_selection():
-    mod = importlib.import_module('scripts.automated_training_pipeline')
+    mod = importlib.import_module('scripts.training.automated_training_pipeline')
     # Access internal selection via reconstructing call by invoking _select_best_model inside summary creation
     # We simulate metrics and call the internal function by re-importing and grabbing it from module dict.
     select_fn = None
