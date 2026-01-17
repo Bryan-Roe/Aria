@@ -1,0 +1,19 @@
+{
+  "job_id": "65f8c0e1-b6ef-11f0-aea3-c86e08e1c791",
+  "counts": {
+    "0000": 520,
+    "1111": 480
+  },
+  "success": true,
+  "metadata": {
+    "backend": "rigetti.sim.qvm",
+    "n_qubits": 4,
+    "pattern": "standard",
+    "circuit": "ghz",
+    "shots": 1000,
+    "entropy": 0.9988455359952018,
+    "max_entropy": 4.0,
+    "circuit_depth": 5,
+    "circuit_gates": 8
+  }
+}

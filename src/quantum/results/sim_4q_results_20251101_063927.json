@@ -1,0 +1,31 @@
+{
+  "job_id": "local-aer-4q-20251101_063927",
+  "counts": {
+    "0000": 464,
+    "1111": 536
+  },
+  "success": true,
+  "metadata": {
+    "backend": "aer_simulator",
+    "n_qubits": 4,
+    "layers": 4,
+    "entanglement": "circular",
+    "method": "stabilizer",
+    "circuit": "stabilizer_ghz",
+    "shots": 1000,
+    "entropy": 0.9962572968375276,
+    "max_entropy": 4.0,
+    "noise": {
+      "pauli_px": 0.0,
+      "pauli_pz": 0.0,
+      "depolarizing_p": 0.0,
+      "amp_damp_gamma": 0.0,
+      "seed": null
+    },
+    "stabilizer": {
+      "type": "ghz",
+      "clifford_layers": 4,
+      "twoq_density": 0.5
+    }
+  }
+}

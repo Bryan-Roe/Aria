@@ -1,0 +1,8 @@
+{
+  "dataset": "ionosphere",
+  "samples_train": 280,
+  "samples_val": 71,
+  "features": 8,
+  "epochs": 2,
+  "final_val_acc": 0.6338028311729431
+}

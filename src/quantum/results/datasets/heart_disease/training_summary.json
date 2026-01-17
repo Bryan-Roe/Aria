@@ -1,0 +1,8 @@
+{
+  "dataset": "heart_disease",
+  "samples_train": 237,
+  "samples_val": 60,
+  "features": 8,
+  "epochs": 2,
+  "final_val_acc": 0.46666666865348816
+}

@@ -1,0 +1,8 @@
+{
+  "dataset": "sonar",
+  "samples_train": 166,
+  "samples_val": 42,
+  "features": 8,
+  "epochs": 2,
+  "final_val_acc": 0.523809552192688
+}

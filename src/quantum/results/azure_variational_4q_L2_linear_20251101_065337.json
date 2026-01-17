@@ -1,0 +1,42 @@
+{
+  "job_id": "749ea855-b6ef-11f0-8ed3-c86e08e1c791",
+  "counts": {
+    "1010": 101,
+    "0101": 208,
+    "1110": 51,
+    "0001": 88,
+    "0000": 52,
+    "0111": 113,
+    "0100": 106,
+    "1000": 53,
+    "0011": 37,
+    "0010": 21,
+    "0110": 43,
+    "1001": 23,
+    "1111": 21,
+    "1011": 47,
+    "1101": 12,
+    "1100": 24
+  },
+  "success": true,
+  "metadata": {
+    "backend": "rigetti.sim.qvm",
+    "n_qubits": 4,
+    "layers": 2,
+    "entanglement": "linear",
+    "method": "hardware",
+    "circuit": "variational",
+    "shots": 1000,
+    "entropy": 3.6213246064970877,
+    "max_entropy": 4.0,
+    "circuit_depth": 12,
+    "circuit_gates": 32,
+    "noise": {
+      "pauli_px": 0.0,
+      "pauli_pz": 0.0,
+      "depolarizing_p": 0.0,
+      "amp_damp_gamma": 0.0,
+      "seed": null
+    }
+  }
+}

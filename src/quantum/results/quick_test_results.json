@@ -1,0 +1,251 @@
+{
+  "timestamp": "2025-11-16T21:44:42.674134",
+  "total_datasets": 27,
+  "successful": 27,
+  "total_time_seconds": 31.56956696510315,
+  "results": {
+    "ionosphere": {
+      "status": "success",
+      "val_accuracy": 0.5625,
+      "val_loss": 0.6794861704111099,
+      "train_time_seconds": 0.1894838809967041,
+      "samples": 351,
+      "train_samples": 280,
+      "val_samples": 71
+    },
+    "banknote": {
+      "status": "success",
+      "val_accuracy": 0.9338235294117647,
+      "val_loss": 0.3006940738243215,
+      "train_time_seconds": 0.7769992351531982,
+      "samples": 1372,
+      "train_samples": 1097,
+      "val_samples": 275
+    },
+    "heart_disease": {
+      "status": "success",
+      "val_accuracy": 0.5416666666666666,
+      "val_loss": 0.6759679317474365,
+      "train_time_seconds": 0.16299819946289062,
+      "samples": 303,
+      "train_samples": 242,
+      "val_samples": 61
+    },
+    "sonar": {
+      "status": "success",
+      "val_accuracy": 0.40625,
+      "val_loss": 0.7193608283996582,
+      "train_time_seconds": 0.11251354217529297,
+      "samples": 208,
+      "train_samples": 166,
+      "val_samples": 42
+    },
+    "breast_cancer": {
+      "status": "success",
+      "val_accuracy": 0.7589285714285714,
+      "val_loss": 0.6423340865543911,
+      "train_time_seconds": 0.3235006332397461,
+      "samples": 569,
+      "train_samples": 455,
+      "val_samples": 114
+    },
+    "diabetes": {
+      "status": "success",
+      "val_accuracy": 0.6180555555555556,
+      "val_loss": 0.6428177091810439,
+      "train_time_seconds": 0.42551350593566895,
+      "samples": 768,
+      "train_samples": 614,
+      "val_samples": 154
+    },
+    "blood_transfusion": {
+      "status": "success",
+      "val_accuracy": 0.75,
+      "val_loss": 0.5855110088984171,
+      "train_time_seconds": 0.41350507736206055,
+      "samples": 747,
+      "train_samples": 597,
+      "val_samples": 150
+    },
+    "haberman": {
+      "status": "success",
+      "val_accuracy": 1.0,
+      "val_loss": 0.5414012670516968,
+      "train_time_seconds": 0.16649389266967773,
+      "samples": 306,
+      "train_samples": 244,
+      "val_samples": 62
+    },
+    "parkinsons": {
+      "status": "success",
+      "val_accuracy": 0.53125,
+      "val_loss": 0.6791676878929138,
+      "train_time_seconds": 0.09846687316894531,
+      "samples": 195,
+      "train_samples": 156,
+      "val_samples": 39
+    },
+    "dermatology": {
+      "status": "success",
+      "val_accuracy": 0.71875,
+      "val_loss": 0.6595237106084824,
+      "train_time_seconds": 0.19950032234191895,
+      "samples": 366,
+      "train_samples": 292,
+      "val_samples": 74
+    },
+    "liver_disorders": {
+      "status": "success",
+      "val_accuracy": 0.953125,
+      "val_loss": 0.6089896708726883,
+      "train_time_seconds": 0.1974949836730957,
+      "samples": 345,
+      "train_samples": 276,
+      "val_samples": 69
+    },
+    "thyroid": {
+      "status": "success",
+      "val_accuracy": 0.34375,
+      "val_loss": 0.7415394484996796,
+      "train_time_seconds": 0.1159975528717041,
+      "samples": 215,
+      "train_samples": 172,
+      "val_samples": 43
+    },
+    "statlog_heart": {
+      "status": "success",
+      "val_accuracy": 0.0,
+      "val_loss": 0.7889909942944845,
+      "train_time_seconds": 0.15447688102722168,
+      "samples": 270,
+      "train_samples": 216,
+      "val_samples": 54
+    },
+    "yeast": {
+      "status": "success",
+      "val_accuracy": 0.6875,
+      "val_loss": 0.5786814110146629,
+      "train_time_seconds": 0.8370029926300049,
+      "samples": 1484,
+      "train_samples": 1187,
+      "val_samples": 297
+    },
+    "wine_red": {
+      "status": "success",
+      "val_accuracy": 0.99375,
+      "val_loss": 0.36603716760873795,
+      "train_time_seconds": 0.9115011692047119,
+      "samples": 1599,
+      "train_samples": 1279,
+      "val_samples": 320
+    },
+    "wine_white": {
+      "status": "success",
+      "val_accuracy": 0.9959016393442623,
+      "val_loss": 0.07783618117453622,
+      "train_time_seconds": 2.803021192550659,
+      "samples": 4898,
+      "train_samples": 3918,
+      "val_samples": 980
+    },
+    "wine_quality_combined": {
+      "status": "success",
+      "val_accuracy": 0.9822530864197531,
+      "val_loss": 0.07686059303397749,
+      "train_time_seconds": 3.7215218544006348,
+      "samples": 6497,
+      "train_samples": 5197,
+      "val_samples": 1300
+    },
+    "iris": {
+      "status": "success",
+      "val_accuracy": 0.0625,
+      "val_loss": 0.7238633036613464,
+      "train_time_seconds": 0.07701349258422852,
+      "samples": 150,
+      "train_samples": 120,
+      "val_samples": 30
+    },
+    "optical_recognition": {
+      "status": "success",
+      "val_accuracy": 0.9893617021276596,
+      "val_loss": 0.13210891210969458,
+      "train_time_seconds": 2.1580018997192383,
+      "samples": 3823,
+      "train_samples": 3058,
+      "val_samples": 765
+    },
+    "pendigits": {
+      "status": "success",
+      "val_accuracy": 0.9798387096774194,
+      "val_loss": 0.10242125492102357,
+      "train_time_seconds": 4.228595495223999,
+      "samples": 7494,
+      "train_samples": 5995,
+      "val_samples": 1499
+    },
+    "wheat_seeds": {
+      "status": "success",
+      "val_accuracy": 0.40625,
+      "val_loss": 0.7154349684715271,
+      "train_time_seconds": 0.11369442939758301,
+      "samples": 210,
+      "train_samples": 168,
+      "val_samples": 42
+    },
+    "seeds": {
+      "status": "success",
+      "val_accuracy": 0.625,
+      "val_loss": 0.6831212639808655,
+      "train_time_seconds": 0.11328792572021484,
+      "samples": 210,
+      "train_samples": 168,
+      "val_samples": 42
+    },
+    "statlog_australian": {
+      "status": "success",
+      "val_accuracy": 0.8203125,
+      "val_loss": 0.5632060542702675,
+      "train_time_seconds": 0.40706324577331543,
+      "samples": 690,
+      "train_samples": 552,
+      "val_samples": 138
+    },
+    "balance_scale": {
+      "status": "success",
+      "val_accuracy": 0.9107142857142857,
+      "val_loss": 0.5041893890925816,
+      "train_time_seconds": 0.3508186340332031,
+      "samples": 625,
+      "train_samples": 500,
+      "val_samples": 125
+    },
+    "contraceptive": {
+      "status": "success",
+      "val_accuracy": 0.6006944444444444,
+      "val_loss": 0.6756182743443383,
+      "train_time_seconds": 0.8417696952819824,
+      "samples": 1473,
+      "train_samples": 1178,
+      "val_samples": 295
+    },
+    "magic_gamma": {
+      "status": "success",
+      "val_accuracy": 0.7753164556962026,
+      "val_loss": 0.4814581696871464,
+      "train_time_seconds": 10.851628541946411,
+      "samples": 19020,
+      "train_samples": 15216,
+      "val_samples": 3804
+    },
+    "glass": {
+      "status": "success",
+      "val_accuracy": 0.4375,
+      "val_loss": 0.6993513405323029,
+      "train_time_seconds": 0.13698792457580566,
+      "samples": 214,
+      "train_samples": 171,
+      "val_samples": 43
+    }
+  }
+}

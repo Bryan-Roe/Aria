@@ -1,0 +1,45 @@
+{
+  "job_id": "local-aer-4q-20251101_065342",
+  "counts": {
+    "0110": 45,
+    "1111": 30,
+    "1001": 24,
+    "1010": 89,
+    "0001": 106,
+    "0111": 94,
+    "0101": 214,
+    "1000": 48,
+    "0100": 91,
+    "0000": 47,
+    "0010": 25,
+    "1110": 47,
+    "1101": 14,
+    "0011": 53,
+    "1011": 47,
+    "1100": 26
+  },
+  "success": true,
+  "metadata": {
+    "backend": "aer_simulator",
+    "n_qubits": 4,
+    "layers": 2,
+    "entanglement": "linear",
+    "method": "matrix_product_state",
+    "circuit": "variational",
+    "shots": 1000,
+    "entropy": 3.6604248159585,
+    "max_entropy": 4.0,
+    "noise": {
+      "pauli_px": 0.0,
+      "pauli_pz": 0.0,
+      "depolarizing_p": 0.0,
+      "amp_damp_gamma": 0.0,
+      "seed": null
+    },
+    "stabilizer": {
+      "type": "ghz",
+      "clifford_layers": 4,
+      "twoq_density": 0.5
+    }
+  }
+}

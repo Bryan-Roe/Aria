@@ -1,0 +1,30 @@
+{
+  "job_id": "06f6ed3a-b6ee-11f0-876e-c86e08e1c791",
+  "counts": {
+    "0000": 100
+  },
+  "success": true,
+  "metadata": {
+    "backend": "quantinuum.sim.h2-1sc",
+    "n_qubits": 4,
+    "layers": 1,
+    "entanglement": "linear",
+    "method": "hardware",
+    "circuit": "stabilizer_ghz",
+    "shots": 100,
+    "entropy": -0.0,
+    "max_entropy": 4.0,
+    "noise": {
+      "pauli_px": 0.0,
+      "pauli_pz": 0.0,
+      "depolarizing_p": 0.0,
+      "amp_damp_gamma": 0.0,
+      "seed": null
+    },
+    "stabilizer": {
+      "type": "ghz",
+      "clifford_layers": 0,
+      "twoq_density": 0.0
+    }
+  }
+}

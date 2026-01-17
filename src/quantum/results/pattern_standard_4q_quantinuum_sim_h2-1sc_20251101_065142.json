@@ -1,0 +1,18 @@
+{
+  "job_id": "26b2c929-b6ef-11f0-862c-c86e08e1c791",
+  "counts": {
+    "0000": 1000
+  },
+  "success": true,
+  "metadata": {
+    "backend": "quantinuum.sim.h2-1sc",
+    "n_qubits": 4,
+    "pattern": "standard",
+    "circuit": "ghz",
+    "shots": 1000,
+    "entropy": -0.0,
+    "max_entropy": 4.0,
+    "circuit_depth": 5,
+    "circuit_gates": 8
+  }
+}

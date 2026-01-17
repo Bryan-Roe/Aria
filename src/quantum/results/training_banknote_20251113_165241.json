@@ -1,0 +1,77 @@
+{
+  "session_id": "session_1763052755700",
+  "config": {
+    "dataset": "banknote",
+    "n_qubits": 2,
+    "n_layers": 1,
+    "learning_rate": 0.02,
+    "duration_minutes": 0.05,
+    "batch_size": 16,
+    "optimizer": "adam",
+    "early_stopping_patience": 5,
+    "checkpoint_every": 10,
+    "use_parameter_shift": true,
+    "use_warmup": true,
+    "warmup_epochs": 2,
+    "use_lr_decay": true,
+    "use_gradient_clipping": true,
+    "max_grad_norm": 1.0
+  },
+  "status": "completed",
+  "current_epoch": 1,
+  "total_epochs": 1,
+  "elapsed_time": 3.806537389755249,
+  "best_val_acc": 0.44363636363636366,
+  "current_loss": 1.341739503090875,
+  "epochs_per_second": 0.0,
+  "eta_seconds": null,
+  "error_message": null,
+  "samples_trained": 80,
+  "current_val_acc": 0.44363636363636366,
+  "current_learning_rate": 0.02,
+  "gradient_norm": 0.11958046935266578,
+  "checkpoint_path": "/workspaces/AI/quantum-ai/checkpoints/final_session_1763052755700.npz",
+  "optimizer": "adam",
+  "epochs_without_improvement": 0,
+  "metrics": {
+    "epochs": [
+      1
+    ],
+    "train_loss": [
+      1.341739503090875
+    ],
+    "val_loss": [
+      1.5329144971169453
+    ],
+    "val_accuracy": [
+      0.44363636363636366
+    ],
+    "timestamps": [
+      3.8062145709991455
+    ]
+  },
+  "progress_percent": 100.0,
+  "evaluation": {
+    "confusion_matrix": [
+      [
+        0,
+        153
+      ],
+      [
+        0,
+        122
+      ]
+    ],
+    "labels": [
+      0,
+      1
+    ],
+    "metrics": {
+      "accuracy": 0.44363636363636366,
+      "precision": 0.44363636363636366,
+      "recall": 1.0,
+      "f1": 0.6146095717884131,
+      "roc_auc": 0.5652523304403729
+    }
+  }
+}

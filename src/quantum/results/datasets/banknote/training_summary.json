@@ -1,0 +1,8 @@
+{
+  "dataset": "banknote",
+  "samples_train": 1097,
+  "samples_val": 275,
+  "features": 8,
+  "epochs": 2,
+  "final_val_acc": 0.5563636422157288
+}

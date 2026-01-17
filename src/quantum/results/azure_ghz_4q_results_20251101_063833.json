@@ -1,0 +1,31 @@
+{
+  "job_id": "55e2ae5b-b6ed-11f0-a8e3-c86e08e1c791",
+  "counts": {
+    "0000": 520,
+    "1111": 480
+  },
+  "success": true,
+  "metadata": {
+    "backend": "rigetti.sim.qvm",
+    "n_qubits": 4,
+    "layers": 1,
+    "entanglement": "linear",
+    "method": "hardware",
+    "circuit": "stabilizer_ghz",
+    "shots": 1000,
+    "entropy": 0.9988455359952018,
+    "max_entropy": 4.0,
+    "noise": {
+      "pauli_px": 0.0,
+      "pauli_pz": 0.0,
+      "depolarizing_p": 0.0,
+      "amp_damp_gamma": 0.0,
+      "seed": null
+    },
+    "stabilizer": {
+      "type": "ghz",
+      "clifford_layers": 0,
+      "twoq_density": 0.0
+    }
+  }
+}
