@@ -45,7 +45,7 @@ if str(quantum_ai_path) not in sys.path:
     sys.path.insert(0, str(quantum_ai_path))
 
 try:
-    from src.quantum_classifier import QuantumClassifier, HybridQuantumClassifier
+    from src.quantum_classifier import QuantumClassifier
     from src.hybrid_qnn import QuantumLayer, HybridQNN
     QUANTUM_AVAILABLE = True
 except ImportError as e:
