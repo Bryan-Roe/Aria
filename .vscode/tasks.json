@@ -545,6 +545,89 @@
 			],
 			"isBackground": false,
 			"problemMatcher": []
+		},
+		{
+			"label": "Visualize: GGUF File (CLI)",
+			"type": "shell",
+			"command": "python",
+			"args": [
+				"scripts/visualize_gguf_simple.py",
+				"${input:ggufFile}"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"options": {
+				"cwd": "${workspaceFolder}"
+			},
+			"presentation": {
+				"reveal": "always",
+				"panel": "dedicated"
+			}
+		},
+		{
+			"label": "Visualize: GGUF Quantum Banknote Model",
+			"type": "shell",
+			"command": "python",
+			"args": [
+				"scripts/visualize_gguf_simple.py",
+				"data_out/quantum_banknote_perfect_model.gguf"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"options": {
+				"cwd": "${workspaceFolder}"
+			},
+			"presentation": {
+				"reveal": "always",
+				"panel": "dedicated"
+			}
+		},
+		{
+			"label": "Visualize: Export GGUF Analysis (JSON + MD)",
+			"type": "shell",
+			"command": "python",
+			"args": [
+				"scripts/visualize_gguf_simple.py",
+				"${input:ggufFile}",
+				"--json",
+				"data_out/gguf_analysis.json",
+				"--md",
+				"data_out/gguf_analysis.md"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"options": {
+				"cwd": "${workspaceFolder}"
+			},
+			"presentation": {
+				"reveal": "always",
+				"panel": "dedicated"
+			}
+		},
+		{
+			"label": "Visualize: Start GGUF Web Server",
+			"type": "shell",
+			"command": "python",
+			"args": [
+				"serve_gguf_viz.py"
+			],
+			"isBackground": true,
+			"problemMatcher": [],
+			"options": {
+				"cwd": "${workspaceFolder}/dashboard"
+			},
+			"presentation": {
+				"reveal": "always",
+				"panel": "dedicated"
+			}
+		}
+	],
+	"inputs": [
+		{
+			"id": "ggufFile",
+			"type": "promptString",
+			"description": "Path to GGUF file",
+			"default": "data_out/quantum_banknote_perfect_model.gguf"
 		}
 	]
 }

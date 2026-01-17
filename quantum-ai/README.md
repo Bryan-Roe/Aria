@@ -26,6 +26,94 @@ Then open **http://localhost:5000** for:
 
 ---
 
+### 🔐 Quick-Run: Fraud Detection API (Port 5050)
+
+Run the Flask API for the fraud/ionosphere demo on port 5050.
+
+```bash
+cd quantum-ai
+# Start on port 5050 (recommended to avoid conflicts)
+PORT=5050 python fraud_detection_api.py
+```
+
+Verify endpoints:
+
+```bash
+# Health
+curl -s http://localhost:5050/health | python -m json.tool
+
+# Single prediction (example features)
+curl -s -X POST http://localhost:5050/predict \
+  -H "Content-Type: application/json" \
+  -d '{"features": [1.0, 2.0, 3.0, 4.0]}' | python -m json.tool
+
+# Model info
+curl -s http://localhost:5050/model_info | python -m json.tool
+```
+
+Notes:
+- Configure host/port via `HOST` and `PORT` env vars; defaults are `0.0.0.0:5001`.
+- If port 5000 is busy, use `PORT=5050` as shown above.
+- This uses Flask’s development server; for production, deploy behind a WSGI server (gunicorn/uvicorn).
+
+---
+
+### 🛡️ Production Start (Gunicorn on 5050)
+
+Minimal Gunicorn command:
+
+```bash
+pip install gunicorn
+cd quantum-ai
+gunicorn -w 2 -b 0.0.0.0:5050 fraud_detection_api:app
+```
+
+Notes:
+- The entrypoint is `fraud_detection_api:app` (Flask app object).
+- Ensure the working directory is `quantum-ai` so model files in `results/` resolve.
+
+---
+
+### 🧩 systemd Unit (Production-style on 5050)
+
+Create `/etc/systemd/system/quantum-ai.service`:
+
+```ini
+[Unit]
+Description=Quantum AI Fraud Detection API (Gunicorn)
+After=network.target
+
+[Service]
+Type=simple
+User=www-data
+Group=www-data
+WorkingDirectory=/opt/aria/quantum-ai
+ExecStart=/usr/bin/gunicorn -w 2 -b 0.0.0.0:5050 wsgi:app
+Restart=always
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
+```
+
+Enable and start:
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl enable --now quantum-ai
+sudo systemctl status quantum-ai
+```
+
+Tail logs:
+
+```bash
+sudo journalctl -u quantum-ai -f
+```
+
+If your code and model files live elsewhere, update `WorkingDirectory` accordingly.
+
 **New to this project?** Start here:
 
 1. **🎨 Web Dashboard** (Recommended): [`WEB_DASHBOARD_README.md`](./WEB_DASHBOARD_README.md)

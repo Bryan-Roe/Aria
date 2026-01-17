@@ -220,6 +220,9 @@ if __name__ == '__main__':
     print(f"   POST /predict - Single prediction")
     print(f"   POST /batch_predict - Batch predictions")
     print(f"   GET  /model_info - Model metadata")
-    print(f"\n🌐 Running on http://localhost:5000\n")
+
+    host = os.getenv('HOST', '0.0.0.0')
+    port = int(os.getenv('PORT', '5001'))
+    print(f"\n🌐 Running on http://{host}:{port}\n")
     
-    app.run(host='0.0.0.0', port=5000, debug=False)
+    app.run(host=host, port=port, debug=False)

@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GGUF Model Visualizer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+        
+        .controls {
+            padding: 30px;
+            background: #f8f9fa;
+            border-bottom: 2px solid #e9ecef;
+        }
+        
+        .file-upload {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .upload-btn {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .upload-btn input[type="file"] {
+            display: none;
+        }
+        
+        .upload-btn label {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 30px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+            display: inline-block;
+        }
+        
+        .upload-btn label:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .sample-models {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .sample-btn {
+            background: white;
+            border: 2px solid #667eea;
+            color: #667eea;
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+        
+        .sample-btn:hover {
+            background: #667eea;
+            color: white;
+        }
+        
+        .content {
+            padding: 30px;
+        }
+        
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #e9ecef;
+        }
+        
+        .tab {
+            padding: 15px 30px;
+            cursor: pointer;
+            border: none;
+            background: none;
+            font-size: 1.1em;
+            font-weight: 500;
+            color: #6c757d;
+            transition: all 0.3s;
+            border-bottom: 3px solid transparent;
+        }
+        
+        .tab.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+        
+        .tab:hover {
+            color: #667eea;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .stat-label {
+            font-size: 0.9em;
+            opacity: 0.9;
+            margin-bottom: 5px;
+        }
+        
+        .stat-value {
+            font-size: 2em;
+            font-weight: bold;
+        }
+        
+        .metadata-table, .tensor-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        
+        .metadata-table th, .metadata-table td,
+        .tensor-table th, .tensor-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .metadata-table th, .tensor-table th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #495057;
+        }
+        
+        .metadata-table tr:hover, .tensor-table tr:hover {
+            background: #f8f9fa;
+        }
+        
+        .chart-container {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 15px;
+        }
+        
+        .architecture-view {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 15px;
+            margin-top: 20px;
+        }
+        
+        .layer-group {
+            background: white;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+            transition: all 0.3s;
+        }
+        
+        .layer-group:hover {
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transform: translateX(5px);
+        }
+        
+        .layer-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .layer-name {
+            font-size: 1.3em;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .layer-stats {
+            color: #6c757d;
+            font-size: 0.9em;
+        }
+        
+        .progress-bar {
+            height: 8px;
+            background: #e9ecef;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            transition: width 0.5s;
+        }
+        
+        .search-box {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            font-size: 1em;
+            margin-bottom: 20px;
+        }
+        
+        .search-box:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6c757d;
+        }
+        
+        .empty-state svg {
+            width: 100px;
+            height: 100px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+        
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.85em;
+            font-weight: 500;
+            margin-left: 10px;
+        }
+        
+        .badge-primary {
+            background: #667eea;
+            color: white;
+        }
+        
+        .badge-secondary {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .export-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .export-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+        
+        .export-btn:hover {
+            background: #218838;
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔍 GGUF Model Visualizer</h1>
+            <p>Inspect and analyze GGUF model files</p>
+        </div>
+        
+        <div class="controls">
+            <div class="file-upload">
+                <div class="upload-btn">
+                    <label for="file-input">
+                        📁 Choose GGUF File
+                    </label>
+                    <input type="file" id="file-input" accept=".gguf">
+                </div>
+                
+                <div class="sample-models">
+                    <span style="margin-right: 10px; font-weight: 500;">Or try samples:</span>
+                    <button class="sample-btn" onclick="loadSample('quantum_banknote')">Quantum Banknote</button>
+                    <button class="sample-btn" onclick="loadSample('quantum_heart')">Heart Disease</button>
+                    <button class="sample-btn" onclick="loadSample('quantum_wine')">Wine Quality</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="content">
+            <div id="error-message" class="error" style="display: none;"></div>
+            
+            <div id="empty-state" class="empty-state">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                </svg>
+                <h2>No file loaded</h2>
+                <p>Upload a GGUF file or select a sample to get started</p>
+            </div>
+            
+            <div id="main-content" style="display: none;">
+                <div class="tabs">
+                    <button class="tab active" data-tab="overview">Overview</button>
+                    <button class="tab" data-tab="metadata">Metadata</button>
+                    <button class="tab" data-tab="architecture">Architecture</button>
+                    <button class="tab" data-tab="tensors">Tensors</button>
+                    <button class="tab" data-tab="statistics">Statistics</button>
+                </div>
+                
+                <div id="overview-tab" class="tab-content active">
+                    <h2>Model Overview</h2>
+                    <div class="stats-grid" id="stats-grid"></div>
+                    <div class="export-buttons">
+                        <button class="export-btn" onclick="exportJSON()">📥 Export JSON</button>
+                        <button class="export-btn" onclick="exportMarkdown()">📝 Export Markdown</button>
+                    </div>
+                </div>
+                
+                <div id="metadata-tab" class="tab-content">
+                    <h2>Metadata</h2>
+                    <input type="text" class="search-box" placeholder="Search metadata..." id="metadata-search">
+                    <table class="metadata-table" id="metadata-table"></table>
+                </div>
+                
+                <div id="architecture-tab" class="tab-content">
+                    <h2>Model Architecture</h2>
+                    <div class="architecture-view" id="architecture-view"></div>
+                </div>
+                
+                <div id="tensors-tab" class="tab-content">
+                    <h2>Tensors</h2>
+                    <input type="text" class="search-box" placeholder="Search tensors..." id="tensor-search">
+                    <table class="tensor-table" id="tensor-table"></table>
+                </div>
+                
+                <div id="statistics-tab" class="tab-content">
+                    <h2>Statistics</h2>
+                    <div id="statistics-content"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let currentModel = null;
+        
+        // Tab switching
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                const tabName = tab.dataset.tab;
+                
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                
+                tab.classList.add('active');
+                document.getElementById(`${tabName}-tab`).classList.add('active');
+            });
+        });
+        
+        // File upload
+        document.getElementById('file-input').addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                readGGUFFile(file);
+            }
+        });
+        
+        // GGUF Reader
+        function readGGUFFile(file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const arrayBuffer = e.target.result;
+                    const data = parseGGUF(arrayBuffer, file.name);
+                    currentModel = data;
+                    displayModel(data);
+                } catch (error) {
+                    showError(`Error parsing GGUF file: ${error.message}`);
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        }
+        
+        function parseGGUF(arrayBuffer, filename) {
+            const view = new DataView(arrayBuffer);
+            let offset = 0;
+            
+            // Read header
+            const magic = view.getUint32(offset, true);
+            offset += 4;
+            
+            if (magic !== 0x46554747) {
+                throw new Error(`Invalid GGUF magic: 0x${magic.toString(16)}`);
+            }
+            
+            const version = view.getUint32(offset, true);
+            offset += 4;
+            
+            const tensorCount = readUint64(view, offset);
+            offset += 8;
+            
+            const metadataKVCount = readUint64(view, offset);
+            offset += 8;
+            
+            // Read metadata
+            const metadata = {};
+            for (let i = 0; i < metadataKVCount; i++) {
+                const [key, value, newOffset] = readMetadataKV(view, offset);
+                metadata[key] = value;
+                offset = newOffset;
+            }
+            
+            // Read tensors
+            const tensors = [];
+            for (let i = 0; i < tensorCount; i++) {
+                const [tensorInfo, newOffset] = readTensorInfo(view, offset);
+                tensors.push(tensorInfo);
+                offset = newOffset;
+            }
+            
+            return {
+                filename,
+                fileSize: arrayBuffer.byteLength,
+                version,
+                tensorCount,
+                metadataKVCount,
+                metadata,
+                tensors
+            };
+        }
+        
+        function readUint64(view, offset) {
+            // Read as two 32-bit values (JavaScript limitation)
+            const low = view.getUint32(offset, true);
+            const high = view.getUint32(offset + 4, true);
+            return high * 0x100000000 + low;
+        }
+        
+        function readString(view, offset) {
+            const length = readUint64(view, offset);
+            offset += 8;
+            
+            const bytes = new Uint8Array(view.buffer, offset, length);
+            const str = new TextDecoder().decode(bytes);
+            return [str, offset + length];
+        }
+        
+        function readMetadataKV(view, offset) {
+            const [key, newOffset1] = readString(view, offset);
+            const valueType = view.getUint32(newOffset1, true);
+            let value, newOffset2;
+            
+            switch (valueType) {
+                case 0: // UINT8
+                    value = view.getUint8(newOffset1 + 4);
+                    newOffset2 = newOffset1 + 5;
+                    break;
+                case 4: // UINT32
+                    value = view.getUint32(newOffset1 + 4, true);
+                    newOffset2 = newOffset1 + 8;
+                    break;
+                case 6: // FLOAT32
+                    value = view.getFloat32(newOffset1 + 4, true);
+                    newOffset2 = newOffset1 + 8;
+                    break;
+                case 8: // STRING
+                    [value, newOffset2] = readString(view, newOffset1 + 4);
+                    break;
+                case 10: // UINT64
+                    value = readUint64(view, newOffset1 + 4);
+                    newOffset2 = newOffset1 + 12;
+                    break;
+                default:
+                    value = `<Unknown type ${valueType}>`;
+                    newOffset2 = newOffset1 + 4;
+            }
+            
+            return [key, value, newOffset2];
+        }
+        
+        function readTensorInfo(view, offset) {
+            const [name, offset1] = readString(view, offset);
+            const nDims = view.getUint32(offset1, true);
+            let offset2 = offset1 + 4;
+            
+            const dims = [];
+            for (let i = 0; i < nDims; i++) {
+                dims.push(readUint64(view, offset2));
+                offset2 += 8;
+            }
+            
+            const dtype = view.getUint32(offset2, true);
+            offset2 += 4;
+            
+            const tensorOffset = readUint64(view, offset2);
+            offset2 += 8;
+            
+            const numElements = dims.reduce((a, b) => a * b, 1);
+            
+            return [{
+                name,
+                dims: dims.reverse(),
+                dtype,
+                offset: tensorOffset,
+                numElements
+            }, offset2];
+        }
+        
+        function displayModel(data) {
+            document.getElementById('empty-state').style.display = 'none';
+            document.getElementById('main-content').style.display = 'block';
+            document.getElementById('error-message').style.display = 'none';
+            
+            displayOverview(data);
+            displayMetadata(data);
+            displayArchitecture(data);
+            displayTensors(data);
+            displayStatistics(data);
+        }
+        
+        function displayOverview(data) {
+            const totalParams = data.tensors.reduce((sum, t) => sum + t.numElements, 0);
+            const fileSizeMB = (data.fileSize / 1024 / 1024).toFixed(2);
+            const paramsM = (totalParams / 1000000).toFixed(2);
+            
+            const stats = [
+                { label: 'File Size', value: `${fileSizeMB} MB` },
+                { label: 'Version', value: `v${data.version}` },
+                { label: 'Tensors', value: data.tensorCount.toLocaleString() },
+                { label: 'Parameters', value: `${paramsM}M` },
+                { label: 'Metadata', value: data.metadataKVCount },
+                { label: 'Architecture', value: data.metadata['general.architecture'] || 'Unknown' }
+            ];
+            
+            const grid = document.getElementById('stats-grid');
+            grid.innerHTML = stats.map(stat => `
+                <div class="stat-card">
+                    <div class="stat-label">${stat.label}</div>
+                    <div class="stat-value">${stat.value}</div>
+                </div>
+            `).join('');
+        }
+        
+        function displayMetadata(data) {
+            const table = document.getElementById('metadata-table');
+            const entries = Object.entries(data.metadata).sort();
+            
+            table.innerHTML = `
+                <thead>
+                    <tr>
+                        <th>Key</th>
+                        <th>Value</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${entries.map(([key, value]) => `
+                        <tr>
+                            <td><strong>${key}</strong></td>
+                            <td>${value}</td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            `;
+            
+            // Search functionality
+            document.getElementById('metadata-search').addEventListener('input', (e) => {
+                const search = e.target.value.toLowerCase();
+                const rows = table.querySelectorAll('tbody tr');
+                rows.forEach(row => {
+                    const text = row.textContent.toLowerCase();
+                    row.style.display = text.includes(search) ? '' : 'none';
+                });
+            });
+        }
+        
+        function displayArchitecture(data) {
+            const groups = {};
+            data.tensors.forEach(tensor => {
+                const parts = tensor.name.split('.');
+                const group = parts[0] || 'other';
+                if (!groups[group]) {
+                    groups[group] = [];
+                }
+                groups[group].push(tensor);
+            });
+            
+            const totalParams = data.tensors.reduce((sum, t) => sum + t.numElements, 0);
+            const container = document.getElementById('architecture-view');
+            
+            container.innerHTML = Object.entries(groups).map(([name, tensors]) => {
+                const groupParams = tensors.reduce((sum, t) => sum + t.numElements, 0);
+                const percentage = (groupParams / totalParams * 100).toFixed(1);
+                
+                return `
+                    <div class="layer-group">
+                        <div class="layer-header">
+                            <div class="layer-name">${name}</div>
+                            <div class="layer-stats">
+                                <span class="badge badge-primary">${tensors.length} tensors</span>
+                                <span class="badge badge-secondary">${groupParams.toLocaleString()} params</span>
+                            </div>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: ${percentage}%"></div>
+                        </div>
+                        <div style="margin-top: 5px; color: #6c757d; font-size: 0.9em;">${percentage}% of total parameters</div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        function displayTensors(data) {
+            const table = document.getElementById('tensor-table');
+            
+            table.innerHTML = `
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Shape</th>
+                        <th>Type</th>
+                        <th>Elements</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${data.tensors.map(tensor => `
+                        <tr>
+                            <td><strong>${tensor.name}</strong></td>
+                            <td><code>[${tensor.dims.join(', ')}]</code></td>
+                            <td><span class="badge badge-primary">${getDtypeName(tensor.dtype)}</span></td>
+                            <td>${tensor.numElements.toLocaleString()}</td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            `;
+            
+            // Search functionality
+            document.getElementById('tensor-search').addEventListener('input', (e) => {
+                const search = e.target.value.toLowerCase();
+                const rows = table.querySelectorAll('tbody tr');
+                rows.forEach(row => {
+                    const text = row.textContent.toLowerCase();
+                    row.style.display = text.includes(search) ? '' : 'none';
+                });
+            });
+        }
+        
+        function displayStatistics(data) {
+            const dtypeCounts = {};
+            const dtypeParams = {};
+            
+            data.tensors.forEach(tensor => {
+                const dtype = getDtypeName(tensor.dtype);
+                dtypeCounts[dtype] = (dtypeCounts[dtype] || 0) + 1;
+                dtypeParams[dtype] = (dtypeParams[dtype] || 0) + tensor.numElements;
+            });
+            
+            const totalParams = data.tensors.reduce((sum, t) => sum + t.numElements, 0);
+            const sizes = data.tensors.map(t => t.numElements);
+            
+            const content = document.getElementById('statistics-content');
+            content.innerHTML = `
+                <div class="chart-container">
+                    <h3>Data Type Distribution</h3>
+                    <table class="metadata-table">
+                        <thead>
+                            <tr>
+                                <th>Type</th>
+                                <th>Tensors</th>
+                                <th>Parameters</th>
+                                <th>Percentage</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${Object.entries(dtypeCounts).map(([dtype, count]) => {
+                                const params = dtypeParams[dtype];
+                                const percent = (params / totalParams * 100).toFixed(1);
+                                return `
+                                    <tr>
+                                        <td><strong>${dtype}</strong></td>
+                                        <td>${count}</td>
+                                        <td>${params.toLocaleString()}</td>
+                                        <td>${percent}%</td>
+                                    </tr>
+                                `;
+                            }).join('')}
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="chart-container">
+                    <h3>Tensor Size Analysis</h3>
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-label">Smallest Tensor</div>
+                            <div class="stat-value">${Math.min(...sizes).toLocaleString()}</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">Largest Tensor</div>
+                            <div class="stat-value">${Math.max(...sizes).toLocaleString()}</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">Average Tensor</div>
+                            <div class="stat-value">${Math.floor(sizes.reduce((a,b) => a+b, 0) / sizes.length).toLocaleString()}</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function getDtypeName(dtype) {
+            const names = {
+                0: 'F32', 1: 'F16', 2: 'Q4_0', 3: 'Q4_1',
+                4: 'Q5_0', 5: 'Q5_1', 6: 'Q8_0', 7: 'Q8_1',
+                8: 'Q2_K', 9: 'Q3_K', 10: 'Q4_K', 11: 'Q5_K',
+                12: 'Q6_K', 13: 'Q8_K', 14: 'I8', 15: 'I16', 16: 'I32'
+            };
+            return names[dtype] || `Unknown(${dtype})`;
+        }
+        
+        function showError(message) {
+            const errorDiv = document.getElementById('error-message');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+            document.getElementById('main-content').style.display = 'none';
+        }
+        
+        function loadSample(modelName) {
+            // In a real implementation, this would load from the server
+            const samples = {
+                'quantum_banknote': '/data_out/quantum_banknote_perfect_model.gguf',
+                'quantum_heart': '/data_out/quantum_heart_disease_model.gguf',
+                'quantum_wine': '/data_out/quantum_wine_quality_combined_model.gguf'
+            };
+            
+            const url = samples[modelName];
+            if (url) {
+                fetch(url)
+                    .then(response => response.arrayBuffer())
+                    .then(arrayBuffer => {
+                        const data = parseGGUF(arrayBuffer, modelName + '.gguf');
+                        currentModel = data;
+                        displayModel(data);
+                    })
+                    .catch(error => {
+                        showError(`Error loading sample: ${error.message}`);
+                    });
+            }
+        }
+        
+        function exportJSON() {
+            if (!currentModel) return;
+            
+            const json = JSON.stringify(currentModel, null, 2);
+            downloadFile(json, 'gguf_analysis.json', 'application/json');
+        }
+        
+        function exportMarkdown() {
+            if (!currentModel) return;
+            
+            const totalParams = currentModel.tensors.reduce((sum, t) => sum + t.numElements, 0);
+            const fileSizeMB = (currentModel.fileSize / 1024 / 1024).toFixed(2);
+            
+            let md = `# GGUF Model Analysis\n\n`;
+            md += `**File:** \`${currentModel.filename}\`\n\n`;
+            md += `**Size:** ${fileSizeMB} MB\n\n`;
+            md += `## Summary\n\n`;
+            md += `- **Tensors:** ${currentModel.tensorCount}\n`;
+            md += `- **Parameters:** ${totalParams.toLocaleString()}\n`;
+            md += `- **Metadata Entries:** ${currentModel.metadataKVCount}\n\n`;
+            
+            md += `## Metadata\n\n`;
+            Object.entries(currentModel.metadata).forEach(([key, value]) => {
+                md += `- **${key}:** ${value}\n`;
+            });
+            
+            md += `\n## Tensors\n\n`;
+            md += `| Name | Shape | Type | Elements |\n`;
+            md += `|------|-------|------|----------|\n`;
+            currentModel.tensors.forEach(tensor => {
+                md += `| ${tensor.name} | [${tensor.dims.join(', ')}] | ${getDtypeName(tensor.dtype)} | ${tensor.numElements.toLocaleString()} |\n`;
+            });
+            
+            downloadFile(md, 'gguf_analysis.md', 'text/markdown');
+        }
+        
+        function downloadFile(content, filename, mimeType) {
+            const blob = new Blob([content], { type: mimeType });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+    </script>
+</body>
+</html>
