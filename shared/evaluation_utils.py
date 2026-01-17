@@ -45,7 +45,9 @@ class EvaluationMetrics:
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary, excluding None values."""
-        return {k: v for k, v in asdict(self).items() if v is not None}
+        return {
+            k: v for k, v in asdict(self).items() if v is not None
+        }
 
     def to_json(self) -> str:
         """Serialize to JSON."""
@@ -88,7 +90,7 @@ class EvaluationResult:
         result_file = output_dir / "result.json"
         with result_file.open("w") as f:
             json.dump(self.to_dict(), f, indent=2)
-        logger.info(f"Result saved: {result_file}")
+        logger.info("Result saved: %s", result_file)
 
     @staticmethod
     def load(result_file: Path) -> EvaluationResult:
@@ -123,7 +125,11 @@ def compute_accuracy(predictions: List[str], references: List[str]) -> float:
     return matches / len(predictions)
 
 
-def compute_bleu(predictions: List[str], references: List[str], n: int = 4) -> float:
+def compute_bleu(
+    predictions: List[str],
+    references: List[str],
+    n: int = 4
+) -> float:
     """
     Compute BLEU score (approximate unigram overlap).
 
@@ -140,7 +146,7 @@ def compute_bleu(predictions: List[str], references: List[str], n: int = 4) -> f
 
     def get_ngrams(text: str, n: int) -> set:
         words = text.lower().split()
-        return set(tuple(words[i:i+n]) for i in range(len(words) - n + 1))
+        return {tuple(words[i:i+n]) for i in range(len(words) - n + 1)}
 
     scores = []
     for pred, ref in zip(predictions, references):
@@ -269,7 +275,10 @@ def compute_perplexity(losses: List[float]) -> float:
     return float(np.exp(mean_loss))
 
 
-def compute_determinism(predictions_run1: List[str], predictions_run2: List[str]) -> float:
+def compute_determinism(
+    predictions_run1: List[str],
+    predictions_run2: List[str]
+) -> float:
     """
     Compute determinism: fraction of identical predictions across runs.
 
@@ -290,7 +299,10 @@ def compute_determinism(predictions_run1: List[str], predictions_run2: List[str]
     return matches / len(predictions_run1)
 
 
-def compute_token_efficiency(tokens_used: List[int], token_budget: int) -> float:
+def compute_token_efficiency(
+    tokens_used: List[int],
+    token_budget: int
+) -> float:
     """
     Compute token efficiency: average tokens used vs budget.
 
@@ -305,14 +317,17 @@ def compute_token_efficiency(tokens_used: List[int], token_budget: int) -> float
         return 0.0
 
     mean_used = np.mean(tokens_used)
-    return min(100.0, (mean_used / token_budget) * 100)
+    return float(min(100.0, (mean_used / token_budget) * 100))
 
 
 # ============================================================================
 # Dataset Utilities
 # ============================================================================
 
-def load_jsonl_dataset(path: Path, max_samples: Optional[int] = None) -> List[Dict]:
+def load_jsonl_dataset(
+    path: Path,
+    max_samples: Optional[int] = None
+) -> List[Dict[str, Any]]:
     """
     Load JSONL dataset (one JSON object per line).
 
@@ -334,12 +349,15 @@ def load_jsonl_dataset(path: Path, max_samples: Optional[int] = None) -> List[Di
             try:
                 items.append(json.loads(line))
             except json.JSONDecodeError as e:
-                logger.warning(f"Failed to parse line {i+1}: {e}")
+                logger.warning("Failed to parse line %d: %s", i+1, e)
 
     return items
 
 
-def load_json_dataset(path: Path, max_samples: Optional[int] = None) -> List[Dict]:
+def load_json_dataset(
+    path: Path,
+    max_samples: Optional[int] = None
+) -> List[Dict[str, Any]]:
     """
     Load JSON array dataset.
 
@@ -362,7 +380,10 @@ def load_json_dataset(path: Path, max_samples: Optional[int] = None) -> List[Dic
     return items
 
 
-def load_csv_dataset(path: Path, max_samples: Optional[int] = None) -> List[Dict]:
+def load_csv_dataset(
+    path: Path,
+    max_samples: Optional[int] = None
+) -> List[Dict[str, Any]]:
     """
     Load CSV dataset (simple: first column = input, second = label).
 
@@ -392,7 +413,10 @@ def load_csv_dataset(path: Path, max_samples: Optional[int] = None) -> List[Dict
     return items
 
 
-def load_dataset(path: Path, max_samples: Optional[int] = None) -> List[Dict]:
+def load_dataset(
+    path: Path,
+    max_samples: Optional[int] = None
+) -> List[Dict[str, Any]]:
     """
     Auto-detect and load dataset (JSONL, JSON, or CSV).
 
@@ -416,7 +440,7 @@ def load_dataset(path: Path, max_samples: Optional[int] = None) -> List[Dict]:
         # Try to detect by content
         try:
             return load_jsonl_dataset(path, max_samples)
-        except Exception:
+        except (ValueError, OSError):
             return load_csv_dataset(path, max_samples)
 
 
@@ -496,7 +520,7 @@ class AggregatedResults:
         with results_file.open("w") as f:
             json.dump([r.to_dict() for r in self.results], f, indent=2)
 
-        logger.info(f"Aggregated results saved to {output_dir}")
+        logger.info("Aggregated results saved to %s", output_dir)
 
 
 # ============================================================================
@@ -523,11 +547,17 @@ class QualityThresholds:
         failures = []
         metrics = result.metrics
 
-        if metrics.accuracy is not None and metrics.accuracy < self.min_accuracy:
+        if (
+            metrics.accuracy is not None
+            and metrics.accuracy < self.min_accuracy
+        ):
             failures.append(
                 f"Accuracy {metrics.accuracy:.3f} < {self.min_accuracy}")
 
-        if metrics.precision is not None and metrics.precision < self.min_precision:
+        if (
+            metrics.precision is not None
+            and metrics.precision < self.min_precision
+        ):
             failures.append(
                 f"Precision {metrics.precision:.3f} < {self.min_precision}")
 
@@ -537,13 +567,21 @@ class QualityThresholds:
         if metrics.f1_score is not None and metrics.f1_score < self.min_f1:
             failures.append(f"F1 {metrics.f1_score:.3f} < {self.min_f1}")
 
-        if metrics.response_time_ms is not None and metrics.response_time_ms > self.max_response_time_ms:
+        if metrics.response_time_ms is not None and (
+            metrics.response_time_ms > self.max_response_time_ms
+        ):
             failures.append(
-                f"Response time {metrics.response_time_ms:.1f}ms > {self.max_response_time_ms}ms")
+                f"Response time {metrics.response_time_ms:.1f}ms > "
+                f"{self.max_response_time_ms}ms"
+            )
 
-        if metrics.determinism is not None and metrics.determinism < self.min_determinism:
+        if metrics.determinism is not None and (
+            metrics.determinism < self.min_determinism
+        ):
             failures.append(
-                f"Determinism {metrics.determinism:.3f} < {self.min_determinism}")
+                f"Determinism {metrics.determinism:.3f} < "
+                f"{self.min_determinism}"
+            )
 
         return len(failures) == 0, failures
 
@@ -552,7 +590,9 @@ class QualityThresholds:
 # Logging & Diagnostics
 # ============================================================================
 
-def setup_evaluation_logging(log_file: Optional[Path] = None) -> logging.Logger:
+def setup_evaluation_logging(
+    log_file: Optional[Path] = None
+) -> logging.Logger:
     """
     Setup logging for evaluation scripts.
 
@@ -562,8 +602,8 @@ def setup_evaluation_logging(log_file: Optional[Path] = None) -> logging.Logger:
     Returns:
         Logger instance
     """
-    logger = logging.getLogger("evaluation")
-    logger.setLevel(logging.DEBUG)
+    eval_logger = logging.getLogger("evaluation")
+    eval_logger.setLevel(logging.DEBUG)
 
     # Console handler
     console_handler = logging.StreamHandler()
@@ -572,7 +612,7 @@ def setup_evaluation_logging(log_file: Optional[Path] = None) -> logging.Logger:
         "[%(name)s] %(asctime)s - %(levelname)s - %(message)s"
     )
     console_handler.setFormatter(formatter)
-    logger.addHandler(console_handler)
+    eval_logger.addHandler(console_handler)
 
     # File handler (if provided)
     if log_file:
@@ -580,6 +620,6 @@ def setup_evaluation_logging(log_file: Optional[Path] = None) -> logging.Logger:
         file_handler = logging.FileHandler(log_file)
         file_handler.setLevel(logging.DEBUG)
         file_handler.setFormatter(formatter)
-        logger.addHandler(file_handler)
+        eval_logger.addHandler(file_handler)
 
-    return logger
+    return eval_logger

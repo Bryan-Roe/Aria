@@ -1658,9 +1658,9 @@ Always include at least one movement or action tag when relevant."""
             'success': True,
             'provider': provider_name or 'unknown',
         }
-
-
-def generate_tags_ai(command: str) -> List[str]:
+    except Exception as e:
+        logger.error(f"Error generating tags with AI: {e}")
+        return {'response_text': '', 'tags': [], 'success': False, 'provider': 'error'}
     """Generate tags using AI model"""
     if MODEL is None:
         return []
