@@ -1,9 +1,10 @@
-.PHONY: help run stop logs status restart healthcheck clean install docker-build docker-run docker-stop docker-logs docker-shell
+.PHONY: help run stop logs status restart healthcheck clean install docker-build docker-run docker-stop docker-logs docker-shell k8s-apply k8s-delete k8s-status k8s-logs
 
 PORT ?= 5050
 WORKERS ?= 2
 IMAGE_NAME ?= quantum-ai-api
 CONTAINER_NAME ?= quantum-ai-api
+K8S_NAMESPACE ?= default
 
 help:
 	@echo "Quantum AI API - Makefile targets:"
@@ -25,9 +26,16 @@ help:
 	@echo "  make docker-logs  - Tail Docker logs"
 	@echo "  make docker-shell - Shell into container"
 	@echo ""
+	@echo "Kubernetes:"
+	@echo "  make k8s-apply   - Deploy to Kubernetes"
+	@echo "  make k8s-delete  - Remove from Kubernetes"
+	@echo "  make k8s-status  - Check K8s deployment status"
+	@echo "  make k8s-logs    - Tail K8s pod logs"
+	@echo ""
 	@echo "Environment variables:"
 	@echo "  PORT=$(PORT)     - API port"
 	@echo "  WORKERS=$(WORKERS) - Gunicorn workers"
+	@echo "  K8S_NAMESPACE=$(K8S_NAMESPACE) - K8s namespace"
 
 run:
 	@echo "🚀 Starting Quantum AI API on port $(PORT) with $(WORKERS) workers..."
@@ -122,3 +130,24 @@ docker-logs:
 docker-shell:
 	@echo "🐚 Opening shell in container..."
 	@docker exec -it $(CONTAINER_NAME) /bin/bash
+
+# Kubernetes targets
+k8s-apply:
+	@echo "☸️  Deploying to Kubernetes (namespace: $(K8S_NAMESPACE))..."
+	@kubectl create namespace $(K8S_NAMESPACE) --dry-run=client -o yaml | kubectl apply -f -
+	@kubectl apply -f k8s/ -n $(K8S_NAMESPACE)
+	@echo "✅ Deployed to Kubernetes"
+	@$(MAKE) k8s-status
+
+k8s-delete:
+	@echo "☸️  Removing from Kubernetes..."
+	@kubectl delete -f k8s/ -n $(K8S_NAMESPACE)
+	@echo "✅ Removed from Kubernetes"
+
+k8s-status:
+	@echo "☸️  Kubernetes Status:"
+	@kubectl get deployments,pods,services -n $(K8S_NAMESPACE) -l app=quantum-ai-api
+
+k8s-logs:
+	@echo "📋 Tailing Kubernetes logs (Ctrl+C to exit)..."
+	@kubectl logs -f -n $(K8S_NAMESPACE) -l app=quantum-ai-api --tail=50

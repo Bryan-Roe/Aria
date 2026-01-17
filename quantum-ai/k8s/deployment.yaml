@@ -1,0 +1,68 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: quantum-ai-api
+  labels:
+    app: quantum-ai-api
+    version: v1
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: quantum-ai-api
+  template:
+    metadata:
+      labels:
+        app: quantum-ai-api
+        version: v1
+    spec:
+      containers:
+      - name: api
+        image: quantum-ai-api:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 5050
+          name: http
+          protocol: TCP
+        env:
+        - name: HOST
+          value: "0.0.0.0"
+        - name: PORT
+          value: "5050"
+        - name: WORKERS
+          valueFrom:
+            configMapKeyRef:
+              name: quantum-ai-config
+              key: workers
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "1000m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 5050
+          initialDelaySeconds: 10
+          periodSeconds: 30
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 5050
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          timeoutSeconds: 3
+          failureThreshold: 2
+        volumeMounts:
+        - name: models
+          mountPath: /app/results
+          readOnly: true
+      volumes:
+      - name: models
+        persistentVolumeClaim:
+          claimName: quantum-ai-models-pvc
+      restartPolicy: Always

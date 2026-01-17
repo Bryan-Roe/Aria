@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: quantum-ai-config
+data:
+  workers: "2"
+  log_level: "info"
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: quantum-ai-models-pvc
+spec:
+  accessModes:
+    - ReadOnlyMany
+  resources:
+    requests:
+      storage: 1Gi
+  storageClassName: standard
