@@ -38,8 +38,8 @@ from typing import Dict, Any, List
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 DATA_OUT = REPO_ROOT / "data_out" / "auto_bootstrap"
-AUTOTRAIN_SCRIPT = REPO_ROOT / "scripts" / "autotrain.py"
-QUANTUM_AUTORUN_SCRIPT = REPO_ROOT / "scripts" / "quantum_autorun.py"
+AUTOTRAIN_SCRIPT = REPO_ROOT / "scripts" / "training" / "autotrain.py"
+QUANTUM_AUTORUN_SCRIPT = REPO_ROOT / "scripts" / "evaluation" / "quantum_autorun.py"
 
 PROJECTS = {
     "root": REPO_ROOT / "venv",
