@@ -66,6 +66,8 @@ Minimal Gunicorn command:
 pip install gunicorn
 cd quantum-ai
 gunicorn -w 2 -b 0.0.0.0:5050 fraud_detection_api:app
+# or
+# gunicorn -w 2 -b 0.0.0.0:5050 wsgi:app
 ```
 
 Notes:
