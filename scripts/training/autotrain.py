@@ -60,7 +60,7 @@ except Exception:  # noqa: BLE001
     yaml = None
 
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
+REPO_ROOT = Path(__file__).resolve().parents[2]
 DATA_OUT = REPO_ROOT / "data_out" / "autotrain"
 HF_TRAIN_SCRIPT = REPO_ROOT / "AI" / \
     "microsoft_phi-silica-3.6_v1" / "scripts" / "train_lora.py"
