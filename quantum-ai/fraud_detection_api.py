@@ -19,9 +19,10 @@ app = Flask(__name__)
 
 # Load model and scaler
 # Load retrained ionosphere model (compatible with current HybridQNN)
-MODEL_PATH = 'results/custom_model.pt'
-SCALER_PATH = 'results/custom_scaler.pkl'
-PCA_PATH = 'results/custom_pca.pkl'
+BASE_DIR = os.path.dirname(__file__)
+MODEL_PATH = os.path.join(BASE_DIR, 'results', 'custom_model.pt')
+SCALER_PATH = os.path.join(BASE_DIR, 'results', 'custom_scaler.pkl')
+PCA_PATH = os.path.join(BASE_DIR, 'results', 'custom_pca.pkl')
 
 if not os.path.exists(MODEL_PATH):
     raise FileNotFoundError(f"Model not found: {MODEL_PATH}")
