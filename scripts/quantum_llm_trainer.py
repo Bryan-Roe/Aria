@@ -54,7 +54,6 @@ except ImportError as e:
 
 try:
     from transformers import AutoModelForCausalLM, AutoTokenizer
-    from peft import LoraConfig, get_peft_model
     TRANSFORMERS_AVAILABLE = True
 except ImportError:
     logging.warning("Transformers not available - using mock implementations")
