@@ -166,7 +166,7 @@ python scripts/test_runner.py --unit  # Run unit tests (~30s)
 - Check availability: `python -c "import torch; print(torch.cuda.is_available())"`
 - Monitor usage: `watch -n 1 nvidia-smi`
 
-**Progressive training workflow** (see [GPU_TRAINING_SUMMARY.md](GPU_TRAINING_SUMMARY.md)):
+**Progressive training workflow:**
 ```bash
 # Phase 1: Quick test (5-15 min, 1 job)
 python scripts/training/progressive_training.py --phase quick
