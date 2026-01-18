@@ -256,7 +256,7 @@ To continuously improve aria movement AI:
 - `datasets/chat/aria_movement/train.json` - Training data
 - `datasets/chat/aria_movement/test.json` - Test data
 - `autotrain_aria.yaml` - Training configuration
-- `scripts/autotrain.py` - Training orchestrator
+- `scripts/training/autotrain.py` - Training orchestrator
 - `scripts/automate_aria_movement.py` - Full automation
 
 **Integration**:

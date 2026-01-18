@@ -184,10 +184,10 @@ jobs:
         run: pip install pyyaml pytest
       
       - name: Validate All Orchestrators
-        run: python scripts/ci_orchestrator.py --validate-all
+        run: python scripts/orchestrators/ci_orchestrator.py --validate-all
       
       - name: Run Unit Tests
-        run: python scripts/ci_orchestrator.py --quick-test
+        run: python scripts/orchestrators/ci_orchestrator.py --quick-test
       
       - name: Upload Results
         uses: actions/upload-artifact@v3
@@ -213,10 +213,10 @@ steps:
 - script: pip install pyyaml pytest
   displayName: 'Install dependencies'
 
-- script: python scripts/ci_orchestrator.py --validate-all
+- script: python scripts/orchestrators/ci_orchestrator.py --validate-all
   displayName: 'Validate orchestrators'
 
-- script: python scripts/ci_orchestrator.py --ci-pipeline
+- script: python scripts/orchestrators/ci_orchestrator.py --ci-pipeline
   displayName: 'Run CI pipeline'
 
 - task: PublishBuildArtifacts@1
@@ -381,7 +381,7 @@ data_out/
   "orchestrators": [
     {
       "name": "autotrain",
-      "script": "scripts/autotrain.py",
+      "script": "scripts/training/autotrain.py",
       "enabled": true,
       "schedule": "0 2 * * *",
       "priority": 1,

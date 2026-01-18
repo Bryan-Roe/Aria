@@ -16,7 +16,7 @@ This directory contains CI/CD workflows for the QAI repository.
 **Requirements**:
 - ✅ Python 3.11
 - ✅ requirements.txt + pyyaml
-- ✅ scripts/auto_bootstrap.py exists
+- ✅ scripts/orchestrators/auto_bootstrap.py exists
 
 ---
 
@@ -31,9 +31,9 @@ This directory contains CI/CD workflows for the QAI repository.
 
 **Requirements**:
 - ✅ Python 3.11
-- ✅ scripts/ci_orchestrator.py
+- ✅ scripts/orchestrators/ci_orchestrator.py
 - ✅ scripts/test_runner.py
-- ✅ scripts/autotrain.py
+- ✅ scripts/training/autotrain.py
 
 ---
 
@@ -142,12 +142,12 @@ Optional (for Azure workflows):
 
 ### Validate Auto Bootstrap
 ```bash
-python scripts/auto_bootstrap.py
+python scripts/orchestrators/auto_bootstrap.py
 ```
 
 ### Run CI Orchestrator
 ```bash
-python scripts/ci_orchestrator.py --validate-all
+python scripts/orchestrators/ci_orchestrator.py --validate-all
 python scripts/test_runner.py --unit
 python scripts/test_runner.py --integration
 ```
@@ -165,8 +165,8 @@ pytest ../tests/test_aria_server.py -v
 
 ### Validate Training Config
 ```bash
-python scripts/autotrain.py --dry-run
-python scripts/quantum_autorun.py --dry-run
+python scripts/training/autotrain.py --dry-run
+python scripts/evaluation/quantum_autorun.py --dry-run
 ```
 
 ## Troubleshooting

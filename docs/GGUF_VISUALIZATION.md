@@ -361,7 +361,7 @@ Both tools share the same GGUF parsing logic, so format changes only need to be 
 
 - **Export Script**: `scripts/export_quantum_to_gguf.py` - Creates GGUF files
 - **Model Guide**: `data_out/GGUF_MODEL_GUIDE.md` - Usage documentation
-- **Training Scripts**: `scripts/autotrain.py` - Model training workflows
+- **Training Scripts**: `scripts/training/autotrain.py` - Model training workflows
 
 ## 🤝 Contributing
 

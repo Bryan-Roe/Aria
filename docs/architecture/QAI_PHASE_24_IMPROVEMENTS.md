@@ -388,7 +388,7 @@ python scripts/backup_manager.py create \
 
 ```bash
 # Terminal 1: Start training
-python scripts/autotrain.py --job phi35_mixed_chat
+python scripts/training/autotrain.py --job phi35_mixed_chat
 
 # Terminal 2: Monitor with notifications (optional)
 python scripts/notification_system.py \
@@ -562,7 +562,7 @@ updateNotificationUI()
 
 ### Training Pipeline
 
-**AutoTrain** (`scripts/autotrain.py`):
+**AutoTrain** (`scripts/training/autotrain.py`):
 ```python
 # Add notification support
 from scripts.notification_system import NotificationManager
@@ -578,25 +578,25 @@ else:
     notifier.notify_job_failed(job_name, error)
 ```
 
-**Quantum AutoRun** (`scripts/quantum_autorun.py`):
+**Quantum AutoRun** (`scripts/evaluation/quantum_autorun.py`):
 - Notifications for quantum job submissions
 - Azure Quantum workspace connection status
 - Job completion alerts (especially for paid QPU runs)
 
-**Evaluation AutoRun** (`scripts/evaluation_autorun.py`):
+**Evaluation AutoRun** (`scripts/evaluation/evaluation_autorun.py`):
 - Notify when evaluation completes
 - Perplexity threshold alerts
 - Best model identification
 
 ### CI/CD Pipeline
 
-**CI Orchestrator** (`scripts/ci_orchestrator.py`):
+**CI Orchestrator** (`scripts/orchestrators/ci_orchestrator.py`):
 ```bash
 # Create backup before CI run
 python scripts/backup_manager.py create --name pre_ci_$(date +%Y%m%d_%H%M%S)
 
 # Run CI pipeline
-python scripts/ci_orchestrator.py --ci-pipeline
+python scripts/orchestrators/ci_orchestrator.py --ci-pipeline
 
 # On success: notification
 # On failure: notification + restore from backup

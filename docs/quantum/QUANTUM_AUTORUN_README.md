@@ -12,7 +12,7 @@ A lightweight orchestrator to automate quantum training runs using `quantum-ai/t
 
 ## Files
 
-- `scripts/quantum_autorun.py` – the orchestrator
+- `scripts/evaluation/quantum_autorun.py` – the orchestrator
 - `quantum_autorun.yaml` – declarative job definitions
 - Outputs under `data_out/quantum_autorun/`
   - `<job>/<timestamp>/stdout.log`

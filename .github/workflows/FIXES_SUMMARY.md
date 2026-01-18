@@ -42,7 +42,7 @@
 - Removed deploy job (can be added later when script exists)
 
 ### 6. Path Correction
-**Issue**: Workflow referenced `scripts/autotrain.py` but actual location is `scripts/training/autotrain.py`
+**Issue**: Workflow referenced `scripts/training/autotrain.py` but actual location is `scripts/training/autotrain.py`
 
 **Fixed in**:
 - `.github/workflows/ci-pipeline.yml`
@@ -56,8 +56,8 @@ GitHub Actions workflows should run successfully.
 ```
 
 ### Files Validated
-- ✅ scripts/auto_bootstrap.py
-- ✅ scripts/ci_orchestrator.py
+- ✅ scripts/orchestrators/auto_bootstrap.py
+- ✅ scripts/orchestrators/ci_orchestrator.py
 - ✅ scripts/test_runner.py
 - ✅ scripts/training/autotrain.py
 - ✅ aria_web/server.py
@@ -76,12 +76,12 @@ GitHub Actions workflows should run successfully.
 
 ### Test Auto Validation
 ```bash
-python scripts/auto_bootstrap.py
+python scripts/orchestrators/auto_bootstrap.py
 ```
 
 ### Test CI Pipeline
 ```bash
-python scripts/ci_orchestrator.py --validate-all
+python scripts/orchestrators/ci_orchestrator.py --validate-all
 python scripts/test_runner.py --unit
 python scripts/test_runner.py --integration
 python scripts/training/autotrain.py --dry-run

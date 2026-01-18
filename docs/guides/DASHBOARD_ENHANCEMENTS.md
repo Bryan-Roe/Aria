@@ -19,7 +19,7 @@
 - Visual feedback: "Cancelling..." → "Cancelled"
 - Available in both desktop table and mobile card views
 
-**Training Script (`scripts/autotrain.py`):**
+**Training Script (`scripts/training/autotrain.py`):**
 - Writes PID to file after subprocess spawns
 - Cleans up PID file automatically on job completion
 - PID file location: `data_out/autotrain/<job_name>.pid`

@@ -6,8 +6,8 @@ on:
     paths:
       - 'autotrain.yaml'
       - 'quantum_autorun.yaml'
-      - 'scripts/autotrain.py'
-      - 'scripts/quantum_autorun.py'
+      - 'scripts/training/autotrain.py'
+      - 'scripts/evaluation/quantum_autorun.py'
       - 'AI/**'
       - 'quantum-ai/**'
   schedule:
@@ -33,7 +33,7 @@ jobs:
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
           pip install pyyaml
       - name: Auto bootstrap (env + orchestrator validation)
-        run: python scripts/auto_bootstrap.py
+        run: python scripts/orchestrators/auto_bootstrap.py
       - name: Upload status artifacts
         uses: actions/upload-artifact@v4
         with:

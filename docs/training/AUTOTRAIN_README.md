@@ -115,7 +115,7 @@ python .\scripts\autotrain.py
 ## CLI Reference
 
 ```bash
-python scripts/autotrain.py [OPTIONS]
+python scripts/training/autotrain.py [OPTIONS]
 
 Options:
   --config PATH      Path to autotrain.yaml (default: autotrain.yaml at repo root)

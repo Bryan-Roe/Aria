@@ -33,7 +33,7 @@ from email.message import EmailMessage
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
+REPO_ROOT = Path(__file__).resolve().parents[2]
 DATA_OUT = REPO_ROOT / "data_out"
 DEPLOY_DIR = REPO_ROOT / "deployed_models"
 REGISTRY_FILE = DEPLOY_DIR / "model_registry.json"
@@ -112,7 +112,7 @@ class ModelDeployer:
 
     def send_notification(self, subject, body, config=None):
         import yaml
-        cfg_path = Path(__file__).resolve().parents[1] / "config" / "notification_config.yaml"
+        cfg_path = Path(__file__).resolve().parents[2] / "config" / "notification_config.yaml"
         if cfg_path.exists():
             with open(cfg_path) as f:
                 config = yaml.safe_load(f)

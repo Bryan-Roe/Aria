@@ -205,7 +205,7 @@ print(f"Logged run: {run_id}")
 
 ### Orchestrator Integration
 
-Modify `scripts/quantum_autorun.py` and `scripts/autotrain.py` to log runs:
+Modify `scripts/evaluation/quantum_autorun.py` and `scripts/training/autotrain.py` to log runs:
 
 ```python
 # Add to quantum_autorun.py after successful training

@@ -5,7 +5,7 @@ version: 1
 
 orchestrators:
   - name: autotrain
-    script: scripts/autotrain.py
+    script: scripts/training/autotrain.py
     enabled: true
     schedule: "0 2 * * *"  # Daily at 2 AM
     priority: 1
@@ -14,7 +14,7 @@ orchestrators:
     dependencies: []
     
   - name: quantum_autorun
-    script: scripts/quantum_autorun.py
+    script: scripts/evaluation/quantum_autorun.py
     enabled: true
     schedule: "0 4 * * *"  # Daily at 4 AM
     priority: 2
@@ -23,7 +23,7 @@ orchestrators:
     dependencies: []
     
   - name: evaluation_autorun
-    script: scripts/evaluation_autorun.py
+    script: scripts/evaluation/evaluation_autorun.py
     enabled: true
     schedule: "0 6 * * *"  # Daily at 6 AM after training
     priority: 3
@@ -32,7 +32,7 @@ orchestrators:
     dependencies: [autotrain, quantum_autorun]  # Wait for training to complete
     
   - name: autonomous_training
-    script: scripts/autonomous_training_orchestrator.py
+    script: scripts/training/autonomous_training_orchestrator.py
     enabled: false  # Enable for continuous learning
     schedule: "continuous"  # Run continuously
     priority: 4

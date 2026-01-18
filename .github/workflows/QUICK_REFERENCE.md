@@ -15,14 +15,14 @@
    - Updated action versions v4 → v5
 
 3. `.github/workflows/ci-pipeline.yml`
-   - Fixed script path: `scripts/autotrain.py` → `scripts/training/autotrain.py`
+   - Fixed script path: `scripts/training/autotrain.py` → `scripts/training/autotrain.py`
    - Simplified train job to use dry-run
    - Removed non-existent deploy job
 
 #### Supporting Scripts
-4. `scripts/auto_bootstrap.py`
-   - Fixed AUTOTRAIN_SCRIPT path: `scripts/autotrain.py` → `scripts/training/autotrain.py`
-   - Fixed QUANTUM_AUTORUN_SCRIPT path: `scripts/quantum_autorun.py` → `scripts/evaluation/quantum_autorun.py`
+4. `scripts/orchestrators/auto_bootstrap.py`
+   - Fixed AUTOTRAIN_SCRIPT path: `scripts/training/autotrain.py`
+   - Fixed QUANTUM_AUTORUN_SCRIPT path: `scripts/evaluation/quantum_autorun.py`
 
 5. `scripts/training/autotrain.py`
    - Fixed REPO_ROOT calculation: `parents[1]` → `parents[2]` (script is 2 levels deep)
@@ -54,13 +54,13 @@ python scripts/validate_workflows.py
 
 ### Test Auto Validation Workflow
 ```bash
-python scripts/auto_bootstrap.py
+python scripts/orchestrators/auto_bootstrap.py
 cat data_out/auto_bootstrap/status_summary.json
 ```
 
 ### Test CI Pipeline Steps
 ```bash
-python scripts/ci_orchestrator.py --validate-all
+python scripts/orchestrators/ci_orchestrator.py --validate-all
 python scripts/test_runner.py --unit
 python scripts/training/autotrain.py --dry-run
 ```
@@ -92,9 +92,9 @@ pytest tests/test_aria_server.py -v
 ### Script Locations
 - **AutoTrain**: `scripts/training/autotrain.py`
 - **Quantum AutoRun**: `scripts/evaluation/quantum_autorun.py`
-- **CI Orchestrator**: `scripts/ci_orchestrator.py`
+- **CI Orchestrator**: `scripts/orchestrators/ci_orchestrator.py`
 - **Test Runner**: `scripts/test_runner.py`
-- **Bootstrap**: `scripts/auto_bootstrap.py`
+- **Bootstrap**: `scripts/orchestrators/auto_bootstrap.py`
 
 ### Config Files
 - **AutoTrain**: `config/training/autotrain.yaml`

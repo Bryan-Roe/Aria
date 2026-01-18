@@ -12,9 +12,9 @@ Features:
 - Comprehensive logging and status tracking
 
 Usage:
-    python scripts/train_and_promote.py --quick
-    python scripts/train_and_promote.py --dataset datasets/chat/mixed_chat --epochs 3
-    python scripts/train_and_promote.py --config training_config.yaml --auto-promote
+    python scripts/training/train_and_promote.py --quick
+    python scripts/training/train_and_promote.py --dataset datasets/chat/mixed_chat --epochs 3
+    python scripts/training/train_and_promote.py --config training_config.yaml --auto-promote
 """
 from __future__ import annotations
 
@@ -29,7 +29,7 @@ from typing import Any, Dict, List, Optional
 
 import yaml
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
+REPO_ROOT = Path(__file__).resolve().parents[2]
 DATA_OUT = REPO_ROOT / "data_out" / "train_and_promote"
 
 

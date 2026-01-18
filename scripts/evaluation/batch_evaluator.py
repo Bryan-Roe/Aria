@@ -34,7 +34,7 @@ from typing import Any, Dict, List, Optional
 
 import yaml
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
+REPO_ROOT = Path(__file__).resolve().parents[2]
 DATA_OUT = REPO_ROOT / "data_out" / "batch_evaluator"
 
 

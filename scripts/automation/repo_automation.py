@@ -127,8 +127,8 @@ class RepoAutomation:
             ),
             "quantum": ComponentConfig(
                 name="Quantum Computing Workflows",
-                script="scripts/quantum_autorun.py",
-                command=["python3", "scripts/quantum_autorun.py"],
+                script="scripts/evaluation/quantum_autorun.py",
+                command=["python3", "scripts/evaluation/quantum_autorun.py"],
                 auto_restart=False,
                 health_check_interval=600,
                 enabled=False,  # Will be enabled if quantum_autorun.yaml exists
@@ -136,8 +136,8 @@ class RepoAutomation:
             ),
             "evaluation": ComponentConfig(
                 name="Model Evaluation System",
-                script="scripts/evaluation_autorun.py",
-                command=["python3", "scripts/evaluation_autorun.py"],
+                script="scripts/evaluation/evaluation_autorun.py",
+                command=["python3", "scripts/evaluation/evaluation_autorun.py"],
                 auto_restart=False,
                 health_check_interval=300,
                 dependencies=["training"],

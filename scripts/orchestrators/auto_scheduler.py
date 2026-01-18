@@ -43,7 +43,7 @@ try:
 except ImportError:
     croniter = None  # Optional dependency
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
+REPO_ROOT = Path(__file__).resolve().parents[2]
 DATA_OUT = REPO_ROOT / "data_out" / "auto_scheduler"
 SCHEDULE_FILE = DATA_OUT / "schedule.json"
 STATE_FILE = DATA_OUT / "state.json"
@@ -67,7 +67,7 @@ class ScheduledJob:
 class AutoScheduler:
     def send_notification(self, subject, body, config=None):
         import yaml
-        cfg_path = Path(__file__).resolve().parents[1] / "config" / "notification_config.yaml"
+        cfg_path = Path(__file__).resolve().parents[2] / "config" / "notification_config.yaml"
         if cfg_path.exists():
             with open(cfg_path) as f:
                 config = yaml.safe_load(f)

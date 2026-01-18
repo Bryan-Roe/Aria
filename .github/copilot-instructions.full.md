@@ -43,8 +43,8 @@
 
 | Goal | Command (repo root) | Notes |
 |------|--------------------|-------|
-| Dry‑run any orchestrator | `python scripts/autotrain.py --dry-run` (or quantum_autorun, evaluation_autorun) | Validate config only |
-| Quick LoRA train & auto‑deploy | `python scripts/train_and_promote.py --quick --auto-promote` | Uses TinyLlama by default |
+| Dry‑run any orchestrator | `python scripts/training/autotrain.py --dry-run` (or quantum_autorun, evaluation_autorun) | Validate config only |
+| Quick LoRA train & auto‑deploy | `python scripts/training/train_and_promote.py --quick --auto-promote` | Uses TinyLlama by default |
 | Full multi‑model pipeline | `python scripts/automated_training_pipeline.py --quick` | Data → train → eval → ranking |
 | Start Functions host | `func host start` | Serves all `/api/*` endpoints |
 | Open web chat UI | Open `http://localhost:7071/api/chat-web` after host starts | - |
@@ -55,7 +55,7 @@
 
 ## 4️⃣ Quantum‑AI Guardrails
 
-- Simulate locally first: `python scripts/quantum_autorun.py --job local_simulator`.
+- Simulate locally first: `python scripts/evaluation/quantum_autorun.py --job local_simulator`.
 - Real QPU jobs require `azure_confirm_cost: true` in `quantum_autorun.yaml` **and** a cost estimate via `estimate_quantum_cost`.
 - MCP server entry point: `python quantum-ai/quantum_mcp_server.py` (tools: `create_quantum_circuit`, `simulate_quantum_circuit`, `submit_quantum_job`, `estimate_quantum_cost`).
 
@@ -111,7 +111,7 @@
 - High-signal files to read first:
   - `function_app.py` — HTTP endpoints and dynamic imports.
   - `shared/chat_providers.py` — provider abstraction and detection logic.
-  - `scripts/autotrain.py`, `scripts/quantum_autorun.py`, `scripts/evaluation_autorun.py` — orchestrators and status writing.
+  - `scripts/training/autotrain.py`, `scripts/evaluation/quantum_autorun.py`, `scripts/evaluation/evaluation_autorun.py` — orchestrators and status writing.
   - `autotrain.yaml`, `quantum_autorun.yaml`, `evaluation_autorun.yaml` — declarative job specs.
   - Health and observability: Application Insights integrates via `shared/telemetry.py`; optional Cosmos persistence via `shared/cosmos_client.py` (feature‑flagged). Failures are non-blocking; check `/api/ai/status` for env and pool saturation.
 

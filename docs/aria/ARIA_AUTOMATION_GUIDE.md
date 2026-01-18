@@ -357,13 +357,13 @@ workflows:
 
 ```bash
 # Start master orchestrator
-python3 scripts/master_orchestrator.py --workflow aria_full_stack
+python3 scripts/orchestrators/master_orchestrator.py --workflow aria_full_stack
 
 # Check status
-python3 scripts/master_orchestrator.py --status
+python3 scripts/orchestrators/master_orchestrator.py --status
 
 # Run as daemon
-python3 scripts/master_orchestrator.py --daemon
+python3 scripts/orchestrators/master_orchestrator.py --daemon
 ```
 
 ---

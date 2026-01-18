@@ -32,7 +32,7 @@ except Exception:  # pragma: no cover
     yaml = None  # Tests will provide simple configs; fail gracefully if missing
 
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
+REPO_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_CONFIG = REPO_ROOT / "quantum_autorun.yaml"
 STATUS_DIR = REPO_ROOT / "data_out" / "quantum_autorun"
 STATUS_FILE = STATUS_DIR / "status.json"

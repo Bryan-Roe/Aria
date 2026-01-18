@@ -35,7 +35,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
+REPO_ROOT = Path(__file__).resolve().parents[2]
 DATA_OUT = REPO_ROOT / "data_out" / "ci_orchestrator"
 
 
@@ -60,9 +60,9 @@ class CIOrchestrator:
         print("[ci] ========================================\n")
         
         jobs = [
-            ValidationJob("autotrain", [sys.executable, "scripts/autotrain.py", "--dry-run"]),
-            ValidationJob("quantum_autorun", [sys.executable, "scripts/quantum_autorun.py", "--dry-run"]),
-            ValidationJob("evaluation_autorun", [sys.executable, "scripts/evaluation_autorun.py", "--dry-run"]),
+            ValidationJob("autotrain", [sys.executable, "scripts/training/autotrain.py", "--dry-run"]),
+            ValidationJob("quantum_autorun", [sys.executable, "scripts/evaluation/quantum_autorun.py", "--dry-run"]),
+            ValidationJob("evaluation_autorun", [sys.executable, "scripts/evaluation/evaluation_autorun.py", "--dry-run"]),
         ]
         
         return self._run_parallel_jobs(jobs)

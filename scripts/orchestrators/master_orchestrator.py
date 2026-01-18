@@ -47,7 +47,7 @@ try:
 except Exception:
     psutil = None  # Optional, for resource monitoring
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
+REPO_ROOT = Path(__file__).resolve().parents[2]
 DATA_OUT = REPO_ROOT / "data_out" / "master_orchestrator"
 CONFIG_FILE = REPO_ROOT / "master_orchestrator.yaml"
 

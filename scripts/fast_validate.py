@@ -32,7 +32,7 @@ def quick_check_datasets() -> Dict[str, Any]:
 def quick_check_scripts() -> Dict[str, Any]:
     """Verify critical scripts exist without importing."""
     critical = [
-        "scripts/autotrain.py",
+        "scripts/training/autotrain.py",
         "scripts/test_runner.py",
         "AI/microsoft_phi-silica-3.6_v1/scripts/train_lora.py"
     ]

@@ -6,7 +6,7 @@ import sys
 from pathlib import Path
 
 # Paths relative to repo root
-REPO_ROOT = Path(__file__).resolve().parents[1]
+REPO_ROOT = Path(__file__).resolve().parents[2]
 LOCAL_TRAIN_DIR = REPO_ROOT / "AI" / "microsoft_phi-silica-3.6_v1" / "local_train"
 TRAIN_SCRIPT = LOCAL_TRAIN_DIR / "train_local.py"
 VENV_DIR = LOCAL_TRAIN_DIR / "venv"

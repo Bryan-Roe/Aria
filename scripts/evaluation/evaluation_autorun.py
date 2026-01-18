@@ -52,16 +52,16 @@ except Exception:  # noqa: BLE001
         return {"success": False, "skipped": True}
 
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
+REPO_ROOT = Path(__file__).resolve().parents[2]
 DATA_OUT = REPO_ROOT / "data_out" / "evaluation_autorun"
 
 # Evaluation scripts by model type
 EVAL_SCRIPTS = {
-    "lora": REPO_ROOT / "scripts" / "evaluate_lora_model.py",
-    "azure": REPO_ROOT / "scripts" / "evaluate_azure_model.py",
-    "openai": REPO_ROOT / "scripts" / "evaluate_openai_model.py",
-    "local": REPO_ROOT / "scripts" / "evaluate_local_model.py",
-    "quantum": REPO_ROOT / "scripts" / "evaluate_quantum_model.py",
+    "lora": REPO_ROOT / "scripts" / "evaluation" / "evaluate_lora_model.py",
+    "azure": REPO_ROOT / "scripts" / "evaluation" / "evaluate_azure_model.py",
+    "openai": REPO_ROOT / "scripts" / "evaluation" / "evaluate_openai_model.py",
+    "local": REPO_ROOT / "scripts" / "evaluation" / "evaluate_local_model.py",
+    "quantum": REPO_ROOT / "scripts" / "evaluation" / "evaluate_quantum_model.py",
 }
 
 # Supported metrics by model type

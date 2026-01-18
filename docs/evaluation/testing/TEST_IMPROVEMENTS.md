@@ -13,8 +13,8 @@ Comprehensive improvements to the test suite including bug fixes, new test files
   - Correcting positioning algorithm expectations
   - Implementing proper object cycling for theme-based naming
 - **test_evaluate_vision.py**: Fixed test data type issues (gts vs preds arrays)
-- **scripts/quantum_autorun.py**: Fixed Python path detection for Linux compatibility
-- **scripts/evaluation_autorun.py**: Removed deprecated datetime.utc usage
+- **scripts/evaluation/quantum_autorun.py**: Fixed Python path detection for Linux compatibility
+- **scripts/evaluation/evaluation_autorun.py**: Removed deprecated datetime.utc usage
 
 ### 2. New Comprehensive Test Files Created
 

@@ -318,7 +318,7 @@ visualize_gguf_simple.py  ← NEW!
 - `scripts/export_quantum_to_gguf.py` - Creates GGUF files
 - `data_out/GGUF_MODEL_GUIDE.md` - Usage guide for GGUF models
 - `quantum-ai/src/hybrid_qnn.py` - Model architecture
-- `scripts/autotrain.py` - Training pipeline
+- `scripts/training/autotrain.py` - Training pipeline
 
 ## 📅 Created
 

@@ -27,8 +27,8 @@ The database integration adds automatic logging of:
 - `.env` - Environment variable template
 
 ✅ **Script Patches**:
-- `scripts/quantum_autorun.py` - Logs quantum runs after success
-- `scripts/autotrain.py` - Logs LoRA runs after success
+- `scripts/evaluation/quantum_autorun.py` - Logs quantum runs after success
+- `scripts/training/autotrain.py` - Logs LoRA runs after success
 
 ## Files That Need Manual Editing
 

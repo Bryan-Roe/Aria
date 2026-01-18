@@ -320,7 +320,7 @@ if __name__ == "__main__":
 Automatically evaluate after training:
 
 ```python
-# In scripts/train_and_promote.py
+# In scripts/training/train_and_promote.py
 
 class TrainAndPromote:
     """Train model and optionally evaluate."""

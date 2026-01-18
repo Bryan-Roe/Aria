@@ -52,8 +52,8 @@ Highlights:
 
 ### Script Patches
 
-- **`scripts/quantum_autorun.py`** – Integrated `log_quantum_run_safe()` after successful runs
-- **`scripts/autotrain.py`** – Integrated `log_lora_run_safe()` after successful runs
+- **`scripts/evaluation/quantum_autorun.py`** – Integrated `log_quantum_run_safe()` after successful runs
+- **`scripts/training/autotrain.py`** – Integrated `log_lora_run_safe()` after successful runs
 - **`scripts/ingest_chat_logs_to_sql.py`** – Backfills chat logs & generates embeddings (NEW)
 
 ### Documentation & Tests

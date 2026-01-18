@@ -33,7 +33,7 @@ from pathlib import Path
 from typing import List, Dict, Any
 import logging
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
+REPO_ROOT = Path(__file__).resolve().parents[2]
 AUTOTRAIN = REPO_ROOT / "scripts" / "autotrain.py"
 EVAL_AUTORUN = REPO_ROOT / "scripts" / "evaluation_autorun.py"
 TRAIN_AND_EVAL_OUT = REPO_ROOT / "data_out" / "train_and_evaluate"

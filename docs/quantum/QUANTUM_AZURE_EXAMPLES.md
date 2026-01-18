@@ -249,11 +249,11 @@ jobs:
       - uses: actions/checkout@v3
       - name: Run quantum autorun dry-run
         run: |
-          python scripts/quantum_autorun.py --dry-run
+          python scripts/evaluation/quantum_autorun.py --dry-run
       
       - name: Run simulator tests only
         run: |
-          python scripts/quantum_autorun.py --job azure_ionq_simulator
+          python scripts/evaluation/quantum_autorun.py --job azure_ionq_simulator
 ```
 
 ## Advanced: Programmatic Job Submission
@@ -268,7 +268,7 @@ jobs = ["azure_sim_1", "azure_sim_2", "azure_sim_3"]
 
 results = []
 for job in jobs:
-    cmd = ["python", "scripts/quantum_autorun.py", "--job", job]
+    cmd = ["python", "scripts/evaluation/quantum_autorun.py", "--job", job]
     proc = subprocess.run(cmd, capture_output=True, text=True)
     results.append({
         "job": job,

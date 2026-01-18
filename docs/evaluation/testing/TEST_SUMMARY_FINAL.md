@@ -32,12 +32,12 @@ Successfully fixed, improved, and expanded the entire test suite for the QAI wor
    - Duplicate class implementations
    - Root cause: Code copy-paste during development
 
-2. ✅ **scripts/quantum_autorun.py** - Fixed Python path detection
+2. ✅ **scripts/evaluation/quantum_autorun.py** - Fixed Python path detection
    - Issue: Looking for `python` or `python.exe`
    - Fix: Now detects `python3.14` on Linux systems
    - Test: `test_quantum_autorun_unit.py::TestCommandBuilder::test_command_with_preset` now passes
 
-3. ✅ **scripts/evaluation_autorun.py** - Removed deprecated datetime usage
+3. ✅ **scripts/evaluation/evaluation_autorun.py** - Removed deprecated datetime usage
    - Issue: Using deprecated `datetime.utc`
    - Fix: Updated to current datetime API
 
@@ -318,8 +318,8 @@ pytest -m integration -v
 
 ### Code Fixes
 - aria_web/server.py (-300 lines of duplicate code)
-- scripts/quantum_autorun.py (1 line fix)
-- scripts/evaluation_autorun.py (1 line fix)
+- scripts/evaluation/quantum_autorun.py (1 line fix)
+- scripts/evaluation/evaluation_autorun.py (1 line fix)
 
 ### Test Files Fixed
 - test_aria_world_generation.py (5 test fixes)

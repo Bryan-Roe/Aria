@@ -16,8 +16,8 @@ All three orchestrators in the QAI workspace have been tested, validated, and co
 **Problem:** Orchestrators were using root venv instead of project-specific venvs, causing "dependencies not installed" errors.
 
 **Solution:**
-- Added `_venv_python_ml()` to `scripts/autotrain.py` → routes to `AI/microsoft_phi-silica-3.6_v1/venv/Scripts/python.exe`
-- Added `_venv_python_quantum()` to `scripts/quantum_autorun.py` → routes to `quantum-ai/venv/Scripts/python.exe`
+- Added `_venv_python_ml()` to `scripts/training/autotrain.py` → routes to `AI/microsoft_phi-silica-3.6_v1/venv/Scripts/python.exe`
+- Added `_venv_python_quantum()` to `scripts/evaluation/quantum_autorun.py` → routes to `quantum-ai/venv/Scripts/python.exe`
 
 **Impact:** Training jobs now execute with correct dependency isolation, preventing cross-contamination between quantum and ML environments.
 
@@ -154,8 +154,8 @@ Loading checkpoint shards: 100%|##########| 2/2 [00:05<00:00,  2.99s/it]
 ## Files Modified in This Session
 
 ### Core Orchestrators
-- `scripts/autotrain.py` - Added `_venv_python_ml()` function
-- `scripts/quantum_autorun.py` - Added `_venv_python_quantum()` function
+- `scripts/training/autotrain.py` - Added `_venv_python_ml()` function
+- `scripts/evaluation/quantum_autorun.py` - Added `_venv_python_quantum()` function
 - `AI/microsoft_phi-silica-3.6_v1/scripts/train_lora.py` - Enhanced error message
 
 ### Web Interface

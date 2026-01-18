@@ -67,7 +67,7 @@ Short & actionable summary for AI agents editing Aria — an interactive AI char
 ```bash
 # === AUTONOMOUS SYSTEMS (Self-Managing) ===
 # Start autonomous training (continuous 30-min cycles)
-nohup python scripts/autonomous_training_orchestrator.py > data_out/autonomous_training.log 2>&1 &
+nohup python scripts/training/autonomous_training_orchestrator.py > data_out/autonomous_training.log 2>&1 &
 
 # Trigger immediate cycle (skip 30-min wait)
 pkill -USR1 -f autonomous_training
@@ -100,13 +100,13 @@ python talk-to-ai/src/chat_cli.py --provider local --once "Hello"  # Smoke test
 python scripts/fast_validate.py              # Quick validation across all components
 
 # === ORCHESTRATORS (Manual Execution) ===
-python scripts/autotrain.py --dry-run         # Validate training config (12 jobs)
-python scripts/quantum_autorun.py --dry-run   # Validate quantum config
-python scripts/evaluation_autorun.py --dry-run # Validate evaluation config
+python scripts/training/autotrain.py --dry-run         # Validate training config (12 jobs)
+python scripts/evaluation/quantum_autorun.py --dry-run   # Validate quantum config
+python scripts/evaluation/evaluation_autorun.py --dry-run # Validate evaluation config
 
 # === TRAINING PIPELINES ===
 python scripts/automated_training_pipeline.py --quick  # Quick LoRA (TinyLlama)
-python scripts/train_and_promote.py --quick --auto-promote  # Train + auto-deploy
+python scripts/training/train_and_promote.py --quick --auto-promote  # Train + auto-deploy
 
 # === MCP & TOOLS ===
 python quantum-ai/quantum_mcp_server.py       # Start quantum MCP server
@@ -188,7 +188,7 @@ python scripts/training/progressive_training.py --all --auto-promote
 ## Critical Patterns
 
 **Autonomous/self-managing systems:**
-- `scripts/autonomous_training_orchestrator.py` — Continuous learning with 30-min cycles (infinite by default)
+- `scripts/training/autonomous_training_orchestrator.py` — Continuous learning with 30-min cycles (infinite by default)
   - Self-discovers datasets (scans `datasets/quantum`, `datasets/chat`, `datasets/massive_quantum`)
   - Self-optimizes: Adaptive epochs `[25, 50, 100, 200]` based on performance history
   - Self-heals: Graceful error handling, continues on failure, logs to `data_out/autonomous_training.log`
@@ -268,12 +268,12 @@ async def run_single_cycle(cycle_number):
 |--------|---------|
 | Add/modify API endpoint | `function_app.py` |
 | Chat provider logic | `talk-to-ai/src/chat_providers.py` (re-exported by `shared/chat_providers.py`) |
-| Training orchestration | `scripts/autotrain.py` + `config/training/autotrain.yaml` |
-| Autonomous training behavior | `scripts/autonomous_training_orchestrator.py` + `config/autonomous_training.yaml` |
+| Training orchestration | `scripts/training/autotrain.py` + `config/training/autotrain.yaml` |
+| Autonomous training behavior | `scripts/training/autonomous_training_orchestrator.py` + `config/autonomous_training.yaml` |
 | Master orchestrator (schedules/coordination) | `scripts/automation/master_orchestrator.py` + `config/master_orchestrator.yaml` |
 | Aria automation | `scripts/automation/aria_automation.py` (server + training + health monitoring) |
 | Full repo automation | `scripts/automation/repo_automation.py` (all components + backups + notifications) |
-| Quantum jobs | `scripts/quantum_autorun.py` + `quantum_autorun.yaml` (root) or `config/quantum/quantum_autorun.yaml` |
+| Quantum jobs | `scripts/evaluation/quantum_autorun.py` + `quantum_autorun.yaml` (root) or `config/quantum/quantum_autorun.yaml` |
 | MCP server tools | `quantum-ai/quantum_mcp_server.py` |
 | Shared DB/telemetry | `shared/sql_engine.py`, `shared/telemetry.py`, `shared/cosmos_client.py` |
 | Aria character interface | `aria_web/index.html`, `aria_web/aria_controller.js`, `aria_web/server.py` |
@@ -365,7 +365,7 @@ python talk-to-ai/src/chat_cli.py --provider lora --adapter-path deployed_models
 **Training troubleshooting:**
 ```bash
 # Validate config without execution
-python scripts/autotrain.py --dry-run
+python scripts/training/autotrain.py --dry-run
 
 # Check for GPU availability
 python -c "import torch; print(f'CUDA available: {torch.cuda.is_available()}')"

@@ -206,7 +206,7 @@ provider = LoraLocalProvider(
 
 ### Existing Models
 
-**Quantum models**: Automatically benefit from trainer improvements when using `train_custom_dataset.py` or `scripts/quantum_autorun.py`
+**Quantum models**: Automatically benefit from trainer improvements when using `train_custom_dataset.py` or `scripts/evaluation/quantum_autorun.py`
 
 **Chat models**: Update initialization:
 ```python

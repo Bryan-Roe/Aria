@@ -44,7 +44,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import List, Dict, Any
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
+REPO_ROOT = Path(__file__).resolve().parents[2]
 SUMMARY_DIR = REPO_ROOT / "data_out" / "automated_training"
 AUTO_DATA_SCRIPT = REPO_ROOT / "scripts" / "auto_data_train.py"
 STATUS_FILE = REPO_ROOT / "data_out" / "parallel_training" / "status.json"

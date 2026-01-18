@@ -17,10 +17,10 @@
 3. **test_evaluate_vision.py** - Fixed 1 failing test
    - Resolved ground truth/predictions array type mismatch
 
-4. **scripts/quantum_autorun.py** - Fixed 1 failing test
+4. **scripts/evaluation/quantum_autorun.py** - Fixed 1 failing test
    - Python path detection now works on Linux (uses `python3.14` instead of `python`)
 
-5. **scripts/evaluation_autorun.py** - Fixed deprecation warning
+5. **scripts/evaluation/evaluation_autorun.py** - Fixed deprecation warning
    - Removed deprecated `datetime.utc`
 
 ### ✅ Created 4 New Test Files (280+ new tests)
@@ -166,8 +166,8 @@ pytest -m "not slow and not azure" -v
 
 ### Bug Fixes
 - aria_web/server.py (removed 300+ lines)
-- scripts/quantum_autorun.py (1 line change)
-- scripts/evaluation_autorun.py (1 line change)
+- scripts/evaluation/quantum_autorun.py (1 line change)
+- scripts/evaluation/evaluation_autorun.py (1 line change)
 
 ### Test Files Fixed
 - test_aria_world_generation.py (assertion fixes)
