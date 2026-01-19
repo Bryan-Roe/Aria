@@ -1,0 +1,927 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LLM Maker - AI Tool Creation Studio</title>
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            background-size: 200% 200%;
+            animation: gradientShift 15s ease infinite;
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px 40px;
+            text-align: center;
+            position: relative;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.95;
+            margin-bottom: 15px;
+        }
+
+        .header-actions {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .header-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.9em;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .header-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            border-color: rgba(255, 255, 255, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            padding: 30px;
+        }
+
+        @media (max-width: 1024px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .card h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+            border-bottom: 2px solid #f093fb;
+            padding-bottom: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #555;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s, box-shadow 0.3s;
+            font-family: inherit;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 10px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .btn-small {
+            padding: 8px 16px;
+            font-size: 0.9em;
+        }
+
+        .status-message {
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            display: none;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .status-message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status-message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .status-message.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        .tools-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .tool-item {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            transition: border-color 0.3s, background 0.3s;
+        }
+
+        .tool-item:hover {
+            border-color: #667eea;
+            background: #f0f3ff;
+        }
+
+        .tool-item h3 {
+            color: #667eea;
+            margin-bottom: 8px;
+            font-size: 1.2em;
+        }
+
+        .tool-item p {
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .tool-meta {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+            font-size: 0.9em;
+        }
+
+        .tool-meta span {
+            background: white;
+            padding: 4px 10px;
+            border-radius: 5px;
+            color: #666;
+        }
+
+        .tool-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 12px;
+        }
+
+        .code-preview {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            max-height: 300px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            margin-top: 15px;
+            display: none;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .stat-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .stat-box .number {
+            font-size: 2em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .stat-box .label {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #999;
+        }
+
+        .empty-state svg {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        .param-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr auto;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .param-row input {
+            margin: 0;
+        }
+
+        .btn-icon {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-icon:hover {
+            background: #c82333;
+        }
+
+        .add-param-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9em;
+            margin-top: 10px;
+        }
+
+        .add-param-btn:hover {
+            background: #218838;
+        }
+
+        .integration-box {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .integration-box h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+        }
+
+        .code-snippet {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 12px;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85em;
+            overflow-x: auto;
+            margin-top: 10px;
+            position: relative;
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8em;
+        }
+
+        .copy-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .example-pills {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+
+        .example-pill {
+            background: #667eea;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.85em;
+            transition: all 0.2s;
+        }
+
+        .example-pill:hover {
+            background: #764ba2;
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🤖 LLM Maker - AI Tool Creation Studio</h1>
+            <p>Create, test, and manage custom AI tools with natural language</p>
+            <div class="header-actions">
+                <a href="/website-maker" class="header-btn">
+                    🌐 Website Maker
+                </a>
+                <a href="#integration-guide" class="header-btn" onclick="scrollToIntegration(); return false;">
+                    📚 Integration Guide
+                </a>
+                <a href="#api-docs" class="header-btn" onclick="showAPIInfo(); return false;">
+                    💻 API Docs
+                </a>
+                <a href="#examples" class="header-btn" onclick="showExamples(); return false;">
+                    💡 Examples
+                </a>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <!-- Create Tool Card -->
+            <div class="card">
+                <h2>✨ Create New Tool</h2>
+                <form id="createToolForm">
+                    <div class="form-group">
+                        <label for="toolName">Tool Name *</label>
+                        <input type="text" id="toolName" placeholder="e.g., calculate_fibonacci" required>
+                        <div class="example-pills" style="margin-top: 8px;">
+                            <span class="example-pill" onclick="fillExample('fibonacci')">🔢 Fibonacci</span>
+                            <span class="example-pill" onclick="fillExample('palindrome')">🔄 Palindrome</span>
+                            <span class="example-pill" onclick="fillExample('temperature')">🌡️ Temperature</span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="toolDescription">Description *</label>
+                        <textarea id="toolDescription" placeholder="Describe what your tool should do..." required></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Parameters</label>
+                        <div id="parametersContainer">
+                            <div class="param-row">
+                                <input type="text" placeholder="Parameter name" class="param-name">
+                                <input type="text" placeholder="Type (e.g., int, str)" class="param-type">
+                                <button type="button" class="btn-icon" onclick="removeParam(this)">✕</button>
+                            </div>
+                        </div>
+                        <button type="button" class="add-param-btn" onclick="addParam()">+ Add Parameter</button>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="returnType">Return Type</label>
+                        <input type="text" id="returnType" placeholder="e.g., int, str, dict" value="Any">
+                    </div>
+
+                    <button type="submit" class="btn" id="createBtn">
+                        <span id="createBtnText">Create Tool</span>
+                        <span class="loading" id="createLoading" style="display: none;"></span>
+                    </button>
+
+                    <div id="createStatus" class="status-message"></div>
+                </form>
+            </div>
+
+            <!-- Stats Card -->
+            <div class="card">
+                <h2>📊 Statistics</h2>
+                <div class="stats-grid">
+                    <div class="stat-box">
+                        <div class="number" id="totalTools">0</div>
+                        <div class="label">Total Tools</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="number" id="validatedTools">0</div>
+                        <div class="label">Validated</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="number" id="totalExecutions">0</div>
+                        <div class="label">Executions</div>
+                    </div>
+                </div>
+
+                <div class="form-group" style="margin-top: 30px;">
+                    <button class="btn btn-secondary" onclick="loadTools()">🔄 Refresh Tools</button>
+                </div>
+
+                <!-- Integration Guide Section -->
+                <div class="integration-box" id="integration-guide">
+                    <h3>📚 Quick Integration</h3>
+                    <p style="font-size: 0.9em; color: #666; margin-bottom: 15px;">
+                        Use these endpoints to integrate LLM Maker into your apps:
+                    </p>
+                    
+                    <strong style="font-size: 0.9em; display: block; margin-top: 15px; color: #555;">List all tools:</strong>
+                    <div class="code-snippet">
+                        <button class="copy-btn" onclick="copyToClipboard('GET http://localhost:8090/api/tools')">Copy</button>
+                        <code>GET http://localhost:8090/api/tools</code>
+                    </div>
+
+                    <strong style="font-size: 0.9em; display: block; margin-top: 15px; color: #555;">Create a tool:</strong>
+                    <div class="code-snippet">
+                        <button class="copy-btn" onclick="copyToClipboard(`fetch('/api/tools', {
+  method: 'POST',
+  headers: {'Content-Type': 'application/json'},
+  body: JSON.stringify({
+    name: 'my_tool',
+    description: 'What it does',
+    parameters: {'x': 'int'},
+    return_type: 'int'
+  })
+})`)">Copy</button>
+                        <code>fetch('/api/tools', {
+  method: 'POST',
+  body: JSON.stringify({
+    name: 'my_tool',
+    description: 'What it does',
+    parameters: {'x': 'int'}
+  })
+})</code>
+                    </div>
+
+                    <strong style="font-size: 0.9em; display: block; margin-top: 15px; color: #555;">Execute a tool:</strong>
+                    <div class="code-snippet">
+                        <button class="copy-btn" onclick="copyToClipboard(`fetch('/api/tools/execute', {
+  method: 'POST',
+  body: JSON.stringify({
+    tool_id: 'tool_xyz',
+    arguments: {'x': 5}
+  })
+})`)">Copy</button>
+                        <code>fetch('/api/tools/execute', {
+  method: 'POST',
+  body: JSON.stringify({
+    tool_id: 'tool_xyz',
+    arguments: {'x': 5}
+  })
+})</code>
+                    </div>
+
+                    <p style="font-size: 0.85em; color: #999; margin-top: 15px;">
+                        💡 Tip: Click "Copy" to copy code snippets to clipboard
+                    </p>
+                </div>
+            </div>
+
+            <!-- Tools List Card -->
+            <div class="card" style="grid-column: 1 / -1;">
+                <h2>🛠️ Your Tools</h2>
+                <div id="toolsList" class="tools-list">
+                    <div class="empty-state">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <path d="M12 6v6l4 2"></path>
+                        </svg>
+                        <p>No tools created yet. Start by creating your first tool above!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let tools = [];
+
+        // Load tools on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadTools();
+            
+            // Setup form submission
+            document.getElementById('createToolForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                createTool();
+            });
+        });
+
+        function addParam() {
+            const container = document.getElementById('parametersContainer');
+            const row = document.createElement('div');
+            row.className = 'param-row';
+            row.innerHTML = `
+                <input type="text" placeholder="Parameter name" class="param-name">
+                <input type="text" placeholder="Type (e.g., int, str)" class="param-type">
+                <button type="button" class="btn-icon" onclick="removeParam(this)">✕</button>
+            `;
+            container.appendChild(row);
+        }
+
+        function removeParam(button) {
+            const container = document.getElementById('parametersContainer');
+            if (container.children.length > 1) {
+                button.parentElement.remove();
+            }
+        }
+
+        function getParameters() {
+            const params = {};
+            const rows = document.querySelectorAll('.param-row');
+            rows.forEach(row => {
+                const name = row.querySelector('.param-name').value.trim();
+                const type = row.querySelector('.param-type').value.trim();
+                if (name && type) {
+                    params[name] = type;
+                }
+            });
+            return params;
+        }
+
+        async function createTool() {
+            const name = document.getElementById('toolName').value.trim();
+            const description = document.getElementById('toolDescription').value.trim();
+            const parameters = getParameters();
+            const returnType = document.getElementById('returnType').value.trim() || 'Any';
+
+            if (!name || !description) {
+                showStatus('createStatus', 'Please fill in all required fields', 'error');
+                return;
+            }
+
+            // Show loading
+            document.getElementById('createBtn').disabled = true;
+            document.getElementById('createBtnText').style.display = 'none';
+            document.getElementById('createLoading').style.display = 'inline-block';
+
+            try {
+                // Simulate API call (replace with actual API endpoint)
+                const response = await mockCreateTool({
+                    name,
+                    description,
+                    parameters,
+                    return_type: returnType
+                });
+
+                if (response.success) {
+                    showStatus('createStatus', `Tool "${name}" created successfully!`, 'success');
+                    document.getElementById('createToolForm').reset();
+                    loadTools();
+                } else {
+                    showStatus('createStatus', `Error: ${response.error}`, 'error');
+                }
+            } catch (error) {
+                showStatus('createStatus', `Error: ${error.message}`, 'error');
+            } finally {
+                // Hide loading
+                document.getElementById('createBtn').disabled = false;
+                document.getElementById('createBtnText').style.display = 'inline';
+                document.getElementById('createLoading').style.display = 'none';
+            }
+        }
+
+        async function loadTools() {
+            try {
+                // Simulate API call (replace with actual API endpoint)
+                const response = await mockLoadTools();
+                
+                tools = response.tools || [];
+                updateStats(response.stats);
+                renderTools();
+            } catch (error) {
+                console.error('Error loading tools:', error);
+            }
+        }
+
+        function updateStats(stats) {
+            document.getElementById('totalTools').textContent = stats.total_tools || 0;
+            document.getElementById('validatedTools').textContent = stats.validated_tools || 0;
+            document.getElementById('totalExecutions').textContent = stats.total_executions || 0;
+        }
+
+        function renderTools() {
+            const container = document.getElementById('toolsList');
+            
+            if (tools.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <path d="M12 6v6l4 2"></path>
+                        </svg>
+                        <p>No tools created yet. Start by creating your first tool above!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = tools.map(tool => `
+                <div class="tool-item" data-id="${tool.id}">
+                    <h3>${tool.name}</h3>
+                    <p>${tool.description}</p>
+                    <div class="tool-meta">
+                        <span>📅 Created: ${new Date(tool.created_at).toLocaleDateString()}</span>
+                        <span>✅ Validated: ${tool.validated ? 'Yes' : 'No'}</span>
+                        <span>▶️ Executions: ${tool.execution_count || 0}</span>
+                        <span>🔙 Returns: ${tool.return_type}</span>
+                    </div>
+                    <div class="tool-actions">
+                        <button class="btn btn-small" onclick="viewCode('${tool.id}')">View Code</button>
+                        <button class="btn btn-small btn-secondary" onclick="testTool('${tool.id}')">Test Tool</button>
+                    </div>
+                    <div class="code-preview" id="code-${tool.id}"></div>
+                </div>
+            `).join('');
+        }
+
+        function viewCode(toolId) {
+            const tool = tools.find(t => t.id === toolId);
+            if (!tool) return;
+
+            const codeElement = document.getElementById(`code-${toolId}`);
+            if (codeElement.style.display === 'block') {
+                codeElement.style.display = 'none';
+            } else {
+                codeElement.textContent = tool.code || '# Code not available';
+                codeElement.style.display = 'block';
+            }
+        }
+
+        function testTool(toolId) {
+            const tool = tools.find(t => t.id === toolId);
+            if (!tool) return;
+
+            // Show a simple test dialog
+            const params = prompt(`Enter parameters for ${tool.name} as JSON:\n\nExample: {"n": 10}`);
+            if (!params) return;
+
+            try {
+                const parsedParams = JSON.parse(params);
+                alert(`Tool execution would run here with params: ${JSON.stringify(parsedParams, null, 2)}\n\nThis is a demo - connect to your LLM Maker API to actually execute tools.`);
+            } catch (error) {
+                alert('Invalid JSON format. Please try again.');
+            }
+        }
+
+        function showStatus(elementId, message, type) {
+            const element = document.getElementById(elementId);
+            element.className = `status-message ${type}`;
+            element.textContent = message;
+            element.style.display = 'block';
+
+            setTimeout(() => {
+                element.style.display = 'none';
+            }, 5000);
+        }
+
+        // Mock API functions (replace with actual API calls)
+        async function realCreateTool_OLD(data) {
+            // Simulate network delay
+            await new Promise(resolve => setTimeout(resolve, 2000));
+
+            // Simulate successful creation
+            const newTool = {
+                id: `tool_${Date.now()}`,
+                name: data.name,
+                description: data.description,
+                parameters: data.parameters,
+                return_type: data.return_type,
+                created_at: new Date().toISOString(),
+                validated: true,
+                execution_count: 0,
+                code: `def ${data.name}(${Object.keys(data.parameters).join(', ')}):\n    """${data.description}"""\n    # Generated code here\n    pass`
+            };
+
+            tools.push(newTool);
+            return { success: true, tool_id: newTool.id };
+        }
+
+        // Helper functions for enhanced UX
+        function scrollToIntegration() {
+            document.getElementById('integration-guide').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function showAPIInfo() {
+            alert('API Documentation:\n\n' +
+                  'GET /api/tools - List all tools\n' +
+                  'POST /api/tools - Create new tool\n' +
+                  'POST /api/tools/execute - Execute tool\n' +
+                  'DELETE /api/tools/{id} - Delete tool\n\n' +
+                  'See the Integration Guide section for code examples!');
+        }
+
+        function showExamples() {
+            const examples = [
+                '🔢 Fibonacci - Calculate Fibonacci numbers',
+                '🔄 Palindrome - Check if text is palindrome',
+                '🌡️ Temperature - Convert Celsius to Fahrenheit'
+            ];
+            alert('Example Tools:\n\n' + examples.join('\n') + '\n\nClick the pills below Tool Name to auto-fill!');
+        }
+
+        function copyToClipboard(text) {
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(text).then(() => {
+                    const btn = event.target.closest('.copy-btn');
+                    const originalText = btn.textContent;
+                    btn.textContent = '✓ Copied!';
+                    btn.style.background = 'rgba(40, 167, 69, 0.3)';
+                    setTimeout(() => {
+                        btn.textContent = originalText;
+                        btn.style.background = '';
+                    }, 2000);
+                }).catch(() => prompt('Copy this code:', text));
+            } else {
+                prompt('Copy this code:', text);
+            }
+        }
+
+        function fillExample(exampleName) {
+            const examples = {
+                fibonacci: {
+                    name: 'calculate_fibonacci',
+                    description: 'Calculate the nth Fibonacci number using iteration. Returns the Fibonacci number at position n.',
+                    params: [{ name: 'n', type: 'int' }],
+                    returnType: 'int'
+                },
+                palindrome: {
+                    name: 'is_palindrome',
+                    description: 'Check if a string is a palindrome (reads the same forwards and backwards). Case-insensitive.',
+                    params: [{ name: 'text', type: 'str' }],
+                    returnType: 'bool'
+                },
+                temperature: {
+                    name: 'celsius_to_fahrenheit',
+                    description: 'Convert temperature from Celsius to Fahrenheit using the formula: F = (C * 9/5) + 32',
+                    params: [{ name: 'celsius', type: 'float' }],
+                    returnType: 'float'
+                }
+            };
+
+            const example = examples[exampleName];
+            if (!example) return;
+
+            document.getElementById('toolName').value = example.name;
+            document.getElementById('toolDescription').value = example.description;
+            document.getElementById('returnType').value = example.returnType;
+
+            const container = document.getElementById('parametersContainer');
+            container.innerHTML = '';
+            example.params.forEach(param => {
+                const row = document.createElement('div');
+                row.className = 'param-row';
+                row.innerHTML = `
+                    <input type="text" placeholder="Parameter name" class="param-name" value="${param.name}">
+                    <input type="text" placeholder="Type (e.g., int, str)" class="param-type" value="${param.type}">
+                    <button type="button" class="btn-icon" onclick="removeParam(this)">✕</button>
+                `;
+                container.appendChild(row);
+            });
+
+            document.getElementById('toolName').scrollIntoView({ behavior: 'smooth', block: 'center' });
+            showStatus('createStatus', `✨ Example "${exampleName}" loaded! Click "Create Tool" to generate it.`, 'info');
+        }
+
+        async function realLoadTools_OLD() {
+            // Simulate network delay
+            await new Promise(resolve => setTimeout(resolve, 500));
+
+            return {
+                tools: tools,
+                stats: {
+                    total_tools: tools.length,
+                    validated_tools: tools.filter(t => t.validated).length,
+                    total_executions: tools.reduce((sum, t) => sum + (t.execution_count || 0), 0)
+                }
+            };
+        }
+    </script>
+</body>
+</html>

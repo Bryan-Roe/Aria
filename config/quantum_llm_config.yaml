@@ -1,0 +1,110 @@
+# Quantum-Enhanced LLM Training Configuration
+# This file configures quantum computing integration for passive LLM training
+
+quantum_settings:
+  # Quantum backend selection
+  backend: "local"  # Options: "local" (simulator), "azure" (Azure Quantum)
+  
+  # Quantum circuit parameters
+  n_qubits: 4  # Number of qubits (higher = more expressive but slower)
+  n_quantum_layers: 2  # Depth of quantum circuits
+  entanglement: "circular"  # Options: "linear", "circular", "full"
+  
+  # Azure Quantum settings (when backend: "azure")
+  azure:
+    resource_id: ""  # Azure Quantum workspace resource ID
+    location: "eastus"  # Azure region
+    target_backend: "ionq.simulator"  # Options: ionq.simulator, ionq.qpu, quantinuum.sim.h1-1e
+    shots: 100  # Number of circuit executions per measurement
+    confirm_cost: false  # Must be true for paid QPU backends
+
+# Passive training settings
+passive_training:
+  enabled: true
+  interval_seconds: 3600  # Run training cycle every hour
+  datasets_dir: "datasets/chat"  # Directory to scan for datasets
+  epochs_per_cycle: 1  # Epochs per passive training cycle
+  max_cycles: 0  # 0 = infinite, positive number to limit cycles
+
+# LLM training parameters
+llm_training:
+  model_name: "microsoft/phi-2"  # Base model for fine-tuning
+  learning_rate: 0.0001
+  batch_size: 4
+  gradient_accumulation_steps: 8
+  max_seq_length: 512
+  
+  # LoRA configuration
+  lora:
+    enabled: true
+    r: 8  # LoRA rank
+    alpha: 16  # LoRA alpha
+    dropout: 0.05
+    target_modules: ["q_proj", "v_proj"]  # Attention modules to apply LoRA
+
+# Quantum enhancement strategies
+quantum_enhancement:
+  # Apply quantum optimization to attention mechanisms
+  optimize_attention: true
+  attention_optimization_frequency: 10  # Every N training steps
+  
+  # Use quantum feature encoding
+  quantum_feature_encoding: true
+  encoding_dimension: 16  # Dimension for quantum encoding
+  
+  # Quantum-assisted hyperparameter optimization
+  quantum_hyperparameter_tuning: false  # Experimental
+  
+  # Quantum circuit caching
+  cache_circuits: true
+  cache_size: 100
+  cache_ttl_seconds: 3600
+
+# Integration with autonomous training
+autonomous_integration:
+  enabled: true
+  report_to_orchestrator: true
+  status_file: "data_out/quantum_llm_training/status.json"
+  
+  # Performance thresholds
+  min_loss_improvement: 0.01  # Minimum improvement to consider cycle successful
+  max_loss_threshold: 5.0  # Alert if loss exceeds this value
+  
+  # Auto-deployment
+  auto_deploy: false
+  deployment_loss_threshold: 1.0  # Deploy model if loss below this
+
+# Monitoring and logging
+monitoring:
+  track_quantum_metrics: true
+  log_circuit_executions: true
+  log_interval: 100  # Log every N steps
+  
+  # Metrics to track
+  metrics:
+    - loss
+    - quantum_advantage_ratio
+    - circuit_execution_time
+    - attention_optimization_gain
+  
+  # Alerts
+  alerts:
+    enabled: false
+    webhook_url: ""  # Slack/Teams webhook for alerts
+    alert_on_failure: true
+    alert_on_completion: false
+
+# Resource management
+resources:
+  max_memory_gb: 8  # Maximum memory per training cycle
+  cpu_cores: 4  # CPU cores for parallel processing
+  use_gpu: true  # Use GPU if available
+  gpu_memory_fraction: 0.8  # Fraction of GPU memory to use
+
+# Output settings
+output:
+  save_dir: "data_out/quantum_llm_training"
+  save_checkpoints: true
+  checkpoint_frequency: 500  # Save checkpoint every N steps
+  save_quantum_circuits: false  # Save circuit diagrams (for debugging)
+  export_format: "json"  # Options: "json", "yaml", "jsonl"

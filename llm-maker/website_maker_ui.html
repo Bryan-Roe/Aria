@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Website Maker - Automated Website Generator</title>
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            background-size: 200% 200%;
+            animation: gradientShift 15s ease infinite;
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px 40px;
+            text-align: center;
+            position: relative;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .header-subtitle {
+            font-size: 1.1em;
+            opacity: 0.9;
+            margin-bottom: 20px;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+
+        .header-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.95em;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+
+        .header-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            border-color: rgba(255, 255, 255, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        @media (max-width: 1024px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border: 2px solid #e1e8ed;
+        }
+
+        .card-header {
+            font-size: 1.5em;
+            margin-bottom: 20px;
+            color: #667eea;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #333;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e1e8ed;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.05em;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .btn-sm {
+            padding: 8px 16px;
+            font-size: 0.9em;
+        }
+
+        .status {
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 15px;
+            display: none;
+        }
+
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            display: block;
+        }
+
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            display: block;
+        }
+
+        .status.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+            display: block;
+        }
+
+        .website-list {
+            display: grid;
+            gap: 15px;
+        }
+
+        .website-card {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            border: 2px solid #e1e8ed;
+            transition: all 0.3s ease;
+        }
+
+        .website-card:hover {
+            border-color: #667eea;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
+        }
+
+        .website-name {
+            font-size: 1.2em;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .website-description {
+            color: #666;
+            margin-bottom: 12px;
+        }
+
+        .website-meta {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            font-size: 0.9em;
+            color: #888;
+            margin-bottom: 15px;
+        }
+
+        .website-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .tag {
+            display: inline-block;
+            padding: 4px 12px;
+            background: #667eea;
+            color: white;
+            border-radius: 20px;
+            font-size: 0.85em;
+            margin-right: 5px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 800px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            font-size: 1.5em;
+            margin-bottom: 20px;
+            color: #667eea;
+        }
+
+        .close {
+            float: right;
+            font-size: 1.5em;
+            font-weight: bold;
+            cursor: pointer;
+            color: #aaa;
+        }
+
+        .close:hover {
+            color: #333;
+        }
+
+        .code-preview {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            margin: 15px 0;
+        }
+
+        .file-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .file-tab {
+            padding: 8px 16px;
+            background: #e1e8ed;
+            border-radius: 8px 8px 0 0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .file-tab.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .pages-container, .features-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .chip {
+            background: #e1e8ed;
+            padding: 8px 12px;
+            border-radius: 20px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9em;
+        }
+
+        .chip-remove {
+            cursor: pointer;
+            font-weight: bold;
+            color: #999;
+        }
+
+        .chip-remove:hover {
+            color: #f5576c;
+        }
+
+        .add-input-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .add-input-group input {
+            flex: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>
+                <i class="fas fa-globe"></i>
+                AI Website Maker
+            </h1>
+            <p class="header-subtitle">Automatically generate and update complete websites with AI</p>
+            <div class="header-actions">
+                <a href="/" class="header-btn">
+                    <i class="fas fa-tools"></i> Tool Maker
+                </a>
+                <button class="header-btn" onclick="refreshWebsites()">
+                    <i class="fas fa-sync-alt"></i> Refresh
+                </button>
+                <button class="header-btn" onclick="showHelp()">
+                    <i class="fas fa-question-circle"></i> Help
+                </button>
+            </div>
+        </div>
+
+        <div class="content">
+            <div class="grid">
+                <!-- Create Website Card -->
+                <div class="card">
+                    <h2 class="card-header">
+                        <i class="fas fa-plus-circle"></i>
+                        Create New Website
+                    </h2>
+                    
+                    <form id="createWebsiteForm">
+                        <div class="form-group">
+                            <label for="websiteName">Website Name *</label>
+                            <input type="text" id="websiteName" placeholder="e.g., my-portfolio" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="websiteDescription">Description *</label>
+                            <textarea id="websiteDescription" placeholder="Describe what your website should do and include..." required></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="websiteStyle">Visual Style</label>
+                            <select id="websiteStyle">
+                                <option value="modern">Modern</option>
+                                <option value="minimal">Minimal</option>
+                                <option value="corporate">Corporate</option>
+                                <option value="creative">Creative</option>
+                                <option value="dark">Dark Theme</option>
+                                <option value="colorful">Colorful</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Pages</label>
+                            <div class="pages-container" id="pagesContainer">
+                                <span class="chip">index <span class="chip-remove" onclick="removeChip(this)">✕</span></span>
+                            </div>
+                            <div class="add-input-group">
+                                <input type="text" id="newPage" placeholder="Add page (e.g., about, contact)">
+                                <button type="button" class="btn btn-sm" onclick="addPage()">
+                                    <i class="fas fa-plus"></i> Add
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Features</label>
+                            <div class="features-container" id="featuresContainer">
+                                <span class="chip">responsive design <span class="chip-remove" onclick="removeChip(this)">✕</span></span>
+                                <span class="chip">modern styling <span class="chip-remove" onclick="removeChip(this)">✕</span></span>
+                            </div>
+                            <div class="add-input-group">
+                                <input type="text" id="newFeature" placeholder="Add feature (e.g., contact form, navigation)">
+                                <button type="button" class="btn btn-sm" onclick="addFeature()">
+                                    <i class="fas fa-plus"></i> Add
+                                </button>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn" id="createBtn">
+                            <i class="fas fa-magic"></i> Generate Website
+                        </button>
+
+                        <div id="createStatus" class="status"></div>
+                    </form>
+                </div>
+
+                <!-- Update Website Card -->
+                <div class="card">
+                    <h2 class="card-header">
+                        <i class="fas fa-edit"></i>
+                        Update Existing Website
+                    </h2>
+                    
+                    <form id="updateWebsiteForm">
+                        <div class="form-group">
+                            <label for="updateWebsiteName">Website Name *</label>
+                            <select id="updateWebsiteName" required>
+                                <option value="">Select a website...</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="updateDescription">What to Change *</label>
+                            <textarea id="updateDescription" placeholder="Describe what changes you want to make..." required></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="targetFile">Target File (Optional)</label>
+                            <input type="text" id="targetFile" placeholder="e.g., index.html (leave blank to update all)">
+                        </div>
+
+                        <button type="submit" class="btn btn-secondary" id="updateBtn">
+                            <i class="fas fa-sync"></i> Update Website
+                        </button>
+
+                        <div id="updateStatus" class="status"></div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Your Websites Card -->
+            <div class="card">
+                <h2 class="card-header">
+                    <i class="fas fa-folder-open"></i>
+                    Your Websites
+                    <button class="btn btn-sm" style="margin-left: auto;" onclick="refreshWebsites()">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                </h2>
+                
+                <div id="websitesList" class="website-list">
+                    <p style="text-align: center; color: #999; padding: 40px;">
+                        <i class="fas fa-info-circle" style="font-size: 3em; margin-bottom: 15px; display: block;"></i>
+                        No websites created yet. Create your first website above!
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- View Website Modal -->
+    <div id="viewModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h2 class="modal-header" id="modalTitle">Website Preview</h2>
+            <div id="modalContent"></div>
+        </div>
+    </div>
+
+    <script>
+        let websites = [];
+        let pages = ['index'];
+        let features = ['responsive design', 'modern styling'];
+
+        // Load websites on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            refreshWebsites();
+        });
+
+        // Create website form submission
+        document.getElementById('createWebsiteForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const name = document.getElementById('websiteName').value.trim();
+            const description = document.getElementById('websiteDescription').value.trim();
+            const style = document.getElementById('websiteStyle').value;
+            
+            if (!name || !description) {
+                showStatus('createStatus', 'Please fill in all required fields', 'error');
+                return;
+            }
+
+            const createBtn = document.getElementById('createBtn');
+            createBtn.disabled = true;
+            createBtn.innerHTML = '<span class="loading"></span> Generating...';
+            
+            showStatus('createStatus', 'AI is generating your website... This may take 20-30 seconds.', 'info');
+
+            try {
+                const response = await fetch('/api/websites', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        name,
+                        description,
+                        style,
+                        pages,
+                        features
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showStatus('createStatus', `✅ ${result.message}`, 'success');
+                    document.getElementById('createWebsiteForm').reset();
+                    pages = ['index'];
+                    features = ['responsive design', 'modern styling'];
+                    updateChips();
+                    refreshWebsites();
+                    
+                    // Show preview
+                    setTimeout(() => viewWebsite(result.metadata.name), 1000);
+                } else {
+                    showStatus('createStatus', `❌ ${result.message || 'Failed to create website'}`, 'error');
+                }
+            } catch (error) {
+                showStatus('createStatus', `❌ Error: ${error.message}`, 'error');
+            } finally {
+                createBtn.disabled = false;
+                createBtn.innerHTML = '<i class="fas fa-magic"></i> Generate Website';
+            }
+        });
+
+        // Update website form submission
+        document.getElementById('updateWebsiteForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const name = document.getElementById('updateWebsiteName').value;
+            const updateDescription = document.getElementById('updateDescription').value.trim();
+            const targetFile = document.getElementById('targetFile').value.trim() || null;
+
+            if (!name || !updateDescription) {
+                showStatus('updateStatus', 'Please fill in all required fields', 'error');
+                return;
+            }
+
+            const updateBtn = document.getElementById('updateBtn');
+            updateBtn.disabled = true;
+            updateBtn.innerHTML = '<span class="loading"></span> Updating...';
+            
+            showStatus('updateStatus', 'AI is updating your website...', 'info');
+
+            try {
+                const response = await fetch('/api/websites/update', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        name,
+                        update_description: updateDescription,
+                        target_file: targetFile
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showStatus('updateStatus', `✅ ${result.message}`, 'success');
+                    document.getElementById('updateWebsiteForm').reset();
+                    refreshWebsites();
+                    
+                    // Show updated preview
+                    setTimeout(() => viewWebsite(name), 1000);
+                } else {
+                    showStatus('updateStatus', `❌ ${result.message || 'Failed to update website'}`, 'error');
+                }
+            } catch (error) {
+                showStatus('updateStatus', `❌ Error: ${error.message}`, 'error');
+            } finally {
+                updateBtn.disabled = false;
+                updateBtn.innerHTML = '<i class="fas fa-sync"></i> Update Website';
+            }
+        });
+
+        async function refreshWebsites() {
+            try {
+                const response = await fetch('/api/websites');
+                const data = await response.json();
+                websites = data.websites || [];
+                
+                // Update dropdown
+                const select = document.getElementById('updateWebsiteName');
+                select.innerHTML = '<option value="">Select a website...</option>';
+                websites.forEach(site => {
+                    const option = document.createElement('option');
+                    option.value = site.name;
+                    option.textContent = site.name;
+                    select.appendChild(option);
+                });
+                
+                // Update list
+                displayWebsites();
+            } catch (error) {
+                console.error('Error loading websites:', error);
+            }
+        }
+
+        function displayWebsites() {
+            const container = document.getElementById('websitesList');
+            
+            if (websites.length === 0) {
+                container.innerHTML = `
+                    <p style="text-align: center; color: #999; padding: 40px;">
+                        <i class="fas fa-info-circle" style="font-size: 3em; margin-bottom: 15px; display: block;"></i>
+                        No websites created yet. Create your first website above!
+                    </p>
+                `;
+                return;
+            }
+
+            container.innerHTML = websites.map(site => `
+                <div class="website-card">
+                    <div class="website-name">${site.name}</div>
+                    <div class="website-description">${site.description}</div>
+                    <div class="website-meta">
+                        <span><i class="fas fa-paint-brush"></i> ${site.style || 'modern'}</span>
+                        <span><i class="fas fa-file"></i> ${site.files ? site.files.length : 0} files</span>
+                        <span><i class="fas fa-clock"></i> ${new Date(site.created_at).toLocaleDateString()}</span>
+                    </div>
+                    <div>
+                        ${(site.pages || []).map(page => `<span class="tag">${page}</span>`).join('')}
+                    </div>
+                    <div class="website-actions" style="margin-top: 15px;">
+                        <button class="btn btn-sm" onclick="viewWebsite('${site.name}')">
+                            <i class="fas fa-eye"></i> View Code
+                        </button>
+                        <button class="btn btn-sm btn-secondary" onclick="deleteWebsite('${site.name}')">
+                            <i class="fas fa-trash"></i> Delete
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function viewWebsite(name) {
+            try {
+                const response = await fetch(`/api/websites/${name}`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    const site = data.website;
+                    const filesContent = site.files_content || {};
+                    const fileNames = Object.keys(filesContent);
+                    
+                    let content = `
+                        <p><strong>Description:</strong> ${site.description}</p>
+                        <p><strong>Style:</strong> ${site.style}</p>
+                        <p><strong>Path:</strong> <code>${site.path}</code></p>
+                        <div class="file-tabs" id="fileTabs">
+                            ${fileNames.map((file, idx) => `
+                                <div class="file-tab ${idx === 0 ? 'active' : ''}" onclick="showFile(${idx}, '${file}')">
+                                    ${file}
+                                </div>
+                            `).join('')}
+                        </div>
+                        ${fileNames.map((file, idx) => `
+                            <div class="code-preview" id="file-${idx}" style="${idx === 0 ? '' : 'display:none;'}">
+                                <pre>${escapeHtml(filesContent[file])}</pre>
+                            </div>
+                        `).join('')}
+                    `;
+                    
+                    document.getElementById('modalTitle').textContent = `Website: ${name}`;
+                    document.getElementById('modalContent').innerHTML = content;
+                    document.getElementById('viewModal').style.display = 'block';
+                }
+            } catch (error) {
+                alert(`Error loading website: ${error.message}`);
+            }
+        }
+
+        function showFile(idx, filename) {
+            // Hide all code previews
+            document.querySelectorAll('.code-preview').forEach(el => el.style.display = 'none');
+            document.querySelectorAll('.file-tab').forEach(el => el.classList.remove('active'));
+            
+            // Show selected
+            document.getElementById(`file-${idx}`).style.display = 'block';
+            document.querySelectorAll('.file-tab')[idx].classList.add('active');
+        }
+
+        async function deleteWebsite(name) {
+            if (!confirm(`Are you sure you want to delete "${name}"?`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/websites/${name}`, {
+                    method: 'DELETE'
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    alert(`✅ ${result.message}`);
+                    refreshWebsites();
+                } else {
+                    alert(`❌ ${result.message}`);
+                }
+            } catch (error) {
+                alert(`❌ Error: ${error.message}`);
+            }
+        }
+
+        function addPage() {
+            const input = document.getElementById('newPage');
+            const page = input.value.trim();
+            
+            if (page && !pages.includes(page)) {
+                pages.push(page);
+                updateChips();
+                input.value = '';
+            }
+        }
+
+        function addFeature() {
+            const input = document.getElementById('newFeature');
+            const feature = input.value.trim();
+            
+            if (feature && !features.includes(feature)) {
+                features.push(feature);
+                updateChips();
+                input.value = '';
+            }
+        }
+
+        function removeChip(element) {
+            const chip = element.parentElement;
+            const text = chip.textContent.replace('✕', '').trim();
+            const container = chip.parentElement;
+            
+            if (container.id === 'pagesContainer') {
+                pages = pages.filter(p => p !== text);
+            } else if (container.id === 'featuresContainer') {
+                features = features.filter(f => f !== text);
+            }
+            
+            chip.remove();
+        }
+
+        function updateChips() {
+            document.getElementById('pagesContainer').innerHTML = pages.map(page => 
+                `<span class="chip">${page} <span class="chip-remove" onclick="removeChip(this)">✕</span></span>`
+            ).join('');
+            
+            document.getElementById('featuresContainer').innerHTML = features.map(feature => 
+                `<span class="chip">${feature} <span class="chip-remove" onclick="removeChip(this)">✕</span></span>`
+            ).join('');
+        }
+
+        function showStatus(id, message, type) {
+            const status = document.getElementById(id);
+            status.textContent = message;
+            status.className = `status ${type}`;
+            status.style.display = 'block';
+            
+            if (type === 'success') {
+                setTimeout(() => {
+                    status.style.display = 'none';
+                }, 5000);
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('viewModal').style.display = 'none';
+        }
+
+        function showHelp() {
+            alert(`AI Website Maker Help
+
+Create Website:
+1. Enter a name (e.g., "my-portfolio")
+2. Describe what you want (be detailed!)
+3. Choose a visual style
+4. Add pages and features
+5. Click "Generate Website"
+
+Update Website:
+1. Select an existing website
+2. Describe what changes you want
+3. Optionally specify which file to update
+4. Click "Update Website"
+
+Tips:
+• Be specific in descriptions for better results
+• Generated sites are saved in llm-maker/generated_sites/
+• You can view and copy the generated code
+• All sites are fully responsive and modern`);
+        }
+
+        function escapeHtml(text) {
+            const map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+            return text.replace(/[&<>"']/g, m => map[m]);
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('viewModal');
+            if (event.target === modal) {
+                closeModal();
+            }
+        };
+    </script>
+</body>
+</html>

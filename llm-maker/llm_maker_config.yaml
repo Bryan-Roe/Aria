@@ -1,0 +1,79 @@
+# LLM Maker Configuration
+
+tool_maker:
+  # AI provider for tool generation (azure, openai, local)
+  provider: local  # Changed to local for demo/testing
+  
+  # Maximum number of tools to store
+  max_tools: 1000
+  
+  # Directory for generated tools
+  tools_directory: ./tools
+  
+  # Generation settings
+  temperature: 0.7
+  max_tokens: 2000
+  
+validation:
+  # Enable strict validation mode
+  strict_mode: true
+  
+  # Allowed Python imports (whitelist)
+  allowed_imports:
+    - math
+    - json
+    - re
+    - datetime
+    - collections
+    - itertools
+    - functools
+    - typing
+  
+  # Blocked operations
+  block_file_access: true
+  block_network_access: true
+  block_subprocess: true
+  block_eval_exec: true
+  
+execution:
+  # Execution timeout in seconds
+  timeout_seconds: 5
+  
+  # Maximum memory usage in MB
+  max_memory_mb: 512
+  
+  # Enable execution logging
+  enable_logging: true
+  
+  # Maximum output size
+  max_output_size: 10000
+
+safety:
+  # Block dangerous built-ins
+  block_dangerous_builtins: true
+  
+  # Dangerous functions to block
+  blocked_functions:
+    - __import__
+    - eval
+    - exec
+    - compile
+    - open
+    - input
+    - breakpoint
+  
+  # Block attribute access to dangerous modules
+  blocked_attributes:
+    - __code__
+    - __globals__
+    - __builtins__
+
+mcp_server:
+  # Server name
+  name: llm-maker-mcp
+  
+  # Enable MCP server
+  enabled: true
+  
+  # Server timeout
+  timeout: 30
