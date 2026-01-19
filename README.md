@@ -197,6 +197,7 @@ Fine-tuning workspace for training Aria's language understanding using LoRA and 
 - `datasets/chat/aria_movement/` - Movement command training data
 - `datasets/chat/aria_expanded/` - Extended Aria interactions
 - `datasets/chat/aria_simple/` - Basic Aria commands
+- `datasets/chat/github_actions/` - GitHub Actions & CI/CD workflows training data
 
 **Quick Training:**
 
