@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aria Auto-Execute Test</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+        .content {
+            padding: 30px;
+        }
+        .control-panel {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .input-group {
+            margin-bottom: 15px;
+        }
+        .input-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #333;
+        }
+        .input-group input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+        .input-group input[type="text"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        .checkbox-group {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            margin: 15px 0;
+        }
+        .checkbox-group label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+        .checkbox-group input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        button {
+            flex: 1;
+            padding: 15px 30px;
+            font-size: 1.1em;
+            font-weight: 600;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .btn-plan {
+            background: #4CAF50;
+            color: white;
+        }
+        .btn-plan:hover {
+            background: #45a049;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.3);
+        }
+        .btn-execute {
+            background: #667eea;
+            color: white;
+        }
+        .btn-execute:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+        .btn-clear {
+            background: #f44336;
+            color: white;
+            flex: 0.3;
+        }
+        .btn-clear:hover {
+            background: #da190b;
+        }
+        .results {
+            margin-top: 30px;
+        }
+        .section {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .section h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .action-card {
+            background: white;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .action-card h4 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+        .action-params {
+            font-family: 'Courier New', monospace;
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 0.9em;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.85em;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+        .status-success {
+            background: #d4edda;
+            color: #155724;
+        }
+        .status-error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        .tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-top: 10px;
+        }
+        .tag {
+            background: #e3f2fd;
+            color: #1976d2;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 0.85em;
+            font-family: 'Courier New', monospace;
+        }
+        .examples {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .examples h4 {
+            color: #856404;
+            margin-bottom: 10px;
+        }
+        .example-list {
+            list-style: none;
+            padding: 0;
+        }
+        .example-list li {
+            padding: 8px;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background 0.2s;
+        }
+        .example-list li:hover {
+            background: rgba(0, 0, 0, 0.05);
+        }
+        .example-list li::before {
+            content: "→ ";
+            color: #ffc107;
+            font-weight: bold;
+        }
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+        .loading.active {
+            display: block;
+        }
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .state-view {
+            font-family: 'Courier New', monospace;
+            background: #282c34;
+            color: #abb2bf;
+            padding: 15px;
+            border-radius: 5px;
+            font-size: 0.9em;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .json-key {
+            color: #e06c75;
+        }
+        .json-string {
+            color: #98c379;
+        }
+        .json-number {
+            color: #d19a66;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🤖 Aria Auto-Execute</h1>
+            <p>LLM-Powered Automatic Action Generation & Execution</p>
+        </div>
+        
+        <div class="content">
+            <div class="examples">
+                <h4>📝 Example Commands (click to use):</h4>
+                <ul class="example-list">
+                    <li onclick="setCommand('Walk to the table and pick up the apple')">Walk to the table and pick up the apple</li>
+                    <li onclick="setCommand('Say hello and wave at the audience')">Say hello and wave at the audience</li>
+                    <li onclick="setCommand('Go to the center and do a little dance')">Go to the center and do a little dance</li>
+                    <li onclick="setCommand('Pick up the book, move to stage left, and drop it')">Pick up the book, move to stage left, and drop it</li>
+                    <li onclick="setCommand('Look at the flower and say how beautiful it is')">Look at the flower and say how beautiful it is</li>
+                    <li onclick="setCommand('Throw the ball toward the right side of the stage')">Throw the ball toward the right side of the stage</li>
+                </ul>
+            </div>
+            
+            <div class="control-panel">
+                <div class="input-group">
+                    <label for="command">Command:</label>
+                    <input type="text" id="command" placeholder="Type a natural language command for Aria..." 
+                           value="Walk to the table and pick up the apple">
+                </div>
+                
+                <div class="checkbox-group">
+                    <label>
+                        <input type="checkbox" id="use-llm" checked>
+                        Use LLM (fallback to rules if unavailable)
+                    </label>
+                    <label>
+                        <input type="checkbox" id="show-state">
+                        Show updated state
+                    </label>
+                </div>
+                
+                <div class="button-group">
+                    <button class="btn-plan" onclick="planActions()">📋 Plan Actions Only</button>
+                    <button class="btn-execute" onclick="executeActions()">▶️ Execute Actions</button>
+                    <button class="btn-clear" onclick="clearResults()">🗑️ Clear</button>
+                </div>
+            </div>
+            
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>Processing command...</p>
+            </div>
+            
+            <div class="results" id="results"></div>
+        </div>
+    </div>
+
+    <script>
+        function setCommand(cmd) {
+            document.getElementById('command').value = cmd;
+        }
+
+        function clearResults() {
+            document.getElementById('results').innerHTML = '';
+        }
+
+        async function planActions() {
+            await sendCommand(false);
+        }
+
+        async function executeActions() {
+            await sendCommand(true);
+        }
+
+        async function sendCommand(autoExecute) {
+            const command = document.getElementById('command').value.trim();
+            const useLlm = document.getElementById('use-llm').checked;
+            const showState = document.getElementById('show-state').checked;
+            
+            if (!command) {
+                alert('Please enter a command');
+                return;
+            }
+
+            const loading = document.getElementById('loading');
+            const results = document.getElementById('results');
+            
+            loading.classList.add('active');
+            results.innerHTML = '';
+
+            try {
+                const response = await fetch('http://localhost:8080/api/aria/execute', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        command: command,
+                        auto_execute: autoExecute,
+                        use_llm: useLlm
+                    })
+                });
+
+                const data = await response.json();
+                displayResults(data, autoExecute, showState);
+
+            } catch (error) {
+                results.innerHTML = `
+                    <div class="section">
+                        <h3>❌ Error</h3>
+                        <p style="color: #721c24;">${error.message}</p>
+                        <p style="margin-top: 10px; font-size: 0.9em;">Make sure the server is running on port 8080</p>
+                    </div>
+                `;
+            } finally {
+                loading.classList.remove('active');
+            }
+        }
+
+        function displayResults(data, autoExecute, showState) {
+            const results = document.getElementById('results');
+            let html = '';
+
+            // Status
+            html += `
+                <div class="section">
+                    <h3>📊 Status</h3>
+                    <p><strong>Command:</strong> ${escapeHtml(data.command)}</p>
+                    <p><strong>Mode:</strong> ${autoExecute ? '▶️ Execute' : '📋 Plan Only'}</p>
+                    <p><strong>Actions Parsed:</strong> ${data.actions?.length || 0}</p>
+                    <span class="status-badge ${data.status === 'success' ? 'status-success' : 'status-error'}">
+                        ${data.status.toUpperCase()}
+                    </span>
+                </div>
+            `;
+
+            // Actions
+            if (data.actions && data.actions.length > 0) {
+                html += `
+                    <div class="section">
+                        <h3>🎯 Planned Actions</h3>
+                `;
+                
+                data.actions.forEach((action, index) => {
+                    html += `
+                        <div class="action-card">
+                            <h4>${index + 1}. ${action.action.toUpperCase()}</h4>
+                            <div class="action-params">${JSON.stringify(action, null, 2)}</div>
+                        </div>
+                    `;
+                });
+                
+                html += `</div>`;
+            }
+
+            // Execution Results
+            if (autoExecute && data.results) {
+                html += `
+                    <div class="section">
+                        <h3>✅ Execution Results</h3>
+                `;
+                
+                data.results.forEach((result, index) => {
+                    const status = result.result.status;
+                    html += `
+                        <div class="action-card">
+                            <h4>${index + 1}. ${result.action.action.toUpperCase()}</h4>
+                            <p><strong>Message:</strong> ${escapeHtml(result.result.message)}</p>
+                            <span class="status-badge ${status === 'success' ? 'status-success' : 'status-error'}">
+                                ${status.toUpperCase()}
+                            </span>
+                            ${result.result.tags ? `
+                                <div class="tags">
+                                    ${result.result.tags.map(tag => `<span class="tag">${escapeHtml(tag)}</span>`).join('')}
+                                </div>
+                            ` : ''}
+                        </div>
+                    `;
+                });
+                
+                html += `</div>`;
+            }
+
+            // Updated State
+            if (showState && data.state) {
+                html += `
+                    <div class="section">
+                        <h3>🔄 Updated Stage State</h3>
+                        <div class="state-view">${syntaxHighlightJson(data.state)}</div>
+                    </div>
+                `;
+            }
+
+            results.innerHTML = html;
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function syntaxHighlightJson(json) {
+            let jsonStr = JSON.stringify(json, null, 2);
+            jsonStr = jsonStr.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            return jsonStr
+                .replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?)/g, (match) => {
+                    let cls = 'json-string';
+                    if (/:$/.test(match)) {
+                        cls = 'json-key';
+                    }
+                    return '<span class="' + cls + '">' + match + '</span>';
+                })
+                .replace(/\b(\d+)\b/g, '<span class="json-number">$1</span>');
+        }
+    </script>
+</body>
+</html>
