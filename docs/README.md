@@ -1,126 +1,103 @@
-# QAI Documentation
+# Aria - GitHub Pages Demo 🎭
 
-This directory contains all documentation for the QAI hybrid quantum-AI/ML workspace.
+Welcome to the **Aria Interactive 3D Character** demo hosted on GitHub Pages!
 
-## 📁 Documentation Structure
+## 🌐 Live Demo
 
-| Directory | Description |
-|-----------|-------------|
-| [guides/](guides/) | General guides, feature documentation, and improvement summaries |
-| [quickref/](quickref/) | Quick reference cards for rapid lookup |
-| [training/](training/) | LoRA fine-tuning, automated training, and evaluation guides |
-| [quantum/](quantum/) | Quantum computing, Azure Quantum, and hybrid ML documentation |
-| [database/](database/) | SQL integration, monitoring, and Cosmos DB setup |
-| [deployment/](deployment/) | Azure deployment, ML training, and production guides |
-| [aria/](aria/) | ARIA visual system and movement training documentation |
-| [architecture/](architecture/) | Phase improvements and architectural documentation |
+Visit the live demo at: **[https://bryan-roe.github.io/Aria/](https://bryan-roe.github.io/Aria/)**
 
-## 🚀 Quick Links
+## ✨ What You Can Do
 
-### Getting Started
-- [Quick Reference](quickref/QUICK_REFERENCE.md) - Essential commands at a glance
-- [Quick Start Chat](quickref/QUICK_START_CHAT.md) - Get chatting in minutes
+This is a **fully functional static demo** that works entirely in your browser:
 
-### Training
-- [AutoTrain README](training/AUTOTRAIN_README.md) - LoRA training orchestration
-- [Training Commands](quickref/TRAINING_COMMANDS_QUICKREF.md) - Training command cheat sheet
-- [Automated Pipeline](training/AUTOMATED_TRAINING_PIPELINE.md) - End-to-end automation
+### Character Controls
+- **Move Aria**: Use commands like "move left", "move right", "jump", "dance"
+- **Expressions**: Try "smile", "wave", "think", "surprised"
+- **3D Movement**: Navigate to waypoints in 3D space
+- **Chat Commands**: Use `/goto center`, `/circle`, `/spiral` for advanced movements
 
-### Quantum Computing
-- [Quantum AutoRun](quantum/QUANTUM_AUTORUN_README.md) - Quantum job orchestration
-- [Azure Quantum Examples](quantum/QUANTUM_AZURE_EXAMPLES.md) - Working examples
+### Object Interaction
+- **Toggle Objects**: Use the object manager buttons to add/remove items
+- **Drag & Drop**: Click and drag objects around the stage
+- **Pickup/Drop**: Click objects to pick them up or drop them
+- **Throw**: Throw objects in different directions
 
-### Database & Monitoring
-- [SQL Quickref](quickref/SQL_QUICKREF.md) - SQL integration quick reference
-- [Database Setup](database/DATABASE_SQL_SETUP.md) - Database configuration
+### Quick Commands
+Try these in the command input:
+- `wave` - Aria waves at you
+- `jump` - Aria jumps with excitement
+- `dance` - Aria performs a dance routine
+- `move to front-left` - Navigate to a waypoint
+- `spin` - Aria spins around
+- `smile` - Change facial expression
 
-### Deployment
-- [Azure Deployment](deployment/AZURE_ML_TRAINING_GUIDE.md) - Deploy to Azure ML
-- [Production Plan](deployment/PRODUCTION_DEPLOYMENT_PLAN.md) - Production readiness
+## 🎯 Features
 
-## 📋 By Category
+- ✅ **3D CSS Animations** - Smooth character movements with depth
+- ✅ **Articulated Joints** - Realistic arm and leg movements
+- ✅ **Eye Tracking** - Eyes follow your cursor
+- ✅ **Object System** - Interactive objects you can manipulate
+- ✅ **Waypoint Navigation** - Predefined stage positions
+- ✅ **Expression System** - Multiple facial expressions
+- ✅ **Gesture System** - Wave, dance, jump, and more
+- ✅ **100% Offline** - Works without any backend server
 
-<details>
-<summary>Guides (35+ documents)</summary>
+## 🔧 Technical Details
 
-See [guides/](guides/) for detailed feature documentation and improvement summaries.
+This demo runs in **static mode** with the following characteristics:
 
-</details>
+- **No Backend Required**: All animations and logic run client-side
+- **Local Command Processing**: Commands are parsed using JavaScript
+- **Graceful Degradation**: API calls fail silently with fallback behavior
+- **Pure HTML/CSS/JS**: No frameworks or dependencies needed
 
-<details>
-<summary>Quick References (10 documents)</summary>
+### Files
+- `index.html` - Main interface with character and controls
+- `aria_controller.js` - Client-side logic for animations and interactions
 
-- [AUTOMATION_QUICKREF.md](quickref/AUTOMATION_QUICKREF.md)
-- [BATCH_EVAL_QUICKREF.md](quickref/BATCH_EVAL_QUICKREF.md)
-- [DATASETS_QUICK_REF.md](quickref/DATASETS_QUICK_REF.md)
-- [QAI_HUB_QUICKREF.md](quickref/QAI_HUB_QUICKREF.md)
-- [QUICK_REFERENCE.md](quickref/QUICK_REFERENCE.md)
-- [QUICK_START_CHAT.md](quickref/QUICK_START_CHAT.md)
-- [SQL_QUICKREF.md](quickref/SQL_QUICKREF.md)
-- [TRAINING_COMMANDS_QUICKREF.md](quickref/TRAINING_COMMANDS_QUICKREF.md)
-- [TRAINING_TAB_QUICKREF.md](quickref/TRAINING_TAB_QUICKREF.md)
-- [VSCODE_TESTING_QUICKREF.md](quickref/VSCODE_TESTING_QUICKREF.md)
+## 🚀 Full Project
 
-</details>
+This is a simplified demo version. The full Aria project includes:
 
-<details>
-<summary>Training (10 documents)</summary>
+- **AI-Powered Commands**: Natural language processing with Azure OpenAI
+- **Real-time Backend**: Python server with WebSocket support  
+- **LoRA Fine-tuning**: Custom AI model training
+- **Quantum ML Integration**: Quantum-classical hybrid training
+- **Advanced Object System**: Physics and collision detection
+- **Multi-character Support**: Multiple AI characters on stage
 
-- [AUTOMATED_TRAINING_PIPELINE.md](training/AUTOMATED_TRAINING_PIPELINE.md)
-- [AUTONOMOUS_TRAINING_README.md](training/AUTONOMOUS_TRAINING_README.md)
-- [AUTOTRAIN_README.md](training/AUTOTRAIN_README.md)
-- [BATCH_EVALUATION_GUIDE.md](training/BATCH_EVALUATION_GUIDE.md)
-- [EVALUATION_AUTORUN_README.md](training/EVALUATION_AUTORUN_README.md)
-- [EXTENDED_MARATHON_TRAINING.md](training/EXTENDED_MARATHON_TRAINING.md)
-- [FAST_TRAINING_GUIDE.md](training/FAST_TRAINING_GUIDE.md)
-- [TRAINING_STARTED.md](training/TRAINING_STARTED.md)
-- [TRAINING_TAB_ENHANCEMENTS.md](training/TRAINING_TAB_ENHANCEMENTS.md)
-- [TRAINING_VALIDATION_RESULTS.md](training/TRAINING_VALIDATION_RESULTS.md)
+Check out the full project: **[github.com/Bryan-Roe/Aria](https://github.com/Bryan-Roe/Aria)**
 
-</details>
+## 📚 Documentation
 
-<details>
-<summary>Quantum (4 documents)</summary>
+- [Main Project README](https://github.com/Bryan-Roe/Aria#readme)
+- [Aria Web Interface Guide](https://github.com/Bryan-Roe/Aria/tree/main/aria_web)
+- [QAI Documentation Index](QAI_DOCS_INDEX.md) - Technical documentation
+- [API Documentation](https://github.com/Bryan-Roe/Aria/blob/main/aria_web/README.md)
 
-- [AZURE_QUANTUM_SUCCESS.md](quantum/AZURE_QUANTUM_SUCCESS.md)
-- [QUANTUM_AUTORUN_README.md](quantum/QUANTUM_AUTORUN_README.md)
-- [QUANTUM_AZURE_EXAMPLES.md](quantum/QUANTUM_AZURE_EXAMPLES.md)
-- [QUANTUM_WEB_APP_COMPLETE.md](quantum/QUANTUM_WEB_APP_COMPLETE.md)
+## 📝 Usage Tips
 
-</details>
+1. **Start Simple**: Try basic commands like "jump" or "wave"
+2. **Explore Waypoints**: Use `/waypoints` in chat to see available positions
+3. **Combine Actions**: Try "move left and wave" for multiple actions
+4. **Drag Objects**: Click and drag any emoji object around the stage
+5. **Use Quick Buttons**: Object manager buttons for quick toggles
 
-<details>
-<summary>Database (7 documents)</summary>
+## 🤝 Contributing
 
-- [AZURE_MONITOR_SQL_SETUP.md](database/AZURE_MONITOR_SQL_SETUP.md)
-- [DATABASE_INTEGRATION_GUIDE.md](database/DATABASE_INTEGRATION_GUIDE.md)
-- [DATABASE_INTEGRATION_SUMMARY.md](database/DATABASE_INTEGRATION_SUMMARY.md)
-- [DATABASE_SQL_SETUP.md](database/DATABASE_SQL_SETUP.md)
-- [SQL_AUTOMATION_COMPLETE.md](database/SQL_AUTOMATION_COMPLETE.md)
-- [SQL_INTEGRATION_COMPLETE.md](database/SQL_INTEGRATION_COMPLETE.md)
-- [TELEMETRY_COSMOS_ENABLEMENT.md](database/TELEMETRY_COSMOS_ENABLEMENT.md)
+We welcome contributions! Visit the [main repository](https://github.com/Bryan-Roe/Aria) to:
 
-</details>
+- Report bugs
+- Suggest features
+- Submit pull requests
+- Join discussions
 
-<details>
-<summary>Deployment (4 documents)</summary>
+## 📄 License
 
-- [AZURE_DEPLOYMENT_ANIME_AVATAR.md](deployment/AZURE_DEPLOYMENT_ANIME_AVATAR.md)
-- [AZURE_ML_TRAINING_GUIDE.md](deployment/AZURE_ML_TRAINING_GUIDE.md)
-- [DEPLOY_CHAT_TO_AZURE.md](deployment/DEPLOY_CHAT_TO_AZURE.md)
-- [PRODUCTION_DEPLOYMENT_PLAN.md](deployment/PRODUCTION_DEPLOYMENT_PLAN.md)
-
-</details>
-
-<details>
-<summary>ARIA (3 documents)</summary>
-
-- [ARIA_MOVEMENT_COMPLETE.md](aria/ARIA_MOVEMENT_COMPLETE.md)
-- [ARIA_MOVEMENT_TRAINING.md](aria/ARIA_MOVEMENT_TRAINING.md)
-- [ARIA_VISUAL_SYSTEM.md](aria/ARIA_VISUAL_SYSTEM.md)
-
-</details>
+This project is open source. See the [LICENSE](https://github.com/Bryan-Roe/Aria/blob/main/LICENSE) file for details.
 
 ---
 
-**Last Updated:** November 2025
+**Enjoy playing with Aria!** 🎭✨
+
+If you encounter any issues, please [open an issue](https://github.com/Bryan-Roe/Aria/issues) on GitHub.
