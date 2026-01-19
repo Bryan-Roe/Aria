@@ -10,19 +10,24 @@ autonomous_mode:
 data_collection:
   auto_discover: true  # Automatically scan for new datasets
   min_datasets: 500  # Minimum datasets to maintain
-  quality_threshold: 50  # Minimum quality score (0-100)
+  quality_threshold: 60  # Minimum quality score (0-100) - increased for better quality
   categories:
     - quantum
     - chat
     - vision
   sources:
-    - openml
-    - huggingface
-    - kaggle
-  parallel_downloads: 10  # Concurrent downloads
+    - sklearn       # Fast, built-in datasets (always available)
+    - openml        # Large repository of ML datasets
+    - huggingface   # High-quality instruction/chat datasets
+    - kaggle        # Community datasets (requires API key)
+    - uci           # UCI ML Repository datasets
+  parallel_downloads: 15  # Concurrent downloads - increased for faster collection
+  auto_augment: true  # Automatically augment datasets with variations
+  validate_on_download: true  # Validate datasets immediately after download
 
 training:
   auto_train: true
+  device: cpu  # Use GPU: cuda, mps (Apple Metal), or cpu
   epochs_progression:  # Progressive epoch training
     - 25
     - 50
@@ -32,6 +37,10 @@ training:
   min_accuracy_threshold: 0.75
   adaptive_epochs: true  # Automatically adjust epochs based on performance
   checkpoint_frequency: 10  # Save checkpoint every N datasets
+  mixed_precision: true  # Use mixed precision (FP16 + FP32) for faster GPU training
+  gradient_accumulation_steps: 4  # Accumulate gradients for better GPU utilization
+  max_gpu_memory_gb: 0  # 0 = auto-detect and use all available
+  max_cpu_cores: 0  # 0 = use all available cores for data loading
 
 optimization:
   auto_tune: true  # Enable automatic hyperparameter tuning
@@ -57,7 +66,7 @@ learning_strategy:
 
 resource_management:
   max_gpu_memory_gb: 0  # 0 = use all available
-  device: cuda  # Force GPU training
+  device: cpu  # Force GPU training
   max_cpu_cores: 0  # 0 = use all available (GPU preferred)
   disk_space_warning_gb: 50  # Alert when disk space below this
 
