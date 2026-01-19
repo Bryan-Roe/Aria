@@ -119,7 +119,7 @@ The following existing scripts already have evaluation support:
 - ✅ `scripts/evaluate_quantum_model.py` — Quantum classifier evaluation
 - ✅ `scripts/evaluate_azure_model.py` — Azure OpenAI evaluation
 - ✅ `scripts/batch_evaluator.py` — Parallel multi-model evaluation
-- ✅ `scripts/evaluation_autorun.py` — YAML-driven orchestrator
+- ✅ `scripts/evaluation/evaluation_autorun.py` — YAML-driven orchestrator
 - ✅ `scripts/results_exporter.py` — Multi-format export
 - ✅ `scripts/training_analytics.py` — Performance trends
 - ✅ `scripts/metrics_ranker.py` — Model ranking

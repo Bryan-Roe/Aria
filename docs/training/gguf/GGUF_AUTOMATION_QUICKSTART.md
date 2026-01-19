@@ -21,7 +21,7 @@
 ### 1️⃣ Run Quick Training → GGUF Pipeline
 ```bash
 cd /workspaces/AI
-python scripts/gguf_training_automation.py --quick
+python scripts/training/gguf_training_automation.py --quick
 ```
 
 **What happens:**
@@ -33,7 +33,7 @@ python scripts/gguf_training_automation.py --quick
 
 ### 2️⃣ Run Full Pipeline (All Models)
 ```bash
-python scripts/gguf_training_automation.py --full
+python scripts/training/gguf_training_automation.py --full
 ```
 
 **Includes:**
@@ -44,7 +44,7 @@ python scripts/gguf_training_automation.py --full
 
 ### 3️⃣ Dry-Run (Show What Would Execute)
 ```bash
-python scripts/gguf_training_automation.py --quick --dry-run
+python scripts/training/gguf_training_automation.py --quick --dry-run
 ```
 
 Shows all steps without executing them.
@@ -55,7 +55,7 @@ Shows all steps without executing them.
 
 ### Convert Existing LoRA Model to GGUF
 ```bash
-python scripts/gguf_training_automation.py \
+python scripts/training/gguf_training_automation.py \
   --convert-only data_out/lora_training/phi35/checkpoint-100
 ```
 
@@ -63,7 +63,7 @@ Skips training, only runs conversion → quantization → validation → deploym
 
 ### Validate GGUF File
 ```bash
-python scripts/gguf_training_automation.py --validate deployed_models/phi35-latest.gguf
+python scripts/training/gguf_training_automation.py --validate deployed_models/phi35-latest.gguf
 ```
 
 Checks:
@@ -74,7 +74,7 @@ Checks:
 
 ### Specific Jobs Only
 ```bash
-python scripts/gguf_training_automation.py --jobs phi35_quick_gguf qwen25_quick_gguf
+python scripts/training/gguf_training_automation.py --jobs phi35_quick_gguf qwen25_quick_gguf
 ```
 
 ---
@@ -82,7 +82,7 @@ python scripts/gguf_training_automation.py --jobs phi35_quick_gguf qwen25_quick_
 ## Pipeline Phases
 
 ### Phase 1: Training
-- Uses existing `scripts/autotrain.py`
+- Uses existing `scripts/training/autotrain.py`
 - Trains LoRA adapters on your dataset
 - Output: `data_out/lora_training/<job_name>/`
 
@@ -238,7 +238,7 @@ python scripts/visualize_gguf_simple.py \
 ### 🔍 Debug Mode
 ```bash
 # Run with full logging
-python scripts/gguf_training_automation.py --quick 2>&1 | tee debug.log
+python scripts/training/gguf_training_automation.py --quick 2>&1 | tee debug.log
 
 # Check phase logs individually
 cat data_out/gguf_training/phi35_quick_gguf/*/training.log
@@ -299,7 +299,7 @@ jobs:
 ### Daily GGUF Training (Linux/Mac)
 ```bash
 # Add to crontab
-0 2 * * * cd /workspaces/AI && python scripts/gguf_training_automation.py --quick >> data_out/gguf_training.log 2>&1
+0 2 * * * cd /workspaces/AI && python scripts/training/gguf_training_automation.py --quick >> data_out/gguf_training.log 2>&1
 ```
 
 ### Windows Task Scheduler
@@ -328,8 +328,8 @@ Tasks: Run Task → GGUF: Validate Model
 
 ## Next Steps
 
-1. **First run:** `python scripts/gguf_training_automation.py --quick --dry-run`
-2. **Then execute:** `python scripts/gguf_training_automation.py --quick`
+1. **First run:** `python scripts/training/gguf_training_automation.py --quick --dry-run`
+2. **Then execute:** `python scripts/training/gguf_training_automation.py --quick`
 3. **Check results:** Open `data_out/gguf_training/summary.json`
 4. **Use model:** `python talk-to-ai/src/chat_cli.py --provider lora --adapter-path deployed_models/phi35_quick_gguf-latest.gguf --once "test"`
 5. **Automate:** Add to cron/scheduler for continuous training
@@ -339,6 +339,6 @@ Tasks: Run Task → GGUF: Validate Model
 ## See Also
 
 - [GPU_TRAINING_SUMMARY.md](../GPU_TRAINING_SUMMARY.md) — GPU setup & progressive training
-- [scripts/autotrain.py](../scripts/autotrain.py) — LoRA training orchestrator
+- [scripts/training/autotrain.py](../scripts/training/autotrain.py) — LoRA training orchestrator
 - [scripts/visualize_gguf_simple.py](../scripts/visualize_gguf_simple.py) — GGUF inspection tool
 - [config/training/gguf_training.yaml](../config/training/gguf_training.yaml) — Configuration

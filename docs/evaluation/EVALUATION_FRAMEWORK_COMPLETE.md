@@ -208,7 +208,7 @@ Aria Workspace/
 │   ├── scripts/evaluate_quantum_model.py
 │   ├── scripts/evaluate_azure_model.py
 │   ├── scripts/batch_evaluator.py
-│   ├── scripts/evaluation_autorun.py
+│   ├── scripts/evaluation/evaluation_autorun.py
 │   ├── scripts/results_exporter.py
 │   ├── scripts/training_analytics.py
 │   └── scripts/metrics_ranker.py

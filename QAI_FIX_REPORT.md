@@ -9,9 +9,9 @@ Fixed 5 critical issues with Quantum-AI infrastructure by recovering deleted orc
 
 ### 1. **Missing Orchestrator Scripts** ✅ FIXED
 **Problem**: Three critical orchestrator scripts were accidentally deleted in a recent commit:
-- `scripts/quantum_autorun.py` 
-- `scripts/train_and_promote.py`
-- `scripts/autonomous_training_orchestrator.py`
+- `scripts/evaluation/quantum_autorun.py` 
+- `scripts/training/train_and_promote.py`
+- `scripts/training/autonomous_training_orchestrator.py`
 
 These scripts are essential for:
 - Running quantum training jobs (local & Azure)
@@ -94,16 +94,16 @@ Currently not installed in base environment (optional). Installation instruction
 
 ### Syntax & Compilation ✅
 ```
-✓ scripts/quantum_autorun.py       (no errors)
-✓ scripts/train_and_promote.py      (no errors)
-✓ scripts/autonomous_training_orchestrator.py (no errors)
+✓ scripts/evaluation/quantum_autorun.py       (no errors)
+✓ scripts/training/train_and_promote.py      (no errors)
+✓ scripts/training/autonomous_training_orchestrator.py (no errors)
 ```
 
 ### File & Directory Checks ✅
 ```
-✓ scripts/quantum_autorun.py                  (314 lines)
-✓ scripts/train_and_promote.py                (333 lines)
-✓ scripts/autonomous_training_orchestrator.py (512 lines)
+✓ scripts/evaluation/quantum_autorun.py                  (314 lines)
+✓ scripts/training/train_and_promote.py                (333 lines)
+✓ scripts/training/autonomous_training_orchestrator.py (512 lines)
 ✓ quantum-ai/ directory                       (exists)
 ✓ quantum-ai/src/ directory                   (exists)
 ✓ quantum-ai/quantum_mcp_server.py            (intact)
@@ -113,7 +113,7 @@ Currently not installed in base environment (optional). Installation instruction
 
 ### Orchestrator Dry-Run Tests ✅
 ```
-✓ python scripts/quantum_autorun.py --dry-run
+✓ python scripts/evaluation/quantum_autorun.py --dry-run
   Status: SUCCESS
   Output: Configuration validated, no actual execution
 ```
@@ -131,28 +131,28 @@ Currently not installed in base environment (optional). Installation instruction
 ### Run Quantum Training
 ```bash
 # Dry-run validation (no execution)
-python scripts/quantum_autorun.py --dry-run
+python scripts/evaluation/quantum_autorun.py --dry-run
 
 # Run specific job
-python scripts/quantum_autorun.py --job heart_quick
+python scripts/evaluation/quantum_autorun.py --job heart_quick
 
 # Run all enabled jobs
-python scripts/quantum_autorun.py
+python scripts/evaluation/quantum_autorun.py
 ```
 
 ### Train & Promote Models
 ```bash
 # Quick training cycle
-python scripts/train_and_promote.py --quick --auto-promote
+python scripts/training/train_and_promote.py --quick --auto-promote
 
 # Standard training
-python scripts/train_and_promote.py --standard --auto-promote
+python scripts/training/train_and_promote.py --standard --auto-promote
 ```
 
 ### Autonomous Training
 ```bash
 # Start autonomous learning (infinite cycles)
-nohup python scripts/autonomous_training_orchestrator.py > data_out/autonomous_training.log 2>&1 &
+nohup python scripts/training/autonomous_training_orchestrator.py > data_out/autonomous_training.log 2>&1 &
 
 # Trigger immediate cycle
 pkill -USR1 -f autonomous_training
@@ -174,9 +174,9 @@ pip install -r quantum-ai/mcp-requirements.txt
 ```
 
 ## Files Modified
-- **[/workspaces/AI/scripts/quantum_autorun.py](scripts/quantum_autorun.py)** - Fixed docstring escape sequence
-- **[/workspaces/AI/scripts/train_and_promote.py](scripts/train_and_promote.py)** - Restored from git (no changes)
-- **[/workspaces/AI/scripts/autonomous_training_orchestrator.py](scripts/autonomous_training_orchestrator.py)** - Restored from git (no changes)
+- **[/workspaces/AI/scripts/evaluation/quantum_autorun.py](scripts/evaluation/quantum_autorun.py)** - Fixed docstring escape sequence
+- **[/workspaces/AI/scripts/training/train_and_promote.py](scripts/training/train_and_promote.py)** - Restored from git (no changes)
+- **[/workspaces/AI/scripts/training/autonomous_training_orchestrator.py](scripts/training/autonomous_training_orchestrator.py)** - Restored from git (no changes)
 
 ## Verification Checklist
 - [x] All orchestrator scripts recovered from git
@@ -198,7 +198,7 @@ pip install -r quantum-ai/mcp-requirements.txt
 
 2. Start autonomous training if not already running:
    ```bash
-   python scripts/autonomous_training_orchestrator.py
+   python scripts/training/autonomous_training_orchestrator.py
    ```
 
 ### Recommended

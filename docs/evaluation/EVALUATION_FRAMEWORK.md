@@ -939,4 +939,4 @@ Use evaluation results to:
 - Generate reports for stakeholders
 - Guide automated model promotion
 
-For questions or issues, check the [Troubleshooting](#troubleshooting) section or review `scripts/evaluation_autorun.py --help`.
+For questions or issues, check the [Troubleshooting](#troubleshooting) section or review `scripts/evaluation/evaluation_autorun.py --help`.

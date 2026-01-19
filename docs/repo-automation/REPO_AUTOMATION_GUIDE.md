@@ -33,7 +33,7 @@ The automation system now uses a lightweight component registry with dynamic ena
 ### 2. Autonomous Training System (`training`)
 
 - **What**: Continuous adaptive cycles (dataset discovery + optional download + distributed benchmark training + performance analysis)
-- **Script**: `scripts/autonomous_training_orchestrator.py`
+- **Script**: `scripts/training/autonomous_training_orchestrator.py`
 - **Health Check Interval**: 5min
 - **Auto-Restart**: Yes
 - **Integrated**: Dataset auto-discovery (replaces standalone dataset component)
@@ -42,7 +42,7 @@ The automation system now uses a lightweight component registry with dynamic ena
 ### 3. Quantum Computing Workflows (`quantum`)
 
 - **What**: Quantum ML / job submission orchestrator
-- **Script**: `scripts/quantum_autorun.py`
+- **Script**: `scripts/evaluation/quantum_autorun.py`
 - **Enabled When**: `quantum_autorun.yaml` present at repo root
 - **Auto-Restart**: No (jobs are typically batch / scheduled)
 - **Dependencies**: (Add Azure Quantum SDK when environment configured)
@@ -50,7 +50,7 @@ The automation system now uses a lightweight component registry with dynamic ena
 ### 4. Model Evaluation System (`evaluation`)
 
 - **What**: Batch model evaluation against curated test sets
-- **Script**: `scripts/evaluation_autorun.py`
+- **Script**: `scripts/evaluation/evaluation_autorun.py`
 - **Enabled When**: `evaluation_autorun.yaml` present at repo root
 - **Dependencies**: `training` component must be running
 - **Auto-Restart**: No (designed for batch cycles)
@@ -364,7 +364,7 @@ The repo automation works with the existing master orchestrator:
 
 ```bash
 # Master orchestrator runs scheduled workflows
-python scripts/master_orchestrator.py --schedule
+python scripts/orchestrators/master_orchestrator.py --schedule
 
 # Repo automation provides continuous operation
 python scripts/repo_automation.py --start --daemon
@@ -424,7 +424,7 @@ def upload_to_cloud(backup_path: Path):
 
 - **Main Docs**: [README.md](../README.md)
 - **Aria Automation**: [ARIA_AUTOMATION_GUIDE.md](ARIA_AUTOMATION_GUIDE.md)
-- **Master Orchestrator**: `scripts/master_orchestrator.py --help`
+- **Master Orchestrator**: `scripts/orchestrators/master_orchestrator.py --help`
 - **Component Docs**: See individual script help messages
 
 ## License

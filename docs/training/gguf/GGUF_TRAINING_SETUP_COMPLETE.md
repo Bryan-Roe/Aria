@@ -5,7 +5,7 @@
 I've automated GGUF training for your Aria platform with a complete, production-ready pipeline:
 
 ### 1. **Main Orchestrator Script**
-📁 `scripts/gguf_training_automation.py` (500+ lines)
+📁 `scripts/training/gguf_training_automation.py` (500+ lines)
 
 **Features:**
 - ✅ Automated 5-phase pipeline (train → convert → quantize → validate → deploy)
@@ -45,12 +45,12 @@ Added to `.vscode/tasks.json`:
 ### Option A: Dry-Run (See What Would Happen)
 ```bash
 cd /workspaces/AI
-python scripts/gguf_training_automation.py --quick --dry-run
+python scripts/training/gguf_training_automation.py --quick --dry-run
 ```
 
 ### Option B: Quick Training (One Model)
 ```bash
-python scripts/gguf_training_automation.py --quick
+python scripts/training/gguf_training_automation.py --quick
 ```
 
 **What happens:**
@@ -64,7 +64,7 @@ python scripts/gguf_training_automation.py --quick
 
 ### Option C: Full Pipeline (All Models)
 ```bash
-python scripts/gguf_training_automation.py --full
+python scripts/training/gguf_training_automation.py --full
 ```
 
 **Trains & deploys:**
@@ -84,7 +84,7 @@ python scripts/gguf_training_automation.py --full
 │                                                          │
 │ 1️⃣  TRAINING (5-10 min)                                 │
 │    └─ Trains LoRA adapter on your dataset              │
-│    └─ Uses: scripts/autotrain.py                       │
+│    └─ Uses: scripts/training/autotrain.py                       │
 │    └─ Output: Trained model weights                    │
 │                                                          │
 │ 2️⃣  GGUF CONVERSION (2-5 min)                           │
@@ -173,28 +173,28 @@ Run from Command Palette (`Ctrl+Shift+P`):
 
 ### 1. Test the System (Safe)
 ```bash
-python scripts/gguf_training_automation.py --quick --dry-run
+python scripts/training/gguf_training_automation.py --quick --dry-run
 # Shows: "Would execute: ... [DRY-RUN]"
 # Doesn't actually run anything
 ```
 
 ### 2. Train & Deploy One Model
 ```bash
-python scripts/gguf_training_automation.py --quick
+python scripts/training/gguf_training_automation.py --quick
 # Trains, converts, quantizes, validates, deploys
 # Model ready at: deployed_models/phi35_quick_gguf-latest.gguf
 ```
 
 ### 3. Convert Existing LoRA Model
 ```bash
-python scripts/gguf_training_automation.py \
+python scripts/training/gguf_training_automation.py \
   --convert-only data_out/lora_training/my_model/checkpoint-100
 # Skips training, goes straight to conversion
 ```
 
 ### 4. Validate GGUF File
 ```bash
-python scripts/gguf_training_automation.py \
+python scripts/training/gguf_training_automation.py \
   --validate deployed_models/phi35_quick_gguf-latest.gguf
 # Checks file integrity and format compliance
 ```
@@ -287,12 +287,12 @@ python scripts/visualize_gguf_simple.py deployed_models/phi35_quick_gguf-latest.
 
 ### 1. Try It Now (Quick)
 ```bash
-python scripts/gguf_training_automation.py --quick --dry-run
+python scripts/training/gguf_training_automation.py --quick --dry-run
 ```
 
 ### 2. Run Full Pipeline
 ```bash
-python scripts/gguf_training_automation.py --quick
+python scripts/training/gguf_training_automation.py --quick
 ```
 
 ### 3. Check Results
@@ -311,7 +311,7 @@ python talk-to-ai/src/chat_cli.py \
 ### 5. Automate (Optional)
 Add to cron for daily training:
 ```bash
-0 2 * * * cd /workspaces/AI && python scripts/gguf_training_automation.py --quick
+0 2 * * * cd /workspaces/AI && python scripts/training/gguf_training_automation.py --quick
 ```
 
 ---
@@ -320,7 +320,7 @@ Add to cron for daily training:
 
 | File | Status | Purpose |
 |------|--------|---------|
-| `scripts/gguf_training_automation.py` | ✨ NEW | Main orchestrator (500+ lines) |
+| `scripts/training/gguf_training_automation.py` | ✨ NEW | Main orchestrator (500+ lines) |
 | `config/training/gguf_training.yaml` | ✨ NEW | GGUF job configuration |
 | `.vscode/tasks.json` | 🔄 UPDATED | Added 5 new tasks |
 | `GGUF_AUTOMATION_QUICKSTART.md` | ✨ NEW | User guide |
@@ -357,12 +357,12 @@ Binary format optimized for inference engines (llama.cpp, etc.)
 - `GGUF_AUTOMATION_QUICKSTART.md` — 5-minute quick start
 - `GGUF_TRAINING_INTEGRATION_GUIDE.md` — Deep technical guide
 - `GPU_TRAINING_SUMMARY.md` — GPU setup & optimization
-- `scripts/gguf_training_automation.py` — Fully documented source code
+- `scripts/training/gguf_training_automation.py` — Fully documented source code
 
 🎯 **Quick commands:**
 ```bash
 # See all available commands
-python scripts/gguf_training_automation.py --help
+python scripts/training/gguf_training_automation.py --help
 
 # Check existing GGUF file
 python scripts/visualize_gguf_simple.py <file.gguf>
@@ -379,7 +379,7 @@ Everything is ready to automate GGUF training. Start with:
 
 ```bash
 cd /workspaces/AI
-python scripts/gguf_training_automation.py --quick --dry-run
+python scripts/training/gguf_training_automation.py --quick --dry-run
 ```
 
 Or use VS Code: Press `Ctrl+Shift+P` → Type `GGUF`

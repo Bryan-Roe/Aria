@@ -32,12 +32,12 @@ def validate_workflow_dependencies() -> List[Tuple[str, str, bool, str]]:
     checks = []
     
     # Auto Validation workflow
-    checks.append(('Auto Validation', 'scripts/auto_bootstrap.py', 
-                   check_file_exists('scripts/auto_bootstrap.py'), 'Required'))
+    checks.append(('Auto Validation', 'scripts/orchestrators/auto_bootstrap.py', 
+                   check_file_exists('scripts/orchestrators/auto_bootstrap.py'), 'Required'))
     
     # CI Pipeline workflow
-    checks.append(('CI Pipeline', 'scripts/ci_orchestrator.py',
-                   check_file_exists('scripts/ci_orchestrator.py'), 'Required'))
+    checks.append(('CI Pipeline', 'scripts/orchestrators/ci_orchestrator.py',
+                   check_file_exists('scripts/orchestrators/ci_orchestrator.py'), 'Required'))
     checks.append(('CI Pipeline', 'scripts/test_runner.py',
                    check_file_exists('scripts/test_runner.py'), 'Required'))
     checks.append(('CI Pipeline', 'scripts/training/autotrain.py',

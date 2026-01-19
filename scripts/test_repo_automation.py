@@ -36,9 +36,9 @@ def test_file_structure():
         (REPO_ROOT / "scripts/start_repo_automation.sh", "Startup wrapper"),
         (REPO_ROOT / "scripts/backup_manager.py", "Backup manager"),
         (REPO_ROOT / "scripts/aria_automation.py", "Aria automation"),
-        (REPO_ROOT / "scripts/autotrain.py", "Training orchestrator"),
-        (REPO_ROOT / "scripts/quantum_autorun.py", "Quantum orchestrator"),
-        (REPO_ROOT / "scripts/evaluation_autorun.py", "Evaluation orchestrator"),
+        (REPO_ROOT / "scripts/training/autotrain.py", "Training orchestrator"),
+        (REPO_ROOT / "scripts/evaluation/quantum_autorun.py", "Quantum orchestrator"),
+        (REPO_ROOT / "scripts/evaluation/evaluation_autorun.py", "Evaluation orchestrator"),
         (REPO_ROOT / "REPO_AUTOMATION_GUIDE.md", "Documentation"),
     ]
 
@@ -181,9 +181,9 @@ def test_integration():
     # Check component scripts exist
     component_scripts = [
         "scripts/aria_automation.py",
-        "scripts/autotrain.py",
-        "scripts/quantum_autorun.py",
-        "scripts/evaluation_autorun.py",
+        "scripts/training/autotrain.py",
+        "scripts/evaluation/quantum_autorun.py",
+        "scripts/evaluation/evaluation_autorun.py",
     ]
 
     all_exist = True

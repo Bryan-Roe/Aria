@@ -210,7 +210,7 @@ python scripts/model_deployer.py --deploy-best
 
 ### 4. Auto-promote with health checks
 ```bash
-python scripts/train_and_promote.py --full --auto-promote
+python scripts/training/train_and_promote.py --full --auto-promote
 ```
 
 ---

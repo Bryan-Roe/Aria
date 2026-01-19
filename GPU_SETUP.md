@@ -30,11 +30,11 @@ python -c "import torch; print(f'GPU name: {torch.cuda.get_device_name(0) if tor
 python scripts/automated_training_pipeline.py --quick
 
 # Full AutoTrain job
-python scripts/autotrain.py --dry-run  # Validate first
-python scripts/autotrain.py             # Run all jobs
+python scripts/training/autotrain.py --dry-run  # Validate first
+python scripts/training/autotrain.py             # Run all jobs
 
 # Autonomous training (continuous cycles)
-nohup python scripts/autonomous_training_orchestrator.py > data_out/autonomous_training.log 2>&1 &
+nohup python scripts/training/autonomous_training_orchestrator.py > data_out/autonomous_training.log 2>&1 &
 ```
 
 ### Monitor GPU Usage

@@ -473,6 +473,150 @@
         "reveal": "always",
         "panel": "dedicated"
       }
+    },
+    {
+      "label": "Monitor: Auto Ops Dashboard",
+      "type": "shell",
+      "command": "python",
+      "args": ["scripts/monitoring/auto_ops_dashboard.py"],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      }
+    },
+    {
+      "label": "Monitor: Auto Ops (Watch)",
+      "type": "shell",
+      "command": "python",
+      "args": ["scripts/monitoring/auto_ops_dashboard.py", "--watch"],
+      "isBackground": true,
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      }
+    },
+    {
+      "label": "Monitor: Auto Ops (Problems Only)",
+      "type": "shell",
+      "command": "python",
+      "args": ["scripts/monitoring/auto_ops_dashboard.py", "--problems"],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      }
+    },
+    {
+      "label": "Monitor: Auto Ops (Compact)",
+      "type": "shell",
+      "command": "python",
+      "args": ["scripts/monitoring/auto_ops_dashboard.py", "--compact"],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      }
+    },
+    {
+      "label": "Monitor: Auto Ops (Export JSON)",
+      "type": "shell",
+      "command": "python",
+      "args": ["scripts/monitoring/auto_ops_dashboard.py", "--export"],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
+    },
+    {
+      "label": "Monitor: Auto Ops Quick Ref",
+      "type": "shell",
+      "command": "python",
+      "args": ["scripts/monitoring/auto_ops_quick_ref.py"],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      }
+    },
+    {
+      "label": "Monitor: Dashboard Server (VS Code)",
+      "type": "shell",
+      "command": "python",
+      "args": ["scripts/monitoring/vs_code_server.py"],
+      "isBackground": true,
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "reveal": "silent",
+        "panel": "shared"
+      },
+      "problemMatcher": {
+        "pattern": {
+          "regexp": "^.*$",
+          "file": 1,
+          "location": 2,
+          "message": 3
+        },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "^.*Server starting.*",
+          "endsPattern": "^.*Ctrl\\+C to stop.*"
+        }
+      }
+    },
+    {
+      "label": "Monitor: Alert Monitor (Background)",
+      "type": "shell",
+      "command": "python",
+      "args": ["scripts/monitoring/vs_code_alert_monitor.py"],
+      "isBackground": true,
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "reveal": "silent",
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Monitor: Start Full VS Code Suite",
+      "dependsOn": [
+        "Monitor: Dashboard Server (VS Code)",
+        "Monitor: Alert Monitor (Background)"
+      ],
+      "dependsOrder": "parallel",
+      "presentation": {
+        "reveal": "silent"
+      }
+    },
+    {
+      "label": "Monitor: Quick Setup (Interactive Menu)",
+      "type": "shell",
+      "command": "python",
+      "args": [
+        "scripts/monitoring/vscode_quickstart.py"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "group": "none",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "panel": "new"
+      }
     }
   ],
   "inputs": [

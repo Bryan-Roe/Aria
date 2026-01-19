@@ -43,7 +43,7 @@ All training/quantum jobs are YAML-driven orchestrators in `scripts/`:
 
 ### Execution Protocol
 
-1. **Always dry-run first**: `python scripts/autotrain.py --dry-run`
+1. **Always dry-run first**: `python scripts/training/autotrain.py --dry-run`
 2. **Consume status.json**: Read `data_out/<orchestrator>/status.json`
 3. **Respect data immutability**: Read-only `datasets/`, write-only `data_out/`
 
@@ -51,14 +51,14 @@ All training/quantum jobs are YAML-driven orchestrators in `scripts/`:
 
 ```bash
 # Orchestrator dry-runs
-python scripts/autotrain.py --dry-run
-python scripts/quantum_autorun.py --dry-run
+python scripts/training/autotrain.py --dry-run
+python scripts/evaluation/quantum_autorun.py --dry-run
 
 # Quick LoRA training
 python scripts/automated_training_pipeline.py --models tinyllama --quick
 
 # Train + deploy best model
-python scripts/train_and_promote.py --quick --auto-promote
+python scripts/training/train_and_promote.py --quick --auto-promote
 
 # Chat CLI
 python talk-to-ai/src/chat_cli.py --provider local --once "Hello"
@@ -112,12 +112,12 @@ Check `/api/ai/status` for missing env vars. Azure OpenAI requires ALL 4 variabl
 Verify adapter directory contains both `adapter_config.json` and `adapter_model.safetensors`.
 
 ### Quantum Job Stuck
-Use simulator first: `python scripts/quantum_autorun.py --job azure_ionq_simulator`
+Use simulator first: `python scripts/evaluation/quantum_autorun.py --job azure_ionq_simulator`
 
 ## Key Files to Reference
 
 - `function_app.py` - HTTP endpoints
 - `shared/chat_providers.py` - Provider abstraction
-- `scripts/autotrain.py` - LoRA orchestrator
+- `scripts/training/autotrain.py` - LoRA orchestrator
 - `quantum-ai/quantum_mcp_server.py` - MCP tools
 - `autotrain.yaml` - Training job definitions

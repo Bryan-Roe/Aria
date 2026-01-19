@@ -576,7 +576,7 @@ python .\scripts\master_orchestrator.py --status
 ```bash
 #!/bin/bash
 # .git/hooks/pre-commit
-python scripts/ci_orchestrator.py --validate-all
+python scripts/orchestrators/ci_orchestrator.py --validate-all
 exit $?
 ```
 

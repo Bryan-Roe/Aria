@@ -212,7 +212,7 @@ python .\scripts\batch_evaluator.py \
 
 ### YAML-Driven Orchestrator
 
-**Script:** `scripts/evaluation_autorun.py`
+**Script:** `scripts/evaluation/evaluation_autorun.py`
 
 - Sequential job execution
 - Configuration-driven (YAML)

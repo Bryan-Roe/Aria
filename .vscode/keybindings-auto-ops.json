@@ -1,0 +1,28 @@
+[
+  {
+    "key": "ctrl+alt+d",
+    "command": "workbench.action.tasks.runTask",
+    "args": "Monitor: Dashboard Server (VS Code)",
+    "when": "!shellExecutionSupported"
+  },
+  {
+    "key": "ctrl+alt+a",
+    "command": "workbench.action.tasks.runTask",
+    "args": "Monitor: Start Full VS Code Suite"
+  },
+  {
+    "key": "ctrl+alt+s",
+    "command": "workbench.action.tasks.runTask",
+    "args": "Monitor: Auto Ops Dashboard"
+  },
+  {
+    "key": "ctrl+alt+w",
+    "command": "workbench.action.tasks.runTask",
+    "args": "Monitor: Auto Ops (Watch)"
+  },
+  {
+    "key": "ctrl+alt+p",
+    "command": "workbench.action.tasks.runTask",
+    "args": "Monitor: Auto Ops (Problems Only)"
+  }
+]

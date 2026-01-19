@@ -20,7 +20,7 @@ The GGUF Training Automation system provides a complete, end-to-end pipeline for
 ├─────────────────────────────────────────────────────────┤
 │                                                         │
 │  Phase 1: Training                                      │
-│  ├─ Uses: scripts/autotrain.py                         │
+│  ├─ Uses: scripts/training/autotrain.py                         │
 │  ├─ Config: config/training/autotrain.yaml             │
 │  └─ Output: data_out/lora_training/                    │
 │                                                         │
@@ -90,24 +90,24 @@ The GGUF Training Automation system provides a complete, end-to-end pipeline for
 
 ```bash
 # 1. Dry-run (show what would execute)
-python scripts/gguf_training_automation.py --quick --dry-run
+python scripts/training/gguf_training_automation.py --quick --dry-run
 
 # 2. Run quick pipeline (1 model)
-python scripts/gguf_training_automation.py --quick
+python scripts/training/gguf_training_automation.py --quick
 
 # 3. Run full pipeline (all models)
-python scripts/gguf_training_automation.py --full
+python scripts/training/gguf_training_automation.py --full
 
 # 4. Convert existing LoRA model
-python scripts/gguf_training_automation.py \
+python scripts/training/gguf_training_automation.py \
   --convert-only data_out/lora_training/phi35/checkpoint-100
 
 # 5. Validate GGUF file
-python scripts/gguf_training_automation.py \
+python scripts/training/gguf_training_automation.py \
   --validate deployed_models/phi35_quick_gguf-latest.gguf
 
 # 6. Run specific jobs
-python scripts/gguf_training_automation.py \
+python scripts/training/gguf_training_automation.py \
   --jobs phi35_quick_gguf qwen25_quick_gguf
 ```
 
@@ -128,10 +128,10 @@ Press `Ctrl+Shift+P` and search for:
 
 ```bash
 # 1. Dry-run to see what will happen
-python scripts/gguf_training_automation.py --quick --dry-run
+python scripts/training/gguf_training_automation.py --quick --dry-run
 
 # 2. Run the pipeline
-python scripts/gguf_training_automation.py --quick
+python scripts/training/gguf_training_automation.py --quick
 
 # 3. Check results
 cat data_out/gguf_training/summary.json
@@ -147,11 +147,11 @@ python talk-to-ai/src/chat_cli.py \
 
 ```bash
 # 1. Run full pipeline with all models
-python scripts/gguf_training_automation.py --full
+python scripts/training/gguf_training_automation.py --full
 
 # 2. Validate all outputs
 for gguf in deployed_models/*.gguf; do
-  python scripts/gguf_training_automation.py --validate "$gguf"
+  python scripts/training/gguf_training_automation.py --validate "$gguf"
 done
 
 # 3. Archive models
@@ -164,7 +164,7 @@ tar -czf deployed_models.tar.gz deployed_models/
 # You have a trained LoRA adapter from previous run
 # Skip training, just convert & deploy
 
-python scripts/gguf_training_automation.py \
+python scripts/training/gguf_training_automation.py \
   --convert-only data_out/lora_training/phi35/checkpoint-100
 
 # Model now at: deployed_models/convert_only-latest.gguf
@@ -178,7 +178,7 @@ Create `daily-gguf-train.sh`:
 #!/bin/bash
 cd /workspaces/AI
 timestamp=$(date +%Y%m%d_%H%M%S)
-python scripts/gguf_training_automation.py --quick \
+python scripts/training/gguf_training_automation.py --quick \
   | tee "data_out/gguf_training_daily_${timestamp}.log"
 ```
 
@@ -289,7 +289,7 @@ Each job has detailed logs:
 
 ### With AutoTrain
 
-The GGUF automation uses `scripts/autotrain.py` for Phase 1:
+The GGUF automation uses `scripts/training/autotrain.py` for Phase 1:
 
 ```python
 # Inside gguf_training_automation.py
@@ -333,7 +333,7 @@ Convert quantum models to GGUF:
 ```bash
 # Quantum outputs in data_out/quantum_training/
 # Convert to GGUF for broader compatibility
-python scripts/gguf_training_automation.py \
+python scripts/training/gguf_training_automation.py \
   --convert-only data_out/quantum_training/best_model
 ```
 
@@ -380,7 +380,7 @@ device: cuda  # Uses GPU if available, falls back to CPU
 cat data_out/autotrain/phi35_quick_gguf/*/stdout.log
 
 # Validate config
-python scripts/autotrain.py --dry-run
+python scripts/training/autotrain.py --dry-run
 ```
 
 **Conversion fails**
@@ -536,6 +536,6 @@ notifications:
 
 - [GGUF_AUTOMATION_QUICKSTART.md](../GGUF_AUTOMATION_QUICKSTART.md) — Quick reference
 - [GPU_TRAINING_SUMMARY.md](../GPU_TRAINING_SUMMARY.md) — GPU setup guide
-- [scripts/gguf_training_automation.py](../scripts/gguf_training_automation.py) — Source code
+- [scripts/training/gguf_training_automation.py](../scripts/training/gguf_training_automation.py) — Source code
 - [config/training/gguf_training.yaml](../config/training/gguf_training.yaml) — Configuration
 - [GGUF spec](https://github.com/ggerganov/ggml/blob/master/docs/gguf.md) — Format documentation

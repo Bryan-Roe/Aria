@@ -231,8 +231,8 @@ $env:OPENAI_MODEL = "gpt-4o-mini"  # Optional
 ```yaml
 - name: Run evaluation suite
   run: |
-    python scripts/evaluation_autorun.py --dry-run
-    python scripts/evaluation_autorun.py --job eval_smoke_test
+    python scripts/evaluation/evaluation_autorun.py --dry-run
+    python scripts/evaluation/evaluation_autorun.py --job eval_smoke_test
     
 - name: Upload evaluation results
   uses: actions/upload-artifact@v3
@@ -244,10 +244,10 @@ $env:OPENAI_MODEL = "gpt-4o-mini"  # Optional
 ### Azure Pipelines Example
 
 ```yaml
-- script: python scripts/evaluation_autorun.py --dry-run
+- script: python scripts/evaluation/evaluation_autorun.py --dry-run
   displayName: 'Validate evaluation config'
   
-- script: python scripts/evaluation_autorun.py
+- script: python scripts/evaluation/evaluation_autorun.py
   displayName: 'Run evaluation suite'
   
 - task: PublishBuildArtifacts@1

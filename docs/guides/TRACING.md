@@ -16,8 +16,8 @@ Quick points:
     available.
   - Fall back to a safe no-op when OpenTelemetry packages are not installed.
 
-- Scripts that run long-lived work (e.g., `scripts/autotrain.py`,
-  `scripts/evaluation_autorun.py`, `scripts/train_and_evaluate.py`) call
+- Scripts that run long-lived work (e.g., `scripts/training/autotrain.py`,
+  `scripts/evaluation/evaluation_autorun.py`, `scripts/training/train_and_evaluate.py`) call
   `shared.tracing.init_tracing()` on startup. The call never fails when OTEL
   packages are missing.
 
