@@ -680,6 +680,8 @@ def main():
                         pass
             except Exception:
                 # Swallow unexpected callback errors
+                pass
+    
     is_streaming = is_iterable_dataset(train_ds)
     # Remove 'messages' column so only tokenized output is kept
     # Note: IterableDataset.map() has limited parameter support compared to Dataset.map()
