@@ -591,13 +591,14 @@ class RepoAutomation:
             "components_running", {}) if status else {}
         
         # Fallback: if PID not recorded, try discovering existing processes
-        for name, component in self.components.items():
-            if name not in dynamic_running:
-                try:
-                    proc = self._find_existing_process(component)
-                    dynamic_running[name] = proc is not None
-                except Exception:
-                    dynamic_running[name] = False
+        if psutil is not None:
+            for name, component in self.components.items():
+                if name not in dynamic_running:
+                    try:
+                        proc = self._find_existing_process(component)
+                        dynamic_running[name] = proc is not None
+                    except Exception:
+                        dynamic_running[name] = False
         
         for name in self.components.keys():
             running = dynamic_running.get(
