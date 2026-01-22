@@ -150,7 +150,9 @@ class DatasetValidator:
                         stats["samples"] += 1
                     
                     except json.JSONDecodeError as e:
-            
+                        stats["format_errors"].append(
+                            f"Line {i}: Invalid JSON ({e.msg})"
+                        )
             # Check if file was empty or contained only blank lines
             if stats["samples"] == 0 and not stats["format_errors"]:
                 stats["format_errors"].append("File is empty or contains no valid data")

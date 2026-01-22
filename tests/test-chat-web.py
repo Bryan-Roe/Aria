@@ -1,12 +1,11 @@
 """
 Test script to verify chat web functionality
 """
-import json
 import sys
 from pathlib import Path
 
 # Add talk-to-ai to path
-talk_to_ai_path = Path(__file__).resolve().parent / "talk-to-ai" / "src"
+talk_to_ai_path = Path(__file__).resolve().parents[1] / "talk-to-ai" / "src"
 sys.path.insert(0, str(talk_to_ai_path))
 
 from chat_providers import detect_provider
@@ -23,7 +22,9 @@ def test_local_provider():
     
     print(f"✓ Response: {response[:100]}...")
     print("✓ Local provider working!")
-    return True
+    assert info.name == "local"
+    assert isinstance(response, str)
+    assert len(response) > 0
 
 def test_provider_detection():
     """Test auto provider detection"""
@@ -39,7 +40,7 @@ def test_provider_detection():
     else:
         print("  (Using local fallback - no API keys)")
     
-    return True
+    assert info.name in {"azure", "openai", "local", "auto", "lmstudio"}
 
 def main():
     print("=" * 50)

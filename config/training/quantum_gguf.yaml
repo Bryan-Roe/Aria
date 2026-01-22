@@ -1,0 +1,226 @@
+# Quantum-Enabled GGUF Training Configuration
+# Orchestrates complete workflow: LoRA training → GGUF conversion → Quantum enhancement → Deployment
+
+name: quantum_gguf_training
+description: "Quantum-enhanced GGUF model training and deployment pipeline"
+version: "1.0.0"
+
+# Global settings
+global:
+  device: cuda  # cuda or cpu
+  seed: 42
+  max_gpu_memory_gb: 0  # 0 = use all available
+  max_cpu_cores: 0      # 0 = use all available
+  timeout_minutes: 120
+  retry_attempts: 2
+  
+# Phase 1: LoRA Training
+training:
+  enabled: true
+  skip_if_exists: false
+  configs:
+    - name: "phi3.5-quantum-chat"
+      base_model: "microsoft/Phi-3.5-mini-instruct"
+      dataset_path: "datasets/chat"
+      lora_r: 16
+      lora_alpha: 32
+      lora_dropout: 0.1
+      max_train_samples: 500
+      max_eval_samples: 100
+      epochs: 3
+      batch_size: 4
+      learning_rate: 1e-4
+      output_dir: "data_out/lora_models/phi3.5-quantum-chat"
+      quantization_type: "bfloat16"
+      quantum_enhanced: true
+      quantum_features:
+        - "entanglement_patterns"
+        - "circuit_embeddings"
+        - "amplitude_encoding"
+      notes: "Chat model with quantum enhancements"
+      
+    - name: "qwen-quantum-coding"
+      base_model: "Qwen/Qwen2.5-7B-Instruct"
+      dataset_path: "datasets/quantum"
+      lora_r: 16
+      lora_alpha: 32
+      lora_dropout: 0.1
+      max_train_samples: 300
+      max_eval_samples: 75
+      epochs: 2
+      batch_size: 4
+      learning_rate: 1e-4
+      output_dir: "data_out/lora_models/qwen-quantum-coding"
+      quantization_type: "bfloat16"
+      quantum_enhanced: true
+      quantum_features:
+        - "quantum_gates_optimization"
+        - "vqe_embeddings"
+        - "qaoa_patterns"
+      notes: "Code generation with quantum optimization"
+
+# Phase 2: GGUF Conversion & Quantization
+conversion:
+  enabled: true
+  output_format: "safetensors"  # safetensors or pickle
+  quantization_strategies:
+    - type: "q4_0"      # 4-bit with block size 32
+      description: "Low precision, highest compression"
+      use_case: "edge_devices"
+      
+    - type: "q5_0"      # 5-bit with block size 32
+      description: "Medium precision, good compression"
+      use_case: "mobile"
+      
+    - type: "q8_0"      # 8-bit with block size 32
+      description: "High precision, moderate compression"
+      use_case: "servers"
+      
+    - type: "f16"       # 16-bit float (half precision)
+      description: "Reference quality, minimal quantization"
+      use_case: "validation"
+
+# Phase 3: Quantum Circuit Enhancement
+quantum_enhancement:
+  enabled: true
+  integration_strategy: "feature_injection"  # feature_injection, layer_fusion, circuit_embedding
+  
+  features:
+    entanglement_patterns:
+      enabled: true
+      num_qubits: 4
+      pattern_type: "linear"  # linear, circular, full
+      
+    circuit_embeddings:
+      enabled: true
+      embedding_dim: 64
+      num_layers: 2
+      
+    amplitude_encoding:
+      enabled: true
+      normalization: "softmax"
+      
+    vqe_embeddings:
+      enabled: true
+      ansatz: "efficient_su2"
+      reps: 1
+      
+    qaoa_patterns:
+      enabled: true
+      p: 1  # QAOA depth
+      
+    quantum_gates_optimization:
+      enabled: true
+      gate_types: ["RX", "RY", "RZ", "CNOT", "Hadamard"]
+      optimization_rounds: 3
+
+# Phase 4: Validation & Benchmarking
+validation:
+  enabled: true
+  benchmark_datasets:
+    - "test_samples_phi.jsonl"
+    - "test_samples_qwen.jsonl"
+  
+  metrics:
+    - name: "inference_speed"
+      unit: "tokens/sec"
+      threshold_min: 10
+      
+    - name: "model_size"
+      unit: "MB"
+      threshold_max: 2048
+      
+    - name: "perplexity"
+      unit: "score"
+      threshold_max: 50
+      
+    - name: "quantum_purity"
+      unit: "score"
+      threshold_min: 0.80
+      
+    - name: "quantum_fidelity"
+      unit: "score"
+      threshold_min: 0.95
+
+# Phase 5: Deployment & Serving
+deployment:
+  enabled: true
+  strategy: "best_performer"  # best_performer, all, manual
+  auto_promote_threshold: 0.90  # Auto-promote if metrics meet threshold
+  
+  serving:
+    - platform: "llama-cpp"  # Local GGUF inference
+      config:
+        n_gpu_layers: 50  # Layers to offload to GPU
+        n_threads: 8      # CPU threads
+        ctx_size: 2048    # Context window
+        
+    - platform: "vllm"  # FastAPI-based serving
+      config:
+        dtype: "float16"
+        gpu_memory_util: 0.9
+        max_model_len: 2048
+        
+    - platform: "azure_inference"  # Azure Container Instance
+      config:
+        sku: "Standard_D4s_v3"
+        enable_gpu: true
+
+# Phase 6: Monitoring & Observability
+monitoring:
+  enabled: true
+  log_level: "INFO"
+  
+  metrics_collection:
+    interval_seconds: 60
+    retention_days: 30
+    
+  alerts:
+    - metric: "memory_usage"
+      threshold_high: 0.90
+      severity: "warning"
+      
+    - metric: "quantum_coherence"
+      threshold_low: 0.85
+      severity: "critical"
+      
+    - metric: "inference_latency"
+      threshold_high: 2.0
+      severity: "warning"
+
+# Output and Storage
+output:
+  base_directory: "data_out/quantum_gguf_training"
+  store_checkpoints: true
+  checkpoint_frequency: 500  # Save every N steps
+  
+  artifacts:
+    lora_models: "lora_models/"
+    gguf_models: "gguf_models/"
+    quantum_data: "quantum_data/"
+    metrics: "metrics/"
+    reports: "reports/"
+
+# Orchestration
+orchestration:
+  parallel_jobs: 2
+  job_timeout_minutes: 120
+  failure_behavior: "continue"  # continue or stop
+  notification_webhook: null
+  
+# Quantum-specific settings
+quantum:
+  provider: "pennylane"  # pennylane or qiskit
+  backend: "default.qubit"  # Simulator or hardware
+  num_qubits: 4
+  max_circuit_depth: 10
+  enable_error_mitigation: true
+  
+  azure_quantum:
+    enabled: false  # Set to true for Azure Quantum integration
+    subscription_id: "${AZURE_SUBSCRIPTION_ID}"
+    resource_group: "${AZURE_RESOURCE_GROUP}"
+    workspace_name: "${AZURE_QUANTUM_WORKSPACE}"
+    provider_id: "ionq"  # ionq or rigetti
+    min_cost_usd: 1.0
+    dry_run_first: true

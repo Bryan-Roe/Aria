@@ -25,7 +25,8 @@ try:
 except Exception:  # pragma: no cover - optional dependency
     psutil = None
 
-REPO_ROOT = Path(__file__).resolve().parent.parent
+# Repo root (two levels up from this file: scripts/automation/ -> scripts/ -> repo)
+REPO_ROOT = Path(__file__).resolve().parents[2]
 PID_FILE = REPO_ROOT / "processes.json"
 STATUS_FILE = REPO_ROOT / "automation_status.json"
 
@@ -104,8 +105,8 @@ class RepoAutomation:
         return {
             "aria": ComponentConfig(
                 name="Aria Character Automation",
-                script="scripts/aria_automation.py",
-                command=["python3", "scripts/aria_automation.py",
+                script="scripts/automation/aria_automation.py",
+                command=["python3", "scripts/automation/aria_automation.py",
                          "--mode", "full"],
                 auto_restart=True,
                 health_check_interval=60,
@@ -113,8 +114,8 @@ class RepoAutomation:
             ),
             "training": ComponentConfig(
                 name="Autonomous Training System",
-                script="scripts/autonomous_training_orchestrator.py",
-                command=["python3", "scripts/autonomous_training_orchestrator.py"],
+                script="scripts/training/autonomous_training_orchestrator.py",
+                command=["python3", "scripts/training/autonomous_training_orchestrator.py"],
                 auto_restart=True,
                 health_check_interval=300,
                 # Use proper pip/import mapping for PyYAML
@@ -147,8 +148,8 @@ class RepoAutomation:
             ),
             "datasets": ComponentConfig(
                 name="Dataset Auto-Discovery (Integrated in training)",
-                script="scripts/autonomous_training_orchestrator.py",
-                command=["python3", "scripts/autonomous_training_orchestrator.py"],
+                script="scripts/training/autonomous_training_orchestrator.py",
+                command=["python3", "scripts/training/autonomous_training_orchestrator.py"],
                 auto_restart=False,
                 health_check_interval=3600,
                 enabled=False,  # Included in training component
@@ -342,7 +343,8 @@ class RepoAutomation:
 
     def stop_component(self, name: str):
         """Stop a single component"""
-                """
+        if name not in self.components or name not in self.processes:
+            # Nothing to stop
             return
 
         component = self.components[name]
@@ -584,34 +586,31 @@ class RepoAutomation:
             for name, pid in pid_map.items():
                 try:
                     p = psutil.Process(pid)
-                    dynamic_running[name] = p.is_running(
-                    ) and p.status() != psutil.STATUS_ZOMBIE
+                    dynamic_running[name] = p.is_running() and p.status() != psutil.STATUS_ZOMBIE
                 except Exception:
                     dynamic_running[name] = False
+            # Discover processes not recorded in the PID file
+            for name, component in self.components.items():
+                if name not in dynamic_running:
+                    try:
+                        proc = self._find_existing_process(component)
+                        dynamic_running[name] = proc is not None
+                        if proc and hasattr(proc, "pid"):
+                            pid_map[name] = proc.pid
+                    except Exception:
+                        dynamic_running[name] = False
 
         # Prefer dynamic running info; fall back to status file content
-        components_running = status.get(
-            "components_running", {}) if status else {}
-        for name in self.components.keys():
-            running = dynamic_running.get(
-                name, components_running.get(name, False))
-            component = self.components.get(name)
-            if component:
-                status_icon = "✅" if running else "❌"
-                dep_ok = (status.get("dependency_status", {}).get(
-                    # Fallback: if PID not recorded, try discovering existing processes
-                    for name, component in self.components.items():
-                        if name not in dynamic_running:
-                            try:
-                                proc=self._find_existing_process(component)
-                                dynamic_running[name]=proc is not None
-                            except Exception:
-                                dynamic_running[name]=False
-                    name, True) if status else True)
-                dep_icon = "🧩" if dep_ok else "⚠️"
-                pid_info = f" (PID {pid_map.get(name)})" if name in pid_map else ""
-                print(
-                    f"  {status_icon} {component.name}{pid_info} ({dep_icon} deps)")
+        components_running = status.get("components_running", {}) if status else {}
+        for name, component in self.components.items():
+            if not component:
+                continue
+            running = dynamic_running.get(name, components_running.get(name, False))
+            dep_ok = (status.get("dependency_status", {}).get(name, True) if status else True)
+            status_icon = "✅" if running else "❌"
+            dep_icon = "🧩" if dep_ok else "⚠️"
+            pid_info = f" (PID {pid_map.get(name)})" if name in pid_map else ""
+            print(f"  {status_icon} {component.name}{pid_info} ({dep_icon} deps)")
 
         # Recent errors
         if status and status.get("errors"):

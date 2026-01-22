@@ -7,7 +7,7 @@ import pytest
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-Q_SCRIPT = REPO_ROOT / "scripts" / "quantum_autorun.py"
+Q_SCRIPT = REPO_ROOT / "scripts" / "evaluation" / "quantum_autorun.py"
 
 
 @pytest.fixture

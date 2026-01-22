@@ -117,7 +117,7 @@ class TestOrchestrationMetrics:
             trend = historical_data[-1]["accuracy"] - historical_data[0]["accuracy"]
             improvement_rate = trend / len(historical_data) * 100
             
-            assert trend == 0.04
+            assert trend == pytest.approx(0.04, abs=0.001)
             assert improvement_rate == pytest.approx(1.33, abs=0.01)
 
 
@@ -154,7 +154,7 @@ class TestResourceMonitoring:
             "total_memory_gb": 24,
             "allocated_gb": 18,
             "reserved_gb": 20,
-            "free_gb": 4
+            "free_gb": 6
         }
         
         utilization = (gpu_stats["allocated_gb"] / gpu_stats["total_memory_gb"]) * 100

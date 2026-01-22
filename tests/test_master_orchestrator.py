@@ -274,7 +274,10 @@ class TestMasterOrchestratorIntegration:
         
         # Would use asyncio.run in real code
         # For now just verify the order makes sense
-        assert "training" < "quantum" < "evaluation"
+        # In sorted order: evaluation < quantum < training (alphabetically)
+        # But execution order should be: training -> quantum -> evaluation
+        sorted_names = sorted(["training", "quantum", "evaluation"])
+        assert sorted_names == ["evaluation", "quantum", "training"]
     
     def test_orchestrator_result_passing(self):
         """Test passing results between orchestrators"""

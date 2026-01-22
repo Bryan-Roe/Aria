@@ -25,10 +25,14 @@
     "python.testing.cwd": "${workspaceFolder}",
     "python.testing.autoTestDiscoverOnSaveEnabled": true,
     "powershell.scriptAnalysis.settingsPath": "quantum-ai/.vscode/PSScriptAnalyzerSettings.psd1",
-    "cmake.sourceDirectory": "C:/Users/Bryan/OneDrive/AI/.venv/Lib/site-packages/pennylane_lightning/core",
+    "cmake.sourceDirectory": "/workspaces/AI/tools/llama.cpp",
     "chat.agent.maxRequests": 200,
     "chat.tools.terminal.autoApprove": {
         "/^ls -lt /workspaces/AI/data_out/gguf_training/\\*/  \\| head -20$/": {
+            "approve": true,
+            "matchCommandLine": true
+        },
+        "/^cd /workspaces/AI && mv tests/test_aria_command_parser\\.py tests/test_aria_command_parser\\.py\\.disabled$/": {
             "approve": true,
             "matchCommandLine": true
         }

@@ -384,8 +384,10 @@ class AriaActionParser:
             adapter_env = os.getenv('ARIA_LORA_ADAPTER_DIR')
             default_adapter = REPO_ROOT / 'data_out' / 'lora_training' / 'lora_adapter'
             adapter_dir = Path(adapter_env) if adapter_env else default_adapter
+            prefer_lora = os.getenv('ARIA_ENABLE_LORA', 'false').lower() in (
+                '1', 'true', 'yes')
 
-            if adapter_dir.exists() and (adapter_dir / 'adapter_config.json').exists():
+            if prefer_lora and adapter_dir.exists() and (adapter_dir / 'adapter_config.json').exists():
                 # explicit lora provider
                 provider, choice = detect_provider(
                     explicit='lora', model_override=str(adapter_dir))
@@ -456,23 +458,41 @@ class AriaActionParser:
     def parse_with_fallback(self, command: str) -> List[Dict]:
         actions: List[Dict] = []
         cmd = command.lower()
+        known_objects = list(stage_state.get('objects', {}).keys())
 
-        # Move detection
-        if any(w in cmd for w in ['go ', 'move ', 'walk ', 'run ']):
-            # Try to find coordinates or named object
-            coord = re.search(
-                r'(?:to|to the)?\s*(\d{1,3})%?[,\s]+(\d{1,3})%?', cmd)
-            if coord:
-                x = int(max(0, min(100, int(coord.group(1)))))
-                y = int(max(0, min(100, int(coord.group(2)))))
-                actions.append({'action': 'move', 'target': {
-                               'x': x, 'y': y}, 'speed': 'normal'})
+        def _move_action(direction: Optional[str] = None, target: Optional[Dict[str, int]] = None, speed: str = 'normal') -> Dict:
+            base = stage_state['aria']['position']
+            dx_dy = {
+                'left': (-12, 0),
+                'right': (12, 0),
+                'up': (0, -10),
+                'down': (0, 10)
+            }.get(direction or '', (0, 0))
+            derived_target = {
+                'x': max(0, min(100, (target or {}).get('x', base['x'] + dx_dy[0]))),
+                'y': max(0, min(100, (target or {}).get('y', base['y'] + dx_dy[1])))
+            }
+            action = {'action': 'move', 'target': derived_target, 'speed': speed}
+            if direction:
+                action['direction'] = direction
+            return action
+
+        # Movement detection (directions, coordinates, or named objects)
+        coord = re.search(r'(?:to|to the)?\s*(\d{1,3})%?[,\s]+(\d{1,3})%?', cmd)
+        if coord:
+            x = int(max(0, min(100, int(coord.group(1)))))
+            y = int(max(0, min(100, int(coord.group(2)))))
+            actions.append(_move_action(target={'x': x, 'y': y}))
+        else:
+            dir_match = re.search(r'\b(?:go|move|walk|run)\s+(left|right|up|down)\b', cmd)
+            if dir_match:
+                direction = dir_match.group(1)
+                actions.append(_move_action(direction=direction))
             else:
-                # Move near common objects
-                for o in ['apple', 'book', 'cup', 'ball', 'flower']:
-                    if o in cmd and o in stage_state.get('objects', {}):
-                        actions.append(
-                            {'action': 'move', 'target': stage_state['objects'][o]['position'], 'speed': 'normal'})
+                for obj in known_objects:
+                    if obj in cmd and any(w in cmd for w in ['move', 'go', 'walk', 'run', 'to']):
+                        target = stage_state['objects'][obj]['position']
+                        actions.append(_move_action(target=target))
                         break
 
         # Say / speak
@@ -487,21 +507,66 @@ class AriaActionParser:
                     {'action': 'say', 'text': text, 'emotion': emotion})
 
         # Pickup
-        for obj in ['apple', 'book', 'cup', 'ball', 'flower']:
-            if obj in cmd and any(w in cmd for w in ['pick', 'get', 'grab', 'take']):
-                if obj in stage_state.get('objects', {}):
-                    actions.append(
-                        {'action': 'move', 'target': stage_state['objects'][obj]['position'], 'speed': 'normal'})
-                    actions.append({'action': 'pickup', 'object_id': obj})
-                    break
+        for obj in known_objects:
+            if obj in cmd and any(w in cmd for w in ['pick', 'pickup', 'get', 'grab', 'take']):
+                target = stage_state['objects'][obj]['position']
+                actions.append(_move_action(target=target))
+                actions.append({'action': 'pickup', 'object': obj, 'object_id': obj})
+                break
+
+        # Drop / release
+        if any(w in cmd for w in ['drop', 'release', 'put down']):
+            actions.append({'action': 'drop', 'object': stage_state['aria'].get('held_object')})
+
+        # Throw detection
+        if 'throw' in cmd:
+            obj = next((o for o in known_objects if o in cmd), stage_state['aria'].get('held_object'))
+            direction = 'right' if 'right' in cmd else 'left' if 'left' in cmd else None
+            target = None
+            if direction:
+                target = _move_action(direction=direction)['target']
+            actions.append({
+                'action': 'throw',
+                'object': obj,
+                'object_id': obj,
+                'direction': direction or 'forward',
+                'target': target or stage_state['aria']['position']
+            })
 
         # Gestures
         for g in ['wave', 'bow', 'nod', 'shake', 'point']:
             if g in cmd:
-                actions.append({'action': 'gesture', 'gesture_type': g})
+                actions.append({'action': 'gesture', 'gesture_type': g, 'type': g})
                 break
 
+        # Look / gaze
+        if any(w in cmd for w in ['look', 'watch', 'observe', 'gaze']):
+            target_obj = next((o for o in known_objects if o in cmd), None)
+            look_action: Dict[str, object] = {'action': 'look'}
+            if target_obj:
+                look_action['target'] = target_obj
+            elif 'left' in cmd:
+                look_action['direction'] = 'left'
+            elif 'right' in cmd:
+                look_action['direction'] = 'right'
+            actions.append(look_action)
+
+        # Wait / pause
+        if any(w in cmd for w in ['wait', 'pause', 'hold']):
+            dur_match = re.search(r'(?:wait|pause)\s*(\d+)', cmd)
+            duration = float(dur_match.group(1)) if dur_match else 0.5
+            actions.append({'action': 'wait', 'duration': duration})
+
+        # Ensure we always return something useful
+        if not actions:
+            actions.append({'action': 'say', 'text': command.strip() or 'ok', 'emotion': 'neutral'})
+
         return actions
+
+    def parse_command(self, command: str, use_llm: bool = True) -> List[Dict]:
+        """Backwards-compatible entry point used by tests and auto-execute."""
+        actions = self.parse(command, use_llm=use_llm)
+        return actions or [{'action': 'say', 'text': command.strip() or 'ok', 'emotion': 'neutral'}]
 
     def parse(self, command: str, use_llm: bool = True) -> List[Dict]:
         if use_llm and self.provider:
@@ -516,6 +581,66 @@ class AriaActionParser:
         actions = self.parse_with_fallback(command)
         logger.info(f"✓ Fallback parsed: {command} -> {len(actions)} actions")
         return actions
+
+
+def validate_action(action: Dict) -> bool:
+    """Lightweight validation used by tests and auto-execute flows."""
+    if not isinstance(action, dict) or 'action' not in action:
+        return False
+    kind = action.get('action')
+    if kind == 'move':
+        return bool(action.get('direction') or action.get('target'))
+    if kind == 'pickup':
+        return bool(action.get('object') or action.get('object_id'))
+    if kind == 'drop':
+        return True
+    if kind == 'throw':
+        return bool(action.get('object') or action.get('object_id'))
+    if kind == 'gesture':
+        return bool(action.get('gesture_type') or action.get('type'))
+    if kind == 'say':
+        return bool(action.get('text'))
+    if kind == 'look':
+        return bool(action.get('target') or action.get('direction'))
+    if kind == 'wait':
+        return True
+    return False
+
+
+def inject_wait_actions(actions: List[Dict], wait_ms: int = 500) -> List[Dict]:
+    """Insert wait actions between existing actions without mutating input."""
+    if not actions:
+        return []
+    result: List[Dict] = []
+    for idx, action in enumerate(actions):
+        result.append(action)
+        if idx < len(actions) - 1:
+            result.append({'action': 'wait', 'duration': wait_ms / 1000.0})
+    return result
+
+
+def auto_execute_command(command: str, mode: str = "parse", use_llm: bool = True) -> Dict:
+    """Parse a command and optionally execute actions immediately."""
+    parsed_actions = action_parser.parse_command(command, use_llm=use_llm)
+    if mode == "parse":
+        return {'status': 'success', 'actions': parsed_actions}
+
+    if mode != "execute":
+        return {'status': 'error', 'message': f'Unknown mode: {mode}', 'actions': []}
+
+    results: List[Dict] = []
+    tags: List[str] = []
+    for action in parsed_actions:
+        if not validate_action(action):
+            results.append({'action': action, 'result': {'status': 'error', 'message': 'invalid action'}})
+            continue
+        execution = execute_aria_action(action)
+        results.append({'action': action, 'result': execution})
+        if execution.get('tags'):
+            tags.extend(execution['tags'])
+
+    overall = 'success' if all(r.get('result', {}).get('status') == 'success' for r in results) else 'completed'
+    return {'status': overall, 'actions': parsed_actions, 'results': results, 'tags': tags}
 
 
 # ------------------------- Tag generation (AI + fallback) -------------------------

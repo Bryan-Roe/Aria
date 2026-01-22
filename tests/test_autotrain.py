@@ -47,7 +47,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 
 def test_autotrain_dry_run_smoke(tmp_path: Path) -> None:
     """Smoke test: the autotrain script should validate the default config in dry-run mode."""
-    script = REPO_ROOT / "scripts" / "autotrain.py"
+    script = REPO_ROOT / "scripts" / "training" / "autotrain.py"
     cfg = REPO_ROOT / "config" / "training" / "autotrain.yaml"
     assert script.exists(), "autotrain.py missing"
     assert cfg.exists(), "autotrain.yaml missing"

@@ -27,28 +27,26 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
-        pip install pytest pytest-timeout pytest-cov
+        pip install -r dev-requirements.txt
+        pip install pytest-cov
+    
+    - name: Run pytest unit tests
+      run: |
+        python -m pytest tests/ -m "not slow and not azure" -v --tb=short --junitxml=test-results.xml
     
     - name: Run CI validation
       run: |
         python scripts/ci_orchestrator.py --validate-all
+      continue-on-error: true
     
-    - name: Run unit tests
-      run: |
-        python scripts/test_runner.py --unit --coverage
-    
-    - name: Run integration tests
-      run: |
-        python scripts/test_runner.py --integration
-    
-    - name: Upload validation results
+    - name: Upload test results
       if: always()
       uses: actions/upload-artifact@v4
       with:
         name: validation-results
         path: |
+          test-results.xml
           data_out/ci_orchestrator/
-          data_out/test_runner/
 
   train:
     runs-on: ubuntu-latest

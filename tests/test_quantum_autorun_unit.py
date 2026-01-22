@@ -6,10 +6,10 @@ from unittest.mock import patch
 import sys
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-if str(REPO_ROOT) not in sys.path:
-    sys.path.insert(0, str(REPO_ROOT))
+if str(REPO_ROOT / "scripts" / "evaluation") not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT / "scripts" / "evaluation"))
 
-from scripts.evaluation.quantum_autorun import (  # type: ignore
+from quantum_autorun import (  # type: ignore
     QJob,
     read_yaml,
     load_jobs,

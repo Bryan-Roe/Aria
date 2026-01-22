@@ -5,7 +5,8 @@
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO_ROOT="$(dirname "$SCRIPT_DIR")"
+REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+AUTOMATION_SCRIPT="$REPO_ROOT/scripts/automation/repo_automation.py"
 
 # Colors
 RED='\033[0;31m'
@@ -75,19 +76,19 @@ function check_dependencies() {
 function start_full_automation() {
     echo -e "${GREEN}🚀 Starting Full Repository Automation...${NC}"
     echo ""
-    python3 "$REPO_ROOT/scripts/repo_automation.py" --start --daemon
+    python3 "$AUTOMATION_SCRIPT" --start --daemon
 }
 
 function start_aria_only() {
     echo -e "${GREEN}🚀 Starting Aria Automation Only...${NC}"
     echo ""
-    python3 "$REPO_ROOT/scripts/repo_automation.py" --start --components aria --daemon
+    python3 "$AUTOMATION_SCRIPT" --start --components aria --daemon
 }
 
 function start_training_pipeline() {
     echo -e "${GREEN}🚀 Starting Training Pipeline...${NC}"
     echo ""
-    python3 "$REPO_ROOT/scripts/repo_automation.py" --start --components training,evaluation --daemon
+    python3 "$AUTOMATION_SCRIPT" --start --components training,evaluation --daemon
 }
 
 function start_custom() {
@@ -102,16 +103,16 @@ function start_custom() {
     
     echo -e "${GREEN}🚀 Starting selected components...${NC}"
     echo ""
-    python3 "$REPO_ROOT/scripts/repo_automation.py" --start --components "$components" --daemon
+    python3 "$AUTOMATION_SCRIPT" --start --components "$components" --daemon
 }
 
 function show_status() {
-    python3 "$REPO_ROOT/scripts/repo_automation.py" --status
+    python3 "$AUTOMATION_SCRIPT" --status
 }
 
 function stop_all() {
     echo -e "${YELLOW}🛑 Stopping all automation...${NC}"
-    python3 "$REPO_ROOT/scripts/repo_automation.py" --stop
+    python3 "$AUTOMATION_SCRIPT" --stop
     echo -e "${GREEN}✅ All automation stopped${NC}"
 }
 
@@ -121,19 +122,19 @@ function run_background() {
     
     case "$mode" in
         full)
-            nohup python3 "$REPO_ROOT/scripts/repo_automation.py" --start --daemon \
+            nohup python3 "$AUTOMATION_SCRIPT" --start --daemon \
                 > "$REPO_ROOT/data_out/repo_automation/automation.log" 2>&1 &
             ;;
         aria)
-            nohup python3 "$REPO_ROOT/scripts/repo_automation.py" --start --components aria --daemon \
+            nohup python3 "$AUTOMATION_SCRIPT" --start --components aria --daemon \
                 > "$REPO_ROOT/data_out/repo_automation/automation.log" 2>&1 &
             ;;
         training)
-            nohup python3 "$REPO_ROOT/scripts/repo_automation.py" --start --components training,evaluation --daemon \
+            nohup python3 "$AUTOMATION_SCRIPT" --start --components training,evaluation --daemon \
                 > "$REPO_ROOT/data_out/repo_automation/automation.log" 2>&1 &
             ;;
         *)
-            nohup python3 "$REPO_ROOT/scripts/repo_automation.py" --start --components "$mode" --daemon \
+            nohup python3 "$AUTOMATION_SCRIPT" --start --components "$mode" --daemon \
                 > "$REPO_ROOT/data_out/repo_automation/automation.log" 2>&1 &
             ;;
     esac
@@ -191,7 +192,7 @@ if [ $# -gt 0 ]; then
                 if [ "$3" == "--background" ] || [ "$3" == "-b" ]; then
                     run_background "$2"
                 else
-                    python3 "$REPO_ROOT/scripts/repo_automation.py" --start --components "$2" --daemon
+                    python3 "$AUTOMATION_SCRIPT" --start --components "$2" --daemon
                 fi
                 exit 0
             fi

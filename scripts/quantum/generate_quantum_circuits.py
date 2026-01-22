@@ -21,9 +21,11 @@ import json
 import numpy as np
 from pathlib import Path
 from dataclasses import dataclass, asdict
+import importlib.util
 from typing import List, Dict, Any, Tuple
 from datetime import datetime
 import logging
+import random
 
 # Setup logging
 logging.basicConfig(
@@ -94,6 +96,100 @@ class QuantumCircuitGenerator:
                 "estimated_coherence_time": 100 + n_qubits * 10,  # microseconds
                 "estimated_gate_time": 35 + n_layers * 5  # nanoseconds
             }
+        )
+        self.circuits.append(circuit)
+        return circuit
+
+    def generate_advanced_circuits(self, complexity: str = "standard", num_qubits: int = 8) -> List[QuantumCircuit]:
+        """
+        Load and convert advanced circuit templates (attention, convolution, etc.)
+        for inclusion in GGUF training datasets.
+        """
+        advanced_path = Path(__file__).resolve().parent.parent / "training" / "advanced_quantum_circuits.py"
+        if not advanced_path.exists():
+            logger.warning("⚠️ Advanced circuit module not found: %s", advanced_path)
+            return []
+
+        spec = importlib.util.spec_from_file_location("advanced_quantum_circuits", advanced_path)
+        if spec is None or spec.loader is None:
+            logger.warning("⚠️ Could not load advanced circuit module")
+            return []
+
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)  # type: ignore
+
+        if not hasattr(module, "create_advanced_quantum_circuits"):
+            logger.warning("⚠️ create_advanced_quantum_circuits not found in advanced module")
+            return []
+
+        create_fn = getattr(module, "create_advanced_quantum_circuits")
+        advanced_raw = create_fn(num_qubits=num_qubits, complexity=complexity)
+
+        added: List[QuantumCircuit] = []
+        for name, circuit in advanced_raw.items():
+            qc = QuantumCircuit(
+                name=f"advanced_{name}",
+                type="advanced",
+                qubits=circuit.get("num_qubits", 0),
+                depth=circuit.get("circuit_depth", 0),
+                gate_count=circuit.get("total_gates", 0),
+                parameters=circuit.get("num_parameters", 0),
+                description=circuit.get("description", "Advanced quantum circuit"),
+                use_cases=["quantum_ml", "attention", "convolution", "hybrid_models"],
+                implementation={
+                    "framework": ["framework-agnostic"],
+                    "gates": circuit.get("gates", []),
+                    "topology": circuit.get("topology", {}),
+                    "gate_counts": circuit.get("gate_counts", {}),
+                },
+                metadata={
+                    "created": datetime.now().isoformat(),
+                    "complexity": complexity,
+                    "num_layers": circuit.get("num_layers", 0),
+                    "notes": "Auto-imported from advanced_quantum_circuits.py",
+                },
+            )
+            self.circuits.append(qc)
+            added.append(qc)
+
+        logger.info("✅ Added %d advanced circuits for GGUF datasets (complexity=%s, qubits=%s)", len(added), complexity, num_qubits)
+        return added
+
+    def generate_self_improving_circuit(self, n_qubits: int = 6, max_layers: int = 6, name_suffix: str = "runtime") -> QuantumCircuit:
+        """
+        Add a self-improving circuit spec that adapts entanglement and depth at runtime.
+        Modeled after the self_learning_quantum_circuit module.
+        """
+        name = f"self_improving_{name_suffix}"
+        description = (
+            "Self-learning PennyLane circuit that cycles entanglement patterns and grows depth "
+            "during training when validation stalls."
+        )
+
+        circuit = QuantumCircuit(
+            name=name,
+            type="self_learning",
+            qubits=n_qubits,
+            depth=max_layers,
+            gate_count=max_layers * 3 + max_layers * 4,
+            parameters=max_layers * n_qubits * 3,
+            description=description,
+            use_cases=["adaptive_training", "runtime_tuning", "hybrid_models"],
+            implementation={
+                "framework": ["pennylane"],
+                "module": "quantum-ai/src/self_learning_quantum_circuit.py",
+                "class": "SelfLearningQuantumCircuit",
+                "entanglement_patterns": ["circular", "full", "ladder", "linear"],
+                "adaptive_depth": True,
+                "data_reuploading": True,
+            },
+            metadata={
+                "created": datetime.now().isoformat(),
+                "runtime_adaptation": "entanglement_cycle_and_depth_growth",
+                "recommended_qubits": 6,
+                "max_layers": 6,
+                "shots_default": 128,
+            },
         )
         self.circuits.append(circuit)
         return circuit
@@ -469,25 +565,126 @@ result = variational_circuit(params)
         for n_qubits in [6, 8]:
             for n_solutions in [1, 2, 4]:
                 self.generate_grover_circuit(n_qubits, n_solutions)
-        
-        logger.info(f"✅ Generated {len(self.circuits)} quantum circuits")
-        return self.circuits
+
+        # Advanced composite circuits (attention, convolution, hybrid layers)
+        self.generate_advanced_circuits(complexity="lite", num_qubits=6)
+        self.generate_advanced_circuits(complexity="standard", num_qubits=8)
+        self.generate_advanced_circuits(complexity="pro", num_qubits=12)
+        # Extra mixed-size advanced sets for broader GGUF coverage
+        self.generate_advanced_circuits(complexity="standard", num_qubits=10)
+        self.generate_advanced_circuits(complexity="pro", num_qubits=14)
+        self.generate_advanced_circuits(complexity="pro", num_qubits=16)
+        self.generate_advanced_circuits(complexity="lite", num_qubits=5)
+        self.generate_advanced_circuits(complexity="standard", num_qubits=7)
+        self.generate_advanced_circuits(complexity="standard", num_qubits=9)
+        self.generate_advanced_circuits(complexity="pro", num_qubits=11)
+        self.generate_advanced_circuits(complexity="pro", num_qubits=13)
+        self.generate_advanced_circuits(complexity="pro", num_qubits=15)
+        # Additional breadth for dataset diversity
+        self.generate_advanced_circuits(complexity="lite", num_qubits=4)
+        self.generate_advanced_circuits(complexity="standard", num_qubits=6)
+        self.generate_advanced_circuits(complexity="pro", num_qubits=18)
+        self.generate_advanced_circuits(complexity="pro", num_qubits=20)
+
+        # Self-learning runtime circuits (small, standard, deep)
+        self.generate_self_improving_circuit(n_qubits=4, max_layers=4, name_suffix="edge")
+        self.generate_self_improving_circuit(n_qubits=6, max_layers=6, name_suffix="runtime")
+        self.generate_self_improving_circuit(n_qubits=8, max_layers=8, name_suffix="deep")
+        # Extra self-learning variants for hardware scaling
+        self.generate_self_improving_circuit(n_qubits=10, max_layers=10, name_suffix="ultra")
+        self.generate_self_improving_circuit(n_qubits=12, max_layers=12, name_suffix="xl")
+        self.generate_self_improving_circuit(n_qubits=14, max_layers=14, name_suffix="xxl")
+        self.generate_self_improving_circuit(n_qubits=5, max_layers=5, name_suffix="edge_plus")
+        self.generate_self_improving_circuit(n_qubits=7, max_layers=7, name_suffix="mid")
+        self.generate_self_improving_circuit(n_qubits=9, max_layers=9, name_suffix="mid_plus")
+        self.generate_self_improving_circuit(n_qubits=16, max_layers=12, name_suffix="hardware_ready")
+        self.generate_self_improving_circuit(n_qubits=18, max_layers=10, name_suffix="hardware_ready_plus")
+        self.generate_self_improving_circuit(n_qubits=20, max_layers=10, name_suffix="hardware_ready_max")
+
+        # Bulk synthetic circuits to reach large dataset sizes
+        self.generate_bulk_random_circuits(target_count=10000)
+
+    def generate_bulk_random_circuits(self, target_count: int = 10000) -> List[QuantumCircuit]:
+        """
+        Quickly synthesize additional circuits to reach a target count.
+        These are lightweight specs to pad GGUF datasets for large-scale testing.
+        """
+        current = len(self.circuits)
+        needed = target_count - current
+        if needed <= 0:
+            return []
+
+        types = ["variational", "qaoa", "vqe", "encoding", "entanglement", "advanced", "self_learning"]
+        added: List[QuantumCircuit] = []
+
+        for i in range(needed):
+            circuit_type = random.choice(types)
+            qubits = random.randint(4, 20)
+            depth = random.randint(1, 64)
+            gate_count = random.randint(qubits, max(qubits + 1, qubits * min(depth, 20)))
+            parameters = random.randint(0, qubits * depth // 2 + 20)
+            name = f"bulk_{circuit_type}_{current + i:05d}"
+
+            circuit = QuantumCircuit(
+                name=name,
+                type=circuit_type,
+                qubits=qubits,
+                depth=depth,
+                gate_count=gate_count,
+                parameters=parameters,
+                description=f"Synthetic {circuit_type} circuit (bulk generated for GGUF datasets)",
+                use_cases=["bulk_dataset_padding", "stress_test", "metadata_coverage"],
+                implementation={
+                    "framework": ["synthetic"],
+                    "gates": ["RX", "RY", "RZ", "CNOT"],
+                    "pattern": "randomized_template",
+                },
+                metadata={
+                    "created": datetime.now().isoformat(),
+                    "synthetic": True,
+                    "note": "Auto-generated to reach target circuit count",
+                },
+            )
+            self.circuits.append(circuit)
+            added.append(circuit)
+
+        logger.info("✅ Added %d bulk random circuits to reach target=%d (total=%d)", len(added), target_count, len(self.circuits))
+        return added
     
     def save_circuits(self, filename: str = "quantum_circuits.json") -> Path:
         """Save all circuits to JSON"""
         output_file = self.output_dir / filename
         
+        # Use minimal per-circuit fields when dataset is very large to keep size and write time low
+        if len(self.circuits) > 2000:
+            circuits_list = [
+                {
+                    "name": c.name,
+                    "type": c.type,
+                    "qubits": c.qubits,
+                    "depth": c.depth,
+                    "gate_count": c.gate_count,
+                    "parameters": c.parameters,
+                    "metadata": c.metadata,
+                }
+                for c in self.circuits
+            ]
+        else:
+            circuits_list = [c.to_dict() for c in self.circuits]
+
         circuits_data = {
             "metadata": {
                 "generated": datetime.now().isoformat(),
                 "total_circuits": len(self.circuits),
                 "circuit_types": list(set(c.type for c in self.circuits))
             },
-            "circuits": [c.to_dict() for c in self.circuits]
+            "circuits": circuits_list
         }
-        
+        # Use compact JSON for very large datasets to speed up writing
+        indent = None if len(self.circuits) > 2000 else 2
+        separators = (',', ':') if indent is None else None
         with open(output_file, 'w') as f:
-            json.dump(circuits_data, f, indent=2, default=str)
+            json.dump(circuits_data, f, indent=indent, separators=separators, default=str)
         
         logger.info(f"✅ Saved {len(self.circuits)} circuits to {output_file}")
         return output_file
@@ -505,6 +702,7 @@ result = variational_circuit(params)
             "circuit_descriptions": [],
             "training_data": []
         }
+        large_dataset = len(self.circuits) > 2000
         
         # Add circuit descriptions as training examples
         for circuit in self.circuits:
@@ -521,22 +719,23 @@ result = variational_circuit(params)
             
             dataset["circuit_descriptions"].append({
                 "name": circuit.name,
-                "description": circuit.description,
+                "description": circuit.description if not large_dataset else circuit.type,
                 "metrics": {
                     "qubits": circuit.qubits,
                     "depth": circuit.depth,
                     "gates": circuit.gate_count,
                     "parameters": circuit.parameters
                 },
-                "use_cases": circuit.use_cases
+                "use_cases": circuit.use_cases if not large_dataset else []
             })
             
-            # Generate synthetic training examples
-            dataset["training_data"].append({
-                "circuit_name": circuit.name,
-                "input": f"Create a {circuit.type} quantum circuit",
-                "output": f"Generated {circuit.name} with {circuit.qubits} qubits and depth {circuit.depth}"
-            })
+            # Generate synthetic training examples (skip or minimize for large/synthetic datasets to keep size manageable)
+            if not large_dataset and not circuit.metadata.get("synthetic"):
+                dataset["training_data"].append({
+                    "circuit_name": circuit.name,
+                    "input": f"Create a {circuit.type} quantum circuit",
+                    "output": f"Generated {circuit.name} with {circuit.qubits} qubits and depth {circuit.depth}"
+                })
         
         return dataset
     
@@ -545,8 +744,10 @@ result = variational_circuit(params)
         dataset = self.generate_gguf_compatible_dataset()
         output_file = self.output_dir / filename
         
+        indent = None if dataset["metadata"].get("circuit_count", 0) > 2000 else 2
+        separators = (',', ':') if indent is None else None
         with open(output_file, 'w') as f:
-            json.dump(dataset, f, indent=2)
+            json.dump(dataset, f, indent=indent, separators=separators)
         
         logger.info(f"✅ Saved GGUF dataset to {output_file}")
         return output_file

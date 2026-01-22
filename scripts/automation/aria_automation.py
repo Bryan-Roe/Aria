@@ -51,7 +51,8 @@ from pathlib import Path
 from typing import Dict, List, Optional, Any
 import psutil
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
+# Repo root (scripts/automation -> scripts -> repo)
+REPO_ROOT = Path(__file__).resolve().parents[2]
 ARIA_WEB_DIR = REPO_ROOT / "aria_web"
 DATA_OUT = REPO_ROOT / "data_out" / "aria_automation"
 STATUS_FILE = DATA_OUT / "status.json"

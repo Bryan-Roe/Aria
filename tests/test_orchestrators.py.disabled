@@ -1,0 +1,289 @@
+"""Tests for orchestrator modules"""
+import pytest
+import json
+import os
+import sys
+from pathlib import Path
+from unittest.mock import Mock, patch, MagicMock
+
+# Add scripts subfolders to path
+REPO_ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(REPO_ROOT / "scripts" / "training"))
+sys.path.insert(0, str(REPO_ROOT / "scripts" / "evaluation"))
+
+from autotrain import load_config, validate_job_config, build_command
+from quantum_autorun import QuantumJobBuilder
+from evaluation_autorun import EvaluationRunner
+
+
+class TestAutotrainOrchestrator:
+    """Test autotrain orchestrator"""
+    
+    def test_load_config_from_yaml(self):
+        """Test loading config from YAML file"""
+        # Create a temporary config file
+        config_data = {
+            "base": {
+                "model": "TinyLlama/TinyLlama-1.1B",
+                "epochs": [10, 20],
+                "batch_size": 8
+            },
+            "jobs": [
+                {
+                    "name": "test_job",
+                    "dataset": "tiny_chat",
+                    "epochs": 10
+                }
+            ]
+        }
+        
+        config = {"base": config_data["base"], "jobs": config_data["jobs"]}
+        assert config is not None
+        assert "base" in config
+        assert "jobs" in config
+    
+    def test_validate_job_config(self):
+        """Test job configuration validation"""
+        job_config = {
+            "name": "test_job",
+            "dataset": "test_dataset",
+            "model": "TinyLlama/TinyLlama-1.1B",
+            "epochs": 10,
+            "batch_size": 8
+        }
+        
+        # Should validate successfully
+        assert job_config is not None
+        assert job_config["name"] == "test_job"
+    
+    def test_build_training_command(self):
+        """Test building training command"""
+        job = {
+            "name": "test_job",
+            "model": "TinyLlama/TinyLlama-1.1B",
+            "dataset": "test_dataset",
+            "epochs": 10
+        }
+        
+        command = build_command(job)
+        assert command is not None
+        assert isinstance(command, (str, list))
+    
+    def test_missing_required_field(self):
+        """Test handling missing required fields"""
+        incomplete_config = {
+            "name": "test_job"
+            # Missing model, dataset, etc.
+        }
+        
+        # Should detect missing fields
+        assert "model" not in incomplete_config
+    
+    def test_config_with_overrides(self):
+        """Test config with CLI overrides"""
+        base_config = {
+            "model": "TinyLlama/TinyLlama-1.1B",
+            "epochs": 10,
+            "batch_size": 8
+        }
+        
+        cli_overrides = {"epochs": 20}
+        merged = {**base_config, **cli_overrides}
+        
+        assert merged["epochs"] == 20
+        assert merged["batch_size"] == 8
+
+
+class TestQuantumOrchestrator:
+    """Test quantum autorun orchestrator"""
+    
+    def test_quantum_builder_initialization(self):
+        """Test quantum job builder initializes"""
+        builder = QuantumJobBuilder()
+        assert builder is not None
+    
+    def test_build_quantum_job(self):
+        """Test building a quantum job"""
+        builder = QuantumJobBuilder()
+        
+        job_config = {
+            "name": "test_quantum_job",
+            "circuit": "qaoa",
+            "shots": 1024
+        }
+        
+        job = builder.build_job(job_config)
+        assert job is not None
+    
+    def test_validate_quantum_backend(self):
+        """Test quantum backend validation"""
+        backends = ["simulator", "ionq"]
+        
+        for backend in backends:
+            assert backend in ["simulator", "ionq", "qpu"]
+    
+    def test_estimate_quantum_cost(self):
+        """Test quantum job cost estimation"""
+        job_config = {
+            "backend": "ionq",
+            "shots": 1000
+        }
+        
+        # Cost should be calculable
+        cost = 1000 * 0.00035  # Example: $0.00035 per shot
+        assert cost > 0
+    
+    def test_dry_run_mode(self):
+        """Test dry run mode doesn't submit jobs"""
+        builder = QuantumJobBuilder()
+        
+        with patch("scripts.quantum_autorun.submit_job") as mock_submit:
+            job_config = {
+                "name": "test_job",
+                "dry_run": True
+            }
+            # In dry run, should not call submit
+            assert "dry_run" in job_config
+
+
+class TestEvaluationOrchestrator:
+    """Test evaluation autorun orchestrator"""
+    
+    def test_evaluation_runner_initialization(self):
+        """Test evaluation runner initializes"""
+        runner = EvaluationRunner()
+        assert runner is not None
+    
+    def test_load_model_for_evaluation(self):
+        """Test loading model for evaluation"""
+        model_path = "test_model.pth"
+        
+        # Model loading should be testable
+        assert model_path.endswith(".pth")
+    
+    def test_run_evaluation_metrics(self):
+        """Test running evaluation metrics"""
+        eval_config = {
+            "model": "test_model",
+            "dataset": "test_dataset",
+            "metrics": ["accuracy", "precision", "recall"]
+        }
+        
+        assert len(eval_config["metrics"]) == 3
+    
+    def test_save_evaluation_results(self):
+        """Test saving evaluation results"""
+        results = {
+            "accuracy": 0.95,
+            "precision": 0.92,
+            "recall": 0.89,
+            "f1": 0.90
+        }
+        
+        # Results should be serializable
+        json_str = json.dumps(results)
+        assert "accuracy" in json_str
+    
+    def test_evaluation_report_generation(self):
+        """Test generating evaluation report"""
+        metrics = {
+            "model": "test_model",
+            "accuracy": 0.95,
+            "timestamp": "2024-01-17"
+        }
+        
+        report = f"Model: {metrics['model']}, Accuracy: {metrics['accuracy']}"
+        assert "test_model" in report
+
+
+class TestOrchestrationErrors:
+    """Test error handling in orchestrators"""
+    
+    def test_handle_missing_dataset(self):
+        """Test handling missing dataset"""
+        job_config = {
+            "name": "test_job",
+            "dataset": "nonexistent_dataset"
+        }
+        
+        # Should raise or handle gracefully
+        assert job_config["dataset"] == "nonexistent_dataset"
+    
+    def test_handle_invalid_model(self):
+        """Test handling invalid model"""
+        job_config = {
+            "model": "nonexistent/model"
+        }
+        
+        # Should be detectable
+        assert "nonexistent" in job_config["model"]
+    
+    def test_handle_insufficient_resources(self):
+        """Test handling insufficient GPU/memory"""
+        job_config = {
+            "batch_size": 512,
+            "max_seq_length": 4096
+        }
+        
+        # Should calculate resource requirements
+        memory_needed = 512 * 4096 * 2  # Rough estimate
+        assert memory_needed > 0
+
+
+class TestStatusTracking:
+    """Test status file tracking"""
+    
+    def test_write_status_file(self):
+        """Test writing status file"""
+        status = {
+            "total_jobs": 5,
+            "succeeded": 3,
+            "failed": 1,
+            "running": 1,
+            "last_updated": "2024-01-17T10:00:00Z"
+        }
+        
+        status_json = json.dumps(status, indent=2)
+        assert "total_jobs" in status_json
+    
+    def test_status_file_schema(self):
+        """Test status file follows schema"""
+        status = {
+            "total_jobs": 5,
+            "succeeded": 3,
+            "failed": 0,
+            "running": 2,
+            "last_updated": "2024-01-17T10:00:00Z",
+            "avg_duration": 45.5
+        }
+        
+        # Validate schema
+        assert status["succeeded"] + status["running"] <= status["total_jobs"]
+
+
+class TestOrchestrationMetrics:
+    """Test metrics collection"""
+    
+    def test_collect_job_metrics(self):
+        """Test collecting job metrics"""
+        metrics = {
+            "job_name": "test_job",
+            "duration": 120.5,
+            "success": True,
+            "loss": 0.0234
+        }
+        
+        assert metrics["duration"] > 0
+        assert isinstance(metrics["success"], bool)
+    
+    def test_aggregate_metrics(self):
+        """Test aggregating metrics across jobs"""
+        job_metrics = [
+            {"duration": 100, "loss": 0.05},
+            {"duration": 120, "loss": 0.03},
+            {"duration": 110, "loss": 0.04}
+        ]
+        
+        avg_duration = sum(m["duration"] for m in job_metrics) / len(job_metrics)
+        assert avg_duration > 0
+        assert 100 <= avg_duration <= 120

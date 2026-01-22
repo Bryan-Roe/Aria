@@ -133,10 +133,8 @@ def convert_to_gguf(
     logger.info(f"🔄 Converting {output_name} to GGUF")
     
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    output_dir = DATA_OUT / "quantum_gguf_training" / output_name / timestamp
-    output_dir.mkdir(parents=True, exist_ok=True)
-    
-    gguf_path = output_dir / f"{output_name}.gguf"
+    output_dir = DATA_OUT / "gguf_training" / "convert_only" / timestamp
+    gguf_path = output_dir / "convert_only.gguf"
     
     if dry_run:
         logger.info(f"[DRY-RUN] Would convert {model_path} -> {gguf_path}")
@@ -165,8 +163,12 @@ def convert_to_gguf(
             logger.error(f"❌ Conversion failed: {result.stderr}")
             return None
             
-        logger.info(f"✅ GGUF created: {gguf_path}")
-        return gguf_path
+        actual_gguf_path = _find_latest_convert_only_gguf(logger)
+        if not actual_gguf_path:
+            return None
+        
+        logger.info(f"✅ GGUF created: {actual_gguf_path}")
+        return actual_gguf_path
         
     except subprocess.TimeoutExpired:
         logger.error("❌ Conversion timed out (10 min limit)")
@@ -174,6 +176,20 @@ def convert_to_gguf(
     except Exception as e:
         logger.error(f"❌ Conversion error: {e}")
         return None
+
+
+def _find_latest_convert_only_gguf(logger: logging.Logger) -> Optional[Path]:
+    convert_only_dir = DATA_OUT / "gguf_training" / "convert_only"
+    if not convert_only_dir.exists():
+        logger.error(f"❌ Convert-only output dir missing: {convert_only_dir}")
+        return None
+    
+    gguf_files = list(convert_only_dir.rglob("convert_only.gguf"))
+    if not gguf_files:
+        logger.error(f"❌ No GGUF files found under: {convert_only_dir}")
+        return None
+    
+    return max(gguf_files, key=lambda p: p.stat().st_mtime)
 
 
 def validate_gguf(gguf_path: Path, logger: logging.Logger) -> bool:

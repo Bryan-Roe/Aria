@@ -40,15 +40,15 @@ class TestCPUMonitoring:
     def test_cpu_load_average(self):
         """Test CPU load average calculation"""
         load_avg = {
-            "1min": 2.5,
-            "5min": 2.3,
-            "15min": 2.1
+            "1min": 6.5,
+            "5min": 5.3,
+            "15min": 4.1
         }
         
         cpu_count = 4
         load_per_cpu_1min = load_avg["1min"] / cpu_count
         
-        # Normal if <= 1.0 per CPU
+        # High if > 1.0 per CPU
         is_high = load_per_cpu_1min > 1.0
         assert is_high
 

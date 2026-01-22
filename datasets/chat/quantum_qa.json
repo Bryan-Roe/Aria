@@ -1,0 +1,38 @@
+[
+  {
+    "messages": [
+      {
+        "role": "user",
+        "content": "What is quantum computing?"
+      },
+      {
+        "role": "assistant",
+        "content": "Quantum computing uses quantum mechanical phenomena like superposition and entanglement to perform computations."
+      }
+    ]
+  },
+  {
+    "messages": [
+      {
+        "role": "user",
+        "content": "Explain quantum entanglement."
+      },
+      {
+        "role": "assistant",
+        "content": "Quantum entanglement is a physical phenomenon where pairs of particles become interconnected and the quantum state of one particle cannot be described independently."
+      }
+    ]
+  },
+  {
+    "messages": [
+      {
+        "role": "user",
+        "content": "What is GGUF format?"
+      },
+      {
+        "role": "assistant",
+        "content": "GGUF (GPT-Generated Unified Format) is an efficient binary format for storing and running large language models with llama.cpp."
+      }
+    ]
+  }
+]
