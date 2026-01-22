@@ -494,11 +494,12 @@ def main():
     # Parse all workflow files
     workflows: List[WorkflowInfo] = []
     if workflow_dir.exists():
-        for workflow_file in workflow_dir.glob("*.yml"):
-            workflow_info = parse_workflow(workflow_file)
-            if workflow_info:
-                workflows.append(workflow_info)
-                print(f"Parsed workflow: {workflow_info.name}")
+        for pattern in ("*.yml", "*.yaml"):
+            for workflow_file in workflow_dir.glob(pattern):
+                workflow_info = parse_workflow(workflow_file)
+                if workflow_info:
+                    workflows.append(workflow_info)
+                    print(f"Parsed workflow: {workflow_info.name}")
     
     if not workflows:
         print(f"Warning: No workflow files found in {workflow_dir}")
