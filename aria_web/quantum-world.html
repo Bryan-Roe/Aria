@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quantum World - Aria</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            color: white;
+        }
+        
+        .header {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 20px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+        
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+        
+        .container {
+            flex: 1;
+            display: flex;
+            gap: 20px;
+            padding: 20px;
+            max-width: 1600px;
+            width: 100%;
+            margin: 0 auto;
+        }
+        
+        .controls {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 25px;
+            width: 350px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+        }
+        
+        .world-display {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .control-group {
+            margin-bottom: 20px;
+        }
+        
+        .control-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            font-size: 0.95em;
+        }
+        
+        .control-group input,
+        .control-group select {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            font-size: 1em;
+        }
+        
+        .control-group input::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+        
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .checkbox-group input[type="checkbox"] {
+            width: auto;
+            cursor: pointer;
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(240, 147, 251, 0.4);
+        }
+        
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(240, 147, 251, 0.6);
+        }
+        
+        .stage {
+            width: 100%;
+            height: 600px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            position: relative;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .object {
+            position: absolute;
+            font-size: 2em;
+            transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            cursor: pointer;
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        .object:hover {
+            transform: scale(1.2);
+            filter: drop-shadow(0 6px 12px rgba(0,0,0,0.5));
+        }
+        
+        .quantum-object {
+            animation: quantumPulse 2s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        @keyframes quantumPulse {
+            0%, 100% {
+                filter: drop-shadow(0 0 10px rgba(102, 126, 234, 0.8))
+                        drop-shadow(0 0 20px rgba(102, 126, 234, 0.4));
+            }
+            50% {
+                filter: drop-shadow(0 0 20px rgba(118, 75, 162, 0.8))
+                        drop-shadow(0 0 40px rgba(118, 75, 162, 0.4));
+            }
+        }
+        
+        .info-panel {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            font-size: 0.9em;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            padding: 5px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .info-label {
+            font-weight: 600;
+            opacity: 0.8;
+        }
+        
+        .info-value {
+            text-align: right;
+        }
+        
+        .status {
+            padding: 10px;
+            margin-top: 15px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: 600;
+            display: none;
+        }
+        
+        .status.success {
+            background: rgba(76, 175, 80, 0.3);
+            display: block;
+        }
+        
+        .status.error {
+            background: rgba(244, 67, 54, 0.3);
+            display: block;
+        }
+        
+        .qubit-line {
+            position: absolute;
+            height: 2px;
+            background: linear-gradient(90deg, 
+                rgba(102, 126, 234, 0.6) 0%, 
+                rgba(118, 75, 162, 0.6) 100%);
+            box-shadow: 0 0 10px rgba(102, 126, 234, 0.8);
+        }
+        
+        .gate-connection {
+            position: absolute;
+            width: 2px;
+            background: linear-gradient(180deg,
+                rgba(240, 147, 251, 0.8) 0%,
+                rgba(245, 87, 108, 0.8) 100%);
+            box-shadow: 0 0 10px rgba(240, 147, 251, 0.8);
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>⚛️ Quantum World Generator</h1>
+        <p>3D World powered by Quantum Computing</p>
+    </div>
+    
+    <div class="container">
+        <div class="controls">
+            <h2 style="margin-bottom: 20px;">Generation Controls</h2>
+            
+            <div class="control-group">
+                <label for="theme">Theme</label>
+                <select id="theme">
+                    <option value="quantum">⚛️ Quantum</option>
+                    <option value="nature">🌳 Nature</option>
+                    <option value="space">🚀 Space</option>
+                    <option value="ocean">🌊 Ocean</option>
+                    <option value="tech">💻 Tech</option>
+                </select>
+            </div>
+            
+            <div class="control-group">
+                <label for="count">Object Count (4-16)</label>
+                <input type="number" id="count" min="4" max="16" value="8">
+            </div>
+            
+            <div class="control-group">
+                <label for="seed">Seed (optional)</label>
+                <input type="number" id="seed" placeholder="Random if empty">
+            </div>
+            
+            <div class="checkbox-group">
+                <input type="checkbox" id="useQuantum" checked>
+                <label for="useQuantum">Use Quantum Generation</label>
+            </div>
+            
+            <button class="btn btn-primary" onclick="generateWorld()">
+                🌍 Generate World
+            </button>
+            
+            <button class="btn btn-secondary" onclick="visualizeCircuit()">
+                📊 Visualize Circuit
+            </button>
+            
+            <div id="status" class="status"></div>
+            
+            <div class="info-panel" id="infoPanel">
+                <h3 style="margin-bottom: 10px;">World Info</h3>
+                <div id="worldInfo">
+                    <p style="opacity: 0.7;">Generate a world to see details</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="world-display">
+            <h2 style="margin-bottom: 15px;">Stage</h2>
+            <div class="stage" id="stage">
+                <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; opacity: 0.5;">
+                    <p style="font-size: 3em;">⚛️</p>
+                    <p style="margin-top: 10px;">Click "Generate World" to begin</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        const API_BASE = '';
+        
+        async function generateWorld() {
+            const theme = document.getElementById('theme').value;
+            const count = parseInt(document.getElementById('count').value);
+            const seedInput = document.getElementById('seed').value;
+            const seed = seedInput ? parseInt(seedInput) : null;
+            const useQuantum = document.getElementById('useQuantum').checked;
+            
+            showStatus('Generating world...', 'info');
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/aria/world`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        theme,
+                        count,
+                        seed,
+                        use_quantum: useQuantum,
+                        use_llm: false
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    renderWorld(data);
+                    displayWorldInfo(data);
+                    showStatus(`✓ World generated! ${useQuantum ? '⚛️ Quantum' : '🎲 Classical'}`, 'success');
+                } else {
+                    showStatus('Error: ' + (data.error || 'Unknown error'), 'error');
+                }
+            } catch (error) {
+                showStatus('Error: ' + error.message, 'error');
+            }
+        }
+        
+        async function visualizeCircuit() {
+            showStatus('Generating quantum circuit visualization...', 'info');
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/aria/quantum/circuit`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({})
+                });
+                
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    renderCircuit(data);
+                    displayCircuitInfo(data);
+                    showStatus('✓ Quantum circuit visualized!', 'success');
+                } else if (data.status === 'unavailable') {
+                    showStatus('⚠️ Quantum generation not available', 'error');
+                } else {
+                    showStatus('Error: ' + (data.error || 'Unknown error'), 'error');
+                }
+            } catch (error) {
+                showStatus('Error: ' + error.message, 'error');
+            }
+        }
+        
+        function renderWorld(data) {
+            const stage = document.getElementById('stage');
+            stage.innerHTML = '';
+            
+            const objects = data.objects || {};
+            const stageWidth = stage.offsetWidth;
+            const stageHeight = stage.offsetHeight;
+            
+            for (const [id, obj] of Object.entries(objects)) {
+                const elem = document.createElement('div');
+                elem.className = 'object';
+                elem.textContent = obj.emoji || '✨';
+                elem.title = id;
+                
+                const x = (obj.position.x / 100) * stageWidth;
+                const y = (obj.position.y / 100) * stageHeight;
+                
+                elem.style.left = `${x}px`;
+                elem.style.top = `${y}px`;
+                elem.style.transform = 'translate(-50%, -50%)';
+                
+                if (obj.properties?.quantum_generated || obj.quantum_state) {
+                    elem.classList.add('quantum-object');
+                }
+                
+                if (obj.properties?.scale) {
+                    elem.style.fontSize = `${2 * obj.properties.scale}em`;
+                }
+                
+                elem.addEventListener('click', () => {
+                    alert(`Object: ${id}\n` +
+                          `Position: (${obj.position.x}, ${obj.position.y})\n` +
+                          `State: ${obj.state}\n` +
+                          (obj.quantum_state ? `Quantum State: ${JSON.stringify(obj.quantum_state)}` : ''));
+                });
+                
+                stage.appendChild(elem);
+                
+                // Animate in
+                setTimeout(() => {
+                    elem.style.opacity = '1';
+                }, Math.random() * 500);
+            }
+        }
+        
+        function renderCircuit(data) {
+            const stage = document.getElementById('stage');
+            stage.innerHTML = '';
+            
+            const objects = data.objects || {};
+            const stageWidth = stage.offsetWidth;
+            const stageHeight = stage.offsetHeight;
+            
+            // Draw qubit lines
+            const qubits = Object.values(objects).filter(o => o.properties?.type === 'qubit');
+            qubits.forEach(qubit => {
+                const line = document.createElement('div');
+                line.className = 'qubit-line';
+                const y = (qubit.position.y / 100) * stageHeight;
+                line.style.top = `${y}px`;
+                line.style.left = '0';
+                line.style.width = '100%';
+                stage.appendChild(line);
+            });
+            
+            // Draw objects
+            for (const [id, obj] of Object.entries(objects)) {
+                const elem = document.createElement('div');
+                elem.className = 'object quantum-object';
+                elem.textContent = obj.emoji || '✨';
+                elem.title = `${id} (${obj.properties?.gate_type || obj.properties?.type || 'unknown'})`;
+                
+                const x = (obj.position.x / 100) * stageWidth;
+                const y = (obj.position.y / 100) * stageHeight;
+                
+                elem.style.left = `${x}px`;
+                elem.style.top = `${y}px`;
+                elem.style.transform = 'translate(-50%, -50%)';
+                
+                elem.addEventListener('click', () => {
+                    alert(`${id}\n` +
+                          `Type: ${obj.properties?.type || 'unknown'}\n` +
+                          (obj.properties?.gate_type ? `Gate: ${obj.properties.gate_type}\n` : '') +
+                          `Position: (${obj.position.x}, ${obj.position.y})`);
+                });
+                
+                stage.appendChild(elem);
+            }
+        }
+        
+        function displayWorldInfo(data) {
+            const env = data.environment || {};
+            const html = `
+                <div class="info-row">
+                    <span class="info-label">Theme:</span>
+                    <span class="info-value">${env.theme || 'Unknown'}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Objects:</span>
+                    <span class="info-value">${data.count || 0}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Method:</span>
+                    <span class="info-value">${env.generation_method || 'unknown'}</span>
+                </div>
+                ${env.quantum_qubits ? `
+                <div class="info-row">
+                    <span class="info-label">Qubits:</span>
+                    <span class="info-value">${env.quantum_qubits}</span>
+                </div>
+                ` : ''}
+                ${env.seed ? `
+                <div class="info-row">
+                    <span class="info-label">Seed:</span>
+                    <span class="info-value">${env.seed}</span>
+                </div>
+                ` : ''}
+                <div class="info-row">
+                    <span class="info-label">Quantum:</span>
+                    <span class="info-value">${data.used_quantum ? '⚛️ Yes' : '❌ No'}</span>
+                </div>
+            `;
+            document.getElementById('worldInfo').innerHTML = html;
+        }
+        
+        function displayCircuitInfo(data) {
+            const env = data.environment || {};
+            const circuit = data.circuit_data || {};
+            const html = `
+                <div class="info-row">
+                    <span class="info-label">Circuit Type:</span>
+                    <span class="info-value">${circuit.name || 'custom'}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Qubits:</span>
+                    <span class="info-value">${env.n_qubits || circuit.n_qubits || 0}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Gates:</span>
+                    <span class="info-value">${circuit.gates?.length || 0}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Objects:</span>
+                    <span class="info-value">${Object.keys(data.objects || {}).length}</span>
+                </div>
+            `;
+            document.getElementById('worldInfo').innerHTML = html;
+        }
+        
+        function showStatus(message, type) {
+            const status = document.getElementById('status');
+            status.textContent = message;
+            status.className = `status ${type}`;
+            
+            if (type === 'success' || type === 'error') {
+                setTimeout(() => {
+                    status.style.display = 'none';
+                }, 5000);
+            }
+        }
+        
+        // Auto-generate on load
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                generateWorld();
+            }, 500);
+        });
+    </script>
+</body>
+</html>

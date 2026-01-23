@@ -46,6 +46,32 @@ except Exception:
     LLM_AVAILABLE = False
     logger.info("LLM providers unavailable; using rule-based fallback only")
 
+# Optional quantum integration
+try:
+    from quantum_3d_bridge import (
+        quantum_predict_behavior,
+        quantum_generate_world,
+        quantum_visualize_state,
+        QUANTUM_AVAILABLE as QUANTUM_LIB_AVAILABLE
+    )
+    QUANTUM_AVAILABLE = QUANTUM_LIB_AVAILABLE
+    logger.info("✓ Quantum 3D bridge loaded successfully")
+except Exception as e:
+    QUANTUM_AVAILABLE = False
+    quantum_predict_behavior = None
+    quantum_generate_world = None
+    quantum_visualize_state = None
+    logger.info(f"Quantum integration unavailable: {e}")
+
+# Fallback: try legacy quantum world generator
+try:
+    from aria_web.quantum_world_generator import get_quantum_generator
+    QUANTUM_WORLD_AVAILABLE = True
+    logger.info("✓ Legacy quantum world generation available")
+except Exception as e:
+    QUANTUM_WORLD_AVAILABLE = False
+    logger.info(f"Legacy quantum world generation unavailable: {e}")
+
 # We avoid loading heavy models in the server; providers are used when available
 MODEL = None
 
@@ -1064,6 +1090,7 @@ class AriaRequestHandler(SimpleHTTPRequestHandler):
                 theme = data.get('theme', 'forest')
                 count = int(data.get('count', 6))
                 use_llm = bool(data.get('use_llm', True))
+                use_quantum = bool(data.get('use_quantum', False))
                 seed = data.get('seed')
                 spacing = int(data.get('spacing', 10))
                 algorithm = data.get('algorithm', 'rejection')
@@ -1071,7 +1098,16 @@ class AriaRequestHandler(SimpleHTTPRequestHandler):
                     'ARIA_WORLD_PERSIST', 'false').lower() == 'true'
                 persist_flag = bool(data.get('persist', persist_flag_env))
 
-                if use_llm and action_parser.provider:
+                # Quantum world generation
+                if use_quantum and QUANTUM_WORLD_AVAILABLE:
+                    try:
+                        generator = get_quantum_generator()
+                        world = generator.generate_quantum_world(theme, count, seed)
+                        logger.info(f"✓ Quantum world generated (theme={theme}, count={count})")
+                    except Exception as e:
+                        logger.warning(f"Quantum generation failed: {e}, falling back")
+                        world = generate_world_fallback(theme, count, seed=seed, spacing=spacing, algorithm=algorithm)
+                elif use_llm and action_parser.provider:
                     world = generate_world_with_llm(
                         theme, count, action_parser.provider, seed=seed, spacing=spacing, algorithm=algorithm)
                 else:
@@ -1093,7 +1129,7 @@ class AriaRequestHandler(SimpleHTTPRequestHandler):
                     'spacing', spacing)
 
                 response = {'status': 'success', 'theme': theme, 'count': len(world['objects']), 'used_llm': world.get(
-                    'llm', False), 'objects': world['objects'], 'environment': world.get('environment', {})}
+                    'llm', False), 'used_quantum': world.get('quantum_powered', False), 'objects': world['objects'], 'environment': world.get('environment', {})}
                 if persist_flag:
                     path = persist_world(world, theme, seed=seed)
                     response['persisted'] = bool(path)
@@ -1108,8 +1144,64 @@ class AriaRequestHandler(SimpleHTTPRequestHandler):
                 self.wfile.write(json.dumps(
                     response, indent=2).encode('utf-8'))
                 logger.info(
-                    f"✓ World generated (theme={theme}, llm={response['used_llm']}, count={response['count']}, algo={algorithm})")
+                    f"✓ World generated (theme={theme}, llm={response['used_llm']}, quantum={response['used_quantum']}, count={response['count']}, algo={algorithm})")
                 return
+
+            if self.path == '/api/aria/quantum/circuit':
+                content_length = int(self.headers.get('Content-Length', 0))
+                body = self.rfile.read(content_length)
+                data = json.loads(body.decode('utf-8')) if body else {}
+                
+                if not QUANTUM_WORLD_AVAILABLE:
+                    self.send_response(503)
+                    self.send_header('Content-Type', 'application/json')
+                    self.end_headers()
+                    self.wfile.write(json.dumps({
+                        'status': 'unavailable',
+                        'message': 'Quantum world generation not available'
+                    }).encode('utf-8'))
+                    return
+                
+                try:
+                    generator = get_quantum_generator()
+                    circuit_data = data.get('circuit_data')
+                    world = generator.visualize_quantum_circuit(circuit_data)
+                    
+                    # Update stage state
+                    stage_state['objects'] = {
+                        oid: {
+                            'position': v['position'],
+                            'state': v.get('state', 'on_stage'),
+                            'emoji': v.get('emoji', ''),
+                            'properties': v.get('properties', {})
+                        }
+                        for oid, v in world['objects'].items()
+                    }
+                    
+                    response = {
+                        'status': 'success',
+                        'objects': world['objects'],
+                        'environment': world.get('environment', {}),
+                        'circuit_data': world.get('circuit_data', {})
+                    }
+                    
+                    self.send_response(200)
+                    self.send_header('Content-Type', 'application/json')
+                    self.end_headers()
+                    self.wfile.write(json.dumps(response, indent=2).encode('utf-8'))
+                    logger.info("✓ Quantum circuit visualized")
+                    return
+                    
+                except Exception as e:
+                    logger.exception('Quantum circuit visualization error')
+                    self.send_response(400)
+                    self.send_header('Content-Type', 'application/json')
+                    self.end_headers()
+                    self.wfile.write(json.dumps({
+                        'status': 'error',
+                        'error': str(e)
+                    }).encode('utf-8'))
+                    return
 
         except ConnectionAbortedError:
             return

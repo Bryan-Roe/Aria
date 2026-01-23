@@ -36,15 +36,20 @@ def test_chat_endpoint_basic_local_provider():
     Memory injection should be zero when DB unavailable or no prior messages.
     Provider can be lmstudio (if running) or local (fallback).
     """
-    req = make_request({
-        "messages": [{"role": "user", "content": "Hello test endpoint"}],
-        "session_id": "pytest-session"
-    })
+    req = make_request(
+        {
+            "messages": [{"role": "user", "content": "Hello test endpoint"}],
+            "session_id": "pytest-session",
+        }
+    )
     resp = function_app.chat(req)
     assert resp.status_code == 200, resp.get_body()
     payload = json.loads(resp.get_body())
     # Provider can be lmstudio (if LM Studio is running) or local (fallback)
-    assert payload["provider"] in ["local", "lmstudio"], f"Unexpected provider: {payload['provider']}"
+    assert payload["provider"] in [
+        "local",
+        "lmstudio",
+    ], f"Unexpected provider: {payload['provider']}"
     assert isinstance(payload.get("response"), str)
     assert "memory_injected" in payload
     assert isinstance(payload["memory_injected"], int)
