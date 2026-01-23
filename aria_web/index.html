@@ -3,8 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>👤 Aria Visual Command System</title>
+    <title>Aria Visual Command System</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --ink: #111a26;
+            --muted: #526279;
+            --accent: #ff7a59;
+            --accent-strong: #ff5a3a;
+            --accent-cool: #0b8a83;
+            --stage-border: rgba(11, 138, 131, 0.6);
+            --glass: rgba(255, 255, 255, 0.86);
+            --glass-strong: rgba(255, 255, 255, 0.94);
+            --shadow-1: 0 18px 45px rgba(12, 20, 35, 0.2);
+            --shadow-2: 0 10px 24px rgba(12, 20, 35, 0.16);
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -12,52 +28,209 @@
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #d4e4f7 0%, #b8d4ed 50%, #a8c5e3 100%);
+            font-family: 'Outfit', sans-serif;
+            background:
+                radial-gradient(1200px 700px at 5% 5%, rgba(255, 247, 232, 0.9), transparent 60%),
+                radial-gradient(900px 600px at 95% 10%, rgba(202, 236, 232, 0.7), transparent 55%),
+                linear-gradient(140deg, #efe3d0 0%, #d4e2db 45%, #c7d6e2 100%);
             min-height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
             padding: 20px;
-            color: #333;
+            color: var(--ink);
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before,
+        body::after {
+            content: '';
+            position: absolute;
+            width: 420px;
+            height: 420px;
+            border-radius: 45%;
+            filter: blur(0);
+            opacity: 0.4;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        body::before {
+            top: -120px;
+            right: -120px;
+            background: radial-gradient(circle, rgba(255, 246, 235, 0.9) 0%, rgba(255, 215, 185, 0.6) 55%, transparent 70%);
+            transform: rotate(12deg);
+        }
+
+        body::after {
+            bottom: -140px;
+            left: -140px;
+            background: radial-gradient(circle, rgba(214, 240, 238, 0.9) 0%, rgba(164, 210, 214, 0.5) 55%, transparent 72%);
+            transform: rotate(-8deg);
+        }
+
+        .skip-link {
+            position: absolute;
+            left: 12px;
+            top: 12px;
+            padding: 8px 12px;
+            background: #0c1b2a;
+            color: #fff;
+            border-radius: 8px;
+            text-decoration: none;
+            transform: translateY(-200%);
+            transition: transform 0.2s ease;
+            z-index: 9999;
+        }
+
+        .skip-link:focus {
+            transform: translateY(0);
         }
 
         .container {
             max-width: 1200px;
             width: 100%;
+            position: relative;
+            z-index: 1;
         }
 
         header {
-            text-align: center;
             margin-bottom: 30px;
+            animation: float-in 0.8s ease-out forwards;
+        }
+
+        .hero {
+            display: grid;
+            grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+            gap: 24px;
+            align-items: center;
+        }
+
+        .eyebrow {
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--accent-cool);
+            margin-bottom: 10px;
         }
 
         h1 {
-            font-size: 2.5em;
-            margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
-            background: linear-gradient(135deg, #4a90e2, #5a9fe5, #6aaff0);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            font-family: 'DM Serif Display', serif;
+            font-size: clamp(2.4rem, 4vw, 3.6rem);
+            margin-bottom: 12px;
+            color: #132033;
         }
 
         .subtitle {
-            font-size: 1.1em;
-            opacity: 0.9;
+            font-size: 1.05rem;
+            color: var(--muted);
+            opacity: 0.95;
+        }
+
+        .hero-actions {
+            margin-top: 18px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .cta {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 16px;
+            border-radius: 999px;
+            background: linear-gradient(135deg, #ff7a59 0%, #ffb347 100%);
+            color: #1b1b1b;
+            font-weight: 600;
+            text-decoration: none;
+            box-shadow: 0 10px 18px rgba(255, 122, 89, 0.25);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .cta:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 14px 24px rgba(255, 122, 89, 0.3);
+        }
+
+        .hero-note {
+            font-size: 0.95rem;
+            color: var(--muted);
+        }
+
+        .command-input .hero-note {
+            margin-bottom: 12px;
+        }
+
+        .hero-card {
+            background: var(--glass);
+            border-radius: 20px;
+            padding: 18px 20px;
+            border: 1px solid rgba(255, 255, 255, 0.7);
+            box-shadow: var(--shadow-2);
+            backdrop-filter: blur(8px);
+        }
+
+        .hero-card h2 {
+            font-size: 1.1rem;
+            color: #1f2b3d;
+            margin-bottom: 10px;
+        }
+
+        .hero-card ul {
+            list-style: none;
+            display: grid;
+            gap: 8px;
+            color: var(--muted);
+            font-size: 0.95rem;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 16px;
+            margin: 24px 0 30px;
+        }
+
+        .feature-card {
+            padding: 16px 18px;
+            border-radius: 18px;
+            background: rgba(255, 255, 255, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            box-shadow: var(--shadow-2);
+            backdrop-filter: blur(8px);
+        }
+
+        .feature-card h3 {
+            margin-bottom: 6px;
+            color: #1f2b3d;
+            font-size: 1.05rem;
+        }
+
+        .feature-card p {
+            color: var(--muted);
+            font-size: 0.95rem;
         }
 
         .object-manager {
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 15px;
-            padding: 20px;
+            background: var(--glass);
+            border-radius: 18px;
+            padding: 22px 24px;
             margin-bottom: 20px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            box-shadow: var(--shadow-2);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(8px);
+            animation: float-in 0.8s ease-out 0.1s forwards;
+            opacity: 0;
         }
 
         .object-manager h3 {
             margin-bottom: 15px;
-            color: #4a90e2;
+            color: var(--accent-cool);
+            font-weight: 600;
         }
 
         .object-controls {
@@ -68,9 +241,9 @@
 
         .object-btn {
             padding: 12px;
-            border: 2px solid #ddd;
+            border: 1px solid rgba(27, 33, 48, 0.15);
             border-radius: 10px;
-            background: white;
+            background: rgba(255, 255, 255, 0.9);
             cursor: pointer;
             font-size: 1.1em;
             transition: all 0.3s ease;
@@ -82,57 +255,62 @@
 
         .object-btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            box-shadow: 0 6px 16px rgba(22, 36, 58, 0.2);
         }
 
         .object-btn.active {
-            background: linear-gradient(135deg, #667eea, #764ba2);
+            background: linear-gradient(135deg, #ff7a59, #ffb347);
             color: white;
-            border-color: #667eea;
+            border-color: transparent;
         }
 
         .object-btn.inactive {
             opacity: 0.5;
-            background: #f5f5f5;
+            background: rgba(246, 248, 252, 0.9);
         }
 
         .main-content {
             display: grid;
-            grid-template-columns: 1fr 400px;
-            gap: 20px;
+            grid-template-columns: minmax(0, 1fr) minmax(320px, 380px);
+            gap: 24px;
             margin-bottom: 20px;
+            align-items: start;
         }
 
         .stage-container {
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 20px;
-            padding: 30px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            background: var(--glass-strong);
+            border-radius: 24px;
+            padding: 28px;
+            box-shadow: var(--shadow-1);
+            border: 1px solid rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            animation: float-in 0.8s ease-out 0.15s forwards;
+            opacity: 0;
         }
 
         .stage {
             position: relative;
             width: 100%;
             height: 500px;
-            background: linear-gradient(180deg, #87CEEB 0%, #98D8E8 50%, #b8e2f2 100%);
+            background: linear-gradient(180deg, #82cdbf 0%, #a7e0d6 55%, #e5f6f2 100%);
             border-radius: 15px;
             overflow: visible;
-            border: 3px solid #667eea;
+            border: 3px solid var(--stage-border);
             perspective: 2000px;
             perspective-origin: 50% 50%;
             transform-style: preserve-3d;
             box-shadow: inset 0 0 100px rgba(255,255,255,0.2),
-                        inset 0 -50px 100px rgba(0,0,0,0.1),
-                        0 15px 50px rgba(0,0,0,0.2);
+                        inset 0 -50px 100px rgba(15, 32, 45, 0.1),
+                        0 18px 55px rgba(12, 20, 35, 0.2);
             animation: stage-ambient 8s ease-in-out infinite;
         }
         
         @keyframes stage-ambient {
             0%, 100% { 
-                background: linear-gradient(180deg, #87CEEB 0%, #98D8E8 50%, #b8e2f2 100%);
+                background: linear-gradient(180deg, #82cdbf 0%, #a7e0d6 55%, #e5f6f2 100%);
             }
             50% { 
-                background: linear-gradient(180deg, #a8d8f0 0%, #b8e8f8 50%, #c8f0ff 100%);
+                background: linear-gradient(180deg, #9ad9cc 0%, #bfeae2 50%, #edf7f4 100%);
             }
         }
         
@@ -184,24 +362,6 @@
         }
         
         /* 3D Floor plane */
-        .stage::before {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            height: 50%;
-            background: linear-gradient(180deg, 
-                rgba(150, 200, 230, 0.3) 0%, 
-                rgba(120, 180, 220, 0.5) 50%, 
-                rgba(100, 160, 200, 0.7) 100%);
-            transform: rotateX(60deg) translateZ(-100px);
-            transform-origin: bottom center;
-            transform-style: preserve-3d;
-            border-radius: 0 0 15px 15px;
-            z-index: 1;
-        }
-        
         /* 3D Floor plane */
         .stage::before {
             content: '';
@@ -211,9 +371,9 @@
             right: 0;
             height: 50%;
             background: linear-gradient(180deg, 
-                rgba(150, 200, 230, 0.2) 0%, 
-                rgba(120, 180, 220, 0.4) 50%, 
-                rgba(100, 160, 200, 0.6) 100%);
+                rgba(152, 214, 206, 0.2) 0%, 
+                rgba(122, 191, 182, 0.4) 50%, 
+                rgba(94, 164, 156, 0.6) 100%);
             transform: rotateX(65deg) translateZ(-120px);
             transform-origin: bottom center;
             transform-style: preserve-3d;
@@ -231,7 +391,7 @@
             transform: translateX(-50%);
             width: 80%;
             height: 40px;
-            background: radial-gradient(ellipse at center, rgba(0,0,0,0.15) 0%, transparent 70%);
+            background: radial-gradient(ellipse at center, rgba(15, 32, 45, 0.18) 0%, transparent 70%);
             border-radius: 50%;
             z-index: 1;
         }
@@ -244,9 +404,9 @@
             transform: translateX(-50%) translateZ(-100px) rotateX(15deg);
             width: 280px;
             height: 15px;
-            background: linear-gradient(to bottom, #8B4513 0%, #A0522D 50%, #8B4513 100%);
+            background: linear-gradient(to bottom, #8a5d3b 0%, #b07a4c 50%, #7a4c2b 100%);
             border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            box-shadow: 0 6px 14px rgba(15, 32, 45, 0.25);
             z-index: 5;
             transform-style: preserve-3d;
         }
@@ -256,7 +416,7 @@
             top: 100%;
             width: 12px;
             height: 80px;
-            background: linear-gradient(to right, #654321 0%, #8B4513 50%, #654321 100%);
+            background: linear-gradient(to right, #5a3d26 0%, #8a5d3b 50%, #5a3d26 100%);
             border-radius: 3px;
             transform: translateX(-50%);
         }
@@ -1017,15 +1177,19 @@
         }
 
         .control-panel {
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 20px;
-            padding: 25px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-            color: #333;
+            background: var(--glass-strong);
+            border-radius: 22px;
+            padding: 24px;
+            box-shadow: var(--shadow-1);
+            color: var(--ink);
+            border: 1px solid rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            animation: float-in 0.8s ease-out 0.2s forwards;
+            opacity: 0;
         }
 
         .control-panel h2 {
-            color: #ff6b9d;
+            color: var(--accent-strong);
             margin-bottom: 15px;
             font-size: 1.5em;
         }
@@ -1037,23 +1201,24 @@
         input[type="text"] {
             width: 100%;
             padding: 12px;
-            border: 2px solid #ff6b9d;
+            border: 1px solid rgba(27, 33, 48, 0.2);
             border-radius: 10px;
             font-size: 1em;
             margin-bottom: 10px;
             transition: border-color 0.3s;
+            font-family: 'Outfit', sans-serif;
         }
 
         input[type="text"]:focus {
             outline: none;
-            border-color: #ff8fab;
-            box-shadow: 0 0 8px rgba(255,107,157,0.3);
+            border-color: var(--accent);
+            box-shadow: 0 0 10px rgba(255, 138, 92, 0.3);
         }
 
         button {
             width: 100%;
             padding: 12px;
-            background: linear-gradient(135deg, #ff6b9d 0%, #ffa5c5 100%);
+            background: linear-gradient(135deg, #ff7a59 0%, #ffb347 100%);
             color: white;
             border: none;
             border-radius: 10px;
@@ -1061,12 +1226,13 @@
             font-weight: bold;
             cursor: pointer;
             transition: transform 0.2s;
-            box-shadow: 0 4px 8px rgba(255,107,157,0.3);
+            box-shadow: 0 10px 20px rgba(255, 107, 74, 0.25);
+            font-family: 'Outfit', sans-serif;
         }
 
         button:hover {
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            box-shadow: 0 12px 24px rgba(255, 107, 74, 0.3);
         }
 
         button:active {
@@ -1075,11 +1241,11 @@
 
         .quick-commands {
             margin-top: 20px;
+        }
+
         .quick-commands h3 {
-            color: #ff6b9d;
+            color: var(--accent-strong);
             margin-bottom: 10px;
-            font-size: 1.2em;
-        }   margin-bottom: 10px;
             font-size: 1.2em;
         }
 
@@ -1090,21 +1256,21 @@
         }
         .quick-btn {
             padding: 8px;
-            background: #f0f0f0;
+            background: rgba(247, 249, 255, 0.9);
             color: #333;
-            border: 2px solid #ff6b9d;
+            border: 1px solid rgba(255, 138, 92, 0.4);
             border-radius: 8px;
             font-size: 0.9em;
             cursor: pointer;
             transition: all 0.2s;
+            width: auto;
         }
 
         .quick-btn:hover {
-            background: #ff6b9d;
+            background: var(--accent-strong);
             color: white;
             transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(255,107,157,0.3);
-        }   color: white;
+            box-shadow: 0 8px 18px rgba(255, 107, 74, 0.25);
         }
 
         /* Chat panel styles */
@@ -1183,14 +1349,14 @@
         }
 
         .chat-msg.user .bubble { 
-            background: linear-gradient(135deg,#667eea,#764ba2); 
+            background: linear-gradient(135deg,#ff7a59,#ffc46b); 
             color: white;
             animation: bubble-pop 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55) 0.1s;
             animation-fill-mode: backwards;
         }
         
         .chat-msg.aria .bubble { 
-            background: #f3f6ff; 
+            background: #edf7f6; 
             color: #24324a;
             animation: bubble-pop 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55) 0.1s;
             animation-fill-mode: backwards;
@@ -1213,89 +1379,181 @@
         .status-log {
             margin-top: 20px;
             padding: 15px;
-            background: #f9f9f9;
+            background: rgba(250, 251, 255, 0.9);
             border-radius: 10px;
             max-height: 200px;
+            border: 1px solid rgba(27, 33, 48, 0.08);
+            box-shadow: 0 8px 16px rgba(16, 24, 40, 0.08);
+        }
+
         .status-log h3 {
-            color: #ff6b9d;
+            color: var(--accent-strong);
             margin-bottom: 10px;
             font-size: 1.1em;
+        }
+
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+
+        a:focus-visible,
+        button:focus-visible,
+        input:focus-visible,
+        .object-btn:focus-visible {
+            outline: 3px solid rgba(11, 138, 131, 0.45);
+            outline-offset: 2px;
         }
 
         .log-entry {
             padding: 5px;
             margin-bottom: 5px;
-            border-left: 3px solid #ff6b9d;
+            border-left: 3px solid var(--accent-strong);
             padding-left: 10px;
             font-size: 0.9em;
             color: #555;
-        }   padding-left: 10px;
-            font-size: 0.9em;
-            color: #555;
         }
 
-        .command-categories {
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 20px;
-            padding: 25px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-            color: #333;
-        .command-categories h2 {
-            color: #ff6b9d;
-            margin-bottom: 15px;
+        @keyframes float-in {
+            from {
+                opacity: 0;
+                transform: translateY(16px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
-        .category {
-            margin-bottom: 15px;
+        @media (max-width: 980px) {
+            .hero {
+                grid-template-columns: 1fr;
+            }
+
+            .feature-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+
+            .stage {
+                height: 420px;
+            }
         }
 
-        .category-title {
-            font-weight: bold;
-            color: #ff8fab;
-            margin-bottom: 5px;
-        }   font-weight: bold;
-            color: #764ba2;
-            margin-bottom: 5px;
+        @media (max-width: 640px) {
+            body {
+                padding: 16px;
+            }
+
+            .hero-actions {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .hero-card,
+            .feature-card,
+            .object-manager,
+            .stage-container,
+            .control-panel {
+                padding: 18px;
+            }
+
+            .object-controls {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .stage {
+                height: 360px;
+            }
+
+            .command-grid {
+                grid-template-columns: 1fr;
+            }
         }
 
-        .category-examples {
-            color: #666;
-            font-size: 0.9em;
-            line-height: 1.6;
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+                scroll-behavior: auto !important;
+            }
         }
     </style>
 </head>
 <body>
+    <a class="skip-link" href="#main">Skip to main content</a>
     <div class="container">
-        <header>
-            <h1>👤 Aria - Human-Like AI Character</h1>
-            <p class="subtitle">Natural movement and realistic appearance with articulated joints! 🦾</p>
+        <header class="hero">
+            <div>
+                <div class="eyebrow">Aria Visual Command System</div>
+                <h1>Choreograph a human-like AI character with vivid, spatial commands.</h1>
+                <p class="subtitle">Direct Aria across a 3D stage, narrate intent in natural language, and watch multi-object interactions unfold in real time.</p>
+                <div class="hero-actions">
+                    <a class="cta" href="#stage">Enter the stage</a>
+                    <div class="hero-note">Try: "aria smile", "jump", or "dance with sparkles".</div>
+                </div>
+            </div>
+            <div class="hero-card">
+                <h2>Live demo focus</h2>
+                <ul>
+                    <li>Directional movement with named waypoints and gestures.</li>
+                    <li>Object persistence with drag, drop, and pickup flows.</li>
+                    <li>Natural chat log for debugging and rehearsal.</li>
+                </ul>
+            </div>
         </header>
 
-        <div id="object-manager" class="object-manager">
-            <h3>🎯 Object Manager</h3>
-            <div class="object-controls">
-                <button class="object-btn active" onclick="toggleObject('apple')" id="btn-apple">
+        <section class="feature-grid" aria-label="Key capabilities">
+            <div class="feature-card">
+                <h3>Spatial awareness</h3>
+                <p>Move Aria through front, center, and diagonal points with smooth staging cues.</p>
+            </div>
+            <div class="feature-card">
+                <h3>Expressive motion</h3>
+                <p>Blend smiles, waves, spins, and jumps without breaking the scene.</p>
+            </div>
+            <div class="feature-card">
+                <h3>Command telemetry</h3>
+                <p>Track each action in the log for fast iteration and clean demos.</p>
+            </div>
+        </section>
+
+        <main id="main">
+            <div id="object-manager" class="object-manager">
+                <h3>Object Manager</h3>
+                <div class="object-controls" role="group" aria-label="Toggle objects on the stage">
+                <button class="object-btn active" onclick="toggleObject('apple')" id="btn-apple" aria-pressed="true">
                     🍎 Apple
                 </button>
-                <button class="object-btn active" onclick="toggleObject('book')" id="btn-book">
+                <button class="object-btn active" onclick="toggleObject('book')" id="btn-book" aria-pressed="true">
                     📚 Book
                 </button>
-                <button class="object-btn active" onclick="toggleObject('cup')" id="btn-cup">
+                <button class="object-btn active" onclick="toggleObject('cup')" id="btn-cup" aria-pressed="true">
                     ☕ Cup
                 </button>
-                <button class="object-btn active" onclick="toggleObject('ball')" id="btn-ball">
+                <button class="object-btn active" onclick="toggleObject('ball')" id="btn-ball" aria-pressed="true">
                     ⚽ Ball
                 </button>
-                <button class="object-btn active" onclick="toggleObject('flower')" id="btn-flower">
+                <button class="object-btn active" onclick="toggleObject('flower')" id="btn-flower" aria-pressed="true">
                     🌸 Flower
                 </button>
+                </div>
             </div>
-        </div>
 
-        <div class="main-content">
-            <div class="stage-container">
-                <div class="stage" id="stage">
+            <div class="main-content">
+                <div class="stage-container">
+                    <div class="stage" id="stage" role="region" aria-label="Interactive stage">
                     <!-- Interactive Table -->
                     <div id="table" class="table">
                         <div class="table-leg" style="left: 10%;"></div>
@@ -1309,7 +1567,7 @@
                     <div id="ball" class="object ball" data-object="ball">⚽</div>
                     <div id="flower" class="object flower" data-object="flower">🌸</div>
                     
-                    <div class="aria-character" id="aria">
+                    <div class="aria-character" id="aria" aria-label="Aria character">
                         <div class="aria-ponytail left"></div>
                         <div class="aria-ponytail right"></div>
                         <div class="aria-hair"></div>
@@ -1392,38 +1650,44 @@
                         </div>
                         <div class="aria-foot right"></div>
                     </div>
-                </div>
-            </div>
-
-            <div class="control-panel">
-                <h2>🎮 Command Input</h2>
-                <div class="command-input">
-                    <input type="text" id="commandInput" placeholder="Type a command (e.g., 'aria smile', 'jump', 'dance with sparkles')" 
-                           onkeypress="if(event.key === 'Enter') sendCommand()">
-                    <button onclick="sendCommand()">Execute Command</button>
-                </div>
-
-                <div class="quick-commands">
-                    <h3>💬 Chat Control</h3>
-                    <div class="chat-panel">
-                        <div id="chatMessages" class="chat-messages" aria-live="polite"></div>
-
-                        <div class="chat-input-block">
-                            <input id="chatInput" type="text" placeholder="Type a chat message or /goto front-left — hit Enter to send"
-                                   onkeypress="if (event.key === 'Enter') sendChat()">
-                            <button class="quick-btn" onclick="sendChat()">Send</button>
-                        </div>
-
-                        <div style="margin-top:8px;font-size:0.85em;color:#666">Commands: <code>/goto &lt;waypoint&gt;</code>, <code>/waypoints</code>, <code>/circle</code>, <code>/spiral</code></div>
                     </div>
                 </div>
 
-                <div class="status-log">
-                    <h3>📋 Command Log</h3>
-                    <div id="logContainer"></div>
+                <div class="control-panel">
+                    <h2>Command Input</h2>
+                    <div class="command-input">
+                        <label class="sr-only" for="commandInput">Command input</label>
+                        <input type="text" id="commandInput" aria-describedby="commandHint"
+                               placeholder="Type a command (e.g., 'aria smile', 'jump', 'dance with sparkles')"
+                               onkeypress="if(event.key === 'Enter') sendCommand()">
+                        <div id="commandHint" class="hero-note">Press Enter or tap Execute Command to trigger an action.</div>
+                        <button onclick="sendCommand()">Execute Command</button>
+                    </div>
+
+                    <div class="quick-commands">
+                        <h3>Chat Control</h3>
+                        <div class="chat-panel">
+                            <div id="chatMessages" class="chat-messages" role="log" aria-live="polite" aria-relevant="additions"></div>
+
+                            <div class="chat-input-block">
+                                <label class="sr-only" for="chatInput">Chat input</label>
+                                <input id="chatInput" type="text" aria-describedby="chatHint"
+                                       placeholder="Type a chat message or /goto front-left — hit Enter to send"
+                                       onkeypress="if (event.key === 'Enter') sendChat()">
+                                <button class="quick-btn" onclick="sendChat()">Send</button>
+                            </div>
+
+                            <div id="chatHint" style="margin-top:8px;font-size:0.85em;color:#666">Commands: <code>/goto &lt;waypoint&gt;</code>, <code>/waypoints</code>, <code>/circle</code>, <code>/spiral</code></div>
+                        </div>
+                    </div>
+
+                    <div class="status-log" role="log" aria-live="polite" aria-relevant="additions">
+                        <h3>Command Log</h3>
+                        <div id="logContainer"></div>
+                    </div>
                 </div>
             </div>
-        </div>
+        </main>
     </div>
 
     <script src="aria_controller.js"></script>

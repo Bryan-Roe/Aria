@@ -29,7 +29,7 @@ class TestChatProvidersDetection:
             # This test assumes detect_provider exists
             # Adjust import based on actual module location
             try:
-                from chat_providers import detect_provider
+                from talk_to_ai.providers import detect_provider
                 provider = detect_provider()
                 assert provider is not None
             except ImportError:
@@ -46,7 +46,7 @@ class TestChatProvidersDetection:
         }
         with patch.dict(os.environ, env_vars, clear=False):
             try:
-                from chat_providers import detect_provider
+                from talk_to_ai.providers import detect_provider
                 provider = detect_provider()
                 assert provider is not None
             except ImportError:
@@ -57,7 +57,7 @@ class TestChatProvidersDetection:
         """Should return OpenAI provider as fallback."""
         with patch.dict(os.environ, {"OPENAI_API_KEY": "sk-test"}, clear=False):
             try:
-                from chat_providers import detect_provider
+                from talk_to_ai.providers import detect_provider
                 provider = detect_provider()
                 assert provider is not None
             except ImportError:
@@ -70,7 +70,7 @@ class TestChatProvidersDetection:
                     if not k.startswith(("AZURE_", "OPENAI_", "LMSTUDIO_"))}
         with patch.dict(os.environ, clean_env, clear=True):
             try:
-                from chat_providers import detect_provider
+                from talk_to_ai.providers import detect_provider
                 provider = detect_provider()
                 assert provider is not None
             except ImportError:
@@ -80,7 +80,7 @@ class TestChatProvidersDetection:
     def test_provider_choice_enum_values(self):
         """Test ProviderChoice enum has expected values."""
         try:
-            from chat_providers import ProviderChoice
+            from talk_to_ai.providers import ProviderChoice
             # Check that ProviderChoice exists as a type
             assert ProviderChoice is not None
             # Don't check for specific attributes due to implementation variation
@@ -91,7 +91,7 @@ class TestChatProvidersDetection:
     def test_role_message_creation(self):
         """Test RoleMessage can be used as a message structure."""
         try:
-            from chat_providers import RoleMessage
+            from talk_to_ai.providers import RoleMessage
             # Just test that we can import it
             assert RoleMessage is not None
         except ImportError:
@@ -101,7 +101,7 @@ class TestChatProvidersDetection:
     def test_role_message_serialization(self):
         """Test RoleMessage can be serialized to dict."""
         try:
-            from chat_providers import RoleMessage
+            from talk_to_ai.providers import RoleMessage
             # Create a dict representation
             msg_dict = {"role": "assistant", "content": "Hi there"}
             assert msg_dict["role"] == "assistant"
@@ -510,7 +510,7 @@ class TestSharedIntegration:
     def test_provider_detection_with_health_check(self):
         """Provider detection should work with health check."""
         try:
-            from chat_providers import detect_provider
+            from talk_to_ai.providers import detect_provider
             from shared.sql_engine import sql_health
             
             provider = detect_provider()

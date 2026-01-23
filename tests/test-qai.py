@@ -13,7 +13,7 @@ def test_chat_providers():
     """Test chat provider detection and initialization"""
     print("Testing chat providers...")
     try:
-        from chat_providers import detect_provider, LocalEchoProvider
+        from talk_to_ai.providers import detect_provider, LocalEchoProvider
         
         # Test local provider
         provider, info = detect_provider(explicit="local")

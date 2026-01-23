@@ -14,8 +14,10 @@ from pathlib import Path
 import sys
 from typing import List, Dict, Any
 
-talk_to_ai_path = Path(__file__).resolve().parent.parent / "talk-to-ai" / "src"
+repo_root = Path(__file__).resolve().parents[4]
+talk_to_ai_path = repo_root / "talk-to-ai" / "src"
 sys.path.insert(0, str(talk_to_ai_path))
+sys.path.insert(0, str(repo_root))
 
 
 class TestLocalProvider:

@@ -20,6 +20,13 @@ Aria is an interactive AI character that combines:
 - **Real-time Object Interaction** - Add, pickup, drop, and throw objects on a virtual stage
 - **Quantum ML Integration** - Experimental quantum-classical hybrid training
 
+## 📚 Repo Navigator
+
+- Quick start: [START_HERE.md](START_HERE.md)
+- Documentation hub: [docs/README.md](docs/README.md)
+- Catalog of moved reference docs: [docs/catalog/README.md](docs/catalog/README.md)
+- Key components: [aria_web/](aria_web/), [talk-to-ai/](talk-to-ai/), [quantum-ai/](quantum-ai/), [AI/microsoft_phi-silica-3.6_v1/](AI/microsoft_phi-silica-3.6_v1/)
+
 ## 🚀 Quick Start
 
 ### 🤖 **NEW: Complete Repository Automation**

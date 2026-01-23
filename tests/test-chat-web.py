@@ -8,7 +8,7 @@ from pathlib import Path
 talk_to_ai_path = Path(__file__).resolve().parents[1] / "talk-to-ai" / "src"
 sys.path.insert(0, str(talk_to_ai_path))
 
-from chat_providers import detect_provider
+from talk_to_ai.providers import detect_provider
 
 def test_local_provider():
     """Test that local provider works"""

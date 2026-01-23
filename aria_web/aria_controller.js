@@ -35,6 +35,7 @@ function toggleObject(objectId) {
         obj.style.display = 'none';
         btn.classList.remove('active');
         btn.classList.add('inactive');
+        btn.setAttribute('aria-pressed', 'false');
         activeObjects[objectId] = false;
         log('🗑️ Removed ' + objectId);
         // Sync change to backend
@@ -44,6 +45,7 @@ function toggleObject(objectId) {
         obj.style.display = 'block';
         btn.classList.add('active');
         btn.classList.remove('inactive');
+        btn.setAttribute('aria-pressed', 'true');
         activeObjects[objectId] = true;
         log('➕ Added ' + objectId);
         // Sync change to backend (object is back on stage)
@@ -2111,6 +2113,7 @@ function addObject(objectName, emoji) {
         btn.className = 'object-btn active';
         btn.id = 'btn-' + objectName;
         btn.textContent = emoji + ' ' + objectName;
+        btn.setAttribute('aria-pressed', 'true');
         btn.onclick = () => toggleObject(objectName);
         objectManager.appendChild(btn);
     }

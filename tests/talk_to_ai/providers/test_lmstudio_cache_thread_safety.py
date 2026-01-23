@@ -13,10 +13,10 @@ from unittest import mock
 import pytest
 
 # Add workspace root to path
-repo_root = Path(__file__).resolve().parent.parent
+repo_root = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(repo_root / "talk-to-ai" / "src"))
 
-import chat_providers
+import talk_to_ai.providers as chat_providers
 
 
 class TestLMStudioCacheThreadSafety:

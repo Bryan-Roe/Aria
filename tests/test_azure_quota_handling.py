@@ -4,7 +4,7 @@ import types
 
 
 def _ensure_talk_to_ai_in_path():
-    # Ensure talk-to-ai/src is importable for tests that import chat_providers
+    # Ensure talk-to-ai/src is importable for tests that import talk_to_ai package
     repo_root = Path(__file__).resolve().parents[1]
     tta = str((repo_root / 'talk-to-ai' / 'src').absolute())
     if tta not in sys.path:
@@ -16,7 +16,7 @@ def test_azure_provider_handles_quota_non_stream(monkeypatch):
     return a friendly message (non-stream mode) instead of raising.
     """
     _ensure_talk_to_ai_in_path()
-    import chat_providers as cp
+    import talk_to_ai.providers as cp
 
     # Fake Azure client that raises a quota/premium exception on create
     class FakeAzure:
@@ -49,7 +49,7 @@ def test_azure_provider_stream_handles_quota_during_iteration(monkeypatch):
     generator should yield a friendly quota message.
     """
     _ensure_talk_to_ai_in_path()
-    import chat_providers as cp
+    import talk_to_ai.providers as cp
 
     # Create generator that yields one chunk then raises
     def fake_stream():

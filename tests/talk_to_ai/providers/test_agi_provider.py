@@ -15,10 +15,11 @@ from typing import Iterable
 import pytest
 
 # Add talk-to-ai/src to path
-repo_root = Path(__file__).resolve().parent.parent
+repo_root = Path(__file__).resolve().parents[3]
 talk_to_ai_src = repo_root / "talk-to-ai" / "src"
 sys.path.insert(0, str(talk_to_ai_src))
 
+# Use shim imports for backward compatibility
 from agi_provider import (
     AGIProvider,
     AGIContext,

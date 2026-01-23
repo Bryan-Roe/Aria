@@ -93,7 +93,7 @@ class TestFunctionAppChatEndpoint:
     def test_chat_message_pruning(self):
         """Chat should prune old messages to fit token limit."""
         try:
-            from token_utils import prune_messages
+            from talk_to_ai.utils.token_utils import prune_messages
             
             messages = [
                 {"role": "user", "content": "Hello"},
@@ -492,7 +492,7 @@ class TestFunctionAppStartup:
     def test_provider_detection_on_startup(self):
         """Provider should be detected on startup."""
         try:
-            from chat_providers import detect_provider
+            from talk_to_ai.providers import detect_provider
             provider = detect_provider()
             assert provider is not None
         except ImportError:

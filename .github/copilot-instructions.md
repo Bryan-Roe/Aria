@@ -1,4 +1,57 @@
-<!-- Concise, practical instructions for AI agents working in this repo. Keep this file short — use the full archive (.github/copilot-instructions.full.md) for details. -->
+<!-- Concise, actionable instructions for AI agents working in this repo. Keep this short; expand only if needed. -->
+
+# Aria — Copilot Quick Guide
+*Last updated: January 23, 2026*
+
+## Core Architecture
+- Three isolated Python projects with separate venvs: quantum-ai/ (quantum ML + MCP), talk-to-ai/ (chat CLI/providers), AI/microsoft_phi-silica-3.6_v1/ (LoRA training). function_app.py glues them via sys.path to expose REST (/api/chat, /api/ai/status, /api/quantum/*, /api/tts).
+- Web surfaces: aria_web/server.py (port 8080) for the animated character + auto-execute planner; chat-web/ static SSE client; docs/index.html GitHub Pages chat.
+- Shared infra in shared/ (chat_providers, sql_engine, telemetry, cosmos_client). Scripts/orchestrators live in scripts/ (training, evaluation, automation, monitoring).
+
+## Provider & Data Patterns
+- Chat provider order (first available wins): explicit flag → LMStudio (LMSTUDIO_BASE_URL) → Azure OpenAI (key + endpoint + deployment + api version) → OpenAI → LoRA adapter (explicit) → local echo fallback. Logic in shared/chat_providers.py and reused by function_app.py.
+- Orchestrators are YAML-driven state machines writing status.json under data_out/<name>/ (autotrain.py, autonomous_training_orchestrator.py, evaluation/quantum_autorun.py, automation/master_orchestrator.py). Do not bypass status files.
+- datasets/ is read-only. Outputs land in data_out/. LoRA adapters need both adapter_config.json and adapter_model.safetensors.
+
+## Environment & Setup
+- Base deps: pip install -r requirements.txt and dev-requirements.txt. Each project keeps its own venv: (cd quantum-ai|talk-to-ai|AI/microsoft_phi-silica-3.6_v1 && python -m venv venv && source venv/bin/activate && pip install -r requirements.txt).
+- Local config: copy local.settings.json.example → local.settings.json and fill Azure/OpenAI keys, LMSTUDIO_BASE_URL, QAI_ENABLE_LOCAL_TTS, QAI_DB_CONN, QAI_ENABLE_COSMOS as needed.
+
+## Go-To Commands (from repo root)
+- Sanity check: python scripts/fast_validate.py
+- Tests: python scripts/test_runner.py --unit | --all | --integration | --watch
+- Functions host: func host start (then curl http://localhost:7071/api/ai/status | jq)
+- Aria character: cd aria_web && python server.py (http://localhost:8080)
+- Chat CLI smoke: python talk-to-ai/src/chat_cli.py --provider local --once "Hello"
+- Orchestrator dry-runs: python scripts/training/autotrain.py --dry-run; python scripts/evaluation/quantum_autorun.py --dry-run; python scripts/evaluation/evaluation_autorun.py --dry-run
+- Full automation wrapper: ./scripts/start_repo_automation.sh full | status | stop (interactive menu if no args)
+
+## Development Conventions
+- Keep component isolation: do not introduce cross-project imports without updating sys.path handling in function_app.py.
+- Preserve provider detection chain and SSE streaming contracts (chat-web/ and function_app.py).
+- Status and metrics: monitoring tools in scripts/monitoring/* (auto_ops_dashboard.py, vs_code_server.py). Use data_out/<orchestrator>/status.json as source of truth.
+- Avoid touching datasets/; prefer new data_out/ artifacts. Respect YAML config precedence: base defaults < CLI flags < per-job overrides < env vars.
+
+## Safety & Deployment
+- Always --dry-run orchestrators before real runs; for quantum set azure_confirm_cost: true before hitting real QPUs and simulate first.
+- Never hardcode secrets; rely on local.settings.json or env vars. Watch DB pool saturation via /api/ai/status (warns ≥80%).
+- Container/devcontainer available at .devcontainer/devcontainer.json; production Functions deploy via func azure functionapp publish <app>.
+
+## Editing Hotspots
+- APIs: function_app.py
+- Chat providers: shared/chat_providers.py
+- Aria server/UI: aria_web/server.py, aria_web/auto-execute.html, aria_web/aria_controller.js
+- Orchestrators: scripts/training/autotrain.py, scripts/training/autonomous_training_orchestrator.py, scripts/automation/master_orchestrator.py (+ config/*.yaml)
+- Quantum MCP & dashboards: quantum-ai/quantum_mcp_server.py, quantum-ai/README.md
+
+## Testing & Validation
+- Preferred markers: @pytest.mark.slow, @pytest.mark.azure, @pytest.mark.integration. Default fast suite: python scripts/test_runner.py --unit.
+- Chat datasets: python scripts/validate_datasets.py --category chat. Training logs live in data_out/autotrain/<job>/stdout.log.
+
+## Troubleshooting
+- Provider issues: curl /api/ai/status, then run talk-to-ai/src/chat_cli.py with explicit --provider to isolate.
+- Training visibility: tail -f data_out/autotrain/job_*.log; watch -n 5 'cat data_out/autonomous_training_status.json | python -m json.tool'.
+- GPU checks: python -c "import torch; print(torch.cuda.is_available())"; adjust max_train_samples if OOM.<!-- Concise, practical instructions for AI agents working in this repo. Keep this file short — use the full archive (.github/copilot-instructions.full.md) for details. -->
 
 # Aria — Copilot Quick Guide
 

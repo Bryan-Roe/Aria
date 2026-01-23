@@ -299,7 +299,7 @@ class TestPruneMessagesOptimization:
         """Test prune_messages when all messages fit within budget."""
         import sys
         sys.path.insert(0, 'talk-to-ai/src')
-        from token_utils import prune_messages
+        from talk_to_ai.utils.token_utils import prune_messages
         
         # Small number of short messages
         messages = [{'role': 'user', 'content': 'Hi'}]

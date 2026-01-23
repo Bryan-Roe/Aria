@@ -6,6 +6,7 @@ This directory contains all documentation for the QAI hybrid quantum-AI/ML works
 
 | Directory | Description |
 |-----------|-------------|
+| [catalog/](catalog/) | Collected reference docs moved from the repository root (Aria, Quantum, GPU, datasets, ops, tests) |
 | [guides/](guides/) | General guides, feature documentation, and improvement summaries |
 | [quickref/](quickref/) | Quick reference cards for rapid lookup |
 | [training/](training/) | LoRA fine-tuning, automated training, and evaluation guides |

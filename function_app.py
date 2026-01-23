@@ -1,9 +1,6 @@
 # =============================================================================
 # QAI Azure Functions Application
 # =============================================================================
-from token_utils import prune_messages
-from chat_providers import detect_provider, RoleMessage
-import azure.functions as func
 import json
 import logging
 import os
@@ -14,6 +11,15 @@ import importlib.util as _iu
 import time
 from typing import Optional
 from datetime import datetime
+
+# Ensure talk-to-ai package is importable before importing its modules
+_talk_to_ai_path = Path(__file__).resolve().parent / "talk-to-ai" / "src"
+if str(_talk_to_ai_path) not in sys.path:
+    sys.path.insert(0, str(_talk_to_ai_path))
+
+from talk_to_ai.utils.token_utils import prune_messages
+from talk_to_ai.providers import detect_provider, RoleMessage
+import azure.functions as func
 
 # -----------------------------------------------------------------------------
 # Optional unified SQL engine health + pool metrics (multi-database support)

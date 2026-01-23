@@ -4,6 +4,11 @@ This folder contains automation utilities, orchestrators, and tools for the QAI 
 
 ## 🎯 Quick Start Commands
 
+### Directory Layout (CLI grouping)
+- Training CLI: [training/cli](training/cli) (auto_data_train, analyze_learning_progress, self_train_synthetic, self_learning_chat, fast_validate, final_validation)
+- Monitoring CLI: [monitoring/cli](monitoring/cli) (aria_diagnostic, validate_dashboard, validate_buttons, validate_workflows)
+- Shims: legacy paths in [scripts/](.) still dispatch to the moved files for backwards compatibility.
+
 ### Training Automation
 
 ```powershell
