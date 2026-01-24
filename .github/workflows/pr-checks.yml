@@ -1,0 +1,108 @@
+name: PR Checks
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  validate:
+    name: Quick Validation
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pyyaml
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+      - name: Validate YAML files
+        run: |
+          python -c "
+          import yaml
+          from pathlib import Path
+          import sys
+          
+          failed = False
+          for yml_file in Path('.github/workflows').glob('*.yml'):
+              try:
+                  with open(yml_file) as f:
+                      yaml.safe_load(f)
+                  print(f'✓ {yml_file}')
+              except Exception as e:
+                  print(f'✗ {yml_file}: {e}')
+                  failed = True
+          
+          sys.exit(1 if failed else 0)
+          "
+
+      - name: Check for common issues
+        run: |
+          echo "Checking for TODO/FIXME markers in modified files..."
+          git diff origin/${{ github.base_ref }}...HEAD --name-only | xargs grep -n "TODO\|FIXME" || echo "No TODO/FIXME found"
+        continue-on-error: true
+
+      - name: Fast validation
+        run: |
+          if [ -f scripts/fast_validate.py ]; then
+            python scripts/fast_validate.py
+          else
+            echo "Fast validate script not found, skipping"
+          fi
+
+  size-check:
+    name: PR Size Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check PR size
+        run: |
+          BASE_SHA=${{ github.event.pull_request.base.sha }}
+          HEAD_SHA=${{ github.event.pull_request.head.sha }}
+          
+          ADDITIONS=$(git diff $BASE_SHA...$HEAD_SHA --numstat | awk '{sum+=$1} END {print sum}')
+          DELETIONS=$(git diff $BASE_SHA...$HEAD_SHA --numstat | awk '{sum+=$2} END {print sum}')
+          FILES_CHANGED=$(git diff $BASE_SHA...$HEAD_SHA --name-only | wc -l)
+          
+          echo "Files changed: $FILES_CHANGED"
+          echo "Lines added: $ADDITIONS"
+          echo "Lines deleted: $DELETIONS"
+          
+          # Warn if PR is very large
+          if [ $FILES_CHANGED -gt 50 ] || [ $ADDITIONS -gt 1000 ]; then
+            echo "⚠️ Warning: This is a large PR. Consider breaking it into smaller PRs for easier review."
+            echo "pr_size=large" >> $GITHUB_OUTPUT
+          else
+            echo "✓ PR size looks good"
+            echo "pr_size=normal" >> $GITHUB_OUTPUT
+          fi
+
+  label-pr:
+    name: Auto-label PR
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Label PR based on files changed
+        uses: actions/labeler@v5
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          configuration-path: .github/labeler.yml
+          sync-labels: true

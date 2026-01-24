@@ -32,7 +32,6 @@ class MCPClient:
             endpoint = "https://models.github.ai/inference",
             credential = AzureKeyCredential(os.environ["GITHUB_TOKEN"]),
             api_version = "2024-12-01-preview",
-            api_version = "2024-08-01-preview",
         )
 
     async def connect_stdio_server(self, server_id: str, command: str, args: list[str], env: Dict[str, str]):

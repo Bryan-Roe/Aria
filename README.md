@@ -6,6 +6,11 @@
 
 *An intelligent, animated AI character with movement, gestures, and natural language interaction*
 
+[![CI Pipeline](https://github.com/Bryan-Roe/Aria/actions/workflows/ci-pipeline.yml/badge.svg)](https://github.com/Bryan-Roe/Aria/actions/workflows/ci-pipeline.yml)
+[![Code Quality](https://github.com/Bryan-Roe/Aria/actions/workflows/code-quality.yml/badge.svg)](https://github.com/Bryan-Roe/Aria/actions/workflows/code-quality.yml)
+[![CodeQL](https://github.com/Bryan-Roe/Aria/actions/workflows/codeql.yml/badge.svg)](https://github.com/Bryan-Roe/Aria/actions/workflows/codeql.yml)
+[![E2E Tests](https://github.com/Bryan-Roe/Aria/actions/workflows/e2e-tests.yml/badge.svg)](https://github.com/Bryan-Roe/Aria/actions/workflows/e2e-tests.yml)
+
 </div>
 
 ---
@@ -21,6 +26,20 @@ Aria is an interactive AI character that combines:
 - **Quantum ML Integration** - Experimental quantum-classical hybrid training
 - **⚛️ Quantum-Enhanced Passive LLM Training** - Background training with quantum computing optimization
 - **🆕 LLM Tool Maker** - Autonomous tool creation system where LLMs create, validate, and execute Python tools
+
+## 🌐 Live Demo (GitHub Pages)
+
+**Try Aria online without installing anything:**
+
+👉 **[https://bryan-roe.github.io/Aria](https://bryan-roe.github.io/Aria)** 👈
+
+The live demo includes:
+- ✨ **Aria Character** - Interactive 3D character with animations
+- 💬 **AI Chat Interface** - Chat with Aria (demo mode with simulated responses)
+- 📊 **Training Dashboard** - View training metrics and progress
+- ⚛️ **Quantum ML** - Quantum computing interface
+
+**Note:** The GitHub Pages demo runs in **demo mode** with mock API responses. For full AI capabilities, quantum computing, and real-time training, run the project locally following the Quick Start guide below.
 
 ## 🚀 Quick Start
 

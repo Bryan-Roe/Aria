@@ -1,4 +1,4 @@
-"""
+r"""
 Train Quantum AI on Your Custom Dataset
 ======================================
 
