@@ -5,12 +5,27 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quantum World - 3D Enhanced</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600&family=JetBrains+Mono:wght@400;600&display=swap');
+
+        :root {
+            --bg-1: #070b10;
+            --bg-2: #131c28;
+            --panel: rgba(9, 13, 18, 0.82);
+            --panel-border: rgba(78, 205, 196, 0.25);
+            --accent: #4ecdc4;
+            --accent-strong: #17c8ff;
+            --accent-warm: #f0b85a;
+            --text: #e9f2ff;
+            --muted: #9bb0c9;
+            --glow: rgba(78, 205, 196, 0.75);
+        }
+
         * { margin: 0; padding: 0; box-sizing: border-box; }
         
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #0a0a0a;
-            color: white;
+            font-family: 'Space Grotesk', 'Segoe UI', sans-serif;
+            background: var(--bg-1);
+            color: var(--text);
             overflow: hidden;
             perspective: 1000px;
         }
@@ -21,7 +36,11 @@
             left: 0;
             width: 100vw;
             height: 100vh;
-            background: radial-gradient(ellipse at center, #1a1a2e 0%, #0a0a0a 100%);
+            background:
+                radial-gradient(700px 500px at 20% 10%, rgba(23, 200, 255, 0.18), transparent 60%),
+                radial-gradient(900px 600px at 80% 0%, rgba(240, 184, 90, 0.2), transparent 55%),
+                radial-gradient(1200px 900px at 50% 120%, rgba(78, 205, 196, 0.2), transparent 60%),
+                linear-gradient(140deg, var(--bg-1), var(--bg-2));
         }
         
         #quantum-canvas {
@@ -34,11 +53,11 @@
             position: fixed;
             top: 20px;
             left: 20px;
-            background: rgba(0, 0, 0, 0.8);
+            background: var(--panel);
             backdrop-filter: blur(10px);
             padding: 20px;
             border-radius: 15px;
-            border: 2px solid rgba(102, 126, 234, 0.3);
+            border: 2px solid var(--panel-border);
             max-width: 300px;
             z-index: 1000;
         }
@@ -51,7 +70,7 @@
             display: block;
             margin-bottom: 5px;
             font-size: 0.9em;
-            color: #667eea;
+            color: var(--accent);
         }
         
         .control-group input[type="range"] {
@@ -63,9 +82,9 @@
             width: 100%;
             padding: 8px;
             background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(102, 126, 234, 0.3);
+            border: 1px solid rgba(78, 205, 196, 0.25);
             border-radius: 5px;
-            color: white;
+            color: var(--text);
         }
         
         .btn {
@@ -80,37 +99,37 @@
         }
         
         .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+            background: linear-gradient(135deg, #2dd4bf 0%, #0ea5e9 100%);
+            color: #08131f;
         }
         
         .btn-secondary {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            color: white;
+            background: linear-gradient(135deg, #f0b85a 0%, #ff865b 100%);
+            color: #1b0f05;
         }
         
         .btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+            box-shadow: 0 6px 20px rgba(78, 205, 196, 0.35);
         }
         
         .stats-overlay {
             position: fixed;
             bottom: 20px;
             right: 20px;
-            background: rgba(0, 0, 0, 0.8);
+            background: var(--panel);
             backdrop-filter: blur(10px);
             padding: 15px;
             border-radius: 10px;
-            border: 2px solid rgba(102, 126, 234, 0.3);
-            font-family: 'Courier New', monospace;
+            border: 2px solid var(--panel-border);
+            font-family: 'JetBrains Mono', 'Courier New', monospace;
             font-size: 0.85em;
             z-index: 1000;
         }
         
         .stat-line {
             margin: 5px 0;
-            color: #667eea;
+            color: var(--accent);
         }
         
         .particle-system {
@@ -124,9 +143,9 @@
             position: absolute;
             width: 2px;
             height: 2px;
-            background: rgba(102, 126, 234, 1);
+            background: rgba(78, 205, 196, 1);
             border-radius: 50%;
-            box-shadow: 0 0 10px rgba(102, 126, 234, 0.8);
+            box-shadow: 0 0 10px rgba(78, 205, 196, 0.8);
             animation: particleDrift 20s linear infinite;
         }
         
@@ -142,7 +161,7 @@
             background: rgba(0, 0, 0, 0.9);
             padding: 10px 15px;
             border-radius: 8px;
-            border: 1px solid rgba(102, 126, 234, 0.5);
+            border: 1px solid rgba(78, 205, 196, 0.5);
             pointer-events: none;
             z-index: 2000;
             font-size: 0.85em;
@@ -151,7 +170,7 @@
         
         .quantum-wave {
             position: absolute;
-            border: 2px solid rgba(102, 126, 234, 0.3);
+            border: 2px solid rgba(78, 205, 196, 0.3);
             border-radius: 50%;
             animation: waveExpand 3s ease-out infinite;
         }
@@ -178,6 +197,19 @@
             z-index: 3000;
             animation: pulse 2s ease-in-out infinite;
         }
+
+        .toggle-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            font-size: 0.85em;
+            color: var(--muted);
+        }
+
+        .toggle-row input {
+            accent-color: var(--accent-strong);
+        }
         
         @keyframes pulse {
             0%, 100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
@@ -192,7 +224,7 @@
     </div>
     
     <div class="controls-overlay">
-        <h3 style="margin-bottom: 15px; color: #667eea;">⚛️ Quantum 3D Control</h3>
+        <h3 style="margin-bottom: 15px; color: var(--accent-strong);">⚛️ Quantum 3D Control</h3>
         
         <div class="control-group">
             <label for="objectCount">Objects: <span id="countValue">50</span></label>
@@ -202,6 +234,11 @@
         <div class="control-group">
             <label for="rotationSpeed">Rotation Speed</label>
             <input type="range" id="rotationSpeed" min="0" max="5" step="0.1" value="1">
+        </div>
+
+        <div class="control-group">
+            <label for="timeScale">Time Scale: <span id="timeValue">1.0x</span></label>
+            <input type="range" id="timeScale" min="0.2" max="2" step="0.1" value="1">
         </div>
         
         <div class="control-group">
@@ -236,30 +273,66 @@
             <label for="zoom">Zoom: <span id="zoomValue">100%</span></label>
             <input type="range" id="zoom" min="50" max="200" value="100">
         </div>
+
+        <div class="control-group">
+            <label for="trailStrength">Trail Strength: <span id="trailValue">12%</span></label>
+            <input type="range" id="trailStrength" min="0" max="30" value="12">
+        </div>
+
+        <div class="control-group">
+            <div class="toggle-row">
+                <span>Trails</span>
+                <input type="checkbox" id="showTrails" checked>
+            </div>
+        </div>
+
+        <div class="control-group">
+            <div class="toggle-row">
+                <span>Connections</span>
+                <input type="checkbox" id="showConnections" checked>
+            </div>
+        </div>
+
+        <div class="control-group">
+            <div class="toggle-row">
+                <span>Auto Drift</span>
+                <input type="checkbox" id="autoDrift" checked>
+            </div>
+        </div>
+
+        <div class="control-group">
+            <div class="toggle-row">
+                <span>Auto Quality</span>
+                <input type="checkbox" id="autoQuality" checked>
+            </div>
+        </div>
         
         <button class="btn btn-primary" onclick="regenerate()">🔄 Regenerate</button>
-        <button class="btn btn-secondary" onclick="toggleAnimation()">⏯️ Pause/Play</button>
+        <button class="btn btn-secondary" id="toggleAnimationBtn" onclick="toggleAnimation()">⏯️ Pause</button>
         <button class="btn btn-secondary" onclick="addParticles()">✨ Add Particles</button>
         <button class="btn btn-secondary" onclick="screenshot()">📸 Screenshot</button>
+        <button class="btn btn-secondary" onclick="resetView()">🧭 Reset View</button>
     </div>
     
     <div class="stats-overlay">
         <div class="stat-line">FPS: <span id="fps">0</span></div>
         <div class="stat-line">Objects: <span id="objCount">0</span></div>
         <div class="stat-line">Rotation: <span id="rotation">0°</span></div>
+        <div class="stat-line">Entropy: <span id="entropy">0</span></div>
         <div class="stat-line">Mode: <span id="mode">sphere</span></div>
     </div>
     
     <div class="info-tooltip" id="tooltip"></div>
     <div class="loading" id="loading">⚛️ Initializing Quantum Field...</div>
     
-    <div style="position: fixed; top: 20px; right: 20px; background: rgba(0,0,0,0.8); padding: 15px; border-radius: 10px; border: 2px solid rgba(102, 126, 234, 0.3); max-width: 250px; z-index: 1000;">
-        <h4 style="color: #667eea; margin-bottom: 10px;">🎮 Controls</h4>
+    <div style="position: fixed; top: 20px; right: 20px; background: var(--panel); padding: 15px; border-radius: 10px; border: 2px solid var(--panel-border); max-width: 250px; z-index: 1000;">
+        <h4 style="color: var(--accent-strong); margin-bottom: 10px;">🎮 Controls</h4>
         <div style="font-size: 0.85em; line-height: 1.6;">
             <div>🖱️ <strong>Drag</strong> - Rotate view</div>
             <div>🔍 <strong>Scroll</strong> - Zoom in/out</div>
             <div>👆 <strong>Click</strong> - Pause/Play</div>
             <div>🎯 <strong>Hover</strong> - Object info</div>
+            <div>📱 <strong>Touch</strong> - Drag + Pinch</div>
         </div>
     </div>
     
@@ -275,15 +348,27 @@
         let fps = 0;
         let lastTime = performance.now();
         let frameCount = 0;
+        let lastQualityCheck = performance.now();
         
         // Camera and interaction
         let cameraRotationX = 0;
         let cameraRotationY = 0;
         let zoomLevel = 1;
         let isDragging = false;
-        let lastMouseX = 0;
-        let lastMouseY = 0;
+        let dragStartX = 0;
+        let dragStartY = 0;
+        let mouseX = 0;
+        let mouseY = 0;
         let hoveredObject = null;
+
+        const state = {
+            trails: true,
+            connections: true,
+            autoDrift: true,
+            autoQuality: true,
+            timeScale: 1,
+            trailStrength: 0.12
+        };
         
         // Initialize canvas
         function resize() {
@@ -459,8 +544,12 @@
             }
             
             // Clear canvas with trail effect
-            ctx.fillStyle = 'rgba(10, 10, 10, 0.1)';
-            ctx.fillRect(0, 0, width, height);
+            if (state.trails) {
+                ctx.fillStyle = `rgba(7, 11, 16, ${state.trailStrength})`;
+                ctx.fillRect(0, 0, width, height);
+            } else {
+                ctx.clearRect(0, 0, width, height);
+            }
             
             // Sort by z-depth
             objects.sort((a, b) => {
@@ -472,7 +561,7 @@
             // Draw objects and check hover
             let newHoveredObject = null;
             objects.forEach(obj => {
-                const result = obj.draw(lastMouseX, lastMouseY);
+                const result = obj.draw(mouseX, mouseY);
                 if (result.isHovered) {
                     newHoveredObject = obj;
                 }
@@ -495,8 +584,8 @@
             }
             
             // Draw connections (optional)
-            if (objects.length < 100) {
-                ctx.strokeStyle = 'rgba(102, 126, 234, 0.1)';
+            if (state.connections && objects.length < 140) {
+                ctx.strokeStyle = 'rgba(78, 205, 196, 0.12)';
                 ctx.lineWidth = 1;
                 for (let i = 0; i < objects.length; i++) {
                     const p1 = objects[i].project();
@@ -513,8 +602,13 @@
                 }
             }
             
-            rotation += 0.005;
+            rotation += 0.005 * state.timeScale;
+            if (state.autoDrift && !isDragging) {
+                cameraRotationY += 0.0006 * state.timeScale;
+                cameraRotationX += 0.0003 * Math.sin(rotation * 0.5);
+            }
             document.getElementById('rotation').textContent = Math.round((rotation % (Math.PI * 2)) * 57.3) + '°';
+            document.getElementById('entropy').textContent = Math.min(100, Math.round((objects.length / 200) * 45 + Math.abs(Math.sin(rotation)) * 55));
             
             // Calculate FPS
             frameCount++;
@@ -524,6 +618,19 @@
                 document.getElementById('fps').textContent = fps;
                 frameCount = 0;
                 lastTime = currentTime;
+            }
+
+            if (currentTime - lastQualityCheck >= 2000) {
+                lastQualityCheck = currentTime;
+                if (state.autoQuality && fps < 24) {
+                    const countInput = document.getElementById('objectCount');
+                    const newCount = Math.max(20, parseInt(countInput.value, 10) - 10);
+                    if (newCount !== parseInt(countInput.value, 10)) {
+                        countInput.value = newCount;
+                        document.getElementById('countValue').textContent = newCount;
+                        generateObjects();
+                    }
+                }
             }
             
             requestAnimationFrame(animate);
@@ -553,6 +660,7 @@
         
         function toggleAnimation() {
             animating = !animating;
+            document.getElementById('toggleAnimationBtn').textContent = animating ? '⏯️ Pause' : '▶️ Play';
         }
         
         function screenshot() {
@@ -562,17 +670,64 @@
             link.click();
         }
         
+        function resetView() {
+            cameraRotationX = 0;
+            cameraRotationY = 0;
+            zoomLevel = 1;
+            document.getElementById('zoom').value = 100;
+            document.getElementById('zoomValue').textContent = '100%';
+        }
+
+        function spawnWave(x, y) {
+            const wave = document.createElement('div');
+            wave.className = 'quantum-wave';
+            wave.style.left = (x - 250) + 'px';
+            wave.style.top = (y - 250) + 'px';
+            wave.style.width = '0';
+            wave.style.height = '0';
+            document.body.appendChild(wave);
+            setTimeout(() => wave.remove(), 3000);
+        }
+
         // Event listeners
         document.getElementById('objectCount').addEventListener('input', (e) => {
             document.getElementById('countValue').textContent = e.target.value;
         });
+
+        document.getElementById('objectCount').addEventListener('change', regenerate);
         
         document.getElementById('visualMode').addEventListener('change', regenerate);
         
         document.getElementById('colorScheme').addEventListener('change', () => {
             objects.forEach((obj, i) => obj.updateColor(i, objects.length));
         });
-        
+
+        document.getElementById('timeScale').addEventListener('input', (e) => {
+            state.timeScale = parseFloat(e.target.value);
+            document.getElementById('timeValue').textContent = state.timeScale.toFixed(1) + 'x';
+        });
+
+        document.getElementById('trailStrength').addEventListener('input', (e) => {
+            state.trailStrength = parseFloat(e.target.value) / 100;
+            document.getElementById('trailValue').textContent = e.target.value + '%';
+        });
+
+        document.getElementById('showTrails').addEventListener('change', (e) => {
+            state.trails = e.target.checked;
+        });
+
+        document.getElementById('showConnections').addEventListener('change', (e) => {
+            state.connections = e.target.checked;
+        });
+
+        document.getElementById('autoDrift').addEventListener('change', (e) => {
+            state.autoDrift = e.target.checked;
+        });
+
+        document.getElementById('autoQuality').addEventListener('change', (e) => {
+            state.autoQuality = e.target.checked;
+        });
+
         document.getElementById('zoom').addEventListener('input', (e) => {
             zoomLevel = e.target.value / 100;
             document.getElementById('zoomValue').textContent = e.target.value + '%';
@@ -583,8 +738,8 @@
         // Mouse drag to rotate
         canvas.addEventListener('mousedown', (e) => {
             isDragging = true;
-            lastMouseX = e.clientX;
-            lastMouseY = e.clientY;
+            dragStartX = e.clientX;
+            dragStartY = e.clientY;
             canvas.style.cursor = 'grabbing';
         });
         
@@ -606,13 +761,13 @@
             
             // Track mouse for hover detection
             const rect = canvas.getBoundingClientRect();
-            lastMouseX = e.clientX - rect.left;
-            lastMouseY = e.clientY - rect.top;
+            mouseX = e.clientX - rect.left;
+            mouseY = e.clientY - rect.top;
             
             // Handle drag rotation
             if (isDragging) {
-                const deltaX = e.clientX - lastMouseX;
-                const deltaY = e.clientY - lastMouseY;
+                const deltaX = e.clientX - dragStartX;
+                const deltaY = e.clientY - dragStartY;
                 
                 cameraRotationY += deltaX * 0.005;
                 cameraRotationX += deltaY * 0.005;
@@ -620,8 +775,8 @@
                 // Clamp vertical rotation
                 cameraRotationX = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, cameraRotationX));
                 
-                lastMouseX = e.clientX;
-                lastMouseY = e.clientY;
+                dragStartX = e.clientX;
+                dragStartY = e.clientY;
             }
         });
         
@@ -639,10 +794,56 @@
         canvas.addEventListener('click', (e) => {
             if (!isDragging) {
                 toggleAnimation();
+                spawnWave(e.clientX, e.clientY);
             }
         });
-        
+
         canvas.style.cursor = 'grab';
+
+        // Touch controls
+        let lastTouchDistance = null;
+        canvas.addEventListener('touchstart', (e) => {
+            if (e.touches.length === 1) {
+                isDragging = true;
+                dragStartX = e.touches[0].clientX;
+                dragStartY = e.touches[0].clientY;
+            }
+            if (e.touches.length === 2) {
+                const dx = e.touches[0].clientX - e.touches[1].clientX;
+                const dy = e.touches[0].clientY - e.touches[1].clientY;
+                lastTouchDistance = Math.hypot(dx, dy);
+            }
+        }, { passive: true });
+
+        canvas.addEventListener('touchmove', (e) => {
+            if (e.touches.length === 1 && isDragging) {
+                const deltaX = e.touches[0].clientX - dragStartX;
+                const deltaY = e.touches[0].clientY - dragStartY;
+                cameraRotationY += deltaX * 0.005;
+                cameraRotationX += deltaY * 0.005;
+                cameraRotationX = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, cameraRotationX));
+                dragStartX = e.touches[0].clientX;
+                dragStartY = e.touches[0].clientY;
+            }
+            if (e.touches.length === 2) {
+                const dx = e.touches[0].clientX - e.touches[1].clientX;
+                const dy = e.touches[0].clientY - e.touches[1].clientY;
+                const distance = Math.hypot(dx, dy);
+                if (lastTouchDistance) {
+                    const delta = distance / lastTouchDistance;
+                    zoomLevel *= delta;
+                    zoomLevel = Math.max(0.5, Math.min(2, zoomLevel));
+                    document.getElementById('zoom').value = Math.round(zoomLevel * 100);
+                    document.getElementById('zoomValue').textContent = Math.round(zoomLevel * 100) + '%';
+                }
+                lastTouchDistance = distance;
+            }
+        }, { passive: true });
+
+        canvas.addEventListener('touchend', () => {
+            isDragging = false;
+            lastTouchDistance = null;
+        });
         
         // Initialize
         resize();
