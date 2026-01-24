@@ -28,7 +28,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: src/web/aria/aria_web
+          path: aria_web
 
   deploy:
     needs: build
