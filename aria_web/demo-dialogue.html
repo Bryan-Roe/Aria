@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aria Dialogue System Demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, rgba(11, 138, 131, 0.1), rgba(255, 122, 89, 0.1));
+            min-height: 100vh;
+            padding: 20px;
+            color: #1a1a1a;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .back-btn {
+            display: inline-block;
+            margin-bottom: 20px;
+            padding: 8px 16px;
+            background: #0b8a83;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: 600;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            color: #0b8a83;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .demo-section {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+        }
+
+        .demo-section h2 {
+            color: #ff7a59;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+
+        .dialogue-box {
+            background: linear-gradient(135deg, rgba(11, 138, 131, 0.05), rgba(255, 247, 232, 0.1));
+            border-left: 4px solid #0b8a83;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            min-height: 100px;
+        }
+
+        .message {
+            margin-bottom: 15px;
+            padding: 15px;
+            border-radius: 12px;
+            word-wrap: break-word;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .user-message {
+            background: #0b8a83;
+            color: white;
+            margin-left: 20%;
+            border-radius: 12px 12px 0 12px;
+        }
+
+        .aria-message {
+            background: white;
+            color: #1a1a1a;
+            margin-right: 20%;
+            border: 2px solid #0b8a83;
+            border-radius: 12px 12px 12px 0;
+        }
+
+        .aria-message strong {
+            color: #0b8a83;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            padding: 12px 16px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #0b8a83;
+        }
+
+        button {
+            padding: 12px 24px;
+            background: #0b8a83;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 1em;
+            transition: all 0.3s;
+        }
+
+        button:hover {
+            background: #087a73;
+            transform: translateY(-2px);
+        }
+
+        .quick-responses {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .quick-btn {
+            padding: 10px 16px;
+            background: #f5f5f5;
+            color: #0b8a83;
+            border: 2px solid #0b8a83;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            font-size: 0.9em;
+        }
+
+        .quick-btn:hover {
+            background: #0b8a83;
+            color: white;
+        }
+
+        .emotions-display {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .emotion {
+            background: white;
+            border: 2px solid #0b8a83;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .emotion:hover {
+            background: #0b8a83;
+            color: white;
+            transform: scale(1.05);
+        }
+
+        .emotion-icon {
+            font-size: 2em;
+            margin-bottom: 8px;
+        }
+
+        .emotion-label {
+            font-weight: 600;
+            font-size: 0.9em;
+        }
+
+        .emotion-intensity {
+            width: 100%;
+            margin-top: 8px;
+            height: 4px;
+            background: #ddd;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .emotion-bar {
+            height: 100%;
+            background: #ff7a59;
+            border-radius: 2px;
+            transition: width 0.3s;
+        }
+
+        .context-info {
+            background: rgba(11, 138, 131, 0.1);
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        .clear-btn {
+            background: #ff7a59;
+            margin-left: 10px;
+        }
+
+        .clear-btn:hover {
+            background: #ff5a3a;
+        }
+
+        .dialogue-type-toggle {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .type-btn {
+            padding: 8px 16px;
+            background: #f5f5f5;
+            color: #0b8a83;
+            border: 2px solid #0b8a83;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .type-btn.active {
+            background: #0b8a83;
+            color: white;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #0b8a83, #087a73);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 1.8em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 0.85em;
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <a href="demo-center.html" class="back-btn">← Back to Demo Center</a>
+            <h1>💬 Aria Dialogue System</h1>
+            <p class="subtitle">Conversational AI with Emotional Intelligence</p>
+        </header>
+
+        <!-- Main Dialogue Demo -->
+        <div class="demo-section">
+            <h2>Interactive Conversation</h2>
+            
+            <div class="dialogue-type-toggle">
+                <button class="type-btn active" onclick="setDialogueType('casual')">👥 Casual Chat</button>
+                <button class="type-btn" onclick="setDialogueType('teaching')">📚 Teaching Mode</button>
+                <button class="type-btn" onclick="setDialogueType('creative')">🎨 Creative</button>
+                <button class="type-btn" onclick="setDialogueType('supportive')">💚 Supportive</button>
+            </div>
+
+            <div class="dialogue-box" id="dialogueBox"></div>
+
+            <div class="input-group">
+                <input type="text" id="userInput" placeholder="Type your message..." autocomplete="off">
+                <button onclick="sendMessage()">Send</button>
+                <button class="clear-btn" onclick="clearDialogue()">Clear</button>
+            </div>
+
+            <div class="quick-responses" id="quickResponses"></div>
+
+            <div class="context-info" id="contextInfo"></div>
+        </div>
+
+        <!-- Emotion Display -->
+        <div class="demo-section">
+            <h2>Detected Emotions & Context</h2>
+            <div class="emotions-display" id="emotionsDisplay"></div>
+        </div>
+
+        <!-- Dialogue Statistics -->
+        <div class="demo-section">
+            <h2>Conversation Statistics</h2>
+            <div class="stats">
+                <div class="stat-card">
+                    <div class="stat-number" id="messageCount">0</div>
+                    <div class="stat-label">Messages Exchanged</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="sentimentScore">0%</div>
+                    <div class="stat-label">Conversation Sentiment</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="engagementLevel">Normal</div>
+                    <div class="stat-label">Engagement Level</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="recognitionScore">0%</div>
+                    <div class="stat-label">Context Recognition</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dialogue Types Info -->
+        <div class="demo-section">
+            <h2>Dialogue Modes Explained</h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                <div style="padding: 15px; background: #f5f5f5; border-radius: 8px;">
+                    <strong>👥 Casual Chat</strong>
+                    <p style="color: #666; margin-top: 8px; font-size: 0.9em;">Friendly, conversational tone with natural responses and personality.</p>
+                </div>
+                <div style="padding: 15px; background: #f5f5f5; border-radius: 8px;">
+                    <strong>📚 Teaching Mode</strong>
+                    <p style="color: #666; margin-top: 8px; font-size: 0.9em;">Educational tone with detailed explanations and learning focus.</p>
+                </div>
+                <div style="padding: 15px; background: #f5f5f5; border-radius: 8px;">
+                    <strong>🎨 Creative</strong>
+                    <p style="color: #666; margin-top: 8px; font-size: 0.9em;">Imaginative responses with creative storytelling and metaphors.</p>
+                </div>
+                <div style="padding: 15px; background: #f5f5f5; border-radius: 8px;">
+                    <strong>💚 Supportive</strong>
+                    <p style="color: #666; margin-top: 8px; font-size: 0.9em;">Empathetic tone focused on understanding and emotional support.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let messageCount = 0;
+        let sentimentScore = 50;
+        let currentDialogueType = 'casual';
+        let emotionState = {
+            happy: 0.6,
+            curious: 0.7,
+            confident: 0.8,
+            thoughtful: 0.5,
+            warm: 0.7,
+            engaged: 0.8
+        };
+
+        const responses = {
+            casual: [
+                "That's really interesting! Tell me more about that.",
+                "Ha! I like the way you think. What else is on your mind?",
+                "You know, I've been thinking about something like that too.",
+                "That's a cool perspective. Have you always felt that way?",
+                "I get it! That makes a lot of sense. What's next?",
+                "Oh, that's something I find fascinating too!"
+            ],
+            teaching: [
+                "Let me break that down for you... In essence, what this means is...",
+                "Great question! This is an important concept to understand.",
+                "To explain that better, we should first understand the fundamentals.",
+                "That's an excellent observation! Here's why that happens:",
+                "You're on the right track. Let me elaborate on that concept.",
+                "This connects to a larger principle: understanding this helps us see..."
+            ],
+            creative: [
+                "Imagine if we could... Actually, that reminds me of a story.",
+                "That sparks a creative thought: what if we considered it differently?",
+                "Ooh, I love where this is going! Picture it like this...",
+                "Your words paint quite a picture! In my mind's eye, I see...",
+                "That's poetic! It reminds me of how everything connects in surprising ways.",
+                "What a vivid way to express that! Let me explore this creatively..."
+            ],
+            supportive: [
+                "I hear you, and I want you to know that your feelings are valid.",
+                "That sounds like something meaningful to you. I'm here to listen.",
+                "You're doing great, and I appreciate you sharing that with me.",
+                "I can sense how important this is to you, and that matters.",
+                "You're not alone in feeling that way. Many people experience this.",
+                "Your perspective is valued, and I'm glad we can talk about this."
+            ]
+        };
+
+        const quickResponses = {
+            casual: ["Tell me about your day", "What makes you happy?", "Any funny stories?"],
+            teaching: ["Explain quantum computing", "How does ML work?", "What's NLP?"],
+            creative: ["Tell me a story", "Create a scenario", "Imagine something new"],
+            supportive: ["I need to talk", "How are you today?", "What should I do?"]
+        };
+
+        function initializeDateDisplay() {
+            updateContextInfo();
+            updateEmotionsDisplay();
+            displayQuickResponses();
+        }
+
+        function setDialogueType(type) {
+            currentDialogueType = type;
+            document.querySelectorAll('.type-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            displayQuickResponses();
+            
+            // Update emotion state based on dialogue type
+            if (type === 'teaching') {
+                emotionState.thoughtful = 0.9;
+                emotionState.confident = 0.85;
+            } else if (type === 'creative') {
+                emotionState.curious = 0.95;
+                emotionState.engaged = 0.9;
+            } else if (type === 'supportive') {
+                emotionState.warm = 0.95;
+                emotionState.engaged = 0.85;
+            } else {
+                emotionState = {
+                    happy: 0.7,
+                    curious: 0.6,
+                    confident: 0.75,
+                    thoughtful: 0.5,
+                    warm: 0.65,
+                    engaged: 0.7
+                };
+            }
+            updateEmotionsDisplay();
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('userInput');
+            const message = input.value.trim();
+            
+            if (!message) return;
+
+            addMessage(message, 'user');
+            input.value = '';
+            messageCount++;
+
+            // Simulate Aria's response
+            setTimeout(() => {
+                const response = getResponse(message);
+                addMessage(response, 'aria');
+                updateStats();
+                updateEmotionsDisplay();
+                updateContextInfo();
+            }, 500 + Math.random() * 1000);
+        }
+
+        function addMessage(text, sender) {
+            const box = document.getElementById('dialogueBox');
+            const msg = document.createElement('div');
+            msg.className = `message ${sender}-message`;
+            
+            if (sender === 'aria') {
+                msg.innerHTML = `<strong>Aria:</strong> ${text}`;
+            } else {
+                msg.textContent = `You: ${text}`;
+            }
+            
+            box.appendChild(msg);
+            box.scrollTop = box.scrollHeight;
+        }
+
+        function getResponse(userMessage) {
+            const responses = responses[currentDialogueType];
+            const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+            
+            // Simple sentiment analysis
+            const positiveWords = ['good', 'great', 'happy', 'love', 'excellent', 'amazing'];
+            const negativeWords = ['bad', 'sad', 'hate', 'terrible', 'awful', 'poor'];
+            
+            if (positiveWords.some(word => userMessage.toLowerCase().includes(word))) {
+                sentimentScore = Math.min(100, sentimentScore + 10);
+                emotionState.happy += 0.1;
+            } else if (negativeWords.some(word => userMessage.toLowerCase().includes(word))) {
+                sentimentScore = Math.max(0, sentimentScore - 10);
+                emotionState.warm += 0.15; // More supportive
+            }
+            
+            return randomResponse;
+        }
+
+        function displayQuickResponses() {
+            const container = document.getElementById('quickResponses');
+            container.innerHTML = '';
+            
+            const prompts = quickResponses[currentDialogueType];
+            prompts.forEach(prompt => {
+                const btn = document.createElement('button');
+                btn.className = 'quick-btn';
+                btn.textContent = prompt;
+                btn.onclick = () => {
+                    document.getElementById('userInput').value = prompt;
+                    sendMessage();
+                };
+                container.appendChild(btn);
+            });
+        }
+
+        function updateEmotionsDisplay() {
+            const container = document.getElementById('emotionsDisplay');
+            container.innerHTML = '';
+            
+            const emotions = [
+                { name: 'Happy', icon: '😊', value: emotionState.happy },
+                { name: 'Curious', icon: '🔍', value: emotionState.curious },
+                { name: 'Confident', icon: '💪', value: emotionState.confident },
+                { name: 'Thoughtful', icon: '🤔', value: emotionState.thoughtful },
+                { name: 'Warm', icon: '❤️', value: emotionState.warm },
+                { name: 'Engaged', icon: '⚡', value: emotionState.engaged }
+            ];
+            
+            emotions.forEach(emotion => {
+                const card = document.createElement('div');
+                card.className = 'emotion';
+                card.innerHTML = `
+                    <div class="emotion-icon">${emotion.icon}</div>
+                    <div class="emotion-label">${emotion.name}</div>
+                    <div class="emotion-intensity">
+                        <div class="emotion-bar" style="width: ${emotion.value * 100}%"></div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function updateContextInfo() {
+            const info = document.getElementById('contextInfo');
+            const time = new Date().toLocaleTimeString();
+            const mode = currentDialogueType.charAt(0).toUpperCase() + currentDialogueType.slice(1);
+            
+            info.innerHTML = `
+                <strong>Current Context:</strong> ${mode} dialogue mode active | Messages: ${messageCount} | Sentiment: ${sentimentScore}% | Time: ${time}
+            `;
+        }
+
+        function updateStats() {
+            document.getElementById('messageCount').textContent = messageCount;
+            document.getElementById('sentimentScore').textContent = Math.round(sentimentScore) + '%';
+            
+            const engagement = messageCount > 5 ? 'High' : (messageCount > 2 ? 'Normal' : 'Starting');
+            document.getElementById('engagementLevel').textContent = engagement;
+            
+            const recognition = Math.min(100, (messageCount * 15));
+            document.getElementById('recognitionScore').textContent = recognition + '%';
+        }
+
+        function clearDialogue() {
+            document.getElementById('dialogueBox').innerHTML = '';
+            messageCount = 0;
+            sentimentScore = 50;
+            updateStats();
+            updateContextInfo();
+            updateEmotionsDisplay();
+        }
+
+        // Initialize on load
+        window.addEventListener('load', initializeDateDisplay);
+
+        // Send on Enter key
+        document.getElementById('userInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendMessage();
+        });
+    </script>
+</body>
+</html>

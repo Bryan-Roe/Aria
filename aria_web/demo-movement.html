@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aria Movement Patterns Demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --accent: #0b8a83;
+            --accent-light: #1da89f;
+            --bg: #f5f7fa;
+            --card: #ffffff;
+            --text: #1a1a1a;
+            --muted: #666;
+        }
+
+        body {
+            font-family: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 20px 0;
+            border-bottom: 2px solid var(--accent);
+        }
+
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            color: var(--accent);
+        }
+
+        .subtitle {
+            color: var(--muted);
+            font-size: 1.1em;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .demo-card {
+            background: var(--card);
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+        }
+
+        .demo-card:hover {
+            box-shadow: 0 8px 25px rgba(11, 138, 131, 0.15);
+            transform: translateY(-4px);
+        }
+
+        .demo-card h2 {
+            color: var(--accent);
+            margin-bottom: 12px;
+            font-size: 1.4em;
+        }
+
+        .demo-card p {
+            color: var(--muted);
+            margin-bottom: 15px;
+            line-height: 1.6;
+        }
+
+        .stage {
+            width: 100%;
+            height: 250px;
+            background: linear-gradient(135deg, #f0f4f8 0%, #e8f1f5 100%);
+            border: 2px solid var(--accent);
+            border-radius: 8px;
+            position: relative;
+            overflow: hidden;
+            margin: 15px 0;
+        }
+
+        .aria {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            background: var(--accent);
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            z-index: 10;
+            transition: all 0.1s linear;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        button {
+            flex: 1;
+            padding: 10px 15px;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            background: var(--accent-light);
+            transform: scale(1.05);
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        .info-box {
+            background: rgba(11, 138, 131, 0.05);
+            border-left: 4px solid var(--accent);
+            padding: 12px;
+            border-radius: 4px;
+            font-size: 0.9em;
+            color: var(--muted);
+        }
+
+        .back-nav {
+            display: inline-block;
+            margin-bottom: 20px;
+            padding: 10px 20px;
+            background: var(--accent);
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: 600;
+        }
+
+        .back-nav:hover {
+            background: var(--accent-light);
+        }
+
+        .pattern-indicator {
+            display: inline-block;
+            padding: 4px 12px;
+            background: rgba(11, 138, 131, 0.1);
+            border-radius: 20px;
+            font-size: 0.85em;
+            color: var(--accent);
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <a href="../../web-hub.html" class="back-nav">🏠 Back to Hub</a>
+
+    <div class="container">
+        <header>
+            <h1>🎯 Aria Movement Patterns</h1>
+            <p class="subtitle">Interactive demonstration of character movement algorithms</p>
+        </header>
+
+        <div class="grid">
+            <!-- Linear Movement -->
+            <div class="demo-card">
+                <h2>Linear Movement</h2>
+                <p>Aria moves in a straight line from start to end point.</p>
+                <div class="stage">
+                    <div class="aria" id="linear-aria">A</div>
+                </div>
+                <div class="controls">
+                    <button onclick="runLinear()">▶ Start</button>
+                    <button onclick="resetLinear()">Reset</button>
+                </div>
+                <div class="info-box">
+                    Smoothly interpolates position over time. Ideal for direct pathing.
+                </div>
+            </div>
+
+            <!-- Circular Movement -->
+            <div class="demo-card">
+                <h2>Circular Orbit</h2>
+                <p>Aria follows a circular path around a center point.</p>
+                <div class="stage">
+                    <div class="aria" id="circle-aria">A</div>
+                </div>
+                <div class="controls">
+                    <button onclick="runCircle()">▶ Start</button>
+                    <button onclick="resetCircle()">Reset</button>
+                </div>
+                <div class="info-box">
+                    Uses trigonometry (sin/cos) for smooth circular motion.
+                </div>
+            </div>
+
+            <!-- Zigzag Movement -->
+            <div class="demo-card">
+                <h2>Zigzag Pattern</h2>
+                <p>Aria moves in a zigzag pattern across the stage.</p>
+                <div class="stage">
+                    <div class="aria" id="zigzag-aria">A</div>
+                </div>
+                <div class="controls">
+                    <button onclick="runZigzag()">▶ Start</button>
+                    <button onclick="resetZigzag()">Reset</button>
+                </div>
+                <div class="info-box">
+                    Sequential waypoint following with sharp direction changes.
+                </div>
+            </div>
+
+            <!-- Spiral Movement -->
+            <div class="demo-card">
+                <h2>Spiral Descent</h2>
+                <p>Aria follows an expanding spiral pattern.</p>
+                <div class="stage">
+                    <div class="aria" id="spiral-aria">A</div>
+                </div>
+                <div class="controls">
+                    <button onclick="runSpiral()">▶ Start</button>
+                    <button onclick="resetSpiral()">Reset</button>
+                </div>
+                <div class="info-box">
+                    Combines circular motion with radius expansion over time.
+                </div>
+            </div>
+
+            <!-- Wave Movement -->
+            <div class="demo-card">
+                <h2>Wave Motion</h2>
+                <p>Aria moves forward while oscillating up and down.</p>
+                <div class="stage">
+                    <div class="aria" id="wave-aria">A</div>
+                </div>
+                <div class="controls">
+                    <button onclick="runWave()">▶ Start</button>
+                    <button onclick="resetWave()">Reset</button>
+                </div>
+                <div class="info-box">
+                    Uses sine waves for smooth vertical oscillation during forward movement.
+                </div>
+            </div>
+
+            <!-- Random Walk -->
+            <div class="demo-card">
+                <h2>Random Walk</h2>
+                <p>Aria moves randomly around the stage.</p>
+                <div class="stage">
+                    <div class="aria" id="random-aria">A</div>
+                </div>
+                <div class="controls">
+                    <button onclick="runRandom()">▶ Start</button>
+                    <button onclick="resetRandom()">Reset</button>
+                </div>
+                <div class="info-box">
+                    Picks random waypoints and moves toward them autonomously.
+                </div>
+            </div>
+        </div>
+
+        <section style="background: var(--card); padding: 25px; border-radius: 12px; margin-top: 30px;">
+            <h2 style="color: var(--accent); margin-bottom: 15px;">📊 Algorithm Details</h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+                <div class="info-box" style="border-left-color: var(--accent); padding: 15px;">
+                    <strong>Linear</strong>: Lerp(start, end, t)
+                </div>
+                <div class="info-box" style="border-left-color: var(--accent); padding: 15px;">
+                    <strong>Circle</strong>: x = cx + r*cos(θ), y = cy + r*sin(θ)
+                </div>
+                <div class="info-box" style="border-left-color: var(--accent); padding: 15px;">
+                    <strong>Zigzag</strong>: Connect waypoints [0,0] → [100%,50%] → [0,100%]
+                </div>
+                <div class="info-box" style="border-left-color: var(--accent); padding: 15px;">
+                    <strong>Spiral</strong>: radius = t × max_r, angle = t × 4π
+                </div>
+                <div class="info-box" style="border-left-color: var(--accent); padding: 15px;">
+                    <strong>Wave</strong>: x = t, y = sin(t × freq) × amplitude
+                </div>
+                <div class="info-box" style="border-left-color: var(--accent); padding: 15px;">
+                    <strong>Random</strong>: Brownian motion with waypoint seeking
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        const stages = {
+            linear: document.getElementById('linear-aria'),
+            circle: document.getElementById('circle-aria'),
+            zigzag: document.getElementById('zigzag-aria'),
+            spiral: document.getElementById('spiral-aria'),
+            wave: document.getElementById('wave-aria'),
+            random: document.getElementById('random-aria')
+        };
+
+        const animations = {};
+
+        function getStageRect(aria) {
+            return aria.parentElement.getBoundingClientRect();
+        }
+
+        function runLinear() {
+            if (animations.linear) return;
+            const aria = stages.linear;
+            const rect = getStageRect(aria);
+            const startX = 20, endX = rect.width - 40;
+            let t = 0;
+
+            animations.linear = setInterval(() => {
+                t += 0.02;
+                if (t >= 1) {
+                    clearInterval(animations.linear);
+                    delete animations.linear;
+                    return;
+                }
+                aria.style.left = (startX + (endX - startX) * t) + 'px';
+            }, 16);
+        }
+
+        function runCircle() {
+            if (animations.circle) return;
+            const aria = stages.circle;
+            const rect = getStageRect(aria);
+            const cx = rect.width / 2, cy = rect.height / 2;
+            const radius = 80;
+            let angle = 0;
+
+            animations.circle = setInterval(() => {
+                angle += 0.1;
+                if (angle >= Math.PI * 2) {
+                    clearInterval(animations.circle);
+                    delete animations.circle;
+                    return;
+                }
+                const x = cx + radius * Math.cos(angle);
+                const y = cy + radius * Math.sin(angle);
+                aria.style.left = (x - 20) + 'px';
+                aria.style.top = (y - 20) + 'px';
+            }, 16);
+        }
+
+        function runZigzag() {
+            if (animations.zigzag) return;
+            const aria = stages.zigzag;
+            const rect = getStageRect(aria);
+            const waypoints = [
+                [20, 20],
+                [rect.width - 40, rect.height / 2],
+                [20, rect.height - 40]
+            ];
+            let currentWaypoint = 0;
+            let t = 0;
+
+            animations.zigzag = setInterval(() => {
+                if (currentWaypoint >= waypoints.length) {
+                    clearInterval(animations.zigzag);
+                    delete animations.zigzag;
+                    return;
+                }
+
+                const start = waypoints[currentWaypoint];
+                const end = waypoints[currentWaypoint + 1] || waypoints[0];
+                t += 0.02;
+
+                if (t >= 1) {
+                    currentWaypoint++;
+                    t = 0;
+                    return;
+                }
+
+                const x = start[0] + (end[0] - start[0]) * t;
+                const y = start[1] + (end[1] - start[1]) * t;
+                aria.style.left = x + 'px';
+                aria.style.top = y + 'px';
+            }, 16);
+        }
+
+        function runSpiral() {
+            if (animations.spiral) return;
+            const aria = stages.spiral;
+            const rect = getStageRect(aria);
+            const cx = rect.width / 2, cy = rect.height / 2;
+            let t = 0;
+
+            animations.spiral = setInterval(() => {
+                t += 0.02;
+                if (t >= 1) {
+                    clearInterval(animations.spiral);
+                    delete animations.spiral;
+                    return;
+                }
+                const angle = t * Math.PI * 4;
+                const radius = 100 * t;
+                const x = cx + radius * Math.cos(angle);
+                const y = cy + radius * Math.sin(angle);
+                aria.style.left = (x - 20) + 'px';
+                aria.style.top = (y - 20) + 'px';
+            }, 16);
+        }
+
+        function runWave() {
+            if (animations.wave) return;
+            const aria = stages.wave;
+            const rect = getStageRect(aria);
+            let t = 0;
+
+            animations.wave = setInterval(() => {
+                t += 0.02;
+                if (t >= 1) {
+                    clearInterval(animations.wave);
+                    delete animations.wave;
+                    return;
+                }
+                const x = 20 + (rect.width - 40) * t;
+                const y = (rect.height / 2) + Math.sin(t * Math.PI * 4) * 40;
+                aria.style.left = (x - 20) + 'px';
+                aria.style.top = (y - 20) + 'px';
+            }, 16);
+        }
+
+        function runRandom() {
+            if (animations.random) return;
+            const aria = stages.random;
+            const rect = getStageRect(aria);
+            let x = rect.width / 2, y = rect.height / 2;
+            let targetX, targetY;
+            let t = 0;
+
+            function setNewTarget() {
+                targetX = Math.random() * (rect.width - 40) + 20;
+                targetY = Math.random() * (rect.height - 40) + 20;
+                t = 0;
+            }
+
+            setNewTarget();
+            let steps = 0;
+
+            animations.random = setInterval(() => {
+                t += 0.02;
+                if (t >= 1) {
+                    steps++;
+                    if (steps >= 5) {
+                        clearInterval(animations.random);
+                        delete animations.random;
+                        return;
+                    }
+                    setNewTarget();
+                }
+
+                x = x + (targetX - x) * t;
+                y = y + (targetY - y) * t;
+                aria.style.left = (x - 20) + 'px';
+                aria.style.top = (y - 20) + 'px';
+            }, 16);
+        }
+
+        function resetLinear() {
+            clearInterval(animations.linear);
+            delete animations.linear;
+            stages.linear.style.left = '50%';
+            stages.linear.style.top = '50%';
+        }
+
+        function resetCircle() {
+            clearInterval(animations.circle);
+            delete animations.circle;
+            stages.circle.style.left = '50%';
+            stages.circle.style.top = '50%';
+        }
+
+        function resetZigzag() {
+            clearInterval(animations.zigzag);
+            delete animations.zigzag;
+            stages.zigzag.style.left = 'calc(50% - 20px)';
+            stages.zigzag.style.top = 'calc(50% - 20px)';
+        }
+
+        function resetSpiral() {
+            clearInterval(animations.spiral);
+            delete animations.spiral;
+            stages.spiral.style.left = '50%';
+            stages.spiral.style.top = '50%';
+        }
+
+        function resetWave() {
+            clearInterval(animations.wave);
+            delete animations.wave;
+            stages.wave.style.left = '50%';
+            stages.wave.style.top = '50%';
+        }
+
+        function resetRandom() {
+            clearInterval(animations.random);
+            delete animations.random;
+            stages.random.style.left = '50%';
+            stages.random.style.top = '50%';
+        }
+    </script>
+</body>
+</html>

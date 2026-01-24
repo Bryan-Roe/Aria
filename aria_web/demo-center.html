@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aria Demo Center</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --accent: #0b8a83;
+            --accent-light: #1da89f;
+            --bg: #f5f7fa;
+            --card: #ffffff;
+            --text: #1a1a1a;
+            --muted: #666;
+        }
+        body {
+            font-family: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, rgba(11, 138, 131, 0.05), rgba(255, 247, 232, 0.3));
+            color: var(--text);
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .container { max-width: 1200px; margin: 0 auto; }
+        header {
+            text-align: center;
+            margin-bottom: 50px;
+            padding: 40px 20px;
+            background: var(--card);
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(11, 138, 131, 0.1);
+        }
+        h1 {
+            font-size: 3em;
+            margin-bottom: 15px;
+            color: var(--accent);
+        }
+        .subtitle {
+            font-size: 1.3em;
+            color: var(--muted);
+            margin-bottom: 20px;
+        }
+        .tagline {
+            font-size: 1em;
+            color: var(--accent);
+            font-weight: 600;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 50px;
+        }
+        .demo-card {
+            background: var(--card);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+        }
+        .demo-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 40px rgba(11, 138, 131, 0.15);
+        }
+        .demo-header {
+            padding: 25px;
+            background: linear-gradient(135deg, rgba(11, 138, 131, 0.1), rgba(255, 247, 232, 0.2));
+            border-bottom: 2px solid var(--accent);
+        }
+        .demo-icon {
+            font-size: 3em;
+            margin-bottom: 10px;
+        }
+        .demo-header h2 {
+            color: var(--accent);
+            margin-bottom: 5px;
+            font-size: 1.5em;
+        }
+        .demo-header p {
+            color: var(--muted);
+            font-size: 0.9em;
+        }
+        .demo-body {
+            padding: 25px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        .demo-body p {
+            color: var(--muted);
+            line-height: 1.6;
+            margin-bottom: 15px;
+            flex: 1;
+        }
+        .features-list {
+            background: rgba(11, 138, 131, 0.05);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+        .features-list li {
+            color: var(--muted);
+            font-size: 0.9em;
+            margin: 6px 0;
+            margin-left: 20px;
+        }
+        .demo-footer {
+            padding: 20px 25px;
+            border-top: 1px solid rgba(11, 138, 131, 0.1);
+            display: flex;
+            gap: 10px;
+        }
+        .demo-btn {
+            flex: 1;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 1em;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            text-align: center;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .demo-btn-primary {
+            background: var(--accent);
+            color: white;
+        }
+        .demo-btn-primary:hover {
+            background: var(--accent-light);
+            transform: scale(1.05);
+        }
+        .demo-btn-secondary {
+            background: transparent;
+            color: var(--accent);
+            border: 2px solid var(--accent);
+        }
+        .demo-btn-secondary:hover {
+            background: var(--accent);
+            color: white;
+        }
+        .back-nav {
+            display: inline-block;
+            margin-bottom: 20px;
+            padding: 10px 20px;
+            background: var(--accent);
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: 600;
+        }
+        .back-nav:hover {
+            background: var(--accent-light);
+        }
+        .info-section {
+            background: var(--card);
+            padding: 30px;
+            border-radius: 16px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        }
+        .info-section h2 {
+            color: var(--accent);
+            margin-bottom: 15px;
+            font-size: 1.6em;
+        }
+        .info-section p {
+            color: var(--muted);
+            line-height: 1.8;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <a href="../../web-hub.html" class="back-nav">🏠 Back to Hub</a>
+
+    <div class="container">
+        <header>
+            <h1>🎨 Aria Demo Center</h1>
+            <p class="subtitle">Interactive AI Character Platform</p>
+            <p class="tagline">Quantum ML Integration & Real-time Demonstration</p>
+        </header>
+
+        <div class="grid">
+            <!-- Movement Demo -->
+            <div class="demo-card">
+                <div class="demo-header">
+                    <div class="demo-icon">🎯</div>
+                    <h2>Movement Patterns</h2>
+                    <p>Spatial choreography & animation</p>
+                </div>
+                <div class="demo-body">
+                    <p>Explore 6 different movement algorithms that Aria uses for realistic spatial navigation and choreography.</p>
+                    <div class="features-list">
+                        <ul>
+                            <li>📍 Linear movement</li>
+                            <li>🔵 Circular orbits</li>
+                            <li>⚡ Zigzag patterns</li>
+                            <li>🌀 Spiral descent</li>
+                            <li>〰️ Wave motion</li>
+                            <li>🎲 Random walk</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="demo-footer">
+                    <a href="demo-movement.html" class="demo-btn demo-btn-primary">▶ Launch Demo</a>
+                </div>
+            </div>
+
+            <!-- Quantum Demo -->
+            <div class="demo-card">
+                <div class="demo-header">
+                    <div class="demo-icon">⚛️</div>
+                    <h2>Quantum States</h2>
+                    <p>Quantum computing visualization</p>
+                </div>
+                <div class="demo-body">
+                    <p>Visualize quantum computing concepts integrated with Aria's decision-making and ML systems.</p>
+                    <div class="features-list">
+                        <ul>
+                            <li>🔀 Superposition</li>
+                            <li>🔗 Entanglement</li>
+                            <li>〰️ Interference patterns</li>
+                            <li>💥 Measurement collapse</li>
+                            <li>📉 Decoherence effects</li>
+                            <li>🎚️ Quantum gates</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="demo-footer">
+                    <a href="demo-quantum.html" class="demo-btn demo-btn-primary">▶ Launch Demo</a>
+                </div>
+            </div>
+
+            <!-- Emotions Demo -->
+            <div class="demo-card">
+                <div class="demo-header">
+                    <div class="demo-icon">😊</div>
+                    <h2>Emotions & Expressions</h2>
+                    <p>Emotional intelligence system</p>
+                </div>
+                <div class="demo-body">
+                    <p>Interactive demonstration of Aria's emotional expression and empathy capabilities with real-time controls.</p>
+                    <div class="features-list">
+                        <ul>
+                            <li>😊 Happiness</li>
+                            <li>😢 Sadness</li>
+                            <li>😠 Anger</li>
+                            <li>😲 Surprise</li>
+                            <li>😨 Fear</li>
+                            <li>🎭 Emotion blending</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="demo-footer">
+                    <a href="demo-emotions.html" class="demo-btn demo-btn-primary">▶ Launch Demo</a>
+                </div>
+            </div>
+
+            <!-- Learning Demo -->
+            <div class="demo-card">
+                <div class="demo-header">
+                    <div class="demo-icon">🧠</div>
+                    <h2>Learning & Memory</h2>
+                    <p>Machine learning capabilities</p>
+                </div>
+                <div class="demo-body">
+                    <p>Showcase Aria's continuous learning, memory formation, and skill development through interactive training.</p>
+                    <div class="features-list">
+                        <ul>
+                            <li>🔍 Pattern recognition</li>
+                            <li>💬 Language processing</li>
+                            <li>🎯 Decision making</li>
+                            <li>💾 Memory formation</li>
+                            <li>❤️ Emotional learning</li>
+                            <li>🏆 Skill mastery</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="demo-footer">
+                    <a href="demo-learning.html" class="demo-btn demo-btn-primary">▶ Launch Demo</a>
+                </div>
+            </div>
+
+            <!-- Dialogue Demo -->
+            <div class="demo-card">
+                <div class="demo-header">
+                    <div class="demo-icon">💬</div>
+                    <h2>Dialogue System</h2>
+                    <p>Conversational AI & emotional responses</p>
+                </div>
+                <div class="demo-body">
+                    <p>Experience Aria's advanced conversational capabilities with emotional intelligence and context awareness.</p>
+                    <div class="features-list">
+                        <ul>
+                            <li>👥 Casual conversation</li>
+                            <li>📚 Teaching mode</li>
+                            <li>🎨 Creative responses</li>
+                            <li>💚 Supportive dialogue</li>
+                            <li>😊 Emotion detection</li>
+                            <li>📊 Sentiment analysis</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="demo-footer">
+                    <a href="demo-dialogue.html" class="demo-btn demo-btn-primary">▶ Launch Demo</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- About Section -->
+        <div class="info-section">
+            <h2>About These Demos</h2>
+            <p>The Aria Demo Center showcases the core capabilities of the Interactive AI Character Platform. Each demo is an interactive, educational tool designed to illustrate different aspects of Aria's artificial intelligence, emotional intelligence, and real-time interaction capabilities.</p>
+            <p><strong>🎯 Movement Patterns</strong> demonstrate the spatial choreography and animation algorithms that make Aria's movement feel natural and fluid.</p>
+            <p><strong>⚛️ Quantum States</strong> visualize quantum computing concepts that power Aria's advanced ML decision-making processes.</p>
+            <p><strong>😊 Emotions</strong> showcase Aria's ability to understand, express, and respond to emotional states with nuance and empathy.</p>
+            <p><strong>🧠 Learning & Memory</strong> illustrate how Aria continuously learns and improves from interactions through machine learning.</p>
+            <p><strong>💬 Dialogue System</strong> demonstrate conversational AI with emotional intelligence, context awareness, and multiple dialogue modes.</p>
+        </div>
+
+        <!-- Features Section -->
+        <div class="info-section">
+            <h2>Platform Features</h2>
+            <p><strong>Real-time Interaction:</strong> All demos provide instant visual feedback and interactive controls for hands-on exploration.</p>
+            <p><strong>Educational Value:</strong> Each demo explains the algorithms and concepts behind the demonstrations.</p>
+            <p><strong>Quantum ML Integration:</strong> Demonstrations of how quantum computing principles enhance Aria's learning and decision-making.</p>
+            <p><strong>Emotional Intelligence:</strong> Advanced systems for understanding and expressing human-like emotions.</p>
+            <p><strong>Continuous Learning:</strong> Memory formation and skill development through machine learning algorithms.</p>
+        </div>
+
+        <!-- Getting Started -->
+        <div class="info-section">
+            <h2>Getting Started</h2>
+            <p><strong>Quick Start:</strong> Click any "Launch Demo" button above to explore interactive demonstrations.</p>
+            <p><strong>Hands-on Learning:</strong> Each demo includes interactive controls, real-time visualizations, and explanatory information.</p>
+            <p><strong>Full Platform:</strong> For the complete Aria experience with 3D character control, object interaction, and quantum world exploration, visit the <a href="index.html" style="color: var(--accent); text-decoration: none; font-weight: 600;">main Aria interface</a>.</p>
+            <p><strong>Advanced Features:</strong> Explore <a href="quantum-portal.html" style="color: var(--accent); text-decoration: none; font-weight: 600;">quantum world</a>, <a href="auto-execute.html" style="color: var(--accent); text-decoration: none; font-weight: 600;">auto-execute planner</a>, and more.</p>
+        </div>
+    </div>
+
+    <script>
+        // Simple analytics for demo launches
+        document.querySelectorAll('.demo-btn-primary').forEach(btn => {
+            btn.addEventListener('click', function() {
+                console.log('Launching demo:', this.href);
+            });
+        });
+    </script>
+</body>
+</html>

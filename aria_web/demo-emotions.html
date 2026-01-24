@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aria Emotion & Expression Demo</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --accent: #0b8a83;
+            --emotion: #ff7a59;
+            --bg: #f5f7fa;
+            --card: #ffffff;
+            --text: #1a1a1a;
+            --muted: #666;
+        }
+        body {
+            font-family: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            padding: 20px;
+        }
+        .container { max-width: 1200px; margin: 0 auto; }
+        header { text-align: center; margin-bottom: 40px; padding: 20px 0; border-bottom: 2px solid var(--emotion); }
+        h1 { font-size: 2.5em; margin-bottom: 10px; color: var(--emotion); }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+        }
+        .demo-card {
+            background: var(--card);
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        }
+        .demo-card h2 { color: var(--emotion); margin-bottom: 12px; font-size: 1.4em; }
+        .face {
+            width: 100%;
+            max-width: 250px;
+            margin: 20px auto;
+            aspect-ratio: 1;
+            background: linear-gradient(135deg, #fffacd, #fff8dc);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4em;
+            position: relative;
+            border: 3px solid var(--emotion);
+        }
+        .slider-group {
+            margin: 20px 0;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        input[type="range"] {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 122, 89, 0.2);
+            border-radius: 3px;
+            outline: none;
+            -webkit-appearance: none;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--emotion);
+            cursor: pointer;
+        }
+        input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--emotion);
+            cursor: pointer;
+            border: none;
+        }
+        .slider-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9em;
+            color: var(--muted);
+        }
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+        button {
+            padding: 10px 15px;
+            background: var(--emotion);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        button:hover { background: #ff5a3a; transform: scale(1.05); }
+        .emotion-meter {
+            width: 100%;
+            height: 30px;
+            background: rgba(255, 122, 89, 0.1);
+            border-radius: 15px;
+            overflow: hidden;
+            margin: 15px 0;
+        }
+        .emotion-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--emotion), #ff5a3a);
+            transition: width 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.8em;
+            font-weight: bold;
+        }
+        .back-nav {
+            display: inline-block;
+            margin-bottom: 20px;
+            padding: 10px 20px;
+            background: var(--accent);
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <a href="../../web-hub.html" class="back-nav">🏠 Back to Hub</a>
+
+    <div class="container">
+        <header>
+            <h1>😊 Aria Emotions & Expressions</h1>
+            <p class="subtitle" style="color: var(--muted);">Interactive emotional state demonstration</p>
+        </header>
+
+        <div class="grid">
+            <!-- Happiness -->
+            <div class="demo-card">
+                <h2>😊 Happiness</h2>
+                <div class="face" id="happy-face">😊</div>
+                <div class="slider-group">
+                    <div class="slider-label"><span>Intensity</span> <span id="happy-value">50%</span></div>
+                    <input type="range" min="0" max="100" value="50" oninput="updateHappiness(this.value)">
+                </div>
+                <div class="emotion-meter">
+                    <div class="emotion-fill" id="happy-meter" style="width: 50%;">50%</div>
+                </div>
+            </div>
+
+            <!-- Sadness -->
+            <div class="demo-card">
+                <h2>😢 Sadness</h2>
+                <div class="face" id="sad-face">😢</div>
+                <div class="slider-group">
+                    <div class="slider-label"><span>Intensity</span> <span id="sad-value">30%</span></div>
+                    <input type="range" min="0" max="100" value="30" oninput="updateSadness(this.value)">
+                </div>
+                <div class="emotion-meter">
+                    <div class="emotion-fill" id="sad-meter" style="width: 30%;">30%</div>
+                </div>
+            </div>
+
+            <!-- Anger -->
+            <div class="demo-card">
+                <h2>😠 Anger</h2>
+                <div class="face" id="angry-face">😠</div>
+                <div class="slider-group">
+                    <div class="slider-label"><span>Intensity</span> <span id="angry-value">20%</span></div>
+                    <input type="range" min="0" max="100" value="20" oninput="updateAnger(this.value)">
+                </div>
+                <div class="emotion-meter">
+                    <div class="emotion-fill" id="angry-meter" style="width: 20%;">20%</div>
+                </div>
+            </div>
+
+            <!-- Surprise -->
+            <div class="demo-card">
+                <h2>😲 Surprise</h2>
+                <div class="face" id="surprise-face">😲</div>
+                <div class="slider-group">
+                    <div class="slider-label"><span>Intensity</span> <span id="surprise-value">40%</span></div>
+                    <input type="range" min="0" max="100" value="40" oninput="updateSurprise(this.value)">
+                </div>
+                <div class="emotion-meter">
+                    <div class="emotion-fill" id="surprise-meter" style="width: 40%;">40%</div>
+                </div>
+            </div>
+
+            <!-- Fear -->
+            <div class="demo-card">
+                <h2>😨 Fear</h2>
+                <div class="face" id="fear-face">😨</div>
+                <div class="slider-group">
+                    <div class="slider-label"><span>Intensity</span> <span id="fear-value">25%</span></div>
+                    <input type="range" min="0" max="100" value="25" oninput="updateFear(this.value)">
+                </div>
+                <div class="emotion-meter">
+                    <div class="emotion-fill" id="fear-meter" style="width: 25%;">25%</div>
+                </div>
+            </div>
+
+            <!-- Confidence -->
+            <div class="demo-card">
+                <h2>😎 Confidence</h2>
+                <div class="face" id="confidence-face">😎</div>
+                <div class="slider-group">
+                    <div class="slider-label"><span>Intensity</span> <span id="confidence-value">60%</span></div>
+                    <input type="range" min="0" max="100" value="60" oninput="updateConfidence(this.value)">
+                </div>
+                <div class="emotion-meter">
+                    <div class="emotion-fill" id="confidence-meter" style="width: 60%;">60%</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Emotion Blending -->
+        <section style="margin-top: 40px; background: var(--card); padding: 25px; border-radius: 12px;">
+            <h2 style="color: var(--emotion); margin-bottom: 20px;">🎭 Emotion Blending</h2>
+            <p style="color: var(--muted); margin-bottom: 20px;">Mix multiple emotions to create complex expressions:</p>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
+                <div>
+                    <div style="text-align: center; font-size: 3em; margin: 20px 0;">😌</div>
+                    <strong>Contentment</strong> (Happy + Calm)
+                    <div class="emotion-meter" style="margin-top: 10px;">
+                        <div class="emotion-fill" style="width: 70%;">70%</div>
+                    </div>
+                </div>
+                <div>
+                    <div style="text-align: center; font-size: 3em; margin: 20px 0;">😤</div>
+                    <strong>Frustration</strong> (Anger + Sadness)
+                    <div class="emotion-meter" style="margin-top: 10px;">
+                        <div class="emotion-fill" style="width: 65%;">65%</div>
+                    </div>
+                </div>
+                <div>
+                    <div style="text-align: center; font-size: 3em; margin: 20px 0;">🤗</div>
+                    <strong>Excitement</strong> (Happy + Surprise)
+                    <div class="emotion-meter" style="margin-top: 10px;">
+                        <div class="emotion-fill" style="width: 80%;">80%</div>
+                    </div>
+                </div>
+                <div>
+                    <div style="text-align: center; font-size: 3em; margin: 20px 0;">😰</div>
+                    <strong>Anxiety</strong> (Fear + Surprise)
+                    <div class="emotion-meter" style="margin-top: 10px;">
+                        <div class="emotion-fill" style="width: 55%;">55%</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Expression Controls -->
+        <section style="margin-top: 40px; background: var(--card); padding: 25px; border-radius: 12px;">
+            <h2 style="color: var(--emotion); margin-bottom: 20px;">🎬 Expression Presets</h2>
+            <div class="controls" style="flex-direction: row; gap: 15px;">
+                <button onclick="setEmotion('happy')">Happy Expression</button>
+                <button onclick="setEmotion('sad')">Sad Expression</button>
+                <button onclick="setEmotion('excited')">Excited Expression</button>
+                <button onclick="setEmotion('neutral')">Neutral Expression</button>
+                <button onclick="randomizeEmotion()">Random Emotion</button>
+            </div>
+            <div id="expression-display" style="text-align: center; font-size: 2em; margin-top: 20px; color: var(--emotion); font-weight: bold;">
+                Set an expression...
+            </div>
+        </section>
+    </div>
+
+    <script>
+        function updateHappiness(value) {
+            document.getElementById('happy-value').textContent = value + '%';
+            document.getElementById('happy-meter').style.width = value + '%';
+            document.getElementById('happy-meter').textContent = value + '%';
+        }
+
+        function updateSadness(value) {
+            document.getElementById('sad-value').textContent = value + '%';
+            document.getElementById('sad-meter').style.width = value + '%';
+            document.getElementById('sad-meter').textContent = value + '%';
+        }
+
+        function updateAnger(value) {
+            document.getElementById('angry-value').textContent = value + '%';
+            document.getElementById('angry-meter').style.width = value + '%';
+            document.getElementById('angry-meter').textContent = value + '%';
+        }
+
+        function updateSurprise(value) {
+            document.getElementById('surprise-value').textContent = value + '%';
+            document.getElementById('surprise-meter').style.width = value + '%';
+            document.getElementById('surprise-meter').textContent = value + '%';
+        }
+
+        function updateFear(value) {
+            document.getElementById('fear-value').textContent = value + '%';
+            document.getElementById('fear-meter').style.width = value + '%';
+            document.getElementById('fear-meter').textContent = value + '%';
+        }
+
+        function updateConfidence(value) {
+            document.getElementById('confidence-value').textContent = value + '%';
+            document.getElementById('confidence-meter').style.width = value + '%';
+            document.getElementById('confidence-meter').textContent = value + '%';
+        }
+
+        function setEmotion(emotion) {
+            const display = document.getElementById('expression-display');
+            const emotions = {
+                happy: { face: '😊😄', text: 'Aria is Happy & Joyful!' },
+                sad: { face: '😢😔', text: 'Aria is Sad & Thoughtful' },
+                excited: { face: '🤩😆', text: 'Aria is Excited & Energetic!' },
+                neutral: { face: '😐🙂', text: 'Aria is Calm & Collected' }
+            };
+            const e = emotions[emotion];
+            display.textContent = e.face + ' ' + e.text;
+        }
+
+        function randomizeEmotion() {
+            const emotions = ['happy', 'sad', 'excited', 'neutral'];
+            const random = emotions[Math.floor(Math.random() * emotions.length)];
+            setEmotion(random);
+        }
+    </script>
+</body>
+</html>

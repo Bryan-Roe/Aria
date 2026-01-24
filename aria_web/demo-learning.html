@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aria AI Learning Demo</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --accent: #0b8a83;
+            --learn: #7c3aed;
+            --bg: #f5f7fa;
+            --card: #ffffff;
+            --text: #1a1a1a;
+            --muted: #666;
+            --success: #10b981;
+        }
+        body {
+            font-family: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            padding: 20px;
+        }
+        .container { max-width: 1200px; margin: 0 auto; }
+        header { text-align: center; margin-bottom: 40px; padding: 20px 0; border-bottom: 2px solid var(--learn); }
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, var(--learn), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+        .demo-card {
+            background: var(--card);
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(124, 58, 237, 0.1);
+        }
+        .demo-card h2 { color: var(--learn); margin-bottom: 12px; font-size: 1.4em; }
+        .progress-bar {
+            width: 100%;
+            height: 25px;
+            background: rgba(124, 58, 237, 0.1);
+            border-radius: 12px;
+            overflow: hidden;
+            margin: 15px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--learn), var(--success));
+            transition: width 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.8em;
+            font-weight: bold;
+        }
+        .stat {
+            background: rgba(124, 58, 237, 0.05);
+            padding: 12px;
+            border-radius: 8px;
+            margin: 10px 0;
+            border-left: 4px solid var(--learn);
+        }
+        .stat strong { color: var(--learn); }
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+        button {
+            padding: 10px 15px;
+            background: var(--learn);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        button:hover { background: #6d28d9; transform: scale(1.05); }
+        .back-nav {
+            display: inline-block;
+            margin-bottom: 20px;
+            padding: 10px 20px;
+            background: var(--accent);
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: 600;
+        }
+        .learning-chart {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-around;
+            height: 200px;
+            background: rgba(124, 58, 237, 0.05);
+            border-radius: 8px;
+            padding: 20px 10px;
+            margin: 20px 0;
+            gap: 10px;
+        }
+        .bar {
+            flex: 1;
+            background: linear-gradient(180deg, var(--learn), var(--success));
+            border-radius: 4px 4px 0 0;
+            transition: height 0.3s ease;
+            position: relative;
+            min-height: 20px;
+        }
+        .bar-label {
+            position: absolute;
+            bottom: -25px;
+            width: 100%;
+            text-align: center;
+            font-size: 0.8em;
+            color: var(--muted);
+        }
+        .bar-value {
+            position: absolute;
+            top: -25px;
+            width: 100%;
+            text-align: center;
+            font-size: 0.9em;
+            font-weight: bold;
+            color: var(--learn);
+        }
+    </style>
+</head>
+<body>
+    <a href="../../web-hub.html" class="back-nav">🏠 Back to Hub</a>
+
+    <div class="container">
+        <header>
+            <h1>🧠 Aria Learning & Memory</h1>
+            <p class="subtitle" style="color: var(--muted);">Machine learning capability demonstration</p>
+        </header>
+
+        <div class="grid">
+            <!-- Pattern Recognition -->
+            <div class="demo-card">
+                <h2>🔍 Pattern Recognition</h2>
+                <p style="color: var(--muted); margin-bottom: 15px;">Learning to identify visual patterns.</p>
+                <div class="learning-chart">
+                    <div class="bar" id="bar1" style="height: 20%;"><span class="bar-value">20%</span><span class="bar-label">Day 1</span></div>
+                    <div class="bar" id="bar2" style="height: 40%;"><span class="bar-value">40%</span><span class="bar-label">Day 2</span></div>
+                    <div class="bar" id="bar3" style="height: 60%;"><span class="bar-value">60%</span><span class="bar-label">Day 3</span></div>
+                    <div class="bar" id="bar4" style="height: 80%;"><span class="bar-value">80%</span><span class="bar-label">Day 4</span></div>
+                </div>
+                <div class="controls">
+                    <button onclick="runPatternLearning()">▶ Train</button>
+                    <button onclick="resetLearning()">Reset</button>
+                </div>
+                <div class="stat">
+                    <strong>Accuracy:</strong> <span id="pattern-acc">20%</span>
+                </div>
+            </div>
+
+            <!-- Language Processing -->
+            <div class="demo-card">
+                <h2>💬 Language Understanding</h2>
+                <p style="color: var(--muted); margin-bottom: 15px;">Improving natural language comprehension.</p>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="nlp-bar" style="width: 35%;">35%</div>
+                </div>
+                <div class="stat">
+                    <strong>Words Learned:</strong> <span id="words-count">1,245</span>
+                </div>
+                <div class="stat">
+                    <strong>Comprehension:</strong> <span id="nlp-comp">35%</span>
+                </div>
+                <div class="controls">
+                    <button onclick="trainNLP()">📚 Learn Words</button>
+                    <button onclick="resetNLP()">Reset</button>
+                </div>
+            </div>
+
+            <!-- Decision Making -->
+            <div class="demo-card">
+                <h2>🎯 Decision Making</h2>
+                <p style="color: var(--muted); margin-bottom: 15px;">Learning optimal action strategies.</p>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="decision-bar" style="width: 45%;">45%</div>
+                </div>
+                <div class="stat">
+                    <strong>Decisions Made:</strong> <span id="decisions-count">542</span>
+                </div>
+                <div class="stat">
+                    <strong>Success Rate:</strong> <span id="success-rate">45%</span>
+                </div>
+                <div class="controls">
+                    <button onclick="trainDecision()">🎲 Make Decisions</button>
+                    <button onclick="resetDecision()">Reset</button>
+                </div>
+            </div>
+
+            <!-- Memory Formation -->
+            <div class="demo-card">
+                <h2>💾 Memory Formation</h2>
+                <p style="color: var(--muted); margin-bottom: 15px;">Building long-term knowledge base.</p>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="memory-bar" style="width: 65%;">65%</div>
+                </div>
+                <div class="stat">
+                    <strong>Memories Stored:</strong> <span id="memory-count">8,342</span>
+                </div>
+                <div class="stat">
+                    <strong>Retrieval Speed:</strong> <span id="memory-speed">2.3ms</span>
+                </div>
+                <div class="controls">
+                    <button onclick="formMemories()">🧠 Add Memories</button>
+                    <button onclick="resetMemory()">Clear</button>
+                </div>
+            </div>
+
+            <!-- Emotion Learning -->
+            <div class="demo-card">
+                <h2>😊 Emotional Intelligence</h2>
+                <p style="color: var(--muted); margin-bottom: 15px;">Understanding and responding to emotions.</p>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="emotion-bar" style="width: 72%;">72%</div>
+                </div>
+                <div class="stat">
+                    <strong>Emotions Recognized:</strong> <span id="emotions-count">8/12</span>
+                </div>
+                <div class="stat">
+                    <strong>Empathy Rating:</strong> <span id="empathy">72%</span>
+                </div>
+                <div class="controls">
+                    <button onclick="trainEmotion()">❤️ Learn Emotions</button>
+                    <button onclick="resetEmotion()">Reset</button>
+                </div>
+            </div>
+
+            <!-- Skill Mastery -->
+            <div class="demo-card">
+                <h2>🎓 Skill Development</h2>
+                <p style="color: var(--muted); margin-bottom: 15px;">Mastering new abilities through practice.</p>
+                <div class="learning-chart">
+                    <div class="bar" id="skill1" style="height: 85%;"><span class="bar-label">Movement</span></div>
+                    <div class="bar" id="skill2" style="height: 65%;"><span class="bar-label">Speaking</span></div>
+                    <div class="bar" id="skill3" style="height: 92%;"><span class="bar-label">Learning</span></div>
+                    <div class="bar" id="skill4" style="height: 78%;"><span class="bar-label">Reasoning</span></div>
+                </div>
+                <div class="controls">
+                    <button onclick="improvSkills()">🏆 Practice</button>
+                    <button onclick="resetSkills()">Reset</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Learning Statistics -->
+        <section style="background: var(--card); padding: 25px; border-radius: 12px;">
+            <h2 style="color: var(--learn); margin-bottom: 20px;">📊 Overall Learning Statistics</h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
+                <div class="stat">
+                    <strong>Total Training Hours:</strong> <span id="total-hours">142.5</span>h
+                </div>
+                <div class="stat">
+                    <strong>Models Trained:</strong> <span id="models-count">34</span>
+                </div>
+                <div class="stat">
+                    <strong>Overall Improvement:</strong> <span id="overall-improvement">+58.3%</span>
+                </div>
+                <div class="stat">
+                    <strong>Estimated IQ:</strong> <span id="iq-estimate">128</span>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        let trainingData = {
+            pattern: 20,
+            nlp: 35,
+            decision: 45,
+            memory: 65,
+            emotion: 72
+        };
+
+        function runPatternLearning() {
+            let progress = parseInt(document.getElementById('pattern-acc').textContent);
+            const interval = setInterval(() => {
+                progress += 15;
+                if (progress > 100) progress = 100;
+                
+                document.getElementById('pattern-acc').textContent = progress + '%';
+                
+                if (progress >= 95) {
+                    clearInterval(interval);
+                }
+            }, 300);
+        }
+
+        function trainNLP() {
+            let words = parseInt(document.getElementById('words-count').textContent.replace(/,/g, ''));
+            let nlp = parseInt(document.getElementById('nlp-comp').textContent);
+            
+            words += Math.floor(Math.random() * 500) + 100;
+            nlp = Math.min(nlp + 8, 100);
+            
+            document.getElementById('words-count').textContent = words.toLocaleString();
+            document.getElementById('nlp-comp').textContent = nlp + '%';
+            document.getElementById('nlp-bar').style.width = nlp + '%';
+            document.getElementById('nlp-bar').textContent = nlp + '%';
+        }
+
+        function trainDecision() {
+            let decisions = parseInt(document.getElementById('decisions-count').textContent);
+            let success = parseInt(document.getElementById('success-rate').textContent);
+            
+            decisions += Math.floor(Math.random() * 150) + 50;
+            success = Math.min(success + 5, 95);
+            
+            document.getElementById('decisions-count').textContent = decisions;
+            document.getElementById('success-rate').textContent = success + '%';
+            document.getElementById('decision-bar').style.width = success + '%';
+            document.getElementById('decision-bar').textContent = success + '%';
+        }
+
+        function formMemories() {
+            let memories = parseInt(document.getElementById('memory-count').textContent);
+            let memory = parseInt(document.getElementById('memory-bar').textContent);
+            
+            memories += Math.floor(Math.random() * 1000) + 500;
+            memory = Math.min(memory + 3, 100);
+            
+            document.getElementById('memory-count').textContent = memories;
+            document.getElementById('memory-bar').style.width = memory + '%';
+            document.getElementById('memory-bar').textContent = memory + '%';
+        }
+
+        function trainEmotion() {
+            let emotions = document.getElementById('emotions-count').textContent.split('/')[0];
+            let empathy = parseInt(document.getElementById('empathy').textContent);
+            
+            emotions = Math.min(parseInt(emotions) + 1, 12);
+            empathy = Math.min(empathy + 3, 100);
+            
+            document.getElementById('emotions-count').textContent = emotions + '/12';
+            document.getElementById('empathy').textContent = empathy + '%';
+            document.getElementById('emotion-bar').style.width = empathy + '%';
+            document.getElementById('emotion-bar').textContent = empathy + '%';
+        }
+
+        function improvSkills() {
+            for (let i = 1; i <= 4; i++) {
+                const bar = document.getElementById('skill' + i);
+                let height = parseFloat(bar.style.height);
+                height = Math.min(height + 5, 100);
+                bar.style.height = height + '%';
+            }
+        }
+
+        function resetLearning() { document.getElementById('pattern-acc').textContent = '20%'; }
+        function resetNLP() { document.getElementById('nlp-bar').style.width = '35%'; }
+        function resetDecision() { document.getElementById('decision-bar').style.width = '45%'; }
+        function resetMemory() { document.getElementById('memory-bar').style.width = '65%'; }
+        function resetEmotion() { document.getElementById('emotion-bar').style.width = '72%'; }
+        function resetSkills() {
+            for (let i = 1; i <= 4; i++) {
+                document.getElementById('skill' + i).style.height = (60 + Math.random() * 35) + '%';
+            }
+        }
+    </script>
+</body>
+</html>
