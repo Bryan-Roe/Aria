@@ -1,0 +1,74 @@
+========================================
+
+
+ 🏠 index.html ........................... Main landing page with Aria Chat
+ 🗺️ sitemap.html (NEW) ................... Complete site navigation guide
+
+ 📁 aria_web/ ............................ Quantum Worlds & Experiences
+   ├── 🌍 quantum-portal.html .............. Central hub (START HERE)
+   ├── 🎭 index.html ....................... Visual Command System
+   ├── 🎮 quantum-world.html ............... Interactive 2D World
+   ├── 🌌 quantum-world-3d.html ............ 3D Canvas Visualization
+   ├── 📚 quantum-world-features.html ...... Feature Documentation
+   ├── 🧪 test-quantum-world.html .......... Test Suite
+   ├── ⚡ auto-execute.html (ADDED) ........ AI-Powered Planner
+   └── 🧪 test.html ........................ Basic tests
+
+ 📁 chat-web/ ............................ Chat Interfaces
+   ├── 💬 index.html ....................... Main Chat UI (SSE streaming)
+   ├── 🤖 aria.html ........................ Aria Character Chat
+   └── 📖 start-backend.html ............... Backend Setup Guide
+
+ 📁 dashboard/ ........................... Training & Analytics
+    ├── 🌌 hub.html (ENHANCED) .............. Command Center with modal menu
+    ├── 📊 index.html ....................... Primary Dashboard
+    ├── 🎯 unified.html ..................... Training Dashboard (Main)
+    ├── 📈 analytics.html ................... Advanced Analytics
+    ├── ⚙️ advanced.html .................... Advanced Configuration
+    ├── ✨ enhanced.html ..................... Enhanced Features
+    ├── 📊 consolidated.html ................ Multi-Panel View
+    └── 🔍 gguf_visualizer.html ............. Model Inspector
+
+
+Total HTML Pages: 25
+Aria Web: 7 pages (including new Auto-Execute)
+Chat Web: 3 pages
+Dashboards: 8 pages
+Main/Nav: 2 pages (including new Sitemap)
+Documentation: 3 external links to GitHub
+
+
+1. Home → Sitemap → Any Page
+2. Home → Aria Portal → 7 Quantum Experiences
+3. Home → Chat Web → 3 Chat Interfaces
+4. Home → Dashboard Hub → 8 Dashboard Views
+5. Dashboard Hub → "More Dashboards" Modal → All 7 Dashboards
+
+ KEY IMPROVEMENTS
+
+ Added comprehensive sitemap.html
+ Fixed broken markdown documentation links
+ Added Auto-Execute Planner to Quantum Portal
+ Enhanced Dashboard Hub with modal menu
+ All 25+ pages properly linked
+ No dead links
+ Consistent navigation across all sections
+ Mobile-responsive design maintained
+
+
+GitHub Pages: https://brycejonathan.github.io/AI/
+Local Dev: cd docs && python -m http.server 8000
+
+
+All pages responsive:
+- Aria Web: Touch-friendly quantum worlds
+- Chat Web: Mobile chat interface
+- Dashboards: Responsive grid layouts
+- Navigation: Collapsible menus
+
+
+- Gradient backgrounds (purple/pink/blue)
+- Glassmorphism cards
+- Smooth animations
+- Unified color scheme (#667eea, #764ba2, #f093fb)
+- Consistent typography (Segoe UI, Roboto, Sans-serif)

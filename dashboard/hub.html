@@ -605,6 +605,27 @@
                     <button class="btn btn-secondary" onclick="showInfo('ci')">Learn More</button>
                 </div>
             </div>
+
+            <!-- More Dashboards -->
+            <div class="system-card">
+                <div class="system-icon">🎛️</div>
+                <h2 class="system-title">More Dashboards</h2>
+                <p class="system-description">
+                    Additional specialized dashboards for advanced monitoring,
+                    analytics, and model visualization tools.
+                </p>
+                <ul class="system-features">
+                    <li>Advanced: Enhanced training UI</li>
+                    <li>Enhanced: Model comparisons</li>
+                    <li>Consolidated: Multi-view</li>
+                    <li>GGUF Visualizer: Model inspector</li>
+                    <li>Analytics: Deep insights</li>
+                </ul>
+                <div class="system-actions">
+                    <button class="btn btn-primary" onclick="openDashboardMenu()">View All</button>
+                    <button class="btn btn-secondary" onclick="showDashboardLinks()">Quick Links</button>
+                </div>
+            </div>
         </div>
 
         <footer>
@@ -813,6 +834,86 @@
 
         function runCI() {
             showToast('To run CI: python ./scripts/ci_orchestrator.py --ci-pipeline');
+        }
+
+        function openDashboardMenu() {
+            const dashboards = [
+                { name: 'Main Dashboard', url: 'index.html', desc: 'Primary dashboard hub' },
+                { name: 'Unified Training', url: 'unified.html', desc: 'Comprehensive training interface' },
+                { name: 'Analytics', url: 'analytics.html', desc: 'Advanced analytics & metrics' },
+                { name: 'Advanced Dashboard', url: 'advanced.html', desc: 'Advanced configuration UI' },
+                { name: 'Enhanced Dashboard', url: 'enhanced.html', desc: 'Enhanced training features' },
+                { name: 'Consolidated View', url: 'consolidated.html', desc: 'Multi-panel overview' },
+                { name: 'GGUF Visualizer', url: 'gguf_visualizer.html', desc: 'Model structure inspector' }
+            ];
+
+            const modal = document.createElement('div');
+            modal.style.cssText = `
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: white;
+                padding: 30px;
+                border-radius: 15px;
+                box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+                z-index: 10000;
+                max-width: 700px;
+                max-height: 80vh;
+                overflow-y: auto;
+                color: #333;
+            `;
+            
+            let dashboardHTML = `
+                <div style="display: flex; justify-content: space-between; margin-bottom: 25px;">
+                    <h2 style="margin: 0; color: #667eea;">🎛️ All Dashboards</h2>
+                    <button id="closeDashBtn" style="background: #f87171; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer;">Close</button>
+                </div>
+                <div style="display: grid; gap: 15px;">
+            `;
+            
+            dashboards.forEach(dash => {
+                dashboardHTML += `
+                    <div style="background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); padding: 20px; border-radius: 12px; border: 1px solid #bae6fd; cursor: pointer; transition: all 0.3s;" 
+                         onclick="window.location.href='${dash.url}'"
+                         onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 8px 20px rgba(102,126,234,0.3)'"
+                         onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
+                        <div style="font-weight: 700; color: #0369a1; font-size: 1.1em; margin-bottom: 5px;">${dash.name}</div>
+                        <div style="color: #64748b; font-size: 0.9em;">${dash.desc}</div>
+                    </div>
+                `;
+            });
+            
+            dashboardHTML += '</div>';
+            modal.innerHTML = dashboardHTML;
+            
+            const overlay = document.createElement('div');
+            overlay.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0,0,0,0.7);
+                z-index: 9999;
+            `;
+            
+            document.body.appendChild(overlay);
+            document.body.appendChild(modal);
+            
+            document.getElementById('closeDashBtn').onclick = () => {
+                modal.remove();
+                overlay.remove();
+            };
+            overlay.onclick = () => {
+                modal.remove();
+                overlay.remove();
+            };
+        }
+
+        function showDashboardLinks() {
+            const links = 'Advanced • Enhanced • Consolidated • Analytics • GGUF Visualizer';
+            showToast(`📊 Available Dashboards: ${links} - Click "View All" to explore`);
         }
 
         function showToast(message) {

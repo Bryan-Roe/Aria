@@ -1,0 +1,60 @@
+<!-- Site Navigation - Include this in your pages -->
+<style>
+.site-nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    z-index: 10000;
+    padding: 10px 20px;
+}
+.site-nav-content {
+    max-width: 1400px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+.site-nav-brand {
+    font-weight: 700;
+    font-size: 1.2em;
+    color: #667eea;
+    text-decoration: none;
+}
+.site-nav-links {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+.site-nav-link {
+    color: #444;
+    text-decoration: none;
+    padding: 6px 12px;
+    border-radius: 6px;
+    transition: all 0.3s;
+    font-size: 0.9em;
+}
+.site-nav-link:hover {
+    background: #667eea;
+    color: white;
+}
+body {
+    padding-top: 60px !important;
+}
+</style>
+<nav class="site-nav">
+    <div class="site-nav-content">
+        <a href="/AI/" class="site-nav-brand">🤖 Aria AI</a>
+        <div class="site-nav-links">
+            <a href="/AI/" class="site-nav-link">🏠 Home</a>
+            <a href="/AI/aria_web/quantum-portal.html" class="site-nav-link">🌐 Portal</a>
+            <a href="/AI/chat-web/index.html" class="site-nav-link">💬 Chat</a>
+            <a href="/AI/dashboard/hub.html" class="site-nav-link">📊 Dashboards</a>
+        </div>
+    </div>
+</nav>

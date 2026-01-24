@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aria AI - Site Map</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            background-size: 200% 200%;
+            animation: gradientShift 15s ease infinite;
+            min-height: 100vh;
+            padding: 40px 20px;
+            color: #333;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        h1 {
+            font-size: 3em;
+            color: white;
+            text-shadow: 2px 2px 8px rgba(0,0,0,0.3);
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            font-size: 1.2em;
+            color: rgba(255,255,255,0.95);
+        }
+
+        .section {
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        .section h2 {
+            color: #667eea;
+            font-size: 2em;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .links-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 15px;
+        }
+
+        .link-card {
+            background: linear-gradient(135deg, rgba(255,255,255,0.98) 0%, rgba(240,245,255,0.98) 100%);
+            border: 1px solid #e0e7ff;
+            border-radius: 12px;
+            padding: 20px;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: block;
+        }
+
+        .link-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(102,126,234,0.3);
+            border-color: #667eea;
+        }
+
+        .link-card h3 {
+            color: #444;
+            font-size: 1.2em;
+            margin-bottom: 8px;
+        }
+
+        .link-card p {
+            color: #666;
+            font-size: 0.9em;
+            line-height: 1.5;
+        }
+
+        .back-home {
+            display: inline-block;
+            margin: 30px auto;
+            padding: 15px 30px;
+            background: white;
+            color: #667eea;
+            text-decoration: none;
+            border-radius: 10px;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            transition: all 0.3s;
+        }
+
+        .back-home:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(102,126,234,0.4);
+        }
+
+        .center {
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🗺️ Aria AI Site Map</h1>
+            <p class="subtitle">Complete navigation guide to all pages and features</p>
+        </header>
+
+        <div class="section">
+            <h2>🏠 Main Pages</h2>
+            <div class="links-grid">
+                <a href="index.html" class="link-card">
+                    <h3>🤖 Home - Aria Chat</h3>
+                    <p>Main landing page with interactive AI character chat interface and streaming responses</p>
+                </a>
+                <a href="sitemap.html" class="link-card">
+                    <h3>🗺️ Site Map</h3>
+                    <p>This page - complete navigation guide to all site content</p>
+                </a>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🌐 Aria Web - Quantum Worlds</h2>
+            <div class="links-grid">
+                <a href="aria_web/quantum-portal.html" class="link-card">
+                    <h3>🌍 Quantum Portal</h3>
+                    <p>Central hub for all Aria Web experiences with links to all quantum worlds</p>
+                </a>
+                <a href="aria_web/index.html" class="link-card">
+                    <h3>🎭 Aria Main Interface</h3>
+                    <p>Core Aria Visual Command System with character controls and object management</p>
+                </a>
+                <a href="aria_web/quantum-world.html" class="link-card">
+                    <h3>🎮 Interactive 2D World</h3>
+                    <p>Full-featured quantum world with drag & drop, save/load, and 5 themes</p>
+                </a>
+                <a href="aria_web/quantum-world-3d.html" class="link-card">
+                    <h3>🌌 3D Canvas Visualization</h3>
+                    <p>Real-time 3D rendering with geometric patterns and smooth animations</p>
+                </a>
+                <a href="aria_web/quantum-world-features.html" class="link-card">
+                    <h3>📚 Feature Showcase</h3>
+                    <p>Interactive documentation with complete feature list and keyboard shortcuts</p>
+                </a>
+                <a href="aria_web/test-quantum-world.html" class="link-card">
+                    <h3>🧪 Test Suite</h3>
+                    <p>Comprehensive testing suite for validating features and API endpoints</p>
+                </a>
+                <a href="aria_web/auto-execute.html" class="link-card">
+                    <h3>⚡ Auto-Execute Planner</h3>
+                    <p>AI-powered planning interface with automatic task execution</p>
+                </a>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>💬 Chat Web</h2>
+            <div class="links-grid">
+                <a href="chat-web/index.html" class="link-card">
+                    <h3>💬 Chat UI</h3>
+                    <p>Main chat interface with streaming responses and SSE support</p>
+                </a>
+                <a href="chat-web/aria.html" class="link-card">
+                    <h3>🤖 Aria Chat</h3>
+                    <p>Alternative chat interface focused on Aria character interactions</p>
+                </a>
+                <a href="chat-web/start-backend.html" class="link-card">
+                    <h3>📖 Backend Start Guide</h3>
+                    <p>Instructions for starting the Azure Functions backend server</p>
+                </a>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>📊 Dashboards</h2>
+            <div class="links-grid">
+                <a href="dashboard/hub.html" class="link-card">
+                    <h3>🌌 QAI Command Center</h3>
+                    <p>Central hub with links to all dashboards and quick actions</p>
+                </a>
+                <a href="dashboard/index.html" class="link-card">
+                    <h3>📊 Main Dashboard</h3>
+                    <p>Primary dashboard with training status and system overview</p>
+                </a>
+                <a href="dashboard/unified.html" class="link-card">
+                    <h3>🎯 Unified Training Dashboard</h3>
+                    <p>Comprehensive LoRA fine-tuning with 20+ parameters and real-time monitoring</p>
+                </a>
+                <a href="dashboard/analytics.html" class="link-card">
+                    <h3>📈 Analytics</h3>
+                    <p>Advanced analytics and metrics visualization tools</p>
+                </a>
+                <a href="dashboard/advanced.html" class="link-card">
+                    <h3>⚙️ Advanced Dashboard</h3>
+                    <p>Advanced configuration UI with extended training options</p>
+                </a>
+                <a href="dashboard/enhanced.html" class="link-card">
+                    <h3>✨ Enhanced Dashboard</h3>
+                    <p>Enhanced training features with improved user experience</p>
+                </a>
+                <a href="dashboard/consolidated.html" class="link-card">
+                    <h3>📊 Consolidated View</h3>
+                    <p>Multi-panel overview combining multiple dashboard views</p>
+                </a>
+                <a href="dashboard/gguf_visualizer.html" class="link-card">
+                    <h3>🔍 GGUF Visualizer</h3>
+                    <p>Model structure inspector for GGUF format files</p>
+                </a>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>📄 Documentation</h2>
+            <div class="links-grid">
+                <a href="https://github.com/brycejonathan/AI/blob/main/docs/ARIA_QUICK_REFERENCE.md" target="_blank" class="link-card">
+                    <h3>📖 Quick Reference</h3>
+                    <p>Quick start guide for Aria system features and commands</p>
+                </a>
+                <a href="https://github.com/brycejonathan/AI/blob/main/docs/GETTING_STARTED_VSCODE.md" target="_blank" class="link-card">
+                    <h3>💻 VS Code Setup</h3>
+                    <p>Development environment setup guide for VS Code</p>
+                </a>
+                <a href="https://github.com/brycejonathan/AI/blob/main/docs/GITHUB_PAGES_SETUP.md" target="_blank" class="link-card">
+                    <h3>🌐 GitHub Pages Setup</h3>
+                    <p>Instructions for deploying to GitHub Pages</p>
+                </a>
+            </div>
+        </div>
+
+        <div class="center">
+            <a href="index.html" class="back-home">🏠 Back to Home</a>
+        </div>
+    </div>
+</body>
+</html>
