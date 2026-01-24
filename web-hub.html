@@ -421,11 +421,11 @@
                     <div class="icon">🚀</div>
                     <h2>API Endpoints</h2>
                 </div>
-                <p>RESTful API documentation and interactive endpoint testing.</p>
-                <div class="status"><span class="status-dot"></span>Running</div>
+                <p>RESTful API documentation and interactive endpoint testing (local development only).</p>
+                <div class="status"><span class="status-dot"></span>Local Dev</div>
                 <div class="card-links">
-                    <a href="http://localhost:7071/api/ai/status" class="btn btn-primary" target="_blank">Check Status</a>
-                    <a href="#" class="btn btn-secondary" onclick="alert('View API docs at /api/docs'); return false;">API Docs</a>
+                    <a href="#" class="btn btn-primary" onclick="checkLocalAPI(); return false;">Check Local Status</a>
+                    <a href="#" class="btn btn-secondary" onclick="showAPIGuide(); return false;">API Documentation</a>
                 </div>
             </div>
 
@@ -434,11 +434,11 @@
                     <div class="icon">🔗</div>
                     <h2>Local Services</h2>
                 </div>
-                <p>Quick links to locally hosted services and servers.</p>
+                <p>Quick links to locally hosted services (available in development environment).</p>
                 <div class="card-links">
-                    <a href="http://localhost:8080" class="btn btn-secondary" target="_blank">Aria Server (8080)</a>
-                    <a href="http://localhost:7071" class="btn btn-secondary" target="_blank">Functions (7071)</a>
-                    <a href="http://localhost:8765" class="btn btn-secondary" target="_blank">Dashboard Server (8765)</a>
+                    <a href="javascript:void(0);" class="btn btn-secondary" onclick="tryLocalService('http://localhost:8080', 'Aria Server'); return false;">Aria Server (8080)</a>
+                    <a href="javascript:void(0);" class="btn btn-secondary" onclick="tryLocalService('http://localhost:7071', 'Azure Functions'); return false;">Functions (7071)</a>
+                    <a href="javascript:void(0);" class="btn btn-secondary" onclick="tryLocalService('http://localhost:8765', 'Dashboard Server'); return false;">Dashboard Server (8765)</a>
                 </div>
             </div>
         </div>
@@ -446,13 +446,115 @@
 
     <footer>
         <div class="footer-links">
-            <a href="aria_web/README.md">Documentation</a>
-            <a href="aria_web/START_HERE.md">Quick Start</a>
-            <a href="aria_web/COMPLETE_FEATURES.md">Features</a>
-            <a href="README.md">Project README</a>
+            <a href="#" onclick="openDocs(); return false;">Documentation</a>
+            <a href="#" onclick="openQuickStart(); return false;">Quick Start</a>
+            <a href="#" onclick="openFeatures(); return false;">Features</a>
+            <a href="#" onclick="openREADME(); return false;">Project README</a>
         </div>
         <p>&copy; 2026 Aria Quantum AI System. All rights reserved.</p>
         <p>Last updated: January 24, 2026</p>
     </footer>
+
+    <script>
+        // Environment detection
+        const isGitHubPages = window.location.hostname.includes('github.io');
+        const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+        
+        // Try to access local services
+        function tryLocalService(url, name) {
+            if (!isLocalhost && !isGitHubPages) {
+                window.open(url, '_blank');
+                return;
+            }
+            
+            if (isGitHubPages) {
+                alert(`"${name}" is only available in your local development environment.\n\nTo run this locally:\n\n${getLocalServiceInstructions(name)}`);
+                return;
+            }
+            
+            // Check if service is actually running
+            fetch(url, { mode: 'no-cors' })
+                .then(() => window.open(url, '_blank'))
+                .catch(() => alert(`"${name}" is not running at ${url}.\n\nMake sure your local service is started.`));
+        }
+        
+        function getLocalServiceInstructions(name) {
+            const instructions = {
+                'Aria Server': 'cd aria_web && python server.py',
+                'Azure Functions': 'func host start',
+                'Dashboard Server': 'python scripts/monitoring/vs_code_server.py'
+            };
+            return instructions[name] || 'See documentation for setup instructions.';
+        }
+        
+        function checkLocalAPI() {
+            if (isGitHubPages) {
+                alert('API status checking is only available in your local development environment.\n\nTo check API status locally:\ncurl http://localhost:7071/api/ai/status | jq');
+                return;
+            }
+            
+            const url = 'http://localhost:7071/api/ai/status';
+            fetch(url)
+                .then(r => r.json())
+                .then(data => {
+                    alert('✅ API is running!\n\nActive Provider: ' + (data.provider || 'unknown') + '\n\nCheck full status at:\n' + url);
+                    window.open(url, '_blank');
+                })
+                .catch(() => alert('⚠️ API is not running at ' + url + '\n\nStart it with: func host start'));
+        }
+        
+        function showAPIGuide() {
+            alert('API Endpoints:\n\n' +
+                '• GET /api/ai/status - Health check and provider info\n' +
+                '• POST /api/chat - Chat interface (streaming)\n' +
+                '• GET /api/quantum/* - Quantum operations\n' +
+                '• POST /api/tts - Text-to-speech\n\n' +
+                'Full documentation available in the project README and function_app.py');
+        }
+        
+        function openDocs() {
+            if (isGitHubPages) {
+                alert('Documentation is available in your local repository at:\naria_web/README.md');
+                return;
+            }
+            window.location.href = 'aria_web/README.md';
+        }
+        
+        function openQuickStart() {
+            if (isGitHubPages) {
+                alert('Quick Start guide is available in your local repository at:\naria_web/START_HERE.md');
+                return;
+            }
+            window.location.href = 'aria_web/START_HERE.md';
+        }
+        
+        function openFeatures() {
+            if (isGitHubPages) {
+                alert('Complete features list is available in your local repository at:\naria_web/COMPLETE_FEATURES.md');
+                return;
+            }
+            window.location.href = 'aria_web/COMPLETE_FEATURES.md';
+        }
+        
+        function openREADME() {
+            if (isGitHubPages) {
+                alert('Main README is available in your local repository at:\nREADME.md');
+                return;
+            }
+            window.location.href = 'README.md';
+        }
+        
+        // Display environment info
+        function displayEnvironmentInfo() {
+            const env = isGitHubPages ? 'GitHub Pages (Deployment)' : isLocalhost ? 'Local Development' : 'Web Server';
+            const info = document.querySelector('footer p:last-of-type');
+            if (info) {
+                info.innerHTML += '<br><small style="color: #666; margin-top: 10px;">Environment: ' + env + '</small>';
+            }
+        }
+        
+        // Run on page load
+        displayEnvironmentInfo();
+    </script>
 </body>
 </html>

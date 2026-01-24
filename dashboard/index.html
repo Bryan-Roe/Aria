@@ -10,6 +10,35 @@
     <script src="keyboard-nav.js"></script>
     <script src="session-history.js"></script>
     <style>
+        /* Hub navigation link */
+        .nav-hub {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 11000;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 16px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.95);
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+            border: 2px solid #667eea;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.25);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .nav-hub:hover {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: #764ba2;
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+            transform: translateY(-2px);
+        }
+
         /* Tab Navigation */
         .tab-nav {
             display: flex;
@@ -303,6 +332,7 @@
     </style>
 </head>
 <body>
+    <a href="../web-hub.html" class="nav-hub" title="Back to Web Hub">🏠 Web Hub</a>
     <div class="container">
         <header>
             <h1>🚀 QAI Training Dashboard</h1>

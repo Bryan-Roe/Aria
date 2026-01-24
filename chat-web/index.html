@@ -958,6 +958,47 @@
         body.dark-theme .circuit-display {
             color: #ccc;
         }
+
+        /* Hub navigation link */
+        .nav-hub {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 11000;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 16px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.95);
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+            border: 2px solid #667eea;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.25);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .nav-hub:hover {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: #764ba2;
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+            transform: translateY(-2px);
+        }
+
+        body.dark-theme .nav-hub {
+            background: rgba(45, 53, 97, 0.95);
+            border-color: #667eea;
+            color: #a7b8ff;
+        }
+
+        body.dark-theme .nav-hub:hover {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
         .start-backend-btn {
             font-size: 13px;
             font-weight: 500;
@@ -2248,6 +2289,7 @@
 
 
     <!-- AI-Generated Aria Avatar -->
+    <a href="../web-hub.html" class="nav-hub" title="Back to Web Hub">🏠 Web Hub</a>
     <div class="aria-avatar-container" id="ariaAvatarContainer" style="display: none;">
         <div class="aria-avatar-frame">
             <img id="ariaAvatarImage" src="" alt="Aria AI Avatar">
