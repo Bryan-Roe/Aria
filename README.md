@@ -29,7 +29,8 @@ Aria is an interactive AI character that combines:
 
 ## 🌐 GitHub Pages
 
-- Landing page: `docs/index.html` (Web Hub with links to every site)
+- Landing page: `docs/index.html` (Chat UI)
+- Web Hub: `docs/web-hub.html`
 - Chat UI: `docs/chat-web/index.html`
 - Entry points: `aria_web/WEB_PAGES.md`
 - API-backed pages accept `?api=https://your-server`
@@ -97,8 +98,8 @@ See [ARIA_AUTOMATION_GUIDE.md](ARIA_AUTOMATION_GUIDE.md) for details
 
 An interactive chat interface with Aria is now available on GitHub Pages. No build required!
 
-**Live Hub**: https://yourusername.github.io/AI/docs/
-**Chat UI**: https://yourusername.github.io/AI/docs/chat-web/index.html
+**Live Hub**: https://yourusername.github.io/AI/docs/web-hub.html
+**Chat UI**: https://yourusername.github.io/AI/docs/
 
 **Features**:
 - ✨ Animated Aria character

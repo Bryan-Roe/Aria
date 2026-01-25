@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aria Quantum AI - Web Hub</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --ink: #1a232f;
+            --ink-soft: #2f3b4a;
+            --muted: #5d6b7c;
+            --accent-warm: #ff7a59;
+            --accent-cool: #0b8a83;
+            --accent-gold: #f2b24c;
+            --glass: rgba(255, 255, 255, 0.88);
+            --glass-strong: rgba(255, 255, 255, 0.95);
+            --shadow-1: 0 24px 60px rgba(19, 26, 38, 0.18);
+            --shadow-2: 0 14px 30px rgba(19, 26, 38, 0.16);
+            --border: rgba(255, 255, 255, 0.6);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            color: var(--ink);
+            min-height: 100vh;
+            background:
+                radial-gradient(1100px 700px at 8% 10%, rgba(255, 244, 228, 0.9), transparent 60%),
+                radial-gradient(900px 620px at 90% 12%, rgba(202, 238, 231, 0.7), transparent 55%),
+                radial-gradient(750px 520px at 20% 85%, rgba(255, 232, 214, 0.6), transparent 60%),
+                linear-gradient(140deg, #f3e6d3 0%, #d9e5dd 45%, #c7d7e4 100%);
+            padding: 32px 20px 48px;
+        }
+
+        .shell {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 44px;
+        }
+
+        h1 {
+            font-family: 'DM Serif Display', serif;
+            font-size: clamp(2.6rem, 3vw + 1.4rem, 3.6rem);
+            letter-spacing: 0.5px;
+            margin-bottom: 14px;
+            color: var(--ink);
+            text-shadow: 0 14px 24px rgba(16, 24, 35, 0.08);
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            color: var(--ink-soft);
+            max-width: 700px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        .meta-bar {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-top: 18px;
+        }
+
+        .meta-chip {
+            background: rgba(255, 255, 255, 0.7);
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            padding: 8px 16px;
+            font-size: 0.9rem;
+            color: var(--muted);
+            box-shadow: 0 8px 20px rgba(19, 26, 38, 0.12);
+        }
+
+        main {
+            display: flex;
+            flex-direction: column;
+            gap: 32px;
+        }
+
+        .section {
+            background: var(--glass);
+            border-radius: 22px;
+            padding: 28px;
+            box-shadow: var(--shadow-1);
+            border: 1px solid var(--border);
+        }
+
+        .section h2 {
+            font-size: 1.5rem;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--ink);
+        }
+
+        .section p {
+            color: var(--muted);
+            margin-bottom: 18px;
+            line-height: 1.6;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            background: var(--glass-strong);
+            border-radius: 18px;
+            padding: 22px;
+            border: 1px solid rgba(255, 255, 255, 0.7);
+            box-shadow: var(--shadow-2);
+            position: relative;
+            overflow: hidden;
+            transform: translateY(0);
+            transition: transform 0.3s ease, box-shadow 0.3s ease, border 0.3s ease;
+            animation: rise 0.7s ease forwards;
+            opacity: 0;
+            animation-delay: var(--delay, 0s);
+        }
+
+        .card::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0));
+            pointer-events: none;
+        }
+
+        .card:hover {
+            transform: translateY(-6px);
+            border-color: rgba(11, 138, 131, 0.4);
+            box-shadow: 0 18px 36px rgba(19, 26, 38, 0.18);
+        }
+
+        .card h3 {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+            color: var(--ink);
+        }
+
+        .card p {
+            font-size: 0.95rem;
+            color: var(--muted);
+        }
+
+        .link-set {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 16px;
+        }
+
+        .btn {
+            text-decoration: none;
+            padding: 10px 16px;
+            border-radius: 10px;
+            font-weight: 600;
+            text-align: center;
+            border: 2px solid transparent;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-cool), var(--accent-warm));
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            transform: translateX(4px);
+            box-shadow: 0 10px 24px rgba(11, 138, 131, 0.25);
+        }
+
+        .btn-secondary {
+            background: #fff;
+            color: var(--accent-cool);
+            border-color: rgba(11, 138, 131, 0.4);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(11, 138, 131, 0.08);
+        }
+
+        .btn-tertiary {
+            background: transparent;
+            color: var(--accent-warm);
+            border-color: rgba(255, 122, 89, 0.5);
+        }
+
+        .status-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 10px;
+            font-size: 0.85rem;
+            color: var(--accent-cool);
+            background: rgba(11, 138, 131, 0.1);
+            padding: 6px 12px;
+            border-radius: 999px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--accent-cool);
+            animation: pulse 2s infinite;
+        }
+
+        footer {
+            margin-top: 50px;
+            text-align: center;
+            color: var(--muted);
+            font-size: 0.9rem;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-bottom: 16px;
+        }
+
+        .footer-links a {
+            color: var(--accent-cool);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .footer-links a:hover {
+            text-decoration: underline;
+        }
+
+        @keyframes rise {
+            from {
+                transform: translateY(14px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+
+        @media (max-width: 720px) {
+            .section {
+                padding: 22px;
+            }
+
+            .meta-chip {
+                font-size: 0.85rem;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .card {
+                animation: none;
+                opacity: 1;
+            }
+
+            .status-dot {
+                animation: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="shell">
+        <header>
+            <h1>Aria Quantum AI</h1>
+            <p class="subtitle">Everything in one place. Launch every Aria experience, dashboard, and portal directly from GitHub Pages.</p>
+            <div class="meta-bar">
+                <div class="meta-chip">All sites are hosted in this Pages build</div>
+                <div class="meta-chip">Fast navigation • No setup required</div>
+            </div>
+        </header>
+
+        <main>
+            <section class="section">
+                <h2>🚀 Start Here</h2>
+                <p>Quick-launch the most popular destinations or jump into the full site map.</p>
+                <div class="grid">
+                    <div class="card" style="--delay: 0.05s;">
+                        <h3>Web Hub Overview</h3>
+                        <p>Curated launchpad with access to every live interface and environment.</p>
+                        <div class="status-chip"><span class="status-dot"></span>GitHub Pages Ready</div>
+                        <div class="link-set">
+                            <a class="btn btn-primary" href="sitemap.html">Open Full Sitemap</a>
+                            <a class="btn btn-secondary" href="chat-web/index.html">Go to Chat UI</a>
+                        </div>
+                    </div>
+                    <div class="card" style="--delay: 0.1s;">
+                        <h3>Quantum Portal</h3>
+                        <p>Gateway to every quantum experience, world, and visualization.</p>
+                        <div class="status-chip"><span class="status-dot"></span>Portal Live</div>
+                        <div class="link-set">
+                            <a class="btn btn-primary" href="aria_web/quantum-portal.html">Enter Portal</a>
+                            <a class="btn btn-tertiary" href="aria_web/quantum-world.html">2D World</a>
+                        </div>
+                    </div>
+                    <div class="card" style="--delay: 0.15s;">
+                        <h3>Command Center</h3>
+                        <p>Unified control panel for dashboards, analytics, and monitoring.</p>
+                        <div class="status-chip"><span class="status-dot"></span>Dashboard Hub</div>
+                        <div class="link-set">
+                            <a class="btn btn-primary" href="dashboard/hub.html">Open Dashboard Hub</a>
+                            <a class="btn btn-secondary" href="dashboard/unified.html">Training View</a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="section">
+                <h2>🎯 Aria Interfaces</h2>
+                <p>Visual command, auto-execute planning, and core Aria controls.</p>
+                <div class="grid">
+                    <div class="card" style="--delay: 0.2s;">
+                        <h3>Aria Visual Command</h3>
+                        <p>Primary visual interface for Aria with real-time controls.</p>
+                        <div class="link-set">
+                            <a class="btn btn-primary" href="aria_web/index.html">Open Aria Interface</a>
+                            <a class="btn btn-secondary" href="aria_web/auto-execute.html">Auto-Execute Planner</a>
+                        </div>
+                    </div>
+                    <div class="card" style="--delay: 0.25s;">
+                        <h3>Feature Showcase</h3>
+                        <p>Interactive guide to everything the Aria web stack can do.</p>
+                        <div class="link-set">
+                            <a class="btn btn-primary" href="aria_web/quantum-world-features.html">Explore Features</a>
+                            <a class="btn btn-secondary" href="aria_web/test-quantum-world.html">Run Test Suite</a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="section">
+                <h2>💬 Chat Experiences</h2>
+                <p>Multiple chat interfaces optimized for fast conversation and streaming responses.</p>
+                <div class="grid">
+                    <div class="card" style="--delay: 0.3s;">
+                        <h3>Chat Web UI</h3>
+                        <p>Full chat interface with streaming, highlighting, and provider toggles.</p>
+                        <div class="link-set">
+                            <a class="btn btn-primary" href="chat-web/index.html">Launch Chat UI</a>
+                            <a class="btn btn-secondary" href="chat-web/aria.html">Aria Character Chat</a>
+                        </div>
+                    </div>
+                    <div class="card" style="--delay: 0.35s;">
+                        <h3>Backend Starter</h3>
+                        <p>Quick instructions for running the chat backend locally.</p>
+                        <div class="link-set">
+                            <a class="btn btn-primary" href="chat-web/start-backend.html">Start Backend Guide</a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="section">
+                <h2>⚛️ Quantum Worlds</h2>
+                <p>Explore the 2D and 3D quantum environments with unique visuals and controls.</p>
+                <div class="grid">
+                    <div class="card" style="--delay: 0.4s;">
+                        <h3>Quantum World 2D</h3>
+                        <p>Interactive 2D simulation with drag & drop and multiple themes.</p>
+                        <div class="link-set">
+                            <a class="btn btn-primary" href="aria_web/quantum-world.html">Launch 2D World</a>
+                        </div>
+                    </div>
+                    <div class="card" style="--delay: 0.45s;">
+                        <h3>Quantum World 3D</h3>
+                        <p>Realtime canvas visualization with 3D geometry and motion.</p>
+                        <div class="link-set">
+                            <a class="btn btn-primary" href="aria_web/quantum-world-3d.html">Launch 3D World</a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="section">
+                <h2>📊 Dashboards & Monitoring</h2>
+                <p>Track training, analytics, and model health across the entire platform.</p>
+                <div class="grid">
+                    <div class="card" style="--delay: 0.5s;">
+                        <h3>Main Dashboards</h3>
+                        <p>Core monitoring dashboards with metrics and training summaries.</p>
+                        <div class="link-set">
+                            <a class="btn btn-primary" href="dashboard/index.html">Main Dashboard</a>
+                            <a class="btn btn-secondary" href="dashboard/unified.html">Unified Training</a>
+                        </div>
+                    </div>
+                    <div class="card" style="--delay: 0.55s;">
+                        <h3>Analytics & Advanced</h3>
+                        <p>Deep analytics, advanced controls, and consolidated views.</p>
+                        <div class="link-set">
+                            <a class="btn btn-primary" href="dashboard/analytics.html">Analytics</a>
+                            <a class="btn btn-secondary" href="dashboard/advanced.html">Advanced</a>
+                            <a class="btn btn-tertiary" href="dashboard/consolidated.html">Consolidated View</a>
+                        </div>
+                    </div>
+                    <div class="card" style="--delay: 0.6s;">
+                        <h3>Specialized Views</h3>
+                        <p>Enhanced UI, GGUF visualizer, and extra monitoring tools.</p>
+                        <div class="link-set">
+                            <a class="btn btn-primary" href="dashboard/enhanced.html">Enhanced Dashboard</a>
+                            <a class="btn btn-secondary" href="dashboard/gguf_visualizer.html">GGUF Visualizer</a>
+                            <a class="btn btn-tertiary" href="dashboard/hub.html">Dashboard Hub</a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="section">
+                <h2>🧩 Characters & Assets</h2>
+                <p>Explore the stylized humanoid pipeline and 3D character showcases.</p>
+                <div class="grid">
+                    <div class="card" style="--delay: 0.65s;">
+                        <h3>Character Hub</h3>
+                        <p>Stylized humanoid assets with Unity-ready pipeline details.</p>
+                        <div class="link-set">
+                            <a class="btn btn-primary" href="characters/index.html">Open Character Hub</a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="section">
+                <h2>📚 Docs & Guides</h2>
+                <p>Reference documentation and quick-start guides hosted inside this Pages build.</p>
+                <div class="grid">
+                    <div class="card" style="--delay: 0.7s;">
+                        <h3>Documentation Index</h3>
+                        <p>Navigate the full documentation tree from a single page.</p>
+                        <div class="link-set">
+                            <a class="btn btn-primary" href="README.md">Docs Overview</a>
+                            <a class="btn btn-secondary" href="ARIA_QUICK_REFERENCE.md">Quick Reference</a>
+                        </div>
+                    </div>
+                    <div class="card" style="--delay: 0.75s;">
+                        <h3>Setup Guides</h3>
+                        <p>Development setup and GitHub Pages deployment instructions.</p>
+                        <div class="link-set">
+                            <a class="btn btn-primary" href="GETTING_STARTED_VSCODE.md">VS Code Setup</a>
+                            <a class="btn btn-secondary" href="GITHUB_PAGES_SETUP.md">Pages Setup</a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <div class="footer-links">
+                <a href="sitemap.html">Full Sitemap</a>
+                <a href="nav.html">Site Navigation Snippet</a>
+                <a href="dashboard/hub.html">Dashboard Hub</a>
+                <a href="aria_web/quantum-portal.html">Quantum Portal</a>
+            </div>
+            <p>&copy; 2026 Aria Quantum AI System. All rights reserved.</p>
+            <p id="environment"></p>
+        </footer>
+    </div>
+
+    <script>
+        const isGitHubPages = window.location.hostname.includes('github.io');
+        const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+        const env = isGitHubPages ? 'GitHub Pages (Deployment)' : isLocalhost ? 'Local Development' : 'Web Server';
+        const envLabel = document.getElementById('environment');
+        envLabel.textContent = `Environment: ${env}`;
+    </script>
+</body>
+</html>
