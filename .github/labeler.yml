@@ -1,0 +1,49 @@
+# Auto-labeler configuration for PRs
+
+'documentation':
+  - changed-files:
+    - any-glob-to-any-file: ['**/*.md', 'docs/**/*']
+
+'tests':
+  - changed-files:
+    - any-glob-to-any-file: ['tests/**/*', '**/*test*.py', 'pytest.ini']
+
+'dependencies':
+  - changed-files:
+    - any-glob-to-any-file: ['requirements.txt', '**/requirements*.txt', 'pyproject.toml', 'setup.py']
+
+'github-actions':
+  - changed-files:
+    - any-glob-to-any-file: ['.github/workflows/**/*', '.github/actions/**/*']
+
+'aria-character':
+  - changed-files:
+    - any-glob-to-any-file: ['aria_web/**/*']
+
+'chat-interface':
+  - changed-files:
+    - any-glob-to-any-file: ['talk-to-ai/**/*', 'chat-web/**/*']
+
+'quantum-ai':
+  - changed-files:
+    - any-glob-to-any-file: ['quantum-ai/**/*']
+
+'training':
+  - changed-files:
+    - any-glob-to-any-file: ['AI/**/*', 'scripts/autotrain*.py', 'scripts/train*.py']
+
+'azure-functions':
+  - changed-files:
+    - any-glob-to-any-file: ['function_app.py', 'host.json', 'http_*/**/*']
+
+'config':
+  - changed-files:
+    - any-glob-to-any-file: ['config/**/*', '*.yaml', '*.yml', '*.json']
+
+'scripts':
+  - changed-files:
+    - any-glob-to-any-file: ['scripts/**/*']
+
+'security':
+  - changed-files:
+    - any-glob-to-any-file: ['SECURITY.md', '.github/workflows/codeql.yml']

@@ -52,6 +52,11 @@ coverage.xml
 *.cover
 .hypothesis/
 .pytest_cache/
+test-results/
+playwright-report/
+safety-report.json
+CHANGELOG.md
+release-artifacts/
 
 # Translations
 *.mo
@@ -177,3 +182,4 @@ data_out/quantum_autorun/status.json
 # Auto-generated config files
 config/autogen/
 autotrain_testtoken.yaml
+autotrain_autogen_*.yaml
