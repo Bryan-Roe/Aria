@@ -1,4 +1,4 @@
-﻿import re
+import re
 from pathlib import Path
 
 html_file = Path('dashboard/unified.html')
