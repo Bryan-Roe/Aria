@@ -23,7 +23,7 @@ def test_health():
     print("TEST 1: Health Check")
     print("="*70)
     
-    response = requests.get(f"{BASE_URL}/api/health")
+    response = requests.get(f"{BASE_URL}/api/health", timeout=REQUEST_TIMEOUT)
     print(f"Status Code: {response.status_code}")
     print(f"Response: {json.dumps(response.json(), indent=2)}")
     

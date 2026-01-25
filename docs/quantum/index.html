@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quantum AI Training Dashboard</title>
+    <link rel="stylesheet" href="/static/styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+    <!-- Background Effects -->
+    <div class="bg-particles"></div>
+    <div class="bg-gradient-orb orb-1"></div>
+    <div class="bg-gradient-orb orb-2"></div>
+    <div class="bg-gradient-orb orb-3"></div>
+    
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <div class="logo-container">
+                    <div class="quantum-logo">
+                        <div class="logo-ring ring-1"></div>
+                        <div class="logo-ring ring-2"></div>
+                        <div class="logo-ring ring-3"></div>
+                        <div class="logo-core">Q</div>
+                    </div>
+                </div>
+                <h1 class="gradient-text">Quantum AI Training Platform</h1>
+                <p class="subtitle">Enterprise-grade quantum machine learning with real-time visualization</p>
+                <div class="status-badge">
+                    <span class="pulse-dot"></span>
+                    <span>System Online</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Training Configuration Panel -->
+            <div class="panel config-panel glass-panel">
+                <div class="panel-header">
+                    <h2><span class="icon-gradient">🎛️</span> Training Configuration</h2>
+                    <div class="panel-badge">Advanced</div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="dataset-select">Dataset</label>
+                    <select id="dataset-select" class="form-control">
+                        <option value="">Loading datasets...</option>
+                    </select>
+                    <div id="dataset-info" class="info-text"></div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="n-qubits">Qubits</label>
+                        <input type="number" id="n-qubits" class="form-control" value="4" min="2" max="8">
+                    </div>
+                    <div class="form-group">
+                        <label for="n-layers">Layers</label>
+                        <input type="number" id="n-layers" class="form-control" value="2" min="1" max="5">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="learning-rate">Learning Rate</label>
+                        <input type="number" id="learning-rate" class="form-control" value="0.01" step="0.001" min="0.001" max="0.1">
+                    </div>
+                    <div class="form-group">
+                        <label for="duration">Duration (min)</label>
+                        <input type="number" id="duration" class="form-control" value="10" min="1" max="120">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="batch-size">Batch Size</label>
+                        <input type="number" id="batch-size" class="form-control" value="32" min="8" max="128">
+                    </div>
+                </div>
+
+                <!-- Advanced Settings -->
+                <details class="advanced-settings" id="advanced-settings">
+                    <summary>Advanced Settings</summary>
+                    <div class="advanced-grid">
+                        <div class="form-group">
+                            <label for="optimizer-select">Optimizer</label>
+                            <select id="optimizer-select" class="form-control">
+                                <option value="adam" selected>Adam (default)</option>
+                                <option value="momentum">Momentum</option>
+                                <option value="sgd">SGD</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="early-stopping">Early Stopping Patience</label>
+                            <input type="number" id="early-stopping" class="form-control" value="20" min="5" max="200">
+                        </div>
+                        <div class="form-group">
+                            <label for="checkpoint-every">Checkpoint Every (epochs)</label>
+                            <input type="number" id="checkpoint-every" class="form-control" value="100" min="10" max="1000">
+                        </div>
+                        <div class="form-group">
+                            <label for="warmup-epochs">Warmup Epochs</label>
+                            <input type="number" id="warmup-epochs" class="form-control" value="10" min="0" max="200">
+                        </div>
+                        <div class="form-group">
+                            <label for="max-grad-norm">Max Grad Norm</label>
+                            <input type="number" id="max-grad-norm" class="form-control" value="1.0" step="0.1" min="0.1" max="10">
+                        </div>
+                        <div class="form-group toggles">
+                            <label class="checkbox"><input type="checkbox" id="use-param-shift" checked> Use Parameter-Shift</label>
+                            <label class="checkbox"><input type="checkbox" id="use-warmup" checked> Use LR Warmup</label>
+                            <label class="checkbox"><input type="checkbox" id="use-lr-decay" checked> Use LR Decay</label>
+                            <label class="checkbox"><input type="checkbox" id="use-grad-clip" checked> Gradient Clipping</label>
+                        </div>
+                    </div>
+                </details>
+
+                <div class="button-group">
+                    <button id="start-training-btn" class="btn btn-primary">
+                        <span class="btn-icon">🚀</span> Start Training
+                    </button>
+                    <button id="stop-training-btn" class="btn btn-danger" disabled>
+                        <span class="btn-icon">⏹️</span> Stop Training
+                    </button>
+                    <button id="export-metrics-btn" class="btn btn-secondary" disabled>
+                        <span class="btn-icon">📥</span> Export Metrics
+                    </button>
+                    <button id="evaluate-btn" class="btn btn-secondary" disabled>
+                        <span class="btn-icon">🧪</span> Evaluate
+                    </button>
+                </div>
+                <div id="validation-error" class="error-message" style="display: none;"></div>
+            </div>
+
+            <!-- Quantum Circuit Visualization -->
+            <div class="panel circuit-panel glass-panel">
+                <div class="panel-header">
+                    <h2><span class="icon-gradient">⚛️</span> Quantum Circuit</h2>
+                    <div class="circuit-stats">
+                        <span class="stat-item"><span class="stat-label">Gates:</span> <span id="gate-count">0</span></span>
+                        <span class="stat-item"><span class="stat-label">Depth:</span> <span id="circuit-depth">0</span></span>
+                    </div>
+                </div>
+                <div class="canvas-container">
+                    <canvas id="circuit-canvas" width="400" height="300"></canvas>
+                </div>
+                <div id="circuit-info" class="info-text">Circuit will appear when training starts</div>
+            </div>
+
+            <!-- Training Status Panel -->
+            <div class="panel status-panel glass-panel">
+                <div class="panel-header">
+                    <h2><span class="icon-gradient">📊</span> Training Status</h2>
+                    <div class="live-indicator">
+                        <span class="live-dot"></span>
+                        <span>LIVE</span>
+                    </div>
+                </div>
+                
+                <div id="status-idle" class="status-message">
+                    <div class="status-icon">💤</div>
+                    <p>Ready to train. Configure your model and click "Start Training".</p>
+                </div>
+
+                <div id="status-training" class="status-message" style="display: none;">
+                    <div class="status-icon spinning">⚛️</div>
+                    <div class="status-details">
+                        <div class="status-item">
+                            <span class="label">Status:</span>
+                            <span id="status-text" class="value">Initializing...</span>
+                        </div>
+                        <div class="status-item">
+                            <span class="label">Epoch:</span>
+                            <span id="current-epoch" class="value">0</span>
+                        </div>
+                        <div class="status-item">
+                            <span class="label">Elapsed:</span>
+                            <span id="elapsed-time" class="value">0:00</span>
+                        </div>
+                        <div class="status-item">
+                            <span class="label">Current Loss:</span>
+                            <span id="current-loss" class="value">-</span>
+                        </div>
+                        <div class="status-item">
+                            <span class="label">Best Val Acc:</span>
+                            <span id="best-val-acc" class="value">0.00%</span>
+                        </div>
+                        <div class="status-item">
+                            <span class="label">Speed:</span>
+                            <span id="training-speed" class="value">- ep/s</span>
+                        </div>
+                        <div class="status-item">
+                            <span class="label">ETA:</span>
+                            <span id="eta-time" class="value">-</span>
+                        </div>
+                        <div class="status-item metric-large">
+                            <span class="label">Live Accuracy:</span>
+                            <div class="accuracy-display">
+                                <div id="accuracy-bar" class="accuracy-bar"></div>
+                                <span id="accuracy-percent" class="accuracy-percent">0%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="progress-bar-container" id="progress-container" style="display: none;">
+                    <div class="progress-bar">
+                        <div id="progress-fill" class="progress-fill"></div>
+                    </div>
+                    <div id="progress-text" class="progress-text">0% complete</div>
+                </div>
+
+                <!-- Evaluation Results -->
+                <div id="evaluation-section" class="evaluation-section" style="display: none;">
+                    <div class="panel-header small">
+                        <h3><span class="icon-gradient">🧪</span> Evaluation</h3>
+                    </div>
+                    <div id="eval-metrics" class="eval-metrics info-text"></div>
+                    <div id="confusion-matrix" class="confusion-matrix"></div>
+                </div>
+            </div>
+
+            <!-- Charts Panel -->
+            <div class="panel charts-panel glass-panel">
+                <div class="panel-header">
+                    <h2><span class="icon-gradient">📈</span> Training Metrics</h2>
+                    <div class="metrics-legend">
+                        <span class="legend-item"><span class="legend-color" style="background: #ef4444;"></span>Training</span>
+                        <span class="legend-item"><span class="legend-color" style="background: #10b981;"></span>Validation</span>
+                    </div>
+                </div>
+                
+                <div class="chart-container">
+                    <canvas id="loss-chart"></canvas>
+                </div>
+                
+                <div class="chart-container">
+                    <canvas id="accuracy-chart"></canvas>
+                </div>
+            </div>
+
+            <!-- Results History Panel -->
+            <div class="panel results-panel glass-panel">
+                <div class="panel-header">
+                    <h2><span class="icon-gradient">📚</span> Training History</h2>
+                    <button class="refresh-btn" onclick="loadResults()">🔄 Refresh</button>
+                </div>
+                <div id="results-list" class="results-list">
+                    <p class="info-text">No training sessions yet. Start training to see results here.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="footer-content">
+                <p class="footer-brand">Quantum AI Platform <span class="version">v2.0</span></p>
+                <p class="footer-tech">Powered by PennyLane • Flask • Chart.js</p>
+                <p class="footer-copyright">© 2025 Quantum Computing Research</p>
+            </div>
+        </footer>
+    </div>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>

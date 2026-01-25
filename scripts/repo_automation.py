@@ -342,6 +342,9 @@ class RepoAutomation:
 
     def stop_component(self, name: str):
         """Stop a single component"""
+        if name not in self.components or name not in self.processes:
+            return
+
         component = self.components[name]
         proc = self.processes[name]
 
@@ -585,6 +588,16 @@ class RepoAutomation:
                     ) and p.status() != psutil.STATUS_ZOMBIE
                 except Exception:
                     dynamic_running[name] = False
+        
+        # Fallback: if PID not recorded, try discovering existing processes
+        if psutil is not None:
+            for name, component in self.components.items():
+                if name not in dynamic_running:
+                    try:
+                        proc = self._find_existing_process(component)
+                        dynamic_running[name] = proc is not None
+                    except Exception:
+                        dynamic_running[name] = False
 
         # Prefer dynamic running info; fall back to status file content
         components_running = status.get(
