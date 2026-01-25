@@ -180,4 +180,4 @@ autotrain_testtoken.yaml
 
 # Repository reorganization archive
 .archive/
-tools/llama.cpp
+tools/llama.cpp/*
