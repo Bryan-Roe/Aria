@@ -1,3 +1,13 @@
+# =============================================================================
+# AzureML LoRA Training - Cloud-based model fine-tuning
+# =============================================================================
+# Purpose: Submits LoRA fine-tuning jobs to Azure ML
+# Triggers: Manual workflow_dispatch only
+# Jobs:
+#   - submit-job: Submits Azure ML training job with specified parameters
+# Note: Requires Azure credentials and ML workspace configuration
+# =============================================================================
+
 name: AzureML LoRA Train
 
 on:

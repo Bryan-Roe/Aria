@@ -1,3 +1,15 @@
+# =============================================================================
+# E2E + Integration Tests - Quick Aria regression testing
+# =============================================================================
+# Purpose: Fast regression tests for Aria character system
+# Triggers: Any push/PR to main (no path filtering)
+# Jobs:
+#   - integration: Quick unit & integration tests
+#   - e2e_playwright: Playwright E2E tests
+#   - containerized_chrome: Pyppeteer containerized tests
+# Note: Faster subset of aria-tests.yml, runs on all changes
+# =============================================================================
+
 name: E2E + Integration Tests
 
 on:

@@ -1,3 +1,14 @@
+# =============================================================================
+# QAI CI Pipeline - Main continuous integration workflow
+# =============================================================================
+# Purpose: Validates code quality, runs tests, and performs daily training
+# Triggers: Push/PR to main/dev branches, daily scheduled runs
+# Jobs:
+#   - validate: Code validation, unit & integration tests
+#   - train: Daily scheduled training workflow (requires validate pass)
+#   - deploy: Model deployment after successful training
+# =============================================================================
+
 name: QAI CI Pipeline
 
 on:

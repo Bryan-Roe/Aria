@@ -1,3 +1,17 @@
+# =============================================================================
+# Aria Comprehensive Tests - Full Aria character system testing
+# =============================================================================
+# Purpose: Comprehensive testing of Aria web interface with multiple browsers
+# Triggers: Changes to aria_web or test files (path-filtered)
+# Jobs:
+#   - unit-integration-tests: Tests across Python 3.10, 3.11, 3.12
+#   - playwright-e2e: Playwright browser automation tests
+#   - pyppeteer-e2e: Pyppeteer-based E2E tests
+#   - containerized-chrome-e2e: Selenium containerized tests
+#   - test-summary: Aggregates results from all test jobs
+# Note: More comprehensive but slower than e2e-tests.yml
+# =============================================================================
+
 name: Aria E2E Tests
 
 on:

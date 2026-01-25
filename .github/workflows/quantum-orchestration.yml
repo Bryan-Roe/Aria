@@ -1,3 +1,13 @@
+# =============================================================================
+# Quantum Automation - Azure Quantum workflow orchestration
+# =============================================================================
+# Purpose: Executes quantum computing workflows on Azure Quantum
+# Triggers: Push to main or manual workflow_dispatch
+# Jobs:
+#   - run-quantum: Runs quantum orchestration scripts
+# Note: Requires Azure credentials for quantum workspace access
+# =============================================================================
+
 name: Quantum Automation
 
 on:
