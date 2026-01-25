@@ -1,0 +1,83 @@
+name: Code Quality
+
+on:
+  push:
+    branches: [ main, dev ]
+  pull_request:
+    branches: [ main, dev ]
+  workflow_dispatch:
+
+jobs:
+  lint:
+    name: Lint and Format Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install linting dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install flake8 black isort mypy
+
+      - name: Run flake8
+        run: |
+          # Stop build on syntax errors or undefined names
+          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+          # Exit-zero treats all errors as warnings
+          flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics --exclude=venv,venv_*,__pycache__,.git,data_out,mount,__blobstorage__,__queuestorage__
+        continue-on-error: true
+
+      - name: Check code formatting with black
+        run: |
+          black --check --diff --exclude="(venv|venv_.*|__pycache__|\.git|data_out|mount|__blobstorage__|__queuestorage__)" .
+        continue-on-error: true
+
+      - name: Check import sorting with isort
+        run: |
+          isort --check-only --diff --skip-glob="venv*" --skip-glob="data_out*" --skip-glob="mount*" .
+        continue-on-error: true
+
+      - name: Type check with mypy (optional)
+        run: |
+          mypy --install-types --non-interactive --ignore-missing-imports --exclude="(venv|venv_.*|data_out|mount)" . || echo "MyPy check completed with warnings"
+        continue-on-error: true
+
+  security-check:
+    name: Security Dependency Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install safety
+        run: |
+          python -m pip install --upgrade pip
+          pip install safety
+
+      - name: Check dependencies for vulnerabilities
+        run: |
+          pip install -r requirements.txt
+          safety check --json || echo "Security check completed with warnings"
+        continue-on-error: true
+
+      - name: Upload safety report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-report
+          path: |
+            safety-report.json
+          if-no-files-found: ignore

@@ -1,4 +1,4 @@
-"""
+r"""
 Azure AI Foundry (Managed Online Endpoint) deployment for Phi-3.x + LoRA adapter.
 - Registers LoRA adapter as a model asset (if given a local path)
 - Creates a managed online endpoint and GPU deployment
