@@ -1,0 +1,2 @@
+{"role": "user", "content": "Hello test endpoint", "timestamp": "2026-01-21T20:52:47.213575", "provider": "local", "model": "local-echo"}
+{"role": "assistant", "content": "My perspective: Hello test endpoint We can refine this together.", "timestamp": "2026-01-21T20:52:47.213626", "provider": "local", "model": "local-echo"}

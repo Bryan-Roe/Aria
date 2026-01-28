@@ -1,0 +1,2 @@
+{"role": "user", "content": "Hello test endpoint", "timestamp": "2025-11-21T17:24:29.995604", "provider": "lmstudio", "model": "local-model"}
+{"role": "assistant", "content": "Hello! \ud83d\udc4b The endpoint is working\u2014how can I assist you today?", "timestamp": "2025-11-21T17:24:29.995998", "provider": "lmstudio", "model": "local-model"}
