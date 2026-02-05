@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Referral Program - Aria Platform</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            color: #667eea;
+            font-size: 2em;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 15px;
+        }
+
+        .nav-links a {
+            padding: 10px 20px;
+            text-decoration: none;
+            color: #667eea;
+            border: 2px solid #667eea;
+            border-radius: 5px;
+            transition: all 0.3s;
+        }
+
+        .nav-links a:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .hero-section {
+            background: white;
+            border-radius: 10px;
+            padding: 40px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .hero-section h2 {
+            color: #667eea;
+            font-size: 2.5em;
+            margin-bottom: 15px;
+        }
+
+        .hero-section p {
+            font-size: 1.2em;
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        .referral-code-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 30px;
+            border-radius: 10px;
+            margin: 30px 0;
+            color: white;
+        }
+
+        .referral-code {
+            font-size: 2.5em;
+            font-weight: bold;
+            letter-spacing: 3px;
+            margin: 20px 0;
+            font-family: monospace;
+        }
+
+        .copy-button {
+            padding: 12px 30px;
+            background: white;
+            color: #667eea;
+            border: none;
+            border-radius: 5px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 1.1em;
+        }
+
+        .copy-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255,255,255,0.3);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .stat-icon {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .stat-value {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #667eea;
+            margin: 10px 0;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 0.9em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .commission-rates {
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .commission-rates h3 {
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+
+        .rate-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .rate-table th, .rate-table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        .rate-table th {
+            background: #f8f9fa;
+            font-weight: 600;
+        }
+
+        .milestones {
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .milestone-item {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            margin: 10px 0;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+
+        .milestone-icon {
+            font-size: 2em;
+            margin-right: 15px;
+        }
+
+        .milestone-info {
+            flex-grow: 1;
+        }
+
+        .milestone-count {
+            font-weight: bold;
+            font-size: 1.2em;
+            color: #667eea;
+        }
+
+        .milestone-bonus {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #4caf50;
+        }
+
+        .referrals-list {
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        th {
+            background: #f8f9fa;
+            font-weight: 600;
+        }
+
+        tr:hover {
+            background: #f8f9fa;
+        }
+
+        .button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .button-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .button-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .share-links {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .share-link {
+            padding: 10px 20px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 5px;
+            text-decoration: none;
+            color: white;
+            transition: all 0.3s;
+        }
+
+        .share-link:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .alert {
+            padding: 15px 20px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+            color: #155724;
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .share-links {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎁 Referral Program</h1>
+            <div class="nav-links">
+                <a href="/">🏠 Home</a>
+                <a href="my-subscription.html">📊 Subscription</a>
+                <a href="account.html">⚙️ Account</a>
+            </div>
+        </div>
+
+        <div class="hero-section">
+            <h2>Earn Money Referring Friends!</h2>
+            <p>Get 20% commission on every referral that subscribes. Plus bonus rewards!</p>
+            
+            <div class="referral-code-section">
+                <h3>Your Unique Referral Code</h3>
+                <div class="referral-code" id="referralCode">DEMO1234AB</div>
+                <button class="copy-button" onclick="copyReferralCode()">📋 Copy Code</button>
+                
+                <div class="share-links">
+                    <a href="#" class="share-link" onclick="shareEmail()">📧 Email</a>
+                    <a href="#" class="share-link" onclick="shareTwitter()">🐦 Twitter</a>
+                    <a href="#" class="share-link" onclick="shareFacebook()">📘 Facebook</a>
+                    <a href="#" class="share-link" onclick="shareLinkedIn()">💼 LinkedIn</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">👥</div>
+                <div class="stat-label">Total Referrals</div>
+                <div class="stat-value" id="totalReferrals">0</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon">💰</div>
+                <div class="stat-label">Total Earned</div>
+                <div class="stat-value" id="totalEarned">$0</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon">⏳</div>
+                <div class="stat-label">Pending Payout</div>
+                <div class="stat-value" id="pendingPayout">$0</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon">✅</div>
+                <div class="stat-label">Paid Out</div>
+                <div class="stat-value" id="paidOut">$0</div>
+            </div>
+        </div>
+
+        <!-- Commission Rates -->
+        <div class="commission-rates">
+            <h3>💵 Commission Rates</h3>
+            <table class="rate-table">
+                <thead>
+                    <tr>
+                        <th>Plan</th>
+                        <th>Price</th>
+                        <th>Commission Rate</th>
+                        <th>Your Earnings</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Pro</strong></td>
+                        <td>$49/month</td>
+                        <td>20%</td>
+                        <td><strong>$9.80</strong> per referral per month</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Enterprise</strong></td>
+                        <td>$199/month</td>
+                        <td>20%</td>
+                        <td><strong>$39.80</strong> per referral per month</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Milestone Bonuses -->
+        <div class="milestones">
+            <h3>🏆 Milestone Bonuses</h3>
+            <p style="color: #666; margin-bottom: 20px;">Earn extra bonuses when you reach these milestones:</p>
+            
+            <div class="milestone-item">
+                <div class="milestone-icon">🥉</div>
+                <div class="milestone-info">
+                    <div class="milestone-count">5 Referrals</div>
+                    <div style="color: #666;">Unlock first bonus</div>
+                </div>
+                <div class="milestone-bonus">$50</div>
+            </div>
+
+            <div class="milestone-item">
+                <div class="milestone-icon">🥈</div>
+                <div class="milestone-info">
+                    <div class="milestone-count">10 Referrals</div>
+                    <div style="color: #666;">Double bonus</div>
+                </div>
+                <div class="milestone-bonus">$100</div>
+            </div>
+
+            <div class="milestone-item">
+                <div class="milestone-icon">🥇</div>
+                <div class="milestone-info">
+                    <div class="milestone-count">25 Referrals</div>
+                    <div style="color: #666;">Gold achievement</div>
+                </div>
+                <div class="milestone-bonus">$300</div>
+            </div>
+
+            <div class="milestone-item">
+                <div class="milestone-icon">💎</div>
+                <div class="milestone-info">
+                    <div class="milestone-count">50 Referrals</div>
+                    <div style="color: #666;">Diamond status</div>
+                </div>
+                <div class="milestone-bonus">$750</div>
+            </div>
+
+            <div class="milestone-item">
+                <div class="milestone-icon">👑</div>
+                <div class="milestone-info">
+                    <div class="milestone-count">100 Referrals</div>
+                    <div style="color: #666;">Elite referrer</div>
+                </div>
+                <div class="milestone-bonus">$2,000</div>
+            </div>
+        </div>
+
+        <!-- Your Referrals -->
+        <div class="referrals-list">
+            <h3 style="color: #667eea; margin-bottom: 20px;">Your Referrals</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>User</th>
+                        <th>Plan</th>
+                        <th>Commission</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="referralsTable">
+                    <tr>
+                        <td colspan="5" style="text-align: center; color: #666; padding: 30px;">
+                            No referrals yet. Share your code to get started!
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Payout Section -->
+        <div class="commission-rates">
+            <h3>💸 Request Payout</h3>
+            <p style="color: #666; margin-bottom: 20px;">
+                Minimum payout: $25. Payouts are processed within 5 business days.
+            </p>
+            <button class="button button-primary" onclick="requestPayout()">
+                Request Payout ($<span id="payoutAmount">0</span>)
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = window.location.protocol + '//' + window.location.host;
+        const USER_ID = 'demo_user';
+
+        // Load referral data
+        async function loadReferralData() {
+            try {
+                const response = await fetch(`${API_BASE}/api/referrals/stats?user_id=${USER_ID}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    updateUI(data);
+                } else {
+                    loadDemoData();
+                }
+            } catch (error) {
+                console.error('Failed to load referral data:', error);
+                loadDemoData();
+            }
+        }
+
+        function loadDemoData() {
+            const demoData = {
+                referral_code: 'DEMO1234AB',
+                referral_count: 0,
+                total_commission: 0,
+                pending_commission: 0,
+                paid_commission: 0,
+                referrals: []
+            };
+            updateUI(demoData);
+        }
+
+        function updateUI(data) {
+            document.getElementById('referralCode').textContent = data.referral_code || 'DEMO1234AB';
+            document.getElementById('totalReferrals').textContent = data.referral_count || 0;
+            document.getElementById('totalEarned').textContent = '$' + (data.total_commission || 0).toFixed(2);
+            document.getElementById('pendingPayout').textContent = '$' + (data.pending_commission || 0).toFixed(2);
+            document.getElementById('paidOut').textContent = '$' + (data.paid_commission || 0).toFixed(2);
+            document.getElementById('payoutAmount').textContent = (data.pending_commission || 0).toFixed(2);
+
+            // Update referrals table
+            const tbody = document.getElementById('referralsTable');
+            if (data.referrals && data.referrals.length > 0) {
+                tbody.innerHTML = '';
+                data.referrals.forEach(ref => {
+                    const row = document.createElement('tr');
+                    const date = new Date(ref.referred_at).toLocaleDateString();
+                    row.innerHTML = `
+                        <td>${date}</td>
+                        <td>${ref.referred_user_id}</td>
+                        <td><span style="background: #667eea; color: white; padding: 5px 10px; border-radius: 5px;">${ref.tier}</span></td>
+                        <td><strong>$${ref.commission.toFixed(2)}/mo</strong></td>
+                        <td><span style="color: ${ref.status === 'active' ? '#4caf50' : '#f44336'};">● ${ref.status}</span></td>
+                    `;
+                    tbody.appendChild(row);
+                });
+            }
+        }
+
+        function copyReferralCode() {
+            const code = document.getElementById('referralCode').textContent;
+            navigator.clipboard.writeText(code).then(() => {
+                alert('Referral code copied to clipboard!');
+            });
+        }
+
+        function shareEmail() {
+            const code = document.getElementById('referralCode').textContent;
+            const subject = 'Try Aria Platform - Get Premium AI Features';
+            const body = `I'm using Aria Platform for AI-powered features and thought you'd like it too!\n\nUse my referral code: ${code}\n\nSign up at: https://aria-platform.com/pricing.html`;
+            window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+        }
+
+        function shareTwitter() {
+            const code = document.getElementById('referralCode').textContent;
+            const text = `Check out @AriaPlatform - amazing AI features! Use code ${code} to sign up.`;
+            window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`, '_blank');
+        }
+
+        function shareFacebook() {
+            const url = 'https://aria-platform.com/pricing.html';
+            window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`, '_blank');
+        }
+
+        function shareLinkedIn() {
+            const url = 'https://aria-platform.com/pricing.html';
+            window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`, '_blank');
+        }
+
+        async function requestPayout() {
+            const amount = parseFloat(document.getElementById('payoutAmount').textContent);
+            if (amount < 25) {
+                alert('Minimum payout amount is $25');
+                return;
+            }
+
+            if (confirm(`Request payout of $${amount.toFixed(2)}?`)) {
+                // In production, call API
+                alert('Payout request submitted! (Demo mode)\n\nYou will receive payment within 5 business days.');
+            }
+        }
+
+        // Load data on page load
+        window.addEventListener('load', loadReferralData);
+    </script>
+</body>
+</html>

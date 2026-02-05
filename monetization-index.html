@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aria Platform - AI-Powered Platform with Monetization</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .hero {
+            text-align: center;
+            padding: 80px 20px;
+            color: white;
+        }
+
+        .hero h1 {
+            font-size: 4em;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .hero p {
+            font-size: 1.5em;
+            opacity: 0.9;
+            margin-bottom: 40px;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .button {
+            padding: 15px 40px;
+            font-size: 1.2em;
+            font-weight: 600;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .button-primary {
+            background: white;
+            color: #667eea;
+        }
+
+        .button-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(255,255,255,0.3);
+        }
+
+        .button-secondary {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 2px solid white;
+        }
+
+        .button-secondary:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 60px 20px;
+        }
+
+        .section {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+
+        .section h2 {
+            color: #667eea;
+            font-size: 2.5em;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+            margin-top: 40px;
+        }
+
+        .feature-card {
+            padding: 30px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            transition: all 0.3s;
+            text-align: center;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.2);
+        }
+
+        .feature-icon {
+            font-size: 3em;
+            margin-bottom: 15px;
+        }
+
+        .feature-card h3 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .feature-card p {
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .pages-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .page-link {
+            display: block;
+            padding: 25px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 10px;
+            transition: all 0.3s;
+        }
+
+        .page-link:hover {
+            transform: translateX(10px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .page-link h3 {
+            font-size: 1.5em;
+            margin-bottom: 10px;
+        }
+
+        .page-link p {
+            opacity: 0.9;
+        }
+
+        .stats-banner {
+            background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
+            color: white;
+            padding: 40px;
+            border-radius: 15px;
+            text-align: center;
+            margin: 40px 0;
+        }
+
+        .stats-banner h3 {
+            font-size: 2em;
+            margin-bottom: 20px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 30px;
+            margin-top: 30px;
+        }
+
+        .stat-item {
+            padding: 20px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 10px;
+        }
+
+        .stat-value {
+            font-size: 2.5em;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .stat-label {
+            opacity: 0.9;
+        }
+
+        .quick-links {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 10px;
+            margin-top: 30px;
+        }
+
+        .quick-links h3 {
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+
+        .quick-links ul {
+            list-style: none;
+        }
+
+        .quick-links li {
+            padding: 10px 0;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .quick-links li:last-child {
+            border-bottom: none;
+        }
+
+        .quick-links a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .quick-links a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.5em;
+            }
+
+            .hero p {
+                font-size: 1.2em;
+            }
+
+            .hero-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .button {
+                width: 80%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="hero">
+        <h1>🎭 Aria Platform</h1>
+        <p>AI-Powered Platform with Complete Monetization System</p>
+        <div class="hero-buttons">
+            <a href="pricing.html" class="button button-primary">💰 View Pricing</a>
+            <a href="my-subscription.html" class="button button-secondary">📊 My Subscription</a>
+            <a href="admin_dashboard.html" class="button button-secondary">👑 Admin Dashboard</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Success Banner -->
+        <div class="stats-banner">
+            <h3>🎉 $2,000+ Monthly Income Stream Achieved!</h3>
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-value">$2,235</div>
+                    <div class="stat-label">Monthly Recurring Revenue</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">$26,820</div>
+                    <div class="stat-label">Annual Revenue</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">15</div>
+                    <div class="stat-label">Target Subscribers</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">111.8%</div>
+                    <div class="stat-label">Target Achievement</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Features Section -->
+        <div class="section">
+            <h2>✨ Platform Features</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🎭</div>
+                    <h3>Aria Character</h3>
+                    <p>Interactive 3D AI character with natural language movement and gestures</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">⚛️</div>
+                    <h3>Quantum Computing</h3>
+                    <p>Quantum ML integration for advanced computational tasks</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">🤖</div>
+                    <h3>Advanced Training</h3>
+                    <p>LoRA fine-tuning and custom model training capabilities</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">🏗️</div>
+                    <h3>Website Maker</h3>
+                    <p>AI-powered website generation with LLM tool creation</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">🔌</div>
+                    <h3>API Access</h3>
+                    <p>RESTful API for integrating Aria into your applications</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">💼</div>
+                    <h3>Commercial License</h3>
+                    <p>Pro and Enterprise tiers include commercial usage rights</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- All Pages Section -->
+        <div class="section">
+            <h2>📄 Monetization Pages</h2>
+            <div class="pages-list">
+                <a href="pricing.html" class="page-link">
+                    <h3>💰 Pricing Page</h3>
+                    <p>View all subscription tiers and features. Beautiful 3-tier comparison with revenue projections.</p>
+                </a>
+
+                <a href="admin_dashboard.html" class="page-link">
+                    <h3>👑 Admin Dashboard</h3>
+                    <p>Revenue analytics and subscriber management. Real-time MRR/ARR tracking.</p>
+                </a>
+
+                <a href="my-subscription.html" class="page-link">
+                    <h3>📊 My Subscription</h3>
+                    <p>User subscription dashboard with usage tracking and feature access.</p>
+                </a>
+
+                <a href="checkout.html?plan=pro" class="page-link">
+                    <h3>🛒 Checkout Page</h3>
+                    <p>Secure payment processing interface. Stripe-ready integration.</p>
+                </a>
+
+                <a href="subscription-success.html?plan=pro" class="page-link">
+                    <h3>✅ Success Page</h3>
+                    <p>Post-payment confirmation with onboarding steps.</p>
+                </a>
+
+                <a href="account.html" class="page-link">
+                    <h3>⚙️ Account Settings</h3>
+                    <p>Profile, billing, API keys, notifications, and security settings.</p>
+                </a>
+            </div>
+        </div>
+
+        <!-- Getting Started Section -->
+        <div class="section">
+            <h2>🚀 Getting Started</h2>
+            
+            <div class="quick-links">
+                <h3>Quick Links</h3>
+                <ul>
+                    <li>📖 <a href="QUICK_START_MONETIZATION.md">Quick Start Guide</a></li>
+                    <li>📚 <a href="MONETIZATION_GUIDE.md">Complete Documentation</a></li>
+                    <li>📊 <a href="INCOME_STREAM_SUMMARY.md">Revenue Summary</a></li>
+                    <li>🔧 <a href="#" onclick="alert('Run: python3 setup_monetization.py'); return false;">Setup Script</a></li>
+                </ul>
+            </div>
+
+            <div class="quick-links">
+                <h3>API Endpoints</h3>
+                <ul>
+                    <li>🔗 <code>GET /api/subscription/pricing</code> - Get pricing tiers</li>
+                    <li>🔗 <code>GET /api/subscription/status</code> - Check user subscription</li>
+                    <li>🔗 <code>POST /api/subscription/upgrade</code> - Upgrade subscription</li>
+                    <li>🔗 <code>GET /api/subscription/revenue</code> - Revenue statistics</li>
+                    <li>🔗 <code>POST /api/subscription/usage</code> - Track usage</li>
+                </ul>
+            </div>
+
+            <div class="quick-links">
+                <h3>Development Commands</h3>
+                <ul>
+                    <li>🖥️ <code>python3 setup_monetization.py</code> - Run setup script</li>
+                    <li>🌐 <code>python3 -m http.server 8000</code> - Start test server</li>
+                    <li>⚡ <code>func host start</code> - Start Azure Functions</li>
+                    <li>🧪 <code>curl http://localhost:7071/api/subscription/revenue | jq</code> - Test API</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Subscription Tiers Preview -->
+        <div class="section">
+            <h2>💎 Subscription Tiers</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🆓</div>
+                    <h3>Free Tier</h3>
+                    <p><strong>$0/month</strong></p>
+                    <p>100 chat messages/mo<br>Basic Aria character<br>Perfect for trying out</p>
+                </div>
+
+                <div class="feature-card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                    <div class="feature-icon">⭐</div>
+                    <h3>Pro Tier</h3>
+                    <p><strong>$49/month</strong></p>
+                    <p>10K messages/mo<br>Quantum computing<br>Advanced training</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">👑</div>
+                    <h3>Enterprise Tier</h3>
+                    <p><strong>$199/month</strong></p>
+                    <p>Unlimited everything<br>Custom models<br>Priority support 24/7</p>
+                </div>
+            </div>
+            <div style="text-align: center; margin-top: 30px;">
+                <a href="pricing.html" class="button button-primary">View Full Pricing Details</a>
+            </div>
+        </div>
+    </div>
+
+    <div style="text-align: center; padding: 40px; color: white;">
+        <p>© 2026 Aria Platform | <a href="https://github.com/Bryan-Roe/Aria" style="color: white;">GitHub</a></p>
+    </div>
+
+    <script>
+        // Add some animation on load
+        window.addEventListener('load', function() {
+            // Fade in sections
+            const sections = document.querySelectorAll('.section, .stats-banner');
+            sections.forEach((section, index) => {
+                section.style.opacity = '0';
+                section.style.transform = 'translateY(20px)';
+                section.style.transition = 'all 0.5s ease-out';
+                
+                setTimeout(() => {
+                    section.style.opacity = '1';
+                    section.style.transform = 'translateY(0)';
+                }, index * 100);
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to Aria! - Subscription Activated</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .success-container {
+            max-width: 700px;
+            width: 100%;
+        }
+
+        .success-card {
+            background: white;
+            border-radius: 20px;
+            padding: 50px 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            text-align: center;
+            animation: slideUp 0.5s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .success-icon {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
+            border-radius: 50%;
+            margin: 0 auto 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 50px;
+            animation: scaleIn 0.5s ease-out 0.2s both;
+        }
+
+        @keyframes scaleIn {
+            from {
+                transform: scale(0);
+            }
+            to {
+                transform: scale(1);
+            }
+        }
+
+        h1 {
+            color: #333;
+            font-size: 2.5em;
+            margin-bottom: 15px;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 1.2em;
+            margin-bottom: 30px;
+        }
+
+        .plan-badge {
+            display: inline-block;
+            padding: 10px 25px;
+            border-radius: 25px;
+            font-weight: bold;
+            font-size: 1.1em;
+            margin: 20px 0;
+        }
+
+        .plan-pro {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .plan-enterprise {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+
+        .info-box {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 25px;
+            margin: 30px 0;
+            text-align: left;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            color: #666;
+            font-weight: 500;
+        }
+
+        .info-value {
+            color: #333;
+            font-weight: 600;
+        }
+
+        .next-steps {
+            text-align: left;
+            margin: 30px 0;
+        }
+
+        .next-steps h3 {
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+
+        .step {
+            display: flex;
+            align-items: start;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+
+        .step:hover {
+            background: #e9ecef;
+            transform: translateX(5px);
+        }
+
+        .step-number {
+            width: 35px;
+            height: 35px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 15px;
+            flex-shrink: 0;
+        }
+
+        .step-content h4 {
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .step-content p {
+            color: #666;
+            font-size: 0.95em;
+        }
+
+        .button {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+            margin: 10px;
+        }
+
+        .button-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .button-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .button-secondary {
+            background: white;
+            color: #667eea;
+            border: 2px solid #667eea;
+        }
+
+        .button-secondary:hover {
+            background: #f8f9fa;
+        }
+
+        .action-buttons {
+            margin-top: 30px;
+        }
+
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            background: #667eea;
+            position: fixed;
+            left: 50%;
+            animation: confetti 3s ease-out forwards;
+            opacity: 0;
+        }
+
+        @keyframes confetti {
+            0% {
+                transform: translateY(0) rotate(0);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) rotate(720deg);
+                opacity: 0;
+            }
+        }
+
+        .support-box {
+            background: #e7f3ff;
+            border-left: 4px solid #2196F3;
+            padding: 20px;
+            margin-top: 30px;
+            border-radius: 5px;
+            text-align: left;
+        }
+
+        .support-box h4 {
+            color: #1976D2;
+            margin-bottom: 10px;
+        }
+
+        .support-box p {
+            color: #555;
+            margin-bottom: 10px;
+        }
+
+        .support-box a {
+            color: #2196F3;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .support-box a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="success-container">
+        <div class="success-card">
+            <div class="success-icon">
+                ✓
+            </div>
+
+            <h1>🎉 Welcome to Aria!</h1>
+            <p class="subtitle">Your subscription is now active</p>
+
+            <div class="plan-badge" id="plan-badge">Pro Plan</div>
+
+            <div class="info-box">
+                <div class="info-row">
+                    <span class="info-label">Order Status</span>
+                    <span class="info-value">✓ Confirmed</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Plan</span>
+                    <span class="info-value" id="plan-name">Pro</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Billing</span>
+                    <span class="info-value">Monthly</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Amount</span>
+                    <span class="info-value" id="amount">$49.00</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Next Billing Date</span>
+                    <span class="info-value" id="next-billing">March 4, 2026</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Confirmation Email</span>
+                    <span class="info-value" id="email">Sent</span>
+                </div>
+            </div>
+
+            <div class="next-steps">
+                <h3>🚀 Next Steps</h3>
+                
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <h4>Explore Your Features</h4>
+                        <p>Check out all the premium features now available in your account</p>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <h4>Start Building</h4>
+                        <p>Use quantum computing, advanced training, and our website maker</p>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <h4>Monitor Your Usage</h4>
+                        <p>Track your usage and limits in your subscription dashboard</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="action-buttons">
+                <a href="my-subscription.html" class="button button-primary">
+                    📊 View My Subscription
+                </a>
+                <a href="/" class="button button-secondary">
+                    🏠 Go to Dashboard
+                </a>
+            </div>
+
+            <div class="support-box">
+                <h4>💡 Need Help Getting Started?</h4>
+                <p>Our team is here to help you make the most of your subscription.</p>
+                <p>
+                    📧 Email: <a href="mailto:support@aria-platform.com">support@aria-platform.com</a><br>
+                    📚 Docs: <a href="MONETIZATION_GUIDE.md">View Documentation</a><br>
+                    💬 Chat: <a href="#">Live Chat Support</a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Get plan from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const selectedPlan = urlParams.get('plan') || 'pro';
+
+        const plans = {
+            pro: {
+                name: 'Pro',
+                price: 49,
+                class: 'plan-pro'
+            },
+            enterprise: {
+                name: 'Enterprise',
+                price: 199,
+                class: 'plan-enterprise'
+            }
+        };
+
+        function initializePage() {
+            const plan = plans[selectedPlan];
+            if (!plan) return;
+
+            // Update plan badge
+            const badge = document.getElementById('plan-badge');
+            badge.textContent = plan.name + ' Plan';
+            badge.className = 'plan-badge ' + plan.class;
+
+            // Update plan name and amount
+            document.getElementById('plan-name').textContent = plan.name;
+            document.getElementById('amount').textContent = '$' + plan.price + '.00';
+
+            // Calculate next billing date
+            const nextDate = new Date();
+            nextDate.setMonth(nextDate.getMonth() + 1);
+            document.getElementById('next-billing').textContent = nextDate.toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+
+            // Get email from localStorage if available
+            const demoSub = localStorage.getItem('demo_subscription');
+            if (demoSub) {
+                const data = JSON.parse(demoSub);
+                document.getElementById('email').textContent = data.email;
+            }
+
+            // Create confetti
+            createConfetti();
+        }
+
+        function createConfetti() {
+            const colors = ['#667eea', '#764ba2', '#f093fb', '#f5576c', '#4caf50'];
+            
+            for (let i = 0; i < 50; i++) {
+                setTimeout(() => {
+                    const confetti = document.createElement('div');
+                    confetti.className = 'confetti';
+                    confetti.style.left = Math.random() * 100 + '%';
+                    confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+                    confetti.style.animationDelay = Math.random() * 0.5 + 's';
+                    confetti.style.animationDuration = (Math.random() * 2 + 2) + 's';
+                    document.body.appendChild(confetti);
+
+                    setTimeout(() => confetti.remove(), 3000);
+                }, i * 50);
+            }
+        }
+
+        // Initialize on load
+        window.addEventListener('load', initializePage);
+    </script>
+</body>
+</html>

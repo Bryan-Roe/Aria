@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aria - Pricing & Plans</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            line-height: 1.6;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            color: white;
+            padding: 40px 20px;
+            margin-bottom: 40px;
+        }
+
+        h1 {
+            font-size: 3em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .subtitle {
+            font-size: 1.3em;
+            opacity: 0.9;
+            margin-bottom: 30px;
+        }
+
+        .revenue-banner {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 15px 30px;
+            border-radius: 30px;
+            display: inline-block;
+            backdrop-filter: blur(10px);
+            font-size: 1.1em;
+            font-weight: 600;
+            margin-top: 20px;
+        }
+
+        .pricing-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 60px;
+        }
+
+        .pricing-card {
+            background: white;
+            border-radius: 20px;
+            padding: 40px 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .pricing-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        .pricing-card.featured {
+            border: 3px solid #667eea;
+        }
+
+        .popular-badge {
+            position: absolute;
+            top: 20px;
+            right: -35px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 5px 40px;
+            transform: rotate(45deg);
+            font-size: 0.85em;
+            font-weight: bold;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        .tier-name {
+            font-size: 2em;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #667eea;
+        }
+
+        .price {
+            font-size: 3em;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .price-currency {
+            font-size: 0.5em;
+            vertical-align: super;
+        }
+
+        .price-period {
+            font-size: 0.4em;
+            color: #666;
+            font-weight: normal;
+        }
+
+        .tier-description {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.05em;
+        }
+
+        .features-list {
+            list-style: none;
+            margin-bottom: 30px;
+        }
+
+        .features-list li {
+            padding: 12px 0;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            align-items: center;
+        }
+
+        .features-list li:last-child {
+            border-bottom: none;
+        }
+
+        .feature-icon {
+            margin-right: 10px;
+            font-size: 1.2em;
+        }
+
+        .feature-icon.check {
+            color: #4caf50;
+        }
+
+        .feature-icon.cross {
+            color: #ccc;
+        }
+
+        .feature-limited {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .cta-button {
+            width: 100%;
+            padding: 15px 30px;
+            font-size: 1.1em;
+            font-weight: bold;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .cta-button.free {
+            background: #e0e0e0;
+            color: #333;
+        }
+
+        .cta-button.pro {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .cta-button.enterprise {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+
+        .cta-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+        }
+
+        .comparison-table {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            margin-bottom: 60px;
+        }
+
+        .comparison-table h2 {
+            text-align: center;
+            color: #667eea;
+            margin-bottom: 30px;
+            font-size: 2em;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-weight: bold;
+        }
+
+        tr:hover {
+            background: #f5f5f5;
+        }
+
+        .revenue-projection {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            margin-bottom: 60px;
+        }
+
+        .revenue-projection h2 {
+            text-align: center;
+            color: #667eea;
+            margin-bottom: 30px;
+            font-size: 2em;
+        }
+
+        .revenue-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .revenue-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+        }
+
+        .revenue-card h3 {
+            font-size: 1.2em;
+            margin-bottom: 15px;
+            opacity: 0.9;
+        }
+
+        .revenue-card .amount {
+            font-size: 2.5em;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .revenue-card .detail {
+            font-size: 0.9em;
+            opacity: 0.8;
+        }
+
+        footer {
+            text-align: center;
+            color: white;
+            padding: 40px 20px;
+            opacity: 0.9;
+        }
+
+        .faq-section {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            margin-bottom: 60px;
+        }
+
+        .faq-section h2 {
+            text-align: center;
+            color: #667eea;
+            margin-bottom: 30px;
+            font-size: 2em;
+        }
+
+        .faq-item {
+            margin-bottom: 25px;
+            padding-bottom: 25px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .faq-item:last-child {
+            border-bottom: none;
+        }
+
+        .faq-question {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .faq-answer {
+            color: #666;
+            line-height: 1.8;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2em;
+            }
+
+            .pricing-container {
+                grid-template-columns: 1fr;
+            }
+
+            .revenue-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎭 Aria Platform Pricing</h1>
+            <p class="subtitle">Choose the perfect plan for your AI-powered journey</p>
+            <div class="revenue-banner">
+                💰 Target: $2,000+ Monthly Recurring Revenue
+            </div>
+        </header>
+
+        <div class="pricing-container">
+            <!-- Free Tier -->
+            <div class="pricing-card">
+                <div class="tier-name">Free</div>
+                <div class="price">
+                    <span class="price-currency">$</span>0
+                    <span class="price-period">/month</span>
+                </div>
+                <p class="tier-description">Perfect for trying out Aria</p>
+                <ul class="features-list">
+                    <li>
+                        <span class="feature-icon check">✓</span>
+                        <span>Basic Chat (100 messages/mo)</span>
+                    </li>
+                    <li>
+                        <span class="feature-icon check">✓</span>
+                        <span>Aria Character Access</span>
+                    </li>
+                    <li>
+                        <span class="feature-icon cross">✗</span>
+                        <span>Quantum Computing</span>
+                    </li>
+                    <li>
+                        <span class="feature-icon cross">✗</span>
+                        <span>Advanced Training</span>
+                    </li>
+                    <li>
+                        <span class="feature-icon cross">✗</span>
+                        <span>Website Maker</span>
+                    </li>
+                    <li>
+                        <span class="feature-icon cross">✗</span>
+                        <span>API Access</span>
+                    </li>
+                </ul>
+                <button class="cta-button free" onclick="selectPlan('free')">Get Started Free</button>
+            </div>
+
+            <!-- Pro Tier -->
+            <div class="pricing-card featured">
+                <div class="popular-badge">POPULAR</div>
+                <div class="tier-name">Pro</div>
+                <div class="price">
+                    <span class="price-currency">$</span>49
+                    <span class="price-period">/month</span>
+                </div>
+                <p class="tier-description">For professionals and small teams</p>
+                <ul class="features-list">
+                    <li>
+                        <span class="feature-icon check">✓</span>
+                        <span>10,000 Chat Messages/mo</span>
+                    </li>
+                    <li>
+                        <span class="feature-icon check">✓</span>
+                        <span>Full Aria Character Suite</span>
+                    </li>
+                    <li>
+                        <span class="feature-icon check">✓</span>
+                        <span>Quantum Computing (50 jobs/mo)</span>
+                    </li>
+                    <li>
+                        <span class="feature-icon check">✓</span>
+                        <span>Advanced Training (20 hrs/mo)</span>
+                    </li>
+                    <li>
+                        <span class="feature-icon check">✓</span>
+                        <span>Website Maker (10 sites/mo)</span>
+                    </li>
+                    <li>
+                        <span class="feature-icon check">✓</span>
+                        <span>API Access (10K requests/mo)</span>
+                    </li>
+                    <li>
+                        <span class="feature-icon check">✓</span>
+                        <span>Commercial License</span>
+                    </li>
+                </ul>
+                <button class="cta-button pro" onclick="selectPlan('pro')">Upgrade to Pro</button>
+            </div>
+
+            <!-- Enterprise Tier -->
+            <div class="pricing-card">
+                <div class="tier-name">Enterprise</div>
+                <div class="price">
+                    <span class="price-currency">$</span>199
+                    <span class="price-period">/month</span>
+                </div>
+                <p class="tier-description">For organizations needing scale</p>
+                <ul class="features-list">
+                    <li>
+                        <span class="feature-icon check">✓</span>
+                        <span><strong>Unlimited</strong> Chat Messages</span>
+                    </li>
+                    <li>
+                        <span class="feature-icon check">✓</span>
+                        <span><strong>Unlimited</strong> Quantum Jobs</span>
+                    </li>
+                    <li>
+                        <span class="feature-icon check">✓</span>
+                        <span><strong>Unlimited</strong> Training Hours</span>
+                    </li>
+                    <li>
+                        <span class="feature-icon check">✓</span>
+                        <span><strong>Unlimited</strong> API Requests</span>
+                    </li>
+                    <li>
+                        <span class="feature-icon check">✓</span>
+                        <span><strong>Unlimited</strong> Websites</span>
+                    </li>
+                    <li>
+                        <span class="feature-icon check">✓</span>
+                        <span>Custom Model Training</span>
+                    </li>
+                    <li>
+                        <span class="feature-icon check">✓</span>
+                        <span>Priority Support (24/7)</span>
+                    </li>
+                    <li>
+                        <span class="feature-icon check">✓</span>
+                        <span>Dedicated Infrastructure</span>
+                    </li>
+                </ul>
+                <button class="cta-button enterprise" onclick="selectPlan('enterprise')">Contact Sales</button>
+            </div>
+        </div>
+
+        <!-- Revenue Projection Section -->
+        <div class="revenue-projection">
+            <h2>📊 Revenue Projection Model</h2>
+            <div class="revenue-grid">
+                <div class="revenue-card">
+                    <h3>Pro Subscribers</h3>
+                    <div class="amount">5</div>
+                    <div class="detail">@ $49/month = $245</div>
+                </div>
+                <div class="revenue-card">
+                    <h3>Enterprise Subscribers</h3>
+                    <div class="amount">10</div>
+                    <div class="detail">@ $199/month = $1,990</div>
+                </div>
+                <div class="revenue-card">
+                    <h3>Monthly Revenue</h3>
+                    <div class="amount">$2,235</div>
+                    <div class="detail">Exceeds $2,000 target!</div>
+                </div>
+                <div class="revenue-card">
+                    <h3>Annual Revenue</h3>
+                    <div class="amount">$26,820</div>
+                    <div class="detail">Projected ARR</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Comparison Table -->
+        <div class="comparison-table">
+            <h2>📋 Detailed Feature Comparison</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Feature</th>
+                        <th>Free</th>
+                        <th>Pro ($49/mo)</th>
+                        <th>Enterprise ($199/mo)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Chat Messages</td>
+                        <td>100/month</td>
+                        <td>10,000/month</td>
+                        <td>Unlimited</td>
+                    </tr>
+                    <tr>
+                        <td>Aria Character</td>
+                        <td>✓ Basic</td>
+                        <td>✓ Full Suite</td>
+                        <td>✓ Custom Animations</td>
+                    </tr>
+                    <tr>
+                        <td>Quantum Computing</td>
+                        <td>✗</td>
+                        <td>50 jobs/month</td>
+                        <td>Unlimited</td>
+                    </tr>
+                    <tr>
+                        <td>Model Training</td>
+                        <td>✗</td>
+                        <td>20 hours/month</td>
+                        <td>Unlimited</td>
+                    </tr>
+                    <tr>
+                        <td>Website Generation</td>
+                        <td>✗</td>
+                        <td>10 sites/month</td>
+                        <td>Unlimited</td>
+                    </tr>
+                    <tr>
+                        <td>API Access</td>
+                        <td>✗</td>
+                        <td>10K requests/month</td>
+                        <td>Unlimited</td>
+                    </tr>
+                    <tr>
+                        <td>Commercial License</td>
+                        <td>✗</td>
+                        <td>✓</td>
+                        <td>✓</td>
+                    </tr>
+                    <tr>
+                        <td>Custom Models</td>
+                        <td>✗</td>
+                        <td>✗</td>
+                        <td>✓</td>
+                    </tr>
+                    <tr>
+                        <td>Priority Support</td>
+                        <td>✗</td>
+                        <td>✗</td>
+                        <td>✓ 24/7</td>
+                    </tr>
+                    <tr>
+                        <td>SLA Guarantee</td>
+                        <td>✗</td>
+                        <td>✗</td>
+                        <td>✓ 99.9% Uptime</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- FAQ Section -->
+        <div class="faq-section">
+            <h2>❓ Frequently Asked Questions</h2>
+            
+            <div class="faq-item">
+                <div class="faq-question">How do I upgrade my subscription?</div>
+                <div class="faq-answer">
+                    Simply click the "Upgrade" button on any plan card. You'll be redirected to our secure payment portal where you can complete the upgrade process. Your new features will be available immediately.
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">Can I cancel anytime?</div>
+                <div class="faq-answer">
+                    Yes! You can cancel your subscription at any time. You'll continue to have access to paid features until the end of your current billing period, then your account will automatically revert to the Free tier.
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">What payment methods do you accept?</div>
+                <div class="faq-answer">
+                    We accept all major credit cards (Visa, MasterCard, American Express, Discover), PayPal, and wire transfers for Enterprise plans. All payments are processed securely through Stripe.
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">What happens if I exceed my usage limits?</div>
+                <div class="faq-answer">
+                    If you approach your usage limits, we'll send you a notification. Once you reach your limit, you'll need to either wait until your monthly reset or upgrade to a higher tier to continue using premium features.
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">Do you offer discounts for annual billing?</div>
+                <div class="faq-answer">
+                    Yes! Save 20% by choosing annual billing. A Pro annual subscription is $470 (instead of $588), and Enterprise annual is $1,910 (instead of $2,388).
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">Can I get a custom plan?</div>
+                <div class="faq-answer">
+                    Absolutely! For organizations with specific needs, we offer custom Enterprise+ plans with tailored features, dedicated infrastructure, and custom SLAs. Contact our sales team to discuss your requirements.
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>© 2026 Aria Platform | <a href="/" style="color: white; text-decoration: underline;">Back to Home</a></p>
+            <p style="margin-top: 10px; font-size: 0.9em;">
+                Questions? Email us at <a href="mailto:sales@aria-platform.com" style="color: white; text-decoration: underline;">sales@aria-platform.com</a>
+            </p>
+        </footer>
+    </div>
+
+    <script>
+        function selectPlan(tier) {
+            if (tier === 'free') {
+                window.location.href = '/';
+            } else if (tier === 'pro') {
+                alert('Pro subscription coming soon! For early access, please contact sales@aria-platform.com');
+            } else if (tier === 'enterprise') {
+                alert('Enterprise plan customization available! Please contact sales@aria-platform.com to discuss your needs.');
+            }
+        }
+
+        // Add some interactivity - highlight best value
+        window.addEventListener('load', function() {
+            const proCard = document.querySelector('.pricing-card.featured');
+            setInterval(function() {
+                proCard.style.transform = 'scale(1.02)';
+                setTimeout(function() {
+                    proCard.style.transform = 'scale(1)';
+                }, 500);
+            }, 3000);
+        });
+    </script>
+</body>
+</html>

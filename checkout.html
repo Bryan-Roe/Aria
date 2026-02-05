@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout - Aria Platform</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            padding: 30px 20px;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .checkout-grid {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 20px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+
+        .card h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 5px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .order-summary {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .summary-row:last-child {
+            border-bottom: none;
+            font-weight: bold;
+            font-size: 1.2em;
+            color: #667eea;
+            padding-top: 15px;
+        }
+
+        .plan-badge {
+            display: inline-block;
+            padding: 8px 15px;
+            border-radius: 15px;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+
+        .plan-pro {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .plan-enterprise {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+
+        .features-list {
+            list-style: none;
+            margin-top: 15px;
+        }
+
+        .features-list li {
+            padding: 8px 0;
+            color: #666;
+            display: flex;
+            align-items: center;
+        }
+
+        .features-list li:before {
+            content: "✓";
+            color: #4caf50;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        .button {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 5px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .button-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .button-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .button-secondary {
+            background: #e0e0e0;
+            color: #333;
+            margin-top: 10px;
+        }
+
+        .button-secondary:hover {
+            background: #d0d0d0;
+        }
+
+        .security-badge {
+            text-align: center;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            margin-top: 20px;
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .security-badge svg {
+            width: 20px;
+            height: 20px;
+            margin-right: 5px;
+            vertical-align: middle;
+        }
+
+        .alert {
+            padding: 15px 20px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+
+        .alert-info {
+            background: #d1ecf1;
+            border-left: 4px solid #0dcaf0;
+            color: #055160;
+        }
+
+        .discount-banner {
+            background: linear-gradient(135deg, #ffd89b 0%, #19547b 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .payment-methods {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            justify-content: center;
+            opacity: 0.7;
+        }
+
+        .payment-methods img {
+            height: 30px;
+        }
+
+        @media (max-width: 768px) {
+            .checkout-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .back-link {
+            display: inline-block;
+            color: white;
+            text-decoration: none;
+            margin-bottom: 20px;
+            padding: 10px 20px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 5px;
+            transition: all 0.3s;
+        }
+
+        .back-link:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .stripe-info {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 15px;
+            font-size: 0.9em;
+            color: #666;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="pricing.html" class="back-link">← Back to Pricing</a>
+        
+        <div class="header">
+            <h1>🛒 Complete Your Purchase</h1>
+            <p>Join thousands of users powering their AI with Aria</p>
+        </div>
+
+        <div class="alert alert-info">
+            <strong>ℹ️ Demo Mode:</strong> This is a demonstration checkout page. In production, this will integrate with Stripe for secure payment processing.
+        </div>
+
+        <div class="checkout-grid">
+            <!-- Payment Form -->
+            <div class="card">
+                <h2>Payment Information</h2>
+                
+                <form id="checkout-form">
+                    <div class="form-group">
+                        <label for="email">Email Address</label>
+                        <input type="email" id="email" name="email" placeholder="you@example.com" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="card-name">Cardholder Name</label>
+                        <input type="text" id="card-name" name="card-name" placeholder="John Doe" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="card-number">Card Number</label>
+                        <input type="text" id="card-number" name="card-number" placeholder="4242 4242 4242 4242" maxlength="19" required>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="exp-date">Expiry Date</label>
+                            <input type="text" id="exp-date" name="exp-date" placeholder="MM / YY" maxlength="7" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="cvv">CVV</label>
+                            <input type="text" id="cvv" name="cvv" placeholder="123" maxlength="4" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="billing-country">Country</label>
+                        <select id="billing-country" name="billing-country" required>
+                            <option value="">Select country</option>
+                            <option value="US">United States</option>
+                            <option value="CA">Canada</option>
+                            <option value="GB">United Kingdom</option>
+                            <option value="AU">Australia</option>
+                            <option value="DE">Germany</option>
+                            <option value="FR">France</option>
+                            <option value="JP">Japan</option>
+                            <option value="OTHER">Other</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" required>
+                            I agree to the <a href="#" style="color: #667eea;">Terms of Service</a> and <a href="#" style="color: #667eea;">Privacy Policy</a>
+                        </label>
+                    </div>
+
+                    <button type="submit" class="button button-primary">
+                        🔒 Complete Purchase
+                    </button>
+
+                    <button type="button" class="button button-secondary" onclick="window.location.href='pricing.html'">
+                        Cancel
+                    </button>
+                </form>
+
+                <div class="security-badge">
+                    🔒 Secured by 256-bit SSL encryption
+                </div>
+
+                <div class="stripe-info">
+                    <strong>💳 Powered by Stripe</strong><br>
+                    In production, payments are processed securely through Stripe.<br>
+                    Your card information is never stored on our servers.
+                </div>
+            </div>
+
+            <!-- Order Summary -->
+            <div class="card">
+                <h2>Order Summary</h2>
+                
+                <div id="plan-badge" class="plan-badge plan-pro">Pro Plan</div>
+                
+                <div class="order-summary">
+                    <div class="summary-row">
+                        <span>Plan</span>
+                        <span id="plan-name">Pro</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>Billing</span>
+                        <span>Monthly</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>Subtotal</span>
+                        <span id="subtotal">$49.00</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>Tax</span>
+                        <span>$0.00</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>Total</span>
+                        <span id="total">$49.00</span>
+                    </div>
+                </div>
+
+                <h3 style="color: #667eea; margin-top: 25px; margin-bottom: 15px;">What's Included</h3>
+                <ul class="features-list" id="plan-features">
+                    <li>10,000 Chat Messages/month</li>
+                    <li>Full Aria Character Suite</li>
+                    <li>Quantum Computing (50 jobs/mo)</li>
+                    <li>Advanced Training (20 hrs/mo)</li>
+                    <li>Website Maker (10 sites/mo)</li>
+                    <li>API Access (10K requests/mo)</li>
+                    <li>Commercial License</li>
+                </ul>
+
+                <div class="discount-banner" style="margin-top: 25px;">
+                    💰 Save 20% with Annual Billing!
+                </div>
+
+                <div class="payment-methods">
+                    <span style="font-size: 0.9em; color: #666;">We accept:</span>
+                    <span>💳 Visa</span>
+                    <span>💳 Mastercard</span>
+                    <span>💳 Amex</span>
+                    <span>💰 PayPal</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Get plan from URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const selectedPlan = urlParams.get('plan') || 'pro';
+
+        const plans = {
+            pro: {
+                name: 'Pro',
+                price: 49,
+                features: [
+                    '10,000 Chat Messages/month',
+                    'Full Aria Character Suite',
+                    'Quantum Computing (50 jobs/mo)',
+                    'Advanced Training (20 hrs/mo)',
+                    'Website Maker (10 sites/mo)',
+                    'API Access (10K requests/mo)',
+                    'Commercial License'
+                ]
+            },
+            enterprise: {
+                name: 'Enterprise',
+                price: 199,
+                features: [
+                    'Unlimited Chat Messages',
+                    'Unlimited Quantum Jobs',
+                    'Unlimited Training Hours',
+                    'Unlimited API Requests',
+                    'Unlimited Websites',
+                    'Custom Model Training',
+                    'Priority Support (24/7)',
+                    'Dedicated Infrastructure'
+                ]
+            }
+        };
+
+        function initializeCheckout() {
+            const plan = plans[selectedPlan];
+            if (!plan) return;
+
+            // Update plan badge
+            const badge = document.getElementById('plan-badge');
+            badge.textContent = plan.name + ' Plan';
+            badge.className = 'plan-badge plan-' + selectedPlan;
+
+            // Update order summary
+            document.getElementById('plan-name').textContent = plan.name;
+            document.getElementById('subtotal').textContent = '$' + plan.price + '.00';
+            document.getElementById('total').textContent = '$' + plan.price + '.00';
+
+            // Update features list
+            const featuresList = document.getElementById('plan-features');
+            featuresList.innerHTML = '';
+            plan.features.forEach(feature => {
+                const li = document.createElement('li');
+                li.textContent = feature;
+                featuresList.appendChild(li);
+            });
+        }
+
+        // Card number formatting
+        document.getElementById('card-number').addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\s/g, '');
+            let formattedValue = value.match(/.{1,4}/g)?.join(' ') || value;
+            e.target.value = formattedValue;
+        });
+
+        // Expiry date formatting
+        document.getElementById('exp-date').addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length >= 2) {
+                value = value.slice(0, 2) + ' / ' + value.slice(2, 4);
+            }
+            e.target.value = value;
+        });
+
+        // CVV - numbers only
+        document.getElementById('cvv').addEventListener('input', function(e) {
+            e.target.value = e.target.value.replace(/\D/g, '');
+        });
+
+        // Form submission
+        document.getElementById('checkout-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // In production, this would integrate with Stripe
+            const email = document.getElementById('email').value;
+            const plan = plans[selectedPlan];
+            
+            // Show processing state
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            submitBtn.textContent = '⏳ Processing...';
+            submitBtn.disabled = true;
+
+            // Simulate payment processing
+            setTimeout(() => {
+                // Store demo subscription
+                localStorage.setItem('demo_subscription', JSON.stringify({
+                    plan: selectedPlan,
+                    email: email,
+                    date: new Date().toISOString()
+                }));
+
+                // Redirect to success page
+                window.location.href = `subscription-success.html?plan=${selectedPlan}`;
+            }, 2000);
+        });
+
+        // Initialize on load
+        window.addEventListener('load', initializeCheckout);
+    </script>
+</body>
+</html>

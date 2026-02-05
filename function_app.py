@@ -87,6 +87,21 @@ sys.path.insert(0, str(quantum_ai_path))
 scripts_path = Path(__file__).resolve().parent / "scripts"
 sys.path.insert(0, str(scripts_path))
 
+# -----------------------------------------------------------------------------
+# Subscription Manager (optional)
+# -----------------------------------------------------------------------------
+try:  # pragma: no cover - defensive import
+    from shared.subscription_manager import (
+        get_subscription_manager,
+        SubscriptionTier,
+        Feature,
+    )
+    subscription_manager_available = True
+except Exception as _sub_err:  # noqa: BLE001
+    logging.info(f"[startup] Subscription manager unavailable: {_sub_err}")
+    subscription_manager_available = False
+    get_subscription_manager = None  # type: ignore
+
 
 # OpenTelemetry tracer (optional)
 try:  # pragma: no cover
@@ -2037,3 +2052,654 @@ def quantum_info(req: func.HttpRequest) -> func.HttpResponse:
             mimetype="application/json",
             headers=create_cors_response_headers()
         )
+
+
+# =============================================================================
+# SUBSCRIPTION & MONETIZATION ENDPOINTS
+# =============================================================================
+
+@app.route(route="subscription/pricing", methods=["GET"], auth_level=func.AuthLevel.ANONYMOUS)
+def subscription_pricing(req: func.HttpRequest) -> func.HttpResponse:
+    """
+    Get pricing information for all subscription tiers.
+    
+    GET /api/subscription/pricing
+    
+    Response: {
+        "tiers": {
+            "free": {...},
+            "pro": {...},
+            "enterprise": {...}
+        }
+    }
+    """
+    logging.info('Pricing endpoint invoked')
+    
+    try:
+        from shared.subscription_manager import TIER_PRICING, TIER_FEATURES, TIER_LIMITS, SubscriptionTier
+        
+        pricing_info = {
+            "tiers": {}
+        }
+        
+        for tier in SubscriptionTier:
+            pricing_info["tiers"][tier.value] = {
+                "name": tier.name,
+                "price": TIER_PRICING[tier],
+                "currency": "USD",
+                "billing_period": "monthly",
+                "features": {f.value: enabled for f, enabled in TIER_FEATURES[tier].items()},
+                "limits": TIER_LIMITS[tier]
+            }
+        
+        return func.HttpResponse(
+            json.dumps(pricing_info),
+            status_code=200,
+            mimetype="application/json",
+            headers=create_cors_response_headers()
+        )
+    
+    except Exception as e:
+        logging.error(f'Pricing endpoint error: {str(e)}')
+        return func.HttpResponse(
+            json.dumps({"error": f"Failed to get pricing: {str(e)}"}),
+            status_code=500,
+            mimetype="application/json",
+            headers=create_cors_response_headers()
+        )
+
+
+@app.route(route="subscription/status", methods=["GET"], auth_level=func.AuthLevel.ANONYMOUS)
+def subscription_status(req: func.HttpRequest) -> func.HttpResponse:
+    """
+    Get subscription status for a user.
+    
+    GET /api/subscription/status?user_id=<user_id>
+    
+    Response: {
+        "user_id": "...",
+        "tier": "pro",
+        "is_active": true,
+        "usage": {...},
+        "limits": {...}
+    }
+    """
+    logging.info('Subscription status endpoint invoked')
+    
+    try:
+        if not subscription_manager_available:
+            return func.HttpResponse(
+                json.dumps({"error": "Subscription manager not available"}),
+                status_code=503,
+                mimetype="application/json",
+                headers=create_cors_response_headers()
+            )
+        
+        user_id = req.params.get('user_id', 'demo_user')
+        
+        manager = get_subscription_manager()
+        subscription = manager.get_subscription(user_id)
+        
+        return func.HttpResponse(
+            json.dumps(subscription.to_dict()),
+            status_code=200,
+            mimetype="application/json",
+            headers=create_cors_response_headers()
+        )
+    
+    except Exception as e:
+        logging.error(f'Subscription status error: {str(e)}')
+        return func.HttpResponse(
+            json.dumps({"error": f"Failed to get subscription status: {str(e)}"}),
+            status_code=500,
+            mimetype="application/json",
+            headers=create_cors_response_headers()
+        )
+
+
+@app.route(route="subscription/upgrade", methods=["POST"], auth_level=func.AuthLevel.ANONYMOUS)
+def subscription_upgrade(req: func.HttpRequest) -> func.HttpResponse:
+    """
+    Upgrade a user's subscription.
+    
+    POST /api/subscription/upgrade
+    Body: {
+        "user_id": "...",
+        "tier": "pro" | "enterprise",
+        "duration_days": 30,
+        "payment_method": "stripe",
+        "stripe_subscription_id": "..."
+    }
+    
+    Response: {
+        "success": true,
+        "subscription": {...}
+    }
+    """
+    logging.info('Subscription upgrade endpoint invoked')
+    
+    try:
+        if not subscription_manager_available:
+            return func.HttpResponse(
+                json.dumps({"error": "Subscription manager not available"}),
+                status_code=503,
+                mimetype="application/json",
+                headers=create_cors_response_headers()
+            )
+        
+        body = json.loads(req.get_body().decode('utf-8'))
+        user_id = body.get('user_id', 'demo_user')
+        tier_str = body.get('tier', 'pro')
+        duration_days = body.get('duration_days', 30)
+        payment_method = body.get('payment_method')
+        stripe_subscription_id = body.get('stripe_subscription_id')
+        
+        tier = SubscriptionTier(tier_str)
+        
+        manager = get_subscription_manager()
+        subscription = manager.upgrade_subscription(
+            user_id=user_id,
+            tier=tier,
+            duration_days=duration_days,
+            payment_method=payment_method,
+            stripe_subscription_id=stripe_subscription_id
+        )
+        
+        return func.HttpResponse(
+            json.dumps({
+                "success": True,
+                "subscription": subscription.to_dict()
+            }),
+            status_code=200,
+            mimetype="application/json",
+            headers=create_cors_response_headers()
+        )
+    
+    except Exception as e:
+        logging.error(f'Subscription upgrade error: {str(e)}')
+        return func.HttpResponse(
+            json.dumps({"error": f"Failed to upgrade subscription: {str(e)}"}),
+            status_code=500,
+            mimetype="application/json",
+            headers=create_cors_response_headers()
+        )
+
+
+@app.route(route="subscription/revenue", methods=["GET"], auth_level=func.AuthLevel.ANONYMOUS)
+def subscription_revenue(req: func.HttpRequest) -> func.HttpResponse:
+    """
+    Get revenue statistics and projections.
+    
+    GET /api/subscription/revenue
+    
+    Response: {
+        "total_subscribers": 15,
+        "active_subscribers": 15,
+        "by_tier": {...},
+        "monthly_recurring_revenue": 2235,
+        "annual_recurring_revenue": 26820
+    }
+    """
+    logging.info('Revenue stats endpoint invoked')
+    
+    try:
+        if not subscription_manager_available:
+            return func.HttpResponse(
+                json.dumps({"error": "Subscription manager not available"}),
+                status_code=503,
+                mimetype="application/json",
+                headers=create_cors_response_headers()
+            )
+        
+        manager = get_subscription_manager()
+        stats = manager.get_revenue_stats()
+        
+        return func.HttpResponse(
+            json.dumps(stats),
+            status_code=200,
+            mimetype="application/json",
+            headers=create_cors_response_headers()
+        )
+    
+    except Exception as e:
+        logging.error(f'Revenue stats error: {str(e)}')
+        return func.HttpResponse(
+            json.dumps({"error": f"Failed to get revenue stats: {str(e)}"}),
+            status_code=500,
+            mimetype="application/json",
+            headers=create_cors_response_headers()
+        )
+
+
+@app.route(route="subscription/usage", methods=["POST"], auth_level=func.AuthLevel.ANONYMOUS)
+def subscription_track_usage(req: func.HttpRequest) -> func.HttpResponse:
+    """
+    Track resource usage for a user.
+    
+    POST /api/subscription/usage
+    Body: {
+        "user_id": "...",
+        "resource": "chat_messages" | "quantum_jobs" | "training_hours" | "api_requests" | "websites_created",
+        "amount": 1
+    }
+    
+    Response: {
+        "success": true,
+        "allowed": true,
+        "current_usage": {...}
+    }
+    """
+    logging.info('Usage tracking endpoint invoked')
+    
+    try:
+        if not subscription_manager_available:
+            return func.HttpResponse(
+                json.dumps({"error": "Subscription manager not available"}),
+                status_code=503,
+                mimetype="application/json",
+                headers=create_cors_response_headers()
+            )
+        
+        body = json.loads(req.get_body().decode('utf-8'))
+        user_id = body.get('user_id', 'demo_user')
+        resource = body.get('resource', 'api_requests')
+        amount = body.get('amount', 1)
+        
+        manager = get_subscription_manager()
+        allowed = manager.track_usage(user_id, resource, amount)
+        
+        subscription = manager.get_subscription(user_id)
+        
+        return func.HttpResponse(
+            json.dumps({
+                "success": True,
+                "allowed": allowed,
+                "current_usage": subscription.usage,
+                "limits": subscription.to_dict()["limits"]
+            }),
+            status_code=200,
+            mimetype="application/json",
+            headers=create_cors_response_headers()
+        )
+    
+    except Exception as e:
+        logging.error(f'Usage tracking error: {str(e)}')
+        return func.HttpResponse(
+            json.dumps({"error": f"Failed to track usage: {str(e)}"}),
+            status_code=500,
+            mimetype="application/json",
+            headers=create_cors_response_headers()
+        )
+
+
+# -----------------------------------------------------------------------------
+# Stripe Webhook Handler
+# -----------------------------------------------------------------------------
+@app.route(route="webhook/stripe", methods=["POST"], auth_level=func.AuthLevel.ANONYMOUS)
+def stripe_webhook(req: func.HttpRequest) -> func.HttpResponse:
+    """
+    Handle Stripe webhook events.
+    
+    POST /api/webhook/stripe
+    Headers: Stripe-Signature
+    Body: Stripe event payload
+    
+    Response: {
+        "status": "success" | "error",
+        "message": "..."
+    }
+    """
+    logging.info('Stripe webhook endpoint invoked')
+    
+    try:
+        from shared.stripe_webhooks import get_webhook_handler
+        
+        payload = req.get_body().decode('utf-8')
+        signature = req.headers.get('Stripe-Signature', '')
+        webhook_secret = os.environ.get('STRIPE_WEBHOOK_SECRET')
+        
+        handler = get_webhook_handler()
+        result = handler.handle_webhook(payload, signature, webhook_secret)
+        
+        status_code = 200 if result["status"] in ["success", "ignored"] else 500
+        
+        return func.HttpResponse(
+            json.dumps(result),
+            status_code=status_code,
+            mimetype="application/json",
+            headers=create_cors_response_headers()
+        )
+    
+    except Exception as e:
+        logging.error(f'Stripe webhook error: {str(e)}')
+        return func.HttpResponse(
+            json.dumps({"status": "error", "message": str(e)}),
+            status_code=500,
+            mimetype="application/json",
+            headers=create_cors_response_headers()
+        )
+
+
+# -----------------------------------------------------------------------------
+# Email Notifications Test Endpoint
+# -----------------------------------------------------------------------------
+@app.route(route="notifications/test", methods=["POST"], auth_level=func.AuthLevel.ANONYMOUS)
+def test_notifications(req: func.HttpRequest) -> func.HttpResponse:
+    """
+    Test email notification system.
+    
+    POST /api/notifications/test
+    Body: {
+        "email": "user@example.com",
+        "type": "usage_warning" | "payment_succeeded" | "subscription_activated"
+    }
+    
+    Response: {
+        "success": true,
+        "message": "Notification sent"
+    }
+    """
+    logging.info('Test notification endpoint invoked')
+    
+    try:
+        from shared.email_notifications import get_email_system
+        
+        body = json.loads(req.get_body().decode('utf-8'))
+        email = body.get('email', 'test@example.com')
+        notification_type = body.get('type', 'usage_warning')
+        
+        email_system = get_email_system()
+        
+        # Send test notification based on type
+        if notification_type == 'usage_warning':
+            success = email_system.notify_usage_warning(
+                user_email=email,
+                resource='chat_messages',
+                percentage=85.0,
+                current=850,
+                limit=1000
+            )
+        elif notification_type == 'payment_succeeded':
+            success = email_system.notify_payment_succeeded(
+                user_email=email,
+                amount=49.00,
+                invoice_id='inv_test123'
+            )
+        elif notification_type == 'subscription_activated':
+            success = email_system.notify_subscription_activated(
+                user_email=email,
+                tier='Pro',
+                price=49.00
+            )
+        else:
+            return func.HttpResponse(
+                json.dumps({"error": f"Unknown notification type: {notification_type}"}),
+                status_code=400,
+                mimetype="application/json",
+                headers=create_cors_response_headers()
+            )
+        
+        return func.HttpResponse(
+            json.dumps({
+                "success": success,
+                "message": f"Test notification sent to {email}",
+                "type": notification_type
+            }),
+            status_code=200,
+            mimetype="application/json",
+            headers=create_cors_response_headers()
+        )
+    
+    except Exception as e:
+        logging.error(f'Test notification error: {str(e)}')
+        return func.HttpResponse(
+            json.dumps({"error": f"Failed to send test notification: {str(e)}"}),
+            status_code=500,
+            mimetype="application/json",
+            headers=create_cors_response_headers()
+        )
+
+
+# -----------------------------------------------------------------------------
+# Notifications Log Endpoint
+# -----------------------------------------------------------------------------
+@app.route(route="notifications/log", methods=["GET"], auth_level=func.AuthLevel.ANONYMOUS)
+def notifications_log(req: func.HttpRequest) -> func.HttpResponse:
+    """
+    Get email notification log.
+    
+    GET /api/notifications/log?user_email=user@example.com
+    
+    Response: {
+        "notifications": [...]
+    }
+    """
+    logging.info('Notifications log endpoint invoked')
+    
+    try:
+        from shared.email_notifications import get_email_system
+        
+        user_email = req.params.get('user_email')
+        
+        email_system = get_email_system()
+        notifications = email_system.get_sent_emails(user_email)
+        
+        return func.HttpResponse(
+            json.dumps({
+                "notifications": notifications,
+                "count": len(notifications)
+            }),
+            status_code=200,
+            mimetype="application/json",
+            headers=create_cors_response_headers()
+        )
+    
+    except Exception as e:
+        logging.error(f'Notifications log error: {str(e)}')
+        return func.HttpResponse(
+            json.dumps({"error": f"Failed to get notifications log: {str(e)}"}),
+            status_code=500,
+            mimetype="application/json",
+            headers=create_cors_response_headers()
+        )
+
+
+# -----------------------------------------------------------------------------
+# Referral System Endpoints
+# -----------------------------------------------------------------------------
+@app.route(route="referrals/code", methods=["GET", "POST"], auth_level=func.AuthLevel.ANONYMOUS)
+def referral_code(req: func.HttpRequest) -> func.HttpResponse:
+    """
+    Get or generate referral code for a user.
+    
+    GET /api/referrals/code?user_id=...
+    POST /api/referrals/code with {"user_id": "..."}
+    
+    Response: {
+        "referral_code": "ABC123DEF",
+        "user_id": "..."
+    }
+    """
+    logging.info('Referral code endpoint invoked')
+    
+    try:
+        from shared.referral_system import get_referral_system
+        
+        if req.method == "GET":
+            user_id = req.params.get('user_id', 'demo_user')
+        else:
+            body = json.loads(req.get_body().decode('utf-8'))
+            user_id = body.get('user_id', 'demo_user')
+        
+        referral_system = get_referral_system()
+        
+        # Get existing or generate new code
+        code = referral_system.get_referral_code(user_id)
+        if not code:
+            code = referral_system.generate_referral_code(user_id)
+        
+        return func.HttpResponse(
+            json.dumps({
+                "referral_code": code,
+                "user_id": user_id
+            }),
+            status_code=200,
+            mimetype="application/json",
+            headers=create_cors_response_headers()
+        )
+    
+    except Exception as e:
+        logging.error(f'Referral code error: {str(e)}')
+        return func.HttpResponse(
+            json.dumps({"error": f"Failed to get referral code: {str(e)}"}),
+            status_code=500,
+            mimetype="application/json",
+            headers=create_cors_response_headers()
+        )
+
+
+@app.route(route="referrals/stats", methods=["GET"], auth_level=func.AuthLevel.ANONYMOUS)
+def referral_stats(req: func.HttpRequest) -> func.HttpResponse:
+    """
+    Get referral statistics for a user.
+    
+    GET /api/referrals/stats?user_id=...
+    
+    Response: {
+        "referral_code": "...",
+        "referral_count": 5,
+        "total_commission": 100.00,
+        "pending_commission": 50.00,
+        "paid_commission": 50.00,
+        "referrals": [...]
+    }
+    """
+    logging.info('Referral stats endpoint invoked')
+    
+    try:
+        from shared.referral_system import get_referral_system
+        
+        user_id = req.params.get('user_id', 'demo_user')
+        
+        referral_system = get_referral_system()
+        stats = referral_system.get_referral_stats(user_id)
+        
+        return func.HttpResponse(
+            json.dumps(stats),
+            status_code=200,
+            mimetype="application/json",
+            headers=create_cors_response_headers()
+        )
+    
+    except Exception as e:
+        logging.error(f'Referral stats error: {str(e)}')
+        return func.HttpResponse(
+            json.dumps({"error": f"Failed to get referral stats: {str(e)}"}),
+            status_code=500,
+            mimetype="application/json",
+            headers=create_cors_response_headers()
+        )
+
+
+@app.route(route="referrals/record", methods=["POST"], auth_level=func.AuthLevel.ANONYMOUS)
+def record_referral(req: func.HttpRequest) -> func.HttpResponse:
+    """
+    Record a new referral.
+    
+    POST /api/referrals/record
+    Body: {
+        "referrer_code": "ABC123",
+        "new_user_id": "user123",
+        "tier": "pro",
+        "subscription_value": 49.00
+    }
+    
+    Response: {
+        "success": true,
+        "commission": 9.80,
+        "referral_count": 5
+    }
+    """
+    logging.info('Record referral endpoint invoked')
+    
+    try:
+        from shared.referral_system import get_referral_system
+        
+        body = json.loads(req.get_body().decode('utf-8'))
+        referrer_code = body.get('referrer_code')
+        new_user_id = body.get('new_user_id')
+        tier = body.get('tier')
+        subscription_value = body.get('subscription_value')
+        
+        if not all([referrer_code, new_user_id, tier, subscription_value]):
+            return func.HttpResponse(
+                json.dumps({"error": "Missing required fields"}),
+                status_code=400,
+                mimetype="application/json",
+                headers=create_cors_response_headers()
+            )
+        
+        referral_system = get_referral_system()
+        result = referral_system.record_referral(
+            referrer_code=referrer_code,
+            new_user_id=new_user_id,
+            tier=tier,
+            subscription_value=subscription_value
+        )
+        
+        return func.HttpResponse(
+            json.dumps(result),
+            status_code=200 if result.get('success') else 400,
+            mimetype="application/json",
+            headers=create_cors_response_headers()
+        )
+    
+    except Exception as e:
+        logging.error(f'Record referral error: {str(e)}')
+        return func.HttpResponse(
+            json.dumps({"error": f"Failed to record referral: {str(e)}"}),
+            status_code=500,
+            mimetype="application/json",
+            headers=create_cors_response_headers()
+        )
+
+
+@app.route(route="referrals/leaderboard", methods=["GET"], auth_level=func.AuthLevel.ANONYMOUS)
+def referral_leaderboard(req: func.HttpRequest) -> func.HttpResponse:
+    """
+    Get referral leaderboard.
+    
+    GET /api/referrals/leaderboard?limit=10
+    
+    Response: {
+        "leaderboard": [
+            {"rank": 1, "user_id": "...", "referral_count": 50, "total_commission": 500}
+        ]
+    }
+    """
+    logging.info('Referral leaderboard endpoint invoked')
+    
+    try:
+        from shared.referral_system import get_referral_system
+        
+        limit = int(req.params.get('limit', '10'))
+        
+        referral_system = get_referral_system()
+        leaderboard = referral_system.get_leaderboard(limit)
+        
+        return func.HttpResponse(
+            json.dumps({"leaderboard": leaderboard}),
+            status_code=200,
+            mimetype="application/json",
+            headers=create_cors_response_headers()
+        )
+    
+    except Exception as e:
+        logging.error(f'Referral leaderboard error: {str(e)}')
+        return func.HttpResponse(
+            json.dumps({"error": f"Failed to get leaderboard: {str(e)}"}),
+            status_code=500,
+            mimetype="application/json",
+            headers=create_cors_response_headers()
+        )
+

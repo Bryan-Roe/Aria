@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account Settings - Aria Platform</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            color: #667eea;
+            font-size: 2em;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 15px;
+        }
+
+        .nav-links a {
+            padding: 10px 20px;
+            text-decoration: none;
+            color: #667eea;
+            border: 2px solid #667eea;
+            border-radius: 5px;
+            transition: all 0.3s;
+        }
+
+        .nav-links a:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .tabs {
+            background: white;
+            border-radius: 10px;
+            padding: 20px 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            gap: 20px;
+            overflow-x: auto;
+        }
+
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+            white-space: nowrap;
+            color: #666;
+            font-weight: 500;
+        }
+
+        .tab:hover {
+            color: #667eea;
+        }
+
+        .tab.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+
+        .card {
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .card.active {
+            display: block;
+        }
+
+        .card h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 5px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-right: 10px;
+        }
+
+        .button-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .button-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .button-secondary {
+            background: #e0e0e0;
+            color: #333;
+        }
+
+        .button-secondary:hover {
+            background: #d0d0d0;
+        }
+
+        .button-danger {
+            background: #f44336;
+            color: white;
+        }
+
+        .button-danger:hover {
+            background: #d32f2f;
+        }
+
+        .info-box {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .info-box h4 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .info-box p {
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .payment-methods-list {
+            list-style: none;
+        }
+
+        .payment-method {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
+        .payment-method-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .card-icon {
+            font-size: 24px;
+        }
+
+        .api-key-display {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 0.9em;
+            margin: 10px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .badge {
+            padding: 5px 10px;
+            border-radius: 12px;
+            font-size: 0.85em;
+            font-weight: 600;
+        }
+
+        .badge-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .badge-success {
+            background: #4caf50;
+            color: white;
+        }
+
+        .alert {
+            padding: 15px 20px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+            color: #155724;
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .nav-links {
+                flex-direction: column;
+                width: 100%;
+            }
+
+            .nav-links a {
+                text-align: center;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .tabs {
+                flex-wrap: nowrap;
+                overflow-x: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>⚙️ Account Settings</h1>
+            <div class="nav-links">
+                <a href="/">🏠 Home</a>
+                <a href="my-subscription.html">📊 Subscription</a>
+                <a href="pricing.html">💰 Pricing</a>
+            </div>
+        </div>
+
+        <div class="tabs">
+            <div class="tab active" onclick="switchTab('profile')">👤 Profile</div>
+            <div class="tab" onclick="switchTab('billing')">💳 Billing</div>
+            <div class="tab" onclick="switchTab('api')">🔑 API Keys</div>
+            <div class="tab" onclick="switchTab('notifications')">🔔 Notifications</div>
+            <div class="tab" onclick="switchTab('security')">🔒 Security</div>
+        </div>
+
+        <!-- Profile Tab -->
+        <div id="profile-tab" class="card active">
+            <h2>Profile Information</h2>
+            
+            <form id="profile-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="first-name">First Name</label>
+                        <input type="text" id="first-name" value="John">
+                    </div>
+                    <div class="form-group">
+                        <label for="last-name">Last Name</label>
+                        <input type="text" id="last-name" value="Doe">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" value="john.doe@example.com">
+                </div>
+
+                <div class="form-group">
+                    <label for="company">Company (Optional)</label>
+                    <input type="text" id="company" value="">
+                </div>
+
+                <div class="form-group">
+                    <label for="bio">Bio</label>
+                    <textarea id="bio" rows="4" placeholder="Tell us about yourself..."></textarea>
+                </div>
+
+                <button type="submit" class="button button-primary">💾 Save Changes</button>
+                <button type="button" class="button button-secondary">Cancel</button>
+            </form>
+        </div>
+
+        <!-- Billing Tab -->
+        <div id="billing-tab" class="card">
+            <h2>Billing & Payment Methods</h2>
+
+            <div class="info-box">
+                <h4>Current Plan</h4>
+                <p><strong>Free Tier</strong> - $0/month</p>
+                <p>Upgrade to Pro or Enterprise for more features</p>
+                <button class="button button-primary" onclick="window.location.href='pricing.html'">Upgrade Plan</button>
+            </div>
+
+            <h3 style="margin: 30px 0 15px;">Payment Methods</h3>
+            <ul class="payment-methods-list">
+                <li class="payment-method">
+                    <div class="payment-method-info">
+                        <span class="card-icon">💳</span>
+                        <div>
+                            <div><strong>Visa •••• 4242</strong></div>
+                            <div style="color: #666; font-size: 0.9em;">Expires 12/2025</div>
+                        </div>
+                        <span class="badge badge-primary">Default</span>
+                    </div>
+                    <div>
+                        <button class="button button-secondary">Edit</button>
+                        <button class="button button-danger">Remove</button>
+                    </div>
+                </li>
+            </ul>
+
+            <button class="button button-secondary" style="margin-top: 15px;">+ Add Payment Method</button>
+
+            <h3 style="margin: 30px 0 15px;">Billing History</h3>
+            <p style="color: #666;">No billing history yet. Invoices will appear here after your first payment.</p>
+        </div>
+
+        <!-- API Keys Tab -->
+        <div id="api-tab" class="card">
+            <h2>API Keys</h2>
+
+            <div class="info-box">
+                <h4>About API Keys</h4>
+                <p>API keys allow you to integrate Aria with your applications. Keep your keys secure and never share them publicly.</p>
+                <p><strong>Note:</strong> API access requires a Pro or Enterprise subscription.</p>
+            </div>
+
+            <h3 style="margin: 30px 0 15px;">Your API Keys</h3>
+            
+            <div class="api-key-display">
+                <div>
+                    <div><strong>Production Key</strong></div>
+                    <code>sk_live_••••••••••••••••••••••••</code>
+                </div>
+                <div>
+                    <button class="button button-secondary">👁️ Show</button>
+                    <button class="button button-secondary">📋 Copy</button>
+                    <button class="button button-danger">🗑️ Revoke</button>
+                </div>
+            </div>
+
+            <button class="button button-primary" style="margin-top: 15px;">+ Create New API Key</button>
+
+            <div style="margin-top: 30px; padding: 20px; background: #fff3cd; border-radius: 8px; border-left: 4px solid #ffc107;">
+                <strong>⚠️ Security Warning</strong>
+                <p style="margin-top: 10px;">Never commit API keys to version control or share them in public forums. Rotate keys regularly for security.</p>
+            </div>
+        </div>
+
+        <!-- Notifications Tab -->
+        <div id="notifications-tab" class="card">
+            <h2>Notification Preferences</h2>
+
+            <h3 style="margin-bottom: 20px;">Email Notifications</h3>
+
+            <div class="form-group">
+                <label style="display: flex; align-items: center; gap: 10px;">
+                    <input type="checkbox" checked> Usage limit warnings (when approaching 80%)
+                </label>
+            </div>
+
+            <div class="form-group">
+                <label style="display: flex; align-items: center; gap: 10px;">
+                    <input type="checkbox" checked> Billing and payment notifications
+                </label>
+            </div>
+
+            <div class="form-group">
+                <label style="display: flex; align-items: center; gap: 10px;">
+                    <input type="checkbox" checked> Product updates and new features
+                </label>
+            </div>
+
+            <div class="form-group">
+                <label style="display: flex; align-items: center; gap: 10px;">
+                    <input type="checkbox"> Marketing and promotional emails
+                </label>
+            </div>
+
+            <div class="form-group">
+                <label style="display: flex; align-items: center; gap: 10px;">
+                    <input type="checkbox" checked> Security alerts
+                </label>
+            </div>
+
+            <button class="button button-primary">💾 Save Preferences</button>
+        </div>
+
+        <!-- Security Tab -->
+        <div id="security-tab" class="card">
+            <h2>Security Settings</h2>
+
+            <h3 style="margin-bottom: 20px;">Change Password</h3>
+            
+            <form id="password-form">
+                <div class="form-group">
+                    <label for="current-password">Current Password</label>
+                    <input type="password" id="current-password">
+                </div>
+
+                <div class="form-group">
+                    <label for="new-password">New Password</label>
+                    <input type="password" id="new-password">
+                </div>
+
+                <div class="form-group">
+                    <label for="confirm-password">Confirm New Password</label>
+                    <input type="password" id="confirm-password">
+                </div>
+
+                <button type="submit" class="button button-primary">🔒 Update Password</button>
+            </form>
+
+            <h3 style="margin: 40px 0 20px;">Two-Factor Authentication</h3>
+            
+            <div class="info-box">
+                <h4>Enhance Your Security</h4>
+                <p>Two-factor authentication adds an extra layer of security to your account.</p>
+                <button class="button button-primary">Enable 2FA</button>
+            </div>
+
+            <h3 style="margin: 40px 0 20px;">Active Sessions</h3>
+            
+            <div class="payment-method" style="margin-bottom: 10px;">
+                <div class="payment-method-info">
+                    <span>🖥️</span>
+                    <div>
+                        <div><strong>Current Session</strong></div>
+                        <div style="color: #666; font-size: 0.9em;">Chrome on Windows • Last active: Just now</div>
+                    </div>
+                </div>
+                <span class="badge badge-success">Active</span>
+            </div>
+
+            <button class="button button-danger" style="margin-top: 15px;">🚪 Sign Out All Other Sessions</button>
+
+            <h3 style="margin: 40px 0 20px;">Danger Zone</h3>
+            
+            <div style="padding: 20px; background: #fee; border-radius: 8px; border-left: 4px solid #f44336;">
+                <h4 style="color: #c62828; margin-bottom: 10px;">Delete Account</h4>
+                <p style="color: #666; margin-bottom: 15px;">Once you delete your account, there is no going back. Please be certain.</p>
+                <button class="button button-danger">Delete My Account</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function switchTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.card').forEach(card => {
+                card.classList.remove('active');
+            });
+
+            // Remove active class from all tab buttons
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+
+            // Show selected tab
+            document.getElementById(tabName + '-tab').classList.add('active');
+
+            // Add active class to clicked tab button
+            event.target.classList.add('active');
+        }
+
+        // Form submissions
+        document.getElementById('profile-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            alert('Profile updated successfully! (Demo mode)');
+        });
+
+        document.getElementById('password-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const newPass = document.getElementById('new-password').value;
+            const confirmPass = document.getElementById('confirm-password').value;
+            
+            if (newPass !== confirmPass) {
+                alert('Passwords do not match!');
+                return;
+            }
+            
+            alert('Password updated successfully! (Demo mode)');
+        });
+    </script>
+</body>
+</html>

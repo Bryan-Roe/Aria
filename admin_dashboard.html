@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aria - Admin Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 30px 20px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+        }
+
+        .stat-value {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+
+        .stat-subtext {
+            font-size: 0.9em;
+            color: #999;
+        }
+
+        .revenue-highlight {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .revenue-highlight .stat-value,
+        .revenue-highlight .stat-label,
+        .revenue-highlight .stat-subtext {
+            color: white;
+        }
+
+        .section {
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .section h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+        }
+
+        .table-container {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        th {
+            background: #f8f9fa;
+            color: #333;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.85em;
+            letter-spacing: 0.5px;
+        }
+
+        tr:hover {
+            background: #f8f9fa;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+        }
+
+        .badge-free {
+            background: #e0e0e0;
+            color: #666;
+        }
+
+        .badge-pro {
+            background: #667eea;
+            color: white;
+        }
+
+        .badge-enterprise {
+            background: #764ba2;
+            color: white;
+        }
+
+        .badge-active {
+            background: #4caf50;
+            color: white;
+        }
+
+        .badge-inactive {
+            background: #f44336;
+            color: white;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 5px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            transition: width 0.3s ease;
+        }
+
+        .button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .button-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .button-primary:hover {
+            transform: scale(1.05);
+            box-shadow: 0 3px 10px rgba(102, 126, 234, 0.4);
+        }
+
+        .button-secondary {
+            background: #e0e0e0;
+            color: #333;
+        }
+
+        .button-secondary:hover {
+            background: #d0d0d0;
+        }
+
+        .chart-container {
+            margin-top: 20px;
+            height: 300px;
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-around;
+            border-bottom: 2px solid #e0e0e0;
+            padding: 20px 0;
+        }
+
+        .chart-bar {
+            width: 80px;
+            background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+            border-radius: 5px 5px 0 0;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .chart-bar:hover {
+            opacity: 0.8;
+        }
+
+        .chart-label {
+            position: absolute;
+            bottom: -30px;
+            width: 100%;
+            text-align: center;
+            font-size: 0.85em;
+            color: #666;
+        }
+
+        .chart-value {
+            position: absolute;
+            top: -25px;
+            width: 100%;
+            text-align: center;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .alert {
+            padding: 15px 20px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+            color: #155724;
+        }
+
+        .alert-info {
+            background: #d1ecf1;
+            border-left: 4px solid #0dcaf0;
+            color: #055160;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .refresh-button {
+            float: right;
+            padding: 8px 16px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9em;
+        }
+
+        .refresh-button:hover {
+            background: #5568d3;
+        }
+
+        @media (max-width: 768px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>📊 Aria Platform - Admin Dashboard</h1>
+        <p>Subscription & Revenue Management</p>
+    </div>
+
+    <div class="container">
+        <div class="alert alert-success" id="target-alert" style="display: none;">
+            <strong>🎉 Target Achieved!</strong> Monthly recurring revenue exceeds $2,000 target.
+        </div>
+
+        <div class="alert alert-info" id="demo-alert">
+            <strong>ℹ️ Demo Mode:</strong> This dashboard shows simulated data. Connect to live subscription manager for real-time statistics.
+        </div>
+
+        <!-- Revenue Stats -->
+        <div class="stats-grid" id="stats-grid">
+            <div class="stat-card revenue-highlight">
+                <div class="stat-label">Monthly Recurring Revenue</div>
+                <div class="stat-value" id="mrr">$0</div>
+                <div class="stat-subtext">Target: $2,000</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="mrr-progress" style="width: 0%"></div>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-label">Annual Recurring Revenue</div>
+                <div class="stat-value" id="arr">$0</div>
+                <div class="stat-subtext">Projected annually</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-label">Total Subscribers</div>
+                <div class="stat-value" id="total-subs">0</div>
+                <div class="stat-subtext" id="active-subs">0 active</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-label">Free Tier</div>
+                <div class="stat-value" id="free-count">0</div>
+                <div class="stat-subtext">Users</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-label">Pro Tier</div>
+                <div class="stat-value" id="pro-count">0</div>
+                <div class="stat-subtext">@ $49/mo each</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-label">Enterprise Tier</div>
+                <div class="stat-value" id="enterprise-count">0</div>
+                <div class="stat-subtext">@ $199/mo each</div>
+            </div>
+        </div>
+
+        <!-- Revenue Chart -->
+        <div class="section">
+            <h2>
+                Revenue by Tier
+                <button class="refresh-button" onclick="loadData()">🔄 Refresh</button>
+            </h2>
+            <div class="chart-container">
+                <div class="chart-bar" id="bar-free" style="height: 0px">
+                    <div class="chart-value" id="val-free">$0</div>
+                    <div class="chart-label">Free</div>
+                </div>
+                <div class="chart-bar" id="bar-pro" style="height: 0px">
+                    <div class="chart-value" id="val-pro">$0</div>
+                    <div class="chart-label">Pro</div>
+                </div>
+                <div class="chart-bar" id="bar-enterprise" style="height: 0px">
+                    <div class="chart-value" id="val-enterprise">$0</div>
+                    <div class="chart-label">Enterprise</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Subscribers Table -->
+        <div class="section">
+            <h2>Active Subscriptions</h2>
+            <div class="table-container">
+                <table id="subscribers-table">
+                    <thead>
+                        <tr>
+                            <th>User ID</th>
+                            <th>Tier</th>
+                            <th>Status</th>
+                            <th>Start Date</th>
+                            <th>MRR Contribution</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="subscribers-body">
+                        <tr>
+                            <td colspan="6" class="loading">
+                                <div class="spinner"></div>
+                                Loading subscription data...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="section">
+            <h2>Quick Actions</h2>
+            <button class="button button-primary" onclick="simulateSubscribers()">📈 Simulate Target Revenue</button>
+            <button class="button button-secondary" onclick="viewPricing()">💰 View Pricing Page</button>
+            <button class="button button-secondary" onclick="exportData()">📊 Export Data</button>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = window.location.protocol + '//' + window.location.host;
+
+        async function loadData() {
+            try {
+                // Load revenue stats
+                const revenueResponse = await fetch(`${API_BASE}/api/subscription/revenue`);
+                if (revenueResponse.ok) {
+                    const revenueData = await revenueResponse.json();
+                    updateStats(revenueData);
+                } else {
+                    // Use demo data if API not available
+                    loadDemoData();
+                }
+            } catch (error) {
+                console.error('Failed to load data:', error);
+                loadDemoData();
+            }
+        }
+
+        function loadDemoData() {
+            // Simulate target revenue scenario
+            const demoData = {
+                total_subscribers: 15,
+                active_subscribers: 15,
+                by_tier: {
+                    free: 0,
+                    pro: 5,
+                    enterprise: 10
+                },
+                monthly_recurring_revenue: 2235,
+                annual_recurring_revenue: 26820
+            };
+            updateStats(demoData);
+            loadDemoSubscribers();
+        }
+
+        function updateStats(data) {
+            const mrr = data.monthly_recurring_revenue || 0;
+            const arr = data.annual_recurring_revenue || 0;
+            const target = 2000;
+            const progress = Math.min((mrr / target) * 100, 100);
+
+            document.getElementById('mrr').textContent = `$${mrr.toLocaleString()}`;
+            document.getElementById('arr').textContent = `$${arr.toLocaleString()}`;
+            document.getElementById('total-subs').textContent = data.total_subscribers || 0;
+            document.getElementById('active-subs').textContent = `${data.active_subscribers || 0} active`;
+            document.getElementById('free-count').textContent = data.by_tier?.free || 0;
+            document.getElementById('pro-count').textContent = data.by_tier?.pro || 0;
+            document.getElementById('enterprise-count').textContent = data.by_tier?.enterprise || 0;
+            document.getElementById('mrr-progress').style.width = `${progress}%`;
+
+            // Update chart
+            const maxRevenue = Math.max(
+                (data.by_tier?.free || 0) * 0,
+                (data.by_tier?.pro || 0) * 49,
+                (data.by_tier?.enterprise || 0) * 199
+            );
+
+            const freeRevenue = (data.by_tier?.free || 0) * 0;
+            const proRevenue = (data.by_tier?.pro || 0) * 49;
+            const enterpriseRevenue = (data.by_tier?.enterprise || 0) * 199;
+
+            document.getElementById('bar-free').style.height = `${(freeRevenue / maxRevenue) * 200 || 10}px`;
+            document.getElementById('bar-pro').style.height = `${(proRevenue / maxRevenue) * 200 || 10}px`;
+            document.getElementById('bar-enterprise').style.height = `${(enterpriseRevenue / maxRevenue) * 200}px`;
+
+            document.getElementById('val-free').textContent = `$${freeRevenue}`;
+            document.getElementById('val-pro').textContent = `$${proRevenue}`;
+            document.getElementById('val-enterprise').textContent = `$${enterpriseRevenue}`;
+
+            // Show success alert if target met
+            if (mrr >= target) {
+                document.getElementById('target-alert').style.display = 'block';
+            }
+        }
+
+        function loadDemoSubscribers() {
+            const tbody = document.getElementById('subscribers-body');
+            tbody.innerHTML = '';
+
+            // Create demo subscribers for target scenario
+            const tiers = [
+                ...Array(5).fill('pro').map((t, i) => ({ tier: t, id: `pro_user_${i+1}` })),
+                ...Array(10).fill('enterprise').map((t, i) => ({ tier: t, id: `ent_user_${i+1}` }))
+            ];
+
+            tiers.forEach(sub => {
+                const row = document.createElement('tr');
+                const price = sub.tier === 'pro' ? 49 : 199;
+                row.innerHTML = `
+                    <td>${sub.id}</td>
+                    <td><span class="badge badge-${sub.tier}">${sub.tier.toUpperCase()}</span></td>
+                    <td><span class="badge badge-active">Active</span></td>
+                    <td>${new Date().toLocaleDateString()}</td>
+                    <td>$${price}</td>
+                    <td>
+                        <button class="button button-secondary" onclick="alert('Subscription management coming soon!')">Manage</button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function simulateSubscribers() {
+            loadDemoData();
+            alert('✅ Simulated target revenue scenario:\n\n5 Pro subscribers @ $49/mo = $245\n10 Enterprise subscribers @ $199/mo = $1,990\n\nTotal MRR: $2,235\nTarget: $2,000 ✓');
+        }
+
+        function viewPricing() {
+            window.open('/pricing.html', '_blank');
+        }
+
+        function exportData() {
+            const data = {
+                timestamp: new Date().toISOString(),
+                mrr: document.getElementById('mrr').textContent,
+                arr: document.getElementById('arr').textContent,
+                total_subscribers: document.getElementById('total-subs').textContent,
+                active_subscribers: document.getElementById('active-subs').textContent
+            };
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `aria-revenue-${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+        }
+
+        // Load data on page load
+        window.addEventListener('load', loadData);
+    </script>
+</body>
+</html>
