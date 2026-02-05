@@ -2331,3 +2331,175 @@ def subscription_track_usage(req: func.HttpRequest) -> func.HttpResponse:
             headers=create_cors_response_headers()
         )
 
+
+# -----------------------------------------------------------------------------
+# Stripe Webhook Handler
+# -----------------------------------------------------------------------------
+@app.route(route="webhook/stripe", methods=["POST"], auth_level=func.AuthLevel.ANONYMOUS)
+def stripe_webhook(req: func.HttpRequest) -> func.HttpResponse:
+    """
+    Handle Stripe webhook events.
+    
+    POST /api/webhook/stripe
+    Headers: Stripe-Signature
+    Body: Stripe event payload
+    
+    Response: {
+        "status": "success" | "error",
+        "message": "..."
+    }
+    """
+    logging.info('Stripe webhook endpoint invoked')
+    
+    try:
+        from shared.stripe_webhooks import get_webhook_handler
+        
+        payload = req.get_body().decode('utf-8')
+        signature = req.headers.get('Stripe-Signature', '')
+        webhook_secret = os.environ.get('STRIPE_WEBHOOK_SECRET')
+        
+        handler = get_webhook_handler()
+        result = handler.handle_webhook(payload, signature, webhook_secret)
+        
+        status_code = 200 if result["status"] in ["success", "ignored"] else 500
+        
+        return func.HttpResponse(
+            json.dumps(result),
+            status_code=status_code,
+            mimetype="application/json",
+            headers=create_cors_response_headers()
+        )
+    
+    except Exception as e:
+        logging.error(f'Stripe webhook error: {str(e)}')
+        return func.HttpResponse(
+            json.dumps({"status": "error", "message": str(e)}),
+            status_code=500,
+            mimetype="application/json",
+            headers=create_cors_response_headers()
+        )
+
+
+# -----------------------------------------------------------------------------
+# Email Notifications Test Endpoint
+# -----------------------------------------------------------------------------
+@app.route(route="notifications/test", methods=["POST"], auth_level=func.AuthLevel.ANONYMOUS)
+def test_notifications(req: func.HttpRequest) -> func.HttpResponse:
+    """
+    Test email notification system.
+    
+    POST /api/notifications/test
+    Body: {
+        "email": "user@example.com",
+        "type": "usage_warning" | "payment_succeeded" | "subscription_activated"
+    }
+    
+    Response: {
+        "success": true,
+        "message": "Notification sent"
+    }
+    """
+    logging.info('Test notification endpoint invoked')
+    
+    try:
+        from shared.email_notifications import get_email_system
+        
+        body = json.loads(req.get_body().decode('utf-8'))
+        email = body.get('email', 'test@example.com')
+        notification_type = body.get('type', 'usage_warning')
+        
+        email_system = get_email_system()
+        
+        # Send test notification based on type
+        if notification_type == 'usage_warning':
+            success = email_system.notify_usage_warning(
+                user_email=email,
+                resource='chat_messages',
+                percentage=85.0,
+                current=850,
+                limit=1000
+            )
+        elif notification_type == 'payment_succeeded':
+            success = email_system.notify_payment_succeeded(
+                user_email=email,
+                amount=49.00,
+                invoice_id='inv_test123'
+            )
+        elif notification_type == 'subscription_activated':
+            success = email_system.notify_subscription_activated(
+                user_email=email,
+                tier='Pro',
+                price=49.00
+            )
+        else:
+            return func.HttpResponse(
+                json.dumps({"error": f"Unknown notification type: {notification_type}"}),
+                status_code=400,
+                mimetype="application/json",
+                headers=create_cors_response_headers()
+            )
+        
+        return func.HttpResponse(
+            json.dumps({
+                "success": success,
+                "message": f"Test notification sent to {email}",
+                "type": notification_type
+            }),
+            status_code=200,
+            mimetype="application/json",
+            headers=create_cors_response_headers()
+        )
+    
+    except Exception as e:
+        logging.error(f'Test notification error: {str(e)}')
+        return func.HttpResponse(
+            json.dumps({"error": f"Failed to send test notification: {str(e)}"}),
+            status_code=500,
+            mimetype="application/json",
+            headers=create_cors_response_headers()
+        )
+
+
+# -----------------------------------------------------------------------------
+# Notifications Log Endpoint
+# -----------------------------------------------------------------------------
+@app.route(route="notifications/log", methods=["GET"], auth_level=func.AuthLevel.ANONYMOUS)
+def notifications_log(req: func.HttpRequest) -> func.HttpResponse:
+    """
+    Get email notification log.
+    
+    GET /api/notifications/log?user_email=user@example.com
+    
+    Response: {
+        "notifications": [...]
+    }
+    """
+    logging.info('Notifications log endpoint invoked')
+    
+    try:
+        from shared.email_notifications import get_email_system
+        
+        user_email = req.params.get('user_email')
+        
+        email_system = get_email_system()
+        notifications = email_system.get_sent_emails(user_email)
+        
+        return func.HttpResponse(
+            json.dumps({
+                "notifications": notifications,
+                "count": len(notifications)
+            }),
+            status_code=200,
+            mimetype="application/json",
+            headers=create_cors_response_headers()
+        )
+    
+    except Exception as e:
+        logging.error(f'Notifications log error: {str(e)}')
+        return func.HttpResponse(
+            json.dumps({"error": f"Failed to get notifications log: {str(e)}"}),
+            status_code=500,
+            mimetype="application/json",
+            headers=create_cors_response_headers()
+        )
+
