@@ -2,10 +2,17 @@
 
 This document outlines identified performance bottlenecks and inefficient code patterns across the QAI codebase, along with specific recommendations for improvement.
 
+**✅ NEW**: See `PERFORMANCE_OPTIMIZATION_SUMMARY.md` for completed Phase 1 & 2 optimizations (Feb 2024).
+
 ## Summary of Findings
 
 | Location | Issue | Severity | Status |
 |----------|-------|----------|--------|
+| `aria_web/server.py` | Repeated any() keyword checks (27 calls) | High | ✅ Fixed |
+| `shared/chat_memory.py` | No connection pooling | High | ✅ Fixed |
+| `batch_evaluator.py` | O(n²) linear search in compare_models | High | ✅ Fixed |
+| `dashboard/serve.py` | Full file read for large logs | Medium | ✅ Fixed |
+| 6 files | Unnecessary .keys() in dict iteration | Low | ✅ Fixed |
 | `token_utils.py` | Repeated tokenizer instantiation | High | Fixed |
 | `chat_memory.py` | Inefficient cosine similarity loop | Medium | Fixed |
 | `chat_memory.py` | Repeated OpenAI client creation | Medium | Fixed |
