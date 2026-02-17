@@ -103,6 +103,34 @@ class BaseChatProvider:
     def complete(self, messages: List[RoleMessage], stream: bool = True) -> Iterable[str] | str:
         raise NotImplementedError
 
+    @staticmethod
+    def _handle_openai_streaming_response(response) -> Generator[str, None, None]:
+        """Extract content from OpenAI-style streaming response.
+        
+        Common helper for OpenAI, LMStudio, and other OpenAI-compatible providers.
+        Handles the standard streaming chunk format with resilient error handling.
+        """
+        for chunk in response:
+            try:
+                delta = chunk.choices[0].delta
+                if delta and delta.content:
+                    yield delta.content
+            except Exception:
+                # Be resilient to SDK shape changes
+                pass
+
+    @staticmethod
+    def _handle_openai_non_streaming_response(response) -> str:
+        """Extract content from OpenAI-style non-streaming response.
+        
+        Common helper for OpenAI, LMStudio, and other OpenAI-compatible providers.
+        Handles the standard completion format with resilient error handling.
+        """
+        try:
+            return response.choices[0].message.content or ""
+        except Exception:
+            return ""
+
 
 class LoraLocalProvider(BaseChatProvider):
     """Provider for local inference with LoRA adapters.
@@ -382,37 +410,18 @@ class OpenAIProvider(BaseChatProvider):
         self.max_output_tokens = max_output_tokens
 
     def complete(self, messages: List[RoleMessage], stream: bool = True) -> Iterable[str] | str:
+        resp = self.client.chat.completions.create(
+            model=self.model,
+            messages=messages,
+            temperature=self.temperature,
+            max_tokens=self.max_output_tokens,
+            stream=stream,
+        )
+        
         if stream:
-            resp = self.client.chat.completions.create(
-                model=self.model,
-                messages=messages,
-                temperature=self.temperature,
-                max_tokens=self.max_output_tokens,
-                stream=True,
-            )
-
-            def gen() -> Generator[str, None, None]:
-                for chunk in resp:
-                    try:
-                        delta = chunk.choices[0].delta
-                        if delta and delta.content:
-                            yield delta.content
-                    except Exception:
-                        # Be resilient to SDK shape changes
-                        pass
-            return gen()
+            return self._handle_openai_streaming_response(resp)
         else:
-            resp = self.client.chat.completions.create(
-                model=self.model,
-                messages=messages,
-                temperature=self.temperature,
-                max_tokens=self.max_output_tokens,
-                stream=False,
-            )
-            try:
-                return resp.choices[0].message.content or ""
-            except Exception:
-                return ""
+            return self._handle_openai_non_streaming_response(resp)
 
 
 class LMStudioProvider(BaseChatProvider):
@@ -431,36 +440,18 @@ class LMStudioProvider(BaseChatProvider):
         self.max_output_tokens = max_output_tokens
 
     def complete(self, messages: List[RoleMessage], stream: bool = True) -> Iterable[str] | str:
+        resp = self.client.chat.completions.create(
+            model=self.model,
+            messages=messages,
+            temperature=self.temperature,
+            max_tokens=self.max_output_tokens,
+            stream=stream,
+        )
+        
         if stream:
-            resp = self.client.chat.completions.create(
-                model=self.model,
-                messages=messages,
-                temperature=self.temperature,
-                max_tokens=self.max_output_tokens,
-                stream=True,
-            )
-
-            def gen() -> Generator[str, None, None]:
-                for chunk in resp:
-                    try:
-                        delta = chunk.choices[0].delta
-                        if delta and delta.content:
-                            yield delta.content
-                    except Exception:
-                        pass
-            return gen()
+            return self._handle_openai_streaming_response(resp)
         else:
-            resp = self.client.chat.completions.create(
-                model=self.model,
-                messages=messages,
-                temperature=self.temperature,
-                max_tokens=self.max_output_tokens,
-                stream=False,
-            )
-            try:
-                return resp.choices[0].message.content or ""
-            except Exception:
-                return ""
+            return self._handle_openai_non_streaming_response(resp)
 
 
 class AzureOpenAIProvider(BaseChatProvider):

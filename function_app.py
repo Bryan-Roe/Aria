@@ -15,65 +15,70 @@ import time
 from typing import Optional
 from datetime import datetime
 
+# Import defensive import helper
+from shared.import_helpers import safe_import, create_stub_function
+
 # -----------------------------------------------------------------------------
 # Optional unified SQL engine health + pool metrics (multi-database support)
 # -----------------------------------------------------------------------------
-try:  # pragma: no cover - defensive import
-    from shared.sql_engine import sql_health, engine_stats  # type: ignore
-except Exception:  # noqa: BLE001
-    def sql_health():  # type: ignore
-        return {"enabled": False, "error": "sql_engine_import_failed"}
-
-    def engine_stats():  # type: ignore
-        return {"enabled": False, "error": "engine_stats_import_failed"}
+sql_funcs = safe_import(
+    'shared.sql_engine',
+    import_names=('sql_health', 'engine_stats'),
+    fallback_factory=create_stub_function
+)
+sql_health = sql_funcs['sql_health']
+engine_stats = sql_funcs['engine_stats']
 
 # -----------------------------------------------------------------------------
 # Early Telemetry Initialization (non-fatal if unavailable)
 # -----------------------------------------------------------------------------
-try:  # pragma: no cover - defensive import
-    from shared.telemetry import init_telemetry
-    init_telemetry()
-except Exception as _telemetry_err:  # noqa: BLE001
-    logging.warning(f"[startup] Telemetry init skipped: {_telemetry_err}")
+telemetry_module = safe_import('shared.telemetry', log_failure=False)
+if telemetry_module and hasattr(telemetry_module, 'init_telemetry'):
+    try:
+        telemetry_module.init_telemetry()
+    except Exception as _telemetry_err:  # noqa: BLE001
+        logging.warning(f"[startup] Telemetry init skipped: {_telemetry_err}")
+else:
+    logging.warning("[startup] Telemetry init skipped: module unavailable")
 
 # Try to initialize generic OpenTelemetry tracing (best-effort)
-try:  # pragma: no cover - optional
-    from shared.tracing import init_tracing
-
-    init_tracing(service_name="qai.functions")
-except Exception as _trace_err:  # noqa: BLE001 - don't fail on missing libs
-    logging.debug(f"[startup] Tracing init skipped: {_trace_err}")
+tracing_module = safe_import('shared.tracing', log_failure=False)
+if tracing_module and hasattr(tracing_module, 'init_tracing'):
+    try:
+        tracing_module.init_tracing(service_name="qai.functions")
+    except Exception as _trace_err:  # noqa: BLE001 - don't fail on missing libs
+        logging.debug(f"[startup] Tracing init skipped: {_trace_err}")
+else:
+    logging.debug("[startup] Tracing init skipped: module unavailable")
 
 # -----------------------------------------------------------------------------
 # Optional Cosmos Client import (lazy health + persistence)
 # -----------------------------------------------------------------------------
-try:  # pragma: no cover - defensive import
-    from shared import cosmos_client
-except Exception as _cosmos_err:  # noqa: BLE001
-    cosmos_client = None  # type: ignore
-    logging.info(f"[startup] Cosmos client unavailable: {_cosmos_err}")
+cosmos_client = safe_import('shared.cosmos_client', log_failure=True)
+if not cosmos_client:
+    logging.info("[startup] Cosmos client unavailable")
 
 # Memory / DB logging utilities (fault-tolerant)
-try:
-    from shared.db_logging import log_chat_message_safe
-except Exception:  # pragma: no cover - if shared not on path
-    log_chat_message_safe = None  # type: ignore
-try:
-    from shared.chat_memory import (
-        generate_embedding,
-        fetch_similar_messages,
-        store_embedding,
-    )
-except Exception:
-    # Provide graceful degradations so endpoint still works
-    def generate_embedding(text: str):  # type: ignore
-        return []
+db_logging = safe_import(
+    'shared.db_logging',
+    import_names=('log_chat_message_safe',),
+    fallback_factory=lambda name: None
+)
+log_chat_message_safe = db_logging['log_chat_message_safe']
 
-    def fetch_similar_messages(query_emb, top_k=5, session_id=None):  # type: ignore
-        return []
-
-    def store_embedding(message_id, embedding, model):  # type: ignore
-        return False
+# Chat memory functions with graceful degradation
+chat_memory_funcs = safe_import(
+    'shared.chat_memory',
+    import_names=('generate_embedding', 'fetch_similar_messages', 'store_embedding'),
+    fallback_factory=lambda name: {
+        'generate_embedding': lambda text: [],
+        'fetch_similar_messages': lambda query_emb, top_k=5, session_id=None: [],
+        'store_embedding': lambda message_id, embedding, model: False,
+    }.get(name, lambda *args, **kwargs: None)
+)
+generate_embedding = chat_memory_funcs['generate_embedding']
+fetch_similar_messages = chat_memory_funcs['fetch_similar_messages']
+store_embedding = chat_memory_funcs['store_embedding']
 
 # Add talk-to-ai to path so we can import chat_providers
 talk_to_ai_path = Path(__file__).resolve().parent / "talk-to-ai" / "src"
