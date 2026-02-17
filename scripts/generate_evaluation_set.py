@@ -44,15 +44,16 @@ def read_jsonl(path: Path) -> List[Dict]:
 
 def hash_messages(msgs: List[Dict]) -> str:
     concat = "\n".join([f"{m.get('role','')}: {m.get('content','')[:500]}" for m in msgs])
-    return hashlib.sha256(concat.encode("utf-8")).hexdigest()[:32]
+    message_hash = hashlib.sha256(concat.encode("utf-8")).hexdigest()[:32]
+    return message_hash
 
 
 def collect_training_hashes(dataset_dir: Path) -> Set[str]:
     hashes: Set[str] = set()
     for split_file in [dataset_dir / "train.json", dataset_dir / "test.json"]:
         for rec in read_jsonl(split_file):
-            h = rec.get("hash") or hash_messages(rec.get("messages", []))
-            hashes.add(h)
+            record_hash = rec.get("hash") or hash_messages(rec.get("messages", []))
+            hashes.add(record_hash)
     return hashes
 
 
@@ -83,19 +84,19 @@ def main():
         candidates: List[Dict] = []
         for cf in candidate_files:
             for rec in read_jsonl(cf):
-                h = rec.get("hash") or hash_messages(rec.get("messages", []))
-                if h in training_hashes:
+                record_hash = rec.get("hash") or hash_messages(rec.get("messages", []))
+                if record_hash in training_hashes:
                     # Still part of training; skip for eval
                     # We rely on separate generation or external datasets to build a truly fresh eval set.
                     continue
-                rec["hash"] = h
+                rec["hash"] = record_hash
                 candidates.append(rec)
         # If no candidates remain (common when sources are entirely training sets), fallback sampling ignoring uniqueness
         if not candidates:
             for cf in candidate_files:
                 for rec in read_jsonl(cf):
-                    h = rec.get("hash") or hash_messages(rec.get("messages", []))
-                    rec["hash"] = h
+                    record_hash = rec.get("hash") or hash_messages(rec.get("messages", []))
+                    rec["hash"] = record_hash
                     candidates.append(rec)
         random.shuffle(candidates)
         selected = candidates[: args.per_source]
@@ -107,9 +108,9 @@ def main():
     # Deduplicate final evaluation set
     dedup = {}
     for r in eval_records:
-        h = r["hash"]
-        if h not in dedup:
-            dedup[h] = r
+        record_hash = r["hash"]
+        if record_hash not in dedup:
+            dedup[record_hash] = r
     final_eval = list(dedup.values())
 
     # Shuffle final

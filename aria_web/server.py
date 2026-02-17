@@ -400,10 +400,10 @@ def generate_world_with_llm(theme: str, count: int, provider) -> dict:
         obj_match = _re.search(r"\{.*\}\s*$", raw_str, flags=_re.DOTALL)
         if obj_match:
             raw_str = obj_match.group(0)
-        data = _json.loads(raw_str)
+        parsed_world_data = _json.loads(raw_str)
         # Basic validation
-        objects = data.get('objects') or {}
-        env = data.get('environment') or {}
+        objects = parsed_world_data.get('objects') or {}
+        env = parsed_world_data.get('environment') or {}
         # Sanitize
         sanitized_objects = {}
         for key, val in list(objects.items())[:count]:
@@ -1013,12 +1013,12 @@ class AriaRequestHandler(SimpleHTTPRequestHandler):
                 content_length = int(self.headers.get('Content-Length', 0))
                 post_data = self.rfile.read(content_length)
 
-                data = json.loads(post_data.decode('utf-8'))
-                command = data.get('command', '')
+                request_data = json.loads(post_data.decode('utf-8'))
+                command = request_data.get('command', '')
 
                 # Update stage state if provided
-                if 'stage_state' in data:
-                    stage_state.update(data['stage_state'])
+                if 'stage_state' in request_data:
+                    stage_state.update(request_data['stage_state'])
 
                 print(f"📝 Command received: {command}")
                 print(f"👁️  Stage context:\n{get_stage_context()}")
@@ -1060,19 +1060,19 @@ class AriaRequestHandler(SimpleHTTPRequestHandler):
             try:
                 content_length = int(self.headers.get('Content-Length', 0))
                 post_data = self.rfile.read(content_length)
-                data = json.loads(post_data.decode('utf-8'))
+                request_data = json.loads(post_data.decode('utf-8'))
 
                 # Support both single object ({action, object}) and bulk ({objects: {...}})
-                if 'objects' in data and isinstance(data['objects'], dict):
+                if 'objects' in request_data and isinstance(request_data['objects'], dict):
                     # Merge supplied objects into stage_state
-                    for k, v in data['objects'].items():
+                    for k, v in request_data['objects'].items():
                         if isinstance(v, dict) and 'position' in v:
                             stage_state['objects'][k] = v
-                    result = {'status': 'ok',
+                    api_response = {'status': 'ok',
                               'objects': stage_state['objects']}
-                elif 'object' in data and 'action' in data:
-                    action = data['action']
-                    obj = data['object']
+                elif 'object' in request_data and 'action' in request_data:
+                    action = request_data['action']
+                    obj = request_data['object']
                     obj_id = obj.get('id') or obj.get('name')
                     if not obj_id:
                         raise ValueError(
@@ -1083,7 +1083,7 @@ class AriaRequestHandler(SimpleHTTPRequestHandler):
                         state = obj.get('state', 'on_stage')
                         stage_state['objects'][obj_id] = {
                             'position': position, 'state': state}
-                        result = {'status': 'added', 'id': obj_id,
+                        api_response = {'status': 'added', 'id': obj_id,
                                   'object': stage_state['objects'][obj_id]}
                     elif action == 'update':
                         if obj_id not in stage_state['objects']:
@@ -1092,11 +1092,11 @@ class AriaRequestHandler(SimpleHTTPRequestHandler):
                             stage_state['objects'][obj_id]['position'] = obj['position']
                         if 'state' in obj:
                             stage_state['objects'][obj_id]['state'] = obj['state']
-                        result = {'status': 'updated', 'id': obj_id,
+                        api_response = {'status': 'updated', 'id': obj_id,
                                   'object': stage_state['objects'][obj_id]}
                     elif action == 'remove' or action == 'delete':
                         removed = stage_state['objects'].pop(obj_id, None)
-                        result = {'status': 'removed',
+                        api_response = {'status': 'removed',
                                   'id': obj_id, 'object': removed}
                     else:
                         raise ValueError(
@@ -1109,7 +1109,7 @@ class AriaRequestHandler(SimpleHTTPRequestHandler):
                 self.send_response(200)
                 self.send_header('Content-Type', 'application/json')
                 self.end_headers()
-                self.wfile.write(json.dumps(result).encode('utf-8'))
+                self.wfile.write(json.dumps(api_response).encode('utf-8'))
                 return
             except Exception as e:
                 print(f"❌ Object API error: {e}")
@@ -1128,11 +1128,11 @@ class AriaRequestHandler(SimpleHTTPRequestHandler):
             try:
                 content_length = int(self.headers.get('Content-Length', 0))
                 body = self.rfile.read(content_length)
-                data = json.loads(body.decode('utf-8'))
+                request_data = json.loads(body.decode('utf-8'))
 
-                command = data.get('command', '')
-                auto_execute = data.get('auto_execute', False)
-                use_llm = data.get('use_llm', True)
+                command = request_data.get('command', '')
+                auto_execute = request_data.get('auto_execute', False)
+                use_llm = request_data.get('use_llm', True)
 
                 if not command:
                     raise ValueError('command is required')
@@ -1141,7 +1141,7 @@ class AriaRequestHandler(SimpleHTTPRequestHandler):
                 actions = action_parser.parse(command, use_llm=use_llm)
 
                 if not actions:
-                    result = {
+                    api_response = {
                         'status': 'error',
                         'message': 'Could not parse command into actions',
                         'command': command,
@@ -1149,26 +1149,26 @@ class AriaRequestHandler(SimpleHTTPRequestHandler):
                     }
                 else:
                     # Execute actions if auto_execute is True
-                    results = []
+                    execution_results = []
                     all_tags = []
 
                     if auto_execute:
                         for action in actions:
                             exec_result = execute_aria_action(action)
-                            results.append({
+                            execution_results.append({
                                 'action': action,
                                 'result': exec_result
                             })
                             if exec_result.get('tags'):
                                 all_tags.extend(exec_result['tags'])
 
-                    result = {
+                    api_response = {
                         'status': 'success',
                         'message': f'Parsed {len(actions)} actions' + (' and executed' if auto_execute else ' (plan only)'),
                         'command': command,
                         'actions': actions,
                         'executed': auto_execute,
-                        'results': results if auto_execute else None,
+                        'results': execution_results if auto_execute else None,
                         'tags': all_tags if auto_execute else None,
                         'state': stage_state if auto_execute else None
                     }
@@ -1176,7 +1176,7 @@ class AriaRequestHandler(SimpleHTTPRequestHandler):
                 self.send_response(200)
                 self.send_header('Content-Type', 'application/json')
                 self.end_headers()
-                self.wfile.write(json.dumps(result, indent=2).encode('utf-8'))
+                self.wfile.write(json.dumps(api_response, indent=2).encode('utf-8'))
 
                 print(f"✓ Execute API: {command} -> {len(actions)} actions" +
                       (f" (executed)" if auto_execute else " (plan only)"))
@@ -1204,10 +1204,10 @@ class AriaRequestHandler(SimpleHTTPRequestHandler):
             try:
                 content_length = int(self.headers.get('Content-Length', 0))
                 body = self.rfile.read(content_length)
-                data = json.loads(body.decode('utf-8')) if body else {}
-                theme = data.get('theme', 'forest')
-                count = int(data.get('count', 6))
-                use_llm = bool(data.get('use_llm', True))
+                request_data = json.loads(body.decode('utf-8')) if body else {}
+                theme = request_data.get('theme', 'forest')
+                count = int(request_data.get('count', 6))
+                use_llm = bool(request_data.get('use_llm', True))
 
                 # Generate
                 if use_llm and action_parser.provider:
