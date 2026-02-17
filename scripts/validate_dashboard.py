@@ -1,6 +1,18 @@
 import re
 from pathlib import Path
 
+# Pre-compile regex patterns for performance
+_RE_CONSOLE_LOG = re.compile(r'console\.log\([^)]+\)')
+_RE_GET_BY_ID = re.compile(r"getElementById\(['\"]([^'\"]+)['\"]\)")
+_RE_QUERY_SELECTOR = re.compile(r"querySelector\(['\"]([^'\"]+)['\"]\)")
+_RE_ELEMENT_IDS = re.compile(r'id=["\']([^"\']+)["\']')
+_RE_ASYNC_FUNCTION = re.compile(r'async\s+function')
+_RE_AWAIT = re.compile(r'\bawait\s+')
+_RE_EVENT_LISTENER = re.compile(r'addEventListener\s*\(')
+_RE_FETCH_CALLS = re.compile(r"fetch\(['\"]([^'\"]+)['\"]\)")
+_RE_LOCALSTORAGE = re.compile(r"localStorage\.(getItem|setItem|removeItem)\(['\"]([^'\"]+)['\"]\)")
+_RE_ONCLICK = re.compile(r'onclick=["\']([^"\']+)["\']')
+
 html_file = Path('dashboard/unified.html')
 content = html_file.read_text(encoding='utf-8')
 
@@ -9,7 +21,7 @@ print('=== Extended Dashboard Validation ===\n')
 issues_found = []
 
 # 1. Check for console.log statements (potential debugging artifacts)
-console_logs = re.findall(r'console\.log\([^)]+\)', content)
+console_logs = _RE_CONSOLE_LOG.findall(content)
 if console_logs:
     print(f'  Found {len(console_logs)} console.log statements (consider removing for production)')
 else:
@@ -18,11 +30,11 @@ else:
 # 2. Check for undefined variable references in common patterns
 print('\n Checking variable references...')
 potential_issues = {
-    'getElementById': re.findall(r"getElementById\(['\"]([^'\"]+)['\"]\)", content),
-    'querySelector': re.findall(r"querySelector\(['\"]([^'\"]+)['\"]\)", content),
+    'getElementById': _RE_GET_BY_ID.findall(content),
+    'querySelector': _RE_QUERY_SELECTOR.findall(content),
 }
 
-element_ids = re.findall(r'id=["\']([^"\']+)["\']', content)
+element_ids = _RE_ELEMENT_IDS.findall(content)
 print(f' Found {len(element_ids)} element IDs defined')
 
 missing_ids = []
@@ -40,22 +52,22 @@ else:
     print(' All element ID references appear valid')
 
 # 3. Check for async/await patterns
-async_functions = len(re.findall(r'async\s+function', content))
-await_calls = len(re.findall(r'\bawait\s+', content))
+async_functions = len(_RE_ASYNC_FUNCTION.findall(content))
+await_calls = len(_RE_AWAIT.findall(content))
 print(f'\n Async functions: {async_functions}, await calls: {await_calls}')
 
 # 4. Check for event listeners
-event_listeners = len(re.findall(r'addEventListener\s*\(', content))
+event_listeners = len(_RE_EVENT_LISTENER.findall(content))
 print(f' Event listeners: {event_listeners}')
 
 # 5. Check for fetch calls (API endpoints)
-fetch_calls = re.findall(r"fetch\(['\"]([^'\"]+)['\"]\)", content)
+fetch_calls = _RE_FETCH_CALLS.findall(content)
 print(f'\n API endpoints used: {len(set(fetch_calls))}')
 for endpoint in sorted(set(fetch_calls)):
     print(f'   - {endpoint}')
 
 # 6. Check for localStorage usage
-localstorage_keys = re.findall(r"localStorage\.(getItem|setItem|removeItem)\(['\"]([^'\"]+)['\"]\)", content)
+localstorage_keys = _RE_LOCALSTORAGE.findall(content)
 if localstorage_keys:
     print(f'\n LocalStorage keys: {len(set([k[1] for k in localstorage_keys]))}')
     for method, key in sorted(set(localstorage_keys)):
@@ -63,7 +75,7 @@ if localstorage_keys:
 
 # 7. Check for potential syntax errors in inline onclick handlers
 print('\n Checking inline onclick syntax...')
-onclick_handlers = re.findall(r'onclick=["\']([^"\']+)["\']', content)
+onclick_handlers = _RE_ONCLICK.findall(content)
 syntax_ok = True
 for i, handler in enumerate(onclick_handlers, 1):
     # Check for balanced parentheses

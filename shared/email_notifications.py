@@ -4,6 +4,7 @@ Handles subscription events, usage alerts, and billing notifications
 """
 
 import logging
+import re
 from typing import Dict, List, Optional, Any
 from datetime import datetime
 from enum import Enum
@@ -11,6 +12,10 @@ from pathlib import Path
 import json
 
 logger = logging.getLogger(__name__)
+
+# Pre-compile regex patterns for performance
+_RE_HTML_TAGS = re.compile(r'<[^<]+?>')
+_RE_WHITESPACE = re.compile(r'\s+')
 
 
 class EmailTemplate(Enum):
@@ -366,9 +371,8 @@ class EmailNotificationSystem:
     
     def _strip_html(self, html: str) -> str:
         """Strip HTML tags for plain text version"""
-        import re
-        text = re.sub('<[^<]+?>', '', html)
-        text = re.sub(r'\s+', ' ', text)
+        text = _RE_HTML_TAGS.sub('', html)
+        text = _RE_WHITESPACE.sub(' ', text)
         return text.strip()
     
     def _get_next_reset_date(self) -> str:

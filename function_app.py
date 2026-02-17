@@ -7,6 +7,7 @@ import azure.functions as func
 import json
 import logging
 import os
+import re
 import sys
 from pathlib import Path
 import subprocess
@@ -17,6 +18,9 @@ from datetime import datetime
 
 # Import defensive import helper
 from shared.import_helpers import safe_import, create_stub_function
+
+# Pre-compiled regex patterns for performance
+_RE_WORD_SPLIT = re.compile(r"\S+")
 
 # -----------------------------------------------------------------------------
 # Optional unified SQL engine health + pool metrics (multi-database support)
@@ -668,8 +672,6 @@ def chat_stream(req: func.HttpRequest) -> func.HttpResponse:
                 yield (f"event: meta\n" f"data: {json.dumps(pre)}\n\n").encode("utf-8")
 
                 # We'll stream both textual deltas and token-level events when possible
-                import re
-
                 # Try to use tiktoken for token-level tokenization when available
                 enc = None
                 try:
@@ -796,7 +798,6 @@ def tts(req: func.HttpRequest) -> func.HttpResponse:
                 import io
                 import base64
                 import wave
-                import re
                 try:
                     import azure.cognitiveservices.speech as speechsdk
                 except Exception as e:
@@ -842,7 +843,7 @@ def tts(req: func.HttpRequest) -> func.HttpResponse:
                 except Exception:
                     duration_s = max(0.2, len(text) * 0.02)
 
-                words = re.findall(r"\S+", text)
+                words = _RE_WORD_SPLIT.findall(text)
                 total_chars = sum(len(w) for w in words) or 1
                 timepoints = []
                 cursor = 0.0
@@ -875,7 +876,6 @@ def tts(req: func.HttpRequest) -> func.HttpResponse:
                     import base64
                     import io
                     import wave
-                    import re
                     import pyttsx3
                 except Exception:  # pyttsx3 not available
                     pyttsx3 = None
@@ -927,7 +927,7 @@ def tts(req: func.HttpRequest) -> func.HttpResponse:
                         except Exception:
                             duration_s = max(0.2, len(text) * 0.02)
 
-                        words = re.findall(r"\S+", text)
+                        words = _RE_WORD_SPLIT.findall(text)
                         total_chars = sum(len(w) for w in words) or 1
                         timepoints = []
                         cursor = 0.0
@@ -954,7 +954,6 @@ def tts(req: func.HttpRequest) -> func.HttpResponse:
                 try:
                     import tempfile
                     import base64
-                    import re
                     from gtts import gTTS
                 except Exception:
                     gTTS = None
@@ -975,7 +974,7 @@ def tts(req: func.HttpRequest) -> func.HttpResponse:
 
                         # approximate duration: fallback to char-count based estimate
                         duration_s = max(0.2, len(text) * 0.02)
-                        words = re.findall(r"\S+", text)
+                        words = _RE_WORD_SPLIT.findall(text)
                         total_chars = sum(len(w) for w in words) or 1
                         timepoints = []
                         cursor = 0.0

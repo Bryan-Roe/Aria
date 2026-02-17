@@ -4,6 +4,9 @@ import re
 import json
 from typing import List, Dict
 
+# Pre-compile regex pattern for performance
+_RE_QUANTITY = re.compile(r"^(?P<qty>(\d+\/\d+|\d+(\.\d+)?))\s*(?P<unit>[a-zA-Z]+)?\s*(?P<name>.*)")
+
 SAMPLE_RECIPES = [
     {
         "title": "Simple Tomato Pasta",
@@ -134,9 +137,8 @@ class LocalProvider:
         text = text_match.group(1).strip() if text_match else prompt
         lines = [l.strip() for l in re.split(r"[\n,;]", text) if l.strip()]
         items = []
-        qty_re = re.compile(r"^(?P<qty>(\d+\/\d+|\d+(\.\d+)?))\s*(?P<unit>[a-zA-Z]+)?\s*(?P<name>.*)")
         for raw in lines:
-            m = qty_re.match(raw)
+            m = _RE_QUANTITY.match(raw)
             if m:
                 items.append(
                     {
