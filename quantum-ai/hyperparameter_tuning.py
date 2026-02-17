@@ -20,37 +20,24 @@ from sklearn.impute import SimpleImputer
 ROOT = Path(__file__).parent
 sys.path.append(str(ROOT / 'src'))
 from hybrid_qnn import HybridQNN, QuantumClassicalTrainer  # noqa: E402
+from dataset_loader import load_dataset, preprocess_for_qubits  # noqa: E402
 
 
 def load_heart_disease():
-    data_path = ROOT.parent / 'datasets' / 'quantum' / 'heart_disease.csv'
-    df = pd.read_csv(data_path, header=None, na_values=['?'])
-
-    # Impute
-    imputer = SimpleImputer(strategy='median')
-    df[df.columns] = imputer.fit_transform(df)
-
-    X = df.iloc[:, :-1].values
-    y = df.iloc[:, -1].values
-    y = (y > 0).astype(int)
-
+    """Load heart disease dataset - wrapper for backward compatibility"""
+    X, y, _ = load_dataset("heart_disease")
     return X, y
 
 
 def preprocess(X, y, n_components=4):
+    """Preprocess data - wrapper using shared preprocess_for_qubits"""
     X_train, X_val, y_train, y_val = train_test_split(
         X, y, test_size=0.2, random_state=42, stratify=y
     )
-
-    scaler = StandardScaler()
-    X_train_scaled = scaler.fit_transform(X_train)
-    X_val_scaled = scaler.transform(X_val)
-
-    pca = PCA(n_components=n_components, random_state=42)
-    X_train_pca = pca.fit_transform(X_train_scaled)
-    X_val_pca = pca.transform(X_val_scaled)
-
-    return (X_train_pca, X_val_pca, y_train, y_val)
+    
+    X_train, X_val, scaler, pca = preprocess_for_qubits(X_train, X_val, n_components)
+    
+    return (X_train, X_val, y_train, y_val)
 
 
 def train_eval(config, X_train, X_val, y_train, y_val):

@@ -37,78 +37,13 @@ src_path = Path(__file__).parent / "src"
 sys.path.insert(0, str(src_path))
 
 from src.hybrid_qnn import HybridQNN, QuantumClassicalTrainer
+from src.dataset_loader import load_dataset, preprocess_for_qubits
 from sklearn.model_selection import StratifiedKFold, train_test_split
 from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
-from sklearn.impute import SimpleImputer
 import torch
 from torch.utils.data import TensorDataset, DataLoader
 import matplotlib.pyplot as plt
-
-
-def load_dataset(name: str) -> Tuple[np.ndarray, np.ndarray]:
-    """Load a preset dataset."""
-    base = Path(__file__).parent.parent / "datasets" / "quantum"
-    datasets_map = {
-        "ionosphere": base / "ionosphere.csv",
-        "sonar": base / "sonar.csv",
-        "heart": base / "heart_disease.csv",
-        "banknote": base / "banknote.csv",
-    }
-    
-    path = datasets_map[name]
-    
-    if name == "heart":
-        df = pd.read_csv(path, na_values=["?"])
-        y = df.iloc[:, -1]
-        X = df.iloc[:, :-1]
-        if X.isnull().any().any():
-            imputer = SimpleImputer(strategy='median')
-            X = pd.DataFrame(imputer.fit_transform(X), columns=X.columns)
-        y = (y > 0).astype(int).values
-        return X.values, y
-    else:
-        df = pd.read_csv(path, na_values=["?", "NA", ""])
-        y = df.iloc[:, -1]
-        X = df.iloc[:, :-1]
-        if X.isnull().any().any():
-            imputer = SimpleImputer(strategy='median')
-            X = pd.DataFrame(imputer.fit_transform(X), columns=X.columns)
-        
-        # Encode labels to 0..K-1
-        if not pd.api.types.is_numeric_dtype(y):
-            vals, y_enc = pd.factorize(y.astype(str))
-            y = vals
-        else:
-            y = y.astype(int).values
-            uniq = np.unique(y)
-            if len(uniq) == 2 and set(uniq) != {0, 1}:
-                mapping = {uniq.min(): 0, uniq.max(): 1}
-                y = np.array([mapping[v] for v in y])
-        
-        return X.values, y
-
-
-def preprocess_for_qubits(X_train, X_val, n_qubits: int):
-    """Standardize and dimension-match to n_qubits."""
-    scaler = StandardScaler()
-    X_train = scaler.fit_transform(X_train)
-    X_val = scaler.transform(X_val)
-    
-    n_features = X_train.shape[1]
-    pca = None
-    
-    if n_features < n_qubits:
-        padding_train = np.zeros((X_train.shape[0], n_qubits - n_features))
-        X_train = np.hstack([X_train, padding_train])
-        padding_val = np.zeros((X_val.shape[0], n_qubits - n_features))
-        X_val = np.hstack([X_val, padding_val])
-    elif n_features > n_qubits:
-        pca = PCA(n_components=n_qubits)
-        X_train = pca.fit_transform(X_train)
-        X_val = pca.transform(X_val)
-    
-    return X_train, X_val, scaler, pca
 
 
 class EarlyStoppingTrainer(QuantumClassicalTrainer):
@@ -148,7 +83,7 @@ class EarlyStoppingTrainer(QuantumClassicalTrainer):
 
 def train_config(dataset_name: str, config: Dict) -> Dict:
     """Train a single config and return metrics."""
-    X, y = load_dataset(dataset_name)
+    X, y, _ = load_dataset(dataset_name)
     
     # Split
     X_train, X_val, y_train, y_val = train_test_split(

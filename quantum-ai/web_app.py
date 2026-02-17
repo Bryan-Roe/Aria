@@ -40,6 +40,18 @@ except Exception:  # pragma: no cover
     confusion_matrix = precision_recall_fscore_support = roc_auc_score = None
 from collections import deque
 import logging
+import sys
+
+# Add src directory to path for imports
+src_path = Path(__file__).parent / "src"
+sys.path.insert(0, str(src_path))
+
+try:
+    from src.dataset_loader import load_dataset as load_dataset_shared, preprocess_for_qubits as preprocess_shared
+except Exception:  # pragma: no cover
+    # Fallback if module not available
+    load_dataset_shared = None
+    preprocess_shared = None
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -120,6 +132,12 @@ class TrainingSession:
 
 def load_dataset(name: str):
     """Load dataset from CSV files"""
+    # Use shared loader if available
+    if load_dataset_shared is not None:
+        X, y, feature_names = load_dataset_shared(name, return_feature_names=True)
+        return X, y, feature_names
+    
+    # Fallback to inline implementation for testing/compatibility
     base = Path(__file__).parent.parent / "datasets" / "quantum"
     presets = {
         "heart": base / "heart_disease.csv",
