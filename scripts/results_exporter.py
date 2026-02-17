@@ -77,12 +77,8 @@ class ResultsExporter:
             return
         
         with output_file.open("w", newline="") as f:
-            # Determine all keys from jobs
-            fieldnames = set()
-            for job in jobs:
-                fieldnames.update(job.keys())
-            
-            fieldnames = sorted(fieldnames)
+            # Use set union for efficient field name collection
+            fieldnames = sorted(set().union(*(job.keys() for job in jobs)))
             writer = csv.DictWriter(f, fieldnames=fieldnames)
             
             writer.writeheader()

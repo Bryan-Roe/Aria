@@ -112,7 +112,8 @@ def chunk_text(rel_path: str, text: str) -> List[Chunk]:
 
 def summarize_chunk(chunk: Chunk) -> str:
     lines = chunk.content.splitlines()
-    first_lines = [l for l in lines[:20] if l.strip()]
+    # Optimize: filter while slicing to avoid double iteration
+    first_lines = [l for l in (lines[:20] if len(lines) >= 20 else lines) if l.strip()]
     funcs = FUNC_OR_CLASS_RE.findall(chunk.content) if chunk.file_lang == "py" else []
     summary_parts = []
     summary_parts.append(f"File: {chunk.rel_path}\nLanguage: {chunk.file_lang}")
@@ -120,8 +121,9 @@ def summarize_chunk(chunk: Chunk) -> str:
         summary_parts.append("Key symbols: " + ", ".join(funcs[:12]))
     # Heuristic responsibilities: look for keywords
     keywords = []
+    content_lower = chunk.content.lower()  # Cache lowercased content
     for kw in ["quantum", "dataset", "train", "chat", "azure", "function", "api", "config", "model", "web", "cli", "script"]:
-        if kw in chunk.content.lower():
+        if kw in content_lower:
             keywords.append(kw)
     if keywords:
         summary_parts.append("Detected themes: " + ", ".join(sorted(set(keywords))))
