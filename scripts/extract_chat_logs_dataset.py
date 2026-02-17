@@ -74,7 +74,8 @@ def build_examples(messages: List[Dict], context_window: int) -> List[Dict]:
                     windows.append({"messages": window})
     
     # Combine lists efficiently with extend
-    return pairs + windows
+    pairs.extend(windows)
+    return pairs
 
 
 def hash_example(example: Dict) -> str:
