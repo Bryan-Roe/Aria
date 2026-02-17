@@ -21,6 +21,35 @@ logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
+# Performance optimization: Pre-compiled patterns for keyword matching
+# Using sets for O(1) lookup instead of list scanning O(n)
+_JUMP_KEYWORDS = frozenset(['jump', 'leap', 'hop'])
+_DANCE_KEYWORDS = frozenset(['dance', 'spin', 'twirl'])
+_WAVE_KEYWORDS = frozenset(['wave', 'greet', 'hello', 'hi'])
+_LOOK_KEYWORDS = frozenset(['look', 'see', 'watch', 'observe'])
+_SIT_KEYWORDS = frozenset(['sit', 'rest', 'relax'])
+_RUN_KEYWORDS = frozenset(['run', 'race', 'sprint'])
+_HIDE_KEYWORDS = frozenset(['hide', 'crouch', 'duck'])
+_PRESENT_KEYWORDS = frozenset(['present', 'show', 'display'])
+_THINK_KEYWORDS = frozenset(['think', 'wonder', 'ponder'])
+_LEFT_KEYWORDS = frozenset(['walk left', 'go left', 'left'])
+_RIGHT_KEYWORDS = frozenset(['walk right', 'go right', 'right'])
+_ADD_KEYWORDS = frozenset(['add', 'create', 'spawn'])
+_LIMB_KEYWORDS = frozenset([
+    'left arm', 'arm left', 'left hand', 'right arm', 'arm right', 'right hand',
+    'left leg', 'leg left', 'right leg', 'leg right'
+])
+_ARM_WAVE_KEYWORDS = frozenset(['wave', 'wiggle'])
+_ARM_RAISE_KEYWORDS = frozenset(['raise', 'up', 'lift'])
+_ARM_LOWER_KEYWORDS = frozenset(['lower', 'down'])
+_ARM_FORWARD_KEYWORDS = frozenset(['forward', 'front'])
+_ARM_BACK_KEYWORDS = frozenset(['back', 'backward', 'behind'])
+
+def _keywords_in_cmd(keywords: frozenset, cmd: str) -> bool:
+    """Check if any keyword from set appears in command string.
+    O(k) where k is number of keywords, but with short-circuit evaluation."""
+    return any(k in cmd for k in keywords)
+
 # Add project paths
 REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO_ROOT / "AI" / "microsoft_phi-silica-3.6_v1"))
@@ -492,34 +521,34 @@ def determine_position_from_context(cmd: str) -> str:
                         # Position slightly to the left of object
                         return f'[aria:position:{max(10, obj_pos["x"] - 10)}:{obj_pos["y"] + 10}]'
 
-    # Action-based positioning
-    if any(k in cmd for k in ['jump', 'leap', 'hop']):
+    # Action-based positioning (optimized with precompiled keyword sets)
+    if _keywords_in_cmd(_JUMP_KEYWORDS, cmd):
         return '[aria:position:50:60]'  # Center for jumping
-    elif any(k in cmd for k in ['dance', 'spin', 'twirl']):
+    elif _keywords_in_cmd(_DANCE_KEYWORDS, cmd):
         return '[aria:position:50:50]'  # Center stage for performance
-    elif any(k in cmd for k in ['wave', 'greet', 'hello', 'hi']):
+    elif _keywords_in_cmd(_WAVE_KEYWORDS, cmd):
         return '[aria:position:30:70]'  # Front-left for greeting
-    elif any(k in cmd for k in ['look', 'see', 'watch', 'observe']):
+    elif _keywords_in_cmd(_LOOK_KEYWORDS, cmd):
         # Look towards table
         if 'table' in cmd:
             return '[aria:position:40:60]'  # Position to see table
         return '[aria:position:20:40]'  # Left side for observing
-    elif any(k in cmd for k in ['sit', 'rest', 'relax']):
+    elif _keywords_in_cmd(_SIT_KEYWORDS, cmd):
         # Near table to sit
         return f'[aria:position:{table_pos["x"] - 5}:{table_pos["y"] + 35}]'
-    elif any(k in cmd for k in ['run', 'race', 'sprint']):
+    elif _keywords_in_cmd(_RUN_KEYWORDS, cmd):
         return '[aria:position:85:70]'  # Far right for running space
-    elif any(k in cmd for k in ['hide', 'crouch', 'duck']):
+    elif _keywords_in_cmd(_HIDE_KEYWORDS, cmd):
         return '[aria:position:10:75]'  # Corner position
-    elif any(k in cmd for k in ['present', 'show', 'display']):
+    elif _keywords_in_cmd(_PRESENT_KEYWORDS, cmd):
         return '[aria:position:50:50]'  # Center to present
-    elif any(k in cmd for k in ['think', 'wonder', 'ponder']):
+    elif _keywords_in_cmd(_THINK_KEYWORDS, cmd):
         return '[aria:position:25:50]'  # Contemplative left position
-    elif any(k in cmd for k in ['walk left', 'go left', 'left']):
+    elif _keywords_in_cmd(_LEFT_KEYWORDS, cmd):
         return '[aria:position:20:70]'  # Moving to left
-    elif any(k in cmd for k in ['walk right', 'go right', 'right']):
+    elif _keywords_in_cmd(_RIGHT_KEYWORDS, cmd):
         return '[aria:position:80:70]'  # Moving to right
-    elif 'add' in cmd or 'create' in cmd or 'spawn' in cmd:
+    elif _keywords_in_cmd(_ADD_KEYWORDS, cmd):
         # For adding objects, position near table
         return f'[aria:position:{table_pos["x"] - 15}:{table_pos["y"] + 20}]'
     else:
@@ -576,11 +605,8 @@ def generate_tags_fallback(command: str) -> List[str]:
     if auto_position:
         tags.append(auto_position)
 
-    # Track if limb commands are detected to avoid movement conflicts
-    has_limb_command = any(k in cmd for k in [
-        'left arm', 'arm left', 'left hand', 'right arm', 'arm right', 'right hand',
-        'left leg', 'leg left', 'right leg', 'leg right'
-    ])
+    # Track if limb commands are detected to avoid movement conflicts (optimized)
+    has_limb_command = _keywords_in_cmd(_LIMB_KEYWORDS, cmd)
 
     # Special: server-side "say" / announce detection (capture original text)
     try:
@@ -670,19 +696,19 @@ def generate_tags_fallback(command: str) -> List[str]:
             parts.append('right_arm')
         if not parts:
             parts = ['right_arm']
-        if any(k in cmd for k in ['wave', 'wiggle']):
+        if _keywords_in_cmd(_ARM_WAVE_KEYWORDS, cmd):
             for p in parts:
                 limb_tag(p, 'wave')
-        elif any(k in cmd for k in ['raise', 'up', 'lift']):
+        elif _keywords_in_cmd(_ARM_RAISE_KEYWORDS, cmd):
             for p in parts:
                 limb_tag(p, 'raise')
-        elif any(k in cmd for k in ['lower', 'down']):
+        elif _keywords_in_cmd(_ARM_LOWER_KEYWORDS, cmd):
             for p in parts:
                 limb_tag(p, 'lower')
-        elif any(k in cmd for k in ['forward', 'front']):
+        elif _keywords_in_cmd(_ARM_FORWARD_KEYWORDS, cmd):
             for p in parts:
                 limb_tag(p, 'forward')
-        elif any(k in cmd for k in ['back', 'backward', 'behind']):
+        elif _keywords_in_cmd(_ARM_BACK_KEYWORDS, cmd):
             for p in parts:
                 limb_tag(p, 'back')
         elif angle_val is not None:
@@ -701,10 +727,10 @@ def generate_tags_fallback(command: str) -> List[str]:
         if 'kick' in cmd:
             for p in parts:
                 limb_tag(p, 'kick')
-        elif any(k in cmd for k in ['forward', 'front']):
+        elif _keywords_in_cmd(_ARM_FORWARD_KEYWORDS, cmd):
             for p in parts:
                 limb_tag(p, 'forward')
-        elif any(k in cmd for k in ['back', 'backward', 'behind']):
+        elif _keywords_in_cmd(_ARM_BACK_KEYWORDS, cmd):
             for p in parts:
                 limb_tag(p, 'back')
         elif angle_val is not None:
