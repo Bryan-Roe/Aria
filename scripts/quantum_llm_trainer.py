@@ -399,8 +399,8 @@ class QuantumEnhancedLLMTrainer:
                 # Look for available datasets using combined glob pattern
                 datasets_dir = Path("datasets/chat")
                 if datasets_dir.exists():
-                    # Single glob with pattern matching both extensions
-                    dataset_files = list(datasets_dir.glob("*/train.json*"))
+                    # Use explicit patterns to match only train.json and train.jsonl
+                    dataset_files = list(datasets_dir.glob("*/train.json")) + list(datasets_dir.glob("*/train.jsonl"))
                     
                     if dataset_files:
                         # Train on a random dataset
