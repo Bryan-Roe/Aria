@@ -332,7 +332,7 @@ class RepoAutomation:
                 if self._is_component_running(name):
                     print(f"✅ {component.name} started (PID {proc.pid})")
                     self._save_process_pids()
-                    # Enforce single-instance: ensure no stray duplicates remain
+            # Enforce single-instance: ensure no stray duplicates remain
                     self._enforce_single_instance(component, keep_pid=proc.pid)
                     return True
                 time.sleep(check_interval)
