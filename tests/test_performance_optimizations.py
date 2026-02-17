@@ -5,10 +5,11 @@ These tests verify that the optimizations made to various modules
 maintain correct functionality while improving performance.
 """
 import json
+import sys
 import tempfile
 import time
-from pathlib import Path
 from collections import deque
+from pathlib import Path
 
 import pytest
 
@@ -43,7 +44,7 @@ class TestSqlRepositoryOptimizations:
 
 
 class TestTrainingAnalyticsOptimizations:
-    """Tests for training_analytics.py string concatenation optimization."""
+    """Tests for training_analytics.py optimizations."""
     
     def test_chart_generation_uses_join(self):
         """Test that chart generation uses join() instead of += in loops."""
@@ -68,6 +69,52 @@ class TestTrainingAnalyticsOptimizations:
         # Verify the pattern: higher values should have more blocks
         # The last line (row 0) should have all blocks
         assert chart[-1].count("█") == len(scaled)
+
+    def test_identify_best_epoch_count_prefers_highest_mean(self, tmp_path):
+        """TrainingAnalytics should pick epoch count with highest average accuracy."""
+        repo_root = Path(__file__).resolve().parents[1]
+        sys.path.insert(0, str(repo_root / "scripts"))
+        try:
+            from training_analytics import TrainingAnalytics
+        finally:
+            sys.path.pop(0)
+
+        status = {
+            "performance_history": [
+                {"epochs": 50, "mean_accuracy": 0.75},
+                {"epochs": 100, "mean_accuracy": 0.80},
+                {"epochs": 100, "mean_accuracy": 0.85},
+                {"epochs": 25, "mean_accuracy": 0.70},
+            ]
+        }
+        status_file = tmp_path / "status.json"
+        status_file.write_text(json.dumps(status))
+
+        analytics = TrainingAnalytics(status_file=str(status_file))
+        assert analytics.identify_best_epoch_count() == 100
+
+    def test_detect_plateau_uses_variance_threshold(self, tmp_path):
+        """Plateau detection should flag when variance is effectively zero."""
+        repo_root = Path(__file__).resolve().parents[1]
+        sys.path.insert(0, str(repo_root / "scripts"))
+        try:
+            from training_analytics import TrainingAnalytics
+        finally:
+            sys.path.pop(0)
+
+        status = {
+            "performance_history": [
+                {"mean_accuracy": 0.9000},
+                {"mean_accuracy": 0.90005},
+                {"mean_accuracy": 0.89995},
+                {"mean_accuracy": 0.90002},
+            ]
+        }
+        status_file = tmp_path / "status.json"
+        status_file.write_text(json.dumps(status))
+
+        analytics = TrainingAnalytics(status_file=str(status_file))
+        assert analytics.detect_plateau(window=3)
 
 
 class TestWebAppOptimizations:

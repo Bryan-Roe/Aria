@@ -3,12 +3,13 @@ Advanced Analytics for Autonomous Training
 Generates charts, trends, and insights
 """
 
+import argparse
 import json
+import statistics
 import sys
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Tuple
-import argparse
 
 
 class TrainingAnalytics:
@@ -75,12 +76,11 @@ class TrainingAnalytics:
                 epoch_performance[epochs] = []
             epoch_performance[epochs].append(accuracy)
         
-        # Find epoch count with best average accuracy
         best_epochs = 100
-        best_avg = 0
+        best_avg = 0.0
         
         for epochs, accuracies in epoch_performance.items():
-            avg = sum(accuracies) / len(accuracies)
+            avg = statistics.fmean(accuracies)
             if avg > best_avg:
                 best_avg = avg
                 best_epochs = epochs
@@ -98,8 +98,7 @@ class TrainingAnalytics:
         accuracies = [p.get("mean_accuracy", 0) for p in recent]
         
         # Check if variance is very low
-        avg = sum(accuracies) / len(accuracies)
-        variance = sum((x - avg) ** 2 for x in accuracies) / len(accuracies)
+        variance = statistics.pvariance(accuracies)
         
         return variance < 0.0001  # Less than 0.01% variance
     
