@@ -26,6 +26,10 @@ class QuantumLayer(nn.Module):
             n_qubits: Number of qubits
             n_layers: Number of variational layers
             device: PennyLane device
+            entanglement: Entanglement pattern ('linear', 'circular', or 'full')
+                - 'linear': O(n) gates, good for large circuits
+                - 'circular': O(n) gates, creates ring topology
+                - 'full': O(n²) gates, maximizes entanglement but slower
         """
         super().__init__()
         self.n_qubits = n_qubits
@@ -49,6 +53,11 @@ class QuantumLayer(nn.Module):
         Args:
             inputs: Classical inputs encoded into quantum states
             weights: Trainable quantum parameters
+            
+        Performance Note:
+            The 'full' entanglement pattern creates O(n²) gates where n is the number
+            of qubits. For large circuits (>10 qubits), this can be computationally
+            expensive. Consider 'linear' or 'circular' patterns for better scalability.
         """
         # Amplitude encoding
         qml.AmplitudeEmbedding(

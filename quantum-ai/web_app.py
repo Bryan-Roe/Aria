@@ -514,8 +514,7 @@ def train_model(session: TrainingSession):
 
             # Keep only recent history for memory efficiency
             if len(session.metrics_history['epochs']) > 1000:
-                for key in session.metrics_history:
-                    session.metrics_history[key] = session.metrics_history[key][-1000:]
+                session.metrics_history = {key: values[-1000:] for key, values in session.metrics_history.items()}
 
             logger.info(f"Epoch {epoch}: Loss={train_loss:.4f}, Val Acc={val_acc:.4f}, Val Loss={val_loss:.4f}, Speed={session.epochs_per_second:.2f} ep/s, LR={session.learning_rate:.6f}, Grad Norm={session.gradient_norm:.6f}")
 
