@@ -9,7 +9,12 @@ from pathlib import Path
 talk_to_ai_path = Path(__file__).resolve().parent.parent / "talk-to-ai" / "src"
 sys.path.insert(0, str(talk_to_ai_path))
 
+# Add repo root to path so we can import shared utilities as a package
+repo_root = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(repo_root))
+
 from chat_providers import detect_provider, RoleMessage
+from shared.http_utils import validate_messages, create_cors_headers
 
 app = func.FunctionApp()
 
@@ -66,13 +71,13 @@ def chat(req: func.HttpRequest) -> func.HttpResponse:
             )
 
         # Validate messages format
-        for msg in messages:
-            if not isinstance(msg, dict) or 'role' not in msg or 'content' not in msg:
-                return func.HttpResponse(
-                    json.dumps({"error": "Invalid message format. Expected {role, content}"}),
-                    status_code=400,
-                    mimetype="application/json"
-                )
+        is_valid, error_msg = validate_messages(messages)
+        if not is_valid:
+            return func.HttpResponse(
+                json.dumps({"error": error_msg}),
+                status_code=400,
+                mimetype="application/json"
+            )
 
         # Get provider
         provider, info = detect_provider(explicit=provider_choice, model_override=model_override)
@@ -96,11 +101,7 @@ def chat(req: func.HttpRequest) -> func.HttpResponse:
             json.dumps(response_data),
             status_code=200,
             mimetype="application/json",
-            headers={
-                "Access-Control-Allow-Origin": "*",  # Allow CORS for local testing
-                "Access-Control-Allow-Methods": "POST, OPTIONS",
-                "Access-Control-Allow-Headers": "Content-Type"
-            }
+            headers=create_cors_headers()
         )
 
     except ValueError as ve:
@@ -132,9 +133,5 @@ def chat_options(req: func.HttpRequest) -> func.HttpResponse:
     return func.HttpResponse(
         "",
         status_code=200,
-        headers={
-            "Access-Control-Allow-Origin": "*",
-            "Access-Control-Allow-Methods": "POST, OPTIONS",
-            "Access-Control-Allow-Headers": "Content-Type"
-        }
+        headers=create_cors_headers()
     )

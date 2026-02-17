@@ -10,6 +10,32 @@ from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
+# Pre-compiled regex patterns for performance (compile once, use many times)
+_FILE_OPERATION_PATTERNS = [
+    (re.compile(r'\bopen\s*\('), "open() function call"),
+    (re.compile(r'\.unlink\s*\('), ".unlink() method (file deletion)"),
+    (re.compile(r'\.rmdir\s*\('), ".rmdir() method"),
+    (re.compile(r'\.mkdir\s*\('), ".mkdir() method"),
+    (re.compile(r'\bwith\s+open\s*\('), "with open() context manager"),
+]
+
+_NETWORK_OPERATION_PATTERNS = [
+    (re.compile(r'\bsocket\.\w+'), "socket module usage"),
+    (re.compile(r'\burllib\.\w+'), "urllib module usage"),
+    (re.compile(r'\brequests\.\w+'), "requests module usage"),
+    (re.compile(r'\bhttp\.\w+'), "http module usage"),
+    (re.compile(r'requests\.(get|post|put|delete|patch)\b'), "requests HTTP method"),
+    (re.compile(r'urllib\.request\.urlopen'), "urllib.request.urlopen"),
+    (re.compile(r'socket\.(socket|connect|bind|listen)'), "socket operations"),
+]
+
+_CODE_EXEC_PATTERNS = [
+    (re.compile(r'\beval\s*\('), "eval"),
+    (re.compile(r'\bexec\s*\('), "exec"),
+    (re.compile(r'\bcompile\s*\('), "compile"),
+    (re.compile(r'\b__import__\s*\('), "__import__"),
+]
+
 
 class ToolValidator:
     """Validates generated tools for safety and correctness"""
@@ -160,20 +186,9 @@ class ToolValidator:
         """Check for file system operations"""
         errors = []
         
-        # More specific patterns to avoid false positives
-        file_patterns = [
-            # open() function calls
-            (r'\bopen\s*\(', "open() function call"),
-            # File operations on pathlib or os.path
-            (r'\.unlink\s*\(', ".unlink() method (file deletion)"),
-            (r'\.rmdir\s*\(', ".rmdir() method"),
-            (r'\.mkdir\s*\(', ".mkdir() method"),
-            # with open() pattern specifically
-            (r'\bwith\s+open\s*\(', "with open() context manager"),
-        ]
-        
-        for pattern, description in file_patterns:
-            if re.search(pattern, code):
+        # Use pre-compiled patterns for performance
+        for compiled_pattern, description in _FILE_OPERATION_PATTERNS:
+            if compiled_pattern.search(code):
                 errors.append(f"File operation detected: {description}")
         
         return errors
@@ -182,21 +197,9 @@ class ToolValidator:
         """Check for network operations"""
         errors = []
         
-        # More specific patterns to avoid false positives
-        network_patterns = [
-            # Module-level access
-            (r'\bsocket\.\w+', "socket module usage"),
-            (r'\burllib\.\w+', "urllib module usage"),
-            (r'\brequests\.\w+', "requests module usage"),
-            (r'\bhttp\.\w+', "http module usage"),
-            # Common network methods (but only if preceded by module or known network object)
-            (r'requests\.[get|post|put|delete|patch]', "requests HTTP method"),
-            (r'urllib\.request\.urlopen', "urllib.request.urlopen"),
-            (r'socket\.(socket|connect|bind|listen)', "socket operations"),
-        ]
-        
-        for pattern, description in network_patterns:
-            if re.search(pattern, code):
+        # Use pre-compiled patterns for performance
+        for compiled_pattern, description in _NETWORK_OPERATION_PATTERNS:
+            if compiled_pattern.search(code):
                 errors.append(f"Network operation detected: {description}")
         
         return errors
@@ -205,17 +208,10 @@ class ToolValidator:
         """Check for dynamic code execution"""
         errors = []
         
-        # Patterns that indicate code execution
-        exec_patterns = [
-            r'\beval\s*\(',
-            r'\bexec\s*\(',
-            r'\bcompile\s*\(',
-            r'\b__import__\s*\(',
-        ]
-        
-        for pattern in exec_patterns:
-            if re.search(pattern, code):
-                errors.append(f"Code execution detected: {pattern}")
+        # Use pre-compiled patterns for performance
+        for compiled_pattern, func_name in _CODE_EXEC_PATTERNS:
+            if compiled_pattern.search(code):
+                errors.append(f"Code execution detected: {func_name}()")
         
         return errors
     

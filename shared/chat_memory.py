@@ -54,15 +54,70 @@ except Exception:  # pragma: no cover - best effort import
 
 # ------------------------- DB Helpers -------------------------
 
+# Connection pool to avoid creating new connections on every call
+_connection_pool = []
+_MAX_POOL_SIZE = 5
+_pool_lock = None
+
+try:
+    import threading
+    _pool_lock = threading.Lock()
+except ImportError:
+    # Fallback for environments without threading
+    class _DummyLock:
+        def __enter__(self): return self
+        def __exit__(self, *args): pass
+    _pool_lock = _DummyLock()
+
 
 def _get_conn():  # noqa: ANN001
+    """Get a database connection from the pool or create a new one.
+    
+    Implements simple connection pooling to avoid overhead of creating
+    new connections on every call. Reuses existing connections when available.
+    """
     conn_str = os.getenv("QAI_DB_CONN")
     if not conn_str or not pyodbc:
         return None
+    
+    # Try to reuse from pool first
+    with _pool_lock:
+        if _connection_pool:
+            conn = _connection_pool.pop()
+            # Verify connection is still valid
+            try:
+                cursor = conn.cursor()
+                cursor.execute("SELECT 1")
+                cursor.close()
+                return conn
+            except Exception:
+                # Connection is stale, will create new one below
+                try:
+                    conn.close()
+                except Exception:
+                    pass
+    
+    # Create new connection if pool is empty or connection was stale
     try:
         return pyodbc.connect(conn_str, timeout=4)
     except Exception:
         return None
+
+
+def _return_conn(conn):  # noqa: ANN001
+    """Return a connection to the pool for reuse."""
+    if not conn:
+        return
+    
+    with _pool_lock:
+        if len(_connection_pool) < _MAX_POOL_SIZE:
+            _connection_pool.append(conn)
+        else:
+            # Pool is full, close the connection
+            try:
+                conn.close()
+            except Exception:
+                pass
 
 # ------------------------- Embedding Generation -------------------------
 
@@ -169,10 +224,8 @@ def store_embedding(message_id: Optional[str], embedding: Sequence[float], model
     except Exception:
         return False
     finally:
-        try:
-            conn.close()
-        except Exception:
-            pass
+        # Return connection to pool instead of closing
+        _return_conn(conn)
 
 # ------------------------- Similarity Search -------------------------
 
@@ -256,10 +309,8 @@ def fetch_similar_messages(query_embedding: Sequence[float], top_k: int = 5, ses
     except Exception:
         return []
     finally:
-        try:
-            conn.close()
-        except Exception:
-            pass
+        # Return connection to pool instead of closing
+        _return_conn(conn)
 
 
 __all__ = [

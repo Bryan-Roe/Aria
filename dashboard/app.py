@@ -179,6 +179,7 @@ def _compute_training_progress():
                 # Tail last ~400 lines for patterns
                 lines = _tail_lines(log_file, 400)
                 # Patterns: Epoch X/Y, global_step = Z, total_flos
+                # Compile regex patterns ONCE outside loop for performance
                 import re
                 epoch_pat = re.compile(r"Epoch\s+(\d+)/(\d+)")
                 step_pat = re.compile(r"global_step\s*=\s*(\d+)")

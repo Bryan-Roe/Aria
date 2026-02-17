@@ -52,8 +52,10 @@ class BackupManager:
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
         backup_name = f"qai_backup_{timestamp}"
         # Ensure uniqueness if multiple backups created within same second
+        # Build set of existing backup names for O(1) lookup
+        existing_names = {b.get('name') for b in self.manifest.get('backups', [])}
         suffix_counter = 2
-        while any(b.get('name') == backup_name for b in self.manifest.get('backups', [])):
+        while backup_name in existing_names:
             backup_name = f"qai_backup_{timestamp}_{suffix_counter}"
             suffix_counter += 1
         backup_path = self.backup_dir / backup_name

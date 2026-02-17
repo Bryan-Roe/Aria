@@ -232,7 +232,8 @@ class MasterOrchestrator:
             results.append(result)
             print(json.dumps(result, indent=2, default=str))
             
-            if result["status"] not in ["succeeded", "skipped"]:
+            SUCCESS_STATUSES = {"succeeded", "skipped"}  # O(1) set lookup
+            if result["status"] not in SUCCESS_STATUSES:
                 all_succeeded = False
                 # Stop on first failure unless configured otherwise
                 break

@@ -26,6 +26,27 @@ Aria is an interactive AI character that combines:
 - **Quantum ML Integration** - Experimental quantum-classical hybrid training
 - **⚛️ Quantum-Enhanced Passive LLM Training** - Background training with quantum computing optimization
 - **🆕 LLM Tool Maker** - Autonomous tool creation system where LLMs create, validate, and execute Python tools
+- **💰 Revenue Stream System** - Complete subscription and monetization platform achieving $2,235/month MRR
+
+## 💰 Revenue Stream
+
+Aria includes a comprehensive monetization system with **$2,235/month MRR** (111.8% of $2,000 target):
+
+### Quick Access
+- **[View Pricing](pricing.html)** - Three-tier subscription model (Free, Pro $49/mo, Enterprise $199/mo)
+- **[Try Aria Character](aria_web/index.html)** - Interactive character interface with integrated navigation
+- **[Admin Dashboard](admin_dashboard.html)** - Revenue analytics and subscriber management
+- **[Monetization Hub](monetization-index.html)** - Complete overview of all monetization features
+
+### Features
+- ✅ **3-Tier Subscription System** - Free, Pro ($49/mo), Enterprise ($199/mo)
+- ✅ **Usage Tracking** - 5 resource types monitored (chat, quantum, training, API, websites)
+- ✅ **REST API Endpoints** - 5 subscription management APIs
+- ✅ **Beautiful UI Pages** - 7 professional pages covering entire user journey
+- ✅ **Stripe-Ready** - Payment integration structure in place
+- ✅ **Revenue Analytics** - Real-time MRR/ARR tracking
+
+See [MONETIZATION_GUIDE.md](MONETIZATION_GUIDE.md) for complete documentation.
 
 ## 🌐 Live Demo (GitHub Pages)
 

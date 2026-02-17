@@ -322,17 +322,31 @@ class RepoAutomation:
             )
 
             self.processes[name] = proc
-            time.sleep(2)  # Give it time to start
+            
+            # Wait with short polling interval instead of fixed sleep
+            max_wait = 2.0
+            check_interval = 0.2
+            elapsed = 0
+            
+            while elapsed < max_wait:
+                if self._is_component_running(name):
+                    print(f"✅ {component.name} started (PID {proc.pid})")
+                    self._save_process_pids()
+            # Enforce single-instance: ensure no stray duplicates remain
+                    self._enforce_single_instance(component, keep_pid=proc.pid)
+                    return True
+                time.sleep(check_interval)
+                elapsed += check_interval
 
-            if self._is_component_running(name):
-                print(f"✅ {component.name} started (PID {proc.pid})")
-                self._save_process_pids()
-                # Enforce single-instance: ensure no stray duplicates remain
-                self._enforce_single_instance(component, keep_pid=proc.pid)
-                return True
-            else:
+            if not self._is_component_running(name):
                 print(f"❌ {component.name} failed to start")
                 return False
+            else:
+                # Started but took the full wait time
+                print(f"✅ {component.name} started (PID {proc.pid})")
+                self._save_process_pids()
+                self._enforce_single_instance(component, keep_pid=proc.pid)
+                return True
 
         except Exception as e:
             error = f"Failed to start {component.name}: {e}"

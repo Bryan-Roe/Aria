@@ -16,6 +16,16 @@ import re
 from urllib.parse import urlparse, parse_qs
 import logging
 
+# Pre-compile regex patterns for performance (avoid recompiling in loops)
+_RE_JSON_BLOCK = re.compile(r'\[.*\]', re.DOTALL)
+_RE_ARIA_TAGS = re.compile(r'\[aria:[^\]]+\]')
+_RE_SAY_COMMAND = re.compile(
+    r"(?:\b(?:say|announce|shout|speak|tell)\b)(?:\s+(?:everyone|that|to))?[:\-\s]+(.+)", 
+    re.IGNORECASE
+)
+_RE_SANITIZE_BRACKETS = re.compile(r'\]')
+_RE_COORDINATES = re.compile(r'(\d{1,3})%?.*?(\d{1,3})%?')
+
 # Configure logging
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s - %(levelname)s - %(message)s')
@@ -39,6 +49,33 @@ except ImportError:
 # Skip AI model loading for faster startup - use rule-based fallback
 MODEL = None
 print("⚠️ Skipping AI model loading - using rule-based fallback for faster startup")
+
+# Pre-compiled keyword sets for O(1) lookup instead of O(n) any() calls
+JUMP_KEYWORDS = frozenset(['jump', 'leap', 'hop'])
+DANCE_KEYWORDS = frozenset(['dance', 'spin', 'twirl'])
+WAVE_KEYWORDS = frozenset(['wave', 'greet', 'hello', 'hi'])
+LOOK_KEYWORDS = frozenset(['look', 'see', 'watch', 'observe'])
+SIT_KEYWORDS = frozenset(['sit', 'rest', 'relax'])
+RUN_KEYWORDS = frozenset(['run', 'race', 'sprint'])
+HIDE_KEYWORDS = frozenset(['hide', 'crouch', 'duck'])
+PRESENT_KEYWORDS = frozenset(['present', 'show', 'display'])
+THINK_KEYWORDS = frozenset(['think', 'wonder', 'ponder'])
+MOVE_KEYWORDS = frozenset(['go', 'move', 'walk', 'run'])
+SAY_KEYWORDS = frozenset(['say', 'speak', 'tell', 'greet'])
+PICKUP_KEYWORDS = frozenset(['pick', 'get', 'grab', 'take'])
+ARM_WAVE_KEYWORDS = frozenset(['wave', 'wiggle'])
+ARM_RAISE_KEYWORDS = frozenset(['raise', 'up', 'lift'])
+ARM_LOWER_KEYWORDS = frozenset(['lower', 'down'])
+ARM_FORWARD_KEYWORDS = frozenset(['forward', 'front'])
+ARM_BACK_KEYWORDS = frozenset(['back', 'backward', 'behind'])
+LEFT_ARM_KEYWORDS = frozenset(['left arm', 'arm left', 'left hand'])
+RIGHT_ARM_KEYWORDS = frozenset(['right arm', 'arm right', 'right hand'])
+LEFT_LEG_KEYWORDS = frozenset(['left leg', 'leg left'])
+RIGHT_LEG_KEYWORDS = frozenset(['right leg', 'leg right'])
+
+def _contains_any_keyword(text: str, keywords: frozenset) -> bool:
+    """Check if text contains any keyword from set. O(1) per keyword check."""
+    return any(kw in text for kw in keywords)
 
 # Global stage state that AI can see
 stage_state = {
@@ -190,8 +227,7 @@ Rules:
                 actions = json.loads(content)
             else:
                 # Extract JSON array from markdown or text
-                import re
-                json_match = re.search(r'\[.*\]', content, re.DOTALL)
+                json_match = _RE_JSON_BLOCK.search(content)
                 if json_match:
                     actions = json.loads(json_match.group(0))
                 else:
@@ -217,7 +253,7 @@ Rules:
         command_lower = command.lower()
 
         # Parse move commands
-        if any(word in command_lower for word in ['go', 'move', 'walk', 'run']):
+        if _contains_any_keyword(command_lower, MOVE_KEYWORDS):
             # Extract target from command
             if 'table' in command_lower:
                 actions.append({"action": "move", "target": {
@@ -233,7 +269,7 @@ Rules:
                                "x": 80, "y": 50}, "speed": "normal"})
 
         # Parse say commands
-        if any(word in command_lower for word in ['say', 'speak', 'tell', 'greet']):
+        if _contains_any_keyword(command_lower, SAY_KEYWORDS):
             # Extract text after say/speak
             for trigger in ['say ', 'speak ', 'tell ', 'greet ']:
                 if trigger in command_lower:
@@ -247,7 +283,7 @@ Rules:
 
         # Parse pickup commands
         for obj in ['apple', 'book', 'cup', 'ball', 'flower']:
-            if obj in command_lower and any(word in command_lower for word in ['pick', 'get', 'grab', 'take']):
+            if obj in command_lower and _contains_any_keyword(command_lower, PICKUP_KEYWORDS):
                 # Move to object first
                 obj_pos = stage_state['objects'][obj]['position']
                 actions.append(
@@ -492,28 +528,28 @@ def determine_position_from_context(cmd: str) -> str:
                         # Position slightly to the left of object
                         return f'[aria:position:{max(10, obj_pos["x"] - 10)}:{obj_pos["y"] + 10}]'
 
-    # Action-based positioning
-    if any(k in cmd for k in ['jump', 'leap', 'hop']):
+    # Action-based positioning (using pre-compiled keyword sets for O(1) lookup)
+    if _contains_any_keyword(cmd, JUMP_KEYWORDS):
         return '[aria:position:50:60]'  # Center for jumping
-    elif any(k in cmd for k in ['dance', 'spin', 'twirl']):
+    elif _contains_any_keyword(cmd, DANCE_KEYWORDS):
         return '[aria:position:50:50]'  # Center stage for performance
-    elif any(k in cmd for k in ['wave', 'greet', 'hello', 'hi']):
+    elif _contains_any_keyword(cmd, WAVE_KEYWORDS):
         return '[aria:position:30:70]'  # Front-left for greeting
-    elif any(k in cmd for k in ['look', 'see', 'watch', 'observe']):
+    elif _contains_any_keyword(cmd, LOOK_KEYWORDS):
         # Look towards table
         if 'table' in cmd:
             return '[aria:position:40:60]'  # Position to see table
         return '[aria:position:20:40]'  # Left side for observing
-    elif any(k in cmd for k in ['sit', 'rest', 'relax']):
+    elif _contains_any_keyword(cmd, SIT_KEYWORDS):
         # Near table to sit
         return f'[aria:position:{table_pos["x"] - 5}:{table_pos["y"] + 35}]'
-    elif any(k in cmd for k in ['run', 'race', 'sprint']):
+    elif _contains_any_keyword(cmd, RUN_KEYWORDS):
         return '[aria:position:85:70]'  # Far right for running space
-    elif any(k in cmd for k in ['hide', 'crouch', 'duck']):
+    elif _contains_any_keyword(cmd, HIDE_KEYWORDS):
         return '[aria:position:10:75]'  # Corner position
-    elif any(k in cmd for k in ['present', 'show', 'display']):
+    elif _contains_any_keyword(cmd, PRESENT_KEYWORDS):
         return '[aria:position:50:50]'  # Center to present
-    elif any(k in cmd for k in ['think', 'wonder', 'ponder']):
+    elif _contains_any_keyword(cmd, THINK_KEYWORDS):
         return '[aria:position:25:50]'  # Contemplative left position
     elif any(k in cmd for k in ['walk left', 'go left', 'left']):
         return '[aria:position:20:70]'  # Moving to left
@@ -558,7 +594,7 @@ def generate_tags_ai(command: str) -> List[str]:
 
         response = tokenizer.decode(
             outputs[0][inputs['input_ids'].shape[1]:], skip_special_tokens=True)
-        tags = re.findall(r'\[aria:[^\]]+\]', response)
+        tags = _RE_ARIA_TAGS.findall(response)
         return tags[:2]  # Return first 2 tags max
     except Exception as e:
         print(f"AI generation error: {e}")
@@ -577,19 +613,19 @@ def generate_tags_fallback(command: str) -> List[str]:
         tags.append(auto_position)
 
     # Track if limb commands are detected to avoid movement conflicts
-    has_limb_command = any(k in cmd for k in [
-        'left arm', 'arm left', 'left hand', 'right arm', 'arm right', 'right hand',
-        'left leg', 'leg left', 'right leg', 'leg right'
-    ])
+    # Using pre-compiled keyword sets for O(1) lookup
+    has_limb_command = (_contains_any_keyword(cmd, LEFT_ARM_KEYWORDS) or 
+                       _contains_any_keyword(cmd, RIGHT_ARM_KEYWORDS) or
+                       _contains_any_keyword(cmd, LEFT_LEG_KEYWORDS) or
+                       _contains_any_keyword(cmd, RIGHT_LEG_KEYWORDS))
 
     # Special: server-side "say" / announce detection (capture original text)
     try:
-        say_match = re.search(
-            r"(?:\b(?:say|announce|shout|speak|tell)\b)(?:\s+(?:everyone|that|to))?[:\-\s]+(.+)", command, flags=re.I)
+        say_match = _RE_SAY_COMMAND.search(command)
         if say_match:
             raw_msg = say_match.group(1).strip()
             # basic sanitization and length cap
-            safe_msg = re.sub(r'\]', '', raw_msg)[:200]
+            safe_msg = _RE_SANITIZE_BRACKETS.sub('', raw_msg)[:200]
             tags.append(f'[aria:say:{safe_msg}]')
     except Exception:
         # ignore parsing errors
@@ -645,11 +681,11 @@ def generate_tags_fallback(command: str) -> List[str]:
     def limb_tag(part: str, action: str):
         tags.append(f'[aria:limb:{part}:{action}]')
 
-    # Helper maps
-    left_arm = any(k in cmd for k in ['left arm', 'arm left', 'left hand'])
-    right_arm = any(k in cmd for k in ['right arm', 'arm right', 'right hand'])
-    left_leg = any(k in cmd for k in ['left leg', 'leg left'])
-    right_leg = any(k in cmd for k in ['right leg', 'leg right'])
+    # Helper maps (using pre-compiled keyword sets)
+    left_arm = _contains_any_keyword(cmd, LEFT_ARM_KEYWORDS)
+    right_arm = _contains_any_keyword(cmd, RIGHT_ARM_KEYWORDS)
+    left_leg = _contains_any_keyword(cmd, LEFT_LEG_KEYWORDS)
+    right_leg = _contains_any_keyword(cmd, RIGHT_LEG_KEYWORDS)
 
     # Numeric angle if present (e.g., "left arm 45 degrees")
     angle_match = None
@@ -670,19 +706,19 @@ def generate_tags_fallback(command: str) -> List[str]:
             parts.append('right_arm')
         if not parts:
             parts = ['right_arm']
-        if any(k in cmd for k in ['wave', 'wiggle']):
+        if _contains_any_keyword(cmd, ARM_WAVE_KEYWORDS):
             for p in parts:
                 limb_tag(p, 'wave')
-        elif any(k in cmd for k in ['raise', 'up', 'lift']):
+        elif _contains_any_keyword(cmd, ARM_RAISE_KEYWORDS):
             for p in parts:
                 limb_tag(p, 'raise')
-        elif any(k in cmd for k in ['lower', 'down']):
+        elif _contains_any_keyword(cmd, ARM_LOWER_KEYWORDS):
             for p in parts:
                 limb_tag(p, 'lower')
-        elif any(k in cmd for k in ['forward', 'front']):
+        elif _contains_any_keyword(cmd, ARM_FORWARD_KEYWORDS):
             for p in parts:
                 limb_tag(p, 'forward')
-        elif any(k in cmd for k in ['back', 'backward', 'behind']):
+        elif _contains_any_keyword(cmd, ARM_BACK_KEYWORDS):
             for p in parts:
                 limb_tag(p, 'back')
         elif angle_val is not None:
@@ -701,10 +737,10 @@ def generate_tags_fallback(command: str) -> List[str]:
         if 'kick' in cmd:
             for p in parts:
                 limb_tag(p, 'kick')
-        elif any(k in cmd for k in ['forward', 'front']):
+        elif _contains_any_keyword(cmd, ARM_FORWARD_KEYWORDS):
             for p in parts:
                 limb_tag(p, 'forward')
-        elif any(k in cmd for k in ['back', 'backward', 'behind']):
+        elif _contains_any_keyword(cmd, ARM_BACK_KEYWORDS):
             for p in parts:
                 limb_tag(p, 'back')
         elif angle_val is not None:
@@ -786,7 +822,7 @@ def generate_tags_fallback(command: str) -> List[str]:
                 break
         else:
             # Try to extract numeric coordinates
-            coord_match = re.search(r'(\d{1,3})%?.*?(\d{1,3})%?', cmd)
+            coord_match = _RE_COORDINATES.search(cmd)
             if coord_match:
                 x, y = coord_match.groups()
                 tags.append(f'[aria:position:{x}:{y}]')

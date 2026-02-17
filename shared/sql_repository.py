@@ -232,9 +232,9 @@ def list_values(limit: int = 100) -> list[dict]:  # noqa: ANN001
     if not engine and not _SQLALCHEMY_AVAILABLE:
         try:
             conn = _get_sqlite_conn()
-            cur = conn.execute("SELECT k, v, updated_at FROM QAI_KeyValue ORDER BY updated_at DESC")
+            cur = conn.execute("SELECT k, v, updated_at FROM QAI_KeyValue ORDER BY updated_at DESC LIMIT ?", (limit,))
             out = []
-            for row in cur.fetchall()[:limit]:
+            for row in cur.fetchall():
                 out.append({"k": row[0], "v": row[1], "updated_at": row[2]})
             return out
         except Exception as e:  # noqa: BLE001
@@ -246,9 +246,9 @@ def list_values(limit: int = 100) -> list[dict]:  # noqa: ANN001
 
     try:
         with engine.connect() as conn:
-            res = conn.execute(text("SELECT k, v, updated_at FROM QAI_KeyValue ORDER BY updated_at DESC"))
+            res = conn.execute(text("SELECT k, v, updated_at FROM QAI_KeyValue ORDER BY updated_at DESC LIMIT :limit"), {"limit": limit})
             items = []
-            for row in res.fetchall()[:limit]:
+            for row in res.fetchall():
                 items.append({"k": row[0], "v": row[1], "updated_at": row[2]})
             return items
     except Exception as e:  # noqa: BLE001

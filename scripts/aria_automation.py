@@ -98,6 +98,15 @@ class AriaAutomation:
         self.start_time = datetime.now()
         self.training_cycles = 0
         self.errors: List[str] = []
+        
+        # Performance optimization: cache port checks
+        self._port_cache: Dict[int, tuple[bool, float]] = {}
+        self._port_cache_ttl = 5.0  # Cache port checks for 5 seconds
+        
+        # Performance optimization: cache process listings
+        self._process_cache: Optional[List[psutil.Process]] = None
+        self._process_cache_time = 0
+        self._process_cache_ttl = 10.0  # Cache process list for 10 seconds
 
         # Setup signal handlers
         signal.signal(signal.SIGINT, self._signal_handler)
@@ -158,10 +167,37 @@ class AriaAutomation:
             return False
 
     def _check_port(self, port: int) -> bool:
-        """Check if port is in use"""
+        """Check if port is in use with caching"""
         import socket
+        current_time = time.time()
+        
+        # Check cache
+        if port in self._port_cache:
+            cached_result, cache_time = self._port_cache[port]
+            if current_time - cache_time < self._port_cache_ttl:
+                return cached_result
+        
+        # Cache miss or expired - check port
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
-            return sock.connect_ex(('localhost', port)) == 0
+            result = sock.connect_ex(('localhost', port)) == 0
+        
+        # Update cache
+        self._port_cache[port] = (result, current_time)
+        return result
+    
+    def _get_process_list(self) -> List[psutil.Process]:
+        """Get cached process listing to avoid expensive psutil.process_iter() calls"""
+        current_time = time.time()
+        
+        # Check cache
+        if self._process_cache is not None:
+            if current_time - self._process_cache_time < self._process_cache_ttl:
+                return self._process_cache
+        
+        # Cache miss or expired - get process list
+        self._process_cache = list(psutil.process_iter(['pid', 'name', 'cmdline']))
+        self._process_cache_time = current_time
+        return self._process_cache
 
     def start_aria_server(self) -> bool:
         """Start Aria web server"""
@@ -170,8 +206,8 @@ class AriaAutomation:
         # Check if already running
         if self._check_port(8080):
             print("⚠️  Port 8080 already in use")
-            # Try to find existing process
-            for proc in psutil.process_iter(['pid', 'name', 'cmdline']):
+            # Try to find existing process using cached process list
+            for proc in self._get_process_list():
                 try:
                     cmdline = proc.info['cmdline']
                     if cmdline and 'server.py' in ' '.join(cmdline):
@@ -200,10 +236,13 @@ class AriaAutomation:
                 text=True
             )
 
-            # Wait for server to start
+            # Wait for server to start with exponential backoff
             print("⏳ Waiting for server to start...")
-            for i in range(10):
-                time.sleep(1)
+            max_wait = 10  # seconds
+            check_interval = 0.1  # Start with 100ms checks
+            elapsed = 0
+            
+            while elapsed < max_wait:
                 if self._check_port(8080):
                     print(
                         f"✅ Aria server started on http://localhost:8080 (PID {proc.pid})")
@@ -217,8 +256,13 @@ class AriaAutomation:
                     )
                     self.save_pids()
                     return True
+                
+                # Exponential backoff: 0.1s, 0.2s, 0.4s, 0.8s, then cap at 1s
+                time.sleep(check_interval)
+                elapsed += check_interval
+                check_interval = min(check_interval * 2, 1.0)
 
-            print("❌ Server failed to start within 10 seconds")
+            print(f"❌ Server failed to start within {max_wait} seconds")
             proc.terminate()
             return False
 

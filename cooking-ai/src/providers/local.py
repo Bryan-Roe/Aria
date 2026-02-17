@@ -88,9 +88,11 @@ class LocalProvider:
         tokens = [t for t in re.split(r"[^a-zA-Z]+", query) if t]
         scored = []
         for r in SAMPLE_RECIPES:
-            # Filter by tags (all filters must match at least one tag)
-            if filters and not all(any(f in tag.lower() for tag in r["tags"]) for f in filters):
-                continue
+            # Filter by tags (optimized: pre-compute tag set for O(1) membership check)
+            if filters:
+                recipe_tags = {tag.lower() for tag in r["tags"]}
+                if not all(any(f in tag for tag in recipe_tags) for f in filters):
+                    continue
             title = r["title"].lower()
             ingredients_blob = " ".join(r["ingredients"]).lower()
             score = 0

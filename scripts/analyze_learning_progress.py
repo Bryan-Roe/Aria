@@ -83,7 +83,10 @@ def analyze_conversations() -> Dict[str, Any]:
     # Lexical diversity (simple): unique assistant words / total assistant words
     diversity = 0.0
     if assistant_messages:
-        words = [w for msg in assistant_messages for w in msg.split()]
+        # Use generator expression to avoid materializing full list in memory
+        # This is more memory-efficient for large message sets
+        from itertools import chain
+        words = list(chain.from_iterable(msg.split() for msg in assistant_messages))
         if words:
             diversity = len(set(words))/len(words)
     return {

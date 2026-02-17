@@ -34,10 +34,11 @@ job = backend.run(qc, shots=100)
 print(f"Job ID: {job.id()}")
 
 # Monitor job status
+TERMINAL_STATUSES = {"Succeeded", "Failed", "Cancelled"}  # O(1) set lookup
 while True:
     status = job.status()
     print(f"Job status: {status}")
-    if status in ["Succeeded", "Failed", "Cancelled"]:
+    if status in TERMINAL_STATUSES:
         break
     time.sleep(10)
 

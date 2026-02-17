@@ -21,6 +21,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import statistics
 import sys
 import time
 from dataclasses import dataclass, field
@@ -132,10 +133,10 @@ def parse_autotrain_status() -> OrchestratorStatus:
         last_updated=data.get("generated_at"),
     )
     
-    # Calculate avg duration
+    # Calculate avg duration using statistics.mean for efficiency
     durations = [j.get("duration_sec", 0) for j in jobs if j.get("duration_sec")]
     if durations:
-        status.avg_duration = sum(durations) / len(durations)
+        status.avg_duration = statistics.mean(durations)
     
     # Detect alerts
     recent_failures = [j["name"] for j in jobs if j.get("status") == "failed"][:3]
@@ -164,10 +165,10 @@ def parse_evaluation_status() -> OrchestratorStatus:
         last_updated=data.get("generated_at"),
     )
     
-    # Calculate avg duration
+    # Calculate avg duration using statistics.mean for efficiency
     durations = [j.get("duration_sec", 0) for j in jobs if j.get("duration_sec")]
     if durations:
-        status.avg_duration = sum(durations) / len(durations)
+        status.avg_duration = statistics.mean(durations)
     
     # Check for placeholder metrics (template evaluators)
     placeholder_jobs = [

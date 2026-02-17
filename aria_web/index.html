@@ -1008,10 +1008,109 @@
             font-size: 0.9em;
             line-height: 1.6;
         }
+
+        /* Navigation Bar */
+        .nav-bar {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 50px;
+            padding: 10px 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .nav-link {
+            color: #4a90e2;
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+
+        .nav-link:hover {
+            background: rgba(102, 126, 234, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .nav-link.upgrade-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 10px 24px;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .nav-link.upgrade-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+        }
+
+        .subscription-badge {
+            background: #4caf50;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.85em;
+            font-weight: 600;
+        }
+
+        .subscription-badge.free {
+            background: #9e9e9e;
+        }
+
+        .subscription-badge.pro {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+        }
+
+        .subscription-badge.enterprise {
+            background: linear-gradient(135deg, #ffd700, #ffed4e);
+            color: #333;
+        }
+
+        @media (max-width: 768px) {
+            .nav-bar {
+                justify-content: center;
+            }
+            
+            .nav-links {
+                flex-direction: column;
+                width: 100%;
+            }
+            
+            .nav-link {
+                width: 100%;
+                text-align: center;
+            }
+        }
     </style>
 </head>
 <body>
     <div class="container">
+        <!-- Navigation Bar -->
+        <nav class="nav-bar">
+            <div class="nav-links">
+                <a href="../monetization-index.html" class="nav-link">🏠 Home</a>
+                <a href="../pricing.html" class="nav-link">💰 Pricing</a>
+                <a href="../my-subscription.html" class="nav-link">📊 My Subscription</a>
+                <a href="../admin_dashboard.html" class="nav-link">👑 Admin</a>
+            </div>
+            <div class="nav-links">
+                <span class="subscription-badge free" id="subscription-badge">Free Tier</span>
+                <a href="../pricing.html" class="nav-link upgrade-btn">⭐ Upgrade</a>
+            </div>
+        </nav>
+
         <header>
             <h1>👤 Aria - Human-Like AI Character</h1>
             <p class="subtitle">Natural movement and realistic appearance with articulated joints! 🦾</p>
@@ -1172,5 +1271,33 @@
     </div>
 
     <script src="aria_controller.js"></script>
+    <script>
+        // Fetch and display subscription status
+        async function loadSubscriptionStatus() {
+            try {
+                // Try to fetch subscription status from API
+                const response = await fetch('/api/subscription/status?user_id=demo_user');
+                if (response.ok) {
+                    const data = await response.json();
+                    const badge = document.getElementById('subscription-badge');
+                    if (badge && data.tier) {
+                        const tierName = data.tier_name || data.tier.toUpperCase();
+                        badge.textContent = `${tierName} Tier`;
+                        badge.className = `subscription-badge ${data.tier.toLowerCase()}`;
+                    }
+                }
+            } catch (error) {
+                // If API is not available, keep default "Free Tier" badge
+                console.log('Subscription API not available, using default badge');
+            }
+        }
+
+        // Load subscription status on page load
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', loadSubscriptionStatus);
+        } else {
+            loadSubscriptionStatus();
+        }
+    </script>
 </body>
 </html>

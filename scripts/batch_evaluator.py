@@ -28,7 +28,7 @@ import sys
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
@@ -72,6 +72,8 @@ class BatchEvaluator:
         self.max_workers = max_workers
         self.tasks: List[EvaluationTask] = []
         self.results: List[EvaluationResult] = []
+        # Performance optimization: cache results lookup by model_id
+        self._results_cache: Dict[str, EvaluationResult] = {}
     
     def load_config(self, config_file: Path):
         """Load evaluation tasks from config file."""
@@ -204,6 +206,8 @@ class BatchEvaluator:
                 try:
                     result = future.result()
                     self.results.append(result)
+                    # Update cache for O(1) lookups
+                    self._results_cache[result.model_id] = result
                     
                     # Use ASCII-safe status indicators
                     status_icon = "[OK]" if result.status == "succeeded" else "[FAIL]"
@@ -217,8 +221,11 @@ class BatchEvaluator:
                     print(f"[ERROR] {task.model_id}: Exception - {e}")
         
         print(f"\n[batch_eval] Evaluation complete")
-        print(f"[batch_eval] Succeeded: {sum(1 for r in self.results if r.status == 'succeeded')}")
-        print(f"[batch_eval] Failed: {sum(1 for r in self.results if r.status == 'failed')}")
+        # Use already classified results from aggregate to avoid redundant passes
+        succeeded_count = sum(1 for r in self.results if r.status == 'succeeded')
+        failed_count = len(self.results) - succeeded_count
+        print(f"[batch_eval] Succeeded: {succeeded_count}")
+        print(f"[batch_eval] Failed: {failed_count}")
     
     def aggregate_results(self) -> Dict:
         """Aggregate all evaluation results.
@@ -310,6 +317,14 @@ class BatchEvaluator:
         model_ids_set = set(model_ids)
         # Single pass through results for O(n+m) complexity instead of O(n*m)
         comparison = [r for r in self.results if r.model_id in model_ids_set]
+        """Compare specific models side-by-side using cached lookups."""
+        comparison = []
+        
+        # Use O(1) cache lookup instead of O(n) linear search
+        for model_id in model_ids:
+            result = self._results_cache.get(model_id)
+            if result:
+                comparison.append(result)
         
         return {
             "models": [r.model_id for r in comparison],
@@ -346,7 +361,19 @@ class BatchEvaluator:
         if not best_model_id:
             raise ValueError("No best model found (all evaluations may have failed)")
         
-        best_result = next(r for r in self.results if r.model_id == best_model_id)
+        # Prefer O(1) cache lookup instead of O(n) linear search, but fall back if needed
+        best_result = self._results_cache.get(best_model_id)
+        if best_result is None:
+            # Fallback to linear search to tolerate transient cache inconsistencies
+            best_result = next(
+                (r for r in self.results if r.model_id == best_model_id),
+                None,
+            )
+        if best_result is None:
+            raise ValueError(
+                f"Best model {best_model_id} not found in evaluation results; "
+                "this indicates an internal consistency error."
+            )
         
         # Determine target directory
         if target_dir is None:

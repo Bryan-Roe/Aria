@@ -234,9 +234,10 @@ class JobQueue:
     
     def cancel_job(self, job_id: str):
         """Cancel a pending or blocked job"""
+        CANCELLABLE_STATUSES = {JobStatus.PENDING, JobStatus.BLOCKED}  # O(1) set lookup
         if job_id in self.jobs:
             job = self.jobs[job_id]
-            if job.status in [JobStatus.PENDING, JobStatus.BLOCKED]:
+            if job.status in CANCELLABLE_STATUSES:
                 job.status = JobStatus.CANCELLED
                 self.save_queue()
                 print(f"Cancelled job {job_id}")
@@ -245,22 +246,40 @@ class JobQueue:
     
     def get_queue_status(self) -> Dict:
         """Get current queue status"""
-        status = {
+        # Single-pass aggregation for efficiency
+        ACTIVE_STATUSES = {JobStatus.PENDING, JobStatus.BLOCKED}
+        counts = {
             'total_jobs': len(self.jobs),
-            'pending': sum(1 for j in self.jobs.values() if j.status == JobStatus.PENDING),
-            'running': sum(1 for j in self.jobs.values() if j.status == JobStatus.RUNNING),
-            'completed': sum(1 for j in self.jobs.values() if j.status == JobStatus.COMPLETED),
-            'failed': sum(1 for j in self.jobs.values() if j.status == JobStatus.FAILED),
-            'blocked': sum(1 for j in self.jobs.values() if j.status == JobStatus.BLOCKED),
-            'cancelled': sum(1 for j in self.jobs.values() if j.status == JobStatus.CANCELLED),
-            'queue_length': len(self.priority_queue),
-            'estimated_total_time': sum(
-                j.estimated_duration for j in self.jobs.values()
-                if j.status in [JobStatus.PENDING, JobStatus.BLOCKED]
-            )
+            'pending': 0,
+            'running': 0,
+            'completed': 0,
+            'failed': 0,
+            'blocked': 0,
+            'cancelled': 0,
+            'estimated_total_time': 0
         }
         
-        return status
+        for job in self.jobs.values():
+            # Count by status
+            if job.status == JobStatus.PENDING:
+                counts['pending'] += 1
+            elif job.status == JobStatus.RUNNING:
+                counts['running'] += 1
+            elif job.status == JobStatus.COMPLETED:
+                counts['completed'] += 1
+            elif job.status == JobStatus.FAILED:
+                counts['failed'] += 1
+            elif job.status == JobStatus.BLOCKED:
+                counts['blocked'] += 1
+            elif job.status == JobStatus.CANCELLED:
+                counts['cancelled'] += 1
+            
+            # Sum estimated time for active jobs
+            if job.status in ACTIVE_STATUSES:
+                counts['estimated_total_time'] += job.estimated_duration
+        
+        counts['queue_length'] = len(self.priority_queue)
+        return counts
     
     def get_job_details(self, job_id: str) -> Optional[Dict]:
         """Get detailed information about a job"""
@@ -298,9 +317,10 @@ class JobQueue:
     
     def clear_completed(self):
         """Remove completed and cancelled jobs from queue"""
+        REMOVABLE_STATUSES = {JobStatus.COMPLETED, JobStatus.CANCELLED}  # O(1) set lookup
         to_remove = [
             job_id for job_id, job in self.jobs.items()
-            if job.status in [JobStatus.COMPLETED, JobStatus.CANCELLED]
+            if job.status in REMOVABLE_STATUSES
         ]
         
         for job_id in to_remove:

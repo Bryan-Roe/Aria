@@ -467,11 +467,32 @@ class ParallelTrainer:
         self.results = await asyncio.gather(*tasks)
         end_time = datetime.now()
         
-        # Prepare run entry
+        # Prepare run entry with single-pass aggregation
         status_file = self.root / "data_out/parallel_training/status.json"
         status_file.parent.mkdir(parents=True, exist_ok=True)
-        agg_train = sum(r.get('dataset_train_samples') or 0 for r in self.results if r.get('dataset_train_samples') is not None)
-        agg_test = sum(r.get('dataset_test_samples') or 0 for r in self.results if r.get('dataset_test_samples') is not None)
+        
+        # Single pass aggregation for all statistics
+        agg_train = 0
+        agg_test = 0
+        succeeded = 0
+        skipped = 0
+        failed = 0
+        
+        for r in self.results:
+            # Aggregate sample counts
+            if r.get('dataset_train_samples') is not None:
+                agg_train += r['dataset_train_samples']
+            if r.get('dataset_test_samples') is not None:
+                agg_test += r['dataset_test_samples']
+            
+            # Count status types
+            status = r.get('status')
+            if status == 'succeeded':
+                succeeded += 1
+            elif status == 'skipped':
+                skipped += 1
+            else:
+                failed += 1
 
         run_entry = {
             'run_id': end_time.strftime('%Y%m%dT%H%M%S'),
@@ -519,14 +540,10 @@ class ParallelTrainer:
         with status_file.open('w', encoding='utf-8') as f:
             json.dump(new_status, f, indent=2)
         
-        # Print summary
+        # Print summary using pre-computed counts
         print("\n" + "="*70)
         print("Parallel Training Summary")
         print("="*70)
-        
-        succeeded = sum(1 for r in self.results if r.get('status') == 'succeeded')
-        skipped = sum(1 for r in self.results if r.get('status') == 'skipped')
-        failed = sum(1 for r in self.results if r.get('status') not in ('succeeded', 'skipped'))
 
         print(f"\nTotal Jobs: {len(self.results)}")
         print(f"Succeeded: {succeeded}")

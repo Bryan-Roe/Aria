@@ -230,13 +230,13 @@ class TrainingAnalytics:
         chart.append(f"Max: {max_val:.2%}  │")
         
         for row in range(chart_height - 1, -1, -1):
-            line = "            │"
+            chars = []
             for value in scaled:
                 if value >= row:
-                    line += "█"
+                    chars.append("█")
                 else:
-                    line += " "
-            chart.append(line)
+                    chars.append(" ")
+            chart.append("            │" + "".join(chars))
         
         chart.append(f"Min: {min_val:.2%}  └" + "─" * len(scaled))
         chart.append(f"             Cycle: 1{' ' * (len(scaled) - 5)}{len(scaled)}")

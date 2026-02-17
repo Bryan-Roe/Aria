@@ -76,6 +76,20 @@ def build_examples(messages: List[Dict], context_window: int) -> List[Dict]:
     # Combine lists efficiently with extend
     pairs.extend(windows)
     return pairs
+                # Must contain at least one user+assistant - check both roles in single pass
+                has_user = False
+                has_assistant = False
+                for x in window:
+                    role = x.get("role")
+                    if role == "user":
+                        has_user = True
+                    elif role == "assistant":
+                        has_assistant = True
+                    if has_user and has_assistant:  # Early exit once both found
+                        break
+                if has_user and has_assistant:
+                    examples.append({"messages": window})
+    return examples
 
 
 def hash_example(example: Dict) -> str:

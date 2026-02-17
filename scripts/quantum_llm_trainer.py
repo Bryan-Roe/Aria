@@ -320,11 +320,10 @@ class QuantumEnhancedLLMTrainer:
                     else:
                         dataset = [data]
         elif dataset_path.is_dir():
-            # Look for train.json or train.jsonl
-            for fname in ['train.json', 'train.jsonl']:
-                file_path = dataset_path / fname
-                if file_path.exists():
-                    return self._load_dataset(file_path)
+            # Look for train files using glob for efficiency
+            train_files = list(dataset_path.glob("train.json")) + list(dataset_path.glob("train.jsonl"))
+            if train_files:
+                return self._load_dataset(train_files[0])
         
         return dataset
     
@@ -397,11 +396,11 @@ class QuantumEnhancedLLMTrainer:
             logger.info(f"\n=== Passive Training Cycle {cycle_count} ===")
             
             try:
-                # Look for available datasets
+                # Look for available datasets using combined glob pattern
                 datasets_dir = Path("datasets/chat")
                 if datasets_dir.exists():
-                    dataset_files = list(datasets_dir.glob("*/train.json")) + \
-                                  list(datasets_dir.glob("*/train.jsonl"))
+                    # Use explicit patterns to match only train.json and train.jsonl
+                    dataset_files = list(datasets_dir.glob("*/train.json")) + list(datasets_dir.glob("*/train.jsonl"))
                     
                     if dataset_files:
                         # Train on a random dataset
