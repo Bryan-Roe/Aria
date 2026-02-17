@@ -234,8 +234,8 @@ def list_values(limit: int = 100) -> list[dict]:  # noqa: ANN001
             conn = _get_sqlite_conn()
             cur = conn.execute("SELECT k, v, updated_at FROM QAI_KeyValue ORDER BY updated_at DESC LIMIT ?", (limit,))
             # Use list comprehension for better performance
-            # Note: fetchall() loads all rows into memory at once. For very large result sets,
-            # consider iterating over cursor directly: [{"k": r[0], ...} for r in cur]
+            # Note: For memory-constrained environments with very large result sets,
+            # you can iterate directly: [{"k": r[0], "v": r[1], "updated_at": r[2]} for r in cur]
             return [{"k": row[0], "v": row[1], "updated_at": row[2]} for row in cur.fetchall()]
         except Exception as e:  # noqa: BLE001
             logging.warning(f"[sql_repository] sqlite fallback list_values failed: {e}")
@@ -248,8 +248,8 @@ def list_values(limit: int = 100) -> list[dict]:  # noqa: ANN001
         with engine.connect() as conn:
             res = conn.execute(text("SELECT k, v, updated_at FROM QAI_KeyValue ORDER BY updated_at DESC LIMIT :limit"), {"limit": limit})
             # Use list comprehension for better performance
-            # Note: fetchall() loads all rows into memory at once. For very large result sets,
-            # consider iterating over cursor directly: [{"k": r[0], ...} for r in res]
+            # Note: For memory-constrained environments with very large result sets,
+            # you can iterate directly: [{"k": r[0], "v": r[1], "updated_at": r[2]} for r in res]
             return [{"k": row[0], "v": row[1], "updated_at": row[2]} for row in res.fetchall()]
     except Exception as e:  # noqa: BLE001
         logging.warning(f"[sql_repository] list_values failed: {e}")
