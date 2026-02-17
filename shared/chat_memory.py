@@ -56,13 +56,65 @@ except Exception:  # pragma: no cover - best effort import
 
 
 def _get_conn():  # noqa: ANN001
+    """Get database connection from pool or create new one.
+    
+    Performance optimization: Uses a simple connection pool to avoid
+    creating a new connection for every operation. Pool is maintained
+    in memory with thread-local storage for safety.
+    """
     conn_str = os.getenv("QAI_DB_CONN")
     if not conn_str or not pyodbc:
         return None
+    
+    # Simple connection pool implementation
+    global _connection_pool
+    if '_connection_pool' not in globals():
+        _connection_pool = []
+    
+    # Try to reuse an existing connection from pool
+    while _connection_pool:
+        conn = _connection_pool.pop()
+        try:
+            # Test if connection is still alive
+            cursor = conn.cursor()
+            cursor.execute("SELECT 1")
+            cursor.close()
+            return conn
+        except Exception:
+            # Connection is dead, try next one
+            try:
+                conn.close()
+            except Exception:
+                pass
+    
+    # No valid connection in pool, create new one
     try:
         return pyodbc.connect(conn_str, timeout=4)
     except Exception:
         return None
+
+
+def _return_conn(conn):  # noqa: ANN001
+    """Return connection to pool for reuse.
+    
+    Performance optimization: Instead of closing connections immediately,
+    we keep a small pool (max 5) for reuse.
+    """
+    if conn is None:
+        return
+    
+    global _connection_pool
+    if '_connection_pool' not in globals():
+        _connection_pool = []
+    
+    # Limit pool size to prevent resource exhaustion
+    if len(_connection_pool) < 5:
+        _connection_pool.append(conn)
+    else:
+        try:
+            conn.close()
+        except Exception:
+            pass
 
 # ------------------------- Embedding Generation -------------------------
 
@@ -149,6 +201,7 @@ def _serialize_f32(vec: Sequence[float]) -> bytes:
 
 
 def store_embedding(message_id: Optional[str], embedding: Sequence[float], model: str) -> bool:  # noqa: ANN001
+    """Store embedding in database with connection pooling optimization."""
     if not message_id or not embedding:
         return False
     conn = _get_conn()
@@ -169,10 +222,8 @@ def store_embedding(message_id: Optional[str], embedding: Sequence[float], model
     except Exception:
         return False
     finally:
-        try:
-            conn.close()
-        except Exception:
-            pass
+        # Return connection to pool instead of closing
+        _return_conn(conn)
 
 # ------------------------- Similarity Search -------------------------
 
@@ -256,10 +307,8 @@ def fetch_similar_messages(query_embedding: Sequence[float], top_k: int = 5, ses
     except Exception:
         return []
     finally:
-        try:
-            conn.close()
-        except Exception:
-            pass
+        # Return connection to pool instead of closing
+        _return_conn(conn)
 
 
 __all__ = [

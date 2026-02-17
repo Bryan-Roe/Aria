@@ -40,6 +40,38 @@ except ImportError:
 MODEL = None
 print("⚠️ Skipping AI model loading - using rule-based fallback for faster startup")
 
+# Performance optimization: Pre-compiled keyword sets for O(1) membership checks
+# Instead of repeated any() calls with list comprehensions
+_MOVE_KEYWORDS = frozenset(['go', 'move', 'walk', 'run'])
+_SAY_KEYWORDS = frozenset(['say', 'speak', 'tell', 'greet'])
+_PICKUP_KEYWORDS = frozenset(['pick', 'get', 'grab', 'take'])
+_JUMP_KEYWORDS = frozenset(['jump', 'leap', 'hop'])
+_DANCE_KEYWORDS = frozenset(['dance', 'spin', 'twirl'])
+_WAVE_KEYWORDS = frozenset(['wave', 'greet', 'hello', 'hi'])
+_LOOK_KEYWORDS = frozenset(['look', 'see', 'watch', 'observe'])
+_SIT_KEYWORDS = frozenset(['sit', 'rest', 'relax'])
+_RUN_KEYWORDS = frozenset(['run', 'race', 'sprint'])
+_HIDE_KEYWORDS = frozenset(['hide', 'crouch', 'duck'])
+_PRESENT_KEYWORDS = frozenset(['present', 'show', 'display'])
+_THINK_KEYWORDS = frozenset(['think', 'wonder', 'ponder'])
+_LIMB_KEYWORDS = frozenset([
+    'left arm', 'arm left', 'left hand', 'right arm', 'arm right', 'right hand',
+    'left leg', 'leg left', 'right leg', 'leg right'
+])
+_ARM_WAVE_KEYWORDS = frozenset(['wave', 'wiggle'])
+_ARM_RAISE_KEYWORDS = frozenset(['raise', 'up', 'lift'])
+_ARM_LOWER_KEYWORDS = frozenset(['lower', 'down'])
+_ARM_FORWARD_KEYWORDS = frozenset(['forward', 'front'])
+_ARM_BACK_KEYWORDS = frozenset(['back', 'backward', 'behind'])
+_GREETING_WORDS = frozenset(['!', 'hello', 'hi'])
+_OBJECTS = frozenset(['apple', 'book', 'cup', 'ball', 'flower'])
+_GESTURES = frozenset(['wave', 'bow', 'nod', 'shake', 'point'])
+
+def _any_word_in_text(keywords: frozenset, text: str) -> bool:
+    """Fast keyword matching using set intersection - O(n) where n is words in text."""
+    text_words = set(text.split())
+    return bool(keywords & text_words)
+
 # Global stage state that AI can see
 stage_state = {
     'aria': {
@@ -216,8 +248,8 @@ Rules:
         actions = []
         command_lower = command.lower()
 
-        # Parse move commands
-        if any(word in command_lower for word in ['go', 'move', 'walk', 'run']):
+        # Parse move commands (optimized: use pre-compiled set)
+        if _any_word_in_text(_MOVE_KEYWORDS, command_lower):
             # Extract target from command
             if 'table' in command_lower:
                 actions.append({"action": "move", "target": {
@@ -232,22 +264,22 @@ Rules:
                 actions.append({"action": "move", "target": {
                                "x": 80, "y": 50}, "speed": "normal"})
 
-        # Parse say commands
-        if any(word in command_lower for word in ['say', 'speak', 'tell', 'greet']):
+        # Parse say commands (optimized: use pre-compiled set)
+        if _any_word_in_text(_SAY_KEYWORDS, command_lower):
             # Extract text after say/speak
             for trigger in ['say ', 'speak ', 'tell ', 'greet ']:
                 if trigger in command_lower:
                     text = command[command_lower.index(
                         trigger) + len(trigger):].strip(' "\'')
-                    emotion = 'happy' if any(w in text.lower() for w in [
-                                             '!', 'hello', 'hi']) else 'neutral'
+                    text_lower = text.lower()
+                    emotion = 'happy' if _any_word_in_text(_GREETING_WORDS, text_lower) else 'neutral'
                     actions.append(
                         {"action": "say", "text": text, "emotion": emotion})
                     break
 
-        # Parse pickup commands
-        for obj in ['apple', 'book', 'cup', 'ball', 'flower']:
-            if obj in command_lower and any(word in command_lower for word in ['pick', 'get', 'grab', 'take']):
+        # Parse pickup commands (optimized: use pre-compiled sets)
+        for obj in _OBJECTS:
+            if obj in command_lower and _any_word_in_text(_PICKUP_KEYWORDS, command_lower):
                 # Move to object first
                 obj_pos = stage_state['objects'][obj]['position']
                 actions.append(
@@ -255,9 +287,8 @@ Rules:
                 actions.append({"action": "pickup", "object_id": obj})
                 break
 
-        # Parse gesture commands
-        gestures = ['wave', 'bow', 'nod', 'shake', 'point']
-        for gesture in gestures:
+        # Parse gesture commands (optimized: use pre-compiled set)
+        for gesture in _GESTURES:
             if gesture in command_lower:
                 actions.append({"action": "gesture", "gesture_type": gesture})
                 break
@@ -492,28 +523,28 @@ def determine_position_from_context(cmd: str) -> str:
                         # Position slightly to the left of object
                         return f'[aria:position:{max(10, obj_pos["x"] - 10)}:{obj_pos["y"] + 10}]'
 
-    # Action-based positioning
-    if any(k in cmd for k in ['jump', 'leap', 'hop']):
+    # Action-based positioning (optimized: use pre-compiled sets)
+    if _any_word_in_text(_JUMP_KEYWORDS, cmd):
         return '[aria:position:50:60]'  # Center for jumping
-    elif any(k in cmd for k in ['dance', 'spin', 'twirl']):
+    elif _any_word_in_text(_DANCE_KEYWORDS, cmd):
         return '[aria:position:50:50]'  # Center stage for performance
-    elif any(k in cmd for k in ['wave', 'greet', 'hello', 'hi']):
+    elif _any_word_in_text(_WAVE_KEYWORDS, cmd):
         return '[aria:position:30:70]'  # Front-left for greeting
-    elif any(k in cmd for k in ['look', 'see', 'watch', 'observe']):
+    elif _any_word_in_text(_LOOK_KEYWORDS, cmd):
         # Look towards table
         if 'table' in cmd:
             return '[aria:position:40:60]'  # Position to see table
         return '[aria:position:20:40]'  # Left side for observing
-    elif any(k in cmd for k in ['sit', 'rest', 'relax']):
+    elif _any_word_in_text(_SIT_KEYWORDS, cmd):
         # Near table to sit
         return f'[aria:position:{table_pos["x"] - 5}:{table_pos["y"] + 35}]'
-    elif any(k in cmd for k in ['run', 'race', 'sprint']):
+    elif _any_word_in_text(_RUN_KEYWORDS, cmd):
         return '[aria:position:85:70]'  # Far right for running space
-    elif any(k in cmd for k in ['hide', 'crouch', 'duck']):
+    elif _any_word_in_text(_HIDE_KEYWORDS, cmd):
         return '[aria:position:10:75]'  # Corner position
-    elif any(k in cmd for k in ['present', 'show', 'display']):
+    elif _any_word_in_text(_PRESENT_KEYWORDS, cmd):
         return '[aria:position:50:50]'  # Center to present
-    elif any(k in cmd for k in ['think', 'wonder', 'ponder']):
+    elif _any_word_in_text(_THINK_KEYWORDS, cmd):
         return '[aria:position:25:50]'  # Contemplative left position
     elif any(k in cmd for k in ['walk left', 'go left', 'left']):
         return '[aria:position:20:70]'  # Moving to left
@@ -576,11 +607,8 @@ def generate_tags_fallback(command: str) -> List[str]:
     if auto_position:
         tags.append(auto_position)
 
-    # Track if limb commands are detected to avoid movement conflicts
-    has_limb_command = any(k in cmd for k in [
-        'left arm', 'arm left', 'left hand', 'right arm', 'arm right', 'right hand',
-        'left leg', 'leg left', 'right leg', 'leg right'
-    ])
+    # Track if limb commands are detected to avoid movement conflicts (optimized: use pre-compiled set)
+    has_limb_command = _any_word_in_text(_LIMB_KEYWORDS, cmd)
 
     # Special: server-side "say" / announce detection (capture original text)
     try:
@@ -645,11 +673,11 @@ def generate_tags_fallback(command: str) -> List[str]:
     def limb_tag(part: str, action: str):
         tags.append(f'[aria:limb:{part}:{action}]')
 
-    # Helper maps
-    left_arm = any(k in cmd for k in ['left arm', 'arm left', 'left hand'])
-    right_arm = any(k in cmd for k in ['right arm', 'arm right', 'right hand'])
-    left_leg = any(k in cmd for k in ['left leg', 'leg left'])
-    right_leg = any(k in cmd for k in ['right leg', 'leg right'])
+    # Helper maps (optimized: use pre-compiled sets for multi-word checks)
+    left_arm = _any_word_in_text(frozenset(['left arm', 'arm left', 'left hand']), cmd)
+    right_arm = _any_word_in_text(frozenset(['right arm', 'arm right', 'right hand']), cmd)
+    left_leg = _any_word_in_text(frozenset(['left leg', 'leg left']), cmd)
+    right_leg = _any_word_in_text(frozenset(['right leg', 'leg right']), cmd)
 
     # Numeric angle if present (e.g., "left arm 45 degrees")
     angle_match = None
@@ -660,7 +688,7 @@ def generate_tags_fallback(command: str) -> List[str]:
         angle_match = None
     angle_val = angle_match.group(1) if angle_match else None
 
-    # Arm actions
+    # Arm actions (optimized: use pre-compiled sets)
     if left_arm or right_arm or 'arm' in cmd:
         # Choose default arm if unspecified
         parts = []
@@ -670,26 +698,26 @@ def generate_tags_fallback(command: str) -> List[str]:
             parts.append('right_arm')
         if not parts:
             parts = ['right_arm']
-        if any(k in cmd for k in ['wave', 'wiggle']):
+        if _any_word_in_text(_ARM_WAVE_KEYWORDS, cmd):
             for p in parts:
                 limb_tag(p, 'wave')
-        elif any(k in cmd for k in ['raise', 'up', 'lift']):
+        elif _any_word_in_text(_ARM_RAISE_KEYWORDS, cmd):
             for p in parts:
                 limb_tag(p, 'raise')
-        elif any(k in cmd for k in ['lower', 'down']):
+        elif _any_word_in_text(_ARM_LOWER_KEYWORDS, cmd):
             for p in parts:
                 limb_tag(p, 'lower')
-        elif any(k in cmd for k in ['forward', 'front']):
+        elif _any_word_in_text(_ARM_FORWARD_KEYWORDS, cmd):
             for p in parts:
                 limb_tag(p, 'forward')
-        elif any(k in cmd for k in ['back', 'backward', 'behind']):
+        elif _any_word_in_text(_ARM_BACK_KEYWORDS, cmd):
             for p in parts:
                 limb_tag(p, 'back')
         elif angle_val is not None:
             for p in parts:
                 limb_tag(p, angle_val)
 
-    # Leg actions
+    # Leg actions (optimized: use pre-compiled sets)
     if left_leg or right_leg or 'leg' in cmd:
         parts = []
         if left_leg:
@@ -701,10 +729,10 @@ def generate_tags_fallback(command: str) -> List[str]:
         if 'kick' in cmd:
             for p in parts:
                 limb_tag(p, 'kick')
-        elif any(k in cmd for k in ['forward', 'front']):
+        elif _any_word_in_text(_ARM_FORWARD_KEYWORDS, cmd):
             for p in parts:
                 limb_tag(p, 'forward')
-        elif any(k in cmd for k in ['back', 'backward', 'behind']):
+        elif _any_word_in_text(_ARM_BACK_KEYWORDS, cmd):
             for p in parts:
                 limb_tag(p, 'back')
         elif angle_val is not None:
