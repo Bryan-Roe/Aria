@@ -691,14 +691,18 @@ class AGIProvider(BaseChatProvider):
         # Check for Aria movement commands
         if analysis.get("intent") == "movement" and analysis.get("domain") == "aria":
             if "[aria:" not in response:
-                # Add movement tag if missing
+                # Add movement tag if missing (optimize: accumulate and join)
                 query_lower = query.lower()
+                tag = None
                 if "left" in query_lower:
-                    response += " [aria:walk:left]"
+                    tag = " [aria:walk:left]"
                 elif "right" in query_lower:
-                    response += " [aria:walk:right]"
+                    tag = " [aria:walk:right]"
                 elif "jump" in query_lower:
-                    response += " [aria:jump]"
+                    tag = " [aria:jump]"
+                
+                if tag:
+                    response = response + tag
         
         # Store reflection for learning
         if issues:
