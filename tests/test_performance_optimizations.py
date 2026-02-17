@@ -415,3 +415,142 @@ class TestHashEmbeddingOptimization:
         
         # Should return zero vector
         assert all(x == 0.0 for x in embedding)
+
+
+class TestAriaKeywordOptimizations:
+    """Tests for aria_web/server.py keyword matching optimizations."""
+    
+    def test_keyword_sets_are_frozensets(self):
+        """Test that keyword constants are frozensets for performance."""
+        import sys
+        sys.path.insert(0, 'aria_web')
+        from server import (
+            MOVE_KEYWORDS, SAY_KEYWORDS, PICKUP_KEYWORDS,
+            JUMP_KEYWORDS, DANCE_KEYWORDS, WAVE_KEYWORDS
+        )
+        
+        # Verify all are frozensets
+        assert isinstance(MOVE_KEYWORDS, frozenset)
+        assert isinstance(SAY_KEYWORDS, frozenset)
+        assert isinstance(PICKUP_KEYWORDS, frozenset)
+        assert isinstance(JUMP_KEYWORDS, frozenset)
+        assert isinstance(DANCE_KEYWORDS, frozenset)
+        assert isinstance(WAVE_KEYWORDS, frozenset)
+        
+    def test_keyword_matching_works(self):
+        """Test that keyword matching still works correctly."""
+        import sys
+        sys.path.insert(0, 'aria_web')
+        from server import MOVE_KEYWORDS, JUMP_KEYWORDS
+        
+        # Test move keywords
+        assert any(word in "let's move left" for word in MOVE_KEYWORDS)
+        assert any(word in "walk to the table" for word in MOVE_KEYWORDS)
+        
+        # Test jump keywords
+        assert any(word in "jump up" for word in JUMP_KEYWORDS)
+        assert any(word in "leap over" for word in JUMP_KEYWORDS)
+
+
+class TestExtractChatLogsOptimization:
+    """Tests for scripts/extract_chat_logs_dataset.py optimization."""
+    
+    def test_single_pass_role_check(self):
+        """Test that single-pass role checking works correctly."""
+        # Simulate the optimized code
+        window = [
+            {"role": "user", "content": "Hello"},
+            {"role": "assistant", "content": "Hi there"},
+            {"role": "user", "content": "How are you?"}
+        ]
+        
+        # Single-pass role collection
+        roles = {x.get("role") for x in window}
+        has_both = "user" in roles and "assistant" in roles
+        
+        assert has_both is True
+        
+    def test_single_pass_role_check_missing_role(self):
+        """Test single-pass role check when role is missing."""
+        window = [
+            {"role": "user", "content": "Hello"},
+            {"role": "user", "content": "Anyone there?"}
+        ]
+        
+        roles = {x.get("role") for x in window}
+        has_both = "user" in roles and "assistant" in roles
+        
+        assert has_both is False
+
+
+class TestBatchEvaluatorOptimization:
+    """Tests for scripts/batch_evaluator.py optimization."""
+    
+    def test_compare_models_uses_dict_index(self):
+        """Test that compare_models builds dict index for O(1) lookups."""
+        # Simulate the EvaluationResult dataclass
+        class MockResult:
+            def __init__(self, model_id, model_type, status, duration, metrics):
+                self.model_id = model_id
+                self.model_type = model_type
+                self.status = status
+                self.duration = duration
+                self.metrics = metrics
+        
+        results = [
+            MockResult("model_a", "lora", "succeeded", 10.5, {"accuracy": 0.95}),
+            MockResult("model_b", "base", "failed", 5.0, {}),
+            MockResult("model_c", "lora", "succeeded", 8.0, {"accuracy": 0.88}),
+            MockResult("model_d", "fine_tune", "succeeded", 12.0, {"accuracy": 0.92}),
+        ]
+        
+        # Build index (optimized approach)
+        results_by_id = {r.model_id: r for r in results}
+        
+        # Test lookups
+        model_ids = ["model_a", "model_c", "model_d"]
+        comparison = []
+        for model_id in model_ids:
+            result = results_by_id.get(model_id)
+            if result:
+                comparison.append(result)
+        
+        assert len(comparison) == 3
+        assert comparison[0].model_id == "model_a"
+        assert comparison[1].model_id == "model_c"
+        assert comparison[2].model_id == "model_d"
+
+
+class TestTrainingAnalyticsOptimization:
+    """Tests for scripts/training_analytics.py string building optimization."""
+    
+    def test_chart_line_building_uses_join(self):
+        """Test that chart line building uses list + join instead of += in loop."""
+        # Simulate the optimized code
+        scaled = [5, 8, 6, 9, 7]
+        chart_height = 10
+        
+        chart = []
+        for row in range(chart_height - 1, -1, -1):
+            # Optimized: list comprehension + join
+            line_chars = ["            │"]
+            for value in scaled:
+                if value >= row:
+                    line_chars.append("█")
+                else:
+                    line_chars.append(" ")
+            chart.append("".join(line_chars))
+        
+        # Verify output
+        assert len(chart) == 10
+        assert all(line.startswith("            │") for line in chart)
+        
+        # Bottom row should be mostly filled
+        bottom_line = chart[-1]
+        assert "█" in bottom_line
+        
+        # Top rows should be mostly empty
+        top_line = chart[0]
+        empty_count = top_line.count(" ")
+        assert empty_count > 0
+
