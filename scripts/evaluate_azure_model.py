@@ -13,9 +13,17 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import sys
 import time
 from pathlib import Path
 from typing import Any, Dict, List
+
+# Add shared directory to path for imports
+script_dir = Path(__file__).parent
+repo_root = script_dir.parent
+sys.path.insert(0, str(repo_root))
+
+from shared.evaluation_utils import load_jsonl, naive_predict, compute_accuracy
 
 try:
     import openai  # type: ignore
@@ -23,32 +31,6 @@ try:
 except Exception:
     openai = None
     HAS_AZURE_OPENAI = False
-
-
-def load_jsonl(path: Path, max_samples: int | None = None) -> List[Dict[str, Any]]:
-    if not path.exists():
-        raise FileNotFoundError(path)
-    data: List[Dict[str, Any]] = []
-    with path.open("r", encoding="utf-8") as f:
-        for i, line in enumerate(f):
-            if max_samples is not None and i >= max_samples:
-                break
-            line = line.strip()
-            if not line:
-                continue
-            data.append(json.loads(line))
-    return data
-
-
-def naive_predict(example: Dict[str, Any]) -> str:
-    if "input" in example and isinstance(example["input"], str):
-        return f"echo: {example['input'].strip()}"
-    msgs = example.get("messages") or []
-    if msgs and isinstance(msgs, list):
-        for m in reversed(msgs):
-            if isinstance(m, dict) and m.get("role") == "user":
-                return f"echo: {m.get('content', '').strip()}"
-    return "echo:"
 
 
 def azure_call(example: Dict[str, Any], deployment: str | None) -> str:
@@ -65,18 +47,6 @@ def azure_call(example: Dict[str, Any], deployment: str | None) -> str:
         return resp.choices[0].message.content.strip()
     except Exception:
         return naive_predict(example)
-
-
-def compute_accuracy(preds: List[str], expects: List[str | None]) -> float:
-    if not preds:
-        return 0.0
-    matched = 0
-    for p, e in zip(preds, expects):
-        if e is None:
-            continue
-        if p.strip() == e.strip():
-            matched += 1
-    return matched / len(preds)
 
 
 def run(dataset: Path, max_samples: int | None, metrics: List[str], deployment: str | None, save_dir: Path | None) -> Dict[str, Any]:
