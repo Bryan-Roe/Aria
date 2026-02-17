@@ -3,11 +3,11 @@ import logging
 from pathlib import Path
 import sys
 
-# Add shared to path for utilities
-shared_path = Path(__file__).resolve().parent.parent / "shared"
-sys.path.insert(0, str(shared_path))
+# Ensure repository root is on sys.path so shared utilities can be imported as a package
+repo_root = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(repo_root))
 
-from http_utils import serve_static_file
+from shared.http_utils import serve_static_file
 
 app = func.FunctionApp()
 
