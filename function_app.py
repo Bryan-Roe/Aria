@@ -1939,21 +1939,25 @@ def quantum_circuit(req: func.HttpRequest) -> func.HttpResponse:
                 "observable": "PauliZ"
             })
 
-        # Create text visualization
-        visualization = f"Quantum Circuit ({n_qubits} qubits, {n_layers} layers, {entanglement} entanglement)\n"
-        visualization += "=" * 60 + "\n\n"
+        # Create text visualization using list for efficiency (avoids O(n²) string concatenation)
+        viz_parts = [
+            f"Quantum Circuit ({n_qubits} qubits, {n_layers} layers, {entanglement} entanglement)\n",
+            "=" * 60 + "\n\n"
+        ]
 
         for layer in range(n_layers + 2):
-            visualization += f"Layer {layer}:\n"
+            viz_parts.append(f"Layer {layer}:\n")
             layer_gates = [g for g in gates if g.get('layer') == layer]
             for gate in layer_gates:
                 if gate['type'] in ['RY', 'RZ']:
-                    visualization += f"  {gate['type']}({gate['parameter']}) on qubit {gate['qubit']}\n"
+                    viz_parts.append(f"  {gate['type']}({gate['parameter']}) on qubit {gate['qubit']}\n")
                 elif gate['type'] == 'CNOT':
-                    visualization += f"  CNOT: control={gate['control']}, target={gate['target']}\n"
+                    viz_parts.append(f"  CNOT: control={gate['control']}, target={gate['target']}\n")
                 elif gate['type'] == 'Measure':
-                    visualization += f"  Measure qubit {gate['qubit']} ({gate['observable']})\n"
-            visualization += "\n"
+                    viz_parts.append(f"  Measure qubit {gate['qubit']} ({gate['observable']})\n")
+            viz_parts.append("\n")
+        
+        visualization = "".join(viz_parts)
 
         response_data = {
             "circuit_info": {
