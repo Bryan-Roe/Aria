@@ -832,19 +832,29 @@ class MyHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
             
             jobs = queue_data.get('jobs', [])
             
+            # Single-pass aggregation to avoid multiple iterations (optimized)
+            status_counts = {'pending': 0, 'running': 0, 'completed': 0, 'failed': 0, 'blocked': 0, 'cancelled': 0}
+            queue_jobs = []
+            estimated_total = 0
+            
+            for job in jobs:
+                status = job.get('status')
+                if status in status_counts:
+                    status_counts[status] += 1
+                if status in {'pending', 'blocked'}:
+                    queue_jobs.append(job)
+                    estimated_total += job.get('estimated_duration', 0)
+            
             return {
                 'total_jobs': len(jobs),
-                'pending': sum(1 for j in jobs if j.get('status') == 'pending'),
-                'running': sum(1 for j in jobs if j.get('status') == 'running'),
-                'completed': sum(1 for j in jobs if j.get('status') == 'completed'),
-                'failed': sum(1 for j in jobs if j.get('status') == 'failed'),
-                'blocked': sum(1 for j in jobs if j.get('status') == 'blocked'),
-                'cancelled': sum(1 for j in jobs if j.get('status') == 'cancelled'),
-                'queue_length': sum(1 for j in jobs if j.get('status') in ['pending', 'blocked']),
-                'estimated_total_time': sum(
-                    j.get('estimated_duration', 0) for j in jobs
-                    if j.get('status') in ['pending', 'blocked']
-                ),
+                'pending': status_counts['pending'],
+                'running': status_counts['running'],
+                'completed': status_counts['completed'],
+                'failed': status_counts['failed'],
+                'blocked': status_counts['blocked'],
+                'cancelled': status_counts['cancelled'],
+                'queue_length': len(queue_jobs),
+                'estimated_total_time': estimated_total,
                 'updated_at': queue_data.get('updated_at')
             }
         except Exception as e:
