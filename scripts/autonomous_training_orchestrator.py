@@ -47,6 +47,16 @@ class AutonomousTrainingOrchestrator:
         self.batch_size = self.config.get("scaling", {}).get("batch_size", 100)
         self.resource_limits = self.config.get("scaling", {}).get("resource_limits", {})
         
+        # Performance optimization: debounce status file writes
+        self._status_dirty = False
+        self._last_status_write = 0
+        self._status_write_interval = 2.0  # Write at most once per 2 seconds
+        
+        # Performance optimization: cache for glob results
+        self._glob_cache = {}
+        self._glob_cache_time = {}
+        self._glob_cache_ttl = 30  # Cache for 30 seconds
+        
         self.status = {
             "started_at": datetime.now().isoformat(),
             "cycles_completed": 0,
@@ -114,10 +124,54 @@ class AutonomousTrainingOrchestrator:
             
             return default_config
     
-    def save_status(self):
-        """Save current status to JSON file"""
-        with open(self.status_file, 'w') as f:
-            json.dump(self.status, f, indent=2)
+    def save_status(self, force: bool = False):
+        """Save current status to JSON file with debouncing
+        
+        Args:
+            force: If True, write immediately regardless of debounce timer
+        """
+        current_time = time.time()
+        time_since_last = current_time - self._last_status_write
+        
+        # Only write if forced or enough time has passed
+        if force or time_since_last >= self._status_write_interval:
+            with open(self.status_file, 'w') as f:
+                json.dump(self.status, f, indent=2)
+            self._last_status_write = current_time
+            self._status_dirty = False
+        else:
+            # Mark as dirty to write later
+            self._status_dirty = True
+    
+    def _flush_status(self):
+        """Force write status if pending"""
+        if self._status_dirty:
+            self.save_status(force=True)
+    
+    def _cached_glob(self, path: Path, pattern: str) -> List[Path]:
+        """Cached glob operation to avoid repeated filesystem scans
+        
+        Args:
+            path: Directory to scan
+            pattern: Glob pattern
+            
+        Returns:
+            List of matching paths
+        """
+        cache_key = f"{path}::{pattern}"
+        current_time = time.time()
+        
+        # Check cache
+        if cache_key in self._glob_cache:
+            cache_time = self._glob_cache_time.get(cache_key, 0)
+            if current_time - cache_time < self._glob_cache_ttl:
+                return self._glob_cache[cache_key]
+        
+        # Cache miss or expired - perform glob
+        results = list(path.glob(pattern))
+        self._glob_cache[cache_key] = results
+        self._glob_cache_time[cache_key] = current_time
+        return results
     
     async def discover_datasets(self) -> Dict[str, int]:
         """Automatically discover and catalog available datasets"""
@@ -127,19 +181,20 @@ class AutonomousTrainingOrchestrator:
         
         discovered = {}
         
-        # Scan local directories
+        # Scan local directories using cached glob
         for category in self.config["data_collection"]["categories"]:
             dataset_dir = Path(f"datasets/{category}")
             if dataset_dir.exists():
-                csv_files = list(dataset_dir.glob("*.csv"))
-                jsonl_files = list(dataset_dir.glob("*.jsonl"))
+                csv_files = self._cached_glob(dataset_dir, "*.csv")
+                jsonl_files = self._cached_glob(dataset_dir, "*.jsonl")
                 discovered[category] = len(csv_files) + len(jsonl_files)
                 logger.info(f"  Found {discovered[category]} datasets in {category}")
         
-        # Check massive quantum datasets
+        # Check massive quantum datasets using cached glob
         massive_dir = Path("datasets/massive_quantum")
         if massive_dir.exists():
-            massive_count = len(list(massive_dir.glob("*.csv")))
+            massive_files = self._cached_glob(massive_dir, "*.csv")
+            massive_count = len(massive_files)
             discovered["massive_quantum"] = massive_count
             logger.info(f"  Found {massive_count} datasets in massive_quantum")
         
@@ -528,14 +583,17 @@ class AutonomousTrainingOrchestrator:
             logger.info("\n\n⚠️ Received interrupt signal. Shutting down gracefully...")
             self.status["current_phase"] = "stopped"
             self.status["stopped_at"] = datetime.now().isoformat()
-            self.save_status()
+            self.save_status(force=True)  # Force write on shutdown
         
         except Exception as e:
             logger.error(f"\n\n❌ Fatal error in autonomous orchestrator: {e}")
             self.status["current_phase"] = "error"
             self.status["error"] = str(e)
-            self.save_status()
+            self.save_status(force=True)  # Force write on error
             raise
+        finally:
+            # Ensure any pending writes are flushed
+            self._flush_status()
     
     async def run_once(self):
         """Run a single autonomous cycle"""
