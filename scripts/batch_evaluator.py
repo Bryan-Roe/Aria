@@ -304,10 +304,12 @@ class BatchEvaluator:
     
     def compare_models(self, model_ids: List[str]) -> Dict:
         """Compare specific models side-by-side."""
-        comparison = []
+        # Build index for O(1) lookups (optimization to avoid O(n×m) nested iteration)
+        results_by_id = {r.model_id: r for r in self.results}
         
+        comparison = []
         for model_id in model_ids:
-            result = next((r for r in self.results if r.model_id == model_id), None)
+            result = results_by_id.get(model_id)
             if result:
                 comparison.append(result)
         
