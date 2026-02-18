@@ -5,19 +5,17 @@
 
 ## Core Architecture
 
-**Three Isolated Projects + Central Integration:**
-- **quantum-ai/** (Python 3.9+, separate venv) — Quantum ML pipelines, PennyLane circuits, MCP server, web dashboards
-- **talk-to-ai/** (Python 3.10+, separate venv) — Chat CLI, multi-provider detection logic, token utilities
-- **AI/microsoft_phi-silica-3.6_v1/** (Python 3.10+, separate venv) — LoRA fine-tuning for Phi-3.5/Qwen models
-- **function_app.py** — Azure Functions that dynamically adds all three projects to `sys.path` (line 14-19) and exposes unified REST APIs
-
-Each project is completely self-contained with its own `requirements.txt` and venv; no shared dependencies between them.
+**Unified Monorepo with Isolated Components:**
+- **src/chat/** — Core chat providers (multi-provider detection: LMStudio, Azure OpenAI, OpenAI, LoRA, local fallback). Source of truth for provider logic; re-exported via `shared/chat_providers.py`.
+- **quantum-ai/** (Python 3.9+, separate venv) — Quantum ML pipelines, PennyLane circuits, MCP server, web dashboards. Fully isolated with own requirements.
+- **AI/microsoft_phi-silica-3.6_v1/** (Python 3.10+, separate venv) — LoRA fine-tuning for Phi-3.5/Qwen models. Training scripts in `scripts/train_lora.py`.
+- **function_app.py** — Azure Functions REST API hub that imports from `src/chat`, `quantum-ai/src`, and `shared/` via dynamic sys.path (lines 14-19, 88-93).
 
 **Web Surfaces & Integration Points:**
-- **src/web/aria/aria_web/server.py** (port 8080) — Interactive 3D character with movement, object interaction, auto-execute planner. Falls back gracefully to rule-based logic if LLM unavailable (see line 41-46 for provider detection try/catch pattern).
-- **src/web/chat/chat-web/** — Pure static HTML/JS SSE client consuming `/api/chat` streaming responses from function_app.py
-- **function_app.py** — Primary REST API hub: `/api/chat`, `/api/ai/status`, `/api/quantum/*`, `/api/tts`
-- **shared/** — Shared infrastructure: `chat_providers.py` (re-exports from talk-to-ai), `sql_engine.py`, `cosmos_client.py`, `telemetry.py`, `chat_memory.py`
+- **src/web/aria/aria_web/server.py** (port 8080) — Interactive 3D character with movement, object interaction, auto-execute planner. Falls back gracefully to rule-based logic if LLM unavailable (see lines 37-46 for provider detection try/catch pattern).
+- **src/web/chat/chat-web/** — Pure static HTML/JS SSE client consuming `/api/chat` streaming responses from function_app.py.
+- **function_app.py** — Primary REST API hub: `/api/chat`, `/api/ai/status`, `/api/quantum/*`, `/api/tts`. Entry point for all HTTP interactions.
+- **shared/** — Shared infrastructure: `chat_providers.py` (re-exports from `src/chat`), `sql_engine.py`, `cosmos_client.py`, `telemetry.py`, `chat_memory.py`.
 
 **Development Environments:**
 - **Dev Container**: `.devcontainer/devcontainer.json` provides Python 3.14 + Windows AI Studio extension
@@ -26,7 +24,7 @@ Each project is completely self-contained with its own `requirements.txt` and ve
 
 ## Critical Patterns
 
-**Chat Provider Detection Chain** (in `shared/chat_providers.py`, see re-export at lines 1-54):
+**Chat Provider Detection Chain** (in `src/chat/chat_providers.py`, re-exported by `shared/chat_providers.py`):
 ```
 Priority order (first match wins):
 1. Explicit --provider flag (e.g., --provider azure)
@@ -36,7 +34,7 @@ Priority order (first match wins):
 5. LoRA adapter (--provider lora + adapter dir with adapter_config.json + adapter_model.safetensors)
 6. Local echo fallback (deterministic, zero dependencies)
 ```
-This chain is consumed by function_app.py (line 21), src/web/aria/aria_web/server.py (line 41), and mount/app.py integrations.
+This chain is consumed by function_app.py (line 21), src/web/aria/aria_web/server.py (line 41), and all web integrations.
 
 **Orchestrator-Driven Workflows** (YAML-based state machines):
 All heavy operations (training, quantum, evaluation) write status.json to `data_out/<orchestrator>/` as source of truth:
@@ -62,7 +60,7 @@ pip install -r requirements.txt -r dev-requirements.txt
 
 # Each isolated project needs its own venv
 cd quantum-ai && python -m venv venv && source venv/bin/activate && pip install -r requirements.txt && deactivate
-cd talk-to-ai && python -m venv venv && source venv/bin/activate && pip install -r requirements.txt && deactivate
+cd AI/http_chat/talk-to-ai && python -m venv venv && source venv/bin/activate && pip install -r requirements.txt && deactivate
 cd AI/microsoft_phi-silica-3.6_v1 && python -m venv venv && source venv/bin/activate && pip install -r requirements.txt && deactivate
 ```
 
@@ -94,8 +92,8 @@ Essential env vars for local.settings.json:
 - `bash scripts/start_aria_full.sh` — One-command startup (Aria server + Functions + monitoring)
 - `bash scripts/start_aria.sh` — Interactive menu for selective startup
 - `cd src/web/aria/aria_web && python server.py` — Start Aria web UI (port 8080), access at http://localhost:8080
-- `python talk-to-ai/src/chat_cli.py --provider local --once "Hello"` — Quick chat CLI smoke test
-- `python talk-to-ai/src/chat_cli.py --provider azure --once "test"` — Test Azure OpenAI provider
+- `python src/chat/chat_cli.py --provider local --once "Hello"` — Quick chat CLI smoke test
+- `python src/chat/chat_cli.py --provider azure --once "test"` — Test Azure OpenAI provider
 
 **Orchestrators (always --dry-run first):**
 - `python scripts/training/autotrain.py --dry-run` — Validate training config without GPU execution
@@ -113,7 +111,7 @@ Essential env vars for local.settings.json:
 ## Development Conventions
 
 **Component Isolation:**
-- Each project (quantum-ai/, talk-to-ai/, AI/microsoft_phi-silica-3.6_v1/) is completely isolated
+- Each project (quantum-ai/, AI/microsoft_phi-silica-3.6_v1/) is completely isolated
 - Never import across project boundaries directly; always go through function_app.py's sys.path handling (lines 14-19) or shared/ re-exports
 - If adding new cross-project imports, update sys.path in function_app.py, src/web/aria/aria_web/server.py, and mount/app.py
 
@@ -197,7 +195,6 @@ This repo uses component-specific instruction files in `.github/instructions/`:
 - `functions.instructions.md` — Azure Functions API endpoints
 - `shared-python.instructions.md` — Shared infrastructure patterns
 - `quantum-ai*.instructions.md` — Quantum ML workflows
-- `talk-to-ai*.instructions.md` — Chat CLI patterns
 - `lora*.instructions.md` — LoRA fine-tuning patterns
 - `chat-web.instructions.md` — Frontend SSE integration
 

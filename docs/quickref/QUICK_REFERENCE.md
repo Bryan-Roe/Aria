@@ -1,321 +1,166 @@
-# QAI Quick Reference Card
+# 🚀 Aria Chat Quick Reference
 
-## 🚀 Common Commands
+## Start Here (90 seconds)
 
-### Development Server
-```powershell
-func host start                                # Start Azure Functions locally
+### Step 1: Start Backend
+```bash
+cd /workspaces/AI
+func host start
+# Runs on http://localhost:7071
 ```
 
-### Status Checks
-```powershell
-# Full system status (includes telemetry, quantum, cosmos)
-curl http://localhost:7071/api/ai/status | jq
+### Step 2: Open Site
+```bash
+# Option A: Direct file
+open docs/index.html
 
-# Specific sections
-curl http://localhost:7071/api/ai/status | jq '.quantum'
-curl http://localhost:7071/api/ai/status | jq '.telemetry'
-curl http://localhost:7071/api/ai/status | jq '.cosmos'
+# Option B: Web server
+python -m http.server 8000
+# Then visit http://localhost:8000/docs/
 ```
 
-### Testing
-```powershell
-# Run all tests
-pytest tests/
+### Step 3: Configure & Chat
+1. Keep server URL: `http://localhost:7071`
+2. Click "Test Connection"
+3. Type message
+4. Press Enter or click Send
 
-# Run specific test file
-pytest tests/test_validate_qiskit_env.py -v
+## File Locations
 
-# Run with coverage
-pytest tests/ --cov=shared --cov=quantum-ai/src
-```
+| File | Purpose | Access |
+|------|---------|--------|
+| `docs/index.html` | Main site | Browser / GitHub Pages |
+| `function_app.py` | Backend API | `func host start` |
+| `docs/GITHUB_PAGES_SETUP.md` | Full setup guide | Read in editor |
+| `docs/SERVER_CONFIGURATION.md` | Configuration options | Read in editor |
+| `verify_aria_chat.py` | Verify setup | `python verify_aria_chat.py` |
 
-### Quantum Environment Management
-```powershell
-cd quantum-ai
+## Common Commands
 
-# Validate current environment
-python .\scripts\validate_qiskit_env.py
+```bash
+# Verify setup
+python verify_aria_chat.py
 
-# Preview Qiskit 1.x upgrade
-python .\scripts\upgrade_qiskit_to_1x.py --dry-run
-
-# Apply upgrade (creates backup)
-python .\scripts\upgrade_qiskit_to_1x.py --install
-
-# Revert if needed
-python .\scripts\upgrade_qiskit_to_1x.py --revert
-```
-
-### Training Orchestrators
-```powershell
-# AutoTrain (LoRA fine-tuning)
-python .\scripts\autotrain.py --dry-run        # Validate config
-python .\scripts\autotrain.py --list           # List all jobs
-python .\scripts\autotrain.py --job phi35_mixed_chat  # Run specific job
-
-# Quantum AutoRun
-python .\scripts\quantum_autorun.py --dry-run  # Validate config
-python .\scripts\quantum_autorun.py --list     # List all jobs
-python .\scripts\quantum_autorun.py --job heart_quick  # Run specific job
-
-# Evaluation AutoRun
-python .\scripts\evaluation_autorun.py --dry-run  # Validate config
-python .\scripts\evaluation_autorun.py --list     # List all jobs
-python .\scripts\evaluation_autorun.py --job eval_smoke_test  # Run specific job
-```
-
-### Chat Interaction
-```powershell
-cd talk-to-ai
-
-# Local mode (FREE, offline)
-python .\src\chat_cli.py --provider local --once "Hello"
-
-# Azure OpenAI (requires env vars)
-python .\src\chat_cli.py --provider azure
-
-# OpenAI
-python .\src\chat_cli.py --provider openai
-```
-
----
-
-## 🔧 Configuration Files
-
-| File | Purpose |
-|------|---------|
-| `local.settings.json` | Azure Functions local settings (API keys, connection strings) |
-| `autotrain.yaml` | LoRA training job definitions |
-| `quantum_autorun.yaml` | Quantum training job definitions |
-| `evaluation_autorun.yaml` | Model evaluation job definitions |
-| `quantum-ai/config/quantum_config.yaml` | Quantum backend settings |
-| `AI/microsoft_phi-silica-3.6_v1/lora/lora.yaml` | LoRA hyperparameters |
-
----
-
-## 🌐 API Endpoints
-
-| Endpoint | Method | Purpose |
-|----------|--------|---------|
-| `/api/ai/status` | GET | System health and diagnostics |
-| `/api/chat` | POST | Chat completion (JSON response) |
-| `/api/chat/stream` | POST | Streaming chat (SSE) |
-| `/api/chat-web` | GET | Web chat interface |
-| `/api/quantum/classify` | POST | Quantum classification |
-| `/api/quantum/circuit` | POST | Quantum circuit visualization |
-| `/api/quantum/info` | GET | Quantum capabilities |
-
----
-
-## 🔑 Environment Variables
-
-### Telemetry (Application Insights)
-```powershell
-$env:APPLICATIONINSIGHTS_CONNECTION_STRING = "InstrumentationKey=...;IngestionEndpoint=..."
-```
-
-### Cosmos DB Persistence
-```powershell
-$env:QAI_ENABLE_COSMOS = "true"
-$env:COSMOS_ENDPOINT = "https://qai-cosmos.documents.azure.com:443/"
-$env:COSMOS_KEY = "your_primary_key_here"
-$env:COSMOS_DATABASE = "qai"
-$env:COSMOS_CONTAINER = "chat_sessions"
-$env:QAI_COSMOS_PERSIST_STRATEGY = "messages"  # or "sessions"
-```
-
-### Azure OpenAI
-```powershell
-$env:AZURE_OPENAI_API_KEY = "your_key"
-$env:AZURE_OPENAI_ENDPOINT = "https://your-resource.openai.azure.com/"
-$env:AZURE_OPENAI_DEPLOYMENT = "gpt-4o-mini"
-$env:AZURE_OPENAI_API_VERSION = "2024-08-01-preview"
-```
-
-### OpenAI
-```powershell
-$env:OPENAI_API_KEY = "sk-..."
-$env:OPENAI_MODEL = "gpt-4o-mini"  # optional
-```
-
-### Azure Quantum
-```powershell
-$env:QAI_STATUS_CONNECT_AZURE_QUANTUM = "true"  # Enable backend probing in status endpoint
-```
-
----
-
-## 📊 Status Endpoint JSON Structure
-
-```json
-{
-  "active_provider": "azure|openai|local|lora",
-  "model": "deployment-name or adapter-path",
-  "telemetry": {
-    "enabled": true|false
-  },
-  "cosmos": {
-    "enabled": true|false,
-    "initialized": true|false,
-    "container_id": "chat_sessions"
-  },
-  "quantum": {
-    "enabled": true|false,
-    "qiskit": "0.46.0 or 1.x.x",
-    "pennylane": "0.43.0",
-    "conflict": true|false,
-    "azure_quantum": {
-      "workspace_connected": true|false,
-      "backends": ["rigetti.sim.qvm", "ionq.simulator"]
-    }
-  },
-  "lora": {
-    "exists": true|false,
-    "adapter_config_exists": true|false,
-    "base_model": "microsoft/Phi-3.5-mini-instruct"
-  }
-}
-```
-
----
-
-## 🐛 Troubleshooting Quick Fixes
-
-### Functions won't start
-```powershell
-# Reinstall dependencies
-.\venv\Scripts\python.exe -m pip install -r requirements.txt
-
-# Check port availability
-Test-NetConnection -ComputerName localhost -Port 7071
-```
-
-### Quantum conflict detected
-```powershell
-# Option 1: Ignore (if quantum endpoints unused)
-# Root venv conflict doesn't affect isolated quantum-ai/venv
-
-# Option 2: Upgrade root venv
-cd quantum-ai
-python .\scripts\upgrade_qiskit_to_1x.py --install
-```
-
-### Tests not discovered
-```powershell
-# Use full pytest path
-.\venv\Scripts\python.exe -m pytest tests/test_validate_qiskit_env.py -v
-```
-
-### Telemetry not appearing
-```powershell
-# Verify connection string format
-echo $env:APPLICATIONINSIGHTS_CONNECTION_STRING
-# Should be: InstrumentationKey=...;IngestionEndpoint=https://...
-
-# Check status endpoint
-curl http://localhost:7071/api/ai/status | jq '.telemetry.enabled'
-```
-
-### Cosmos writes failing
-```powershell
-# Check firewall rules in Azure Portal
-# Ensure IP is allowlisted or "Allow from Azure Portal" enabled
-
-# Verify credentials
-curl http://localhost:7071/api/ai/status | jq '.cosmos.error'
-```
-
----
-
-## 📚 Documentation Index
-
-| Document | Description |
-|----------|-------------|
-| [README.md](README.md) | Main project overview |
-| [ENHANCEMENTS_SUMMARY.md](ENHANCEMENTS_SUMMARY.md) | Recent improvements (Nov 2025) |
-| [TELEMETRY_COSMOS_ENABLEMENT.md](TELEMETRY_COSMOS_ENABLEMENT.md) | Observability setup guide |
-| [QUANTUM_AUTORUN_README.md](QUANTUM_AUTORUN_README.md) | Quantum orchestrator usage |
-| [AUTOTRAIN_README.md](AUTOTRAIN_README.md) | LoRA training orchestrator |
-| [quantum-ai/README.md](quantum-ai/README.md) | Quantum AI project docs |
-| [talk-to-ai/README.md](talk-to-ai/README.md) | Chat CLI documentation |
-
----
-
-## 🎯 Typical Workflows
-
-### Quick Start (Development)
-```powershell
-# 1. Start Functions
+# Run backend
 func host start
 
-# 2. Check status
-curl http://localhost:7071/api/ai/status | jq
+# Run static server
+python -m http.server 8000
 
-# 3. Test chat
-curl -X POST http://localhost:7071/api/chat -H "Content-Type: application/json" -d '{"messages":[{"role":"user","content":"Hello"}]}'
+# Test API endpoint
+curl http://localhost:7071/api/ai/status
 
-# 4. Open web UI
-start http://localhost:7071/api/chat-web
+# Check logs (after running)
+cat data_out/chat.log
 ```
 
-### Enable Production Observability
-```powershell
-# 1. Add to local.settings.json (or Azure app settings)
-{
-  "APPLICATIONINSIGHTS_CONNECTION_STRING": "...",
-  "QAI_ENABLE_COSMOS": "true",
-  "COSMOS_ENDPOINT": "...",
-  "COSMOS_KEY": "..."
-}
+## Deployment Checklist
 
-# 2. Restart Functions
-func host start
+- [ ] **Local Test**: Can chat with function_app on localhost
+- [ ] **Deploy Backend**: `func azure functionapp publish <app-name>`
+- [ ] **Get Azure URL**: Copy from Azure Portal
+- [ ] **Update Server URL**: Edit docs/index.html or use param
+- [ ] **Enable GitHub Pages**: Settings → Pages → /docs folder
+- [ ] **Test Production**: Open GitHub Pages URL
+- [ ] **Share URL**: `https://yourusername.github.io/AI/docs/`
 
-# 3. Verify
-curl http://localhost:7071/api/ai/status | jq '.telemetry, .cosmos'
+## Server URLs by Scenario
+
+| Scenario | Server URL |
+|----------|-----------|
+| Local development | `http://localhost:7071` |
+| Azure Functions | `https://your-app.azurewebsites.net` |
+| GitHub Pages parameter | `?server=https://...` |
+| Docker container | `http://localhost:8080` |
+
+## Providers
+
+| Provider | Setup | Speed | Cost |
+|----------|-------|-------|------|
+| LMStudio | LMSTUDIO_BASE_URL env var | ⚡ Fastest | Free (local) |
+| Azure OpenAI | AZURE_* env vars | ⚡ Fast | Paid |
+| OpenAI | OPENAI_API_KEY env var | ⚡ Fast | Paid |
+| Local Echo | None | ⚡ Instant | Free |
+
+## Troubleshooting 30-Second Fixes
+
+| Problem | Fix |
+|---------|-----|
+| "Can't connect" | `func host start` running? |
+| "Wrong URL" | Default is `http://localhost:7071` |
+| "No response" | Click "Test Connection" |
+| "Streaming stops" | Check function_app logs |
+| "History disappears" | Disable incognito mode |
+
+## Performance Tips
+
+- **Fastest Setup**: LMStudio local mode
+- **Best Quality**: Azure OpenAI
+- **No Cost**: Local echo mode
+- **Responsive UI**: Use temperature 0.5-0.7
+
+## URLs to Remember
+
+```
+Local Dev:     http://localhost:7071
+Static Site:   http://localhost:8000/docs/
+Production:    https://yourusername.github.io/AI/docs/
+Azure Backend: https://your-app.azurewebsites.net
 ```
 
-### Train Quantum Model
-```powershell
-# 1. Validate environment
-cd quantum-ai
-python .\scripts\validate_qiskit_env.py
+## Key Features
 
-# 2. Test locally (FREE)
-python train_custom_dataset.py --preset heart --epochs 1
+✨ Animated Aria character  
+💬 Real-time streaming chat  
+🔌 Multi-provider LLM support  
+📱 Responsive (desktop & mobile)  
+💾 Chat history persistence  
+⚙️ Provider selector  
+🌡️ Temperature control  
+🧪 Connection test button  
 
-# 3. Run orchestrated jobs
-cd ..
-python .\scripts\quantum_autorun.py --job heart_quick
+## Documentation
+
+| Guide | Purpose |
+|-------|---------|
+| GITHUB_PAGES_SETUP.md | Complete setup walkthrough |
+| SERVER_CONFIGURATION.md | All deployment scenarios |
+| verify_aria_chat.py | Automated verification |
+| ARIA_CHAT_GITHUB_PAGES_COMPLETE.md | Full project summary |
+
+## One-Liners
+
+```bash
+# Verify all components
+python verify_aria_chat.py && echo "✓ Ready to go!"
+
+# Run backend + open site
+(func host start &) && sleep 2 && open docs/index.html
+
+# Deploy to Azure
+func azure functionapp publish MyApp && echo "✓ Live!"
+
+# Test connection
+curl -s http://localhost:7071/api/ai/status | python -m json.tool
 ```
 
-### Fine-Tune Phi-3.6
-```powershell
-# 1. Smoke test (CPU, 64 samples)
-cd AI\microsoft_phi-silica-3.6_v1
-python .\scripts\train_lora.py --dataset ..\..\datasets\chat\dolly --config .\lora\lora.yaml --max-train-samples 64 --epochs 1
+## Status Codes
 
-# 2. Full training (GPU recommended)
-python .\scripts\train_lora.py --dataset ..\..\datasets\chat\dolly --config .\lora\lora.yaml
-
-# 3. Use trained adapter
-cd ..\..\talk-to-ai
-python .\src\chat_cli.py --provider lora --model ..\data_out\lora_training\lora_adapter
-```
+| Code | Meaning | Action |
+|------|---------|--------|
+| 200 | Success | Proceed normally |
+| 400 | Bad request | Check message format |
+| 404 | Not found | Wrong endpoint/URL |
+| 500 | Server error | Check function_app logs |
+| Connection refused | Backend down | Run `func host start` |
 
 ---
 
-## 💡 Pro Tips
+**Quick Links**:
+- 📖 [Full Setup Guide](docs/GITHUB_PAGES_SETUP.md)
+- ⚙️ [Configuration Guide](docs/SERVER_CONFIGURATION.md)
+- 🎯 [Project Complete](ARIA_CHAT_GITHUB_PAGES_COMPLETE.md)
+- ✅ [Verify Setup](verify_aria_chat.py)
 
-- **Always dry-run orchestrators first**: `--dry-run` flag validates config without execution
-- **Use status endpoint for debugging**: Shows provider, venv, ML libs, adapters, quantum env
-- **Test quantum locally before Azure**: Local simulators are FREE and unlimited
-- **Enable telemetry for production**: Application Insights free tier covers most dev/test needs
-- **Cosmos serverless for low traffic**: ~$0.08/month for 1000 chat turns (per-message strategy)
-- **Check conflict flag**: `quantum.conflict: true` indicates mixed Qiskit versions (may need upgrade)
-- **Backup before upgrades**: `upgrade_qiskit_to_1x.py` auto-creates timestamped backups
-
----
-
-**Last Updated:** November 20, 2025
+**Status**: ✅ Ready to Use  
+**Last Updated**: January 23, 2026

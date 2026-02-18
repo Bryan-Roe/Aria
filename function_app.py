@@ -12,13 +12,13 @@ import time
 from typing import Optional
 from datetime import datetime
 
-# Ensure talk-to-ai package is importable before importing its modules
-_talk_to_ai_path = Path(__file__).resolve().parent / "talk-to-ai" / "src"
-if str(_talk_to_ai_path) not in sys.path:
-    sys.path.insert(0, str(_talk_to_ai_path))
+# Ensure src/chat package is importable before importing its modules
+_src_chat_path = Path(__file__).resolve().parent / "src" / "chat"
+if str(_src_chat_path) not in sys.path:
+    sys.path.insert(0, str(_src_chat_path))
 
-from talk_to_ai.utils.token_utils import prune_messages
-from talk_to_ai.providers import detect_provider, RoleMessage
+from token_utils import prune_messages  # type: ignore
+from chat_providers import detect_provider, RoleMessage  # type: ignore
 import azure.functions as func
 
 # -----------------------------------------------------------------------------
@@ -82,8 +82,7 @@ except Exception:
         return False
 
 # Add talk-to-ai to path so we can import chat_providers
-talk_to_ai_path = Path(__file__).resolve().parent / "talk-to-ai" / "src"
-sys.path.insert(0, str(talk_to_ai_path))
+# (Legacy comment - chat_providers now imported from src/chat above)
 
 # Add quantum-ai to path
 quantum_ai_path = Path(__file__).resolve().parent / "quantum-ai" / "src"
