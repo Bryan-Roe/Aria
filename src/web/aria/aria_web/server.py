@@ -25,6 +25,7 @@ from concurrent.futures import ThreadPoolExecutor, TimeoutError as FuturesTimeou
 from datetime import timezone
 from functools import lru_cache
 from http.server import HTTPServer, SimpleHTTPRequestHandler
+from socketserver import ThreadingMixIn
 from pathlib import Path
 from typing import Dict, List, Optional, Any
 from urllib.parse import parse_qs, urlparse
@@ -1910,6 +1911,11 @@ def execute_aria_action(action: dict) -> dict:
         return {'status': 'error', 'message': str(e)}
 
 
+class ThreadedHTTPServer(ThreadingMixIn, HTTPServer):
+    """Handle each request in a new thread so the server doesn't block."""
+    daemon_threads = True
+
+
 class AriaRequestHandler(SimpleHTTPRequestHandler):
     def end_headers(self):
         # Add CORS headers
@@ -2001,8 +2007,8 @@ class AriaRequestHandler(SimpleHTTPRequestHandler):
                     {'status': 'error', 'error': str(e)}).encode('utf-8'))
 
         else:
-            self.send_response(404)
-            self.end_headers()
+            # Fall back to serving static files (index.html, JS, etc.)
+            super().do_GET()
 
     def do_POST(self):
         """Handle API requests"""
@@ -2197,9 +2203,13 @@ class AriaRequestHandler(SimpleHTTPRequestHandler):
         self.end_headers()
 
     def log_message(self, format, *args):
-        """Custom logging"""
-        if 'favicon' not in args[0] if args else True:
-            print(f"[WEB] {args[0] if args else format}")
+        """Custom logging — suppress noisy favicon requests."""
+        try:
+            msg = str(args[0]) if args else format
+            if 'favicon' not in msg:
+                print(f"[WEB] {msg}")
+        except Exception:
+            pass
 
 
 if __name__ == '__main__':
@@ -2220,7 +2230,7 @@ if __name__ == '__main__':
     port = int(os.getenv('ARIA_PORT', '8080'))
     # Default to localhost for security
     host = os.environ.get('ARIA_HOST', '127.0.0.1')
-    server = HTTPServer((host, port), AriaRequestHandler)
+    server = ThreadedHTTPServer((host, port), AriaRequestHandler)
 
     print("\n" + "=" * 70)
     print("Aria Visual Command System - Web Server")

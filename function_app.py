@@ -5,6 +5,11 @@ import json
 import logging
 import os
 import sys
+import base64
+import io
+import re
+import tempfile
+import wave
 from pathlib import Path
 import subprocess
 import importlib.util as _iu
@@ -102,6 +107,120 @@ except Exception:  # pragma: no cover - library optional
 
 app = func.FunctionApp()
 
+# ---------------------------------------------------------------------------
+# Reusable CORS headers (frozen dict created once, not per-response)
+# ---------------------------------------------------------------------------
+_CORS_HEADERS = {
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Methods": "POST, GET, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type",
+}
+
+
+def create_cors_response_headers() -> dict:
+    """Return a copy of common CORS headers for responses."""
+    return dict(_CORS_HEADERS)
+
+
+def _json_error(msg: str, status_code: int = 500, **extra) -> func.HttpResponse:
+    """Return a JSON error response with CORS headers.
+
+    Any extra keyword arguments are merged into the response body
+    (e.g. ``_json_error("Not found", 404, detail="...")``).
+    """
+    body = {"error": msg, **extra}
+    return func.HttpResponse(
+        json.dumps(body),
+        status_code=status_code,
+        mimetype="application/json",
+        headers=create_cors_response_headers(),
+    )
+
+
+def _json_ok(data: dict, status_code: int = 200) -> func.HttpResponse:
+    """Return a JSON success response with CORS headers."""
+    return func.HttpResponse(
+        json.dumps(data),
+        status_code=status_code,
+        mimetype="application/json",
+        headers=create_cors_response_headers(),
+    )
+
+
+# ---------------------------------------------------------------------------
+# Word-level timepoint helper (used by all TTS backends)
+# ---------------------------------------------------------------------------
+def _compute_word_timepoints(text: str, duration_s: float) -> list[dict]:
+    """Compute approximate word-level timepoints proportional to character length.
+
+    Returns a list of {"word": str, "start_ms": int, "end_ms": int} dicts.
+    """
+    words = re.findall(r"\S+", text)
+    total_chars = sum(len(w) for w in words) or 1
+    timepoints: list[dict] = []
+    cursor = 0.0
+    for w in words:
+        proportion = len(w) / total_chars
+        dur = duration_s * proportion
+        start_ms = int(cursor * 1000)
+        end_ms = int((cursor + dur) * 1000)
+        timepoints.append({"word": w, "start_ms": start_ms, "end_ms": end_ms})
+        cursor += dur
+    return timepoints
+
+
+# ---------------------------------------------------------------------------
+# Serve a JSON data file (common pattern for many monitoring endpoints)
+# ---------------------------------------------------------------------------
+def _serve_json_file(file_path: Path, not_found_msg: str = "No data found") -> func.HttpResponse:
+    """Return the contents of a JSON file, or 404/500 responses."""
+    try:
+        if file_path.exists():
+            with open(file_path, "r") as f:
+                data = json.load(f)
+            return func.HttpResponse(
+                json.dumps(data), status_code=200,
+                mimetype="application/json", headers=create_cors_response_headers(),
+            )
+        return func.HttpResponse(
+            json.dumps({"error": not_found_msg}), status_code=404,
+            mimetype="application/json", headers=create_cors_response_headers(),
+        )
+    except Exception as e:
+        return func.HttpResponse(
+            json.dumps({"error": str(e)}), status_code=500,
+            mimetype="application/json", headers=create_cors_response_headers(),
+        )
+
+
+# ---------------------------------------------------------------------------
+# Serve a static file with no-cache headers (HTML, JS, CSS)
+# ---------------------------------------------------------------------------
+def _serve_static_file(
+    file_path: Path, mimetype: str, label: str = "file"
+) -> func.HttpResponse:
+    """Read and return a static file with cache-busting headers."""
+    try:
+        if file_path.exists():
+            content = file_path.read_text(encoding="utf-8")
+            return func.HttpResponse(
+                content, status_code=200, mimetype=mimetype,
+                headers={
+                    "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
+                    "Pragma": "no-cache",
+                    "Expires": "0",
+                },
+            )
+        return func.HttpResponse(
+            f"// Error: {label} not found at {file_path}" if "javascript" in mimetype
+            else f"<h1>Error</h1><p>{label} not found at {file_path}</p>",
+            status_code=404, mimetype=mimetype,
+        )
+    except Exception as e:
+        logging.error(f"Error serving {label}: {e}")
+        err_body = f"// Error: {e}" if "javascript" in mimetype else f"<h1>Error</h1><p>{e}</p>"
+        return func.HttpResponse(err_body, status_code=500, mimetype=mimetype)
+
 
 # =============================================================================
 # Chat Web Interface - Serves the HTML/JS frontend
@@ -110,71 +229,15 @@ app = func.FunctionApp()
 @app.route(route="chat-web", methods=["GET"], auth_level=func.AuthLevel.ANONYMOUS)
 def serve_chat_web(req: func.HttpRequest) -> func.HttpResponse:
     """Serve the chat web interface HTML"""
-    try:
-        html_path = Path(__file__).resolve().parent / "chat-web" / "index.html"
-
-        if html_path.exists():
-            with open(html_path, 'r', encoding='utf-8') as f:
-                html_content = f.read()
-
-            return func.HttpResponse(
-                html_content,
-                status_code=200,
-                mimetype="text/html",
-                headers={
-                    "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
-                    "Pragma": "no-cache",
-                    "Expires": "0"
-                }
-            )
-        else:
-            return func.HttpResponse(
-                f"<h1>Error</h1><p>Chat interface not found at {html_path}</p>",
-                status_code=404,
-                mimetype="text/html"
-            )
-    except Exception as e:
-        logging.error(f'Error serving chat web: {str(e)}')
-        return func.HttpResponse(
-            f"<h1>Error</h1><p>{str(e)}</p>",
-            status_code=500,
-            mimetype="text/html"
-        )
+    html_path = Path(__file__).resolve().parent / "chat-web" / "index.html"
+    return _serve_static_file(html_path, mimetype="text/html", label="Chat interface")
 
 
 @app.route(route="chat-web/chat.js", methods=["GET"], auth_level=func.AuthLevel.ANONYMOUS)
 def serve_chat_js(req: func.HttpRequest) -> func.HttpResponse:
     """Serve the chat JavaScript file"""
-    try:
-        js_path = Path(__file__).resolve().parent / "chat-web" / "chat.js"
-
-        if js_path.exists():
-            with open(js_path, 'r', encoding='utf-8') as f:
-                js_content = f.read()
-
-            return func.HttpResponse(
-                js_content,
-                status_code=200,
-                mimetype="application/javascript",
-                headers={
-                    "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
-                    "Pragma": "no-cache",
-                    "Expires": "0"
-                }
-            )
-        else:
-            return func.HttpResponse(
-                f"// Error: JavaScript file not found at {js_path}",
-                status_code=404,
-                mimetype="application/javascript"
-            )
-    except Exception as e:
-        logging.error(f'Error serving chat.js: {str(e)}')
-        return func.HttpResponse(
-            f"// Error: {str(e)}",
-            status_code=500,
-            mimetype="application/javascript"
-        )
+    js_path = Path(__file__).resolve().parent / "chat-web" / "chat.js"
+    return _serve_static_file(js_path, mimetype="application/javascript", label="chat.js")
 
 
 # =============================================================================
@@ -224,23 +287,12 @@ def chat(req: func.HttpRequest) -> func.HttpResponse:
         system_prompt = req_body.get('system_prompt')
 
         if not messages:
-            return func.HttpResponse(
-                json.dumps({"error": "No messages provided"}),
-                status_code=400,
-                mimetype="application/json",
-                headers=create_cors_response_headers()
-            )
+            return _json_error("No messages provided", 400)
 
         # Validate messages format
         for msg in messages:
             if not isinstance(msg, dict) or 'role' not in msg or 'content' not in msg:
-                return func.HttpResponse(
-                    json.dumps(
-                        {"error": "Invalid message format. Expected {role, content}"}),
-                    status_code=400,
-                    mimetype="application/json",
-                    headers=create_cors_response_headers()
-                )
+                return _json_error("Invalid message format. Expected {role, content}", 400)
 
         # =============================
         # Memory Retrieval (SQL-backed)
@@ -423,37 +475,17 @@ def chat(req: func.HttpRequest) -> func.HttpResponse:
             finally:
                 span_ctx.__exit__(None, None, None)
 
-        return func.HttpResponse(
-            json.dumps(response_data),
-            status_code=200,
-            mimetype="application/json",
-            headers=create_cors_response_headers()
-        )
+        return _json_ok(response_data)
 
     except ValueError as ve:
         logging.error(f'Validation error: {str(ve)}')
-        return func.HttpResponse(
-            json.dumps({"error": f"Validation error: {str(ve)}"}),
-            status_code=400,
-            mimetype="application/json",
-            headers=create_cors_response_headers()
-        )
+        return _json_error(f"Validation error: {ve}", 400)
     except RuntimeError as re:
         logging.error(f'Runtime error: {str(re)}')
-        return func.HttpResponse(
-            json.dumps({"error": f"Configuration error: {str(re)}"}),
-            status_code=500,
-            mimetype="application/json",
-            headers=create_cors_response_headers()
-        )
+        return _json_error(f"Configuration error: {re}", 500)
     except Exception as e:
         logging.error(f'Unexpected error: {str(e)}')
-        return func.HttpResponse(
-            json.dumps({"error": f"Internal server error: {str(e)}"}),
-            status_code=500,
-            mimetype="application/json",
-            headers=create_cors_response_headers()
-        )
+        return _json_error(f"Internal server error: {e}", 500)
 
 
 @app.route(route="chat", methods=["OPTIONS"], auth_level=func.AuthLevel.ANONYMOUS)
@@ -466,15 +498,6 @@ def chat_options(req: func.HttpRequest) -> func.HttpResponse:
     )
 
 
-def create_cors_response_headers():
-    """Create common CORS headers for all responses."""
-    return {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Methods": "POST, GET, OPTIONS",
-        "Access-Control-Allow-Headers": "Content-Type"
-    }
-
-
 # =============================================================================
 # Automation Tool Endpoints: Resource Monitor, Model Deployer, Results Exporter, Evaluation
 # =============================================================================
@@ -482,113 +505,72 @@ def create_cors_response_headers():
 @app.route(route="resource-monitor", methods=["GET"], auth_level=func.AuthLevel.ANONYMOUS)
 def resource_monitor_status(req: func.HttpRequest) -> func.HttpResponse:
     """Return latest resource monitor snapshot."""
-    try:
-        snap_path = Path(__file__).resolve().parent / \
-            "data_out" / "resource_monitor_snapshot.json"
-        if snap_path.exists():
-            with open(snap_path, "r") as f:
-                data = json.load(f)
-            return func.HttpResponse(json.dumps(data), status_code=200, mimetype="application/json", headers=create_cors_response_headers())
-        else:
-            return func.HttpResponse(json.dumps({"error": "No snapshot found"}), status_code=404, mimetype="application/json", headers=create_cors_response_headers())
-    except Exception as e:
-        return func.HttpResponse(json.dumps({"error": str(e)}), status_code=500, mimetype="application/json", headers=create_cors_response_headers())
+    snap_path = Path(__file__).resolve().parent / "data_out" / "resource_monitor_snapshot.json"
+    return _serve_json_file(snap_path, not_found_msg="No snapshot found")
 
 
 @app.route(route="model-deployer/status", methods=["GET"], auth_level=func.AuthLevel.ANONYMOUS)
 def model_deployer_status(req: func.HttpRequest) -> func.HttpResponse:
     """Return model deployer registry status."""
-    try:
-        reg_path = Path(__file__).resolve().parent / \
-            "deployed_models" / "model_registry.json"
-        if reg_path.exists():
-            with open(reg_path, "r") as f:
-                data = json.load(f)
-            return func.HttpResponse(json.dumps(data), status_code=200, mimetype="application/json", headers=create_cors_response_headers())
-        else:
-            return func.HttpResponse(json.dumps({"error": "No registry found"}), status_code=404, mimetype="application/json", headers=create_cors_response_headers())
-    except Exception as e:
-        return func.HttpResponse(json.dumps({"error": str(e)}), status_code=500, mimetype="application/json", headers=create_cors_response_headers())
+    reg_path = Path(__file__).resolve().parent / "deployed_models" / "model_registry.json"
+    return _serve_json_file(reg_path, not_found_msg="No registry found")
 
 
 @app.route(route="results-export", methods=["GET"], auth_level=func.AuthLevel.ANONYMOUS)
 def results_export(req: func.HttpRequest) -> func.HttpResponse:
     """Return latest results export (all orchestrators)."""
-    try:
-        res_path = Path(__file__).resolve().parent / \
-            "exports" / "all_orchestrators.json"
-        if res_path.exists():
-            with open(res_path, "r") as f:
-                data = json.load(f)
-            return func.HttpResponse(json.dumps(data), status_code=200, mimetype="application/json", headers=create_cors_response_headers())
-        else:
-            return func.HttpResponse(json.dumps({"error": "No results found"}), status_code=404, mimetype="application/json", headers=create_cors_response_headers())
-    except Exception as e:
-        return func.HttpResponse(json.dumps({"error": str(e)}), status_code=500, mimetype="application/json", headers=create_cors_response_headers())
+    res_path = Path(__file__).resolve().parent / "exports" / "all_orchestrators.json"
+    return _serve_json_file(res_path, not_found_msg="No results found")
 
 
 @app.route(route="evaluation-results", methods=["GET"], auth_level=func.AuthLevel.ANONYMOUS)
 def evaluation_results(req: func.HttpRequest) -> func.HttpResponse:
     """Return latest batch evaluation results."""
-    try:
-        eval_path = Path(__file__).resolve().parent / \
-            "data_out" / "evaluation_results.json"
-        if eval_path.exists():
-            with open(eval_path, "r") as f:
-                data = json.load(f)
-            return func.HttpResponse(json.dumps(data), status_code=200, mimetype="application/json", headers=create_cors_response_headers())
-        else:
-            return func.HttpResponse(json.dumps({"error": "No evaluation results found"}), status_code=404, mimetype="application/json", headers=create_cors_response_headers())
-    except Exception as e:
-        return func.HttpResponse(json.dumps({"error": str(e)}), status_code=500, mimetype="application/json", headers=create_cors_response_headers())
+    eval_path = Path(__file__).resolve().parent / "data_out" / "evaluation_results.json"
+    return _serve_json_file(eval_path, not_found_msg="No evaluation results found")
 
 
 # =============================================================================
 # Streaming Chat API (Server-Sent Events compatible)
 # =============================================================================
 
-def parse_movement_commands(text: str) -> dict:
-    """Parse movement commands from AI response text"""
-    lower_text = text.lower()
-    commands = []
-
-    # Movement commands
-    if '[aria:walk:left]' in lower_text or 'walk left' in lower_text:
-        commands.append(
-            {'action': 'walk', 'direction': 'left', 'distance': 200})
-    if '[aria:walk:right]' in lower_text or 'walk right' in lower_text:
-        commands.append(
-            {'action': 'walk', 'direction': 'right', 'distance': 200})
-    if '[aria:walk:up]' in lower_text or 'walk up' in lower_text:
-        commands.append({'action': 'walk', 'direction': 'up', 'distance': 200})
-    if '[aria:walk:down]' in lower_text or 'walk down' in lower_text:
-        commands.append(
-            {'action': 'walk', 'direction': 'down', 'distance': 200})
-
-    if '[aria:move:left]' in lower_text or 'aria move left' in lower_text:
-        commands.append(
-            {'action': 'move', 'direction': 'left', 'distance': 100})
-    if '[aria:move:right]' in lower_text or 'aria move right' in lower_text:
-        commands.append(
-            {'action': 'move', 'direction': 'right', 'distance': 100})
-    if '[aria:move:up]' in lower_text or 'aria move up' in lower_text:
-        commands.append({'action': 'move', 'direction': 'up', 'distance': 100})
-    if '[aria:move:down]' in lower_text or 'aria move down' in lower_text:
-        commands.append(
-            {'action': 'move', 'direction': 'down', 'distance': 100})
-
+_MOVEMENT_RULES: list[tuple[list[str], dict]] = [
+    # (trigger phrases, command dict)
+    # Walk commands
+    (['[aria:walk:left]', 'walk left'],
+     {'action': 'walk', 'direction': 'left', 'distance': 200}),
+    (['[aria:walk:right]', 'walk right'],
+     {'action': 'walk', 'direction': 'right', 'distance': 200}),
+    (['[aria:walk:up]', 'walk up'],
+     {'action': 'walk', 'direction': 'up', 'distance': 200}),
+    (['[aria:walk:down]', 'walk down'],
+     {'action': 'walk', 'direction': 'down', 'distance': 200}),
+    # Move commands
+    (['[aria:move:left]', 'aria move left'],
+     {'action': 'move', 'direction': 'left', 'distance': 100}),
+    (['[aria:move:right]', 'aria move right'],
+     {'action': 'move', 'direction': 'right', 'distance': 100}),
+    (['[aria:move:up]', 'aria move up'],
+     {'action': 'move', 'direction': 'up', 'distance': 100}),
+    (['[aria:move:down]', 'aria move down'],
+     {'action': 'move', 'direction': 'down', 'distance': 100}),
     # Position commands
-    if '[aria:center]' in lower_text or 'go to center' in lower_text or 'move to center' in lower_text:
-        commands.append({'action': 'center'})
-
+    (['[aria:center]', 'go to center', 'move to center'],
+     {'action': 'center'}),
     # Action commands
-    if '[aria:wave]' in lower_text or 'aria wave' in lower_text:
-        commands.append({'action': 'wave'})
-    if '[aria:jump]' in lower_text or 'aria jump' in lower_text:
-        commands.append({'action': 'jump'})
-    if '[aria:dance]' in lower_text or 'aria dance' in lower_text:
-        commands.append({'action': 'dance'})
+    (['[aria:wave]', 'aria wave'], {'action': 'wave'}),
+    (['[aria:jump]', 'aria jump'], {'action': 'jump'}),
+    (['[aria:dance]', 'aria dance'], {'action': 'dance'}),
+]
 
+
+def parse_movement_commands(text: str) -> dict:
+    """Parse movement commands from AI response text."""
+    lower_text = text.lower()
+    commands = [
+        dict(cmd) for triggers, cmd in _MOVEMENT_RULES
+        if any(t in lower_text for t in triggers)
+    ]
     return {'commands': commands} if commands else {}
 
 
@@ -610,12 +592,7 @@ def chat_stream(req: func.HttpRequest) -> func.HttpResponse:
         system_prompt = body.get('system_prompt')
 
         if not messages:
-            return func.HttpResponse(
-                json.dumps({"error": "No messages provided"}),
-                status_code=400,
-                mimetype="application/json",
-                headers=create_cors_response_headers(),
-            )
+            return _json_error("No messages provided", 400)
 
         provider, info = detect_provider(
             explicit=provider_choice,
@@ -653,7 +630,6 @@ def chat_stream(req: func.HttpRequest) -> func.HttpResponse:
                 yield (f"event: meta\n" f"data: {json.dumps(pre)}\n\n").encode("utf-8")
 
                 # We'll stream both textual deltas and token-level events when possible
-                import re
 
                 # Try to use tiktoken for token-level tokenization when available
                 enc = None
@@ -740,12 +716,7 @@ def chat_stream(req: func.HttpRequest) -> func.HttpResponse:
 
     except Exception as e:  # noqa: BLE001
         logging.error(f"chat/stream error: {e}")
-        return func.HttpResponse(
-            json.dumps({"error": str(e)}),
-            status_code=500,
-            mimetype="application/json",
-            headers=create_cors_response_headers(),
-        )
+        return _json_error(str(e), 500)
 
 
 @app.route(route="tts", methods=["POST"], auth_level=func.AuthLevel.ANONYMOUS)
@@ -762,7 +733,7 @@ def tts(req: func.HttpRequest) -> func.HttpResponse:
         body = req.get_json() or {}
         text = (body.get('text') or '').strip()
         if not text:
-            return func.HttpResponse(json.dumps({"error": "No text provided"}), status_code=400, mimetype="application/json", headers=create_cors_response_headers())
+            return _json_error("No text provided", 400)
 
         # Optional voice/rate/pitch params
         voice = body.get('voice')
@@ -778,14 +749,10 @@ def tts(req: func.HttpRequest) -> func.HttpResponse:
 
         if az_key and az_region:
             try:
-                import io
-                import base64
-                import wave
-                import re
                 try:
                     import azure.cognitiveservices.speech as speechsdk
                 except Exception as e:
-                    return func.HttpResponse(json.dumps({"error": "Azure Speech SDK not available on server (install azure-cognitiveservices-speech)"}), status_code=500, mimetype="application/json", headers=create_cors_response_headers())
+                    return _json_error("Azure Speech SDK not available on server (install azure-cognitiveservices-speech)", 500)
 
                 # Configure speech
                 scfg = speechsdk.SpeechConfig(
@@ -809,7 +776,7 @@ def tts(req: func.HttpRequest) -> func.HttpResponse:
                     # Could be 'Canceled' with details
                     detail = getattr(result, 'error_details',
                                      None) or str(result.reason)
-                    return func.HttpResponse(json.dumps({"error": "Synthesis failed", "detail": str(detail)}), status_code=500, mimetype="application/json", headers=create_cors_response_headers())
+                    return _json_error("Synthesis failed", 500, detail=str(detail))
 
                 # Extract audio bytes
                 stream = speechsdk.AudioDataStream(result)
@@ -827,26 +794,14 @@ def tts(req: func.HttpRequest) -> func.HttpResponse:
                 except Exception:
                     duration_s = max(0.2, len(text) * 0.02)
 
-                words = re.findall(r"\S+", text)
-                total_chars = sum(len(w) for w in words) or 1
-                timepoints = []
-                cursor = 0.0
-                for w in words:
-                    proportion = len(w) / total_chars
-                    dur = duration_s * proportion
-                    start_ms = int(cursor * 1000)
-                    end_ms = int((cursor + dur) * 1000)
-                    timepoints.append(
-                        {"word": w, "start_ms": start_ms, "end_ms": end_ms})
-                    cursor += dur
+                timepoints = _compute_word_timepoints(text, duration_s)
 
-                import base64 as _b64
-                audio_b64 = _b64.b64encode(audio_bytes).decode('ascii')
+                audio_b64 = base64.b64encode(audio_bytes).decode('ascii')
 
                 return func.HttpResponse(json.dumps({"audio_base64": audio_b64, "format": "wav", "timepoints": timepoints}), status_code=200, mimetype="application/json", headers=create_cors_response_headers())
             except Exception as e:
                 logging.exception(f"TTS (Azure) synth failed: {e}")
-                return func.HttpResponse(json.dumps({"error": f"TTS provider error: {e}"}), status_code=500, mimetype="application/json", headers=create_cors_response_headers())
+                return _json_error(f"TTS provider error: {e}", 500)
 
         # No remote TTS provider is configured. Attempt optional local fallbacks if enabled.
         enable_local = os.getenv('QAI_ENABLE_LOCAL_TTS', 'true').lower() in (
@@ -856,11 +811,6 @@ def tts(req: func.HttpRequest) -> func.HttpResponse:
             # Try pyttsx3 (offline, best on Windows) first
             try:
                 try:
-                    import tempfile
-                    import base64
-                    import io
-                    import wave
-                    import re
                     import pyttsx3
                 except Exception:  # pyttsx3 not available
                     pyttsx3 = None
@@ -912,18 +862,7 @@ def tts(req: func.HttpRequest) -> func.HttpResponse:
                         except Exception:
                             duration_s = max(0.2, len(text) * 0.02)
 
-                        words = re.findall(r"\S+", text)
-                        total_chars = sum(len(w) for w in words) or 1
-                        timepoints = []
-                        cursor = 0.0
-                        for w in words:
-                            proportion = len(w) / total_chars
-                            dur = duration_s * proportion
-                            start_ms = int(cursor * 1000)
-                            end_ms = int((cursor + dur) * 1000)
-                            timepoints.append(
-                                {"word": w, "start_ms": start_ms, "end_ms": end_ms})
-                            cursor += dur
+                        timepoints = _compute_word_timepoints(text, duration_s)
 
                         audio_b64 = base64.b64encode(
                             audio_bytes).decode('ascii')
@@ -937,9 +876,6 @@ def tts(req: func.HttpRequest) -> func.HttpResponse:
 
                 # If pyttsx3 not available or failed, try gTTS (mp3 output)
                 try:
-                    import tempfile
-                    import base64
-                    import re
                     from gtts import gTTS
                 except Exception:
                     gTTS = None
@@ -960,18 +896,7 @@ def tts(req: func.HttpRequest) -> func.HttpResponse:
 
                         # approximate duration: fallback to char-count based estimate
                         duration_s = max(0.2, len(text) * 0.02)
-                        words = re.findall(r"\S+", text)
-                        total_chars = sum(len(w) for w in words) or 1
-                        timepoints = []
-                        cursor = 0.0
-                        for w in words:
-                            proportion = len(w) / total_chars
-                            dur = duration_s * proportion
-                            start_ms = int(cursor * 1000)
-                            end_ms = int((cursor + dur) * 1000)
-                            timepoints.append(
-                                {"word": w, "start_ms": start_ms, "end_ms": end_ms})
-                            cursor += dur
+                        timepoints = _compute_word_timepoints(text, duration_s)
 
                         audio_b64 = base64.b64encode(
                             audio_bytes).decode('ascii')
@@ -985,22 +910,18 @@ def tts(req: func.HttpRequest) -> func.HttpResponse:
 
             except Exception as e:
                 logging.exception(f"Local fallback TTS failed: {e}")
-                return func.HttpResponse(json.dumps({"error": f"Local TTS provider failed: {e}"}), status_code=500, mimetype="application/json", headers=create_cors_response_headers())
+                return _json_error(f"Local TTS provider failed: {e}", 500)
 
         # If we reach here remote + local TTS are unavailable
-        return func.HttpResponse(
-            json.dumps({
-                "error": "No remote TTS provider configured and no local fallback available.",
-                "help": "Set AZURE_SPEECH_KEY and AZURE_SPEECH_REGION to enable Azure speech, or install pyttsx3 or gTTS and set QAI_ENABLE_LOCAL_TTS=true in local.settings.json/.env to enable local fallback. See local.settings.json.example and .env.example in the repo for templates."
-            }),
-            status_code=501,
-            mimetype="application/json",
-            headers=create_cors_response_headers()
+        return _json_error(
+            "No remote TTS provider configured and no local fallback available.",
+            501,
+            help="Set AZURE_SPEECH_KEY and AZURE_SPEECH_REGION to enable Azure speech, or install pyttsx3 or gTTS and set QAI_ENABLE_LOCAL_TTS=true in local.settings.json/.env to enable local fallback. See local.settings.json.example and .env.example in the repo for templates.",
         )
 
     except Exception as e:  # noqa: BLE001
         logging.exception(f"/tts error: {e}")
-        return func.HttpResponse(json.dumps({"error": str(e)}), status_code=500, mimetype="application/json", headers=create_cors_response_headers())
+        return _json_error(str(e), 500)
 
 
 # =============================================================================
@@ -1013,19 +934,130 @@ def start_backend(req: func.HttpRequest) -> func.HttpResponse:
     logging.info('Backend start request received')
 
     # If this endpoint responds, the backend is already running
-    return func.HttpResponse(
-        json.dumps({
-            'status': 'already_running',
-            'message': 'Backend is already running (this endpoint is responding)'
-        }),
-        mimetype='application/json',
-        status_code=200
-    )
+    return _json_ok({
+        'status': 'already_running',
+        'message': 'Backend is already running (this endpoint is responding)',
+    })
 
 
 # =============================================================================
 # Status API - Health and environment diagnostics
 # =============================================================================
+
+
+def _status_venv_info(repo_root: Path) -> dict:
+    """Gather venv availability and package versions for ai_status."""
+    venv_python = repo_root / "venv" / "Scripts" / "python.exe"
+    info: dict = {"path": str(venv_python), "exists": venv_python.exists(),
+                  "packages": {}, "error": None}
+    if not info["exists"]:
+        return info
+    try:
+        code = (
+            "import json, importlib.util, importlib.metadata as md;"
+            "mods=['torch','transformers','peft'];"
+            "avail={m:(importlib.util.find_spec(m) is not None) for m in mods};"
+            "vers={};"
+            "\nfor m in mods:\n\t"
+            "\n\ttry:\n\t\tvers[m]=md.version(m)\n\texcept Exception:\n\t\tvers[m]=None;"
+            "print(json.dumps({'available':avail,'versions':vers}))"
+        )
+        proc = subprocess.run(
+            [str(venv_python), "-c", code], capture_output=True, text=True, timeout=12)
+        if proc.returncode == 0:
+            info["packages"] = json.loads(proc.stdout.strip() or "{}")
+        else:
+            info["error"] = proc.stderr.strip() or f"exit {proc.returncode}"
+    except Exception as e:  # noqa: BLE001
+        info["error"] = str(e)
+    return info
+
+
+def _status_quantum_info() -> dict:
+    """Gather quantum environment info for ai_status (non-blocking)."""
+    qinfo: dict = {
+        "enabled": False,
+        "qiskit": None,
+        "pennylane": None,
+        "azure_quantum": {
+            "workspace_connected": False,
+            "backends": [],
+            "attempted": False,
+            "error": None,
+        },
+        "conflict": None,
+    }
+    try:
+        import qiskit  # type: ignore
+        qinfo["qiskit"] = getattr(qiskit, "__version__", None)
+        qinfo["enabled"] = True
+    except Exception as _qe:
+        qinfo["qiskit"] = f"error: {_qe}"  # noqa: BLE001
+    try:
+        import pennylane  # type: ignore
+        qinfo["pennylane"] = getattr(pennylane, "__version__", None)
+    except Exception:
+        pass
+    # Conflict detection
+    try:
+        from quantum_ai.scripts.validate_qiskit_env import detect_conflict  # type: ignore
+    except Exception:
+        def detect_conflict(versions):
+            if versions.get("qiskit") and str(versions.get("qiskit")).startswith("1.") and versions.get("qiskit_aer"):
+                return {"conflict": True}
+            return {"conflict": False}
+    try:
+        versions_map = {}
+        for name in ["qiskit", "qiskit_aer", "qiskit_machine_learning"]:
+            try:
+                mod = __import__(name)
+                versions_map[name] = getattr(mod, "__version__", "unknown")
+            except Exception as ie:  # noqa: BLE001
+                versions_map[name] = f"error: {ie}"
+        qinfo["conflict"] = detect_conflict(versions_map).get("conflict")
+    except Exception as _ce:  # noqa: BLE001
+        qinfo["conflict"] = f"error: {_ce}"
+
+    # Optional Azure Quantum backend probing
+    if os.getenv("QAI_STATUS_CONNECT_AZURE_QUANTUM", "false").lower() == "true":
+        qinfo["azure_quantum"]["attempted"] = True
+        try:
+            from quantum_ai.src.azure_quantum_integration import AzureQuantumIntegration  # type: ignore
+            cfg_path = Path(__file__).resolve().parent / "quantum-ai" / "config" / "quantum_config.yaml"
+            if cfg_path.exists():
+                aq = AzureQuantumIntegration(str(cfg_path))
+                aq.connect()
+                bnames = aq.list_backends()[:8]
+                qinfo["azure_quantum"].update({"workspace_connected": True, "backends": bnames})
+            else:
+                qinfo["azure_quantum"]["error"] = "quantum_config.yaml missing"
+        except Exception as aq_err:  # noqa: BLE001
+            qinfo["azure_quantum"]["error"] = str(aq_err)
+    return qinfo
+
+
+def _status_learning_info() -> dict:
+    """Gather self-learning system status for ai_status."""
+    info: dict = {
+        "enabled": False, "training_cycles": 0,
+        "total_conversations": 0, "new_conversations": 0,
+        "last_training": None, "best_model_path": None, "model_history": [],
+    }
+    try:
+        sf = Path(__file__).resolve().parent / "data_out" / "self_learning" / "status.json"
+        if sf.exists():
+            with open(sf, "r") as lf:
+                s = json.load(lf)
+            info["enabled"] = s.get("learning_enabled", True)
+            info["training_cycles"] = s.get("training_cycles", 0)
+            info["total_conversations"] = s.get("total_conversations", 0)
+            info["new_conversations"] = s.get("conversations_since_last_train", 0)
+            info["last_training"] = s.get("last_training")
+            info["best_model_path"] = s.get("best_model_path")
+            info["model_history"] = s.get("model_history", [])[-3:]
+    except Exception as _le:  # noqa: BLE001
+        info["error"] = str(_le)
+    return info
 
 @app.route(route="ai/status", methods=["GET"], auth_level=func.AuthLevel.ANONYMOUS)
 def ai_status(req: func.HttpRequest) -> func.HttpResponse:
@@ -1296,21 +1328,11 @@ def ai_status(req: func.HttpRequest) -> func.HttpResponse:
             "status": "ok",
         }
 
-        return func.HttpResponse(
-            json.dumps(payload),
-            status_code=200,
-            mimetype="application/json",
-            headers=create_cors_response_headers(),
-        )
+        return _json_ok(payload)
 
     except Exception as e:  # noqa: BLE001
         logging.error(f"ai/status error: {e}")
-        return func.HttpResponse(
-            json.dumps({"status": "error", "error": str(e)}),
-            status_code=500,
-            mimetype="application/json",
-            headers=create_cors_response_headers(),
-        )
+        return _json_error(str(e), 500, status="error")
 
 
 # =============================================================================
@@ -1358,12 +1380,7 @@ def vision_infer(req: func.HttpRequest) -> func.HttpResponse:
         try:
             from vision_inference import VisionInference
         except ImportError as e:
-            return func.HttpResponse(
-                json.dumps({"error": f"Vision inference not available: {e}"}),
-                status_code=500,
-                mimetype="application/json",
-                headers=create_cors_response_headers()
-            )
+            return _json_error(f"Vision inference not available: {e}", 500)
 
         # Parse request
         req_body = req.get_json()
@@ -1372,13 +1389,8 @@ def vision_infer(req: func.HttpRequest) -> func.HttpResponse:
         format_type = req_body.get('format', 'base64')
 
         if not image_data and not image_url:
-            return func.HttpResponse(
-                json.dumps(
-                    {"error": "No image provided. Include 'image' (base64) or 'image_url' in request body."}),
-                status_code=400,
-                mimetype="application/json",
-                headers=create_cors_response_headers()
-            )
+            return _json_error(
+                "No image provided. Include 'image' (base64) or 'image_url' in request body.", 400)
 
         # Initialize vision inference (loads latest checkpoint)
         # Cache the instance for performance (singleton pattern)
@@ -1387,15 +1399,10 @@ def vision_infer(req: func.HttpRequest) -> func.HttpResponse:
             try:
                 vision_infer._vision_model = VisionInference()
             except FileNotFoundError as e:
-                return func.HttpResponse(
-                    json.dumps({
-                        "error": "No trained model found",
-                        "detail": str(e),
-                        "help": "Train a model first using: python scripts/train_vision.py"
-                    }),
-                    status_code=404,
-                    mimetype="application/json",
-                    headers=create_cors_response_headers()
+                return _json_error(
+                    "No trained model found", 404,
+                    detail=str(e),
+                    help="Train a model first using: python scripts/train_vision.py",
                 )
 
         vi = vision_infer._vision_model
@@ -1406,39 +1413,21 @@ def vision_infer(req: func.HttpRequest) -> func.HttpResponse:
             try:
                 import requests
                 from PIL import Image
-                import io
                 response = requests.get(image_url, timeout=10)
                 response.raise_for_status()
                 img = Image.open(io.BytesIO(response.content))
                 result = vi.predict(img)
             except Exception as e:
-                return func.HttpResponse(
-                    json.dumps(
-                        {"error": f"Failed to fetch image from URL: {e}"}),
-                    status_code=400,
-                    mimetype="application/json",
-                    headers=create_cors_response_headers()
-                )
+                return _json_error(f"Failed to fetch image from URL: {e}", 400)
         elif format_type == 'base64':
             # Decode base64 image
             try:
                 result = vi.predict_base64(image_data)
             except Exception as e:
-                return func.HttpResponse(
-                    json.dumps(
-                        {"error": f"Failed to decode base64 image: {e}"}),
-                    status_code=400,
-                    mimetype="application/json",
-                    headers=create_cors_response_headers()
-                )
+                return _json_error(f"Failed to decode base64 image: {e}", 400)
         else:
-            return func.HttpResponse(
-                json.dumps(
-                    {"error": f"Unsupported format: {format_type}. Use 'base64' or provide 'image_url'."}),
-                status_code=400,
-                mimetype="application/json",
-                headers=create_cors_response_headers()
-            )
+            return _json_error(
+                f"Unsupported format: {format_type}. Use 'base64' or provide 'image_url'.", 400)
 
         # Add model metadata to response
         response_data = {
@@ -1446,21 +1435,11 @@ def vision_infer(req: func.HttpRequest) -> func.HttpResponse:
             "model_info": vi.get_model_info()
         }
 
-        return func.HttpResponse(
-            json.dumps(response_data),
-            status_code=200,
-            mimetype="application/json",
-            headers=create_cors_response_headers()
-        )
+        return _json_ok(response_data)
 
     except Exception as e:
         logging.error(f'Vision infer error: {str(e)}')
-        return func.HttpResponse(
-            json.dumps({"error": f"Vision inference failed: {str(e)}"}),
-            status_code=500,
-            mimetype="application/json",
-            headers=create_cors_response_headers()
-        )
+        return _json_error(f"Vision inference failed: {e}", 500)
 
 
 @app.route(route="vision/infer", methods=["OPTIONS"], auth_level=func.AuthLevel.ANONYMOUS)
@@ -1503,51 +1482,28 @@ def vision_batch_infer(req: func.HttpRequest) -> func.HttpResponse:
     try:
         from vision_inference import VisionInference
         from PIL import Image
-        import io
-        import base64
     except ImportError as e:
-        return func.HttpResponse(
-            json.dumps({"error": f"Vision inference not available: {e}"}),
-            status_code=500,
-            mimetype="application/json",
-            headers=create_cors_response_headers()
-        )
+        return _json_error(f"Vision inference not available: {e}", 500)
 
     try:
         req_body = req.get_json()
         images_data = req_body.get('images', [])
 
         if not images_data:
-            return func.HttpResponse(
-                json.dumps({"error": "No images provided"}),
-                status_code=400,
-                mimetype="application/json",
-                headers=create_cors_response_headers()
-            )
+            return _json_error("No images provided", 400)
 
         # Limit batch size to prevent overload
         max_batch_size = 50
         if len(images_data) > max_batch_size:
-            return func.HttpResponse(
-                json.dumps(
-                    {"error": f"Batch size exceeds limit of {max_batch_size} images"}),
-                status_code=400,
-                mimetype="application/json",
-                headers=create_cors_response_headers()
-            )
+            return _json_error(
+                f"Batch size exceeds limit of {max_batch_size} images", 400)
 
         # Initialize vision model
         if not hasattr(vision_batch_infer, '_vision_model'):
             try:
                 vision_batch_infer._vision_model = VisionInference()
             except FileNotFoundError as e:
-                return func.HttpResponse(
-                    json.dumps(
-                        {"error": "No trained model found", "detail": str(e)}),
-                    status_code=404,
-                    mimetype="application/json",
-                    headers=create_cors_response_headers()
-                )
+                return _json_error("No trained model found", 404, detail=str(e))
 
         vi = vision_batch_infer._vision_model
 
@@ -1569,12 +1525,7 @@ def vision_batch_infer(req: func.HttpRequest) -> func.HttpResponse:
                 continue
 
         if not pil_images:
-            return func.HttpResponse(
-                json.dumps({"error": "No valid images could be decoded"}),
-                status_code=400,
-                mimetype="application/json",
-                headers=create_cors_response_headers()
-            )
+            return _json_error("No valid images could be decoded", 400)
 
         # Run batch inference
         predictions = vi.predict_batch(pil_images)
@@ -1593,21 +1544,11 @@ def vision_batch_infer(req: func.HttpRequest) -> func.HttpResponse:
             'model_info': vi.get_model_info()
         }
 
-        return func.HttpResponse(
-            json.dumps(response_data),
-            status_code=200,
-            mimetype="application/json",
-            headers=create_cors_response_headers()
-        )
+        return _json_ok(response_data)
 
     except Exception as e:
         logging.error(f'Vision batch infer error: {str(e)}')
-        return func.HttpResponse(
-            json.dumps({"error": f"Batch inference failed: {str(e)}"}),
-            status_code=500,
-            mimetype="application/json",
-            headers=create_cors_response_headers()
-        )
+        return _json_error(f"Batch inference failed: {e}", 500)
 
 
 @app.route(route="image/generate", methods=["POST", "OPTIONS"], auth_level=func.AuthLevel.ANONYMOUS)
@@ -1643,12 +1584,7 @@ def image_generate(req: func.HttpRequest) -> func.HttpResponse:
         style_hint = req_body.get('style', '')
 
         if not prompt:
-            return func.HttpResponse(
-                json.dumps({"error": "Prompt is required"}),
-                status_code=400,
-                mimetype="application/json",
-                headers=create_cors_response_headers()
-            )
+            return _json_error("Prompt is required", 400)
 
         if style_hint:
             prompt = f"{prompt}, {style_hint} style"
@@ -1678,7 +1614,7 @@ def image_generate(req: func.HttpRequest) -> func.HttpResponse:
             response_data = {'image_url': image_url,
                              'prompt': prompt, 'model': 'dall-e-2', 'size': size}
 
-            return func.HttpResponse(json.dumps(response_data), status_code=200, mimetype="application/json", headers=create_cors_response_headers())
+            return _json_ok(response_data)
 
         except Exception as openai_error:
             logging.warning(
@@ -1707,7 +1643,6 @@ def image_generate(req: func.HttpRequest) -> func.HttpResponse:
                 <text x="256" y="410" font-size="14" text-anchor="middle" fill="rgba(255,255,255,0.6)">{openai_error.__class__.__name__}</text>
             </svg>'''
 
-            import base64
             svg_base64 = base64.b64encode(
                 placeholder_svg.encode()).decode()
 
@@ -1721,11 +1656,11 @@ def image_generate(req: func.HttpRequest) -> func.HttpResponse:
             response_data = {'image_data': svg_base64, 'prompt': prompt,
                              'model': 'fallback-svg', 'size': '512x512', 'fallback': True, 'error': err_text}
 
-            return func.HttpResponse(json.dumps(response_data), status_code=200, mimetype="application/json", headers=create_cors_response_headers())
+            return _json_ok(response_data)
 
     except Exception as e:
         logging.error(f'Image generation error: {str(e)}')
-        return func.HttpResponse(json.dumps({"error": f"Image generation failed: {str(e)}"}), status_code=500, mimetype="application/json", headers=create_cors_response_headers())
+        return _json_error(f"Image generation failed: {e}", 500)
 
 
 # =============================================================================
@@ -1759,13 +1694,7 @@ def quantum_classify(req: func.HttpRequest) -> func.HttpResponse:
             import torch
             import numpy as np
         except ImportError as e:
-            return func.HttpResponse(
-                json.dumps(
-                    {"error": f"Quantum dependencies not available: {e}"}),
-                status_code=500,
-                mimetype="application/json",
-                headers=create_cors_response_headers()
-            )
+            return _json_error(f"Quantum dependencies not available: {e}", 500)
 
         # Parse request
         req_body = req.get_json()
@@ -1774,12 +1703,7 @@ def quantum_classify(req: func.HttpRequest) -> func.HttpResponse:
         n_layers = req_body.get('n_layers', 2)
 
         if not features:
-            return func.HttpResponse(
-                json.dumps({"error": "No features provided"}),
-                status_code=400,
-                mimetype="application/json",
-                headers=create_cors_response_headers()
-            )
+            return _json_error("No features provided", 400)
 
         # Initialize quantum classifier
         classifier = QuantumClassifier()
@@ -1821,21 +1745,11 @@ def quantum_classify(req: func.HttpRequest) -> func.HttpResponse:
             }
         }
 
-        return func.HttpResponse(
-            json.dumps(response_data),
-            status_code=200,
-            mimetype="application/json",
-            headers=create_cors_response_headers()
-        )
+        return _json_ok(response_data)
 
     except Exception as e:
         logging.error(f'Quantum classify error: {str(e)}')
-        return func.HttpResponse(
-            json.dumps({"error": f"Quantum classification failed: {str(e)}"}),
-            status_code=500,
-            mimetype="application/json",
-            headers=create_cors_response_headers()
-        )
+        return _json_error(f"Quantum classification failed: {e}", 500)
 
 
 @app.route(route="quantum/circuit", methods=["POST"], auth_level=func.AuthLevel.ANONYMOUS)
@@ -1957,21 +1871,11 @@ def quantum_circuit(req: func.HttpRequest) -> func.HttpResponse:
             "visualization": visualization
         }
 
-        return func.HttpResponse(
-            json.dumps(response_data),
-            status_code=200,
-            mimetype="application/json",
-            headers=create_cors_response_headers()
-        )
+        return _json_ok(response_data)
 
     except Exception as e:
         logging.error(f'Quantum circuit error: {str(e)}')
-        return func.HttpResponse(
-            json.dumps({"error": f"Circuit creation failed: {str(e)}"}),
-            status_code=500,
-            mimetype="application/json",
-            headers=create_cors_response_headers()
-        )
+        return _json_error(f"Circuit creation failed: {e}", 500)
 
 
 @app.route(route="quantum/info", methods=["GET"], auth_level=func.AuthLevel.ANONYMOUS)
@@ -2027,18 +1931,8 @@ def quantum_info(req: func.HttpRequest) -> func.HttpResponse:
             "version": "1.0.0"
         }
 
-        return func.HttpResponse(
-            json.dumps(response_data),
-            status_code=200,
-            mimetype="application/json",
-            headers=create_cors_response_headers()
-        )
+        return _json_ok(response_data)
 
     except Exception as e:
         logging.error(f'Quantum info error: {str(e)}')
-        return func.HttpResponse(
-            json.dumps({"error": f"Failed to get quantum info: {str(e)}"}),
-            status_code=500,
-            mimetype="application/json",
-            headers=create_cors_response_headers()
-        )
+        return _json_error(f"Failed to get quantum info: {e}", 500)

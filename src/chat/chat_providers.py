@@ -48,22 +48,16 @@ except Exception:  # pragma: no cover - optional at runtime
 _lm_studio_availability_cache: Dict[str, Any] = {
     "available": None, "checked_at": 0.0, "url": None}
 _lm_studio_cache_lock = threading.RLock()
-# Backward-compatible alias for tests expecting _lmstudio_cache_lock
-_lmstudio_cache_lock = _lm_studio_cache_lock
 _LM_STUDIO_CACHE_TTL_SECONDS = 30
+
+# Backward-compatible aliases — some tests and older code use the shorter names.
+_lmstudio_cache_lock = _lm_studio_cache_lock
+_lmstudio_cache = _lm_studio_availability_cache  # alias for the single cache dict
+_LMSTUDIO_CACHE_TTL = _LM_STUDIO_CACHE_TTL_SECONDS
 
 
 # {"role": "system|user|assistant", "content": "..."}
 RoleMessage = Dict[str, str]
-
-
-# -------------------------------------------------------------------------
-# LM Studio availability cache to avoid repeated HTTP health checks
-# -------------------------------------------------------------------------
-
-_lmstudio_cache: Dict[str, Any] = {
-    "available": None, "checked_at": 0.0, "url": None}
-_LMSTUDIO_CACHE_TTL = 30  # seconds
 
 
 def _check_lmstudio_available(url: str) -> bool:

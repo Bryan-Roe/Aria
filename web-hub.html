@@ -413,6 +413,64 @@
                 </div>
             </div>
 
+            <!-- Quantum AI Training -->
+            <div class="category-title">🧪 Quantum AI Training</div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="icon">⚗️</div>
+                    <h2>Quantum Training Dashboard</h2>
+                </div>
+                <p>Enterprise-grade quantum ML training with real-time visualization and metrics export.</p>
+                <div class="status"><span class="status-dot"></span>Training UI</div>
+                <div class="card-links">
+                    <a href="javascript:void(0);" class="btn btn-primary" onclick="tryLocalService('http://localhost:7071', 'Quantum Training UI'); return false;">Open Training UI</a>
+                </div>
+            </div>
+
+            <!-- Characters -->
+            <div class="category-title">🧩 Characters & Assets</div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="icon">🧍</div>
+                    <h2>3D Characters</h2>
+                </div>
+                <p>Stylized humanoid character pipeline, briefs, and Unity URP-ready tools.</p>
+                <div class="status"><span class="status-dot"></span>Assets</div>
+                <div class="card-links">
+                    <a href="characters/index.html" class="btn btn-primary">View Characters</a>
+                </div>
+            </div>
+
+            <!-- Documentation -->
+            <div class="category-title">📄 Documentation & Site Map</div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="icon">🗺️</div>
+                    <h2>Site Map</h2>
+                </div>
+                <p>Complete navigation guide to every page and feature in the project.</p>
+                <div class="card-links">
+                    <a href="docs/sitemap.html" class="btn btn-primary">Open Site Map</a>
+                    <a href="docs/nav.html" class="btn btn-secondary">Navigation</a>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="icon">📚</div>
+                    <h2>GitHub Pages Docs</h2>
+                </div>
+                <p>Full documentation site with architecture guides, deployment checklists, and quick reference.</p>
+                <div class="status"><span class="status-dot"></span>Docs</div>
+                <div class="card-links">
+                    <a href="docs/index.html" class="btn btn-primary">Open Docs</a>
+                    <a href="javascript:void(0);" class="btn btn-secondary" onclick="tryLocalService('http://localhost:8888', 'Docs Preview Server'); return false;">Preview Server (8888)</a>
+                </div>
+            </div>
+
             <!-- API & Development -->
             <div class="category-title">🔌 API & Services</div>
 
@@ -438,7 +496,10 @@
                 <div class="card-links">
                     <a href="javascript:void(0);" class="btn btn-secondary" onclick="tryLocalService('http://localhost:8080', 'Aria Server'); return false;">Aria Server (8080)</a>
                     <a href="javascript:void(0);" class="btn btn-secondary" onclick="tryLocalService('http://localhost:7071', 'Azure Functions'); return false;">Functions (7071)</a>
-                    <a href="javascript:void(0);" class="btn btn-secondary" onclick="tryLocalService('http://localhost:8765', 'Dashboard Server'); return false;">Dashboard Server (8765)</a>
+                    <a href="javascript:void(0);" class="btn btn-secondary" onclick="tryLocalService('http://localhost:8000', 'Dashboard Static'); return false;">Dashboard (8000)</a>
+                    <a href="javascript:void(0);" class="btn btn-secondary" onclick="tryLocalService('http://localhost:8765', 'Monitoring Dashboard'); return false;">Monitoring (8765)</a>
+                    <a href="javascript:void(0);" class="btn btn-secondary" onclick="tryLocalService('http://localhost:5000', 'Flask Dashboard'); return false;">Flask Dashboard (5000)</a>
+                    <a href="javascript:void(0);" class="btn btn-secondary" onclick="tryLocalService('http://localhost:8888', 'Docs Preview'); return false;">Docs Preview (8888)</a>
                 </div>
             </div>
         </div>
@@ -452,7 +513,7 @@
             <a href="#" onclick="openREADME(); return false;">Project README</a>
         </div>
         <p>&copy; 2026 Aria Quantum AI System. All rights reserved.</p>
-        <p>Last updated: January 24, 2026</p>
+        <p>Last updated: February 18, 2026</p>
     </footer>
 
     <script>
@@ -480,11 +541,17 @@
         
         function getLocalServiceInstructions(name) {
             const instructions = {
-                'Aria Server': 'cd aria_web && python server.py',
+                'Aria Server': 'cd src/web/aria/aria_web && python server.py',
                 'Azure Functions': 'func host start',
+                'Dashboard Static': 'cd src/web/dashboard/dashboard && python serve.py',
+                'Monitoring Dashboard': 'python scripts/monitoring/vs_code_server.py',
+                'Flask Dashboard': 'cd src/web/dashboard/dashboard && python app.py',
+                'Docs Preview Server': 'cd docs && python -m http.server 8888',
+                'Docs Preview': 'cd docs && python -m http.server 8888',
+                'Quantum Training UI': 'python quantum-ai/web_ui -- (served via API)',
                 'Dashboard Server': 'python scripts/monitoring/vs_code_server.py'
             };
-            return instructions[name] || 'See documentation for setup instructions.';
+            return instructions[name] || 'python scripts/start_all_websites.py  (launches everything)';
         }
         
         function checkLocalAPI() {

@@ -14,10 +14,10 @@ import signal
 import os
 import sys
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
+REPO_ROOT = Path(__file__).resolve().parents[4]  # -> c:\...\AI  (repo root)
 sys.path.insert(0, str(REPO_ROOT))  # Ensure scripts module is importable
 
-from scripts.autotrain import load_jobs, Job, run_job  # reuse orchestrator logic for retry
+from scripts.training.autotrain import load_jobs, Job, run_job  # reuse orchestrator logic for retry
 
 app = Flask(__name__)
 socketio = SocketIO(app, cors_allowed_origins="*")
@@ -67,7 +67,7 @@ def _compute_training_progress():
       eta_seconds / eta_iso: estimated remaining time until all jobs finish (based on avg succeeded duration)
       average_job_duration_seconds: mean duration of succeeded jobs
     """
-    cfg_path = REPO_ROOT / "autotrain.yaml"
+    cfg_path = REPO_ROOT / "config" / "training" / "autotrain.yaml"
     try:
         cfg = yaml.safe_load(cfg_path.read_text(encoding="utf-8")) if cfg_path.exists() else {}
         configured_jobs = [j.get("name") for j in cfg.get("jobs", []) if j.get("name")]
@@ -301,7 +301,7 @@ def retry_job(job_name: str):
             return jsonify({"error": "job_not_found"}), 404
 
         # Load job from config so we have full definition (dataset, save_dir, etc.)
-        cfg_path = REPO_ROOT / "autotrain.yaml"
+        cfg_path = REPO_ROOT / "config" / "training" / "autotrain.yaml"
         try:
             config_jobs = {j.name: j for j in load_jobs(cfg_path)}
         except Exception:
