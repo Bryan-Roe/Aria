@@ -218,7 +218,7 @@ class DataGenerator:
             "train_samples": len(train_data),
             "test_samples": len(test_data),
             "seed": self.seed,
-            "sources": list(set(item.get("source", "unknown") for item in all_data))
+            "sources": sorted({item.get("source", "unknown") for item in all_data})
         }
         
         with open(metadata_file, 'w') as f:
