@@ -1,7 +1,7 @@
 ---
 name: "Quantum-AI-MCP-Python"
 description: "Python-specific guidance for quantum-ai MCP server"
-applyTo: "quantum-ai/quantum_mcp_server.py"
+applyTo: "quantum/quantum_mcp_server.py"
 ---
 # Quantum AI MCP Server – Python file
 
@@ -16,6 +16,6 @@ applyTo: "quantum-ai/quantum_mcp_server.py"
 - Safety limits enforced: ≤10 local qubits, default ≤1000 shots, 60s timeout per call, CircuitCache (LRU + TTL) to avoid recomputation.
 - Cost gate for Azure QPU: require `confirm_cost=true` (tool args) and set `azure_confirm_cost: true` in orchestrator YAML before real hardware.
 - Prefer local simulator backends (Qiskit Aer) or FREE Azure simulators before paid hardware.
-- Azure workspace configuration: `quantum-ai/config/quantum_config.yaml` (requires `az login`).
+- Azure workspace configuration: `quantum/config/quantum_config.yaml` (requires `az login`).
 - Outputs & status: write to `data_out/quantum_autorun/` and use status JSON for machine-readable progress.
 - Tests: `python .\\scripts\\test_runner.py --unit` and `pytest -m "not slow and not azure"`.

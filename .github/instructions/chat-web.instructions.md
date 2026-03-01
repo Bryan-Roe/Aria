@@ -1,7 +1,7 @@
 ---
 name: "Chat-Web"
 description: "Guidance for chat-web frontend and SSE integration"
-applyTo: "chat-web/**"
+applyTo: "web/chat-web/**"
 ---
 # Chat Web – frontend & SSE
 

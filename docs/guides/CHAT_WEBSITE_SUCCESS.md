@@ -4,7 +4,7 @@
 
 I've created a complete, production-ready chat website with:
 
-### 1. **Frontend** (`chat-web/`)
+### 1. **Frontend** (`web/chat-web/`)
 - Beautiful gradient UI with animations
 - Responsive design (works on mobile & desktop)
 - Real-time typing indicators
@@ -19,7 +19,7 @@ I've created a complete, production-ready chat website with:
 - Error handling & logging
 
 ### 3. **Integration**
-- Reuses existing `talk-to-ai` chat logic
+- Reuses existing `tools/talk-to-ai` chat logic
 - Supports 3 providers: Local (free), OpenAI, Azure OpenAI
 - Auto-detects best available provider
 
@@ -74,7 +74,7 @@ c:\Users\Bryan\OneDrive\AI\
 ├── start-chat-web.ps1           # Startup script
 ├── test-chat-web.py             # Test suite
 ├── CHAT_WEBSITE_GUIDE.md        # Complete documentation
-└── chat-web/
+└── web/chat-web/
     ├── index.html               # Beautiful UI
     ├── chat.js                  # Frontend logic
     └── README.md                # Quick reference
@@ -100,8 +100,8 @@ c:\Users\Bryan\OneDrive\AI\
 ## Documentation
 
 - **Complete Guide**: `CHAT_WEBSITE_GUIDE.md`
-- **Quick Reference**: `chat-web/README.md`
-- **Provider Details**: `talk-to-ai/README.md`
+- **Quick Reference**: `web/chat-web/README.md`
+- **Provider Details**: `tools/tools/talk-to-ai/README.md`
 - **Architecture**: `.github/copilot-instructions.md`
 
 ## Cost Summary

@@ -85,7 +85,7 @@ This repository uses GitHub Actions for continuous integration, testing, deploym
 - **containerized_chrome**: Pyppeteer E2E tests
 
 #### 7. **Aria Tests** (`aria-tests.yml`)
-**Triggers:** Push/PR (aria_web changes), manual
+**Triggers:** Push/PR (web/aria_web changes), manual
 
 **Jobs:**
 - **unit-integration-tests**: Tests across Python 3.10, 3.11, 3.12

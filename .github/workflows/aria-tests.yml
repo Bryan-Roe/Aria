@@ -2,7 +2,7 @@
 # Aria Comprehensive Tests - Full Aria character system testing
 # =============================================================================
 # Purpose: Comprehensive testing of Aria web interface with multiple browsers
-# Triggers: Changes to aria_web or test files (path-filtered)
+# Triggers: Changes to web/aria_web or test files (path-filtered)
 # Jobs:
 #   - unit-integration-tests: Tests across Python 3.10, 3.11, 3.12
 #   - playwright-e2e: Playwright browser automation tests
@@ -18,14 +18,14 @@ on:
   push:
     branches: [main, develop]
     paths:
-      - 'aria_web/**'
+      - 'web/web/aria_web/**'
       - 'tests/test_*aria*.py'
       - 'tests/test_*ui*.py'
       - '.github/workflows/aria-tests.yml'
   pull_request:
     branches: [main, develop]
     paths:
-      - 'aria_web/**'
+      - 'web/web/aria_web/**'
       - 'tests/test_*aria*.py'
       - 'tests/test_*ui*.py'
       - '.github/workflows/aria-tests.yml'
@@ -95,7 +95,7 @@ jobs:
 
       - name: Start Aria server (background)
         run: |
-          cd aria_web
+          cd web/aria_web
           python server.py &
           echo $! > /tmp/aria_server.pid
           sleep 3
@@ -173,7 +173,7 @@ jobs:
 
       - name: Start Aria server (background)
         run: |
-          cd aria_web
+          cd web/aria_web
           python server.py &
           echo $! > /tmp/aria_server.pid
           sleep 3
@@ -234,7 +234,7 @@ jobs:
 
       - name: Start Aria server (background)
         run: |
-          cd aria_web
+          cd web/aria_web
           python server.py &
           echo $! > /tmp/aria_server.pid
           sleep 3

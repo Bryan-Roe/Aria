@@ -10,7 +10,7 @@ def test_otel_callback_import_and_methods(monkeypatch):
     """
     # Load the file directly to avoid package name issues
     script_path = Path(__file__).resolve(
-    ).parents[1] / "AI" / "microsoft_phi-silica-3.6_v1" / "scripts" / "otel_callback.py"
+    ).parents[1] / "lora" / "scripts" / "otel_callback.py"
     spec = spec_from_file_location("otel_callback_test_mod", str(script_path))
     assert spec is not None
     mod = module_from_spec(spec)

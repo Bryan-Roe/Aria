@@ -80,8 +80,8 @@ func start
 
 ## Files Modified
 
-- `chat-web/index.html` - UI + CSS + CDN imports
-- `chat-web/chat.js` - Enhanced logic + persistence
+- `web/chat-web/index.html` - UI + CSS + CDN imports
+- `web/chat-web/chat.js` - Enhanced logic + persistence
 - `function_app.py` - Backend API (unchanged, working)
 
 **Total**: Production-ready chat interface! 🎉

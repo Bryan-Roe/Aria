@@ -15,7 +15,7 @@ applyTo: "AI/microsoft_phi-silica-3.6_v1/scripts/**/*.py"
   - Validate datasets: `python .\\scripts\\validate_datasets.py --category chat`
 - LoRA readiness: adapter dir requires `adapter_config.json` and `adapter_model.safetensors` (`data_out/lora_training/<job>/lora_adapter/`).
 - Ranking metrics: `perplexity_improvement`, `diversity_avg` (`distinct_diversity`), `combined_improvement`.
-- Use in CLI: `python .\\talk-to-ai\\src\\chat_cli.py --provider lora --model <adapter_dir>`
+- Use in CLI: `python .\\tools/talk-to-ai\\src\\chat_cli.py --provider lora --model <adapter_dir>`
 - Config precedence: base YAML < CLI flags < per-job YAML overrides < env vars.
 - Data immutability: read-only `datasets/`; write-only outputs under `data_out/`.
 - Tests & CI: `python .\\scripts\\test_runner.py --all` and VS Code Test Explorer (🧪) for debugging.

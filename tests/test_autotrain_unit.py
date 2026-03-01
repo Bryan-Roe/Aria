@@ -1,4 +1,13 @@
 """Unit tests for AutoTrain orchestrator components."""
+import sys
+from pathlib import Path
+import pytest
+from unittest.mock import Mock, patch
+import tempfile
+import json
+REPO_ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(REPO_ROOT / "scripts"))
+
 from autotrain import (
     Job,
     read_yaml,
@@ -6,22 +15,6 @@ from autotrain import (
     build_hf_command,
     build_local_command,
 )
-import pytest
-from unittest.mock import Mock, patch
-from pathlib import Path
-import tempfile
-import json
-import sys
-from pathlib import Path
-REPO_ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(REPO_ROOT / "scripts"))
-REPO_ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(REPO_ROOT / "scripts"))
-
-
-# Import the module under test
-REPO_ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(REPO_ROOT / "scripts"))
 
 
 class TestJobDataclass:
@@ -188,7 +181,7 @@ class TestLocalCommandBuilder:
         job = Job(
             name="test",
             runner="local",
-            config="AI/microsoft_phi-silica-3.6_v1/local_train/local_config.yaml",
+            config="lora/local_train/local_config.yaml",
         )
         cmd = build_local_command(job)
         assert "--config" in cmd
@@ -306,6 +299,27 @@ jobs:
 """,
             encoding="utf-8",
         )
+
+        def test_trainer_tokenizer_keyword_matches_signature(self):
+                """Ensure that ``train_lora`` chooses a valid Trainer keyword.
+
+                The script uses ``_trainer_tokenizer_kwarg`` to dynamically select
+                either ``tokenizer`` or ``processing_class`` depending on the
+                installed transformers version.  This test verifies that the chosen
+                key actually exists in ``Trainer.__init__`` so the training job will
+                not fail with a ``TypeError`` (which previously happened when
+                running with transformers>=5).
+                """
+
+                import inspect
+                from AI.microsoft_phi_silica_3.6_v1.scripts import train_lora  # type: ignore
+
+                chosen = train_lora._trainer_tokenizer_kwarg()
+                params = inspect.signature(train_lora.Trainer.__init__).parameters
+                assert chosen in params, (
+                        f"_trainer_tokenizer_kwarg returned '{chosen}' which is not in"
+                        f" Trainer.__init__ params {list(params)}"
+                )
 
         # We can't easily test main() with sys.exit, but we can test load_jobs
         jobs = load_jobs(cfg)

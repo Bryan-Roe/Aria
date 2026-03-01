@@ -19,7 +19,7 @@ This document outlines identified performance bottlenecks and inefficient code p
 ## 1. Token Utils - Repeated Tokenizer Instantiation
 
 ### Location
-`talk-to-ai/src/token_utils.py` - `_get_text_encoder()` function
+`tools/tools/talk-to-ai/src/token_utils.py` - `_get_text_encoder()` function
 
 ### Problem
 Every call to `count_messages_tokens()` or `prune_messages()` creates a new tokenizer instance. For Hugging Face tokenizers, this involves:
@@ -209,7 +209,7 @@ def validate_jsonl(self, filepath: Path, verbose: bool = False) -> Dict:
 ## 5. Chat Providers - LM Studio Health Check On Every Auto-Detect
 
 ### Location
-`talk-to-ai/src/chat_providers.py` - `detect_provider()` function
+`tools/tools/talk-to-ai/src/chat_providers.py` - `detect_provider()` function
 
 ### Problem
 In auto mode, the function makes an HTTP request to check if LM Studio is running on every call, adding latency even when LM Studio isn't being used.
@@ -259,7 +259,7 @@ def _check_lmstudio_available(url: str) -> bool:
 ## 6. Quantum Classifier - Sequential Batch Processing
 
 ### Location
-`quantum-ai/src/quantum_classifier.py` - `forward()` method
+`quantum/src/quantum_classifier.py` - `forward()` method
 
 ### Problem
 Processes batch items sequentially in a Python loop, which is slow for quantum circuit execution.
@@ -375,7 +375,7 @@ chart.append("            │" + "".join(chars))
 ### 9. Quantum Web App - Dictionary Iteration Efficiency
 
 #### Location
-`quantum-ai/web_app.py` - metrics history trimming (line 516)
+`quantum/web_app.py` - metrics history trimming (line 516)
 
 #### Problem
 Inefficient loop-based dictionary updates:
@@ -399,7 +399,7 @@ session.metrics_history = {key: values[-1000:] for key, values in session.metric
 ### 10. Quantum Circuit - Performance Documentation
 
 #### Location
-`quantum-ai/src/hybrid_qnn.py` - QuantumLayer class
+`quantum/src/hybrid_qnn.py` - QuantumLayer class
 
 #### Problem
 Missing documentation about O(n²) complexity of full entanglement pattern.

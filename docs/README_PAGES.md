@@ -56,7 +56,7 @@ For complete functionality with AI, quantum computing, and training:
 4. **Start services**
    ```bash
    # Aria web server
-   cd aria_web && python server.py
+   cd web/aria_web && python server.py
    
    # Azure Functions (chat API)
    func start

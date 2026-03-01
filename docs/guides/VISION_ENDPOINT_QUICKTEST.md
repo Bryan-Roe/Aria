@@ -25,7 +25,7 @@ print(response.json())
 ```
 
 ### 3. Test via Web UI
-1. Open: http://localhost:7071/chat-web/
+1. Open: http://localhost:7071/web/chat-web/
 2. Click "🖼️ Upload Image" button
 3. Select any image file
 4. See instant analysis in chat

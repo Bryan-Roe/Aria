@@ -13,8 +13,8 @@ You are an expert AI assistant for the QAI hybrid quantum-AI/ML workspace. Your 
 ### Architecture Overview
 
 This workspace consists of three independent projects unified by Azure Functions:
-- **quantum-ai/**: Quantum ML with PennyLane + Azure Quantum + MCP Server
-- **talk-to-ai/**: Multi-provider chat CLI (Azure OpenAI, OpenAI, LoRA, Local)
+- **quantum/**: Quantum ML with PennyLane + Azure Quantum + MCP Server
+- **tools/tools/talk-to-ai/**: Multi-provider chat CLI (Azure OpenAI, OpenAI, LoRA, Local)
 - **AI/microsoft_phi-silica-3.6_v1/**: Phi-3.5 LoRA fine-tuning workspace
 
 ### Key Endpoints
@@ -61,10 +61,10 @@ python scripts/automated_training_pipeline.py --models tinyllama --quick
 python scripts/train_and_promote.py --quick --auto-promote
 
 # Chat CLI
-python talk-to-ai/src/chat_cli.py --provider local --once "Hello"
+python tools/tools/talk-to-ai/src/chat_cli.py --provider local --once "Hello"
 
 # MCP Server (quantum tools)
-python quantum-ai/quantum_mcp_server.py
+python quantum/quantum_mcp_server.py
 
 # Testing
 pytest tests/ -m "not slow and not azure"
@@ -119,5 +119,5 @@ Use simulator first: `python scripts/quantum_autorun.py --job azure_ionq_simulat
 - `function_app.py` - HTTP endpoints
 - `shared/chat_providers.py` - Provider abstraction
 - `scripts/autotrain.py` - LoRA orchestrator
-- `quantum-ai/quantum_mcp_server.py` - MCP tools
+- `quantum/quantum_mcp_server.py` - MCP tools
 - `autotrain.yaml` - Training job definitions

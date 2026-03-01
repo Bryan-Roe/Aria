@@ -2,7 +2,7 @@
 
 ## Overview
 
-The QAI chat interface (`chat-web/`) implements a dual-mode architecture that supports both:
+The QAI chat interface (`web/chat-web/`) implements a dual-mode architecture that supports both:
 - **Standalone UI mode**: Full-featured chat interface with `chat.js` handling all UI interactions
 - **Embedded mode** (reserved for future use): Minimal inline controller for streaming chat only
 
@@ -29,7 +29,7 @@ The QAI chat interface (`chat-web/`) implements a dual-mode architecture that su
 ### Backend Endpoints
 
 - **`/api/chat-web`**: Serves index.html
-- **`/api/chat-web/chat.js`**: Serves chat.js module
+- **`/api/web/chat-web/chat.js`**: Serves chat.js module
 - **`/api/chat`**: One-shot chat completion (POST)
 - **`/api/chat/stream`**: Server-sent events streaming chat (POST)
 - **`/api/vision/infer`**: Vision inference using TinyConvNet (POST)
@@ -193,7 +193,7 @@ If OpenAI Images API fails (no key, quota exceeded, network error):
 
 **Diagnosis**: ARIA_EMBEDDED flag may be set incorrectly
 
-**Fix**: Check `chat-web/index.html` around line 2507:
+**Fix**: Check `web/chat-web/index.html` around line 2507:
 ```html
 <script>
     window.ARIA_EMBEDDED = false;  // Must be false for chat.js to wire up UI
@@ -295,11 +295,11 @@ typeof hljs    // Should be "object"
 ### Making Changes
 
 **To modify UI behavior**:
-1. Edit `chat-web/chat.js`
+1. Edit `web/chat-web/chat.js`
 2. Reload page (no restart needed, served on-demand)
 
 **To modify HTML/CSS**:
-1. Edit `chat-web/index.html`
+1. Edit `web/chat-web/index.html`
 2. Reload page
 
 **To modify backend**:

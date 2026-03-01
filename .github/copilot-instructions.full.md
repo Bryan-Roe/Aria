@@ -7,8 +7,8 @@
 ## 1️⃣ Core Architecture
 
 - **Projects (isolated venvs)**:
-  - `quantum-ai/` – quantum‑ML pipelines, MCP server, web dashboard.
-  - `talk-to-ai/` – multi‑provider chat CLI (Azure OpenAI, OpenAI, LoRA, local fallback).
+  - `quantum/` – quantum‑ML pipelines, MCP server, web dashboard.
+  - `tools/tools/talk-to-ai/` – multi‑provider chat CLI (Azure OpenAI, OpenAI, LoRA, local fallback).
   - `AI/microsoft_phi-silica-3.6_v1/` – Phi‑3.5 LoRA fine‑tuning.
 - **Integration layer**: `function_app.py` (Azure Functions) exposing:
   - `/api/chat` – streaming chat.
@@ -57,7 +57,7 @@
 
 - Simulate locally first: `python scripts/quantum_autorun.py --job local_simulator`.
 - Real QPU jobs require `azure_confirm_cost: true` in `quantum_autorun.yaml` **and** a cost estimate via `estimate_quantum_cost`.
-- MCP server entry point: `python quantum-ai/quantum_mcp_server.py` (tools: `create_quantum_circuit`, `simulate_quantum_circuit`, `submit_quantum_job`, `estimate_quantum_cost`).
+- MCP server entry point: `python quantum/quantum_mcp_server.py` (tools: `create_quantum_circuit`, `simulate_quantum_circuit`, `submit_quantum_job`, `estimate_quantum_cost`).
 
 ---
 
@@ -93,7 +93,7 @@
 
 ## Copilot Quickstart for QAI (condensed)
 
-- Architecture in one breath: three independent projects — `quantum-ai/` (quantum ML + MCP server), `talk-to-ai/` (CLI chat), and `AI/microsoft_phi-silica-3.6_v1/` (LoRA fine-tuning) — unified by `function_app.py` (Azure Functions) and shared infra in `shared/`.
+- Architecture in one breath: three independent projects — `quantum/` (quantum ML + MCP server), `tools/tools/talk-to-ai/` (CLI chat), and `AI/microsoft_phi-silica-3.6_v1/` (LoRA fine-tuning) — unified by `function_app.py` (Azure Functions) and shared infra in `shared/`.
 - Key endpoints (served by Functions): `/api/chat`, `/api/chat-web`, `/api/tts`, `/api/quantum/*`, `/api/ai/status`. Check runtime health at `/api/ai/status`.
 - Provider detection order (see `shared/chat_providers.py:detect_provider()`): Azure OpenAI → OpenAI → LoRA → Local. Azure needs all 4 env vars: `AZURE_OPENAI_API_KEY`, `AZURE_OPENAI_ENDPOINT`, `AZURE_OPENAI_DEPLOYMENT`, `AZURE_OPENAI_API_VERSION`.
 - Immutable data model: read-only `datasets/`; write-only `data_out/`. Orchestrators run from repo root and emit machine-readable status JSON under `data_out/<orchestrator>/status.json`.
@@ -101,10 +101,10 @@
   - Dry-run safety first: `python .\scripts\autotrain.py --dry-run`; `python .\scripts\quantum_autorun.py --dry-run`; `python .\scripts\evaluation_autorun.py --dry-run`.
   - Quick LoRA train+deploy: `python .\scripts\train_and_promote.py --quick --auto-promote`.
   - Ultrafast TinyLlama: `python .\scripts\automated_training_pipeline.py --models tinyllama --quick`.
-- LoRA readiness: adapter must contain `adapter_config.json` and `adapter_model.safetensors`. Use CLI: `python .\talk-to-ai\src\chat_cli.py --provider lora --model <adapter_dir>`.
+- LoRA readiness: adapter must contain `adapter_config.json` and `adapter_model.safetensors`. Use CLI: `python .\tools/talk-to-ai\src\chat_cli.py --provider lora --model <adapter_dir>`.
 - Dataset convention (chat): `datasets/chat/<name>/{train.json,test.json}` with `[{"messages": [{"role": "user|assistant", "content": "..."}]}]`. Validate with `python .\scripts\validate_datasets.py --category chat`.
 - Quantum guardrails: always simulate locally (Qiskit Aer) before cloud; real QPU runs require `azure_confirm_cost: true` in `quantum_autorun.yaml`. Use `python .\scripts\quantum_autorun.py --job azure_ionq_simulator` first.
-- MCP server (quantum tools): `python .\quantum-ai\quantum_mcp_server.py`. Tools include `create_quantum_circuit`, `simulate_quantum_circuit`, `submit_quantum_job`, `estimate_quantum_cost` (see `quantum-ai/quantum_mcp_server.py`).
+- MCP server (quantum tools): `python .\quantum-ai\quantum_mcp_server.py`. Tools include `create_quantum_circuit`, `simulate_quantum_circuit`, `submit_quantum_job`, `estimate_quantum_cost` (see `quantum/quantum_mcp_server.py`).
 - Testing workflow: prefer `python .\scripts\test_runner.py --all` (fast) or VS Code Test Explorer (🧪). Pytest markers: `not slow and not azure` for local runs.
 - Azure storage/dev: Azurite databases present at root; Functions host can run offline. Configure speech TTS via `AZURE_SPEECH_KEY`/`AZURE_SPEECH_REGION` or enable local fallback with `QAI_ENABLE_LOCAL_TTS=true`.
 - Config precedence: YAML base < CLI flags < per-job YAML overrides < environment variables. Never hardcode secrets; use `local.settings.json` (dev) or Azure App Settings (prod).
@@ -132,7 +132,7 @@ python --version
 python .\scripts\system_health_check.py
 
 # 4. Test basic functionality (no API keys needed)
-python .\talk-to-ai\src\chat_cli.py --provider local --once "Hello"
+python .\tools/talk-to-ai\src\chat_cli.py --provider local --once "Hello"
 
 # 5. Run fast unit tests to verify setup
 python .\scripts\test_runner.py --unit

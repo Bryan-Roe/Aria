@@ -142,7 +142,7 @@ def serve_static_file(
     
     Example:
         content, status, headers = serve_static_file(
-            Path("chat-web/index.html"),
+            Path("web/chat-web/index.html"),
             "text/html",
             use_cache_headers=True
         )

@@ -248,7 +248,7 @@ python .\scripts\vision_inference.py --image test.jpg --checkpoint path/to/model
 
 ## Integration with Aria Chat
 
-The vision API is integrated into the Aria chat interface (`chat-web/`):
+The vision API is integrated into the Aria chat interface (`web/chat-web/`):
 
 1. **Upload Button**: Click 🖼️ icon to upload image
 2. **Auto-Analysis**: Image analyzed immediately on upload
@@ -302,5 +302,5 @@ Response includes vision endpoints:
 - **Training Guide**: `VISION_TRAINING_GUIDE.md`
 - **Inference Module**: `scripts/vision_inference.py`
 - **Tests**: `tests/test_vision_inference.py`
-- **Frontend**: `chat-web/index.html` and `chat-web/chat.js`
+- **Frontend**: `web/chat-web/index.html` and `web/chat-web/chat.js`
 - **Azure Functions**: `function_app.py`

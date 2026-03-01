@@ -28,7 +28,7 @@ Or run the startup script:
 ```
 ┌─────────────────┐
 │   Browser       │
-│  (chat-web/)    │
+│  (web/chat-web/)    │
 └────────┬────────┘
          │ HTTP/JSON
          ↓
@@ -40,20 +40,20 @@ Or run the startup script:
          ↓
 ┌─────────────────┐
 │  Chat Providers │
-│(talk-to-ai/src) │
+│(tools/tools/talk-to-ai/src) │
 └─────────────────┘
 ```
 
 ### Files Created/Modified:
 
-1. **Frontend** (`chat-web/`)
+1. **Frontend** (`web/chat-web/`)
    - `index.html` - Beautiful gradient UI
    - `chat.js` - Client-side logic
    - `README.md` - Documentation
 
 2. **Backend** (`function_app.py`)
    - Chat API endpoint (`/api/chat`)
-   - Static file serving (`/api/chat-web`, `/api/chat-web/chat.js`)
+   - Static file serving (`/api/chat-web`, `/api/web/chat-web/chat.js`)
    - CORS support for local testing
 
 3. **Utilities**
@@ -115,7 +115,7 @@ Response:
 
 Serves the HTML interface
 
-### GET /api/chat-web/chat.js
+### GET /api/web/chat-web/chat.js
 
 Serves the JavaScript client
 
@@ -199,7 +199,7 @@ https://chat-web-app-unique-123.azurewebsites.net/api/chat-web
 
 ### Change Colors
 
-Edit `chat-web/index.html`, find the gradient definitions:
+Edit `web/chat-web/index.html`, find the gradient definitions:
 
 ```css
 background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -249,7 +249,7 @@ Then pass `?code=YOUR_FUNCTION_KEY` in API calls.
 **Solution**: These are false positives. Run:
 ```powershell
 pip install azure-functions colorama
-cd talk-to-ai; pip install -r requirements.txt
+cd tools/talk-to-ai; pip install -r requirements.txt
 ```
 
 ### Provider Errors
@@ -312,7 +312,7 @@ View logs in Azure Portal:
 ## 🆘 Support
 
 - Report issues in the main QAI repo
-- Check `talk-to-ai/README.md` for provider details
+- Check `tools/tools/talk-to-ai/README.md` for provider details
 - Review `.github/copilot-instructions.md` for architecture
 
 ## 🎉 Congratulations!

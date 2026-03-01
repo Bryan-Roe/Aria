@@ -16,7 +16,7 @@ This iteration focused on building developer experience infrastructure and fixin
 **Purpose:** Comprehensive diagnostic tool to validate system health across all components.
 
 **Features:**
-- ✅ Validates 4 virtual environments (root, quantum-ai, ML, talk-to-ai)
+- ✅ Validates 4 virtual environments (root, quantum-ai, ML, tools/talk-to-ai)
 - ✅ Checks Azure Functions status (running/stopped)
 - ✅ Verifies documentation completeness (6 core docs)
 - ✅ Counts test files and provides test statistics
@@ -44,7 +44,7 @@ Overall Health: GOOD
   ✓ root: Azure Functions runtime
   ✓ quantum-ai: Quantum ML training
   ✓ ml: LoRA fine-tuning
-  ✓ talk-to-ai: Chat CLI
+  ✓ tools/talk-to-ai: Chat CLI
 
 [AZURE FUNCTIONS]
   ✗ Not running (expected at http://localhost:7071)

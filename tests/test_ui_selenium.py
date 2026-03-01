@@ -46,12 +46,14 @@ pytestmark = pytest.mark.skipif(
 )
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-ARIA_WEB = REPO_ROOT / 'aria_web'
-SERVER_URL = os.environ.get('ARIA_SERVER_URL', 'http://localhost:8000')
+ARIA_WEB = REPO_ROOT / 'web/web/aria_web'
+# allow configurable port via environment; server defaults to 8080
+DEFAULT_PORT = int(os.environ.get('ARIA_PORT', '8080'))
+SERVER_URL = os.environ.get('ARIA_SERVER_URL', f'http://localhost:{DEFAULT_PORT}')
 SELENIUM_REMOTE_URL = os.environ.get('SELENIUM_REMOTE_URL', 'http://localhost:4444/wd/hub')
 
 
-def is_port_open(port=8000, host='127.0.0.1'):
+def is_port_open(port=DEFAULT_PORT, host='127.0.0.1'):
     """Check if a port is open."""
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     try:
@@ -65,14 +67,17 @@ def is_port_open(port=8000, host='127.0.0.1'):
 
 def ensure_server_running():
     """Start the Aria server if not already running."""
-    if is_port_open(8000):
+    if is_port_open(DEFAULT_PORT):
         logger.info("Server already running")
         return None
 
     logger.info("Starting Aria server...")
+    env = os.environ.copy()
+    env.setdefault('ARIA_PORT', str(DEFAULT_PORT))
     proc = subprocess.Popen(
         ["python3", "server.py"], 
         cwd=str(ARIA_WEB), 
+        env=env,
         stdout=subprocess.DEVNULL, 
         stderr=subprocess.DEVNULL
     )

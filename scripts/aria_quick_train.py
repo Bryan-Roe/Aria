@@ -5,8 +5,8 @@ import sys
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-VENV_PYTHON = REPO_ROOT / "AI" / "microsoft_phi-silica-3.6_v1" / "venv" / "Scripts" / "python.exe"
-TRAIN_SCRIPT = REPO_ROOT / "AI" / "microsoft_phi-silica-3.6_v1" / "scripts" / "train_lora.py"
+VENV_PYTHON = REPO_ROOT / "lora" / "venv" / "Scripts" / "python.exe"
+TRAIN_SCRIPT = REPO_ROOT / "lora" / "scripts" / "train_lora.py"
 
 cmd = [
     str(VENV_PYTHON),

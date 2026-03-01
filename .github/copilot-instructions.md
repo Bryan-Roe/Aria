@@ -10,23 +10,23 @@ Short & actionable summary for AI agents editing Aria — an interactive AI char
 
 - **Interactive AI Character Platform** with 3D animated avatar, natural language movement commands, and real-time object interaction
 - **Three isolated projects + Functions integration layer:**
-  - `quantum-ai/` — MCP server, web dashboard, quantum ML pipelines (separate venv)
-  - `talk-to-ai/` — chat CLI with multi-provider support (separate venv)
+  - `quantum/` — MCP server, web dashboard, quantum ML pipelines (separate venv)
+  - `tools/tools/talk-to-ai/` — chat CLI with multi-provider support (separate venv)
   - `AI/microsoft_phi-silica-3.6_v1/` — Phi-3.5 LoRA fine-tuning (separate venv)
   - `function_app.py` — Azure Functions integration exposing all APIs
 - **Integration points:**
-  - `function_app.py` dynamically imports from talk-to-ai/src and quantum-ai/src (adds to sys.path)
+  - `function_app.py` dynamically imports from tools/tools/talk-to-ai/src and quantum/src (adds to sys.path)
   - Shared infra in `shared/`: re-exports chat providers, DB engines, telemetry, Cosmos client
 - **Web Interfaces:**
-  - `aria_web/` — Interactive Aria character interface with CSS animations, eye tracking, gestures
-  - `chat-web/` — Streaming chat UI with SSE support
+  - `web/web/aria_web/` — Interactive Aria character interface with CSS animations, eye tracking, gestures
+  - `web/chat-web/` — Streaming chat UI with SSE support
 - **API endpoints** (via `function_app.py`):
   - `/api/chat` — streaming chat SSE
   - `/api/chat-web` — web UI HTML
   - `/api/tts` — Azure Speech TTS (falls back to local if enabled)
   - `/api/quantum/*` — quantum job submission/monitoring
   - `/api/ai/status` — health check showing active provider, env vars, DB pool, Cosmos status
-- **Aria Web API endpoints** (via `aria_web/server.py` on port 8080):
+- **Aria Web API endpoints** (via `web/web/aria_web/server.py` on port 8080):
   - `GET /api/aria/state` — current stage state (position, objects, expressions)
   - `POST /api/aria/command` — process natural language commands
   - `POST /api/aria/execute` — auto-execute action sequences (plan or execute mode)
@@ -83,7 +83,7 @@ python scripts/aria_automation.py --mode full
 python scripts/aria_automation.py --status
 
 # === ARIA CHARACTER WEB UI ===
-cd aria_web && python server.py                  # Start Aria web interface (port 8080)
+cd web/aria_web && python server.py                  # Start Aria web interface (port 8080)
 # Access at: http://localhost:8080
 # Auto-Execute UI: http://localhost:8080/auto-execute.html
 # Commands: "move left", "wave", "dance", "jump", "pickup ball", "throw"
@@ -96,7 +96,7 @@ curl http://localhost:7071/api/ai/status | jq # Health check
 # === TESTING & VALIDATION ===
 python scripts/test_runner.py --unit          # Fast unit tests
 python scripts/test_runner.py --all           # All tests
-python talk-to-ai/src/chat_cli.py --provider local --once "Hello"  # Smoke test
+python tools/tools/talk-to-ai/src/chat_cli.py --provider local --once "Hello"  # Smoke test
 python scripts/fast_validate.py              # Quick validation across all components
 
 # === ORCHESTRATORS (Manual Execution) ===
@@ -109,7 +109,7 @@ python scripts/automated_training_pipeline.py --quick  # Quick LoRA (TinyLlama)
 python scripts/train_and_promote.py --quick --auto-promote  # Train + auto-deploy
 
 # === MCP & TOOLS ===
-python quantum-ai/quantum_mcp_server.py       # Start quantum MCP server
+python quantum/quantum_mcp_server.py       # Start quantum MCP server
 
 # === MONITORING & DIAGNOSTICS ===
 curl http://localhost:7071/api/ai/status | jq # Comprehensive health check
@@ -204,17 +204,17 @@ async def run_single_cycle(cycle_number):
 | Change | File(s) |
 |--------|---------|
 | Add/modify API endpoint | `function_app.py` |
-| Chat provider logic | `talk-to-ai/src/chat_providers.py` (re-exported by `shared/chat_providers.py`) |
+| Chat provider logic | `tools/tools/talk-to-ai/src/chat_providers.py` (re-exported by `shared/chat_providers.py`) |
 | Training orchestration | `scripts/autotrain.py` + root `autotrain.yaml` |
 | Autonomous training behavior | `scripts/autonomous_training_orchestrator.py` + `config/autonomous_training.yaml` |
 | Master orchestrator (schedules/coordination) | `scripts/master_orchestrator.py` + `config/master_orchestrator.yaml` |
 | Aria automation | `scripts/aria_automation.py` (server + training + health monitoring) |
 | Full repo automation | `scripts/repo_automation.py` (all components + backups + notifications) |
 | Quantum jobs | `scripts/quantum_autorun.py` + root `quantum_autorun.yaml` |
-| MCP server tools | `quantum-ai/quantum_mcp_server.py` |
+| MCP server tools | `quantum/quantum_mcp_server.py` |
 | Shared DB/telemetry | `shared/sql_engine.py`, `shared/telemetry.py`, `shared/cosmos_client.py` |
-| Aria character interface | `aria_web/index.html`, `aria_web/aria_controller.js`, `aria_web/server.py` |
-| Aria movement/gestures | `aria_web/aria_controller.js` (command parsing & animation triggers) |
+| Aria character interface | `web/web/aria_web/index.html`, `web/web/aria_web/aria_controller.js`, `web/web/aria_web/server.py` |
+| Aria movement/gestures | `web/web/aria_web/aria_controller.js` (command parsing & animation triggers) |
 
 ## Safety Rules
 
@@ -255,7 +255,7 @@ This repo uses component-specific instruction files in `.github/instructions/`:
 - `functions.instructions.md` — Azure Functions API endpoints
 - `shared-python.instructions.md` — Shared infrastructure patterns
 - `quantum-ai*.instructions.md` — Quantum ML workflows
-- `talk-to-ai*.instructions.md` — Chat CLI patterns
+- `tools/talk-to-ai*.instructions.md` — Chat CLI patterns
 - `lora*.instructions.md` — LoRA fine-tuning patterns
 - `chat-web.instructions.md` — Frontend SSE integration
 

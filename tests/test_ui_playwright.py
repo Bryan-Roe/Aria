@@ -9,7 +9,7 @@ import shutil
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-ARIA_WEB = REPO_ROOT / 'aria_web'
+ARIA_WEB = REPO_ROOT / 'web/web/aria_web'
 SERVER_URL = 'http://127.0.0.1:8080'
 
 
@@ -25,13 +25,13 @@ def is_port_open(port=8080, host='127.0.0.1'):
 
 
 def ensure_server_running():
-    """Start aria_web server when it's not running and return process (if started).
+    """Start web/aria_web server when it's not running and return process (if started).
     If another server is already running, return None (re-use).
     """
     if is_port_open(8080):
         return None
 
-    # start server using python in aria_web
+    # start server using python in web/aria_web
     proc = subprocess.Popen(["python3", "server.py"], cwd=str(ARIA_WEB), stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
     # wait a short while for server to come up

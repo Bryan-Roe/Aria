@@ -339,7 +339,7 @@ Response excerpt:
 ### 🧪 Backfill Then Query
 
 ```powershell
-python .\scripts\ingest_chat_logs_to_sql.py --logs-dir talk-to-ai\logs --embed-assistant
+python .\scripts\ingest_chat_logs_to_sql.py --logs-dir tools/talk-to-ai\logs --embed-assistant
 ```
 
 Re-run chat with same `session_id` to leverage historical context.

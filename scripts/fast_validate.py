@@ -52,7 +52,7 @@ def quick_check_venv() -> Dict[str, Any]:
     venv_markers = [
         "venv/Scripts/python.exe",
         "venv/bin/python",
-        "quantum-ai/venv/Scripts/python.exe"
+        "quantum/venv/Scripts/python.exe"
     ]
     found = sum(1 for m in venv_markers if (REPO_ROOT / m).exists())
     

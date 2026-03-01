@@ -17,7 +17,7 @@ All three orchestrators in the QAI workspace have been tested, validated, and co
 
 **Solution:**
 - Added `_venv_python_ml()` to `scripts/autotrain.py` → routes to `AI/microsoft_phi-silica-3.6_v1/venv/Scripts/python.exe`
-- Added `_venv_python_quantum()` to `scripts/quantum_autorun.py` → routes to `quantum-ai/venv/Scripts/python.exe`
+- Added `_venv_python_quantum()` to `scripts/quantum_autorun.py` → routes to `quantum/venv/Scripts/python.exe`
 
 **Impact:** Training jobs now execute with correct dependency isolation, preventing cross-contamination between quantum and ML environments.
 
@@ -149,7 +149,7 @@ Loading checkpoint shards: 100%|##########| 2/2 [00:05<00:00,  2.99s/it]
 1. **Monitor phi35 training:** Check logs in `data_out\autotrain\phi35_mixed_chat\`
 2. **Run full quantum suite:** `python .\scripts\quantum_autorun.py` (all jobs, local simulators)
 3. **Enable autonomous loop:** `python .\scripts\autonomous_training_orchestrator.py` (continuous optimization)
-4. **Azure deployment:** Use Bicep templates in `quantum-ai/azure/` for cloud infrastructure
+4. **Azure deployment:** Use Bicep templates in `quantum/azure/` for cloud infrastructure
 
 ## Files Modified in This Session
 

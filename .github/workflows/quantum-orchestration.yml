@@ -37,8 +37,8 @@ jobs:
     - name: Run Orchestration
       shell: pwsh
       run: |
-        ./quantum-ai/azure/quantum_master_orchestration.ps1 -ResourceGroup rg-quantum-ai -WorkspaceName quantum-ai-workspace -Location eastus
+        ./quantum/azure/quantum_master_orchestration.ps1 -ResourceGroup rg-quantum-ai -WorkspaceName quantum-ai-workspace -Location eastus
         # Or the Logic App variant
-        # ./quantum-ai/azure/quantum_full_logicapp_orchestration.ps1 -LogicAppUrl $env:LOGIC_APP_URL
+        # ./quantum/azure/quantum_full_logicapp_orchestration.ps1 -LogicAppUrl $env:LOGIC_APP_URL
       env:
         LOGIC_APP_URL: ${{ inputs.LOGIC_APP_URL }}

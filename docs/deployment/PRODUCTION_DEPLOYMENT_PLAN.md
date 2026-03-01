@@ -233,7 +233,7 @@ cost_limits:
 **Real-time Dashboard:**
 ```powershell
 # Start Flask dashboard
-python quantum-ai/demo_dashboard.py --port 5000
+python quantum/demo_dashboard.py --port 5000
 
 # Metrics tracked:
 # - QPU vs simulator accuracy delta

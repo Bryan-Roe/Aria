@@ -7,8 +7,8 @@ import sys
 from pathlib import Path
 from unittest.mock import Mock
 
-# Add talk-to-ai to path
-sys.path.insert(0, str(Path(__file__).parent.parent / "talk-to-ai" / "src"))
+# Add tools/talk-to-ai to path
+sys.path.insert(0, str(Path(__file__).parent.parent / "tools/tools/talk-to-ai" / "src"))
 
 from chat_providers import BaseChatProvider
 

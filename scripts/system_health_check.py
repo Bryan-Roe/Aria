@@ -59,9 +59,9 @@ class HealthChecker:
             "purpose": "LoRA fine-tuning",
         }
         
-        # Check talk-to-ai venv
-        chat_venv = REPO_ROOT / "talk-to-ai" / "venv" / "Scripts" / "python.exe"
-        status["venvs"]["talk-to-ai"] = {
+        # Check tools/talk-to-ai venv
+        chat_venv = REPO_ROOT / "tools/tools/talk-to-ai" / "venv" / "Scripts" / "python.exe"
+        status["venvs"]["tools/tools/talk-to-ai"] = {
             "path": str(chat_venv),
             "exists": chat_venv.exists(),
             "purpose": "Chat CLI",

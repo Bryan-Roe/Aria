@@ -15,7 +15,7 @@ import math
 def analyze_conversations() -> Dict[str, Any]:
     """Analyze collected conversations and return metrics dict"""
     repo_root = Path(__file__).resolve().parents[1]
-    logs_dir = repo_root / "talk-to-ai" / "logs"
+    logs_dir = repo_root / "tools/tools/talk-to-ai" / "logs"
     
     if not logs_dir.exists():
         print(f"No logs directory found at: {logs_dir}")

@@ -21,7 +21,7 @@
 
 ## 🎯 Key Optimizations Implemented
 
-### 1. Hot Path Keyword Matching (aria_web/server.py)
+### 1. Hot Path Keyword Matching (web/web/aria_web/server.py)
 - **Lines**: +108/-40
 - **Before**: 39 `any()` calls with O(n) list scans
 - **After**: Pre-compiled frozensets with O(1) lookups
@@ -33,7 +33,7 @@
 - **After**: Thread-safe pool with connection reuse
 - **Speedup**: **50-100x** for batch operations
 
-### 3. Regex Pre-compilation (aria_web/server.py)
+### 3. Regex Pre-compilation (web/web/aria_web/server.py)
 - **Patterns**: 7 regex patterns moved to module level
 - **Before**: Compiled on every call
 - **After**: Compiled once at startup
@@ -170,9 +170,9 @@ Future opportunities including:
 ## 🎯 Impact Assessment
 
 ### Hot Paths Optimized
-1. ✅ **Command keyword matching** (aria_web) - Every user command
+1. ✅ **Command keyword matching** (web/aria_web) - Every user command
 2. ✅ **Database connections** (chat_memory) - Every embedding operation
-3. ✅ **Regex pattern matching** (aria_web) - Command parsing
+3. ✅ **Regex pattern matching** (web/aria_web) - Command parsing
 4. ✅ **Memory efficiency** (scripts) - Large dataset processing
 5. ✅ **Algorithm complexity** (cooking-ai) - Recipe filtering
 
@@ -192,7 +192,7 @@ Future opportunities including:
 ```
 f6d1694 Add future optimization recommendations and final documentation
 d6f3f81 Add medium-priority optimizations and comprehensive documentation  
-82673bd Optimize aria_web/server.py keyword checks and add connection pooling
+82673bd Optimize web/web/aria_web/server.py keyword checks and add connection pooling
 e2e1b36 Initial plan
 ```
 

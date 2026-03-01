@@ -687,7 +687,7 @@
                 analytics: 'analytics.html',
                 queue: () => showJobQueue(),
                 quantum: () => showToast('Quantum interface: Use quantum_mcp_server.py or quantum_autorun.py'),
-                chat: () => showToast('Chat interface: Run python talk-to-ai/src/chat_cli.py')
+                chat: () => showToast('Chat interface: Run python tools/tools/talk-to-ai/src/chat_cli.py')
             };
 
             const handler = actions[action];
@@ -780,7 +780,7 @@
                 chat: 'Multi-Provider Chat supports Azure OpenAI, OpenAI, LoRA adapters, and local models with auto-detection.',
                 eval: 'Evaluation Suite provides automated model assessment with perplexity, loss tracking, and comparison tools.',
                 datasets: 'Dataset Manager helps browse, validate, and manage training datasets with automatic discovery.',
-                api: 'API Gateway unifies all three projects (quantum-ai, talk-to-ai, lora training) through Azure Functions.',
+                api: 'API Gateway unifies all three projects (quantum-ai, tools/talk-to-ai, lora training) through Azure Functions.',
                 monitor: 'Resource Monitor tracks GPU, CPU, memory usage with historical data and alert thresholds.',
                 ci: 'CI/CD Pipeline automates testing (70 tests), validation, and deployment with orchestrator coordination.'
             };
@@ -788,7 +788,7 @@
         }
 
         function openChat() {
-            showToast('To use chat: python talk-to-ai/src/chat_cli.py --provider azure');
+            showToast('To use chat: python tools/tools/talk-to-ai/src/chat_cli.py --provider azure');
         }
 
         function runQuantum() {

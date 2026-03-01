@@ -21,7 +21,7 @@ This refactoring effort focused on identifying and eliminating code duplication 
 - Kept AzureOpenAIProvider's custom quota handling logic intact
 
 **Files Modified**:
-- `talk-to-ai/src/chat_providers.py`
+- `tools/tools/talk-to-ai/src/chat_providers.py`
 
 **Impact**: 
 - Eliminated ~60 lines of duplicated code
@@ -53,9 +53,9 @@ This refactoring effort focused on identifying and eliminating code duplication 
 ### 3. HTTP Validation & File Serving (Medium Impact)
 
 **Problem**: 
-- Message validation logic duplicated in http_chat/function_app.py and function_app.py
+- Message validation logic duplicated in services/http_chat/function_app.py and function_app.py
 - CORS headers manually created in multiple places
-- File serving pattern duplicated in http_chat_web/function_app.py (lines 11-74)
+- File serving pattern duplicated in services/http_chat_web/function_app.py (lines 11-74)
 
 **Solution**:
 - Created `shared/http_utils.py` with utilities:
@@ -64,12 +64,12 @@ This refactoring effort focused on identifying and eliminating code duplication 
   - `create_no_cache_headers()` - Cache control headers
   - `validate_provider_choice()` - Provider validation logic
   - `serve_static_file()` - DRY file serving with error handling
-- Refactored http_chat/function_app.py to use validation utilities
-- Refactored http_chat_web/function_app.py to use file serving utility
+- Refactored services/http_chat/function_app.py to use validation utilities
+- Refactored services/http_chat_web/function_app.py to use file serving utility
 
 **Files Modified**:
-- `http_chat/function_app.py`
-- `http_chat_web/function_app.py`
+- `services/http_chat/function_app.py`
+- `services/http_chat_web/function_app.py`
 
 **Files Created**:
 - `shared/http_utils.py` (195 lines)

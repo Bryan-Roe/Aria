@@ -8,7 +8,7 @@
 ### 1. Virtual Environment Setup
 - ✅ **Root venv**: Working (Azure Functions runtime)
 - ✅ **quantum-ai venv**: Recreated with all dependencies
-- ✅ **talk-to-ai venv**: Recreated with all dependencies
+- ✅ **tools/talk-to-ai venv**: Recreated with all dependencies
 
 ### 2. Quantum Integration
 - ✅ **quantum_provider.py**: Created new quantum-enhanced chat provider
@@ -34,10 +34,10 @@
 - numpy (latest)
 
 **Quantum-AI venv:**
-- All requirements from `quantum-ai/requirements.txt`
+- All requirements from `quantum/requirements.txt`
 
 **Talk-to-AI venv:**
-- All requirements from `talk-to-ai/requirements.txt`
+- All requirements from `tools/tools/talk-to-ai/requirements.txt`
 
 ## Verification Results
 
@@ -66,7 +66,7 @@ All components tested and verified:
 
 ## New Files Created
 
-1. **`talk-to-ai/src/quantum_provider.py`**: Quantum-enhanced chat provider
+1. **`tools/tools/talk-to-ai/src/quantum_provider.py`**: Quantum-enhanced chat provider
    - Uses variational quantum circuits for sentiment analysis
    - Integrates with QuantumClassifier from quantum-ai
    - Provides quantum-flavored responses with analysis insights
@@ -90,18 +90,18 @@ All components tested and verified:
    - Implemented 3 quantum endpoints (classify, circuit, info)
    - Full quantum classification with PennyLane integration
 
-2. **`talk-to-ai/src/chat_providers.py`**:
+2. **`tools/tools/talk-to-ai/src/chat_providers.py`**:
    - Added quantum provider detection
    - Integrated quantum_provider module
    - Updated provider priority (quantum → Azure → OpenAI → local)
 
-3. **`chat-web/chat.js`**:
+3. **`web/chat-web/chat.js`**:
    - Added quantum mode toggle button
    - Implemented quantum analysis panel
    - Added quantum circuit visualization
    - Integrated quantum API endpoints
 
-4. **`chat-web/index.html`**:
+4. **`web/chat-web/index.html`**:
    - Added quantum mode UI components
    - Added quantum panel styling
    - Added quantum indicator animations
@@ -122,7 +122,7 @@ cd C:\Users\Bryan\OneDrive\AI
 
 ### Test Quantum CLI
 ```powershell
-cd talk-to-ai
+cd tools/talk-to-ai
 .\venv\Scripts\python.exe src\chat_cli.py --provider quantum --once "What is quantum computing?"
 ```
 
@@ -151,7 +151,7 @@ cd quantum-ai
 │           │                       │             │
 │           ▼                       ▼             │
 │  ┌────────────────────────────────────────┐    │
-│  │      talk-to-ai/src/                   │    │
+│  │      tools/tools/talk-to-ai/src/                   │    │
 │  │  • chat_providers.py (5 providers)     │    │
 │  │  • quantum_provider.py (NEW)           │    │
 │  │  • token_utils.py                      │    │
@@ -159,7 +159,7 @@ cd quantum-ai
 │                 │                               │
 │                 ▼                               │
 │  ┌────────────────────────────────────────┐    │
-│  │      quantum-ai/src/                   │    │
+│  │      quantum/src/                   │    │
 │  │  • quantum_classifier.py               │    │
 │  │  • QuantumClassifier (PennyLane)       │    │
 │  │  • Variational circuits (4q, 2l)       │    │
@@ -169,7 +169,7 @@ cd quantum-ai
                     │
                     ▼
          ┌──────────────────────┐
-         │   chat-web/          │
+         │   web/chat-web/          │
          │ • index.html         │
          │ • chat.js            │
          │   - Quantum Mode UI  │
@@ -253,8 +253,8 @@ This will:
 - Test quantum endpoints
 
 For specific help:
-- Quantum issues → See `quantum-ai/README.md`
-- Chat issues → See `talk-to-ai/README.md`
+- Quantum issues → See `quantum/README.md`
+- Chat issues → See `tools/tools/talk-to-ai/README.md`
 - Deployment → See `DEPLOY_CHAT_TO_AZURE.md`
 
 ---

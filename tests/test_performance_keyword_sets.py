@@ -1,4 +1,4 @@
-"""Performance tests for keyword set optimizations in aria_web/server.py"""
+"""Performance tests for keyword set optimizations in web/web/aria_web/server.py"""
 import pytest
 import time
 import sys
@@ -6,7 +6,7 @@ from pathlib import Path
 
 # Add project paths for imports
 REPO_ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(REPO_ROOT / "aria_web"))
+sys.path.insert(0, str(REPO_ROOT / "web/web/aria_web"))
 
 # Import the optimized functions
 from server import (

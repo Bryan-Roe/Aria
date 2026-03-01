@@ -5,8 +5,8 @@ import json
 import sys
 from pathlib import Path
 
-# Add talk-to-ai to path
-talk_to_ai_path = Path(__file__).resolve().parent / "talk-to-ai" / "src"
+# Add tools/talk-to-ai to path
+talk_to_ai_path = Path(__file__).resolve().parent / "tools/tools/talk-to-ai" / "src"
 sys.path.insert(0, str(talk_to_ai_path))
 
 from chat_providers import detect_provider

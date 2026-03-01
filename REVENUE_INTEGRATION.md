@@ -8,7 +8,7 @@ The Aria platform now has a **complete revenue stream system** integrated into t
 
 ### 1. Navigation Bar on Aria Character Interface
 
-The main Aria character page (`aria_web/index.html`) now includes:
+The main Aria character page (`web/web/aria_web/index.html`) now includes:
 
 - **Navigation Bar** - Clean, responsive navigation at the top
 - **Monetization Links** - Direct links to:
@@ -55,7 +55,7 @@ graph LR
 
 ## Technical Implementation
 
-### Aria Character Interface (`aria_web/index.html`)
+### Aria Character Interface (`web/web/aria_web/index.html`)
 
 **Added CSS:**
 ```css
@@ -98,12 +98,12 @@ async function loadSubscriptionStatus() {
 
 **Added Hero Button:**
 ```html
-<a href="aria_web/index.html" class="button button-primary">👤 Try Aria</a>
+<a href="web/web/aria_web/index.html" class="button button-primary">👤 Try Aria</a>
 ```
 
 **Added Platform Section:**
 ```html
-<a href="aria_web/index.html" class="page-link">
+<a href="web/web/aria_web/index.html" class="page-link">
     <h3>👤 Aria Character</h3>
     <p>Interactive 3D AI character with natural language commands. The main platform experience.</p>
 </a>
@@ -166,7 +166,7 @@ GET /api/subscription/status?user_id=demo_user
 
 1. **Start Aria Server:**
 ```bash
-cd aria_web
+cd web/aria_web
 python server.py
 ```
 
@@ -194,7 +194,7 @@ python -m http.server 8000
 
 ## Files Modified
 
-1. **`aria_web/index.html`** - Added navigation bar and subscription badge
+1. **`web/web/aria_web/index.html`** - Added navigation bar and subscription badge
 2. **`monetization-index.html`** - Added "Try Aria" button and Aria Character link
 3. **`README.md`** - Added revenue stream section
 

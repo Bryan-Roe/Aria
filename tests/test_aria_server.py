@@ -1,5 +1,5 @@
 import re
-from aria_web import server as aria_server
+from web/aria_web import server as aria_server
 
 
 def test_generate_tags_fallback_say_detection():

@@ -19,6 +19,32 @@ Usage:
   python .\\scripts\\test_runner.py --watch                # Watch mode (re-run on change)
 """
 from __future__ import annotations
+import subprocess
+import sys
+
+
+def ensure_dependencies():
+    """Make sure the Python dependencies from requirements files are installed.
+
+    This helps stabilise the test environment when the venv isn't active or
+    packages are missing. By default it installs from the root
+    `requirements.txt`.  When quantum-related tests are run we also install
+    the quantum-ai requirements so that packages like PennyLane and Qiskit are
+    available.
+    """
+    # always install the base requirements
+    base_req = REPO_ROOT / "requirements.txt"
+    for req_file in (base_req, REPO_ROOT / "quantum-ai" / "requirements.txt"):
+        if req_file.exists():
+            try:
+                print(f"[test_runner] installing dependencies from {req_file}")
+                subprocess.run(
+                    [sys.executable, "-m", "pip", "install", "-r", str(req_file)],
+                    check=True,
+                )
+            except subprocess.CalledProcessError as e:
+                print(f"Failed to install dependencies from {req_file}: {e}")
+
 
 import argparse
 import json
@@ -102,6 +128,13 @@ SUITES = {
         name="quantum",
         patterns=["test_quantum*.py", "test_validate_qiskit*.py"],
         exclude_markers=["azure"],
+    ),
+    # Workspace verification for entire QAI stack (chat + quantum + function app)
+    "qai": TestSuite(
+        name="qai",
+        patterns=["test-qai.py"],
+        exclude_markers=["azure"],
+        timeout=600,  # may take a bit longer when installing deps
     ),
     "database": TestSuite(
         name="database",

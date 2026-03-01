@@ -12,7 +12,7 @@ This directory contains all GitHub Actions workflows for the Aria repository. Wo
 
 ### ✅ Testing Workflows
 - **`aria-tests.yml`** - Comprehensive Aria testing
-  - Runs on: Changes to `aria_web/` or Aria test files
+  - Runs on: Changes to `web/web/aria_web/` or Aria test files
   - Purpose: Multi-version (3.10-3.12), multi-browser E2E tests
   - Duration: ~20-30 minutes
   - Note: Path-filtered, more thorough
@@ -66,7 +66,7 @@ on:
 on:
   push:
     paths:
-      - 'aria_web/**'          # Only runs if these paths change
+      - 'web/web/aria_web/**'          # Only runs if these paths change
       - 'tests/**'
 ```
 

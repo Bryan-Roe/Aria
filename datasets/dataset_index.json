@@ -53,7 +53,7 @@
       "license": "Internal user interaction data",
       "size_gb": 0.0,
       "generation_script": "scripts/extract_chat_logs_dataset.py",
-      "source": "talk-to-ai/logs/*.jsonl",
+      "source": "tools/tools/talk-to-ai/logs/*.jsonl",
       "status": "dynamic"
     },
     "mixed_chat": {

@@ -210,7 +210,7 @@ def log_lora_run_safe(job, result: Dict[str, Any]) -> Dict[str, Any]:  # noqa: A
         return {"success": False, "skipped": True}
     try:
         cursor = conn.cursor()
-        cfg_path = Path(job.config) if getattr(job, "config", None) else REPO_ROOT / "AI" / "microsoft_phi-silica-3.6_v1" / "lora" / "lora.yaml"
+        cfg_path = Path(job.config) if getattr(job, "config", None) else REPO_ROOT / "lora" / "lora" / "lora.yaml"
         cfg = _load_yaml(cfg_path)
         # Extract values with fallbacks
         lora_rank = cfg.get("lora_rank", 8)  # Not present -> placeholder

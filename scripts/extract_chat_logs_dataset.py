@@ -1,4 +1,4 @@
-"""Extract chat conversation logs from talk-to-ai/logs into Phi-3 style dataset.
+"""Extract chat conversation logs from tools/tools/talk-to-ai/logs into Phi-3 style dataset.
 
 Each log file is JSONL with entries: {"role": "user|assistant", "content": "...", "timestamp": "..."}
 We transform these into training records with a messages list.
@@ -16,7 +16,7 @@ Outputs:
 
 Usage (PowerShell):
   python .\\scripts\\extract_chat_logs_dataset.py --max-records 500
-  python AI\\microsoft_phi-silica-3.6_v1\\scripts\\train_lora.py --dataset .\\datasets\\chat\\chat_logs --dry-run
+  python lora\\scripts\\train_lora.py --dataset .\\datasets\\chat\\chat_logs --dry-run
 """
 from __future__ import annotations
 import argparse
@@ -26,7 +26,7 @@ import random
 from pathlib import Path
 from typing import List, Dict
 
-LOGS_DIR = Path("talk-to-ai/logs")
+LOGS_DIR = Path("tools/tools/talk-to-ai/logs")
 OUTPUT_DIR = Path("datasets/chat/chat_logs")
 
 

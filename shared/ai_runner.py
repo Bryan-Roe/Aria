@@ -1,11 +1,11 @@
 """Shared AI runner module for Azure Functions.
 
-Provides a simple helper to invoke the existing talk-to-ai CLI (`chat_cli.py`) in one-shot
+Provides a simple helper to invoke the existing tools/talk-to-ai CLI (`chat_cli.py`) in one-shot
 mode so we can reuse the provider auto-detection logic without refactoring.
 
 Environment variables influencing behavior:
   DEFAULT_AI_PROVIDER  -> provider passed when caller does not supply one (default: 'local')
-  WRITE_AI_RUN_LOG     -> if '1' (default), write output to talk-to-ai/logs/auto_run_<ts>.txt
+  WRITE_AI_RUN_LOG     -> if '1' (default), write output to tools/tools/talk-to-ai/logs/auto_run_<ts>.txt
   SYSTEM_PROMPT        -> optional system prompt override forwarded to CLI via --system
 
 The runner returns the raw assistant output as a string plus a metadata dict.
@@ -22,8 +22,8 @@ from typing import Tuple, Dict, Optional
 import re
 
 ROOT_DIR = Path(__file__).resolve().parent.parent
-CHAT_CLI = ROOT_DIR / "talk-to-ai" / "src" / "chat_cli.py"
-LOG_DIR = ROOT_DIR / "talk-to-ai" / "logs"
+CHAT_CLI = ROOT_DIR / "tools/tools/talk-to-ai" / "src" / "chat_cli.py"
+LOG_DIR = ROOT_DIR / "tools/tools/talk-to-ai" / "logs"
 
 # Cached ANSI escape regex for performance across imports
 _ANSI_ESCAPE_RE = re.compile(r"\x1B\[[0-?]*[ -/]*[@-~]")

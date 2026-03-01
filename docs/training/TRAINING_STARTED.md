@@ -27,13 +27,13 @@
   - Dataset: heart_disease.csv
   - Qubits: 4
   - Epochs: 50
-  - Output: `quantum-ai/results/`
+  - Output: `quantum/results/`
   
 - **Ionosphere Classifier**
   - Dataset: ionosphere.csv
   - Qubits: 4
   - Epochs: 100
-  - Output: `quantum-ai/results/`
+  - Output: `quantum/results/`
 
 ## Monitoring
 
@@ -90,7 +90,7 @@ Each quantum job will generate:
 
 ### LoRA Chat
 ```powershell
-cd talk-to-ai
+cd tools/talk-to-ai
 python .\src\chat_cli.py --provider lora --model ..\data_out\lora_training\phi35
 ```
 

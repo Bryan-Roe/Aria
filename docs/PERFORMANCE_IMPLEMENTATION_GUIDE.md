@@ -7,7 +7,7 @@ This guide provides step-by-step instructions for implementing the performance i
 ## 🎯 Implementation Roadmap
 
 ### Week 1: Critical Fixes
-- **Fix #1**: Aria keyword lookups (aria_web/server.py)
+- **Fix #1**: Aria keyword lookups (web/web/aria_web/server.py)
 - **Fix #3**: Batch evaluator indexing (scripts/batch_evaluator.py)
 - **Fix #6**: Remove redundant iteration (scripts/batch_evaluator.py)
 
@@ -27,7 +27,7 @@ This guide provides step-by-step instructions for implementing the performance i
 
 ### Critical Fix #1: Aria Keyword Lookups
 
-**File:** `aria_web/server.py`  
+**File:** `web/web/aria_web/server.py`  
 **Lines:** 496-521  
 **Estimated time:** 30 minutes  
 **Risk:** Low (pure optimization, same logic)
@@ -522,7 +522,7 @@ Create `tests/test_performance_optimizations.py`:
 import pytest
 import time
 from scripts.batch_evaluator import BatchEvaluator, EvaluationResult
-from aria_web.server import _extract_action_position
+from web/aria_web.server import _extract_action_position
 from shared.chat_memory import store_embeddings_batch
 
 class TestPerformanceOptimizations:

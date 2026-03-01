@@ -126,8 +126,8 @@ def main():
         "config/aria_automation.service",
         "config/master_orchestrator.yaml",
         "ARIA_AUTOMATION_GUIDE.md",
-        "aria_web/server.py",
-        "aria_web/index.html"
+        "web/web/aria_web/server.py",
+        "web/web/aria_web/index.html"
     ]
 
     for file_path in files_to_check:

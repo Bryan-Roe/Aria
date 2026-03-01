@@ -5,7 +5,7 @@ import pytest
 # Check if SQLAlchemy is available for these tests
 
 try:
-    # import sqlalchemy (unused)
+    import sqlalchemy  # actually attempt import so skip works correctly
     _sqlalchemy_available = True
 except ImportError:
     _sqlalchemy_available = False

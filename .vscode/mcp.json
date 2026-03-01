@@ -2,9 +2,9 @@
   "servers": {
     "quantum-mcp-server": {
       "type": "stdio",
-      "command": "${workspaceFolder}/quantum-ai/venv/bin/python",
+      "command": "${workspaceFolder}/quantum/venv/bin/python",
       "args": [
-        "${workspaceFolder}/quantum-ai/quantum_mcp_server.py"
+        "${workspaceFolder}/quantum/quantum_mcp_server.py"
       ]
     },
     "phi-model-server": {

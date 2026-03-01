@@ -1,7 +1,7 @@
 ---
 name: "Chat-CLI-Python"
-description: "Python-specific guidance for talk-to-ai/"
-applyTo: "talk-to-ai/src/**/*.py"
+description: "Python-specific guidance for tools/tools/talk-to-ai/"
+applyTo: "tools/tools/talk-to-ai/src/**/*.py"
 ---
 # Chat CLI – Python files
 
@@ -10,10 +10,10 @@ applyTo: "talk-to-ai/src/**/*.py"
 - Implement providers by subclassing `BaseChatProvider` and implementing `complete(messages, stream)`.
 - Streaming support: emit SSE lines (`data: {json}`) and `[DONE]` sentinel; clients must parse SSE correctly.
 - CLI usage examples:
-  - Local: `python .\\talk-to-ai\\src\\chat_cli.py --provider local --once "Hello"`
+  - Local: `python .\\tools/talk-to-ai\\src\\chat_cli.py --provider local --once "Hello"`
   - OpenAI: set `$env:OPENAI_API_KEY`; then `--provider openai`
   - Azure: set the 4 env vars; then `--provider azure`
-  - LoRA: `python .\\talk-to-ai\\src\\chat_cli.py --provider lora --model <adapter_dir>`
+  - LoRA: `python .\\tools/talk-to-ai\\src\\chat_cli.py --provider lora --model <adapter_dir>`
 - LoRA adapter directory must contain BOTH `adapter_config.json` and `adapter_model.safetensors`.
 - Conversations persisted in JSONL; interactive commands: `/new`, `/save`, `/exit`.
 - Functions endpoints for web integration: `/api/chat`, `/api/chat-web`; check `/api/ai/status` for provider readiness.

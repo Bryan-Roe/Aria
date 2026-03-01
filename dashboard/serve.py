@@ -722,7 +722,7 @@ class MyHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
             # Check virtual environments
             health['checks']['venvs'] = {
                 'quantum_ai': (root_dir / 'quantum-ai' / 'venv').exists(),
-                'talk_to_ai': (root_dir / 'talk-to-ai' / 'venv').exists(),
+                'talk_to_ai': (root_dir / 'tools/tools/talk-to-ai' / 'venv').exists(),
                 'lora_training': (root_dir / 'AI' / 'microsoft_phi-silica-3.6_v1' / 'venv').exists()
             }
             

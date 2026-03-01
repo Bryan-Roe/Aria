@@ -181,7 +181,7 @@ def main():
     print("=" * 70)
     print("\nNext steps:")
     print("1. Train model: python .\\scripts\\autotrain.py --config autotrain_aria.yaml --job aria_movement_quick")
-    print("2. Test trained model: python .\\talk-to-ai\\src\\chat_cli.py --provider lora --model data_out\\aria_models\\aria_quick")
+    print("2. Test trained model: python .\\tools/talk-to-ai\\src\\chat_cli.py --provider lora --model data_out\\aria_models\\aria_quick")
     print("3. Deploy: Copy adapter to data_out\\lora_training\\lora_adapter")
     
     return 0

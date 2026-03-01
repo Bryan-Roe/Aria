@@ -27,7 +27,7 @@ pytest tests/
 pytest tests/test_validate_qiskit_env.py -v
 
 # Run with coverage
-pytest tests/ --cov=shared --cov=quantum-ai/src
+pytest tests/ --cov=shared --cov=quantum/src
 ```
 
 ### Quantum Environment Management
@@ -67,7 +67,7 @@ python .\scripts\evaluation_autorun.py --job eval_smoke_test  # Run specific job
 
 ### Chat Interaction
 ```powershell
-cd talk-to-ai
+cd tools/talk-to-ai
 
 # Local mode (FREE, offline)
 python .\src\chat_cli.py --provider local --once "Hello"
@@ -89,7 +89,7 @@ python .\src\chat_cli.py --provider openai
 | `autotrain.yaml` | LoRA training job definitions |
 | `quantum_autorun.yaml` | Quantum training job definitions |
 | `evaluation_autorun.yaml` | Model evaluation job definitions |
-| `quantum-ai/config/quantum_config.yaml` | Quantum backend settings |
+| `quantum/config/quantum_config.yaml` | Quantum backend settings |
 | `AI/microsoft_phi-silica-3.6_v1/lora/lora.yaml` | LoRA hyperparameters |
 
 ---
@@ -194,7 +194,7 @@ Test-NetConnection -ComputerName localhost -Port 7071
 ### Quantum conflict detected
 ```powershell
 # Option 1: Ignore (if quantum endpoints unused)
-# Root venv conflict doesn't affect isolated quantum-ai/venv
+# Root venv conflict doesn't affect isolated quantum/venv
 
 # Option 2: Upgrade root venv
 cd quantum-ai
@@ -237,8 +237,8 @@ curl http://localhost:7071/api/ai/status | jq '.cosmos.error'
 | [TELEMETRY_COSMOS_ENABLEMENT.md](TELEMETRY_COSMOS_ENABLEMENT.md) | Observability setup guide |
 | [QUANTUM_AUTORUN_README.md](QUANTUM_AUTORUN_README.md) | Quantum orchestrator usage |
 | [AUTOTRAIN_README.md](AUTOTRAIN_README.md) | LoRA training orchestrator |
-| [quantum-ai/README.md](quantum-ai/README.md) | Quantum AI project docs |
-| [talk-to-ai/README.md](talk-to-ai/README.md) | Chat CLI documentation |
+| [quantum/README.md](quantum/README.md) | Quantum AI project docs |
+| [tools/tools/talk-to-ai/README.md](tools/tools/talk-to-ai/README.md) | Chat CLI documentation |
 
 ---
 
@@ -300,7 +300,7 @@ python .\scripts\train_lora.py --dataset ..\..\datasets\chat\dolly --config .\lo
 python .\scripts\train_lora.py --dataset ..\..\datasets\chat\dolly --config .\lora\lora.yaml
 
 # 3. Use trained adapter
-cd ..\..\talk-to-ai
+cd ..\..\tools/talk-to-ai
 python .\src\chat_cli.py --provider lora --model ..\data_out\lora_training\lora_adapter
 ```
 

@@ -16,7 +16,7 @@ All compile/lint errors in actual repository files have been successfully resolv
 - **Status:** ✅ PASS
 
 ### 2. PowerShell Deployment Script
-- **File:** `quantum-ai/deploy_simple.ps1`
+- **File:** `quantum/deploy_simple.ps1`
 - **Issue:** False-positive "loginCheck assigned but never used" from PSScriptAnalyzer
 - **Resolution:** 
   - Added inline documentation explaining try/catch pattern
@@ -44,12 +44,12 @@ All compile/lint errors in actual repository files have been successfully resolv
 ## Verified Clean Files
 
 All orchestration and automation scripts:
-- ✅ `quantum-ai/deploy_simple.ps1`
-- ✅ `quantum-ai/azure/quantum_batch_jobs.ps1`
-- ✅ `quantum-ai/azure/quantum_cli_automation.ps1`
-- ✅ `quantum-ai/azure/quantum_master_orchestration.ps1`
-- ✅ `quantum-ai/azure/quantum_orchestration_robust.ps1`
-- ✅ `quantum-ai/azure/quantum_full_logicapp_orchestration.ps1`
+- ✅ `quantum/deploy_simple.ps1`
+- ✅ `quantum/azure/quantum_batch_jobs.ps1`
+- ✅ `quantum/azure/quantum_cli_automation.ps1`
+- ✅ `quantum/azure/quantum_master_orchestration.ps1`
+- ✅ `quantum/azure/quantum_orchestration_robust.ps1`
+- ✅ `quantum/azure/quantum_full_logicapp_orchestration.ps1`
 - ✅ `.github/workflows/quantum-orchestration.yml`
 
 All fine-tuning workspace files:
@@ -66,8 +66,8 @@ The global error scan reports issues in:
 
 ## Configuration Files Added
 
-1. **`quantum-ai/PSScriptAnalyzerSettings.psd1`** - Root-level analyzer config
-2. **`quantum-ai/.vscode/PSScriptAnalyzerSettings.psd1`** - Project-specific analyzer config
+1. **`quantum/PSScriptAnalyzerSettings.psd1`** - Root-level analyzer config
+2. **`quantum/.vscode/PSScriptAnalyzerSettings.psd1`** - Project-specific analyzer config
 3. **`.vscode/settings.json`** - Updated to reference analyzer config path
 4. **`AI/microsoft_phi-silica-3.6_v1/.vscode/python-imports.md`** - Import resolution guide
 

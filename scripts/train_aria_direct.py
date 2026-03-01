@@ -234,7 +234,7 @@ def main():
     print("=" * 70)
     print(f"\nNext steps:")
     print(f"1. Test with chat CLI:")
-    print(f"   python .\\talk-to-ai\\src\\chat_cli.py --provider lora --model {output_dir}")
+    print(f"   python .\\tools/talk-to-ai\\src\\chat_cli.py --provider lora --model {output_dir}")
     print(f"\n2. Deploy to production:")
     print(f"   Copy-Item -Recurse {output_dir} data_out\\lora_training\\lora_adapter")
     print(f"\n3. Restart Azure Functions to load new model")

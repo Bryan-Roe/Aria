@@ -1,6 +1,6 @@
 """
 Chat Integration Module
-Interfaces with talk-to-ai chat providers and conversation management
+Interfaces with tools/talk-to-ai chat providers and conversation management
 """
 
 import json

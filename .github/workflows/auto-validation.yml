@@ -18,7 +18,7 @@ on:
       - 'scripts/autotrain.py'
       - 'scripts/quantum_autorun.py'
       - 'AI/**'
-      - 'quantum-ai/**'
+      - 'quantum/**'
   schedule:
     - cron: '0 5 * * *'
   workflow_dispatch:

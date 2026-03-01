@@ -1,9 +1,9 @@
 $ErrorActionPreference = 'Stop'
 $repo = Split-Path -Parent $PSScriptRoot
-$final = Join-Path $repo 'AI\microsoft_phi-silica-3.6_v1\local_train\outputs\final'
+$final = Join-Path $repo 'lora\local_train\outputs\final'
 if (-not (Test-Path $final)) { Write-Information "No final output directory found: $final" -InformationAction Continue; exit 0 }
 $stamp = Get-Date -Format 'yyyyMMdd_HHmmss'
-$destRoot = Join-Path $repo 'AI\microsoft_phi-silica-3.6_v1\data_out\backups'
+$destRoot = Join-Path $repo 'lora\data_out\backups'
 $dest = Join-Path $destRoot $stamp
 New-Item -ItemType Directory -Force -Path $dest | Out-Null
 $files = @('adapter_model.safetensors','adapter_config.json','README.md','tokenizer.json','tokenizer_config.json','special_tokens_map.json')

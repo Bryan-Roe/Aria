@@ -40,7 +40,7 @@ for img_path in self.root.rglob('*'):
 
 ### 2. Quantum Circuit Evaluation Caching
 
-**File**: `quantum-ai/web_app.py`  
+**File**: `quantum/web_app.py`  
 **Lines**: 448-452  
 **Severity**: Medium  
 
@@ -87,7 +87,7 @@ for xi, yi in zip(X_val, y_val):
 
 ### 3. Generator Usage for Memory Efficiency
 
-**File**: `quantum-ai/web_app.py`  
+**File**: `quantum/web_app.py`  
 **Line**: 200  
 **Severity**: Low  
 
@@ -119,9 +119,9 @@ return (qml.expval(qml.PauliZ(i)) for i in range(n_qubits))
 
 **Files**: Multiple quantum circuit implementations  
 **Examples**:
-- `quantum-ai/src/hybrid_qnn.py:72-74`
-- `quantum-ai/web_app.py:193-197`
-- `quantum-ai/train_pennylane_simple.py:107-115`
+- `quantum/src/hybrid_qnn.py:72-74`
+- `quantum/web_app.py:193-197`
+- `quantum/train_pennylane_simple.py:107-115`
 
 **Pattern**:
 ```python

@@ -115,7 +115,7 @@ def main():
     print()
     
     print("2️⃣  Fine-tune Phi-3.6 (requires GPU):")
-    print("   cd AI\\microsoft_phi-silica-3.6_v1")
+    print("   cd lora")
     print("   python .\\scripts\\train_lora.py --dataset ..\\..\\datasets\\chat\\dolly --config .\\lora\\lora.yaml --max-train-samples 64")
     print()
     

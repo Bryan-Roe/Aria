@@ -93,7 +93,7 @@ data_out/evaluation_autorun/
 - name: eval_quantum_heart
   enabled: true
   model_type: quantum
-  model_path: quantum-ai/results/heart_disease_model.json
+  model_path: quantum/results/heart_disease_model.json
   dataset: datasets/quantum/heart_disease.csv
   max_samples: null  # Full test set
   metrics:

@@ -8,7 +8,7 @@ Complete examples for using Quantum AutoRun with Azure Quantum hardware.
 - [ ] Azure Quantum workspace created and configured
 - [ ] Azure CLI installed: `az --version`
 - [ ] Authenticated: `az login`
-- [ ] Config updated: `quantum-ai/config/quantum_config.yaml`
+- [ ] Config updated: `quantum/config/quantum_config.yaml`
 - [ ] Python environment with quantum-ai dependencies
 
 ## Example 1: Free Azure Simulator (No Costs)
@@ -27,7 +27,7 @@ jobs:
     enabled: true
     extra_args:
       - --circuit-file
-      - quantum-ai/results/bell_state.qasm
+      - quantum/results/bell_state.qasm
 ```
 
 ### Commands
@@ -60,7 +60,7 @@ jobs:
     enabled: false            # Keep disabled until ready
     extra_args:
       - --circuit-file
-      - quantum-ai/results/optimized_circuit.qasm
+      - quantum/results/optimized_circuit.qasm
 ```
 
 ### Safety Validation
@@ -145,7 +145,7 @@ python .\scripts\analyze_quantum_results.py
 ### Create Circuit
 
 ```python
-# quantum-ai/create_test_circuit.py
+# quantum/create_test_circuit.py
 from qiskit import QuantumCircuit
 
 def create_bell_state():
@@ -172,7 +172,7 @@ jobs:
     enabled: true
     extra_args:
       - --circuit-file
-      - quantum-ai/results/bell_state.qasm
+      - quantum/results/bell_state.qasm
 ```
 
 ## Troubleshooting

@@ -56,4 +56,4 @@ jobs:
     # Requires: az login, valid Azure Quantum workspace
     extra_args:
       - --circuit-file
-      - quantum-ai/results/sample_circuit.qasm  # path to QASM circuit file
+      - quantum/results/sample_circuit.qasm  # path to QASM circuit file

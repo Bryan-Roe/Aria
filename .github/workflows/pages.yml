@@ -7,7 +7,7 @@ on:
       - copilot/setup-git-pages-3d-world
     paths:
       - 'docs/**'
-      - 'aria_web/**'
+      - 'web/web/aria_web/**'
       - '.github/workflows/pages.yml'
     branches: [ main, copilot/enable-github-pages-for-repo ]
   workflow_dispatch:

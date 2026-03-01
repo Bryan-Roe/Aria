@@ -146,7 +146,7 @@ def _exists_cached(path: str) -> bool:
 
 ### 4. Batch Processing Optimization Opportunities
 
-#### 4.1 quantum-ai/src/quantum_classifier.py - Batch Processing
+#### 4.1 quantum/src/quantum_classifier.py - Batch Processing
 **Location**: `quantum_classifier.py` - `forward()` method
 
 **Issue**: Sequential processing of batch items in quantum circuit execution.
@@ -181,7 +181,7 @@ def timed(func):
 
 Apply to:
 - All Azure Functions endpoints
-- `generate_tags_fallback()` in aria_web/server.py
+- `generate_tags_fallback()` in web/web/aria_web/server.py
 - `fetch_similar_messages()` in shared/chat_memory.py
 - Training pipeline orchestrators
 
@@ -203,7 +203,7 @@ def execute_with_timing(cursor, query, *args):
 ### 3. Profile Hot Paths with cProfile
 ```bash
 # For server endpoints
-python -m cProfile -s cumulative aria_web/server.py > profile.txt
+python -m cProfile -s cumulative web/web/aria_web/server.py > profile.txt
 
 # For scripts
 python -m cProfile -s cumulative scripts/autotrain.py --dry-run > profile.txt
@@ -253,9 +253,9 @@ def performance_metrics():
 
 These were fixed in the 2026-02-17 optimization pass:
 
-1. ✅ aria_web/server.py keyword sets (1.09x speedup)
+1. ✅ web/web/aria_web/server.py keyword sets (1.09x speedup)
 2. ✅ shared/chat_memory.py connection pooling (50-100x for batch)
-3. ✅ aria_web/server.py regex compilation (2-5x speedup)
+3. ✅ web/web/aria_web/server.py regex compilation (2-5x speedup)
 4. ✅ scripts/analyze_learning_progress.py generators (memory-efficient)
 5. ✅ cooking-ai/src/providers/local.py tag filtering (O(n²) → O(n))
 

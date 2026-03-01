@@ -3,7 +3,7 @@
 ## What Was Configured
 
 ### 1. Test Discovery ✅
-- **Test paths:** `tests/`, `cooking-ai/tests/`, `quantum-ai/tests/`
+- **Test paths:** `tests/`, `cooking-ai/tests/`, `quantum/tests/`
 - **Test patterns:** `test_*.py` files, `Test*` classes, `test_*` functions
 - **Auto-discovery:** Enabled on file save
 - **Tests found:** 68 tests across multiple suites

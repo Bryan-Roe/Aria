@@ -36,7 +36,7 @@ param(
 
 $ErrorActionPreference = "Stop"
 $ScriptRoot = Split-Path -Parent $PSScriptRoot
-$VenvPython = Join-Path $ScriptRoot "AI\microsoft_phi-silica-3.6_v1\venv\Scripts\python.exe"
+$VenvPython = Join-Path $ScriptRoot "lora\venv\Scripts\python.exe"
 
 Write-Host "========================================" -ForegroundColor Cyan
 Write-Host "  Fast Training Launcher" -ForegroundColor Green

@@ -8,7 +8,7 @@ This document summarizes the performance optimizations implemented to address sl
 
 ## 🎯 Critical Issues Fixed (High Impact)
 
-### 1. aria_web/server.py - Keyword Set Optimization
+### 1. web/web/aria_web/server.py - Keyword Set Optimization
 **Problem**: Hot path contained 20+ consecutive `any()` calls checking keywords against lists, each requiring O(n) linear search.
 
 **Before**:
@@ -113,7 +113,7 @@ def store_embedding(...):
 
 ---
 
-### 3. aria_web/server.py - Regex Pattern Pre-compilation
+### 3. web/web/aria_web/server.py - Regex Pattern Pre-compilation
 **Problem**: Regex patterns compiled on every call in hot paths.
 
 **Before**:
@@ -298,9 +298,9 @@ pytest tests/test_performance_keyword_sets.py -v
 **Total optimizations implemented**: 5 critical/high-impact fixes  
 **Estimated aggregate speedup**: 1.5-2x for typical workloads  
 **Key hot paths optimized**:
-- ✅ Command keyword matching (aria_web)
+- ✅ Command keyword matching (web/aria_web)
 - ✅ Database connection management (shared/chat_memory)
-- ✅ Regex pattern compilation (aria_web)
+- ✅ Regex pattern compilation (web/aria_web)
 - ✅ Memory-efficient word aggregation (scripts)
 - ✅ Tag filter complexity reduction (cooking-ai)
 

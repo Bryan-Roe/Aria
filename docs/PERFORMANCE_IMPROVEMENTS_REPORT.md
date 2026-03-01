@@ -77,7 +77,7 @@ for x in window:
 ---
 
 #### 1.2 Set-Based Membership Checks
-**Files:** `quantum-ai/src/automate_quantum_job.py`, `scripts/job_queue.py` (3 locations), `scripts/master_orchestrator.py`
+**Files:** `quantum/src/automate_quantum_job.py`, `scripts/job_queue.py` (3 locations), `scripts/master_orchestrator.py`
 
 **Problem:** O(n) list membership checks in hot paths
 ```python
@@ -208,7 +208,7 @@ visualization = "".join(viz_parts)
 ---
 
 #### 2.3 Pre-Compiled Validation Patterns
-**File:** `llm-maker/src/tool_validator.py`
+**File:** `tools/llm-maker/src/tool_validator.py`
 
 **Problem:** Compiling 16 patterns on every validation call
 ```python
@@ -250,7 +250,7 @@ for compiled_pattern, desc in _FILE_OPERATION_PATTERNS:
 |------|-----------|------------------|
 | dashboard/app.py | Regex in loop | 100-400x |
 | function_app.py | String concat | 10-100x |
-| llm-maker/tool_validator.py | Regex compilation | 16x |
+| tools/llm-maker/tool_validator.py | Regex compilation | 16x |
 | job_queue.py | Multiple iterations | 6x |
 | backup_manager.py | O(n²) uniqueness | 10-100x |
 | extract_chat_logs_dataset.py | Dual iteration | 2x |

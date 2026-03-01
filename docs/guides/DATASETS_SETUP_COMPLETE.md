@@ -231,9 +231,9 @@ Get-ChildItem .\datasets -Recurse | Measure-Object -Property Length -Sum
 - **Papers with Code**: Research-quality datasets
 
 ### Training Tutorials:
-- Quantum AI: `quantum-ai/README.md`
+- Quantum AI: `quantum/README.md`
 - Phi-3.6 Fine-tuning: `AI/microsoft_phi-silica-3.6_v1/README.md`
-- Custom datasets: `quantum-ai/train_custom_dataset.py`
+- Custom datasets: `quantum/train_custom_dataset.py`
 
 ### Tools:
 - Hugging Face `datasets` library (streaming, caching)

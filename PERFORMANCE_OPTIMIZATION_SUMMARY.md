@@ -47,7 +47,7 @@ line = "│" + "".join(chars)  # O(n) - single allocation
 
 ### 3. Dictionary Operations (Medium Priority) ✅
 **Problem**: Inefficient loop-based dictionary updates  
-**Location**: `quantum-ai/web_app.py` (line 516)  
+**Location**: `quantum/web_app.py` (line 516)  
 **Impact**: 2x improvement + better code readability  
 **Fix**: Replaced loop with dictionary comprehension
 
@@ -64,7 +64,7 @@ metrics_history = {key: values[-1000:] for key, values in metrics_history.items(
 
 ### 4. Performance Documentation (Low Priority) ✅
 **Problem**: Missing documentation about O(n²) complexity in quantum circuits  
-**Location**: `quantum-ai/src/hybrid_qnn.py`  
+**Location**: `quantum/src/hybrid_qnn.py`  
 **Impact**: User awareness and informed decision-making  
 **Fix**: Added comprehensive docstrings explaining performance characteristics
 
@@ -123,8 +123,8 @@ Three optimization patterns stored for future reference:
 
 - `shared/sql_repository.py` - SQL optimization
 - `scripts/training_analytics.py` - String optimization
-- `quantum-ai/web_app.py` - Dictionary optimization
-- `quantum-ai/src/hybrid_qnn.py` - Documentation
+- `quantum/web_app.py` - Dictionary optimization
+- `quantum/src/hybrid_qnn.py` - Documentation
 - `tests/test_performance_optimizations.py` - New tests
 - `docs/PERFORMANCE_IMPROVEMENTS.md` - Updated docs
 - `docs/FUTURE_PERFORMANCE_OPPORTUNITIES.md` - New docs

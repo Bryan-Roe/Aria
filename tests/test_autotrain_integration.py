@@ -23,7 +23,7 @@ jobs:
   - name: test_job
     runner: hf
     dataset: datasets/chat/mixed_chat
-    config: AI/microsoft_phi-silica-3.6_v1/lora/lora.yaml
+    config: lora/lora.yaml
     max_train_samples: 10
     max_eval_samples: 4
     epochs: 1
@@ -402,7 +402,7 @@ class TestReinstallFlag:
 jobs:
   - name: local_job
     runner: local
-    config: AI/microsoft_phi-silica-3.6_v1/local_train/local_config.yaml
+    config: lora/local_train/local_config.yaml
 """,
             encoding="utf-8",
         )

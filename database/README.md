@@ -19,7 +19,7 @@ This database project provides comprehensive tracking and analytics for the QAI 
 
 #### Chat & Conversations
 
-- **ChatConversations** - Chat session metadata for talk-to-ai and Azure Functions
+- **ChatConversations** - Chat session metadata for tools/talk-to-ai and Azure Functions
 - **ChatMessages** - Individual messages with token usage and timing
 
 #### Semantic Memory (Embeddings)
@@ -44,7 +44,7 @@ Embedding configuration:
 Backfill existing logs:
 
 ```powershell
-python .\scripts\ingest_chat_logs_to_sql.py --logs-dir talk-to-ai\logs --embed-assistant
+python .\scripts\ingest_chat_logs_to_sql.py --logs-dir tools/talk-to-ai\logs --embed-assistant
 ```
 
 Table schema excerpt:

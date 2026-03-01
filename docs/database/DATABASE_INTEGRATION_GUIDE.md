@@ -54,8 +54,8 @@ except Exception:  # noqa: BLE001
     def log_chat_message_safe(*_a, **_kw):  # type: ignore
         return {"success": False, "skipped": True}
 
-# Add talk-to-ai to path so we can import chat_providers
-talk_to_ai_path = Path(__file__).resolve().parent / "talk-to-ai" / "src"
+# Add tools/talk-to-ai to path so we can import chat_providers
+talk_to_ai_path = Path(__file__).resolve().parent / "tools/tools/talk-to-ai" / "src"
 sys.path.insert(0, str(talk_to_ai_path))
 ```
 

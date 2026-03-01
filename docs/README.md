@@ -71,9 +71,9 @@ Check out the full project: **[github.com/Bryan-Roe/Aria](https://github.com/Bry
 ## 📚 Documentation
 
 - [Main Project README](https://github.com/Bryan-Roe/Aria#readme)
-- [Aria Web Interface Guide](https://github.com/Bryan-Roe/Aria/tree/main/aria_web)
+- [Aria Web Interface Guide](https://github.com/Bryan-Roe/Aria/tree/main/web/aria_web)
 - [QAI Documentation Index](QAI_DOCS_INDEX.md) - Technical documentation
-- [API Documentation](https://github.com/Bryan-Roe/Aria/blob/main/aria_web/README.md)
+- [API Documentation](https://github.com/Bryan-Roe/Aria/blob/main/web/web/aria_web/README.md)
 
 ## 📝 Usage Tips
 

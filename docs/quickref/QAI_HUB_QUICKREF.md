@@ -335,7 +335,7 @@ python .\scripts\quantum_autorun.py --dry-run       # Validate
 python .\scripts\quantum_autorun.py --job local     # Run local
 
 # Chat
-python .\talk-to-ai\src\chat_cli.py --provider azure
+python .\tools/talk-to-ai\src\chat_cli.py --provider azure
 
 # Testing
 pytest tests/ -m "not slow and not azure"            # Fast tests

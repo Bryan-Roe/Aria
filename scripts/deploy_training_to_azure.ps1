@@ -57,8 +57,8 @@ param(
 
 $ErrorActionPreference = "Stop"
 $ScriptRoot = Split-Path -Parent $PSScriptRoot
-$VenvPython = Join-Path $ScriptRoot "AI\microsoft_phi-silica-3.6_v1\venv\Scripts\python.exe"
-$AzureMLScript = Join-Path $ScriptRoot "AI\microsoft_phi-silica-3.6_v1\azure_ml_training.py"
+$VenvPython = Join-Path $ScriptRoot "lora\venv\Scripts\python.exe"
+$AzureMLScript = Join-Path $ScriptRoot "lora\azure_ml_training.py"
 $AutotrainConfig = Join-Path $ScriptRoot "autotrain.yaml"
 
 # Logging
@@ -310,7 +310,7 @@ foreach ($job in $filteredJobs) {
             "--workspace-name", $WorkspaceName,
             "--experiment-name", $job.name,
             "--dataset-name", $datasetName,
-            "--config", "AI/microsoft_phi-silica-3.6_v1/lora/lora.yaml"
+            "--config", "lora/lora.yaml"
         )
         
         if ($job.max_train_samples -gt 0) {

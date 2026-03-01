@@ -42,7 +42,7 @@ if has_user and has_assistant:
 
 ### 2. Set-Based Membership Checks
 **Files:** 
-- `quantum-ai/src/automate_quantum_job.py` (line 37)
+- `quantum/src/automate_quantum_job.py` (line 37)
 - `scripts/job_queue.py` (lines 237, 249, 302)
 - `scripts/master_orchestrator.py` (line 235)
 

@@ -228,7 +228,7 @@ AI: "Centering Aria and waving! [aria:center] [aria:wave]"
 ### Using Chat CLI
 ```powershell
 # Load the trained adapter
-python .\talk-to-ai\src\chat_cli.py --provider lora --model data_out\aria_models\aria_direct
+python .\tools/talk-to-ai\src\chat_cli.py --provider lora --model data_out\aria_models\aria_direct
 
 # Test commands
 > Move Aria left
@@ -488,7 +488,7 @@ python .\scripts\evaluate_lora_model.py --model data_out\aria_models\aria_direct
 ### Integration Points
 - `function_app.py` (lines 515-565) - Command parser
 - `function_app.py` (lines 640-690) - SSE streaming with movement detection
-- `chat-web/index.html` - Frontend (needs EventSource integration)
+- `web/chat-web/index.html` - Frontend (needs EventSource integration)
 
 ### Output Locations
 - `data_out/aria_models/aria_direct/` - Trained model

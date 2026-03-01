@@ -1,4 +1,4 @@
-"""Unit tests for quantum-ai/web_app.py path traversal security fixes."""
+"""Unit tests for quantum/web_app.py path traversal security fixes."""
 import importlib.util
 import sys
 from pathlib import Path
@@ -15,7 +15,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO_ROOT / "quantum-ai"))
 
 
-# Dynamically import web_app from quantum-ai/web_app.py (file lives in the quantum-ai/ dir)
+# Dynamically import web_app from quantum/web_app.py (file lives in the quantum/ dir)
 web_app_path = REPO_ROOT / "quantum-ai" / "web_app.py"
 spec = importlib.util.spec_from_file_location("web_app", str(web_app_path))
 if spec is None:

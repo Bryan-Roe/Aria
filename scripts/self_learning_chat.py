@@ -29,7 +29,7 @@ logger = logging.getLogger(__name__)
 class SelfLearningChat:
     def __init__(self):
         self.repo_root = Path(__file__).resolve().parents[1]
-        self.chat_logs_dir = self.repo_root / "talk-to-ai" / "logs"
+        self.chat_logs_dir = self.repo_root / "tools/tools/talk-to-ai" / "logs"
         self.training_data_dir = self.repo_root / "datasets" / "chat" / "chat_logs"
         self.output_dir = self.repo_root / "data_out" / "self_learning"
         self.status_file = self.output_dir / "status.json"

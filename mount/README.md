@@ -176,7 +176,7 @@ All paths are relative to the workspace root:
 paths:
   workspace_root: ..
   quantum_ai: ../quantum-ai
-  talk_to_ai: ../talk-to-ai
+  talk_to_ai: ../tools/talk-to-ai
   phi_training: ../AI/microsoft_phi-silica-3.6_v1
   datasets: ../datasets
   data_out: ../data_out

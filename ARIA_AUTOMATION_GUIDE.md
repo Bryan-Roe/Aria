@@ -514,21 +514,21 @@ python3 scripts/aria_automation.py --stop
 1. Check dependencies:
 
    ```bash
-   cd aria_web
+   cd web/aria_web
    pip3 install -r requirements.txt
    ```
 
 2. Test server manually:
 
    ```bash
-   cd aria_web
+   cd web/aria_web
    python3 server.py
    ```
 
 3. Check for errors:
 
    ```bash
-   python3 aria_web/server.py 2>&1 | tee server_debug.log
+   python3 web/web/aria_web/server.py 2>&1 | tee server_debug.log
    ```
 
 ### Issue: Backend Not Starting
@@ -647,8 +647,8 @@ tail -f data_out/lora_training/*/last_run.json
 ## 📚 Additional Resources
 
 - **Main README**: `README.md`
-- **Aria Web Docs**: `aria_web/README.md`
-- **Auto-Execute Guide**: `aria_web/AUTO-EXECUTE.md`
+- **Aria Web Docs**: `web/web/aria_web/README.md`
+- **Auto-Execute Guide**: `web/web/aria_web/AUTO-EXECUTE.md`
 - **Training Guide**: `scripts/README.md`
 - **Master Orchestrator**: `ADVANCED_AUTOMATION.md`
 

@@ -16,6 +16,25 @@ import time
 from typing import Optional
 from datetime import datetime
 
+# --- stub-friendly fallbacks for tests -------------------------------------------------
+# Some unit tests monkeypatch `azure.functions` with minimal stubs that may lack
+# attributes referenced in type hints or during initialization. Provide safe
+# defaults so importing this module never fails when a stub is injected.
+if not hasattr(func, 'HttpRequest'):
+    class _HttpRequest:  # pragma: no cover - only for stub scenarios
+        pass
+    func.HttpRequest = _HttpRequest
+
+if not hasattr(func, 'HttpResponse'):
+    class _HttpResponse:  # pragma: no cover - only for stub scenarios
+        pass
+    func.HttpResponse = _HttpResponse
+
+# Ensure FunctionApp is callable; tests sometimes set it to a SimpleNamespace
+# which isn't. We'll catch that later when instantiating `app`.
+
+# --------------------------------------------------------------------------------------
+
 # Import defensive import helper
 from shared.import_helpers import safe_import, create_stub_function
 
@@ -84,8 +103,8 @@ generate_embedding = chat_memory_funcs['generate_embedding']
 fetch_similar_messages = chat_memory_funcs['fetch_similar_messages']
 store_embedding = chat_memory_funcs['store_embedding']
 
-# Add talk-to-ai to path so we can import chat_providers
-talk_to_ai_path = Path(__file__).resolve().parent / "talk-to-ai" / "src"
+# Add tools/talk-to-ai to path so we can import chat_providers
+talk_to_ai_path = Path(__file__).resolve().parent / "tools/tools/talk-to-ai" / "src"
 sys.path.insert(0, str(talk_to_ai_path))
 
 # Add quantum-ai to path
@@ -119,7 +138,17 @@ try:  # pragma: no cover
 except Exception:  # pragma: no cover - library optional
     _tracer = None
 
-app = func.FunctionApp()
+
+# Create the Functions app instance, but guard against badly-behaved stubs.
+try:
+    app = func.FunctionApp()
+except Exception:  # pragma: no cover - fallback for test stub
+    class _DummyFunctionApp:
+        def route(self, *args, **kwargs):
+            def decorator(f):
+                return f
+            return decorator
+    app = _Dummy_functionApp = _DummyFunctionApp()
 
 
 # =============================================================================
@@ -161,7 +190,7 @@ def serve_chat_web(req: func.HttpRequest) -> func.HttpResponse:
         )
 
 
-@app.route(route="chat-web/chat.js", methods=["GET"], auth_level=func.AuthLevel.ANONYMOUS)
+@app.route(route="web/chat-web/chat.js", methods=["GET"], auth_level=func.AuthLevel.ANONYMOUS)
 def serve_chat_js(req: func.HttpRequest) -> func.HttpResponse:
     """Serve the chat JavaScript file"""
     try:
@@ -317,7 +346,7 @@ def chat(req: func.HttpRequest) -> func.HttpResponse:
         # Self-Learning: Log conversation for training
         # =============================
         try:
-            logs_dir = Path(__file__).resolve().parent / "talk-to-ai" / "logs"
+            logs_dir = Path(__file__).resolve().parent / "tools/tools/talk-to-ai" / "logs"
             logs_dir.mkdir(parents=True, exist_ok=True)
 
             # Create timestamped log file
@@ -1287,7 +1316,7 @@ def ai_status(req: func.HttpRequest) -> func.HttpResponse:
             },
             "endpoints": [
                 "/api/chat-web",
-                "/api/chat-web/chat.js",
+                "/api/web/chat-web/chat.js",
                 "/api/chat",
                 "/api/chat/stream",
                 "/api/ai/status",

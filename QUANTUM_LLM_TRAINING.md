@@ -51,7 +51,7 @@ This feature integrates quantum computing capabilities into passive LLM training
                                            │
                                            ▼
 ┌─────────────────────────────────────────────────────────────┐
-│ Quantum Computing Layer (quantum-ai/)                        │
+│ Quantum Computing Layer (quantum/)                        │
 │  ├── QuantumClassifier (variational circuits)                │
 │  ├── HybridQNN (quantum-classical hybrid)                    │
 │  ├── QuantumLayer (PennyLane integration)                    │
@@ -423,7 +423,7 @@ For issues and questions:
 1. Check troubleshooting section above
 2. Review logs in `data_out/quantum_llm_training.log`
 3. Test with local simulator first
-4. Check quantum-ai/ module is properly configured
+4. Check quantum/ module is properly configured
 
 ## License
 

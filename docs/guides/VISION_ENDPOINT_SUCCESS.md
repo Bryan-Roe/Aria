@@ -35,13 +35,13 @@ Successfully implemented full-stack vision inference pipeline for the QAI web ch
 
 ### Frontend (Aria Chat)
 
-**HTML** (`chat-web/index.html`):
+**HTML** (`web/chat-web/index.html`):
 - 🖼️ Upload Image button with gradient styling
 - Hidden file input (`accept="image/*"`)
 - Preview container with thumbnail and clear button
 - CSS styling matching existing chat aesthetics
 
-**JavaScript** (`chat-web/chat.js`):
+**JavaScript** (`web/chat-web/chat.js`):
 - Event handlers: button click, file selection, clear
 - FileReader for base64 encoding
 - Auto-analysis on upload (immediate API call)
@@ -143,7 +143,7 @@ numpy>=1.24.0      # Array operations
 func host start
 
 # Open Aria chat
-start http://localhost:7071/chat-web/
+start http://localhost:7071/web/chat-web/
 
 # Upload image via UI and see instant results
 ```

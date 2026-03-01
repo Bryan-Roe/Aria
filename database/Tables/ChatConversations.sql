@@ -1,4 +1,4 @@
--- Chat conversations and messages for talk-to-ai and Azure Functions chat endpoints
+-- Chat conversations and messages for tools/talk-to-ai and Azure Functions chat endpoints
 CREATE TABLE [dbo].[ChatConversations]
 (
     [ConversationId] UNIQUEIDENTIFIER NOT NULL PRIMARY KEY DEFAULT NEWID(),

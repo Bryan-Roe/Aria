@@ -118,7 +118,7 @@ class TestTrainingAnalyticsOptimizations:
 
 
 class TestWebAppOptimizations:
-    """Tests for quantum-ai/web_app.py memory optimization."""
+    """Tests for quantum/web_app.py memory optimization."""
     
     def test_metrics_history_trimming_uses_comprehension(self):
         """Test that metrics history trimming uses dict comprehension."""
@@ -408,7 +408,7 @@ class TestPruneMessagesOptimization:
     def test_prune_messages_complexity(self):
         """Test that prune_messages correctly prunes messages within budget."""
         import sys
-        sys.path.insert(0, 'talk-to-ai/src')
+        sys.path.insert(0, 'tools/tools/talk-to-ai/src')
         from token_utils import prune_messages
         
         # Create many messages to test pruning
@@ -430,7 +430,7 @@ class TestPruneMessagesOptimization:
     def test_prune_messages_no_pruning_needed(self):
         """Test prune_messages when all messages fit within budget."""
         import sys
-        sys.path.insert(0, 'talk-to-ai/src')
+        sys.path.insert(0, 'tools/tools/talk-to-ai/src')
         from token_utils import prune_messages
         
         # Small number of short messages
@@ -454,7 +454,7 @@ class TestStringBuildOptimization:
     def test_build_prompt_uses_join(self):
         """Test that _build_prompt produces correct output with optimized join."""
         import sys
-        sys.path.insert(0, 'talk-to-ai/src')
+        sys.path.insert(0, 'tools/tools/talk-to-ai/src')
         from lora_infer_bridge import _build_prompt
         
         messages = [
@@ -473,7 +473,7 @@ class TestStringBuildOptimization:
     def test_build_prompt_empty_messages(self):
         """Test _build_prompt with empty messages."""
         import sys
-        sys.path.insert(0, 'talk-to-ai/src')
+        sys.path.insert(0, 'tools/tools/talk-to-ai/src')
         from lora_infer_bridge import _build_prompt
         
         prompt = _build_prompt([])

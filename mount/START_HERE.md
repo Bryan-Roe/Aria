@@ -122,7 +122,7 @@ All with a modern purple gradient theme!
 
 - **Backend**: FastAPI + Python 3.10+
 - **Frontend**: Vanilla JavaScript + CSS3
-- **Integration**: Direct imports from quantum-ai, talk-to-ai, phi-training
+- **Integration**: Direct imports from quantum-ai, tools/talk-to-ai, phi-training
 - **API**: REST with CORS support
 - **UI**: Responsive, mobile-friendly
 

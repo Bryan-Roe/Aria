@@ -31,14 +31,14 @@ try {
     Write-Host "⚠️  Error checking dependencies: $_" -ForegroundColor Red
 }
 
-# Check if talk-to-ai requirements are installed
+# Check if tools/talk-to-ai requirements are installed
 Write-Host "Checking chat provider dependencies..." -ForegroundColor Cyan
-if (Test-Path ".\talk-to-ai\requirements.txt") {
+if (Test-Path ".\tools/talk-to-ai\requirements.txt") {
     try {
         & $pythonCmd -c "import openai" 2>$null
         if ($LASTEXITCODE -ne 0) {
-            Write-Host "Installing talk-to-ai requirements (for OpenAI/Azure support)..." -ForegroundColor Yellow
-            & $pythonCmd -m pip install -r .\talk-to-ai\requirements.txt --quiet
+            Write-Host "Installing tools/talk-to-ai requirements (for OpenAI/Azure support)..." -ForegroundColor Yellow
+            & $pythonCmd -m pip install -r .\tools/talk-to-ai\requirements.txt --quiet
         }
     } catch {
         Write-Host "Note: OpenAI package not found. Local provider will be used." -ForegroundColor Yellow

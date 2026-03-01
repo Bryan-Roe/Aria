@@ -137,7 +137,7 @@ function Show-Status {
     Write-Host "  Rapid Train:       " -NoNewline
     Write-Host ".\scripts\ultrafast_train.ps1 -Mode rapid" -ForegroundColor White
     Write-Host "  Test Model:        " -NoNewline
-    Write-Host "python talk-to-ai\src\chat_cli.py --once 'test'" -ForegroundColor White
+    Write-Host "python tools/talk-to-ai\src\chat_cli.py --once 'test'" -ForegroundColor White
     
     Write-Host ""
     Write-Host "=" * 80 -ForegroundColor Cyan

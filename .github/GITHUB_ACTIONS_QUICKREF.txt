@@ -47,7 +47,7 @@
                            Triggers: push to main, PRs to main
                            
   aria-tests.yml           Aria-specific tests (Python 3.10, 3.11, 3.12)
-                           Triggers: push/PR (aria_web changes), manual
+                           Triggers: push/PR (web/aria_web changes), manual
 
 ┌─────────────────────────────────────────────────────────────────────────────────┐
 │ SPECIALIZED WORKFLOWS                                                            │

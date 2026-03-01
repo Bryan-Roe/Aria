@@ -115,14 +115,14 @@ Features:
 **Usage**:
 ```powershell
 # Auto-detect provider
-python .\talk-to-ai\src\chat_cli.py
+python .\tools/talk-to-ai\src\chat_cli.py
 
 # Specific provider
-python .\talk-to-ai\src\chat_cli.py --provider azure
-python .\talk-to-ai\src\chat_cli.py --provider lora --model data_out\lora_training\lora_adapter
+python .\tools/talk-to-ai\src\chat_cli.py --provider azure
+python .\tools/talk-to-ai\src\chat_cli.py --provider lora --model data_out\lora_training\lora_adapter
 
 # One-shot mode
-python .\talk-to-ai\src\chat_cli.py --provider azure --once "What is quantum computing?"
+python .\tools/talk-to-ai\src\chat_cli.py --provider azure --once "What is quantum computing?"
 ```
 
 **Health Check**:
@@ -219,7 +219,7 @@ Endpoints:
 - `/api/ai/status` - Health check (provider, env vars, SQL, Cosmos, telemetry)
 
 **Integration**:
-- Dynamic imports from all 3 projects (quantum-ai, talk-to-ai, lora training)
+- Dynamic imports from all 3 projects (quantum-ai, tools/talk-to-ai, lora training)
 - SQL persistence (unified engine: Azure SQL, PostgreSQL, MySQL, SQLite)
 - Cosmos DB persistence (optional, feature-flagged)
 - Application Insights telemetry (optional)
@@ -322,7 +322,7 @@ The hub provides 6 one-click shortcuts:
 
 **Toast Messages**:
 - Quick actions that require CLI show instructional toasts
-- Example: "To use chat: python talk-to-ai/src/chat_cli.py --provider azure"
+- Example: "To use chat: python tools/tools/talk-to-ai/src/chat_cli.py --provider azure"
 
 ---
 
@@ -702,7 +702,7 @@ Submit ideas via GitHub Issues or contribute PRs!
 
 ### Documentation
 - Main README.md (repo root)
-- Individual project READMEs (quantum-ai, talk-to-ai, AI/microsoft_phi-silica-3.6_v1)
+- Individual project READMEs (quantum-ai, tools/talk-to-ai, AI/microsoft_phi-silica-3.6_v1)
 - Markdown guides in repo root (20+ files)
 
 ### Testing

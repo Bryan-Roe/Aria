@@ -53,14 +53,14 @@ The AGI provider is a wrapper that enhances any underlying chat provider (Azure 
 
 ```powershell
 # Basic AGI chat
-python .\talk-to-ai\src\chat_cli.py --provider agi
+python .\tools/talk-to-ai\src\chat_cli.py --provider agi
 
 # One-shot with AGI reasoning
-python .\talk-to-ai\src\chat_cli.py --provider agi --once "Explain how quantum entanglement works"
+python .\tools/talk-to-ai\src\chat_cli.py --provider agi --once "Explain how quantum entanglement works"
 
 # Verbose mode (shows reasoning steps)
 $env:AGI_VERBOSE = "true"
-python .\talk-to-ai\src\chat_cli.py --provider agi
+python .\tools/talk-to-ai\src\chat_cli.py --provider agi
 ```
 
 ### Programmatic Usage
@@ -349,7 +349,7 @@ Enable verbose mode to see the reasoning process:
 
 ```powershell
 $env:AGI_VERBOSE = "true"
-python .\talk-to-ai\src\chat_cli.py --provider agi --once "Debug this query"
+python .\tools/talk-to-ai\src\chat_cli.py --provider agi --once "Debug this query"
 ```
 
 ## Performance Considerations

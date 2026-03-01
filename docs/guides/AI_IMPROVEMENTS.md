@@ -174,10 +174,10 @@ provider = LoraLocalProvider(
 1. **Compare with baseline**:
    ```powershell
    # Old model
-   python quantum-ai/train_custom_dataset.py --preset heart --epochs 50
+   python quantum/train_custom_dataset.py --preset heart --epochs 50
    
    # New model (automatically uses improvements)
-   python quantum-ai/train_custom_dataset.py --preset heart --epochs 50
+   python quantum/train_custom_dataset.py --preset heart --epochs 50
    ```
 
 2. **Monitor metrics**:

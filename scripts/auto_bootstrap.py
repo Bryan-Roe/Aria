@@ -5,7 +5,7 @@ Purpose: Provide a single command to quickly validate environment readiness and
 all orchestrator configurations without performing heavy training or paid runs.
 
 Features:
-- Detect and summarize per-project virtual environments (root, quantum-ai, talk-to-ai, LoRA project)
+- Detect and summarize per-project virtual environments (root, quantum-ai, tools/talk-to-ai, LoRA project)
 - Verify presence of key requirement files
 - Optionally create missing venvs (skipped in --dry-run mode)
 - Run dry-run for AutoTrain and Quantum AutoRun orchestrators
@@ -44,14 +44,14 @@ QUANTUM_AUTORUN_SCRIPT = REPO_ROOT / "scripts" / "quantum_autorun.py"
 PROJECTS = {
     "root": REPO_ROOT / "venv",
     "quantum-ai": REPO_ROOT / "quantum-ai" / "venv",
-    "talk-to-ai": REPO_ROOT / "talk-to-ai" / "venv",
+    "tools/tools/talk-to-ai": REPO_ROOT / "tools/tools/talk-to-ai" / "venv",
     "phi-lora": REPO_ROOT / "AI" / "microsoft_phi-silica-3.6_v1" / "venv",
 }
 
 REQUIREMENTS = {
     "root": REPO_ROOT / "requirements.txt",
     "quantum-ai": REPO_ROOT / "quantum-ai" / "requirements.txt",
-    "talk-to-ai": REPO_ROOT / "talk-to-ai" / "requirements.txt",
+    "tools/tools/talk-to-ai": REPO_ROOT / "tools/tools/talk-to-ai" / "requirements.txt",
     "phi-lora": REPO_ROOT / "AI" / "microsoft_phi-silica-3.6_v1" / "requirements.txt",
 }
 

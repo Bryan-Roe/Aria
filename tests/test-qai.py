@@ -6,8 +6,8 @@ import sys
 from pathlib import Path
 
 # Add paths
-sys.path.insert(0, str(Path('talk-to-ai/src').absolute()))
-sys.path.insert(0, str(Path('quantum-ai/src').absolute()))
+sys.path.insert(0, str(Path('tools/tools/talk-to-ai/src').absolute()))
+sys.path.insert(0, str(Path('quantum/src').absolute()))
 
 def test_chat_providers():
     """Test chat provider detection and initialization"""

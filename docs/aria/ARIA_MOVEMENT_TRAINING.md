@@ -132,7 +132,7 @@ Get-Content "$($logDir.FullName)\stdout.log" -Wait
 ### Using the chat CLI
 ```powershell
 # Load the trained adapter
-python .\talk-to-ai\src\chat_cli.py --provider lora --model data_out\aria_models\aria_quick
+python .\tools/talk-to-ai\src\chat_cli.py --provider lora --model data_out\aria_models\aria_quick
 
 # Test with movement commands
 > Move Aria left
