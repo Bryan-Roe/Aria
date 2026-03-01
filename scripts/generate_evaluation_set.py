@@ -44,7 +44,8 @@ def read_jsonl(path: Path) -> List[Dict]:
 
 def hash_messages(msgs: List[Dict]) -> str:
     concat = "\n".join([f"{m.get('role','')}: {m.get('content','')[:500]}" for m in msgs])
-    return hashlib.sha256(concat.encode("utf-8")).hexdigest()[:32]
+    message_hash = hashlib.sha256(concat.encode("utf-8")).hexdigest()[:32]
+    return message_hash
 
 
 def collect_training_hashes_and_records(dataset_dir: Path) -> tuple[Set[str], List[Dict]]:
@@ -109,9 +110,9 @@ def main():
     # Deduplicate final evaluation set
     dedup = {}
     for r in eval_records:
-        h = r["hash"]
-        if h not in dedup:
-            dedup[h] = r
+        record_hash = r["hash"]
+        if record_hash not in dedup:
+            dedup[record_hash] = r
     final_eval = list(dedup.values())
 
     # Shuffle final

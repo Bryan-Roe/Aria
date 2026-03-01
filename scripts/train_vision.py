@@ -56,34 +56,34 @@ def generate_toy_shapes_dataset(path: Path, classes=('circle', 'square'), sample
 
     def draw_shape(img: Image.Image, shape: str):
         draw = ImageDraw.Draw(img)
-        w, h = img.size
-        pad = int(min(w, h) * 0.12)
-        bbox = [pad, pad, w - pad, h - pad]
-        color = tuple(int(x) for x in np.random.randint(40, 220, size=3))
+        width, height = img.size
+        padding = int(min(width, height) * 0.12)
+        bbox = [padding, padding, width - padding, height - padding]
+        color = tuple(int(component) for component in np.random.randint(40, 220, size=3))
         if shape == 'circle':
             draw.ellipse(bbox, fill=tuple(color))
         elif shape == 'square':
             draw.rectangle(bbox, fill=tuple(color))
         else:
-            draw.polygon([(w//2, pad), (w-pad, h-pad),
-                         (pad, h-pad)], fill=tuple(color))
+            draw.polygon([(width//2, padding), (width-padding, height-padding),
+                         (padding, height-padding)], fill=tuple(color))
 
-    for cl in classes:
-        cl_dir = path / cl
-        cl_dir.mkdir(parents=True, exist_ok=True)
-        for i in range(samples_per_class):
+    for class_name in classes:
+        class_dir = path / class_name
+        class_dir.mkdir(parents=True, exist_ok=True)
+        for sample_index in range(samples_per_class):
             img = Image.new('RGB', size, color=(255, 255, 255))
             # add some random backgrounds / noise
             if random.random() < 0.15:
-                bg = tuple(int(x) for x in np.random.randint(200, 255, size=3))
-                Image.new('RGB', size, color=bg).paste(img)
-            draw_shape(img, cl)
+                background_color = tuple(int(component) for component in np.random.randint(200, 255, size=3))
+                Image.new('RGB', size, color=background_color).paste(img)
+            draw_shape(img, class_name)
             # jitter rotation/resize
             if random.random() < 0.5:
                 img = img.rotate(random.uniform(-10, 10),
                                  resample=Image.BILINEAR, expand=False)
-            p = cl_dir / f"{cl}_{i:03d}.png"
-            img.save(p, format='PNG')
+            image_path = class_dir / f"{class_name}_{sample_index:03d}.png"
+            img.save(image_path, format='PNG')
 
     return path
 
@@ -113,17 +113,17 @@ class SimpleImageFolder(Dataset):
         return len(self.samples)
 
     def __getitem__(self, idx):
-        p, lab = self.samples[idx]
-        img = Image.open(p).convert('RGB')
+        file_path, label = self.samples[idx]
+        img = Image.open(file_path).convert('RGB')
         # apply transforms if present (these should return tensors in CHW)
         if self.transform is not None:
-            return self.transform(img), int(lab)
+            return self.transform(img), int(label)
 
         img = img.resize(self.img_size, Image.BILINEAR)
         arr = np.asarray(img, dtype=np.float32) / 255.0
         # CHW
         tensor = torch.from_numpy(arr).permute(2, 0, 1).contiguous()
-        return tensor, int(lab)
+        return tensor, int(label)
 
 
 class TinyConvNet(nn.Module):
@@ -150,18 +150,18 @@ def train_one_epoch(model, loader, opt, device):
     correct = 0
     loss_sum = 0.0
     criterion = nn.CrossEntropyLoss()
-    for xb, yb in loader:
-        xb = xb.to(device)
-        yb = yb.to(device)
-        logits = model(xb)
-        loss = criterion(logits, yb)
+    for batch_inputs, batch_labels in loader:
+        batch_inputs = batch_inputs.to(device)
+        batch_labels = batch_labels.to(device)
+        logits = model(batch_inputs)
+        loss = criterion(logits, batch_labels)
         opt.zero_grad()
         loss.backward()
         opt.step()
         loss_sum += float(loss.item())
         preds = logits.argmax(dim=1)
-        correct += int((preds == yb).sum())
-        total += xb.shape[0]
+        correct += int((preds == batch_labels).sum())
+        total += batch_inputs.shape[0]
     return loss_sum / max(1, len(loader)), correct / max(1, total)
 
 
@@ -170,13 +170,13 @@ def eval_one_epoch(model, loader, device):
     total = 0
     correct = 0
     with torch.no_grad():
-        for xb, yb in loader:
-            xb = xb.to(device)
-            yb = yb.to(device)
-            logits = model(xb)
+        for batch_inputs, batch_labels in loader:
+            batch_inputs = batch_inputs.to(device)
+            batch_labels = batch_labels.to(device)
+            logits = model(batch_inputs)
             preds = logits.argmax(dim=1)
-            correct += int((preds == yb).sum())
-            total += xb.shape[0]
+            correct += int((preds == batch_labels).sum())
+            total += batch_inputs.shape[0]
     return correct / max(1, total)
 
 
@@ -217,15 +217,15 @@ def main(argv=None):
         return 2
 
     all_samples = []
-    for c in classes:
-        for f in (dataset / c).iterdir():
-            if f.suffix.lower() in ('.png', '.jpg', '.jpeg'):
-                all_samples.append((f, c))
+    for class_name in classes:
+        for file_path in (dataset / class_name).iterdir():
+            if file_path.suffix.lower() in ('.png', '.jpg', '.jpeg'):
+                all_samples.append((file_path, class_name))
 
     random.seed(args.seed)
     random.shuffle(all_samples)
-    n = len(all_samples)
-    split = max(1, int(n * (1.0 - args.val_split)))
+    num_samples = len(all_samples)
+    split = max(1, int(num_samples * (1.0 - args.val_split)))
     train_samples = all_samples[:split]
     test_samples = all_samples[split:]
 
@@ -234,16 +234,16 @@ def main(argv=None):
     if tmp_root.exists():
         shutil.rmtree(tmp_root)
     tmp_root.mkdir(parents=True, exist_ok=True)
-    for pth, cls in train_samples:
-        target = tmp_root / cls
+    for file_path, class_name in train_samples:
+        target = tmp_root / class_name
         target.mkdir(parents=True, exist_ok=True)
-        shutil.copy(pth, target / pth.name)
+        shutil.copy(file_path, target / file_path.name)
     # test dir
     tmp_test = tmp_root / '__test'
-    for pth, cls in test_samples:
-        target = tmp_test / cls
+    for file_path, class_name in test_samples:
+        target = tmp_test / class_name
         target.mkdir(parents=True, exist_ok=True)
-        shutil.copy(pth, target / pth.name)
+        shutil.copy(file_path, target / file_path.name)
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print('Using device:', device)
@@ -271,23 +271,23 @@ def main(argv=None):
                     img = img.transpose(Image.FLIP_LEFT_RIGHT)
                 # rotation
                 if random.random() < 0.35:
-                    ang = random.uniform(-15, 15)
-                    img = img.rotate(ang, resample=Image.BILINEAR)
+                    angle = random.uniform(-15, 15)
+                    img = img.rotate(angle, resample=Image.BILINEAR)
                 # brightness/contrast
                 if random.random() < 0.5:
-                    b = random.uniform(0.8, 1.2)
-                    img = ImageEnhance.Brightness(img).enhance(b)
+                    brightness_factor = random.uniform(0.8, 1.2)
+                    img = ImageEnhance.Brightness(img).enhance(brightness_factor)
                 if random.random() < 0.5:
-                    c = random.uniform(0.85, 1.15)
-                    img = ImageEnhance.Contrast(img).enhance(c)
+                    contrast_factor = random.uniform(0.85, 1.15)
+                    img = ImageEnhance.Contrast(img).enhance(contrast_factor)
                 # small random crop + resize
                 if random.random() < 0.3:
-                    w, h = img.size
-                    crop_w = int(w * random.uniform(0.8, 1.0))
-                    crop_h = int(h * random.uniform(0.8, 1.0))
-                    left = random.randint(0, max(0, w - crop_w))
-                    top = random.randint(0, max(0, h - crop_h))
-                    img = img.crop((left, top, left + crop_w, top + crop_h))
+                    width, height = img.size
+                    crop_width = int(width * random.uniform(0.8, 1.0))
+                    crop_height = int(height * random.uniform(0.8, 1.0))
+                    left = random.randint(0, max(0, width - crop_width))
+                    top = random.randint(0, max(0, height - crop_height))
+                    img = img.crop((left, top, left + crop_width, top + crop_height))
             img = img.resize((img_size, img_size), Image.BILINEAR)
             arr = np.asarray(img, dtype=np.float32) / 255.0
             return torch.from_numpy(arr).permute(2, 0, 1).contiguous()
@@ -321,11 +321,11 @@ def main(argv=None):
     out_dir = Path(args.out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    for e in range(epochs):
+    for epoch_index in range(epochs):
         loss, acc = train_one_epoch(model, train_loader, opt, device)
         val_acc = eval_one_epoch(model, test_loader, device)
         print(
-            f"Epoch {e+1}/{epochs}  loss={loss:.4f}  train_acc={acc:.3f}  val_acc={val_acc:.3f}")
+            f"Epoch {epoch_index+1}/{epochs}  loss={loss:.4f}  train_acc={acc:.3f}  val_acc={val_acc:.3f}")
 
     ck = out_dir / f"vision_model_epoch{epochs}.pt"
     torch.save({'model': model.state_dict(), 'classes': train_ds.classes}, ck)

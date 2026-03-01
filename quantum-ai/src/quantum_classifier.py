@@ -64,39 +64,39 @@ class QuantumClassifier:
             Expectation values of Pauli-Z measurements
         """
         # Enhanced data encoding with amplitude and phase
-        for i in range(self.n_qubits):
-            idx = i % len(inputs)
+        for qubit_index in range(self.n_qubits):
+            input_index = qubit_index % len(inputs)
             # RY for amplitude encoding
-            qml.RY(inputs[idx], wires=i)
+            qml.RY(inputs[input_index], wires=qubit_index)
             # Add RZ for phase encoding (increases circuit expressiveness)
-            if i < len(inputs):
-                qml.RZ(inputs[idx] * 0.5, wires=i)
+            if qubit_index < len(inputs):
+                qml.RZ(inputs[input_index] * 0.5, wires=qubit_index)
         
         # Variational layers
         for layer in range(self.n_layers):
             # Rotation gates
-            for i in range(self.n_qubits):
-                qml.RY(weights[layer, i, 0], wires=i)
-                qml.RZ(weights[layer, i, 1], wires=i)
+            for qubit_index in range(self.n_qubits):
+                qml.RY(weights[layer, qubit_index, 0], wires=qubit_index)
+                qml.RZ(weights[layer, qubit_index, 1], wires=qubit_index)
             
             # Entanglement
             if self.entanglement == 'linear':
-                for i in range(self.n_qubits - 1):
-                    qml.CNOT(wires=[i, i + 1])
+                for qubit_index in range(self.n_qubits - 1):
+                    qml.CNOT(wires=[qubit_index, qubit_index + 1])
             elif self.entanglement == 'circular':
-                for i in range(self.n_qubits):
-                    qml.CNOT(wires=[i, (i + 1) % self.n_qubits])
+                for qubit_index in range(self.n_qubits):
+                    qml.CNOT(wires=[qubit_index, (qubit_index + 1) % self.n_qubits])
             elif self.entanglement == 'full':
-                for i in range(self.n_qubits):
-                    for j in range(i + 1, self.n_qubits):
-                        qml.CNOT(wires=[i, j])
+                for source_qubit in range(self.n_qubits):
+                    for target_qubit in range(source_qubit + 1, self.n_qubits):
+                        qml.CNOT(wires=[source_qubit, target_qubit])
         
                 # Final rotation layer for enhanced expressiveness
-                for i in range(self.n_qubits):
-                    qml.RY(weights[-1, i, 0] * 0.5, wires=i)
+                for qubit_index in range(self.n_qubits):
+                    qml.RY(weights[-1, qubit_index, 0] * 0.5, wires=qubit_index)
         
         # Measurements
-        return [qml.expval(qml.PauliZ(i)) for i in range(self.n_qubits)]
+        return [qml.expval(qml.PauliZ(qubit_index)) for qubit_index in range(self.n_qubits)]
     
     def forward(self, inputs: torch.Tensor, weights: torch.Tensor) -> torch.Tensor:
         """
@@ -114,13 +114,13 @@ class QuantumClassifier:
         # Pre-allocate output tensor for better memory efficiency
         outputs = torch.empty(batch_size, self.n_qubits, dtype=torch.float32)
         
-        for i, inp in enumerate(inputs):
-            result = self.qnode(inp, weights)
+        for sample_index, input_sample in enumerate(inputs):
+            result = self.qnode(input_sample, weights)
             # Convert list of expectation values to tensor
             if isinstance(result, list):
-                outputs[i] = torch.tensor(result, dtype=torch.float32)
+                outputs[sample_index] = torch.tensor(result, dtype=torch.float32)
             else:
-                outputs[i] = result
+                outputs[sample_index] = result
         
         return outputs
     
@@ -139,39 +139,39 @@ class QuantumClassifier:
         )
         return weights
     
-    def preprocess_data(self, X: np.ndarray) -> torch.Tensor:
+    def preprocess_data(self, feature_data: np.ndarray) -> torch.Tensor:
         """
         Preprocess classical data for quantum encoding.
         
         Args:
-            X: Classical feature data
+            feature_data: Classical feature data
             
         Returns:
             Normalized torch tensor
         """
         # Normalize to [0, 2π] for quantum encoding
         # Use in-place operations for better memory efficiency
-        X_min = X.min()
-        X_range = X.max() - X_min
+        data_min = feature_data.min()
+        data_range = feature_data.max() - data_min
         # Use small epsilon to avoid division by zero when all values are identical
-        if X_range == 0:
-            X_range = 1e-8
-        X_normalized = (X - X_min) / X_range * (2 * np.pi)
-        return torch.FloatTensor(X_normalized)
+        if data_range == 0:
+            data_range = 1e-8
+        data_normalized = (feature_data - data_min) / data_range * (2 * np.pi)
+        return torch.FloatTensor(data_normalized)
     
-    def predict(self, X: np.ndarray, weights: torch.Tensor) -> np.ndarray:
+    def predict(self, input_features: np.ndarray, weights: torch.Tensor) -> np.ndarray:
         """
         Make predictions on new data.
         
         Args:
-            X: Input features
+            input_features: Input features
             weights: Trained quantum parameters
             
         Returns:
             Predictions
         """
-        X_processed = self.preprocess_data(X)
-        outputs = self.forward(X_processed, weights)
+        processed_features = self.preprocess_data(input_features)
+        outputs = self.forward(processed_features, weights)
         predictions = torch.sign(outputs[:, 0])  # Binary classification
         return predictions.detach().numpy()
 
@@ -210,25 +210,25 @@ class HybridQuantumClassifier(nn.Module):
         
         logger.info(f"Initialized HybridQuantumClassifier with input_dim={input_dim}")
     
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
+    def forward(self, input_features: torch.Tensor) -> torch.Tensor:
         """
         Forward pass through the hybrid model.
         
         Args:
-            x: Input features
+            input_features: Input features
             
         Returns:
             Model predictions
         """
         # Classical preprocessing
-        x = self.classical_layers(x)
+        classical_output = self.classical_layers(input_features)
         
         # Quantum processing
-        quantum_out = self.quantum_classifier.forward(x, self.quantum_weights)
+        quantum_output = self.quantum_classifier.forward(classical_output, self.quantum_weights)
         
         # Classical postprocessing
-        output = self.output_layer(quantum_out)
-        return torch.sigmoid(output)
+        final_output = self.output_layer(quantum_output)
+        return torch.sigmoid(final_output)
 
 
 def train_quantum_model(
@@ -282,9 +282,9 @@ def train_quantum_model(
         epoch_loss = 0
         
         # Mini-batch training
-        for i in range(0, len(X_train), batch_size):
-            batch_X = X_train_tensor[i:i+batch_size]
-            batch_y = y_train_tensor[i:i+batch_size]
+        for batch_start_index in range(0, len(X_train), batch_size):
+            batch_X = X_train_tensor[batch_start_index:batch_start_index+batch_size]
+            batch_y = y_train_tensor[batch_start_index:batch_start_index+batch_size]
             
             optimizer.zero_grad()
             predictions = model(batch_X)

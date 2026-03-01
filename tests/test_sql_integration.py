@@ -40,7 +40,7 @@ def test_sql_repository_crud():
     assert get_value("alpha") == "two"
 
     # List values should include the key
-    keys = [item["k"] for item in list_values()]
+    keys = [item["key_name"] for item in list_values()]
     assert "alpha" in keys
 
     # Delete

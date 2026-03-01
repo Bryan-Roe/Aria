@@ -81,17 +81,17 @@ class HybridQuantumNet(nn.Module):
         # Classical postprocessing
         self.fc2 = nn.Linear(hidden_dim, 2)  # Binary classification
     
-    def forward(self, x):
-        x = self.fc1(x)
-        x = self.relu(x)
-        x = self.dropout(x)
+    def forward(self, input_features):
+        features = self.fc1(input_features)
+        features = self.relu(features)
+        features = self.dropout(features)
         
         # Quantum-inspired transformation
-        x = torch.matmul(x, self.quantum_weight)
-        x = torch.tanh(x)  # Bounded activation (quantum-like)
+        features = torch.matmul(features, self.quantum_weight)
+        features = torch.tanh(features)  # Bounded activation (quantum-like)
         
-        x = self.fc2(x)
-        return x
+        output = self.fc2(features)
+        return output
 
 
 def train_single_dataset(
@@ -134,53 +134,53 @@ def train_single_dataset(
             }
         
         # Prepare data
-        X = df.drop('target', axis=1).values
-        y = df['target'].values
+        feature_matrix = df.drop('target', axis=1).values
+        target_labels = df['target'].values
         
         # Handle categorical targets
         from sklearn.preprocessing import LabelEncoder
         le = LabelEncoder()
-        y = le.fit_transform(y)
+        target_labels = le.fit_transform(target_labels)
         
         # Binary classification only for now
-        if len(np.unique(y)) > 2:
+        if len(np.unique(target_labels)) > 2:
             # Convert to binary (largest class vs rest)
-            majority_class = np.bincount(y).argmax()
-            y = (y == majority_class).astype(int)
+            majority_class = np.bincount(target_labels).argmax()
+            target_labels = (target_labels == majority_class).astype(int)
         
-        n_samples = len(X)
-        n_features = X.shape[1]
-        n_classes = len(np.unique(y))
+        num_samples = len(feature_matrix)
+        num_features = feature_matrix.shape[1]
+        num_classes = len(np.unique(target_labels))
         
         # Quick test mode
         if quick_test:
             epochs = 1
-            if n_samples > 500:
-                indices = np.random.choice(n_samples, 500, replace=False)
-                X = X[indices]
-                y = y[indices]
-                n_samples = 500
+            if num_samples > 500:
+                indices = np.random.choice(num_samples, 500, replace=False)
+                feature_matrix = feature_matrix[indices]
+                target_labels = target_labels[indices]
+                num_samples = 500
         
         # Feature preprocessing
         scaler = StandardScaler()
-        X_scaled = scaler.fit_transform(X)
+        scaled_features = scaler.fit_transform(feature_matrix)
         
         # PCA to n_qubits features
-        if n_features > n_qubits:
+        if num_features > n_qubits:
             pca = PCA(n_components=n_qubits)
-            X_reduced = pca.fit_transform(X_scaled)
+            reduced_features = pca.fit_transform(scaled_features)
             variance_explained = pca.explained_variance_ratio_.sum()
         else:
-            X_reduced = X_scaled
+            reduced_features = scaled_features
             # Pad if needed
-            if n_features < n_qubits:
-                padding = np.zeros((n_samples, n_qubits - n_features))
-                X_reduced = np.hstack([X_reduced, padding])
+            if num_features < n_qubits:
+                padding = np.zeros((num_samples, n_qubits - num_features))
+                reduced_features = np.hstack([reduced_features, padding])
             variance_explained = 1.0
         
         # Train/test split
         X_train, X_test, y_train, y_test = train_test_split(
-            X_reduced, y, test_size=0.2, random_state=42, stratify=y
+            reduced_features, target_labels, test_size=0.2, random_state=42, stratify=target_labels
         )
         
         # Convert to tensors
@@ -248,9 +248,9 @@ def train_single_dataset(
         return {
             'dataset': dataset_name,
             'status': 'success',
-            'samples': n_samples,
-            'features': n_features,
-            'classes': n_classes,
+            'samples': num_samples,
+            'features': num_features,
+            'classes': num_classes,
             'variance_explained': variance_explained,
             'best_accuracy': best_acc,
             'best_epoch': best_epoch,
@@ -437,11 +437,11 @@ class DistributedBenchmark:
             print(f"   Challenging (<75%): {len(challenging)}")
             
             # Top 10
-            top_10 = sorted(successful, key=lambda x: x['best_accuracy'], reverse=True)[:10]
+            top_datasets = sorted(successful, key=lambda x: x['best_accuracy'], reverse=True)[:10]
             print(f"\n🥇 TOP 10 DATASETS:")
-            for i, r in enumerate(top_10, 1):
-                print(f"   {i}. {r['dataset']}: {r['best_accuracy']:.2%} "
-                      f"({r['samples']} samples, {r['features']} features)")
+            for rank, result in enumerate(top_datasets, 1):
+                print(f"   {rank}. {result['dataset']}: {result['best_accuracy']:.2%} "
+                      f"({result['samples']} samples, {result['features']} features)")
         
         # Save detailed results
         summary = {
