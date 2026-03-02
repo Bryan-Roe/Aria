@@ -101,7 +101,7 @@ c:\Users\Bryan\OneDrive\AI\
 
 - **Complete Guide**: `CHAT_WEBSITE_GUIDE.md`
 - **Quick Reference**: `web/chat-web/README.md`
-- **Provider Details**: `tools/tools/talk-to-ai/README.md`
+- **Provider Details**: `tools/talk-to-ai/README.md`
 - **Architecture**: `.github/copilot-instructions.md`
 
 ## Cost Summary

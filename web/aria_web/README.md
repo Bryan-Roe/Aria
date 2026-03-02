@@ -219,7 +219,7 @@ pytest tests/test_*aria*.py tests/test_ui_*.py -v
 ### File Structure
 
 ```
-web/web/aria_web/
+web/aria_web/
 ├── index.html           # Main UI
 ├── test.html            # Test page for features
 ├── aria_controller.js   # Client-side logic
@@ -259,7 +259,7 @@ web/web/aria_web/
 GitHub Actions workflow (`.github/workflows/aria-tests.yml`) runs automatically on:
 - Push to `main` or `develop`
 - Pull requests
-- Changes to `web/web/aria_web/` or test files
+- Changes to `web/aria_web/` or test files
 
 Workflow includes:
 - Unit & integration tests (Python 3.10, 3.11, 3.12)

@@ -44,14 +44,14 @@ QUANTUM_AUTORUN_SCRIPT = REPO_ROOT / "scripts" / "quantum_autorun.py"
 PROJECTS = {
     "root": REPO_ROOT / "venv",
     "quantum-ai": REPO_ROOT / "quantum-ai" / "venv",
-    "tools/tools/talk-to-ai": REPO_ROOT / "tools/tools/talk-to-ai" / "venv",
+    "tools/talk-to-ai": REPO_ROOT / "tools/talk-to-ai" / "venv",
     "phi-lora": REPO_ROOT / "AI" / "microsoft_phi-silica-3.6_v1" / "venv",
 }
 
 REQUIREMENTS = {
     "root": REPO_ROOT / "requirements.txt",
     "quantum-ai": REPO_ROOT / "quantum-ai" / "requirements.txt",
-    "tools/tools/talk-to-ai": REPO_ROOT / "tools/tools/talk-to-ai" / "requirements.txt",
+    "tools/talk-to-ai": REPO_ROOT / "tools/talk-to-ai" / "requirements.txt",
     "phi-lora": REPO_ROOT / "AI" / "microsoft_phi-silica-3.6_v1" / "requirements.txt",
 }
 

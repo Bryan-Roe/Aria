@@ -349,8 +349,8 @@ All documentation is comprehensive and complete:
 
 1. **Quick Start:** This file (ARIA_AUTOMATION_SUMMARY.md)
 2. **Full Guide:** ARIA_AUTOMATION_GUIDE.md (400+ lines)
-3. **Aria Web:** web/web/aria_web/README.md
-4. **Auto-Execute:** web/web/aria_web/AUTO-EXECUTE.md
+3. **Aria Web:** web/aria_web/README.md
+4. **Auto-Execute:** web/aria_web/AUTO-EXECUTE.md
 5. **Training:** scripts/README.md
 
 ---
@@ -470,8 +470,8 @@ sudo journalctl -u aria_automation -f
 
 - **Main README:** `README.md`
 - **Automation Guide:** `ARIA_AUTOMATION_GUIDE.md`
-- **Aria Web:** `web/web/aria_web/README.md`
-- **Auto-Execute:** `web/web/aria_web/AUTO-EXECUTE.md`
+- **Aria Web:** `web/aria_web/README.md`
+- **Auto-Execute:** `web/aria_web/AUTO-EXECUTE.md`
 - **Master Orchestrator:** `ADVANCED_AUTOMATION.md`
 
 ---

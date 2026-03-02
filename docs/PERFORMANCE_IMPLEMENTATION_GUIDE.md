@@ -7,7 +7,7 @@ This guide provides step-by-step instructions for implementing the performance i
 ## 🎯 Implementation Roadmap
 
 ### Week 1: Critical Fixes
-- **Fix #1**: Aria keyword lookups (web/web/aria_web/server.py)
+- **Fix #1**: Aria keyword lookups (web/aria_web/server.py)
 - **Fix #3**: Batch evaluator indexing (scripts/batch_evaluator.py)
 - **Fix #6**: Remove redundant iteration (scripts/batch_evaluator.py)
 
@@ -27,7 +27,7 @@ This guide provides step-by-step instructions for implementing the performance i
 
 ### Critical Fix #1: Aria Keyword Lookups
 
-**File:** `web/web/aria_web/server.py`  
+**File:** `web/aria_web/server.py`  
 **Lines:** 496-521  
 **Estimated time:** 30 minutes  
 **Risk:** Low (pure optimization, same logic)

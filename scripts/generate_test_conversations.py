@@ -5,7 +5,7 @@ from datetime import datetime
 from pathlib import Path
 
 # Create logs directory
-logs_dir = Path(__file__).resolve().parents[1] / "tools/tools/talk-to-ai" / "logs"
+logs_dir = Path(__file__).resolve().parents[1] / "tools/talk-to-ai" / "logs"
 logs_dir.mkdir(parents=True, exist_ok=True)
 
 # Test conversation pairs - expanded set for cycle #2

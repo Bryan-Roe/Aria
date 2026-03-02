@@ -2,7 +2,7 @@
 
 **Generated:** 2026-02-17  
 **Analysis Type:** Static code analysis for performance anti-patterns  
-**Scope:** Python codebase (scripts/, shared/, quantum/, web/web/aria_web/, function_app.py)
+**Scope:** Python codebase (scripts/, shared/, quantum/, web/aria_web/, function_app.py)
 
 ---
 
@@ -22,9 +22,9 @@ This report identifies **15 performance improvement opportunities** across the A
 
 ## Critical Issues (Immediate Action Recommended)
 
-### 1. Repeated Keyword Lookups in Hot Path (web/web/aria_web/server.py)
+### 1. Repeated Keyword Lookups in Hot Path (web/aria_web/server.py)
 
-**Location:** `web/web/aria_web/server.py`, lines 496-521  
+**Location:** `web/aria_web/server.py`, lines 496-521  
 **Severity:** Critical  
 **Impact:** High - This function is called for every user command
 
@@ -826,7 +826,7 @@ The analysis found several excellent performance patterns already in use:
 ## Implementation Priority
 
 ### Immediate (Week 1)
-1. Fix `web/web/aria_web/server.py` keyword lookups (Critical #1)
+1. Fix `web/aria_web/server.py` keyword lookups (Critical #1)
 2. Add `batch_evaluator.py` result indexing (Critical #3)
 3. Remove redundant iteration in `batch_evaluator.py` (High #6)
 
@@ -933,7 +933,7 @@ def store_embedding(...):
 
 ## Conclusion
 
-This analysis identified **15 performance improvement opportunities** with estimated improvements ranging from 2x to 100x for specific operations. The critical issues in `web/web/aria_web/server.py`, `chat_memory.py`, and `batch_evaluator.py` should be addressed first, as they affect high-traffic code paths.
+This analysis identified **15 performance improvement opportunities** with estimated improvements ranging from 2x to 100x for specific operations. The critical issues in `web/aria_web/server.py`, `chat_memory.py`, and `batch_evaluator.py` should be addressed first, as they affect high-traffic code paths.
 
 The codebase already demonstrates several strong performance patterns, particularly in the use of efficient data structures and algorithms. Building on these foundations with the recommended fixes will significantly improve overall system performance.
 

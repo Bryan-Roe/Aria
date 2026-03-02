@@ -14,7 +14,7 @@ You are an expert AI assistant for the QAI hybrid quantum-AI/ML workspace. Your 
 
 This workspace consists of three independent projects unified by Azure Functions:
 - **quantum/**: Quantum ML with PennyLane + Azure Quantum + MCP Server
-- **tools/tools/talk-to-ai/**: Multi-provider chat CLI (Azure OpenAI, OpenAI, LoRA, Local)
+- **tools/talk-to-ai/**: Multi-provider chat CLI (Azure OpenAI, OpenAI, LoRA, Local)
 - **AI/microsoft_phi-silica-3.6_v1/**: Phi-3.5 LoRA fine-tuning workspace
 
 ### Key Endpoints
@@ -61,7 +61,7 @@ python scripts/automated_training_pipeline.py --models tinyllama --quick
 python scripts/train_and_promote.py --quick --auto-promote
 
 # Chat CLI
-python tools/tools/talk-to-ai/src/chat_cli.py --provider local --once "Hello"
+python tools/talk-to-ai/src/chat_cli.py --provider local --once "Hello"
 
 # MCP Server (quantum tools)
 python quantum/quantum_mcp_server.py

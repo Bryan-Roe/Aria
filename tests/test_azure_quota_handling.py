@@ -4,9 +4,9 @@ import types
 
 
 def _ensure_talk_to_ai_in_path():
-    # Ensure tools/tools/talk-to-ai/src is importable for tests that import chat_providers
+    # Ensure tools/talk-to-ai/src is importable for tests that import chat_providers
     repo_root = Path(__file__).resolve().parents[1]
-    tta = str((repo_root / 'tools/tools/talk-to-ai' / 'src').absolute())
+    tta = str((repo_root / 'tools/talk-to-ai' / 'src').absolute())
     if tta not in sys.path:
         sys.path.insert(0, tta)
 

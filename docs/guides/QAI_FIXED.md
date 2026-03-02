@@ -37,7 +37,7 @@
 - All requirements from `quantum/requirements.txt`
 
 **Talk-to-AI venv:**
-- All requirements from `tools/tools/talk-to-ai/requirements.txt`
+- All requirements from `tools/talk-to-ai/requirements.txt`
 
 ## Verification Results
 
@@ -66,7 +66,7 @@ All components tested and verified:
 
 ## New Files Created
 
-1. **`tools/tools/talk-to-ai/src/quantum_provider.py`**: Quantum-enhanced chat provider
+1. **`tools/talk-to-ai/src/quantum_provider.py`**: Quantum-enhanced chat provider
    - Uses variational quantum circuits for sentiment analysis
    - Integrates with QuantumClassifier from quantum-ai
    - Provides quantum-flavored responses with analysis insights
@@ -90,7 +90,7 @@ All components tested and verified:
    - Implemented 3 quantum endpoints (classify, circuit, info)
    - Full quantum classification with PennyLane integration
 
-2. **`tools/tools/talk-to-ai/src/chat_providers.py`**:
+2. **`tools/talk-to-ai/src/chat_providers.py`**:
    - Added quantum provider detection
    - Integrated quantum_provider module
    - Updated provider priority (quantum → Azure → OpenAI → local)
@@ -151,7 +151,7 @@ cd quantum-ai
 │           │                       │             │
 │           ▼                       ▼             │
 │  ┌────────────────────────────────────────┐    │
-│  │      tools/tools/talk-to-ai/src/                   │    │
+│  │      tools/talk-to-ai/src/                   │    │
 │  │  • chat_providers.py (5 providers)     │    │
 │  │  • quantum_provider.py (NEW)           │    │
 │  │  • token_utils.py                      │    │
@@ -254,7 +254,7 @@ This will:
 
 For specific help:
 - Quantum issues → See `quantum/README.md`
-- Chat issues → See `tools/tools/talk-to-ai/README.md`
+- Chat issues → See `tools/talk-to-ai/README.md`
 - Deployment → See `DEPLOY_CHAT_TO_AZURE.md`
 
 ---

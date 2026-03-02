@@ -104,7 +104,7 @@ fetch_similar_messages = chat_memory_funcs['fetch_similar_messages']
 store_embedding = chat_memory_funcs['store_embedding']
 
 # Add tools/talk-to-ai to path so we can import chat_providers
-talk_to_ai_path = Path(__file__).resolve().parent / "tools/tools/talk-to-ai" / "src"
+talk_to_ai_path = Path(__file__).resolve().parent / "tools/talk-to-ai" / "src"
 sys.path.insert(0, str(talk_to_ai_path))
 
 # Add quantum-ai to path
@@ -346,7 +346,7 @@ def chat(req: func.HttpRequest) -> func.HttpResponse:
         # Self-Learning: Log conversation for training
         # =============================
         try:
-            logs_dir = Path(__file__).resolve().parent / "tools/tools/talk-to-ai" / "logs"
+            logs_dir = Path(__file__).resolve().parent / "tools/talk-to-ai" / "logs"
             logs_dir.mkdir(parents=True, exist_ok=True)
 
             # Create timestamped log file

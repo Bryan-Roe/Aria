@@ -139,4 +139,4 @@ pip install -r .\tools/talk-to-ai\requirements.txt
 ## Notes
 
 - The local provider is simple and meant for offline testing; for best results, use OpenAI or Azure OpenAI.
-- Conversations are stored in JSONL under `tools/tools/talk-to-ai/logs/`.
+- Conversations are stored in JSONL under `tools/talk-to-ai/logs/`.

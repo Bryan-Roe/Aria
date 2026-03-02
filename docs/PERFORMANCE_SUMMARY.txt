@@ -16,7 +16,7 @@
 🔴 CRITICAL ISSUES (Immediate Action - Week 1)
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-1. ARIA KEYWORD LOOKUPS (web/web/aria_web/server.py:496-521)
+1. ARIA KEYWORD LOOKUPS (web/aria_web/server.py:496-521)
    ├─ Problem: Creates 20+ lists per user command
    ├─ Impact: Every Aria command affected (high traffic)
    ├─ Fix Time: 30 minutes

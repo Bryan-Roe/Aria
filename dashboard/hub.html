@@ -687,7 +687,7 @@
                 analytics: 'analytics.html',
                 queue: () => showJobQueue(),
                 quantum: () => showToast('Quantum interface: Use quantum_mcp_server.py or quantum_autorun.py'),
-                chat: () => showToast('Chat interface: Run python tools/tools/talk-to-ai/src/chat_cli.py')
+                chat: () => showToast('Chat interface: Run python tools/talk-to-ai/src/chat_cli.py')
             };
 
             const handler = actions[action];
@@ -788,7 +788,7 @@
         }
 
         function openChat() {
-            showToast('To use chat: python tools/tools/talk-to-ai/src/chat_cli.py --provider azure');
+            showToast('To use chat: python tools/talk-to-ai/src/chat_cli.py --provider azure');
         }
 
         function runQuantum() {

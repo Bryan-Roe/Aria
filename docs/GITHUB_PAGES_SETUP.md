@@ -164,7 +164,7 @@ Visit and test each application:
 - Multiple provider support
 
 ❌ **Backend Services**
-- Python server (web/web/aria_web/server.py)
+- Python server (web/aria_web/server.py)
 - Azure Functions (function_app.py)
 - Flask dashboard (dashboard/app.py)
 - Database connections
@@ -196,7 +196,7 @@ Visit and test each application:
 
 **To update web applications:**
 
-1. **Modify source files** in `web/web/aria_web/`, `web/chat-web/`, etc.
+1. **Modify source files** in `web/aria_web/`, `web/chat-web/`, etc.
 2. **Test locally** with full backend
 3. **Copy to docs/** with `DEMO_MODE = true`
 4. **Test demo mode** locally
@@ -205,8 +205,8 @@ Visit and test each application:
 **Example:**
 ```bash
 # Update Aria character
-cp web/web/aria_web/index.html docs/aria/
-cp web/web/aria_web/aria_controller.js docs/aria/
+cp web/aria_web/index.html docs/aria/
+cp web/aria_web/aria_controller.js docs/aria/
 
 # Ensure demo mode is enabled
 grep "DEMO_MODE = true" docs/aria/aria_controller.js

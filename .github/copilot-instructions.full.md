@@ -8,7 +8,7 @@
 
 - **Projects (isolated venvs)**:
   - `quantum/` – quantum‑ML pipelines, MCP server, web dashboard.
-  - `tools/tools/talk-to-ai/` – multi‑provider chat CLI (Azure OpenAI, OpenAI, LoRA, local fallback).
+  - `tools/talk-to-ai/` – multi‑provider chat CLI (Azure OpenAI, OpenAI, LoRA, local fallback).
   - `AI/microsoft_phi-silica-3.6_v1/` – Phi‑3.5 LoRA fine‑tuning.
 - **Integration layer**: `function_app.py` (Azure Functions) exposing:
   - `/api/chat` – streaming chat.
@@ -93,7 +93,7 @@
 
 ## Copilot Quickstart for QAI (condensed)
 
-- Architecture in one breath: three independent projects — `quantum/` (quantum ML + MCP server), `tools/tools/talk-to-ai/` (CLI chat), and `AI/microsoft_phi-silica-3.6_v1/` (LoRA fine-tuning) — unified by `function_app.py` (Azure Functions) and shared infra in `shared/`.
+- Architecture in one breath: three independent projects — `quantum/` (quantum ML + MCP server), `tools/talk-to-ai/` (CLI chat), and `AI/microsoft_phi-silica-3.6_v1/` (LoRA fine-tuning) — unified by `function_app.py` (Azure Functions) and shared infra in `shared/`.
 - Key endpoints (served by Functions): `/api/chat`, `/api/chat-web`, `/api/tts`, `/api/quantum/*`, `/api/ai/status`. Check runtime health at `/api/ai/status`.
 - Provider detection order (see `shared/chat_providers.py:detect_provider()`): Azure OpenAI → OpenAI → LoRA → Local. Azure needs all 4 env vars: `AZURE_OPENAI_API_KEY`, `AZURE_OPENAI_ENDPOINT`, `AZURE_OPENAI_DEPLOYMENT`, `AZURE_OPENAI_API_VERSION`.
 - Immutable data model: read-only `datasets/`; write-only `data_out/`. Orchestrators run from repo root and emit machine-readable status JSON under `data_out/<orchestrator>/status.json`.

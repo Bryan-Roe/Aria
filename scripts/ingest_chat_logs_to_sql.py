@@ -69,7 +69,7 @@ def ingest_file(path: Path, embed_assistant: bool = False) -> dict:  # noqa: ANN
 
 def main(argv: List[str] | None = None) -> int:
     p = argparse.ArgumentParser(description="Backfill chat logs into SQL memory store")
-    p.add_argument("--logs-dir", default="tools/tools/talk-to-ai/logs", help="Directory containing chat_*.jsonl logs")
+    p.add_argument("--logs-dir", default="tools/talk-to-ai/logs", help="Directory containing chat_*.jsonl logs")
     p.add_argument("--limit", type=int, default=0, help="Optional limit of files to ingest")
     p.add_argument("--embed-assistant", action="store_true", help="Also embed assistant messages")
     p.add_argument("--dry-run", action="store_true", help="List files only without ingestion")

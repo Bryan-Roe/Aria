@@ -8,7 +8,7 @@ from pathlib import Path
 import pytest
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-ARIA_WEB = REPO_ROOT / 'web/web/aria_web'
+ARIA_WEB = REPO_ROOT / 'web/aria_web'
 SERVER_URL = 'http://127.0.0.1:8080'
 
 

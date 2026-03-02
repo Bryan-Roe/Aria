@@ -1,4 +1,4 @@
-"""Extract chat conversation logs from tools/tools/talk-to-ai/logs into Phi-3 style dataset.
+"""Extract chat conversation logs from tools/talk-to-ai/logs into Phi-3 style dataset.
 
 Each log file is JSONL with entries: {"role": "user|assistant", "content": "...", "timestamp": "..."}
 We transform these into training records with a messages list.
@@ -26,7 +26,7 @@ import random
 from pathlib import Path
 from typing import List, Dict
 
-LOGS_DIR = Path("tools/tools/talk-to-ai/logs")
+LOGS_DIR = Path("tools/talk-to-ai/logs")
 OUTPUT_DIR = Path("datasets/chat/chat_logs")
 
 

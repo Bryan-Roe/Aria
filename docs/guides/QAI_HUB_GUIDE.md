@@ -322,7 +322,7 @@ The hub provides 6 one-click shortcuts:
 
 **Toast Messages**:
 - Quick actions that require CLI show instructional toasts
-- Example: "To use chat: python tools/tools/talk-to-ai/src/chat_cli.py --provider azure"
+- Example: "To use chat: python tools/talk-to-ai/src/chat_cli.py --provider azure"
 
 ---
 

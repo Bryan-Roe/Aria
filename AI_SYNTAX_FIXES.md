@@ -156,7 +156,7 @@ python scripts/test_ai_improvements.py
 
 ### Smoke Test
 ```bash
-cd tools/tools/talk-to-ai/src && python _smoke_test.py
+cd tools/talk-to-ai/src && python _smoke_test.py
 ```
 
 **Result**: ✅ Chat provider working correctly

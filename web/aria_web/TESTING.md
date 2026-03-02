@@ -150,7 +150,7 @@ The project includes a comprehensive GitHub Actions workflow (`.github/workflows
 The workflow runs automatically on:
 - Push to `main` or `develop` branches
 - Pull requests targeting `main` or `develop`
-- Changes to `web/web/aria_web/` directory or test files
+- Changes to `web/aria_web/` directory or test files
 
 Manual trigger:
 ```bash
@@ -198,7 +198,7 @@ Manual trigger:
 ```
 ┌─────────────────────┐
 │   Browser UI        │
-│  (web/web/aria_web/index.html)│
+│  (web/aria_web/index.html)│
 └──────────┬──────────┘
            │ User clicks/drags
            ▼

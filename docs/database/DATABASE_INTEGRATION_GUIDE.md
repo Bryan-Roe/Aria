@@ -55,7 +55,7 @@ except Exception:  # noqa: BLE001
         return {"success": False, "skipped": True}
 
 # Add tools/talk-to-ai to path so we can import chat_providers
-talk_to_ai_path = Path(__file__).resolve().parent / "tools/tools/talk-to-ai" / "src"
+talk_to_ai_path = Path(__file__).resolve().parent / "tools/talk-to-ai" / "src"
 sys.path.insert(0, str(talk_to_ai_path))
 ```
 

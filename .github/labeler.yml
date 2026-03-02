@@ -18,11 +18,11 @@
 
 'aria-character':
   - changed-files:
-    - any-glob-to-any-file: ['web/web/aria_web/**/*']
+    - any-glob-to-any-file: ['web/aria_web/**/*']
 
 'chat-interface':
   - changed-files:
-    - any-glob-to-any-file: ['tools/tools/talk-to-ai/**/*', 'web/chat-web/**/*']
+    - any-glob-to-any-file: ['tools/talk-to-ai/**/*', 'web/chat-web/**/*']
 
 'quantum-ai':
   - changed-files:

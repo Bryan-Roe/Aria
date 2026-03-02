@@ -52,8 +52,8 @@ def test_image_generate_azure_quota_fallback(monkeypatch: pytest.MonkeyPatch):
     # Ensure top-level module import works
     repo_root = Path(__file__).resolve().parents[1]
     cast(Any, monkeypatch).syspath_prepend(str(repo_root))
-    # Ensure tools/tools/talk-to-ai/src is available for token_utils/chat_providers imports
-    tta = str((repo_root / 'tools/tools/talk-to-ai' / 'src').absolute())
+    # Ensure tools/talk-to-ai/src is available for token_utils/chat_providers imports
+    tta = str((repo_root / 'tools/talk-to-ai' / 'src').absolute())
     cast(Any, monkeypatch).syspath_prepend(tta)
     # Prepare environment to force Azure path
     monkeypatch.setenv('OPENAI_API_KEY', '')
@@ -137,7 +137,7 @@ def test_image_generate_openai_success(monkeypatch: pytest.MonkeyPatch):
     """
     repo_root = Path(__file__).resolve().parents[1]
     cast(Any, monkeypatch).syspath_prepend(str(repo_root))
-    tta = str((repo_root / 'tools/tools/talk-to-ai' / 'src').absolute())
+    tta = str((repo_root / 'tools/talk-to-ai' / 'src').absolute())
     cast(Any, monkeypatch).syspath_prepend(tta)
 
     # Use the non-Azure path
@@ -200,7 +200,7 @@ def test_image_generate_azure_status_code_quota(monkeypatch: pytest.MonkeyPatch)
     """
     repo_root = Path(__file__).resolve().parents[1]
     cast(Any, monkeypatch).syspath_prepend(str(repo_root))
-    tta = str((repo_root / 'tools/tools/talk-to-ai' / 'src').absolute())
+    tta = str((repo_root / 'tools/talk-to-ai' / 'src').absolute())
     cast(Any, monkeypatch).syspath_prepend(tta)
 
     monkeypatch.setenv('OPENAI_API_KEY', '')

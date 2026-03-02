@@ -19,7 +19,7 @@ This document outlines identified performance bottlenecks and inefficient code p
 ## 1. Token Utils - Repeated Tokenizer Instantiation
 
 ### Location
-`tools/tools/talk-to-ai/src/token_utils.py` - `_get_text_encoder()` function
+`tools/talk-to-ai/src/token_utils.py` - `_get_text_encoder()` function
 
 ### Problem
 Every call to `count_messages_tokens()` or `prune_messages()` creates a new tokenizer instance. For Hugging Face tokenizers, this involves:
@@ -209,7 +209,7 @@ def validate_jsonl(self, filepath: Path, verbose: bool = False) -> Dict:
 ## 5. Chat Providers - LM Studio Health Check On Every Auto-Detect
 
 ### Location
-`tools/tools/talk-to-ai/src/chat_providers.py` - `detect_provider()` function
+`tools/talk-to-ai/src/chat_providers.py` - `detect_provider()` function
 
 ### Problem
 In auto mode, the function makes an HTTP request to check if LM Studio is running on every call, adding latency even when LM Studio isn't being used.

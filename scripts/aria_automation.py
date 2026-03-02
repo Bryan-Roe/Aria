@@ -52,7 +52,7 @@ from typing import Dict, List, Optional, Any
 import psutil
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-ARIA_WEB_DIR = REPO_ROOT / "web/web/aria_web"
+ARIA_WEB_DIR = REPO_ROOT / "web/aria_web"
 DATA_OUT = REPO_ROOT / "data_out" / "aria_automation"
 STATUS_FILE = DATA_OUT / "status.json"
 PID_FILE = DATA_OUT / "processes.json"

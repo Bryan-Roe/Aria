@@ -14,7 +14,7 @@ import pytest
 
 # Add workspace root to path
 repo_root = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(repo_root / "tools/tools/talk-to-ai" / "src"))
+sys.path.insert(0, str(repo_root / "tools/talk-to-ai" / "src"))
 
 import chat_providers
 

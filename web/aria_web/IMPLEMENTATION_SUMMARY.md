@@ -55,12 +55,12 @@ Successfully added LLM-powered automatic action generation and execution system 
 ## 📁 Files Created/Modified
 
 ### Created:
-- `web/web/aria_web/auto-execute.html` - Web UI for testing (529 lines)
-- `web/web/aria_web/AUTO-EXECUTE.md` - Comprehensive documentation (450+ lines)
+- `web/aria_web/auto-execute.html` - Web UI for testing (529 lines)
+- `web/aria_web/AUTO-EXECUTE.md` - Comprehensive documentation (450+ lines)
 - This summary document
 
 ### Modified:
-- `web/web/aria_web/server.py` - Added 223 lines:
+- `web/aria_web/server.py` - Added 223 lines:
   - LLM imports and provider detection (lines 12-13, 23-31)
   - ARIA_ACTIONS schema (lines 57-101)
   - AriaActionParser class (lines 104-277)

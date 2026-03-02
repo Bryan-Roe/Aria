@@ -137,8 +137,8 @@
 
   Quick Summary:        ARIA_AUTOMATION_SUMMARY.md
   Complete Guide:       ARIA_AUTOMATION_GUIDE.md
-  Aria Web Docs:        web/web/aria_web/README.md
-  Auto-Execute:         web/web/aria_web/AUTO-EXECUTE.md
+  Aria Web Docs:        web/aria_web/README.md
+  Auto-Execute:         web/aria_web/AUTO-EXECUTE.md
   Main README:          README.md
 
 ┌──────────────────────────────────────────────────────────────────────────────┐

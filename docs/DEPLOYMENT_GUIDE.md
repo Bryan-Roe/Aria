@@ -31,7 +31,7 @@ Aria/
 │   │   └── shared-theme.css
 │   └── quantum/              # Quantum ML interface
 │       └── index.html
-├── web/web/aria_web/                 # Source (local development)
+├── web/aria_web/                 # Source (local development)
 ├── web/chat-web/                 # Source (local development)
 └── dashboard/                # Source (local development)
 ```
@@ -203,7 +203,7 @@ const DEMO_RESPONSES = [
 
 ### Updating Existing Applications
 
-1. **Modify source files** in `web/web/aria_web/`, `web/chat-web/`, etc.
+1. **Modify source files** in `web/aria_web/`, `web/chat-web/`, etc.
 2. **Copy changes to docs/** with demo mode enabled
 3. **Test locally** before committing
 4. **Commit and push** to trigger deployment
@@ -214,8 +214,8 @@ When updating source files, remember to sync to docs:
 
 ```bash
 # Example: Update Aria character
-cp web/web/aria_web/index.html docs/aria/
-cp web/web/aria_web/aria_controller.js docs/aria/
+cp web/aria_web/index.html docs/aria/
+cp web/aria_web/aria_controller.js docs/aria/
 
 # Verify demo mode is enabled
 grep "DEMO_MODE = true" docs/aria/aria_controller.js

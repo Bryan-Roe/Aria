@@ -24,7 +24,7 @@ Files changed
 -------------
 
 - shared/azure_utils.py — new heuristics & helpers for detecting quota/rate-limit errors and producing a short actionable message.
-- tools/tools/talk-to-ai/src/chat_providers.py — AzureOpenAIProvider now retries transient rate-limit errors and surfaces user-friendly quota messages instead of raising fatal exceptions.
+- tools/talk-to-ai/src/chat_providers.py — AzureOpenAIProvider now retries transient rate-limit errors and surfaces user-friendly quota messages instead of raising fatal exceptions.
 - shared/chat_memory.py — embedding generation now falls back to local hashing when Azure embedding calls return quota / premium errors.
 - function_app.py — image endpoint now formats nicer error text on quota conditions.
 

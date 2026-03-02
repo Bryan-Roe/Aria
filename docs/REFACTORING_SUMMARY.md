@@ -21,7 +21,7 @@ This refactoring effort focused on identifying and eliminating code duplication 
 - Kept AzureOpenAIProvider's custom quota handling logic intact
 
 **Files Modified**:
-- `tools/tools/talk-to-ai/src/chat_providers.py`
+- `tools/talk-to-ai/src/chat_providers.py`
 
 **Impact**: 
 - Eliminated ~60 lines of duplicated code

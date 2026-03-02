@@ -402,7 +402,7 @@ python AI\microsoft_phi-silica-3.6_v1\scripts\train_lora.py --dataset .\datasets
 - **Streaming**: Use `datasets` library for >10GB files
 
 ### For Talk-to-AI Chat:
-- **Logs**: Your own conversation history in `tools/tools/talk-to-ai/logs/*.jsonl`
+- **Logs**: Your own conversation history in `tools/talk-to-ai/logs/*.jsonl`
 - **Fine-tune on**: Personal assistant style from your interactions
 - **Combine with**: OpenAssistant for general knowledge
 

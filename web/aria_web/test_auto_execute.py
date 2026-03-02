@@ -154,7 +154,7 @@ def run_tests():
         print("\n📖 Try the web interface:")
         print(f"   Open: {BASE_URL}/auto-execute.html")
         print("\n📚 Read full documentation:")
-        print("   See: web/web/aria_web/AUTO-EXECUTE.md\n")
+        print("   See: web/aria_web/AUTO-EXECUTE.md\n")
         
         return True
         

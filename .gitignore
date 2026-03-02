@@ -150,11 +150,11 @@ quantum/results/
 
 
 # Chat Logs (keep directory structure but ignore logs)
-tools/tools/talk-to-ai/logs/*.jsonl
-tools/tools/talk-to-ai/logs/*.txt
+tools/talk-to-ai/logs/*.jsonl
+tools/talk-to-ai/logs/*.txt
 
 # VS Code temporary files
-tools/tools/talk-to-ai/src/Untitled-*.json
+tools/talk-to-ai/src/Untitled-*.json
 
 # Model checkpoints and outputs
 *.ckpt

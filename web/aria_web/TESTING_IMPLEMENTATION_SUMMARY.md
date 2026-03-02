@@ -19,7 +19,7 @@ Comprehensive testing infrastructure for Aria 3D character web interface with CI
 - Push to main/develop branches
 - Pull requests
 - Manual workflow dispatch
-- Path filters: `web/web/aria_web/**`, `tests/test_*aria*.py`, `tests/test_*ui*.py`
+- Path filters: `web/aria_web/**`, `tests/test_*aria*.py`, `tests/test_*ui*.py`
 
 **Features**:
 - Parallel job execution
@@ -60,8 +60,8 @@ pytest -m "not e2e"         # Run everything except E2E
 
 ### 4. Comprehensive Documentation
 **Files**: 
-- `web/web/aria_web/TESTING.md` - Complete testing guide
-- `web/web/aria_web/README.md` - Project overview with API docs
+- `web/aria_web/TESTING.md` - Complete testing guide
+- `web/aria_web/README.md` - Project overview with API docs
 
 **Testing Guide Includes**:
 - Overview of all test types
@@ -252,7 +252,7 @@ $ python -c "import yaml; yaml.safe_load(open('.github/workflows/aria-tests.yml'
 
 1. **Clone repo**
 2. **Run fast tests**: `pytest tests/test_aria_server.py -v`
-3. **Read docs**: Open `web/web/aria_web/TESTING.md`
+3. **Read docs**: Open `web/aria_web/TESTING.md`
 4. **Install E2E deps**: `pip install playwright && playwright install chromium`
 5. **Run E2E tests**: `pytest tests/test_ui_playwright.py -m playwright -v`
 6. **Push changes**: CI automatically runs all tests

@@ -34,7 +34,7 @@ Aria includes a comprehensive monetization system with **$2,235/month MRR** (111
 
 ### Quick Access
 - **[View Pricing](pricing.html)** - Three-tier subscription model (Free, Pro $49/mo, Enterprise $199/mo)
-- **[Try Aria Character](web/web/aria_web/index.html)** - Interactive character interface with integrated navigation
+- **[Try Aria Character](web/aria_web/index.html)** - Interactive character interface with integrated navigation
 - **[Admin Dashboard](admin_dashboard.html)** - Revenue analytics and subscriber management
 - **[Monetization Hub](monetization-index.html)** - Complete overview of all monetization features
 
@@ -175,7 +175,7 @@ python src/chat_cli.py --provider local --once "Hello Aria!"
 
 This workspace is organized around Aria with supporting AI/ML infrastructure:
 
-### 🎭 **web/web/aria_web/** - Aria Character Interface
+### 🎭 **web/aria_web/** - Aria Character Interface
 
 The main Aria character controller with 3D animations and object interactions.
 
@@ -202,11 +202,11 @@ python server.py
 - `POST /api/aria/object` - Manage objects
 - `POST /api/aria/world` - Generate themed worlds
 
-**Documentation:** [web/web/aria_web/README.md](web/web/aria_web/README.md)
+**Documentation:** [web/aria_web/README.md](web/aria_web/README.md)
 
 ---
 
-### 💬 **tools/tools/talk-to-ai/** - Aria Chat CLI
+### 💬 **tools/talk-to-ai/** - Aria Chat CLI
 
 Multi-provider chat CLI for interacting with Aria using natural language.
 
@@ -242,7 +242,7 @@ python .\src\chat_cli.py --provider azure
 
 **Aria Movement Commands:** Try saying "Move Aria left", "Wave", "Dance", or "Jump"!
 
-**Documentation:** See [tools/tools/talk-to-ai/README.md](tools/tools/talk-to-ai/README.md)
+**Documentation:** See [tools/talk-to-ai/README.md](tools/talk-to-ai/README.md)
 
 ---
 
@@ -540,7 +540,7 @@ python .\src\chat_cli.py --provider local --once "Move Aria left"
 ## 📝 File Organization
 
 ```
-├── web/web/aria_web/               # 🎭 Main Aria character controller
+├── web/aria_web/               # 🎭 Main Aria character controller
 │   ├── server.py           # Python backend API
 │   ├── aria_controller.js  # Frontend character logic
 │   └── index.html          # Interactive stage UI
@@ -559,7 +559,7 @@ python .\src\chat_cli.py --provider local --once "Move Aria left"
 │   ├── train_aria_direct.py
 │   ├── automate_aria_movement.py
 │   └── test_aria_dataset.py
-├── tools/tools/talk-to-ai/             # Chat CLI for Aria
+├── tools/talk-to-ai/             # Chat CLI for Aria
 ├── quantum/             # Quantum ML platform
 ├── tools/llm-maker/              # 🔧 LLM Tool Maker (autonomous tool creation)
 ├── AI/                     # Model fine-tuning workspace
@@ -579,8 +579,8 @@ python .\src\chat_cli.py --provider local --once "Move Aria left"
   - [ARIA_MOVEMENT_COMPLETE.md](docs/aria/ARIA_MOVEMENT_COMPLETE.md) - Implementation guide
   - [ARIA_MOVEMENT_TRAINING.md](docs/aria/ARIA_MOVEMENT_TRAINING.md) - Training reference
   - [ARIA_VISUAL_SYSTEM.md](docs/aria/ARIA_VISUAL_SYSTEM.md) - Visual system design
-- **[web/web/aria_web/README.md](web/web/aria_web/README.md)** - Web interface and API docs
-- **[web/web/aria_web/TESTING.md](web/web/aria_web/TESTING.md)** - Testing guide
+- **[web/aria_web/README.md](web/aria_web/README.md)** - Web interface and API docs
+- **[web/aria_web/TESTING.md](web/aria_web/TESTING.md)** - Testing guide
 
 ### Supporting Documentation
 
@@ -597,7 +597,7 @@ python .\src\chat_cli.py --provider local --once "Move Aria left"
 
 If Aria commands aren't working:
 
-1. Ensure the web/aria_web server is running: `python web/web/aria_web/server.py`
+1. Ensure the web/aria_web server is running: `python web/aria_web/server.py`
 2. Check browser console for JavaScript errors
 3. Verify API responses: `curl http://localhost:8000/api/aria/state`
 
@@ -629,7 +629,7 @@ Verify SDK version: `pip list | findstr openai` should show `openai>=1.37.0`
 
 - [ARIA_MOVEMENT_COMPLETE.md](docs/aria/ARIA_MOVEMENT_COMPLETE.md) - Full implementation guide
 - [ARIA_MOVEMENT_TRAINING.md](docs/aria/ARIA_MOVEMENT_TRAINING.md) - Training reference
-- [web/web/aria_web/TESTING.md](web/web/aria_web/TESTING.md) - Testing strategies
+- [web/aria_web/TESTING.md](web/aria_web/TESTING.md) - Testing strategies
 
 ---
 
@@ -709,9 +709,9 @@ python -m pytest tests/test_autotrain_unit.py -v
 
 | Component | Path | Purpose |
 |-----------|------|---------|
-| **Aria Web** | `web/web/aria_web/` | 🎭 Main character controller |
+| **Aria Web** | `web/aria_web/` | 🎭 Main character controller |
 | **Aria Character** | `web/chat-web/aria.html` | ✨ Animated avatar demo |
-| **Chat with Aria** | `tools/tools/talk-to-ai/` | 💬 CLI chat interface |
+| **Chat with Aria** | `tools/talk-to-ai/` | 💬 CLI chat interface |
 | **Aria Training** | `datasets/chat/aria_*` | 📊 Training datasets |
 | **Aria Docs** | `docs/aria/` | 📖 Documentation |
 | **Quantum ML** | `quantum/` | ⚛️ Experimental quantum features |
@@ -814,10 +814,10 @@ Train and use fine-tuned Aria models using LoRA adapters:
 
 ```powershell
 # Chat with a trained Aria adapter
-python ./tools/tools/talk-to-ai/src/chat_cli.py --provider lora --model data_out/aria_models/aria_direct
+python ./tools/talk-to-ai/src/chat_cli.py --provider lora --model data_out/aria_models/aria_direct
 
 # Or use the default adapter location
-python ./tools/tools/talk-to-ai/src/chat_cli.py --provider lora --model data_out/lora_training/lora_adapter
+python ./tools/talk-to-ai/src/chat_cli.py --provider lora --model data_out/lora_training/lora_adapter
 ```
 
 ### Web App

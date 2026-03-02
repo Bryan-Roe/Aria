@@ -11,14 +11,14 @@ Short & actionable summary for AI agents editing Aria — an interactive AI char
 - **Interactive AI Character Platform** with 3D animated avatar, natural language movement commands, and real-time object interaction
 - **Three isolated projects + Functions integration layer:**
   - `quantum/` — MCP server, web dashboard, quantum ML pipelines (separate venv)
-  - `tools/tools/talk-to-ai/` — chat CLI with multi-provider support (separate venv)
+  - `tools/talk-to-ai/` — chat CLI with multi-provider support (separate venv)
   - `AI/microsoft_phi-silica-3.6_v1/` — Phi-3.5 LoRA fine-tuning (separate venv)
   - `function_app.py` — Azure Functions integration exposing all APIs
 - **Integration points:**
-  - `function_app.py` dynamically imports from tools/tools/talk-to-ai/src and quantum/src (adds to sys.path)
+  - `function_app.py` dynamically imports from tools/talk-to-ai/src and quantum/src (adds to sys.path)
   - Shared infra in `shared/`: re-exports chat providers, DB engines, telemetry, Cosmos client
 - **Web Interfaces:**
-  - `web/web/aria_web/` — Interactive Aria character interface with CSS animations, eye tracking, gestures
+  - `web/aria_web/` — Interactive Aria character interface with CSS animations, eye tracking, gestures
   - `web/chat-web/` — Streaming chat UI with SSE support
 - **API endpoints** (via `function_app.py`):
   - `/api/chat` — streaming chat SSE
@@ -26,7 +26,7 @@ Short & actionable summary for AI agents editing Aria — an interactive AI char
   - `/api/tts` — Azure Speech TTS (falls back to local if enabled)
   - `/api/quantum/*` — quantum job submission/monitoring
   - `/api/ai/status` — health check showing active provider, env vars, DB pool, Cosmos status
-- **Aria Web API endpoints** (via `web/web/aria_web/server.py` on port 8080):
+- **Aria Web API endpoints** (via `web/aria_web/server.py` on port 8080):
   - `GET /api/aria/state` — current stage state (position, objects, expressions)
   - `POST /api/aria/command` — process natural language commands
   - `POST /api/aria/execute` — auto-execute action sequences (plan or execute mode)
@@ -96,7 +96,7 @@ curl http://localhost:7071/api/ai/status | jq # Health check
 # === TESTING & VALIDATION ===
 python scripts/test_runner.py --unit          # Fast unit tests
 python scripts/test_runner.py --all           # All tests
-python tools/tools/talk-to-ai/src/chat_cli.py --provider local --once "Hello"  # Smoke test
+python tools/talk-to-ai/src/chat_cli.py --provider local --once "Hello"  # Smoke test
 python scripts/fast_validate.py              # Quick validation across all components
 
 # === ORCHESTRATORS (Manual Execution) ===
@@ -204,7 +204,7 @@ async def run_single_cycle(cycle_number):
 | Change | File(s) |
 |--------|---------|
 | Add/modify API endpoint | `function_app.py` |
-| Chat provider logic | `tools/tools/talk-to-ai/src/chat_providers.py` (re-exported by `shared/chat_providers.py`) |
+| Chat provider logic | `tools/talk-to-ai/src/chat_providers.py` (re-exported by `shared/chat_providers.py`) |
 | Training orchestration | `scripts/autotrain.py` + root `autotrain.yaml` |
 | Autonomous training behavior | `scripts/autonomous_training_orchestrator.py` + `config/autonomous_training.yaml` |
 | Master orchestrator (schedules/coordination) | `scripts/master_orchestrator.py` + `config/master_orchestrator.yaml` |
@@ -213,8 +213,8 @@ async def run_single_cycle(cycle_number):
 | Quantum jobs | `scripts/quantum_autorun.py` + root `quantum_autorun.yaml` |
 | MCP server tools | `quantum/quantum_mcp_server.py` |
 | Shared DB/telemetry | `shared/sql_engine.py`, `shared/telemetry.py`, `shared/cosmos_client.py` |
-| Aria character interface | `web/web/aria_web/index.html`, `web/web/aria_web/aria_controller.js`, `web/web/aria_web/server.py` |
-| Aria movement/gestures | `web/web/aria_web/aria_controller.js` (command parsing & animation triggers) |
+| Aria character interface | `web/aria_web/index.html`, `web/aria_web/aria_controller.js`, `web/aria_web/server.py` |
+| Aria movement/gestures | `web/aria_web/aria_controller.js` (command parsing & animation triggers) |
 
 ## Safety Rules
 

@@ -1,7 +1,7 @@
 """Chat providers re-export module for shared infrastructure.
 
 This module re-exports chat providers from the canonical source at
-tools/tools/talk-to-ai/src/chat_providers.py to avoid code duplication while
+tools/talk-to-ai/src/chat_providers.py to avoid code duplication while
 maintaining backward compatibility for imports from shared/.
 
 Usage:
@@ -15,9 +15,9 @@ import sys
 import importlib.util
 from pathlib import Path
 
-# Load the canonical chat_providers module directly from tools/tools/talk-to-ai/src
+# Load the canonical chat_providers module directly from tools/talk-to-ai/src
 _canonical_path = Path(__file__).resolve().parent.parent / \
-    "tools/tools/talk-to-ai" / "src" / "chat_providers.py"
+    "tools/talk-to-ai" / "src" / "chat_providers.py"
 _spec = importlib.util.spec_from_file_location(
     "_canonical_chat_providers", _canonical_path)
 _canonical_module = importlib.util.module_from_spec(_spec)
@@ -61,7 +61,7 @@ except AttributeError:
 # Conditionally export AGI provider using the same dynamic import pattern
 try:
     _agi_path = Path(__file__).resolve().parent.parent / \
-        "tools/tools/talk-to-ai" / "src" / "agi_provider.py"
+        "tools/talk-to-ai" / "src" / "agi_provider.py"
     if _agi_path.exists():
         _agi_spec = importlib.util.spec_from_file_location(
             "_agi_provider_module", _agi_path)

@@ -46,7 +46,7 @@ pytestmark = pytest.mark.skipif(
 )
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-ARIA_WEB = REPO_ROOT / 'web/web/aria_web'
+ARIA_WEB = REPO_ROOT / 'web/aria_web'
 # allow configurable port via environment; server defaults to 8080
 DEFAULT_PORT = int(os.environ.get('ARIA_PORT', '8080'))
 SERVER_URL = os.environ.get('ARIA_SERVER_URL', f'http://localhost:{DEFAULT_PORT}')

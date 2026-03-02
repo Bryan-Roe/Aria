@@ -6,7 +6,7 @@ import sys
 from pathlib import Path
 
 # Add tools/talk-to-ai to path so we can import chat_providers
-talk_to_ai_path = Path(__file__).resolve().parent.parent / "tools/tools/talk-to-ai" / "src"
+talk_to_ai_path = Path(__file__).resolve().parent.parent / "tools/talk-to-ai" / "src"
 sys.path.insert(0, str(talk_to_ai_path))
 
 # Add repo root to path so we can import shared utilities as a package

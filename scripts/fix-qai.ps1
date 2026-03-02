@@ -71,11 +71,11 @@ Write-Host ""
 Write-Host "3. Verifying quantum integration..." -ForegroundColor Yellow
 
 Write-Host "   Testing quantum provider..." -ForegroundColor Gray
-$quantumTest = "import sys; sys.path.insert(0, 'tools/tools/talk-to-ai/src'); sys.path.insert(0, 'quantum/src'); from quantum_provider import create_quantum_provider; print('   Quantum provider OK')"
+$quantumTest = "import sys; sys.path.insert(0, 'tools/talk-to-ai/src'); sys.path.insert(0, 'quantum/src'); from quantum_provider import create_quantum_provider; print('   Quantum provider OK')"
 & ".\venv\Scripts\python.exe" -c $quantumTest
 
 Write-Host "   Testing chat providers..." -ForegroundColor Gray
-$chatTest = "import sys; sys.path.insert(0, 'tools/tools/talk-to-ai/src'); from chat_providers import detect_provider; print('   Chat providers OK')"
+$chatTest = "import sys; sys.path.insert(0, 'tools/talk-to-ai/src'); from chat_providers import detect_provider; print('   Chat providers OK')"
 & ".\venv\Scripts\python.exe" -c $chatTest
 
 # Fix 4: Check git status

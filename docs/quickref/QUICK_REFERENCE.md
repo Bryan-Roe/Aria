@@ -238,7 +238,7 @@ curl http://localhost:7071/api/ai/status | jq '.cosmos.error'
 | [QUANTUM_AUTORUN_README.md](QUANTUM_AUTORUN_README.md) | Quantum orchestrator usage |
 | [AUTOTRAIN_README.md](AUTOTRAIN_README.md) | LoRA training orchestrator |
 | [quantum/README.md](quantum/README.md) | Quantum AI project docs |
-| [tools/tools/talk-to-ai/README.md](tools/tools/talk-to-ai/README.md) | Chat CLI documentation |
+| [tools/talk-to-ai/README.md](tools/talk-to-ai/README.md) | Chat CLI documentation |
 
 ---
 

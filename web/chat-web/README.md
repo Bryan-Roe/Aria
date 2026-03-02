@@ -31,7 +31,7 @@ The chat will work immediately with the free local provider!
 
 - **Frontend**: `web/chat-web/` - Pure HTML/CSS/JS, no build required
 - **Backend**: `services/http_chat/` - Azure Functions endpoint
-- **Chat Logic**: Reuses `tools/tools/talk-to-ai/src/chat_providers.py`
+- **Chat Logic**: Reuses `tools/talk-to-ai/src/chat_providers.py`
 
 ## Provider Configuration
 
@@ -129,7 +129,7 @@ pip install -r requirements.txt
 The function includes CORS headers. If testing locally, ensure you're accessing via `http://localhost:7071`.
 
 **Provider errors:**
-Check environment variables and ensure `tools/tools/talk-to-ai/src/chat_providers.py` is accessible.
+Check environment variables and ensure `tools/talk-to-ai/src/chat_providers.py` is accessible.
 
 ## Cost Optimization
 
@@ -149,7 +149,7 @@ web/chat-web/
 services/http_chat/
   function_app.py    # Azure Functions endpoint
 
-tools/tools/talk-to-ai/src/
+tools/talk-to-ai/src/
   chat_providers.py  # Provider implementations (shared)
 ```
 

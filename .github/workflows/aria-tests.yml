@@ -18,14 +18,14 @@ on:
   push:
     branches: [main, develop]
     paths:
-      - 'web/web/aria_web/**'
+      - 'web/aria_web/**'
       - 'tests/test_*aria*.py'
       - 'tests/test_*ui*.py'
       - '.github/workflows/aria-tests.yml'
   pull_request:
     branches: [main, develop]
     paths:
-      - 'web/web/aria_web/**'
+      - 'web/aria_web/**'
       - 'tests/test_*aria*.py'
       - 'tests/test_*ui*.py'
       - '.github/workflows/aria-tests.yml'

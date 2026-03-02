@@ -8,7 +8,7 @@ This document summarizes the performance optimizations implemented to address sl
 
 ## 🎯 Critical Issues Fixed (High Impact)
 
-### 1. web/web/aria_web/server.py - Keyword Set Optimization
+### 1. web/aria_web/server.py - Keyword Set Optimization
 **Problem**: Hot path contained 20+ consecutive `any()` calls checking keywords against lists, each requiring O(n) linear search.
 
 **Before**:
@@ -113,7 +113,7 @@ def store_embedding(...):
 
 ---
 
-### 3. web/web/aria_web/server.py - Regex Pattern Pre-compilation
+### 3. web/aria_web/server.py - Regex Pattern Pre-compilation
 **Problem**: Regex patterns compiled on every call in hot paths.
 
 **Before**:
