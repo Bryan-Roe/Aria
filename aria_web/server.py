@@ -75,6 +75,8 @@ RIGHT_LEG_KEYWORDS = frozenset(['right leg', 'leg right'])
 SPARKLE_KEYWORDS = frozenset(['sparkle', 'sparkles', 'glitter', 'shimmer', 'shine'])
 GLOW_KEYWORDS = frozenset(['glow', 'glowing', 'radiate', 'illuminate'])
 HEARTS_KEYWORDS = frozenset(['hearts', 'heart', 'love'])
+WALK_LEFT_KEYWORDS = frozenset(['walk left', 'go left', 'left'])
+WALK_RIGHT_KEYWORDS = frozenset(['walk right', 'go right', 'right'])
 
 def _contains_any_keyword(text: str, keywords: frozenset) -> bool:
     """Check if text contains any keyword from set. O(1) per keyword check."""
@@ -554,9 +556,9 @@ def determine_position_from_context(cmd: str) -> str:
         return '[aria:position:50:50]'  # Center to present
     elif _contains_any_keyword(cmd, THINK_KEYWORDS):
         return '[aria:position:25:50]'  # Contemplative left position
-    elif any(k in cmd for k in ['walk left', 'go left', 'left']):
+    elif _contains_any_keyword(cmd, WALK_LEFT_KEYWORDS):
         return '[aria:position:20:70]'  # Moving to left
-    elif any(k in cmd for k in ['walk right', 'go right', 'right']):
+    elif _contains_any_keyword(cmd, WALK_RIGHT_KEYWORDS):
         return '[aria:position:80:70]'  # Moving to right
     elif 'add' in cmd or 'create' in cmd or 'spawn' in cmd:
         # For adding objects, position near table

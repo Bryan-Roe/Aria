@@ -51,6 +51,9 @@ _lm_studio_cache_lock = threading.RLock()
 # Backward-compatible alias for tests expecting _lmstudio_cache_lock
 _lmstudio_cache_lock = _lm_studio_cache_lock
 _LM_STUDIO_CACHE_TTL_SECONDS = 30
+# Backward-compatible aliases for tests
+_lmstudio_cache = _lm_studio_availability_cache
+_LMSTUDIO_CACHE_TTL = _LM_STUDIO_CACHE_TTL_SECONDS
 
 
 # {"role": "system|user|assistant", "content": "..."}
