@@ -2,20 +2,36 @@
 
 This repository uses GitHub Actions for continuous integration, testing, deployment, and automation.
 
+**14 workflows, organized by purpose.** Use this page to find the right workflow for your task.
+
 ## 📊 Workflow Status
 
-| Workflow | Status | Description |
-| -------- | ------ | ----------- |
-| CI Pipeline | ![CI Pipeline](https://github.com/Bryan-Roe/Aria/actions/workflows/ci-pipeline.yml/badge.svg) | Main CI with validation, training, and deployment |
-| Code Quality | ![Code Quality](https://github.com/Bryan-Roe/Aria/actions/workflows/code-quality.yml/badge.svg) | Linting, formatting, and security checks |
-| CodeQL Security | ![CodeQL](https://github.com/Bryan-Roe/Aria/actions/workflows/codeql.yml/badge.svg) | Security vulnerability scanning |
-| PR Checks | ![PR Checks](https://github.com/Bryan-Roe/Aria/actions/workflows/pr-checks.yml/badge.svg) | Fast validation for pull requests |
-| Auto Validation | ![Auto Validation](https://github.com/Bryan-Roe/Aria/actions/workflows/auto-validation.yml/badge.svg) | Orchestrator dry-run validation |
-| E2E Tests | ![E2E Tests](https://github.com/Bryan-Roe/Aria/actions/workflows/e2e-tests.yml/badge.svg) | End-to-end browser tests |
-| Aria Tests | ![Aria Tests](https://github.com/Bryan-Roe/Aria/actions/workflows/aria-tests.yml/badge.svg) | Aria character tests |
-| Quantum | ![Quantum](https://github.com/Bryan-Roe/Aria/actions/workflows/quantum-orchestration.yml/badge.svg) | Quantum computing workflows |
-| Azure ML | ![Azure ML](https://github.com/Bryan-Roe/Aria/actions/workflows/azureml-train.yml/badge.svg) | Azure ML training jobs |
-| Release | ![Release](https://github.com/Bryan-Roe/Aria/actions/workflows/release.yml/badge.svg) | Automated releases |
+| Status | Workflow | Description |
+| --- | --- | --- |
+| ![CI Pipeline](https://github.com/Bryan-Roe/Aria/actions/workflows/ci-pipeline.yml/badge.svg) | **CI Pipeline** | Validation → training → deployment (daily + PR) |
+| ![Code Quality](https://github.com/Bryan-Roe/Aria/actions/workflows/code-quality.yml/badge.svg) | **Code Quality** | black, flake8, isort, mypy, safety checks |
+| ![CodeQL](https://github.com/Bryan-Roe/Aria/actions/workflows/codeql.yml/badge.svg) | **CodeQL Security** | Python & JS vulnerability scanning |
+| ![PR Checks](https://github.com/Bryan-Roe/Aria/actions/workflows/pr-checks.yml/badge.svg) | **PR Checks** | Fast validation + auto-labeling |
+| ![Auto Validation](https://github.com/Bryan-Roe/Aria/actions/workflows/auto-validation.yml/badge.svg) | **Auto Validation** | Orchestrator config dry-runs |
+| ![E2E Tests](https://github.com/Bryan-Roe/Aria/actions/workflows/e2e-tests.yml/badge.svg) | **E2E Tests** | Browser automation (Playwright, Pyppeteer, Selenium) |
+| ![Aria Tests](https://github.com/Bryan-Roe/Aria/actions/workflows/aria-tests.yml/badge.svg) | **Aria Tests** | Character runtime (Python 3.10, 3.11, 3.12) |
+| ![Quantum](https://github.com/Bryan-Roe/Aria/actions/workflows/quantum-orchestration.yml/badge.svg) | **Quantum Orchestration** | Azure Quantum workflows |
+| ![Azure ML](https://github.com/Bryan-Roe/Aria/actions/workflows/azureml-train.yml/badge.svg) | **Azure ML Training** | LoRA training jobs on cloud GPU |
+| ![Release](https://github.com/Bryan-Roe/Aria/actions/workflows/release.yml/badge.svg) | **Release** | Automated semantic releases |
+| — | **Stale Issues/PRs** | Auto-close inactive issues (60d) and PRs (30d) |
+| — | **Pages** | Deploy GitHub Pages documentation |
+| — | **Workflow Validation** | Syntax check for workflow files |
+
+## Find by Task
+
+- **Push broke tests** → CI Pipeline / E2E Tests / Code Quality
+- **Aria character buggy** → Aria Tests
+- **New orchestrator job** → Auto Validation
+- **Cloud training needed** → Azure ML Training (manual)
+- **Quantum task** → Quantum Orchestration (manual)
+- **Release publish** → Release (git tag v*.*.*)
+- **Security issues** → CodeQL Security / Code Quality
+- **Workflow YAML error** → Workflow Validation (manual)
 
 ## 🔄 Workflows Overview
 

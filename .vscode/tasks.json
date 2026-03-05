@@ -136,6 +136,117 @@
       "args": ["/home/bryan/Aria/Aria/run_quantum_embedded.py"],
       "isBackground": false,
       "group": "build"
+    },
+    {
+      "label": "run: quantum-llm concurrent (3 epochs)",
+      "type": "shell",
+      "command": "/home/bryan/Aria/Aria/.venv/bin/python",
+      "args": ["examples/quantum_llm_concurrent_train.py", "--epochs", "3"],
+      "isBackground": false,
+      "group": "test"
+    },
+    {
+      "label": "run: quantum-llm concurrent (10 epochs)",
+      "type": "shell",
+      "command": "/home/bryan/Aria/Aria/.venv/bin/python",
+      "args": ["examples/quantum_llm_concurrent_train.py", "--epochs", "10"],
+      "isBackground": false,
+      "group": "test"
+    },
+    {
+      "label": "run: quantum-llm concurrent (1000 epochs)",
+      "type": "shell",
+      "command": "/home/bryan/Aria/Aria/.venv/bin/python",
+      "args": ["examples/quantum_llm_concurrent_train.py", "--epochs", "1000"],
+      "isBackground": false,
+      "group": "test"
+    },
+    {
+      "label": "run: quantum-llm concurrent (10000 epochs)",
+      "type": "shell",
+      "command": "/home/bryan/Aria/Aria/.venv/bin/python",
+      "args": ["examples/quantum_llm_concurrent_train.py", "--epochs", "10000"],
+      "isBackground": false,
+      "group": "test"
+    },
+    {
+      "label": "run: quantum-llm concurrent (10000 epochs quiet)",
+      "type": "shell",
+      "command": "/home/bryan/Aria/Aria/.venv/bin/python",
+      "args": [
+        "-c",
+        "import logging,sys; sys.path.insert(0,'scripts'); import quantum_llm_concurrent as q; logging.getLogger().setLevel(logging.WARNING); q.logger.setLevel(logging.WARNING); trainer=q.QuantumLLMConcurrentTrainer(n_epochs=10000,batch_size=16,n_qubits=4,n_layers=2,quantum_feedback_weight=0.1); result=trainer.train(); print(result.summary())"
+      ],
+      "isBackground": false,
+      "group": "test"
+    },
+    {
+      "label": "run: quantum-llm concurrent (10000 epochs quiet)",
+      "type": "shell",
+      "command": "/home/bryan/Aria/Aria/.venv/bin/python",
+      "args": [
+        "-c",
+        "import logging,sys; sys.path.insert(0,\"scripts\"); import quantum_llm_concurrent as q; logging.getLogger().setLevel(logging.WARNING); q.logger.setLevel(logging.WARNING); trainer=q.QuantumLLMConcurrentTrainer(n_epochs=10000,batch_size=16,n_qubits=4,n_layers=2,quantum_feedback_weight=0.1); result=trainer.train(); print(result.summary())"
+      ],
+      "isBackground": false,
+      "group": "test"
+    },
+    {
+      "label": "run: quantum-llm concurrent (20000 epochs)",
+      "type": "shell",
+      "command": "/home/bryan/Aria/Aria/.venv/bin/python",
+      "args": ["examples/quantum_llm_concurrent_train.py", "--epochs", "20000"],
+      "isBackground": false,
+      "group": "test"
+    },
+    {
+      "label": "run: quantum-llm concurrent (20000 epochs quiet)",
+      "type": "shell",
+      "command": "/home/bryan/Aria/Aria/.venv/bin/python",
+      "args": [
+        "examples/quantum_llm_concurrent_train.py",
+        "--epochs",
+        "20000",
+        "--quiet"
+      ],
+      "isBackground": false,
+      "group": "test"
+    },
+    {
+      "label": "run: custom llm chat (auto)",
+      "type": "shell",
+      "command": "/home/bryan/Aria/Aria/.venv/bin/python",
+      "args": ["scripts/run_chat_cli.py"],
+      "isBackground": false,
+      "group": "test",
+      "problemMatcher": []
+    },
+    {
+      "label": "run: custom llm chat (lmstudio)",
+      "type": "shell",
+      "command": "/home/bryan/Aria/Aria/.venv/bin/python",
+      "args": ["scripts/run_chat_cli.py", "--provider", "lmstudio"],
+      "isBackground": false,
+      "group": "test",
+      "problemMatcher": []
+    },
+    {
+      "label": "run: custom llm chat (local)",
+      "type": "shell",
+      "command": "/home/bryan/Aria/Aria/.venv/bin/python",
+      "args": ["scripts/run_chat_cli.py", "--provider", "local"],
+      "isBackground": false,
+      "group": "test",
+      "problemMatcher": []
+    },
+    {
+      "label": "run: custom llm chat (dry-run)",
+      "type": "shell",
+      "command": "/home/bryan/Aria/Aria/.venv/bin/python",
+      "args": ["scripts/run_chat_cli.py", "--dry-run"],
+      "isBackground": false,
+      "group": "test",
+      "problemMatcher": []
     }
   ]
 }

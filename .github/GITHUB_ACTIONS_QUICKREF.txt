@@ -72,7 +72,11 @@
                            PRs: stale after 30d, close after 7d
                            Triggers: daily midnight UTC, manual
                            
-  workflow-validation.yml⭐  Validates workflow syntax
+  pages.yml           ⭐   Deploy GitHub Pages documentation
+                           Triggers: docs/ changes, manual trigger
+                           Deploys static site from docs/ to gh-pages
+                           
+  workflow-validation.yml⭐ Validates workflow YAML syntax
                            Triggers: workflow file changes, push to main
 
 ┌─────────────────────────────────────────────────────────────────────────────────┐
@@ -115,7 +119,7 @@
 │ CONFIGURATION FILES                                                              │
 └─────────────────────────────────────────────────────────────────────────────────┘
 
-  .github/workflows/        Workflow definitions (13 workflows)
+  .github/workflows/        Workflow definitions (14 workflows)
   .github/labeler.yml       Auto-labeling configuration
   .github/dependabot.yml    Dependency update configuration
   pytest.ini                Test configuration

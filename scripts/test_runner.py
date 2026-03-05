@@ -1,7 +1,7 @@
 #!/usr/bin/env python
-"""Test Runner - Automated Test Orchestrator
+"""Test Runner - Automated Test Orchestrator.
 
-Runs pytest with intelligent filtering, parallel execution, and result aggregation.
+Runs pytest with filtering, parallel execution, and result aggregation.
 
 Features:
 - Auto-detect test suites (unit, integration, slow, azure)
@@ -11,41 +11,16 @@ Features:
 - CI-friendly exit codes and artifacts
 
 Usage:
-  python .\\scripts\\test_runner.py --all                  # Run all non-slow tests
+    python .\\scripts\\test_runner.py --all
+            # Run all non-slow tests
   python .\\scripts\\test_runner.py --unit                 # Unit tests only
   python .\\scripts\\test_runner.py --integration          # Integration tests
   python .\\scripts\\test_runner.py --suite autotrain      # Specific suite
   python .\\scripts\\test_runner.py --coverage             # With coverage
-  python .\\scripts\\test_runner.py --watch                # Watch mode (re-run on change)
+  python .\\scripts\\test_runner.py --watch
+      # Watch mode (re-run on change)
 """
 from __future__ import annotations
-import subprocess
-import sys
-
-
-def ensure_dependencies():
-    """Make sure the Python dependencies from requirements files are installed.
-
-    This helps stabilise the test environment when the venv isn't active or
-    packages are missing. By default it installs from the root
-    `requirements.txt`.  When quantum-related tests are run we also install
-    the quantum-ai requirements so that packages like PennyLane and Qiskit are
-    available.
-    """
-    # always install the base requirements
-    base_req = REPO_ROOT / "requirements.txt"
-    for req_file in (base_req, REPO_ROOT / "quantum" / "requirements.txt"):
-        if req_file.exists():
-            try:
-                print(f"[test_runner] installing dependencies from {req_file}")
-                subprocess.run(
-                    [sys.executable, "-m", "pip", "install", "-r", str(req_file)],
-                    check=True,
-                )
-            except subprocess.CalledProcessError as e:
-                print(f"Failed to install dependencies from {req_file}: {e}")
-
-
 import argparse
 import json
 import re
@@ -55,11 +30,86 @@ import time
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Dict, List, Optional
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 TESTS_DIR = REPO_ROOT / "tests"
 DATA_OUT = REPO_ROOT / "data_out" / "test_runner"
+_PYTEST_PYTHON: Optional[str] = None
+
+
+def ensure_dependencies() -> None:
+    """Ensure requirements files are installed before running tests.
+
+    This helps stabilise local environments when a venv is not active or
+    packages are missing. It installs from root `requirements.txt` and, when
+    present, `quantum/requirements.txt`.
+    """
+    base_req = REPO_ROOT / "requirements.txt"
+    quantum_req = REPO_ROOT / "quantum" / "requirements.txt"
+
+    for req_file in (base_req, quantum_req):
+        if req_file.exists():
+            try:
+                print(f"[test_runner] installing dependencies from {req_file}")
+                subprocess.run(
+                    [
+                        sys.executable,
+                        "-m",
+                        "pip",
+                        "install",
+                        "-r",
+                        str(req_file),
+                    ],
+                    check=True,
+                )
+            except subprocess.CalledProcessError as e:
+                print(
+                    "Failed to install dependencies from "
+                    f"{req_file}: {e}"
+                )
+
+
+def get_pytest_python() -> str:
+    """Resolve an interpreter that can import pytest.
+
+    Prefer the repository venv when available, then fall back to the current
+    interpreter. If pytest is missing everywhere, attempt dependency install
+    once and re-check.
+    """
+    global _PYTEST_PYTHON
+    if _PYTEST_PYTHON:
+        return _PYTEST_PYTHON
+
+    venv_python = REPO_ROOT / ".venv" / "bin" / "python"
+    candidates: List[str] = []
+    if venv_python.exists():
+        candidates.append(str(venv_python))
+    candidates.append(sys.executable)
+
+    def _has_pytest(python_bin: str) -> bool:
+        probe = subprocess.run(
+            [python_bin, "-c", "import pytest"],
+            capture_output=True,
+            text=True,
+        )
+        return probe.returncode == 0
+
+    for python_bin in candidates:
+        if _has_pytest(python_bin):
+            _PYTEST_PYTHON = python_bin
+            return _PYTEST_PYTHON
+
+    print("[test_runner] pytest not found; attempting dependency install")
+    ensure_dependencies()
+
+    for python_bin in candidates:
+        if _has_pytest(python_bin):
+            _PYTEST_PYTHON = python_bin
+            return _PYTEST_PYTHON
+
+    _PYTEST_PYTHON = sys.executable
+    return _PYTEST_PYTHON
 
 
 @dataclass
@@ -73,6 +123,7 @@ class TestSuite:
 
     def build_pytest_args(self) -> List[str]:
         args = []
+        matched_any = False
 
         # Expand glob patterns to actual file paths
         if self.patterns:
@@ -80,10 +131,11 @@ class TestSuite:
                 # Use pathlib glob to expand wildcards
                 matches = list(TESTS_DIR.glob(pattern))
                 if matches:
+                    matched_any = True
                     args.extend([str(p) for p in matches])
-                else:
-                    # If no matches, add the pattern anyway (pytest will report no tests)
-                    args.append(str(TESTS_DIR / pattern))
+            # If none of the patterns matched, fall back to full tests dir
+            if not matched_any:
+                args.append(str(TESTS_DIR))
         else:
             args.append(str(TESTS_DIR))
 
@@ -98,8 +150,8 @@ class TestSuite:
                 marker_expr.append(f"not {m}")
 
             if marker_expr:
-                # Join the expressions with ' and ' to create a single string argument
-                # This ensures pytest receives the complete expression as one value
+                # Join expressions with ' and ' to keep a single arg value.
+                # This ensures pytest receives one complete marker expression.
                 args.extend(["-m", " and ".join(marker_expr)])
 
         return args
@@ -129,7 +181,7 @@ SUITES = {
         patterns=["test_quantum*.py", "test_validate_qiskit*.py"],
         exclude_markers=["azure"],
     ),
-    # Workspace verification for entire QAI stack (chat + quantum + function app)
+    # Workspace verification for entire QAI stack.
     "qai": TestSuite(
         name="qai",
         patterns=["test-qai.py"],
@@ -176,11 +228,15 @@ class TestResult:
     coverage_pct: Optional[float] = None
 
 
-def run_pytest(suite: TestSuite, coverage: bool = False, verbose: int = 1) -> TestResult:
+def run_pytest(
+    suite: TestSuite,
+    coverage: bool = False,
+    verbose: int = 1,
+) -> TestResult:
     """Execute pytest for a test suite"""
     print(f"\n[test_runner] Running suite: {suite.name}")
 
-    cmd = [sys.executable, "-m", "pytest"]
+    cmd = [get_pytest_python(), "-m", "pytest"]
 
     # Verbosity
     if verbose > 0:
@@ -229,7 +285,8 @@ def run_pytest(suite: TestSuite, coverage: bool = False, verbose: int = 1) -> Te
         clean_output = ansi_escape.sub('', result.output)
 
         # Parse pytest output for stats using regex for robustness
-        # Look for patterns like "40 passed in 0.13s" or "5 passed, 2 failed in 10.5s"
+        # Examples: "40 passed in 0.13s" and
+        # "5 passed, 2 failed in 10.5s".
         passed_match = re.search(r'(\d+)\s+passed', clean_output)
         if passed_match:
             result.tests_passed = int(passed_match.group(1))
@@ -257,10 +314,16 @@ def run_pytest(suite: TestSuite, coverage: bool = False, verbose: int = 1) -> Te
                         result.coverage_pct = cov_data.get(
                             "totals", {}).get("percent_covered")
                 except Exception as e:
-                    result.output += f"\n[coverage-parse-error] {e}" if result.output else f"[coverage-parse-error] {e}"
+                    cov_err = f"[coverage-parse-error] {e}"
+                    result.output += (
+                        f"\n{cov_err}" if result.output else cov_err
+                    )
 
         # Determine status
         if proc.returncode == 0:
+            result.status = "passed"
+        elif proc.returncode == 5 and result.tests_collected == 0:
+            # pytest "no tests collected" should not fail orchestration
             result.status = "passed"
         elif result.tests_failed > 0:
             result.status = "failed"
@@ -284,7 +347,11 @@ def run_pytest(suite: TestSuite, coverage: bool = False, verbose: int = 1) -> Te
         "timeout": "[TIMEOUT]"
     }
     status_mark = status_symbols.get(result.status, "[?]")
-    print(f"[test_runner] {status_mark} {suite.name}: {result.tests_passed} passed, {result.tests_failed} failed in {result.duration_sec:.1f}s")
+    print(
+        f"[test_runner] {status_mark} {suite.name}: "
+        f"{result.tests_passed} passed, {result.tests_failed} failed "
+        f"in {result.duration_sec:.1f}s"
+    )
 
     return result
 
@@ -306,7 +373,9 @@ def write_results(results: List[TestResult]) -> None:
                 "tests_failed": r.tests_failed,
                 "tests_skipped": r.tests_skipped,
                 "exit_code": r.exit_code,
-                "coverage_pct": round(r.coverage_pct, 2) if r.coverage_pct else None,
+                "coverage_pct": (
+                    round(r.coverage_pct, 2) if r.coverage_pct else None
+                ),
             }
             for r in results
         ],
@@ -317,7 +386,9 @@ def write_results(results: List[TestResult]) -> None:
             "total_tests": sum(r.tests_collected for r in results),
             "total_passed": sum(r.tests_passed for r in results),
             "total_failed": sum(r.tests_failed for r in results),
-            "total_duration_sec": round(sum(r.duration_sec for r in results), 2),
+            "total_duration_sec": round(
+                sum(r.duration_sec for r in results), 2
+            ),
         },
     }
 
@@ -343,8 +414,10 @@ def write_results(results: List[TestResult]) -> None:
         "",
         "## Test Suites",
         "",
-        "| Suite | Status | Tests | Passed | Failed | Skipped | Duration | Coverage |",
-        "|-------|--------|-------|--------|--------|---------|----------|----------|",
+        "| Suite | Status | Tests | Passed | Failed | Skipped | Duration | "
+        "Coverage |",
+        "|-------|--------|-------|--------|--------|---------|----------|"
+        "----------|",
     ]
 
     for r in results:
@@ -366,7 +439,7 @@ def write_results(results: List[TestResult]) -> None:
     with md_path.open("w", encoding="utf-8") as f:
         f.write("\n".join(lines))
 
-    print(f"\n[test_runner] Results written:")
+    print("\n[test_runner] Results written:")
     print(f"  JSON: {json_path}")
     print(f"  Markdown: {md_path}")
 
@@ -408,7 +481,9 @@ def watch_mode(suites: List[str], coverage: bool) -> None:
 
             if changed:
                 print(
-                    f"\n[test_runner] Detected changes in {len(changed)} file(s)")
+                    f"\n[test_runner] Detected changes "
+                    f"in {len(changed)} file(s)"
+                )
                 for c in changed[:5]:
                     print(f"  - {Path(c).relative_to(REPO_ROOT)}")
 
@@ -449,7 +524,9 @@ def main() -> None:
         print("Available test suites:")
         for name, suite in SUITES.items():
             print(
-                f"  {name:15} - patterns={suite.patterns}, markers={suite.markers}")
+                f"  {name:15} - patterns={suite.patterns}, "
+                f"markers={suite.markers}"
+            )
         return
 
     # Determine which suites to run

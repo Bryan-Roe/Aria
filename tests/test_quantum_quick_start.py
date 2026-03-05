@@ -1,6 +1,7 @@
 """Tests for quantum/src/quantum_quick_start.py — local simulation only."""
 from __future__ import annotations
 
+import importlib
 import json
 import sys
 from pathlib import Path
@@ -14,17 +15,17 @@ QUANTUM_SRC = REPO_ROOT / "quantum" / "src"
 if str(QUANTUM_SRC) not in sys.path:
     sys.path.insert(0, str(QUANTUM_SRC))
 
-from quantum_quick_start import (
-    build_parser,
-    main,
-    run_aer_bell_state,
-    run_aer_ghz,
-    train_local_classifier,
-)
+_qs = importlib.import_module("quantum_quick_start")
+build_parser = _qs.build_parser
+main = _qs.main
+run_aer_bell_state = _qs.run_aer_bell_state
+run_aer_ghz = _qs.run_aer_ghz
+train_local_classifier = _qs.train_local_classifier
 
 # ---------------------------------------------------------------------------
 # Aer circuit tests
 # ---------------------------------------------------------------------------
+
 
 class TestAerBellState:
     def test_returns_counts(self):
@@ -124,7 +125,16 @@ class TestCLI:
     def test_main_full(self, tmp_path):
         """Full run with results saved to a temp dir."""
         with patch("quantum_quick_start.DATA_OUT", tmp_path):
-            result = main(["--epochs", "1", "--batch-size", "32", "--dataset", "banknote"])
+            result = main(
+                [
+                    "--epochs",
+                    "1",
+                    "--batch-size",
+                    "32",
+                    "--dataset",
+                    "banknote",
+                ]
+            )
         assert result["mode"] == "full"
         assert "classifier" in result
         # Check a JSON was written

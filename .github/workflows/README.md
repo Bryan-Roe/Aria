@@ -1,6 +1,13 @@
 # GitHub Actions Workflows
 
-This directory contains all GitHub Actions workflows for the Aria repository. Workflows are organized by purpose and execution pattern.
+This directory contains **14 GitHub Actions workflows** for the Aria repository, organized by purpose and execution pattern.
+
+## Quick Navigation
+
+- **Need to find the right workflow?** See [../WORKFLOWS.md](../WORKFLOWS.md) for full details.
+- **Want to run tests locally?** Use `pytest` — see `pytest.ini` at repo root.
+- **Want to trigger a workflow?** Go to Actions tab → Select workflow → Run workflow.
+- **Want to understand trigger patterns?** See "When workflows run" below.
 
 ## Workflow Organization
 
@@ -43,6 +50,24 @@ This directory contains all GitHub Actions workflows for the Aria repository. Wo
   - Runs on: Push to main, manual trigger
   - Purpose: Execute quantum workflows on Azure Quantum
   - Requires: Azure credentials, Quantum workspace
+
+## Maintenance & Deployment Workflows
+
+- **`release.yml`** - Automated releases
+  - Runs on: Git tags (v*.*.*), manual
+  - Purpose: Create GitHub releases with changelog and artifacts
+  
+- **`stale.yml`** - Auto-close stale issues/PRs
+  - Runs on: Daily midnight UTC, manual
+  - Purpose: Issues (60d) and PRs (30d) auto-close
+  
+- **`pages.yml`** - Documentation deployment
+  - Runs on: docs/ changes, manual
+  - Purpose: Deploy docs to GitHub Pages
+  
+- **`workflow-validation.yml`** - Workflow syntax checks
+  - Runs on: Workflow file changes, push to main
+  - Purpose: Validate YAML syntax for all workflows
 
 ## Workflow Patterns
 

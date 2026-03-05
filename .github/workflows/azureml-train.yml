@@ -13,6 +13,10 @@ name: AzureML LoRA Train
 on:
   workflow_dispatch:
     inputs:
+      AZURE_CREDENTIALS:
+        description: Service principal JSON for azure/login
+        required: true
+        type: string
       subscriptionId:
         description: Azure subscription ID
         required: true
@@ -43,11 +47,10 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Azure login
+        if: ${{ inputs.AZURE_CREDENTIALS != '' }}
         uses: azure/login@v2
         with:
-          # Create an Azure AD app and set its JSON creds in this secret:
-          # { "clientId": "...", "clientSecret": "...", "subscriptionId": "...", "tenantId": "..." }
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
+          creds: ${{ inputs.AZURE_CREDENTIALS }}
 
       - name: Install Azure ML CLI
         uses: azure/cli@v2

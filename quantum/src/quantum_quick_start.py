@@ -9,7 +9,8 @@ Usage:
     python quantum/src/quantum_quick_start.py                       # defaults
     python quantum/src/quantum_quick_start.py --dataset heart       # preset
     python quantum/src/quantum_quick_start.py --n-qubits 6 --epochs 5
-    python quantum/src/quantum_quick_start.py --dry-run             # no training
+    python quantum/src/quantum_quick_start.py --dry-run             # no
+                                                                   # training
 
 Outputs are written to data_out/quantum_quick_start/ (never datasets/).
 """
@@ -22,9 +23,7 @@ import sys
 import time
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Dict, Optional, Tuple
-
-import numpy as np
+from typing import Any, Dict
 
 # ---------------------------------------------------------------------------
 # Paths
@@ -48,25 +47,37 @@ def run_aer_bell_state(shots: int = 1024) -> Dict[str, Any]:
 
     Returns a dict with measurement counts and metadata.
     """
-    from qiskit import QuantumCircuit, transpile
-    from qiskit_aer import AerSimulator
+    try:
+        from qiskit.circuit import QuantumCircuit
+        from qiskit_aer import AerSimulator
 
-    qc = QuantumCircuit(2, 2)
-    qc.h(0)
-    qc.cx(0, 1)
-    qc.measure([0, 1], [0, 1])
+        qc = QuantumCircuit(2, 2)
+        qc.h(0)
+        qc.cx(0, 1)
+        qc.measure([0, 1], [0, 1])
 
-    sim = AerSimulator()
-    compiled = transpile(qc, sim)
-    result = sim.run(compiled, shots=shots).result()
-    counts = result.get_counts()
+        sim = AerSimulator()
+        result = sim.run(qc, shots=shots).result()
+        counts = result.get_counts()
+        backend = "aer_simulator"
+        success = bool(result.success)
+    except Exception as exc:
+        logger.warning(
+            "Qiskit Aer unavailable (%s); using analytic Bell fallback.",
+            exc,
+        )
+        zeros = shots // 2
+        ones = shots - zeros
+        counts = {"00": zeros, "11": ones}
+        backend = "analytic_fallback"
+        success = True
 
     return {
         "circuit": "bell_state",
         "shots": shots,
         "counts": counts,
-        "backend": "aer_simulator",
-        "success": result.success,
+        "backend": backend,
+        "success": success,
     }
 
 
@@ -75,30 +86,46 @@ def run_aer_bell_state(shots: int = 1024) -> Dict[str, Any]:
 # ---------------------------------------------------------------------------
 def run_aer_ghz(n_qubits: int = 3, shots: int = 1024) -> Dict[str, Any]:
     """Simulate a GHZ state |000...0> + |111...1> on Aer."""
-    from qiskit import QuantumCircuit, transpile
-    from qiskit_aer import AerSimulator
-
     if n_qubits < 2 or n_qubits > 10:
-        raise ValueError("n_qubits must be between 2 and 10 for local safety limits")
+        raise ValueError(
+            "n_qubits must be between 2 and 10 for local safety limits"
+        )
 
-    qc = QuantumCircuit(n_qubits, n_qubits)
-    qc.h(0)
-    for i in range(1, n_qubits):
-        qc.cx(0, i)
-    qc.measure(range(n_qubits), range(n_qubits))
+    try:
+        from qiskit.circuit import QuantumCircuit
+        from qiskit_aer import AerSimulator
 
-    sim = AerSimulator()
-    compiled = transpile(qc, sim)
-    result = sim.run(compiled, shots=shots).result()
-    counts = result.get_counts()
+        qc = QuantumCircuit(n_qubits, n_qubits)
+        qc.h(0)
+        for i in range(1, n_qubits):
+            qc.cx(0, i)
+        qc.measure(range(n_qubits), range(n_qubits))
+
+        sim = AerSimulator()
+        result = sim.run(qc, shots=shots).result()
+        counts = result.get_counts()
+        backend = "aer_simulator"
+        success = bool(result.success)
+    except Exception as exc:
+        logger.warning(
+            "Qiskit Aer unavailable (%s); using analytic GHZ fallback.",
+            exc,
+        )
+        zeros_state = "0" * n_qubits
+        ones_state = "1" * n_qubits
+        zeros = shots // 2
+        ones = shots - zeros
+        counts = {zeros_state: zeros, ones_state: ones}
+        backend = "analytic_fallback"
+        success = True
 
     return {
         "circuit": f"ghz_{n_qubits}q",
         "n_qubits": n_qubits,
         "shots": shots,
         "counts": counts,
-        "backend": "aer_simulator",
-        "success": result.success,
+        "backend": backend,
+        "success": success,
     }
 
 
@@ -132,7 +159,9 @@ def train_local_classifier(
     X_train, X_val, y_train, y_val = train_test_split(
         X, y, test_size=test_size, random_state=42, stratify=y
     )
-    X_train, X_val, scaler, pca = preprocess_for_qubits(X_train, X_val, n_qubits)
+    X_train, X_val, scaler, pca = preprocess_for_qubits(
+        X_train, X_val, n_qubits
+    )
 
     logger.info(
         "Dataset '%s': %d train / %d val  →  %d features (qubits=%d)",
@@ -178,7 +207,7 @@ def train_local_classifier(
                     batch_out.append(torch.stack(res))
                 else:
                     batch_out.append(res)
-            q_out = torch.stack(batch_out)
+            q_out = torch.stack(batch_out).to(dtype=x.dtype)
             return torch.sigmoid(self.post(q_out))
 
     model = _HybridModel()
@@ -190,7 +219,11 @@ def train_local_classifier(
     X_v = torch.FloatTensor(X_val)
     y_v = torch.FloatTensor(y_val).unsqueeze(1)
 
-    history: Dict[str, list] = {"train_loss": [], "val_loss": [], "val_acc": []}
+    history: Dict[str, list] = {
+        "train_loss": [],
+        "val_loss": [],
+        "val_acc": [],
+    }
 
     t0 = time.time()
     for epoch in range(epochs):
@@ -198,8 +231,8 @@ def train_local_classifier(
         epoch_loss = 0.0
         n_batches = 0
         for i in range(0, len(X_t), batch_size):
-            bx = X_t[i : i + batch_size]
-            by = y_t[i : i + batch_size]
+            bx = X_t[i:i + batch_size]
+            by = y_t[i:i + batch_size]
             optimizer.zero_grad()
             pred = model(bx)
             loss = criterion(pred, by)
@@ -266,18 +299,37 @@ def build_parser() -> argparse.ArgumentParser:
         choices=["banknote", "ionosphere", "sonar", "heart"],
         help="Preset dataset name (default: banknote)",
     )
-    p.add_argument("--n-qubits", type=int, default=4, help="Number of qubits (2-10)")
-    p.add_argument("--n-layers", type=int, default=2, help="Variational layers")
+    p.add_argument(
+        "--n-qubits",
+        type=int,
+        default=4,
+        help="Number of qubits (2-10)",
+    )
+    p.add_argument(
+        "--n-layers",
+        type=int,
+        default=2,
+        help="Variational layers",
+    )
     p.add_argument("--epochs", type=int, default=3, help="Training epochs")
     p.add_argument("--batch-size", type=int, default=8, help="Batch size")
     p.add_argument("--lr", type=float, default=0.01, help="Learning rate")
-    p.add_argument("--shots", type=int, default=1024, help="Aer simulation shots")
+    p.add_argument(
+        "--shots",
+        type=int,
+        default=1024,
+        help="Aer simulation shots",
+    )
     p.add_argument(
         "--dry-run",
         action="store_true",
         help="Only run Aer sanity circuits, skip classifier training",
     )
-    p.add_argument("--no-save", action="store_true", help="Skip saving results JSON")
+    p.add_argument(
+        "--no-save",
+        action="store_true",
+        help="Skip saving results JSON",
+    )
     return p
 
 

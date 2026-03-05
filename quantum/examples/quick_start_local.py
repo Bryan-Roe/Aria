@@ -8,6 +8,7 @@ No cloud accounts required — everything runs on your CPU.
 """
 from __future__ import annotations
 
+import importlib
 import sys
 from pathlib import Path
 
@@ -16,7 +17,10 @@ QUANTUM_SRC = Path(__file__).resolve().parents[1] / "src"
 if str(QUANTUM_SRC) not in sys.path:
     sys.path.insert(0, str(QUANTUM_SRC))
 
-from quantum_quick_start import run_aer_bell_state, run_aer_ghz, train_local_classifier
+_qs = importlib.import_module("quantum_quick_start")
+run_aer_bell_state = _qs.run_aer_bell_state
+run_aer_ghz = _qs.run_aer_ghz
+train_local_classifier = _qs.train_local_classifier
 
 
 def main():
