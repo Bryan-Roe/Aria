@@ -13,56 +13,17 @@ Supported metrics: accuracy, precision, recall, f1_score
 from __future__ import annotations
 
 import argparse
-import csv
 import json
+import sys
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
+# Add shared directory to path for imports
+script_dir = Path(__file__).parent
+repo_root = script_dir.parent
+sys.path.insert(0, str(repo_root))
 
-def load_labels_from_dataset(path: Path, max_samples: Optional[int] = None) -> List[Any]:
-    if not path.exists():
-        raise FileNotFoundError(path)
-    labels: List[Any] = []
-
-    # Try JSONL / JSON array first
-    try:
-        with path.open("r", encoding="utf-8") as f:
-            txt = f.read().strip()
-            if not txt:
-                return []
-            if txt.startswith("["):
-                obj = json.loads(txt)
-                if isinstance(obj, list):
-                    for i, item in enumerate(obj):
-                        if max_samples is not None and i >= max_samples:
-                            break
-                        labels.append(item.get("label")
-                                      if isinstance(item, dict) else None)
-                    return labels
-            else:
-                f.seek(0)
-                for i, line in enumerate(f):
-                    if max_samples is not None and i >= max_samples:
-                        break
-                    line = line.strip()
-                    if not line:
-                        continue
-                    obj = json.loads(line)
-                    labels.append(obj.get("label"))
-                return labels
-    except json.JSONDecodeError:
-        # Fallback to CSV
-        with path.open("r", encoding="utf-8") as f:
-            reader = csv.reader(f)
-            for i, row in enumerate(reader):
-                if max_samples is not None and i >= max_samples:
-                    break
-                if not row:
-                    continue
-                # assume second column is label
-                label = row[1] if len(row) > 1 else None
-                labels.append(label)
-        return labels
+from shared.evaluation_utils import load_labels_from_dataset
 
 
 def load_model_predictions(model_path: Path, max_samples: Optional[int] = None) -> List[Any]:

@@ -23,94 +23,18 @@ returns "echo: <input>". This keeps tests fast and offline.
 from __future__ import annotations
 
 import argparse
-import csv
 import json
+import sys
 import time
 from pathlib import Path
-from typing import Any, Dict, Iterable, List, Tuple
+from typing import Any, Dict, List
 
+# Add shared directory to path for imports
+script_dir = Path(__file__).parent
+repo_root = script_dir.parent
+sys.path.insert(0, str(repo_root))
 
-def load_dataset(path: Path, max_samples: int | None = None) -> List[Dict[str, Any]]:
-    if not path.exists():
-        raise FileNotFoundError(path)
-
-    data: List[Dict[str, Any]] = []
-    # Try JSONL (one object per line)
-    try:
-        with path.open("r", encoding="utf-8") as f:
-            # If file looks like a JSON array, parsing as JSON will succeed
-            text = f.read().strip()
-            if not text:
-                return []
-            if text.startswith("["):
-                objs = json.loads(text)
-                if isinstance(objs, list):
-                    data = objs
-                else:
-                    data = [objs]
-            else:
-                # treat as JSONL
-                f.seek(0)
-                for i, line in enumerate(f):
-                    if max_samples is not None and i >= max_samples:
-                        break
-                    line = line.strip()
-                    if not line:
-                        continue
-                    data.append(json.loads(line))
-    except json.JSONDecodeError:
-        # Fallback to CSV (simple) - first column input, second expected
-        data = []
-        with path.open("r", encoding="utf-8") as f:
-            reader = csv.reader(f)
-            for i, row in enumerate(reader):
-                if max_samples is not None and i >= max_samples:
-                    break
-                if not row:
-                    continue
-                inp = row[0]
-                expected = row[1] if len(row) > 1 else None
-                data.append({"input": inp, "expected": expected})
-
-    if max_samples is not None:
-        return data[:max_samples]
-    return data
-
-
-def naive_predict(example: Dict[str, Any]) -> str:
-    # Extract text from common patterns
-    if "input" in example and isinstance(example["input"], str):
-        content = example["input"].strip()
-        return f"echo: {content}"
-
-    # Chat-style messages
-    msgs = example.get("messages") or example.get("conversation") or []
-    if isinstance(msgs, list) and msgs:
-        # find last user message
-        last_user = None
-        for m in reversed(msgs):
-            if isinstance(m, dict) and m.get("role") == "user":
-                last_user = m.get("content", "")
-                break
-        if last_user is None:
-            last_user = msgs[-1].get("content",
-                                     "") if isinstance(msgs[-1], dict) else str(msgs[-1])
-        return f"echo: {last_user.strip()}"
-
-    # Fallback
-    return "echo:"
-
-
-def compute_accuracy(preds: List[str], expects: List[str]) -> float:
-    if not preds:
-        return 0.0
-    match = 0
-    for p, e in zip(preds, expects):
-        if e is None:
-            continue
-        if p.strip() == e.strip():
-            match += 1
-    return match / len(preds)
+from shared.evaluation_utils import load_dataset, naive_predict, compute_accuracy
 
 
 def basic_bleu(preds: List[str], expects: List[str]) -> float:
