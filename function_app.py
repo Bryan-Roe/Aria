@@ -1,8 +1,6 @@
 # =============================================================================
 # QAI Azure Functions Application
 # =============================================================================
-from token_utils import prune_messages
-from chat_providers import detect_provider, RoleMessage
 import azure.functions as func
 import json
 import logging
@@ -95,6 +93,11 @@ sys.path.insert(0, str(quantum_ai_path))
 # Add scripts to path for vision inference
 scripts_path = Path(__file__).resolve().parent / "scripts"
 sys.path.insert(0, str(scripts_path))
+
+# Import chat and token utilities (now that paths are set up)
+# Note: Can import from shared/ (which re-exports) or directly from canonical sources
+from shared.token_utils import prune_messages
+from shared.chat_providers import detect_provider, RoleMessage
 
 # -----------------------------------------------------------------------------
 # Subscription Manager (optional)

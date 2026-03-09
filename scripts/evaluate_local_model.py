@@ -29,12 +29,21 @@ import time
 from pathlib import Path
 from typing import Any, Dict, List
 
-# Add shared directory to path for imports
-script_dir = Path(__file__).parent
-repo_root = script_dir.parent
-sys.path.insert(0, str(repo_root))
+# Add shared module to path for imports
+sys.path.insert(0, str(Path(__file__).parent.parent / "shared"))
+from evaluation_utils import load_dataset, naive_predict
 
-from shared.evaluation_utils import load_dataset, naive_predict, compute_accuracy
+
+def compute_accuracy(preds: List[str], expects: List[str]) -> float:
+    if not preds:
+        return 0.0
+    match = 0
+    for p, e in zip(preds, expects):
+        if e is None:
+            continue
+        if p.strip() == e.strip():
+            match += 1
+    return match / len(preds)
 
 
 def basic_bleu(preds: List[str], expects: List[str]) -> float:
