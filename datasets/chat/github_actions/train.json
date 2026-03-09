@@ -1,5 +1,9 @@
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
+=======
+<<<<<<< main
+>>>>>>> Stashed changes
 =======
 <<<<<<< main
 >>>>>>> Stashed changes
@@ -21,7 +25,10 @@
 {"messages": [{"role": "user", "content": "What GitHub Actions are used in the 'Workflow Validation' workflow?"}, {"role": "assistant", "content": "The workflow uses 2 different actions:\n\n- **actions/checkout@v4**: Checks out the repository code\n- **actions/setup-python@v5**: Sets up a Python environment"}], "source_workflow": "Workflow Validation", "source_path": ".github/workflows/workflow-validation.yml", "template": "actions", "hash": "800351e749a64f53"}
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 =======
+=======
+>>>>>>> Stashed changes
 =======
 >>>>>>> Stashed changes
 =======
@@ -40,6 +47,9 @@
 {"messages": [{"role": "user", "content": "What GitHub Actions are used in the 'QAI CI Pipeline' workflow?"}, {"role": "assistant", "content": "The workflow uses 3 different actions:\n\n- **actions/checkout@v4**: Checks out the repository code\n- **actions/setup-python@v5**: Sets up a Python environment\n- **actions/upload-artifact@v4**: Uploads build artifacts for later use"}], "source_workflow": "QAI CI Pipeline", "source_path": ".github/workflows/ci-pipeline.yml", "template": "actions", "hash": "5baacd58b1e6417e"}
 >>>>>>> origin/sync/github-sync-20260307-085533
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
 =======
 >>>>>>> Stashed changes
