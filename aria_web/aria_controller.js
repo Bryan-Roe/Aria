@@ -696,15 +696,15 @@ function executeLocalCommand(command) {
         effectIntensity = 'heavy';
     }
 
-    if (cmd.includes('sparkle')) {
+    if (cmd.includes('sparkle') || cmd.includes('glitter') || cmd.includes('shimmer') || cmd.includes('shine')) {
         createEffect('sparkle', effectIntensity);
         executed = true;
     }
-    if (cmd.includes('hearts')) {
+    if (cmd.includes('hearts') || cmd.includes('heart') || cmd.includes('love')) {
         createEffect('hearts', effectIntensity);
         executed = true;
     }
-    if (cmd.includes('glow')) {
+    if (cmd.includes('glow') || cmd.includes('glowing') || cmd.includes('radiate') || cmd.includes('illuminate')) {
         createEffect('glow', effectIntensity);
         executed = true;
     }
