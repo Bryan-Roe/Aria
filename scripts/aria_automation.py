@@ -107,6 +107,7 @@ class AriaAutomation:
         self._process_cache: Optional[List[psutil.Process]] = None
         self._process_cache_time = 0
         self._process_cache_ttl = 10.0  # Cache process list for 10 seconds
+        self._status_dirty = True  # Track if status needs saving
 
         # Setup signal handlers
         signal.signal(signal.SIGINT, self._signal_handler)
@@ -214,6 +215,8 @@ class AriaAutomation:
             print("⚠️  Port 8080 already in use")
             # Try to find existing process using cached process list
             for proc in self._get_process_list():
+            # Try to find existing process (optimized: search keyword once outside loop)
+            for proc in psutil.process_iter(['pid', 'name', 'cmdline']):
                 try:
                     cmdline = proc.info['cmdline']
                     if cmdline:
