@@ -1,5 +1,3 @@
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
 # Aria - Interactive AI Character Platform
 
 <div align="center">
@@ -1665,13 +1663,11 @@ python .\src\chat_cli.py --provider local --once "Move Aria left"
 ├── tests/                  # Test suites
 └── data_out/               # Generated outputs (git-ignored)
 ```
->>>>>>> origin/sync/github-sync-20260307-085533
 
 ---
 
 ## 📚 Documentation
 
-<<<<<<< main
 | Document | Purpose |
 |----------|---------|
 | [aria_web/README.md](aria_web/README.md) | Character stage API reference |
@@ -1682,7 +1678,6 @@ python .\src\chat_cli.py --provider local --once "Move Aria left"
 | [MONETIZATION_GUIDE.md](MONETIZATION_GUIDE.md) | Subscription and revenue system |
 | [REPO_AUTOMATION_GUIDE.md](REPO_AUTOMATION_GUIDE.md) | Full repository automation reference |
 | [QUANTUM_LLM_TRAINING.md](QUANTUM_LLM_TRAINING.md) | Quantum-LLM concurrent training |
-=======
 ### Aria Documentation
 
 - **[docs/aria/](docs/aria/)** - Complete Aria system documentation
@@ -1740,32 +1735,26 @@ Verify SDK version: `pip list | findstr openai` should show `openai>=1.37.0`
 - [ARIA_MOVEMENT_COMPLETE.md](docs/aria/ARIA_MOVEMENT_COMPLETE.md) - Full implementation guide
 - [ARIA_MOVEMENT_TRAINING.md](docs/aria/ARIA_MOVEMENT_TRAINING.md) - Training reference
 - [web/aria_web/TESTING.md](web/aria_web/TESTING.md) - Testing strategies
->>>>>>> origin/sync/github-sync-20260307-085533
 
 ---
 
 ## 🤝 Contributing
 
-<<<<<<< main
 - Update `README.md` when adding configuration options, changing CLI flags, introducing new providers, or modifying cost behaviour.
 - All output files go under `data_out/` (git-ignored). Never modify files under `datasets/`.
 - Always run `--dry-run` on orchestrators before executing GPU or QPU workloads.
-=======
 When modifying code, update project README.md if:
 
 - Adding new configuration options
 - Changing CLI flags or commands
 - Introducing new providers/backends
 - Modifying cost implications
->>>>>>> origin/sync/github-sync-20260307-085533
 
 ---
 
 ## 📄 License
 
 See individual project directories for license information.
-<<<<<<< main
-=======
 
 ---
 
@@ -1967,8 +1956,3 @@ pip install peft transformers torch
 - If the model fails to load, check that your adapter path is correct and contains the required files.
 
 ---
->>>>>>> origin/sync/github-sync-20260307-085533
-<<<<<<< Updated upstream
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
