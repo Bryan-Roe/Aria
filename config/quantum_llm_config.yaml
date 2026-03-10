@@ -42,20 +42,42 @@ llm_training:
     dropout: 0.05
     target_modules: ["q_proj", "v_proj"]  # Attention modules to apply LoRA
 
-# Quantum enhancement strategies
+# Quantum Transformer Architecture
+# Used by quantum_transformer.py and quantum_llm_trainer.py
+quantum_transformer:
+  # Model dimensions
+  vocab_size: 256               # Character-level vocabulary
+  d_model: 64                   # Embedding / model dimension
+  n_heads: 4                    # Attention heads (d_model / n_heads should = 2^n_qubits)
+  n_transformer_layers: 2       # Number of QuantumTransformerBlocks
+  max_seq_len: 32               # Maximum sequence length
+  dropout: 0.1
+
+  # Quantum circuit settings
+  n_qubits: 4                   # Qubits per quantum circuit (4-8)
+  n_quantum_layers: 2           # Variational layers per quantum circuit
+  entanglement: "circular"      # linear, circular, full
+
+  # Component selection
+  use_quantum_attention: true   # Use QuantumSelfAttention (vs classical)
+  use_quantum_ffn: true         # Use QuantumFeedForward (vs classical)
+
+  # Weight management
+  tie_embeddings: true          # Share token_embedding and lm_head weights
+
+  # Training hyperparameters
+  learning_rate: 0.001
+  weight_decay: 0.01
+  gradient_clip: 1.0
+  batch_size: 4                 # Small batch for quantum circuit speed
+
+# Quantum enhancement strategies (legacy, kept for backward compat)
 quantum_enhancement:
-  # Apply quantum optimization to attention mechanisms
   optimize_attention: true
-  attention_optimization_frequency: 10  # Every N training steps
-  
-  # Use quantum feature encoding
+  attention_optimization_frequency: 1  # Every step (real quantum circuits now)
   quantum_feature_encoding: true
-  encoding_dimension: 16  # Dimension for quantum encoding
-  
-  # Quantum-assisted hyperparameter optimization
-  quantum_hyperparameter_tuning: false  # Experimental
-  
-  # Quantum circuit caching
+  encoding_dimension: 16  # 2^n_qubits for 4 qubits
+  quantum_hyperparameter_tuning: false
   cache_circuits: true
   cache_size: 100
   cache_ttl_seconds: 3600

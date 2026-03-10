@@ -123,13 +123,17 @@ def record_chat_message(user_id: str, message: Dict[str, Any], provider: str, mo
     if c is None:
         return False
     try:
+        import uuid
+        # Use UUID to prevent ID collisions (CRITICAL FIX: data loss prevention)
+        doc_id = f"{user_id}-{uuid.uuid4().hex}"
         doc = {
-            "id": f"{user_id}-{message.get('timestamp')}-{hash(message.get('content','')) & 0xffffffff}",
+            "id": doc_id,
             "userId": user_id,
             "role": message.get("role"),
             "content": message.get("content"),
             "provider": provider,
             "model": model,
+            "timestamp": message.get('timestamp'),  # Keep for querying
         }
         c.upsert_item(doc)
         return True
@@ -146,13 +150,17 @@ def record_chat_session(user_id: str, messages: list[Dict[str, Any]], provider: 
     if c is None:
         return False
     try:
+        import uuid
+        # Use UUID to prevent ID collisions
+        doc_id = f"session-{user_id}-{uuid.uuid4().hex}"
         doc = {
-            "id": f"session-{user_id}-{len(messages)}-{hash(str(messages)) & 0xffffffff}",
+            "id": doc_id,
             "userId": user_id,
             "messages": messages,
             "provider": provider,
             "model": model,
             "messageCount": len(messages),
+            "timestamp": time.time(),  # For querying/sorting
         }
         c.upsert_item(doc)
         return True

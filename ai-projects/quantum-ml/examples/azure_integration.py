@@ -7,7 +7,7 @@ from pathlib import Path
 from qiskit import QuantumCircuit
 
 # Add parent directory to path
-sys.path.append(str(Path(__file__).parent.parent / "src"))
+sys.path.append(str(Path(__file__).parent.parent.parent.parent / "ai-projects" / "quantum-ml" / "src"))
 
 print("=" * 60)
 print("AZURE QUANTUM INTEGRATION GUIDE")

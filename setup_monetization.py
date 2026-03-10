@@ -68,17 +68,17 @@ def verify_core_files():
             'function_app.py'
         ],
         'Frontend': [
-            'pricing.html',
-            'admin_dashboard.html',
-            'my-subscription.html',
-            'checkout.html',
-            'subscription-success.html',
-            'account.html'
+            'web/monetization/pricing.html',
+            'web/monetization/admin_dashboard.html',
+            'web/monetization/my-subscription.html',
+            'web/monetization/checkout.html',
+            'web/monetization/subscription-success.html',
+            'web/monetization/account.html'
         ],
         'Documentation': [
-            'MONETIZATION_GUIDE.md',
-            'INCOME_STREAM_SUMMARY.md',
-            'QUICK_START_MONETIZATION.md'
+            'docs/guides/MONETIZATION_GUIDE.md',
+            'docs/summaries/INCOME_STREAM_SUMMARY.md',
+            'docs/guides/QUICK_START_MONETIZATION.md'
         ]
     }
     
@@ -204,25 +204,25 @@ def print_next_steps():
     
     print(f"{Colors.GREEN}1. View the Pricing Page:{Colors.END}")
     print(f"   python3 -m http.server 8000")
-    print(f"   Then open: http://localhost:8000/pricing.html\n")
+    print(f"   Then open: http://localhost:8000/web/monetization/pricing.html\n")
     
     print(f"{Colors.GREEN}2. View the Admin Dashboard:{Colors.END}")
-    print(f"   Open: http://localhost:8000/admin_dashboard.html\n")
+    print(f"   Open: http://localhost:8000/web/monetization/admin_dashboard.html\n")
     
     print(f"{Colors.GREEN}3. Test the APIs (optional):{Colors.END}")
     print(f"   func host start")
     print(f"   curl http://localhost:7071/api/subscription/revenue | jq\n")
     
     print(f"{Colors.GREEN}4. View Documentation:{Colors.END}")
-    print(f"   cat QUICK_START_MONETIZATION.md\n")
+    print(f"   cat docs/guides/QUICK_START_MONETIZATION.md\n")
     
     print(f"{Colors.GREEN}5. Access All Pages:{Colors.END}")
-    print(f"   - pricing.html - Pricing tiers")
-    print(f"   - admin_dashboard.html - Revenue dashboard")
-    print(f"   - my-subscription.html - User subscription")
-    print(f"   - checkout.html - Payment page")
-    print(f"   - subscription-success.html - Success page")
-    print(f"   - account.html - Account settings\n")
+    print(f"   - web/monetization/pricing.html - Pricing tiers")
+    print(f"   - web/monetization/admin_dashboard.html - Revenue dashboard")
+    print(f"   - web/monetization/my-subscription.html - User subscription")
+    print(f"   - web/monetization/checkout.html - Payment page")
+    print(f"   - web/monetization/subscription-success.html - Success page")
+    print(f"   - web/monetization/account.html - Account settings\n")
 
 def main():
     """Main setup function"""

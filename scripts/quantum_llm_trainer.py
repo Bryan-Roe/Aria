@@ -2,28 +2,27 @@
 Quantum-Enhanced LLM Training Module
 =====================================
 
-Integrates quantum computing capabilities into passive LLM training.
-Provides quantum-assisted optimization and feature encoding for LLM fine-tuning.
+Trains a QuantumLLM (transformer with real quantum circuits in attention and
+feed-forward layers) on character-level language modeling tasks.
 
 Features:
-- Quantum-assisted hyperparameter optimization
-- Quantum feature encoding for attention mechanisms
-- Hybrid quantum-classical loss optimization
-- Passive background quantum circuit training
-- Integration with autonomous training orchestrator
+- Real quantum circuits via PennyLane in attention and FFN layers
+- Character-level dataset for proof-of-concept training
+- Gradient backpropagation through quantum circuits
+- Passive background training mode
+- Classical fallback when quantum libraries unavailable
 
 Usage:
-    # Train with quantum enhancement
-    python quantum_llm_trainer.py --dataset datasets/chat/aria_chat --quantum-backend local
-    
-    # Use Azure Quantum (requires configuration)
-    python quantum_llm_trainer.py --dataset datasets/chat/aria_chat --quantum-backend azure
-    
+    # Train on a text file
+    python quantum_llm_trainer.py --dataset path/to/text_or_json
+
+    # Train with custom architecture
+    python quantum_llm_trainer.py --dataset path/to/data --n-qubits 4 --d-model 64
+
     # Passive mode (background training)
     python quantum_llm_trainer.py --passive --interval 3600
 
 Author: Quantum AI Workspace
-Date: December 8, 2025
 """
 
 import argparse
@@ -32,31 +31,32 @@ import logging
 import sys
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple, Any
-import yaml
+from typing import Dict, List, Optional, Any
 
+import yaml
 import numpy as np
 import torch
+import torch.nn as nn
+from torch.utils.data import Dataset, DataLoader
 
-# Add quantum-ai to path
-quantum_ai_path = Path(__file__).parent.parent / "quantum-ai"
-if str(quantum_ai_path) not in sys.path:
-    sys.path.insert(0, str(quantum_ai_path))
+# Add ai-projects/quantum-ml to path
+quantum_ml_path = Path(__file__).parent.parent / "ai-projects" / "quantum-ml"
+quantum_ml_src = quantum_ml_path / "src"
+for p in [str(quantum_ml_path), str(quantum_ml_src)]:
+    if p not in sys.path:
+        sys.path.insert(0, p)
 
 try:
-    from src.quantum_classifier import QuantumClassifier
-    from src.hybrid_qnn import QuantumLayer
-    QUANTUM_AVAILABLE = True
+    from quantum_transformer import QuantumLLM, QUANTUM_AVAILABLE
 except ImportError as e:
-    logging.warning(f"Quantum modules not available: {e}")
+    logging.warning(f"QuantumLLM not available: {e}")
     QUANTUM_AVAILABLE = False
 
 try:
-    import transformers
-    TRANSFORMERS_AVAILABLE = True
+    from hybrid_qnn import QuantumLayer
+    QUANTUM_LAYER_AVAILABLE = True
 except ImportError:
-    logging.warning("Transformers not available - using mock implementations")
-    TRANSFORMERS_AVAILABLE = False
+    QUANTUM_LAYER_AVAILABLE = False
 
 # Setup logging
 logging.basicConfig(
@@ -66,114 +66,90 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-class QuantumAttentionOptimizer:
-    """
-    Quantum-enhanced optimizer for attention mechanisms in LLMs.
-    Uses quantum circuits to optimize attention weight distributions.
-    """
-    
-    def __init__(self, n_qubits: int = 4, n_layers: int = 2, backend: str = "default.qubit"):
-        self.n_qubits = n_qubits
-        self.n_layers = n_layers
-        self.backend = backend
-        
-        if QUANTUM_AVAILABLE:
-            try:
-                config_path = quantum_ai_path / "config" / "quantum_config.yaml"
-                self.quantum_classifier = QuantumClassifier(str(config_path))
-                logger.info(f"Initialized quantum optimizer with {n_qubits} qubits")
-            except Exception as e:
-                logger.warning(f"Failed to initialize quantum classifier: {e}")
-                self.quantum_classifier = None
-        else:
-            self.quantum_classifier = None
-            logger.warning("Quantum classifier not available - using classical fallback")
-    
-    def optimize_attention_weights(self, attention_scores: torch.Tensor) -> torch.Tensor:
-        """
-        Apply quantum optimization to attention weight distribution.
-        
-        Args:
-            attention_scores: Raw attention scores [batch_size, seq_len, seq_len]
-            
-        Returns:
-            Quantum-optimized attention weights
-        """
-        if self.quantum_classifier is None:
-            # Classical fallback
-            return torch.softmax(attention_scores, dim=-1)
-        
-        try:
-            # Convert to numpy for quantum processing
-            scores_np = attention_scores.detach().cpu().numpy()
-            batch_size, seq_len, _ = scores_np.shape
-            
-            # Process with quantum circuit (simplified for efficiency)
-            # In production, this would use actual quantum circuits
-            optimized_scores = scores_np.copy()
-            
-            # Apply quantum-inspired transformation
-            # This mimics quantum superposition and entanglement effects
-            for b in range(batch_size):
-                # Normalize to quantum-friendly range
-                normalized = (scores_np[b] - scores_np[b].mean()) / (scores_np[b].std() + 1e-8)
-                # Quantum-inspired phase encoding
-                phase = np.exp(1j * normalized * np.pi / 2)
-                # Interference pattern (simulated quantum measurement)
-                interference = np.abs(phase) ** 2
-                optimized_scores[b] = interference
-            
-            return torch.tensor(optimized_scores, dtype=attention_scores.dtype, device=attention_scores.device)
-        
-        except Exception as e:
-            logger.warning(f"Quantum optimization failed: {e}, using classical fallback")
-            return torch.softmax(attention_scores, dim=-1)
+# ---------------------------------------------------------------------------
+# Character-level dataset
+# ---------------------------------------------------------------------------
 
+class CharacterDataset(Dataset):
+    """Character-level dataset for quantum LLM training.
+
+    Reads text, builds a character vocabulary, and produces overlapping
+    windows of (input_ids, target_ids) where target is shifted by one
+    position (standard next-token prediction).
+    """
+
+    def __init__(self, text: str, seq_len: int = 32, vocab_size: int = 1000):
+        self.seq_len = seq_len
+
+        # Build vocabulary from the text (up to vocab_size unique chars)
+        unique_chars = sorted(set(text))
+        if len(unique_chars) > vocab_size - 1:
+            unique_chars = unique_chars[:vocab_size - 1]
+
+        self.char_to_id = {c: i + 1 for i, c in enumerate(unique_chars)}
+        self.char_to_id["\x00"] = 0  # padding / unknown
+        self.id_to_char = {v: k for k, v in self.char_to_id.items()}
+        self.actual_vocab_size = len(self.char_to_id)
+
+        # Encode entire text
+        self.encoded = [self.char_to_id.get(c, 0) for c in text]
+
+        # We need at least seq_len + 1 characters for one sample
+        if len(self.encoded) < seq_len + 1:
+            # Pad with zeros if text is too short
+            self.encoded = self.encoded + [0] * (seq_len + 1 - len(self.encoded))
+
+        logger.info(
+            f"CharacterDataset: {len(text)} chars, "
+            f"{self.actual_vocab_size} unique tokens, "
+            f"{len(self)} samples (seq_len={seq_len})"
+        )
+
+    def __len__(self) -> int:
+        return max(1, len(self.encoded) - self.seq_len)
+
+    def __getitem__(self, idx: int):
+        chunk = self.encoded[idx: idx + self.seq_len + 1]
+        input_ids = torch.tensor(chunk[:-1], dtype=torch.long)
+        target_ids = torch.tensor(chunk[1:], dtype=torch.long)
+        return input_ids, target_ids
+
+    def decode(self, ids) -> str:
+        """Convert token ids back to text."""
+        if isinstance(ids, torch.Tensor):
+            ids = ids.tolist()
+        return "".join(self.id_to_char.get(i, "?") for i in ids)
+
+
+# ---------------------------------------------------------------------------
+# Feature encoder (kept for auxiliary use, uses real QuantumLayer)
+# ---------------------------------------------------------------------------
 
 class QuantumFeatureEncoder:
-    """
-    Encodes classical LLM features into quantum-enhanced representations.
-    Uses amplitude encoding and variational circuits.
-    """
-    
+    """Encodes classical features into quantum-enhanced representations."""
+
     def __init__(self, n_qubits: int = 4, n_layers: int = 2):
         self.n_qubits = n_qubits
-        self.n_layers = n_layers
-        
-        if QUANTUM_AVAILABLE:
+        self.quantum_layer = None
+
+        if QUANTUM_LAYER_AVAILABLE:
             try:
                 self.quantum_layer = QuantumLayer(
                     n_qubits=n_qubits,
                     n_layers=n_layers,
                     device="default.qubit",
-                    entanglement="circular"
+                    entanglement="circular",
                 )
                 logger.info("Initialized quantum feature encoder")
             except Exception as e:
                 logger.warning(f"Failed to initialize quantum layer: {e}")
-                self.quantum_layer = None
-        else:
-            self.quantum_layer = None
-    
+
     def encode(self, features: torch.Tensor) -> torch.Tensor:
-        """
-        Encode features using quantum circuit.
-        
-        Args:
-            features: Input features [batch_size, feature_dim]
-            
-        Returns:
-            Quantum-encoded features
-        """
         if self.quantum_layer is None:
-            # Classical fallback - simple nonlinear transformation
             return torch.tanh(features)
-        
+
         try:
-            # Ensure features are compatible with quantum encoding
             batch_size, feature_dim = features.shape
-            
-            # Pad or truncate to match quantum dimension
             quantum_dim = 2 ** self.n_qubits
             if feature_dim < quantum_dim:
                 padded = torch.zeros(batch_size, quantum_dim, device=features.device)
@@ -181,125 +157,334 @@ class QuantumFeatureEncoder:
                 features = padded
             elif feature_dim > quantum_dim:
                 features = features[:, :quantum_dim]
-            
-            # Normalize for amplitude encoding
+
             features_norm = features / (torch.norm(features, dim=1, keepdim=True) + 1e-8)
-            
-            # Process through quantum layer
-            quantum_output = self.quantum_layer(features_norm)
-            
-            return quantum_output
-        
+            return self.quantum_layer(features_norm)
         except Exception as e:
             logger.warning(f"Quantum encoding failed: {e}, using classical fallback")
             return torch.tanh(features)
 
 
+# ---------------------------------------------------------------------------
+# Main trainer
+# ---------------------------------------------------------------------------
+
 class QuantumEnhancedLLMTrainer:
     """
-    Main training class that integrates quantum computing into LLM training.
-    Supports both active and passive training modes.
+    Trains a QuantumLLM on character-level language modeling.
+
+    The QuantumLLM uses real PennyLane quantum circuits inside its
+    transformer blocks (QuantumSelfAttention and QuantumFeedForward).
+    Gradients flow through the quantum circuits via PennyLane's
+    torch interface.
     """
-    
+
     def __init__(self, config: Dict[str, Any]):
         self.config = config
-        self.quantum_backend = config.get("quantum_backend", "local")
-        self.n_qubits = config.get("n_qubits", 4)
-        self.n_layers = config.get("n_quantum_layers", 2)
         self.passive_mode = config.get("passive", False)
         self.interval = config.get("interval", 3600)
-        
-        # Initialize quantum components
-        self.attention_optimizer = QuantumAttentionOptimizer(
-            n_qubits=self.n_qubits,
-            n_layers=self.n_layers,
-            backend=self.quantum_backend
+
+        # Device
+        use_gpu = config.get("use_gpu", True)
+        self.device = torch.device(
+            "cuda" if torch.cuda.is_available() and use_gpu else "cpu"
         )
-        
+
+        # Build quantum transformer config
+        qt_config = config.get("quantum_transformer", {})
+        self.model_config = {
+            "vocab_size": qt_config.get("vocab_size", config.get("vocab_size", 256)),
+            "d_model": qt_config.get("d_model", config.get("d_model", 64)),
+            "n_heads": qt_config.get("n_heads", config.get("n_heads", 4)),
+            "n_transformer_layers": qt_config.get(
+                "n_transformer_layers", config.get("n_transformer_layers", 2)
+            ),
+            "n_qubits": qt_config.get("n_qubits", config.get("n_qubits", 4)),
+            "n_quantum_layers": qt_config.get(
+                "n_quantum_layers", config.get("n_quantum_layers", 2)
+            ),
+            "max_seq_len": qt_config.get("max_seq_len", config.get("max_seq_len", 32)),
+            "entanglement": qt_config.get(
+                "entanglement", config.get("entanglement", "circular")
+            ),
+            "dropout": qt_config.get("dropout", config.get("dropout", 0.1)),
+            "use_quantum_attention": qt_config.get("use_quantum_attention", True),
+            "use_quantum_ffn": qt_config.get("use_quantum_ffn", True),
+            "tie_embeddings": qt_config.get("tie_embeddings", True),
+        }
+
+        # Create model
+        self.model = QuantumLLM.from_config({"quantum_transformer": self.model_config})
+        self.model = self.model.to(self.device)
+
+        # Optimizer
+        lr = qt_config.get("learning_rate", config.get("learning_rate", 0.001))
+        wd = qt_config.get("weight_decay", config.get("weight_decay", 0.01))
+        self.optimizer = torch.optim.AdamW(self.model.parameters(), lr=lr, weight_decay=wd)
+
+        # Loss and gradient clipping
+        self.criterion = nn.CrossEntropyLoss()
+        self.grad_clip = qt_config.get("gradient_clip", config.get("gradient_clip", 1.0))
+        self.batch_size = qt_config.get("batch_size", config.get("batch_size", 4))
+
+        # Learning rate scheduler
+        self.scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
+            self.optimizer, mode="min", factor=0.5, patience=3
+        )
+
+        # Feature encoder (auxiliary)
         self.feature_encoder = QuantumFeatureEncoder(
-            n_qubits=self.n_qubits,
-            n_layers=self.n_layers
+            n_qubits=self.model_config["n_qubits"],
+            n_layers=self.model_config["n_quantum_layers"],
         )
-        
-        # Training state
-        self.training_history = []
+
+        # Metrics
+        self.training_history: List[Dict] = []
         self.quantum_metrics = {
             "circuit_executions": 0,
             "optimization_steps": 0,
-            "quantum_advantage_ratio": 0.0
+            "quantum_available": QUANTUM_AVAILABLE,
         }
-        
-        logger.info(f"Initialized QuantumEnhancedLLMTrainer")
-        logger.info(f"  Backend: {self.quantum_backend}")
-        logger.info(f"  Qubits: {self.n_qubits}")
-        logger.info(f"  Quantum Layers: {self.n_layers}")
-        logger.info(f"  Passive Mode: {self.passive_mode}")
-    
+
+        n_params = sum(p.numel() for p in self.model.parameters())
+        logger.info("Initialized QuantumEnhancedLLMTrainer")
+        logger.info(f"  Device: {self.device}")
+        logger.info(f"  Parameters: {n_params:,}")
+        logger.info(f"  Quantum available: {QUANTUM_AVAILABLE}")
+        logger.info(f"  Model config: {self.model_config}")
+
+    # ------------------------------------------------------------------
+    # Dataset loading
+    # ------------------------------------------------------------------
+
+    def _extract_text(self, dataset_path: Path) -> str:
+        """Extract raw text from various file formats."""
+        text_parts = []
+
+        if dataset_path.is_file():
+            if dataset_path.suffix == ".txt":
+                text_parts.append(dataset_path.read_text(errors="replace"))
+
+            elif dataset_path.suffix == ".jsonl":
+                with open(dataset_path) as f:
+                    for line in f:
+                        line = line.strip()
+                        if not line:
+                            continue
+                        record = json.loads(line)
+                        for key in ("text", "content", "message", "input", "output"):
+                            if key in record:
+                                text_parts.append(str(record[key]))
+
+            elif dataset_path.suffix == ".json":
+                with open(dataset_path) as f:
+                    data = json.load(f)
+                if isinstance(data, list):
+                    for record in data:
+                        if isinstance(record, dict):
+                            for key in ("text", "content", "message", "input", "output"):
+                                if key in record:
+                                    text_parts.append(str(record[key]))
+                        elif isinstance(record, str):
+                            text_parts.append(record)
+                elif isinstance(data, dict):
+                    for key in ("text", "content", "message", "input", "output"):
+                        if key in data:
+                            text_parts.append(str(data[key]))
+
+        elif dataset_path.is_dir():
+            for pattern in ["*.txt", "*.json", "*.jsonl"]:
+                for fp in sorted(dataset_path.glob(pattern)):
+                    text_parts.append(self._extract_text(fp))
+            for subdir_name in ["train.json", "train.jsonl"]:
+                sub = dataset_path / subdir_name
+                if sub.exists():
+                    text_parts.append(self._extract_text(sub))
+
+        combined = "\n".join(text_parts)
+        if not combined.strip():
+            # Generate a small synthetic corpus so training can still run
+            logger.warning(
+                "No text extracted from dataset -- using synthetic placeholder text"
+            )
+            combined = (
+                "The quick brown fox jumps over the lazy dog. "
+                "Pack my box with five dozen liquor jugs. "
+                "How vexingly quick daft zebras jump. "
+            ) * 50
+
+        return combined
+
+    def _make_dataloader(self, dataset_path: Path) -> DataLoader:
+        """Build a DataLoader from a dataset path."""
+        text = self._extract_text(dataset_path)
+        dataset = CharacterDataset(
+            text=text,
+            seq_len=self.model_config["max_seq_len"],
+            vocab_size=self.model_config["vocab_size"],
+        )
+        return DataLoader(
+            dataset,
+            batch_size=self.batch_size,
+            shuffle=True,
+            drop_last=True,
+        )
+
+    # ------------------------------------------------------------------
+    # Training loop
+    # ------------------------------------------------------------------
+
+    def _estimate_circuit_evals(self, batch_size: int, seq_len: int) -> int:
+        """Estimate the number of quantum circuit evaluations per batch."""
+        if not QUANTUM_AVAILABLE:
+            return 0
+        n_heads = self.model_config["n_heads"]
+        n_blocks = self.model_config["n_transformer_layers"]
+        # Attention: 2 maps (Q, K) * batch*seq per head per block
+        attn_evals = 2 * batch_size * seq_len * n_heads * n_blocks
+        # FFN: 1 map * batch*seq per block
+        ffn_evals = batch_size * seq_len * n_blocks
+        return attn_evals + ffn_evals
+
+    def _train_epoch(self, dataloader: DataLoader, epoch: int) -> float:
+        """Train one epoch with real forward/backward through quantum circuits."""
+        self.model.train()
+        total_loss = 0.0
+        num_batches = 0
+
+        for batch_idx, (input_ids, targets) in enumerate(dataloader):
+            input_ids = input_ids.to(self.device)
+            targets = targets.to(self.device)
+
+            # Forward pass (gradients flow through quantum circuits)
+            logits = self.model(input_ids)
+
+            # Cross-entropy loss
+            loss = self.criterion(
+                logits.view(-1, self.model.vocab_size),
+                targets.view(-1),
+            )
+
+            # Backward pass
+            self.optimizer.zero_grad()
+            loss.backward()
+
+            # Gradient clipping
+            if self.grad_clip > 0:
+                torch.nn.utils.clip_grad_norm_(
+                    self.model.parameters(), self.grad_clip
+                )
+
+            self.optimizer.step()
+
+            batch_loss = loss.item()
+            total_loss += batch_loss
+            num_batches += 1
+
+            # Track quantum circuit evaluations
+            evals = self._estimate_circuit_evals(
+                input_ids.shape[0], input_ids.shape[1]
+            )
+            self.quantum_metrics["circuit_executions"] += evals
+            self.quantum_metrics["optimization_steps"] += 1
+
+            if batch_idx % 5 == 0:
+                logger.info(
+                    f"  Epoch {epoch+1} | Batch {batch_idx}/{len(dataloader)} | "
+                    f"Loss: {batch_loss:.4f} | "
+                    f"Circuit evals: {evals}"
+                )
+
+        avg_loss = total_loss / max(num_batches, 1)
+        self.training_history.append({
+            "epoch": epoch,
+            "loss": avg_loss,
+            "circuit_executions": self.quantum_metrics["circuit_executions"],
+            "lr": self.optimizer.param_groups[0]["lr"],
+        })
+
+        # Update scheduler
+        self.scheduler.step(avg_loss)
+
+        return avg_loss
+
     def train_with_quantum_enhancement(
         self,
-        model: Optional[Any],
         dataset_path: Path,
         output_dir: Path,
-        epochs: int = 3
+        epochs: int = 3,
     ) -> Dict[str, Any]:
         """
-        Train LLM with quantum enhancement.
-        
+        Train the QuantumLLM on a dataset.
+
         Args:
-            model: Pre-trained LLM model (or None for mock training)
-            dataset_path: Path to training dataset
-            output_dir: Directory to save results
+            dataset_path: Path to training data (text, json, or jsonl)
+            output_dir: Directory for results and checkpoints
             epochs: Number of training epochs
-            
+
         Returns:
             Training results and quantum metrics
         """
-        logger.info(f"Starting quantum-enhanced training")
+        logger.info("Starting quantum-enhanced LLM training")
         logger.info(f"  Dataset: {dataset_path}")
         logger.info(f"  Output: {output_dir}")
         logger.info(f"  Epochs: {epochs}")
-        
+
         output_dir.mkdir(parents=True, exist_ok=True)
-        
-        # Load dataset
-        try:
-            dataset = self._load_dataset(dataset_path)
-            logger.info(f"Loaded {len(dataset)} training samples")
-        except Exception as e:
-            logger.error(f"Failed to load dataset: {e}")
-            dataset = []
-        
-        # Training loop with quantum enhancement
+
+        # Build dataloader
+        dataloader = self._make_dataloader(dataset_path)
+        logger.info(f"  Batches per epoch: {len(dataloader)}")
+
         results = {
             "status": "success",
             "epochs_completed": 0,
             "final_loss": 0.0,
             "quantum_metrics": self.quantum_metrics,
-            "started_at": datetime.now().isoformat()
+            "model_config": self.model_config,
+            "started_at": datetime.now().isoformat(),
         }
-        
+
+        best_loss = float("inf")
+
         for epoch in range(epochs):
-            logger.info(f"\nEpoch {epoch + 1}/{epochs}")
-            
-            # Simulate training with quantum enhancement
-            epoch_loss = self._train_epoch_with_quantum(model, dataset, epoch)
-            
+            logger.info(f"\n--- Epoch {epoch + 1}/{epochs} ---")
+
+            epoch_loss = self._train_epoch(dataloader, epoch)
+
             results["epochs_completed"] = epoch + 1
             results["final_loss"] = epoch_loss
-            
-            logger.info(f"  Loss: {epoch_loss:.4f}")
-            logger.info(f"  Quantum executions: {self.quantum_metrics['circuit_executions']}")
-        
+
+            logger.info(
+                f"  Epoch {epoch+1} complete | Avg Loss: {epoch_loss:.4f} | "
+                f"LR: {self.optimizer.param_groups[0]['lr']:.6f}"
+            )
+
+            # Save best checkpoint
+            if epoch_loss < best_loss:
+                best_loss = epoch_loss
+                ckpt_path = output_dir / "best_quantum_llm.pt"
+                torch.save({
+                    "model_state_dict": self.model.state_dict(),
+                    "optimizer_state_dict": self.optimizer.state_dict(),
+                    "epoch": epoch,
+                    "loss": epoch_loss,
+                    "model_config": self.model_config,
+                }, ckpt_path)
+                logger.info(f"  Saved best checkpoint: {ckpt_path}")
+
         results["completed_at"] = datetime.now().isoformat()
-        
-        # Save results
+        results["best_loss"] = best_loss
+
+        # Save results JSON
         results_file = output_dir / "quantum_training_results.json"
-        with open(results_file, 'w') as f:
+        with open(results_file, "w") as f:
             json.dump(results, f, indent=2)
-        
-        logger.info(f"\nTraining complete!")
-        logger.info(f"Results saved to: {results_file}")
-        
+        logger.info(f"\nTraining complete! Results saved to: {results_file}")
+
+        # Generate sample text
+        self._generate_sample(output_dir, dataloader.dataset)
+
         return results
     
     def _load_dataset(self, dataset_path: Path) -> List[Dict[str, Any]]:
@@ -368,33 +553,49 @@ class QuantumEnhancedLLMTrainer:
         
         return avg_loss
     
+
+    def _generate_sample(self, output_dir: Path, dataset: CharacterDataset):
+        """Generate a sample from the trained model."""
+        try:
+            prompt_ids = torch.tensor([[1, 2, 3, 4]], dtype=torch.long, device=self.device)
+            generated = self.model.generate(
+                prompt_ids, max_new_tokens=50, temperature=0.8, top_k=20
+            )
+            text = dataset.decode(generated[0])
+            logger.info(f"  Sample generation: {text[:100]}...")
+
+            sample_path = output_dir / "generated_sample.txt"
+            sample_path.write_text(text)
+        except Exception as e:
+            logger.warning(f"Sample generation failed: {e}")
+
+    # ------------------------------------------------------------------
+    # Passive training
+    # ------------------------------------------------------------------
+
     def run_passive_training(self):
-        """
-        Run in passive mode - continuous background training.
-        Integrates with autonomous training orchestrator.
-        """
+        """Run in passive mode -- continuous background training cycles."""
         logger.info("Starting passive quantum-enhanced LLM training")
         logger.info(f"  Interval: {self.interval} seconds")
-        
+
         import time
         import signal
-        
-        # Setup signal handler for graceful shutdown
+
         self.running = True
-        
+
         def signal_handler(sig, frame):
             logger.info("Received shutdown signal")
             self.running = False
-        
+
         signal.signal(signal.SIGINT, signal_handler)
         signal.signal(signal.SIGTERM, signal_handler)
-        
+
         cycle_count = 0
-        
+
         while self.running:
             cycle_count += 1
             logger.info(f"\n=== Passive Training Cycle {cycle_count} ===")
-            
+
             try:
                 # Look for available datasets using combined glob pattern
                 datasets_dir = Path("datasets/chat")
@@ -402,32 +603,38 @@ class QuantumEnhancedLLMTrainer:
                     # Use explicit patterns to match only train.json and train.jsonl
                     dataset_files = list(datasets_dir.glob("*/train.json")) + list(datasets_dir.glob("*/train.jsonl"))
                     
+                    dataset_files = (
+                        list(datasets_dir.glob("*/train.json"))
+                        + list(datasets_dir.glob("*/train.jsonl"))
+                        + list(datasets_dir.glob("*.txt"))
+                    )
+
                     if dataset_files:
-                        # Train on a random dataset
                         import random
                         dataset_path = random.choice(dataset_files)
                         logger.info(f"Selected dataset: {dataset_path}")
-                        
-                        output_dir = Path("data_out/quantum_llm_training") / f"cycle_{cycle_count}"
-                        
-                        # Run training
+
+                        output_dir = (
+                            Path("data_out/quantum_llm_training") / f"cycle_{cycle_count}"
+                        )
+
                         results = self.train_with_quantum_enhancement(
-                            model=None,
                             dataset_path=dataset_path,
                             output_dir=output_dir,
-                            epochs=1  # Single epoch for passive training
+                            epochs=1,
                         )
-                        
-                        logger.info(f"Cycle {cycle_count} complete: Loss={results['final_loss']:.4f}")
+                        logger.info(
+                            f"Cycle {cycle_count} complete: "
+                            f"Loss={results['final_loss']:.4f}"
+                        )
                     else:
                         logger.warning("No datasets found for passive training")
                 else:
                     logger.warning(f"Datasets directory not found: {datasets_dir}")
-            
+
             except Exception as e:
                 logger.error(f"Error in passive training cycle: {e}", exc_info=True)
-            
-            # Wait for next cycle
+
             if self.running:
                 if self.interval == 0:
                     logger.info(
@@ -436,124 +643,110 @@ class QuantumEnhancedLLMTrainer:
                     break
                 logger.info(f"Waiting {self.interval} seconds until next cycle...")
                 time.sleep(self.interval)
-        
+
         logger.info("Passive training stopped")
 
 
+# ---------------------------------------------------------------------------
+# CLI
+# ---------------------------------------------------------------------------
+
 def main():
     parser = argparse.ArgumentParser(
-        description="Quantum-Enhanced LLM Training",
-        formatter_class=argparse.RawDescriptionHelpFormatter
+        description="Quantum-Enhanced LLM Training with Real Quantum Circuits",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
     )
-    
+
+    # Dataset / output
+    parser.add_argument("--dataset", type=str, help="Path to training data")
     parser.add_argument(
-        "--dataset",
-        type=str,
-        help="Path to training dataset (file or directory)"
+        "--output-dir", type=str, default="data_out/quantum_llm_training",
+        help="Output directory for results",
     )
-    
+
+    # Model architecture
+    parser.add_argument("--vocab-size", type=int, default=256)
+    parser.add_argument("--d-model", type=int, default=64)
+    parser.add_argument("--n-heads", type=int, default=4)
+    parser.add_argument("--n-transformer-layers", type=int, default=2)
+    parser.add_argument("--max-seq-len", type=int, default=32)
+
+    # Quantum circuit settings
+    parser.add_argument("--n-qubits", type=int, default=4)
+    parser.add_argument("--n-quantum-layers", type=int, default=2)
     parser.add_argument(
-        "--output-dir",
-        type=str,
-        default="data_out/quantum_llm_training",
-        help="Output directory for results"
+        "--entanglement", type=str, default="circular",
+        choices=["linear", "circular", "full"],
     )
-    
-    parser.add_argument(
-        "--quantum-backend",
-        type=str,
-        default="local",
-        choices=["local", "azure"],
-        help="Quantum backend to use (local simulator or Azure Quantum)"
-    )
-    
-    parser.add_argument(
-        "--n-qubits",
-        type=int,
-        default=4,
-        help="Number of qubits for quantum circuits"
-    )
-    
-    parser.add_argument(
-        "--n-quantum-layers",
-        type=int,
-        default=2,
-        help="Number of quantum circuit layers"
-    )
-    
-    parser.add_argument(
-        "--epochs",
-        type=int,
-        default=3,
-        help="Number of training epochs"
-    )
-    
-    parser.add_argument(
-        "--passive",
-        action="store_true",
-        help="Run in passive mode (continuous background training)"
-    )
-    
-    parser.add_argument(
-        "--interval",
-        type=int,
-        default=3600,
-        help="Interval between passive training cycles (seconds)"
-    )
-    
-    parser.add_argument(
-        "--config",
-        type=str,
-        help="Path to configuration YAML file"
-    )
-    
+
+    # Training
+    parser.add_argument("--epochs", type=int, default=3)
+    parser.add_argument("--batch-size", type=int, default=4)
+    parser.add_argument("--learning-rate", type=float, default=0.001)
+    parser.add_argument("--gradient-clip", type=float, default=1.0)
+
+    # Passive mode
+    parser.add_argument("--passive", action="store_true")
+    parser.add_argument("--interval", type=int, default=3600)
+
+    # Config file
+    parser.add_argument("--config", type=str, help="Path to YAML config file")
+
     args = parser.parse_args()
-    
-    # Build configuration
+
+    # Build config from CLI args
     config = {
-        "quantum_backend": args.quantum_backend,
-        "n_qubits": args.n_qubits,
-        "n_quantum_layers": args.n_quantum_layers,
+        "quantum_transformer": {
+            "vocab_size": args.vocab_size,
+            "d_model": args.d_model,
+            "n_heads": args.n_heads,
+            "n_transformer_layers": args.n_transformer_layers,
+            "max_seq_len": args.max_seq_len,
+            "n_qubits": args.n_qubits,
+            "n_quantum_layers": args.n_quantum_layers,
+            "entanglement": args.entanglement,
+            "learning_rate": args.learning_rate,
+            "batch_size": args.batch_size,
+            "gradient_clip": args.gradient_clip,
+        },
         "passive": args.passive,
-        "interval": args.interval
+        "interval": args.interval,
     }
-    
-    # Load additional config from file if provided
+
+    # Merge config file if provided
     if args.config:
         config_path = Path(args.config)
         if config_path.exists():
             with open(config_path) as f:
                 file_config = yaml.safe_load(f)
                 config.update(file_config)
-    
-    # Initialize trainer
+
+    # Create trainer
     trainer = QuantumEnhancedLLMTrainer(config)
-    
+
     if args.passive:
-        # Run in passive mode
         trainer.run_passive_training()
     else:
-        # Run active training
         if not args.dataset:
             logger.error("--dataset is required for active training mode")
             return 1
-        
-        dataset_path = Path(args.dataset)
-        output_dir = Path(args.output_dir)
-        
+
         results = trainer.train_with_quantum_enhancement(
-            model=None,
-            dataset_path=dataset_path,
-            output_dir=output_dir,
-            epochs=args.epochs
+            dataset_path=Path(args.dataset),
+            output_dir=Path(args.output_dir),
+            epochs=args.epochs,
         )
-        
+
         logger.info("\nTraining Summary:")
         logger.info(f"  Status: {results['status']}")
         logger.info(f"  Epochs: {results['epochs_completed']}")
         logger.info(f"  Final Loss: {results['final_loss']:.4f}")
-        logger.info(f"  Quantum Executions: {results['quantum_metrics']['circuit_executions']}")
-    
+        logger.info(f"  Best Loss: {results.get('best_loss', 'N/A')}")
+        logger.info(
+            f"  Circuit Executions: "
+            f"{results['quantum_metrics']['circuit_executions']}"
+        )
+
     return 0
 
 

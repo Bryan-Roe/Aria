@@ -1,7 +1,7 @@
 ---
 name: "Chat-CLI-workspace"
-description: "Slim instructions for talk-to-ai/"
-applyTo: "talk-to-ai/**"
+description: "Slim instructions for ai-projects/chat-cli/"
+applyTo: "ai-projects/chat-cli/**"
 ---
 # Chat CLI – workspace-specific guidance
 

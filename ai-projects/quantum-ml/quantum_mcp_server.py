@@ -67,25 +67,6 @@ except ImportError as e:
 import numpy as np
 import torch
 from qiskit import QuantumCircuit
-try:
-    from grover_circuit import GroverCircuit
-except ImportError:
-    GroverCircuit = None
-
-try:
-    from enhanced_variational_circuit import EnhancedVariationalCircuit
-except ImportError:
-    EnhancedVariationalCircuit = None
-
-try:
-    from circuit_visualizer import CircuitVisualizer
-except ImportError:
-    CircuitVisualizer = None
-
-try:
-    from azure_quantum_tester import AzureQuantumTester
-except ImportError:
-    AzureQuantumTester = None
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
@@ -146,6 +127,7 @@ class CircuitCache:
         ]
         for key in expired:
             self._evict(key)
+        return len(expired)  # Return count for logging
 
 
 # Global state for quantum resources
@@ -154,7 +136,19 @@ quantum_state = {
     "quantum_classifier": None,
     "circuit_cache": CircuitCache(max_size=100, ttl_seconds=3600),
     "config_cache": {},  # Cache YAML configs to avoid repeated temp file creation
+    "last_cache_cleanup": time.time(),  # Track last cleanup time
 }
+
+
+def _cleanup_cache_if_needed():
+    """Periodically clean expired circuits from cache (called before operations)"""
+    current_time = time.time()
+    # Run cleanup every 10 minutes
+    if current_time - quantum_state["last_cache_cleanup"] > 600:
+        expired_count = quantum_state["circuit_cache"].clear_expired()
+        if expired_count > 0:
+            logging.info(f"[quantum_mcp] Cleaned {expired_count} expired circuits from cache")
+        quantum_state["last_cache_cleanup"] = current_time
 
 
 def initialize_quantum_resources():
@@ -351,144 +345,6 @@ async def list_tools() -> List[Tool]:
                 "required": ["circuit_id"],
             },
         ),
-        Tool(
-            name="grover_search",
-            description="Run Grover's search algorithm for marked states and return success probability plus top states.",
-            inputSchema={
-                "type": "object",
-                "properties": {
-                    "n_qubits": {
-                        "type": "integer",
-                        "description": "Number of qubits/search space size (2^n)",
-                        "minimum": 1,
-                        "maximum": 8,
-                        "default": 3,
-                    },
-                    "marked_states": {
-                        "type": "array",
-                        "description": "List of decimal states to mark (e.g., [5] for |101⟩)",
-                        "items": {"type": "integer"},
-                        "minItems": 1,
-                    },
-                    "iterations": {
-                        "type": "integer",
-                        "description": "Override Grover iterations (defaults to optimal)",
-                        "minimum": 1,
-                    },
-                    "shots": {
-                        "type": "integer",
-                        "description": "Number of measurement shots",
-                        "minimum": 1,
-                        "maximum": 20000,
-                        "default": 1000,
-                    },
-                },
-                "required": ["marked_states"],
-            },
-        ),
-        Tool(
-            name="run_variational_circuit",
-            description="Execute the enhanced variational quantum circuit with configurable encoding/entanglement and return expectations.",
-            inputSchema={
-                "type": "object",
-                "properties": {
-                    "input_vector": {
-                        "type": "array",
-                        "description": "Input features for the circuit",
-                        "items": {"type": "number"},
-                        "minItems": 1,
-                    },
-                    "n_qubits": {
-                        "type": "integer",
-                        "description": "Number of qubits",
-                        "minimum": 2,
-                        "maximum": 12,
-                        "default": 4,
-                    },
-                    "n_layers": {
-                        "type": "integer",
-                        "description": "Variational layers",
-                        "minimum": 1,
-                        "maximum": 10,
-                        "default": 3,
-                    },
-                    "encoding": {
-                        "type": "string",
-                        "description": "Data encoding strategy",
-                        "enum": ["angle", "amplitude", "iqp", "hybrid"],
-                        "default": "hybrid",
-                    },
-                    "entanglement": {
-                        "type": "string",
-                        "description": "Entanglement pattern",
-                        "enum": ["linear", "circular", "full", "pyramid", "alternating"],
-                        "default": "pyramid",
-                    },
-                    "use_data_reuploading": {
-                        "type": "boolean",
-                        "description": "Reupload data between layers",
-                        "default": True,
-                    },
-                    "shots": {
-                        "type": "integer",
-                        "description": "Number of shots (None for statevector)",
-                        "minimum": 1,
-                        "maximum": 20000,
-                    },
-                },
-                "required": ["input_vector"],
-            },
-        ),
-        Tool(
-            name="visualize_cached_circuit",
-            description="Render a cached Qiskit circuit to disk (PNG/text) for inspection.",
-            inputSchema={
-                "type": "object",
-                "properties": {
-                    "circuit_id": {
-                        "type": "string",
-                        "description": "ID of a previously created circuit",
-                    },
-                    "style": {
-                        "type": "string",
-                        "description": "Visualization style",
-                        "enum": ["mpl", "text", "latex"],
-                        "default": "text",
-                    },
-                    "filename": {
-                        "type": "string",
-                        "description": "Optional output filename (default auto-generated)",
-                    },
-                },
-                "required": ["circuit_id"],
-            },
-        ),
-        Tool(
-            name="azure_quantum_test_suite",
-            description="List Azure Quantum targets or run the lightweight test suite (requires Azure Quantum SDK + credentials).",
-            inputSchema={
-                "type": "object",
-                "properties": {
-                    "target_name": {
-                        "type": "string",
-                        "description": "Azure Quantum target (e.g., ionq.simulator, quantinuum.sim.h1-1sc)",
-                        "default": "ionq.simulator",
-                    },
-                    "shots": {
-                        "type": "integer",
-                        "description": "Shots per circuit when running tests",
-                        "minimum": 1,
-                        "maximum": 1000,
-                        "default": 100,
-                    },
-                    "list_only": {
-                        "type": "boolean",
-                        "description": "Only list targets instead of submitting jobs",
-                        "default": True,
-                    },
-                },
-            },
-        ),
     ]
 
 
@@ -513,14 +369,6 @@ async def call_tool(name: str, arguments: Any) -> List[TextContent]:
             return await estimate_cost_handler(arguments)
         elif name == "get_quantum_circuit_properties":
             return await circuit_properties_handler(arguments)
-        elif name == "grover_search":
-            return await grover_search_handler(arguments)
-        elif name == "run_variational_circuit":
-            return await variational_circuit_handler(arguments)
-        elif name == "visualize_cached_circuit":
-            return await visualize_circuit_handler(arguments)
-        elif name == "azure_quantum_test_suite":
-            return await azure_tester_handler(arguments)
         else:
             return [TextContent(type="text", text=f"Unknown tool: {name}")]
             
@@ -531,18 +379,28 @@ async def call_tool(name: str, arguments: Any) -> List[TextContent]:
 
 async def create_circuit_handler(args: Dict) -> List[TextContent]:
     """Create a quantum circuit based on parameters (optimized with async execution)"""
+    # Periodic cache cleanup to prevent memory leaks
+    _cleanup_cache_if_needed()
+    
     n_qubits = args["n_qubits"]
     circuit_type = args["circuit_type"]
     
     # Offload circuit creation to thread pool for CPU-intensive operations
     loop = asyncio.get_event_loop()
-    circuit = await loop.run_in_executor(
-        io_executor,
-        _create_circuit_sync,
-        n_qubits,
-        circuit_type,
-        args.get("gates")
-    )
+    try:
+        # Add timeout to prevent hanging (CRITICAL FIX)
+        circuit = await asyncio.wait_for(
+            loop.run_in_executor(
+                io_executor,
+                _create_circuit_sync,
+                n_qubits,
+                circuit_type,
+                args.get("gates")
+            ),
+            timeout=30.0  # 30-second max for circuit creation
+        )
+    except asyncio.TimeoutError:
+        return [TextContent(type="text", text="Circuit creation timed out after 30s")]
     
     if circuit is None:
         return [TextContent(type="text", text="Invalid circuit type or missing gates for custom type")]
@@ -933,191 +791,6 @@ Gate Breakdown:
         properties += f"  - {gate}: {count}\n"
     
     return [TextContent(type="text", text=properties)]
-
-
-async def grover_search_handler(args: Dict) -> List[TextContent]:
-    """Run Grover search for marked states"""
-    if GroverCircuit is None:
-        return [TextContent(type="text", text="GroverCircuit not available. Install pennylane to enable this tool.")]
-    
-    n_qubits = args.get("n_qubits", 3)
-    marked_states = args["marked_states"]
-    iterations = args.get("iterations")
-    shots = args.get("shots", 1000)
-    
-    loop = asyncio.get_event_loop()
-    summary = await loop.run_in_executor(
-        io_executor,
-        _grover_search_sync,
-        n_qubits,
-        marked_states,
-        iterations,
-        shots
-    )
-    return [TextContent(type="text", text=summary)]
-
-
-def _grover_search_sync(n_qubits: int, marked_states: List[int], iterations: Optional[int], shots: int) -> str:
-    grover = GroverCircuit(n_qubits=n_qubits, shots=shots)
-    result = grover.search(marked_states=marked_states, iterations=iterations)
-    
-    top_states = sorted(result["probabilities"].items(), key=lambda x: x[1], reverse=True)[:5]
-    top_lines = "\n".join([f"  |{state}⟩ (dec {int(state, 2)}): {prob:.3%}" for state, prob in top_states])
-    
-    return (
-        f"Grover search complete\n"
-        f"- Qubits: {n_qubits}\n"
-        f"- Marked states: {marked_states}\n"
-        f"- Iterations: {result['iterations']}\n"
-        f"- Shots: {shots}\n"
-        f"- Success probability: {result['success_probability']:.3%}\n\n"
-        f"Top states:\n{top_lines}"
-    )
-
-
-async def variational_circuit_handler(args: Dict) -> List[TextContent]:
-    """Run the enhanced variational circuit with custom encoding/entanglement"""
-    if EnhancedVariationalCircuit is None:
-        return [TextContent(type="text", text="EnhancedVariationalCircuit not available. Install pennylane and torch to enable this tool.")]
-    
-    input_vector = args["input_vector"]
-    n_qubits = args.get("n_qubits", 4)
-    n_layers = args.get("n_layers", 3)
-    encoding = args.get("encoding", "hybrid")
-    entanglement = args.get("entanglement", "pyramid")
-    use_data_reuploading = args.get("use_data_reuploading", True)
-    shots = args.get("shots")
-    
-    loop = asyncio.get_event_loop()
-    summary = await loop.run_in_executor(
-        io_executor,
-        _run_variational_sync,
-        input_vector,
-        n_qubits,
-        n_layers,
-        encoding,
-        entanglement,
-        use_data_reuploading,
-        shots
-    )
-    return [TextContent(type="text", text=summary)]
-
-
-def _run_variational_sync(
-    input_vector: List[float],
-    n_qubits: int,
-    n_layers: int,
-    encoding: str,
-    entanglement: str,
-    use_data_reuploading: bool,
-    shots: Optional[int],
-) -> str:
-    x = torch.tensor(input_vector, dtype=torch.float32)
-    circuit = EnhancedVariationalCircuit(
-        n_qubits=n_qubits,
-        n_layers=n_layers,
-        encoding=encoding,
-        entanglement=entanglement,
-        use_data_reuploading=use_data_reuploading,
-        shots=shots,
-    )
-    with torch.no_grad():
-        output = circuit.forward(x)
-    info = circuit.get_circuit_info()
-    output_list = [float(val) for val in output]
-    
-    return (
-        "Enhanced variational circuit executed\n"
-        f"- Output expectations (Pauli-Z): {output_list}\n"
-        f"- Encoding: {encoding}, Entanglement: {entanglement}\n"
-        f"- Qubits: {info['n_qubits']}, Layers: {info['n_layers']}\n"
-        f"- Data reuploading: {info['data_reuploading']}\n"
-        f"- Parameters: {info['n_parameters']}, Depth (est): {info['circuit_depth_estimate']}"
-    )
-
-
-async def visualize_circuit_handler(args: Dict) -> List[TextContent]:
-    """Render a cached circuit to disk for inspection"""
-    if CircuitVisualizer is None:
-        return [TextContent(type="text", text="CircuitVisualizer not available. Install qiskit and matplotlib to enable this tool.")]
-    
-    circuit_id = args["circuit_id"]
-    style = args.get("style", "text")
-    filename = args.get("filename")
-    circuit = quantum_state["circuit_cache"].get(circuit_id)
-    
-    if circuit is None:
-        return [TextContent(type="text", text=f"Circuit ID '{circuit_id}' not found or expired. Create it first.")]
-    
-    loop = asyncio.get_event_loop()
-    filepath = await loop.run_in_executor(
-        io_executor,
-        _visualize_circuit_sync,
-        circuit,
-        circuit_id,
-        style,
-        filename
-    )
-    return [TextContent(type="text", text=f"Visualization saved to: {filepath}")]
-
-
-def _visualize_circuit_sync(circuit: QuantumCircuit, circuit_id: str, style: str, filename: Optional[str]) -> str:
-    output_dir = Path(__file__).parent / "results" / "mcp_visualizations"
-    visualizer = CircuitVisualizer(output_dir=str(output_dir))
-    target_filename = filename or f"{circuit_id}_{style}"
-    return visualizer.visualize_qiskit(circuit, style=style, filename=target_filename, show=False)
-
-
-async def azure_tester_handler(args: Dict) -> List[TextContent]:
-    """List Azure Quantum targets or run the quick test suite"""
-    if AzureQuantumTester is None:
-        return [TextContent(type="text", text="AzureQuantumTester not available. Install azure-quantum, qiskit, and qiskit-qir to enable this tool.")]
-    
-    target_name = args.get("target_name", "ionq.simulator")
-    shots = args.get("shots", 100)
-    list_only = args.get("list_only", True)
-    
-    loop = asyncio.get_event_loop()
-    try:
-        if list_only:
-            targets = await loop.run_in_executor(io_executor, _azure_list_targets_sync)
-            target_lines = "\n".join([f"  • {t['id']} ({t['provider']}) – {t['status']}" for t in targets])
-            return [TextContent(type="text", text=f"Available Azure Quantum targets:\n\n{target_lines}")]
-        else:
-            summary = await loop.run_in_executor(
-                io_executor,
-                _azure_run_test_suite_sync,
-                target_name,
-                shots
-            )
-            return [TextContent(type="text", text=summary)]
-    except Exception as e:
-        return [TextContent(type="text", text=f"Azure Quantum tester error: {e}")]
-
-
-def _azure_list_targets_sync() -> List[Dict]:
-    tester = AzureQuantumTester()
-    return tester.list_targets()
-
-
-def _azure_run_test_suite_sync(target_name: str, shots: int) -> str:
-    tester = AzureQuantumTester()
-    results = tester.run_test_suite(target_name=target_name, shots=shots)
-    successes = sum(1 for r in results.values() if r.get("success"))
-    total = len(results)
-    lines = []
-    for name, result in results.items():
-        status = "✓" if result.get("success") else "✗"
-        top = result.get("probabilities", {})
-        top_state = sorted(top.items(), key=lambda x: x[1], reverse=True)[0] if top else None
-        top_text = f"{top_state[0]} ({top_state[1]:.2%})" if top_state else "n/a"
-        lines.append(f"{status} {name}: {result.get('status', 'unknown')} | Top: {top_text}")
-    lines_text = "\n".join(lines)
-    return (
-        f"Azure Quantum test suite ({target_name}, {shots} shots)\n"
-        f"Successes: {successes}/{total}\n\n"
-        f"{lines_text}"
-    )
 
 
 async def main():

@@ -9,7 +9,7 @@ from pathlib import Path
 import sys
 
 # Add parent directory to path for imports
-sys.path.append(str(Path(__file__).parent.parent / "src"))
+sys.path.append(str(Path(__file__).parent.parent.parent.parent / "ai-projects" / "quantum-ml" / "src"))
 
 print("=" * 60)
 print("QUANTUM CIRCUIT CREATION EXAMPLES")

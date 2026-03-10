@@ -51,7 +51,7 @@ warnings.filterwarnings('ignore')
 
 # Import quantum ML components (reuse from existing codebase)
 import sys
-sys.path.insert(0, str(Path(__file__).parent.parent / "quantum-ai"))
+sys.path.insert(0, str(Path(__file__).parent.parent / "ai-projects" / "quantum-ml"))
 
 try:
     from sklearn.model_selection import train_test_split

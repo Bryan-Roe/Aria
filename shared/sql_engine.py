@@ -28,6 +28,10 @@ from __future__ import annotations
 import os
 import logging
 import time
+
+# Configuration constants
+SQL_POOL_RECYCLE_SECONDS = 1800  # Refresh idle connections every 30 minutes
+SLOW_QUERY_THRESHOLD_MS = 500    # Default slow query threshold
 import urllib.parse
 import hashlib
 from typing import Optional, Any, Dict
@@ -168,14 +172,12 @@ def get_engine():  # noqa: ANN001
             return None
         # Unsupported vendor without SQLAlchemy
         return None
-        # Unsupported vendor without SQLAlchemy
-        return None
     if _ENGINE is None or _LAST_URL != url:
         try:
             _ENGINE = create_engine(
                 url,
                 pool_pre_ping=True,
-                pool_recycle=1800,  # refresh idle conns every 30m
+                pool_recycle=SQL_POOL_RECYCLE_SECONDS,  # refresh idle conns every 30m
                 future=True,
             )
             _LAST_URL = url

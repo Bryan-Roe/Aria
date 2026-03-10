@@ -1,7 +1,7 @@
 ---
 name: "Chat-CLI-Python"
-description: "Python-specific guidance for talk-to-ai/"
-applyTo: "talk-to-ai/src/**/*.py"
+description: "Python-specific guidance for ai-projects/chat-cli/"
+applyTo: "ai-projects/chat-cli/src/**/*.py"
 ---
 # Chat CLI – Python files
 
