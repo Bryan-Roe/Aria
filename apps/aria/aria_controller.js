@@ -591,6 +591,7 @@ function setPosition(xPercent, yPercent, zDepth = 0, rotateY = 0) {
         aria.style.transition = ''; // Reset transition
         clearInterval(walkInterval);
         resetWalkCycle();
+        spawnDustCloud(); // landing dust
         log(`✅ Arrived at (${Math.round(xPercent)}%, ${Math.round(yPercent)}%)`);
         // If we were targeting a waypoint, announce in chat
         if (characterState.currentWaypoint) {
@@ -899,6 +900,22 @@ function changeExpression(emotion) {
     setTimeout(() => {
         aria.style.transform = 'translateX(-50%) scale(1)';
     }, 300);
+
+    // Emit mood-appropriate emoji particle
+    const moodEmoji = { smile: '😊', happy: '😄', sad: '😢', surprised: '😲', confused: '🤔', thinking: '💭', wink: '😉' };
+    const emoji = moodEmoji[emotion];
+    if (emoji && stage && aria) {
+        const rect = aria.getBoundingClientRect();
+        const sr = stage.getBoundingClientRect();
+        const cx = ((rect.left + rect.width / 2 - sr.left) / sr.width) * 100;
+        const cy = ((rect.top - sr.top) / sr.height) * 100;
+        const el = document.createElement('div');
+        el.textContent = emoji;
+        el.style.cssText = `position:absolute;left:${cx}%;top:${cy}%;font-size:22px;pointer-events:none;z-index:60;transition:all 0.8s ease-out;opacity:1;`;
+        stage.appendChild(el);
+        requestAnimationFrame(() => { el.style.transform = 'translateY(-30px) scale(1.3)'; el.style.opacity = '0'; });
+        setTimeout(() => el.remove(), 900);
+    }
 }
 
 // Idle animation state
@@ -1563,6 +1580,51 @@ function createEffect(type, intensity = 'normal') {
     // Start effect creation
     requestAnimationFrame(createSingleEffect);
 }
+
+// Dust cloud on landing / arrival
+function spawnDustCloud() {
+    if (!stage || !aria) return;
+    const rect = aria.getBoundingClientRect();
+    const stageRect = stage.getBoundingClientRect();
+    const cx = ((rect.left + rect.width / 2 - stageRect.left) / stageRect.width) * 100;
+    const cy = ((rect.bottom - stageRect.top) / stageRect.height) * 100;
+    for (let i = 0; i < 6; i++) {
+        const p = document.createElement('div');
+        p.style.cssText = `position:absolute;left:${cx + (Math.random()-0.5)*8}%;top:${cy - Math.random()*3}%;width:${6+Math.random()*6}px;height:${6+Math.random()*6}px;background:rgba(160,140,120,${0.3+Math.random()*0.3});border-radius:50%;pointer-events:none;z-index:5;transition:all ${0.4+Math.random()*0.4}s ease-out;`;
+        stage.appendChild(p);
+        requestAnimationFrame(() => {
+            p.style.transform = `translate(${(Math.random()-0.5)*30}px, ${-10-Math.random()*20}px) scale(${1.5+Math.random()})`;
+            p.style.opacity = '0';
+        });
+        setTimeout(() => p.remove(), 900);
+    }
+}
+
+// Ambient idle sparkles — gentle occasional twinkle near Aria
+let _idleSparkleInterval = null;
+function startIdleSparkles() {
+    if (_idleSparkleInterval) return;
+    _idleSparkleInterval = setInterval(() => {
+        if (!aria || !stage) return;
+        // Only sparkle when idle (not walking/dancing)
+        if (aria.classList.contains('walking') || aria.classList.contains('dancing') || aria.classList.contains('running')) return;
+        if (Math.random() > 0.35) return; // ~35% chance each tick
+        const rect = aria.getBoundingClientRect();
+        const stageRect = stage.getBoundingClientRect();
+        const cx = ((rect.left + rect.width / 2 - stageRect.left) / stageRect.width) * 100;
+        const cy = ((rect.top + rect.height * 0.3 - stageRect.top) / stageRect.height) * 100;
+        const s = document.createElement('div');
+        s.textContent = '✦';
+        s.style.cssText = `position:absolute;left:${cx + (Math.random()-0.5)*10}%;top:${cy + (Math.random()-0.5)*8}%;font-size:${8+Math.random()*8}px;color:rgba(255,215,0,${0.4+Math.random()*0.4});pointer-events:none;z-index:50;transition:all ${0.6+Math.random()*0.6}s ease-out;`;
+        stage.appendChild(s);
+        requestAnimationFrame(() => {
+            s.style.transform = `translateY(${-15-Math.random()*15}px) scale(0.3)`;
+            s.style.opacity = '0';
+        });
+        setTimeout(() => s.remove(), 1400);
+    }, 2000);
+}
+startIdleSparkles();
 
 function centerAria() {
     aria.style.left = '50%';

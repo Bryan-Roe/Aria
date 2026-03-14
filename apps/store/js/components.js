@@ -67,6 +67,9 @@ function getFooter() {
       </div>
       <div class="footer-bottom">
         &copy; ${year} TechDrop. All rights reserved.
+        <span style="margin-left:16px;opacity:0.6;font-size:0.85em">
+          Part of the <a href="../aria/" style="color:inherit;text-decoration:underline">Aria</a> platform
+        </span>
       </div>
     </div>
   </footer>`;

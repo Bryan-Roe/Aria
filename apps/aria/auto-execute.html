@@ -327,8 +327,12 @@
 <body>
     <div class="container">
         <div class="top-bar">
-            <a href="./">← Back to Aria</a>
-            <button class="theme-toggle" onclick="toggleTheme()" title="Toggle dark mode">🌙</button>
+            <div style="display:flex;gap:8px;align-items:center">
+                <a href="./">← Aria</a>
+                <a href="../chat/">💬 Chat</a>
+                <a href="../dashboard/">📊 Dashboard</a>
+            </div>
+            <button class="theme-toggle" onclick="toggleTheme()" title="Toggle dark mode (Ctrl+D)">🌙</button>
         </div>
         <div class="header">
             <h1>Aria Auto-Execute</h1>
@@ -562,6 +566,11 @@
                 const btn = document.querySelector('.theme-toggle');
                 if (btn) btn.textContent = '☀️';
             }
+            // Ctrl+D for dark mode, Enter in command field to execute
+            document.addEventListener('keydown', function(e) {
+                if (e.ctrlKey && e.key === 'd') { e.preventDefault(); toggleTheme(); }
+                if (e.key === 'Enter' && e.target.id === 'command') { e.preventDefault(); executeActions(); }
+            });
         })();
     </script>
 </body>

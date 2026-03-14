@@ -349,9 +349,22 @@
         .status-dot-warning { background:#ffc107 !important; }
         .clickable-badge { cursor:pointer; border:none; background: rgba(255,255,255,0.1); }
         .mt-10 { margin-top:10px; }
+        /* Cross-app nav */
+        .app-nav { display:flex; gap:8px; padding:10px 20px; background:rgba(0,0,0,0.2); border-radius:12px; margin-bottom:16px; align-items:center; flex-wrap:wrap; }
+        .app-nav a { color:rgba(255,255,255,0.85); text-decoration:none; padding:6px 14px; border-radius:8px; font-size:0.88em; font-weight:500; transition:all 0.2s; background:rgba(255,255,255,0.06); }
+        .app-nav a:hover { background:rgba(255,255,255,0.15); transform:translateY(-1px); }
+        .app-nav a.active { background:rgba(102,126,234,0.35); color:#fff; }
+        .app-nav .nav-label { color:rgba(255,255,255,0.4); font-size:0.78em; text-transform:uppercase; letter-spacing:0.5px; margin-right:4px; }
     </style>
 <body>
     <div class="container">
+        <nav class="app-nav">
+            <span class="nav-label">Navigate</span>
+            <a href="../aria/">👤 Aria</a>
+            <a href="../chat/">💬 Chat</a>
+            <a href="./" class="active">📊 Dashboard</a>
+            <a href="../store/">🛒 Store</a>
+        </nav>
         <header>
             <h1>🌌 QAI Command Center</h1>
             <p class="subtitle">Quantum-AI Hybrid Training & Deployment Hub</p>
@@ -634,7 +647,13 @@
 
         <footer>
             <p>QAI Command Center v2.0 | Hybrid Quantum-AI Training Platform</p>
-            <p class="mt-10">Three independent projects, unified experience</p>
+            <p class="mt-10" style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:8px">
+                <a href="../aria/" style="color:rgba(255,255,255,0.6);text-decoration:none;font-size:0.85em">👤 Aria Character</a>
+                <a href="../chat/" style="color:rgba(255,255,255,0.6);text-decoration:none;font-size:0.85em">💬 Chat Interface</a>
+                <a href="unified.html" style="color:rgba(255,255,255,0.6);text-decoration:none;font-size:0.85em">🎯 Training</a>
+                <a href="analytics.html" style="color:rgba(255,255,255,0.6);text-decoration:none;font-size:0.85em">📈 Analytics</a>
+                <a href="../store/" style="color:rgba(255,255,255,0.6);text-decoration:none;font-size:0.85em">🛒 Store</a>
+            </p>
         </footer>
     </div>
 
