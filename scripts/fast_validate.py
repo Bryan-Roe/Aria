@@ -81,6 +81,83 @@ def quick_check_outputs() -> Dict[str, Any]:
         "speed": "instant"
     }
 
+def quick_check_configs() -> Dict[str, Any]:
+    """Verify critical YAML configs parse without error."""
+    import importlib
+    yaml_mod = importlib.import_module("yaml") if importlib.util.find_spec("yaml") else None
+
+    configs = [
+        "config/autonomous_training.yaml",
+        "config/master_orchestrator.yaml",
+    ]
+    issues: List[str] = []
+    for cfg in configs:
+        path = REPO_ROOT / cfg
+        if not path.exists():
+            issues.append(f"missing: {cfg}")
+            continue
+        if yaml_mod:
+            try:
+                with open(path, "r", encoding="utf-8") as f:
+                    yaml_mod.safe_load(f)
+            except Exception as exc:
+                issues.append(f"parse error in {cfg}: {exc}")
+
+    return {
+        "status": "ok" if not issues else "config_issues",
+        "issues": issues,
+        "speed": "instant",
+    }
+
+
+def quick_check_providers() -> Dict[str, Any]:
+    """Check which chat providers have required env vars present (no connections)."""
+    import os
+
+    providers: Dict[str, bool] = {}
+    providers["azure_openai"] = all(
+        os.environ.get(k)
+        for k in [
+            "AZURE_OPENAI_API_KEY",
+            "AZURE_OPENAI_ENDPOINT",
+            "AZURE_OPENAI_DEPLOYMENT",
+            "AZURE_OPENAI_API_VERSION",
+        ]
+    )
+    providers["openai"] = bool(os.environ.get("OPENAI_API_KEY"))
+    providers["lmstudio"] = bool(os.environ.get("LMSTUDIO_BASE_URL"))
+    providers["cosmos"] = bool(os.environ.get("QAI_ENABLE_COSMOS"))
+    providers["sql"] = bool(os.environ.get("QAI_DB_CONN"))
+
+    available = [p for p, v in providers.items() if v]
+    return {
+        "status": "ok" if available else "no_providers",
+        "available": available,
+        "speed": "instant",
+    }
+
+
+def quick_check_dependencies() -> Dict[str, Any]:
+    """Verify key Python packages are importable (no heavy loads)."""
+    import importlib.util
+
+    packages = ["pytest", "yaml", "flask", "azure.functions"]
+    present = []
+    missing = []
+    for pkg in packages:
+        if importlib.util.find_spec(pkg):
+            present.append(pkg)
+        else:
+            missing.append(pkg)
+
+    return {
+        "status": "ok" if not missing else "missing_deps",
+        "present": present,
+        "missing": missing,
+        "speed": "instant",
+    }
+
+
 def main() -> None:
     """Run all fast checks (completes in <100ms)."""
     print("🚀 Fast Validation (no heavy imports, no parsing)")
@@ -91,6 +168,9 @@ def main() -> None:
         ("Scripts", quick_check_scripts),
         ("Virtual Envs", quick_check_venv),
         ("Output Dirs", quick_check_outputs),
+        ("Configs", quick_check_configs),
+        ("Providers", quick_check_providers),
+        ("Dependencies", quick_check_dependencies),
     ]
     
     results: List[Dict[str, Any]] = []
