@@ -1049,6 +1049,14 @@
             color: var(--text-secondary);
             font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
         }
+        .log-entry.log-error {
+            border-left-color: #ef4444;
+            color: #ef4444;
+        }
+        [data-theme="dark"] .log-entry.log-error {
+            color: #f87171;
+            border-left-color: #f87171;
+        }
 
         .command-categories {
             background: var(--panel-bg);
@@ -1201,6 +1209,89 @@
             box-shadow: 0 2px 8px var(--accent-glow);
         }
 
+        /* Speech bubble */
+        .speech-bubble {
+            position: absolute;
+            top: -60px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--panel-bg);
+            color: var(--text-primary);
+            padding: 8px 14px;
+            border-radius: 12px;
+            font-size: 0.82em;
+            max-width: 200px;
+            text-align: center;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+            border: 1px solid var(--border);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s, transform 0.3s;
+            z-index: 50;
+        }
+        .speech-bubble.visible {
+            opacity: 1;
+            transform: translateX(-50%) translateY(-4px);
+        }
+        .speech-bubble::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-left: 8px solid transparent;
+            border-right: 8px solid transparent;
+            border-top: 8px solid var(--panel-bg);
+        }
+
+        /* Connection status */
+        .connection-status {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.78em;
+            color: var(--text-secondary);
+            padding: 4px 10px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            transition: all var(--transition);
+        }
+        .connection-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #9e9e9e;
+            transition: background var(--transition);
+        }
+        .connection-status.connected .connection-dot { background: #4caf50; }
+        .connection-status.disconnected .connection-dot { background: #ef4444; }
+        .connection-status.checking .connection-dot { background: #f59e0b; animation: blink 1s infinite; }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+        /* Feedback toast */
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%) translateY(20px);
+            background: var(--panel-bg);
+            color: var(--text-primary);
+            padding: 10px 20px;
+            border-radius: 12px;
+            font-size: 0.88em;
+            font-weight: 500;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+            border: 1px solid var(--border);
+            opacity: 0;
+            transition: opacity 0.3s, transform 0.3s;
+            z-index: 1000;
+            pointer-events: none;
+        }
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
         /* Keyboard hints */
         .kbd-hint {
             margin-top: 8px;
@@ -1216,6 +1307,30 @@
             background: var(--input-bg);
             font-family: inherit;
             font-size: 0.95em;
+        }
+
+        /* Stage overlay info */
+        .stage-info {
+            position: absolute;
+            bottom: 8px;
+            right: 10px;
+            font-size: 0.72em;
+            color: rgba(0,0,0,0.35);
+            z-index: 20;
+            font-family: monospace;
+        }
+        [data-theme="dark"] .stage-info { color: rgba(255,255,255,0.25); }
+
+        /* Fullscreen stage */
+        .stage-fullscreen {
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100vw !important;
+            height: 100vh !important;
+            border-radius: 0 !important;
+            z-index: 9999;
+            border: none !important;
         }
 
         /* Responsive */
@@ -1254,6 +1369,10 @@
                 <a href="../dashboard/" class="nav-link">📊 Dashboard</a>
             </div>
             <div class="nav-links">
+                <div class="connection-status checking" id="connectionStatus">
+                    <span class="connection-dot"></span>
+                    <span id="connectionLabel">Checking...</span>
+                </div>
                 <span class="subscription-badge free" id="subscription-badge">Free Tier</span>
                 <button class="theme-toggle" onclick="toggleTheme()" title="Toggle dark mode">🌙</button>
             </div>
@@ -1301,7 +1420,11 @@
                     <div id="ball" class="object ball" data-object="ball">⚽</div>
                     <div id="flower" class="object flower" data-object="flower">🌸</div>
                     
+                    <!-- Stage position readout -->
+                    <div class="stage-info" id="stageInfo"></div>
+
                     <div class="aria-character" id="aria">
+                        <div class="speech-bubble" id="speechBubble"></div>
                         <div class="aria-ponytail left"></div>
                         <div class="aria-ponytail right"></div>
                         <div class="aria-hair"></div>
@@ -1435,7 +1558,7 @@
                 </div>
 
                 <div class="kbd-hint">
-                    <kbd>Enter</kbd> send command &middot; <kbd>↑</kbd> <kbd>↓</kbd> history
+                    <kbd>Enter</kbd> send &middot; <kbd>↑</kbd><kbd>↓</kbd> history &middot; <kbd>/</kbd> focus &middot; <kbd>Ctrl+D</kbd> theme &middot; <kbd>F11</kbd> fullscreen
                 </div>
             </div>
         </div>
@@ -1443,7 +1566,7 @@
 
     <script src="aria_controller.js"></script>
     <script>
-        // Dark mode toggle
+        // === Dark mode toggle ===
         function toggleTheme() {
             const html = document.documentElement;
             const btn = document.querySelector('.theme-toggle');
@@ -1457,7 +1580,6 @@
                 localStorage.setItem('aria-theme', 'dark');
             }
         }
-        // Restore saved theme
         (function() {
             const saved = localStorage.getItem('aria-theme');
             if (saved === 'dark') {
@@ -1467,7 +1589,161 @@
             }
         })();
 
-        // Fetch and display subscription status
+        // === Connection status checker ===
+        async function checkConnection() {
+            const el = document.getElementById('connectionStatus');
+            const label = document.getElementById('connectionLabel');
+            el.className = 'connection-status checking';
+            label.textContent = 'Checking...';
+            try {
+                const r = await fetch('/api/aria/state', { signal: AbortSignal.timeout(3000) });
+                if (r.ok) {
+                    el.className = 'connection-status connected';
+                    label.textContent = 'Connected';
+                } else {
+                    el.className = 'connection-status disconnected';
+                    label.textContent = 'Error ' + r.status;
+                }
+            } catch(e) {
+                el.className = 'connection-status disconnected';
+                label.textContent = 'Offline';
+            }
+        }
+        checkConnection();
+        setInterval(checkConnection, 30000);
+
+        // === Speech bubble ===
+        let speechTimeout;
+        function showSpeechBubble(text, duration) {
+            duration = duration || 3000;
+            const bubble = document.getElementById('speechBubble');
+            if (!bubble) return;
+            bubble.textContent = text;
+            bubble.classList.add('visible');
+            clearTimeout(speechTimeout);
+            speechTimeout = setTimeout(function() { bubble.classList.remove('visible'); }, duration);
+        }
+        // Hook into addChatMessage to show Aria replies as speech bubbles
+        if (typeof addChatMessage === 'function') {
+            const _origAddChat = addChatMessage;
+            addChatMessage = function(role, text) {
+                _origAddChat(role, text);
+                if (role === 'aria' && text.length < 80) {
+                    showSpeechBubble(text);
+                }
+            };
+        }
+
+        // === Toast notifications ===
+        let toastEl, toastTimeout;
+        function showToast(msg) {
+            if (!toastEl) {
+                toastEl = document.createElement('div');
+                toastEl.className = 'toast';
+                document.body.appendChild(toastEl);
+            }
+            toastEl.textContent = msg;
+            toastEl.classList.add('show');
+            clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(function() { toastEl.classList.remove('show'); }, 2500);
+        }
+
+        // === Command history (arrow keys) ===
+        (function() {
+            const cmdHistory = [];
+            let historyIdx = -1;
+            const cmdInput = document.getElementById('commandInput');
+            if (!cmdInput) return;
+
+            cmdInput.addEventListener('keydown', function(e) {
+                if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    if (historyIdx < cmdHistory.length - 1) {
+                        historyIdx++;
+                        cmdInput.value = cmdHistory[cmdHistory.length - 1 - historyIdx];
+                    }
+                } else if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    if (historyIdx > 0) {
+                        historyIdx--;
+                        cmdInput.value = cmdHistory[cmdHistory.length - 1 - historyIdx];
+                    } else {
+                        historyIdx = -1;
+                        cmdInput.value = '';
+                    }
+                }
+            });
+
+            // Wrap sendCommand to record history
+            if (typeof sendCommand === 'function') {
+                const _orig = sendCommand;
+                window.sendCommand = async function() {
+                    const val = cmdInput.value.trim();
+                    if (val && (cmdHistory.length === 0 || cmdHistory[cmdHistory.length - 1] !== val)) {
+                        cmdHistory.push(val);
+                        if (cmdHistory.length > 50) cmdHistory.shift();
+                    }
+                    historyIdx = -1;
+                    return _orig();
+                };
+            }
+        })();
+
+        // === Stage position readout ===
+        setInterval(function() {
+            const info = document.getElementById('stageInfo');
+            if (!info || typeof characterState === 'undefined') return;
+            const pos = characterState.position || {};
+            info.textContent = 'x:' + Math.round(pos.x||0) + ' y:' + Math.round(pos.y||0);
+        }, 500);
+
+        // === Global keyboard shortcuts ===
+        document.addEventListener('keydown', function(e) {
+            // "/" to focus command input (when not already in an input)
+            if (e.key === '/' && !['INPUT','TEXTAREA','SELECT'].includes(document.activeElement.tagName)) {
+                e.preventDefault();
+                document.getElementById('commandInput').focus();
+            }
+            // Ctrl+K to clear log
+            if (e.ctrlKey && e.key === 'k') {
+                e.preventDefault();
+                const logEl = document.getElementById('logContainer');
+                if (logEl) logEl.innerHTML = '';
+                showToast('Log cleared');
+            }
+            // Escape to blur inputs
+            if (e.key === 'Escape') {
+                document.activeElement.blur();
+            }
+            // Ctrl+D to toggle dark mode
+            if (e.ctrlKey && e.key === 'd') {
+                e.preventDefault();
+                toggleTheme();
+            }
+            // F11 or Ctrl+Shift+F to toggle fullscreen stage
+            if (e.key === 'F11' || (e.ctrlKey && e.shiftKey && e.key === 'F')) {
+                e.preventDefault();
+                toggleFullscreenStage();
+            }
+        });
+
+        // === Fullscreen stage toggle ===
+        function toggleFullscreenStage() {
+            const stage = document.getElementById('stage');
+            if (!stage) return;
+            stage.classList.toggle('stage-fullscreen');
+            if (stage.classList.contains('stage-fullscreen')) {
+                showToast('Fullscreen — press Esc or F11 to exit');
+                document.addEventListener('keydown', function escHandler(e) {
+                    if (e.key === 'Escape') {
+                        stage.classList.remove('stage-fullscreen');
+                        document.removeEventListener('keydown', escHandler);
+                    }
+                });
+            }
+        }
+
+        // === Subscription status ===
         async function loadSubscriptionStatus() {
             try {
                 const response = await fetch('/api/subscription/status?user_id=demo_user');
@@ -1476,13 +1752,11 @@
                     const badge = document.getElementById('subscription-badge');
                     if (badge && data.tier) {
                         const tierName = data.tier_name || data.tier.toUpperCase();
-                        badge.textContent = `${tierName} Tier`;
-                        badge.className = `subscription-badge ${data.tier.toLowerCase()}`;
+                        badge.textContent = tierName + ' Tier';
+                        badge.className = 'subscription-badge ' + data.tier.toLowerCase();
                     }
                 }
-            } catch (e) {
-                // Keep default badge
-            }
+            } catch (e) {}
         }
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', loadSubscriptionStatus);

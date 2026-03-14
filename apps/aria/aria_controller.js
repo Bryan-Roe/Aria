@@ -82,9 +82,14 @@ let characterState = {
 
 // Visual feedback function
 function showFeedback(message) {
+    // Use toast if available (defined in index.html), fall back to stage overlay
+    if (typeof showToast === 'function') {
+        showToast(message);
+        return;
+    }
     const feedback = document.createElement('div');
     feedback.textContent = message;
-    feedback.style.cssText = 'position:absolute; top:20px; left:50%; transform:translateX(-50%); background:#e74c3c; color:white; padding:15px 30px; border-radius:15px; font-size:28px; font-weight:bold; z-index:999; box-shadow:0 5px 20px rgba(0,0,0,0.3); animation:pulse 0.5s ease;';
+    feedback.style.cssText = 'position:absolute; top:20px; left:50%; transform:translateX(-50%); background:var(--accent, #667eea); color:white; padding:12px 24px; border-radius:12px; font-size:0.9em; font-weight:600; z-index:999; box-shadow:0 4px 16px rgba(0,0,0,0.2); animation:pulse 0.5s ease;';
     stage.appendChild(feedback);
     setTimeout(() => feedback.remove(), 2500);
 }
@@ -199,8 +204,7 @@ const expressions = {
 function log(message, isError = false) {
     const entry = document.createElement('div');
     entry.className = 'log-entry';
-    entry.style.borderLeftColor = isError ? '#e74c3c' : '#667eea';
-    entry.style.color = isError ? '#e74c3c' : '#555';
+    if (isError) entry.classList.add('log-error');
     entry.textContent = `${new Date().toLocaleTimeString()}: ${message}`;
     logContainer.insertBefore(entry, logContainer.firstChild);
     

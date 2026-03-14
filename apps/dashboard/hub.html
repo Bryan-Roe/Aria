@@ -434,6 +434,10 @@
                     <div class="action-icon">📋</div>
                     <div class="action-label">Job Queue</div>
                 </div>
+                <div class="action-btn" onclick="quickAction('aria')">
+                    <div class="action-icon">👤</div>
+                    <div class="action-label">Aria Character</div>
+                </div>
             </div>
         </div>
 
@@ -605,6 +609,27 @@
                     <button class="btn btn-secondary" onclick="showInfo('ci')">Learn More</button>
                 </div>
             </div>
+
+            <!-- Aria Character -->
+            <div class="system-card" onclick="openSystem('../aria/')">
+                <div class="system-icon">👤</div>
+                <h2 class="system-title">Aria Character</h2>
+                <p class="system-description">
+                    Interactive AI character with natural language commands,
+                    3D CSS animations, and LLM-powered auto-execution.
+                </p>
+                <ul class="system-features">
+                    <li>Natural language commands</li>
+                    <li>8 core action types</li>
+                    <li>Object interaction & physics</li>
+                    <li>World generation via LLM</li>
+                    <li>Dark mode support</li>
+                </ul>
+                <div class="system-actions">
+                    <a href="../aria/" class="btn btn-primary">Open Aria</a>
+                    <a href="../aria/auto-execute.html" class="btn btn-secondary" onclick="event.stopPropagation()">Auto-Execute</a>
+                </div>
+            </div>
         </div>
 
         <footer>
@@ -687,7 +712,8 @@
                 analytics: 'analytics.html',
                 queue: () => showJobQueue(),
                 quantum: () => showToast('Quantum interface: Use quantum_mcp_server.py or quantum_autorun.py'),
-                chat: () => showToast('Chat interface: Run python talk-to-ai/src/chat_cli.py')
+                chat: () => showToast('Chat interface: Run python talk-to-ai/src/chat_cli.py'),
+                aria: '../aria/'
             };
 
             const handler = actions[action];
