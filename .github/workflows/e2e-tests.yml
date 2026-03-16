@@ -18,6 +18,10 @@ on:
   pull_request:
     branches: [ main ]
 
+concurrency:
+  group: e2e-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   integration:
     name: Unit & Integration tests
@@ -26,13 +30,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Setup Python
-        uses: actions/setup-python@v4
+        uses: ./.github/actions/setup-python-env
         with:
-          python-version: '3.11'
-      - name: Upgrade pip
-        run: python -m pip install --upgrade pip
-      - name: Install test deps
-        run: python -m pip install pytest requests pytest-asyncio
+          install-requirements: 'false'
+          extra-packages: 'pytest requests pytest-asyncio'
       - name: Start server and run integration tests
         run: |
           python3 aria_web/server.py > /tmp/aria_server.log 2>&1 &
@@ -48,15 +49,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Setup Python
-        uses: actions/setup-python@v4
+        uses: ./.github/actions/setup-python-env
         with:
-          python-version: '3.11'
-      - name: Upgrade pip
-        run: python -m pip install --upgrade pip
-      - name: Install Playwright & test deps
-        run: |
-          python -m pip install pytest playwright pytest-asyncio requests
-          python -m playwright install chromium
+          install-requirements: 'false'
+          extra-packages: 'pytest playwright pytest-asyncio requests'
+      - name: Install Playwright browsers
+        run: python -m playwright install chromium --with-deps
       - name: Start server and run Playwright tests
         run: |
           python3 aria_web/server.py > /tmp/aria_server.log 2>&1 &

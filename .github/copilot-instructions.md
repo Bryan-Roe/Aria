@@ -96,8 +96,13 @@ curl http://localhost:7071/api/ai/status | jq # Health check
 # === TESTING & VALIDATION ===
 python scripts/test_runner.py --unit          # Fast unit tests
 python scripts/test_runner.py --all           # All tests
+python scripts/test_runner.py --unit --coverage # Unit tests + coverage
+python scripts/test_runner.py --list-suites   # Show available suites
+python scripts/test_runner.py --unit --watch  # Re-run on file changes
 python ai-projects/chat-cli/src/chat_cli.py --provider local --once "Hello"  # Smoke test
-python scripts/fast_validate.py              # Quick validation across all components
+python scripts/fast_validate.py              # Quick validation (datasets, scripts, venvs, configs, providers, deps)
+python scripts/cleanup_artifacts.py          # Preview old artifact cleanup (dry-run)
+python scripts/cleanup_artifacts.py --apply  # Actually delete old artifacts
 
 # === ORCHESTRATORS (Manual Execution) ===
 python scripts/autotrain.py --dry-run         # Validate training config (12 jobs)
@@ -215,6 +220,22 @@ async def run_single_cycle(cycle_number):
 | Shared DB/telemetry | `shared/sql_engine.py`, `shared/telemetry.py`, `shared/cosmos_client.py` |
 | Aria character interface | `apps/aria/index.html`, `apps/aria/aria_controller.js`, `apps/aria/server.py` |
 | Aria movement/gestures | `apps/aria/aria_controller.js` (command parsing & animation triggers) |
+| Semantic memory/embeddings | `shared/chat_memory.py` (generate_embedding, fetch_similar, store) |
+| Token management | `ai-projects/chat-cli/src/token_utils.py` (counting, pruning) |
+| LLM tool generation | `ai-projects/llm-maker/src/tool_maker.py`, `tool_validator.py` |
+| Website generation | `ai-projects/llm-maker/src/website_maker.py` |
+| Cooking AI recipes | `ai-projects/cooking-ai/src/agents/recipe_agent.py` |
+| Subscriptions/monetization | `shared/subscription_manager.py` + `setup_monetization.py` |
+| DB logging (fault-tolerant) | `shared/db_logging.py` (SP wrappers) |
+| Vision/expression AI | `scripts/vision_inference.py` (TinyConvNet) |
+| Batch model evaluation | `scripts/batch_evaluator.py` + `config/evaluation/` |
+| Monitoring dashboard | `apps/dashboard/` (hub, analytics, GPU monitor) |
+| AGI reasoning | `ai-projects/chat-cli/src/agi_provider.py` |
+| Test runner | `scripts/test_runner.py` (centralized suite orchestrator) |
+| Request validation | `shared/request_validator.py` (JSON schema validation) |
+| Artifact cleanup | `scripts/cleanup_artifacts.py` (data_out/ retention) |
+| Model evaluation | `scripts/evaluate_model.py` (delegates or fallback metrics) |
+| Fast validation | `scripts/fast_validate.py` (configs, providers, deps) |
 
 ## Safety Rules
 
@@ -258,23 +279,72 @@ This repo uses component-specific instruction files in `.github/instructions/`:
 - `talk-to-ai*.instructions.md` — Chat CLI patterns
 - `lora*.instructions.md` — LoRA fine-tuning patterns
 - `chat-web.instructions.md` — Frontend SSE integration
+- `agi-provider.instructions.md` — AGI reasoning system
+- `aria-character.instructions.md` — Interactive character system
+- `aria-web.instructions.md` — Aria web server module
+- `autonomous-training.instructions.md` — Autonomous training orchestration
+- `training-scripts.instructions.md` — Training script patterns
+- `orchestrator-configs.instructions.md` — YAML orchestrator configs
+- `dashboard.instructions.md` — Monitoring dashboard
+- `tests.instructions.md` — Testing infrastructure
+- `llm-maker.instructions.md` — Safe tool/website generation
+- `cooking-ai.instructions.md` — Cooking AI recipe agent
+- `chat-providers.instructions.md` — Multi-provider chat system
+- `chat-memory.instructions.md` — Semantic memory & embeddings
+- `subscription.instructions.md` — Subscription/monetization
+- `db-logging.instructions.md` — Fault-tolerant DB logging
+- `telemetry.instructions.md` — OpenTelemetry setup
+- `token-utils.instructions.md` — Token counting & context pruning
+- `evaluation.instructions.md` — Batch evaluation & analytics
+- `vision-inference.instructions.md` — Vision AI & CNN models
 
 These are automatically applied by VS Code based on file paths. Check attachment indicators to see which rules are active.
 
 ## Custom Coding Agents
 
-**QAI Specialist Agent** (`.github/agents/my-agent.agent.md`):
-- Expert in quantum-AI/ML hybrid development, training orchestration, and Azure Functions integration
-- Understands provider detection chain, orchestrator-driven workflows, and quantum cost awareness
-- Enforces safety protocols: dry-runs before execution, cost warnings for QPU, dataset immutability
-- Quick commands: orchestrator validation, LoRA training, chat CLI testing, MCP server operations
-- Access via GitHub Copilot agent selection or direct reference
+Available agents in `.github/agents/`:
 
-**Chat Modes** (`.github/chatmodes/`):
-- `Azure_function_codegen_and_deployment.chatmode.md` — Enterprise Azure Functions workflow with IaC
-- `Azure_Static_Web_App.chatmode.md` — Static web app deployment patterns
+| Agent | Purpose |
+|-------|---------|
+| `ai.agent.md` | Primary autonomous agent — task decomposition, multi-step execution |
+| `my-agent.agent.md` | QAI specialist — quantum-AI/ML development |
+| `agi-reasoning.agent.md` | Chain-of-thought reasoning, self-reflection |
+| `aria-character.agent.md` | Interactive character commands, animations |
+| `autonomous-trainer.agent.md` | LoRA training lifecycle, model promotion |
+| `full-stack-debugger.agent.md` | Cross-stack issue diagnosis |
+| `automated-code-fixer.agent.md` | Autonomous code improvements |
+| `ai-architect.agent.md` | AI pipeline design, provider integration |
+| `llm-maker.agent.md` | Safe tool/website generation |
+| `chat-provider.agent.md` | Multi-provider chat, streaming, memory |
+| `platform-ops.agent.md` | Subscriptions, monitoring, deployment |
+| `vision-ai.agent.md` | Expression/emotion classification |
+| `data-pipeline.agent.md` | Batch evaluation, dataset management |
 
-**Usage**: These agents are invoked automatically based on context or can be explicitly selected in GitHub Copilot interfaces.
+**Chat Modes** (`.github/chatmodes/` → migrated to `.github/agents/`):
+- `AI_model_training.agent.md` — End-to-end LoRA training, evaluation, and model promotion
+- `Aria_character_development.agent.md` — Interactive character commands, actions, world generation
+- `Quantum_ML_development.agent.md` — Quantum circuits, simulation, Azure Quantum pipelines
+- `Full_stack_debugging.agent.md` — Cross-stack diagnostic protocol
+- `AI_chat_development.agent.md` — Multi-provider chat, streaming, memory, self-learning
+- `Azure_function_codegen_and_deployment.agent.md` — Enterprise Azure Functions workflow with IaC
+- `Azure_Static_Web_App.agent.md` — Static web app deployment patterns
+
+**Prompts** (`.github/prompts/`):
+- `agi.prompt.md` — AGI reasoning with chain-of-thought
+- `reason.prompt.md` — Structured analysis
+- `debug.prompt.md` — Systematic diagnostic protocol
+- `review.prompt.md` — Code review (correctness, security, performance)
+- `aria-command.prompt.md` — Natural language → Aria actions
+- `train.prompt.md` — Training execution with safety
+- `quantum.prompt.md` — Cost-aware quantum workflows
+- `chat.prompt.md` — Multi-provider chat with memory
+- `generate-tool.prompt.md` — Safe Python tool generation
+- `generate-website.prompt.md` — Complete website generation
+- `evaluate.prompt.md` — Model evaluation & benchmarking
+- `deploy.prompt.md` — Model/service deployment
+- `optimize.prompt.md` — Performance analysis & optimization
+
+**Usage**: Agents are invoked automatically based on context or explicitly selected in GitHub Copilot interfaces.
 
 ## Coding Agent Best Practices
 

@@ -15,8 +15,100 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+    commit-message:
+      prefix: "deps(pip)"
     groups:
       python-dependencies:
+        patterns:
+          - "*"
+    reviewers:
+      - "Bryan-Roe"
+
+  - package-ecosystem: "pip"
+    directory: "/ai-projects/quantum-ml"
+    schedule:
+      interval: "weekly"
+    commit-message:
+      prefix: "deps(quantum-ml)"
+    groups:
+      quantum-ml-deps:
+        patterns:
+          - "*"
+
+  - package-ecosystem: "pip"
+    directory: "/ai-projects/quantum-ml/production"
+    schedule:
+      interval: "weekly"
+    commit-message:
+      prefix: "deps(quantum-prod)"
+    groups:
+      quantum-prod-deps:
+        patterns:
+          - "*"
+
+  - package-ecosystem: "pip"
+    directory: "/ai-projects/chat-cli"
+    schedule:
+      interval: "weekly"
+    commit-message:
+      prefix: "deps(chat-cli)"
+    groups:
+      chat-cli-deps:
+        patterns:
+          - "*"
+
+  - package-ecosystem: "pip"
+    directory: "/ai-projects/cooking-ai"
+    schedule:
+      interval: "weekly"
+    commit-message:
+      prefix: "deps(cooking-ai)"
+    groups:
+      cooking-ai-deps:
+        patterns:
+          - "*"
+
+  - package-ecosystem: "pip"
+    directory: "/ai-projects/llm-maker"
+    schedule:
+      interval: "weekly"
+    commit-message:
+      prefix: "deps(llm-maker)"
+    groups:
+      llm-maker-deps:
+        patterns:
+          - "*"
+
+  - package-ecosystem: "pip"
+    directory: "/ai-projects/lora-training/microsoft_phi-silica-3.6_v1"
+    schedule:
+      interval: "weekly"
+    commit-message:
+      prefix: "deps(lora)"
+    groups:
+      lora-deps:
+        patterns:
+          - "*"
+
+  - package-ecosystem: "pip"
+    directory: "/ai-projects/lora-training/quantum-ai"
+    schedule:
+      interval: "weekly"
+    commit-message:
+      prefix: "deps(lora-quantum)"
+    groups:
+      lora-quantum-deps:
+        patterns:
+          - "*"
+
+  - package-ecosystem: "pip"
+    directory: "/mount"
+    schedule:
+      interval: "weekly"
+    commit-message:
+      prefix: "deps(mount)"
+    groups:
+      mount-deps:
         patterns:
           - "*"
 
@@ -24,8 +116,12 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+    commit-message:
+      prefix: "ci"
     groups:
       github-actions:
         patterns:
           - "*"
+    reviewers:
+      - "Bryan-Roe"
 

@@ -34,6 +34,9 @@
   Run Tests:
     python3 scripts/test_repo_automation.py
 
+  Integration Smoke:
+    python3 scripts/integration_smoke.py
+
   Demo:
     ./scripts/demo_repo_automation.sh
 
@@ -121,7 +124,7 @@
 📚 DOCUMENTATION
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  Full Guide:           cat REPO_AUTOMATION_GUIDE.md
+  Full Guide:           cat docs/guides/REPO_AUTOMATION_GUIDE.md
   Aria Guide:           cat ARIA_AUTOMATION_GUIDE.md
   Main README:          cat README.md
   Master Orchestrator:  python3 scripts/master_orchestrator.py --help

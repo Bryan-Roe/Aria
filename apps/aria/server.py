@@ -6,6 +6,7 @@ Serves the HTML/JS frontend and provides API endpoint for command generation
 import random
 import math
 import sys
+import hashlib
 from pathlib import Path
 import datetime
 from datetime import timezone
@@ -79,8 +80,35 @@ WALK_LEFT_KEYWORDS = frozenset(['walk left', 'go left', 'left'])
 WALK_RIGHT_KEYWORDS = frozenset(['walk right', 'go right', 'right'])
 
 def _contains_any_keyword(text: str, keywords: frozenset) -> bool:
-    """Check if text contains any keyword from set. O(1) per keyword check."""
-    return any(kw in text for kw in keywords)
+    """Check if text contains any keyword from set."""
+    for kw in keywords:
+        if kw in text:
+            return True
+    return False
+
+
+def _any_word_in_text(words: frozenset, text: str) -> bool:
+    """Backward-compatible helper alias used by older tests."""
+    return _contains_any_keyword(text, words)
+
+
+def _keywords_in_cmd(words: frozenset, text: str) -> bool:
+    """Backward-compatible helper alias used by older tests."""
+    return _contains_any_keyword(text, words)
+
+
+# Legacy constant aliases expected by older modules/tests.
+_MOVE_KEYWORDS = MOVE_KEYWORDS
+_SAY_KEYWORDS = SAY_KEYWORDS
+_PICKUP_KEYWORDS = PICKUP_KEYWORDS
+_JUMP_KEYWORDS = JUMP_KEYWORDS
+_DANCE_KEYWORDS = DANCE_KEYWORDS
+_LIMB_KEYWORDS = frozenset(
+    set(LEFT_ARM_KEYWORDS)
+    | set(RIGHT_ARM_KEYWORDS)
+    | set(LEFT_LEG_KEYWORDS)
+    | set(RIGHT_LEG_KEYWORDS)
+)
 
 # Global stage state that AI can see
 stage_state = {
@@ -297,9 +325,10 @@ Rules:
                 break
 
         # Parse gesture commands
-        gestures = ['wave', 'bow', 'nod', 'shake', 'point']
+        gestures = ['wave', 'thumbs_up', 'clap', 'shrug', 'bow', 'nod']
         for gesture in gestures:
-            if gesture in command_lower:
+            trigger = gesture.replace('_', ' ')
+            if trigger in command_lower:
                 actions.append({"action": "gesture", "gesture_type": gesture})
                 break
 
@@ -334,8 +363,7 @@ Rules:
 
 
 def _sanitize_id(raw: str) -> str:
-    import re as _re
-    cleaned = _re.sub(r"[^a-zA-Z0-9_]+", "_", raw.strip().lower())
+    cleaned = re.sub(r"[^a-zA-Z0-9_]+", "_", raw.strip().lower())
     return cleaned[:30] or f"obj_{random.randint(1000, 9999)}"
 
 
@@ -430,18 +458,15 @@ def generate_world_with_llm(theme: str, count: int, provider) -> dict:
         raw_str = raw if isinstance(raw, str) else str(raw)
         # Strip code fences
         if '```' in raw_str:
-            import re as _re
-            m = _re.search(r"```(?:json)?\n(.*?)(```)$",
-                           raw_str, flags=_re.DOTALL)
+            m = re.search(r"```(?:json)?\n(.*?)(```)$",
+                          raw_str, flags=re.DOTALL)
             if m:
                 raw_str = m.group(1).strip()
         # Extract first JSON object
-        import json as _json
-        import re as _re
-        obj_match = _re.search(r"\{.*\}\s*$", raw_str, flags=_re.DOTALL)
+        obj_match = re.search(r"\{.*\}\s*$", raw_str, flags=re.DOTALL)
         if obj_match:
             raw_str = obj_match.group(0)
-        parsed_world_data = _json.loads(raw_str)
+        parsed_world_data = json.loads(raw_str)
         # Basic validation
         objects = parsed_world_data.get('objects') or {}
         env = parsed_world_data.get('environment') or {}
@@ -566,7 +591,6 @@ def determine_position_from_context(cmd: str) -> str:
     else:
         # Context-aware positioning: stay put if already in good position
         # or move to interesting area if idle
-        import hashlib
         pos_hash = int(hashlib.md5(cmd.encode()).hexdigest()[:4], 16)
         x = 30 + (pos_hash % 40)  # Random between 30-70%
         y = 60 + (pos_hash % 20)  # Random between 60-80%
@@ -662,7 +686,7 @@ def generate_tags_fallback(command: str) -> List[str]:
     elif 'flip' in cmd:
         tags.append('[aria:animate:flip]')
 
-    # Gestures
+    # Gestures (allowlist: wave, thumbs_up, clap, shrug, bow, nod)
     if 'wave' in cmd:
         tags.append('[aria:gesture:wave]')
     elif 'thumbs up' in cmd:
@@ -671,6 +695,8 @@ def generate_tags_fallback(command: str) -> List[str]:
         tags.append('[aria:gesture:clap]')
     elif 'shrug' in cmd:
         tags.append('[aria:gesture:shrug]')
+    elif 'nod' in cmd:
+        tags.append('[aria:gesture:nod]')
 
     # Limb controls and poses (AI may also emit these; fallback supports natural phrases)
     # Hands up / T-pose / Cross arms
@@ -693,12 +719,7 @@ def generate_tags_fallback(command: str) -> List[str]:
     right_leg = _contains_any_keyword(cmd, RIGHT_LEG_KEYWORDS)
 
     # Numeric angle if present (e.g., "left arm 45 degrees")
-    angle_match = None
-    try:
-        angle_match = next((m for m in __import__('re').finditer(
-            r'(-?\d{1,3})\s*(deg|degree|degrees)?', cmd)), None)
-    except Exception:
-        angle_match = None
+    angle_match = re.search(r'(-?\d{1,3})\s*(?:deg|degree|degrees)?', cmd)
     angle_val = angle_match.group(1) if angle_match else None
 
     # Arm actions
@@ -874,6 +895,11 @@ def execute_aria_action(action: dict) -> dict:
         if action_type == 'move':
             target = action.get('target')
             if isinstance(target, dict) and 'x' in target and 'y' in target:
+                # Clamp position to stage bounds (0-100)
+                target = {
+                    'x': max(0, min(100, target['x'])),
+                    'y': max(0, min(100, target['y']))
+                }
                 stage_state['aria']['position'] = target
                 return {
                     'status': 'success',
@@ -892,7 +918,7 @@ def execute_aria_action(action: dict) -> dict:
                 }
 
         elif action_type == 'say':
-            text = action.get('text', '')
+            text = str(action.get('text', ''))[:200]  # Cap at 200 chars
             emotion = action.get('emotion', 'neutral')
             stage_state['aria']['expression'] = emotion
             return {
@@ -963,8 +989,7 @@ def execute_aria_action(action: dict) -> dict:
 
         elif action_type == 'gesture':
             gesture_type = action.get('gesture_type', 'wave')
-            valid_gestures = ['wave', 'bow', 'nod',
-                              'shake', 'point', 'shrug', 'clap']
+            valid_gestures = frozenset(['wave', 'thumbs_up', 'clap', 'shrug', 'bow', 'nod'])
 
             if gesture_type not in valid_gestures:
                 gesture_type = 'wave'  # Default fallback
@@ -1312,6 +1337,11 @@ class AriaRequestHandler(SimpleHTTPRequestHandler):
         """Custom logging"""
         if 'favicon' not in args[0] if args else True:
             print(f"🌐 {args[0] if args else format}")
+
+
+# Backward-compatible module alias used by tests and older integrations:
+# `from server import server as aria_server`.
+server = sys.modules[__name__]
 
 
 def main():

@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aria AI Store — Plans & Features</title>
+  <meta name="description" content="Explore Aria AI platform plans, features, and API access tiers.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛍️</text></svg>">
+  <style>
+    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+    :root{
+      --brand:#6366f1;--brand-light:#818cf8;--accent:#f472b6;
+      --bg:#0f0b1e;--surface:rgba(255,255,255,.04);--border:rgba(255,255,255,.08);
+      --text:#e2e8f0;--text-muted:#94a3b8;--radius:16px;
+      --transition:.25s cubic-bezier(.4,0,.2,1);
+    }
+    html{scroll-behavior:smooth}
+    body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+
+    /* Background */
+    .bg-effect{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+    .bg-effect::before{
+      content:'';position:absolute;width:130%;height:130%;top:-15%;left:-15%;
+      background:conic-gradient(from 200deg at 50% 50%,#6366f1 0deg,#8b5cf6 90deg,#ec4899 180deg,#6366f1 360deg);
+      filter:blur(100px);opacity:.18;animation:bgSpin 25s linear infinite;
+    }
+    @keyframes bgSpin{to{transform:rotate(360deg)}}
+
+    /* Nav */
+    nav{position:sticky;top:0;z-index:100;backdrop-filter:blur(20px) saturate(1.8);background:rgba(15,11,30,.8);border-bottom:1px solid rgba(255,255,255,.06)}
+    .nav-inner{display:flex;align-items:center;justify-content:space-between;max-width:1280px;margin:0 auto;padding:14px 24px}
+    .nav-brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:#fff;font-weight:700;font-size:1.15em}
+    .nav-links{display:flex;gap:6px;flex-wrap:wrap}
+    .nav-links a{color:rgba(255,255,255,.65);text-decoration:none;font-size:.88em;font-weight:500;padding:6px 14px;border-radius:8px;transition:var(--transition)}
+    .nav-links a:hover,.nav-links a.active{color:#fff;background:rgba(255,255,255,.1)}
+
+    .container{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:0 24px}
+
+    /* Hero */
+    .hero{text-align:center;padding:80px 0 60px;color:#fff}
+    .hero h1{font-size:clamp(2em,5vw,3.5em);font-weight:800;line-height:1.1;
+      background:linear-gradient(135deg,#fff,#c7d2fe,#f9a8d4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    .hero p{color:rgba(255,255,255,.6);font-size:1.15em;max-width:600px;margin:16px auto 0;line-height:1.6}
+    .demo-badge{display:inline-block;background:rgba(245,158,11,.15);color:#fbbf24;padding:6px 16px;border-radius:100px;font-size:.82em;font-weight:600;margin-top:20px}
+
+    /* Pricing cards */
+    .plans{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px;padding:60px 0}
+    .plan{
+      background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
+      padding:32px;display:flex;flex-direction:column;transition:var(--transition);position:relative;overflow:hidden;
+    }
+    .plan:hover{transform:translateY(-4px);border-color:rgba(255,255,255,.15)}
+    .plan.featured{border-color:var(--brand);box-shadow:0 0 40px rgba(99,102,241,.15)}
+    .plan.featured::before{
+      content:'Most Popular';position:absolute;top:16px;right:-32px;
+      background:linear-gradient(135deg,var(--brand),var(--accent));color:#fff;
+      font-size:.7em;font-weight:700;text-transform:uppercase;padding:4px 40px;
+      transform:rotate(45deg);letter-spacing:.05em;
+    }
+    .plan-icon{font-size:2em;margin-bottom:12px}
+    .plan-name{font-size:1.4em;font-weight:800;color:#fff;margin-bottom:4px}
+    .plan-price{font-size:2.2em;font-weight:800;color:var(--brand-light);margin-bottom:4px}
+    .plan-price span{font-size:.4em;font-weight:500;color:var(--text-muted)}
+    .plan-desc{color:var(--text-muted);font-size:.9em;margin-bottom:20px;line-height:1.5}
+    .plan-features{list-style:none;flex:1;margin-bottom:24px}
+    .plan-features li{padding:6px 0;font-size:.9em;display:flex;align-items:flex-start;gap:8px}
+    .plan-features li::before{content:'✓';color:#22c55e;font-weight:700;flex-shrink:0}
+    .plan-features li.disabled{opacity:.35}
+    .plan-features li.disabled::before{content:'—';color:var(--text-muted)}
+    .btn-plan{
+      display:block;text-align:center;padding:14px;border-radius:10px;
+      font-weight:700;font-size:1em;text-decoration:none;transition:var(--transition);border:none;cursor:pointer;
+    }
+    .btn-plan.primary{background:linear-gradient(135deg,var(--brand),var(--accent));color:#fff;box-shadow:0 4px 20px rgba(99,102,241,.3)}
+    .btn-plan.primary:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(99,102,241,.4)}
+    .btn-plan.outline{background:rgba(255,255,255,.06);color:#fff;border:1px solid rgba(255,255,255,.15)}
+    .btn-plan.outline:hover{background:rgba(255,255,255,.1)}
+
+    /* Features grid */
+    section{padding:60px 0}
+    .section-header{text-align:center;margin-bottom:40px;color:#fff}
+    .section-header h2{font-size:2em;font-weight:700;margin-bottom:8px}
+    .section-header p{color:rgba(255,255,255,.5);font-size:1.05em}
+    .features-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px}
+    .feat{
+      background:var(--surface);border:1px solid var(--border);border-radius:12px;
+      padding:20px;transition:var(--transition);
+    }
+    .feat:hover{background:rgba(255,255,255,.06);transform:translateY(-2px)}
+    .feat-icon{font-size:1.4em;margin-bottom:8px}
+    .feat-title{font-weight:700;color:#fff;margin-bottom:4px}
+    .feat-desc{color:var(--text-muted);font-size:.88em;line-height:1.5}
+
+    /* API Tiers */
+    .api-table{width:100%;border-collapse:collapse;font-size:.9em;color:#fff;margin-top:20px}
+    .api-table th{text-align:left;padding:12px;border-bottom:2px solid var(--border);color:var(--brand-light);font-size:.8em;text-transform:uppercase;letter-spacing:.05em}
+    .api-table td{padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.04)}
+    .api-table tr:hover td{background:rgba(255,255,255,.02)}
+    .check{color:#22c55e;font-weight:700}
+    .cross{color:#ef4444;opacity:.4}
+
+    /* FAQ */
+    .faq{max-width:700px;margin:0 auto}
+    details{background:var(--surface);border:1px solid var(--border);border-radius:10px;margin-bottom:8px;transition:var(--transition)}
+    details:hover{border-color:rgba(255,255,255,.12)}
+    details summary{padding:16px 20px;cursor:pointer;font-weight:600;color:#fff;font-size:.95em;list-style:none}
+    details summary::-webkit-details-marker{display:none}
+    details summary::before{content:'+ ';color:var(--brand-light);font-weight:700;margin-right:6px}
+    details[open] summary::before{content:'− '}
+    details p{padding:0 20px 16px;color:var(--text-muted);font-size:.9em;line-height:1.6}
+
+    footer{border-top:1px solid rgba(255,255,255,.06);padding:32px;text-align:center;color:rgba(255,255,255,.35);font-size:.85em}
+    footer a{color:rgba(255,255,255,.55);text-decoration:none}footer a:hover{color:#fff}
+
+    @media(max-width:768px){.nav-links{display:none}.plans{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+  <div class="bg-effect"></div>
+
+  <nav>
+    <div class="nav-inner">
+      <a href="../" class="nav-brand">👤 Aria</a>
+      <div class="nav-links">
+        <a href="../">Home</a>
+        <a href="../documentation.html">Docs</a>
+        <a href="../aria/">Aria Demo</a>
+        <a href="../chat/">Chat</a>
+        <a href="../dashboard/">Dashboard</a>
+        <a href="./" class="active">Store</a>
+        <a href="https://github.com/Bryan-Roe/Aria" target="_blank">GitHub</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="hero">
+    <div class="container">
+      <h1>Aria AI Platform</h1>
+      <p>Choose the plan that fits your needs — from free experimentation to enterprise-grade AI with quantum ML, autonomous training, and full API access.</p>
+      <div class="demo-badge">Demo Mode — Preview Only</div>
+    </div>
+  </div>
+
+  <!-- Pricing Plans -->
+  <div class="container">
+    <div class="plans">
+      <div class="plan">
+        <div class="plan-icon">🆓</div>
+        <div class="plan-name">Free</div>
+        <div class="plan-price">$0<span>/month</span></div>
+        <div class="plan-desc">Get started with core AI features, local models, and basic character interactions.</div>
+        <ul class="plan-features">
+          <li>Local AI model fallback</li>
+          <li>Basic Aria character controls</li>
+          <li>Chat CLI access</li>
+          <li>Community support</li>
+          <li>5 API calls / hour</li>
+          <li class="disabled">Quantum ML pipelines</li>
+          <li class="disabled">LoRA fine-tuning</li>
+          <li class="disabled">Priority support</li>
+        </ul>
+        <a href="#" class="btn-plan outline">Get Started Free</a>
+      </div>
+
+      <div class="plan featured">
+        <div class="plan-icon">⚡</div>
+        <div class="plan-name">Pro</div>
+        <div class="plan-price">$29<span>/month</span></div>
+        <div class="plan-desc">Full AI provider access, training pipelines, and advanced character features.</div>
+        <ul class="plan-features">
+          <li>All Free features</li>
+          <li>Azure OpenAI + OpenAI providers</li>
+          <li>LoRA fine-tuning (3 models/month)</li>
+          <li>Full Aria action sequences</li>
+          <li>World generation</li>
+          <li>Training dashboard access</li>
+          <li>500 API calls / hour</li>
+          <li class="disabled">Quantum ML (simulator only)</li>
+        </ul>
+        <a href="#" class="btn-plan primary">Start Pro Trial</a>
+      </div>
+
+      <div class="plan">
+        <div class="plan-icon">🏢</div>
+        <div class="plan-name">Enterprise</div>
+        <div class="plan-price">Custom</div>
+        <div class="plan-desc">Full platform access with quantum computing, unlimited training, and dedicated support.</div>
+        <ul class="plan-features">
+          <li>All Pro features</li>
+          <li>Quantum ML (real QPU access)</li>
+          <li>Unlimited LoRA training</li>
+          <li>Autonomous training cycles</li>
+          <li>Custom model deployment</li>
+          <li>Dedicated Azure resources</li>
+          <li>Unlimited API access</li>
+          <li>Priority technical support</li>
+        </ul>
+        <a href="#" class="btn-plan outline">Contact Sales</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Features included -->
+  <section>
+    <div class="container">
+      <div class="section-header">
+        <h2>What's Included</h2>
+        <p>Every plan includes access to Aria's core platform</p>
+      </div>
+      <div class="features-grid">
+        <div class="feat"><div class="feat-icon">🎭</div><div class="feat-title">Interactive Character</div><div class="feat-desc">3D animated avatar with natural language commands, gestures, and object interactions.</div></div>
+        <div class="feat"><div class="feat-icon">💬</div><div class="feat-title">Multi-Provider Chat</div><div class="feat-desc">Azure OpenAI, OpenAI, LMStudio, LoRA adapters, and local model fallback.</div></div>
+        <div class="feat"><div class="feat-icon">📊</div><div class="feat-title">Training Dashboard</div><div class="feat-desc">Monitor model training, GPU usage, performance analytics, and batch evaluations.</div></div>
+        <div class="feat"><div class="feat-icon">⚛️</div><div class="feat-title">Quantum ML</div><div class="feat-desc">Hybrid quantum-classical ML with Qiskit, PennyLane, and Azure Quantum backends.</div></div>
+        <div class="feat"><div class="feat-icon">🧠</div><div class="feat-title">AGI Reasoning</div><div class="feat-desc">Chain-of-thought reasoning, task decomposition, and self-reflection engine.</div></div>
+        <div class="feat"><div class="feat-icon">🔌</div><div class="feat-title">35+ API Endpoints</div><div class="feat-desc">RESTful APIs for chat, vision, TTS, quantum jobs, subscriptions, and more.</div></div>
+        <div class="feat"><div class="feat-icon">🤖</div><div class="feat-title">LoRA Fine-Tuning</div><div class="feat-desc">Phi-3.5 model fine-tuning with adaptive epochs and automatic model promotion.</div></div>
+        <div class="feat"><div class="feat-icon">👁️</div><div class="feat-title">Vision AI</div><div class="feat-desc">Expression classification, image inference, and facial emotion detection via CNN.</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- API comparison table -->
+  <section>
+    <div class="container">
+      <div class="section-header">
+        <h2>API Access Comparison</h2>
+        <p>Detailed feature breakdown by tier</p>
+      </div>
+      <div style="overflow-x:auto;border-radius:var(--radius);border:1px solid var(--border)">
+        <table class="api-table">
+          <thead>
+            <tr><th>Feature</th><th>Free</th><th>Pro</th><th>Enterprise</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Chat API (streaming)</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td></tr>
+            <tr><td>Aria character commands</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td></tr>
+            <tr><td>Text-to-speech</td><td class="cross">✕</td><td class="check">✓</td><td class="check">✓</td></tr>
+            <tr><td>Vision inference</td><td class="cross">✕</td><td class="check">✓</td><td class="check">✓</td></tr>
+            <tr><td>LoRA fine-tuning</td><td class="cross">✕</td><td>3/month</td><td>Unlimited</td></tr>
+            <tr><td>Quantum circuits</td><td class="cross">✕</td><td>Simulator</td><td class="check">QPU</td></tr>
+            <tr><td>Autonomous training</td><td class="cross">✕</td><td class="cross">✕</td><td class="check">✓</td></tr>
+            <tr><td>World generation</td><td class="cross">✕</td><td class="check">✓</td><td class="check">✓</td></tr>
+            <tr><td>Semantic memory</td><td class="cross">✕</td><td class="check">✓</td><td class="check">✓</td></tr>
+            <tr><td>Rate limit</td><td>5/hr</td><td>500/hr</td><td>Unlimited</td></tr>
+            <tr><td>Support</td><td>Community</td><td>Email</td><td>Dedicated</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section>
+    <div class="container">
+      <div class="section-header">
+        <h2>Frequently Asked Questions</h2>
+      </div>
+      <div class="faq">
+        <details>
+          <summary>Can I use Aria without any API keys?</summary>
+          <p>Yes! The Free tier uses a local model fallback that requires no external API keys or accounts. You can interact with Aria's character, use the chat CLI, and explore the platform core features.</p>
+        </details>
+        <details>
+          <summary>What AI providers are supported?</summary>
+          <p>Aria supports Azure OpenAI, OpenAI, LMStudio, LoRA adapters (custom fine-tuned models), and a zero-dependency local fallback. Provider detection is automatic with configurable fallback chains.</p>
+        </details>
+        <details>
+          <summary>Do I need a GPU for training?</summary>
+          <p>For LoRA fine-tuning, a CUDA-capable GPU is recommended but not required. CPU training works for small datasets. Enterprise plans include access to dedicated Azure GPU resources.</p>
+        </details>
+        <details>
+          <summary>How does quantum ML work?</summary>
+          <p>Aria integrates Qiskit and PennyLane for hybrid quantum-classical machine learning. You can simulate circuits locally, use the Azure Quantum simulator, or submit jobs to real quantum hardware (Enterprise only).</p>
+        </details>
+        <details>
+          <summary>Is the platform open source?</summary>
+          <p>Yes! Aria is fully open source on GitHub. The Free tier gives you access to all source code and local features. Paid plans add cloud infrastructure, managed services, and premium support.</p>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <a href="../">Home</a> · <a href="../documentation.html">Docs</a> · <a href="https://github.com/Bryan-Roe/Aria" target="_blank">GitHub</a> · <a href="https://github.com/Bryan-Roe/Aria/issues" target="_blank">Issues</a>
+    <p style="margin-top:8px">&copy; 2026 Aria — Interactive AI Character Platform</p>
+  </footer>
+</body>
+</html>

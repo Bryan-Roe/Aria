@@ -7,30 +7,31 @@ on:
     branches: [ main, dev ]
   workflow_dispatch:
 
+concurrency:
+  group: quality-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   lint:
     name: Lint and Format Check
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - name: Setup Python
+        uses: ./.github/actions/setup-python-env
         with:
-          python-version: '3.11'
-          cache: 'pip'
+          install-requirements: 'false'
+          extra-packages: 'flake8 black isort mypy'
 
-      - name: Install linting dependencies
+      - name: Run flake8 (blocking — syntax errors)
         run: |
-          python -m pip install --upgrade pip
-          pip install flake8 black isort mypy
-
-      - name: Run flake8
-        run: |
-          # Stop build on syntax errors or undefined names
           flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-          # Exit-zero treats all errors as warnings
+
+      - name: Run flake8 (advisory — style warnings)
+        run: |
           flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics --exclude=venv,venv_*,__pycache__,.git,data_out,mount,__blobstorage__,__queuestorage__
         continue-on-error: true
 
@@ -52,32 +53,39 @@ jobs:
   security-check:
     name: Security Dependency Check
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - name: Setup Python
+        uses: ./.github/actions/setup-python-env
         with:
-          python-version: '3.11'
-          cache: 'pip'
-
-      - name: Install safety
-        run: |
-          python -m pip install --upgrade pip
-          pip install safety
+          extra-packages: 'safety pip-audit'
 
       - name: Check dependencies for vulnerabilities
         run: |
-          pip install -r requirements.txt
-          safety check --json || echo "Security check completed with warnings"
+          pip-audit --format json --output safety-report.json || echo "Vulnerability check completed with findings"
         continue-on-error: true
+
+      - name: Generate security summary
+        if: always()
+        run: |
+          echo "## Security Check Results" >> $GITHUB_STEP_SUMMARY
+          if [ -f safety-report.json ]; then
+            echo '```json' >> $GITHUB_STEP_SUMMARY
+            head -100 safety-report.json >> $GITHUB_STEP_SUMMARY
+            echo '' >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+          else
+            echo "No vulnerabilities found." >> $GITHUB_STEP_SUMMARY
+          fi
 
       - name: Upload safety report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: security-report
-          path: |
-            safety-report.json
+          path: safety-report.json
           if-no-files-found: ignore
+          retention-days: 14

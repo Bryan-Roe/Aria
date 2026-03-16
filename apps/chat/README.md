@@ -6,7 +6,7 @@ A modern, responsive web-based chat interface that works with multiple AI provid
 
 - 🎨 Beautiful, responsive UI with gradient design
 - 💬 Real-time chat with AI assistants
-- 🔄 Support for multiple providers (Local, OpenAI, Azure OpenAI)
+- 🔄 Support for multiple providers (Local, LM Studio, Ollama, OpenAI, Azure OpenAI)
 - 🆓 Free local mode (no API keys required)
 - 🌐 Accessible via web browser
 
@@ -29,9 +29,9 @@ The chat will work immediately with the free local provider!
 
 ## Architecture
 
-- **Frontend**: `chat-web/` - Pure HTML/CSS/JS, no build required
-- **Backend**: `http_chat/` - Azure Functions endpoint
-- **Chat Logic**: Reuses `talk-to-ai/src/chat_providers.py`
+- **Frontend**: `apps/chat/` - Pure HTML/CSS/JS, no build required
+- **Backend**: `function_app.py` - Azure Functions endpoint
+- **Chat Logic**: Reuses `ai-projects/chat-cli/src/chat_providers.py`
 
 ## Provider Configuration
 
@@ -54,6 +54,14 @@ $env:AZURE_OPENAI_API_VERSION = "2024-08-01-preview"
 ```
 
 The backend auto-detects the best available provider.
+
+Auto-detection order in runtime:
+
+1. LM Studio (if reachable)
+2. Ollama (if reachable)
+3. Azure OpenAI (if env is complete)
+4. OpenAI (if key is set)
+5. Local fallback
 
 ## API Endpoint
 
@@ -121,7 +129,7 @@ Invoke-RestMethod -Uri http://localhost:7071/api/chat -Method POST -Body $body -
 **"Module not found" errors:**
 ```powershell
 pip install azure-functions colorama
-cd talk-to-ai
+cd ai-projects/chat-cli
 pip install -r requirements.txt
 ```
 
@@ -129,7 +137,7 @@ pip install -r requirements.txt
 The function includes CORS headers. If testing locally, ensure you're accessing via `http://localhost:7071`.
 
 **Provider errors:**
-Check environment variables and ensure `talk-to-ai/src/chat_providers.py` is accessible.
+Check environment variables and ensure `ai-projects/chat-cli/src/chat_providers.py` is accessible.
 
 ## Cost Optimization
 
@@ -149,7 +157,7 @@ chat-web/
 http_chat/
   function_app.py    # Azure Functions endpoint
 
-talk-to-ai/src/
+ai-projects/chat-cli/src/
   chat_providers.py  # Provider implementations (shared)
 ```
 

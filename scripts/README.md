@@ -39,6 +39,18 @@ python .\scripts\ci_orchestrator.py --ci-pipeline
 
 # Validate orchestrators
 python .\scripts\ci_orchestrator.py --validate-all
+
+# Fast integration smoke checks
+python .\scripts\integration_smoke.py
+
+# Focused integration contract tests
+python .\scripts\ci_orchestrator.py --integration-contract-tests
+
+# One-command local gate script
+bash ./scripts/integration_contract_gate.sh
+
+# One-command local gate (VS Code task label)
+# integration:contract-gate
 ```
 
 ### Quantum Operations
@@ -181,17 +193,19 @@ python .\scripts\test_runner.py --list-suites
 - Coverage integration
 
 #### `ci_orchestrator.py`
-**Purpose:** Continuous integration pipeline with 10 validation steps.
+**Purpose:** Continuous integration pipeline with staged validation gates.
 
 **Steps:**
 1. Orchestrator validations (autotrain, quantum, evaluation)
-2. Unit tests (via test_runner)
-3. Dataset validation
-4. Integration tests
-5. Code quality checks
-6. Security scanning
-7. Deployment preparation
-8. Azure ML validation
+2. Integration smoke checks (cross-component)
+3. Integration contract unit tests (resolver, scheduler, status schemas)
+4. Unit tests (via test_runner)
+5. Dataset validation
+6. Integration tests
+7. Code quality checks
+8. Security scanning
+9. Deployment preparation
+10. Azure ML validation
 
 **Usage:**
 ```powershell
@@ -200,6 +214,14 @@ python .\scripts\ci_orchestrator.py --ci-pipeline
 
 # Validate orchestrators only
 python .\scripts\ci_orchestrator.py --validate-all
+
+# Run focused integration contract tests only
+python .\scripts\ci_orchestrator.py --integration-contract-tests
+
+# Run full contract gate sequence (smoke + contract tests + validate-all)
+bash ./scripts/integration_contract_gate.sh
+
+# Or run the VS Code task: integration:contract-gate
 ```
 
 **Current Status:** 5/10 passing (all critical steps ✅)

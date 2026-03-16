@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 — Page Not Found | Aria</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>👤</text></svg>">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{
+            font-family:'Segoe UI',system-ui,sans-serif;
+            background:#0f0b1e;color:#e2e8f0;
+            min-height:100vh;display:flex;flex-direction:column;
+            align-items:center;justify-content:center;text-align:center;
+            padding:24px;overflow:hidden;
+        }
+        .bg{position:fixed;inset:0;z-index:0;pointer-events:none}
+        .bg::before{
+            content:'';position:absolute;width:140%;height:140%;top:-20%;left:-20%;
+            background:conic-gradient(from 180deg at 50% 50%,#6366f1 0deg,#8b5cf6 72deg,#ec4899 144deg,#6366f1 216deg,#3b82f6 288deg,#6366f1 360deg);
+            animation:spin 25s linear infinite;filter:blur(100px);opacity:.2;
+        }
+        @keyframes spin{to{transform:rotate(360deg)}}
+        .content{position:relative;z-index:1;max-width:500px}
+        .code{
+            font-size:8em;font-weight:900;line-height:1;
+            background:linear-gradient(135deg,#6366f1,#f472b6);
+            -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+            background-clip:text;margin-bottom:16px;
+        }
+        h1{font-size:1.8em;font-weight:700;margin-bottom:12px}
+        p{color:#94a3b8;font-size:1.1em;line-height:1.6;margin-bottom:32px}
+        .links{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+        .btn{
+            display:inline-flex;align-items:center;gap:8px;
+            padding:12px 24px;border-radius:10px;font-weight:600;font-size:1em;
+            text-decoration:none;transition:.25s;border:none;cursor:pointer;
+        }
+        .btn-primary{
+            background:linear-gradient(135deg,#6366f1,#f472b6);color:#fff;
+            box-shadow:0 4px 20px rgba(99,102,241,.35);
+        }
+        .btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(99,102,241,.45)}
+        .btn-outline{
+            background:rgba(255,255,255,.06);color:#fff;
+            border:1px solid rgba(255,255,255,.15);
+        }
+        .btn-outline:hover{background:rgba(255,255,255,.12)}
+        .character{font-size:4em;margin-bottom:16px;animation:float 3s ease-in-out infinite}
+        @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+    </style>
+</head>
+<body>
+    <div class="bg"></div>
+    <div class="content">
+        <div class="character">👤</div>
+        <div class="code">404</div>
+        <h1>Aria can't find that page</h1>
+        <p>The page you're looking for doesn't exist or has been moved. Let's get you back on track.</p>
+        <div class="links">
+            <a href="./" class="btn btn-primary">Back to Home</a>
+            <a href="documentation.html" class="btn btn-outline">Browse Docs</a>
+        </div>
+    </div>
+</body>
+</html>

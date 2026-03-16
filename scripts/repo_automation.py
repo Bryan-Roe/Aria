@@ -16,9 +16,14 @@ import sys
 import threading
 import time
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional
+
+try:
+    from .config_paths import resolve_existing_config_path
+except ImportError:
+    from config_paths import resolve_existing_config_path
 
 try:
     import psutil
@@ -26,8 +31,15 @@ except Exception:  # pragma: no cover - optional dependency
     psutil = None
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-PID_FILE = REPO_ROOT / "processes.json"
-STATUS_FILE = REPO_ROOT / "automation_status.json"
+AUTOMATION_DIR = REPO_ROOT / "data_out" / "repo_automation"
+PID_FILE = AUTOMATION_DIR / "processes.json"
+STATUS_FILE = AUTOMATION_DIR / "status.json"
+
+# Backward-compatible legacy locations.
+LEGACY_PID_FILE = REPO_ROOT / "processes.json"
+LEGACY_STATUS_FILE = REPO_ROOT / "automation_status.json"
+
+AUTOMATION_DIR.mkdir(parents=True, exist_ok=True)
 
 
 class _ExistingProcessWrapper:
@@ -67,7 +79,11 @@ class ComponentConfig:
 @dataclass
 class AutomationStatus:
     # Overall automation status
+    generated_at: str
+    run_id: str
     started: str
+    config_path: Optional[str] = None
+    config_paths: Dict[str, Optional[str]] = field(default_factory=dict)
     uptime_seconds: float = 0
     components_running: Dict[str, bool] = field(default_factory=dict)
     dependency_status: Dict[str, bool] = field(default_factory=dict)
@@ -84,7 +100,8 @@ class RepoAutomation:
         self.components: Dict[str, ComponentConfig] = self._init_components()
         self.processes: Dict[str, Any] = {}
         self.running = True
-        self.start_time = datetime.now()
+        self.start_time = datetime.now(timezone.utc)
+        self.run_id = self.start_time.strftime("%Y%m%dT%H%M%SZ")
         self.total_cycles = 0
         self.errors: List[str] = []
         self.dependency_status: Dict[str, bool] = {}
@@ -179,33 +196,76 @@ class RepoAutomation:
 
     def _auto_enable_components(self):
         """Enable optional components based on presence of their config files"""
-        config_checks = {
-            "quantum": REPO_ROOT / "quantum_autorun.yaml",
-            "evaluation": REPO_ROOT / "evaluation_autorun.yaml",
+        config_keys = {
+            "quantum": "quantum_autorun",
+            "evaluation": "evaluation_autorun",
         }
-        for name, path in config_checks.items():
-            if name in self.components and path.exists():
+        for name, config_key in config_keys.items():
+            if name in self.components and resolve_existing_config_path(REPO_ROOT, config_key):
                 self.components[name].enabled = True
+
+    @staticmethod
+    def _read_json(path: Path) -> Optional[Dict[str, Any]]:
+        """Read JSON file safely and return None on parse/read errors."""
+        try:
+            with open(path, "r") as f:
+                data = json.load(f)
+            return data if isinstance(data, dict) else None
+        except Exception:
+            return None
+
+    def _pid_files(self) -> List[Path]:
+        """PID file candidates in canonical-first order."""
+        return [PID_FILE, LEGACY_PID_FILE]
+
+    def _status_files(self) -> List[Path]:
+        """Status file candidates in canonical-first order."""
+        return [STATUS_FILE, LEGACY_STATUS_FILE]
+
+    @staticmethod
+    def _utc_now_str() -> str:
+        """UTC timestamp in stable ISO-like format."""
+        return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+    def _resolved_optional_config_paths(self) -> Dict[str, Optional[str]]:
+        """Resolve optional orchestrator config paths for status metadata."""
+        config_keys = {
+            "quantum": "quantum_autorun",
+            "evaluation": "evaluation_autorun",
+        }
+        resolved: Dict[str, Optional[str]] = {}
+        for name, key in config_keys.items():
+            path = resolve_existing_config_path(REPO_ROOT, key)
+            resolved[name] = str(path.relative_to(REPO_ROOT)) if path is not None else None
+        return resolved
 
     def _attach_existing_from_pidfile(self):
         """Attach to previously recorded processes if still running"""
-        if not PID_FILE.exists():
-            return
         if psutil is None:
             return
-        try:
-            with open(PID_FILE, "r") as f:
-                mapping = json.load(f)
-            for name, pid in mapping.items():
-                if name in self.components:
-                    try:
-                        proc = psutil.Process(pid)
-                        if proc.is_running() and proc.status() != psutil.STATUS_ZOMBIE:
-                            self.processes[name] = _ExistingProcessWrapper(pid)
-                    except Exception:
-                        continue
-        except Exception:
-            pass
+
+        # Read both canonical and legacy PID files; canonical entries win.
+        mapping: Dict[str, int] = {}
+        for pid_file in reversed(self._pid_files()):
+            if not pid_file.exists():
+                continue
+            data = self._read_json(pid_file)
+            if not data:
+                continue
+            for name, pid in data.items():
+                try:
+                    mapping[name] = int(pid)
+                except Exception:
+                    continue
+
+        for name, pid in mapping.items():
+            if name in self.components:
+                try:
+                    proc = psutil.Process(pid)
+                    if proc.is_running() and proc.status() != psutil.STATUS_ZOMBIE:
+                        self.processes[name] = _ExistingProcessWrapper(pid)
+                except Exception:
+                    continue
 
     def _signal_handler(self, signum, frame):
         """Handle shutdown signals gracefully"""
@@ -216,44 +276,62 @@ class RepoAutomation:
 
     def _get_pid_map(self) -> Dict[str, int]:
         """Load PID mapping from file if present"""
-        if not PID_FILE.exists():
-            return {}
-        try:
-            with open(PID_FILE, "r") as f:
-                data = json.load(f)
-                # Ensure only int PIDs
-                return {k: int(v) for k, v in data.items() if v is not None}
-        except Exception:
-            return {}
+        merged: Dict[str, int] = {}
+        # Legacy first, canonical last so canonical values win.
+        for pid_file in reversed(self._pid_files()):
+            if not pid_file.exists():
+                continue
+            data = self._read_json(pid_file)
+            if not data:
+                continue
+            for key, value in data.items():
+                if value is None:
+                    continue
+                try:
+                    merged[key] = int(value)
+                except Exception:
+                    continue
+        return merged
 
     def _remove_pid_entry(self, name: str):
         """Remove a single component entry from PID file"""
-        try:
-            mapping = self._get_pid_map()
-            if name in mapping:
-                mapping.pop(name, None)
-                with open(PID_FILE, "w") as f:
-                    json.dump(mapping, f, indent=2)
-        except Exception:
-            pass
+        for pid_file in self._pid_files():
+            if not pid_file.exists():
+                continue
+            try:
+                data = self._read_json(pid_file) or {}
+                if name in data:
+                    data.pop(name, None)
+                    with open(pid_file, "w") as f:
+                        json.dump(data, f, indent=2)
+            except Exception:
+                continue
 
     def save_status(self):
         """Save current status to JSON"""
         status = AutomationStatus(
-            started=self.start_time.isoformat(),
-            uptime_seconds=(datetime.now() - self.start_time).total_seconds(),
+            generated_at=self._utc_now_str(),
+            run_id=self.run_id,
+            started=self.start_time.strftime("%Y-%m-%dT%H:%M:%SZ"),
+            config_path=None,
+            config_paths=self._resolved_optional_config_paths(),
+            uptime_seconds=(datetime.now(timezone.utc) - self.start_time).total_seconds(),
             components_running={
                 name: self._is_component_running(name)
                 for name in self.components.keys()
             },
             dependency_status=self.dependency_status,
-            last_health_check=datetime.now().isoformat(),
+            last_health_check=self._utc_now_str(),
             total_cycles=self.total_cycles,
             errors=self.errors[-20:],  # Last 20 errors
         )
 
-        with open(STATUS_FILE, "w") as f:
-            json.dump(vars(status), f, indent=2)
+        for status_file in self._status_files():
+            try:
+                with open(status_file, "w") as f:
+                    json.dump(vars(status), f, indent=2)
+            except Exception:
+                continue
 
     def _is_component_running(self, name: str) -> bool:
         """Check if component is running"""
@@ -421,11 +499,12 @@ class RepoAutomation:
 
         self.save_status()
         # Clear PID file
-        if PID_FILE.exists():
-            try:
-                PID_FILE.unlink()
-            except Exception:
-                pass
+        for pid_file in self._pid_files():
+            if pid_file.exists():
+                try:
+                    pid_file.unlink()
+                except Exception:
+                    continue
         print("✅ All components stopped")
 
     def health_check(self) -> Dict[str, bool]:
@@ -543,11 +622,12 @@ class RepoAutomation:
         """Persist current process PIDs for continuity"""
         mapping = {name: getattr(proc, 'pid', None) for name,
                    proc in self.processes.items() if proc is not None}
-        try:
-            with open(PID_FILE, 'w') as f:
-                json.dump(mapping, f, indent=2)
-        except Exception:
-            pass
+        for pid_file in self._pid_files():
+            try:
+                with open(pid_file, 'w') as f:
+                    json.dump(mapping, f, indent=2)
+            except Exception:
+                continue
 
     def monitoring_loop(self, interval: int = 60):
         """Continuous monitoring with auto-recovery"""
@@ -570,12 +650,13 @@ class RepoAutomation:
         """Display current status"""
         pid_map = self._get_pid_map()
         status = None
-        if STATUS_FILE.exists():
-            try:
-                with open(STATUS_FILE, "r") as f:
-                    status = json.load(f)
-            except Exception:
-                status = None
+        for status_file in self._status_files():
+            if not status_file.exists():
+                continue
+            data = self._read_json(status_file)
+            if data:
+                status = data
+                break
 
         print("\n" + "=" * 80)
         print("🤖 Repository Automation Status")

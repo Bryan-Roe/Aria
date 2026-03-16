@@ -2,15 +2,15 @@
 # No Azure dependencies - just core ML libraries
 
 # Core ML frameworks
-torch>=2.0.0
-transformers>=4.36.0
-peft>=0.7.0
-datasets>=2.16.0
-accelerate>=0.25.0
+torch>=2.5.0
+transformers>=4.47.0
+peft>=0.14.0
+datasets>=2.21.0
+accelerate>=0.36.0
 
 # Utilities
 pyyaml>=6.0
-tqdm>=4.66.0
+tqdm>=4.67.0
 
 # Optional: Quantization support (for 4bit/8bit training)
 # Uncomment if using use_4bit or use_8bit in config:

@@ -82,9 +82,14 @@ let characterState = {
 
 // Visual feedback function
 function showFeedback(message) {
+    // Use toast if available (defined in index.html), fall back to stage overlay
+    if (typeof showToast === 'function') {
+        showToast(message);
+        return;
+    }
     const feedback = document.createElement('div');
     feedback.textContent = message;
-    feedback.style.cssText = 'position:absolute; top:20px; left:50%; transform:translateX(-50%); background:#e74c3c; color:white; padding:15px 30px; border-radius:15px; font-size:28px; font-weight:bold; z-index:999; box-shadow:0 5px 20px rgba(0,0,0,0.3); animation:pulse 0.5s ease;';
+    feedback.style.cssText = 'position:absolute; top:20px; left:50%; transform:translateX(-50%); background:var(--accent, #667eea); color:white; padding:12px 24px; border-radius:12px; font-size:0.9em; font-weight:600; z-index:999; box-shadow:0 4px 16px rgba(0,0,0,0.2); animation:pulse 0.5s ease;';
     stage.appendChild(feedback);
     setTimeout(() => feedback.remove(), 2500);
 }
@@ -199,8 +204,7 @@ const expressions = {
 function log(message, isError = false) {
     const entry = document.createElement('div');
     entry.className = 'log-entry';
-    entry.style.borderLeftColor = isError ? '#e74c3c' : '#667eea';
-    entry.style.color = isError ? '#e74c3c' : '#555';
+    if (isError) entry.classList.add('log-error');
     entry.textContent = `${new Date().toLocaleTimeString()}: ${message}`;
     logContainer.insertBefore(entry, logContainer.firstChild);
     
@@ -231,12 +235,7 @@ function addChatMessage(role, text) {
         inner.appendChild(sender);
         inner.appendChild(bubble);
 
-        // For user messages align right
-        if (role === 'user') {
-            msgWrap.appendChild(inner);
-        } else {
-            msgWrap.appendChild(inner);
-        }
+        msgWrap.appendChild(inner);
 
         container.appendChild(msgWrap);
         container.scrollTop = container.scrollHeight;
@@ -592,6 +591,7 @@ function setPosition(xPercent, yPercent, zDepth = 0, rotateY = 0) {
         aria.style.transition = ''; // Reset transition
         clearInterval(walkInterval);
         resetWalkCycle();
+        spawnDustCloud(); // landing dust
         log(`✅ Arrived at (${Math.round(xPercent)}%, ${Math.round(yPercent)}%)`);
         // If we were targeting a waypoint, announce in chat
         if (characterState.currentWaypoint) {
@@ -900,6 +900,22 @@ function changeExpression(emotion) {
     setTimeout(() => {
         aria.style.transform = 'translateX(-50%) scale(1)';
     }, 300);
+
+    // Emit mood-appropriate emoji particle
+    const moodEmoji = { smile: '😊', happy: '😄', sad: '😢', surprised: '😲', confused: '🤔', thinking: '💭', wink: '😉' };
+    const emoji = moodEmoji[emotion];
+    if (emoji && stage && aria) {
+        const rect = aria.getBoundingClientRect();
+        const sr = stage.getBoundingClientRect();
+        const cx = ((rect.left + rect.width / 2 - sr.left) / sr.width) * 100;
+        const cy = ((rect.top - sr.top) / sr.height) * 100;
+        const el = document.createElement('div');
+        el.textContent = emoji;
+        el.style.cssText = `position:absolute;left:${cx}%;top:${cy}%;font-size:22px;pointer-events:none;z-index:60;transition:all 0.8s ease-out;opacity:1;`;
+        stage.appendChild(el);
+        requestAnimationFrame(() => { el.style.transform = 'translateY(-30px) scale(1.3)'; el.style.opacity = '0'; });
+        setTimeout(() => el.remove(), 900);
+    }
 }
 
 // Idle animation state
@@ -1348,7 +1364,10 @@ function animate(className) {
         setTimeout(() => moveArm(ariaArmRight, -60, 150), 350);
         setTimeout(() => moveArm(ariaArmRight, -30, 150), 500);
         setTimeout(() => moveArm(ariaArmRight, -60, 150), 650);
-        setTimeout(() => resetLimbs(200), 800);
+        setTimeout(() => {
+            resetLimbs(200);
+            isPerformingAction = false;
+        }, 800);
     } else if (className === 'jumping') {
         console.log('Jumping animation triggered with leg bending');
         aria.classList.add(className);
@@ -1533,7 +1552,6 @@ function createEffect(type, intensity = 'normal') {
 
         // Add color variation for sparkle
         if (type === 'sparkle') {
-            const randomColor = sparkleColors[Math.floor(Math.random() * sparkleColors.length)];
             effect.style.filter = `hue-rotate(${Math.random() * 360}deg)`;
         }
 
@@ -1562,6 +1580,51 @@ function createEffect(type, intensity = 'normal') {
     // Start effect creation
     requestAnimationFrame(createSingleEffect);
 }
+
+// Dust cloud on landing / arrival
+function spawnDustCloud() {
+    if (!stage || !aria) return;
+    const rect = aria.getBoundingClientRect();
+    const stageRect = stage.getBoundingClientRect();
+    const cx = ((rect.left + rect.width / 2 - stageRect.left) / stageRect.width) * 100;
+    const cy = ((rect.bottom - stageRect.top) / stageRect.height) * 100;
+    for (let i = 0; i < 6; i++) {
+        const p = document.createElement('div');
+        p.style.cssText = `position:absolute;left:${cx + (Math.random()-0.5)*8}%;top:${cy - Math.random()*3}%;width:${6+Math.random()*6}px;height:${6+Math.random()*6}px;background:rgba(160,140,120,${0.3+Math.random()*0.3});border-radius:50%;pointer-events:none;z-index:5;transition:all ${0.4+Math.random()*0.4}s ease-out;`;
+        stage.appendChild(p);
+        requestAnimationFrame(() => {
+            p.style.transform = `translate(${(Math.random()-0.5)*30}px, ${-10-Math.random()*20}px) scale(${1.5+Math.random()})`;
+            p.style.opacity = '0';
+        });
+        setTimeout(() => p.remove(), 900);
+    }
+}
+
+// Ambient idle sparkles — gentle occasional twinkle near Aria
+let _idleSparkleInterval = null;
+function startIdleSparkles() {
+    if (_idleSparkleInterval) return;
+    _idleSparkleInterval = setInterval(() => {
+        if (!aria || !stage) return;
+        // Only sparkle when idle (not walking/dancing)
+        if (aria.classList.contains('walking') || aria.classList.contains('dancing') || aria.classList.contains('running')) return;
+        if (Math.random() > 0.35) return; // ~35% chance each tick
+        const rect = aria.getBoundingClientRect();
+        const stageRect = stage.getBoundingClientRect();
+        const cx = ((rect.left + rect.width / 2 - stageRect.left) / stageRect.width) * 100;
+        const cy = ((rect.top + rect.height * 0.3 - stageRect.top) / stageRect.height) * 100;
+        const s = document.createElement('div');
+        s.textContent = '✦';
+        s.style.cssText = `position:absolute;left:${cx + (Math.random()-0.5)*10}%;top:${cy + (Math.random()-0.5)*8}%;font-size:${8+Math.random()*8}px;color:rgba(255,215,0,${0.4+Math.random()*0.4});pointer-events:none;z-index:50;transition:all ${0.6+Math.random()*0.6}s ease-out;`;
+        stage.appendChild(s);
+        requestAnimationFrame(() => {
+            s.style.transform = `translateY(${-15-Math.random()*15}px) scale(0.3)`;
+            s.style.opacity = '0';
+        });
+        setTimeout(() => s.remove(), 1400);
+    }, 2000);
+}
+startIdleSparkles();
 
 function centerAria() {
     aria.style.left = '50%';
@@ -1628,40 +1691,12 @@ function randomCharacterEvolution() {
 }
 
 // Automatic character evolution disabled - keeping neutral human-like appearance
-let evolutionCountdown = 30;
-const timerDisplay = document.getElementById('evolutionTimer');
-
-// setInterval(randomCharacterEvolution, 30000); // Disabled
-
-// Countdown timer
-setInterval(() => {
-    evolutionCountdown--;
-    if (evolutionCountdown <= 0) {
-        evolutionCountdown = 30;
-    }
-    
-    // Update timer display
-    if (timerDisplay) {
-        timerDisplay.textContent = `⏰ Next evolution in: ${evolutionCountdown}s`;
-        if (evolutionCountdown <= 5) {
-            timerDisplay.style.color = '#e74c3c';
-            timerDisplay.style.animation = 'pulse 0.5s ease infinite';
-        } else {
-            timerDisplay.style.color = '#667eea';
-            timerDisplay.style.animation = 'none';
-        }
-    }
-    
-    if (evolutionCountdown <= 5 && evolutionCountdown > 0) {
-        log(`⏰ Character evolving in ${evolutionCountdown} seconds...`);
-    }
-}, 1000);
+// setInterval(randomCharacterEvolution, 30000);
 
 // Initialize
 log('🎨 Aria Visual System Ready!');
 log('🤖 AI Character Generation: ACTIVE');
 log('Type commands or use quick buttons');
-log('⏰ Auto-evolution every 30 seconds');
 
 // Object Interaction System
 // Helper: derive stage-relative percentage position from an element
@@ -2088,6 +2123,62 @@ log('👀 Idle animations enabled - watch for breathing and blinking!');
 // Start automatic behaviors
 startAutoBehaviors();
 log('✨ Auto-behaviors enabled - Aria will move and react on her own!');
+
+// === Eye tracking (follows mouse cursor) ===
+(function initEyeTracking() {
+    const eyes = document.querySelectorAll('.aria-eye');
+    if (!eyes.length || !stage) return;
+
+    document.addEventListener('mousemove', function(e) {
+        eyes.forEach(function(eye) {
+            const rect = eye.getBoundingClientRect();
+            const cx = rect.left + rect.width / 2;
+            const cy = rect.top + rect.height / 2;
+            const angle = Math.atan2(e.clientY - cy, e.clientX - cx);
+            const dist = Math.min(3, Math.hypot(e.clientX - cx, e.clientY - cy) / 50);
+            const dx = Math.cos(angle) * dist;
+            const dy = Math.sin(angle) * dist;
+            // Shift the eye's radial gradient to simulate looking
+            eye.style.backgroundPosition = `${50 + dx * 5}% ${50 + dy * 5}%`;
+        });
+    });
+
+    log('👁️ Eye tracking active — Aria follows your cursor!');
+})();
+
+// === Natural blink cycle ===
+(function initBlinkCycle() {
+    function doBlink() {
+        if (!ariaEyeLeft || !ariaEyeRight) return;
+        // Skip if performing action or mid-expression
+        if (isPerformingAction) return;
+        const origL = ariaEyeLeft.style.height;
+        const origR = ariaEyeRight.style.height;
+        ariaEyeLeft.style.transition = 'height 0.06s';
+        ariaEyeRight.style.transition = 'height 0.06s';
+        ariaEyeLeft.style.height = '1px';
+        ariaEyeRight.style.height = '1px';
+        setTimeout(function() {
+            ariaEyeLeft.style.height = origL || '';
+            ariaEyeRight.style.height = origR || '';
+            ariaEyeLeft.style.transition = '';
+            ariaEyeRight.style.transition = '';
+        }, 120);
+    }
+    // Natural blink interval: 3-6 seconds with occasional double-blink
+    function scheduleBlink() {
+        const delay = 3000 + Math.random() * 3000;
+        setTimeout(function() {
+            doBlink();
+            // 20% chance of a double-blink
+            if (Math.random() < 0.2) {
+                setTimeout(doBlink, 250);
+            }
+            scheduleBlink();
+        }, delay);
+    }
+    scheduleBlink();
+})();
 
 // Expose minimal testing helpers
 window.ariaTest = {

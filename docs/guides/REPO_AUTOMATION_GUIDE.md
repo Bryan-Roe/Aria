@@ -43,7 +43,7 @@ The automation system now uses a lightweight component registry with dynamic ena
 
 - **What**: Quantum ML / job submission orchestrator
 - **Script**: `scripts/quantum_autorun.py`
-- **Enabled When**: `quantum_autorun.yaml` present at repo root
+- **Enabled When**: `config/quantum/quantum_autorun.yaml` (falls back to root `quantum_autorun.yaml`)
 - **Auto-Restart**: No (jobs are typically batch / scheduled)
 - **Dependencies**: (Add Azure Quantum SDK when environment configured)
 
@@ -51,7 +51,7 @@ The automation system now uses a lightweight component registry with dynamic ena
 
 - **What**: Batch model evaluation against curated test sets
 - **Script**: `scripts/evaluation_autorun.py`
-- **Enabled When**: `evaluation_autorun.yaml` present at repo root
+- **Enabled When**: `config/evaluation/evaluation_autorun.yaml` (falls back to root `evaluation_autorun.yaml`)
 - **Dependencies**: `training` component must be running
 - **Auto-Restart**: No (designed for batch cycles)
 - **Dependencies Auto-Installed**: `scikit-learn`, `numpy`, `matplotlib`, `seaborn`
@@ -92,15 +92,13 @@ Each component’s dependency set is verified just-in-time; missing packages are
 
 Components are auto-enabled based on presence of configuration files:
 
-| Component   | Condition                          | Default |
-|-------------|------------------------------------|---------|
-| `quantum`   | `quantum_autorun.yaml` exists       | Disabled (enabled if present) |
-| `evaluation`| `evaluation_autorun.yaml` exists    | Disabled (enabled if present) |
-| `training`  | Always enabled                      | Enabled |
-| `aria`      | Always enabled                      | Enabled |
-| `monitoring`| Manual                              | Disabled |
-| `backup`    | Manual                              | Disabled |
-| `datasets`  | Integrated (no separate component)  | Disabled |
+- `quantum`: `config/quantum/quantum_autorun.yaml` exists (or root fallback); default disabled.
+- `evaluation`: `config/evaluation/evaluation_autorun.yaml` exists (or root fallback); default disabled.
+- `training`: always enabled.
+- `aria`: always enabled.
+- `monitoring`: manual enablement only.
+- `backup`: manual enablement only.
+- `datasets`: integrated into `training`; no separate component.
 
 ### Adding New Components
 
@@ -219,6 +217,33 @@ tail -f data_out/repo_automation/automation.log
 tail -f data_out/aria_automation/*.log
 tail -f data_out/autotrain/*.log
 ```
+
+## Operational Smoke Flow
+
+Use this sequence after config or orchestrator changes.
+
+```bash
+# 1) Repository integration smoke (local fast gate)
+python scripts/integration_smoke.py --json
+
+# 2) CI smoke stage parity check
+python scripts/ci_orchestrator.py --integration-smoke
+
+# 3) Focused integration contract tests
+python scripts/ci_orchestrator.py --integration-contract-tests
+
+# 4) Core orchestrator dry-run checks
+python scripts/ci_orchestrator.py --validate-all
+
+# 5) Unified runtime view (optional continuous watch)
+python scripts/status_dashboard.py --watch
+```
+
+Shortcut in VS Code: run task `integration:contract-gate` from `.vscode/tasks.json` to execute steps 1-4 in one command.
+
+Shell shortcut: `bash ./scripts/integration_contract_gate.sh` (add `--strict-endpoints` to require local Functions host).
+
+If step 1 fails, fix integration wiring first. If step 1 passes but step 2 or 3 fails, fix CI parity or contract regressions before merging.
 
 ## Production Deployment
 

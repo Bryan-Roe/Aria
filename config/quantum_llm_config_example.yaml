@@ -1,0 +1,361 @@
+# Quantum LLM Configuration Example
+# Copy this file to customize your quantum-enhanced language model training
+
+# =============================================================================
+# Model Architecture
+# =============================================================================
+
+# Vocabulary size (256 for char-level, larger for subword)
+vocab_size: 256
+
+# Model dimension (hidden size)
+d_model: 128
+
+# Number of attention heads
+n_heads: 4
+
+# Number of transformer layers
+n_layers: 4
+
+# Feedforward dimension
+d_ff: 512
+
+# Maximum sequence length
+max_seq_length: 512
+
+# =============================================================================
+# Quantum Configuration
+# =============================================================================
+
+# Number of qubits per quantum layer
+n_qubits: 4
+
+# Quantum backend: "default.qubit", "lightning.qubit", or Azure Quantum device
+quantum_backend: "default.qubit"
+
+# Number of shots per quantum circuit execution (higher = more accurate, slower)
+quantum_shots: 1000
+
+# Enable quantum attention mechanism
+enable_quantum_attention: true
+
+# Enable quantum feedforward network
+enable_quantum_ffn: true
+
+# Enable multi-scale quantum attention with varying qubit counts
+enable_multi_scale_attention: true
+
+# Qubit counts for multi-scale attention heads
+# Each value represents qubits for one attention head
+n_qubits_per_head:
+  - 2  # Fine-grained patterns
+  - 3  # Mid-level structures
+  - 4  # Standard complexity
+  - 6  # Complex relationships
+
+# Enable adaptive entanglement topology selection
+enable_adaptive_entanglement: true
+
+# Enable quantum circuit result caching
+enable_circuit_caching: true
+
+# Cache size (number of circuit results to cache)
+circuit_cache_size: 1000
+
+# Enable quantum error mitigation techniques
+enable_error_mitigation: false
+
+# Error mitigation method: "zne" (zero-noise extrapolation) or "readout"
+error_mitigation_method: "zne"
+
+# =============================================================================
+# Training Configuration
+# =============================================================================
+
+# Batch size for training
+batch_size: 16
+
+# Learning rate
+learning_rate: 0.0001
+
+# Number of training epochs
+num_epochs: 10
+
+# Enable curriculum learning (progressive quantum integration)
+enable_curriculum: true
+
+# Curriculum stages (if enable_curriculum is true)
+curriculum_stages:
+  - name: "classical_warmup"
+    quantum_ratio: 0.0
+    num_epochs: 2
+    learning_rate: 0.0001
+    batch_size: 16
+    freeze_classical_layers: false
+    enable_quantum_layers: []
+    
+  - name: "quantum_transition"
+    quantum_ratio: 0.3
+    num_epochs: 3
+    learning_rate: 0.00005
+    batch_size: 16
+    freeze_classical_layers: false
+    enable_quantum_layers:
+      - "attention"
+    
+  - name: "full_quantum"
+    quantum_ratio: 0.7
+    num_epochs: 10
+    learning_rate: 0.00001
+    batch_size: 8
+    freeze_classical_layers: false
+    enable_quantum_layers:
+      - "attention"
+      - "feedforward"
+
+# Enable adaptive quantum/classical routing
+enable_adaptive_routing: true
+
+# Adaptive routing learning rate
+routing_learning_rate: 0.001
+
+# Gradient clipping value
+gradient_clip_norm: 1.0
+
+# Weight decay for regularization
+weight_decay: 0.01
+
+# Learning rate warmup steps
+warmup_steps: 100
+
+# =============================================================================
+# Circuit Optimization
+# =============================================================================
+
+# Optimization level: 0=none, 1=light, 2=moderate, 3=aggressive
+optimization_level: 2
+
+# Enable gate fusion optimization
+enable_gate_fusion: true
+
+# Enable gate cancellation optimization
+enable_gate_cancellation: true
+
+# Enable parameter shift optimization
+enable_parameter_shift: true
+
+# Maximum circuit depth before optimization
+max_circuit_depth: 20
+
+# Target reduction in two-qubit gates (0.0-1.0)
+target_two_qubit_gate_reduction: 0.3
+
+# Maximum batch size for circuit execution
+max_batch_circuits: 10
+
+# Enable parallel circuit execution (if supported by backend)
+enable_parallel_circuits: false
+
+# Maximum concurrent circuits
+max_concurrent_circuits: 5
+
+# Quantum resource utilization limit (0.0-1.0)
+quantum_resource_limit: 0.8
+
+# =============================================================================
+# Monitoring & Logging
+# =============================================================================
+
+# Enable real-time training dashboard
+enable_dashboard: true
+
+# Dashboard update interval (seconds)
+dashboard_update_interval: 10
+
+# Enable alert system for anomalies
+enable_alerts: true
+
+# Anomaly detection z-score threshold
+anomaly_threshold: 3.0
+
+# Enable performance profiling
+enable_profiling: true
+
+# Profiling sample rate (0.0-1.0, 1.0 = profile every batch)
+profiling_sample_rate: 0.1
+
+# Log interval (batches)
+log_interval: 10
+
+# Enable visualization export
+enable_visualization_export: true
+
+# =============================================================================
+# Checkpointing & Output
+# =============================================================================
+
+# Output directory for all training artifacts
+output_dir: "data_out/quantum_llm"
+
+# Enable checkpoint saving
+save_checkpoints: true
+
+# Checkpoint save interval (steps)
+checkpoint_interval: 100
+
+# Maximum checkpoints to keep (0 = keep all)
+max_checkpoints: 5
+
+# Save best model based on validation loss
+save_best_model: true
+
+# Export model format: "pytorch", "onnx", "both"
+export_format: "pytorch"
+
+# Save training report
+save_training_report: true
+
+# Save configuration with model
+save_config_with_model: true
+
+# =============================================================================
+# Dataset Configuration
+# =============================================================================
+
+# Training dataset path (can be text, JSON, or chat format)
+train_dataset: "datasets/quantum/quantum_concepts.json"
+
+# Validation dataset path (optional)
+val_dataset: null
+
+# Validation split ratio (if val_dataset is null)
+val_split_ratio: 0.1
+
+# Random seed for dataset splitting
+dataset_seed: 42
+
+# Maximum samples to use from dataset (0 = use all)
+max_samples: 0
+
+# Enable data augmentation
+enable_data_augmentation: false
+
+# Data augmentation noise level (0.0-1.0)
+augmentation_noise_level: 0.1
+
+# Tokenizer configuration
+tokenizer:
+  type: "character"  # "character" or "subword"
+  vocab_size: 256
+  add_special_tokens: true
+
+# Multi-source dataset configuration (if using multiple datasets)
+multi_source_datasets: []
+#   - path: "datasets/chat/conversations.json"
+#     type: "json"
+#     weight: 0.5
+#   - path: "datasets/quantum/quantum_concepts.json"
+#     type: "json"
+#     weight: 0.5
+
+# =============================================================================
+# Hardware Configuration
+# =============================================================================
+
+# Device: "cpu", "cuda", "cuda:0", etc.
+device: "cpu"
+
+# Enable mixed precision training (requires GPU)
+enable_mixed_precision: false
+
+# Number of data loader workers
+num_workers: 0
+
+# Pin memory for faster GPU transfer
+pin_memory: false
+
+# =============================================================================
+# Advanced Options
+# =============================================================================
+
+# Enable quantum prompt tuning
+enable_prompt_tuning: false
+
+# Number of quantum prompt embeddings
+n_quantum_prompts: 10
+
+# Enable gradient checkpointing (saves memory)
+enable_gradient_checkpointing: false
+
+# Enable stochastic weight averaging
+enable_swa: false
+
+# SWA start step
+swa_start_step: 1000
+
+# Enable early stopping
+enable_early_stopping: false
+
+# Early stopping patience (epochs)
+early_stopping_patience: 3
+
+# Early stopping min delta
+early_stopping_min_delta: 0.001
+
+# =============================================================================
+# Azure Quantum Configuration (Optional)
+# =============================================================================
+
+# Enable Azure Quantum backend
+enable_azure_quantum: false
+
+# Azure Quantum workspace resource ID
+azure_quantum_workspace_id: ""
+
+# Azure Quantum location
+azure_quantum_location: "westus"
+
+# Azure Quantum target device
+# Options: "ionq.simulator", "ionq.qpu", "quantinuum.sim.h1-1e", etc.
+azure_quantum_target: "ionq.simulator"
+
+# Azure Quantum job timeout (seconds)
+azure_quantum_timeout: 300
+
+# Confirm cost before submitting to real QPU
+azure_confirm_cost: true
+
+# =============================================================================
+# Experiment Tracking (Optional)
+# =============================================================================
+
+# Enable Weights & Biases logging
+enable_wandb: false
+
+# W&B project name
+wandb_project: "quantum-llm"
+
+# W&B run name
+wandb_run_name: null
+
+# W&B entity
+wandb_entity: null
+
+# Enable TensorBoard logging
+enable_tensorboard: false
+
+# TensorBoard log directory
+tensorboard_log_dir: "data_out/quantum_llm/tensorboard"
+
+# =============================================================================
+# Reproducibility
+# =============================================================================
+
+# Random seed for reproducibility
+random_seed: 42
+
+# Deterministic mode (may reduce performance)
+deterministic: false
+
+# Benchmark cudnn (may improve performance but decrease reproducibility)
+benchmark_cudnn: true

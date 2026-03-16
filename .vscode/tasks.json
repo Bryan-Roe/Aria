@@ -1,0 +1,25 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "integration:contract-gate",
+			"type": "shell",
+			"command": "bash",
+			"args": [
+				"-lc",
+				"./scripts/integration_contract_gate.sh"
+			],
+			"problemMatcher": []
+		},
+		{
+			"label": "integration:contract-gate-strict",
+			"type": "shell",
+			"command": "bash",
+			"args": [
+				"-lc",
+				"./scripts/integration_contract_gate.sh --strict-endpoints"
+			],
+			"problemMatcher": []
+		}
+	]
+}

@@ -1,0 +1,29 @@
+{
+  "top_level_required": [
+    "generated_at",
+    "run_id",
+    "config_path",
+    "config_paths",
+    "strict_endpoints",
+    "total_steps",
+    "succeeded",
+    "warnings",
+    "failed",
+    "skipped",
+    "errors",
+    "passed",
+    "results"
+  ],
+  "config_paths_required": [
+    "master_orchestrator",
+    "quantum_autorun",
+    "evaluation_autorun"
+  ],
+  "result_required": [
+    "name",
+    "status",
+    "critical",
+    "duration_sec",
+    "detail"
+  ]
+}

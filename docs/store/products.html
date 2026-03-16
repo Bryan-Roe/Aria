@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shop - TechDrop</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+
+  <div id="header-slot"></div>
+
+  <main>
+    <div class="page-header">
+      <div class="container">
+        <h1>Shop All Products</h1>
+        <p>Browse our full catalog of electronics and gadgets</p>
+      </div>
+    </div>
+
+    <div class="container">
+      <div class="shop-layout">
+        <!-- Sidebar Filters -->
+        <aside class="shop-sidebar">
+          <div class="filter-group">
+            <h4>Category</h4>
+            <select id="categoryFilter">
+              <option value="all">All Categories</option>
+              <option value="smartphones">Smartphones</option>
+              <option value="audio">Audio</option>
+              <option value="wearables">Wearables</option>
+              <option value="accessories">Accessories</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <h4>Max Price</h4>
+            <input type="range" id="priceRange" min="0" max="500" value="500">
+            <div class="price-range-labels">
+              <span>$0</span>
+              <span id="priceLabel">$500</span>
+            </div>
+          </div>
+          <div class="filter-group">
+            <h4>Sort By</h4>
+            <select id="sortFilter">
+              <option value="default">Default</option>
+              <option value="price-low">Price: Low to High</option>
+              <option value="price-high">Price: High to Low</option>
+              <option value="name">Name: A to Z</option>
+            </select>
+          </div>
+        </aside>
+
+        <!-- Product Grid -->
+        <div>
+          <div class="shop-results-header">
+            <p id="resultsCount"></p>
+          </div>
+          <div class="shop-products-grid" id="shopProductsGrid">
+            <!-- Rendered by JS -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <div id="footer-slot"></div>
+
+  <script src="js/products.js"></script>
+  <script src="js/components.js"></script>
+  <script src="js/app.js"></script>
+  <script>initShopPage();</script>
+</body>
+</html>

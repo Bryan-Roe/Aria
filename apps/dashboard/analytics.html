@@ -256,10 +256,32 @@
         body.dark-mode .comparison-table tr:hover {
             background: #222 !important;
         }
+        /* Cross-app nav */
+        .app-nav { display:flex; gap:8px; padding:10px 20px; background:rgba(0,0,0,0.2); border-radius:12px; margin-bottom:16px; align-items:center; flex-wrap:wrap; }
+        .app-nav a { color:rgba(255,255,255,0.85); text-decoration:none; padding:6px 14px; border-radius:8px; font-size:0.88em; font-weight:500; transition:all 0.2s; background:rgba(255,255,255,0.06); }
+        .app-nav a:hover { background:rgba(255,255,255,0.15); transform:translateY(-1px); }
+        .app-nav a.active { background:rgba(102,126,234,0.35); color:#fff; }
+        .app-nav .nav-label { color:rgba(255,255,255,0.4); font-size:0.78em; text-transform:uppercase; letter-spacing:0.5px; margin-right:4px; }
+        .breadcrumb { display:flex; gap:6px; align-items:center; font-size:0.82em; color:rgba(255,255,255,0.5); margin-bottom:12px; }
+        .breadcrumb a { color:rgba(255,255,255,0.7); text-decoration:none; }
+        .breadcrumb a:hover { color:#fff; }
+        .breadcrumb .sep { margin:0 2px; }
     </style>
 </head>
 <body>
     <div class="container">
+        <nav class="app-nav">
+            <span class="nav-label">Navigate</span>
+            <a href="../aria/">👤 Aria</a>
+            <a href="../chat/">💬 Chat</a>
+            <a href="./" class="active">📊 Dashboard</a>
+            <a href="../store/">🛒 Store</a>
+        </nav>
+        <div class="breadcrumb">
+            <a href="./">Dashboard</a>
+            <span class="sep">›</span>
+            <span>Analytics</span>
+        </div>
         <header>
             <h1>📊 QAI Analytics Dashboard</h1>
             <p>Real-time training performance & model comparison</p>
@@ -964,5 +986,11 @@
             setInterval(refreshData, 30000);
         });
     </script>
+    <footer style="text-align:center;padding:24px 0 12px;color:rgba(255,255,255,0.45);font-size:0.82em;">
+        <a href="./" style="color:inherit;text-decoration:underline">Dashboard Hub</a> ·
+        <a href="unified.html" style="color:inherit;text-decoration:underline">Training</a> ·
+        <a href="advanced.html" style="color:inherit;text-decoration:underline">Advanced</a>
+        <div style="margin-top:6px">Part of the <a href="../aria/" style="color:inherit;text-decoration:underline">Aria</a> platform</div>
+    </footer>
 </body>
 </html>

@@ -1,0 +1,23 @@
+{
+  "total_records": 20,
+  "train_records": 17,
+  "test_records": 3,
+  "generation_seed": 99,
+  "workflows_parsed": 13,
+  "workflow_names": [
+    "QAI CI Pipeline",
+    "Stale Issues and PRs",
+    "PR Checks",
+    "Release",
+    "CodeQL Security Scanning",
+    "Workflow Validation",
+    "AzureML LoRA Train",
+    "Aria E2E Tests",
+    "Quantum Automation",
+    "E2E + Integration Tests",
+    "Auto Validation",
+    "Code Quality",
+    "Deploy to GitHub Pages"
+  ],
+  "generation_date": "2026-03-09T19:24:52.566230"
+}

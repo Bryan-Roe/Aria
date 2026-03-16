@@ -15,13 +15,23 @@ import sys
 import importlib.util
 from pathlib import Path
 
-# Load the canonical token_utils module directly from talk-to-ai/src
-_canonical_path = Path(__file__).resolve().parent.parent / \
-    "talk-to-ai" / "src" / "token_utils.py"
-_spec = importlib.util.spec_from_file_location(
-    "_canonical_token_utils", _canonical_path)
+# Load canonical token utils from current chat-cli location, with legacy fallback.
+_repo_root = Path(__file__).resolve().parent.parent
+_canonical_candidates = [
+    _repo_root / "ai-projects" / "chat-cli" / "src" / "token_utils.py",
+    _repo_root / "talk-to-ai" / "src" / "token_utils.py",
+]
+
+_canonical_path = next((p for p in _canonical_candidates if p.exists()), None)
+if _canonical_path is None:
+    raise FileNotFoundError("token_utils canonical file not found in known locations")
+
+_spec = importlib.util.spec_from_file_location("_canonical_token_utils", _canonical_path)
+if _spec is None or _spec.loader is None:
+    raise ImportError(f"Unable to load canonical token utils: {_canonical_path}")
+
 _canonical_module = importlib.util.module_from_spec(_spec)
-sys.modules["_canonical_token_utils"] = _canonical_module
+sys.modules[_spec.name] = _canonical_module
 _spec.loader.exec_module(_canonical_module)
 
 # Re-export all public symbols from canonical token_utils

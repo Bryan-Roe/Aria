@@ -9,7 +9,7 @@
 
 **An intelligent, animated AI character with movement, gestures, and natural language interaction.**
 
-[Live Demo](https://bryan-roe.github.io/Aria) · [Aria Web UI](aria_web/) · [Quick Start](#-quick-start)
+[Live Demo](https://bryan-roe.github.io/Aria) · [Aria Web UI](apps/aria/) · [Quick Start](#-quick-start)
 
 </div>
 
@@ -17,15 +17,15 @@
 
 ## What is Aria?
 
-Aria is a full-stack interactive AI character platform. She lives on a virtual 3D stage, responds to natural language commands ("wave", "pick up the ball", "dance"), speaks via text-to-speech, and is powered by a multi-provider AI backend that supports Azure OpenAI, OpenAI, LM Studio, local models, and LoRA fine-tuned adapters.
+Aria is a full-stack interactive AI character platform. She lives on a virtual 3D stage, responds to natural language commands ("wave", "pick up the ball", "dance"), speaks via text-to-speech, and is powered by a multi-provider AI backend that supports LM Studio, Ollama, Azure OpenAI, OpenAI, local models, and LoRA fine-tuned adapters.
 
 The project is organized around four core areas:
 
 | Area | Folder | Description |
 |------|--------|-------------|
-| **Character interface** | `aria_web/` | Animated 3D character stage with object interaction |
-| **Chat / AI backends** | `talk-to-ai/` | Multi-provider CLI and streaming chat API |
-| **Quantum ML** | `quantum-ai/` | Hybrid quantum-classical training (experimental) |
+| **Character interface** | `apps/aria/` | Animated 3D character stage with object interaction |
+| **Chat / AI backends** | `ai-projects/chat-cli/` | Multi-provider CLI and streaming chat API |
+| **Quantum ML** | `ai-projects/quantum-ml/` | Hybrid quantum-classical training (experimental) |
 | **Model fine-tuning** | `AI/` | LoRA fine-tuning for Aria's language understanding |
 
 Supporting infrastructure lives in `shared/`, `scripts/`, `config/`, and `function_app.py` (Azure Functions API layer).
@@ -42,8 +42,8 @@ Supporting infrastructure lives in `shared/`, `scripts/`, `config/`, and `functi
 ### 1 — Run the Aria character web UI
 
 ```bash
-cd aria_web
-pip install -r ../requirements.txt   # only needed once
+cd apps/aria
+pip install -r ../../requirements.txt   # only needed once
 python server.py
 # Open http://localhost:8080
 ```
@@ -54,13 +54,13 @@ Type commands in the chat box: `move left`, `wave`, `jump`, `pick up the ball`, 
 
 ```bash
 # Local mode — no API keys required
-python talk-to-ai/src/chat_cli.py --provider local --once "Hello Aria!"
+python ai-projects/chat-cli/src/chat_cli.py --provider local --once "Hello Aria!"
 
 # OpenAI
-OPENAI_API_KEY=sk-... python talk-to-ai/src/chat_cli.py --provider openai
+OPENAI_API_KEY=sk-... python ai-projects/chat-cli/src/chat_cli.py --provider openai
 
 # Azure OpenAI (requires all four env vars — see Configuration below)
-python talk-to-ai/src/chat_cli.py --provider azure
+python ai-projects/chat-cli/src/chat_cli.py --provider azure
 ```
 
 Interactive session commands: `/new`, `/save`, `/exit`.
@@ -78,12 +78,12 @@ curl http://localhost:7071/api/ai/status | python -m json.tool   # health check
 ## 🏗️ Project Structure
 
 ```
-aria_web/           Animated character stage (HTML/CSS/JS + Python API server)
-chat-web/           Browser-based streaming chat UI
-talk-to-ai/         Multi-provider chat CLI
-quantum-ai/         Quantum ML platform (circuits, MCP server, Azure Quantum)
-llm-maker/          Autonomous tool-creation system
-cooking-ai/         Cooking-focused AI assistant
+apps/aria/          Animated character stage (HTML/CSS/JS + Python API server)
+apps/chat/          Browser-based streaming chat UI
+ai-projects/chat-cli/ Multi-provider chat CLI
+ai-projects/quantum-ml/ Quantum ML platform (circuits, MCP server, Azure Quantum)
+ai-projects/llm-maker/ Autonomous tool-creation system
+ai-projects/cooking-ai/ Cooking-focused AI assistant
 AI/                 LoRA fine-tuning workspace (Phi / TinyLlama)
 shared/             Shared Python modules (providers, DB, telemetry, Cosmos)
 scripts/            Orchestration, training, evaluation, and utility scripts
@@ -128,10 +128,10 @@ The auto-execute system parses complex multi-step requests ("walk to the table a
 Provider auto-detection order:
 
 ```
-LM Studio → Azure OpenAI → OpenAI → Local (zero-dependency echo)
+LM Studio → Ollama → Azure OpenAI → OpenAI → Local (zero-dependency echo)
 ```
 
-Pass `--provider` to override: `local`, `openai`, `azure`, `lora`, `quantum`, `agi`.
+Pass `--provider` to override: `local`, `openai`, `azure`, `lmstudio`, `ollama`, `lora`, `quantum`, `agi`.
 
 **Azure OpenAI** — all four variables required:
 
@@ -150,7 +150,7 @@ adapter_model.safetensors
 ```
 
 ```bash
-python talk-to-ai/src/chat_cli.py --provider lora --model data_out/lora_training/lora_adapter
+python ai-projects/chat-cli/src/chat_cli.py --provider lora --model data_out/lora_training/lora_adapter
 ```
 
 All providers implement `BaseChatProvider.complete(messages, stream)`. Add a new provider by subclassing `BaseChatProvider` in `shared/chat_providers.py`.
@@ -168,10 +168,10 @@ Local Qiskit Aer simulation is free and unlimited. Azure simulator backends are 
 python scripts/quantum_autorun.py --dry-run
 
 # Interactive training dashboard
-cd quantum-ai && ./start_dashboard.sh   # http://localhost:5000
+cd ai-projects/quantum-ml && ./start_dashboard.sh   # http://localhost:5000
 
 # Start the MCP server (8 quantum tools)
-python quantum-ai/quantum_mcp_server.py
+python ai-projects/quantum-ml/quantum_mcp_server.py
 ```
 
 **MCP tools:** `create_quantum_circuit`, `simulate_quantum_circuit`, `get_quantum_circuit_properties`, `connect_azure_quantum`, `list_quantum_backends`, `submit_quantum_job`, `estimate_quantum_cost`, `train_quantum_classifier`.
@@ -239,6 +239,12 @@ python scripts/test_runner.py --all
 # With coverage report
 python scripts/test_runner.py --all --coverage
 
+# One-command integration contract gate (local)
+bash ./scripts/integration_contract_gate.sh
+
+# Strict gate (requires local Functions host at :7071)
+bash ./scripts/integration_contract_gate.sh --strict-endpoints
+
 # Direct pytest
 pytest -m "not slow and not azure" tests/
 ```
@@ -283,13 +289,13 @@ Never commit secrets. All keys belong in environment variables or `local.setting
 
 | Document | Purpose |
 |----------|---------|
-| [aria_web/README.md](aria_web/README.md) | Character stage API reference |
-| [quantum-ai/README.md](quantum-ai/README.md) | Quantum ML platform guide |
-| [talk-to-ai/README.md](talk-to-ai/README.md) | Chat CLI reference |
-| [llm-maker/README.md](llm-maker/README.md) | Tool maker guide |
+| [apps/aria/README.md](apps/aria/README.md) | Character stage API reference |
+| [ai-projects/quantum-ml/README.md](ai-projects/quantum-ml/README.md) | Quantum ML platform guide |
+| [ai-projects/chat-cli/README.md](ai-projects/chat-cli/README.md) | Chat CLI reference |
+| [ai-projects/llm-maker/README.md](ai-projects/llm-maker/README.md) | Tool maker guide |
 | [docs/aria/](docs/aria/) | Aria movement & training documentation |
 | [MONETIZATION_GUIDE.md](MONETIZATION_GUIDE.md) | Subscription and revenue system |
-| [REPO_AUTOMATION_GUIDE.md](REPO_AUTOMATION_GUIDE.md) | Full repository automation reference |
+| [docs/guides/REPO_AUTOMATION_GUIDE.md](docs/guides/REPO_AUTOMATION_GUIDE.md) | Full repository automation reference |
 | [QUANTUM_LLM_TRAINING.md](QUANTUM_LLM_TRAINING.md) | Quantum-LLM concurrent training |
 
 ---

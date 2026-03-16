@@ -4,24 +4,24 @@ opentelemetry-sdk>=1.23.0,<2.0.0
 azure-cosmos>=4.7.0,<5.0.0  # Cosmos DB client
 
 azure-functions
-openai>=1.37.0
+openai>=1.58.0
 colorama>=0.4.6
-pytest>=7.4.0
-pytest-asyncio>=0.21.0
-tiktoken>=0.6.0
+pytest>=8.0.0
+pytest-asyncio>=0.24.0
+tiktoken>=0.8.0
 pyyaml>=6.0.1
 pyodbc>=5.0.1  # Database logging (Azure SQL / SQL Server)
-sqlalchemy>=2.0.29  # Optional higher-level DB access (future use)
+sqlalchemy>=2.0.36  # Optional higher-level DB access (future use)
 
 # Optional relational drivers (uncomment if using these backends)
 # psycopg2-binary>=2.9.9  # PostgreSQL support
 # mysqlclient>=2.2.4      # MySQL/MariaDB support
 
 # Dashboard / WebSocket
-Flask>=3.0.0
-flask-socketio>=5.3.6
+Flask>=3.1.0
+flask-socketio>=5.4.0
 python-socketio>=5.11.0
-eventlet>=0.35.2  # Optional async server for SocketIO (can fallback to threading)
+eventlet>=0.37.0  # Optional async server for SocketIO (can fallback to threading)
 
 # Optional TTS fallbacks for local development: pyttsx3 (offline, Windows-friendly) and gTTS
 # If you want server-side TTS without Azure credentials, enable QAI_ENABLE_LOCAL_TTS and
@@ -32,16 +32,16 @@ gTTS>=2.3.0
 # Optional evaluation & visualization (confusion-matrix, plots)
 # Install these when you want to produce evaluation artifacts:
 # scikit-learn, matplotlib, seaborn
-scikit-learn>=1.2.0
-matplotlib>=3.7.0
-seaborn>=0.12.0
+scikit-learn>=1.6.0
+matplotlib>=3.9.0
+seaborn>=0.13.0
 
 # Vision inference dependencies
-Pillow>=10.0.0
-torch>=2.0.0
-numpy>=1.24.0
+Pillow>=11.1.0
+torch>=2.5.0
+numpy>=1.26.4
 
 # JSON schema validation library used by tests and cooking-ai utilities
-jsonschema>=4.18.0
+jsonschema>=4.23.0
 
 # NOTE: After adding telemetry & cosmos, run task: pip install (functions)

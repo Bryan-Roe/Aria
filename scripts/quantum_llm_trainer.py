@@ -39,10 +39,23 @@ import torch
 import torch.nn as nn
 from torch.utils.data import Dataset, DataLoader
 
+<<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> f7862a0 (refactor: Consolidate AI projects under ai-projects/ directory)
 # Add ai-projects/quantum-ml to path
 quantum_ml_path = Path(__file__).parent.parent / "ai-projects" / "quantum-ml"
 quantum_ml_src = quantum_ml_path / "src"
 for p in [str(quantum_ml_path), str(quantum_ml_src)]:
+<<<<<<< HEAD
+=======
+# Add quantum-ai to path
+quantum_ai_path = Path(__file__).parent.parent / "quantum-ai"
+quantum_ai_src = quantum_ai_path / "src"
+for p in [str(quantum_ai_path), str(quantum_ai_src)]:
+>>>>>>> 6f22fc0 (refactor: Organize repository structure)
+=======
+>>>>>>> f7862a0 (refactor: Consolidate AI projects under ai-projects/ directory)
     if p not in sys.path:
         sys.path.insert(0, p)
 

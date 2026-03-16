@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Documentation — Aria Platform</title>
+    <meta name="description" content="Browse all Aria platform documentation: guides, quick references, training, quantum ML, deployment, and more.">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <style>
+        *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+        :root{
+            --brand:#6366f1;--brand-light:#818cf8;--brand-dark:#4f46e5;
+            --accent:#f472b6;--surface:#111827;--surface-card:rgba(255,255,255,.04);
+            --border:rgba(255,255,255,.08);--text:#e2e8f0;--text-muted:#94a3b8;
+            --radius:14px;--transition:0.2s cubic-bezier(.4,0,.2,1);
+        }
+        html{scroll-behavior:smooth}
+        body{
+            font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
+            background:#0f0b1e;color:var(--text);min-height:100vh;
+        }
+
+        /* Background */
+        .bg{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+        .bg::before{
+            content:'';position:absolute;width:120%;height:120%;top:-10%;left:-10%;
+            background:conic-gradient(from 220deg at 40% 50%,#6366f1 0deg,#8b5cf6 90deg,#ec4899 180deg,#6366f1 360deg);
+            filter:blur(100px);opacity:.2;animation:bgSpin 30s linear infinite;
+        }
+        @keyframes bgSpin{to{transform:rotate(360deg)}}
+
+        /* Nav */
+        nav{
+            position:sticky;top:0;z-index:100;
+            backdrop-filter:blur(20px) saturate(1.8);
+            background:rgba(15,11,30,.8);
+            border-bottom:1px solid rgba(255,255,255,.06);
+        }
+        .nav-inner{
+            display:flex;align-items:center;justify-content:space-between;
+            max-width:1400px;margin:0 auto;padding:14px 24px;
+        }
+        .nav-brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:#fff;font-weight:700;font-size:1.15em}
+        .nav-links{display:flex;gap:6px;flex-wrap:wrap}
+        .nav-links a{
+            color:rgba(255,255,255,.65);text-decoration:none;font-size:.88em;font-weight:500;
+            padding:6px 14px;border-radius:8px;transition:var(--transition);
+        }
+        .nav-links a:hover,.nav-links a.active{color:#fff;background:rgba(255,255,255,.1)}
+
+        /* Layout */
+        .page{position:relative;z-index:1;display:flex;min-height:calc(100vh - 56px)}
+        .sidebar{
+            width:280px;flex-shrink:0;
+            background:rgba(15,11,30,.6);backdrop-filter:blur(16px);
+            border-right:1px solid var(--border);
+            padding:20px 0;overflow-y:auto;position:sticky;top:56px;height:calc(100vh - 56px);
+        }
+        .main{flex:1;padding:32px 40px;max-width:960px;overflow-x:hidden}
+        .main.centered{margin:0 auto}
+
+        /* Sidebar search */
+        .sidebar-search{padding:0 16px 16px;position:relative}
+        .sidebar-search input{
+            width:100%;padding:10px 12px 10px 36px;
+            background:rgba(255,255,255,.06);border:1px solid var(--border);
+            border-radius:10px;color:#fff;font-size:.9em;transition:var(--transition);
+        }
+        .sidebar-search input::placeholder{color:rgba(255,255,255,.3)}
+        .sidebar-search input:focus{outline:none;border-color:var(--brand);background:rgba(255,255,255,.08)}
+        .sidebar-search .icon{position:absolute;left:28px;top:50%;transform:translateY(-50%);color:rgba(255,255,255,.3);font-size:.85em;pointer-events:none}
+
+        /* Sidebar categories */
+        .sidebar-category{margin-bottom:4px}
+        .sidebar-category-label{
+            display:flex;align-items:center;justify-content:space-between;gap:8px;
+            padding:10px 16px;font-size:.82em;font-weight:700;text-transform:uppercase;
+            letter-spacing:.06em;color:var(--brand-light);cursor:pointer;
+            transition:var(--transition);user-select:none;
+        }
+        .sidebar-category-label:hover{color:#fff;background:rgba(255,255,255,.03)}
+        .sidebar-category-label .chevron{transition:transform .2s;font-size:.7em}
+        .sidebar-category.collapsed .chevron{transform:rotate(-90deg)}
+        .sidebar-category.collapsed .sidebar-items{display:none}
+        .sidebar-items{padding:0 8px 8px}
+        .sidebar-item{
+            display:block;padding:7px 12px;margin:1px 0;
+            border-radius:8px;text-decoration:none;
+            font-size:.88em;color:var(--text-muted);
+            transition:var(--transition);cursor:pointer;
+            white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+        }
+        .sidebar-item:hover{color:#fff;background:rgba(255,255,255,.06)}
+        .sidebar-item.active{color:#fff;background:rgba(99,102,241,.2);font-weight:600}
+
+        /* Doc count badge */
+        .count-badge{
+            font-size:.7em;font-weight:700;padding:2px 7px;border-radius:6px;
+            background:rgba(99,102,241,.15);color:var(--brand-light);
+        }
+
+        /* Content area */
+        .doc-header{margin-bottom:32px;padding-bottom:24px;border-bottom:1px solid var(--border)}
+        .doc-header h1{font-size:2em;font-weight:800;margin-bottom:8px;
+            background:linear-gradient(135deg,#fff,var(--brand-light));
+            -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+        }
+        .doc-header p{color:var(--text-muted);font-size:1.05em;line-height:1.6}
+
+        /* Welcome grid */
+        .welcome-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px;margin-top:24px}
+        .welcome-card{
+            background:var(--surface-card);border:1px solid var(--border);
+            border-radius:var(--radius);padding:20px;cursor:pointer;
+            transition:var(--transition);text-decoration:none;color:var(--text);
+        }
+        .welcome-card:hover{background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.12);transform:translateY(-2px)}
+        .welcome-card .wc-icon{font-size:1.5em;margin-bottom:8px}
+        .welcome-card .wc-title{font-weight:700;margin-bottom:4px;color:#fff}
+        .welcome-card .wc-count{font-size:.85em;color:var(--text-muted)}
+
+        /* Rendered markdown */
+        .md-content{line-height:1.7;color:var(--text)}
+        .md-content h1{font-size:1.8em;font-weight:800;margin:32px 0 12px;color:#fff}
+        .md-content h2{font-size:1.4em;font-weight:700;margin:28px 0 10px;color:#fff;padding-bottom:6px;border-bottom:1px solid var(--border)}
+        .md-content h3{font-size:1.15em;font-weight:700;margin:24px 0 8px;color:rgba(255,255,255,.9)}
+        .md-content h4{font-size:1em;font-weight:700;margin:20px 0 6px;color:rgba(255,255,255,.85)}
+        .md-content p{margin:10px 0;color:var(--text)}
+        .md-content a{color:var(--brand-light);text-decoration:none}
+        .md-content a:hover{text-decoration:underline}
+        .md-content ul,.md-content ol{margin:10px 0 10px 20px}
+        .md-content li{margin:4px 0}
+        .md-content code{
+            background:rgba(99,102,241,.12);padding:2px 6px;border-radius:4px;
+            font-family:'Cascadia Code','Fira Code',monospace;font-size:.88em;color:var(--brand-light);
+        }
+        .md-content pre{
+            background:rgba(0,0,0,.4);border:1px solid var(--border);border-radius:10px;
+            padding:16px;margin:14px 0;overflow-x:auto;
+        }
+        .md-content pre code{background:none;padding:0;color:var(--text);font-size:.85em}
+        .md-content blockquote{
+            border-left:3px solid var(--brand);padding:8px 16px;margin:14px 0;
+            background:rgba(99,102,241,.06);border-radius:0 8px 8px 0;
+        }
+        .md-content table{
+            width:100%;border-collapse:collapse;margin:14px 0;font-size:.9em;
+        }
+        .md-content th{
+            text-align:left;padding:10px 12px;border-bottom:2px solid var(--border);
+            color:var(--brand-light);font-weight:700;
+        }
+        .md-content td{padding:8px 12px;border-bottom:1px solid rgba(255,255,255,.04)}
+        .md-content tr:hover td{background:rgba(255,255,255,.02)}
+        .md-content img{max-width:100%;border-radius:8px;margin:12px 0}
+        .md-content hr{border:none;border-top:1px solid var(--border);margin:24px 0}
+        .md-content details{margin:12px 0}
+        .md-content summary{cursor:pointer;font-weight:600;color:var(--brand-light);padding:6px 0}
+
+        /* Loading / Error states */
+        .loading{text-align:center;padding:60px 20px;color:var(--text-muted)}
+        .loading .spinner{
+            width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--brand);
+            border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 16px;
+        }
+        @keyframes spin{to{transform:rotate(360deg)}}
+        .error-msg{
+            background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);
+            border-radius:10px;padding:20px;color:#fca5a5;text-align:center;
+        }
+
+        /* Breadcrumb */
+        .breadcrumb{
+            display:flex;align-items:center;gap:6px;font-size:.85em;
+            color:var(--text-muted);margin-bottom:16px;flex-wrap:wrap;
+        }
+        .breadcrumb a{color:var(--brand-light);text-decoration:none}
+        .breadcrumb a:hover{text-decoration:underline}
+        .breadcrumb .sep{opacity:.4}
+
+        /* Mobile sidebar toggle */
+        .sidebar-toggle{display:none;position:fixed;bottom:20px;right:20px;z-index:200;
+            width:48px;height:48px;border-radius:50%;border:none;cursor:pointer;
+            background:linear-gradient(135deg,var(--brand),var(--accent));color:#fff;
+            font-size:1.2em;box-shadow:0 4px 20px rgba(99,102,241,.4);
+        }
+
+        @media(max-width:900px){
+            .sidebar{position:fixed;left:-300px;top:56px;z-index:150;transition:left .3s;height:calc(100vh - 56px)}
+            .sidebar.open{left:0}
+            .sidebar-toggle{display:grid;place-items:center}
+            .main{padding:24px 16px}
+            .nav-links{display:none}
+        }
+
+        /* Footer */
+        footer{
+            border-top:1px solid rgba(255,255,255,.06);padding:24px;
+            text-align:center;color:rgba(255,255,255,.35);font-size:.85em;
+        }
+        footer a{color:rgba(255,255,255,.55);text-decoration:none}
+        footer a:hover{color:#fff}
+    </style>
+</head>
+<body>
+    <div class="bg"></div>
+
+    <nav>
+        <div class="nav-inner">
+            <a href="./" class="nav-brand">👤 Aria</a>
+            <div class="nav-links">
+                <a href="./">Home</a>
+                <a href="documentation.html" class="active">Docs</a>
+                <a href="aria/">Aria Demo</a>
+                <a href="chat/">Chat</a>
+                <a href="dashboard/">Dashboard</a>
+                <a href="quantum/">Quantum</a>
+                <a href="https://github.com/Bryan-Roe/Aria" target="_blank">GitHub</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="page">
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-search">
+                <span class="icon">🔍</span>
+                <input type="text" id="docSearch" placeholder="Search docs..." oninput="filterDocs()">
+            </div>
+            <div id="sidebarContent"></div>
+        </aside>
+
+        <div class="main centered" id="mainContent">
+            <div class="doc-header">
+                <h1>📚 Aria Documentation</h1>
+                <p>Guides, references, and tutorials for the Aria interactive AI character platform.</p>
+            </div>
+            <div id="contentArea"></div>
+        </div>
+    </div>
+
+    <button class="sidebar-toggle" id="sidebarToggle" onclick="toggleSidebar()">☰</button>
+
+    <footer>
+        <a href="./">Home</a> · <a href="https://github.com/Bryan-Roe/Aria" target="_blank">GitHub</a> · <a href="https://github.com/Bryan-Roe/Aria/issues" target="_blank">Issues</a>
+        <p style="margin-top:8px">&copy; 2026 Aria — Interactive AI Character Platform</p>
+    </footer>
+
+    <script>
+    // ===== Documentation Registry =====
+    const DOCS = {
+        'Quick References': {
+            icon: '⚡',
+            items: [
+                { title: 'Quick Reference', path: 'quickref/QUICK_REFERENCE.md' },
+                { title: 'Quick Start Chat', path: 'quickref/QUICK_START_CHAT.md' },
+                { title: 'Training Commands', path: 'quickref/TRAINING_COMMANDS_QUICKREF.md' },
+                { title: 'Automation', path: 'quickref/AUTOMATION_QUICKREF.md' },
+                { title: 'Batch Evaluation', path: 'quickref/BATCH_EVAL_QUICKREF.md' },
+                { title: 'Datasets', path: 'quickref/DATASETS_QUICK_REF.md' },
+                { title: 'QAI Hub', path: 'quickref/QAI_HUB_QUICKREF.md' },
+                { title: 'SQL Integration', path: 'quickref/SQL_QUICKREF.md' },
+                { title: 'Training Tab', path: 'quickref/TRAINING_TAB_QUICKREF.md' },
+                { title: 'VS Code Testing', path: 'quickref/VSCODE_TESTING_QUICKREF.md' },
+            ]
+        },
+        'Training & Models': {
+            icon: '🤖',
+            items: [
+                { title: 'AutoTrain Guide', path: 'training/AUTOTRAIN_README.md' },
+                { title: 'Automated Pipeline', path: 'training/AUTOMATED_TRAINING_PIPELINE.md' },
+                { title: 'Autonomous Training', path: 'training/AUTONOMOUS_TRAINING_README.md' },
+                { title: 'Batch Evaluation', path: 'training/BATCH_EVALUATION_GUIDE.md' },
+                { title: 'Evaluation AutoRun', path: 'training/EVALUATION_AUTORUN_README.md' },
+                { title: 'Fast Training', path: 'training/FAST_TRAINING_GUIDE.md' },
+                { title: 'Marathon Training', path: 'training/EXTENDED_MARATHON_TRAINING.md' },
+                { title: 'Training Tab Enhancements', path: 'training/TRAINING_TAB_ENHANCEMENTS.md' },
+                { title: 'Training Validation', path: 'training/TRAINING_VALIDATION_RESULTS.md' },
+            ]
+        },
+        'Quantum Computing': {
+            icon: '⚛️',
+            items: [
+                { title: 'Quantum AutoRun', path: 'quantum/QUANTUM_AUTORUN_README.md' },
+                { title: 'Azure Quantum Examples', path: 'quantum/QUANTUM_AZURE_EXAMPLES.md' },
+                { title: 'Quantum LLM Development', path: 'QUANTUM_LLM_DEVELOPMENT_SUMMARY.md' },
+            ]
+        },
+        'Database & Infrastructure': {
+            icon: '🗄️',
+            items: [
+                { title: 'Database Setup', path: 'database/DATABASE_SQL_SETUP.md' },
+                { title: 'Database Integration', path: 'database/DATABASE_INTEGRATION_GUIDE.md' },
+                { title: 'Azure Monitor SQL', path: 'database/AZURE_MONITOR_SQL_SETUP.md' },
+                { title: 'SQL Automation', path: 'database/SQL_AUTOMATION_COMPLETE.md' },
+                { title: 'Telemetry & Cosmos', path: 'database/TELEMETRY_COSMOS_ENABLEMENT.md' },
+            ]
+        },
+        'Deployment': {
+            icon: '🚀',
+            items: [
+                { title: 'Deployment Guide', path: 'DEPLOYMENT_GUIDE.md' },
+                { title: 'Azure ML Training', path: 'deployment/AZURE_ML_TRAINING_GUIDE.md' },
+                { title: 'Deploy Chat to Azure', path: 'deployment/DEPLOY_CHAT_TO_AZURE.md' },
+                { title: 'Production Plan', path: 'deployment/PRODUCTION_DEPLOYMENT_PLAN.md' },
+                { title: 'Azure Anime Avatar', path: 'deployment/AZURE_DEPLOYMENT_ANIME_AVATAR.md' },
+                { title: 'GitHub Pages Setup', path: 'GITHUB_PAGES_SETUP.md' },
+            ]
+        },
+        'Aria Character': {
+            icon: '🎭',
+            items: [
+                { title: 'Aria Visual System', path: 'aria/ARIA_VISUAL_SYSTEM.md' },
+                { title: 'Movement System', path: 'aria/ARIA_MOVEMENT_COMPLETE.md' },
+                { title: 'Movement Training', path: 'aria/ARIA_MOVEMENT_TRAINING.md' },
+            ]
+        },
+        'Guides': {
+            icon: '📖',
+            items: [
+                { title: 'Advanced Features', path: 'guides/ADVANCED_FEATURES_GUIDE.md' },
+                { title: 'Aria Automation', path: 'guides/ARIA_AUTOMATION_GUIDE.md' },
+                { title: 'Chat Website', path: 'guides/CHAT_WEBSITE_GUIDE.md' },
+                { title: 'Dashboard Guide', path: 'guides/DASHBOARD_COMPLETE_GUIDE.md' },
+                { title: 'Datasets Catalog', path: 'guides/AI_DATASETS_CATALOG.md' },
+                { title: 'Monitoring Guide', path: 'guides/MONITORING_GUIDE.md' },
+                { title: 'Notification System', path: 'guides/NOTIFICATION_SYSTEM_GUIDE.md' },
+                { title: 'QAI Hub Guide', path: 'guides/QAI_HUB_GUIDE.md' },
+                { title: 'Repo Automation', path: 'guides/REPO_AUTOMATION_GUIDE.md' },
+                { title: 'Vision API', path: 'guides/VISION_API_GUIDE.md' },
+                { title: 'VS Code Testing', path: 'guides/VSCODE_TESTING_GUIDE.md' },
+                { title: 'Web Architecture', path: 'guides/WEB_PAGE_ARCHITECTURE.md' },
+                { title: 'Monetization', path: 'guides/MONETIZATION_GUIDE.md' },
+                { title: 'Quantum LLM Training', path: 'guides/QUANTUM_LLM_TRAINING.md' },
+                { title: 'Advanced Automation', path: 'guides/ADVANCED_AUTOMATION.md' },
+            ]
+        },
+        'Architecture': {
+            icon: '🏗️',
+            items: [
+                { title: 'Phase 24 Improvements', path: 'architecture/QAI_PHASE_24_IMPROVEMENTS.md' },
+                { title: 'Phase 25 Improvements', path: 'architecture/PHASE_25_IMPROVEMENTS.md' },
+                { title: 'Phase 26 Improvements', path: 'architecture/PHASE_26_IMPROVEMENTS.md' },
+                { title: 'Phase 27 Complete', path: 'architecture/PHASE27_COMPLETE.md' },
+            ]
+        },
+        'Performance': {
+            icon: '⚡',
+            items: [
+                { title: 'Performance Index', path: 'PERFORMANCE_INDEX.md' },
+                { title: 'Optimization Guide', path: 'PERFORMANCE_OPTIMIZATION_GUIDE.md' },
+                { title: 'Quick Fixes', path: 'PERFORMANCE_QUICK_FIXES.md' },
+                { title: 'Implementation Guide', path: 'PERFORMANCE_IMPLEMENTATION_GUIDE.md' },
+                { title: 'Critical Fixes 2026', path: 'PERFORMANCE_CRITICAL_FIXES_2026.md' },
+                { title: 'Analysis', path: 'PERFORMANCE_ANALYSIS.md' },
+                { title: 'Regex Optimization', path: 'REGEX_OPTIMIZATION_2026-02-17.md' },
+            ]
+        },
+    };
+
+    // ===== State =====
+    let currentDoc = null;
+
+    // ===== Initialization =====
+    function init() {
+        buildSidebar();
+        showWelcome();
+
+        // Check URL hash for direct doc link
+        if (location.hash) {
+            const docPath = decodeURIComponent(location.hash.slice(1));
+            loadDoc(docPath);
+        }
+    }
+
+    // ===== Build sidebar =====
+    function buildSidebar() {
+        const container = document.getElementById('sidebarContent');
+        let html = '';
+        for (const [category, data] of Object.entries(DOCS)) {
+            html += `<div class="sidebar-category" data-category="${category}">
+                <div class="sidebar-category-label" onclick="toggleCategory(this)">
+                    <span>${data.icon} ${category}</span>
+                    <span style="display:flex;align-items:center;gap:6px">
+                        <span class="count-badge">${data.items.length}</span>
+                        <span class="chevron">▼</span>
+                    </span>
+                </div>
+                <div class="sidebar-items">`;
+            for (const item of data.items) {
+                html += `<a class="sidebar-item" data-path="${item.path}" onclick="loadDoc('${item.path}')" title="${item.title}">${item.title}</a>`;
+            }
+            html += '</div></div>';
+        }
+        container.innerHTML = html;
+    }
+
+    // ===== Welcome page =====
+    function showWelcome() {
+        const area = document.getElementById('contentArea');
+        let totalDocs = 0;
+        let cards = '';
+        for (const [category, data] of Object.entries(DOCS)) {
+            totalDocs += data.items.length;
+            const firstPath = data.items[0]?.path || '';
+            cards += `<a class="welcome-card" onclick="loadDoc('${firstPath}')">
+                <div class="wc-icon">${data.icon}</div>
+                <div class="wc-title">${category}</div>
+                <div class="wc-count">${data.items.length} document${data.items.length !== 1 ? 's' : ''}</div>
+            </a>`;
+        }
+        area.innerHTML = `
+            <p style="color:var(--text-muted);margin-bottom:8px">
+                ${totalDocs} documents across ${Object.keys(DOCS).length} categories.
+                Select a document from the sidebar or click a category below.
+            </p>
+            <div class="welcome-grid">${cards}</div>
+            <div style="margin-top:32px;padding:20px;background:var(--surface-card);border:1px solid var(--border);border-radius:var(--radius)">
+                <h3 style="margin-bottom:10px;color:#fff">🚀 Getting Started</h3>
+                <ol style="margin-left:20px;line-height:2">
+                    <li>Start with <a style="color:var(--brand-light);cursor:pointer" onclick="loadDoc('quickref/QUICK_REFERENCE.md')">Quick Reference</a> for essential commands</li>
+                    <li>Try <a style="color:var(--brand-light);cursor:pointer" onclick="loadDoc('quickref/QUICK_START_CHAT.md')">Quick Start Chat</a> to get chatting in minutes</li>
+                    <li>Explore <a style="color:var(--brand-light);cursor:pointer" onclick="loadDoc('training/AUTOTRAIN_README.md')">AutoTrain Guide</a> for LoRA fine-tuning</li>
+                    <li>Browse <a style="color:var(--brand-light);cursor:pointer" onclick="loadDoc('guides/DASHBOARD_COMPLETE_GUIDE.md')">Dashboard Guide</a> for monitoring</li>
+                </ol>
+            </div>
+        `;
+        document.querySelector('.doc-header h1').textContent = '📚 Aria Documentation';
+        document.querySelector('.doc-header p').textContent = 'Guides, references, and tutorials for the Aria interactive AI character platform.';
+        currentDoc = null;
+        history.replaceState(null, '', 'documentation.html');
+        highlightSidebar(null);
+    }
+
+    // ===== Load and render a doc =====
+    async function loadDoc(path) {
+        if (!path) return;
+        currentDoc = path;
+        const area = document.getElementById('contentArea');
+        const header = document.querySelector('.doc-header');
+
+        // Show loading
+        area.innerHTML = '<div class="loading"><div class="spinner"></div>Loading document...</div>';
+
+        // Update URL hash
+        history.pushState(null, '', '#' + encodeURIComponent(path));
+        highlightSidebar(path);
+        closeSidebarMobile();
+
+        try {
+            const resp = await fetch(path);
+            if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+            const text = await resp.text();
+
+            // Find title from doc registry
+            let docTitle = path.split('/').pop().replace(/\.md$/, '').replace(/_/g, ' ');
+            let docCategory = '';
+            for (const [category, data] of Object.entries(DOCS)) {
+                const found = data.items.find(i => i.path === path);
+                if (found) { docTitle = found.title; docCategory = category; break; }
+            }
+
+            // Update header
+            header.innerHTML = `
+                <div class="breadcrumb">
+                    <a onclick="showWelcome()" style="cursor:pointer">Docs</a>
+                    <span class="sep">›</span>
+                    ${docCategory ? `<span>${docCategory}</span><span class="sep">›</span>` : ''}
+                    <span style="color:#fff">${docTitle}</span>
+                </div>
+                <h1>${docTitle}</h1>
+                <p style="font-size:.85em;margin-top:6px">
+                    <a href="https://github.com/Bryan-Roe/Aria/blob/main/docs/${path}" target="_blank"
+                       style="color:var(--brand-light);text-decoration:none">
+                        View on GitHub ↗
+                    </a>
+                </p>
+            `;
+
+            // Render markdown
+            const html = marked.parse(text, {
+                gfm: true,
+                breaks: true,
+                highlight: function(code, lang) {
+                    if (lang && hljs.getLanguage(lang)) {
+                        return hljs.highlight(code, { language: lang }).value;
+                    }
+                    return hljs.highlightAuto(code).value;
+                }
+            });
+            area.innerHTML = `<div class="md-content">${html}</div>`;
+
+            // Apply syntax highlighting to any remaining code blocks
+            area.querySelectorAll('pre code').forEach(block => {
+                hljs.highlightElement(block);
+            });
+
+            // Scroll to top
+            document.querySelector('.main').scrollTo(0, 0);
+
+        } catch (err) {
+            area.innerHTML = `<div class="error-msg">
+                <p style="font-size:1.1em;margin-bottom:8px">Failed to load document</p>
+                <p style="opacity:.7">${err.message}</p>
+                <p style="margin-top:12px">
+                    <a href="https://github.com/Bryan-Roe/Aria/blob/main/docs/${path}" target="_blank"
+                       style="color:var(--brand-light)">View on GitHub instead ↗</a>
+                </p>
+            </div>`;
+        }
+    }
+
+    // ===== Sidebar interactions =====
+    function toggleCategory(el) {
+        el.parentElement.classList.toggle('collapsed');
+    }
+
+    function highlightSidebar(path) {
+        document.querySelectorAll('.sidebar-item').forEach(item => {
+            item.classList.toggle('active', item.dataset.path === path);
+        });
+    }
+
+    function filterDocs() {
+        const term = document.getElementById('docSearch').value.toLowerCase();
+        document.querySelectorAll('.sidebar-category').forEach(cat => {
+            const items = cat.querySelectorAll('.sidebar-item');
+            let shown = 0;
+            items.forEach(item => {
+                const match = item.textContent.toLowerCase().includes(term) ||
+                              (item.dataset.path || '').toLowerCase().includes(term);
+                item.style.display = match ? '' : 'none';
+                if (match) shown++;
+            });
+            cat.style.display = shown || !term ? '' : 'none';
+            if (term && shown) cat.classList.remove('collapsed');
+        });
+    }
+
+    // ===== Mobile sidebar =====
+    function toggleSidebar() {
+        document.getElementById('sidebar').classList.toggle('open');
+    }
+    function closeSidebarMobile() {
+        document.getElementById('sidebar').classList.remove('open');
+    }
+
+    // ===== Handle back/forward =====
+    window.addEventListener('popstate', () => {
+        if (location.hash) {
+            loadDoc(decodeURIComponent(location.hash.slice(1)));
+        } else {
+            showWelcome();
+        }
+    });
+
+    // ===== Boot =====
+    document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
