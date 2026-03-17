@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: codeql-${{ github.ref }}-${{ matrix.language || 'default' }}
+  group: codeql-${{ github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:

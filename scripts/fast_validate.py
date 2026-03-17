@@ -32,7 +32,7 @@ def quick_check_datasets() -> Dict[str, Any]:
 def quick_check_scripts() -> Dict[str, Any]:
     """Verify critical scripts exist without importing."""
     critical = [
-        "scripts/autotrain.py",
+        "autotrain.py",
         "scripts/test_runner.py",
         "ai-projects/lora-training/microsoft_phi-silica-3.6_v1/scripts/train_lora.py"
     ]
@@ -84,6 +84,7 @@ def quick_check_outputs() -> Dict[str, Any]:
 def quick_check_configs() -> Dict[str, Any]:
     """Verify critical YAML configs parse without error."""
     import importlib
+    import importlib.util
     yaml_mod = importlib.import_module("yaml") if importlib.util.find_spec("yaml") else None
 
     configs = [
@@ -145,9 +146,12 @@ def quick_check_dependencies() -> Dict[str, Any]:
     present = []
     missing = []
     for pkg in packages:
-        if importlib.util.find_spec(pkg):
-            present.append(pkg)
-        else:
+        try:
+            if importlib.util.find_spec(pkg):
+                present.append(pkg)
+            else:
+                missing.append(pkg)
+        except ModuleNotFoundError:
             missing.append(pkg)
 
     return {

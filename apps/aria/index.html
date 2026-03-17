@@ -348,29 +348,53 @@
 
         /* Head - Realistic skin tone with subtle contours */
         .aria-head {
-            width: 75px;
-            height: 85px;
-            background: radial-gradient(ellipse at 35% 30%, #fef5e7 0%, #f9e8d9 25%, #f5d4b8 60%, #e8c4a8 100%);
-            border-radius: 50% 50% 46% 46%;
+            width: 72px;
+            height: 80px;
+            background: radial-gradient(ellipse at 38% 24%, #fff9f1 0%, #faecdd 24%, #f3d7bc 58%, #e0b89b 100%);
+            border-radius: 48% 48% 44% 44% / 44% 44% 56% 56%;
             position: absolute;
-            top: 0;
+            top: 3px;
             left: 50%;
             transform: translateX(-50%);
-            border: 2px solid rgba(60, 50, 45, 0.6);
+            border: 1.5px solid rgba(60, 50, 45, 0.52);
             z-index: 4;
-            box-shadow: inset -3px -3px 12px rgba(232, 196, 168, 0.4),
-                        inset 3px 3px 15px rgba(255, 255, 255, 0.5),
-                        0 6px 18px rgba(0,0,0,0.15);
+            box-shadow: inset -3px -4px 12px rgba(214, 168, 138, 0.22),
+                        inset 4px 4px 15px rgba(255, 255, 255, 0.55),
+                        0 6px 16px rgba(0,0,0,0.14);
+        }
+
+        .aria-head::before,
+        .aria-head::after {
+            content: '';
+            position: absolute;
+            top: 34px;
+            width: 10px;
+            height: 18px;
+            background: linear-gradient(180deg, #f7e3cf 0%, #ebc5aa 100%);
+            border: 1.5px solid rgba(60, 50, 45, 0.38);
+            border-radius: 48% 52% 44% 56%;
+            box-shadow: inset 1px 1px 2px rgba(255,255,255,0.3);
+            z-index: -1;
+        }
+
+        .aria-head::before {
+            left: -6px;
+            transform: rotate(-6deg);
+        }
+
+        .aria-head::after {
+            right: -6px;
+            transform: scaleX(-1) rotate(-6deg);
         }
 
         /* Hair - Natural flowing brown with dimensional highlights */
         .aria-hair {
-            width: 82px;
-            height: 72px;
+            width: 74px;
+            height: 50px;
             background: linear-gradient(145deg, #7d5e4f 0%, #9b7d6a 20%, #6b4f3d 50%, #594435 80%, #4a3728 100%);
-            border-radius: 55% 55% 30% 30%;
+            border-radius: 56% 56% 36% 36% / 74% 74% 28% 28%;
             position: absolute;
-            top: -8px;
+            top: 0;
             left: 50%;
             transform: translateX(-50%);
             border: 2px solid rgba(60, 50, 45, 0.7);
@@ -384,70 +408,71 @@
         .aria-hair::after {
             content: '';
             position: absolute;
-            width: 30px;
-            height: 20px;
+            width: 20px;
+            height: 13px;
             background: radial-gradient(ellipse at 40% 35%, rgba(255,255,255,0.22) 0%, transparent 70%);
             border-radius: 50%;
-            top: 10px;
-            left: 14px;
+            top: 8px;
+            left: 17px;
             pointer-events: none;
         }
 
         /* Hair bangs - Natural brown */
         .aria-bangs {
             position: absolute;
-            top: 35px;
+            top: 18px;
             left: 50%;
             transform: translateX(-50%);
-            width: 55px;
-            height: 22px;
+            width: 38px;
+            height: 12px;
             z-index: 6;
         }
 
         .aria-bang {
             position: absolute;
-            width: 14px;
-            height: 26px;
+            width: 8px;
+            height: 12px;
             background: linear-gradient(145deg, #7d5e4f 0%, #6b4f3d 50%, #594435 100%);
-            border-radius: 50% 50% 60% 60%;
-            border: 2px solid rgba(60, 50, 45, 0.6);
+            border-radius: 50% 50% 70% 70%;
+            border: 1.25px solid rgba(60, 50, 45, 0.55);
             box-shadow: inset 1px 1px 3px rgba(155, 125, 106, 0.3),
                         1px 2px 4px rgba(0,0,0,0.15);
         }
 
-        .aria-bang:nth-child(1) { left: 5px; transform: rotate(-12deg); }
-        .aria-bang:nth-child(2) { left: 21px; }
-        .aria-bang:nth-child(3) { right: 5px; transform: rotate(12deg); }
+        .aria-bang:nth-child(1) { left: 5px; transform: rotate(-16deg); }
+        .aria-bang:nth-child(2) { left: 15px; height: 10px; }
+        .aria-bang:nth-child(3) { right: 5px; transform: rotate(16deg); }
 
         /* Hair ponytails - Natural flowing brown */
         .aria-ponytail {
             position: absolute;
-            top: 28px;
-            width: 14px;
-            height: 50px;
+            top: 30px;
+            width: 12px;
+            height: 42px;
             background: linear-gradient(180deg, #6b4f3d 0%, #7d5e4f 30%, #594435 60%, #4a3728 100%);
-            border-radius: 40% 40% 50% 50%;
+            border-radius: 46% 46% 58% 58%;
             border: 2px solid rgba(60, 50, 45, 0.6);
-            z-index: 3;
+            z-index: 2;
             box-shadow: inset 1px 0 3px rgba(155, 125, 106, 0.25),
                         1px 2px 5px rgba(0,0,0,0.15);
+            transform-origin: top center;
         }
 
         .aria-ponytail.left {
-            left: -12px;
-            transform: rotate(-18deg);
+            left: 41px;
+            transform: rotate(-34deg);
         }
 
         .aria-ponytail.right {
-            right: -12px;
-            transform: rotate(18deg);
+            right: 41px;
+            transform: rotate(34deg);
         }
 
         /* Eyes - Natural human proportions */
         /* Eyes - Natural human proportions */
         .aria-eyes {
             position: absolute;
-            top: 28px;
+            top: 34px;
             width: 100%;
             display: flex;
             justify-content: space-around;
@@ -456,13 +481,13 @@
         }
 
         .aria-eye {
-            width: 20px;
-            height: 24px;
-            background: radial-gradient(ellipse at 42% 38%, #ffffff 0%, #eef4fb 25%, #a8c8e8 62%, #7ba8cd 100%);
+            width: 18px;
+            height: 20px;
+            background: radial-gradient(ellipse at 42% 38%, #ffffff 0%, #f5fbff 34%, #c5def0 68%, #8fb1ce 100%);
             border-radius: 50% 50% 52% 48%;
-            border: 2px solid rgba(40, 35, 30, 0.75);
+            border: 1.5px solid rgba(40, 35, 30, 0.72);
             position: relative;
-            box-shadow: inset 0 1px 4px rgba(255,255,255,0.7),
+            box-shadow: inset 0 1px 4px rgba(255,255,255,0.78),
                         0 2px 6px rgba(0,0,0,0.15);
             overflow: hidden;
         }
@@ -471,8 +496,8 @@
         .aria-eye::before {
             content: '';
             position: absolute;
-            width: 13px;
-            height: 14px;
+            width: 11px;
+            height: 12px;
             background: radial-gradient(circle at 35% 30%, #5a92bf 0%, #3a6e99 45%, #1e456e 100%);
             border-radius: 50%;
             top: 50%;
@@ -487,8 +512,8 @@
         .aria-eye::after {
             content: '';
             position: absolute;
-            width: 7px;
-            height: 8px;
+            width: 5.5px;
+            height: 6.5px;
             background: radial-gradient(circle at 32% 28%, #4a3a30 0%, #1e1410 100%);
             border-radius: 50%;
             top: 50%;
@@ -501,38 +526,38 @@
         /* Eye specular highlight */
         .aria-eye-shine {
             position: absolute;
-            width: 5px;
-            height: 5px;
-            background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.95), rgba(255,255,255,0.6));
+            width: 4.5px;
+            height: 4.5px;
+            background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.98), rgba(255,255,255,0.65));
             border-radius: 50%;
-            top: 22%;
-            left: 22%;
+            top: 16%;
+            left: 24%;
             pointer-events: none;
             z-index: 3;
-            filter: blur(0.4px);
+            filter: blur(0.35px);
         }
 
         /* Eyebrows - animated for expressions */
         .aria-eyebrow {
             position: absolute;
-            height: 3.5px;
-            width: 16px;
+            height: 3px;
+            width: 15px;
             background: linear-gradient(90deg, transparent 0%, #4a3728 12%, #7d5e4f 55%, #4a3728 88%, transparent 100%);
             border-radius: 4px;
-            top: 21px;
+            top: 28px;
             z-index: 9;
             transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
                         top 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .aria-eyebrow.left {
-            left: 9px;
+            left: 10px;
             transform-origin: right center;
             transform: rotate(-5deg);
         }
 
         .aria-eyebrow.right {
-            right: 9px;
+            right: 10px;
             transform-origin: left center;
             transform: rotate(5deg);
         }
@@ -543,8 +568,8 @@
             top: 51px;
             left: 50%;
             transform: translateX(-50%);
-            width: 8px;
-            height: 5px;
+            width: 6px;
+            height: 4px;
             border-left: 1.5px solid rgba(180,140,120,0.35);
             border-right: 1.5px solid rgba(180,140,120,0.35);
             border-bottom: 2px solid rgba(180,140,120,0.42);
@@ -571,28 +596,28 @@
         /* Blush - Natural rosy cheeks */
         .aria-blush {
             position: absolute;
-            width: 16px;
-            height: 11px;
+            width: 14px;
+            height: 10px;
             background: radial-gradient(ellipse at center, rgba(243, 165, 150, 0.45) 0%, rgba(230, 140, 140, 0.28) 50%, transparent 100%);
             border-radius: 60% 60% 50% 50%;
-            top: 48px;
+            top: 50px;
             filter: blur(1.2px);
             transition: opacity 0.5s ease;
         }
 
-        .aria-blush.left { left: 8px; }
-        .aria-blush.right { right: 8px; }
+        .aria-blush.left { left: 7px; }
+        .aria-blush.right { right: 7px; }
 
         /* Mouth - Natural lips with gentle curves */
         .aria-mouth {
             position: absolute;
-            top: 60px;
+            top: 61px;
             left: 50%;
             transform: translateX(-50%);
-            width: 18px;
-            height: 7px;
+            width: 16px;
+            height: 6px;
             background: linear-gradient(180deg, rgba(220, 160, 160, 0.45) 0%, rgba(200, 145, 145, 0.65) 100%);
-            border: 2px solid rgba(185, 120, 120, 0.85);
+            border: 1.5px solid rgba(185, 120, 120, 0.82);
             border-top: none;
             border-radius: 0 0 20px 20px;
             z-index: 6;
@@ -602,8 +627,8 @@
 
         .aria-mouth.smile {
             border-radius: 0 0 28px 28px;
-            width: 22px;
-            height: 9px;
+            width: 20px;
+            height: 8px;
             border-color: rgba(185, 120, 120, 0.9);
             background: linear-gradient(180deg, rgba(235, 175, 175, 0.5) 0%, rgba(210, 155, 155, 0.7) 100%);
         }
@@ -617,12 +642,12 @@
 
         /* Body - Soft casual top with natural draping */
         .aria-body {
-            width: 55px;
-            height: 70px;
+            width: 64px;
+            height: 78px;
             background: linear-gradient(135deg, #5fa3ee 0%, #4a90e2 40%, #6db0f5 70%, #5a9fe5 100%);
-            border-radius: 38% 38% 48% 48%;
+            border-radius: 46% 46% 30% 30% / 18% 18% 58% 58%;
             position: absolute;
-            top: 75px;
+            top: 77px;
             left: 50%;
             transform: translateX(-50%);
             border: 2px solid rgba(60, 50, 45, 0.5);
@@ -630,6 +655,22 @@
             box-shadow: inset -2px -3px 8px rgba(74, 144, 226, 0.3),
                         inset 2px 3px 10px rgba(255,255,255,0.4),
                         0 4px 12px rgba(0,0,0,0.15);
+            overflow: visible;
+        }
+
+        .aria-body::after {
+            content: '';
+            position: absolute;
+            left: 50%;
+            bottom: -5px;
+            transform: translateX(-50%);
+            width: 34px;
+            height: 14px;
+            background: linear-gradient(180deg, #5a9fe5 0%, #4b8edc 100%);
+            border: 2px solid rgba(60, 50, 45, 0.42);
+            border-top: none;
+            border-radius: 0 0 14px 14px;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.08);
         }
 
         /* Shirt collar with subtle detail */
@@ -685,45 +726,47 @@
         /* Shoulders */
         .aria-shoulder {
             position: absolute;
-            width: 11px;
-            height: 11px;
-            background: #4a90e2;
+            width: 20px;
+            height: 20px;
+            background: linear-gradient(135deg, #68aef6 0%, #4a90e2 55%, #5a9fe5 100%);
             border-radius: 50%;
-            border: 2px solid #2c2c2c;
-            top: 77px;
+            border: 2px solid rgba(60, 50, 45, 0.35);
+            top: 83px;
             z-index: 3;
-            display: none;
+            display: block;
+            box-shadow: inset -1px -1px 4px rgba(74, 144, 226, 0.25),
+                        inset 1px 1px 4px rgba(255,255,255,0.35);
         }
 
-        .aria-shoulder.left { left: 39px; }
-        .aria-shoulder.right { right: 39px; }
+        .aria-shoulder.left { left: 38px; }
+        .aria-shoulder.right { right: 38px; }
 
         /* Upper Arms - Natural skin with subtle shading */
         .aria-upper-arm {
-            width: 15px;
-            height: 34px;
+            width: 16px;
+            height: 36px;
             background: linear-gradient(180deg, #fef5e7 0%, #f5d4b8 40%, #e8c4a8 100%);
             border-radius: 11px;
             position: absolute;
-            top: 78px;
+            top: 84px;
             border: 2px solid rgba(60, 50, 45, 0.4);
-            z-index: 1;
+            z-index: 3;
             box-shadow: inset -1px -1px 4px rgba(232, 196, 168, 0.3),
                         inset 1px 1px 4px rgba(255,255,255,0.4),
                         1px 2px 6px rgba(0,0,0,0.12);
             transition: transform 0.3s ease;
+            transform-origin: 50% 4px;
+            overflow: visible;
         }
 
         .aria-upper-arm.left {
-            left: 45px;
-            transform: rotate(-20deg);
-            transform-origin: top center;
+            left: 38px;
+            transform: rotate(-10deg);
         }
 
         .aria-upper-arm.right {
-            right: 45px;
-            transform: rotate(20deg);
-            transform-origin: top center;
+            right: 38px;
+            transform: rotate(10deg);
         }
 
         /* Elbows */
@@ -744,30 +787,30 @@
         /* Lower Arms (Forearms) - Smooth natural skin */
         .aria-lower-arm {
             width: 14px;
-            height: 32px;
+            height: 30px;
             background: linear-gradient(180deg, #e8c4a8 0%, #f5d4b8 50%, #fef5e7 100%);
             border-radius: 10px;
             position: absolute;
             border: 2px solid rgba(60, 50, 45, 0.4);
-            z-index: 1;
+            z-index: 4;
             box-shadow: inset -1px -1px 4px rgba(232, 196, 168, 0.3),
                         inset 1px 1px 4px rgba(255,255,255,0.4),
                         1px 2px 6px rgba(0,0,0,0.12);
             transition: transform 0.3s ease;
+            transform-origin: 50% 4px;
+            overflow: visible;
         }
 
         .aria-lower-arm.left {
-            top: 108px;
-            left: 34px;
-            transform: rotate(-15deg);
-            transform-origin: top center;
+            top: 24px;
+            left: -2px;
+            transform: rotate(8deg);
         }
 
         .aria-lower-arm.right {
-            top: 108px;
-            right: 34px;
-            transform: rotate(15deg);
-            transform-origin: top center;
+            top: 24px;
+            left: 3px;
+            transform: rotate(-8deg);
         }
 
         /* Wrists */
@@ -788,27 +831,27 @@
         /* Hands - Delicate with natural skin tone */
         .aria-hand {
             position: absolute;
-            width: 14px;
-            height: 15px;
+            width: 15px;
+            height: 16px;
             background: radial-gradient(ellipse at 35% 28%, #fef5e7 0%, #f5d4b8 50%, #e8c4a8 100%);
             border-radius: 48% 48% 52% 52%;
             border: 2px solid rgba(60, 50, 45, 0.4);
-            z-index: 1;
+            z-index: 5;
             box-shadow: inset 1px 1px 3px rgba(255,255,255,0.3),
                         1px 2px 5px rgba(0,0,0,0.1);
             transition: transform 0.3s ease;
         }
 
         .aria-hand.left {
-            top: 137px;
-            left: 26px;
-            transform: rotate(-10deg);
+            top: 21px;
+            left: -3px;
+            transform: rotate(6deg);
         }
 
         .aria-hand.right {
-            top: 137px;
-            right: 26px;
-            transform: rotate(10deg);
+            top: 21px;
+            left: 2px;
+            transform: rotate(-6deg);
         }
 
         /* Fingers */
@@ -829,34 +872,44 @@
         /* Hips */
         .aria-hip {
             position: absolute;
-            width: 11px;
-            height: 11px;
-            background: #3d5a80;
+            width: 15px;
+            height: 12px;
+            background: linear-gradient(180deg, #46688d 0%, #3d5a80 100%);
             border-radius: 50%;
-            border: 2px solid #2c2c2c;
-            top: 140px;
-            z-index: 3;
-            display: none;
+            border: 2px solid rgba(60, 50, 45, 0.35);
+            top: 145px;
+            z-index: 1;
+            display: block;
+            box-shadow: inset 1px 1px 3px rgba(255,255,255,0.15);
         }
 
-        .aria-hip.left { left: 48px; }
-        .aria-hip.right { right: 48px; }
+        .aria-hip.left { left: 53px; }
+        .aria-hip.right { right: 53px; }
 
         /* Upper Legs (Thighs) */
         .aria-upper-leg {
-            width: 16px;
-            height: 35px;
+            width: 18px;
+            height: 34px;
             background: linear-gradient(180deg, #3d5a80 0%, #4a6a90 100%);
-            border-radius: 8px;
+            border-radius: 9px 9px 8px 8px;
             position: absolute;
-            top: 142px;
+            top: 147px;
             border: 2px solid rgba(60, 50, 45, 0.5);
             z-index: 1;
             transition: transform 0.3s ease;
+            transform-origin: 50% 4px;
+            overflow: visible;
         }
 
-        .aria-upper-leg.left { left: 54px; }
-        .aria-upper-leg.right { right: 54px; }
+        .aria-upper-leg.left {
+            left: 53px;
+            transform: rotate(2deg);
+        }
+
+        .aria-upper-leg.right {
+            right: 53px;
+            transform: rotate(-2deg);
+        }
 
         /* Knees */
         .aria-knee {
@@ -875,19 +928,28 @@
 
         /* Lower Legs (Shins/Calves) */
         .aria-lower-leg {
-            width: 16px;
-            height: 36px;
+            width: 17px;
+            height: 34px;
             background: linear-gradient(180deg, #4a6a90 0%, #3d5a80 100%);
             border-radius: 7px;
             position: absolute;
-            top: 173px;
+            top: 28px;
             border: 2px solid rgba(60, 50, 45, 0.5);
-            z-index: 1;
+            z-index: 2;
             transition: transform 0.3s ease;
+            transform-origin: 50% 4px;
+            overflow: visible;
         }
 
-        .aria-lower-leg.left { left: 54px; }
-        .aria-lower-leg.right { right: 54px; }
+        .aria-lower-leg.left {
+            left: -1px;
+            transform: rotate(1deg);
+        }
+
+        .aria-lower-leg.right {
+            left: 0;
+            transform: rotate(-1deg);
+        }
 
         /* Ankles */
         .aria-ankle {
@@ -906,23 +968,23 @@
 
         /* Shoes - White sneakers */
         .aria-foot {
-            width: 26px;
-            height: 13px;
+            width: 27px;
+            height: 12px;
             background: linear-gradient(135deg, #f5f5f5, #e0e0e0);
             border-radius: 8px 12px 12px 8px;
             position: absolute;
-            top: 206px;
+            top: 28px;
             border: 2px solid rgba(60, 50, 45, 0.5);
             box-shadow: inset 0 1px 3px rgba(255,255,255,0.4),
                         0 2px 4px rgba(0,0,0,0.1);
         }
 
         .aria-foot.left {
-            left: 48px;
+            left: -6px;
         }
 
         .aria-foot.right {
-            right: 48px;
+            left: -4px;
             border-radius: 12px 8px 8px 12px;
         }
 
@@ -1792,6 +1854,7 @@
                             <div class="aria-blush right"></div>
                             <div class="aria-eyes">
                                 <div class="aria-eye">
+                                    <div class="aria-eye-shine"></div>
                                     <div class="aria-eyelash"></div>
                                     <div class="aria-eyelash"></div>
                                     <div class="aria-eyelash"></div>
@@ -1799,6 +1862,7 @@
                                     <div class="aria-eyelash"></div>
                                 </div>
                                 <div class="aria-eye">
+                                    <div class="aria-eye-shine"></div>
                                     <div class="aria-eyelash"></div>
                                     <div class="aria-eyelash"></div>
                                     <div class="aria-eyelash"></div>
@@ -1817,51 +1881,51 @@
                         <div class="aria-shoulder left"></div>
                         <div class="aria-upper-arm left" id="ariaUpperArmLeft">
                             <div class="aria-elbow"></div>
-                        </div>
-                        <div class="aria-lower-arm left" id="ariaLowerArmLeft">
-                            <div class="aria-wrist"></div>
-                        </div>
-                        <div class="aria-hand left" id="ariaHandLeft">
-                            <div class="aria-finger"></div>
-                            <div class="aria-finger"></div>
-                            <div class="aria-finger"></div>
-                            <div class="aria-finger"></div>
+                            <div class="aria-lower-arm left" id="ariaLowerArmLeft">
+                                <div class="aria-wrist"></div>
+                                <div class="aria-hand left" id="ariaHandLeft">
+                                    <div class="aria-finger"></div>
+                                    <div class="aria-finger"></div>
+                                    <div class="aria-finger"></div>
+                                    <div class="aria-finger"></div>
+                                </div>
+                            </div>
                         </div>
                         
                         <!-- Right Arm with Joints -->
                         <div class="aria-shoulder right"></div>
                         <div class="aria-upper-arm right" id="ariaUpperArmRight">
                             <div class="aria-elbow"></div>
-                        </div>
-                        <div class="aria-lower-arm right" id="ariaLowerArmRight">
-                            <div class="aria-wrist"></div>
-                        </div>
-                        <div class="aria-hand right" id="ariaHandRight">
-                            <div class="aria-finger"></div>
-                            <div class="aria-finger"></div>
-                            <div class="aria-finger"></div>
-                            <div class="aria-finger"></div>
+                            <div class="aria-lower-arm right" id="ariaLowerArmRight">
+                                <div class="aria-wrist"></div>
+                                <div class="aria-hand right" id="ariaHandRight">
+                                    <div class="aria-finger"></div>
+                                    <div class="aria-finger"></div>
+                                    <div class="aria-finger"></div>
+                                    <div class="aria-finger"></div>
+                                </div>
+                            </div>
                         </div>
                         
                         <!-- Left Leg with Joints -->
                         <div class="aria-hip left"></div>
                         <div class="aria-upper-leg left" id="ariaUpperLegLeft">
                             <div class="aria-knee"></div>
+                            <div class="aria-lower-leg left" id="ariaLowerLegLeft">
+                                <div class="aria-ankle"></div>
+                                <div class="aria-foot left"></div>
+                            </div>
                         </div>
-                        <div class="aria-lower-leg left" id="ariaLowerLegLeft">
-                            <div class="aria-ankle"></div>
-                        </div>
-                        <div class="aria-foot left"></div>
                         
                         <!-- Right Leg with Joints -->
                         <div class="aria-hip right"></div>
                         <div class="aria-upper-leg right" id="ariaUpperLegRight">
                             <div class="aria-knee"></div>
+                            <div class="aria-lower-leg right" id="ariaLowerLegRight">
+                                <div class="aria-ankle"></div>
+                                <div class="aria-foot right"></div>
+                            </div>
                         </div>
-                        <div class="aria-lower-leg right" id="ariaLowerLegRight">
-                            <div class="aria-ankle"></div>
-                        </div>
-                        <div class="aria-foot right"></div>
                     </div>
                 </div>
             </div>
