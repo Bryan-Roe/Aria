@@ -1045,6 +1045,7 @@
             }
         }
     </style>
+    <link rel="stylesheet" href="../global-upgrade.css">
 </head>
 <body>
     <div class="container">
@@ -1217,5 +1218,39 @@
 
     <script src="aria_controller.js"></script>
     <script src="../aria-nav.js"></script>
+    <script>
+    // Keyboard shortcuts for docs/aria
+    (function() {
+        var THEME_KEY = 'aria-theme';
+        function toggleTheme() {
+            var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+            document.documentElement.setAttribute('data-theme', isDark ? 'light' : 'dark');
+            try { localStorage.setItem(THEME_KEY, isDark ? 'light' : 'dark'); } catch(e) {}
+        }
+        // Restore saved theme
+        try {
+            if (localStorage.getItem(THEME_KEY) === 'dark')
+                document.documentElement.setAttribute('data-theme', 'dark');
+        } catch(e) {}
+        document.addEventListener('keydown', function(e) {
+            var isTyping = document.activeElement && (
+                document.activeElement.tagName === 'INPUT' ||
+                document.activeElement.tagName === 'TEXTAREA' ||
+                document.activeElement.tagName === 'SELECT' ||
+                document.activeElement.isContentEditable
+            );
+            if (isTyping) {
+                if (e.key === 'Enter' && document.activeElement.id === 'commandInput') return; // handled inline
+                if (e.key === 'Escape') { document.activeElement.blur(); return; }
+                return;
+            }
+            var withMod = e.ctrlKey || e.metaKey;
+            if (withMod && e.key.toLowerCase() === 'd') { e.preventDefault(); toggleTheme(); }
+            if (e.key === '/') { e.preventDefault(); var ci = document.getElementById('commandInput'); if (ci) ci.focus(); }
+            if (e.key === 'Escape') { document.activeElement.blur(); }
+        });
+    })();
+    </script>
+    <script src="../global-upgrade.js"></script>
 </body>
 </html>

@@ -96,6 +96,7 @@
         .fade-in { animation: fade .4s ease; }
         @keyframes fade { from { opacity:0; transform:translateY(4px); } to { opacity:1; transform:translateY(0); } }
     </style>
+    <link rel="stylesheet" href="../../global-upgrade.css">
 </head>
 <body>
     <h1>QAI Automation Dashboard <button id="theme-toggle" title="Toggle theme">🌙</button></h1>
@@ -348,14 +349,14 @@
                     } else {
                         btn.disabled = false;
                         btn.textContent = 'Retry';
-                        alert('Retry failed: ' + (resp.error||'unknown'));
+                            showToast('Retry failed: ' + (resp.error||'unknown'), 'warn', 4000);
                     }
                 })
                 .catch(err => {
                     console.error('Retry error', err);
                     btn.disabled = false;
                     btn.textContent = 'Retry';
-                    alert('Retry request error');
+                    showToast('Retry request error', 'warn', 4000);
                 });
         });
         
@@ -365,7 +366,7 @@
             if (!btn) return;
             const jobName = btn.getAttribute('data-cancel');
             if (!jobName) return;
-            if (!confirm('Cancel running job ' + jobName + '? This will terminate the process.')) return;
+
             btn.disabled = true;
             btn.textContent = 'Cancelling...';
             fetch('/api/cancel_job/' + encodeURIComponent(jobName), { method:'POST' })
@@ -376,16 +377,28 @@
                     } else {
                         btn.disabled = false;
                         btn.textContent = 'Cancel';
-                        alert('Cancel failed: ' + (resp.error||'unknown'));
+                            showToast('Cancel failed: ' + (resp.error||'unknown'), 'warn', 4000);
                     }
                 })
                 .catch(err => {
                     console.error('Cancel error', err);
                     btn.disabled = false;
                     btn.textContent = 'Cancel';
-                    alert('Cancel request error');
+                    showToast('Cancel request error', 'warn', 4000);
                 });
         });
     </script>
+    <div id="dash-toast" style="position:fixed;bottom:24px;right:24px;background:#1e293b;color:#e2e8f0;padding:12px 20px;border-radius:8px;font-size:14px;z-index:9999;opacity:0;transition:opacity 0.3s;pointer-events:none;max-width:380px;box-shadow:0 4px 12px rgba(0,0,0,.4)"></div>
+    <script>
+        function showToast(msg, type, duration) {
+            var t = document.getElementById('dash-toast');
+            t.textContent = msg;
+            t.style.background = type === 'warn' ? '#7c2d12' : type === 'ok' ? '#14532d' : '#1e293b';
+            t.style.opacity = '1';
+            clearTimeout(t._tid);
+            t._tid = setTimeout(function() { t.style.opacity = '0'; }, duration || 3500);
+        }
+    </script>
+    <script src="../../global-upgrade.js"></script>
 </body>
 </html>

@@ -267,6 +267,7 @@
         .breadcrumb a:hover { color:#fff; }
         .breadcrumb .sep { margin:0 2px; }
     </style>
+    <link rel="stylesheet" href="../global-upgrade.css">
 </head>
 <body>
     <div class="container">
@@ -285,7 +286,7 @@
         <header>
             <h1>📊 QAI Analytics Dashboard</h1>
             <p>Real-time training performance & model comparison</p>
-            <button id="darkModeToggle" onclick="toggleDarkModeAnalytics()" style="position:absolute;top:20px;right:20px;padding:10px 16px;border:none;border-radius:8px;background:#222;color:#fff;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,0.3)" title="Toggle Dark Mode (D)">🌙</button>
+            <button id="darkModeToggle" onclick="toggleDarkModeAnalytics()" style="position:absolute;top:20px;right:20px;padding:10px 16px;border:none;border-radius:8px;background:#222;color:#fff;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,0.3)" title="Toggle Dark Mode (Ctrl/Cmd+D)">🌙</button>
         </header>
         
         <div class="stats-bar">
@@ -974,7 +975,21 @@
             showToast('Dark mode ' + (isDark ? 'enabled':'disabled'), 'info');
         }
         applyDarkModePreference();
-        document.addEventListener('keydown', (e) => { if (e.key.toLowerCase() === 'd') toggleDarkModeAnalytics(); });
+        document.addEventListener('keydown', (e) => {
+            const isTyping = document.activeElement && (
+                document.activeElement.tagName === 'INPUT' ||
+                document.activeElement.tagName === 'TEXTAREA' ||
+                document.activeElement.tagName === 'SELECT' ||
+                document.activeElement.isContentEditable
+            );
+            if (isTyping) return;
+            const withMod = e.ctrlKey || e.metaKey;
+            if (withMod && e.key.toLowerCase() === 'd') { e.preventDefault(); toggleDarkModeAnalytics(); }
+            if (withMod && e.key.toLowerCase() === 'r') { e.preventDefault(); refreshData(); }
+            if (e.key === 'Escape') {
+                document.getElementById('modelSelect') && document.getElementById('modelSelect').blur();
+            }
+        });
         
         // Initialize on load
         window.addEventListener('DOMContentLoaded', () => {
@@ -992,5 +1007,6 @@
         <a href="advanced.html" style="color:inherit;text-decoration:underline">Advanced</a>
         <div style="margin-top:6px">Part of the <a href="../aria/" style="color:inherit;text-decoration:underline">Aria</a> platform</div>
     </footer>
+    <script src="../global-upgrade.js"></script>
 </body>
 </html>

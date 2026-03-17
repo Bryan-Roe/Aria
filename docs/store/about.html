@@ -3,46 +3,77 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>About Us - TechDrop</title>
+  <title>About Aria Store</title>
+  <meta name="description" content="Learn how Aria Store packages subscriptions, training, quantum pilots, and deployment support for the Aria platform.">
   <link rel="stylesheet" href="css/style.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="../global-upgrade.css">
 </head>
-<body>
+<body class="store-theme">
 
   <div id="header-slot"></div>
 
   <main>
-    <section class="about-hero">
+    <section class="store-subpage-hero">
       <div class="container">
-        <h1>About TechDrop</h1>
-        <p>We connect you with the best electronics and gadgets from trusted suppliers worldwide.</p>
+        <div class="page-hero-card">
+          <p class="store-eyebrow">About the store</p>
+          <h1>Turn raw platform capability into a clear adoption path.</h1>
+          <p>Aria Store translates demos, dashboards, training systems, and quantum workflows into offers that operators, buyers, and implementation teams can actually navigate.</p>
+          <div class="hero-chip-row">
+            <span class="store-pill">Subscriptions</span>
+            <span class="store-pill">Training</span>
+            <span class="store-pill">Quantum pilots</span>
+            <span class="store-pill">Deployment support</span>
+          </div>
+        </div>
       </div>
     </section>
 
-    <section class="about-content">
+    <section class="store-section about-content">
       <div class="container">
-        <p>TechDrop was built with a simple mission: make quality electronics accessible to everyone. We partner with trusted manufacturers and distributors to bring you carefully curated gadgets at competitive prices.</p>
-        <p>Every product in our catalog is selected for its quality, value, and reliability. Whether you're looking for the latest audio gear, smart wearables, or essential tech accessories, we've got you covered.</p>
-        <p>We believe in transparency and great customer service. Have a question about a product or need help with your order? Our team is always ready to help.</p>
+        <div class="page-shell">
+          <div class="page-intro-grid">
+            <article class="page-intro-card">
+              <i class="fa-solid fa-route"></i>
+              <h3>Buyer clarity</h3>
+              <p>The store should answer what the platform does, which package fits, and what a team should do next without requiring repo archaeology.</p>
+            </article>
+            <article class="page-intro-card">
+              <i class="fa-solid fa-gears"></i>
+              <h3>Operator fit</h3>
+              <p>Every offer is framed around how Aria actually runs: providers, dashboards, training loops, deployment paths, and service ownership.</p>
+            </article>
+            <article class="page-intro-card">
+              <i class="fa-solid fa-people-group"></i>
+              <h3>Adoption support</h3>
+              <p>The catalog is designed for the handoff between experimentation, onboarding, and scaled deployment.</p>
+            </article>
+          </div>
 
-        <div class="trust-badges">
-          <div class="trust-badge">
-            <i class="fa-solid fa-truck-fast"></i>
-            <h3>Fast Shipping</h3>
-            <p>We work with reliable shipping partners to get your order to you as quickly as possible.</p>
-          </div>
-          <div class="trust-badge">
-            <i class="fa-solid fa-shield-halved"></i>
-            <h3>Secure Shopping</h3>
-            <p>Your information is always protected. Shop with confidence knowing your data is safe.</p>
-          </div>
-          <div class="trust-badge">
-            <i class="fa-solid fa-rotate-left"></i>
-            <h3>Easy Returns</h3>
-            <p>Not satisfied with your purchase? Our hassle-free return process makes it easy.</p>
+          <p>Aria began as an interactive AI character platform with real runtime surfaces: animated character control, multi-provider chat, orchestration dashboards, training pipelines, and quantum ML experiments. The store exists so those capabilities can be packaged into understandable adoption routes.</p>
+          <p>Instead of a generic ecommerce catalog, the store now focuses on platform access, training enablement, pilot engagements, and deployment support. That makes it relevant to teams evaluating Aria for internal tools, public demos, or operator-managed rollouts.</p>
+          <p>The goal is practical clarity. A visitor should be able to tell whether they need a subscription, a training sprint, a quantum pilot, or a broader implementation workshop before they ever reach out.</p>
+
+          <div class="trust-badges">
+            <div class="trust-badge">
+              <i class="fa-solid fa-compass-drafting"></i>
+              <h3>Architecture-aware packaging</h3>
+              <p>Offers reflect how the platform is actually structured: surface, API layer, provider routing, training, and infrastructure.</p>
+            </div>
+            <div class="trust-badge">
+              <i class="fa-solid fa-chart-line"></i>
+              <h3>Operational readiness</h3>
+              <p>Catalog entries point toward dashboards, evaluation loops, rollout planning, and the ongoing work required after the first demo.</p>
+            </div>
+            <div class="trust-badge">
+              <i class="fa-solid fa-rocket"></i>
+              <h3>Deployment-first guidance</h3>
+              <p>The store is built to help teams move from exploration to managed use, not just to present feature lists.</p>
+            </div>
           </div>
         </div>
       </div>
@@ -55,5 +86,6 @@
   <script src="js/components.js"></script>
   <script src="js/app.js"></script>
   <script>initAboutPage();</script>
+  <script src="../global-upgrade.js"></script>
 </body>
 </html>

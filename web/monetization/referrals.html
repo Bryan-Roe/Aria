@@ -542,7 +542,7 @@
         function copyReferralCode() {
             const code = document.getElementById('referralCode').textContent;
             navigator.clipboard.writeText(code).then(() => {
-                alert('Referral code copied to clipboard!');
+                showToast('Referral code copied to clipboard!');
             });
         }
 
@@ -572,18 +572,31 @@
         async function requestPayout() {
             const amount = parseFloat(document.getElementById('payoutAmount').textContent);
             if (amount < 25) {
-                alert('Minimum payout amount is $25');
+                showToast('Minimum payout amount is $25', 'warn');
                 return;
             }
 
-            if (confirm(`Request payout of $${amount.toFixed(2)}?`)) {
-                // In production, call API
-                alert('Payout request submitted! (Demo mode)\n\nYou will receive payment within 5 business days.');
-            }
+            // In production, call API
+            showToast('Payout request submitted! (Demo mode) — You will receive payment within 5 business days.', 'ok', 5000);
         }
 
         // Load data on page load
         window.addEventListener('load', loadReferralData);
+    </script>
+    <div id="aria-toast" style="position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(120%);background:#1e1e2e;color:#fff;padding:14px 24px;border-radius:10px;box-shadow:0 8px 32px rgba(0,0,0,0.35);font-size:0.95em;z-index:9999;transition:transform 0.3s cubic-bezier(.22,1,.36,1),opacity 0.3s;opacity:0;max-width:90vw;text-align:center;pointer-events:none"></div>
+    <script>
+    function showToast(msg, type, duration) {
+        var t = document.getElementById('aria-toast');
+        t.textContent = msg;
+        t.style.background = type === 'warn' ? '#b45309' : type === 'ok' ? '#166534' : '#1e1e2e';
+        t.style.transform = 'translateX(-50%) translateY(0)';
+        t.style.opacity = '1';
+        clearTimeout(t._timer);
+        t._timer = setTimeout(function() {
+            t.style.transform = 'translateX(-50%) translateY(120%)';
+            t.style.opacity = '0';
+        }, duration || 3500);
+    }
     </script>
 </body>
 </html>

@@ -192,6 +192,7 @@
             header h1 { font-size: 1.8em; }
         }
     </style>
+    <link rel="stylesheet" href="../global-upgrade.css">
 </head>
 <body>
     <a href="../" style="position:fixed;top:16px;left:16px;z-index:10001;display:inline-flex;align-items:center;gap:6px;color:rgba(255,255,255,.8);text-decoration:none;font-size:.9em;font-weight:500;padding:8px 16px;background:rgba(0,0,0,.3);border-radius:8px;backdrop-filter:blur(8px)">← Home</a>
@@ -589,11 +590,11 @@
                                     window.liveTracker = new LiveProgressTracker({
                                         onComplete: () => {
                                             refreshData();
-                                            alert('Training completed!');
+                                                showToast('Training completed! ✓', 'ok', 5000);
                                         },
                                         onError: (err) => {
                                             console.error('Training error:', err);
-                                            alert('Training failed: ' + err.message);
+                                                showToast('Training failed: ' + err.message, 'warn', 6000);
                                         }
                                     });
                                 }
@@ -881,7 +882,7 @@
                 });
                 
                 const result = await response.json();
-                alert(result.message || 'Training started!');
+                showToast(result.message || 'Training started! ✓', 'ok', 4000);
 
                 // Start live progress tracking (Phase 28)
                 if (window.liveTracker && result.job_id) {
@@ -895,7 +896,7 @@
                 
                 refreshData();
             } catch (err) {
-                alert('Failed to start training: ' + err.message);
+                 showToast('Failed to start training: ' + err.message, 'warn', 6000);
             }
             
             return false;
@@ -1100,23 +1101,23 @@
                     if (el) el.value = config[key];
                 });
                 switchTab('training');
-                alert('Session config loaded! Review and click Start Training.');
+                 showToast('Session config loaded — review and click Start Training', 'ok', 4000);
             }
         }
 
         // Utility Functions
         function showSystemHealth() {
-            alert('System Health Check:\n\n' +
-                  '✅ API Server: Online\n' +
-                  '✅ GPU: Available\n' +
-                  '✅ Storage: 85% free\n' +
-                  '✅ Anomaly Detector: ' + (anomalyDetector ? 'Active' : 'Inactive') + '\n' +
-                  '✅ Session History: ' + (sessionHistory ? 'Enabled' : 'Disabled'));
+            showInfo('System Health Check',
+                '✅ API Server: Online\n' +
+                '✅ GPU: Available\n' +
+                '✅ Storage: 85% free\n' +
+                '✅ Anomaly Detector: ' + (anomalyDetector ? 'Active' : 'Inactive') + '\n' +
+                '✅ Session History: ' + (sessionHistory ? 'Enabled' : 'Disabled'));
         }
 
         function showTuningWizard() {
             switchTab('tools');
-            alert('Tuning Wizard: Use the Dataset Profiler tool to analyze your dataset and get optimal hyperparameter recommendations!');
+              showToast('Use the Dataset Profiler in Tools to get optimal hyperparameter recommendations', 'info', 5000);
         }
 
         function loadConfig() {
@@ -1133,9 +1134,9 @@
                             const el = document.getElementById(key);
                             if (el) el.value = config[key];
                         });
-                        alert('Config loaded successfully!');
+                            showToast('Config loaded successfully ✓', 'ok', 3500);
                     } catch (err) {
-                        alert('Failed to load config: ' + err.message);
+                            showToast('Failed to load config: ' + err.message, 'warn', 5000);
                     }
                 };
                 reader.readAsText(file);
@@ -1145,7 +1146,7 @@
                 // Phase 30: Hyperparameter Optimizer Functions
                 function startHyperparamOptimization() {
                     if (!window.hyperOptimizer) {
-                        alert('Hyperparameter optimizer not initialized');
+                        showToast('Hyperparameter optimizer not initialized', 'warn', 4000);
                         return;
                     }
 
@@ -1182,13 +1183,14 @@
                 }
 
                 function configureSearchSpace() {
-                    alert('Search Space Configuration:\n\nDefault search space includes:\n' +
-                          '• Learning Rate: 1e-5 to 1e-3 (log scale)\n' +
-                          '• Batch Size: [2, 4, 8, 16]\n' +
-                          '• LoRA Rank: [8, 16, 32, 64]\n' +
-                          '• LoRA Alpha: [16, 32, 64]\n' +
-                          '• Epochs: 1 to 5\n\n' +
-                          'Custom configuration coming in future update!');
+                    showInfo('Search Space Configuration',
+                        'Default search space:\n' +
+                        '  • Learning Rate: 1e-5 to 1e-3 (log scale)\n' +
+                        '  • Batch Size: [2, 4, 8, 16]\n' +
+                        '  • LoRA Rank: [8, 16, 32, 64]\n' +
+                        '  • LoRA Alpha: [16, 32, 64]\n' +
+                        '  • Epochs: 1 to 5\n\n' +
+                        'Custom configuration coming in a future update.');
 
                         // Phase 29: Model Comparison Functions
                         function toggleSelectAll() {
@@ -1199,17 +1201,17 @@
 
                         function compareSelectedModels() {
                             if (!window.modelComparator) {
-                                alert('Model comparator not initialized');
+                                showToast('Model comparator not initialized', 'warn', 4000);
                                 return;
                             }
 
                             const checkboxes = document.querySelectorAll('.compare-checkbox:checked');
                             if (checkboxes.length === 0) {
-                                alert('Please select at least 2 models to compare');
+                                showToast('Please select at least 2 models to compare', 'warn', 4000);
                                 return;
                             }
                             if (checkboxes.length > 4) {
-                                alert('Maximum 4 models can be compared at once');
+                                showToast('Maximum 4 models can be compared at once', 'warn', 4000);
                                 return;
                             }
 
@@ -1224,7 +1226,7 @@
 
                             // Switch to analytics tab
                             switchTab('analytics');
-                            alert(`Comparing ${checkboxes.length} models. View results in Analytics tab.`);
+                            showToast(`Comparing ${checkboxes.length} models — results in Analytics tab`, 'ok', 4000);
                         }
 
                         function clearComparisonSelection() {
@@ -1243,6 +1245,34 @@
             }
         });
     </script>
+    <div id="dash-toast" style="position:fixed;bottom:24px;right:24px;background:#1e293b;color:#e2e8f0;padding:12px 20px;border-radius:8px;font-size:14px;z-index:9999;opacity:0;transition:opacity 0.3s;pointer-events:none;max-width:380px;box-shadow:0 4px 12px rgba(0,0,0,.4)"></div>
+    <div id="dash-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:10000;align-items:center;justify-content:center">
+        <div style="background:#1e293b;color:#e2e8f0;border-radius:10px;padding:24px 28px;max-width:500px;width:90%;box-shadow:0 8px 32px rgba(0,0,0,.5)">
+            <div id="dash-modal-title" style="font-weight:700;font-size:16px;margin-bottom:12px;color:#7dd3fc"></div>
+            <pre id="dash-modal-body" style="white-space:pre-wrap;font-family:inherit;font-size:13px;line-height:1.6;margin:0 0 16px"></pre>
+            <button onclick="document.getElementById('dash-modal').style.display='none'" style="background:#3b82f6;color:#fff;border:none;padding:8px 20px;border-radius:6px;cursor:pointer;font-size:13px">Close</button>
+        </div>
+    </div>
+    <script>
+        function showToast(msg, type, duration) {
+            var t = document.getElementById('dash-toast');
+            t.textContent = msg;
+            t.style.background = type === 'warn' ? '#7c2d12' : type === 'ok' ? '#14532d' : '#1e293b';
+            t.style.opacity = '1';
+            clearTimeout(t._tid);
+            t._tid = setTimeout(function() { t.style.opacity = '0'; }, duration || 3500);
+        }
+        function showInfo(title, body) {
+            var m = document.getElementById('dash-modal');
+            document.getElementById('dash-modal-title').textContent = title;
+            document.getElementById('dash-modal-body').textContent = body;
+            m.style.display = 'flex';
+        }
+        document.getElementById('dash-modal').addEventListener('click', function(e) {
+            if (e.target === this) this.style.display = 'none';
+        });
+    </script>
     <script src="../aria-nav.js"></script>
+    <script src="../global-upgrade.js"></script>
 </body>
 </html>

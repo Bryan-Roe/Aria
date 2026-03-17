@@ -569,6 +569,7 @@
             box-shadow: 0 12px 30px rgba(102, 126, 234, 0.6);
         }
     </style>
+    <link rel="stylesheet" href="../global-upgrade.css">
 </head>
 <body>
     <div class="anime-character" id="animeCharacter">
@@ -748,6 +749,13 @@
 
         // Keyboard controls
         document.addEventListener('keydown', function(e) {
+            const isTyping = document.activeElement && (
+                document.activeElement.tagName === 'INPUT' ||
+                document.activeElement.tagName === 'TEXTAREA' ||
+                document.activeElement.tagName === 'SELECT' ||
+                document.activeElement.isContentEditable
+            );
+            if (isTyping) return;
             if (e.key === 'w' || e.key === 'W') {
                 waveArm('right');
             } else if (e.key === 'r' || e.key === 'R') {
@@ -757,5 +765,6 @@
             }
         });
     </script>
+    <script src="../global-upgrade.js"></script>
 </body>
 </html>

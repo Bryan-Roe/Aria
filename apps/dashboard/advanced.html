@@ -332,6 +332,7 @@
         .breadcrumb a:hover { color:#fff; }
         .breadcrumb .sep { margin:0 2px; }
     </style>
+    <link rel="stylesheet" href="../global-upgrade.css">
 </head>
 <body>
     <div class="container">
@@ -767,6 +768,19 @@
                 });
         }
 
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            const isTyping = document.activeElement && (
+                document.activeElement.tagName === 'INPUT' ||
+                document.activeElement.tagName === 'TEXTAREA' ||
+                document.activeElement.tagName === 'SELECT' ||
+                document.activeElement.isContentEditable
+            );
+            if (isTyping) return;
+            const withMod = e.ctrlKey || e.metaKey;
+            if (withMod && e.key.toLowerCase() === 'r') { e.preventDefault(); refreshAll(); }
+        });
+
         // Initialize
         refreshAll();
         
@@ -781,5 +795,6 @@
         <a href="analytics.html" style="color:inherit;text-decoration:underline">Analytics</a>
         <div style="margin-top:6px">Part of the <a href="../aria/" style="color:inherit;text-decoration:underline">Aria</a> platform</div>
     </footer>
+    <script src="../global-upgrade.js"></script>
 </body>
 </html>

@@ -262,6 +262,7 @@
             color: #d19a66;
         }
     </style>
+    <link rel="stylesheet" href="../global-upgrade.css">
 </head>
 <body>
     <div class="container">
@@ -340,7 +341,10 @@
             const showState = document.getElementById('show-state').checked;
             
             if (!command) {
-                alert('Please enter a command');
+                var el = document.getElementById('command');
+                el.focus();
+                el.placeholder = '⚠️ Please enter a command first...';
+                setTimeout(function() { el.placeholder = 'e.g. Walk left and pick up the ball...'; }, 2000);
                 return;
             }
 
@@ -477,5 +481,6 @@
         }
     </script>
     <script src="../aria-nav.js"></script>
+    <script src="../global-upgrade.js"></script>
 </body>
 </html>

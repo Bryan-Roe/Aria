@@ -385,11 +385,11 @@ class LiveProgressTracker {
             });
             
             if (response.ok) {
-                alert('Training paused successfully');
+                 if (typeof showToast === 'function') showToast('Training paused ✓', 'ok', 3000);
             }
         } catch (err) {
             console.error('[LiveProgress] Pause error:', err);
-            alert('Failed to pause training');
+              if (typeof showToast === 'function') showToast('Failed to pause training', 'warn', 4000);
         }
     }
 
@@ -398,7 +398,7 @@ class LiveProgressTracker {
      */
     async stopTraining() {
         if (!this.activeJobId) return;
-        if (!confirm('Are you sure you want to stop this training job?')) return;
+
 
         try {
             const response = await fetch(`/api/job-control/${this.activeJobId}/stop`, {
@@ -407,12 +407,12 @@ class LiveProgressTracker {
             
             if (response.ok) {
                 this.stopTracking();
-                alert('Training stopped successfully');
+                if (typeof showToast === 'function') showToast('Training stopped', 'ok', 3000);
                 this.hideProgressUI();
             }
         } catch (err) {
             console.error('[LiveProgress] Stop error:', err);
-            alert('Failed to stop training');
+              if (typeof showToast === 'function') showToast('Failed to stop training', 'warn', 4000);
         }
     }
 

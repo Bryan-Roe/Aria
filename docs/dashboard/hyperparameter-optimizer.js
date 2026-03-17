@@ -486,7 +486,7 @@ class HyperparameterOptimizer {
             }
         });
 
-        alert('Best configuration applied to training form!');
+        if (typeof showToast === 'function') showToast('Best config applied to training form ✓', 'ok', 3500);
         
         // Switch to training tab
         if (typeof switchTab === 'function') {
@@ -569,10 +569,10 @@ class HyperparameterOptimizer {
      * Stop optimization
      */
     stopOptimization() {
-        if (!confirm('Are you sure you want to stop optimization?')) return;
+
         
         this.maxTrials = this.currentTrial;
-        alert('Optimization will stop after current trial completes');
+        if (typeof showToast === 'function') showToast('Optimization stopping after current trial', 'info', 4000);
     }
 
     /**

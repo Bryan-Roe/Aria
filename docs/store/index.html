@@ -3,287 +3,870 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Aria AI Store — Plans & Features</title>
-  <meta name="description" content="Explore Aria AI platform plans, features, and API access tiers.">
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛍️</text></svg>">
+  <title>Aria Store - Plans, Access, and Adoption</title>
+  <meta name="description" content="Choose a plan, browse product surfaces, and navigate pricing, checkout, account, and enterprise adoption paths for the Aria platform.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='24' fill='%23122033'/%3E%3Ctext x='50' y='60' text-anchor='middle' font-size='52'%3E%F0%9F%9B%8D%EF%B8%8F%3C/text%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../global-upgrade.css">
   <style>
-    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
-    :root{
-      --brand:#6366f1;--brand-light:#818cf8;--accent:#f472b6;
-      --bg:#0f0b1e;--surface:rgba(255,255,255,.04);--border:rgba(255,255,255,.08);
-      --text:#e2e8f0;--text-muted:#94a3b8;--radius:16px;
-      --transition:.25s cubic-bezier(.4,0,.2,1);
+    *, *::before, *::after { box-sizing: border-box; }
+
+    :root {
+      --paper: #f7f2e8;
+      --paper-soft: #f2eadc;
+      --ink: #122033;
+      --ink-soft: #5f6874;
+      --line: rgba(18, 32, 51, 0.12);
+      --panel: rgba(255, 255, 255, 0.76);
+      --panel-strong: rgba(255, 255, 255, 0.92);
+      --shadow: 0 24px 64px rgba(18, 32, 51, 0.12);
+      --shadow-soft: 0 16px 36px rgba(18, 32, 51, 0.08);
+      --teal: #0f9d89;
+      --coral: #d95b43;
+      --gold: #d3a53e;
+      --slate: #22405c;
+      --radius-xl: 30px;
+      --radius-lg: 22px;
+      --radius-md: 16px;
+      --radius-sm: 12px;
+      --transition: 220ms cubic-bezier(0.22, 1, 0.36, 1);
     }
-    html{scroll-behavior:smooth}
-    body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
 
-    /* Background */
-    .bg-effect{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
-    .bg-effect::before{
-      content:'';position:absolute;width:130%;height:130%;top:-15%;left:-15%;
-      background:conic-gradient(from 200deg at 50% 50%,#6366f1 0deg,#8b5cf6 90deg,#ec4899 180deg,#6366f1 360deg);
-      filter:blur(100px);opacity:.18;animation:bgSpin 25s linear infinite;
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Instrument Sans", system-ui, sans-serif;
+      color: var(--ink);
+      background: linear-gradient(180deg, #fbf7ef 0%, #f7f2e8 56%, #efe5d6 100%);
+      overflow-x: hidden;
     }
-    @keyframes bgSpin{to{transform:rotate(360deg)}}
 
-    /* Nav */
-    nav{position:sticky;top:0;z-index:100;backdrop-filter:blur(20px) saturate(1.8);background:rgba(15,11,30,.8);border-bottom:1px solid rgba(255,255,255,.06)}
-    .nav-inner{display:flex;align-items:center;justify-content:space-between;max-width:1280px;margin:0 auto;padding:14px 24px}
-    .nav-brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:#fff;font-weight:700;font-size:1.15em}
-    .nav-links{display:flex;gap:6px;flex-wrap:wrap}
-    .nav-links a{color:rgba(255,255,255,.65);text-decoration:none;font-size:.88em;font-weight:500;padding:6px 14px;border-radius:8px;transition:var(--transition)}
-    .nav-links a:hover,.nav-links a.active{color:#fff;background:rgba(255,255,255,.1)}
-
-    .container{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:0 24px}
-
-    /* Hero */
-    .hero{text-align:center;padding:80px 0 60px;color:#fff}
-    .hero h1{font-size:clamp(2em,5vw,3.5em);font-weight:800;line-height:1.1;
-      background:linear-gradient(135deg,#fff,#c7d2fe,#f9a8d4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-    .hero p{color:rgba(255,255,255,.6);font-size:1.15em;max-width:600px;margin:16px auto 0;line-height:1.6}
-    .demo-badge{display:inline-block;background:rgba(245,158,11,.15);color:#fbbf24;padding:6px 16px;border-radius:100px;font-size:.82em;font-weight:600;margin-top:20px}
-
-    /* Pricing cards */
-    .plans{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px;padding:60px 0}
-    .plan{
-      background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
-      padding:32px;display:flex;flex-direction:column;transition:var(--transition);position:relative;overflow:hidden;
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: -2;
+      background:
+        radial-gradient(circle at 16% 18%, rgba(15, 157, 137, 0.16), transparent 30%),
+        radial-gradient(circle at 86% 14%, rgba(217, 91, 67, 0.16), transparent 24%),
+        radial-gradient(circle at 60% 78%, rgba(211, 165, 62, 0.18), transparent 28%);
+      pointer-events: none;
     }
-    .plan:hover{transform:translateY(-4px);border-color:rgba(255,255,255,.15)}
-    .plan.featured{border-color:var(--brand);box-shadow:0 0 40px rgba(99,102,241,.15)}
-    .plan.featured::before{
-      content:'Most Popular';position:absolute;top:16px;right:-32px;
-      background:linear-gradient(135deg,var(--brand),var(--accent));color:#fff;
-      font-size:.7em;font-weight:700;text-transform:uppercase;padding:4px 40px;
-      transform:rotate(45deg);letter-spacing:.05em;
+
+    body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      background-image:
+        linear-gradient(rgba(18, 32, 51, 0.032) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(18, 32, 51, 0.032) 1px, transparent 1px);
+      background-size: 34px 34px;
+      mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.82), transparent 92%);
+      pointer-events: none;
     }
-    .plan-icon{font-size:2em;margin-bottom:12px}
-    .plan-name{font-size:1.4em;font-weight:800;color:#fff;margin-bottom:4px}
-    .plan-price{font-size:2.2em;font-weight:800;color:var(--brand-light);margin-bottom:4px}
-    .plan-price span{font-size:.4em;font-weight:500;color:var(--text-muted)}
-    .plan-desc{color:var(--text-muted);font-size:.9em;margin-bottom:20px;line-height:1.5}
-    .plan-features{list-style:none;flex:1;margin-bottom:24px}
-    .plan-features li{padding:6px 0;font-size:.9em;display:flex;align-items:flex-start;gap:8px}
-    .plan-features li::before{content:'✓';color:#22c55e;font-weight:700;flex-shrink:0}
-    .plan-features li.disabled{opacity:.35}
-    .plan-features li.disabled::before{content:'—';color:var(--text-muted)}
-    .btn-plan{
-      display:block;text-align:center;padding:14px;border-radius:10px;
-      font-weight:700;font-size:1em;text-decoration:none;transition:var(--transition);border:none;cursor:pointer;
+
+    a { color: inherit; }
+
+    .shell {
+      width: min(1220px, calc(100vw - 32px));
+      margin: 0 auto;
     }
-    .btn-plan.primary{background:linear-gradient(135deg,var(--brand),var(--accent));color:#fff;box-shadow:0 4px 20px rgba(99,102,241,.3)}
-    .btn-plan.primary:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(99,102,241,.4)}
-    .btn-plan.outline{background:rgba(255,255,255,.06);color:#fff;border:1px solid rgba(255,255,255,.15)}
-    .btn-plan.outline:hover{background:rgba(255,255,255,.1)}
 
-    /* Features grid */
-    section{padding:60px 0}
-    .section-header{text-align:center;margin-bottom:40px;color:#fff}
-    .section-header h2{font-size:2em;font-weight:700;margin-bottom:8px}
-    .section-header p{color:rgba(255,255,255,.5);font-size:1.05em}
-    .features-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px}
-    .feat{
-      background:var(--surface);border:1px solid var(--border);border-radius:12px;
-      padding:20px;transition:var(--transition);
+    .site-header {
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      backdrop-filter: blur(18px) saturate(1.4);
+      background: rgba(247, 242, 232, 0.78);
+      border-bottom: 1px solid rgba(18, 32, 51, 0.08);
     }
-    .feat:hover{background:rgba(255,255,255,.06);transform:translateY(-2px)}
-    .feat-icon{font-size:1.4em;margin-bottom:8px}
-    .feat-title{font-weight:700;color:#fff;margin-bottom:4px}
-    .feat-desc{color:var(--text-muted);font-size:.88em;line-height:1.5}
 
-    /* API Tiers */
-    .api-table{width:100%;border-collapse:collapse;font-size:.9em;color:#fff;margin-top:20px}
-    .api-table th{text-align:left;padding:12px;border-bottom:2px solid var(--border);color:var(--brand-light);font-size:.8em;text-transform:uppercase;letter-spacing:.05em}
-    .api-table td{padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.04)}
-    .api-table tr:hover td{background:rgba(255,255,255,.02)}
-    .check{color:#22c55e;font-weight:700}
-    .cross{color:#ef4444;opacity:.4}
+    .nav-shell {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      padding: 14px 0;
+    }
 
-    /* FAQ */
-    .faq{max-width:700px;margin:0 auto}
-    details{background:var(--surface);border:1px solid var(--border);border-radius:10px;margin-bottom:8px;transition:var(--transition)}
-    details:hover{border-color:rgba(255,255,255,.12)}
-    details summary{padding:16px 20px;cursor:pointer;font-weight:600;color:#fff;font-size:.95em;list-style:none}
-    details summary::-webkit-details-marker{display:none}
-    details summary::before{content:'+ ';color:var(--brand-light);font-weight:700;margin-right:6px}
-    details[open] summary::before{content:'− '}
-    details p{padding:0 20px 16px;color:var(--text-muted);font-size:.9em;line-height:1.6}
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: var(--ink);
+    }
 
-    footer{border-top:1px solid rgba(255,255,255,.06);padding:32px;text-align:center;color:rgba(255,255,255,.35);font-size:.85em}
-    footer a{color:rgba(255,255,255,.55);text-decoration:none}footer a:hover{color:#fff}
+    .brand-mark {
+      width: 42px;
+      height: 42px;
+      border-radius: 14px;
+      background:
+        radial-gradient(circle at 50% 34%, var(--teal) 0 11px, transparent 12px),
+        linear-gradient(180deg, var(--slate), #16283d);
+      position: relative;
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.16);
+    }
 
-    @media(max-width:768px){.nav-links{display:none}.plans{grid-template-columns:1fr}}
+    .brand-mark::after {
+      content: "";
+      position: absolute;
+      left: 9px;
+      right: 9px;
+      bottom: 8px;
+      height: 11px;
+      border-radius: 999px 999px 8px 8px;
+      border: 3px solid rgba(247, 242, 232, 0.96);
+      border-top: 0;
+    }
+
+    .brand-copy {
+      display: grid;
+      gap: 2px;
+    }
+
+    .brand-copy strong {
+      font-family: "Space Grotesk", sans-serif;
+      font-size: 1.08rem;
+      line-height: 1;
+      letter-spacing: -0.03em;
+    }
+
+    .brand-copy span {
+      font-size: 0.78rem;
+      color: var(--ink-soft);
+    }
+
+    .nav-toggle {
+      display: none;
+      align-items: center;
+      justify-content: center;
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.55);
+      color: var(--ink);
+      cursor: pointer;
+    }
+
+    .site-nav {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .site-nav a {
+      text-decoration: none;
+      padding: 10px 14px;
+      border-radius: 999px;
+      color: var(--ink-soft);
+      font-size: 0.94rem;
+      transition: background var(--transition), color var(--transition), transform var(--transition);
+    }
+
+    .site-nav a:hover,
+    .site-nav a:focus-visible,
+    .site-nav a.is-active {
+      background: rgba(255, 255, 255, 0.72);
+      color: var(--ink);
+      transform: translateY(-1px);
+      outline: none;
+    }
+
+    main {
+      padding: 28px 0 40px;
+      display: grid;
+      gap: 18px;
+    }
+
+    .hero-grid,
+    .paths-grid,
+    .plans-grid,
+    .signal-grid,
+    .links-grid {
+      display: grid;
+      gap: 16px;
+    }
+
+    .hero-grid {
+      grid-template-columns: minmax(0, 1.05fr) minmax(320px, 0.95fr);
+    }
+
+    .hero-card,
+    .route-card,
+    .plan-card,
+    .signal-card,
+    .link-card,
+    .comparison-card,
+    .footer-card {
+      background: var(--panel);
+      border: 1px solid rgba(255, 255, 255, 0.62);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+    }
+
+    .hero-card,
+    .route-card,
+    .plan-card,
+    .signal-card,
+    .link-card,
+    .comparison-card,
+    .footer-card {
+      border-radius: var(--radius-xl);
+    }
+
+    .hero-card,
+    .comparison-card,
+    .footer-card {
+      padding: 28px;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      margin: 0 0 14px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: var(--slate);
+    }
+
+    .eyebrow::before {
+      content: "";
+      width: 28px;
+      height: 2px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--teal), var(--coral));
+    }
+
+    h1, h2, h3, .metric strong, .plan-price {
+      font-family: "Space Grotesk", sans-serif;
+      letter-spacing: -0.04em;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(2.8rem, 6vw, 5rem);
+      line-height: 0.96;
+      max-width: 11ch;
+    }
+
+    h1 span { color: var(--coral); }
+
+    .hero-copy,
+    .hero-panel p,
+    .route-card p,
+    .plan-card p,
+    .signal-card p,
+    .link-card p,
+    .comparison-card p,
+    .metric span,
+    .plan-list li,
+    .comparison-list li,
+    .footer-card p {
+      color: var(--ink-soft);
+      line-height: 1.7;
+    }
+
+    .hero-copy {
+      margin: 16px 0 0;
+      max-width: 62ch;
+      font-size: 1.05rem;
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 24px;
+    }
+
+    .button-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 48px;
+      padding: 0 18px;
+      border-radius: 999px;
+      border: 1px solid rgba(18, 32, 51, 0.1);
+      text-decoration: none;
+      color: var(--ink);
+      background: rgba(255, 255, 255, 0.74);
+      font-weight: 700;
+      transition: transform var(--transition), background var(--transition), box-shadow var(--transition);
+    }
+
+    .button-link:hover,
+    .button-link:focus-visible {
+      transform: translateY(-2px);
+      background: rgba(255, 255, 255, 0.92);
+      outline: none;
+    }
+
+    .button-link.primary {
+      background: linear-gradient(135deg, var(--teal), #1bb6a4);
+      color: #f6fffd;
+      border-color: transparent;
+      box-shadow: 0 14px 28px rgba(15, 157, 137, 0.24);
+    }
+
+    .metrics-row {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 24px;
+    }
+
+    .metric {
+      padding: 16px;
+      border-radius: var(--radius-md);
+      background: rgba(255, 255, 255, 0.7);
+      border: 1px solid rgba(18, 32, 51, 0.08);
+      box-shadow: var(--shadow-soft);
+    }
+
+    .metric strong {
+      display: block;
+      font-size: 1.4rem;
+      line-height: 1;
+    }
+
+    .metric span {
+      display: block;
+      margin-top: 8px;
+      font-size: 0.84rem;
+      line-height: 1.45;
+    }
+
+    .hero-panel {
+      display: grid;
+      gap: 12px;
+    }
+
+    .signal-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      margin-top: 12px;
+    }
+
+    .signal-card,
+    .route-card,
+    .plan-card,
+    .link-card {
+      padding: 22px;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 10px;
+      border-radius: 999px;
+      background: rgba(18, 32, 51, 0.06);
+      color: var(--ink-soft);
+      font-size: 0.74rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    .paths-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .route-card,
+    .plan-card,
+    .link-card {
+      text-decoration: none;
+      color: inherit;
+      transition: transform var(--transition), background var(--transition), border-color var(--transition);
+    }
+
+    .route-card:hover,
+    .route-card:focus-visible,
+    .plan-card:hover,
+    .plan-card:focus-visible,
+    .link-card:hover,
+    .link-card:focus-visible {
+      transform: translateY(-2px);
+      background: var(--panel-strong);
+      outline: none;
+    }
+
+    .route-card[data-tone="teal"] { border-top: 5px solid rgba(15, 157, 137, 0.86); }
+    .route-card[data-tone="coral"] { border-top: 5px solid rgba(217, 91, 67, 0.86); }
+    .route-card[data-tone="gold"] { border-top: 5px solid rgba(211, 165, 62, 0.92); }
+
+    .route-card h3,
+    .plan-card h3,
+    .link-card h3,
+    .comparison-card h2 {
+      margin: 16px 0 0;
+      font-size: 1.34rem;
+      line-height: 1.1;
+    }
+
+    .route-card strong,
+    .plan-card strong,
+    .link-card strong {
+      display: inline-flex;
+      margin-top: 16px;
+      color: var(--slate);
+      font-size: 0.88rem;
+    }
+
+    .plans-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .plan-card.featured {
+      border: 1px solid rgba(15, 157, 137, 0.35);
+      box-shadow: 0 24px 64px rgba(15, 157, 137, 0.14);
+    }
+
+    .plan-price {
+      margin-top: 14px;
+      font-size: 2.3rem;
+      line-height: 1;
+    }
+
+    .plan-price span {
+      font-family: "Instrument Sans", system-ui, sans-serif;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--ink-soft);
+      letter-spacing: normal;
+    }
+
+    .plan-list,
+    .comparison-list {
+      list-style: none;
+      padding: 0;
+      margin: 18px 0 0;
+      display: grid;
+      gap: 10px;
+    }
+
+    .plan-list li,
+    .comparison-list li {
+      position: relative;
+      padding-left: 22px;
+      font-size: 0.92rem;
+    }
+
+    .plan-list li::before,
+    .comparison-list li::before {
+      content: "•";
+      position: absolute;
+      left: 0;
+      color: var(--teal);
+      font-weight: 800;
+    }
+
+    .plan-cta {
+      margin-top: 20px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 46px;
+      padding: 0 16px;
+      border-radius: 999px;
+      text-decoration: none;
+      font-weight: 700;
+      color: var(--ink);
+      background: rgba(255, 255, 255, 0.82);
+      border: 1px solid rgba(18, 32, 51, 0.1);
+    }
+
+    .plan-card.featured .plan-cta {
+      background: linear-gradient(135deg, var(--teal), #1bb6a4);
+      color: #f6fffd;
+      border-color: transparent;
+    }
+
+    .comparison-card {
+      display: grid;
+      grid-template-columns: minmax(0, 0.9fr) minmax(320px, 1.1fr);
+      gap: 24px;
+      align-items: start;
+    }
+
+    .comparison-table {
+      width: 100%;
+      border-collapse: collapse;
+      overflow: hidden;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.74);
+      box-shadow: var(--shadow-soft);
+    }
+
+    .comparison-table th,
+    .comparison-table td {
+      padding: 12px 14px;
+      border-bottom: 1px solid rgba(18, 32, 51, 0.08);
+      text-align: left;
+    }
+
+    .comparison-table th {
+      color: var(--slate);
+      font-size: 0.82rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .yes { color: var(--teal); font-weight: 700; }
+    .no { color: var(--coral); font-weight: 700; }
+
+    .links-grid {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    footer {
+      padding: 0 0 42px;
+    }
+
+    .footer-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .footer-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .footer-links a {
+      text-decoration: none;
+      padding: 10px 12px;
+      border-radius: 999px;
+      color: var(--ink-soft);
+      transition: background var(--transition), color var(--transition);
+    }
+
+    .footer-links a:hover,
+    .footer-links a:focus-visible {
+      background: rgba(255, 255, 255, 0.62);
+      color: var(--ink);
+      outline: none;
+    }
+
+    @media (max-width: 1080px) {
+      .hero-grid,
+      .comparison-card {
+        grid-template-columns: 1fr;
+      }
+
+      .paths-grid,
+      .plans-grid,
+      .links-grid,
+      .metrics-row,
+      .signal-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 820px) {
+      .shell {
+        width: min(1220px, calc(100vw - 20px));
+      }
+
+      .nav-toggle {
+        display: inline-flex;
+      }
+
+      .site-nav {
+        position: absolute;
+        left: 10px;
+        right: 10px;
+        top: calc(100% + 8px);
+        padding: 10px;
+        border-radius: 22px;
+        background: rgba(247, 242, 232, 0.96);
+        border: 1px solid rgba(18, 32, 51, 0.1);
+        box-shadow: var(--shadow);
+        display: none;
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .site-nav.open {
+        display: flex;
+      }
+
+      .site-nav a {
+        border-radius: 14px;
+      }
+
+      .paths-grid,
+      .plans-grid,
+      .links-grid,
+      .metrics-row,
+      .signal-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .hero-card,
+      .comparison-card,
+      .footer-card,
+      .route-card,
+      .plan-card,
+      .signal-card,
+      .link-card {
+        padding: 20px;
+      }
+
+      .footer-card {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+
+      *, *::before, *::after {
+        animation: none !important;
+        transition: none !important;
+      }
+    }
   </style>
 </head>
 <body>
-  <div class="bg-effect"></div>
-
-  <nav>
-    <div class="nav-inner">
-      <a href="../" class="nav-brand">👤 Aria</a>
-      <div class="nav-links">
+  <header class="site-header">
+    <div class="shell nav-shell">
+      <a class="brand" href="../">
+        <span class="brand-mark" aria-hidden="true"></span>
+        <span class="brand-copy">
+          <strong>Aria</strong>
+          <span>interactive AI character platform</span>
+        </span>
+      </a>
+      <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav" aria-label="Toggle navigation">Menu</button>
+      <nav class="site-nav" id="site-nav">
         <a href="../">Home</a>
         <a href="../documentation.html">Docs</a>
-        <a href="../aria/">Aria Demo</a>
+        <a href="../aria/">Aria</a>
         <a href="../chat/">Chat</a>
-        <a href="../dashboard/">Dashboard</a>
-        <a href="./" class="active">Store</a>
-        <a href="https://github.com/Bryan-Roe/Aria" target="_blank">GitHub</a>
-      </div>
+        <a href="../dashboard/hub.html">Dashboards</a>
+        <a class="is-active" href="./">Store</a>
+        <a href="https://github.com/Bryan-Roe/Aria" target="_blank" rel="noreferrer">GitHub</a>
+      </nav>
     </div>
-  </nav>
+  </header>
 
-  <div class="hero">
-    <div class="container">
-      <h1>Aria AI Platform</h1>
-      <p>Choose the plan that fits your needs — from free experimentation to enterprise-grade AI with quantum ML, autonomous training, and full API access.</p>
-      <div class="demo-badge">Demo Mode — Preview Only</div>
-    </div>
-  </div>
+  <main class="shell">
+    <section class="hero-grid">
+      <article class="hero-card">
+        <p class="eyebrow">Storefront and pricing</p>
+        <h1>Decide how to <span>adopt Aria</span> without decoding the repo.</h1>
+        <p class="hero-copy">The store should answer three questions immediately: what the platform unlocks, which plan fits the workload, and where a buyer or operator should go next. This page now routes all three cleanly.</p>
+        <div class="hero-actions">
+          <a class="button-link primary" href="../monetization/pricing.html">See pricing</a>
+          <a class="button-link" href="products.html">Browse catalog</a>
+          <a class="button-link" href="contact.html">Talk to sales</a>
+        </div>
+        <div class="metrics-row">
+          <div class="metric"><strong>3</strong><span>Adoption paths from free exploration to enterprise deployment.</span></div>
+          <div class="metric"><strong>35+</strong><span>APIs available across chat, vision, subscriptions, and quantum workflows.</span></div>
+          <div class="metric"><strong>6</strong><span>Provider routes including Azure OpenAI, OpenAI, LMStudio, LoRA, and local fallback.</span></div>
+          <div class="metric"><strong>1</strong><span>Commercial entry point that links pricing, checkout, account, and product pages.</span></div>
+        </div>
+      </article>
 
-  <!-- Pricing Plans -->
-  <div class="container">
-    <div class="plans">
-      <div class="plan">
-        <div class="plan-icon">🆓</div>
-        <div class="plan-name">Free</div>
-        <div class="plan-price">$0<span>/month</span></div>
-        <div class="plan-desc">Get started with core AI features, local models, and basic character interactions.</div>
-        <ul class="plan-features">
-          <li>Local AI model fallback</li>
-          <li>Basic Aria character controls</li>
-          <li>Chat CLI access</li>
-          <li>Community support</li>
-          <li>5 API calls / hour</li>
-          <li class="disabled">Quantum ML pipelines</li>
-          <li class="disabled">LoRA fine-tuning</li>
-          <li class="disabled">Priority support</li>
+      <aside class="hero-card hero-panel">
+        <div>
+          <p class="eyebrow">Buying signals</p>
+          <h2>Match the plan to the operating mode.</h2>
+          <p>If you are exploring local use, you should not land on enterprise language. If you need deployment, billing, or managed capacity, the path should be explicit.</p>
+        </div>
+        <div class="signal-grid">
+          <article class="signal-card">
+            <span class="chip">Free</span>
+            <h3>Local experimentation</h3>
+            <p>Best when you want the character demo, local fallback chat, and source access without account setup.</p>
+          </article>
+          <article class="signal-card">
+            <span class="chip">Pro</span>
+            <h3>Cloud-backed production work</h3>
+            <p>Move to managed providers, richer actions, training access, and operational dashboards.</p>
+          </article>
+          <article class="signal-card">
+            <span class="chip">Enterprise</span>
+            <h3>Dedicated capacity</h3>
+            <p>Use this path when you need real quantum workloads, managed infrastructure, or procurement support.</p>
+          </article>
+          <article class="signal-card">
+            <span class="chip">Operator</span>
+            <h3>Account and billing</h3>
+            <p>Return to account, subscription, checkout, or referral surfaces without bouncing through unrelated pages.</p>
+          </article>
+        </div>
+      </aside>
+    </section>
+
+    <section class="paths-grid">
+      <a class="route-card" data-tone="teal" href="../documentation.html">
+        <span class="chip">Evaluate</span>
+        <h3>Start with docs and local usage</h3>
+        <p>Use the docs hub when you need startup commands, architecture notes, training guides, and repo-wide navigation before buying anything.</p>
+        <strong>Open documentation</strong>
+      </a>
+      <a class="route-card" data-tone="coral" href="../monetization/pricing.html">
+        <span class="chip">Buy</span>
+        <h3>Compare plans and upgrade paths</h3>
+        <p>Go straight to pricing when the question is plan fit, commercial packaging, or feature access by tier.</p>
+        <strong>Open pricing</strong>
+      </a>
+      <a class="route-card" data-tone="gold" href="../monetization/account.html">
+        <span class="chip">Operate</span>
+        <h3>Manage active subscriptions</h3>
+        <p>Use the account and subscription surfaces for renewals, plan changes, referrals, and operational customer actions.</p>
+        <strong>Manage account</strong>
+      </a>
+    </section>
+
+    <section class="plans-grid">
+      <article class="plan-card">
+        <span class="chip">Explorer</span>
+        <h3>Free</h3>
+        <div class="plan-price">$0 <span>/ month</span></div>
+        <p>Use Aria locally, explore the character interface, and test provider fallbacks without commercial commitment.</p>
+        <ul class="plan-list">
+          <li>Local fallback chat and core character controls.</li>
+          <li>Source access and self-hosted experimentation.</li>
+          <li>Good fit for evaluation, demos, and developer onboarding.</li>
         </ul>
-        <a href="#" class="btn-plan outline">Get Started Free</a>
-      </div>
+        <a class="plan-cta" href="../monetization/pricing.html">Compare free tier</a>
+      </article>
 
-      <div class="plan featured">
-        <div class="plan-icon">⚡</div>
-        <div class="plan-name">Pro</div>
-        <div class="plan-price">$29<span>/month</span></div>
-        <div class="plan-desc">Full AI provider access, training pipelines, and advanced character features.</div>
-        <ul class="plan-features">
-          <li>All Free features</li>
-          <li>Azure OpenAI + OpenAI providers</li>
-          <li>LoRA fine-tuning (3 models/month)</li>
-          <li>Full Aria action sequences</li>
-          <li>World generation</li>
-          <li>Training dashboard access</li>
-          <li>500 API calls / hour</li>
-          <li class="disabled">Quantum ML (simulator only)</li>
+      <article class="plan-card featured">
+        <span class="chip">Builder</span>
+        <h3>Pro</h3>
+        <div class="plan-price">$29 <span>/ month</span></div>
+        <p>For teams that need managed providers, full character workflows, dashboards, and richer model-backed features.</p>
+        <ul class="plan-list">
+          <li>Azure OpenAI and OpenAI provider routes.</li>
+          <li>LoRA fine-tuning allowance and world generation access.</li>
+          <li>Dashboard visibility with higher API throughput.</li>
         </ul>
-        <a href="#" class="btn-plan primary">Start Pro Trial</a>
-      </div>
+        <a class="plan-cta" href="../monetization/checkout.html">Start Pro</a>
+      </article>
 
-      <div class="plan">
-        <div class="plan-icon">🏢</div>
-        <div class="plan-name">Enterprise</div>
-        <div class="plan-price">Custom</div>
-        <div class="plan-desc">Full platform access with quantum computing, unlimited training, and dedicated support.</div>
-        <ul class="plan-features">
-          <li>All Pro features</li>
-          <li>Quantum ML (real QPU access)</li>
-          <li>Unlimited LoRA training</li>
-          <li>Autonomous training cycles</li>
-          <li>Custom model deployment</li>
-          <li>Dedicated Azure resources</li>
-          <li>Unlimited API access</li>
-          <li>Priority technical support</li>
+      <article class="plan-card">
+        <span class="chip">Operator</span>
+        <h3>Enterprise</h3>
+        <div class="plan-price">Custom <span>engagement</span></div>
+        <p>For organizations that need managed infrastructure, real quantum workflows, custom deployment, or procurement support.</p>
+        <ul class="plan-list">
+          <li>Dedicated capacity and managed cloud resources.</li>
+          <li>Advanced training, deployment, and operator support paths.</li>
+          <li>Best fit for production rollout and platform integration.</li>
         </ul>
-        <a href="#" class="btn-plan outline">Contact Sales</a>
-      </div>
-    </div>
-  </div>
+        <a class="plan-cta" href="contact.html">Talk to sales</a>
+      </article>
+    </section>
 
-  <!-- Features included -->
-  <section>
-    <div class="container">
-      <div class="section-header">
-        <h2>What's Included</h2>
-        <p>Every plan includes access to Aria's core platform</p>
+    <section class="comparison-card">
+      <div>
+        <p class="eyebrow">Decision support</p>
+        <h2>What changes as you move up the stack.</h2>
+        <p>The store should show the operational consequences of each tier, not just a price. This comparison keeps the differences practical.</p>
+        <ul class="comparison-list">
+          <li>Free is for local evaluation and source-first exploration.</li>
+          <li>Pro is for provider-backed usage, richer runtime features, and faster execution paths.</li>
+          <li>Enterprise is for managed deployment, special access, and organizational onboarding.</li>
+        </ul>
       </div>
-      <div class="features-grid">
-        <div class="feat"><div class="feat-icon">🎭</div><div class="feat-title">Interactive Character</div><div class="feat-desc">3D animated avatar with natural language commands, gestures, and object interactions.</div></div>
-        <div class="feat"><div class="feat-icon">💬</div><div class="feat-title">Multi-Provider Chat</div><div class="feat-desc">Azure OpenAI, OpenAI, LMStudio, LoRA adapters, and local model fallback.</div></div>
-        <div class="feat"><div class="feat-icon">📊</div><div class="feat-title">Training Dashboard</div><div class="feat-desc">Monitor model training, GPU usage, performance analytics, and batch evaluations.</div></div>
-        <div class="feat"><div class="feat-icon">⚛️</div><div class="feat-title">Quantum ML</div><div class="feat-desc">Hybrid quantum-classical ML with Qiskit, PennyLane, and Azure Quantum backends.</div></div>
-        <div class="feat"><div class="feat-icon">🧠</div><div class="feat-title">AGI Reasoning</div><div class="feat-desc">Chain-of-thought reasoning, task decomposition, and self-reflection engine.</div></div>
-        <div class="feat"><div class="feat-icon">🔌</div><div class="feat-title">35+ API Endpoints</div><div class="feat-desc">RESTful APIs for chat, vision, TTS, quantum jobs, subscriptions, and more.</div></div>
-        <div class="feat"><div class="feat-icon">🤖</div><div class="feat-title">LoRA Fine-Tuning</div><div class="feat-desc">Phi-3.5 model fine-tuning with adaptive epochs and automatic model promotion.</div></div>
-        <div class="feat"><div class="feat-icon">👁️</div><div class="feat-title">Vision AI</div><div class="feat-desc">Expression classification, image inference, and facial emotion detection via CNN.</div></div>
-      </div>
-    </div>
-  </section>
 
-  <!-- API comparison table -->
-  <section>
-    <div class="container">
-      <div class="section-header">
-        <h2>API Access Comparison</h2>
-        <p>Detailed feature breakdown by tier</p>
-      </div>
-      <div style="overflow-x:auto;border-radius:var(--radius);border:1px solid var(--border)">
-        <table class="api-table">
+      <div style="overflow-x:auto;">
+        <table class="comparison-table">
           <thead>
-            <tr><th>Feature</th><th>Free</th><th>Pro</th><th>Enterprise</th></tr>
+            <tr>
+              <th>Capability</th>
+              <th>Free</th>
+              <th>Pro</th>
+              <th>Enterprise</th>
+            </tr>
           </thead>
           <tbody>
-            <tr><td>Chat API (streaming)</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td></tr>
-            <tr><td>Aria character commands</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td></tr>
-            <tr><td>Text-to-speech</td><td class="cross">✕</td><td class="check">✓</td><td class="check">✓</td></tr>
-            <tr><td>Vision inference</td><td class="cross">✕</td><td class="check">✓</td><td class="check">✓</td></tr>
-            <tr><td>LoRA fine-tuning</td><td class="cross">✕</td><td>3/month</td><td>Unlimited</td></tr>
-            <tr><td>Quantum circuits</td><td class="cross">✕</td><td>Simulator</td><td class="check">QPU</td></tr>
-            <tr><td>Autonomous training</td><td class="cross">✕</td><td class="cross">✕</td><td class="check">✓</td></tr>
-            <tr><td>World generation</td><td class="cross">✕</td><td class="check">✓</td><td class="check">✓</td></tr>
-            <tr><td>Semantic memory</td><td class="cross">✕</td><td class="check">✓</td><td class="check">✓</td></tr>
-            <tr><td>Rate limit</td><td>5/hr</td><td>500/hr</td><td>Unlimited</td></tr>
-            <tr><td>Support</td><td>Community</td><td>Email</td><td>Dedicated</td></tr>
+            <tr><td>Local character demo</td><td class="yes">Yes</td><td class="yes">Yes</td><td class="yes">Yes</td></tr>
+            <tr><td>Managed AI providers</td><td class="no">No</td><td class="yes">Yes</td><td class="yes">Yes</td></tr>
+            <tr><td>LoRA fine-tuning access</td><td class="no">No</td><td class="yes">Yes</td><td class="yes">Yes</td></tr>
+            <tr><td>Quantum simulator access</td><td class="no">No</td><td class="yes">Yes</td><td class="yes">Yes</td></tr>
+            <tr><td>Real quantum workloads</td><td class="no">No</td><td class="no">No</td><td class="yes">Yes</td></tr>
+            <tr><td>Managed onboarding</td><td class="no">No</td><td class="no">No</td><td class="yes">Yes</td></tr>
           </tbody>
         </table>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- FAQ -->
-  <section>
-    <div class="container">
-      <div class="section-header">
-        <h2>Frequently Asked Questions</h2>
-      </div>
-      <div class="faq">
-        <details>
-          <summary>Can I use Aria without any API keys?</summary>
-          <p>Yes! The Free tier uses a local model fallback that requires no external API keys or accounts. You can interact with Aria's character, use the chat CLI, and explore the platform core features.</p>
-        </details>
-        <details>
-          <summary>What AI providers are supported?</summary>
-          <p>Aria supports Azure OpenAI, OpenAI, LMStudio, LoRA adapters (custom fine-tuned models), and a zero-dependency local fallback. Provider detection is automatic with configurable fallback chains.</p>
-        </details>
-        <details>
-          <summary>Do I need a GPU for training?</summary>
-          <p>For LoRA fine-tuning, a CUDA-capable GPU is recommended but not required. CPU training works for small datasets. Enterprise plans include access to dedicated Azure GPU resources.</p>
-        </details>
-        <details>
-          <summary>How does quantum ML work?</summary>
-          <p>Aria integrates Qiskit and PennyLane for hybrid quantum-classical machine learning. You can simulate circuits locally, use the Azure Quantum simulator, or submit jobs to real quantum hardware (Enterprise only).</p>
-        </details>
-        <details>
-          <summary>Is the platform open source?</summary>
-          <p>Yes! Aria is fully open source on GitHub. The Free tier gives you access to all source code and local features. Paid plans add cloud infrastructure, managed services, and premium support.</p>
-        </details>
+    <section class="links-grid">
+      <a class="link-card" href="products.html">
+        <span class="chip">Catalog</span>
+        <h3>Browse products</h3>
+        <p>Open the catalog surfaces when you want to view packaged product pages and storefront content.</p>
+        <strong>Open products</strong>
+      </a>
+      <a class="link-card" href="about.html">
+        <span class="chip">Context</span>
+        <h3>Read about the platform</h3>
+        <p>Use the about page for positioning, background, and broader product framing.</p>
+        <strong>Open about</strong>
+      </a>
+      <a class="link-card" href="../monetization/referrals.html">
+        <span class="chip">Growth</span>
+        <h3>Referral and incentive flows</h3>
+        <p>Jump directly to referral pages when the next step is growth, sharing, or campaign work.</p>
+        <strong>Open referrals</strong>
+      </a>
+      <a class="link-card" href="contact.html">
+        <span class="chip">Contact</span>
+        <h3>Talk to a human</h3>
+        <p>Use the contact page when the buyer needs answers before selecting a tier or moving to checkout.</p>
+        <strong>Open contact</strong>
+      </a>
+    </section>
+  </main>
+
+  <footer class="shell">
+    <div class="footer-card">
+      <p>The store now routes evaluation, pricing, account management, and enterprise contact as one coherent buying surface.</p>
+      <div class="footer-links">
+        <a href="../">Home</a>
+        <a href="../documentation.html">Docs</a>
+        <a href="../monetization/pricing.html">Pricing</a>
+        <a href="../monetization/account.html">Account</a>
+        <a href="https://github.com/Bryan-Roe/Aria/issues" target="_blank" rel="noreferrer">Issues</a>
       </div>
     </div>
-  </section>
-
-  <footer>
-    <a href="../">Home</a> · <a href="../documentation.html">Docs</a> · <a href="https://github.com/Bryan-Roe/Aria" target="_blank">GitHub</a> · <a href="https://github.com/Bryan-Roe/Aria/issues" target="_blank">Issues</a>
-    <p style="margin-top:8px">&copy; 2026 Aria — Interactive AI Character Platform</p>
   </footer>
+
+  <script>
+    const navToggle = document.querySelector('.nav-toggle');
+    const siteNav = document.getElementById('site-nav');
+
+    navToggle?.addEventListener('click', () => {
+      const isOpen = siteNav.classList.toggle('open');
+      navToggle.setAttribute('aria-expanded', String(isOpen));
+    });
+
+    siteNav.querySelectorAll('a').forEach((link) => {
+      link.addEventListener('click', () => {
+        siteNav.classList.remove('open');
+        navToggle?.setAttribute('aria-expanded', 'false');
+      });
+    });
+  </script>
+  <script src="../global-upgrade.js"></script>
 </body>
 </html>

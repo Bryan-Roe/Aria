@@ -79,6 +79,12 @@
 
         .pricing-card.featured {
             border: 3px solid #667eea;
+            animation: spotlight-pulse 4s ease-in-out infinite;
+        }
+
+        @keyframes spotlight-pulse {
+            0%, 100% { box-shadow: 0 8px 30px rgba(102, 126, 234, 0.20); }
+            50%       { box-shadow: 0 12px 48px rgba(102, 126, 234, 0.45); }
         }
 
         .popular-badge {
@@ -628,27 +634,31 @@
         </footer>
     </div>
 
+    <div id="aria-toast" style="position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(120%);background:#1e1e2e;color:#fff;padding:14px 24px;border-radius:10px;box-shadow:0 8px 32px rgba(0,0,0,0.35);font-size:0.95em;z-index:9999;transition:transform 0.3s cubic-bezier(.22,1,.36,1),opacity 0.3s;opacity:0;max-width:90vw;text-align:center;pointer-events:none"></div>
+
     <script>
+        function showToast(msg, duration) {
+            var t = document.getElementById('aria-toast');
+            t.textContent = msg;
+            t.style.transform = 'translateX(-50%) translateY(0)';
+            t.style.opacity = '1';
+            clearTimeout(t._timer);
+            t._timer = setTimeout(function() {
+                t.style.transform = 'translateX(-50%) translateY(120%)';
+                t.style.opacity = '0';
+            }, duration || 3500);
+        }
+
+        // Pricing plan selection
         function selectPlan(tier) {
             if (tier === 'free') {
                 window.location.href = '/';
             } else if (tier === 'pro') {
-                alert('Pro subscription coming soon! For early access, please contact sales@aria-platform.com');
+                showToast('Pro subscription coming soon! Contact sales@aria-platform.com for early access.');
             } else if (tier === 'enterprise') {
-                alert('Enterprise plan customization available! Please contact sales@aria-platform.com to discuss your needs.');
+                showToast('Enterprise customization available. Contact sales@aria-platform.com to discuss your needs.');
             }
         }
-
-        // Add some interactivity - highlight best value
-        window.addEventListener('load', function() {
-            const proCard = document.querySelector('.pricing-card.featured');
-            setInterval(function() {
-                proCard.style.transform = 'scale(1.02)';
-                setTimeout(function() {
-                    proCard.style.transform = 'scale(1)';
-                }, 500);
-            }, 3000);
-        });
     </script>
 </body>
 </html>

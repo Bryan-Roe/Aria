@@ -3,74 +3,87 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Contact Us - TechDrop</title>
+  <title>Contact Aria Store</title>
+  <meta name="description" content="Start a conversation about subscriptions, training, deployment support, or custom Aria rollout work.">
   <link rel="stylesheet" href="css/style.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="../global-upgrade.css">
 </head>
-<body>
+<body class="store-theme">
 
   <div id="header-slot"></div>
 
   <main>
-    <div class="page-header">
+    <section class="store-subpage-hero">
       <div class="container">
-        <h1>Contact Us</h1>
-        <p>Have a question or want to inquire about a product? We'd love to hear from you.</p>
-      </div>
-    </div>
-
-    <section class="contact-section">
-      <div class="container">
-        <div class="contact-grid">
-          <div class="contact-form">
-            <h2>Send a Message</h2>
-            <form id="contactForm">
-              <div class="form-group">
-                <label for="contactName">Your Name</label>
-                <input type="text" id="contactName" required placeholder="John Doe">
-              </div>
-              <div class="form-group">
-                <label for="contactEmail">Your Email</label>
-                <input type="email" id="contactEmail" required placeholder="john@example.com">
-              </div>
-              <div class="form-group">
-                <label for="contactSubject">Subject</label>
-                <input type="text" id="contactSubject" placeholder="Product inquiry, question, etc.">
-              </div>
-              <div class="form-group">
-                <label for="contactMessage">Message</label>
-                <textarea id="contactMessage" required placeholder="Tell us how we can help..."></textarea>
-              </div>
-              <button type="submit" class="btn btn-primary" style="width:100%;">
-                <i class="fa-solid fa-paper-plane"></i> Send Message
-              </button>
-            </form>
+        <div class="page-hero-card">
+          <p class="store-eyebrow">Contact</p>
+          <h1>Start the right conversation before rollout.</h1>
+          <p>Use this page for subscription questions, implementation scoping, training requests, or platform fit discussions. In this repo version, the form routes to GitHub issues by default.</p>
+          <div class="hero-chip-row">
+            <span class="store-pill">Sales questions</span>
+            <span class="store-pill">Support requests</span>
+            <span class="store-pill">Implementation planning</span>
           </div>
+        </div>
+      </div>
+    </section>
 
-          <div class="contact-info">
-            <h2>Get in Touch</h2>
-            <div class="contact-info-item">
-              <i class="fa-solid fa-envelope"></i>
-              <div>
-                <h4>Email</h4>
-                <p>contact@example.com</p>
-              </div>
+    <section class="store-section contact-section">
+      <div class="container">
+        <div class="page-shell">
+          <div class="contact-grid">
+            <div class="contact-form">
+              <h2>Open an inquiry</h2>
+              <form id="contactForm">
+                <div class="form-group">
+                  <label for="contactName">Your Name</label>
+                  <input type="text" id="contactName" required placeholder="Jane Operator">
+                </div>
+                <div class="form-group">
+                  <label for="contactEmail">Your Email</label>
+                  <input type="email" id="contactEmail" required placeholder="jane@example.com">
+                </div>
+                <div class="form-group">
+                  <label for="contactSubject">Subject</label>
+                  <input type="text" id="contactSubject" placeholder="Subscription fit, training request, deployment workshop">
+                </div>
+                <div class="form-group">
+                  <label for="contactMessage">Message</label>
+                  <textarea id="contactMessage" required placeholder="Tell us where you are in evaluation or rollout and what you need next."></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width:100%;">
+                  <i class="fa-solid fa-paper-plane"></i> Open GitHub inquiry
+                </button>
+              </form>
+              <p class="form-note">This demo routes new requests to the repository issue tracker so the contact flow is usable without a configured sales inbox.</p>
             </div>
-            <div class="contact-info-item">
-              <i class="fa-solid fa-clock"></i>
-              <div>
-                <h4>Business Hours</h4>
-                <p>Monday - Friday: 9am - 6pm<br>Saturday: 10am - 4pm</p>
+
+            <div class="contact-info">
+              <h2>Where to send people next</h2>
+              <div class="contact-info-item">
+                <i class="fa-solid fa-life-ring"></i>
+                <div>
+                  <h4>Issues and support</h4>
+                  <p>Use GitHub issues for questions, bugs, or follow-up requests on the public repo surface.</p>
+                </div>
               </div>
-            </div>
-            <div class="contact-info-item">
-              <i class="fa-solid fa-comments"></i>
-              <div>
-                <h4>Response Time</h4>
-                <p>We typically respond within 24 hours.</p>
+              <div class="contact-info-item">
+                <i class="fa-solid fa-book-open"></i>
+                <div>
+                  <h4>Technical due diligence</h4>
+                  <p>Send evaluators to the docs hub when they need architecture, commands, training notes, or deployment references.</p>
+                </div>
+              </div>
+              <div class="contact-info-item">
+                <i class="fa-solid fa-briefcase"></i>
+                <div>
+                  <h4>Commercial path</h4>
+                  <p>Use pricing, account, and store catalog pages when the next step is package fit rather than technical exploration.</p>
+                </div>
               </div>
             </div>
           </div>
@@ -85,5 +98,6 @@
   <script src="js/components.js"></script>
   <script src="js/app.js"></script>
   <script>initContactPage();</script>
+  <script src="../global-upgrade.js"></script>
 </body>
 </html>

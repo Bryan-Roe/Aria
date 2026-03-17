@@ -2270,6 +2270,7 @@
             text-decoration: underline;
         }
     </style>
+    <link rel="stylesheet" href="../global-upgrade.css">
 </head>
 <body>
 
@@ -3853,9 +3854,9 @@
             }
         }
         
-        // Toggle AI movement with keyboard shortcut (Ctrl+M)
+        // Toggle AI movement with keyboard shortcut (Ctrl/Cmd+M)
         document.addEventListener('keydown', function(e) {
-            if (e.ctrlKey && e.key === 'm') {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'm') {
                 if (aiMovementEnabled) {
                     stopAIMovement();
                     console.log('AI movement: OFF');
@@ -4647,5 +4648,6 @@
     });
     </script>
     <script src="../aria-nav.js"></script>
+    <script src="../global-upgrade.js"></script>
 </body>
 </html>

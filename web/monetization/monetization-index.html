@@ -382,7 +382,7 @@
                     <li>📖 <a href="QUICK_START_MONETIZATION.md">Quick Start Guide</a></li>
                     <li>📚 <a href="MONETIZATION_GUIDE.md">Complete Documentation</a></li>
                     <li>📊 <a href="INCOME_STREAM_SUMMARY.md">Revenue Summary</a></li>
-                    <li>🔧 <a href="#" onclick="alert('Run: python3 setup_monetization.py'); return false;">Setup Script</a></li>
+                    <li>🔧 <a href="#" onclick="showSetupHint(); return false;">Setup Script</a></li>
                 </ul>
             </div>
 
@@ -443,7 +443,21 @@
         <p>© 2026 Aria Platform | <a href="https://github.com/Bryan-Roe/Aria" style="color: white;">GitHub</a></p>
     </div>
 
+    <div id="aria-toast" style="position:fixed;bottom:24px;right:24px;background:#333;color:#fff;padding:12px 20px;border-radius:8px;font-size:14px;z-index:9999;opacity:0;transition:opacity 0.3s;pointer-events:none;max-width:340px"></div>
+
     <script>
+        function showToast(msg, type, duration) {
+            var t = document.getElementById('aria-toast');
+            t.textContent = msg;
+            t.style.background = type === 'warn' ? '#b45309' : type === 'ok' ? '#166534' : '#1e293b';
+            t.style.opacity = '1';
+            clearTimeout(t._tid);
+            t._tid = setTimeout(function() { t.style.opacity = '0'; }, duration || 3500);
+        }
+        function showSetupHint() {
+            showToast('Run: python3 setup_monetization.py', 'info', 5000);
+        }
+
         // Add some animation on load
         window.addEventListener('load', function() {
             // Fade in sections

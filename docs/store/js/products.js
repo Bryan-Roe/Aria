@@ -5,70 +5,74 @@
 const PRODUCTS = [
   {
     id: 1,
-    name: "Wireless Bluetooth Earbuds",
-    price: 49.99,
-    category: "audio",
+    name: "Aria Pro Access",
+    price: 29.00,
+    category: "subscriptions",
     image: "images/placeholder.svg",
-    description: "High-quality wireless earbuds with noise cancellation, 24-hour battery life, and premium sound. Perfect for music, calls, and workouts.",
+    description: "Monthly access package for teams that want provider-backed chat, richer character workflows, dashboards, and production-grade runtime features without a custom engagement.",
     featured: true,
     features: [
-      "Active noise cancellation",
-      "24-hour battery with charging case",
-      "IPX5 water resistant",
-      "Bluetooth 5.3"
+      "Managed provider access for Azure OpenAI and OpenAI routes",
+      "Full character actions, world generation, and dashboard surfaces",
+      "Priority access to training and evaluation workflows",
+      "Fits teams moving from local demos to cloud-backed usage"
     ]
   },
   {
     id: 2,
-    name: "Smart Watch Pro",
-    price: 129.99,
-    category: "wearables",
+    name: "Autonomous Training Sprint",
+    price: 399.00,
+    category: "training",
     image: "images/placeholder.svg",
-    description: "Feature-packed smartwatch with health tracking, GPS, and a stunning AMOLED display. Stay connected and monitor your fitness goals.",
+    description: "A focused enablement package for teams adopting LoRA fine-tuning, evaluation loops, and autonomous training cycles across the Aria stack.",
     featured: true,
     features: [
-      "1.4\" AMOLED display",
-      "Heart rate & SpO2 monitoring",
-      "Built-in GPS",
-      "7-day battery life"
+      "Training pipeline review and dataset readiness guidance",
+      "Evaluation setup for batch runs, analytics, and promotion gates",
+      "Operator walkthrough for dashboards and performance tracking",
+      "Best fit before turning on continuous or scheduled retraining"
     ]
   },
   {
     id: 3,
-    name: "USB-C Hub Adapter 7-in-1",
-    price: 34.99,
-    category: "accessories",
+    name: "Quantum Pilot Package",
+    price: 1299.00,
+    category: "quantum",
     image: "images/placeholder.svg",
-    description: "Expand your laptop connectivity with this compact 7-in-1 USB-C hub featuring HDMI, USB 3.0, SD card reader, and power delivery.",
-    featured: false,
+    description: "Hybrid quantum-classical pilot planning for teams exploring simulators, Azure Quantum workflows, and proof-of-value experiments before committing to larger workloads.",
+    featured: true,
     features: [
-      "4K HDMI output",
-      "100W power delivery passthrough",
-      "USB 3.0 ports x3",
-      "SD & microSD card reader"
+      "Circuit design and simulation workflow review",
+      "Azure Quantum integration planning and guardrail setup",
+      "Pilot architecture guidance for hybrid quantum ML experiments",
+      "Intended for research or enterprise readiness conversations"
     ]
   },
   {
     id: 4,
-    name: "Portable Bluetooth Speaker",
-    price: 59.99,
-    category: "audio",
+    name: "Enterprise Deployment Workshop",
+    price: 799.00,
+    category: "services",
     image: "images/placeholder.svg",
-    description: "Compact, waterproof Bluetooth speaker with 360-degree sound and 12-hour playtime. Take your music anywhere.",
-    featured: true,
+    description: "Hands-on deployment scoping for organizations packaging Aria for internal rollout, managed infrastructure, and operator onboarding.",
+    featured: false,
     features: [
-      "360-degree immersive sound",
-      "IPX7 waterproof",
-      "12-hour battery life",
-      "Built-in microphone"
+      "Deployment path review across docs, APIs, and automation surfaces",
+      "Recommendations for monitoring, subscriptions, and service ownership",
+      "Rollout plan for customer-facing or internal operator teams",
+      "Ideal precursor to a broader enterprise implementation"
     ]
   }
 ];
 
 // Categories used for filtering
 const CATEGORIES = [
-  { id: "smartphones", name: "Smartphones", icon: "fa-mobile-screen-button" },
-  { id: "audio", name: "Audio", icon: "fa-headphones" },
-  { id: "wearables", name: "Wearables", icon: "fa-clock" },
-  { id: "accessories", name: "Accessories", icon: "fa-plug" }
+  { id: "subscriptions", name: "Subscriptions", icon: "fa-layer-group" },
+  { id: "training", name: "Training", icon: "fa-brain" },
+  { id: "quantum", name: "Quantum Programs", icon: "fa-atom" },
+  { id: "services", name: "Deployment Services", icon: "fa-server" }
 ];
+
+function getCategoryById(id) {
+  return CATEGORIES.find(function (category) { return category.id === id; }) || null;
+}

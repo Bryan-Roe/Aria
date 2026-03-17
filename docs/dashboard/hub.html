@@ -246,6 +246,55 @@
             margin-bottom: 25px;
             text-align: center;
         }
+
+        .hub-tools {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 16px;
+            padding: 18px 20px;
+            margin: 22px 0 28px;
+            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px);
+        }
+
+        .hub-tools-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .hub-search {
+            flex: 1;
+            min-width: 220px;
+            padding: 11px 14px;
+            border-radius: 10px;
+            border: 1px solid rgba(255,255,255,0.25);
+            background: rgba(0,0,0,0.2);
+            color: #fff;
+            font-size: 0.95em;
+        }
+
+        .hub-search::placeholder {
+            color: rgba(255,255,255,0.6);
+        }
+
+        .hub-search:focus {
+            outline: 2px solid rgba(102,126,234,0.55);
+            outline-offset: 1px;
+        }
+
+        .hub-search-summary {
+            margin-top: 10px;
+            font-size: 0.85em;
+            color: rgba(255,255,255,0.7);
+        }
+
+        .hub-clear-btn:disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+            transform: none;
+        }
         
         .actions-grid {
             display: grid;
@@ -345,7 +394,8 @@
                 opacity: 1;
             }
         }
-        .dark-toggle { position:absolute;top:20px;right:20px;padding:10px 16px;border:none;border-radius:8px;background:#222;color:#fff;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,0.3); }
+        .header-controls { display:flex; justify-content:flex-end; margin: 6px 0 10px; }
+        .dark-toggle { padding:10px 16px;border:none;border-radius:8px;background:#222;color:#fff;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,0.3); }
         .status-dot-warning { background:#ffc107 !important; }
         .clickable-badge { cursor:pointer; border:none; background: rgba(255,255,255,0.1); }
         .mt-10 { margin-top:10px; }
@@ -356,6 +406,8 @@
         .app-nav a.active { background:rgba(102,126,234,0.35); color:#fff; }
         .app-nav .nav-label { color:rgba(255,255,255,0.4); font-size:0.78em; text-transform:uppercase; letter-spacing:0.5px; margin-right:4px; }
     </style>
+    <link rel="stylesheet" href="../global-upgrade.css">
+</head>
 <body>
     <a href="../" style="position:fixed;top:16px;left:16px;z-index:10001;display:inline-flex;align-items:center;gap:6px;color:rgba(255,255,255,.8);text-decoration:none;font-size:.9em;font-weight:500;padding:8px 16px;background:rgba(0,0,0,.3);border-radius:8px;backdrop-filter:blur(8px)">← Home</a>
     <div class="container">
@@ -369,10 +421,12 @@
         <header>
             <h1>🌌 QAI Command Center</h1>
             <p class="subtitle">Quantum-AI Hybrid Training & Deployment Hub</p>
+            <div class="header-controls">
+                <button id="darkModeToggleHub" onclick="toggleDarkModeHub()" class="dark-toggle" title="Toggle Dark Mode (Ctrl/Cmd+D)">🌙</button>
+            </div>
             <div class="system-status">
                 <div class="status-badge online">
                     <div class="status-dot"></div>
-            <button id="darkModeToggleHub" onclick="toggleDarkModeHub()" class="dark-toggle" title="Toggle Dark Mode (Ctrl+D)">🌙</button>
                     <span>Dashboard Server</span>
                 </div>
                 <div class="status-badge online">
@@ -411,6 +465,14 @@
                 <div class="stat-value" id="gpuUtil">--</div>
                 <div class="stat-label">GPU Usage</div>
             </div>
+        </div>
+
+        <div class="hub-tools">
+            <div class="hub-tools-row">
+                <input id="hubSearch" class="hub-search" type="search" placeholder="Search actions and systems (try: quantum, dataset, ci, monitor)" aria-label="Search dashboard actions and systems">
+                <button id="hubClearSearch" class="btn btn-secondary hub-clear-btn" type="button">Clear</button>
+            </div>
+            <p id="hubSearchSummary" class="hub-search-summary" aria-live="polite"></p>
         </div>
 
         <div class="quick-actions">
@@ -661,6 +723,77 @@
     <div class="toast" id="toast"></div>
 
     <script>
+        const HUB_SEARCH_KEY = 'qai_hub_search';
+        const hubSearchInput = document.getElementById('hubSearch');
+        const hubSearchSummary = document.getElementById('hubSearchSummary');
+        const hubClearSearchBtn = document.getElementById('hubClearSearch');
+        const hubActionCards = Array.from(document.querySelectorAll('.quick-actions .action-btn'));
+        const hubSystemCards = Array.from(document.querySelectorAll('.systems-grid .system-card'));
+
+        function clearHubSearch() {
+            if (!hubSearchInput) return;
+            hubSearchInput.value = '';
+            applyHubSearch();
+            hubSearchInput.focus();
+        }
+
+        function applyHubSearch() {
+            if (!hubSearchInput) return;
+
+            const term = hubSearchInput.value.trim().toLowerCase();
+            let visibleActions = 0;
+            let visibleSystems = 0;
+
+            hubActionCards.forEach((card) => {
+                const haystack = card.textContent.toLowerCase();
+                const match = !term || haystack.includes(term);
+                card.hidden = !match;
+                if (match) visibleActions += 1;
+            });
+
+            hubSystemCards.forEach((card) => {
+                const haystack = card.textContent.toLowerCase();
+                const match = !term || haystack.includes(term);
+                card.hidden = !match;
+                if (match) visibleSystems += 1;
+            });
+
+            if (hubSearchSummary) {
+                if (term) {
+                    hubSearchSummary.textContent = `Showing ${visibleActions} quick actions and ${visibleSystems} systems for "${term}".`;
+                } else {
+                    hubSearchSummary.textContent = `Showing ${visibleActions} quick actions and ${visibleSystems} systems.`;
+                }
+            }
+
+            if (hubClearSearchBtn) {
+                hubClearSearchBtn.disabled = !term;
+            }
+
+            try {
+                localStorage.setItem(HUB_SEARCH_KEY, term);
+            } catch (error) {
+                // Ignore storage failures.
+            }
+        }
+
+        function initHubSearch() {
+            if (!hubSearchInput) return;
+
+            try {
+                const saved = localStorage.getItem(HUB_SEARCH_KEY);
+                if (saved) {
+                    hubSearchInput.value = saved;
+                }
+            } catch (error) {
+                // Ignore storage failures.
+            }
+
+            hubSearchInput.addEventListener('input', applyHubSearch);
+            hubClearSearchBtn?.addEventListener('click', clearHubSearch);
+            applyHubSearch();
+        }
+
         // Load stats on page load
         async function loadStats() {
             try {
@@ -1038,20 +1171,48 @@
 
         // Keyboard shortcuts
         document.addEventListener('keydown', (e) => {
-            if (e.ctrlKey && e.key === 'h') {
+            const activeEl = document.activeElement;
+            const tag = activeEl?.tagName?.toLowerCase();
+            const isTyping = tag === 'input' || tag === 'textarea' || activeEl?.isContentEditable;
+            const withMod = e.ctrlKey || e.metaKey;
+
+            if (withMod && e.key.toLowerCase() === 'k') {
+                e.preventDefault();
+                hubSearchInput?.focus();
+                hubSearchInput?.select();
+                return;
+            }
+
+            if (!isTyping && e.key === '/') {
+                e.preventDefault();
+                hubSearchInput?.focus();
+                return;
+            }
+
+            if (e.key === 'Escape' && hubSearchInput?.value) {
+                e.preventDefault();
+                clearHubSearch();
+                return;
+            }
+
+            if (isTyping) return;
+
+            if (withMod && e.key.toLowerCase() === 'h') {
                 e.preventDefault();
                 viewHistory();
             }
-            if (e.ctrlKey && e.key === 'r') {
+            if (withMod && e.key.toLowerCase() === 'r') {
                 e.preventDefault();
                 loadStats();
                 showToast('Stats refreshed');
             }
-            if (e.ctrlKey && e.key.toLowerCase() === 'd') {
+            if (withMod && e.key.toLowerCase() === 'd') {
                 e.preventDefault();
                 toggleDarkModeHub();
             }
         });
+
+        initHubSearch();
 
         // Load stats on page load
         loadStats();
@@ -1078,5 +1239,6 @@
         }, 10000);
     </script>
     <script src="../aria-nav.js"></script>
+    <script src="../global-upgrade.js"></script>
 </body>
 </html>

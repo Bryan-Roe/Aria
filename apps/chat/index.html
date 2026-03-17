@@ -2243,6 +2243,7 @@
             display: none;
         }
     </style>
+    <link rel="stylesheet" href="../global-upgrade.css">
 </head>
 <body>
 
@@ -2452,7 +2453,7 @@
             </div>
             <div style="display:flex;align-items:center;gap:10px">
                 <div class="provider-info" id="providerInfo">Connecting...</div>
-                <button onclick="document.body.classList.toggle('dark-theme');localStorage.setItem('chat-dark',document.body.classList.contains('dark-theme'))" style="background:rgba(255,255,255,0.15);border:none;color:white;padding:4px 10px;border-radius:8px;cursor:pointer;font-size:14px;transition:background 0.2s" title="Toggle dark mode (Ctrl+D)">🌙</button>
+                <button onclick="document.body.classList.toggle('dark-theme');localStorage.setItem('chat-dark',document.body.classList.contains('dark-theme'))" style="background:rgba(255,255,255,0.15);border:none;color:white;padding:4px 10px;border-radius:8px;cursor:pointer;font-size:14px;transition:background 0.2s" title="Toggle dark mode (Ctrl/Cmd+D)">🌙</button>
             </div>
         </div>
 
@@ -2584,7 +2585,7 @@
     (function(){
         if(localStorage.getItem('chat-dark')==='true') document.body.classList.add('dark-theme');
         document.addEventListener('keydown',function(e){
-            if(e.ctrlKey && e.key==='d'){e.preventDefault();document.body.classList.toggle('dark-theme');localStorage.setItem('chat-dark',document.body.classList.contains('dark-theme'));}
+            if((e.ctrlKey||e.metaKey) && e.key==='d'){e.preventDefault();document.body.classList.toggle('dark-theme');localStorage.setItem('chat-dark',document.body.classList.contains('dark-theme'));}
         });
     })();
     </script>
@@ -3812,9 +3813,9 @@
             }
         }
         
-        // Toggle AI movement with keyboard shortcut (Ctrl+M)
+        // Toggle AI movement with keyboard shortcut (Ctrl/Cmd+M)
         document.addEventListener('keydown', function(e) {
-            if (e.ctrlKey && e.key === 'm') {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'm') {
                 if (aiMovementEnabled) {
                     stopAIMovement();
                     console.log('AI movement: OFF');
@@ -4605,5 +4606,6 @@
         setInterval(checkQAIBackendStatus, 30000);
     });
     </script>
+    <script src="../global-upgrade.js"></script>
 </body>
 </html>

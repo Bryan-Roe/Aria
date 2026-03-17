@@ -82,15 +82,16 @@
             font-size: 2.2em;
             margin-bottom: 6px;
             font-weight: 700;
-            background: linear-gradient(135deg, var(--accent), #a78bfa);
+            background: linear-gradient(135deg, #c06070 0%, #a870a0 40%, var(--accent) 70%, #a78bfa 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
 
         .subtitle {
-            font-size: 1em;
+            font-size: 0.95em;
             color: var(--text-secondary);
+            letter-spacing: 0.3px;
         }
 
         .object-manager {
@@ -120,7 +121,7 @@
 
         .object-btn {
             padding: 8px 14px;
-            border: 2px solid var(--input-border);
+            border: 1.5px solid var(--input-border);
             border-radius: 10px;
             background: var(--input-bg);
             color: var(--text-primary);
@@ -131,6 +132,7 @@
             align-items: center;
             justify-content: center;
             gap: 5px;
+            font-weight: 500;
         }
 
         .object-btn:hover {
@@ -139,14 +141,16 @@
         }
 
         .object-btn.active {
-            border-color: var(--accent);
-            background: var(--accent-glow);
-            color: var(--text-primary);
+            border-color: var(--accent) !important;
+            background: rgba(102, 126, 234, 0.08) !important;
+            color: var(--text-primary) !important;
+            box-shadow: 0 1px 4px rgba(102, 126, 234, 0.12);
         }
 
         .object-btn.inactive {
             opacity: 0.4;
-            background: var(--log-bg);
+            background: var(--log-bg) !important;
+            color: var(--text-secondary) !important;
         }
 
         .main-content {
@@ -163,6 +167,7 @@
             box-shadow: var(--panel-shadow);
             border: 1px solid var(--border);
             transition: background var(--transition), border var(--transition);
+            position: relative;
         }
 
         .stage {
@@ -172,11 +177,26 @@
             background: var(--bg-stage);
             border-radius: 12px;
             overflow: visible;
-            border: 2px solid var(--border);
+            border: 1.5px solid rgba(0,0,0,0.06);
             perspective: 1200px;
             perspective-origin: 50% 50%;
             transform-style: preserve-3d;
             transition: background var(--transition), border var(--transition);
+        }
+
+        /* Sky clouds */
+        .stage::before {
+            content: '';
+            position: absolute;
+            top: 8%;
+            left: 12%;
+            width: 80px;
+            height: 28px;
+            background: radial-gradient(ellipse at 40% 50%, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0.15) 60%, transparent 100%);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 0;
+            filter: blur(2px);
         }
         
         /* Table */
@@ -264,6 +284,21 @@
             z-index: 10;
             animation: breathe 4s ease-in-out infinite;
         }
+
+        /* Character ground shadow */
+        .aria-character::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 70px;
+            height: 12px;
+            background: radial-gradient(ellipse at center, rgba(0,0,0,0.18) 0%, rgba(0,0,0,0.06) 50%, transparent 80%);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: -1;
+        }
         
         /* Walking animation states */
         .aria-character.walking {
@@ -288,13 +323,18 @@
         }
 
         @keyframes breathe {
-            0%, 100% { 
-                transform: translateX(-50%) scaleY(1) translateY(0);
-            }
-            50% { 
-                transform: translateX(-50%) scaleY(0.985) translateY(1px);
-            }
+            0%, 100% { transform: translateX(-50%) scaleY(1)     translateY(0); }
+            35%       { transform: translateX(-50%) scaleY(1.008) translateY(-1.5px); }
+            65%       { transform: translateX(-50%) scaleY(0.985) translateY(1px); }
         }
+
+        /* Mood-based character glow */
+        .aria-character.mood-happy    { filter: drop-shadow(0 8px 18px rgba(0,0,0,0.25)) drop-shadow(0 0 16px rgba(95,179,245,0.48)); }
+        .aria-character.mood-sad      { filter: drop-shadow(0 8px 18px rgba(0,0,0,0.3))  drop-shadow(0 0 12px rgba(108,122,137,0.52)); }
+        .aria-character.mood-angry    { filter: drop-shadow(0 8px 18px rgba(0,0,0,0.25)) drop-shadow(0 0 18px rgba(220,70,50,0.55)); }
+        .aria-character.mood-thinking { filter: drop-shadow(0 8px 18px rgba(0,0,0,0.25)) drop-shadow(0 0 12px rgba(90,127,168,0.42)); }
+        .aria-character.mood-calm     { filter: drop-shadow(0 8px 18px rgba(0,0,0,0.25)) drop-shadow(0 0 14px rgba(76,175,80,0.38)); }
+        .aria-character.mood-excited  { filter: drop-shadow(0 8px 18px rgba(0,0,0,0.25)) drop-shadow(0 0 20px rgba(255,200,50,0.52)); }
         
         @keyframes walk-bounce {
             0%, 100% { transform: translateX(-50%) translateY(0); }
@@ -341,6 +381,18 @@
                         0 3px 8px rgba(0,0,0,0.2);
         }
 
+        .aria-hair::after {
+            content: '';
+            position: absolute;
+            width: 30px;
+            height: 20px;
+            background: radial-gradient(ellipse at 40% 35%, rgba(255,255,255,0.22) 0%, transparent 70%);
+            border-radius: 50%;
+            top: 10px;
+            left: 14px;
+            pointer-events: none;
+        }
+
         /* Hair bangs - Natural brown */
         .aria-bangs {
             position: absolute;
@@ -367,100 +419,165 @@
         .aria-bang:nth-child(2) { left: 21px; }
         .aria-bang:nth-child(3) { right: 5px; transform: rotate(12deg); }
 
-        /* Hair ponytails - Natural brown */
+        /* Hair ponytails - Natural flowing brown */
         .aria-ponytail {
             position: absolute;
-            top: 30px;
-            width: 18px;
-            height: 55px;
-            background: linear-gradient(180deg, #4a3728 0%, #6b4f3d 50%, #3d2d20 100%);
-            border-radius: 45%;
-            border: 3px solid #2c2c2c;
+            top: 28px;
+            width: 14px;
+            height: 50px;
+            background: linear-gradient(180deg, #6b4f3d 0%, #7d5e4f 30%, #594435 60%, #4a3728 100%);
+            border-radius: 40% 40% 50% 50%;
+            border: 2px solid rgba(60, 50, 45, 0.6);
             z-index: 3;
+            box-shadow: inset 1px 0 3px rgba(155, 125, 106, 0.25),
+                        1px 2px 5px rgba(0,0,0,0.15);
         }
 
         .aria-ponytail.left {
-            left: -15px;
-            transform: rotate(-20deg);
+            left: -12px;
+            transform: rotate(-18deg);
         }
 
         .aria-ponytail.right {
-            right: -15px;
-            transform: rotate(20deg);
+            right: -12px;
+            transform: rotate(18deg);
         }
 
         /* Eyes - Natural human proportions */
+        /* Eyes - Natural human proportions */
         .aria-eyes {
             position: absolute;
-            top: 30px;
+            top: 28px;
             width: 100%;
             display: flex;
             justify-content: space-around;
-            padding: 0 15px;
+            padding: 0 10px;
             z-index: 7;
         }
 
         .aria-eye {
-            width: 16px;
-            height: 18px;
-            background: radial-gradient(ellipse at 45% 40%, #ffffff 0%, #f0f5f9 30%, #7ba8cd 70%, #5b8fb9 100%);
-            border-radius: 52% 48% 50% 50%;
-            border: 2px solid rgba(60, 50, 45, 0.7);
+            width: 20px;
+            height: 24px;
+            background: radial-gradient(ellipse at 42% 38%, #ffffff 0%, #eef4fb 25%, #a8c8e8 62%, #7ba8cd 100%);
+            border-radius: 50% 50% 52% 48%;
+            border: 2px solid rgba(40, 35, 30, 0.75);
             position: relative;
-            box-shadow: inset 0 1px 3px rgba(255,255,255,0.6),
-                        0 2px 5px rgba(0,0,0,0.12);
+            box-shadow: inset 0 1px 4px rgba(255,255,255,0.7),
+                        0 2px 6px rgba(0,0,0,0.15);
+            overflow: hidden;
         }
 
+        /* Iris ring - tracks cursor via CSS custom property */
         .aria-eye::before {
             content: '';
             position: absolute;
-            width: 7px;
-            height: 7px;
-            background: radial-gradient(circle at 35% 30%, #3d2d20 0%, #2c1f16 100%);
+            width: 13px;
+            height: 14px;
+            background: radial-gradient(circle at 35% 30%, #5a92bf 0%, #3a6e99 45%, #1e456e 100%);
             border-radius: 50%;
             top: 50%;
             left: 50%;
-            transform: translate(-50%, -50%);
-            box-shadow: inset 0 1px 2px rgba(0,0,0,0.3);
+            transform: translate(calc(-50% + var(--px, 0px)), calc(-50% + var(--py, 0px)));
+            transition: transform 0.1s ease-out;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.3), 0 0 4px rgba(58,110,153,0.3);
+            z-index: 1;
         }
 
+        /* Pupil on top of iris - also tracks */
         .aria-eye::after {
             content: '';
             position: absolute;
-            width: 3px;
-            height: 3px;
-            background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.95), rgba(255,255,255,0.7));
+            width: 7px;
+            height: 8px;
+            background: radial-gradient(circle at 32% 28%, #4a3a30 0%, #1e1410 100%);
             border-radius: 50%;
-            top: 32%;
-            left: 32%;
-            filter: blur(0.3px);
+            top: 50%;
+            left: 50%;
+            transform: translate(calc(-50% + var(--px, 0px)), calc(-50% + var(--py, 0px)));
+            transition: transform 0.1s ease-out;
+            z-index: 2;
+        }
+
+        /* Eye specular highlight */
+        .aria-eye-shine {
+            position: absolute;
+            width: 5px;
+            height: 5px;
+            background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.95), rgba(255,255,255,0.6));
+            border-radius: 50%;
+            top: 22%;
+            left: 22%;
+            pointer-events: none;
+            z-index: 3;
+            filter: blur(0.4px);
+        }
+
+        /* Eyebrows - animated for expressions */
+        .aria-eyebrow {
+            position: absolute;
+            height: 3.5px;
+            width: 16px;
+            background: linear-gradient(90deg, transparent 0%, #4a3728 12%, #7d5e4f 55%, #4a3728 88%, transparent 100%);
+            border-radius: 4px;
+            top: 21px;
+            z-index: 9;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                        top 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .aria-eyebrow.left {
+            left: 9px;
+            transform-origin: right center;
+            transform: rotate(-5deg);
+        }
+
+        .aria-eyebrow.right {
+            right: 9px;
+            transform-origin: left center;
+            transform: rotate(5deg);
+        }
+
+        /* Subtle nose hint */
+        .aria-nose {
+            position: absolute;
+            top: 51px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 8px;
+            height: 5px;
+            border-left: 1.5px solid rgba(180,140,120,0.35);
+            border-right: 1.5px solid rgba(180,140,120,0.35);
+            border-bottom: 2px solid rgba(180,140,120,0.42);
+            border-radius: 0 0 6px 6px;
+            z-index: 6;
         }
 
         /* Eyelashes - Delicate and natural */
         .aria-eyelash {
             position: absolute;
             width: 1.5px;
-            height: 6px;
-            background: linear-gradient(180deg, #3c322d 0%, rgba(60, 50, 45, 0.4) 100%);
+            height: 7px;
+            background: linear-gradient(180deg, #3c322d 0%, rgba(60, 50, 45, 0.35) 100%);
             top: -5px;
             border-radius: 50%;
             box-shadow: 0 1px 2px rgba(0,0,0,0.15);
         }
 
-        .aria-eyelash:nth-child(2) { left: -2px; transform: rotate(-20deg); }
-        .aria-eyelash:nth-child(3) { left: 4px; transform: rotate(-10deg); }
-        .aria-eyelash:nth-child(4) { right: 4px; transform: rotate(10deg); }
-        .aria-eyelash:nth-child(5) { right: -2px; transform: rotate(20deg); }
+        .aria-eyelash:nth-child(2) { left: -2px; transform: rotate(-22deg); }
+        .aria-eyelash:nth-child(3) { left: 5px; transform: rotate(-10deg); }
+        .aria-eyelash:nth-child(4) { right: 5px; transform: rotate(10deg); }
+        .aria-eyelash:nth-child(5) { right: -2px; transform: rotate(22deg); }
 
         /* Blush - Natural rosy cheeks */
         .aria-blush {
             position: absolute;
-            width: 15px;
-            height: 10px;
-            background: radial-gradient(ellipse at center, rgba(243, 175, 160, 0.35) 0%, rgba(230, 150, 150, 0.2) 50%, transparent 100%);
+            width: 16px;
+            height: 11px;
+            background: radial-gradient(ellipse at center, rgba(243, 165, 150, 0.45) 0%, rgba(230, 140, 140, 0.28) 50%, transparent 100%);
             border-radius: 60% 60% 50% 50%;
             top: 48px;
-            filter: blur(1px);
+            filter: blur(1.2px);
+            transition: opacity 0.5s ease;
         }
 
         .aria-blush.left { left: 8px; }
@@ -472,22 +589,23 @@
             top: 60px;
             left: 50%;
             transform: translateX(-50%);
-            width: 16px;
-            height: 6px;
-            background: linear-gradient(180deg, rgba(230, 175, 175, 0.3) 0%, rgba(212, 165, 165, 0.5) 100%);
-            border: 2px solid rgba(200, 140, 140, 0.7);
+            width: 18px;
+            height: 7px;
+            background: linear-gradient(180deg, rgba(220, 160, 160, 0.45) 0%, rgba(200, 145, 145, 0.65) 100%);
+            border: 2px solid rgba(185, 120, 120, 0.85);
             border-top: none;
-            border-radius: 0 0 18px 18px;
+            border-radius: 0 0 20px 20px;
             z-index: 6;
-            box-shadow: inset 0 1px 2px rgba(255,200,200,0.3);
+            box-shadow: inset 0 1px 2px rgba(255,200,200,0.4);
+            transition: all 0.3s ease;
         }
 
         .aria-mouth.smile {
             border-radius: 0 0 28px 28px;
-            width: 20px;
-            height: 8px;
-            border-color: rgba(200, 140, 140, 0.8);
-            background: linear-gradient(180deg, rgba(240, 185, 185, 0.4) 0%, rgba(220, 165, 165, 0.6) 100%);
+            width: 22px;
+            height: 9px;
+            border-color: rgba(185, 120, 120, 0.9);
+            background: linear-gradient(180deg, rgba(235, 175, 175, 0.5) 0%, rgba(210, 155, 155, 0.7) 100%);
         }
 
         .aria-mouth.sad {
@@ -548,6 +666,22 @@
             display: none;
         }
 
+        /* Neck - skin-tone bridge between head and shirt collar */
+        .aria-neck {
+            position: absolute;
+            top: 63px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 22px;
+            height: 20px;
+            background: linear-gradient(180deg, #f5d4b8 0%, #e8c4a8 65%, #ddb89a 100%);
+            border-radius: 6px 6px 4px 4px;
+            z-index: 3;
+            border: 1.5px solid rgba(60, 50, 45, 0.3);
+            border-top: none;
+            box-shadow: inset -1px 0 4px rgba(200,160,130,0.25);
+        }
+
         /* Shoulders */
         .aria-shoulder {
             position: absolute;
@@ -581,13 +715,13 @@
         }
 
         .aria-upper-arm.left {
-            left: 33px;
+            left: 45px;
             transform: rotate(-20deg);
             transform-origin: top center;
         }
 
         .aria-upper-arm.right {
-            right: 33px;
+            right: 45px;
             transform: rotate(20deg);
             transform-origin: top center;
         }
@@ -624,14 +758,14 @@
 
         .aria-lower-arm.left {
             top: 108px;
-            left: 26px;
+            left: 34px;
             transform: rotate(-15deg);
             transform-origin: top center;
         }
 
         .aria-lower-arm.right {
             top: 108px;
-            right: 26px;
+            right: 34px;
             transform: rotate(15deg);
             transform-origin: top center;
         }
@@ -667,13 +801,13 @@
 
         .aria-hand.left {
             top: 137px;
-            left: 20px;
+            left: 26px;
             transform: rotate(-10deg);
         }
 
         .aria-hand.right {
             top: 137px;
-            right: 20px;
+            right: 26px;
             transform: rotate(10deg);
         }
 
@@ -716,7 +850,7 @@
             border-radius: 8px;
             position: absolute;
             top: 142px;
-            border: 2px solid #2c2c2c;
+            border: 2px solid rgba(60, 50, 45, 0.5);
             z-index: 1;
             transition: transform 0.3s ease;
         }
@@ -741,13 +875,13 @@
 
         /* Lower Legs (Shins/Calves) */
         .aria-lower-leg {
-            width: 15px;
+            width: 16px;
             height: 36px;
             background: linear-gradient(180deg, #4a6a90 0%, #3d5a80 100%);
             border-radius: 7px;
             position: absolute;
             top: 173px;
-            border: 2px solid #2c2c2c;
+            border: 2px solid rgba(60, 50, 45, 0.5);
             z-index: 1;
             transition: transform 0.3s ease;
         }
@@ -778,8 +912,9 @@
             border-radius: 8px 12px 12px 8px;
             position: absolute;
             top: 206px;
-            border: 2px solid #2c2c2c;
-            box-shadow: inset 0 1px 3px rgba(255,255,255,0.4);
+            border: 2px solid rgba(60, 50, 45, 0.5);
+            box-shadow: inset 0 1px 3px rgba(255,255,255,0.4),
+                        0 2px 4px rgba(0,0,0,0.1);
         }
 
         .aria-foot.left {
@@ -821,24 +956,36 @@
         }
 
         @keyframes jump {
-            0%, 100% { transform: translateX(-50%) translateY(0) scale(1); }
-            50% { transform: translateX(-50%) translateY(-250px) scale(1.15); }
+            0%   { transform: translateX(-50%) translateY(0)      scaleY(1)    scaleX(1); }
+            8%   { transform: translateX(-50%) translateY(0)      scaleY(0.82) scaleX(1.18); }
+            40%  { transform: translateX(-50%) translateY(-130px) scaleY(1.12) scaleX(0.92); }
+            65%  { transform: translateX(-50%) translateY(-100px) scaleY(1.06) scaleX(0.96); }
+            88%  { transform: translateX(-50%) translateY(-4px)   scaleY(0.87) scaleX(1.13); }
+            95%  { transform: translateX(-50%) translateY(0)      scaleY(1.04) scaleX(0.97); }
+            100% { transform: translateX(-50%) translateY(0)      scaleY(1)    scaleX(1); }
         }
         
         @keyframes dance {
-            0%, 100% { transform: translateX(-50%) rotate(-45deg) scale(1.1); }
-            50% { transform: translateX(-50%) rotate(45deg) scale(1.3); }
+            0%,100% { transform: translateX(-50%) rotate(0deg)   scale(1)    translateY(0); }
+            14%     { transform: translateX(-50%) rotate(-14deg) scale(1.06) translateY(-10px); }
+            28%     { transform: translateX(-50%) rotate(0deg)   scale(1.12) translateY(-20px); }
+            42%     { transform: translateX(-50%) rotate(14deg)  scale(1.06) translateY(-10px); }
+            56%     { transform: translateX(-50%) rotate(0deg)   scale(1.1)  translateY(-18px); }
+            70%     { transform: translateX(-50%) rotate(-10deg) scale(1.05) translateY(-8px); }
+            85%     { transform: translateX(-50%) rotate(5deg)   scale(1.02) translateY(-4px); }
         }
 
         @keyframes spin {
-            0% { transform: translateX(-50%) rotate(0deg); }
-            100% { transform: translateX(-50%) rotate(360deg); }
+            0%   { transform: translateX(-50%) rotate(0deg)   scale(1); }
+            50%  { transform: translateX(-50%) rotate(200deg) scale(1.08); }
+            100% { transform: translateX(-50%) rotate(360deg) scale(1); }
         }
 
         @keyframes wave {
             0%, 100% { transform: translateX(-50%) scale(1); }
-            25% { transform: translateX(-50%) scale(1.1) rotate(5deg); }
-            75% { transform: translateX(-50%) scale(1.1) rotate(-5deg); }
+            20%      { transform: translateX(-50%) scale(1.06) rotate(4deg) translateY(-4px); }
+            50%      { transform: translateX(-50%) scale(1.1)  rotate(-4deg) translateY(-8px); }
+            80%      { transform: translateX(-50%) scale(1.06) rotate(3deg) translateY(-4px); }
         }
 
         @keyframes pulse {
@@ -885,8 +1032,9 @@
         .control-panel h2 {
             color: var(--accent);
             margin-bottom: 14px;
-            font-size: 1.3em;
+            font-size: 1.2em;
             font-weight: 700;
+            letter-spacing: 0.3px;
         }
 
         .command-input {
@@ -896,7 +1044,7 @@
         input[type="text"] {
             width: 100%;
             padding: 11px 14px;
-            border: 2px solid var(--input-border);
+            border: 1.5px solid var(--input-border);
             border-radius: 10px;
             font-size: 0.95em;
             margin-bottom: 10px;
@@ -916,26 +1064,36 @@
         }
 
         button {
-            width: 100%;
-            padding: 11px;
-            background: linear-gradient(135deg, var(--accent), #a78bfa);
+            padding: 11px 20px;
+            background: linear-gradient(135deg, #c06070 0%, var(--accent) 50%, #a78bfa 100%);
             color: white;
             border: none;
             border-radius: 10px;
             font-size: 0.95em;
             font-weight: 600;
             cursor: pointer;
-            transition: transform var(--transition), box-shadow var(--transition);
+            transition: transform var(--transition), box-shadow var(--transition), filter var(--transition);
             box-shadow: 0 4px 12px var(--accent-glow);
         }
 
         button:hover {
             transform: translateY(-2px);
             box-shadow: 0 6px 20px var(--accent-glow);
+            filter: brightness(1.05);
         }
 
         button:active {
             transform: translateY(0);
+            filter: brightness(0.95);
+        }
+
+        /* Execute button — primary CTA */
+        .command-input button {
+            width: 100%;
+            padding: 10px;
+            font-size: 0.92em;
+            border-radius: 10px;
+            letter-spacing: 0.3px;
         }
 
         .quick-commands {
@@ -945,8 +1103,10 @@
         .quick-commands h3 {
             color: var(--accent);
             margin-bottom: 10px;
-            font-size: 1.1em;
+            font-size: 0.95em;
             font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .command-grid {
@@ -987,7 +1147,7 @@
         }
 
         .chat-messages {
-            height: 200px;
+            height: 180px;
             overflow-y: auto;
             padding: 12px;
             background: var(--input-bg);
@@ -998,6 +1158,17 @@
             gap: 8px;
             scrollbar-width: thin;
             scrollbar-color: var(--input-border) transparent;
+        }
+
+        /* Empty state for chat */
+        .chat-messages:empty::before {
+            content: 'No messages yet — say hello!';
+            display: block;
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 0.82em;
+            padding: 40px 0;
+            opacity: 0.6;
         }
 
         .chat-msg {
@@ -1020,18 +1191,23 @@
             box-shadow: 0 2px 8px rgba(0,0,0,0.06);
         }
 
-        .chat-msg.user .bubble { background: linear-gradient(135deg, var(--accent), #a78bfa); color: white; }
+        .chat-msg.user .bubble { background: linear-gradient(135deg, #c06070 0%, var(--accent) 50%, #a78bfa 100%); color: white; }
         .chat-msg.aria .bubble { background: var(--panel-bg); color: var(--text-primary); border: 1px solid var(--border); }
 
         .chat-input-block { display:flex; gap:8px; align-items:center; }
         .chat-input-block input { flex:1; padding:10px 12px; border-radius:10px; border:1.5px solid var(--input-border); background: var(--input-bg); color: var(--text-primary); }
+        .chat-input-block .quick-btn {
+            width: auto;
+            flex-shrink: 0;
+            padding: 10px 18px;
+        }
 
         .status-log {
-            margin-top: 16px;
+            margin-top: 14px;
             padding: 14px;
             background: var(--log-bg);
             border-radius: 10px;
-            max-height: 180px;
+            max-height: 160px;
             overflow-y: auto;
             border: 1px solid var(--border);
             scrollbar-width: thin;
@@ -1048,13 +1224,33 @@
             letter-spacing: 0.5px;
         }
 
+        /* Empty state for log */
+        #logContainer:empty::before {
+            content: 'Waiting for commands...';
+            display: block;
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 0.82em;
+            padding: 16px 0;
+            opacity: 0.5;
+            font-style: italic;
+        }
+
         .log-entry {
-            padding: 4px 0 4px 10px;
-            margin-bottom: 4px;
+            padding: 5px 8px 5px 10px;
+            margin-bottom: 3px;
             border-left: 3px solid var(--accent);
             font-size: 0.82em;
             color: var(--text-secondary);
             font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+            border-radius: 0 6px 6px 0;
+            transition: background 0.15s ease;
+        }
+        .log-entry:hover {
+            background: rgba(0,0,0,0.03);
+        }
+        [data-theme="dark"] .log-entry:hover {
+            background: rgba(255,255,255,0.04);
         }
         .log-entry.log-error {
             border-left-color: #ef4444;
@@ -1100,32 +1296,35 @@
         .nav-bar {
             background: var(--panel-bg);
             border-radius: var(--radius);
-            padding: 10px 20px;
+            padding: 8px 14px;
             margin-bottom: 16px;
             box-shadow: var(--panel-shadow);
             border: 1px solid var(--border);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            flex-wrap: wrap;
-            gap: 10px;
+            gap: 8px;
             transition: background var(--transition), border var(--transition);
+            overflow-x: auto;
+            white-space: nowrap;
         }
 
         .nav-links {
             display: flex;
-            gap: 8px;
+            gap: 4px;
             align-items: center;
+            flex-shrink: 0;
         }
 
         .nav-link {
             color: var(--accent);
             text-decoration: none;
-            padding: 7px 14px;
-            border-radius: 10px;
+            padding: 5px 10px;
+            border-radius: 8px;
             transition: all var(--transition);
             font-weight: 500;
-            font-size: 0.9em;
+            font-size: 0.82em;
+            letter-spacing: 0.2px;
         }
 
         .nav-link:hover {
@@ -1133,10 +1332,13 @@
             transform: translateY(-1px);
         }
 
+        .nav-link[href*="aria"], .nav-link[href="/"] {
+        }
+
         .nav-link.upgrade-btn {
             background: linear-gradient(135deg, var(--accent), #a78bfa);
             color: white;
-            padding: 8px 18px;
+            padding: 6px 14px;
             font-weight: 600;
             box-shadow: 0 4px 12px var(--accent-glow);
         }
@@ -1149,13 +1351,15 @@
         .subscription-badge {
             background: #4caf50;
             color: white;
-            padding: 4px 12px;
+            padding: 3px 10px;
             border-radius: 10px;
-            font-size: 0.82em;
+            font-size: 0.72em;
             font-weight: 600;
+            letter-spacing: 0.3px;
+            text-transform: capitalize;
         }
 
-        .subscription-badge.free { background: var(--text-secondary); }
+        .subscription-badge.free { background: rgba(90,101,119,0.75); }
         .subscription-badge.pro { background: linear-gradient(135deg, var(--accent), #a78bfa); }
         .subscription-badge.enterprise { background: linear-gradient(135deg, #ffd700, #ffed4e); color: #333; }
 
@@ -1163,10 +1367,10 @@
         .theme-toggle {
             background: none;
             border: 1.5px solid var(--input-border);
-            border-radius: 10px;
-            padding: 6px 12px;
+            border-radius: 8px;
+            padding: 4px 10px;
             cursor: pointer;
-            font-size: 1.1em;
+            font-size: 1em;
             width: auto;
             box-shadow: none;
             transition: all var(--transition);
@@ -1178,42 +1382,52 @@
             box-shadow: none;
         }
 
-        /* Quick action bar */
+        /* Quick action sections — subtle card groups */
         .quick-actions {
             display: flex;
             flex-wrap: wrap;
             gap: 6px;
-            margin-top: 12px;
-            padding-top: 12px;
-            border-top: 1px solid var(--border);
+            margin-top: 14px;
+            padding: 12px;
+            background: var(--log-bg);
+            border-radius: 10px;
+            border: 1px solid var(--border);
+        }
+        .quick-actions + .quick-actions {
+            margin-top: 8px;
         }
         .quick-actions h4 {
             width: 100%;
-            font-size: 0.82em;
+            font-size: 0.78em;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            letter-spacing: 0.6px;
             color: var(--text-secondary);
             font-weight: 600;
-            margin-bottom: 2px;
+            margin-bottom: 4px;
         }
         .action-btn {
-            padding: 5px 10px;
-            background: var(--input-bg);
+            padding: 7px 14px;
+            background: var(--panel-bg);
             color: var(--text-primary);
-            border: 1px solid var(--input-border);
+            border: 1.5px solid var(--input-border);
             border-radius: 8px;
-            font-size: 0.8em;
+            font-size: 0.84em;
             cursor: pointer;
             transition: all var(--transition);
             width: auto;
-            box-shadow: none;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+            font-weight: 500;
         }
         .action-btn:hover {
             background: var(--accent);
             color: white;
             border-color: var(--accent);
             transform: translateY(-1px);
-            box-shadow: 0 2px 8px var(--accent-glow);
+            box-shadow: 0 3px 10px var(--accent-glow);
+        }
+        .action-btn:active {
+            transform: translateY(0) scale(0.96);
+            box-shadow: 0 1px 4px var(--accent-glow);
         }
 
         /* Speech bubble */
@@ -1222,19 +1436,25 @@
             top: -60px;
             left: 50%;
             transform: translateX(-50%);
-            background: var(--panel-bg);
+            background: rgba(255, 255, 255, 0.88);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
             color: var(--text-primary);
             padding: 8px 14px;
-            border-radius: 12px;
+            border-radius: 14px;
             font-size: 0.82em;
             max-width: 200px;
             text-align: center;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.12);
-            border: 1px solid var(--border);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1), 0 1px 4px rgba(0,0,0,0.06);
+            border: 1px solid rgba(255,255,255,0.5);
             opacity: 0;
             pointer-events: none;
             transition: opacity 0.3s, transform 0.3s;
             z-index: 50;
+        }
+        [data-theme="dark"] .speech-bubble {
+            background: rgba(30, 34, 42, 0.88);
+            border-color: rgba(255,255,255,0.1);
         }
         .speech-bubble.visible {
             opacity: 1;
@@ -1248,7 +1468,10 @@
             transform: translateX(-50%);
             border-left: 8px solid transparent;
             border-right: 8px solid transparent;
-            border-top: 8px solid var(--panel-bg);
+            border-top: 8px solid rgba(255, 255, 255, 0.88);
+        }
+        [data-theme="dark"] .speech-bubble::after {
+            border-top-color: rgba(30, 34, 42, 0.88);
         }
 
         /* Connection status */
@@ -1301,19 +1524,37 @@
 
         /* Keyboard hints */
         .kbd-hint {
-            margin-top: 8px;
-            font-size: 0.78em;
+            margin-top: 10px;
+            font-size: 0.75em;
             color: var(--text-secondary);
             text-align: center;
+            opacity: 0.7;
+            line-height: 1.8;
         }
         .kbd-hint kbd {
             display: inline-block;
-            padding: 1px 6px;
+            padding: 2px 7px;
             border: 1px solid var(--input-border);
-            border-radius: 4px;
+            border-radius: 5px;
             background: var(--input-bg);
-            font-family: inherit;
-            font-size: 0.95em;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            font-size: 0.92em;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+            margin: 0 1px;
+            transition: background var(--transition), border-color var(--transition);
+            cursor: default;
+        }
+        .chat-panel .kbd-hint kbd {
+            cursor: pointer;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.88em;
+            letter-spacing: 0.2px;
+        }
+        .chat-panel .kbd-hint kbd:hover {
+            background: var(--card-bg);
+            border-color: var(--accent);
+            color: var(--accent);
         }
 
         /* Stage overlay info */
@@ -1321,12 +1562,19 @@
             position: absolute;
             bottom: 8px;
             right: 10px;
-            font-size: 0.72em;
-            color: rgba(0,0,0,0.35);
+            font-size: 0.7em;
+            color: rgba(0,0,0,0.3);
             z-index: 20;
-            font-family: monospace;
+            font-family: 'SF Mono', 'Cascadia Code', 'Fira Code', monospace;
+            background: rgba(255,255,255,0.35);
+            padding: 2px 8px;
+            border-radius: 8px;
+            backdrop-filter: blur(4px);
         }
-        [data-theme="dark"] .stage-info { color: rgba(255,255,255,0.25); }
+        [data-theme="dark"] .stage-info {
+            color: rgba(255,255,255,0.3);
+            background: rgba(0,0,0,0.25);
+        }
 
         /* Fullscreen stage */
         .stage-fullscreen {
@@ -1351,14 +1599,15 @@
         @media (max-width: 768px) {
             .nav-bar {
                 justify-content: center;
+                flex-wrap: wrap;
             }
             .nav-links {
-                flex-direction: column;
-                width: 100%;
+                flex-wrap: wrap;
+                justify-content: center;
             }
             .nav-link {
-                width: 100%;
-                text-align: center;
+                padding: 4px 8px;
+                font-size: 0.78em;
             }
             h1 { font-size: 1.6em; }
             .stage { height: 350px; }
@@ -1374,8 +1623,91 @@
             .stage { height: 280px; }
             .action-btn { font-size: 0.8em; padding: 6px 10px; }
             .quick-actions h4 { font-size: 0.85em; }
+            .nav-link { padding: 3px 6px; font-size: 0.72em; }
+        }
+
+        /* Footer */
+        .aria-footer {
+            text-align: center;
+            padding: 24px 16px 16px;
+            color: var(--text-secondary);
+            font-size: 0.82em;
+            opacity: 0.65;
+            border-top: 1px solid var(--border);
+            margin-top: 8px;
+        }
+        .aria-footer a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            padding: 2px 0;
+            transition: color 0.2s ease;
+        }
+        .aria-footer a:hover {
+            color: var(--accent);
+        }
+        .aria-footer div {
+            margin-top: 6px;
+            font-size: 0.88em;
+            letter-spacing: 0.3px;
+        }
+
+        /* Connection status — compact */
+        .connection-status {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.72em;
+            color: var(--text-secondary);
+            padding: 3px 8px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+        .connection-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #9e9e9e;
+        }
+        .connection-status.connected .connection-dot { background: #4caf50; }
+        .connection-status.disconnected .connection-dot { background: #b0b0b0; }
+        .connection-status.checking .connection-dot { background: #f59e0b; animation: blink 1s infinite; }
+
+        /* Stage ground detail */
+        .stage::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 22%;
+            background: linear-gradient(180deg, transparent 0%, rgba(34,120,60,0.08) 40%, rgba(34,120,60,0.14) 100%);
+            pointer-events: none;
+            border-radius: 0 0 12px 12px;
+        }
+
+        /* Second cloud (positioned via box-shadow trick on stage container) */
+        .stage-container::after {
+            content: '';
+            display: block;
+            position: absolute;
+            top: 50px;
+            right: 60px;
+            width: 60px;
+            height: 22px;
+            background: radial-gradient(ellipse at 50% 50%, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0.1) 60%, transparent 100%);
+            border-radius: 50%;
+            pointer-events: none;
+            filter: blur(1.5px);
+        }
+
+        /* Object button override — keep chips, not blocks */
+        .object-btn {
+            padding: 8px 14px !important;
+            min-height: auto !important;
+            width: auto !important;
         }
     </style>
+    <link rel="stylesheet" href="../global-upgrade.css">
 </head>
 <body>
     <div class="container">
@@ -1394,7 +1726,7 @@
                     <span id="connectionLabel">Checking...</span>
                 </div>
                 <span class="subscription-badge free" id="subscription-badge">Free Tier</span>
-                <button class="theme-toggle" onclick="toggleTheme()" title="Toggle dark mode">🌙</button>
+                <button class="theme-toggle" onclick="toggleTheme()" title="Toggle dark mode (Ctrl/Cmd+D)">🌙</button>
             </div>
         </nav>
 
@@ -1454,6 +1786,8 @@
                             <div class="aria-bang"></div>
                         </div>
                         <div class="aria-head">
+                            <div class="aria-eyebrow left" id="ariaEyebrowLeft"></div>
+                            <div class="aria-eyebrow right" id="ariaEyebrowRight"></div>
                             <div class="aria-blush left"></div>
                             <div class="aria-blush right"></div>
                             <div class="aria-eyes">
@@ -1472,8 +1806,10 @@
                                     <div class="aria-eyelash"></div>
                                 </div>
                             </div>
+                            <div class="aria-nose"></div>
                             <div class="aria-mouth" id="ariaMouth"></div>
                         </div>
+                        <div class="aria-neck"></div>
                         <div class="aria-bow"></div>
                         <div class="aria-body"></div>
                         
@@ -1546,7 +1882,7 @@
                     <button class="action-btn" onclick="quickCommand('jump')">⬆ Jump</button>
                     <button class="action-btn" onclick="quickCommand('run right')">🏃 Run</button>
                 </div>
-                <div class="quick-actions" style="border-top:none;padding-top:0">
+                <div class="quick-actions">
                     <h4>Expressions</h4>
                     <button class="action-btn" onclick="quickCommand('smile')">😊 Smile</button>
                     <button class="action-btn" onclick="quickCommand('sad')">😢 Sad</button>
@@ -1567,7 +1903,10 @@
                         </div>
 
                         <div class="kbd-hint">
-                            <kbd>/goto</kbd> <kbd>/waypoints</kbd> <kbd>/circle</kbd> <kbd>/spiral</kbd>
+                            <kbd onclick="document.getElementById('chatInput').value='/goto ';document.getElementById('chatInput').focus()">/goto</kbd>
+                            <kbd onclick="document.getElementById('chatInput').value='/waypoints';sendChat()">/waypoints</kbd>
+                            <kbd onclick="document.getElementById('chatInput').value='/circle';sendChat()">/circle</kbd>
+                            <kbd onclick="document.getElementById('chatInput').value='/spiral';sendChat()">/spiral</kbd>
                         </div>
                     </div>
                 </div>
@@ -1578,7 +1917,7 @@
                 </div>
 
                 <div class="kbd-hint">
-                    <kbd>Enter</kbd> send &middot; <kbd>↑</kbd><kbd>↓</kbd> history &middot; <kbd>/</kbd> focus &middot; <kbd>Ctrl+D</kbd> theme &middot; <kbd>F11</kbd> fullscreen
+                    <kbd>Enter</kbd> send &middot; <kbd>↑</kbd><kbd>↓</kbd> history &middot; <kbd>/</kbd> focus &middot; <kbd>←</kbd><kbd>→</kbd><kbd>↑</kbd> move &middot; <kbd>1</kbd>–<kbd>5</kbd> expressions &middot; <kbd>Ctrl/Cmd+D</kbd> theme &middot; <kbd>Ctrl/Cmd+K</kbd> clear log &middot; <kbd>F11</kbd> fullscreen
                 </div>
             </div>
         </div>
@@ -1622,7 +1961,7 @@
                     label.textContent = 'Connected';
                 } else {
                     el.className = 'connection-status disconnected';
-                    label.textContent = 'Error ' + r.status;
+                    label.textContent = 'Offline';
                 }
             } catch(e) {
                 el.className = 'connection-status disconnected';
@@ -1724,8 +2063,9 @@
                 e.preventDefault();
                 document.getElementById('commandInput').focus();
             }
-            // Ctrl+K to clear log
-            if (e.ctrlKey && e.key === 'k') {
+            const withMod = e.ctrlKey || e.metaKey;
+            // Ctrl/Cmd+K to clear log
+            if (withMod && e.key === 'k') {
                 e.preventDefault();
                 const logEl = document.getElementById('logContainer');
                 if (logEl) logEl.innerHTML = '';
@@ -1735,15 +2075,32 @@
             if (e.key === 'Escape') {
                 document.activeElement.blur();
             }
-            // Ctrl+D to toggle dark mode
-            if (e.ctrlKey && e.key === 'd') {
+            // Ctrl/Cmd+D to toggle dark mode
+            if (withMod && e.key === 'd') {
                 e.preventDefault();
                 toggleTheme();
             }
-            // F11 or Ctrl+Shift+F to toggle fullscreen stage
-            if (e.key === 'F11' || (e.ctrlKey && e.shiftKey && e.key === 'F')) {
+            // F11 or Ctrl/Cmd+Shift+F to toggle fullscreen stage
+            if (e.key === 'F11' || (withMod && e.shiftKey && e.key === 'F')) {
                 e.preventDefault();
                 toggleFullscreenStage();
+            }
+            // Arrow/number shortcuts — only when not typing in an input
+            const isTyping = document.activeElement && (
+                document.activeElement.tagName === 'INPUT' ||
+                document.activeElement.tagName === 'TEXTAREA' ||
+                document.activeElement.tagName === 'SELECT' ||
+                document.activeElement.isContentEditable
+            );
+            if (!isTyping && typeof quickCommand === 'function') {
+                if (e.key === 'ArrowLeft')  { e.preventDefault(); quickCommand('move left'); }
+                if (e.key === 'ArrowRight') { e.preventDefault(); quickCommand('move right'); }
+                if (e.key === 'ArrowUp')    { e.preventDefault(); quickCommand('jump'); }
+                if (e.key === '1') quickCommand('smile');
+                if (e.key === '2') quickCommand('sad');
+                if (e.key === '3') quickCommand('wave');
+                if (e.key === '4') quickCommand('dance');
+                if (e.key === '5') quickCommand('spin');
             }
         });
 
@@ -1784,11 +2141,12 @@
             loadSubscriptionStatus();
         }
     </script>
-    <footer style="text-align:center;padding:20px 0 8px;color:var(--text-secondary);font-size:0.82em;opacity:0.7;">
-        <a href="../dashboard/" style="color:var(--text-secondary);text-decoration:underline">Dashboard</a> ·
-        <a href="../chat/" style="color:var(--text-secondary);text-decoration:underline">Chat</a> ·
-        <a href="../store/" style="color:var(--text-secondary);text-decoration:underline">Store</a>
-        <div style="margin-top:4px">Aria Interactive AI Character Platform</div>
+    <footer class="aria-footer">
+        <a href="../dashboard/">Dashboard</a> ·
+        <a href="../chat/">Chat</a> ·
+        <a href="../store/">Store</a>
+        <div>Aria Interactive AI Character Platform</div>
     </footer>
+    <script src="../global-upgrade.js"></script>
 </body>
 </html>

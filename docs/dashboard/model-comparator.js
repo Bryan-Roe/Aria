@@ -16,7 +16,7 @@ class ModelComparator {
     addModel(modelId) {
         if (this.selectedModels.includes(modelId)) return;
         if (this.selectedModels.length >= 4) {
-            alert('Maximum 4 models can be compared at once');
+            if (typeof showToast === 'function') showToast('Maximum 4 models can be compared at once', 'warn', 4000);
             return;
         }
         
@@ -249,7 +249,7 @@ class ModelComparator {
      */
     async benchmarkSelected() {
         if (this.selectedModels.length === 0) {
-            alert('Please select models to benchmark');
+            if (typeof showToast === 'function') showToast('Please select models to benchmark', 'warn', 4000);
             return;
         }
 

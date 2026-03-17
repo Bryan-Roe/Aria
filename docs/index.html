@@ -614,6 +614,22 @@
         .legend-chip {
             background: rgba(18, 32, 51, 0.06);
             color: var(--ink-soft);
+            border: 1px solid transparent;
+            cursor: pointer;
+        }
+
+        .legend-chip:hover,
+        .legend-chip:focus-visible {
+            background: rgba(255, 255, 255, 0.78);
+            color: var(--ink);
+            border-color: rgba(18, 32, 51, 0.14);
+            outline: none;
+        }
+
+        .legend-chip.is-active {
+            background: rgba(15, 157, 137, 0.14);
+            color: var(--slate);
+            border-color: rgba(15, 157, 137, 0.34);
         }
 
         .search-summary {
@@ -960,6 +976,7 @@
             }
         }
     </style>
+    <link rel="stylesheet" href="global-upgrade.css">
 </head>
 <body>
     <header class="site-header">
@@ -1145,13 +1162,13 @@
                     <div class="search-row">
                         <input class="search-input" id="surface-search" type="search" placeholder="Search for aria, docs, localhost, pricing, analytics, auto execute, quantum..." aria-label="Search website surfaces">
                         <div class="legend">
-                            <span class="legend-chip demo">Demo</span>
-                            <span class="legend-chip docs">Docs</span>
-                            <span class="legend-chip business">Business</span>
-                            <span class="legend-chip local">Local</span>
+                            <button class="legend-chip demo" type="button" data-filter="demo" aria-pressed="false">Demo</button>
+                            <button class="legend-chip docs" type="button" data-filter="docs" aria-pressed="false">Docs</button>
+                            <button class="legend-chip business" type="button" data-filter="business" aria-pressed="false">Business</button>
+                            <button class="legend-chip local" type="button" data-filter="local" aria-pressed="false">Local</button>
                         </div>
                     </div>
-                    <p class="search-summary" id="search-summary">Showing 34 surfaces across demos, docs, business pages, and localhost services.</p>
+                    <p class="search-summary" id="search-summary" aria-live="polite">Showing 34 surfaces across demos, docs, business pages, and localhost services.</p>
                 </div>
 
                 <div class="resource-groups">
@@ -1497,7 +1514,9 @@
         const siteNav = document.getElementById('site-nav');
         const searchInput = document.getElementById('surface-search');
         const searchSummary = document.getElementById('search-summary');
+        const legendChips = Array.from(document.querySelectorAll('.legend-chip[data-filter]'));
         const resourceGroups = Array.from(document.querySelectorAll('[data-group]'));
+        let activeTypeFilter = '';
 
         navToggle?.addEventListener('click', () => {
             const isOpen = siteNav.classList.toggle('open');
@@ -1511,13 +1530,47 @@
             });
         });
 
+        document.addEventListener('click', (event) => {
+            if (!siteNav.classList.contains('open')) return;
+            const clickedToggle = navToggle && navToggle.contains(event.target);
+            if (clickedToggle || siteNav.contains(event.target)) return;
+            siteNav.classList.remove('open');
+            navToggle?.setAttribute('aria-expanded', 'false');
+        });
+
+        function getCardType(card) {
+            if (card.dataset.surfaceType) return card.dataset.surfaceType;
+            const badge = card.querySelector('.resource-type');
+            if (!badge) return '';
+            if (badge.classList.contains('demo')) return 'demo';
+            if (badge.classList.contains('docs')) return 'docs';
+            if (badge.classList.contains('business')) return 'business';
+            if (badge.classList.contains('local')) return 'local';
+            return '';
+        }
+
+        function updateLegendState() {
+            legendChips.forEach((chip) => {
+                const active = chip.dataset.filter === activeTypeFilter;
+                chip.classList.toggle('is-active', active);
+                chip.setAttribute('aria-pressed', String(active));
+            });
+        }
+
         function updateSearchSummary(term, visibleCount) {
+            const typeSuffix = activeTypeFilter ? ` in ${activeTypeFilter} surfaces` : '';
             if (!term) {
-                searchSummary.textContent = `Showing ${visibleCount} surfaces across demos, docs, business pages, and localhost services.`;
+                searchSummary.textContent = `Showing ${visibleCount} surfaces${typeSuffix} across demos, docs, business pages, and localhost services.`;
                 return;
             }
-            searchSummary.textContent = `${visibleCount} result${visibleCount === 1 ? '' : 's'} for "${term}".`;
+            searchSummary.textContent = `${visibleCount} result${visibleCount === 1 ? '' : 's'} for "${term}"${typeSuffix}.`;
         }
+
+        resourceGroups.forEach((group) => {
+            group.querySelectorAll('.resource-card').forEach((card) => {
+                card.dataset.surfaceType = getCardType(card);
+            });
+        });
 
         function applySurfaceFilter() {
             const term = searchInput.value.trim().toLowerCase();
@@ -1527,7 +1580,9 @@
                 let groupVisible = 0;
                 group.querySelectorAll('.resource-card').forEach((card) => {
                     const haystack = `${card.dataset.search || ''} ${card.textContent}`.toLowerCase();
-                    const match = !term || haystack.includes(term);
+                    const termMatch = !term || haystack.includes(term);
+                    const typeMatch = !activeTypeFilter || card.dataset.surfaceType === activeTypeFilter;
+                    const match = termMatch && typeMatch;
                     card.hidden = !match;
                     if (match) {
                         visibleCount += 1;
@@ -1541,6 +1596,47 @@
         }
 
         searchInput?.addEventListener('input', applySurfaceFilter);
+
+        legendChips.forEach((chip) => {
+            chip.addEventListener('click', () => {
+                activeTypeFilter = activeTypeFilter === chip.dataset.filter ? '' : chip.dataset.filter;
+                updateLegendState();
+                applySurfaceFilter();
+            });
+        });
+
+        document.addEventListener('keydown', (event) => {
+            if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
+                event.preventDefault();
+                searchInput?.focus();
+                searchInput?.select();
+                return;
+            }
+
+            if (event.key === 'Escape') {
+                const hadSearch = Boolean(searchInput?.value);
+                const hadFilter = Boolean(activeTypeFilter);
+
+                if (hadSearch && searchInput) {
+                    searchInput.value = '';
+                }
+
+                if (hadFilter) {
+                    activeTypeFilter = '';
+                    updateLegendState();
+                }
+
+                if (hadSearch || hadFilter) {
+                    applySurfaceFilter();
+                    return;
+                }
+
+                siteNav.classList.remove('open');
+                navToggle?.setAttribute('aria-expanded', 'false');
+            }
+        });
+
+        updateLegendState();
         applySurfaceFilter();
 
         async function pingSurface(url) {
@@ -1586,5 +1682,6 @@
             revealItems.forEach((item) => observer.observe(item));
         }
     </script>
+    <script src="global-upgrade.js"></script>
 </body>
 </html>

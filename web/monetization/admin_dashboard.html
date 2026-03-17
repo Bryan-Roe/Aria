@@ -522,7 +522,7 @@
                     <td>${new Date().toLocaleDateString()}</td>
                     <td>$${price}</td>
                     <td>
-                        <button class="button button-secondary" onclick="alert('Subscription management coming soon!')">Manage</button>
+                        <button class="button button-secondary" onclick="showToast('Subscription management coming soon!')">Manage</button>
                     </td>
                 `;
                 tbody.appendChild(row);
@@ -531,7 +531,7 @@
 
         function simulateSubscribers() {
             loadDemoData();
-            alert('✅ Simulated target revenue scenario:\n\n5 Pro subscribers @ $49/mo = $245\n10 Enterprise subscribers @ $199/mo = $1,990\n\nTotal MRR: $2,235\nTarget: $2,000 ✓');
+            showToast('Simulated: 5 Pro @ $49 + 10 Enterprise @ $199 = $2,235 MRR (✓ exceeds $2k target)', 'ok', 6000);
         }
 
         function viewPricing() {
@@ -556,6 +556,21 @@
 
         // Load data on page load
         window.addEventListener('load', loadData);
+    </script>
+    <div id="aria-toast" style="position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(120%);background:#1e1e2e;color:#fff;padding:14px 24px;border-radius:10px;box-shadow:0 8px 32px rgba(0,0,0,0.35);font-size:0.95em;z-index:9999;transition:transform 0.3s cubic-bezier(.22,1,.36,1),opacity 0.3s;opacity:0;max-width:90vw;text-align:center;pointer-events:none"></div>
+    <script>
+    function showToast(msg, type, duration) {
+        var t = document.getElementById('aria-toast');
+        t.textContent = msg;
+        t.style.background = type === 'warn' ? '#b45309' : type === 'ok' ? '#166534' : '#1e1e2e';
+        t.style.transform = 'translateX(-50%) translateY(0)';
+        t.style.opacity = '1';
+        clearTimeout(t._timer);
+        t._timer = setTimeout(function() {
+            t.style.transform = 'translateX(-50%) translateY(120%)';
+            t.style.opacity = '0';
+        }, duration || 3500);
+    }
     </script>
 </body>
 </html>

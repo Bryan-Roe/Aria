@@ -671,6 +671,44 @@
             color: #999;
             pointer-events: none;
         }
+
+        .command-bar {
+            margin: 14px 0 18px;
+            padding: 12px;
+            border-radius: 10px;
+            border: 1px solid rgba(255,255,255,0.15);
+            background: rgba(255,255,255,0.06);
+            -webkit-backdrop-filter: blur(8px);
+            backdrop-filter: blur(8px);
+        }
+
+        .command-bar .search-container {
+            margin-bottom: 8px;
+        }
+
+        .command-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            color: rgba(255,255,255,0.75);
+            font-size: 0.83em;
+        }
+
+        .command-clear-btn {
+            padding: 5px 10px;
+            font-size: 0.78em;
+        }
+
+        .command-clear-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        body.dark-mode .command-bar {
+            background: rgba(0,0,0,0.25);
+            border-color: rgba(255,255,255,0.12);
+        }
         
         /* Keyboard Shortcuts Help */
         .shortcuts-help {
@@ -912,6 +950,7 @@
         .breadcrumb a:hover { color:#fff; }
         .breadcrumb .sep { margin:0 2px; }
     </style>
+    <link rel="stylesheet" href="../global-upgrade.css">
 </head>
 <body>
     <div class="container">
@@ -947,12 +986,23 @@
 
         <!-- Tabs Navigation -->
         <div class="tabs">
-            <button class="tab active" onclick="switchTab('overview')">📊 Overview</button>
-            <button class="tab" onclick="switchTab('jobs')">🔧 Jobs</button>
-            <button class="tab" onclick="switchTab('models')">🏆 Models</button>
-            <button class="tab" onclick="switchTab('datasets')">📚 Datasets</button>
-            <button class="tab" onclick="switchTab('configs')">⚙️ Configs</button>
-            <button class="tab" onclick="switchTab('train')">🚀 New Training</button>
+            <button class="tab active" onclick="switchTab('overview', this)">📊 Overview</button>
+            <button class="tab" onclick="switchTab('jobs', this)">🔧 Jobs</button>
+            <button class="tab" onclick="switchTab('models', this)">🏆 Models</button>
+            <button class="tab" onclick="switchTab('datasets', this)">📚 Datasets</button>
+            <button class="tab" onclick="switchTab('configs', this)">⚙️ Configs</button>
+            <button class="tab" onclick="switchTab('train', this)">🚀 New Training</button>
+        </div>
+
+        <div class="command-bar">
+            <div class="search-container">
+                <input type="search" class="search-input" id="dashboardCommandSearch" placeholder="Jump to tabs quickly (overview, jobs, models, datasets, configs, train)">
+                <span class="search-icon">⌘</span>
+            </div>
+            <div class="command-meta">
+                <span id="dashboardCommandSummary" aria-live="polite">Use Ctrl/Cmd+K to focus. Press Enter to open the best tab match.</span>
+                <button type="button" id="dashboardCommandClear" class="btn btn-secondary command-clear-btn">Clear</button>
+            </div>
         </div>
 
         <!-- Overview Tab -->
@@ -1314,6 +1364,10 @@
             <span class="shortcut-key">/</span>
         </div>
         <div class="shortcut-item">
+            <span>Command Bar</span>
+            <span class="shortcut-key">Ctrl/Cmd+K</span>
+        </div>
+        <div class="shortcut-item">
             <span>Close Modal</span>
             <span class="shortcut-key">ESC</span>
         </div>
@@ -1326,6 +1380,12 @@
         let durationChart = null;
         let lastJobCount = 0;
         let expandedJobs = new Set();
+        const DASHBOARD_TAB_NAMES = ['overview', 'jobs', 'models', 'datasets', 'configs', 'train'];
+        const DASHBOARD_TAB_KEY = 'qai_dashboard_unified_active_tab';
+        const DASHBOARD_COMMAND_KEY = 'qai_dashboard_unified_command_query';
+        const dashboardCommandInput = document.getElementById('dashboardCommandSearch');
+        const dashboardCommandSummary = document.getElementById('dashboardCommandSummary');
+        const dashboardCommandClear = document.getElementById('dashboardCommandClear');
 
         async function refreshAll() {
             await Promise.all([
@@ -1748,12 +1808,153 @@
                 });
         }
 
-        function switchTab(tabName) {
+        function getTabKeywords(tabName) {
+            const mapping = {
+                overview: ['overview', 'gpu', 'system', 'stats', 'chart'],
+                jobs: ['jobs', 'running', 'completed', 'queue', 'search'],
+                models: ['models', 'leaderboard', 'rank'],
+                datasets: ['datasets', 'data', 'samples'],
+                configs: ['configs', 'configuration', 'settings'],
+                train: ['train', 'training', 'new job', 'wizard', 'preset']
+            };
+            return mapping[tabName] || [tabName];
+        }
+
+        function resolveCommandTab(query) {
+            const normalized = query.trim().toLowerCase();
+            if (!normalized) return null;
+
+            for (const tabName of DASHBOARD_TAB_NAMES) {
+                const keywords = getTabKeywords(tabName);
+                if (
+                    tabName.includes(normalized) ||
+                    normalized.includes(tabName) ||
+                    keywords.some((word) => word.includes(normalized) || normalized.includes(word))
+                ) {
+                    return tabName;
+                }
+            }
+
+            return null;
+        }
+
+        function updateCommandSummary(message) {
+            if (!dashboardCommandSummary) return;
+            dashboardCommandSummary.textContent = message;
+        }
+
+        function applyDashboardCommandSearch() {
+            if (!dashboardCommandInput) return;
+
+            const query = dashboardCommandInput.value.trim().toLowerCase();
+            const tabButtons = Array.from(document.querySelectorAll('.tabs .tab'));
+
+            let visibleCount = 0;
+            tabButtons.forEach((button, index) => {
+                const tabName = DASHBOARD_TAB_NAMES[index] || '';
+                const keywords = getTabKeywords(tabName);
+                const buttonText = button.textContent.toLowerCase();
+                const matches = !query ||
+                    buttonText.includes(query) ||
+                    tabName.includes(query) ||
+                    keywords.some((word) => word.includes(query) || query.includes(word));
+
+                button.hidden = Boolean(query) && !matches;
+                if (matches) visibleCount += 1;
+            });
+
+            const suggestedTab = resolveCommandTab(query);
+            if (!query) {
+                updateCommandSummary('Use Ctrl/Cmd+K to focus. Press Enter to open the best tab match.');
+            } else if (suggestedTab) {
+                updateCommandSummary(`Showing ${visibleCount} tab matches. Press Enter to open ${suggestedTab}.`);
+            } else {
+                updateCommandSummary(`No tab match for "${query}". Try overview, jobs, models, datasets, configs, or train.`);
+            }
+
+            if (dashboardCommandClear) {
+                dashboardCommandClear.disabled = !query;
+            }
+
+            try {
+                localStorage.setItem(DASHBOARD_COMMAND_KEY, query);
+            } catch (error) {
+                // Ignore storage failures.
+            }
+        }
+
+        function clearDashboardCommandSearch() {
+            if (!dashboardCommandInput) return;
+            dashboardCommandInput.value = '';
+            applyDashboardCommandSearch();
+            dashboardCommandInput.focus();
+        }
+
+        function initDashboardCommandBar() {
+            if (!dashboardCommandInput) return;
+
+            try {
+                const savedQuery = localStorage.getItem(DASHBOARD_COMMAND_KEY);
+                if (savedQuery) {
+                    dashboardCommandInput.value = savedQuery;
+                }
+            } catch (error) {
+                // Ignore storage failures.
+            }
+
+            dashboardCommandInput.addEventListener('input', applyDashboardCommandSearch);
+            dashboardCommandInput.addEventListener('keydown', (event) => {
+                if (event.key === 'Enter') {
+                    const targetTab = resolveCommandTab(dashboardCommandInput.value);
+                    if (targetTab) {
+                        event.preventDefault();
+                        switchTabByName(targetTab);
+                    }
+                }
+
+                if (event.key === 'Escape' && dashboardCommandInput.value) {
+                    event.preventDefault();
+                    clearDashboardCommandSearch();
+                }
+            });
+
+            dashboardCommandClear?.addEventListener('click', clearDashboardCommandSearch);
+            applyDashboardCommandSearch();
+        }
+
+        function restoreDashboardTab() {
+            try {
+                const savedTab = localStorage.getItem(DASHBOARD_TAB_KEY);
+                if (savedTab && DASHBOARD_TAB_NAMES.includes(savedTab) && savedTab !== 'overview') {
+                    switchTabByName(savedTab);
+                }
+            } catch (error) {
+                // Ignore storage failures.
+            }
+        }
+
+        function switchTab(tabName, tabButton = null) {
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-            
-            event.target.classList.add('active');
-            document.getElementById(`tab-${tabName}`).classList.add('active');
+
+            const buttons = Array.from(document.querySelectorAll('.tab'));
+            const tabIndex = DASHBOARD_TAB_NAMES.indexOf(tabName);
+            const fallbackButton = tabIndex >= 0 ? buttons[tabIndex] : null;
+            const targetButton = tabButton || fallbackButton;
+
+            if (targetButton) {
+                targetButton.classList.add('active');
+            }
+
+            document.getElementById(`tab-${tabName}`)?.classList.add('active');
+
+            try {
+                localStorage.setItem(DASHBOARD_TAB_KEY, tabName);
+            } catch (error) {
+                // Ignore storage failures.
+            }
+
+            applyDashboardCommandSearch();
             
             // Load data for specific tabs
             if (tabName === 'datasets') {
@@ -2184,7 +2385,36 @@
         
         // Keyboard Shortcuts
         document.addEventListener('keydown', (e) => {
-            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+            const target = e.target;
+            const targetTag = target?.tagName?.toLowerCase();
+            const isTyping = targetTag === 'input' || targetTag === 'textarea' || targetTag === 'select' || target?.isContentEditable;
+            const withMod = e.ctrlKey || e.metaKey;
+
+            if (withMod && e.key.toLowerCase() === 'k') {
+                e.preventDefault();
+                dashboardCommandInput?.focus();
+                dashboardCommandInput?.select();
+                return;
+            }
+
+            if (e.key === 'Escape' && dashboardCommandInput?.value) {
+                e.preventDefault();
+                clearDashboardCommandSearch();
+                return;
+            }
+
+            if (!isTyping && e.key === '/') {
+                e.preventDefault();
+                const jobsTabActive = document.getElementById('tab-jobs')?.classList.contains('active');
+                if (jobsTabActive) {
+                    document.getElementById('jobSearch')?.focus();
+                } else {
+                    dashboardCommandInput?.focus();
+                }
+                return;
+            }
+
+            if (isTyping) return;
             
             switch(e.key.toLowerCase()) {
                 case 'a':
@@ -2217,10 +2447,6 @@
                 case '6':
                     switchTabByName('train');
                     break;
-                case '/':
-                    e.preventDefault();
-                    document.getElementById('jobSearch')?.focus();
-                    break;
                 case 'escape':
                     if (document.getElementById('shortcutsModal').classList.contains('show')) {
                         toggleShortcuts();
@@ -2233,12 +2459,12 @@
         });
         
         function switchTabByName(tabName) {
-            document.querySelectorAll('.tab').forEach((t, i) => {
-                const tabs = ['overview', 'jobs', 'models', 'datasets', 'configs', 'train'];
-                if (tabs[i] === tabName) {
-                    t.click();
-                }
-            });
+            const tabIndex = DASHBOARD_TAB_NAMES.indexOf(tabName);
+            if (tabIndex < 0) return;
+
+            const buttons = Array.from(document.querySelectorAll('.tab'));
+            const targetButton = buttons[tabIndex] || null;
+            switchTab(tabName, targetButton);
         }
         
         function toggleShortcuts() {
@@ -2481,6 +2707,9 @@
         setTimeout(() => {
             showToast('Dashboard loaded! Press ? for shortcuts', 'success', 4000);
         }, 500);
+
+        initDashboardCommandBar();
+        restoreDashboardTab();
         
         refreshAll();
         
@@ -2834,15 +3063,21 @@
         
         // Add keyboard shortcuts for new features
         document.addEventListener('keydown', (e) => {
-            if (e.ctrlKey && e.key === 'm') {
+            const target = e.target;
+            const targetTag = target?.tagName?.toLowerCase();
+            const isTyping = targetTag === 'input' || targetTag === 'textarea' || targetTag === 'select' || target?.isContentEditable;
+            const withMod = e.ctrlKey || e.metaKey;
+            if (isTyping || !withMod) return;
+
+            if (e.key.toLowerCase() === 'm') {
                 e.preventDefault();
                 compareModels();
             }
-            if (e.ctrlKey && e.key === 't') {
+            if (e.key.toLowerCase() === 't') {
                 e.preventDefault();
                 showConfigTemplates();
             }
-            if (e.ctrlKey && e.key === 'y') {
+            if (e.key.toLowerCase() === 'y') {
                 e.preventDefault();
                 showTuningWizard();
             }
@@ -3018,5 +3253,6 @@
         <a href="advanced.html" style="color:inherit;text-decoration:underline">Advanced</a>
         <div style="margin-top:6px">Part of the <a href="../aria/" style="color:inherit;text-decoration:underline">Aria</a> platform</div>
     </footer>
+    <script src="../global-upgrade.js"></script>
 </body>
 </html>

@@ -323,6 +323,7 @@
             .btn-clear { flex: 1; }
         }
     </style>
+    <link rel="stylesheet" href="../global-upgrade.css">
 </head>
 <body>
     <div class="container">
@@ -333,7 +334,7 @@
                 <a href="../dashboard/">📊 Dashboard</a>
                 <a href="../store/">🛒 Store</a>
             </div>
-            <button class="theme-toggle" onclick="toggleTheme()" title="Toggle dark mode (Ctrl+D)">🌙</button>
+            <button class="theme-toggle" onclick="toggleTheme()" title="Toggle dark mode (Ctrl/Cmd+D)">🌙</button>
         </div>
         <div class="header">
             <h1>Aria Auto-Execute</h1>
@@ -410,7 +411,9 @@
             const showState = document.getElementById('show-state').checked;
             
             if (!command) {
-                alert('Please enter a command');
+                document.getElementById('command').focus();
+                document.getElementById('command').placeholder = '⚠️ Please enter a command first...';
+                setTimeout(function() { document.getElementById('command').placeholder = 'Enter a natural language command for Aria...'; }, 2000);
                 return;
             }
 
@@ -567,12 +570,13 @@
                 const btn = document.querySelector('.theme-toggle');
                 if (btn) btn.textContent = '☀️';
             }
-            // Ctrl+D for dark mode, Enter in command field to execute
+            // Ctrl/Cmd+D for dark mode, Enter in command field to execute
             document.addEventListener('keydown', function(e) {
-                if (e.ctrlKey && e.key === 'd') { e.preventDefault(); toggleTheme(); }
+                if ((e.ctrlKey || e.metaKey) && e.key === 'd') { e.preventDefault(); toggleTheme(); }
                 if (e.key === 'Enter' && e.target.id === 'command') { e.preventDefault(); executeActions(); }
             });
         })();
     </script>
+    <script src="../global-upgrade.js"></script>
 </body>
 </html>

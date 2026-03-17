@@ -1,10 +1,10 @@
 // Aria Visual Command Controller
 const aria = document.getElementById('aria');
 const ariaMouth = document.getElementById('ariaMouth');
-const ariaArmLeft = document.getElementById('ariaArmLeft');
-const ariaArmRight = document.getElementById('ariaArmRight');
-const ariaLegLeft = document.getElementById('ariaLegLeft');
-const ariaLegRight = document.getElementById('ariaLegRight');
+const ariaArmLeft = document.getElementById('ariaUpperArmLeft');
+const ariaArmRight = document.getElementById('ariaUpperArmRight');
+const ariaLegLeft = document.getElementById('ariaUpperLegLeft');
+const ariaLegRight = document.getElementById('ariaUpperLegRight');
 const stage = document.getElementById('stage');
 const commandInput = document.getElementById('commandInput');
 const logContainer = document.getElementById('logContainer');
@@ -58,6 +58,35 @@ const ariaEyes = document.querySelectorAll('.aria-eye');
 const ariaEyeLeft = ariaEyes[0];
 const ariaEyeRight = ariaEyes[1];
 
+// Eyebrow elements (added for expressive expressions)
+const ariaEyebrowLeft  = document.getElementById('ariaEyebrowLeft');
+const ariaEyebrowRight = document.getElementById('ariaEyebrowRight');
+
+// ── Eye Tracking: pupils/iris follow the cursor ──────────────────────────────
+let _eyeRaf = null;
+document.addEventListener('mousemove', (e) => {
+    if (_eyeRaf) return;
+    _eyeRaf = requestAnimationFrame(() => {
+        _eyeRaf = null;
+        if (!aria) return;
+        const r = aria.getBoundingClientRect();
+        if (!r.width) return;
+        const cx = r.left + r.width  * 0.5;
+        const cy = r.top  + r.height * 0.27;  // roughly eye-level
+        const dx = e.clientX - cx;
+        const dy = e.clientY - cy;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        const maxO = 2.5;
+        const ox = dist > 15 ? (dx / dist) * Math.min(maxO, dist * 0.026) : 0;
+        const oy = dist > 15 ? (dy / dist) * Math.min(maxO * 0.55, dist * 0.016) : 0;
+        ariaEyes.forEach(eye => {
+            eye.style.setProperty('--px', `${ox.toFixed(2)}px`);
+            eye.style.setProperty('--py', `${oy.toFixed(2)}px`);
+        });
+    });
+});
+// ─────────────────────────────────────────────────────────────────────────────
+
 // AI-Controlled Character State (single combined object)
 let characterState = {
     mood: 'neutral',
@@ -99,7 +128,9 @@ function analyzeAIResponse(text) {
     const lowerText = text.toLowerCase();
     
     // Detect mood from response
-    if (lowerText.includes('happy') || lowerText.includes('great') || lowerText.includes('wonderful') || lowerText.includes('excited')) {
+    if (lowerText.includes('excited') || lowerText.includes('amazing') || lowerText.includes('fantastic') || lowerText.includes('thrilled')) {
+        return { mood: 'excited', energy: 95 };
+    } else if (lowerText.includes('happy') || lowerText.includes('great') || lowerText.includes('wonderful')) {
         return { mood: 'happy', energy: 80 };
     } else if (lowerText.includes('sad') || lowerText.includes('sorry') || lowerText.includes('unfortunate')) {
         return { mood: 'sad', energy: 30 };
@@ -117,6 +148,7 @@ function analyzeAIResponse(text) {
 function generateCharacterFromMood(mood, energy) {
     const moodColors = {
         happy: { body: '#5fb3f5', hair: '#6b4f3d', accent: '#7ac5ff' },
+        excited: { body: '#f3a71a', hair: '#6b4f3d', accent: '#ffd06b' },
         sad: { body: '#6C7A89', hair: '#4a3728', accent: '#95A5A6' },
         angry: { body: '#E74C3C', hair: '#4a3728', accent: '#ff6b6b' },
         calm: { body: '#4a90e2', hair: '#4a3728', accent: '#5a9fe5' },
@@ -147,7 +179,15 @@ function applyCharacterStyle(style) {
     // Add glow pulse during transformation
     aria.style.filter = 'drop-shadow(0 0 30px ' + style.colors.body + ') brightness(1.5)';
     setTimeout(() => {
-        aria.style.filter = 'none';
+        // After pulse, keep mood glow
+        const moodClasses = ['mood-happy','mood-sad','mood-angry','mood-thinking','mood-calm','mood-excited'];
+        moodClasses.forEach(c => aria.classList.remove(c));
+        if (style.mood && style.mood !== 'neutral') {
+            aria.style.filter = '';   // let CSS class handle it
+            aria.classList.add('mood-' + style.mood);
+        } else {
+            aria.style.filter = '';
+        }
     }, 1000);
     
     // Apply colors with smooth transition
@@ -177,7 +217,9 @@ function autoGenerateCharacter(responseText) {
     
     // Trigger automatic animation based on mood
     setTimeout(() => {
-        if (analysis.mood === 'happy') {
+        if (analysis.mood === 'excited') {
+            animate('dancing');
+        } else if (analysis.mood === 'happy') {
             animate('jumping');
         } else if (analysis.mood === 'sad') {
             move('left', 'normal');
@@ -841,17 +883,37 @@ function executeTags(tags) {
     });
 }
 
+// ── Eyebrow expression helper ────────────────────────────────────────────────
+function setEyebrows(state) {
+    if (!ariaEyebrowLeft || !ariaEyebrowRight) return;
+    const DEFAULTS = { l: 'rotate(-5deg)', r: 'rotate(5deg)' };
+    const brows = {
+        happy:     { l: 'rotate(-8deg) translateY(-3px)', r: 'rotate(8deg) translateY(-3px)' },
+        smile:     { l: 'rotate(-8deg) translateY(-3px)', r: 'rotate(8deg) translateY(-3px)' },
+        sad:       { l: 'rotate(5deg) translateY(1px)',   r: 'rotate(-5deg) translateY(1px)' },
+        angry:     { l: 'rotate(-14deg) translateY(4px)', r: 'rotate(14deg) translateY(4px)' },
+        surprised: { l: 'rotate(-3deg) translateY(-6px)', r: 'rotate(3deg) translateY(-6px)' },
+        confused:  { l: 'rotate(8deg) translateY(-1px)',  r: 'rotate(-3deg) translateY(-2px)' },
+        thinking:  { l: 'rotate(-4deg) translateY(-3px)', r: 'rotate(7deg) translateY(1px)' },
+        wink:      { l: DEFAULTS.l,                       r: 'rotate(10deg) translateY(-2px)' },
+    };
+    const s = brows[state] || DEFAULTS;
+    ariaEyebrowLeft.style.transform  = s.l;
+    ariaEyebrowRight.style.transform = s.r;
+}
+// ─────────────────────────────────────────────────────────────────────────────
+
 function changeExpression(emotion) {
     ariaMouth.className = 'aria-mouth';
-    
+
     // Reset any previous expression modifications
     ariaMouth.style.borderRadius = '';
-    ariaMouth.style.width = '';
-    ariaMouth.style.height = '';
-    ariaMouth.style.borderTop = '';
-    ariaMouth.style.transform = '';
-    
-    switch(emotion) {
+    ariaMouth.style.width        = '';
+    ariaMouth.style.height       = '';
+    ariaMouth.style.borderTop    = '';
+    ariaMouth.style.transform    = '';
+
+    switch (emotion) {
         case 'smile':
         case 'happy':
             ariaMouth.classList.add('smile');
@@ -861,52 +923,44 @@ function changeExpression(emotion) {
             break;
         case 'surprised':
             ariaMouth.style.borderRadius = '50%';
-            ariaMouth.style.width = '15px';
-            ariaMouth.style.height = '15px';
-            ariaMouth.style.borderTop = '2px solid #333';
+            ariaMouth.style.width        = '15px';
+            ariaMouth.style.height       = '15px';
+            ariaMouth.style.borderTop    = '2px solid #333';
             break;
         case 'confused':
-            // Wavy/uncertain mouth
-            ariaMouth.style.width = '18px';
-            ariaMouth.style.height = '6px';
+            ariaMouth.style.width        = '18px';
+            ariaMouth.style.height       = '6px';
             ariaMouth.style.borderRadius = '0 0 50% 50%';
-            ariaMouth.style.transform = 'translateX(-50%) rotate(5deg)';
+            ariaMouth.style.transform    = 'translateX(-50%) rotate(5deg)';
             break;
         case 'thinking':
-            // Side mouth (pondering)
-            ariaMouth.style.width = '12px';
-            ariaMouth.style.height = '8px';
+            ariaMouth.style.width        = '12px';
+            ariaMouth.style.height       = '8px';
             ariaMouth.style.borderRadius = '0 0 50% 50%';
-            ariaMouth.style.transform = 'translateX(-30%)';
-            // Also raise one eyebrow (using eye height)
-            if (ariaEyeLeft) {
-                ariaEyeLeft.style.transform = 'translateY(-2px)';
-                setTimeout(() => {
-                    ariaEyeLeft.style.transform = '';
-                }, 2000);
-            }
+            ariaMouth.style.transform    = 'translateX(-30%)';
             break;
         case 'wink':
-            document.querySelectorAll('.aria-eye')[1].style.height = '4px';
-            setTimeout(() => {
-                document.querySelectorAll('.aria-eye')[1].style.height = '12px';
-            }, 500);
+            ariaEyeRight.style.transition = 'height 0.07s';
+            ariaEyeRight.style.height     = '3px';
+            setTimeout(() => { ariaEyeRight.style.height = ''; }, 500);
             break;
         default:
             ariaMouth.classList.add('smile');
     }
-    
-    aria.style.transform = 'translateX(-50%) scale(1.1)';
-    setTimeout(() => {
-        aria.style.transform = 'translateX(-50%) scale(1)';
-    }, 300);
 
-    // Emit mood-appropriate emoji particle
-    const moodEmoji = { smile: '😊', happy: '😄', sad: '😢', surprised: '😲', confused: '🤔', thinking: '💭', wink: '😉' };
+    // Animate eyebrows to match expression
+    setEyebrows(emotion);
+
+    // Brief scale pulse
+    aria.style.transform = 'translateX(-50%) scale(1.1)';
+    setTimeout(() => { aria.style.transform = 'translateX(-50%) scale(1)'; }, 300);
+
+    // Float an emoji above Aria to reinforce the expression
+    const moodEmoji = { smile: '😊', happy: '😄', sad: '😢', surprised: '😲', confused: '🤔', thinking: '💭', wink: '😉', angry: '😠' };
     const emoji = moodEmoji[emotion];
     if (emoji && stage && aria) {
         const rect = aria.getBoundingClientRect();
-        const sr = stage.getBoundingClientRect();
+        const sr   = stage.getBoundingClientRect();
         const cx = ((rect.left + rect.width / 2 - sr.left) / sr.width) * 100;
         const cy = ((rect.top - sr.top) / sr.height) * 100;
         const el = document.createElement('div');
@@ -922,40 +976,62 @@ function changeExpression(emotion) {
 let idleAnimationInterval = null;
 let isPerformingAction = false;
 
-// Start idle breathing animation
+// Start idle animation — breathing, blinking, random glances
 function startIdleAnimation() {
     if (idleAnimationInterval) return;
-    
+
     idleAnimationInterval = setInterval(() => {
-        if (!isPerformingAction) {
-            // Subtle breathing effect
-            ariaBody.style.transition = 'transform 2s ease-in-out';
-            ariaBody.style.transform = 'scaleY(1.03)';
-            
-            // Occasional blink
-            if (Math.random() > 0.7) {
-                ariaEyeLeft.style.height = '2px';
-                ariaEyeRight.style.height = '2px';
-                setTimeout(() => {
-                    ariaEyeLeft.style.height = '12px';
-                    ariaEyeRight.style.height = '12px';
-                }, 150);
-            }
-            
-            // Slight head bob
-            if (Math.random() > 0.8) {
-                ariaHead.style.transition = 'transform 0.8s ease-in-out';
-                ariaHead.style.transform = 'translateY(-3px)';
-                setTimeout(() => {
-                    ariaHead.style.transform = 'translateY(0)';
-                }, 800);
-            }
-            
-            setTimeout(() => {
-                ariaBody.style.transform = 'scaleY(1)';
-            }, 2000);
+        if (isPerformingAction) return;
+
+        const rand = Math.random();
+
+        // Breathing (always)
+        if (ariaBody) {
+            ariaBody.style.transition = 'transform 2.5s ease-in-out';
+            ariaBody.style.transform  = 'scaleY(1.03) scaleX(0.99)';
+            setTimeout(() => { ariaBody.style.transform = 'scaleY(1) scaleX(1)'; }, 2500);
         }
-    }, 4000);
+
+        // Blink ~40% of ticks
+        if (rand < 0.4 && ariaEyeLeft && ariaEyeRight) {
+            const origH = ariaEyeLeft.style.height || '';
+            ariaEyeLeft.style.transition  = 'height 0.07s';
+            ariaEyeRight.style.transition = 'height 0.07s';
+            ariaEyeLeft.style.height  = '2px';
+            ariaEyeRight.style.height = '2px';
+            setTimeout(() => {
+                ariaEyeLeft.style.height  = origH;
+                ariaEyeRight.style.height = origH;
+            }, 140);
+        }
+
+        // Head tilt / bob ~25% of ticks
+        if (rand > 0.55 && rand < 0.8 && ariaHead) {
+            const tilt   = (Math.random() - 0.5) * 6;  // -3° to +3°
+            const bob    = -1.5 - Math.random() * 1.5;
+            ariaHead.style.transition = 'transform 1.6s ease-in-out';
+            ariaHead.style.transform  = `translateX(-50%) translateY(${bob}px) rotate(${tilt}deg)`;
+            setTimeout(() => {
+                ariaHead.style.transform = 'translateX(-50%)';
+            }, 1600);
+        }
+
+        // Random glance (look aside then return) ~20% of ticks
+        if (rand > 0.8 && !_eyeRaf) {
+            const gx = (Math.random() > 0.5 ? 1 : -1) * (1.5 + Math.random() * 1.5);
+            const gy = (Math.random() - 0.4) * 1.2;
+            ariaEyes.forEach(eye => {
+                eye.style.setProperty('--px', `${gx.toFixed(2)}px`);
+                eye.style.setProperty('--py', `${gy.toFixed(2)}px`);
+            });
+            setTimeout(() => {
+                ariaEyes.forEach(eye => {
+                    eye.style.setProperty('--px', '0px');
+                    eye.style.setProperty('--py', '0px');
+                });
+            }, 700 + Math.random() * 1200);
+        }
+    }, 3500);
 }
 
 // Stop idle animation

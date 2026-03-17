@@ -653,12 +653,27 @@
 
         function cancelSubscription() {
             if (confirm('Are you sure you want to cancel your subscription? You will retain access until the end of your billing period.')) {
-                alert('Subscription cancellation coming soon! For now, please contact support@aria-platform.com');
+                showToast('Subscription cancellation coming soon. Contact support@aria-platform.com for assistance.', 'info', 5000);
             }
         }
 
         // Load data on page load
         window.addEventListener('load', loadSubscriptionData);
+    </script>
+    <div id="aria-toast" style="position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(120%);background:#1e1e2e;color:#fff;padding:14px 24px;border-radius:10px;box-shadow:0 8px 32px rgba(0,0,0,0.35);font-size:0.95em;z-index:9999;transition:transform 0.3s cubic-bezier(.22,1,.36,1),opacity 0.3s;opacity:0;max-width:90vw;text-align:center;pointer-events:none"></div>
+    <script>
+    function showToast(msg, type, duration) {
+        var t = document.getElementById('aria-toast');
+        t.textContent = msg;
+        t.style.background = type === 'warn' ? '#b45309' : '#1e1e2e';
+        t.style.transform = 'translateX(-50%) translateY(0)';
+        t.style.opacity = '1';
+        clearTimeout(t._timer);
+        t._timer = setTimeout(function() {
+            t.style.transform = 'translateX(-50%) translateY(120%)';
+            t.style.opacity = '0';
+        }, duration || 3500);
+    }
     </script>
 </body>
 </html>

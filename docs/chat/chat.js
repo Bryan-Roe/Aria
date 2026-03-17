@@ -110,7 +110,7 @@ document.addEventListener('DOMContentLoaded', () => {
             e.preventDefault();
             sendMessage();
         }
-        if (e.key === 'k' && e.ctrlKey) {
+        if (e.key === 'k' && (e.ctrlKey || e.metaKey)) {
             e.preventDefault();
             newChat();
         }
@@ -567,7 +567,7 @@ function clearChat(preserveMessages = false) {
 
 function exportChat() {
     if (messages.length === 0) {
-        alert('No messages to export');
+        if (typeof showToast === 'function') showToast('No messages to export', 3000);
         return;
     }
 
@@ -621,7 +621,7 @@ function importChat() {
                     throw new Error('Invalid chat export format');
                 }
             } catch (error) {
-                alert(`Failed to import: ${error.message}`);
+                if (typeof showToast === 'function') showToast(`Import failed: ${error.message}`, 4000);
             }
         };
         reader.readAsText(file);
