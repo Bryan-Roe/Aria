@@ -64,6 +64,27 @@ CORS(app)
 training_sessions = {}
 training_lock = threading.Lock()
 
+# Resource limits to prevent DoS
+MAX_ACTIVE_SESSIONS = 10      # Max concurrent running sessions
+MAX_TOTAL_SESSIONS = 100      # Max sessions kept in memory at once
+SESSION_TTL_SECONDS = 3600    # Prune completed/errored sessions after 1 hour
+
+
+def _prune_old_sessions() -> None:
+    """Remove completed/errored sessions older than SESSION_TTL_SECONDS.
+
+    Must be called while holding training_lock.
+    """
+    cutoff = time.time() - SESSION_TTL_SECONDS
+    stale = [
+        sid for sid, s in training_sessions.items()
+        if s.status in ("completed", "error", "stopped")
+        and s.end_time is not None
+        and s.end_time < cutoff
+    ]
+    for sid in stale:
+        del training_sessions[sid]
+
 
 class TrainingSession:
     """Manages a single training session with real-time metrics"""
@@ -134,9 +155,10 @@ def load_dataset(name: str):
     """Load dataset from CSV files"""
     # Use shared loader if available
     if load_dataset_shared is not None:
-        X, y, feature_names = load_dataset_shared(name, return_feature_names=True)
+        X, y, feature_names = load_dataset_shared(
+            name, return_feature_names=True)
         return X, y, feature_names
-    
+
     # Fallback to inline implementation for testing/compatibility
     base = Path(__file__).parent.parent / "datasets" / "quantum"
     presets = {
@@ -234,7 +256,7 @@ def compute_loss(circuit, X, y, weights):
 
 def compute_gradient(circuit, X, y, weights, use_parameter_shift=True):
     """Compute gradient using PennyLane's built-in automatic differentiation
-    
+
     This is dramatically faster than manual parameter-shift implementation as it:
     - Uses vectorized operations internally
     - Leverages hardware acceleration when available
@@ -243,7 +265,7 @@ def compute_gradient(circuit, X, y, weights, use_parameter_shift=True):
     # Create a loss function for a single sample that PennyLane can differentiate
     def loss_fn(w):
         return compute_loss(circuit, X, y, w)
-    
+
     # Use PennyLane's built-in gradient computation
     # This leverages the autograd interface we specified in @qml.qnode
     try:
@@ -254,7 +276,7 @@ def compute_gradient(circuit, X, y, weights, use_parameter_shift=True):
         # Fallback to manual parameter-shift if autograd fails
         # This path is much slower but ensures compatibility
         grad = np.zeros_like(weights)
-        
+
         if use_parameter_shift:
             # Parameter-shift rule: more accurate for quantum circuits
             shift = np.pi / 2
@@ -551,7 +573,8 @@ def train_model(session: TrainingSession):
 
             # Keep only recent history for memory efficiency
             if len(session.metrics_history['epochs']) > 1000:
-                session.metrics_history = {key: values[-1000:] for key, values in session.metrics_history.items()}
+                session.metrics_history = {
+                    key: values[-1000:] for key, values in session.metrics_history.items()}
 
             logger.info(f"Epoch {epoch}: Loss={train_loss:.4f}, Val Acc={val_acc:.4f}, Val Loss={val_loss:.4f}, Speed={session.epochs_per_second:.2f} ep/s, LR={session.learning_rate:.6f}, Grad Norm={session.gradient_norm:.6f}")
 
@@ -640,6 +663,9 @@ def start_training():
     """Start a new training session"""
     config = request.json
 
+    if not isinstance(config, dict):
+        return jsonify({"error": "Invalid request body: expected JSON object"}), 400
+
     # Validate config
     required = ['dataset', 'n_qubits', 'n_layers']
     for key in required:
@@ -654,11 +680,24 @@ def start_training():
     if config.get('learning_rate', 0.01) <= 0 or config.get('learning_rate', 0.01) > 1:
         return jsonify({"error": "learning_rate must be between 0 and 1"}), 400
 
-    # Create session
-    session_id = f"session_{int(time.time()*1000)}"
-    session = TrainingSession(session_id, config)
-
     with training_lock:
+        # Prune stale sessions before checking limits.
+        _prune_old_sessions()
+
+        # Reject if too many sessions are already active.
+        active = sum(
+            1 for s in training_sessions.values()
+            if s.status not in ("completed", "error", "stopped")
+        )
+        if active >= MAX_ACTIVE_SESSIONS:
+            return jsonify({"error": "Too many active training sessions. Try again later."}), 429
+
+        if len(training_sessions) >= MAX_TOTAL_SESSIONS:
+            return jsonify({"error": "Session limit reached. Too many sessions in memory."}), 429
+
+        # Create session
+        session_id = f"session_{int(time.time()*1000)}"
+        session = TrainingSession(session_id, config)
         training_sessions[session_id] = session
 
     # Start training thread
@@ -934,7 +973,11 @@ def get_checkpoint(session_id):
 @app.route('/api/load_checkpoint', methods=['POST'])
 def load_checkpoint():
     """Load a checkpoint and resume training"""
-    checkpoint_path = request.json.get('checkpoint_path')
+    payload = request.json
+    if not isinstance(payload, dict):
+        return jsonify({"error": "Invalid request body: expected JSON object"}), 400
+
+    checkpoint_path = payload.get('checkpoint_path')
 
     if not checkpoint_path:
         return jsonify({"error": "No checkpoint path provided"}), 400
