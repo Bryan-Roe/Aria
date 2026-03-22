@@ -1,5 +1,6 @@
 """Tests for ConfigValidator validation logic."""
 
+from config_validator import ConfigValidator, ValidationResult, ValidationError
 import json
 import sys
 import tempfile
@@ -13,7 +14,6 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO_ROOT / "shared"))
 
 # Import after adding to path
-from config_validator import ConfigValidator, ValidationResult, ValidationError
 
 
 class TestConfigValidator:
