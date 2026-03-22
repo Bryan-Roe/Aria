@@ -1,34 +1,23 @@
 {
   "servers": {
-    "quantum-mcp-server": {
+    "quantum-ai": {
       "type": "stdio",
       "command": "${workspaceFolder}/ai-projects/quantum-ml/venv/bin/python",
       "args": [
         "${workspaceFolder}/ai-projects/quantum-ml/quantum_mcp_server.py"
-      ]
-    },
-    "phi-model-server": {
-      "type": "stdio",
-      "command": "${workspaceFolder}/AI/microsoft_phi-silica-3.6_v1/venv/bin/python",
-      "args": [
-        "${workspaceFolder}/AI/microsoft_phi-silica-3.6_v1/scripts/model_server.py"
-      ]
-    },
-    "phi-mcp-client": {
-      "type": "stdio",
-      "command": "${workspaceFolder}/AI/microsoft_phi-silica-3.6_v1/venv/bin/python",
-      "args": [
-        "${workspaceFolder}/AI/microsoft_phi-silica-3.6_v1/mcp.py"
-      ]
-    },
-    "mcp": {
-      "command": "python3",
-      "args": [
-        "ai-projects/quantum-ml/quantum_mcp_server.py"
       ],
       "env": {
-        "MCP_ENV": "development",
-        "PYTHONUNBUFFERED": "1"
+        "PYTHONPATH": "${workspaceFolder}/ai-projects/quantum-ml"
+      }
+    },
+    "llm-maker": {
+      "type": "stdio",
+      "command": "python3",
+      "args": [
+        "${workspaceFolder}/ai-projects/llm-maker/llm_maker_mcp_server.py"
+      ],
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/ai-projects/llm-maker:${workspaceFolder}/shared"
       }
     }
   }
