@@ -1,5 +1,5 @@
 ---
-description: "Use during refactor review: generate role-based API/perf/testing/security checklists with evidence-driven checks."
+description: "Use when you are conducting refactor review and need role-based API/perf/testing/security checklists with evidence-driven checks."
 name: "Refactor Reviewer Checklist"
 argument-hint: "Refactor scope + key invariants + reviewer roles"
 agent: agent

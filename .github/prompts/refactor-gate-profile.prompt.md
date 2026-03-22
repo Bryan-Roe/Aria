@@ -1,5 +1,5 @@
 ---
-description: "Use early in a refactor to decide required quality gates based on risk and contract surface (internal-only vs contract-affecting)."
+description: "Use when you are early in a refactor and need to decide required quality gates based on risk and contract surface (internal-only vs contract-affecting)."
 name: "Refactor Gate Profile"
 argument-hint: "Scope + risk signals + contract touchpoints"
 agent: agent

@@ -1,5 +1,5 @@
 ---
-description: "Use before merge on refactor PRs: produce an explicit go/no-go decision with evidence-backed blockers and required next action."
+description: "Use when you are preparing to merge a refactor PR and need an explicit go/no-go decision with evidence-backed blockers and required next action."
 name: "Refactor Merge Gate"
 argument-hint: "Scope + required invariants + validation evidence + open risks"
 agent: agent

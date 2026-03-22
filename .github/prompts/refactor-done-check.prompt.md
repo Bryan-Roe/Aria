@@ -1,5 +1,5 @@
 ---
-description: "Use at the end of a refactor workflow: run a strict final done-check and report whether all required artifacts and gates are complete."
+description: "Use when you are at the end of a refactor workflow: run a strict final done-check and report whether all required artifacts and gates are complete."
 name: "Refactor Done Check"
 argument-hint: "Scope + required gates + available artifacts"
 agent: agent

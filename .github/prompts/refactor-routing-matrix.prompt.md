@@ -1,5 +1,5 @@
 ---
-description: "Use to produce a stage-to-command routing matrix for refactor prompts, including primary transitions and optional governance paths."
+description: "Use when you need a stage-to-command routing matrix for refactor prompts, including primary transitions and optional governance paths."
 name: "Refactor Routing Matrix"
 argument-hint: "Scope + strictness + include optional governance edges"
 agent: agent

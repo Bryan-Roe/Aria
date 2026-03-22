@@ -1,5 +1,5 @@
 ---
-description: "Use to generate a full ordered refactor command runbook from risk profile, constraints, and required gates."
+description: "Use when you need a full ordered refactor command runbook from risk profile, constraints, and required gates."
 name: "Refactor Sequence Builder"
 argument-hint: "Scope + profile + required gates + constraints"
 agent: agent
@@ -24,6 +24,7 @@ Generate an end-to-end ordered slash-command sequence for the refactor workflow.
 - **Optional branches** (if any)
 - **Stop conditions** (when to pause and reassess)
 - **Final completion check command**
+- **Optional next command**: one slash command
 
 ### Allowed next commands
 - `/refactor-gate-profile`

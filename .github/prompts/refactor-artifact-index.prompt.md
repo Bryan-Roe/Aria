@@ -1,5 +1,5 @@
 ---
-description: "Use to build a canonical artifact index for refactor workflow outputs (what exists, where it lives, and which step produced it)."
+description: "Use when you need a canonical artifact index for refactor workflow outputs (what exists, where it lives, and which step produced it)."
 name: "Refactor Artifact Index"
 argument-hint: "Scope + completed steps + known artifacts"
 agent: agent

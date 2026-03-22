@@ -1,5 +1,5 @@
 ---
-description: "Use to define or refresh the canonical refactor workflow registry (stage vocabulary, command inventory, and gate taxonomy)."
+description: "Use when you need to define or refresh the canonical refactor workflow registry (stage vocabulary, command inventory, and gate taxonomy)."
 name: "Refactor Workflow Registry"
 argument-hint: "Current workflow scope + strictness + include deprecated aliases"
 agent: agent

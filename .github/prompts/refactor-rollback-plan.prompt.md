@@ -1,5 +1,5 @@
 ---
-description: "Use to generate a concrete rollback/backout plan for a refactor, including triggers, actions, and verification after rollback."
+description: "Use when you need a concrete rollback/backout plan for a refactor, including triggers, actions, and verification after rollback."
 name: "Refactor Rollback Plan"
 argument-hint: "Scope + deployment context + risk triggers + rollback constraints"
 agent: agent

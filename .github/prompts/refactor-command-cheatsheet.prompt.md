@@ -19,6 +19,7 @@ Given the user's current refactor state, output **exactly one best next slash co
 
 ### Output format
 - **Single line only**: `/prompt-name concise arguments...`
+- **Optional next command**: one slash command
 
 ### Allowed next commands
 - `/refactor-precheck`

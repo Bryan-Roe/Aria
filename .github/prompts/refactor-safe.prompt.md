@@ -57,6 +57,7 @@ Optional workflow:
 - **Optional next command**: one slash command
 
 ### Optional next commands
+- `/refactor-precheck`
 - `/refactor-verify`
 - `/refactor-pr-summary`
 - `/refactor-reviewer-checklist`
