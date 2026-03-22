@@ -5,7 +5,7 @@ import pytest
 # Check if SQLAlchemy is available for these tests
 
 try:
-    # import sqlalchemy (unused)
+    import sqlalchemy as _sqlalchemy  # noqa: F401
     _sqlalchemy_available = True
 except ImportError:
     _sqlalchemy_available = False

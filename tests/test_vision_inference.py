@@ -3,6 +3,8 @@
 Tests cover:
 """  # noqa: F401
 
+from __future__ import annotations
+
 from typing import Any
 import importlib.util
 import base64

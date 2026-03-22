@@ -7,7 +7,9 @@ from pathlib import Path
 from typing import Any, Generator
 
 import pytest
-from flask.testing import FlaskClient
+
+pytest.importorskip("flask", reason="flask is not installed")
+from flask.testing import FlaskClient  # noqa: E402
 
 # Import the module under test
 REPO_ROOT = Path(__file__).resolve().parents[1]
