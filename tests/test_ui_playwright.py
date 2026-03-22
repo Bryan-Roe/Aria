@@ -8,6 +8,8 @@ import shutil
 
 from pathlib import Path
 
+pytest.importorskip("playwright", reason="playwright is not installed")
+
 REPO_ROOT = Path(__file__).resolve().parents[1]
 ARIA_WEB = REPO_ROOT / 'aria_web'
 SERVER_URL = 'http://127.0.0.1:8080'
@@ -87,7 +89,9 @@ def test_client_add_pickup_and_drag_updates_server():
             assert 'Aria' in page.content()
 
             # Add object via client API
-            page.evaluate("(name, emoji) => addObject(name, emoji)", unique_name, '🧸')
+            # Playwright Python's page.evaluate() accepts only a single extra `arg`;
+            # pass multiple values as a list and destructure in the JS expression.
+            page.evaluate("([name, emoji]) => addObject(name, emoji)", [unique_name, '🧸'])
 
             # wait for server to report it
             obj = wait_for_object(unique_name, timeout=5.0)
