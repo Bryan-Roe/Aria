@@ -554,7 +554,8 @@ If no changes are needed for this file, return the original content unchanged.""
         """Run test suite to validate changes."""
         _LOGGER.info("Running tests...")
 
-        test_script = REPO_ROOT / "scripts" / "test_runner.py"
+        repo_root = self.repo.repo_root
+        test_script = repo_root / "scripts" / "test_runner.py"
         if not test_script.exists():
             _LOGGER.warning("Test runner not found, skipping tests")
             return {"total": 0, "passed": 0, "failed": 0, "success": False}
@@ -566,7 +567,7 @@ If no changes are needed for this file, return the original content unchanged.""
                 [sys.executable, str(test_script), "--unit"],
                 capture_output=True,
                 text=True,
-                cwd=REPO_ROOT,
+                cwd=repo_root,
                 timeout=300,
             )
 
@@ -632,7 +633,7 @@ If no changes are needed for this file, return the original content unchanged.""
             # Stage only files the agent modified to avoid scooping up user work.
             subprocess.run(
                 ["git", "add", "--"] + files_to_stage,
-                cwd=REPO_ROOT,
+                cwd=self.repo.repo_root,
                 check=True,
                 capture_output=True,
             )
@@ -640,7 +641,7 @@ If no changes are needed for this file, return the original content unchanged.""
             # Commit
             result = subprocess.run(
                 ["git", "commit", "-m", message],
-                cwd=REPO_ROOT,
+                cwd=self.repo.repo_root,
                 capture_output=True,
                 text=True,
             )

@@ -42,7 +42,6 @@ Perform a strict final completion check for a refactor change set.
 - `/refactor-workflow-registry`
 - `/refactor-workflow-audit`
 - `/refactor-routing-matrix`
-- `none`
 
 ### Example invocations
 - `done-check for /api/chat refactor: require verify + reviewer-checklist + merge-gate + release-note`

@@ -103,3 +103,67 @@ def test_commit_changes_stages_only_agent_modified_files(monkeypatch: pytest.Mon
     )
     assert " M notes.txt" in status.stdout
     assert "tracked.py" not in status.stdout
+
+
+def test_commit_changes_uses_agent_repo_root_instead_of_global(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    subprocess.run(["git", "init"], cwd=tmp_path, check=True, capture_output=True)
+    subprocess.run(["git", "config", "user.email", "agent@example.com"], cwd=tmp_path, check=True, capture_output=True)
+    subprocess.run(["git", "config", "user.name", "Agent Test"], cwd=tmp_path, check=True, capture_output=True)
+
+    tracked = tmp_path / "tracked.py"
+    tracked.write_text("print('base')\n", encoding="utf-8")
+    subprocess.run(["git", "add", "tracked.py"], cwd=tmp_path, check=True, capture_output=True)
+    subprocess.run(["git", "commit", "-m", "initial"], cwd=tmp_path, check=True, capture_output=True)
+    tracked.write_text("print('agent change')\n", encoding="utf-8")
+
+    wrong_root = tmp_path / "wrong-root"
+    wrong_root.mkdir()
+    monkeypatch.setattr(aca, "REPO_ROOT", wrong_root)
+    monkeypatch.setattr(aca, "DATA_OUT", tmp_path / "data_out")
+    monkeypatch.setattr(aca, "STATUS_FILE", tmp_path / "data_out" / "status.json")
+
+    agent = aca.CodeAgent(llm_type="echo")
+    agent.repo.repo_root = tmp_path
+    agent.state = _make_state()
+    agent.state.files_modified = ["tracked.py"]
+
+    committed = agent.commit_changes("agent commit", files=["tracked.py"])
+
+    assert committed is True
+
+    show = subprocess.run(
+        ["git", "show", "--name-only", "--pretty=format:", "HEAD"],
+        cwd=tmp_path,
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    committed_files = {line.strip() for line in show.stdout.splitlines() if line.strip()}
+    assert committed_files == {"tracked.py"}
+
+
+def test_run_tests_uses_agent_repo_root_instead_of_global(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    scripts_dir = tmp_path / "scripts"
+    scripts_dir.mkdir()
+    test_runner = scripts_dir / "test_runner.py"
+    test_runner.write_text(
+        "print('collected 1 items')\n"
+        "print('1 passed')\n",
+        encoding="utf-8",
+    )
+
+    wrong_root = tmp_path / "wrong-root"
+    wrong_root.mkdir()
+    monkeypatch.setattr(aca, "REPO_ROOT", wrong_root)
+    monkeypatch.setattr(aca, "DATA_OUT", tmp_path / "data_out")
+    monkeypatch.setattr(aca, "STATUS_FILE", tmp_path / "data_out" / "status.json")
+
+    agent = aca.CodeAgent(llm_type="echo")
+    agent.repo.repo_root = tmp_path
+
+    results = agent.run_tests()
+
+    assert results["success"] is True
+    assert results["total"] == 1
+    assert results["passed"] == 1
+    assert results["failed"] == 0

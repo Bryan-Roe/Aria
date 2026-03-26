@@ -1,7 +1,7 @@
 ---
 description: "Use when implementing a refactor: keep behavior stable, minimize diff risk, and include verification evidence."
 name: "Safe Refactor"
-argument-hint: "Target + goals + constraints (example: function_app.py chat route: extract helper, preserve SSE contract, no API changes)"
+argument-hint: "Target + goals + constraints (example: scope + goal + invariant)"
 agent: agent
 ---
 
