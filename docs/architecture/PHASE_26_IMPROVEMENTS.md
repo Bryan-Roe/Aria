@@ -38,6 +38,7 @@ Phase 26 transitions from UI polish to **intelligent, data-driven optimization**
 - **Process**: Shells out to `dataset_profiler.py --recommend --quiet`, parses JSON output
 - **Timeout**: 30-second limit with graceful error handling
 - **Response Format**:
+
   ```json
   {
     "total_samples": 290,
@@ -204,7 +205,7 @@ curl "http://localhost:8080/api/profile-dataset?dataset=mixed_chat"
 
 **Expected Output**:
 
-```
+```text
 GPU: NVIDIA RTX 4090 (24GB)
 Available VRAM: 20.5GB (85% free)
 Model: microsoft/Phi-3.5-mini-instruct (3.8B params)

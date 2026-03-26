@@ -1,6 +1,6 @@
 # SQL Integration Automation Suite
 
-**Complete automation tools for deployment, monitoring, and maintenance**
+Complete automation tools for deployment, monitoring, and maintenance.
 
 ## Overview
 

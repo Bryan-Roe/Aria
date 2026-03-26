@@ -1,6 +1,6 @@
 # Quantum LLM Quick Reference
 
-**Fast reference for daily quantum LLM development**
+## Fast reference for daily quantum LLM development
 
 ---
 
@@ -167,7 +167,7 @@ pip install torch pennylane pyyaml numpy
 
 ## 📁 Output Structure
 
-```
+```text
 data_out/quantum_llm_quickstart/
 ├── final_model.pt                 # Trained model
 ├── config.yaml                    # Used configuration

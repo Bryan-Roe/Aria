@@ -1,7 +1,5 @@
 # Aria — Interactive AI Character Platform
 
-<div align="center">
-
 [![CI Pipeline](https://github.com/Bryan-Roe/Aria/actions/workflows/ci-pipeline.yml/badge.svg)](https://github.com/Bryan-Roe/Aria/actions/workflows/ci-pipeline.yml)
 [![Code Quality](https://github.com/Bryan-Roe/Aria/actions/workflows/code-quality.yml/badge.svg)](https://github.com/Bryan-Roe/Aria/actions/workflows/code-quality.yml)
 [![CodeQL](https://github.com/Bryan-Roe/Aria/actions/workflows/codeql.yml/badge.svg)](https://github.com/Bryan-Roe/Aria/actions/workflows/codeql.yml)
@@ -10,8 +8,6 @@
 **An intelligent, animated AI character with movement, gestures, and natural language interaction.**
 
 [Live Demo](https://bryan-roe.github.io/Aria) · [Aria Web UI](apps/aria/) · [Quick Start](#-quick-start)
-
-</div>
 
 ---
 
@@ -84,7 +80,7 @@ curl http://localhost:7071/api/ai/status | python -m json.tool   # health check
 
 ## 🏗️ Project Structure
 
-```
+```text
 apps/aria/          Animated character stage (HTML/CSS/JS + Python API server)
 apps/chat/          Browser-based streaming chat UI
 ai-projects/chat-cli/ Multi-provider chat CLI
@@ -134,7 +130,7 @@ The auto-execute system parses complex multi-step requests ("walk to the table a
 
 Provider auto-detection order:
 
-```
+```text
 LM Studio → Ollama → Azure OpenAI → OpenAI → Local (zero-dependency echo)
 ```
 
@@ -142,7 +138,7 @@ Pass `--provider` to override: `local`, `openai`, `azure`, `lmstudio`, `ollama`,
 
 **Azure OpenAI** — all four variables required:
 
-```
+```text
 AZURE_OPENAI_API_KEY
 AZURE_OPENAI_ENDPOINT
 AZURE_OPENAI_DEPLOYMENT
@@ -151,7 +147,7 @@ AZURE_OPENAI_API_VERSION
 
 **LoRA adapter** — adapter directory must contain:
 
-```
+```text
 adapter_config.json
 adapter_model.safetensors
 ```

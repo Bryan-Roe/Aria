@@ -1,19 +1,19 @@
-"""Performance tests for keyword set optimizations in apps/aria/server.py"""
+"""Performance tests for keyword set optimizations in apps/aria/server.py
+
+The `apps/aria` directory is added to sys.path by tests/conftest.py, so
+`from server import ...` works here at module level without any manual path setup.
+"""
+import time
+
+import pytest
+
 from server import (
-    _contains_any_keyword,
-    JUMP_KEYWORDS,
     DANCE_KEYWORDS,
+    JUMP_KEYWORDS,
     WAVE_KEYWORDS,
+    _contains_any_keyword,
     determine_position_from_context,
 )
-import time
-import pytest
-import sys
-from pathlib import Path
-
-# Add project paths for imports
-REPO_ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(REPO_ROOT / "apps" / "aria"))
 
 
 class TestKeywordSetPerformance:

@@ -84,7 +84,7 @@ cd ai-projects/quantum-ml
 ./start_dashboard.sh
 ```
 
-Then open **http://localhost:5000** for:
+Then open **<http://localhost:5000>** for:
 
 - 📊 Real-time training visualization with live charts
 - 🎛️ Interactive hyperparameter tuning
@@ -195,20 +195,26 @@ If your code and model files live elsewhere, update `WorkingDirectory` according
    - Perfect for learning and experimentation
    - No coding required - just configure and train
 
-2. **Hardware Testing Results:** [`HARDWARE_TEST_RESULTS.md`](./HARDWARE_TEST_RESULTS.md)
+## Hardware Testing Results
+
+[`HARDWARE_TEST_RESULTS.md`](./HARDWARE_TEST_RESULTS.md)
 
 - Multi-backend validation (Rigetti ✅, Quantinuum ⚠️)
 - GHZ and variational circuit tests
 - Hardware vs simulator comparison
 
-3. **Provider Comparison:** [`PROVIDER_COMPARISON_RESULTS.md`](./PROVIDER_COMPARISON_RESULTS.md)
+## Provider Comparison
+
+[`PROVIDER_COMPARISON_RESULTS.md`](./PROVIDER_COMPARISON_RESULTS.md)
 
 - Detailed gate pattern analysis
 - MPS simulation validation (90.5% vs 91.5% entropy)
 - Quantinuum bug investigation
 - Production recommendations
 
-4. **Quick Reference:** [`QUICK_REFERENCE.md`](./QUICK_REFERENCE.md)
+## Quick Reference
+
+[`QUICK_REFERENCE.md`](./QUICK_REFERENCE.md)
 
 - All commands, workflows, and tips in one place
 

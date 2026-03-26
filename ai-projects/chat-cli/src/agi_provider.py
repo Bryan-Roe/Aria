@@ -25,6 +25,90 @@ MAX_HISTORY_SIZE = 50
 MAX_GOALS = 5
 MAX_REASONING_CHAINS = 10
 
+# ---------------------------------------------------------------------------
+# Agent registry — maps agent names to capabilities for multi-agent routing.
+# Each entry describes the domains/intents an agent handles best, which
+# underlying provider to instantiate, and subtask templates for decomposition.
+# ---------------------------------------------------------------------------
+_AGENT_REGISTRY: Dict[str, Dict[str, Any]] = {
+    "quantum-specialist": {
+        "domains": ["quantum"],
+        "intents": ["explanation", "coding", "question"],
+        "provider": "quantum",
+        "confidence_boost": 0.3,
+        "subtask_templates": [
+            "Define the quantum computing concepts involved",
+            "Explain quantum gates or circuit design if relevant",
+            "Connect to classical computing equivalent",
+            "Provide code using Qiskit or PennyLane if applicable",
+        ],
+        "description": "Expert in quantum computing, qubits, gates, and quantum algorithms",
+    },
+    "code-specialist": {
+        "domains": ["technical"],
+        "intents": ["coding", "creation"],
+        "provider": "lora",
+        "confidence_boost": 0.2,
+        "subtask_templates": [
+            "Identify required inputs, outputs, and edge cases",
+            "Design the function/class interface",
+            "Implement core logic with error handling",
+            "Add type hints and docstring",
+        ],
+        "description": "Expert code generator for implementation tasks",
+    },
+    "aria-character": {
+        "domains": ["aria"],
+        "intents": ["movement", "creation"],
+        "provider": "local",
+        "confidence_boost": 0.4,
+        "subtask_templates": [
+            "Parse requested Aria action",
+            "Select appropriate [aria:action] tag",
+            "Compose natural language acknowledgement",
+        ],
+        "description": "Handles Aria character movement and action commands",
+    },
+    "ai-specialist": {
+        "domains": ["ai"],
+        "intents": ["explanation", "question", "coding"],
+        "provider": "lora",
+        "confidence_boost": 0.15,
+        "subtask_templates": [
+            "Identify the AI/ML concept being asked about",
+            "Explain the mechanism with a concrete analogy",
+            "Discuss trade-offs and practical usage",
+            "Summarize key takeaways",
+        ],
+        "description": "AI/ML training, LoRA, transformers specialist",
+    },
+    "reasoning-specialist": {
+        "domains": ["ai"],
+        "intents": ["explanation", "question"],
+        "provider": "agi",
+        "confidence_boost": 0.1,
+        "subtask_templates": [
+            "Identify core question and key concepts",
+            "Build analogies from familiar domains",
+            "Explain step by step from simple to complex",
+            "Summarize with a concrete example",
+        ],
+        "description": "Deep reasoning and explanation using AGI chain-of-thought",
+    },
+    "general": {
+        "domains": [],
+        "intents": [],
+        "provider": "agi",
+        "confidence_boost": 0.0,
+        "subtask_templates": [
+            "Understand the query",
+            "Formulate a response",
+            "Review for completeness",
+        ],
+        "description": "General-purpose AGI assistant",
+    },
+}
+
 
 # ---------------------------------------------------------------------------
 # Sanitization helpers
@@ -152,6 +236,7 @@ class AGIProvider(BaseChatProvider):
         self.verbose = verbose
         self.context = AGIContext()
         self._base_provider_choice: Optional[ProviderChoice] = None
+        self._last_agent_used: Optional[str] = None
 
     def _get_base_provider(self) -> BaseChatProvider:
         if self.base_provider is None:
@@ -237,7 +322,11 @@ class AGIProvider(BaseChatProvider):
             domain = "quantum"
         elif any(w in query_lower for w in ["aria", "avatar", "gesture", "animation"]):
             domain = "aria"
-        elif any(w in query_lower for w in ["ai", "llm", "transformer", "lora", "training"]):
+        elif any(w in query_lower for w in [
+            "ai", "llm", "transformer", "lora", "training",
+            "fine-tun", "neural network", "machine learning", "deep learning",
+            "embeddings", "tokenizer", "inference", "model weights",
+        ]):
             domain = "ai"
         elif any(
             w in query_lower
@@ -272,8 +361,74 @@ class AGIProvider(BaseChatProvider):
             "summary": f"{complexity.capitalize()} {intent} query about {domain}",
         }
 
+    # ------------------------------------------------------------------
+    # Multi-agent routing
+    # ------------------------------------------------------------------
+
+    def _select_agent(self, analysis: Dict[str, Any]) -> str:
+        """Select the best specialist agent based on query analysis.
+
+        Scores each non-fallback agent by domain match, intent match, and a
+        confidence-weighted boost factor.  Returns the registry key of the
+        winning agent (or ``"general"`` when no specialist scores above zero).
+        """
+        intent = analysis.get("intent", "general")
+        domain = analysis.get("domain", "general")
+        confidence = analysis.get("confidence", 0.5)
+
+        best_agent = "general"
+        best_score = 0.0
+
+        for agent_name, agent_config in _AGENT_REGISTRY.items():
+            if agent_name == "general":
+                continue
+            score = 0.0
+            if domain in agent_config.get("domains", []):
+                score += 0.5
+            if intent in agent_config.get("intents", []):
+                score += 0.3
+            # Only apply confidence boost when there is at least one domain or
+            # intent match — prevents pure-boost wins on general queries.
+            if score > 0.0:
+                score += agent_config.get("confidence_boost", 0.0) * confidence
+            if score > best_score:
+                best_score = score
+                best_agent = agent_name
+
+        return best_agent
+
+    def _dispatch_to_agent(self, query: str, agent_name: str, analysis: Dict[str, Any]) -> Optional[str]:
+        """Try to route *query* to a specialist provider.
+
+        Returns the agent's reply as a plain string, or ``None`` when the
+        specialist is unavailable (falls back to AGI processing).
+        """
+        config = _AGENT_REGISTRY.get(agent_name, {})
+        provider_name = config.get("provider", "agi")
+
+        if provider_name in ("agi", ""):
+            return None  # let AGI handle it directly
+
+        try:
+            specialist, _ = detect_provider(explicit=provider_name)
+            messages = [{"role": "user", "content": query}]
+            result = specialist.complete(messages, stream=False)
+            response = result if isinstance(result, str) else "".join(result)
+            _logger.debug("Agent dispatch: %s → %s chars", agent_name, len(response))
+            return response
+        except Exception as exc:
+            _logger.debug("Agent dispatch to %s failed: %s", agent_name, _sanitize_for_logging(str(exc)))
+            return None  # fall back to AGI
+
     def _decompose_task(self, query: str, analysis: Dict[str, Any]) -> List[str]:
         _ = query
+        # First try to pull subtask templates from the selected agent's registry entry.
+        selected_agent = analysis.get("selected_agent")
+        if selected_agent and selected_agent in _AGENT_REGISTRY:
+            templates = _AGENT_REGISTRY[selected_agent].get("subtask_templates", [])
+            if templates:
+                return templates[: self.reasoning_depth]
+
         intent = analysis.get("intent", "general")
         if intent == "coding":
             steps = [
@@ -320,12 +475,28 @@ class AGIProvider(BaseChatProvider):
             f"{analysis.get('complexity', 'simple').capitalize()} {analysis.get('intent', 'general')} query about {analysis.get('domain', 'general')}",
         )
         thoughts = [f"Understanding: {summary}"]
-        if analysis.get("domain") == "aria":
+
+        # Domain-specific reasoning hints.
+        domain = analysis.get("domain", "general")
+        if domain == "aria":
             thoughts.append(
                 "Aria context: include movement/action tags when appropriate.")
-        if analysis.get("domain") == "quantum":
+        elif domain == "quantum":
             thoughts.append(
                 "Quantum context: distinguish simulator vs hardware where relevant.")
+        elif domain == "ai":
+            thoughts.append(
+                "AI/ML context: distinguish training, inference, and evaluation concerns.")
+        elif domain == "technical":
+            thoughts.append(
+                "Technical context: prefer concrete, runnable code examples.")
+
+        # Surface which specialist will handle this query.
+        selected_agent = analysis.get("selected_agent")
+        if selected_agent and selected_agent != "general":
+            agent_desc = _AGENT_REGISTRY.get(selected_agent, {}).get("description", selected_agent)
+            thoughts.append(f"Specialist: {agent_desc}")
+
         context_hint = self.context.get_relevant_context(query)
         if context_hint:
             thoughts.append("Considering recent conversation context.")
@@ -336,12 +507,28 @@ class AGIProvider(BaseChatProvider):
     def _reason(self, query: str, messages: List[RoleMessage]) -> List[ReasoningStep]:
         chain: List[ReasoningStep] = []
         analysis = self._analyze_query(query)
+
+        # Multi-agent: pick the best specialist for this query and record it.
+        selected_agent = self._select_agent(analysis)
+        analysis["selected_agent"] = selected_agent
+        self._last_agent_used = selected_agent
+
         chain.append(
             ReasoningStep(
                 step_type="analyze",
                 content=analysis["summary"],
                 confidence=analysis["confidence"],
                 metadata=analysis,
+            )
+        )
+
+        # Add an agent-selection step so the reasoning trace is transparent.
+        agent_desc = _AGENT_REGISTRY.get(selected_agent, {}).get("description", selected_agent)
+        chain.append(
+            ReasoningStep(
+                step_type="route",
+                content=f"Routing to: {selected_agent} — {agent_desc}",
+                metadata={"agent": selected_agent},
             )
         )
 
@@ -408,8 +595,19 @@ class AGIProvider(BaseChatProvider):
                 analysis = step.metadata
                 break
 
-        system_prompt = self._build_agi_system_prompt(
-            analysis, reasoning_chain)
+        # --- Multi-agent dispatch: try the selected specialist first. ---
+        selected_agent = analysis.get("selected_agent", "general")
+        if selected_agent and selected_agent != "general":
+            specialist_response = self._dispatch_to_agent(query, selected_agent, analysis)
+            if specialist_response is not None:
+                if self.verbose and reasoning_chain:
+                    specialist_response = (
+                        f"{self._format_reasoning_chain(reasoning_chain)}\n\n---\n\n{specialist_response}"
+                    )
+                return specialist_response
+
+        # Specialist unavailable or returned None — fall back to AGI base provider.
+        system_prompt = self._build_agi_system_prompt(analysis, reasoning_chain)
         enhanced_messages: List[RoleMessage] = [
             {"role": "system", "content": system_prompt}]
 
@@ -499,6 +697,7 @@ class AGIProvider(BaseChatProvider):
         icons = {
             "analyze": "🔍",
             "decompose": "📋",
+            "route": "🧭",
             "synthesize": "💡",
             "reflect": "🪞",
             "refine": "✨",
@@ -539,6 +738,8 @@ class AGIProvider(BaseChatProvider):
             "active_goals": self.context.goals.copy(),
             "learned_patterns_count": len(self.context.learned_patterns),
             "conversation_length": len(self.context.conversation_history),
+            "last_agent_used": self._last_agent_used,
+            "available_agents": list(_AGENT_REGISTRY.keys()),
         }
 
 

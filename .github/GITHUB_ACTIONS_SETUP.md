@@ -186,12 +186,12 @@ The new workflows complement the existing 6 workflows:
 
 ### New Workflows (Added)
 
-7. **code-quality.yml** - Linting and security checks
-8. **codeql.yml** - Security scanning
-9. **pr-checks.yml** - PR validation
-10. **release.yml** - Release automation
-11. **stale.yml** - Stale management
-12. **workflow-validation.yml** - Workflow validation
+1. **code-quality.yml** - Linting and security checks
+2. **codeql.yml** - Security scanning
+3. **pr-checks.yml** - PR validation
+4. **release.yml** - Release automation
+5. **stale.yml** - Stale management
+6. **workflow-validation.yml** - Workflow validation
 
 ## Benefits
 
@@ -270,8 +270,8 @@ git push origin v1.0.0
 
 #### Monitoring Workflows
 
-- View all workflow runs: https://github.com/Bryan-Roe/Aria/actions
-- Check security alerts: https://github.com/Bryan-Roe/Aria/security
+- View all workflow runs: <https://github.com/Bryan-Roe/Aria/actions>
+- Check security alerts: <https://github.com/Bryan-Roe/Aria/security>
 - Review stale items: Filter by "stale" label
 
 #### Manual Triggers
@@ -342,7 +342,7 @@ All workflows have been validated:
 
 ## Support
 
-### Documentation
+### References
 
 - [WORKFLOWS.md](WORKFLOWS.md) - Detailed workflow documentation
 - [GitHub Actions Docs](https://docs.github.com/en/actions)

@@ -24,6 +24,11 @@ REPO_ROOT = Path(__file__).parent.parent
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
+# Make apps/aria importable so tests can do `from server import ...` at the top
+_ARIA_APP_DIR = str(REPO_ROOT / "apps" / "aria")
+if _ARIA_APP_DIR not in sys.path:
+    sys.path.insert(0, _ARIA_APP_DIR)
+
 # ==================== FIXTURES ====================
 
 

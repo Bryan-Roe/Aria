@@ -104,7 +104,7 @@ cat data_out/chat.log
 
 ## URLs to Remember
 
-```
+```text
 Local Dev:     http://localhost:7071
 Static Site:   http://localhost:8000/docs/
 Production:    https://yourusername.github.io/Aria/

@@ -141,9 +141,10 @@ def greet(name):
 ```
 
 Ask: "Create a markdown table"
+
 | Column 1 | Column 2 |
-|----------|----------|
-| Data 1 | Data 2 |
+| -------- | -------- |
+| Data 1   | Data 2   |
 
 ### Keyboard Shortcuts
 
@@ -245,7 +246,7 @@ Your chat website now has:
 
 ## 🌐 Access Your Improved Website
 
-**URL:** http://localhost:7071/api/chat-web
+**URL:** <http://localhost:7071/api/chat-web>
 
 **Quick Start:**
 

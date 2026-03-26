@@ -185,19 +185,20 @@ cd aria_web
 python server.py
 ```
 
-2. **Start HTTP Server for Monetization Pages:**
+1. **Start HTTP Server for Monetization Pages:**
 
 ```bash
 python -m http.server 8000
 ```
 
-3. **Test Navigation:**
-   - Visit: http://localhost:8080/ (Aria character)
-   - Click "Home" → Should go to monetization hub
-   - Click "Pricing" → Should show pricing page
-   - Click "Upgrade" → Should show pricing page
-   - Visit: http://localhost:8000/monetization-index.html
-   - Click "Try Aria" → Should go to character interface
+1. **Test Navigation:**
+
+- Visit: <http://localhost:8080/> (Aria character)
+- Click "Home" → Should go to monetization hub
+- Click "Pricing" → Should show pricing page
+- Click "Upgrade" → Should show pricing page
+- Visit: <http://localhost:8000/monetization-index.html>
+- Click "Try Aria" → Should go to character interface
 
 ### Visual Verification
 
@@ -252,7 +253,7 @@ For questions or issues:
 
 - 📖 See documentation above
 - 🐛 Open an issue on GitHub
-- 💬 Contact: support@aria-platform.com
+- 💬 Contact: <mailto:support@aria-platform.com>
 
 ---
 

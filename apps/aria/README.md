@@ -203,7 +203,7 @@ curl -X POST http://localhost:8080/api/aria/world \
 
 ## Client-Server Sync Flow
 
-```
+```text
 User Action (Click/Drag)
     ↓
 aria_controller.js
@@ -246,7 +246,7 @@ pytest tests/test_*aria*.py tests/test_ui_*.py -v
 
 ### File Structure
 
-```
+```text
 aria_web/
 ├── index.html           # Main UI
 ├── test.html            # Test page for features

@@ -1,6 +1,7 @@
 from __future__ import annotations
 from pathlib import Path
 import unittest
+import unittest.mock
 import tempfile
 import sys
 import os
@@ -121,6 +122,87 @@ class ChatProviderTests(unittest.TestCase):
                 first_path.read_text(encoding="utf-8"),
                 second_path.read_text(encoding="utf-8"),
             )
+
+
+class AGIMultiAgentTests(unittest.TestCase):
+    """Tests for AGI multi-agent routing and dispatch."""
+
+    def setUp(self) -> None:
+        import agi_provider
+        self.agi = agi_provider.AGIProvider(base_provider=None)
+        self._registry = agi_provider._AGENT_REGISTRY
+
+    def test_select_agent_quantum_domain(self) -> None:
+        """Quantum domain + explanation intent should select quantum-specialist."""
+        analysis = {"intent": "explanation", "domain": "quantum", "confidence": 0.8}
+        agent = self.agi._select_agent(analysis)
+        self.assertEqual(agent, "quantum-specialist")
+
+    def test_select_agent_aria_movement(self) -> None:
+        """Movement intent + aria domain should select aria-character."""
+        analysis = {"intent": "movement", "domain": "aria", "confidence": 0.9}
+        agent = self.agi._select_agent(analysis)
+        self.assertEqual(agent, "aria-character")
+
+    def test_select_agent_coding_falls_to_code_specialist(self) -> None:
+        """Technical domain + coding intent should select code-specialist."""
+        analysis = {"intent": "coding", "domain": "technical", "confidence": 0.7}
+        agent = self.agi._select_agent(analysis)
+        self.assertEqual(agent, "code-specialist")
+
+    def test_select_agent_unknown_returns_general(self) -> None:
+        """Unrecognised domain/intent should fall back to 'general'."""
+        analysis = {"intent": "general", "domain": "general", "confidence": 0.5}
+        agent = self.agi._select_agent(analysis)
+        self.assertEqual(agent, "general")
+
+    def test_dispatch_agi_agent_returns_none(self) -> None:
+        """Dispatching to 'general' (provider=agi) must return None so AGI handles it."""
+        result = self.agi._dispatch_to_agent("hello", "general", {})
+        self.assertIsNone(result)
+
+    def test_dispatch_unavailable_specialist_returns_none(self) -> None:
+        """If specialist provider is unavailable, dispatch should return None gracefully."""
+        # 'quantum' provider will fail in this env — we just need no exception raised.
+        result = self.agi._dispatch_to_agent(
+            "What is superposition?", "quantum-specialist",
+            {"intent": "explanation", "domain": "quantum"},
+        )
+        # Either None (unavailable) or a string (available) — must not raise.
+        self.assertTrue(result is None or isinstance(result, str))
+
+    def test_reason_sets_last_agent_used(self) -> None:
+        """After _reason(), _last_agent_used should be set to a registry key."""
+        messages: list = [{"role": "user", "content": "move Aria to the left"}]
+        self.agi._reason("move Aria to the left", messages)
+        self.assertIn(self.agi._last_agent_used, self._registry)
+
+    def test_reasoning_summary_includes_agent_info(self) -> None:
+        """get_reasoning_summary() must include last_agent_used and available_agents."""
+        summary = self.agi.get_reasoning_summary()
+        self.assertIn("last_agent_used", summary)
+        self.assertIn("available_agents", summary)
+        self.assertIsInstance(summary["available_agents"], list)
+        self.assertIn("general", summary["available_agents"])
+
+    def test_decompose_uses_agent_registry_templates(self) -> None:
+        """When selected_agent is set, decompose should use its subtask templates."""
+        analysis = {
+            "intent": "coding",
+            "domain": "quantum",
+            "complexity": "complex",
+            "confidence": 0.8,
+            "selected_agent": "quantum-specialist",
+        }
+        steps = self.agi._decompose_task("Write a Bell state circuit", analysis)
+        # Should pull from quantum-specialist templates, not generic coding steps.
+        self.assertTrue(any("quantum" in s.lower() for s in steps))
+
+    def test_registry_has_required_agents(self) -> None:
+        """All expected specialist agents should exist in the registry."""
+        expected = {"quantum-specialist", "code-specialist", "aria-character",
+                    "ai-specialist", "reasoning-specialist", "general"}
+        self.assertTrue(expected.issubset(set(self._registry.keys())))
 
 
 if __name__ == "__main__":

@@ -249,12 +249,16 @@ def interactive_chat(args: argparse.Namespace) -> int:
             if hasattr(provider, "get_reasoning_summary"):
                 # type: ignore[union-attr]
                 summary = provider.get_reasoning_summary()
+                last_agent = summary.get("last_agent_used") or "none yet"
+                available = ", ".join(summary.get("available_agents", []))
                 print_system(
                     f"AGI Reasoning Summary:\n"
                     f"  Reasoning chains stored : {summary.get('total_reasoning_chains', 0)}\n"
                     f"  Conversation turns      : {summary.get('conversation_length', 0)}\n"
                     f"  Active goals            : {', '.join(summary.get('active_goals', [])) or 'none'}\n"
-                    f"  Learned patterns        : {summary.get('learned_patterns_count', 0)}"
+                    f"  Learned patterns        : {summary.get('learned_patterns_count', 0)}\n"
+                    f"  Last agent routed to    : {last_agent}\n"
+                    f"  Available agents        : {available}"
                 )
             else:
                 print_system(

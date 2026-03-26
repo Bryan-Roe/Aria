@@ -13,7 +13,7 @@ A local LLM-based agent that can autonomously work on repository tasks, includin
 
 Choose one of the following:
 
-**Option A: Ollama (Recommended - Simple)**
+#### Option A: Ollama (Recommended - Simple)
 
 ```bash
 # Download and install from https://ollama.ai
@@ -27,7 +27,7 @@ ollama serve
 ollama pull mistral  # or llama2, neural-chat, etc.
 ```
 
-**Option B: LM Studio**
+#### Option B: LM Studio
 
 ```bash
 # Download from https://lmstudio.ai
@@ -97,7 +97,7 @@ The agent operates in 5 phases:
 
 ### Data Flow
 
-```
+```text
 Task Description
     ↓
 CodeAgent.execute_task()
@@ -217,7 +217,7 @@ python scripts/autonomous_code_agent.py \
 
 ### "Cannot connect to Ollama"
 
-```
+```text
 Error: Cannot connect to Ollama at http://127.0.0.1:11434
 ```
 
@@ -236,7 +236,7 @@ curl http://127.0.0.1:11434/api/tags
 
 ### "Cannot connect to LM Studio"
 
-```
+```text
 Error: Cannot connect to LM Studio at http://127.0.0.1:1234/v1
 ```
 

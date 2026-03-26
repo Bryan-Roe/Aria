@@ -243,14 +243,14 @@ def chat(req: func.HttpRequest) -> func.HttpResponse:
     POST /api/chat
     Body: {
         "messages": [{"role": "user|assistant|system", "content": "..."}],
-        "provider": "auto|openai|azure|local" (optional),
+        "provider": "auto|openai|azure|lmstudio|ollama|agi|quantum|local" (optional),
         "model": "model-name" (optional),
         "stream": false (optional, streaming not implemented in HTTP yet)
     }
 
     Response: {
         "response": "assistant's reply",
-        "provider": "azure|openai|local",
+        "provider": "azure|openai|lmstudio|ollama|agi|quantum-llm|local",
         "model": "model-name"
     }
     """

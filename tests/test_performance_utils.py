@@ -20,14 +20,12 @@ from shared.performance_utils import (
     timeit,
 )
 
+import io
 import json
 import time
 from unittest.mock import patch
-import io
 
 import pytest
-
-sys.path.insert(0, str(Path(__file__).parent.parent))
 
 
 # ---------------------------------------------------------------------------

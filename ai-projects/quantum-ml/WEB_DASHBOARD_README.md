@@ -37,7 +37,7 @@ pip install -r web-requirements.txt
 python web_app.py
 ```
 
-Then open your browser to: **http://localhost:5000**
+Then open your browser to: **<http://localhost:5000>**
 
 ## 📖 How to Use
 
@@ -188,7 +188,7 @@ All datasets automatically:
 
 ## 📁 File Structure
 
-```
+```text
 ai-projects/quantum-ml/
 ├── web_app.py                    # Flask backend
 ├── start_dashboard.sh            # Launch script
@@ -333,7 +333,7 @@ print(f"Epoch {status['current_epoch']}, Accuracy: {status['best_val_acc']}")
 
 ### Quick Test Run
 
-```
+```text
 Dataset: heart
 Qubits: 4
 Layers: 2
@@ -346,7 +346,7 @@ Expected: ~70-80% accuracy in 10-20 epochs
 
 ### High-Accuracy Training
 
-```
+```text
 Dataset: banknote
 Qubits: 4
 Layers: 3
@@ -359,7 +359,7 @@ Expected: ~90-95% accuracy in 50-100 epochs
 
 ### Fast Iteration
 
-```
+```text
 Dataset: any
 Qubits: 3
 Layers: 1
@@ -394,4 +394,4 @@ Built with:
 
 **Ready to explore quantum machine learning?** 🚀
 
-Run `./start_dashboard.sh` and open http://localhost:5000 to get started!
+Run `./start_dashboard.sh` and open <http://localhost:5000> to get started!
