@@ -1,7 +1,7 @@
 ---
 description: "Use when planning a refactor: assess invariants, regression hotspots, and validation strategy before code changes."
 name: "Refactor Precheck"
-argument-hint: "Target + intent + hard constraints (example: chat stream handler, extract helper, preserve SSE schema)"
+argument-hint: "Target + intent + constraints (example: scope + goal + invariant)"
 agent: agent
 ---
 
