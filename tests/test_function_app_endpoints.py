@@ -189,6 +189,63 @@ class TestPostValidation:
         resp = app_module.chat_stream(req)
         assert resp.status_code == 400
 
+    def test_chat_stream_memory_injection(self, app_module, monkeypatch):
+        """POST /api/chat/stream should call memory helpers and include count in meta SSE event."""
+        import azure.functions as _af
+        import inspect
+
+        captured: dict = {"embedding": None,
+                          "session_id": None, "sse_body": b""}
+
+        def _fake_embedding(text: str):
+            captured["embedding"] = text
+            return [0.1, 0.2, 0.3]
+
+        def _fake_similar(query_emb, top_k=5, session_id=None):
+            captured["session_id"] = session_id
+            return [{"content": "Previous answer about widgets", "similarity": 0.88}]
+
+        # Patch func.HttpResponse inside function_app so streaming body (generator) is consumed
+        _real_HttpResponse = _af.HttpResponse
+
+        def _capturing_HttpResponse(body=None, **kwargs):
+            if body is not None and inspect.isgenerator(body):
+                consumed = b"".join(body)
+                captured["sse_body"] = consumed
+                return _real_HttpResponse(consumed, **kwargs)
+            return _real_HttpResponse(body, **kwargs)
+
+        monkeypatch.setattr(app_module.func, "HttpResponse",
+                            _capturing_HttpResponse)
+        monkeypatch.setattr(app_module, "generate_embedding", _fake_embedding)
+        monkeypatch.setattr(
+            app_module, "fetch_similar_messages", _fake_similar)
+
+        req = _mock_request("POST", body={
+            "messages": [{"role": "user", "content": "How do I use widgets?"}],
+            "session_id": "test-session-789",
+        })
+        resp = app_module.chat_stream(req)
+        assert resp.status_code == 200
+
+        # Parse SSE body for the meta event
+        body_text = captured["sse_body"].decode("utf-8")
+        meta_data: dict | None = None
+        for line in body_text.splitlines():
+            if line.startswith("data:"):
+                try:
+                    obj = json.loads(line[5:].strip())
+                    if "memory_messages" in obj:
+                        meta_data = obj
+                        break
+                except json.JSONDecodeError:
+                    pass
+
+        assert meta_data is not None, "No meta event with memory_messages in SSE body"
+        assert meta_data["memory_messages"] == 1
+        assert captured["embedding"] == "How do I use widgets?"
+        assert captured["session_id"] == "test-session-789"
+
     def test_tts_no_text(self, app_module):
         """POST /api/tts with no text field → 400."""
         req = _mock_request("POST", body={})

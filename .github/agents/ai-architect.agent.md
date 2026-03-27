@@ -3,14 +3,17 @@ name: ai-architect
 description: "AI systems architect for the Aria platform. Designs end-to-end AI pipelines, integrates providers, plans memory systems, and architects multi-agent workflows.\n\nTrigger phrases include:\n- 'design an AI pipeline'\n- 'architect a new AI feature'\n- 'integrate a new provider'\n- 'plan the AI system'\n- 'how should I structure this AI'\n- 'design multi-agent workflow'\n- 'memory architecture'\n\nExamples:\n- User says 'design a RAG pipeline for Aria' → invoke for retrieval-augmented generation architecture\n- User asks 'how should I add a new LLM provider?' → invoke for provider integration design\n- User says 'architect a multi-agent system for code review' → invoke for agent orchestration design\n\nThis agent understands the full Aria AI stack: providers, memory, embeddings, subscriptions, streaming, self-learning, and deployment."
 tools:
   - edit
-  - search
-  - runCommands
-  - fetch
-  - memory
-  - runSubagent
-  - problems
-  - todos
-  - changes
+  - azure-mcp/search
+  - execute/getTerminalOutput
+  - execute/runInTerminal
+  - read/terminalLastCommand
+  - read/terminalSelection
+  - web/fetch
+  - vscode/memory
+  - agent
+  - read/problems
+  - todo
+  - search/changes
 ---
 
 # AI Architect Agent

@@ -250,14 +250,30 @@ def interactive_chat(args: argparse.Namespace) -> int:
                 # type: ignore[union-attr]
                 summary = provider.get_reasoning_summary()
                 last_agent = summary.get("last_agent_used") or "none yet"
+                last_score = summary.get("last_agent_score")
+                score_str = f"{last_score:.3f}" if last_score is not None else "n/a"
                 available = ", ".join(summary.get("available_agents", []))
+
+                # Build learned-pattern lines (top 5 by observation count).
+                top_patterns = summary.get("top_learned_patterns", [])
+                if top_patterns:
+                    pattern_lines = "\n".join(
+                        f"    {p.get('domain', '?')}/{p.get('intent', '?')} "
+                        f"→ {p.get('agent', '?')} (×{p.get('count', 0)})"
+                        for p in top_patterns
+                    )
+                    pattern_section = f"\n  Top routing patterns    :\n{pattern_lines}"
+                else:
+                    pattern_section = ""
+
                 print_system(
                     f"AGI Reasoning Summary:\n"
                     f"  Reasoning chains stored : {summary.get('total_reasoning_chains', 0)}\n"
                     f"  Conversation turns      : {summary.get('conversation_length', 0)}\n"
                     f"  Active goals            : {', '.join(summary.get('active_goals', [])) or 'none'}\n"
-                    f"  Learned patterns        : {summary.get('learned_patterns_count', 0)}\n"
-                    f"  Last agent routed to    : {last_agent}\n"
+                    f"  Learned patterns        : {summary.get('learned_patterns_count', 0)}"
+                    f"{pattern_section}\n"
+                    f"  Last agent routed to    : {last_agent} (score={score_str})\n"
                     f"  Available agents        : {available}"
                 )
             else:
@@ -303,7 +319,7 @@ def build_arg_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(
         description="Simple terminal chat app with local/OpenAI/Azure providers")
     p.add_argument("--provider", choices=["auto", "openai", "azure", "local", "lora", "agi", "quantum",
-                    "lmstudio", "ollama"], default="auto", help="Which provider to use (default: auto)")
+                                          "lmstudio", "ollama"], default="auto", help="Which provider to use (default: auto)")
     p.add_argument("--system", type=str, help="Custom system prompt")
     p.add_argument("--model", type=str, help="Model/deployment name override")
     p.add_argument("--once", type=str, help="Send a single message then exit")

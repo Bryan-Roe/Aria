@@ -1,7 +1,7 @@
 ---
 name: Azure_function_codegen_and_deployment
 description: Generate and deploy Azure Functions with comprehensive planning, code generation, and deployment automation.
-tools: ["changes","edit","extensions","fetch","githubRepo","new","problems","runCommands","runNotebooks","runTasks","search","testFailure","todos","usages","vscodeAPI","memory"]
+tools: ["search/changes","edit","vscode/extensions","web/fetch","vscode/getProjectSetupInfo","vscode/installExtension","vscode/newWorkspace","vscode/runCommand","read/problems","execute/getTerminalOutput","execute/runInTerminal","read/terminalLastCommand","read/terminalSelection","execute/runNotebookCell","read/getNotebookSummary","read/readNotebookCellOutput","execute/createAndRunTask","execute/runTask","read/getTaskOutput","search","execute/testFailure","todo","search/usages","vscode/vscodeAPI","vscode/memory"]
 ---
 
 # Azure Functions Code Generation and Deployment

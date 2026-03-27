@@ -487,6 +487,24 @@
                     </label>
                 </div>
 
+                <div class="input-group">
+                    <label for="provider">Provider (optional):</label>
+                    <select id="provider">
+                        <option value="">Auto-detect</option>
+                        <option value="quantum-llm">Quantum LLM</option>
+                        <option value="azure">Azure OpenAI</option>
+                        <option value="openai">OpenAI</option>
+                        <option value="lmstudio">LM Studio</option>
+                        <option value="ollama">Ollama</option>
+                        <option value="local">Local fallback</option>
+                    </select>
+                </div>
+
+                <div class="input-group">
+                    <label for="model">Model / Path (optional):</label>
+                    <input type="text" id="model" placeholder="e.g. data_out/quantum_llm_training">
+                </div>
+
                 <div class="button-group">
                     <button class="btn-plan" onclick="planActions()">📋 Plan Actions Only</button>
                     <button class="btn-execute" onclick="executeActions()">▶️ Execute Actions</button>
@@ -504,6 +522,52 @@
     </div>
 
     <script>
+        const AUTOEXEC_PROVIDER_KEY = 'aria-autoexec-provider';
+        const AUTOEXEC_MODEL_KEY = 'aria-autoexec-model';
+        const AUTOEXEC_USE_LLM_KEY = 'aria-autoexec-use-llm';
+        const AUTOEXEC_SHOW_STATE_KEY = 'aria-autoexec-show-state';
+
+        function restoreAutoExecuteSettings() {
+            try {
+                const providerEl = document.getElementById('provider');
+                const modelEl = document.getElementById('model');
+                const useLlmEl = document.getElementById('use-llm');
+                const showStateEl = document.getElementById('show-state');
+
+                if (providerEl) {
+                    const savedProvider = localStorage.getItem(AUTOEXEC_PROVIDER_KEY);
+                    if (savedProvider !== null) providerEl.value = savedProvider;
+                }
+                if (modelEl) {
+                    const savedModel = localStorage.getItem(AUTOEXEC_MODEL_KEY);
+                    if (savedModel !== null) modelEl.value = savedModel;
+                }
+                if (useLlmEl) {
+                    const savedUseLlm = localStorage.getItem(AUTOEXEC_USE_LLM_KEY);
+                    if (savedUseLlm !== null) useLlmEl.checked = savedUseLlm !== 'false';
+                }
+                if (showStateEl) {
+                    const savedShowState = localStorage.getItem(AUTOEXEC_SHOW_STATE_KEY);
+                    if (savedShowState !== null) showStateEl.checked = savedShowState === 'true';
+                }
+            } catch (err) {
+                console.warn('restoreAutoExecuteSettings failed:', err);
+            }
+        }
+
+        function persistAutoExecuteSettings(provider, model, useLlm, showState) {
+            try {
+                localStorage.setItem(AUTOEXEC_PROVIDER_KEY, provider || '');
+                localStorage.setItem(AUTOEXEC_MODEL_KEY, model || '');
+                localStorage.setItem(AUTOEXEC_USE_LLM_KEY, String(Boolean(useLlm)));
+                localStorage.setItem(AUTOEXEC_SHOW_STATE_KEY, String(Boolean(showState)));
+            } catch (err) {
+                console.warn('persistAutoExecuteSettings failed:', err);
+            }
+        }
+
+        restoreAutoExecuteSettings();
+
         function setCommand(cmd) {
             document.getElementById('command').value = cmd;
         }
@@ -524,6 +588,10 @@
             const command = document.getElementById('command').value.trim();
             const useLlm = document.getElementById('use-llm').checked;
             const showState = document.getElementById('show-state').checked;
+            const provider = document.getElementById('provider').value.trim();
+            const model = document.getElementById('model').value.trim();
+
+            persistAutoExecuteSettings(provider, model, useLlm, showState);
 
             if (!command) {
                 document.getElementById('command').focus();
@@ -547,7 +615,9 @@
                     body: JSON.stringify({
                         command: command,
                         auto_execute: autoExecute,
-                        use_llm: useLlm
+                        use_llm: useLlm,
+                        provider: provider || undefined,
+                        model: model || undefined,
                     })
                 });
 
@@ -578,6 +648,8 @@
                     <p><strong>Command:</strong> ${escapeHtml(data.command)}</p>
                     <p><strong>Mode:</strong> ${autoExecute ? '▶️ Execute' : '📋 Plan Only'}</p>
                     <p><strong>Actions Parsed:</strong> ${data.actions?.length || 0}</p>
+                    <p><strong>Provider Requested:</strong> ${escapeHtml((data.provider_requested || 'auto').toString())}</p>
+                    ${data.model_requested ? `<p><strong>Model Requested:</strong> ${escapeHtml(data.model_requested.toString())}</p>` : ''}
                     <span class="status-badge ${data.status === 'success' ? 'status-success' : 'status-error'}">
                         ${data.status.toUpperCase()}
                     </span>

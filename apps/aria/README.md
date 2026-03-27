@@ -4,6 +4,8 @@ A real-time 3D character controller with object management and server synchroniz
 
 ## Features
 
+- **UE5-First Web Runtime**: Unreal Engine 5 Pixel Streaming mode is the default renderer
+- **Fallback Renderer**: Optional Three.js renderer remains available as a compatibility fallback
 - **3D Character Control**: Move Aria character around the stage using waypoints
 - **Object Management**: Add, pickup, drop, and throw objects
 - **Server Sync**: All client actions synchronized to Python backend
@@ -25,6 +27,8 @@ python server.py
 
 ### Frontend (`index.html` + `aria_controller.js`)
 
+- UE5-first renderer toggle (`UE5` / `Three.js`)
+- UE5 Pixel Streaming URL via `?ue5Url=...` or `localStorage["aria-ue5-url"]`
 - 3D CSS transforms for character positioning
 - Drag-and-drop object placement
 - Click waypoints for movement
@@ -304,7 +308,7 @@ Workflow includes:
 - [ ] Physics engine for object interactions
 - [ ] Inventory system
 - [ ] Multi-character support
-- [ ] 3D model rendering (Three.js/Babylon.js)
+- [ ] Deeper UE5 scene integration (bi-directional gameplay events)
 - [ ] Save/load stage state
 - [ ] Undo/redo functionality
 - [ ] Collaborative editing (multiple users)

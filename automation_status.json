@@ -1,24 +1,31 @@
 {
-  "generated_at": "2026-03-26T20:17:24Z",
-  "run_id": "20260326T201613Z",
-  "started": "2026-03-26T20:16:13Z",
+  "generated_at": "2026-03-27T03:40:43Z",
+  "run_id": "20260327T034012Z",
+  "started": "2026-03-27T03:40:12Z",
   "config_path": null,
   "config_paths": {
     "quantum": "config/quantum/quantum_autorun.yaml",
     "evaluation": "config/evaluation/evaluation_autorun.yaml"
   },
-  "uptime_seconds": 70.218029,
+  "uptime_seconds": 31.062722,
   "components_running": {
-    "aria": false,
-    "training": false,
+    "aria": true,
+    "training": true,
     "quantum": false,
     "evaluation": false,
     "datasets": false,
     "monitoring": false,
     "backup": false
   },
-  "dependency_status": {},
-  "last_health_check": "2026-03-26T20:17:24Z",
+  "dependency_status": {
+    "aria": true,
+    "training": true,
+    "quantum": true,
+    "evaluation": false
+  },
+  "last_health_check": "2026-03-27T03:40:43Z",
   "total_cycles": 0,
-  "errors": []
+  "errors": [
+    "Dependencies still missing after install (evaluation): scikit-learn"
+  ]
 }

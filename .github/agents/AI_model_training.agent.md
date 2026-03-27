@@ -1,7 +1,7 @@
 ---
 name: AI_model_training
 description: End-to-end AI model training workflow — dataset curation, LoRA fine-tuning, evaluation, and model promotion with safety gates.
-tools: ["changes","edit","fetch","new","problems","runCommands","runTasks","search","testFailure","todos","usages","memory"]
+tools: ["search/changes","edit","web/fetch","vscode/getProjectSetupInfo", "vscode/installExtension", "vscode/newWorkspace", "vscode/runCommand","read/problems","execute/getTerminalOutput", "execute/runInTerminal", "read/terminalLastCommand", "read/terminalSelection","execute/createAndRunTask", "execute/runTask", "read/getTaskOutput","azure-mcp/search","execute/testFailure","todo","search/usages","vscode/memory"]
 ---
 
 # AI Model Training & Deployment

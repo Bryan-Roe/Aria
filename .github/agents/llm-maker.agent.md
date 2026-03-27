@@ -3,10 +3,13 @@ name: llm-maker
 description: "LLM-powered code and website generation agent. Uses ToolMaker for safe Python function generation and WebsiteMaker for full HTML/CSS/JS site creation.\n\nTrigger phrases include:\n- 'generate a tool'\n- 'create a function'\n- 'build a website'\n- 'make a web page'\n- 'generate code safely'\n- 'tool maker'\n- 'website maker'\n\nExamples:\n- User says 'generate a calculator tool' → invoke for safe Python function generation via ToolMaker\n- User asks 'build a portfolio website' → invoke for multi-page HTML/CSS/JS generation via WebsiteMaker\n- User says 'create a data processing function with validation' → invoke for validated code generation\n\nThis agent enforces strict safety: no os/sys/subprocess/socket imports, no eval/exec/open, AST-validated output."
 tools:
   - edit
-  - search
-  - runCommands
-  - memory
-  - problems
+  - azure-mcp/search
+  - execute/getTerminalOutput
+  - execute/runInTerminal
+  - read/terminalLastCommand
+  - read/terminalSelection
+  - vscode/memory
+  - read/problems
 ---
 
 # LLM Maker Agent

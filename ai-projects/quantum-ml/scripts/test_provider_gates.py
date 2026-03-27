@@ -147,6 +147,19 @@ def create_ghz_rigetti_native(n_qubits: int = 4) -> QuantumCircuit:
     return qc
 
 
+def create_ghz_provider_native(n_qubits: int = 4, provider: str = "standard") -> QuantumCircuit:
+    """Factory for provider-specific GHZ circuit construction."""
+    provider_key = provider.lower().strip()
+    if provider_key == "quantinuum":
+        return create_ghz_quantinuum_native(n_qubits)
+    if provider_key == "ionq":
+        return create_ghz_ionq_native(n_qubits)
+    if provider_key == "rigetti":
+        return create_ghz_rigetti_native(n_qubits)
+    # Default generic decomposition
+    return create_ghz_standard(n_qubits)
+
+
 def compute_entropy(counts: dict[str, int]) -> float:
     total = sum(counts.values())
     if total == 0:

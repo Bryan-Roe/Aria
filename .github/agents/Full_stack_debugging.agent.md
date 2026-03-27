@@ -1,7 +1,7 @@
 ---
 name: Full_stack_debugging
 description: Systematic cross-stack debugging for the Aria platform — trace issues from frontend JS through Python backends, Azure Functions, and AI pipelines.
-tools: ["changes","edit","fetch","problems","runCommands","runTasks","search","testFailure","todos","usages","memory"]
+tools: ["search/changes","edit","web/fetch","read/problems","execute/getTerminalOutput", "execute/runInTerminal", "read/terminalLastCommand", "read/terminalSelection","execute/createAndRunTask", "execute/runTask", "read/getTaskOutput","azure-mcp/search","execute/testFailure","todo","search/usages","vscode/memory"]
 ---
 
 # Full-Stack Debugging

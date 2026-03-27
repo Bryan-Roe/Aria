@@ -1,7 +1,7 @@
 ---
 name: Azure_Static_Web_App
 description: Custom mode for creating and deploying Azure Static Web Apps
-tools: ["changes","edit","extensions","fetch","githubRepo","new","problems","runCommands","runNotebooks","runTasks","search","testFailure","todos","usages","vscodeAPI","memory"]
+tools: ["search/changes","edit","vscode/extensions","web/fetch","vscode/getProjectSetupInfo", "vscode/installExtension", "vscode/newWorkspace", "vscode/runCommand","read/problems","execute/getTerminalOutput", "execute/runInTerminal", "read/terminalLastCommand", "read/terminalSelection","execute/runNotebookCell", "read/getNotebookSummary", "read/readNotebookCellOutput","execute/createAndRunTask", "execute/runTask", "read/getTaskOutput","azure-mcp/search","execute/testFailure","todo","search/usages","vscode/vscodeAPI","vscode/memory"]
 ---
 
 # Azure Static Web Apps Assistant

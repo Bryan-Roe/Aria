@@ -3,14 +3,19 @@ name: autonomous-trainer
 description: "Autonomous training and model lifecycle agent. Manages LoRA fine-tuning, dataset curation, performance analysis, model promotion, and continuous learning cycles.\n\nTrigger phrases include:\n- 'train a model'\n- 'fine-tune'\n- 'LoRA training'\n- 'improve model performance'\n- 'start autonomous training'\n- 'evaluate models'\n- 'promote model'\n- 'dataset curation'\n\nExamples:\n- User says 'start a training run with the latest datasets' → invoke for orchestrated training\n- User asks 'why is model accuracy dropping?' → invoke for performance analysis and debugging\n- User says 'set up continuous learning' → invoke for autonomous training pipeline configuration\n\nThis agent understands training orchestrators, dataset conventions, LoRA adapters, performance tracking, and model deployment."
 tools:
   - edit
-  - search
-  - runCommands
-  - runTasks
-  - memory
-  - runSubagent
-  - runTests
-  - problems
-  - todos
+  - azure-mcp/search
+  - execute/getTerminalOutput
+  - execute/runInTerminal
+  - read/terminalLastCommand
+  - read/terminalSelection
+  - execute/createAndRunTask
+  - execute/runTask
+  - read/getTaskOutput
+  - vscode/memory
+  - agent
+  - execute/runTests
+  - read/problems
+  - todo
 ---
 
 # Autonomous Training Agent

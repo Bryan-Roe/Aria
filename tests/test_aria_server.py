@@ -1,4 +1,5 @@
 import re
+import json
 import importlib.util
 import sys
 from http import HTTPStatus
@@ -532,6 +533,44 @@ def test_log_message_handles_httpstatus_args(capsys):
     assert "code 404, message File not found" in captured.out
 
 
+def test_generate_world_with_llm_accepts_provider_content_dict():
+    class MockProvider:
+        def complete(self, messages, stream=False):
+            world_payload = {
+                "objects": [
+                    {"id": "star", "emoji": "⭐", "position": {
+                        "x": 20, "y": 30}, "state": "on_stage"},
+                    {"id": "moon", "emoji": "🌙", "position": {
+                        "x": 45, "y": 25}, "state": "on_stage"}
+                ],
+                "environment": {"theme": "space", "stage_bounds": {"width": 100, "height": 100}}
+            }
+            return {"content": json.dumps(world_payload)}
+
+    world = aria_server.generate_world_with_llm("space", 2, MockProvider())
+    assert world.get('llm', False) is True
+    assert world['environment']['theme'] == 'space'
+    assert 'star' in world['objects'] or 'moon' in world['objects']
+
+
+def test_generate_world_with_llm_accepts_object_list_in_response():
+    class MockProvider:
+        def complete(self, messages, stream=False):
+            world_payload = {
+                "objects": [
+                    {"id": "shell", "emoji": "🐚", "position": {
+                        "x": 30, "y": 40}, "state": "on_stage"}
+                ],
+                "environment": {"theme": "ocean", "stage_bounds": {"width": 100, "height": 100}}
+            }
+            return json.dumps(world_payload)
+
+    world = aria_server.generate_world_with_llm("ocean", 1, MockProvider())
+    assert world.get('llm', False) is True
+    assert world['environment']['theme'] == 'ocean'
+    assert any(obj['emoji'] == '🐚' for obj in world['objects'].values())
+
+
 # ===== Sparkle Functionality Tests =====
 
 def test_sparkle_effect_basic():
@@ -674,3 +713,96 @@ def test_effect_intensity_mutually_exclusive():
     # Light should be applied due to if-elif order (light is checked first)
     assert '[aria:effect:sparkle:light]' in sparkle_tags[0], \
         f"Expected light intensity to take precedence but got {sparkle_tags[0]}"
+
+
+def test_action_to_tags_move_position_and_say() -> None:
+    move_tags = aria_server.action_to_tags(
+        {"action": "move", "target": {"x": 42, "y": 73}}
+    )
+    assert move_tags == ['[aria:position:42:73]']
+
+    say_tags = aria_server.action_to_tags(
+        {"action": "say", "text": "Hello", "emotion": "happy"}
+    )
+    assert '[aria:say:Hello]' in say_tags
+    assert '[aria:expression:happy]' in say_tags
+
+
+def test_tags_from_actions_flattens_results() -> None:
+    tags = aria_server.tags_from_actions([
+        {"action": "gesture", "gesture_type": "wave"},
+        {"action": "wait", "duration": 1.5},
+    ])
+
+    assert tags == ['[aria:gesture:wave]', '[aria:wait:1.5]']
+
+
+def test_parse_use_llm_false_bypasses_provider_resolution(monkeypatch) -> None:
+    parser = aria_server.AriaActionParser()
+
+    def fail_if_called(*args, **kwargs):
+        raise AssertionError(
+            "provider resolution should not run when use_llm=False")
+
+    monkeypatch.setattr(
+        parser, '_resolve_provider_for_request', fail_if_called)
+
+    actions = parser.parse("wave", use_llm=False)
+
+    assert any(
+        a.get('action') == 'gesture' and a.get('gesture_type') == 'wave'
+        for a in actions
+    ), f"Expected fallback gesture action when use_llm=False but got {actions}"
+
+
+def test_parse_accepts_quantum_llm_provider_alias(monkeypatch):
+    captured = {}
+
+    class DummyProvider:
+        def complete(self, messages, stream=False):
+            return "[]"
+
+    class DummyChoice:
+        name = "quantum-llm"
+        model = "quantum-llm"
+
+    def fake_detect_provider(explicit=None, model_override=None, **kwargs):
+        captured['explicit'] = explicit
+        captured['model_override'] = model_override
+        return DummyProvider(), DummyChoice()
+
+    monkeypatch.setattr(aria_server, 'detect_provider', fake_detect_provider)
+
+    parser = aria_server.AriaActionParser()
+    actions = parser.parse(
+        "Plan a move",
+        use_llm=True,
+        provider_choice="quantum-llm",
+        model_override="data_out/quantum_llm_training",
+    )
+
+    assert actions == []
+    assert captured['explicit'] == 'quantum'
+    assert captured['model_override'] == 'data_out/quantum_llm_training'
+
+
+def test_parse_falls_back_when_provider_resolution_fails(monkeypatch):
+    parser = aria_server.AriaActionParser()
+
+    def failing_detect_provider(explicit=None, model_override=None, **kwargs):
+        raise RuntimeError("provider unavailable")
+
+    monkeypatch.setattr(aria_server, 'detect_provider',
+                        failing_detect_provider)
+
+    actions = parser.parse(
+        "wave",
+        use_llm=True,
+        provider_choice="quantum-llm",
+        model_override="data_out/quantum_llm_training",
+    )
+
+    assert any(
+        a.get('action') == 'gesture' and a.get('gesture_type') == 'wave'
+        for a in actions
+    ), f"Expected fallback parser action but got {actions}"

@@ -1,25 +1,30 @@
 """Simple HTTP server for training dashboard"""
-from gpu_monitor import get_gpu_info, get_gpu_processes, get_system_resources
-import http.server
-import socketserver
-import webbrowser
-import sys
-import json
-import yaml
-import subprocess
-import time
-import os
-import re
-import random
-from pathlib import Path
-from urllib.parse import urlparse, parse_qs
-from datetime import datetime
 from collections import defaultdict
+from datetime import datetime
+from urllib.parse import urlparse, parse_qs
+import random
+import re
+import os
+import time
+import subprocess
+import yaml
+import json
+import webbrowser
+import socketserver
+import http.server
+from vram_calculator import calculate_safe_batch_size
+from gpu_monitor import get_gpu_info, get_gpu_processes, get_system_resources
+import sys
+from pathlib import Path
+# Make scripts/ importable when serve.py is run from apps/dashboard/
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts"))
 
 # Import GPU monitoring
 sys.path.insert(0, str(Path(__file__).parent))
 
 PORT = 8000
+REPO_ROOT = Path(__file__).resolve().parents[2]
+DASHBOARD_DIR = Path(__file__).resolve().parent
 
 # Simple rate limiting
 request_counts = defaultdict(list)
@@ -27,6 +32,10 @@ MAX_REQUESTS_PER_MINUTE = 60
 
 
 class MyHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
+    def __init__(self, *args, directory=None, **kwargs):
+        # Always serve static dashboard assets from apps/dashboard.
+        super().__init__(*args, directory=str(DASHBOARD_DIR), **kwargs)
+
     def log_request(self, code='-', size='-'):
         """Enhanced request logging with timestamps"""
         timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
@@ -55,8 +64,7 @@ class MyHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
             return
 
         # Use the root_dir set by main()
-        root_dir = getattr(self.__class__, 'root_dir',
-                           Path(__file__).parent.parent)
+        root_dir = getattr(self.__class__, 'root_dir', REPO_ROOT)
 
         # Redirect root to consolidated dashboard
         if self.path == '/' or self.path == '/index.html':
@@ -198,6 +206,29 @@ class MyHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
             self.send_json_response({'processes': get_gpu_processes()})
             return
 
+        # API: VRAM-aware batch size calculator
+        elif self.path.startswith('/api/vram-info'):
+            from urllib.parse import urlparse, parse_qs
+            qs = parse_qs(urlparse(self.path).query)
+
+            def _qs(key, default=''):
+                vals = qs.get(key, [default])
+                return vals[0] if vals else default
+            model = _qs('model', '')
+            params_b_str = _qs('params_b', '')
+            params_b = float(params_b_str) if params_b_str else None
+            lora_rank = int(_qs('lora_rank', '16'))
+            seq_len = int(_qs('seq_len', '512'))
+            dtype = _qs('dtype', 'fp16')
+            self.send_json_response(calculate_safe_batch_size(
+                model_name=model,
+                params_b=params_b,
+                lora_rank=lora_rank,
+                seq_len=seq_len,
+                dtype=dtype,
+            ))
+            return
+
         # API: System resources
         elif self.path == '/api/system':
             self.send_json_response(get_system_resources())
@@ -233,8 +264,7 @@ class MyHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
 
     def do_POST(self):
         # Use the root_dir set by main()
-        root_dir = getattr(self.__class__, 'root_dir',
-                           Path(__file__).parent.parent)
+        root_dir = getattr(self.__class__, 'root_dir', REPO_ROOT)
 
         # API: Start training
         if self.path == '/api/start-training':
@@ -280,8 +310,7 @@ class MyHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
 
     def get_job_progress(self, job_id):
         """Return job progress information"""
-        root_dir = getattr(self.__class__, 'root_dir',
-                           Path(__file__).parent.parent)
+        root_dir = getattr(self.__class__, 'root_dir', REPO_ROOT)
         status_file = root_dir / 'data_out' / 'autotrain' / 'status.json'
         try:
             with open(status_file, 'r') as f:
@@ -329,8 +358,7 @@ class MyHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
 
     def get_job_metrics(self, job_id):
         """Return arrays for charting training/validation loss"""
-        root_dir = getattr(self.__class__, 'root_dir',
-                           Path(__file__).parent.parent)
+        root_dir = getattr(self.__class__, 'root_dir', REPO_ROOT)
         status_file = root_dir / 'data_out' / 'autotrain' / 'status.json'
         steps = []
         train_loss = []
@@ -379,8 +407,7 @@ class MyHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
 
     def get_datasets(self):
         # Use the root_dir set by main()
-        root_dir = getattr(self.__class__, 'root_dir',
-                           Path(__file__).parent.parent)
+        root_dir = getattr(self.__class__, 'root_dir', REPO_ROOT)
         datasets_dir = root_dir / 'datasets' / 'chat'
         datasets = []
 
@@ -454,8 +481,7 @@ class MyHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
 
     def get_models(self):
         # Use the root_dir set by main()
-        root_dir = getattr(self.__class__, 'root_dir',
-                           Path(__file__).parent.parent)
+        root_dir = getattr(self.__class__, 'root_dir', REPO_ROOT)
         models_dir = root_dir / 'data_out' / 'lora_training' / 'marathon'
         models = []
 
@@ -480,8 +506,7 @@ class MyHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
 
     def get_configs(self):
         # Use the root_dir set by main()
-        root_dir = getattr(self.__class__, 'root_dir',
-                           Path(__file__).parent.parent)
+        root_dir = getattr(self.__class__, 'root_dir', REPO_ROOT)
         configs = []
 
         try:
@@ -515,8 +540,7 @@ class MyHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
 
     def get_job_details(self, job_name):
         # Use the root_dir set by main()
-        root_dir = getattr(self.__class__, 'root_dir',
-                           Path(__file__).parent.parent)
+        root_dir = getattr(self.__class__, 'root_dir', REPO_ROOT)
         status_file = root_dir / 'data_out' / 'autotrain' / 'status.json'
 
         try:
@@ -539,8 +563,7 @@ class MyHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
 
     def get_job_logs(self, job_name):
         # Use the root_dir set by main()
-        root_dir = getattr(self.__class__, 'root_dir',
-                           Path(__file__).parent.parent)
+        root_dir = getattr(self.__class__, 'root_dir', REPO_ROOT)
         status_file = root_dir / 'data_out' / 'autotrain' / 'status.json'
 
         try:
@@ -567,8 +590,7 @@ class MyHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
     def start_training(self, params):
         """Create and queue a new training job"""
         # Use the root_dir set by main()
-        root_dir = getattr(self.__class__, 'root_dir',
-                           Path(__file__).parent.parent)
+        root_dir = getattr(self.__class__, 'root_dir', REPO_ROOT)
 
         try:
             # Accept both legacy and new parameter names
@@ -640,8 +662,7 @@ class MyHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
     def control_job(self, job_id, action='pause'):
         """Stub to control a job (pause/stop) via flag files"""
         try:
-            root_dir = getattr(self.__class__, 'root_dir',
-                               Path(__file__).parent.parent)
+            root_dir = getattr(self.__class__, 'root_dir', REPO_ROOT)
             control_dir = root_dir / 'data_out' / 'control'
             control_dir.mkdir(parents=True, exist_ok=True)
             flag_file = control_dir / f'{job_id}.{action}'
@@ -681,8 +702,7 @@ class MyHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
     def get_training_history(self):
         """Get historical training data for charts"""
         # Use the root_dir set by main()
-        root_dir = getattr(self.__class__, 'root_dir',
-                           Path(__file__).parent.parent)
+        root_dir = getattr(self.__class__, 'root_dir', REPO_ROOT)
         status_file = root_dir / 'data_out' / 'autotrain' / 'status.json'
 
         try:
@@ -720,8 +740,7 @@ class MyHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
 
     def get_system_health(self):
         """Comprehensive system health check"""
-        root_dir = getattr(self.__class__, 'root_dir',
-                           Path(__file__).parent.parent)
+        root_dir = getattr(self.__class__, 'root_dir', REPO_ROOT)
 
         health = {
             'status': 'healthy',
@@ -774,8 +793,7 @@ class MyHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
 
     def get_quick_stats(self):
         """Quick summary statistics"""
-        root_dir = getattr(self.__class__, 'root_dir',
-                           Path(__file__).parent.parent)
+        root_dir = getattr(self.__class__, 'root_dir', REPO_ROOT)
 
         stats = {
             'training_jobs': 0,
@@ -907,13 +925,8 @@ class MyHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
 
 
 def main():
-    # Store root directory before changing
-    root_dir = Path(__file__).parent.parent
-    dashboard_dir = Path(__file__).parent
-
-    # Change to dashboard directory for file serving
-    import os
-    os.chdir(dashboard_dir)
+    # Use repository root for all API file lookups.
+    root_dir = REPO_ROOT
 
     # Make root_dir available to handler
     MyHTTPRequestHandler.root_dir = root_dir

@@ -2,27 +2,37 @@
 description: Autonomous agent for complex task decomposition, multi-step reasoning, and self-correcting execution with safety boundaries. Use for analyzing user objectives, breaking down tasks, and delivering optimal, safe solutions.
 name: agent
 tools:
-	- runCommands
-	- runTasks
+	- execute/getTerminalOutput
+	- execute/runInTerminal
+	- read/terminalLastCommand
+	- read/terminalSelection
+	- execute/createAndRunTask
+	- execute/runTask
+	- read/getTaskOutput
 	- edit
-	- runNotebooks
-	- search
-	- new
-	- extensions
-	- todos
-	- runSubagent
-	- runTests
+	- execute/runNotebookCell
+	- read/getNotebookSummary
+	- read/readNotebookCellOutput
+	- azure-mcp/search
+	- vscode/extensions
+	- vscode/getProjectSetupInfo
+	- vscode/installExtension
+	- vscode/newWorkspace
+	- vscode/runCommand
+	- todo
+	- agent
+	- execute/runTests
 	- github.vscode-pull-request-github/issue_fetch
 	- github.vscode-pull-request-github/doSearch
 	- github.vscode-pull-request-github/activePullRequest
 	- github.vscode-pull-request-github/openPullRequest
-	- usages
-	- vscodeAPI
-	- problems
-	- changes
-	- testFailure
-	- fetch
-	- memory
+	- search/usages
+	- vscode/vscodeAPI
+	- read/problems
+	- search/changes
+	- execute/testFailure
+	- web/fetch
+	- vscode/memory
 	- ms-azuretools.vscode-azureresourcegroups/azureActivityLog
 	- ms-python.python/getPythonEnvironmentInfo
 	- ms-python.python/getPythonExecutableCommand
@@ -44,6 +54,7 @@ You are the primary autonomous agent for the Aria platform. You handle complex m
 ## Platform Context
 
 Aria is an interactive AI character platform with:
+
 - **Multi-provider chat** (Azure OpenAI → OpenAI → LMStudio → LoRA → Local fallback)
 - **AGI reasoning** (chain-of-thought, task decomposition, self-reflection)
 - **Interactive character** (3D animated avatar, NL commands, world generation)
@@ -57,19 +68,19 @@ Aria is an interactive AI character platform with:
 
 Delegate to specialist agents when the task requires deep domain expertise:
 
-| Agent | Use For |
-|-------|---------|
-| `agi-reasoning` | Chain-of-thought analysis, task decomposition, self-reflection |
-| `aria-character` | Character commands, actions, world generation, animations |
-| `autonomous-trainer` | LoRA training, dataset curation, model promotion |
-| `full-stack-debugger` | Cross-stack issue diagnosis |
-| `ai-architect` | AI pipeline design, provider integration, memory architecture |
-| `llm-maker` | Safe code/website generation via ToolMaker/WebsiteMaker |
-| `chat-provider` | Provider detection, streaming, memory injection, tokens |
-| `platform-ops` | Subscriptions, monitoring, deployment, dashboards |
-| `vision-ai` | Expression classification, CNN models, image inference |
-| `data-pipeline` | Batch evaluation, dataset management, benchmarking |
-| `qai-specialist` | Quantum-AI hybrid workflows |
+| Agent                 | Use For                                                        |
+| --------------------- | -------------------------------------------------------------- |
+| `agi-reasoning`       | Chain-of-thought analysis, task decomposition, self-reflection |
+| `aria-character`      | Character commands, actions, world generation, animations      |
+| `autonomous-trainer`  | LoRA training, dataset curation, model promotion               |
+| `full-stack-debugger` | Cross-stack issue diagnosis                                    |
+| `ai-architect`        | AI pipeline design, provider integration, memory architecture  |
+| `llm-maker`           | Safe code/website generation via ToolMaker/WebsiteMaker        |
+| `chat-provider`       | Provider detection, streaming, memory injection, tokens        |
+| `platform-ops`        | Subscriptions, monitoring, deployment, dashboards              |
+| `vision-ai`           | Expression classification, CNN models, image inference         |
+| `data-pipeline`       | Batch evaluation, dataset management, benchmarking             |
+| `qai-specialist`      | Quantum-AI hybrid workflows                                    |
 
 ## Safety Boundaries
 

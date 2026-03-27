@@ -16,10 +16,13 @@ Docker setup:
 """
 
 import time
+import json
 import requests
 import socket
 import subprocess
+import sys
 from pathlib import Path
+from urllib.parse import urlparse
 import pytest
 import os
 import logging
@@ -39,17 +42,117 @@ except ImportError:
     SELENIUM_AVAILABLE = False
     logger.warning("Selenium not installed")
 
-# Skip all tests if selenium not available
-pytestmark = pytest.mark.skipif(
-    not SELENIUM_AVAILABLE,
-    reason="Selenium not installed"
-)
-
 REPO_ROOT = Path(__file__).resolve().parents[1]
 ARIA_WEB = REPO_ROOT / 'aria_web'
+ARIA_APPS = REPO_ROOT / 'apps' / 'aria'
 SERVER_URL = os.environ.get('ARIA_SERVER_URL', 'http://localhost:8080')
 SELENIUM_REMOTE_URL = os.environ.get(
     'SELENIUM_REMOTE_URL', 'http://localhost:4444/wd/hub')
+
+
+def _is_local_host(hostname: str | None) -> bool:
+    """Return True for localhost-style hostnames/IPs."""
+    return hostname in {'127.0.0.1', 'localhost', '::1'}
+
+
+def _resolve_server_cwd() -> Path:
+    """Resolve the best directory containing server.py for Aria UI tests."""
+    if (ARIA_WEB / 'server.py').exists():
+        return ARIA_WEB
+    if (ARIA_APPS / 'server.py').exists():
+        return ARIA_APPS
+    # Keep a clear failure mode if project layout changes unexpectedly.
+    raise RuntimeError(
+        f"Could not find Aria server.py under {ARIA_WEB} or {ARIA_APPS}")
+
+
+def _selenium_status_url(remote_url: str) -> str:
+    """Build a Selenium status URL from a WebDriver endpoint URL.
+
+    Supports standard endpoints like:
+    - http://host:4444/wd/hub
+    - http://host:4444/wd/hub/
+    - http://host:4444/session (fallback)
+    """
+    parsed = urlparse(remote_url)
+    base = f"{parsed.scheme or 'http'}://{parsed.netloc}"
+    path = (parsed.path or '').rstrip('/')
+
+    if path.endswith('/wd/hub'):
+        return f"{base}/wd/hub/status"
+
+    # Default modern Selenium path.
+    return f"{base}/status"
+
+
+def _selenium_status_urls(remote_url: str) -> list[str]:
+    """Return candidate status endpoints to probe in priority order."""
+    primary = _selenium_status_url(remote_url)
+    parsed = urlparse(remote_url)
+    base = f"{parsed.scheme or 'http'}://{parsed.netloc}"
+    secondary = f"{base}/wd/hub/status" if primary != f"{base}/wd/hub/status" else f"{base}/status"
+    return [primary, secondary]
+
+
+def _selenium_ready_from_payload(status: dict) -> bool:
+    """Interpret Selenium status payloads across Grid versions."""
+    if not isinstance(status, dict):
+        return False
+
+    value = status.get('value')
+    if isinstance(value, dict) and 'ready' in value:
+        return bool(value.get('ready'))
+
+    # Fallback for alternate payloads that expose top-level ready.
+    if 'ready' in status:
+        return bool(status.get('ready'))
+
+    return False
+
+
+def test_is_local_host_variants():
+    assert _is_local_host('localhost')
+    assert _is_local_host('127.0.0.1')
+    assert _is_local_host('::1')
+    assert not _is_local_host('example.com')
+
+
+def test_resolve_server_cwd_contains_server_script():
+    cwd = _resolve_server_cwd()
+    assert (cwd / 'server.py').exists()
+
+
+def test_ensure_server_running_rejects_unhealthy_non_local(monkeypatch):
+    module = sys.modules[__name__]
+    monkeypatch.setattr(module, 'SERVER_URL', 'http://example.com:8080')
+    monkeypatch.setattr(module, 'is_aria_api_healthy', lambda _url: False)
+
+    with pytest.raises(RuntimeError, match='Configured ARIA_SERVER_URL is not healthy'):
+        ensure_server_running()
+
+
+def test_selenium_status_url_with_wd_hub_path():
+    assert _selenium_status_url(
+        'http://localhost:4444/wd/hub') == 'http://localhost:4444/wd/hub/status'
+    assert _selenium_status_url(
+        'http://localhost:4444/wd/hub/') == 'http://localhost:4444/wd/hub/status'
+
+
+def test_selenium_status_url_with_non_standard_path_uses_status_root():
+    assert _selenium_status_url(
+        'http://localhost:4444/session') == 'http://localhost:4444/status'
+
+
+def test_selenium_status_urls_returns_primary_and_fallback():
+    urls = _selenium_status_urls('http://localhost:4444/session')
+    assert urls == ['http://localhost:4444/status', 'http://localhost:4444/wd/hub/status']
+
+
+def test_selenium_ready_from_payload_variants():
+    assert _selenium_ready_from_payload({'value': {'ready': True}})
+    assert _selenium_ready_from_payload({'ready': True})
+    assert not _selenium_ready_from_payload({'value': {'ready': False}})
+    assert not _selenium_ready_from_payload({'foo': 'bar'})
 
 
 def is_port_open(port=8080, host='127.0.0.1'):
@@ -64,23 +167,68 @@ def is_port_open(port=8080, host='127.0.0.1'):
         return False
 
 
+def _find_free_port(host='127.0.0.1'):
+    """Find a free TCP port on localhost."""
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    try:
+        s.bind((host, 0))
+        return s.getsockname()[1]
+    finally:
+        s.close()
+
+
+def is_aria_api_healthy(base_url: str) -> bool:
+    """Return True only when /api/aria/state responds with expected JSON."""
+    try:
+        r = requests.get(f"{base_url}/api/aria/state", timeout=1.0)
+        if not r.ok:
+            return False
+        payload = r.json()
+        return isinstance(payload, dict) and 'aria' in payload and 'objects' in payload
+    except (requests.RequestException, ValueError, json.JSONDecodeError):
+        return False
+
+
 def ensure_server_running():
     """Start the Aria server if not already running."""
-    if is_port_open(8000):
-        logger.info("Server already running")
+    global SERVER_URL
+
+    parsed = urlparse(SERVER_URL)
+    configured_host = parsed.hostname or '127.0.0.1'
+    configured_port = parsed.port or 8080
+
+    # Re-use configured URL whenever it is healthy.
+    if is_aria_api_healthy(SERVER_URL):
+        logger.info("Aria API server already running")
         return None
 
+    # If user points to a non-local endpoint and it's unhealthy, do not silently
+    # start a local server on a different URL.
+    if not _is_local_host(configured_host):
+        raise RuntimeError(
+            f"Configured ARIA_SERVER_URL is not healthy: {SERVER_URL}")
+
+    # If configured local port is occupied by another service, launch Aria on a free port.
+    target_port = configured_port if not is_port_open(
+        configured_port, configured_host) else _find_free_port()
+    target_url = f"http://127.0.0.1:{target_port}"
+    server_cwd = _resolve_server_cwd()
+
     logger.info("Starting Aria server...")
+    env = os.environ.copy()
+    env['ARIA_PORT'] = str(target_port)
     proc = subprocess.Popen(
         ["python3", "server.py"],
-        cwd=str(ARIA_WEB),
+        cwd=str(server_cwd),
+        env=env,
         stdout=subprocess.DEVNULL,
         stderr=subprocess.DEVNULL
     )
 
     # Wait for server to be available
     for i in range(30):
-        if is_port_open(8080):
+        if is_aria_api_healthy(target_url):
+            SERVER_URL = target_url
             logger.info(f"Server started successfully after {i+1} attempts")
             return proc
         time.sleep(0.2)
@@ -105,17 +253,17 @@ def wait_for_object(name, timeout=4.0):
 
 def is_selenium_hub_ready():
     """Check if Selenium hub is accessible."""
-    try:
-        response = requests.get(
-            f"{SELENIUM_REMOTE_URL.rsplit('/wd/hub', 1)[0]}/wd/hub/status", timeout=2)
-        if response.ok:
-            status = response.json()
-            if status.get('value', {}).get('ready'):
-                logger.info("Selenium hub is ready")
-                return True
-            logger.warning(f"Selenium hub not ready: {status}")
-    except Exception as e:
-        logger.warning(f"Selenium hub not accessible: {e}")
+    for status_url in _selenium_status_urls(SELENIUM_REMOTE_URL):
+        try:
+            response = requests.get(status_url, timeout=2)
+            if response.ok:
+                status = response.json()
+                if _selenium_ready_from_payload(status):
+                    logger.info(f"Selenium hub is ready via {status_url}")
+                    return True
+                logger.warning(f"Selenium hub not ready via {status_url}: {status}")
+        except Exception as e:
+            logger.warning(f"Selenium hub not accessible via {status_url}: {e}")
     return False
 
 
@@ -155,6 +303,7 @@ def create_remote_driver(max_retries=3):
 
 
 @pytest.mark.selenium
+@pytest.mark.skipif(not SELENIUM_AVAILABLE, reason="Selenium not installed")
 def test_selenium_add_pickup_drop():
     """Test object sync using containerized Chrome via Selenium."""
     # Ensure server is running

@@ -4,16 +4,23 @@ description: "AGI reasoning and autonomous decision-making agent. Specializes in
 tools:
   - edit
   - search
-  - runCommands
-  - runTasks
-  - fetch
-  - memory
-  - runSubagent
-  - runNotebooks
-  - problems
-  - changes
-  - todos
-  - runTests
+  - execute/getTerminalOutput
+  - execute/runInTerminal
+  - read/terminalLastCommand
+  - read/terminalSelection
+  - execute/createAndRunTask
+  - execute/runTask
+  - read/getTaskOutput
+  - web/fetch
+  - vscode/memory
+  - agent
+  - execute/runNotebookCell
+  - read/getNotebookSummary
+  - read/readNotebookCellOutput
+  - read/problems
+  - search/changes
+  - todo
+  - execute/runTests
 ---
 
 # AGI Reasoning Agent

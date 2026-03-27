@@ -1,7 +1,7 @@
 ---
 name: qai-specialist
 description: Expert QAI workspace specialist for hybrid quantum-AI/ML development, training orchestration, and Azure Functions integration
-tools: ["*"]
+tools: []
 ---
 
 # QAI Workspace Specialist

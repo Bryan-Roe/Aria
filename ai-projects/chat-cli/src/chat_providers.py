@@ -421,7 +421,8 @@ class LocalEchoProvider(BaseChatProvider):
             for m in messages
             if m.get("role") == "user" and m.get("content", "").strip()
         ]
-        topic = user_topics[0][:120].rstrip(".,?!") if user_topics else "the current task"
+        topic = user_topics[0][:120].rstrip(
+            ".,?!") if user_topics else "the current task"
 
         if "message count exceeded limit" in last_assistant.lower():
             return (
@@ -597,18 +598,76 @@ class OpenAIProvider(BaseChatProvider):
         self.max_output_tokens = max_output_tokens
 
     def complete(self, messages: List[RoleMessage], stream: bool = True) -> Iterable[str] | str:
-        resp = self.client.chat.completions.create(
-            model=self.model,
-            messages=messages,
-            temperature=self.temperature,
-            max_tokens=self.max_output_tokens,
-            stream=stream,
-        )
+        """Complete with OpenAI and handle quota/rate-limit errors gracefully.
+
+        Behaviour mirrors AzureOpenAIProvider:
+          - Quota/billing errors → friendly string or single-chunk generator.
+          - Transient 429 errors → small retry with back-off.
+          - Mid-stream errors → yielded friendly/error token instead of raising.
+        """
+        def _attempt_create(**kwargs):
+            max_retries = 3
+            base_backoff = 0.4
+            attempt = 0
+            while True:
+                try:
+                    return self.client.chat.completions.create(**kwargs)
+                except Exception as e:
+                    if is_quota_error(e):
+                        raise
+                    if is_transient_rate_error(e) and attempt < max_retries:
+                        sleep_time = base_backoff * (2 ** attempt)
+                        _LOGGER.info(
+                            "OpenAI rate-limit, retrying in %.2fs (attempt %d)",
+                            sleep_time,
+                            attempt + 1,
+                        )
+                        time.sleep(sleep_time)
+                        attempt += 1
+                        continue
+                    raise
+
+        try:
+            resp = _attempt_create(
+                model=self.model,
+                messages=messages,
+                temperature=self.temperature,
+                max_tokens=self.max_output_tokens,
+                stream=stream,
+            )
+        except Exception as e:
+            if is_quota_error(e):
+                friendly = format_quota_message(e, service_name="OpenAI")
+                if stream:
+                    def _gen_quota_err() -> Generator[str, None, None]:
+                        yield friendly
+
+                    return _gen_quota_err()
+                return friendly
+            raise
 
         if stream:
-            return self._handle_openai_streaming_response(resp)
+            def _gen() -> Generator[str, None, None]:
+                try:
+                    for chunk in resp:
+                        try:
+                            delta = chunk.choices[0].delta
+                            if delta and delta.content:
+                                yield delta.content
+                        except Exception:
+                            continue
+                except Exception as exc:
+                    if is_quota_error(exc):
+                        yield format_quota_message(exc, service_name="OpenAI")
+                    else:
+                        yield f"[OpenAI error: {str(exc)}]"
+
+            return _gen()
         else:
-            return self._handle_openai_non_streaming_response(resp)
+            try:
+                return resp.choices[0].message.content or ""
+            except Exception:
+                return ""
 
 
 class LMStudioProvider(BaseChatProvider):

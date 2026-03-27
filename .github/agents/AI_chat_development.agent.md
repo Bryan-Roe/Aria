@@ -1,7 +1,7 @@
 ---
 name: AI_chat_development
 description: Multi-provider AI chat development — provider integration, streaming, semantic memory, token management, and self-learning pipelines.
-tools: ["changes","edit","fetch","new","problems","runCommands","search","todos","usages","memory"]
+tools: ["search/changes","edit","web/fetch","vscode/getProjectSetupInfo", "vscode/installExtension", "vscode/newWorkspace", "vscode/runCommand","read/problems","execute/getTerminalOutput", "execute/runInTerminal", "read/terminalLastCommand", "read/terminalSelection","azure-mcp/search","todo","search/usages","vscode/memory"]
 ---
 
 # AI Chat Development

@@ -544,7 +544,7 @@ def test_agi_smoke():
     agi = AGIProvider(base_provider=mock_provider)
 
     result = agi.complete(
-        [{"role": "user", "content": "Hello Aria!"}],
+        [{"role": "user", "content": "What is 2 plus 2?"}],
         stream=False
     )
 

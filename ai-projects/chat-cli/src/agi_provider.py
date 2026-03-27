@@ -84,7 +84,7 @@ _AGENT_REGISTRY: Dict[str, Dict[str, Any]] = {
     },
     "reasoning-specialist": {
         "domains": ["ai"],
-        "intents": ["explanation", "question"],
+        "intents": ["explanation", "question", "reasoning"],
         "provider": "agi",
         "confidence_boost": 0.1,
         "subtask_templates": [
@@ -310,6 +310,11 @@ class AGIProvider(BaseChatProvider):
             intent = "movement"
         elif any(w in query_lower for w in ["code", "function", "class", "debug", "refactor", "implement"]):
             intent = "coding"
+        elif any(p in query_lower for p in [
+            "reason about", "think through", "step by step", "analyze step",
+            "break down", "explain your reasoning", "chain of thought",
+        ]):
+            intent = "reasoning"
         elif any(p in query_lower for p in ["what is", "explain", "how does", "define", "describe"]):
             intent = "explanation"
         elif any(w in query_lower for w in ["create", "build", "generate", "write", "design"]):
@@ -365,16 +370,43 @@ class AGIProvider(BaseChatProvider):
     # Multi-agent routing
     # ------------------------------------------------------------------
 
-    def _select_agent(self, analysis: Dict[str, Any]) -> str:
+    def _select_agent(self, analysis: Dict[str, Any]) -> tuple:
         """Select the best specialist agent based on query analysis.
 
         Scores each non-fallback agent by domain match, intent match, and a
-        confidence-weighted boost factor.  Returns the registry key of the
-        winning agent (or ``"general"`` when no specialist scores above zero).
+        confidence-weighted boost factor.  Also incorporates previously learned
+        routing patterns stored in ``context.learned_patterns`` to reinforce
+        successful agent assignments for the same domain+intent signature.
+
+        A time-decay factor is applied to the learned-pattern bonus so that
+        stale observations contribute progressively less weight.  The half-life
+        is 24 hours: ``decay = 0.5 ** (age_hours / 24)``.
+
+        Returns a ``(agent_name, score)`` tuple where *score* is the winning
+        match score (0.0 for the general fallback).
         """
+        import math
+        import time
+
         intent = analysis.get("intent", "general")
         domain = analysis.get("domain", "general")
         confidence = analysis.get("confidence", 0.5)
+
+        # Retrieve past routing pattern for this domain+intent, if any.
+        pattern_key = f"routing_{domain}_{intent}"
+        learned = self.context.learned_patterns.get(pattern_key)
+        learned_agent = learned.get("agent") if learned else None
+        if learned:
+            count = learned.get("count", 1)
+            last_seen = learned.get("last_seen")
+            if last_seen:
+                age_hours = (time.time() - last_seen) / 3600.0
+                decay = 0.5 ** (age_hours / 24.0)  # 24 h half-life
+            else:
+                decay = 1.0
+            learned_weight = min(0.15, 0.05 * math.log(count + 1)) * decay
+        else:
+            learned_weight = 0.0
 
         best_agent = "general"
         best_score = 0.0
@@ -391,11 +423,16 @@ class AGIProvider(BaseChatProvider):
             # intent match — prevents pure-boost wins on general queries.
             if score > 0.0:
                 score += agent_config.get("confidence_boost", 0.0) * confidence
+                # Learned pattern bonus for agents that previously handled this signature.
+                if agent_name == learned_agent:
+                    score += learned_weight
             if score > best_score:
                 best_score = score
                 best_agent = agent_name
 
-        return best_agent
+        _logger.debug("Agent selected: %s (score=%.3f, domain=%s, intent=%s, learned=%s)",
+                      best_agent, best_score, domain, intent, learned_agent)
+        return best_agent, best_score
 
     def _dispatch_to_agent(self, query: str, agent_name: str, analysis: Dict[str, Any]) -> Optional[str]:
         """Try to route *query* to a specialist provider.
@@ -414,10 +451,12 @@ class AGIProvider(BaseChatProvider):
             messages = [{"role": "user", "content": query}]
             result = specialist.complete(messages, stream=False)
             response = result if isinstance(result, str) else "".join(result)
-            _logger.debug("Agent dispatch: %s → %s chars", agent_name, len(response))
+            _logger.debug("Agent dispatch: %s → %s chars",
+                          agent_name, len(response))
             return response
         except Exception as exc:
-            _logger.debug("Agent dispatch to %s failed: %s", agent_name, _sanitize_for_logging(str(exc)))
+            _logger.debug("Agent dispatch to %s failed: %s",
+                          agent_name, _sanitize_for_logging(str(exc)))
             return None  # fall back to AGI
 
     def _decompose_task(self, query: str, analysis: Dict[str, Any]) -> List[str]:
@@ -425,7 +464,8 @@ class AGIProvider(BaseChatProvider):
         # First try to pull subtask templates from the selected agent's registry entry.
         selected_agent = analysis.get("selected_agent")
         if selected_agent and selected_agent in _AGENT_REGISTRY:
-            templates = _AGENT_REGISTRY[selected_agent].get("subtask_templates", [])
+            templates = _AGENT_REGISTRY[selected_agent].get(
+                "subtask_templates", [])
             if templates:
                 return templates[: self.reasoning_depth]
 
@@ -494,7 +534,8 @@ class AGIProvider(BaseChatProvider):
         # Surface which specialist will handle this query.
         selected_agent = analysis.get("selected_agent")
         if selected_agent and selected_agent != "general":
-            agent_desc = _AGENT_REGISTRY.get(selected_agent, {}).get("description", selected_agent)
+            agent_desc = _AGENT_REGISTRY.get(selected_agent, {}).get(
+                "description", selected_agent)
             thoughts.append(f"Specialist: {agent_desc}")
 
         context_hint = self.context.get_relevant_context(query)
@@ -509,8 +550,9 @@ class AGIProvider(BaseChatProvider):
         analysis = self._analyze_query(query)
 
         # Multi-agent: pick the best specialist for this query and record it.
-        selected_agent = self._select_agent(analysis)
+        selected_agent, agent_score = self._select_agent(analysis)
         analysis["selected_agent"] = selected_agent
+        analysis["agent_score"] = round(agent_score, 3)
         self._last_agent_used = selected_agent
 
         chain.append(
@@ -523,7 +565,8 @@ class AGIProvider(BaseChatProvider):
         )
 
         # Add an agent-selection step so the reasoning trace is transparent.
-        agent_desc = _AGENT_REGISTRY.get(selected_agent, {}).get("description", selected_agent)
+        agent_desc = _AGENT_REGISTRY.get(selected_agent, {}).get(
+            "description", selected_agent)
         chain.append(
             ReasoningStep(
                 step_type="route",
@@ -553,21 +596,60 @@ class AGIProvider(BaseChatProvider):
         intent = analysis.get("intent", "general")
         domain = analysis.get("domain", "general")
         complexity = analysis.get("complexity", "simple")
+        selected_agent = analysis.get("selected_agent", "general")
 
         lines = [
             "You are Aria, an intelligent assistant with structured reasoning.",
             "Be accurate, helpful, and concise.",
         ]
 
-        if domain == "aria":
-            lines.extend(
-                [
-                    "For movement/gesture requests include tags like:",
-                    "[aria:walk:left], [aria:walk:right], [aria:walk:up], [aria:walk:down], [aria:jump], [aria:wave], [aria:dance], [aria:spin], [aria:idle]",
-                ]
-            )
+        # Agent-specific persona guidance injected before generic rules
+        if selected_agent == "quantum-specialist":
+            lines += [
+                "You are acting as the Quantum Specialist.",
+                "Always distinguish between quantum simulation and real hardware execution.",
+                "Use proper notation (|0⟩, |1⟩, ⊗, unitary matrices) where helpful.",
+                "Prefer Qiskit/Pennylane examples unless another framework is mentioned.",
+            ]
+        elif selected_agent == "code-specialist":
+            lines += [
+                "You are acting as the Code Specialist.",
+                "Provide complete, runnable code. Include relevant imports.",
+                "Prefer Python unless another language is explicitly requested.",
+                "Briefly explain non-obvious logic after the code block.",
+            ]
+        elif selected_agent == "aria-character":
+            lines += [
+                "You are acting as the Aria Character Specialist.",
+                "For movement/gesture requests include tags like:",
+                "[aria:walk:left], [aria:walk:right], [aria:walk:up], [aria:walk:down],"
+                " [aria:jump], [aria:wave], [aria:dance], [aria:spin], [aria:idle]",
+                "Describe character actions in present tense, vivid but brief.",
+            ]
+        elif selected_agent == "ai-specialist":
+            lines += [
+                "You are acting as the AI/ML Specialist.",
+                "Cover both theoretical intuition and practical implementation.",
+                "Cite standard libraries (PyTorch, Transformers, PEFT) when relevant.",
+                "When discussing LoRA: mention rank, alpha, target_modules, and adapter merging.",
+            ]
+        elif selected_agent == "reasoning-specialist":
+            lines += [
+                "You are acting as the Reasoning Specialist.",
+                "Think step-by-step. Show your intermediate reasoning before the final answer.",
+                "Use structured formats (numbered lists, tables) for multi-step logic.",
+            ]
+        else:
+            # General / fallback — keep existing aria domain guidance
+            if domain == "aria":
+                lines.extend(
+                    [
+                        "For movement/gesture requests include tags like:",
+                        "[aria:walk:left], [aria:walk:right], [aria:walk:up], [aria:walk:down], [aria:jump], [aria:wave], [aria:dance], [aria:spin], [aria:idle]",
+                    ]
+                )
 
-        if intent == "coding":
+        if intent == "coding" and selected_agent not in ("code-specialist", "quantum-specialist"):
             lines.append(
                 "For coding responses: include practical, runnable snippets when asked.")
         elif intent == "explanation":
@@ -598,7 +680,8 @@ class AGIProvider(BaseChatProvider):
         # --- Multi-agent dispatch: try the selected specialist first. ---
         selected_agent = analysis.get("selected_agent", "general")
         if selected_agent and selected_agent != "general":
-            specialist_response = self._dispatch_to_agent(query, selected_agent, analysis)
+            specialist_response = self._dispatch_to_agent(
+                query, selected_agent, analysis)
             if specialist_response is not None:
                 if self.verbose and reasoning_chain:
                     specialist_response = (
@@ -607,7 +690,8 @@ class AGIProvider(BaseChatProvider):
                 return specialist_response
 
         # Specialist unavailable or returned None — fall back to AGI base provider.
-        system_prompt = self._build_agi_system_prompt(analysis, reasoning_chain)
+        system_prompt = self._build_agi_system_prompt(
+            analysis, reasoning_chain)
         enhanced_messages: List[RoleMessage] = [
             {"role": "system", "content": system_prompt}]
 
@@ -620,16 +704,75 @@ class AGIProvider(BaseChatProvider):
 
         try:
             provider = self._get_base_provider()
+            # Apply agent-aware temperature: deterministic domains run cooler.
+            _AGENT_TEMPERATURES: Dict[str, float] = {
+                "quantum-specialist": 0.3,
+                "code-specialist": 0.2,
+                "ai-specialist": 0.5,
+                "aria-character": 0.8,
+                "reasoning-specialist": 0.4,
+            }
+            original_temp = getattr(provider, "temperature", None)
+            if selected_agent in _AGENT_TEMPERATURES:
+                try:
+                    provider.temperature = _AGENT_TEMPERATURES[selected_agent]
+                except AttributeError:
+                    pass  # provider is immutable — skip
             result = provider.complete(enhanced_messages, stream=False)
+            # Restore original temperature so state doesn't leak.
+            if original_temp is not None:
+                try:
+                    provider.temperature = original_temp
+                except AttributeError:
+                    pass
             response = result if isinstance(result, str) else "".join(result)
         except Exception as exc:
             _logger.error("Base provider error: %s",
                           _sanitize_for_logging(str(exc)))
             response = self._generate_fallback_response(query, analysis)
 
+        # Record a routing pattern so future queries benefit from history.
+        self._learn_from_routing(analysis, selected_agent)
+
         if self.verbose and reasoning_chain:
             response = f"{self._format_reasoning_chain(reasoning_chain)}\n\n---\n\n{response}"
         return response
+
+    def _learn_from_routing(self, analysis: Dict[str, Any], agent_used: str) -> None:
+        """Record successful routing decisions as learned patterns.
+
+        Stores `(domain, intent) → agent` mappings in ``context.learned_patterns``
+        so that future calls with the same domain+intent signature can be
+        resolved with increased confidence.  Only non-general routings are
+        stored to avoid polluting the pattern store with uninformative data.
+
+        Each pattern entry records a ``last_seen`` Unix timestamp so that
+        `_select_agent` can apply time-decay to older observations.
+        """
+        import time
+        if agent_used == "general":
+            return
+        domain = analysis.get("domain", "general")
+        intent = analysis.get("intent", "general")
+        pattern_key = f"routing_{domain}_{intent}"
+        now = time.time()
+        existing = self.context.learned_patterns.get(pattern_key)
+        if existing is None:
+            self.context.learned_patterns[pattern_key] = {
+                "agent": agent_used,
+                "domain": domain,
+                "intent": intent,
+                "count": 1,
+                "last_seen": now,
+            }
+        else:
+            # If a different agent somehow wins for the same signature, reset to this winner.
+            if existing.get("agent") != agent_used:
+                existing["agent"] = agent_used
+                existing["count"] = 1
+            else:
+                existing["count"] = existing.get("count", 0) + 1
+            existing["last_seen"] = now
 
     def _generate_fallback_response(self, query: str, analysis: Dict[str, Any]) -> str:
         intent = analysis.get("intent", "general")
@@ -733,12 +876,31 @@ class AGIProvider(BaseChatProvider):
         self.context.goals.clear()
 
     def get_reasoning_summary(self) -> Dict[str, Any]:
+        # Extract agent_score from last reasoning chain if available.
+        last_agent_score: Optional[float] = None
+        if self.context.reasoning_chains:
+            last_chain = self.context.reasoning_chains[-1]
+            for step in last_chain:
+                if step.step_type == "analyze":
+                    last_agent_score = step.metadata.get("agent_score")
+                    break
+
+        # Top learned routing patterns (by observation count, routing only).
+        routing_patterns = [
+            v for v in self.context.learned_patterns.values()
+            if isinstance(v, dict) and "agent" in v and "count" in v
+        ]
+        top_patterns = sorted(routing_patterns, key=lambda p: p.get(
+            "count", 0), reverse=True)[:5]
+
         return {
             "total_reasoning_chains": len(self.context.reasoning_chains),
             "active_goals": self.context.goals.copy(),
             "learned_patterns_count": len(self.context.learned_patterns),
+            "top_learned_patterns": top_patterns,
             "conversation_length": len(self.context.conversation_history),
             "last_agent_used": self._last_agent_used,
+            "last_agent_score": last_agent_score,
             "available_agents": list(_AGENT_REGISTRY.keys()),
         }
 

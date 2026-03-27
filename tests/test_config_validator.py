@@ -1,6 +1,4 @@
 """Tests for ConfigValidator validation logic."""
-
-from config_validator import ConfigValidator, ValidationResult, ValidationError
 import json
 import sys
 import tempfile
@@ -9,11 +7,11 @@ from typing import Dict, Any
 
 import pytest
 
-# Add shared to path for imports
+# Add shared to path for direct module imports
 REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO_ROOT / "shared"))
 
-# Import after adding to path
+from config_validator import ConfigValidator, ValidationError, ValidationResult  # noqa: E402
 
 
 class TestConfigValidator:

@@ -4,16 +4,18 @@ description: "Full-stack debugging agent for the Aria platform. Diagnoses issues
 tools:
   - edit
   - search
-  - runCommands
-  - runTasks
-  - fetch
-  - memory
-  - runSubagent
-  - runTests
-  - problems
-  - changes
-  - testFailure
-  - todos
+  - execute
+  - execute/createAndRunTask
+  - execute/runTask
+  - read/getTaskOutput
+  - web/fetch
+  - vscode/memory
+  - agent
+  - execute/runTests
+  - read/problems
+  - search/changes
+  - execute/testFailure
+  - todo
 ---
 
 # Full-Stack Debugger Agent

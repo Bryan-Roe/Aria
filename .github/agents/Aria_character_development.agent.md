@@ -1,7 +1,7 @@
 ---
 name: Aria_character_development
 description: Interactive Aria character development — natural language commands, action sequences, world generation, animations, and stage management.
-tools: ["changes","edit","fetch","new","problems","runCommands","search","todos","usages","memory"]
+tools: ["search/changes","edit","web/fetch","vscode/getProjectSetupInfo", "vscode/installExtension", "vscode/newWorkspace", "vscode/runCommand","read/problems","execute/getTerminalOutput", "execute/runInTerminal", "read/terminalLastCommand", "read/terminalSelection","azure-mcp/search","todo","search/usages","vscode/memory"]
 ---
 
 # Aria Character Development

@@ -2,6 +2,7 @@ import asyncio
 import os
 import sys
 import time
+import json
 import requests
 import socket
 import subprocess
@@ -24,16 +25,48 @@ def is_port_open(port=8080, host='127.0.0.1'):
         return False
 
 
+def _find_free_port(host='127.0.0.1'):
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    try:
+        s.bind((host, 0))
+        return s.getsockname()[1]
+    finally:
+        s.close()
+
+
+def is_aria_api_healthy(base_url: str) -> bool:
+    """Return True only when /api/aria/state responds with expected JSON."""
+    try:
+        r = requests.get(f"{base_url}/api/aria/state", timeout=1.0)
+        if not r.ok:
+            return False
+        payload = r.json()
+        return isinstance(payload, dict) and 'aria' in payload and 'objects' in payload
+    except (requests.RequestException, ValueError, json.JSONDecodeError):
+        return False
+
+
 def ensure_server_running():
-    if is_port_open(8080):
+    global SERVER_URL
+
+    # Re-use only when 8080 is an actual Aria API instance.
+    if is_port_open(8080) and is_aria_api_healthy(SERVER_URL):
         return None
 
+    # If 8080 is occupied by something else, run Aria on a free port.
+    target_port = 8080 if not is_port_open(8080) else _find_free_port()
+    target_url = f"http://127.0.0.1:{target_port}"
+
+    env = os.environ.copy()
+    env['ARIA_PORT'] = str(target_port)
+
     proc = subprocess.Popen(["python3", "server.py"], cwd=str(
-        ARIA_WEB), stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        ARIA_WEB), env=env, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
     # wait for server to be available
     for _ in range(30):
-        if is_port_open(8080):
+        if is_aria_api_healthy(target_url):
+            SERVER_URL = target_url
             return proc
         time.sleep(0.2)
 

@@ -4,6 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/svg+xml"
+        href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ctext y='52' font-size='48'%3E%F0%9F%8E%AD%3C/text%3E%3C/svg%3E">
     <title>Aria — Interactive AI Character</title>
     <style>
         :root {
@@ -209,6 +211,123 @@
             transition: background var(--transition), border var(--transition);
         }
 
+        .hidden {
+            display: none !important;
+        }
+
+        .engine-switcher {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 60;
+            display: flex;
+            gap: 6px;
+            background: rgba(255, 255, 255, 0.75);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 6px;
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+        }
+
+        [data-theme="dark"] .engine-switcher {
+            background: rgba(18, 24, 36, 0.82);
+        }
+
+        .engine-btn {
+            padding: 6px 10px;
+            border-radius: 8px;
+            border: 1px solid var(--input-border);
+            background: var(--input-bg);
+            color: var(--text-primary);
+            box-shadow: none;
+            font-size: 0.8em;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .engine-btn.active {
+            background: linear-gradient(135deg, #c06070 0%, var(--accent) 50%, #a78bfa 100%);
+            color: #fff;
+            border-color: var(--accent);
+        }
+
+        .ue5-overlay {
+            position: absolute;
+            inset: 0;
+            z-index: 40;
+            border-radius: 12px;
+            overflow: hidden;
+            background: rgba(11, 17, 29, 0.68);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            color: #fff;
+        }
+
+        .ue5-overlay iframe {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            border: 0;
+            z-index: 1;
+            background: #000;
+        }
+
+        .ue5-card {
+            position: relative;
+            z-index: 2;
+            width: min(520px, 90%);
+            border: 1px solid rgba(255, 255, 255, 0.24);
+            border-radius: 12px;
+            padding: 14px 16px;
+            background: rgba(9, 16, 28, 0.82);
+            text-align: center;
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+        }
+
+        .ue5-card h3 {
+            margin-bottom: 8px;
+            font-size: 0.95em;
+            letter-spacing: 0.4px;
+            text-transform: uppercase;
+        }
+
+        .ue5-card p {
+            margin-bottom: 10px;
+            font-size: 0.85em;
+            line-height: 1.45;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .ue5-link {
+            display: inline-block;
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.28);
+            border-radius: 8px;
+            padding: 6px 10px;
+            text-decoration: none;
+            font-size: 0.78em;
+            font-weight: 600;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .ue5-link:hover {
+            background: rgba(255, 255, 255, 0.18);
+        }
+
+        .stage.ue5-active>.table,
+        .stage.ue5-active>.object,
+        .stage.ue5-active>.stage-info,
+        .stage.ue5-active>#aria {
+            opacity: 0;
+            pointer-events: none;
+        }
+
         /* Sky clouds */
         .stage::before {
             content: '';
@@ -237,6 +356,7 @@
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
             z-index: 5;
             transform-style: preserve-3d;
+            display: none;
         }
 
         .table-leg {
@@ -331,16 +451,20 @@
 
         .aria-character {
             position: absolute;
-            bottom: 10%;
-            left: 20%;
+            bottom: 32%;
+            left: 50%;
             transform: translateX(-50%) translateZ(0px) rotateY(0deg);
             width: 160px;
             height: 260px;
-            transition: all 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            background: linear-gradient(to bottom, #8B4513 0%, #A0522D 50%, #8B4513 100%);
+            display: none;
             filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.25));
             transform-style: preserve-3d;
             z-index: 10;
             animation: breathe 4s ease-in-out infinite;
+            /* Hidden – Three.js renders the 3D version; this div is the state machine */
+            visibility: hidden !important;
+            pointer-events: none !important;
         }
 
         /* Character ground shadow */
@@ -506,6 +630,9 @@
                 inset 4px 4px 15px rgba(255, 255, 255, 0.55),
                 0 6px 16px rgba(0, 0, 0, 0.14);
         }
+
+        visibility: hidden !important;
+        pointer-events: none !important;
 
         .aria-head::before,
         .aria-head::after {
@@ -1887,7 +2014,9 @@
             border-top-color: rgba(30, 34, 42, 0.88);
         }
 
-        /* Connection status */
+        z-index: -1;
+        }
+
         .connection-status {
             display: flex;
             align-items: center;
@@ -2204,7 +2333,6 @@
             width: auto !important;
         }
     </style>
-    <link rel="stylesheet" href="../global-upgrade.css">
 </head>
 
 <body>
@@ -2230,7 +2358,7 @@
 
         <header>
             <h1>Aria — Interactive AI Character</h1>
-            <p class="subtitle">Natural language commands, gestures, and object interaction</p>
+            <p class="subtitle">UE5-first web runtime with natural language commands and object interaction</p>
         </header>
 
         <div id="object-manager" class="object-manager">
@@ -2257,6 +2385,22 @@
         <div class="main-content">
             <div class="stage-container">
                 <div class="stage" id="stage">
+                    <div class="engine-switcher" role="group" aria-label="Render engine selection">
+                        <button class="engine-btn" id="engineUE5Btn" onclick="setRenderEngine('ue5')">UE5</button>
+                        <button class="engine-btn" id="engineThreeBtn"
+                            onclick="setRenderEngine('threejs')">Three.js</button>
+                    </div>
+
+                    <div id="ue5Overlay" class="ue5-overlay hidden" aria-live="polite">
+                        <iframe id="ue5Frame" title="Aria Unreal Engine 5 stream" allow="autoplay; fullscreen"></iframe>
+                        <div class="ue5-card" id="ue5Card">
+                            <h3>Unreal Engine 5 Mode</h3>
+                            <p id="ue5StatusText">Preparing UE5 stream configuration…</p>
+                            <a id="ue5OpenLink" class="ue5-link hidden" href="#" target="_blank"
+                                rel="noopener noreferrer">Open UE5 stream in a new tab</a>
+                        </div>
+                    </div>
+
                     <!-- Interactive Table -->
                     <div id="table" class="table">
                         <div class="table-leg" style="left: 10%;"></div>
@@ -2372,6 +2516,29 @@
                     <input type="text" id="commandInput" placeholder="e.g. walk left, smile, dance, pickup apple"
                         onkeypress="if(event.key === 'Enter') sendCommand()">
                     <button onclick="sendCommand()">Execute</button>
+                </div>
+
+                <div class="command-input">
+                    <label for="providerSelect"
+                        style="display:block; margin-bottom:6px; color:var(--text-secondary); font-size:0.82em;">Provider
+                        (optional)</label>
+                    <select id="providerSelect"
+                        style="width:100%; padding:11px 14px; border:1.5px solid var(--input-border); border-radius:10px; background:var(--input-bg); color:var(--text-primary); margin-bottom:10px;">
+                        <option value="">Auto-detect</option>
+                        <option value="quantum-llm">Quantum LLM</option>
+                        <option value="azure">Azure OpenAI</option>
+                        <option value="openai">OpenAI</option>
+                        <option value="lmstudio">LM Studio</option>
+                        <option value="ollama">Ollama</option>
+                        <option value="local">Local fallback</option>
+                    </select>
+                    <input type="text" id="modelInput"
+                        placeholder="Model/path (optional), e.g. data_out/quantum_llm_training">
+                    <label for="useLlmToggle"
+                        style="display:flex; align-items:center; gap:8px; margin-top:8px; color:var(--text-secondary); font-size:0.82em;">
+                        <input type="checkbox" id="useLlmToggle" checked>
+                        Use LLM (disable to force rule-based fallback)
+                    </label>
                 </div>
 
                 <!-- Quick Actions -->
@@ -2645,6 +2812,154 @@
         } else {
             loadSubscriptionStatus();
         }
+
+        // === Render engine selection (UE5-first with Three.js fallback) ===
+        const RENDER_ENGINE_KEY = 'aria-render-engine';
+        const UE5_URL_KEY = 'aria-ue5-url';
+        let threeJsBootstrapped = false;
+
+        function loadScriptOnce(src, id) {
+            return new Promise(function (resolve, reject) {
+                const existing = document.getElementById(id);
+                if (existing) {
+                    if (existing.getAttribute('data-loaded') === 'true') {
+                        resolve();
+                        return;
+                    }
+                    existing.addEventListener('load', function () { resolve(); }, { once: true });
+                    existing.addEventListener('error', function () { reject(new Error('Failed loading ' + src)); }, { once: true });
+                    return;
+                }
+
+                const script = document.createElement('script');
+                script.id = id;
+                script.src = src;
+                script.async = true;
+                script.onload = function () {
+                    script.setAttribute('data-loaded', 'true');
+                    resolve();
+                };
+                script.onerror = function () { reject(new Error('Failed loading ' + src)); };
+                document.body.appendChild(script);
+            });
+        }
+
+        async function ensureThreeJsRenderer() {
+            if (threeJsBootstrapped) {
+                toggleThreeCanvas(true);
+                return;
+            }
+            await loadScriptOnce('https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.min.js', 'threejs-cdn-script');
+            await loadScriptOnce('aria_threejs.js', 'aria-threejs-script');
+            threeJsBootstrapped = true;
+            toggleThreeCanvas(true);
+        }
+
+        function resolveUe5Url() {
+            const params = new URLSearchParams(window.location.search);
+            const fromQuery = params.get('ue5Url');
+            if (fromQuery) {
+                localStorage.setItem(UE5_URL_KEY, fromQuery);
+                return fromQuery;
+            }
+
+            const fromStorage = localStorage.getItem(UE5_URL_KEY);
+            if (fromStorage) return fromStorage;
+
+            if (typeof window.ARIA_UE5_URL === 'string' && window.ARIA_UE5_URL.trim()) {
+                return window.ARIA_UE5_URL.trim();
+            }
+
+            return '';
+        }
+
+        function toggleThreeCanvas(show) {
+            const canvas = document.getElementById('ariaCanvas3D');
+            if (canvas) {
+                canvas.style.display = show ? 'block' : 'none';
+            }
+        }
+
+        function setEngineButtons(engine) {
+            const ue5Btn = document.getElementById('engineUE5Btn');
+            const threeBtn = document.getElementById('engineThreeBtn');
+            if (ue5Btn) ue5Btn.classList.toggle('active', engine === 'ue5');
+            if (threeBtn) threeBtn.classList.toggle('active', engine === 'threejs');
+        }
+
+        async function setRenderEngine(engine, opts) {
+            opts = opts || {};
+            const persist = opts.persist !== false;
+
+            const normalized = engine === 'threejs' ? 'threejs' : 'ue5';
+            const stage = document.getElementById('stage');
+            const ue5Overlay = document.getElementById('ue5Overlay');
+            const ue5Frame = document.getElementById('ue5Frame');
+            const ue5StatusText = document.getElementById('ue5StatusText');
+            const ue5OpenLink = document.getElementById('ue5OpenLink');
+
+            if (persist) {
+                localStorage.setItem(RENDER_ENGINE_KEY, normalized);
+            }
+            setEngineButtons(normalized);
+
+            if (normalized === 'ue5') {
+                if (stage) stage.classList.add('ue5-active');
+                if (ue5Overlay) ue5Overlay.classList.remove('hidden');
+                toggleThreeCanvas(false);
+
+                const streamUrl = resolveUe5Url();
+                if (streamUrl) {
+                    if (ue5Frame) {
+                        if (ue5Frame.src !== streamUrl) ue5Frame.src = streamUrl;
+                        ue5Frame.classList.remove('hidden');
+                    }
+                    if (ue5StatusText) {
+                        ue5StatusText.textContent = 'Streaming from Unreal Engine 5. Commands and APIs remain active while rendering runs in UE5.';
+                    }
+                    if (ue5OpenLink) {
+                        ue5OpenLink.href = streamUrl;
+                        ue5OpenLink.classList.remove('hidden');
+                    }
+                } else {
+                    if (ue5Frame) {
+                        ue5Frame.removeAttribute('src');
+                        ue5Frame.classList.add('hidden');
+                    }
+                    if (ue5StatusText) {
+                        ue5StatusText.textContent = 'UE5 mode is active. Set a Pixel Streaming URL via ?ue5Url=https://... or localStorage["aria-ue5-url"] to render live UE5 output.';
+                    }
+                    if (ue5OpenLink) ue5OpenLink.classList.add('hidden');
+                }
+
+                return;
+            }
+
+            if (stage) stage.classList.remove('ue5-active');
+            if (ue5Overlay) ue5Overlay.classList.add('hidden');
+            if (ue5Frame) ue5Frame.classList.add('hidden');
+            try {
+                await ensureThreeJsRenderer();
+            } catch (err) {
+                if (ue5StatusText) {
+                    ue5StatusText.textContent = 'Three.js fallback failed to load. Staying in UE5 mode. Error: ' + (err && err.message ? err.message : 'Unknown error');
+                }
+                if (ue5Overlay) ue5Overlay.classList.remove('hidden');
+                if (stage) stage.classList.add('ue5-active');
+                setEngineButtons('ue5');
+                localStorage.setItem(RENDER_ENGINE_KEY, 'ue5');
+            }
+        }
+
+        window.setRenderEngine = setRenderEngine;
+
+        (function initRenderEngine() {
+            const params = new URLSearchParams(window.location.search);
+            const fromQuery = params.get('engine');
+            const fromStorage = localStorage.getItem(RENDER_ENGINE_KEY);
+            const initialEngine = (fromQuery || fromStorage || 'ue5').toLowerCase();
+            setRenderEngine(initialEngine, { persist: false });
+        })();
     </script>
     <footer class="aria-footer">
         <a href="../dashboard/">Dashboard</a> ·
@@ -2652,7 +2967,6 @@
         <a href="../store/">Store</a>
         <div>Aria Interactive AI Character Platform</div>
     </footer>
-    <script src="../global-upgrade.js"></script>
 </body>
 
 </html>

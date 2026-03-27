@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,19 +13,19 @@
             padding: 0;
             box-sizing: border-box;
         }
-        
+
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
             color: #eee;
             padding: 20px;
         }
-        
+
         .container {
             max-width: 1800px;
             margin: 0 auto;
         }
-        
+
         header {
             background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
             border-radius: 15px;
@@ -34,31 +35,31 @@
             text-align: center;
             position: relative;
         }
-        
+
         h1 {
             color: #fff;
             font-size: 2.5em;
             margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
         }
-        
+
         .controls {
             display: flex;
             gap: 15px;
             margin-bottom: 30px;
             flex-wrap: wrap;
         }
-        
+
         .control-group {
-            background: rgba(255,255,255,0.1);
+            background: rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.2);
+            border: 1px solid rgba(255, 255, 255, 0.2);
             border-radius: 10px;
             padding: 15px;
             flex: 1;
             min-width: 200px;
         }
-        
+
         .control-group label {
             display: block;
             margin-bottom: 8px;
@@ -67,24 +68,26 @@
             text-transform: uppercase;
             letter-spacing: 1px;
         }
-        
-        select, button {
+
+        select,
+        button {
             width: 100%;
             padding: 10px;
-            border: 1px solid rgba(255,255,255,0.3);
+            border: 1px solid rgba(255, 255, 255, 0.3);
             border-radius: 8px;
-            background: rgba(255,255,255,0.15);
+            background: rgba(255, 255, 255, 0.15);
             color: #fff;
             font-size: 1em;
             cursor: pointer;
             transition: all 0.3s;
         }
-        
-        select:hover, button:hover {
-            background: rgba(255,255,255,0.25);
-            border-color: rgba(255,255,255,0.5);
+
+        select:hover,
+        button:hover {
+            background: rgba(255, 255, 255, 0.25);
+            border-color: rgba(255, 255, 255, 0.5);
         }
-        
+
         button {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             border: none;
@@ -92,35 +95,35 @@
             text-transform: uppercase;
             letter-spacing: 1px;
         }
-        
+
         button:hover {
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
         }
-        
+
         .charts-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
             gap: 25px;
             margin-bottom: 30px;
         }
-        
+
         .chart-container {
-            background: rgba(255,255,255,0.08);
+            background: rgba(255, 255, 255, 0.08);
             backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.15);
+            border: 1px solid rgba(255, 255, 255, 0.15);
             border-radius: 15px;
             padding: 25px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
             transition: all 0.3s;
         }
-        
+
         .chart-container:hover {
             transform: translateY(-5px);
-            box-shadow: 0 12px 40px rgba(0,0,0,0.3);
-            border-color: rgba(255,255,255,0.3);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+            border-color: rgba(255, 255, 255, 0.3);
         }
-        
+
         .chart-title {
             color: #fff;
             font-size: 1.3em;
@@ -129,7 +132,7 @@
             align-items: center;
             gap: 10px;
         }
-        
+
         .chart-title .badge {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             padding: 5px 12px;
@@ -139,48 +142,48 @@
             text-transform: uppercase;
             letter-spacing: 1px;
         }
-        
+
         .chart-canvas {
             position: relative;
             height: 350px;
         }
-        
+
         .stats-bar {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 15px;
             margin-bottom: 30px;
         }
-        
+
         .stat-card {
-            background: rgba(255,255,255,0.1);
+            background: rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.2);
+            border: 1px solid rgba(255, 255, 255, 0.2);
             border-radius: 12px;
             padding: 20px;
             text-align: center;
             transition: all 0.3s;
         }
-        
+
         .stat-card:hover {
             transform: translateY(-3px);
-            background: rgba(255,255,255,0.15);
+            background: rgba(255, 255, 255, 0.15);
         }
-        
+
         .stat-value {
             font-size: 2.5em;
             font-weight: 700;
             color: #fff;
             margin-bottom: 5px;
         }
-        
+
         .stat-label {
             color: #aaa;
             font-size: 0.9em;
             text-transform: uppercase;
             letter-spacing: 1px;
         }
-        
+
         .live-indicator {
             display: inline-block;
             width: 10px;
@@ -190,85 +193,164 @@
             animation: pulse 2s infinite;
             margin-left: 10px;
         }
-        
+
         @keyframes pulse {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.5; transform: scale(1.2); }
+
+            0%,
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+
+            50% {
+                opacity: 0.5;
+                transform: scale(1.2);
+            }
         }
-        
+
         .comparison-table {
             width: 100%;
             margin-top: 20px;
             border-collapse: collapse;
         }
-        
+
         .comparison-table th,
         .comparison-table td {
             padding: 12px;
             text-align: left;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
-        
+
         .comparison-table th {
-            background: rgba(255,255,255,0.1);
+            background: rgba(255, 255, 255, 0.1);
             color: #fff;
             font-weight: 600;
             text-transform: uppercase;
             font-size: 0.85em;
             letter-spacing: 1px;
         }
-        
+
         .comparison-table tr:hover {
-            background: rgba(255,255,255,0.05);
+            background: rgba(255, 255, 255, 0.05);
         }
-        
-        .metric-good { color: #4ade80; }
-        .metric-warning { color: #fbbf24; }
-        .metric-bad { color: #f87171; }
+
+        .metric-good {
+            color: #4ade80;
+        }
+
+        .metric-warning {
+            color: #fbbf24;
+        }
+
+        .metric-bad {
+            color: #f87171;
+        }
+
         /* Dark Mode Overrides */
         body.dark-mode {
             background: #121212 !important;
             color: #e0e0e0;
         }
+
         body.dark-mode header {
             background: linear-gradient(135deg, #1f2937 0%, #374151 100%) !important;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.7);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.7);
         }
+
         body.dark-mode .chart-container,
         body.dark-mode .stat-card,
         body.dark-mode .control-group {
             background: #1e1e1e !important;
             border: 1px solid #333 !important;
         }
+
         body.dark-mode select,
         body.dark-mode button {
             background: #2d2d2d !important;
             border-color: #444 !important;
             color: #e0e0e0 !important;
         }
+
         body.dark-mode .chart-title .badge {
-            background: linear-gradient(135deg,#2563eb 0%, #1d4ed8 100%) !important;
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%) !important;
         }
+
         body.dark-mode .comparison-table th {
             background: #1e1e1e !important;
             color: #e0e0e0 !important;
         }
+
         body.dark-mode .comparison-table tr:hover {
             background: #222 !important;
         }
+
         /* Cross-app nav */
-        .app-nav { display:flex; gap:8px; padding:10px 20px; background:rgba(0,0,0,0.2); border-radius:12px; margin-bottom:16px; align-items:center; flex-wrap:wrap; }
-        .app-nav a { color:rgba(255,255,255,0.85); text-decoration:none; padding:6px 14px; border-radius:8px; font-size:0.88em; font-weight:500; transition:all 0.2s; background:rgba(255,255,255,0.06); }
-        .app-nav a:hover { background:rgba(255,255,255,0.15); transform:translateY(-1px); }
-        .app-nav a.active { background:rgba(102,126,234,0.35); color:#fff; }
-        .app-nav .nav-label { color:rgba(255,255,255,0.4); font-size:0.78em; text-transform:uppercase; letter-spacing:0.5px; margin-right:4px; }
-        .breadcrumb { display:flex; gap:6px; align-items:center; font-size:0.82em; color:rgba(255,255,255,0.5); margin-bottom:12px; }
-        .breadcrumb a { color:rgba(255,255,255,0.7); text-decoration:none; }
-        .breadcrumb a:hover { color:#fff; }
-        .breadcrumb .sep { margin:0 2px; }
+        .app-nav {
+            display: flex;
+            gap: 8px;
+            padding: 10px 20px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 12px;
+            margin-bottom: 16px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .app-nav a {
+            color: rgba(255, 255, 255, 0.85);
+            text-decoration: none;
+            padding: 6px 14px;
+            border-radius: 8px;
+            font-size: 0.88em;
+            font-weight: 500;
+            transition: all 0.2s;
+            background: rgba(255, 255, 255, 0.06);
+        }
+
+        .app-nav a:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-1px);
+        }
+
+        .app-nav a.active {
+            background: rgba(102, 126, 234, 0.35);
+            color: #fff;
+        }
+
+        .app-nav .nav-label {
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 0.78em;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-right: 4px;
+        }
+
+        .breadcrumb {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+            font-size: 0.82em;
+            color: rgba(255, 255, 255, 0.5);
+            margin-bottom: 12px;
+        }
+
+        .breadcrumb a {
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+        }
+
+        .breadcrumb a:hover {
+            color: #fff;
+        }
+
+        .breadcrumb .sep {
+            margin: 0 2px;
+        }
     </style>
+    <link rel="stylesheet" href="shared-theme.css">
     <link rel="stylesheet" href="../global-upgrade.css">
 </head>
+
 <body>
     <div class="container">
         <nav class="app-nav">
@@ -286,9 +368,11 @@
         <header>
             <h1>📊 QAI Analytics Dashboard</h1>
             <p>Real-time training performance & model comparison</p>
-            <button id="darkModeToggle" onclick="toggleDarkModeAnalytics()" style="position:absolute;top:20px;right:20px;padding:10px 16px;border:none;border-radius:8px;background:#222;color:#fff;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,0.3)" title="Toggle Dark Mode (Ctrl/Cmd+D)">🌙</button>
+            <button id="darkModeToggle" onclick="toggleDarkModeAnalytics()"
+                style="position:absolute;top:20px;right:20px;padding:10px 16px;border:none;border-radius:8px;background:#222;color:#fff;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,0.3)"
+                title="Toggle Dark Mode (Ctrl/Cmd+D)">🌙</button>
         </header>
-        
+
         <div class="stats-bar">
             <div class="stat-card">
                 <div class="stat-value" id="totalJobs">0</div>
@@ -307,7 +391,7 @@
                 <div class="stat-label">Total Training Time</div>
             </div>
         </div>
-        
+
         <div class="controls">
             <div class="control-group">
                 <label for="modelSelect">Select Model</label>
@@ -332,8 +416,22 @@
                 <label>&nbsp;</label>
                 <button onclick="exportCharts()">📥 Export Charts</button>
             </div>
+            <div class="control-group">
+                <label>&nbsp;</label>
+                <button id="anomalyToggleBtn" onclick="toggleAnomalyPanel()">🔍 Anomaly Detection</button>
+            </div>
         </div>
-        
+        <!-- Anomaly Detection Panel -->
+        <div id="anomalyPanel" class="chart-container" style="display:none;margin-bottom:24px">
+            <div class="chart-title">
+                ⚠️ Training Anomaly Detection
+                <span class="badge" id="anomalyBadgeCount" style="background:#3b82f6">0</span>
+                <button onclick="anomalyDetector && anomalyDetector.clearAnomalies(); renderAnomalyPanel()"
+                    style="float:right;font-size:0.8em;padding:2px 8px;cursor:pointer">Clear All</button>
+            </div>
+            <div id="anomalyList" style="max-height:240px;overflow-y:auto;padding:12px"></div>
+        </div>
+
         <div class="charts-grid">
             <div class="chart-container">
                 <div class="chart-title">
@@ -345,7 +443,7 @@
                     <canvas id="lossChart"></canvas>
                 </div>
             </div>
-            
+
             <div class="chart-container">
                 <div class="chart-title">
                     GPU Utilization History
@@ -355,7 +453,7 @@
                     <canvas id="gpuChart"></canvas>
                 </div>
             </div>
-            
+
             <div class="chart-container">
                 <div class="chart-title">
                     Model Performance Comparison
@@ -365,7 +463,7 @@
                     <canvas id="performanceChart"></canvas>
                 </div>
             </div>
-            
+
             <div class="chart-container">
                 <div class="chart-title">
                     Training Time Distribution
@@ -376,7 +474,7 @@
                 </div>
             </div>
         </div>
-        
+
         <div class="chart-container">
             <div class="chart-title">Model Comparison Matrix</div>
             <table class="comparison-table" id="comparisonTable">
@@ -396,11 +494,11 @@
             </table>
         </div>
     </div>
-    
+
     <script>
         let charts = {};
         let wsConnection = null;
-        
+
         // Chart.js configuration
         const chartColors = {
             primary: 'rgb(102, 126, 234)',
@@ -410,27 +508,27 @@
             danger: 'rgb(248, 113, 113)',
             info: 'rgb(96, 165, 250)'
         };
-        
+
         // Initialize WebSocket connection
         function initWebSocket() {
             try {
                 wsConnection = new WebSocket('ws://localhost:8765');
-                
+
                 wsConnection.onopen = () => {
                     console.log('WebSocket connected');
                     showToast('Connected to live updates', 'success');
                 };
-                
+
                 wsConnection.onmessage = (event) => {
                     const data = JSON.parse(event.data);
                     handleWebSocketMessage(data);
                 };
-                
+
                 wsConnection.onerror = (error) => {
                     console.error('WebSocket error:', error);
                     showToast('Live updates unavailable, using polling', 'warning');
                 };
-                
+
                 wsConnection.onclose = () => {
                     console.log('WebSocket disconnected');
                     setTimeout(initWebSocket, 5000); // Retry connection
@@ -441,7 +539,7 @@
                 setInterval(refreshData, 30000);
             }
         }
-        
+
         // Track progress notifications to avoid spamming
         const progressNotified = {};
         function handleWebSocketMessage(data) {
@@ -470,7 +568,7 @@
                 } catch (e) { console.warn('Notification bridge error', e); }
             }
         }
-        
+
         // Initialize charts
         function initCharts() {
             // Loss Chart
@@ -501,7 +599,7 @@
                     }
                 }
             });
-            
+
             // GPU Chart
             const gpuCtx = document.getElementById('gpuChart').getContext('2d');
             charts.gpu = new Chart(gpuCtx, {
@@ -525,7 +623,7 @@
                     },
                     scales: {
                         x: { ticks: { color: '#aaa' }, grid: { color: 'rgba(255,255,255,0.1)' } },
-                        y: { 
+                        y: {
                             ticks: { color: '#aaa' },
                             grid: { color: 'rgba(255,255,255,0.1)' },
                             min: 0,
@@ -534,7 +632,7 @@
                     }
                 }
             });
-            
+
             // Performance Chart (Bar)
             const perfCtx = document.getElementById('performanceChart').getContext('2d');
             charts.performance = new Chart(perfCtx, {
@@ -566,7 +664,7 @@
                     }
                 }
             });
-            
+
             // Time Chart (Doughnut)
             const timeCtx = document.getElementById('timeChart').getContext('2d');
             charts.time = new Chart(timeCtx, {
@@ -586,7 +684,7 @@
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        legend: { 
+                        legend: {
                             display: true,
                             position: 'bottom',
                             labels: { color: '#fff' }
@@ -595,27 +693,27 @@
                 }
             });
         }
-        
+
         // Fetch data from API
         async function refreshData() {
             try {
                 const response = await fetch('/api/history');
                 const data = await response.json();
-                
+
                 updateCharts(data);
                 updateStats(data);
                 updateComparisonTable(data);
-                
+
                 showToast('Data refreshed successfully', 'success');
             } catch (error) {
                 console.error('Error fetching data:', error);
                 showToast('Failed to fetch data', 'error');
             }
         }
-        
+
         function updateCharts(data) {
             if (!data.jobs) return;
-            
+
             // Update loss chart
             const lossData = data.jobs.map((j, i) => ({
                 x: i + 1,
@@ -624,7 +722,21 @@
             charts.loss.data.labels = data.jobs.map((_, i) => `Job ${i + 1}`);
             charts.loss.data.datasets[0].data = lossData.map(d => d.y);
             charts.loss.update();
-            
+
+            // Feed loss values to anomaly detector
+            if (anomalyDetector) {
+                data.jobs.forEach((j, i) => {
+                    const loss = j.post_loss || j.final_loss;
+                    if (loss != null) {
+                        anomalyDetector.addLossValue(i + 1, loss, j.name || `Job ${i + 1}`);
+                    }
+                });
+                const stats = anomalyDetector.getStatistics();
+                const badge = document.getElementById('anomalyBadgeCount');
+                if (badge) badge.textContent = stats.total;
+                renderAnomalyPanel();
+            }
+
             // Update performance chart
             charts.performance.data.labels = data.jobs.slice(0, 5).map(j => j.name || 'Unknown');
             charts.performance.data.datasets[0].data = data.jobs.slice(0, 5).map(j => {
@@ -632,24 +744,24 @@
                 return (1 / loss * 100).toFixed(2);
             });
             charts.performance.update();
-            
+
             // Update time distribution
             const quick = data.jobs.filter(j => (j.duration || 0) < 600).length;
             const medium = data.jobs.filter(j => (j.duration || 0) >= 600 && (j.duration || 0) < 3600).length;
             const long = data.jobs.filter(j => (j.duration || 0) >= 3600).length;
-            
+
             charts.time.data.datasets[0].data = [quick, medium, long];
             charts.time.update();
         }
-        
+
         function updateStats(data) {
             document.getElementById('totalJobs').textContent = data.jobs ? data.jobs.length : 0;
-            
+
             const avgLoss = data.jobs && data.jobs.length > 0
                 ? (data.jobs.reduce((sum, j) => sum + (j.post_loss || j.final_loss || 0), 0) / data.jobs.length).toFixed(3)
                 : '0.00';
             document.getElementById('avgLoss').textContent = avgLoss;
-            
+
             const bestJob = data.jobs && data.jobs.length > 0
                 ? data.jobs.reduce((best, j) => {
                     const loss = j.post_loss || j.final_loss || Infinity;
@@ -658,25 +770,25 @@
                 })
                 : null;
             document.getElementById('bestModel').textContent = bestJob ? (bestJob.name || 'Unknown') : 'N/A';
-            
+
             const totalTime = data.jobs && data.jobs.length > 0
                 ? Math.round(data.jobs.reduce((sum, j) => sum + (j.duration || 0), 0) / 3600)
                 : 0;
             document.getElementById('totalTime').textContent = totalTime + 'h';
         }
-        
+
         function updateComparisonTable(data) {
             const tbody = document.querySelector('#comparisonTable tbody');
             tbody.innerHTML = '';
-            
+
             if (!data.jobs || data.jobs.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#aaa;">No jobs found</td></tr>';
                 return;
             }
-            
+
             data.jobs.forEach(job => {
                 const row = document.createElement('tr');
-                
+
                 const finalLoss = job.post_loss || job.final_loss || 0;
                 const improvement = job.pre_loss && job.post_loss
                     ? ((job.pre_loss - job.post_loss) / job.pre_loss * 100).toFixed(2)
@@ -686,9 +798,9 @@
                     : 'N/A';
                 const rank = job.lora_rank || 'N/A';
                 const score = finalLoss > 0 ? (1 / finalLoss * 100).toFixed(2) : '0';
-                
+
                 const scoreClass = score > 80 ? 'metric-good' : score > 50 ? 'metric-warning' : 'metric-bad';
-                
+
                 row.innerHTML = `
                     <td>${job.name || 'Unknown'}</td>
                     <td>${finalLoss.toFixed(4)}</td>
@@ -697,15 +809,15 @@
                     <td>${rank}</td>
                     <td class="${scoreClass}">${score}</td>
                 `;
-                
+
                 tbody.appendChild(row);
             });
         }
-        
+
         function showToast(message, type) {
             console.log(`[${type.toUpperCase()}] ${message}`);
         }
-        
+
         // Desktop notification system (same as unified.html)
         let notificationsEnabled = false;
         try {
@@ -713,25 +825,25 @@
             if (storedNotif === 'true' && "Notification" in window && Notification.permission === 'granted') {
                 notificationsEnabled = true;
             }
-        } catch(e) { console.warn('Notif storage unavailable', e); }
-        
+        } catch (e) { console.warn('Notif storage unavailable', e); }
+
         function initNotifications() {
             if ("Notification" in window) {
                 if (Notification.permission === "granted") {
                     notificationsEnabled = true;
-                    try { localStorage.setItem('qai_notifications_enabled','true'); } catch(e){}
+                    try { localStorage.setItem('qai_notifications_enabled', 'true'); } catch (e) { }
                 } else if (Notification.permission !== "denied") {
                     Notification.requestPermission().then(permission => {
                         notificationsEnabled = (permission === "granted");
-                        try { localStorage.setItem('qai_notifications_enabled', notificationsEnabled ? 'true':'false'); } catch(e){}
+                        try { localStorage.setItem('qai_notifications_enabled', notificationsEnabled ? 'true' : 'false'); } catch (e) { }
                     });
                 }
             }
         }
-        
+
         function sendDesktopNotification(title, message, icon = '🔔') {
             if (!notificationsEnabled) return;
-            
+
             try {
                 const notification = new Notification(title, {
                     body: message,
@@ -739,7 +851,7 @@
                     requireInteraction: false,
                     tag: 'qai-analytics'
                 });
-                
+
                 notification.onclick = () => {
                     window.focus();
                     notification.close();
@@ -748,10 +860,10 @@
                 console.error("Notification error:", e);
             }
         }
-        
+
         // Initialize notifications on load
         initNotifications();
-        
+
         async function exportCharts() {
             const modal = document.createElement('div');
             modal.style.cssText = `
@@ -767,7 +879,7 @@
                 color: #333;
                 min-width: 400px;
             `;
-            
+
             modal.innerHTML = `
                 <h2 style="margin: 0 0 20px 0; color: #667eea;">📥 Export Options</h2>
                 <div style="margin-bottom: 20px;">
@@ -785,7 +897,7 @@
                     Close
                 </button>
             `;
-            
+
             const overlay = document.createElement('div');
             overlay.style.cssText = `
                 position: fixed;
@@ -796,10 +908,10 @@
                 background: rgba(0,0,0,0.7);
                 z-index: 9999;
             `;
-            
+
             document.body.appendChild(overlay);
             document.body.appendChild(modal);
-            
+
             document.getElementById('closeExportBtn').onclick = () => {
                 modal.remove();
                 overlay.remove();
@@ -809,7 +921,7 @@
                 overlay.remove();
             };
         }
-        
+
         function exportAsPNG() {
             ['lossChart', 'gpuChart', 'performanceChart', 'timeChart'].forEach((chartId, index) => {
                 setTimeout(() => {
@@ -822,11 +934,11 @@
             });
             showToast('Charts exported as PNG!', 'success');
         }
-        
+
         function exportAsCSV() {
             const response = fetch('/api/history').then(res => res.json()).then(data => {
                 let csv = 'Job Name,Final Loss,Pre Loss,Post Loss,Improvement %,Duration (min),LoRA Rank\n';
-                
+
                 data.jobs.forEach(job => {
                     const finalLoss = (job.post_loss || job.final_loss || 0).toFixed(4);
                     const preLoss = (job.pre_loss || 0).toFixed(4);
@@ -836,50 +948,50 @@
                         : 'N/A';
                     const duration = job.duration ? Math.round(job.duration / 60) : 'N/A';
                     const rank = job.lora_rank || 'N/A';
-                    
+
                     csv += `"${job.name || 'Unknown'}",${finalLoss},${preLoss},${postLoss},${improvement},${duration},${rank}\n`;
                 });
-                
+
                 const blob = new Blob([csv], { type: 'text/csv' });
                 const link = document.createElement('a');
                 link.download = `qai_training_data_${new Date().toISOString().split('T')[0]}.csv`;
                 link.href = URL.createObjectURL(blob);
                 link.click();
-                
+
                 showToast('Data exported as CSV!', 'success');
             }).catch(err => {
                 showToast('Export failed: ' + err.message, 'error');
             });
         }
-        
+
         function exportReport() {
             fetch('/api/history').then(res => res.json()).then(data => {
                 let report = `QAI TRAINING ANALYTICS REPORT\n`;
                 report += `Generated: ${new Date().toLocaleString()}\n`;
                 report += `${'='.repeat(60)}\n\n`;
-                
+
                 report += `SUMMARY STATISTICS\n`;
                 report += `${'='.repeat(60)}\n`;
                 report += `Total Jobs: ${data.jobs.length}\n`;
-                
+
                 const avgLoss = data.jobs.length > 0
                     ? (data.jobs.reduce((sum, j) => sum + (j.post_loss || j.final_loss || 0), 0) / data.jobs.length).toFixed(3)
                     : '0.000';
                 report += `Average Final Loss: ${avgLoss}\n`;
-                
+
                 const bestJob = data.jobs.reduce((best, j) => {
                     const loss = j.post_loss || j.final_loss || Infinity;
                     const bestLoss = best.post_loss || best.final_loss || Infinity;
                     return loss < bestLoss ? j : best;
                 }, data.jobs[0] || {});
                 report += `Best Model: ${bestJob.name || 'N/A'}\n`;
-                
+
                 const totalTime = Math.round(data.jobs.reduce((sum, j) => sum + (j.duration || 0), 0) / 3600);
                 report += `Total Training Time: ${totalTime} hours\n\n`;
-                
+
                 report += `DETAILED JOB RESULTS\n`;
                 report += `${'='.repeat(60)}\n\n`;
-                
+
                 data.jobs.forEach((job, index) => {
                     report += `${index + 1}. ${job.name || 'Unknown'}\n`;
                     report += `   Final Loss: ${(job.post_loss || job.final_loss || 0).toFixed(4)}\n`;
@@ -895,13 +1007,13 @@
                     }
                     report += `\n`;
                 });
-                
+
                 const blob = new Blob([report], { type: 'text/plain' });
                 const link = document.createElement('a');
                 link.download = `qai_report_${new Date().toISOString().split('T')[0]}.txt`;
                 link.href = URL.createObjectURL(blob);
                 link.click();
-                
+
                 showToast('Report generated!', 'success');
             }).catch(err => {
                 showToast('Report generation failed: ' + err.message, 'error');
@@ -912,7 +1024,7 @@
             try {
                 const { jsPDF } = window.jspdf || {};
                 if (!jsPDF) { showToast('PDF library not loaded', 'error'); return; }
-                const doc = new jsPDF('p','pt','a4');
+                const doc = new jsPDF('p', 'pt', 'a4');
                 let y = 40;
                 doc.setFontSize(18);
                 doc.text('QAI Training Analytics Report', 40, y);
@@ -920,14 +1032,14 @@
                 doc.setFontSize(10);
                 doc.text('Generated: ' + new Date().toLocaleString(), 40, y);
                 y += 20;
-                const charts = ['lossChart','gpuChart','performanceChart','timeChart'];
+                const charts = ['lossChart', 'gpuChart', 'performanceChart', 'timeChart'];
                 charts.forEach((id, idx) => {
                     const canvas = document.getElementById(id);
                     if (!canvas) return;
                     const imgData = canvas.toDataURL('image/png');
                     if (y > 700) { doc.addPage(); y = 40; }
                     doc.setFontSize(14);
-                    doc.text(id.replace('Chart',' Chart'), 40, y);
+                    doc.text(id.replace('Chart', ' Chart'), 40, y);
                     y += 10;
                     doc.addImage(imgData, 'PNG', 40, y, 500, 300);
                     y += 320;
@@ -941,7 +1053,7 @@
 
         // Inject PDF option into export modal when opened
         const originalExportCharts = exportCharts;
-        exportCharts = async function() {
+        exportCharts = async function () {
             await originalExportCharts();
             const modal = document.querySelector('div[style*="Export Options"]') || document.querySelector('div[style*="Export Options"],div');
             // Fallback: find modal by heading text
@@ -969,10 +1081,10 @@
         }
         function toggleDarkModeAnalytics() {
             const isDark = document.body.classList.toggle('dark-mode');
-            localStorage.setItem('darkMode', isDark ? 'true':'false');
+            localStorage.setItem('darkMode', isDark ? 'true' : 'false');
             const btn = document.getElementById('darkModeToggle');
             if (btn) btn.textContent = isDark ? '☀️' : '🌙';
-            showToast('Dark mode ' + (isDark ? 'enabled':'disabled'), 'info');
+            showToast('Dark mode ' + (isDark ? 'enabled' : 'disabled'), 'info');
         }
         applyDarkModePreference();
         document.addEventListener('keydown', (e) => {
@@ -990,13 +1102,65 @@
                 document.getElementById('modelSelect') && document.getElementById('modelSelect').blur();
             }
         });
-        
+
+        // ----- Anomaly Detection -----
+        let anomalyDetector = null;
+
+        function initAnomalyDetector() {
+            if (typeof TrainingAnomalyDetector === 'undefined') return;
+            anomalyDetector = new TrainingAnomalyDetector({
+                enableNotifications: true,
+                enableAutoPause: false,
+                onAnomaly: (anomaly) => {
+                    renderAnomalyPanel();
+                    const stats = anomalyDetector.getStatistics();
+                    const badge = document.getElementById('anomalyBadgeCount');
+                    if (badge) {
+                        badge.textContent = stats.total;
+                        const c = anomaly.severity === 'error' ? '#ef4444' :
+                            anomaly.severity === 'warning' ? '#f59e0b' : '#3b82f6';
+                        badge.style.background = c;
+                    }
+                }
+            });
+        }
+
+        function toggleAnomalyPanel() {
+            const panel = document.getElementById('anomalyPanel');
+            const btn = document.getElementById('anomalyToggleBtn');
+            if (!panel) return;
+            const showing = panel.style.display !== 'none';
+            panel.style.display = showing ? 'none' : 'block';
+            btn.textContent = showing ? '🔍 Anomaly Detection' : '🔍 Anomaly Detection ✓';
+            btn.style.background = showing ? '' : '#7c3aed';
+            if (!showing) renderAnomalyPanel();
+        }
+
+        function renderAnomalyPanel() {
+            const list = document.getElementById('anomalyList');
+            if (!list) return;
+            if (!anomalyDetector || anomalyDetector.anomalies.length === 0) {
+                list.innerHTML = '<p style="color:rgba(255,255,255,0.45);text-align:center;margin:16px 0">No anomalies detected</p>';
+                return;
+            }
+            const sev = { error: '#ef4444', warning: '#f59e0b', info: '#3b82f6' };
+            const items = anomalyDetector.getRecentAnomalies(20).slice().reverse();
+            list.innerHTML = items.map(a => `
+                <div style="border-left:3px solid ${sev[a.severity] || '#666'};padding:8px 12px;margin-bottom:8px;background:rgba(255,255,255,0.05);border-radius:4px;font-size:0.88em">
+                    <strong style="color:${sev[a.severity] || '#fff'}">${a.type}</strong>
+                    <span style="float:right;opacity:0.5;font-size:0.85em">Ep ${a.epoch || '?'} · ${a.jobName || ''}</span>
+                    <br><span style="opacity:0.85">${a.message}</span>
+                    <br><em style="opacity:0.6">💡 ${a.recommendation}</em>
+                </div>`).join('');
+        }
+
         // Initialize on load
         window.addEventListener('DOMContentLoaded', () => {
             initCharts();
+            initAnomalyDetector();
             initWebSocket();
             refreshData();
-            
+
             // Refresh data every 30 seconds as fallback
             setInterval(refreshData, 30000);
         });
@@ -1005,8 +1169,13 @@
         <a href="./" style="color:inherit;text-decoration:underline">Dashboard Hub</a> ·
         <a href="unified.html" style="color:inherit;text-decoration:underline">Training</a> ·
         <a href="advanced.html" style="color:inherit;text-decoration:underline">Advanced</a>
-        <div style="margin-top:6px">Part of the <a href="../aria/" style="color:inherit;text-decoration:underline">Aria</a> platform</div>
+        <div style="margin-top:6px">Part of the <a href="../aria/"
+                style="color:inherit;text-decoration:underline">Aria</a> platform</div>
     </footer>
+    <script src="keyboard-nav.js"></script>
+    <script src="session-history.js"></script>
+    <script src="anomaly-detector.js"></script>
     <script src="../global-upgrade.js"></script>
 </body>
+
 </html>

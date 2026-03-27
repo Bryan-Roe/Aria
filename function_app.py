@@ -706,6 +706,27 @@ def chat_stream(req: func.HttpRequest) -> func.HttpResponse:
                 headers=create_cors_response_headers(),
             )
 
+        # =============================
+        # Memory Retrieval — mirrors /api/chat behavior
+        # =============================
+        stream_user_content = next(
+            (m['content'] for m in reversed(messages) if m.get('role') == 'user'), None)
+        stream_memory_messages: list[dict] = []
+        if stream_user_content:
+            try:
+                stream_embedding = generate_embedding(stream_user_content)
+                similar_msgs = fetch_similar_messages(
+                    stream_embedding, top_k=5, session_id=body.get('session_id'))
+                for idx, sm in enumerate(similar_msgs):
+                    stream_memory_messages.append({
+                        "role": "system",
+                        "content": f"[Memory #{idx+1} | similarity={sm.get('similarity'):.3f}] {sm.get('content')}"
+                    })
+            except Exception as _mem_err:  # noqa: BLE001
+                logging.warning(f"Stream memory retrieval failed: {_mem_err}")
+        if stream_memory_messages:
+            messages = stream_memory_messages + messages
+
         provider, info = detect_provider(
             explicit=provider_choice,
             model_override=model_override,
@@ -731,6 +752,7 @@ def chat_stream(req: func.HttpRequest) -> func.HttpResponse:
                 pre = {
                     "provider": info.name,
                     "model": info.model,
+                    "memory_messages": len(stream_memory_messages),
                     "pruning": {
                         "original_tokens": stats.original_tokens,
                         "pruned_tokens": stats.pruned_tokens,

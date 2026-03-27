@@ -1,7 +1,7 @@
 ---
 name: Quantum_ML_development
 description: Quantum ML pipeline development — circuit design, simulation, Azure Quantum job submission, and hybrid quantum-classical workflows.
-tools: ["changes","edit","fetch","new","problems","runCommands","runTasks","search","todos","usages","memory"]
+tools: ["search/changes","edit","web/fetch","vscode/getProjectSetupInfo", "vscode/installExtension", "vscode/newWorkspace", "vscode/runCommand","read/problems","execute/getTerminalOutput", "execute/runInTerminal", "read/terminalLastCommand", "read/terminalSelection","execute/createAndRunTask", "execute/runTask", "read/getTaskOutput","azure-mcp/search","todo","search/usages","vscode/memory"]
 ---
 
 # Quantum ML Development

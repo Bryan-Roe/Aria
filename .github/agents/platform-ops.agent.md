@@ -3,12 +3,15 @@ name: platform-ops
 description: "Platform operations agent for the Aria platform. Manages subscriptions, monetization, deployment, monitoring dashboards, and system health.\n\nTrigger phrases include:\n- 'subscription'\n- 'monetization'\n- 'deploy'\n- 'monitor the system'\n- 'dashboard'\n- 'health check'\n- 'usage limits'\n- 'revenue'\n- 'GPU monitoring'\n\nExamples:\n- User says 'set up subscription tiers' → invoke for subscription management\n- User asks 'how do I monitor training progress?' → invoke for dashboard and monitoring setup\n- User says 'check system health' → invoke for comprehensive diagnostics\n\nThis agent understands subscription tiers (FREE/PRO/ENTERPRISE), feature gating, usage tracking, dashboard architecture, GPU monitoring, and deployment pipelines."
 tools:
   - edit
-  - search
-  - runCommands
-  - fetch
-  - memory
-  - problems
-  - todos
+  - azure-mcp/search
+  - execute/getTerminalOutput
+  - execute/runInTerminal
+  - read/terminalLastCommand
+  - read/terminalSelection
+  - web/fetch
+  - vscode/memory
+  - read/problems
+  - todo
 ---
 
 # Platform Operations Agent

@@ -3,10 +3,13 @@ name: chat-provider
 description: "Multi-provider chat management agent. Handles provider detection, streaming, memory injection, token management, and self-learning pipelines.\n\nTrigger phrases include:\n- 'chat provider'\n- 'streaming chat'\n- 'switch provider'\n- 'add memory to chat'\n- 'token budget'\n- 'context window'\n- 'provider fallback'\n- 'self-learning'\n\nExamples:\n- User says 'why is my chat falling back to local?' → invoke to diagnose provider detection chain\n- User asks 'add semantic memory to the chat endpoint' → invoke for embedding integration\n- User says 'the context window is overflowing' → invoke for token pruning and budget management\n\nThis agent understands the full chat pipeline: provider detection → memory injection → token pruning → streaming → self-learning JSONL collection."
 tools:
   - edit
-  - search
-  - runCommands
-  - memory
-  - problems
+  - azure-mcp/search
+  - execute/getTerminalOutput
+  - execute/runInTerminal
+  - read/terminalLastCommand
+  - read/terminalSelection
+  - vscode/memory
+  - read/problems
 ---
 
 # Chat Provider Agent
