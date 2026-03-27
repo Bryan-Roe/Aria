@@ -7,6 +7,7 @@ import random
 import math
 import sys
 import os
+import socket
 import hashlib
 from pathlib import Path
 import datetime
@@ -1787,10 +1788,19 @@ def main():
             except Exception:
                 pass
 
+            # If another service occupies the port, fall back to a free port.
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+                sock.bind((host, 0))
+                fallback_port = sock.getsockname()[1]
+
             print(
-                f"❌ Port {port} is already in use and does not appear to be an Aria server.")
-            print("💡 Stop the process using that port or set ARIA_PORT to a free port.")
-        raise
+                f"⚠️ Port {port} is in use by another service; starting Aria on free port {fallback_port}.")
+            print(
+                f"💡 Set ARIA_PORT={fallback_port} (or another free port) to control startup port explicitly.")
+            port = fallback_port
+            server = HTTPServer((host, port), AriaRequestHandler)
+        else:
+            raise
 
     print("\n" + "=" * 70)
     print("🎨 Aria Visual Command System - Web Server")

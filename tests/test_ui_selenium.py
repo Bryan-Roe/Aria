@@ -145,7 +145,8 @@ def test_selenium_status_url_with_non_standard_path_uses_status_root():
 
 def test_selenium_status_urls_returns_primary_and_fallback():
     urls = _selenium_status_urls('http://localhost:4444/session')
-    assert urls == ['http://localhost:4444/status', 'http://localhost:4444/wd/hub/status']
+    assert urls == ['http://localhost:4444/status',
+                    'http://localhost:4444/wd/hub/status']
 
 
 def test_selenium_ready_from_payload_variants():
@@ -261,9 +262,11 @@ def is_selenium_hub_ready():
                 if _selenium_ready_from_payload(status):
                     logger.info(f"Selenium hub is ready via {status_url}")
                     return True
-                logger.warning(f"Selenium hub not ready via {status_url}: {status}")
+                logger.warning(
+                    f"Selenium hub not ready via {status_url}: {status}")
         except Exception as e:
-            logger.warning(f"Selenium hub not accessible via {status_url}: {e}")
+            logger.warning(
+                f"Selenium hub not accessible via {status_url}: {e}")
     return False
 
 

@@ -145,5 +145,6 @@
                 "copilot/oswe-vscode-prime"
             ]
         }
-    }
+    },
+    "python-envs.defaultEnvManager": "ms-python.python:system"
 }

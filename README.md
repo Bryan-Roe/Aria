@@ -214,6 +214,20 @@ cat data_out/autonomous_training_status.json | python -m json.tool
 tail -f data_out/autonomous_training.log
 ```
 
+## 👀 Watch Continuous Automation Loop
+
+If you are running the perpetual validation worker (`data_out/continuous_automation/loop.pid`) and watchdog (`watchdog.pid`), you can watch live status with:
+
+```bash
+# One-shot snapshot
+python scripts/watch_continuous_automation.py
+
+# Live dashboard view (refresh every 5 seconds)
+python scripts/watch_continuous_automation.py --watch --interval 5
+```
+
+This watcher shows process health, cycle start/end cadence, last integration-gate status, latest pytest summary, and the latest log tail from `data_out/continuous_automation/loop.log`.
+
 ---
 
 ## 🔧 LLM Tool Maker
