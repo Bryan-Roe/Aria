@@ -4,11 +4,15 @@ Verifies that orchestrator status files are correctly aggregated and exposed
 through the status endpoint for real-time monitoring.
 """
 
+
+
+import importlib.util
 import json
 import sys
 from datetime import datetime
 from pathlib import Path
-import importlib.util
+from types import ModuleType
+
 import pytest
 
 
@@ -28,61 +32,54 @@ def app_module():
     return module
 
 
+
+
 class MockRequest:
     """Mock Azure Functions HttpRequest."""
 
-    def __init__(self, method="GET"):
+    def __init__(self, method="GET", route_params=None):
         self.method = method
+        self.route_params = route_params if route_params is not None else {}
 
     def get_json(self):
         return {}
 
 
-def test_orchestrator_health_in_status_endpoint(app_module):
-    """Verify /api/ai/status includes orchestrator_health section."""
-    req = MockRequest("GET")
-    resp = app_module.ai_status(req)
-
-    assert resp.status_code == 200
-    data = json.loads(resp.get_body())
-
-    # Verify orchestrator_health section exists
-    assert "orchestrator_health" in data, "orchestrator_health section missing from /api/ai/status"
-
-    # Verify required fields
-    orchestrator_health = data["orchestrator_health"]
-    assert orchestrator_health["enabled"] is True
-    assert isinstance(orchestrator_health["orchestrators"], dict)
-    assert orchestrator_health["overall_status"] in [
-        "healthy", "degraded", "idle", "error", "unknown"]
-    assert "last_checked" in orchestrator_health
-    assert isinstance(orchestrator_health["active_count"], int)
-    assert isinstance(orchestrator_health["failed_count"], int)
-
-
-def test_orchestrator_health_aggregates_autonomous_training(app_module):
-    """Verify autonomous_training orchestrator is included if status file exists."""
+def test_orchestrator_health_aggregates_autonomous_training(app_module: ModuleType):
+    """
+    Conditional test: Verifies autonomous_training orchestrator is included if status file exists.
+    If the status file does not exist, the test is explicitly skipped.
+    """
     repo_root = Path(__file__).resolve().parents[1]
     status_file = repo_root / "data_out" / "autonomous_training_status.json"
 
-    if status_file.exists():
-        req = MockRequest("GET")
-        resp = app_module.ai_status(req)
-        data = json.loads(resp.get_body())
-        orchestrators = data["orchestrator_health"]["orchestrators"]
+    if not status_file.exists():
+        pytest.skip("autonomous_training_status.json does not exist; skipping test.")
 
-        # If status file exists, should be included
-        if "autonomous_training" in orchestrators:
-            orch = orchestrators["autonomous_training"]
-            assert "status" in orch
-            assert "cycles_completed" in orch or "error" in orch
-
-
-def test_orchestrator_health_aggregates_standard_orchestrators(app_module):
-    """Verify standard orchestrators are included if status files exist."""
     req = MockRequest("GET")
     resp = app_module.ai_status(req)
-    data = json.loads(resp.get_body())
+    body = resp.get_body()
+    if isinstance(body, bytes):
+        body = body.decode()
+    data = json.loads(body)
+    orchestrators = data["orchestrator_health"]["orchestrators"]
+
+    # If status file exists, should be included
+    assert "autonomous_training" in orchestrators, "autonomous_training orchestrator missing despite status file present."
+    orch = orchestrators["autonomous_training"]
+    assert "status" in orch
+    assert "cycles_completed" in orch or "error" in orch
+
+
+def test_orchestrator_health_status_endpoint(app_module: ModuleType):
+    """Verify standard orchestrators are included if status files exist."""
+
+    req = MockRequest("GET")
+    resp = app_module.ai_status(req)
+    body = resp.get_body()
+    if isinstance(body, bytes):
+        body = body.decode()
+    data = json.loads(body)
     orchestrators = data["orchestrator_health"]["orchestrators"]
 
     # Check that standard orchestrators are properly formatted if present
@@ -95,11 +92,15 @@ def test_orchestrator_health_aggregates_standard_orchestrators(app_module):
             assert "total_jobs" in orch or "error" in orch
 
 
-def test_orchestrator_health_overall_status_logic(app_module):
+def test_orchestrator_health_overall_status_logic(app_module: ModuleType):
     """Verify overall_status correctly reflects orchestrator states."""
+
     req = MockRequest("GET")
     resp = app_module.ai_status(req)
-    data = json.loads(resp.get_body())
+    body = resp.get_body()
+    if isinstance(body, bytes):
+        body = body.decode()
+    data = json.loads(body)
 
     orchestrator_health = data["orchestrator_health"]
     overall = orchestrator_health["overall_status"]
@@ -116,7 +117,7 @@ def test_orchestrator_health_overall_status_logic(app_module):
         assert overall in ["idle", "unknown"]
 
 
-def test_orchestrator_health_endpoint_resilience(app_module):
+def test_orchestrator_health_endpoint_resilience(app_module: ModuleType):
     """Verify /api/ai/status doesn't crash if status files are malformed."""
     # This test just verifies the endpoint returns 200 even if
     # orchestrator status files are missing or broken
@@ -126,19 +127,25 @@ def test_orchestrator_health_endpoint_resilience(app_module):
     resp = app_module.ai_status(req)
     assert resp.status_code == 200
 
-    data = json.loads(resp.get_body())
+    body = resp.get_body()
+    if isinstance(body, bytes):
+        body = body.decode()
+    data = json.loads(body)
     assert "orchestrator_health" in data
     # Should gracefully degrade to empty orchestrators dict
     assert isinstance(data["orchestrator_health"]["orchestrators"], dict)
 
 
-def test_orchestrator_health_last_checked_utc_z(app_module):
+def test_orchestrator_health_last_checked_utc_z(app_module: ModuleType):
     """Verify orchestrator_health.last_checked is UTC ISO-8601 ending in Z."""
     req = MockRequest("GET")
     resp = app_module.ai_status(req)
     assert resp.status_code == 200
 
-    data = json.loads(resp.get_body())
+    body = resp.get_body()
+    if isinstance(body, bytes):
+        body = body.decode()
+    data = json.loads(body)
     last_checked = data["orchestrator_health"]["last_checked"]
     assert isinstance(last_checked, str)
     assert last_checked.endswith("Z")

@@ -1,0 +1,18 @@
+{
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "type": "command",
+        "command": "python3 .github/hooks/scripts/enforce_task_complete.py",
+        "timeout": 5
+      }
+    ],
+    "Stop": [
+      {
+        "type": "command",
+        "command": "python3 .github/hooks/scripts/enforce_task_complete.py",
+        "timeout": 5
+      }
+    ]
+  }
+}
