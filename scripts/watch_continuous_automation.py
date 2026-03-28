@@ -127,8 +127,10 @@ def _tail(lines: Iterable[str], n: int) -> list[str]:
 
 
 def _analyze_loop_log(lines: list[str]) -> dict[str, object]:
-    cycle_starts = 0
-    cycle_ends = 0
+    raw_start_lines = 0
+    raw_end_lines = 0
+    start_times: set[str] = set()
+    end_times: set[str] = set()
     last_start: Optional[datetime] = None
     last_end: Optional[datetime] = None
     last_pytest_summary: Optional[str] = None
@@ -137,14 +139,22 @@ def _analyze_loop_log(lines: list[str]) -> dict[str, object]:
     for line in lines:
         start_match = CYCLE_START_RE.match(line)
         if start_match:
-            cycle_starts += 1
-            last_start = _parse_iso(start_match.group("ts"))
+            raw_start_lines += 1
+            ts = start_match.group("ts").strip()
+            start_times.add(ts)
+            parsed = _parse_iso(ts)
+            if parsed is not None and (last_start is None or parsed >= last_start):
+                last_start = parsed
             continue
 
         end_match = CYCLE_END_RE.match(line)
         if end_match:
-            cycle_ends += 1
-            last_end = _parse_iso(end_match.group("ts"))
+            raw_end_lines += 1
+            ts = end_match.group("ts").strip()
+            end_times.add(ts)
+            parsed = _parse_iso(ts)
+            if parsed is not None and (last_end is None or parsed >= last_end):
+                last_end = parsed
             continue
 
         pytest_match = PYTEST_PASS_RE.match(line.strip())
@@ -160,11 +170,21 @@ def _analyze_loop_log(lines: list[str]) -> dict[str, object]:
         elif GATE_FAIL_RE.search(line):
             last_gate_status = "failed"
 
-    in_progress = cycle_starts > cycle_ends
+    cycle_starts = len(start_times)
+    cycle_ends = len(end_times)
+    # Prefer temporal ordering over raw counts in case log windows are truncated
+    # or duplicate workers emit mirrored entries.
+    in_progress = False
+    if last_start is not None and last_end is not None:
+        in_progress = last_start > last_end
+    elif last_start is not None and last_end is None:
+        in_progress = True
 
     return {
         "cycle_starts": cycle_starts,
         "cycle_ends": cycle_ends,
+        "duplicate_start_markers": max(0, raw_start_lines - cycle_starts),
+        "duplicate_end_markers": max(0, raw_end_lines - cycle_ends),
         "in_progress": in_progress,
         "last_start": last_start,
         "last_end": last_end,
@@ -201,6 +221,13 @@ def _print_snapshot(lines_to_show: int) -> None:
 
     print(fmt_proc(loop_status))
     print(fmt_proc(watchdog_status))
+    dup_starts = analysis.get("duplicate_start_markers", 0)
+    dup_ends = analysis.get("duplicate_end_markers", 0)
+    if isinstance(dup_starts, int) and isinstance(dup_ends, int) and (dup_starts > 0 or dup_ends > 0):
+        print(
+            f"⚠️  duplicate log markers detected: start+{dup_starts}, end+{dup_ends}")
+    else:
+        print("🟢 duplicate log markers: none")
 
     print("-" * 78)
     print(

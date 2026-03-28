@@ -228,6 +228,26 @@ python scripts/watch_continuous_automation.py --watch --interval 5
 
 This watcher shows process health, cycle start/end cadence, last integration-gate status, latest pytest summary, and the latest log tail from `data_out/continuous_automation/loop.log`.
 
+## 🤖 PID Auto-Edit Agent
+
+If you want a background agent that runs with a PID and automatically processes queued file-editing tasks:
+
+```bash
+# Start daemon
+python scripts/pid_auto_edit_agent.py start
+
+# Queue a task (safe default shown with echo + dry-run)
+python scripts/pid_auto_edit_agent.py enqueue --task "add docstrings to scripts/watch_continuous_automation.py" --llm-type echo --dry-run
+
+# Check status
+python scripts/pid_auto_edit_agent.py status
+
+# Stop daemon
+python scripts/pid_auto_edit_agent.py stop
+```
+
+Agent state is stored under `data_out/pid_auto_edit_agent/` (`agent.pid`, `queue.jsonl`, `done.jsonl`, `failed.jsonl`, `agent.log`).
+
 ---
 
 ## 🔧 LLM Tool Maker
