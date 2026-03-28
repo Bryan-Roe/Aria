@@ -381,13 +381,24 @@ def main():
         print(analytics.generate_ascii_chart())
 
 
+def _squelch_stdout_after_broken_pipe() -> None:
+    """Redirect stdout to /dev/null to prevent shutdown-time flush errors."""
+    try:
+        devnull = os.open(os.devnull, os.O_WRONLY)
+        os.dup2(devnull, sys.stdout.fileno())
+        os.close(devnull)
+    except Exception:
+        pass
+
+
 if __name__ == "__main__":
     try:
         main()
-    except BrokenPipeError:
         try:
-            devnull = os.open(os.devnull, os.O_WRONLY)
-            os.dup2(devnull, sys.stdout.fileno())
-        except Exception:
-            pass
+            sys.stdout.flush()
+        except BrokenPipeError:
+            _squelch_stdout_after_broken_pipe()
+            sys.exit(0)
+    except BrokenPipeError:
+        _squelch_stdout_after_broken_pipe()
         sys.exit(0)

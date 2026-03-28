@@ -56,10 +56,13 @@ def _install_fake_quantum_trainer_module(
     This keeps endpoint tests fast and deterministic without loading heavyweight
     model dependencies.
     """
-    import torch
-
     module = types.ModuleType("quantum_llm_trainer")
     module.QUANTUM_AVAILABLE = True
+
+    try:
+        import torch
+    except Exception:
+        torch = None
 
     class _FakeModel:
         def __init__(self, tokens: list[int]):
@@ -74,8 +77,17 @@ def _install_fake_quantum_trainer_module(
                     "temperature": temperature,
                     "top_k": top_k,
                 }
-                capture["prompt_shape"] = tuple(prompt_ids.shape)
-            return torch.tensor([self._tokens], dtype=torch.long)
+                if hasattr(prompt_ids, "shape"):
+                    capture["prompt_shape"] = tuple(prompt_ids.shape)
+                else:
+                    capture["prompt_shape"] = (
+                        len(prompt_ids),
+                        len(prompt_ids[0]) if prompt_ids else 0,
+                    )
+
+            if torch is not None:
+                return torch.tensor([self._tokens], dtype=torch.long)
+            return [self._tokens]
 
     class QuantumEnhancedLLMTrainer:
         def __init__(self, config):

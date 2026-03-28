@@ -19,9 +19,18 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
-import torch
-import torch.nn as nn
-from torch.utils.data import DataLoader, Dataset
+try:
+    import torch
+    import torch.nn as nn
+    from torch.utils.data import DataLoader, Dataset
+except Exception:  # pragma: no cover - optional dependency in lightweight envs
+    torch = None
+    nn = None
+
+    class Dataset:  # type: ignore[override]
+        """Fallback placeholder when torch is unavailable."""
+
+    DataLoader = None  # type: ignore[assignment]
 
 # Add paths
 repo_root = Path(__file__).resolve().parent.parent
@@ -34,8 +43,9 @@ for p in [str(quantum_ml_path), str(quantum_ml_src)]:
 try:
     from quantum_transformer import QUANTUM_AVAILABLE, QuantumLLM
 except ImportError as e:
-    logging.error(f"Cannot import QuantumLLM: {e}")
-    sys.exit(1)
+    logging.warning(f"QuantumLLM unavailable at import time: {e}")
+    QUANTUM_AVAILABLE = False
+    QuantumLLM = None
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
@@ -156,6 +166,12 @@ def train_quantum_llm(args):
     if not QUANTUM_AVAILABLE:
         logger.error(
             "Quantum layers not available. Install pennylane: pip install pennylane"
+        )
+        return 1
+
+    if torch is None or nn is None or DataLoader is None:
+        logger.error(
+            "PyTorch is not installed. Install torch to run training: pip install torch"
         )
         return 1
 

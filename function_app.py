@@ -2708,20 +2708,32 @@ def quantum_llm(req: func.HttpRequest) -> func.HttpResponse:
             }
             trainer = QuantumEnhancedLLMTrainer(config)
 
-            import torch
+            prompt_token_ids = [
+                ord(c) % trainer.model_config["vocab_size"] for c in prompt[:32]
+            ]
+            try:
+                import torch
 
-            prompt_ids = torch.tensor(
-                [[ord(c) % trainer.model_config["vocab_size"] for c in prompt[:32]]],
-                dtype=torch.long,
-            )
+                prompt_ids = torch.tensor([prompt_token_ids], dtype=torch.long)
+            except Exception:
+                # Keep endpoint usable in lightweight environments where torch is
+                # intentionally absent; fake/alternate trainer implementations can
+                # still accept a nested token list.
+                prompt_ids = [prompt_token_ids]
+
             generated = trainer.model.generate(
                 prompt_ids, max_new_tokens=max_tokens, temperature=0.8, top_k=20
             )
             # Decode back to text using the simple char mapping
             vocab_size = trainer.model_config["vocab_size"]
+            generated_row = generated[0]
+            tokens = (
+                generated_row.tolist()
+                if hasattr(generated_row, "tolist")
+                else list(generated_row)
+            )
             text = "".join(
-                chr(t % 128) if 32 <= (t % 128) < 127 else "?"
-                for t in generated[0].tolist()
+                chr(t % 128) if 32 <= (t % 128) < 127 else "?" for t in tokens
             )
 
             return func.HttpResponse(
@@ -2730,7 +2742,7 @@ def quantum_llm(req: func.HttpRequest) -> func.HttpResponse:
                         "action": "generate",
                         "prompt": prompt,
                         "generated": text,
-                        "tokens": len(generated[0]),
+                        "tokens": len(tokens),
                         "quantum_available": QUANTUM_AVAILABLE,
                         "readiness": (
                             get_quantum_llm_status(

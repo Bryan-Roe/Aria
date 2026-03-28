@@ -95,77 +95,89 @@ def wait_for_object(name, timeout=4.0):
 
 @pytest.mark.pyppeteer
 @pytest.mark.e2e
-@pytest.mark.asyncio
-async def test_pyppeteer_add_pickup_drop():
-    if sys.version_info >= (3, 12):
-        pytest.skip("pyppeteer is not reliable on Python >= 3.12 in this environment")
+def test_pyppeteer_add_pickup_drop():
+    async def _run():
+        if sys.version_info >= (3, 12):
+            pytest.skip(
+                "pyppeteer is not reliable on Python >= 3.12 in this environment"
+            )
 
-    try:
-        from pyppeteer import launch
-    except Exception:
-        pytest.skip("pyppeteer not available")
+        try:
+            from pyppeteer import launch
+        except Exception:
+            pytest.skip("pyppeteer not available")
 
-    proc = ensure_server_running()
-    started_proc = proc is not None
+        proc = ensure_server_running()
+        started_proc = proc is not None
 
-    name = f"e2e_pypp_{int(time.time()*1000)}"
+        name = f"e2e_pypp_{int(time.time()*1000)}"
+        browser = None
+        try:
+            try:
+                chrome_path = os.getenv("CHROME_PATH") or os.getenv(
+                    "PUPPETEER_EXECUTABLE_PATH"
+                )
+                launch_kwargs = {
+                    "headless": True,
+                    "args": [
+                        "--no-sandbox",
+                        "--disable-dev-shm-usage",
+                        "--disable-gpu",
+                        "--disable-setuid-sandbox",
+                    ],
+                }
+                if chrome_path:
+                    # Use system-installed Chrome/Chromium for better CI compatibility
+                    launch_kwargs["executablePath"] = chrome_path
 
-    try:
-        chrome_path = os.getenv("CHROME_PATH") or os.getenv("PUPPETEER_EXECUTABLE_PATH")
-        launch_kwargs = {
-            "headless": True,
-            "args": [
-                "--no-sandbox",
-                "--disable-dev-shm-usage",
-                "--disable-gpu",
-                "--disable-setuid-sandbox",
-            ],
-        }
-        if chrome_path:
-            # Use system-installed Chrome/Chromium for better CI compatibility
-            launch_kwargs["executablePath"] = chrome_path
+                browser = await launch(**launch_kwargs)
+            except Exception as e:
+                # In many headless CI/dev containers Chromium fails to launch due missing system deps.
+                pytest.skip(f"pyppeteer/Chromium couldn't start: {e}")
 
-        browser = await launch(**launch_kwargs)
-    except Exception as e:
-        # In many headless CI/dev containers Chromium fails to launch due missing system deps.
-        pytest.skip(f"pyppeteer/Chromium couldn't start: {e}")
-    page = await browser.newPage()
-    await page.goto(SERVER_URL)
+            page = await browser.newPage()
+            await page.goto(SERVER_URL)
 
-    # Add object via client code
-    await page.evaluate("(n, e) => addObject(n, e)", name, "🧸")
+            # Add object via client code
+            await page.evaluate("(n, e) => addObject(n, e)", name, "🧸")
 
-    obj = wait_for_object(name, timeout=6.0)
-    assert obj is not None, f"Server didn't report newly added object {name}"
+            obj = wait_for_object(name, timeout=6.0)
+            assert obj is not None, f"Server didn't report newly added object {name}"
 
-    # Pick it up
-    await page.evaluate("(n) => pickUpObject(n)", name)
+            # Pick it up
+            await page.evaluate("(n) => pickUpObject(n)", name)
 
-    # Wait for server state 'held'
-    deadline = time.time() + 4.0
-    held = False
-    while time.time() < deadline:
-        j = requests.get(f"{SERVER_URL}/api/aria/state", timeout=1.0).json()
-        if j.get("objects", {}).get(name, {}).get("state") == "held":
-            held = True
-            break
-        await asyncio.sleep(0.1)
-    assert held, "Object not marked held on server after pickUpObject"
+            # Wait for server state 'held'
+            deadline = time.time() + 4.0
+            held = False
+            while time.time() < deadline:
+                j = requests.get(f"{SERVER_URL}/api/aria/state", timeout=1.0).json()
+                if j.get("objects", {}).get(name, {}).get("state") == "held":
+                    held = True
+                    break
+                await asyncio.sleep(0.1)
+            assert held, "Object not marked held on server after pickUpObject"
 
-    # Drop
-    await page.evaluate("() => dropObject()")
-    dropped = wait_for_object(name, timeout=5.0)
-    assert dropped is not None and dropped.get("state") in ["on_stage", "on_table"]
+            # Drop
+            await page.evaluate("() => dropObject()")
+            dropped = wait_for_object(name, timeout=5.0)
+            assert dropped is not None and dropped.get("state") in [
+                "on_stage",
+                "on_table",
+            ]
 
-    # Cleanup
-    r = requests.post(
-        f"{SERVER_URL}/api/aria/object",
-        json={"action": "remove", "object": {"id": name}},
-    )
-    assert r.ok
+            # Cleanup
+            r = requests.post(
+                f"{SERVER_URL}/api/aria/object",
+                json={"action": "remove", "object": {"id": name}},
+            )
+            assert r.ok
+        finally:
+            if browser is not None:
+                await browser.close()
 
-    await browser.close()
+            if started_proc and proc:
+                proc.kill()
+                proc.wait(timeout=2)
 
-    if started_proc and proc:
-        proc.kill()
-        proc.wait(timeout=2)
+    asyncio.run(_run())
