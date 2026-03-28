@@ -1,4 +1,7 @@
 {
+    "github.copilot.advanced.debug.useElectronFetcher": false,
+    "github.copilot.advanced.debug.useNodeFetcher": true,
+    "github.copilot.advanced.debug.useNodeFetchFetcher": false,
     "azureFunctions.deploySubpath": ".",
     "azureFunctions.scmDoBuildDuringDeployment": true,
     "azureFunctions.pythonVenv": ".venv",

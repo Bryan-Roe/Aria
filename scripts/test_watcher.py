@@ -8,6 +8,7 @@ Usage:
 This script uses polling (no external deps) so it works in CI/dev containers.
 """
 import argparse
+import shlex
 import subprocess
 import time
 from pathlib import Path
@@ -29,9 +30,9 @@ def scan_files(paths, exts=(".py",)):
 def run_command(cmd):
     print(f"\n=== Running: {cmd} ===")
     try:
-        proc = subprocess.Popen(cmd, shell=True)
-        proc.communicate()
-        rc = proc.returncode
+        cmd_args = shlex.split(cmd) if isinstance(cmd, str) else list(cmd)
+        result = subprocess.run(cmd_args, check=False)
+        rc = result.returncode
         print(f"=== Finished (exit {rc}) ===\n")
     except KeyboardInterrupt:
         print("Interrupted during test run")
