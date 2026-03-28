@@ -138,6 +138,22 @@ class TestLoad:
         result = self.mod._load("sub/status.json")
         assert result["status"] == "ok"
 
+    def test_load_with_meta_includes_helper_fields(self, tmp_path, monkeypatch):
+        monkeypatch.setattr(self.mod, "DATA_OUT", tmp_path)
+        (tmp_path /
+         "meta.json").write_text('{"status": "ok"}', encoding="utf-8")
+        result = self.mod._load_with_meta("meta.json", max_age_seconds=3600)
+        assert result["status"] == "ok"
+        assert "_status_file_exists" in result
+        assert "_status_file_error" in result
+
+    def test_status_hint_for_stale_data(self):
+        hint = self.mod._status_hint({
+            "_status_file_error": None,
+            "_status_file_stale": True,
+        })
+        assert "stale" in hint
+
 
 # ─── export_dashboard ─────────────────────────────────────────────────────────
 

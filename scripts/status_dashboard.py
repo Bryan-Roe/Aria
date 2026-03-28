@@ -18,6 +18,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
+from shared.json_utils import load_status_json
+
 REPO_ROOT = Path(__file__).resolve().parent.parent
 DATA_OUT = REPO_ROOT / "data_out"
 
@@ -39,14 +41,31 @@ ORCHESTRATORS = [
 
 def _load(rel: str) -> Dict[str, Any]:
     p = DATA_OUT / rel
-    if not p.exists():
+    loaded = load_status_json(p)
+    if loaded.get("_status_file_error"):
         return {}
-    try:
-        with open(p, encoding="utf-8") as f:
-            data = json.load(f)
-            return data if isinstance(data, dict) else {}
-    except Exception:
-        return {}
+    # Strip helper metadata for dashboard consumers.
+    return {
+        k: v for k, v in loaded.items()
+        if not k.startswith("_status_file_")
+    }
+
+
+def _load_with_meta(rel: str, max_age_seconds: Optional[int] = None) -> Dict[str, Any]:
+    p = DATA_OUT / rel
+    return load_status_json(p, max_age_seconds=max_age_seconds)
+
+
+def _status_hint(data: Dict[str, Any]) -> str:
+    if data.get("_status_file_error"):
+        return ""
+    if data.get("_status_file_stale"):
+        return "  ⚠️ stale"
+    return ""
+
+
+def _trim_status_meta(data: Dict[str, Any]) -> Dict[str, Any]:
+    return {k: v for k, v in data.items() if not k.startswith("_status_file_")}
 
 
 def _fmt_time(iso: Optional[str]) -> str:
@@ -87,8 +106,9 @@ def _row(label: str, value: str, width: int = 30) -> str:
 # ─── section printers ────────────────────────────────────────────────────────
 
 def _print_orchestrator(name: str, rel_path: str) -> Dict[str, Any]:
-    data = _load(rel_path)
-    if not data:
+    data_with_meta = _load_with_meta(rel_path, max_age_seconds=24 * 3600)
+    data = _trim_status_meta(data_with_meta)
+    if data_with_meta.get("_status_file_error"):
         print(f"   {name:<30} ⬜ no data")
         return {"name": name, "status": "no_data"}
 
@@ -112,6 +132,7 @@ def _print_orchestrator(name: str, rel_path: str) -> Dict[str, Any]:
     else:
         line += f"status: {status_str}"
     line += f"  [{_fmt_time(updated)}]"
+    line += _status_hint(data_with_meta)
     print(line)
     return {"name": name, "status": status_str, "total": total, "ok": ok, "failed": failed}
 

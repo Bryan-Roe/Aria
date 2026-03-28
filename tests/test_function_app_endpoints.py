@@ -143,6 +143,62 @@ class TestGetEndpoints:
         data = json.loads(resp.get_body())
         assert "provider" in data or "status" in data
 
+    def test_ai_status_uses_shared_status_loader_without_leaking_metadata(self, app_module, monkeypatch):
+        """GET /api/ai/status should strip shared loader metadata from payloads."""
+
+        def _fake_status(path, *_, **__):
+            path = Path(path)
+            base = {
+                "_status_file_exists": True,
+                "_status_file_age_seconds": 1.0,
+                "_status_file_stale": False,
+                "_status_file_error": None,
+            }
+            if path.name == "autonomous_training_status.json":
+                return {
+                    **base,
+                    "cycles_completed": 4,
+                    "best_accuracy": 0.91,
+                    "last_updated": "2026-03-28T00:00:00Z",
+                    "performance_history": [
+                        {"accuracy": 0.5},
+                        {"accuracy": 0.9},
+                    ],
+                }
+            if path.name == "autonomous_training_heartbeat.json":
+                return {**base, "state": "completed", "pid": 1234}
+            if path.name == "status.json" and path.parent.name == "autotrain":
+                return {
+                    **base,
+                    "total_jobs": 5,
+                    "succeeded": 5,
+                    "failed": 0,
+                    "running": 0,
+                    "last_updated": "2026-03-28T00:00:00Z",
+                }
+            return {
+                "_status_file_exists": False,
+                "_status_file_age_seconds": None,
+                "_status_file_stale": None,
+                "_status_file_error": "File not found",
+            }
+
+        monkeypatch.setattr(app_module, "load_status_json", _fake_status)
+
+        req = _mock_request("GET")
+        resp = app_module.ai_status(req)
+        assert resp.status_code == 200
+
+        data = json.loads(resp.get_body())
+        orch = data["orchestrator_health"]["orchestrators"]
+
+        assert orch["autonomous_training"]["cycles_completed"] == 4
+        assert orch["autotrain"]["status"] == "ok"
+        assert not any(
+            key.startswith("_status_file_")
+            for key in orch["autonomous_training"]
+        )
+
     def test_chat_options(self, app_module):
         """OPTIONS /api/chat returns CORS headers."""
         req = _mock_request("OPTIONS")

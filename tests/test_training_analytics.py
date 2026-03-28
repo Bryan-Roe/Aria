@@ -104,6 +104,14 @@ class TestLoadStatus:
         ta = _write_ta(tmp_path, {})
         assert ta.status == {}
 
+    def test_status_loader_metadata_not_leaked(self, tmp_path):
+        ta = _write_ta(
+            tmp_path,
+            {"cycles_completed": 3, "performance_history": []},
+        )
+        assert ta.status["cycles_completed"] == 3
+        assert not any(key.startswith("_status_file_") for key in ta.status)
+
 
 # ---------------------------------------------------------------------------
 # TestCalculateImprovementRate

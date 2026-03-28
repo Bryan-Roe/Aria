@@ -2,6 +2,7 @@
 # QAI Azure Functions Application
 # =============================================================================
 from shared.import_helpers import safe_import, create_stub_function
+from shared.json_utils import load_status_json
 from token_utils import prune_messages
 from chat_providers import detect_provider, RoleMessage
 import azure.functions as func
@@ -1154,6 +1155,17 @@ def ai_status(req: func.HttpRequest) -> func.HttpResponse:
       - assets and known endpoints
     """
     try:
+        def _load_status_payload(status_path: Path, *, require_clean: bool = False) -> dict:
+            loaded = load_status_json(status_path)
+            if loaded.get("_status_file_error"):
+                if require_clean and loaded.get("_status_file_exists"):
+                    raise ValueError(loaded["_status_file_error"])
+                return {}
+            return {
+                k: v for k, v in loaded.items()
+                if not k.startswith("_status_file_")
+            }
+
         # Environment flags
         azure_env = {
             "AZURE_OPENAI_API_KEY": bool(os.getenv("AZURE_OPENAI_API_KEY")),
@@ -1368,23 +1380,29 @@ def ai_status(req: func.HttpRequest) -> func.HttpResponse:
         try:
             learning_status_file = Path(__file__).resolve(
             ).parent / "data_out" / "self_learning" / "status.json"
-            if learning_status_file.exists():
-                with open(learning_status_file, "r") as lf:
-                    learning_status = json.load(lf)
-                    learning_info["enabled"] = learning_status.get(
-                        "learning_enabled", True)
-                    learning_info["training_cycles"] = learning_status.get(
-                        "training_cycles", 0)
-                    learning_info["total_conversations"] = learning_status.get(
-                        "total_conversations", 0)
-                    learning_info["new_conversations"] = learning_status.get(
-                        "conversations_since_last_train", 0)
-                    learning_info["last_training"] = learning_status.get(
-                        "last_training")
-                    learning_info["best_model_path"] = learning_status.get(
-                        "best_model_path")
-                    learning_info["model_history"] = learning_status.get(
-                        "model_history", [])[-3:]  # Last 3
+            loaded_learning_status = load_status_json(learning_status_file)
+            if not loaded_learning_status.get("_status_file_error"):
+                learning_status = {
+                    k: v for k, v in loaded_learning_status.items()
+                    if not k.startswith("_status_file_")
+                }
+                learning_info["enabled"] = learning_status.get(
+                    "learning_enabled", True)
+                learning_info["training_cycles"] = learning_status.get(
+                    "training_cycles", 0)
+                learning_info["total_conversations"] = learning_status.get(
+                    "total_conversations", 0)
+                learning_info["new_conversations"] = learning_status.get(
+                    "conversations_since_last_train", 0)
+                learning_info["last_training"] = learning_status.get(
+                    "last_training")
+                learning_info["best_model_path"] = learning_status.get(
+                    "best_model_path")
+                learning_info["model_history"] = learning_status.get(
+                    "model_history", [])[-3:]  # Last 3
+            elif loaded_learning_status.get("_status_file_exists"):
+                learning_info["error"] = loaded_learning_status.get(
+                    "_status_file_error")
         except Exception as _le:  # noqa: BLE001
             learning_info["error"] = str(_le)
 
@@ -1403,17 +1421,16 @@ def ai_status(req: func.HttpRequest) -> func.HttpResponse:
             # Autonomous training (uses top-level status + heartbeat)
             try:
                 autotrain_status_file = data_out_dir / "autonomous_training_status.json"
-                if autotrain_status_file.exists():
-                    with open(autotrain_status_file, "r") as f:
-                        at_status = json.load(f)
+                at_status = _load_status_payload(
+                    autotrain_status_file, require_clean=True)
+                if at_status:
                     heartbeat_file = data_out_dir / "autonomous_training_heartbeat.json"
                     heartbeat_running = False
-                    if heartbeat_file.exists():
+                    heartbeat = _load_status_payload(heartbeat_file)
+                    if heartbeat:
                         try:
-                            with open(heartbeat_file, "r") as f:
-                                hb = json.load(f)
-                            heartbeat_running = hb.get(
-                                "state") == "completed" or hb.get("pid")
+                            heartbeat_running = heartbeat.get(
+                                "state") == "completed" or heartbeat.get("pid")
                         except Exception:
                             pass
 
@@ -1441,9 +1458,9 @@ def ai_status(req: func.HttpRequest) -> func.HttpResponse:
             for name in standard_names:
                 try:
                     status_file = data_out_dir / name / "status.json"
-                    if status_file.exists():
-                        with open(status_file, "r") as f:
-                            orch_status = json.load(f)
+                    orch_status = _load_status_payload(
+                        status_file, require_clean=True)
+                    if orch_status:
 
                         # Normalize to common schema
                         total = orch_status.get("total_jobs", 0)

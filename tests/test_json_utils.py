@@ -10,6 +10,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from shared.json_utils import (
     load_json,
+    load_status_json,
     load_jsonl,
     merge_json_files,
     save_json,
@@ -77,6 +78,59 @@ class TestLoadJson:
         result = load_json(p)
         assert result["emoji"] == "🎉"
         assert result["cjk"] == "日本語"
+
+
+# ---------------------------------------------------------------------------
+# load_status_json
+# ---------------------------------------------------------------------------
+
+class TestLoadStatusJson:
+    def test_missing_file_returns_default_with_error(self, tmp_path):
+        result = load_status_json(
+            tmp_path / "missing_status.json",
+            default={"cycles_completed": 0},
+        )
+        assert result["cycles_completed"] == 0
+        assert result["_status_file_exists"] is False
+        assert result["_status_file_error"] == "File not found"
+
+    def test_valid_status_dict_merges_into_default(self, tmp_path):
+        p = tmp_path / "status.json"
+        p.write_text(
+            '{"cycles_completed": 7, "best_accuracy": 0.92}', encoding="utf-8")
+
+        result = load_status_json(
+            p, default={"cycles_completed": 0, "fallback": True})
+        assert result["cycles_completed"] == 7
+        assert result["best_accuracy"] == 0.92
+        assert result["fallback"] is True
+        assert result["_status_file_exists"] is True
+        assert result["_status_file_error"] is None
+
+    def test_invalid_json_sets_error(self, tmp_path):
+        p = tmp_path / "bad_status.json"
+        p.write_text("not json", encoding="utf-8")
+
+        result = load_status_json(p, default={"ok": False})
+        assert result["ok"] is False
+        assert result["_status_file_exists"] is True
+        assert "JSONDecodeError" in (result["_status_file_error"] or "")
+
+    def test_non_object_root_sets_error(self, tmp_path):
+        p = tmp_path / "status_array.json"
+        p.write_text("[1, 2, 3]", encoding="utf-8")
+
+        result = load_status_json(p)
+        assert result["_status_file_exists"] is True
+        assert result["_status_file_error"] == "JSON root is not an object"
+
+    def test_staleness_flag_is_set_when_threshold_exceeded(self, tmp_path):
+        p = tmp_path / "status.json"
+        p.write_text('{"status": "ok"}', encoding="utf-8")
+
+        result = load_status_json(p, max_age_seconds=0)
+        assert result["_status_file_stale"] is True
+        assert isinstance(result["_status_file_age_seconds"], float)
 
 
 # ---------------------------------------------------------------------------

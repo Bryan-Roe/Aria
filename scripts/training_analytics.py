@@ -3,14 +3,19 @@ Advanced Analytics for Autonomous Training
 Generates charts, trends, and insights
 """
 
+from shared.json_utils import load_status_json
 import argparse
-import json
 import os
 import statistics
 import sys
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Tuple
+
+REPO_ROOT = Path(__file__).resolve().parent.parent
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
 
 
 class TrainingAnalytics:
@@ -22,19 +27,13 @@ class TrainingAnalytics:
 
     def load_status(self) -> Dict:
         """Load status from file"""
-        if not self.status_file.exists():
+        loaded = load_status_json(self.status_file)
+        if loaded.get("_status_file_error"):
             return {}
-
-        try:
-            with open(self.status_file, encoding="utf-8") as f:
-                parsed = json.load(f)
-                return parsed if isinstance(parsed, dict) else {}
-        except json.JSONDecodeError:
-            # Graceful fallback for partially-written/corrupted status files.
-            return {}
-        except OSError:
-            # Graceful fallback for transient file read issues.
-            return {}
+        return {
+            k: v for k, v in loaded.items()
+            if not k.startswith("_status_file_")
+        }
 
     @staticmethod
     def _get_accuracy(perf: Dict) -> float:

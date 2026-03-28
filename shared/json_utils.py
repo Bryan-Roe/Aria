@@ -9,6 +9,7 @@ to reduce code duplication and ensure consistent formatting.
 from __future__ import annotations
 
 import json
+import time
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
 
@@ -45,6 +46,62 @@ def load_json(path: Union[str, Path], default: Optional[Any] = None) -> Any:
         if default is not None:
             return default
         raise
+
+
+def load_status_json(
+    path: Union[str, Path],
+    *,
+    max_age_seconds: Optional[int] = None,
+    default: Optional[Dict[str, Any]] = None,
+) -> Dict[str, Any]:
+    """
+    Load a status JSON file safely with optional staleness metadata.
+
+    Always returns a dictionary and appends helper metadata keys:
+      - _status_file_exists: bool
+      - _status_file_age_seconds: Optional[float]
+      - _status_file_stale: Optional[bool]
+      - _status_file_error: Optional[str]
+
+    Args:
+        path: Path to status JSON file
+        max_age_seconds: Optional staleness threshold
+        default: Optional dict merged as fallback base
+
+    Returns:
+        Dictionary containing parsed JSON object (if valid) plus metadata.
+    """
+    file_path = Path(path)
+    result: Dict[str, Any] = dict(default or {})
+
+    exists = file_path.exists()
+    age_seconds: Optional[float] = None
+    stale: Optional[bool] = None
+    error: Optional[str] = None
+
+    if exists:
+        try:
+            age_seconds = max(0.0, time.time() - file_path.stat().st_mtime)
+            if max_age_seconds is not None:
+                stale = age_seconds > max_age_seconds
+
+            with file_path.open("r", encoding="utf-8") as f:
+                payload = json.load(f)
+
+            if isinstance(payload, dict):
+                result.update(payload)
+            else:
+                error = "JSON root is not an object"
+        except Exception as exc:
+            error = f"{type(exc).__name__}: {exc}"
+    else:
+        error = "File not found"
+
+    result["_status_file_exists"] = exists
+    result["_status_file_age_seconds"] = age_seconds
+    result["_status_file_stale"] = stale
+    result["_status_file_error"] = error
+    return result
 
 
 def save_json(

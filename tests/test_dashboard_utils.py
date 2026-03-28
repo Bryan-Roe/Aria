@@ -79,6 +79,12 @@ class TestLoadJson:
         result = load_json(p)
         assert isinstance(result, dict)
 
+    def test_json_array_returns_empty_dict(self, tmp_path):
+        p = tmp_path / "array.json"
+        p.write_text("[1, 2, 3]", encoding="utf-8")
+        result = load_json(p)
+        assert result == {}
+
 
 # ---------------------------------------------------------------------------
 # TestFormatTime

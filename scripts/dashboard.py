@@ -3,11 +3,12 @@
 Aria Platform Autonomous Systems Dashboard
 Real-time monitoring of training orchestrators, quantum jobs, and AI services.
 """
-import json
 import sys
 from pathlib import Path
 from datetime import datetime
 from typing import Dict, Any
+
+from shared.json_utils import load_status_json
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 DATA_OUT = REPO_ROOT / 'data_out'
@@ -15,13 +16,14 @@ DATA_OUT = REPO_ROOT / 'data_out'
 
 def load_json(path: Path) -> Dict[str, Any]:
     """Safely load JSON file."""
-    if not path.exists():
+    loaded = load_status_json(path)
+    if loaded.get("_status_file_error"):
         return {}
-    try:
-        with open(path) as f:
-            return json.load(f)
-    except:
-        return {}
+    # Keep backwards compatibility: this helper only returns user payload.
+    return {
+        k: v for k, v in loaded.items()
+        if not k.startswith("_status_file_")
+    }
 
 
 def format_time(iso_str: str | None) -> str:
