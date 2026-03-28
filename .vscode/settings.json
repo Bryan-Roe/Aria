@@ -1,5 +1,4 @@
 {
-    "azureAutomation.directory.basePath": "",
     "azureFunctions.deploySubpath": ".",
     "azureFunctions.scmDoBuildDuringDeployment": true,
     "azureFunctions.pythonVenv": ".venv",
@@ -30,7 +29,6 @@
     "python.analysis.extraPaths": [
         "./ai-projects/llm-maker/src",
         "./aria_web",
-        "./tests/test_",
         "./tests/test_",
         "./ai-projects/quantum-ml/src"
     ],

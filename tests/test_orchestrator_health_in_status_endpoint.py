@@ -1,4 +1,4 @@
-from tests.test_orchestrator_health_integration import MockRequest
+from tests.test_orchestrator_health_integration import MockRequest, app_module
 
 
 import json

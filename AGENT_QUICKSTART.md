@@ -404,6 +404,24 @@ Ideas for improvements:
 4. Performance metrics collection
 5. Automatic prompt optimization
 
+### Note on CLI scripts
+
+When adding or changing Python CLI scripts that may be executed directly (for example via `python scripts/foo.py` or invoked in subprocesses), ensure the repository root is added to `sys.path` before importing local packages. This avoids ModuleNotFoundError when the script is run as a subprocess or from other working directories.
+
+Recommended pattern:
+
+```python
+from pathlib import Path
+import sys
+
+REPO_ROOT = Path(__file__).resolve().parent.parent
+if str(REPO_ROOT) not in sys.path:
+  sys.path.insert(0, str(REPO_ROOT))
+
+# Now safe to import local packages, e.g.:
+from shared.json_utils import load_status_json
+```
+
 ## Resources
 
 - **Ollama**: https://ollama.ai

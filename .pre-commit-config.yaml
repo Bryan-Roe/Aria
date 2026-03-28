@@ -1,0 +1,9 @@
+repos:
+  - repo: local
+    hooks:
+      - id: check-cli-sys-path
+        name: Check CLI sys.path pattern
+        entry: scripts/check_cli_scripts_sys_path.py
+        language: python
+        files: ^scripts/.*\.py$
+        description: "Ensure CLI scripts add repo root to sys.path before importing local packages"

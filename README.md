@@ -201,6 +201,30 @@ Outputs are written to `data_out/lora_training/`.
 
 ---
 
+## 🛠️ Development & Tests
+
+Local development helpers and test instructions.
+
+- Test watcher script: `scripts/test_watcher.py` — automatically re-runs tests on file changes. See `NEXT_STEPS.md` for usage and troubleshooting.
+
+- To run the full test suite once:
+
+```bash
+python3 -m pytest tests -q --maxfail=1 && echo FULL_PYTEST_OK
+```
+
+- Reproducible dev environment (recommended):
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements-dev.txt
+```
+
+If you'd like CI to run tests on PRs, see `.github/workflows/pr-tests.yml` in the repo.
+
+---
+
 ## 🤖 Autonomous Training
 
 A background orchestrator continuously discovers datasets, trains, and evaluates models on a 30-minute cycle.
@@ -342,6 +366,37 @@ Never commit secrets. All keys belong in environment variables or `local.setting
 - Update `README.md` when adding configuration options, changing CLI flags, introducing new providers, or modifying cost behaviour.
 - All output files go under `data_out/` (git-ignored). Never modify files under `datasets/`.
 - Always run `--dry-run` on orchestrators before executing GPU or QPU workloads.
+
+### Note on CLI scripts
+
+When adding or changing Python CLI scripts that may be executed directly (for example via `python scripts/foo.py` or invoked in subprocesses), ensure the repository root is added to `sys.path` before importing local packages. This avoids ModuleNotFoundError when the script is run as a subprocess or from other working directories.
+
+Recommended pattern:
+
+```python
+from pathlib import Path
+import sys
+
+REPO_ROOT = Path(__file__).resolve().parent.parent
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+# Now safe to import local packages, e.g.:
+from shared.json_utils import load_status_json
+```
+
+This pattern is used in `scripts/training_analytics.py` to ensure reliable behaviour when invoked from tests, CI, or shell pipelines.
+
+### Enable pre-commit hook
+
+We ship a `.pre-commit-config.yaml` and a local hook that checks CLI scripts. To enable locally:
+
+```bash
+pip install pre-commit
+pre-commit install
+```
+
+After installing, commits will run the `check-cli-sys-path` hook for changed files under `scripts/`.
 
 ---
 

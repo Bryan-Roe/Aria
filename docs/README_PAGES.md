@@ -195,6 +195,22 @@ When adding or modifying GitHub Pages content:
 4. Verify mobile responsiveness
 5. Update this README if adding new sections
 
+### Note on CLI scripts
+
+If you include Python CLI scripts referenced from docs or demo pages (for example `scripts/foo.py`), prefer adding the repository root to `sys.path` at script startup so the script can import local packages regardless of working directory. Use the snippet below as a copy-paste example:
+
+```python
+from pathlib import Path
+import sys
+
+REPO_ROOT = Path(__file__).resolve().parent.parent
+if str(REPO_ROOT) not in sys.path:
+   sys.path.insert(0, str(REPO_ROOT))
+
+# Now import local packages safely:
+from shared.json_utils import load_status_json
+```
+
 ## 🔗 Links
 
 - **Repository**: https://github.com/Bryan-Roe/Aria

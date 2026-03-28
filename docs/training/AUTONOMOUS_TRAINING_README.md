@@ -327,6 +327,21 @@ Typical performance on 552 datasets:
 
 ## Contributing
 
+### Note on CLI scripts
+
+Training orchestration and helper scripts are often executed from CI or as subprocesses. When creating new CLI scripts under `scripts/`, add the repository root to `sys.path` at the top of the file to ensure imports from `shared/` work regardless of CWD. Example:
+
+```python
+from pathlib import Path
+import sys
+
+REPO_ROOT = Path(__file__).resolve().parent.parent
+if str(REPO_ROOT) not in sys.path:
+  sys.path.insert(0, str(REPO_ROOT))
+
+from shared.json_utils import load_status_json
+```
+
 To extend the autonomous training system:
 
 1. Add new optimization strategies in `optimization_cycle()`
