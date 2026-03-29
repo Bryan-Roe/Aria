@@ -5,6 +5,7 @@ Optimized for speed over completeness
 """
 import json
 import sys
+import time
 from pathlib import Path
 from typing import Any, Dict, List
 
@@ -185,6 +186,62 @@ def quick_check_providers() -> Dict[str, Any]:
     }
 
 
+def quick_check_ai_tokens() -> Dict[str, Any]:
+    """Check token automation status produced by generate_ai_tokens.py.
+
+    Reads data_out/ai_token_status.json (if present) and reports whether at
+    least one provider is healthy. This complements quick_check_providers,
+    which only checks env-var presence.
+    """
+    status_path = REPO_ROOT / "data_out" / "ai_token_status.json"
+    if not status_path.exists():
+        return {
+            "status": "no_token_status",
+            "error": "Run `python3 scripts/generate_ai_tokens.py` to create token health status",
+            "speed": "instant",
+        }
+
+    try:
+        payload = json.loads(status_path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        return {
+            "status": "token_status_parse_error",
+            "error": f"Invalid JSON in {status_path.name}: {exc}",
+            "speed": "instant",
+        }
+
+    healthy = int(payload.get("healthy", 0))
+    total = int(payload.get("total", 0))
+    providers = payload.get("providers", {})
+
+    # Mark stale if older than 24h to encourage periodic refresh
+    last_updated = payload.get("last_updated", "")
+    stale = False
+    if isinstance(last_updated, str) and last_updated:
+        try:
+            # Expecting format like 2026-03-29T08:35:15Z
+            parsed = time.strptime(last_updated, "%Y-%m-%dT%H:%M:%SZ")
+            age_seconds = max(0.0, time.time() - time.mktime(parsed))
+            stale = age_seconds > 24 * 60 * 60
+        except ValueError:
+            stale = True
+
+    if healthy > 0:
+        status = "ok" if not stale else "token_status_stale"
+    else:
+        status = "no_healthy_token_providers"
+
+    return {
+        "status": status,
+        "healthy": healthy,
+        "total": total,
+        "stale": stale,
+        "last_updated": last_updated,
+        "providers": providers,
+        "speed": "instant",
+    }
+
+
 def _find_project_python() -> Path | None:
     """Return a likely project Python executable path, preferring local venvs."""
     import os
@@ -278,6 +335,7 @@ def main() -> None:
         ("Output Dirs", quick_check_outputs),
         ("Configs", quick_check_configs),
         ("Providers", quick_check_providers),
+        ("AI Tokens", quick_check_ai_tokens),
         ("Dependencies", quick_check_dependencies),
     ]
 

@@ -124,3 +124,94 @@ def test_quick_check_dependencies_falls_back_to_project_venv(monkeypatch):
     assert result["status"] == "ok"
     assert set(result["missing"]) == set()
     assert "project_python" in result
+
+
+def test_quick_check_ai_tokens_missing_file(tmp_path, monkeypatch):
+    mod = _load_fast_validate_module()
+    monkeypatch.setattr(mod, "REPO_ROOT", tmp_path)
+
+    result = mod.quick_check_ai_tokens()
+
+    assert result["status"] == "no_token_status"
+    assert "generate_ai_tokens.py" in result["error"]
+
+
+def test_quick_check_ai_tokens_ok_when_healthy_provider_exists(tmp_path, monkeypatch):
+    mod = _load_fast_validate_module()
+    monkeypatch.setattr(mod, "REPO_ROOT", tmp_path)
+
+    out = tmp_path / "data_out"
+    out.mkdir(parents=True)
+    status_path = out / "ai_token_status.json"
+    status_path.write_text(
+        "{\n"
+        '  "last_updated": "2099-01-01T00:00:00Z",\n'
+        '  "healthy": 1,\n'
+        '  "total": 4,\n'
+        '  "providers": {"ollama": {"status": "ok"}}\n'
+        "}\n"
+    )
+
+    result = mod.quick_check_ai_tokens()
+
+    assert result["status"] == "ok"
+    assert result["healthy"] == 1
+    assert result["total"] == 4
+    assert result["stale"] is False
+
+
+def test_quick_check_ai_tokens_parse_error(tmp_path, monkeypatch):
+    mod = _load_fast_validate_module()
+    monkeypatch.setattr(mod, "REPO_ROOT", tmp_path)
+
+    out = tmp_path / "data_out"
+    out.mkdir(parents=True)
+    (out / "ai_token_status.json").write_text("{not valid json")
+
+    result = mod.quick_check_ai_tokens()
+
+    assert result["status"] == "token_status_parse_error"
+
+
+def test_quick_check_ai_tokens_warn_when_no_healthy(tmp_path, monkeypatch):
+    mod = _load_fast_validate_module()
+    monkeypatch.setattr(mod, "REPO_ROOT", tmp_path)
+
+    out = tmp_path / "data_out"
+    out.mkdir(parents=True)
+    status_path = out / "ai_token_status.json"
+    status_path.write_text(
+        "{\n"
+        '  "last_updated": "2099-01-01T00:00:00Z",\n'
+        '  "healthy": 0,\n'
+        '  "total": 4,\n'
+        '  "providers": {}\n'
+        "}\n"
+    )
+
+    result = mod.quick_check_ai_tokens()
+
+    assert result["status"] == "no_healthy_token_providers"
+    assert result["healthy"] == 0
+
+
+def test_quick_check_ai_tokens_marks_stale(tmp_path, monkeypatch):
+    mod = _load_fast_validate_module()
+    monkeypatch.setattr(mod, "REPO_ROOT", tmp_path)
+
+    out = tmp_path / "data_out"
+    out.mkdir(parents=True)
+    status_path = out / "ai_token_status.json"
+    status_path.write_text(
+        "{\n"
+        '  "last_updated": "2000-01-01T00:00:00Z",\n'
+        '  "healthy": 1,\n'
+        '  "total": 4,\n'
+        '  "providers": {"ollama": {"status": "ok"}}\n'
+        "}\n"
+    )
+
+    result = mod.quick_check_ai_tokens()
+
+    assert result["status"] == "token_status_stale"
+    assert result["stale"] is True
