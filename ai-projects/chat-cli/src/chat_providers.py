@@ -82,6 +82,31 @@ _OLLAMA_CACHE_TTL_SECONDS = 30
 RoleMessage = Dict[str, str]
 
 
+# Backward-compatible provider aliases used by tests and scripts.
+# Keys should be lowercase and normalized with `-`/`_` variants where useful.
+_PROVIDER_ALIASES: Dict[str, str] = {
+    "azure_openai": "azure",
+    "azure-openai": "azure",
+    "open_ai": "openai",
+    "lm_studio": "lmstudio",
+    "lm-studio": "lmstudio",
+    "local_echo": "local",
+    "local-echo": "local",
+    "quantum_llm": "quantum",
+    "quantum-llm": "quantum",
+}
+
+
+def _get_lmstudio_api_key() -> Optional[str]:
+    """Resolve LM Studio API token from supported env var names."""
+    return (
+        os.getenv("LM_API_TOKEN")
+        or os.getenv("LMSTUDIO_API_KEY")
+        or os.getenv("LMSTUDIO_TOKEN")
+        or os.getenv("LMSTUDIO_API_TOKEN")
+    )
+
+
 def _is_text_like_content_block_type(block_type: Any) -> bool:
     """Return True for OpenAI-compatible text block type variants."""
     if not isinstance(block_type, str):
@@ -840,8 +865,13 @@ class LMStudioProvider(BaseChatProvider):
             raise RuntimeError(
                 "openai package not installed. Install 'openai' to use this provider."
             )
+        # Newer LM Studio server configurations can require API token auth.
+        # Keep backward compatibility by using the legacy placeholder key when
+        # no token env var is provided.
+        lmstudio_api_key = _get_lmstudio_api_key() or "lm-studio"
         self.client = OpenAI(
-            base_url=base_url, api_key="lm-studio"  # LM Studio doesn't require real key
+            base_url=base_url,
+            api_key=lmstudio_api_key,
         )
         self.model = model
         self.temperature = temperature
@@ -901,6 +931,24 @@ class LMStudioProvider(BaseChatProvider):
                     f"2. Use --model flag to specify the correct model name\n"
                     f"3. Set LMSTUDIO_MODEL environment variable\n\n"
                     f"The model name should match what's shown in LM Studio's server panel."
+                )
+                if stream:
+
+                    def gen_err() -> Generator[str, None, None]:
+                        yield suggestion
+
+                    return gen_err()
+                return suggestion
+
+            if "invalid_api_key" in error_msg or "api token is required" in error_msg:
+                suggestion = (
+                    f"❌ LM Studio at {self.base_url} requires API token authentication.\n\n"
+                    f"Troubleshooting steps:\n"
+                    f"1. Export one of: LM_API_TOKEN, LMSTUDIO_API_KEY, LMSTUDIO_TOKEN, LMSTUDIO_API_TOKEN\n"
+                    f"2. Ensure token matches LM Studio server configuration\n"
+                    f"3. Re-run with --provider lmstudio\n\n"
+                    f"Example:\n"
+                    f"export LM_API_TOKEN='<your-token>'"
                 )
                 if stream:
 
@@ -1167,6 +1215,7 @@ def _check_lm_studio_available(server_url: str) -> bool:
 
     # Perform HTTP check outside lock to avoid blocking other threads
     is_available = False
+    lmstudio_api_key = _get_lmstudio_api_key()
     try:
         import urllib.error
         import urllib.request
@@ -1174,11 +1223,19 @@ def _check_lm_studio_available(server_url: str) -> bool:
         # Remove trailing /v1 if present, then append /v1/models
         base_url = server_url.removesuffix("/v1")
         models_endpoint_url = base_url + "/v1/models"
-        request = urllib.request.Request(
-            models_endpoint_url, headers={"User-Agent": "QAI"}
-        )
+        headers = {"User-Agent": "QAI"}
+        if lmstudio_api_key:
+            headers["Authorization"] = f"Bearer {lmstudio_api_key}"
+        request = urllib.request.Request(models_endpoint_url, headers=headers)
         urllib.request.urlopen(request, timeout=1)
         is_available = True
+    except urllib.error.HTTPError as exc:
+        # Endpoint is reachable but auth failed: count as available only when
+        # caller configured a token (possibly wrong/expired).
+        if exc.code in (401, 403) and bool(lmstudio_api_key):
+            is_available = True
+        else:
+            is_available = False
     except Exception:
         is_available = False
 
@@ -1274,6 +1331,7 @@ def detect_provider(
       9) LoRA if provider is 'lora' and model_override is set
     """
     provider_choice = (explicit or "auto").lower()
+    provider_choice = _PROVIDER_ALIASES.get(provider_choice, provider_choice)
 
     # LM Studio config
     lm_studio_base_url = os.getenv("LMSTUDIO_BASE_URL", "http://127.0.0.1:1234/v1")

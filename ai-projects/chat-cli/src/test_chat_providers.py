@@ -139,6 +139,211 @@ class ChatProviderTests(unittest.TestCase):
                 second_path.read_text(encoding="utf-8"),
             )
 
+    def test_lmstudio_provider_uses_lm_api_token_when_present(self) -> None:
+        """LMStudioProvider should use LM_API_TOKEN when set."""
+
+        captured: dict[str, str] = {}
+
+        class _FakeOpenAI:
+            def __init__(self, *, base_url: str, api_key: str):
+                captured["base_url"] = base_url
+                captured["api_key"] = api_key
+
+        old_openai = chat_providers.OpenAI
+        old_token = os.environ.get("LM_API_TOKEN")
+        old_legacy = os.environ.get("LMSTUDIO_API_KEY")
+        try:
+            chat_providers.OpenAI = _FakeOpenAI
+            os.environ["LM_API_TOKEN"] = "token-from-lm-api-token"
+            os.environ.pop("LMSTUDIO_API_KEY", None)
+
+            _provider = chat_providers.LMStudioProvider(
+                base_url="http://127.0.0.1:1234/v1",
+                model="local-model",
+            )
+
+            self.assertEqual(captured.get("api_key"),
+                             "token-from-lm-api-token")
+            self.assertEqual(captured.get("base_url"),
+                             "http://127.0.0.1:1234/v1")
+        finally:
+            chat_providers.OpenAI = old_openai
+            if old_token is None:
+                os.environ.pop("LM_API_TOKEN", None)
+            else:
+                os.environ["LM_API_TOKEN"] = old_token
+            if old_legacy is None:
+                os.environ.pop("LMSTUDIO_API_KEY", None)
+            else:
+                os.environ["LMSTUDIO_API_KEY"] = old_legacy
+
+    def test_lmstudio_provider_falls_back_to_legacy_api_key_var(self) -> None:
+        """LMStudioProvider should use LMSTUDIO_API_KEY when LM_API_TOKEN is absent."""
+
+        captured: dict[str, str] = {}
+
+        class _FakeOpenAI:
+            def __init__(self, *, base_url: str, api_key: str):
+                captured["base_url"] = base_url
+                captured["api_key"] = api_key
+
+        old_openai = chat_providers.OpenAI
+        old_token = os.environ.get("LM_API_TOKEN")
+        old_legacy = os.environ.get("LMSTUDIO_API_KEY")
+        try:
+            chat_providers.OpenAI = _FakeOpenAI
+            os.environ.pop("LM_API_TOKEN", None)
+            os.environ["LMSTUDIO_API_KEY"] = "token-from-legacy-var"
+
+            _provider = chat_providers.LMStudioProvider(
+                base_url="http://127.0.0.1:1234/v1",
+                model="local-model",
+            )
+
+            self.assertEqual(captured.get("api_key"), "token-from-legacy-var")
+        finally:
+            chat_providers.OpenAI = old_openai
+            if old_token is None:
+                os.environ.pop("LM_API_TOKEN", None)
+            else:
+                os.environ["LM_API_TOKEN"] = old_token
+            if old_legacy is None:
+                os.environ.pop("LMSTUDIO_API_KEY", None)
+            else:
+                os.environ["LMSTUDIO_API_KEY"] = old_legacy
+
+    def test_lmstudio_provider_supports_lmstudio_token_aliases(self) -> None:
+        """LMStudioProvider should accept LMSTUDIO_TOKEN as API token source."""
+
+        captured: dict[str, str] = {}
+
+        class _FakeOpenAI:
+            def __init__(self, *, base_url: str, api_key: str):
+                captured["base_url"] = base_url
+                captured["api_key"] = api_key
+
+        old_openai = chat_providers.OpenAI
+        old_token = os.environ.get("LM_API_TOKEN")
+        old_legacy = os.environ.get("LMSTUDIO_API_KEY")
+        old_alias = os.environ.get("LMSTUDIO_TOKEN")
+        old_alias2 = os.environ.get("LMSTUDIO_API_TOKEN")
+        try:
+            chat_providers.OpenAI = _FakeOpenAI
+            os.environ.pop("LM_API_TOKEN", None)
+            os.environ.pop("LMSTUDIO_API_KEY", None)
+            os.environ["LMSTUDIO_TOKEN"] = "token-from-lmstudio-token"
+            os.environ.pop("LMSTUDIO_API_TOKEN", None)
+
+            _provider = chat_providers.LMStudioProvider(
+                base_url="http://127.0.0.1:1234/v1",
+                model="local-model",
+            )
+
+            self.assertEqual(captured.get("api_key"), "token-from-lmstudio-token")
+        finally:
+            chat_providers.OpenAI = old_openai
+            if old_token is None:
+                os.environ.pop("LM_API_TOKEN", None)
+            else:
+                os.environ["LM_API_TOKEN"] = old_token
+            if old_legacy is None:
+                os.environ.pop("LMSTUDIO_API_KEY", None)
+            else:
+                os.environ["LMSTUDIO_API_KEY"] = old_legacy
+            if old_alias is None:
+                os.environ.pop("LMSTUDIO_TOKEN", None)
+            else:
+                os.environ["LMSTUDIO_TOKEN"] = old_alias
+            if old_alias2 is None:
+                os.environ.pop("LMSTUDIO_API_TOKEN", None)
+            else:
+                os.environ["LMSTUDIO_API_TOKEN"] = old_alias2
+
+    def test_lmstudio_availability_check_uses_auth_header_when_token_present(self) -> None:
+        """Availability check should include bearer auth when token env is set."""
+
+        old_token = os.environ.get("LM_API_TOKEN")
+        old_legacy = os.environ.get("LMSTUDIO_API_KEY")
+        old_alias = os.environ.get("LMSTUDIO_TOKEN")
+        old_alias2 = os.environ.get("LMSTUDIO_API_TOKEN")
+
+        captured: dict[str, str] = {}
+
+        def _fake_urlopen(request, timeout=1):
+            captured["authorization"] = request.headers.get("Authorization", "")
+
+            class _Resp:
+                pass
+
+            return _Resp()
+
+        try:
+            os.environ.pop("LM_API_TOKEN", None)
+            os.environ.pop("LMSTUDIO_API_KEY", None)
+            os.environ["LMSTUDIO_TOKEN"] = "token-auth-header"
+            os.environ.pop("LMSTUDIO_API_TOKEN", None)
+
+            # Clear cache so test exercises real request path.
+            chat_providers._lm_studio_availability_cache["available"] = None
+            chat_providers._lm_studio_availability_cache["checked_at"] = 0.0
+            chat_providers._lm_studio_availability_cache["url"] = None
+
+            with unittest.mock.patch("urllib.request.urlopen", _fake_urlopen):
+                available = chat_providers._check_lm_studio_available(
+                    "http://127.0.0.1:1234/v1"
+                )
+
+            self.assertTrue(available)
+            self.assertEqual(captured.get("authorization"), "Bearer token-auth-header")
+        finally:
+            if old_token is None:
+                os.environ.pop("LM_API_TOKEN", None)
+            else:
+                os.environ["LM_API_TOKEN"] = old_token
+            if old_legacy is None:
+                os.environ.pop("LMSTUDIO_API_KEY", None)
+            else:
+                os.environ["LMSTUDIO_API_KEY"] = old_legacy
+            if old_alias is None:
+                os.environ.pop("LMSTUDIO_TOKEN", None)
+            else:
+                os.environ["LMSTUDIO_TOKEN"] = old_alias
+            if old_alias2 is None:
+                os.environ.pop("LMSTUDIO_API_TOKEN", None)
+            else:
+                os.environ["LMSTUDIO_API_TOKEN"] = old_alias2
+
+    def test_lmstudio_provider_invalid_api_key_returns_actionable_message(self) -> None:
+        """invalid_api_key failures should return clear LM Studio token instructions."""
+
+        class _FakeCompletions:
+            def create(self, **kwargs):
+                raise RuntimeError("invalid_api_key: token required")
+
+        class _FakeChat:
+            completions = _FakeCompletions()
+
+        class _FakeOpenAI:
+            def __init__(self, *, base_url: str, api_key: str):
+                self.chat = _FakeChat()
+
+        old_openai = chat_providers.OpenAI
+        try:
+            chat_providers.OpenAI = _FakeOpenAI
+            provider = chat_providers.LMStudioProvider(
+                base_url="http://127.0.0.1:1234/v1",
+                model="local-model",
+            )
+            message = provider.complete(
+                [{"role": "user", "content": "hello"}],
+                stream=False,
+            )
+            self.assertIsInstance(message, str)
+            self.assertIn("requires API token authentication", message)
+            self.assertIn("LM_API_TOKEN", message)
+        finally:
+            chat_providers.OpenAI = old_openai
+
 
 class AGIMultiAgentTests(unittest.TestCase):
     """Tests for AGI multi-agent routing and dispatch."""
