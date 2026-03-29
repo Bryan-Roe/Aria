@@ -65,6 +65,86 @@ const activeObjects = {
     flower: true
 };
 
+function clampPercent(v, fallback = 50) {
+    const n = Number(v);
+    if (!Number.isFinite(n)) return fallback;
+    return Math.max(0, Math.min(100, n));
+}
+
+function applyServerAriaState(ariaState) {
+    if (!ariaState || typeof ariaState !== 'object') return;
+
+    const pos = ariaState.position || {};
+    const x = clampPercent(pos.x, characterState.position.x);
+    const y = clampPercent(pos.y, characterState.position.y);
+
+    // Keep client/server coordinate convention aligned with moveToPosition()
+    // where CSS bottom is inverted from logical y.
+    aria.style.left = `${x}%`;
+    aria.style.bottom = `${100 - y}%`;
+    characterState.position = {
+        ...characterState.position,
+        x,
+        y,
+    };
+
+    if (typeof ariaState.expression === 'string' && ariaState.expression) {
+        try {
+            changeExpression(ariaState.expression);
+        } catch (err) {
+            console.warn('applyServerAriaState expression failed:', err);
+        }
+    }
+}
+
+function applyServerObjectsState(objectsState) {
+    if (!objectsState || typeof objectsState !== 'object') return;
+
+    for (const [objectId, objState] of Object.entries(objectsState)) {
+        const objEl = document.getElementById(objectId);
+        if (!objEl || !objState || typeof objState !== 'object') continue;
+
+        const pos = objState.position || {};
+        if (typeof pos.x !== 'undefined') {
+            objEl.style.left = `${clampPercent(pos.x, 50)}%`;
+        }
+        if (typeof pos.y !== 'undefined') {
+            // Object y values are persisted from CSS bottom percentages.
+            objEl.style.bottom = `${clampPercent(pos.y, 35)}%`;
+        }
+
+        const state = String(objState.state || '').toLowerCase();
+        const hidden = state === 'hidden' || state === 'off_stage' || state === 'removed';
+        const btn = document.getElementById('btn-' + objectId);
+
+        objEl.style.display = hidden ? 'none' : 'block';
+        activeObjects[objectId] = !hidden;
+
+        if (btn) {
+            btn.classList.toggle('active', !hidden);
+            btn.classList.toggle('inactive', hidden);
+        }
+    }
+}
+
+async function hydrateStageFromServer() {
+    try {
+        const response = await fetch('/api/aria/state', { cache: 'no-store' });
+        if (!response.ok) {
+            log(`⚠️ Stage sync unavailable (${response.status})`);
+            return;
+        }
+
+        const payload = await response.json();
+        applyServerAriaState(payload.aria || {});
+        applyServerObjectsState(payload.objects || {});
+        log('🔄 Stage synced from server');
+    } catch (err) {
+        console.warn('hydrateStageFromServer failed:', err);
+        log('⚠️ Could not sync stage from server');
+    }
+}
+
 // Toggle object visibility
 function toggleObject(objectId) {
     const obj = document.getElementById(objectId);
@@ -2189,6 +2269,7 @@ function addObject(objectName, emoji) {
 
 // Initialize object interactions
 initializeObjectInteractions();
+hydrateStageFromServer();
 log('🎮 Objects: apple, book, cup, ball, flower');
 log('💡 Try: "pick up apple", "drop", "throw ball"');
 
