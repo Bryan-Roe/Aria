@@ -10,6 +10,7 @@ Validates:
 from __future__ import annotations
 
 import json
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -26,13 +27,17 @@ HOOK_SCRIPT = (
 BLOCK_MARKER = "You have not yet marked the task as complete"
 
 
-def _run_hook(payload: dict) -> dict:
+def _run_hook(payload: dict, env_overrides: dict[str, str] | None = None) -> dict:
     raw = json.dumps(payload)
+    env = os.environ.copy()
+    if env_overrides:
+        env.update(env_overrides)
     result = subprocess.run(
         [sys.executable, str(HOOK_SCRIPT)],
         input=raw,
         capture_output=True,
         text=True,
+        env=env,
     )
     try:
         return {"exit": result.returncode, **json.loads(result.stdout)}
@@ -99,6 +104,18 @@ class TestStopAllow:
         }
         r = _run_hook(payload)
         assert r.get("continue") is True
+
+    def test_env_override_allows_stop_without_task_complete(self):
+        payload = {
+            "hookEventName": "Stop",
+            "messages": [{"content": "done"}],
+        }
+        r = _run_hook(
+            payload,
+            env_overrides={"ARIA_ALLOW_STOP_WITHOUT_TASK_COMPLETE": "true"},
+        )
+        assert r.get("continue") is True
+        assert "explicit env override" in (r.get("systemMessage") or "").lower()
 
 
 # ---------------------------------------------------------------------------

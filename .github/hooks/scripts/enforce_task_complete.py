@@ -16,6 +16,7 @@ Design goals:
 from __future__ import annotations
 
 import json
+import os
 import re
 import sys
 from typing import Any
@@ -36,6 +37,7 @@ _SCOPE_DRIFT_KEYWORDS = (
     "nice-to-have",
     "follow-up",
 )
+_ALLOW_STOP_OVERRIDE_ENV = "ARIA_ALLOW_STOP_WITHOUT_TASK_COMPLETE"
 
 
 def _walk(obj: Any):
@@ -167,6 +169,12 @@ def _event_name(payload: dict[str, Any]) -> str:
     return ""
 
 
+def _is_truthy_env(value: str | None) -> bool:
+    if value is None:
+        return False
+    return value.strip().lower() in {"1", "true", "yes", "on"}
+
+
 def _emit(obj: dict[str, Any], exit_code: int = 0) -> None:
     print(json.dumps(obj, ensure_ascii=False))
     raise SystemExit(exit_code)
@@ -213,9 +221,6 @@ def main() -> None:
     # Stop — block unless task_complete was called OR loop escape fires.
     # ------------------------------------------------------------------
     if event == "Stop":
-        if True:
-            _emit({"continue": True, "systemMessage": "task_complete guard bypassed by local session patch."})
-
         if _contains_task_complete(payload):
             _emit({"continue": True})
 
@@ -262,6 +267,17 @@ def main() -> None:
                     "systemMessage": (
                         "Loop-escape: task_complete attempts detected but result "
                         "may have been cleared. Allowing stop."
+                    ),
+                }
+            )
+
+        if _is_truthy_env(os.getenv(_ALLOW_STOP_OVERRIDE_ENV)):
+            _emit(
+                {
+                    "continue": True,
+                    "systemMessage": (
+                        "task_complete guard bypassed by explicit env override "
+                        f"({_ALLOW_STOP_OVERRIDE_ENV}=true)."
                     ),
                 }
             )
