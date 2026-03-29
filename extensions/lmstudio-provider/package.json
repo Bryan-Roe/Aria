@@ -1,0 +1,50 @@
+{
+  "name": "lmstudio-provider",
+  "displayName": "LM Studio Language Model Provider",
+  "description": "Registers LM Studio models as VS Code language models for use in Copilot Chat",
+  "version": "1.0.0",
+  "publisher": "aria-workspace",
+  "engines": {
+    "vscode": "^1.100.0"
+  },
+  "categories": [
+    "AI"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "languageModelChatProviders": [
+      {
+        "vendor": "lmstudio",
+        "name": "LM Studio"
+      }
+    ],
+    "configuration": {
+      "title": "LM Studio Provider",
+      "properties": {
+        "lmstudio.baseUrl": {
+          "type": "string",
+          "default": "http://192.168.1.153:1234/v1",
+          "description": "Base URL for the LM Studio OpenAI-compatible API"
+        },
+        "lmstudio.defaultModel": {
+          "type": "string",
+          "default": "nvidia/nemotron-3-nano-4b",
+          "description": "Default model ID to use when no model is specified"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "package": "vsce package --no-dependencies"
+  },
+  "devDependencies": {
+    "@types/node": "^20.19.37",
+    "@types/vscode": "^1.100.0",
+    "@vscode/vsce": "^3.0.0",
+    "typescript": "^5.4.0"
+  }
+}
