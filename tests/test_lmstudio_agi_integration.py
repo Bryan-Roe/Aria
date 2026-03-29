@@ -29,41 +29,32 @@ def test_agent_registration():
     assert agent["confidence_boost"] == 0.05, "Confidence boost should be 0.05"
 
     print("✓ Agent registration test passed")
-    return True
 
 
 def test_provider_detection():
     """Test that detect_provider can create LMStudioProvider."""
     from chat_providers import detect_provider
 
-    try:
-        provider, choice = detect_provider(explicit="lmstudio")
-        assert provider is not None, "Provider should be created"
-        assert choice.name == "lmstudio", "Choice should be lmstudio"
-        assert choice.model == "local-model", "Model should be local-model"
+    provider, choice = detect_provider(explicit="lmstudio")
+    assert provider is not None, "Provider should be created"
+    assert choice.name == "lmstudio", "Choice should be lmstudio"
+    assert choice.model == "local-model", "Model should be local-model"
 
-        print("✓ Provider detection test passed")
-        print(f"   Provider type: {type(provider).__name__}")
-        print(f"   Choice: {choice.name} ({choice.model})")
-        return True
-    except Exception as e:
-        print(f"✗ Provider detection failed: {e}")
-        return False
+    print("✓ Provider detection test passed")
+    print(f"   Provider type: {type(provider).__name__}")
+    print(f"   Choice: {choice.name} ({choice.model})")
 
 
 def test_agent_class_methods():
     """Test that AGI provider can be instantiated."""
     from agi_provider import AGIProvider
 
+    # Instantiation may raise if optional dependencies are missing — that's acceptable.
     try:
-        # This would be used in actual chat flow
-        agi = AGIProvider()
+        AGIProvider()
         print("✓ AGI provider instantiation test passed")
-        return True
     except Exception as e:
-        print(f"⚠ AGI provider instantiation: {e}")
-        # This is not critical - AGI might have optional dependencies
-        return True
+        print(f"⚠ AGI provider instantiation (optional dep missing): {e}")
 
 
 def test_env_configuration():
@@ -71,10 +62,12 @@ def test_env_configuration():
     lmstudio_url = os.getenv("LMSTUDIO_BASE_URL", "http://127.0.0.1:1234/v1")
     lmstudio_model = os.getenv("LMSTUDIO_MODEL", "local-model")
 
+    assert isinstance(lmstudio_url, str) and lmstudio_url, "LMSTUDIO_BASE_URL should be a non-empty string"
+    assert isinstance(lmstudio_model, str) and lmstudio_model, "LMSTUDIO_MODEL should be a non-empty string"
+
     print(f"✓ Environment configuration test passed")
     print(f"   LMSTUDIO_BASE_URL: {lmstudio_url}")
     print(f"   LMSTUDIO_MODEL: {lmstudio_model}")
-    return True
 
 
 def run_all_tests():

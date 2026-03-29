@@ -27,9 +27,16 @@ HOOK_SCRIPT = (
 BLOCK_MARKER = "You have not yet marked the task as complete"
 
 
+_ALLOW_ENV_KEY = "ARIA_ALLOW_STOP_WITHOUT_TASK_COMPLETE"
+
+
 def _run_hook(payload: dict, env_overrides: dict[str, str] | None = None) -> dict:
     raw = json.dumps(payload)
     env = os.environ.copy()
+    # Strip the ambient bypass flag so blocking tests are not affected by the
+    # current shell environment.  Individual tests that want to test the bypass
+    # path can re-add it explicitly via env_overrides.
+    env.pop(_ALLOW_ENV_KEY, None)
     if env_overrides:
         env.update(env_overrides)
     result = subprocess.run(
@@ -47,6 +54,22 @@ def _run_hook(payload: dict, env_overrides: dict[str, str] | None = None) -> dic
             "stdout": result.stdout,
             "stderr": result.stderr,
         }
+
+
+_FLAG_FILE = Path("/tmp/task_complete.flag")
+
+
+@pytest.fixture(autouse=True)
+def _clean_task_complete_flag():
+    """Remove the flag-file bypass artifact before/after every test.
+
+    The flag is a one-shot mechanism for external callers; a stale flag from a
+    previous session or a prior test would inadvertently allow the Stop hook to
+    pass, causing false positives in the blocking test cases.
+    """
+    _FLAG_FILE.unlink(missing_ok=True)
+    yield
+    _FLAG_FILE.unlink(missing_ok=True)
 
 
 # ---------------------------------------------------------------------------
