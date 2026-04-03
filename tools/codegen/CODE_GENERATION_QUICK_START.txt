@@ -1,0 +1,308 @@
+# Code Generation Quick Reference Card
+
+**For fast access to code generation in Aria**
+
+## 🚀 Quickest Way: Copilot Chat
+
+Press `Ctrl+Shift+I` and type:
+```
+@llm-maker Generate a function that [what you need]
+```
+
+**Examples:**
+```
+@llm-maker Generate a function that validates phone numbers
+@llm-maker Generate a function that extracts URLs from text
+@llm-maker Build a landing page website with pricing
+```
+
+---
+
+## 📊 What Can Be Generated
+
+### ✅ Functions (Safe)
+- Email, phone, URL validation
+- Data parsing (CSV, JSON, query strings)
+- Text utilities (slugify, reverse, analyze)
+- Math functions (primes, fibonacci, interest)
+- String operations (camelCase, snake_case)
+- List operations (flatten, chunk, rotate)
+
+### ✅ Websites
+- Portfolio sites
+- Blog templates
+- Landing pages
+- Documentation sites
+- E-commerce sites
+
+### ❌ NOT Allowed
+- Code using `os`, `sys`, `subprocess`
+- Functions with `eval` or `exec`
+- Network/file system access
+- Dynamic imports
+
+---
+
+## 🎯 Common Tasks
+
+### Generate Email Validator
+```
+@llm-maker Generate a function that validates email addresses using regex patterns
+```
+
+### Generate CSV Parser
+```
+@llm-maker Generate a function that parses CSV lines handling quoted fields
+```
+
+### Generate Password Strength Checker
+```
+@llm-maker Generate a function that checks password strength (length, complexity)
+```
+
+### Generate Website
+```
+@llm-maker Build a modern portfolio website with pages for home, about, and contact
+```
+
+### Generate Multiple Functions
+```
+@llm-maker Generate these functions:
+1. A slug generator that converts titles to URL-friendly format
+2. A prime number checker
+3. A function that reverses strings
+```
+
+---
+
+## 💻 Command Line Tools
+
+### View All Templates
+```bash
+python3 code_generation_templates.py list
+```
+
+### Get Template Info
+```bash
+python3 code_generation_templates.py info validation email
+```
+
+### Run Interactive Menu
+```bash
+python3 code_generation_quickstart.py
+```
+
+### See Working Examples
+```bash
+python3 code_generation_demo.py
+```
+
+---
+
+## 📖 Full Documentation
+
+**Main Guide**: `.github/CODE_GENERATION_GUIDE.md`
+- Complete API reference
+- 20+ detailed examples
+- Safety validation rules
+- Troubleshooting guide
+
+**Templates**: `code_generation_templates.py`
+- 40+ pre-built patterns
+- 7 categories
+- Parameter definitions
+- Usage examples
+
+**Quickstart**: `code_generation_quickstart.py`
+- Interactive menu
+- Browse templates
+- Learn documentation
+- Quick reference
+
+---
+
+## 🔧 CLI Usage Examples
+
+### List validation templates
+```bash
+python3 code_generation_templates.py list
+# Shows: email, phone, url, credit_card, password_strength
+```
+
+### Check specific template
+```bash
+python3 code_generation_templates.py info text extract_emails
+# Shows: parameters, returns, example
+```
+
+### Run all working demos
+```bash
+python3 code_generation_demo.py
+# Runs 8 demonstrations with test results
+```
+
+---
+
+## 🎓 Learning Path
+
+1. **First Time?** → Run `python3 code_generation_demo.py`
+2. **Explore** → Run `python3 code_generation_quickstart.py`
+3. **Find Pattern** → Use `python3 code_generation_templates.py list`
+4. **Go Interactive** → Open Copilot Chat and use `@llm-maker`
+5. **Deep Dive** → Read `.github/CODE_GENERATION_GUIDE.md`
+
+---
+
+## ⚡ Pro Tips
+
+### Tip 1: Be Specific
+```
+❌ Bad: "Generate a validator"
+✅ Good: "Generate a function that validates US phone numbers (10 digits)"
+```
+
+### Tip 2: Include Domain Context
+```
+❌ Bad: "Calculate interest"
+✅ Good: "Calculate compound interest with monthly compounding"
+```
+
+### Tip 3: Request Multiple at Once
+```
+✅ Good: "@llm-maker Generate these 3 utility functions: ..."
+```
+
+### Tip 4: Batch Similar Tasks
+```
+✅ Good: "Generate validators for email, phone, and credit card"
+```
+
+---
+
+## 🐛 Troubleshooting
+
+### "Import X is not allowed"
+**Solution**: Request simpler version without file/system access
+```
+✅ Instead of: "Read CSV from file"
+   Use: "Parse a CSV line string"
+```
+
+### "Code doesn't work"
+**Solution**: Add more context or simplify
+```
+✅ Instead of: "Parse JSON"
+   Use: "Parse simple key=value format"
+```
+
+### "Website missing files"
+**Solution**: Start with fewer pages
+```
+✅ Instead of: "Build complex site with 10 pages"
+   Use: "Create a simple landing page"
+```
+
+---
+
+## 📋 Template Categories
+
+### Validation (6 templates)
+email, phone, url, credit_card, password_strength, etc.
+
+### Text Processing (6 templates)
+slugify, extract_emails, extract_urls, extract_hashtags, truncate_text
+
+### Data Transform (5 templates)
+parse_csv_line, parse_query_string, flatten_list, group_by, merge_dicts
+
+### Math (6 templates)
+calculate_average, calculate_median, compound_interest, fibonacci, prime_factors
+
+### Strings (6 templates)
+reverse_string, is_palindrome, camel_case, snake_case, title_case, count_occurrences
+
+### Arrays (5 templates)
+find_duplicates, remove_duplicates, chunks, rotate_list, intersect
+
+### Type Checking (5 templates)
+is_even, is_odd, is_prime, is_perfect_square, is_numeric
+
+### Websites (5 templates)
+portfolio, blog, landing, documentation, ecommerce
+
+---
+
+## 🎯 Real-World Examples
+
+### Example 1: E-Commerce Site
+```
+@llm-maker Build a modern e-commerce website with product grid, shopping cart, and checkout pages
+```
+
+### Example 2: Data Processing Pipeline
+```
+@llm-maker Generate these functions:
+1. Parse CSV data into Python dictionaries
+2. Filter records by category
+3. Calculate average price per category
+4. Export results as formatted table
+```
+
+### Example 3: Validation Suite
+```
+@llm-maker Generate validators for:
+- Email addresses
+- Phone numbers
+- Password strength
+- Credit card numbers
+- URLs
+```
+
+### Example 4: Blog Generator
+```
+@llm-maker Create a minimalist blog website with:
+- Homepage listing recent posts
+- Individual post pages
+- About the author section
+- Contact form
+- Dark mode support
+```
+
+---
+
+## 📞 Getting Help
+
+**In Copilot Chat:**
+```
+@llm-maker What functions can you generate for me?
+@llm-maker Show me examples of text processing functions
+@llm-maker Help me design a website
+```
+
+**Documentation:**
+- `.github/CODE_GENERATION_GUIDE.md` - Full guide
+- `code_generation_templates.py` - Template browser
+- `code_generation_demo.py` - Working examples
+- `code_generation_quickstart.py` - Interactive menu
+
+---
+
+## ✨ Start Now!
+
+### Option 1: Interactive
+```bash
+python3 code_generation_quickstart.py
+```
+
+### Option 2: Copy-Paste Ready
+Open Copilot Chat (`Ctrl+Shift+I`) and paste:
+```
+@llm-maker Generate a function that validates email addresses with proper regex
+```
+
+### Option 3: See Examples First
+```bash
+python3 code_generation_demo.py
+```
+
+**Your code generation journey starts here! 🚀**

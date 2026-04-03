@@ -1,0 +1,45 @@
+# =============================================================================
+# Quantum Automation - Azure Quantum workflow orchestration
+# =============================================================================
+# Purpose: Executes quantum computing workflows on Azure Quantum
+# Triggers: Push to main or manual workflow_dispatch
+# Jobs:
+#   - run-quantum: Runs quantum orchestration scripts
+# Note: Requires Azure credentials for quantum workspace access
+# =============================================================================
+
+name: Quantum Automation
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      AZURE_CREDENTIALS:
+        description: "Service principal JSON for azure/login (optional; recommended via GitHub Secret)"
+        required: false
+        type: string
+      LOGIC_APP_URL:
+        description: "Logic App URL for optional notifications"
+        required: false
+        type: string
+
+jobs:
+  run-quantum:
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+    - uses: actions/checkout@v4
+    - name: Azure Login
+      if: ${{ inputs.AZURE_CREDENTIALS != '' }}
+      uses: azure/login@v2
+      with:
+        creds: ${{ inputs.AZURE_CREDENTIALS }}
+    - name: Run Orchestration
+      shell: pwsh
+      run: |
+        ./ai-projects/quantum-ml/azure/quantum_master_orchestration.ps1 -ResourceGroup rg-quantum-ai -WorkspaceName quantum-ai-workspace -Location eastus
+        # Or the Logic App variant
+        # ./ai-projects/quantum-ml/azure/quantum_full_logicapp_orchestration.ps1 -LogicAppUrl $env:LOGIC_APP_URL
+      env:
+        LOGIC_APP_URL: ${{ inputs.LOGIC_APP_URL }}

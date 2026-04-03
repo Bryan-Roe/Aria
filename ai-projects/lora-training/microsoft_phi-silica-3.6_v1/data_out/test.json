@@ -1,0 +1,2 @@
+{"messages": [{"role": "user", "content": "What is 2+2?"}, {"role": "assistant", "content": "4"}]}
+{"messages": [{"role": "user", "content": "Hello, bot."}, {"role": "assistant", "content": "Hi! How can I assist?"}]}

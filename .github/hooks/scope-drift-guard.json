@@ -1,0 +1,11 @@
+{
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "type": "command",
+        "command": "python3 .github/hooks/scripts/scope_drift_guard.py",
+        "timeout": 5
+      }
+    ]
+  }
+}

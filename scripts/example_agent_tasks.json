@@ -1,0 +1,20 @@
+[
+  {
+    "task": "Add docstrings to shared/chat_memory.py",
+    "llm_type": "echo",
+    "dry_run": true,
+    "skip_tests": true
+  },
+  {
+    "task": "Clean unused imports from function_app.py",
+    "llm_type": "echo",
+    "dry_run": true,
+    "skip_tests": true
+  },
+  {
+    "task": "Improve error messages in scripts/autonomous_code_agent.py",
+    "llm_type": "echo",
+    "dry_run": true,
+    "skip_tests": true
+  }
+]

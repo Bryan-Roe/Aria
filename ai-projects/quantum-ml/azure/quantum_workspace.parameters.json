@@ -1,0 +1,23 @@
+{
+    "$schema":  "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+    "contentVersion":  "1.0.0.0",
+    "parameters":  {
+                       "location":  {
+                                        "value":  "eastus"
+                                    },
+                       "workspaceName":  {
+                                             "value":  "quantum-ai-workspace"
+                                         },
+                       "storageAccountName":  {
+                                                  "value":  "quantumstorage1031"
+                                              },
+                       "tags":  {
+                                    "value":  {
+                                                  "Environment":  "Development",
+                                                  "Project":  "Quantum-AI",
+                                                  "ManagedBy":  "Bicep",
+                                                  "CostCenter":  "Research"
+                                              }
+                                }
+                   }
+}

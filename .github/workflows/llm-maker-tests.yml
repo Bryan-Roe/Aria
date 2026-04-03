@@ -1,0 +1,35 @@
+name: llm-maker Tests
+
+on:
+  push:
+    paths:
+      - 'ai-projects/llm-maker/**'
+  pull_request:
+    paths:
+      - 'ai-projects/llm-maker/**'
+  workflow_dispatch:
+
+jobs:
+  test-llm-maker:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Install dev dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements-dev.txt ]; then pip install -r requirements-dev.txt; \
+          elif [ -f pyproject.toml ]; then python -m pip install -e .[dev]; \
+          else pip install pytest; fi
+
+      - name: Run llm-maker tests
+        run: |
+          python -m pytest ai-projects/llm-maker/tests -q --maxfail=1
+        env:
+          CI: true

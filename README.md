@@ -1,0 +1,426 @@
+# Aria — Interactive AI Character Platform
+
+[![CI Pipeline](https://github.com/Bryan-Roe/Aria/actions/workflows/ci-pipeline.yml/badge.svg)](https://github.com/Bryan-Roe/Aria/actions/workflows/ci-pipeline.yml)
+[![Code Quality](https://github.com/Bryan-Roe/Aria/actions/workflows/code-quality.yml/badge.svg)](https://github.com/Bryan-Roe/Aria/actions/workflows/code-quality.yml)
+[![CodeQL](https://github.com/Bryan-Roe/Aria/actions/workflows/codeql.yml/badge.svg)](https://github.com/Bryan-Roe/Aria/actions/workflows/codeql.yml)
+[![E2E Tests](https://github.com/Bryan-Roe/Aria/actions/workflows/e2e-tests.yml/badge.svg)](https://github.com/Bryan-Roe/Aria/actions/workflows/e2e-tests.yml)
+
+**An intelligent, animated AI character with movement, gestures, and natural language interaction.**
+
+[Live Demo](https://bryan-roe.github.io/Aria) · [Aria Web UI](apps/aria/) · [Quick Start](#-quick-start)
+
+---
+
+## What is Aria?
+
+Aria is a full-stack interactive AI character platform. She lives on a virtual 3D stage, responds to natural language commands ("wave", "pick up the ball", "dance"), speaks via text-to-speech, and is powered by a multi-provider AI backend that supports LM Studio, Ollama, Azure OpenAI, OpenAI, local models, and LoRA fine-tuned adapters.
+
+The project is organized around four core areas:
+
+| Area                    | Folder                    | Description                                         |
+| ----------------------- | ------------------------- | --------------------------------------------------- |
+| **Character interface** | `apps/aria/`              | Animated 3D character stage with object interaction |
+| **Chat / AI backends**  | `ai-projects/chat-cli/`   | Multi-provider CLI and streaming chat API           |
+| **Quantum ML**          | `ai-projects/quantum-ml/` | Hybrid quantum-classical training (experimental)    |
+| **Model fine-tuning**   | `AI/`                     | LoRA fine-tuning for Aria's language understanding  |
+
+Supporting infrastructure lives in `shared/`, `scripts/`, `config/`, and `function_app.py` (Azure Functions API layer).
+
+---
+
+## 🚀 Quick Start
+
+### Prerequisites
+
+- Python 3.9+
+- Git
+
+### 1 — Run the Aria character web UI
+
+```bash
+cd apps/aria
+pip install -r ../../requirements.txt   # only needed once
+python server.py
+# Open http://localhost:8080
+```
+
+Type commands in the chat box: `move left`, `wave`, `jump`, `pick up the ball`, `dance`.
+
+### 2 — Chat via CLI (no UI required)
+
+```bash
+# Local mode — no API keys required
+python ai-projects/chat-cli/src/chat_cli.py --provider local --once "Hello Aria!"
+
+# OpenAI
+OPENAI_API_KEY=sk-... python ai-projects/chat-cli/src/chat_cli.py --provider openai
+
+# Azure OpenAI (requires all four env vars — see Configuration below)
+python ai-projects/chat-cli/src/chat_cli.py --provider azure
+
+# Continuous autonomous mode (default)
+python ai-projects/chat-cli/src/chat_cli.py --provider local
+
+# Manual interactive mode
+python ai-projects/chat-cli/src/chat_cli.py --provider local --interactive
+```
+
+Interactive session commands: `/new`, `/save`, `/exit`.
+The default CLI now runs autonomously forever; use `--interactive` if you want stdin prompts back.
+
+### 3 — Start the Azure Functions API host
+
+```bash
+func host start
+# Endpoints: /api/chat, /api/chat-web, /api/tts, /api/quantum/*, /api/ai/status
+curl http://localhost:7071/api/ai/status | python -m json.tool   # health check
+```
+
+---
+
+## 🏗️ Project Structure
+
+```text
+apps/aria/          Animated character stage (HTML/CSS/JS + Python API server)
+apps/chat/          Browser-based streaming chat UI
+ai-projects/chat-cli/ Multi-provider chat CLI
+ai-projects/quantum-ml/ Quantum ML platform (circuits, MCP server, Azure Quantum)
+ai-projects/llm-maker/ Autonomous tool-creation system
+ai-projects/cooking-ai/ Cooking-focused AI assistant
+AI/                 LoRA fine-tuning workspace (Phi / TinyLlama)
+shared/             Shared Python modules (providers, DB, telemetry, Cosmos)
+scripts/            Orchestration, training, evaluation, and utility scripts
+config/             YAML configs for orchestrators
+datasets/           Read-only training datasets
+data_out/           All generated outputs (git-ignored)
+function_app.py     Azure Functions entry point (all /api/* endpoints)
+```
+
+---
+
+## 🎭 Aria Character
+
+The Aria character runs at `http://localhost:8080` (or the [GitHub Pages demo](https://bryan-roe.github.io/Aria)).
+
+**Natural language commands (examples):**
+
+| Command                    | Effect                             |
+| -------------------------- | ---------------------------------- |
+| `move left` / `move right` | Walk to stage edge                 |
+| `wave` / `dance` / `jump`  | Trigger gesture                    |
+| `pick up the ball`         | Pick up a nearby object            |
+| `throw the ball`           | Throw held object with physics     |
+| `say hello`                | Aria speaks the text aloud via TTS |
+
+The auto-execute system parses complex multi-step requests ("walk to the table and pick up the apple") into a structured sequence of 8 core actions: `move`, `say`, `pickup`, `drop`, `throw`, `gesture`, `look`, `wait`.
+
+**Aria web server API (port 8080):**
+
+| Method | Path                | Description                                          |
+| ------ | ------------------- | ---------------------------------------------------- |
+| `GET`  | `/api/aria/state`   | Current stage state (position, objects, expressions) |
+| `POST` | `/api/aria/command` | Process a natural language command                   |
+| `POST` | `/api/aria/execute` | Auto-execute an action sequence                      |
+| `POST` | `/api/aria/object`  | Add / update / remove an object                      |
+| `POST` | `/api/aria/world`   | Generate a themed world via LLM                      |
+
+---
+
+## 💬 Chat Providers
+
+Provider auto-detection order:
+
+```text
+LM Studio → Ollama → Azure OpenAI → OpenAI → Local (zero-dependency echo)
+```
+
+Pass `--provider` to override: `local`, `openai`, `azure`, `lmstudio`, `ollama`, `lora`, `quantum`, `agi`.
+
+**Azure OpenAI** — all four variables required:
+
+```text
+AZURE_OPENAI_API_KEY
+AZURE_OPENAI_ENDPOINT
+AZURE_OPENAI_DEPLOYMENT
+AZURE_OPENAI_API_VERSION
+```
+
+**LoRA adapter** — adapter directory must contain:
+
+```text
+adapter_config.json
+adapter_model.safetensors
+```
+
+```bash
+python ai-projects/chat-cli/src/chat_cli.py --provider lora --model data_out/lora_training/lora_adapter
+```
+
+All providers implement `BaseChatProvider.complete(messages, stream)`. Add a new provider by subclassing `BaseChatProvider` in `shared/chat_providers.py`.
+
+---
+
+## ⚛️ Quantum ML (Experimental)
+
+Local Qiskit Aer simulation is free and unlimited. Azure simulator backends are also free. Real QPU hardware is billed per gate-shot — always simulate first.
+
+**Workflow:** Test locally → Validate on Azure simulator → Run on QPU (set `azure_confirm_cost: true` in YAML first)
+
+```bash
+# Validate config without running anything
+python scripts/quantum_autorun.py --dry-run
+
+# Interactive training dashboard
+cd ai-projects/quantum-ml && ./start_dashboard.sh   # http://localhost:5000
+
+# Start the MCP server (8 quantum tools)
+python ai-projects/quantum-ml/quantum_mcp_server.py
+```
+
+**MCP tools:** `create_quantum_circuit`, `simulate_quantum_circuit`, `get_quantum_circuit_properties`, `connect_azure_quantum`, `list_quantum_backends`, `submit_quantum_job`, `estimate_quantum_cost`, `train_quantum_classifier`.
+
+---
+
+## 🧠 LoRA Fine-Tuning
+
+Train a small model on Aria-specific datasets using LoRA adapters.
+
+```bash
+# Quick training run (TinyLlama, CPU-friendly, ~10–15 s)
+python scripts/automated_training_pipeline.py --models tinyllama --quick
+
+# Full train → evaluate → auto-promote best checkpoint
+python scripts/train_and_promote.py --quick --auto-promote
+
+# Validate configs without running
+python scripts/autotrain.py --dry-run
+```
+
+Training datasets are in `datasets/chat/aria_movement/`, `aria_expanded/`, and `aria_simple/` (read-only).
+Outputs are written to `data_out/lora_training/`.
+
+***
+
+## 🤖 Autonomous Training
+
+A background orchestrator continuously discovers datasets, trains, and evaluates models on a 30-minute cycle.
+
+```bash
+# Start the autonomous loop (runs indefinitely)
+nohup python scripts/autonomous_training_orchestrator.py > data_out/autonomous_training.log 2>&1 &
+
+# Check live status
+cat data_out/autonomous_training_status.json | python -m json.tool
+tail -f data_out/autonomous_training.log
+```
+
+## 👀 Watch Continuous Automation Loop
+
+If you are running the perpetual validation worker (`data_out/continuous_automation/loop.pid`) and watchdog (`watchdog.pid`), you can watch live status with:
+
+```bash
+# One-shot snapshot
+python scripts/watch_continuous_automation.py
+
+# Live dashboard view (refresh every 5 seconds)
+python scripts/watch_continuous_automation.py --watch --interval 5
+```
+
+This watcher shows process health, cycle start/end cadence, last integration-gate status, latest pytest summary, and the latest log tail from `data_out/continuous_automation/loop.log`.
+
+## 🤖 PID Auto-Edit Agent
+
+If you want a background agent that runs with a PID and automatically processes queued file-editing tasks:
+
+```bash
+# Start daemon
+python scripts/pid_auto_edit_agent.py start
+
+# Queue a task (safe default shown with echo + dry-run)
+python scripts/pid_auto_edit_agent.py enqueue --task "add docstrings to scripts/watch_continuous_automation.py" --llm-type echo --dry-run
+
+# Check status
+python scripts/pid_auto_edit_agent.py status
+
+# Stop daemon
+python scripts/pid_auto_edit_agent.py stop
+```
+
+Agent state is stored under `data_out/pid_auto_edit_agent/` (`agent.pid`, `queue.jsonl`, `done.jsonl`, `failed.jsonl`, `agent.log`).
+
+---
+
+## 🔧 LLM Tool Maker
+
+An autonomous system where an LLM generates, validates, and sandboxes Python tools at runtime.
+
+```bash
+cd llm-maker
+python examples/quick_start.py        # create a tool from a description
+python llm_maker_mcp_server.py        # expose tools via MCP
+```
+
+Security: no dangerous imports, no filesystem or network access, no `eval`/`exec`, sandboxed execution with resource limits.
+
+---
+
+## 🧪 Testing & Development Workflow
+
+For contributors: see [`scripts/test_watcher.py`](scripts/test_watcher.py) for a lightweight test watcher that automatically re-runs tests on file changes. For more details and troubleshooting, refer to [`NEXT_STEPS.md`](NEXT_STEPS.md).
+
+- **Run the watcher:**
+
+  ```bash
+  python3 scripts/test_watcher.py
+  ```
+
+- **Run full test suite manually:**
+
+  ```bash
+  python3 -m pytest tests -q --maxfail=1
+  ```
+
+See `NEXT_STEPS.md` for more on dev setup, troubleshooting, and recommended next actions.
+
+---
+
+## 🤪 Testing
+
+```bash
+# Fast unit tests (~0.5 s, no external services)
+python scripts/test_runner.py --unit
+
+# All fast tests (unit + integration, ~10 s)
+python scripts/test_runner.py --all
+
+# With coverage report
+python scripts/test_runner.py --all --coverage
+
+# One-command integration contract gate (local)
+bash ./scripts/integration_contract_gate.sh
+
+# Strict gate (requires local Functions host at :7071)
+bash ./scripts/integration_contract_gate.sh --strict-endpoints
+
+# Direct pytest
+pytest -m "not slow and not azure" tests/
+```
+
+VS Code users: open the Test Explorer (🧪 beaker icon) for interactive test running and debugging.
+
+---
+
+## 🌐 Live Demo
+
+**[https://bryan-roe.github.io/Aria](https://bryan-roe.github.io/Aria)**
+
+The demo runs in mock mode with simulated API responses — no API keys needed. For full AI capabilities, run the project locally.
+
+---
+
+## 🔒 Configuration & Secrets
+
+Copy the example files to get started:
+
+```bash
+cp .env.example .env
+cp local.settings.json.example local.settings.json
+# Fill in API keys as needed
+```
+
+Never commit secrets. All keys belong in environment variables or `local.settings.json` (development only).
+
+**Optional services** (feature-flagged — safe to leave unset):
+
+| Service              | How to enable                                                                                     |
+| -------------------- | ------------------------------------------------------------------------------------------------- |
+| SQL persistence      | `QAI_DB_CONN` env var (SQLite, PostgreSQL, or Azure SQL)                                          |
+| Cosmos DB            | `QAI_ENABLE_COSMOS=true` + `COSMOS_ENDPOINT`, `COSMOS_KEY`, `COSMOS_DATABASE`, `COSMOS_CONTAINER` |
+| Application Insights | `APPLICATIONINSIGHTS_CONNECTION_STRING`                                                           |
+| Azure Speech TTS     | `AZURE_SPEECH_KEY` + `AZURE_SPEECH_REGION`                                                        |
+| Local TTS fallback   | `QAI_ENABLE_LOCAL_TTS=true` (uses pyttsx3 or gTTS when Azure credentials are absent)              |
+
+---
+
+## 📚 Documentation
+
+| Document                                                                     | Purpose                                |
+| ---------------------------------------------------------------------------- | -------------------------------------- |
+| [apps/aria/README.md](apps/aria/README.md)                                   | Character stage API reference          |
+| [ai-projects/quantum-ml/README.md](ai-projects/quantum-ml/README.md)         | Quantum ML platform guide              |
+| [ai-projects/chat-cli/README.md](ai-projects/chat-cli/README.md)             | Chat CLI reference                     |
+| [ai-projects/llm-maker/README.md](ai-projects/llm-maker/README.md)           | Tool maker guide                       |
+| [docs/aria/](docs/aria/)                                                     | Aria movement & training documentation |
+| [docs/guides/MONETIZATION_GUIDE.md](docs/guides/MONETIZATION_GUIDE.md)       | Subscription and revenue system        |
+| [docs/guides/REPO_AUTOMATION_GUIDE.md](docs/guides/REPO_AUTOMATION_GUIDE.md) | Full repository automation reference   |
+| [docs/guides/QUANTUM_LLM_TRAINING.md](docs/guides/QUANTUM_LLM_TRAINING.md)   | Quantum-LLM concurrent training        |
+
+---
+
+## 🤝 Contributing
+
+- Update `README.md` when adding configuration options, changing CLI flags, introducing new providers, or modifying cost behaviour.
+- All output files go under `data_out/` (git-ignored). Never modify files under `datasets/`.
+- Always run `--dry-run` on orchestrators before executing GPU or QPU workloads.
+
+### Note on CLI scripts
+
+When adding or changing Python CLI scripts that may be executed directly (for example via `python scripts/foo.py` or invoked in subprocesses), ensure the repository root is added to `sys.path` before importing local packages. This avoids ModuleNotFoundError when the script is run as a subprocess or from other working directories.
+
+Recommended pattern:
+
+```python
+from pathlib import Path
+import sys
+
+REPO_ROOT = Path(__file__).resolve().parent.parent
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+# Now safe to import local packages, e.g.:
+from shared.json_utils import load_status_json
+```
+
+This pattern is used in `scripts/training_analytics.py` to ensure reliable behaviour when invoked from tests, CI, or shell pipelines.
+
+### Enable pre-commit hook
+
+We ship a `.pre-commit-config.yaml` and a local hook that checks CLI scripts. To enable locally:
+
+```bash
+pip install pre-commit
+pre-commit install
+```
+
+After installing, commits will run the `check-cli-sys-path` hook for changed files under `scripts/`.
+
+### Quick installer
+
+You can run the convenience script to install dev requirements and pre-commit hooks automatically:
+
+```bash
+./scripts/setup-dev.sh
+```
+
+The script will:
+
+- install `requirements-dev.txt` (if present) or at least `pre-commit`,
+- run `pre-commit install`, and
+- run `pre-commit run --all-files` (non-blocking; it will print any hook failures).
+
+---
+
+## 📄 License
+
+See individual project directories for license information.
+
+---
+
+## 🧹 Linting & Type Checking
+
+- **Lint:** Run `ruff .` to check code style and common errors.
+- **Type check:** Run `mypy .` to check for type errors.
+- **Autoformat:** Run `black .` and `isort .` for formatting and import sorting.
+- **Pre-commit:** Install hooks with `pre-commit install` to enforce checks before every commit.
+
+See `.pre-commit-config.yaml` and `pyproject.toml` for configuration details.

@@ -1,0 +1,19 @@
+name: Devcontainer CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build and test devcontainer
+        uses: devcontainers/ci@v0.2
+        with:
+          runCmd: python -m pytest tests -q --maxfail=1

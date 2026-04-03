@@ -1,0 +1,26 @@
+# Writer-Reviewer Multi-Agent Workflow — Python Dependencies
+# -----------------------------------------------------------
+# Versions are pinned while the Agent Framework SDK is in preview to avoid
+# breaking changes (e.g. AgentRunResponseUpdate → AgentResponseUpdate,
+# create_agent → as_agent, etc.).
+
+# ── Microsoft Agent Framework ─────────────────────────────────────────────
+agent-framework-azure-ai==1.0.0rc3
+agent-framework-core==1.0.0rc3
+
+# ── Azure AI Agent Server (HTTP server wrapper) ───────────────────────────
+azure-ai-agentserver-core==1.0.0b16
+azure-ai-agentserver-agentframework==1.0.0b16
+
+# ── Azure Identity (DefaultAzureCredential) ───────────────────────────────
+# Keep compatible with:
+# - agent-framework-core (>=1,<2)
+# - azure-ai-agentserver-core (>=1.25.1)
+azure-identity>=1.25.1,<2.0.0
+
+# ── Utilities ─────────────────────────────────────────────────────────────
+python-dotenv>=1.0.0   # loads .env file
+
+# ── Debugging (VS Code AI Toolkit Agent Inspector integration) ────────────
+debugpy                # VS Code Python Debugger support
+agent-dev-cli          # agentdev command (AI Toolkit Inspector integration)

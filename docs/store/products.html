@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Catalog - Aria Store</title>
+  <meta name="description" content="Browse Aria Store subscriptions, training packages, quantum pilots, and deployment services.">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="../global-upgrade.css">
+</head>
+<body class="store-theme">
+
+  <div id="header-slot"></div>
+
+  <main>
+    <section class="store-subpage-hero">
+      <div class="container">
+        <div class="page-hero-card">
+          <p class="store-eyebrow">Catalog</p>
+          <h1>Browse subscriptions, enablement, and rollout support.</h1>
+          <p>Filter the catalog by category, price ceiling, and search term to find the package closest to your current deployment stage.</p>
+          <div class="hero-chip-row">
+            <span class="store-pill">Subscription access</span>
+            <span class="store-pill">Training packages</span>
+            <span class="store-pill">Quantum pilots</span>
+            <span class="store-pill">Deployment services</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="store-section">
+      <div class="container">
+        <div class="page-shell">
+          <div class="shop-layout">
+            <aside class="shop-sidebar">
+              <div class="filter-group">
+                <h4>Category</h4>
+                <select id="categoryFilter">
+                  <option value="all">All Categories</option>
+                  <option value="subscriptions">Subscriptions</option>
+                  <option value="training">Training</option>
+                  <option value="quantum">Quantum Programs</option>
+                  <option value="services">Deployment Services</option>
+                </select>
+              </div>
+              <div class="filter-group">
+                <h4>Max Price</h4>
+                <input type="range" id="priceRange" min="0" max="1500" value="1500">
+                <div class="price-range-labels">
+                  <span>$0</span>
+                  <span id="priceLabel">$1500</span>
+                </div>
+              </div>
+              <div class="filter-group">
+                <h4>Sort By</h4>
+                <select id="sortFilter">
+                  <option value="default">Default</option>
+                  <option value="price-low">Price: Low to High</option>
+                  <option value="price-high">Price: High to Low</option>
+                  <option value="name">Name: A to Z</option>
+                </select>
+              </div>
+            </aside>
+
+            <div>
+              <div class="shop-results-header">
+                <p id="resultsCount"></p>
+                <div class="shop-results-actions">
+                  <button type="button" class="btn btn-outline" id="clearFiltersBtn">Clear Filters</button>
+                  <span class="shop-shortcut-hint">Shortcut: Ctrl/Cmd+K search</span>
+                </div>
+              </div>
+              <div class="shop-products-grid" id="shopProductsGrid">
+                <!-- Rendered by JS -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div id="footer-slot"></div>
+
+  <script src="js/products.js"></script>
+  <script src="js/components.js"></script>
+  <script src="js/app.js"></script>
+  <script>initShopPage();</script>
+  <script src="../global-upgrade.js"></script>
+</body>
+</html>

@@ -1,0 +1,79 @@
+name: API Health Smoke
+
+on:
+    pull_request:
+        branches: [main, dev]
+        paths:
+            - "function_app.py"
+            - "host.json"
+            - "shared/**"
+            - "ai-projects/chat-cli/src/**"
+            - ".github/workflows/api-health-smoke.yml"
+    push:
+        branches: [main]
+        paths:
+            - "function_app.py"
+            - "host.json"
+            - "shared/**"
+            - "ai-projects/chat-cli/src/**"
+            - ".github/workflows/api-health-smoke.yml"
+    schedule:
+        - cron: "30 4 * * *" # Daily 04:30 UTC
+    workflow_dispatch:
+
+concurrency:
+    group: api-health-${{ github.ref }}
+    cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+    smoke:
+        name: API Smoke Validation
+        runs-on: ubuntu-latest
+        timeout-minutes: 15
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+
+            - name: Setup Python
+              uses: ./.github/actions/setup-python-env
+              with:
+                  extra-packages: "pytest requests"
+
+            - name: Run integration smoke checks
+              run: |
+                  python scripts/integration_smoke.py --json
+
+            - name: Run strict endpoint smoke (scheduled only)
+              if: github.event_name == 'schedule'
+              run: |
+                  python scripts/integration_smoke.py --strict-endpoints --json
+
+            - name: Validate AI status route contract tests
+              run: |
+                  python scripts/ci_orchestrator.py --integration-contract-tests
+
+            - name: Upload smoke artifacts
+              if: always()
+              uses: actions/upload-artifact@v4
+              with:
+                  name: api-health-smoke-${{ github.run_number }}
+                  retention-days: 14
+                  path: |
+                      data_out/integration_smoke/
+                      data_out/ci_orchestrator/status.json
+
+            - name: Summary
+              if: always()
+              run: |
+                  echo "## API Health Smoke" >> $GITHUB_STEP_SUMMARY
+                  echo "" >> $GITHUB_STEP_SUMMARY
+                  echo "| Check | Result |" >> $GITHUB_STEP_SUMMARY
+                  echo "|-------|--------|" >> $GITHUB_STEP_SUMMARY
+                  echo "| integration_smoke.py --json | ✅ completed |" >> $GITHUB_STEP_SUMMARY
+                  if [ "${{ github.event_name }}" = "schedule" ]; then
+                    echo "| integration_smoke.py --strict-endpoints --json | ✅ completed |" >> $GITHUB_STEP_SUMMARY
+                  else
+                    echo "| strict endpoint run | skipped (non-scheduled event) |" >> $GITHUB_STEP_SUMMARY
+                  fi
+                  echo "| ci_orchestrator --integration-contract-tests | ✅ completed |" >> $GITHUB_STEP_SUMMARY

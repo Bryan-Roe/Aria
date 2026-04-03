@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+# Pre-commit hook - Run fast tests before allowing commit
+#
+# Installation:
+#   git config core.hooksPath .githooks
+#
+# To bypass (for emergency commits):
+#   git commit --no-verify
+
+set -e
+
+echo "🧪 Running pre-commit tests..."
+
+# Run fast unit tests only (skip slow/integration)
+python scripts/test_runner.py --unit --verbose 0
+
+if [ $? -eq 0 ]; then
+    echo "✅ Tests passed - proceeding with commit"
+    exit 0
+else
+    echo "❌ Tests failed - commit blocked"
+    echo ""
+    echo "To fix:"
+    echo "  1. Review test failures above"
+    echo "  2. Fix the issues and try again"
+    echo "  3. Or bypass with: git commit --no-verify (not recommended)"
+    exit 1
+fi
