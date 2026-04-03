@@ -1,0 +1,43 @@
+{
+  "output_dir": "data_out/quantum_llm_training",
+  "status_file": "data_out/quantum_llm_training/status.json",
+  "last_updated": "2026-03-29T14:38:35.006216",
+  "available": true,
+  "status": "completed",
+  "mode": "simulated",
+  "passive_mode": false,
+  "dataset_path": "data_out/autonomous_datasets/python_help/train.jsonl",
+  "epochs_requested": 3,
+  "epochs_completed": 3,
+  "best_loss": 0.7543364953476782,
+  "final_loss": 0.7543364953476782,
+  "checkpoint_path": "data_out/quantum_llm_training/best_quantum_llm.pt",
+  "best_checkpoint_path": "data_out/quantum_llm_training/best_quantum_llm.pt",
+  "last_checkpoint_path": "data_out/quantum_llm_training/final_model.pt",
+  "quantum_available": true,
+  "training_history": [
+    {
+      "epoch": 0,
+      "loss": 0.8968169734807874,
+      "quantum_executions": 1
+    },
+    {
+      "epoch": 1,
+      "loss": 0.7940342068868932,
+      "quantum_executions": 2
+    },
+    {
+      "epoch": 2,
+      "loss": 0.7543364953476782,
+      "quantum_executions": 3
+    }
+  ],
+  "quantum_metrics": {
+    "circuit_executions": 3,
+    "optimization_steps": 3,
+    "quantum_available": true
+  },
+  "results_file": "data_out/quantum_llm_training/quantum_training_results.json",
+  "started_at": "2026-03-29T14:38:34.592696",
+  "completed_at": "2026-03-29T14:38:34.991354"
+}

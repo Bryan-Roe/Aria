@@ -1,0 +1,294 @@
+2026-03-28 21:57:46,546 MainThread INFO Multi-agent run 20260328_215746: 3 tasks, max_workers=3
+2026-03-28 21:57:46,546 agent_0 INFO Worker starting task: Update shared/chat_memory.py: add comprehensive docstrings t
+2026-03-28 21:57:46,546 agent_0 INFO Initialized ollama client: http://127.0.0.1:11434 model=codellama:latest
+2026-03-28 21:57:46,547 agent_1 INFO Worker starting task: Update shared/chat_providers.py: improve error handling and 
+2026-03-28 21:57:46,547 agent_1 INFO Initialized ollama client: http://127.0.0.1:11434 model=codellama:latest
+2026-03-28 21:57:46,547 agent_2 INFO Worker starting task: Update scripts/autonomous_training_orchestrator.py: add type
+2026-03-28 21:57:46,547 agent_2 INFO Initialized ollama client: http://127.0.0.1:11434 model=codellama:latest
+2026-03-28 21:57:49,540 agent_1 INFO Starting task 20260328_215749 (dry_run=False): Update shared/chat_providers.py: improve error handling and logging around provider fallback paths
+2026-03-28 21:57:49,540 agent_0 INFO Starting task 20260328_215749 (dry_run=False): Update shared/chat_memory.py: add comprehensive docstrings to public functions and classes
+2026-03-28 21:57:49,550 agent_0 INFO Planning task [documentation]: Update shared/chat_memory.py: add comprehensive docstrings to public functions and classes
+2026-03-28 21:57:49,552 agent_1 INFO Planning task [bug_fix]: Update shared/chat_providers.py: improve error handling and logging around provider fallback paths
+2026-03-28 21:57:49,568 agent_1 ERROR Error querying LLM: Cannot connect to Ollama at http://127.0.0.1:11434: HTTP Error 404: Not Found
+Traceback (most recent call last):
+  File "/workspaces/Aria/scripts/autonomous_code_agent.py", line 298, in _query_ollama
+    with urllib.request.urlopen(req, timeout=60) as response:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/urllib/request.py", line 216, in urlopen
+    return opener.open(url, data, timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/urllib/request.py", line 525, in open
+    response = meth(req, response)
+               ^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/urllib/request.py", line 634, in http_response
+    response = self.parent.error(
+               ^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/urllib/request.py", line 563, in error
+    return self._call_chain(*args)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/urllib/request.py", line 496, in _call_chain
+    result = func(*args)
+             ^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/urllib/request.py", line 643, in http_error_default
+    raise HTTPError(req.full_url, code, msg, hdrs, fp)
+urllib.error.HTTPError: HTTP Error 404: Not Found
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/workspaces/Aria/scripts/autonomous_code_agent.py", line 271, in query
+    return self._query_ollama(prompt, max_tokens)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspaces/Aria/scripts/autonomous_code_agent.py", line 302, in _query_ollama
+    raise ConnectionError(f"Cannot connect to Ollama at {self.base_url}: {e}")
+ConnectionError: Cannot connect to Ollama at http://127.0.0.1:11434: HTTP Error 404: Not Found
+
+2026-03-28 21:57:49,569 agent_0 ERROR Error querying LLM: Cannot connect to Ollama at http://127.0.0.1:11434: HTTP Error 404: Not Found
+Traceback (most recent call last):
+  File "/workspaces/Aria/scripts/autonomous_code_agent.py", line 298, in _query_ollama
+    with urllib.request.urlopen(req, timeout=60) as response:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/urllib/request.py", line 216, in urlopen
+    return opener.open(url, data, timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/urllib/request.py", line 525, in open
+    response = meth(req, response)
+               ^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/urllib/request.py", line 634, in http_response
+    response = self.parent.error(
+               ^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/urllib/request.py", line 563, in error
+    return self._call_chain(*args)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/urllib/request.py", line 496, in _call_chain
+    result = func(*args)
+             ^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/urllib/request.py", line 643, in http_error_default
+    raise HTTPError(req.full_url, code, msg, hdrs, fp)
+urllib.error.HTTPError: HTTP Error 404: Not Found
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/workspaces/Aria/scripts/autonomous_code_agent.py", line 271, in query
+    return self._query_ollama(prompt, max_tokens)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspaces/Aria/scripts/autonomous_code_agent.py", line 302, in _query_ollama
+    raise ConnectionError(f"Cannot connect to Ollama at {self.base_url}: {e}")
+ConnectionError: Cannot connect to Ollama at http://127.0.0.1:11434: HTTP Error 404: Not Found
+
+2026-03-28 21:57:49,570 agent_1 INFO Planning complete: Error: Cannot connect to Ollama at http://127.0.0.1:11434: HTTP Error 404: Not Found
+2026-03-28 21:57:49,571 agent_0 INFO Planning complete: Error: Cannot connect to Ollama at http://127.0.0.1:11434: HTTP Error 404: Not Found
+2026-03-28 21:57:49,575 agent_1 ERROR Error querying LLM: Cannot connect to Ollama at http://127.0.0.1:11434: HTTP Error 404: Not Found
+Traceback (most recent call last):
+  File "/workspaces/Aria/scripts/autonomous_code_agent.py", line 298, in _query_ollama
+    with urllib.request.urlopen(req, timeout=60) as response:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/urllib/request.py", line 216, in urlopen
+    return opener.open(url, data, timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/urllib/request.py", line 525, in open
+    response = meth(req, response)
+               ^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/urllib/request.py", line 634, in http_response
+    response = self.parent.error(
+               ^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/urllib/request.py", line 563, in error
+    return self._call_chain(*args)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/urllib/request.py", line 496, in _call_chain
+    result = func(*args)
+             ^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/urllib/request.py", line 643, in http_error_default
+    raise HTTPError(req.full_url, code, msg, hdrs, fp)
+urllib.error.HTTPError: HTTP Error 404: Not Found
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/workspaces/Aria/scripts/autonomous_code_agent.py", line 271, in query
+    return self._query_ollama(prompt, max_tokens)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspaces/Aria/scripts/autonomous_code_agent.py", line 302, in _query_ollama
+    raise ConnectionError(f"Cannot connect to Ollama at {self.base_url}: {e}")
+ConnectionError: Cannot connect to Ollama at http://127.0.0.1:11434: HTTP Error 404: Not Found
+
+2026-03-28 21:57:49,575 agent_0 ERROR Error querying LLM: Cannot connect to Ollama at http://127.0.0.1:11434: HTTP Error 404: Not Found
+Traceback (most recent call last):
+  File "/workspaces/Aria/scripts/autonomous_code_agent.py", line 298, in _query_ollama
+    with urllib.request.urlopen(req, timeout=60) as response:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/urllib/request.py", line 216, in urlopen
+    return opener.open(url, data, timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/urllib/request.py", line 525, in open
+    response = meth(req, response)
+               ^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/urllib/request.py", line 634, in http_response
+    response = self.parent.error(
+               ^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/urllib/request.py", line 563, in error
+    return self._call_chain(*args)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/urllib/request.py", line 496, in _call_chain
+    result = func(*args)
+             ^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/urllib/request.py", line 643, in http_error_default
+    raise HTTPError(req.full_url, code, msg, hdrs, fp)
+urllib.error.HTTPError: HTTP Error 404: Not Found
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/workspaces/Aria/scripts/autonomous_code_agent.py", line 271, in query
+    return self._query_ollama(prompt, max_tokens)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspaces/Aria/scripts/autonomous_code_agent.py", line 302, in _query_ollama
+    raise ConnectionError(f"Cannot connect to Ollama at {self.base_url}: {e}")
+ConnectionError: Cannot connect to Ollama at http://127.0.0.1:11434: HTTP Error 404: Not Found
+
+2026-03-28 21:57:49,577 agent_1 INFO Identified 0 relevant file(s): []
+2026-03-28 21:57:49,578 agent_0 INFO Identified 0 relevant file(s): []
+2026-03-28 21:57:49,578 agent_1 INFO Identified files: []
+2026-03-28 21:57:49,579 agent_0 INFO Identified files: []
+2026-03-28 21:57:49,586 agent_1 INFO Running tests...
+2026-03-28 21:57:49,587 agent_0 INFO Running tests...
+2026-03-28 21:57:51,684 agent_2 INFO Starting task 20260328_215751 (dry_run=False): Update scripts/autonomous_training_orchestrator.py: add type hints to key public methods
+2026-03-28 21:57:51,696 agent_2 INFO Planning task [feature]: Update scripts/autonomous_training_orchestrator.py: add type hints to key public methods
+2026-03-28 21:57:51,702 agent_2 ERROR Error querying LLM: Cannot connect to Ollama at http://127.0.0.1:11434: HTTP Error 404: Not Found
+Traceback (most recent call last):
+  File "/workspaces/Aria/scripts/autonomous_code_agent.py", line 298, in _query_ollama
+    with urllib.request.urlopen(req, timeout=60) as response:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/urllib/request.py", line 216, in urlopen
+    return opener.open(url, data, timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/urllib/request.py", line 525, in open
+    response = meth(req, response)
+               ^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/urllib/request.py", line 634, in http_response
+    response = self.parent.error(
+               ^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/urllib/request.py", line 563, in error
+    return self._call_chain(*args)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/urllib/request.py", line 496, in _call_chain
+    result = func(*args)
+             ^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/urllib/request.py", line 643, in http_error_default
+    raise HTTPError(req.full_url, code, msg, hdrs, fp)
+urllib.error.HTTPError: HTTP Error 404: Not Found
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/workspaces/Aria/scripts/autonomous_code_agent.py", line 271, in query
+    return self._query_ollama(prompt, max_tokens)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspaces/Aria/scripts/autonomous_code_agent.py", line 302, in _query_ollama
+    raise ConnectionError(f"Cannot connect to Ollama at {self.base_url}: {e}")
+ConnectionError: Cannot connect to Ollama at http://127.0.0.1:11434: HTTP Error 404: Not Found
+
+2026-03-28 21:57:51,704 agent_2 INFO Planning complete: Error: Cannot connect to Ollama at http://127.0.0.1:11434: HTTP Error 404: Not Found
+2026-03-28 21:57:51,708 agent_2 ERROR Error querying LLM: Cannot connect to Ollama at http://127.0.0.1:11434: HTTP Error 404: Not Found
+Traceback (most recent call last):
+  File "/workspaces/Aria/scripts/autonomous_code_agent.py", line 298, in _query_ollama
+    with urllib.request.urlopen(req, timeout=60) as response:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/urllib/request.py", line 216, in urlopen
+    return opener.open(url, data, timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/urllib/request.py", line 525, in open
+    response = meth(req, response)
+               ^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/urllib/request.py", line 634, in http_response
+    response = self.parent.error(
+               ^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/urllib/request.py", line 563, in error
+    return self._call_chain(*args)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/urllib/request.py", line 496, in _call_chain
+    result = func(*args)
+             ^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/urllib/request.py", line 643, in http_error_default
+    raise HTTPError(req.full_url, code, msg, hdrs, fp)
+urllib.error.HTTPError: HTTP Error 404: Not Found
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/workspaces/Aria/scripts/autonomous_code_agent.py", line 271, in query
+    return self._query_ollama(prompt, max_tokens)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspaces/Aria/scripts/autonomous_code_agent.py", line 302, in _query_ollama
+    raise ConnectionError(f"Cannot connect to Ollama at {self.base_url}: {e}")
+ConnectionError: Cannot connect to Ollama at http://127.0.0.1:11434: HTTP Error 404: Not Found
+
+2026-03-28 21:57:51,709 agent_2 INFO Identified 0 relevant file(s): []
+2026-03-28 21:57:51,712 agent_2 INFO Identified files: []
+2026-03-28 21:57:51,723 agent_2 INFO Running tests...
+2026-03-28 21:59:00,938 agent_1 DEBUG Test output: 
+============================================================
+  Running suite: unit  (Fast unit tests (~0.5s))
+============================================================
+
+============================= test session starts ==============================
+collected 1370 items / 17 deselected / 3 skipped / 1353 selected
+
+tests/test_agent_mode_delegation_contracts.py ............               [  0%]
+tests/test_agi_provider.py ............................................. [  4%]
+......              
+2026-03-28 21:59:00,938 agent_0 DEBUG Test output: 
+============================================================
+  Running suite: unit  (Fast unit tests (~0.5s))
+============================================================
+
+============================= test session starts ==============================
+collected 1370 items / 17 deselected / 3 skipped / 1353 selected
+
+tests/test_agent_mode_delegation_contracts.py ............               [  0%]
+tests/test_agi_provider.py ............................................. [  4%]
+......              
+2026-03-28 21:59:00,939 agent_1 INFO Tests: passed=False results={'total': 1353, 'passed': 1295, 'failed': 9, 'success': False, 'output': '\n============================================================\n  Running suite: unit  (Fast unit tests (~0.5s))\n============================================================\n\n============================= test session starts ==============================\ncollected 1370 items / 17 deselected / 3 skipped / 1353 selected\n\ntests/test_agent_mode_delegation_contracts.py ............               [  0%]\ntests/test_agi_provider.py ............................................. [  4%]\n......              '}
+2026-03-28 21:59:00,941 agent_0 INFO Tests: passed=False results={'total': 1353, 'passed': 1295, 'failed': 9, 'success': False, 'output': '\n============================================================\n  Running suite: unit  (Fast unit tests (~0.5s))\n============================================================\n\n============================= test session starts ==============================\ncollected 1370 items / 17 deselected / 3 skipped / 1353 selected\n\ntests/test_agent_mode_delegation_contracts.py ............               [  0%]\ntests/test_agi_provider.py ............................................. [  4%]\n......              '}
+2026-03-28 21:59:00,946 agent_1 INFO Task 20260328_215749 complete in 64.62s (~405 tokens)
+2026-03-28 21:59:00,946 agent_0 INFO Task 20260328_215749 complete in 64.62s (~394 tokens)
+2026-03-28 21:59:16,809 agent_2 DEBUG Test output: 
+============================================================
+  Running suite: unit  (Fast unit tests (~0.5s))
+============================================================
+
+============================= test session starts ==============================
+collected 1370 items / 17 deselected / 3 skipped / 1353 selected
+
+tests/test_agent_mode_delegation_contracts.py ............               [  0%]
+tests/test_agi_provider.py ............................................. [  4%]
+......              
+2026-03-28 21:59:16,811 agent_2 INFO Tests: passed=False results={'total': 1353, 'passed': 1295, 'failed': 9, 'success': False, 'output': '\n============================================================\n  Running suite: unit  (Fast unit tests (~0.5s))\n============================================================\n\n============================= test session starts ==============================\ncollected 1370 items / 17 deselected / 3 skipped / 1353 selected\n\ntests/test_agent_mode_delegation_contracts.py ............               [  0%]\ntests/test_agi_provider.py ............................................. [  4%]\n......              '}
+2026-03-28 21:59:16,817 agent_2 INFO Task 20260328_215751 complete in 75.44s (~395 tokens)
+
+Running 3 task(s) with up to 3 parallel worker(s)...
+
+  ✗ [failed      ] Update shared/chat_providers.py: improve error handling (64.62s)
+         error: Validation tests failed
+  ✗ [failed      ] Update shared/chat_memory.py: add comprehensive docstri (64.62s)
+         error: Validation tests failed
+  ✗ [failed      ] Update scripts/autonomous_training_orchestrator.py: add (75.44s)
+         error: Validation tests failed
+
+====================================================================
+===================== MULTI-AGENT RUN SUMMARY ======================
+====================================================================
+  Run ID          : 20260328_215746
+  Total tasks     : 3
+  Succeeded       : 0
+  Failed          : 3
+  Rolled back     : 0
+  Tests skipped   : 0
+  Files modified  : 0
+  ~Tokens used    : 1194
+  Wall-clock time : 80.58s
+  Consensus       : reached=True winner=failure ratio=1.0 reason=ok
+====================================================================
+
+Report saved: data_out/multi_agent_code_changes_run_1774735066/report_20260328_215746.json

@@ -1,0 +1,49 @@
+{
+  "generated_at_utc": "20260329T044427Z",
+  "report": {
+    "checks": {
+      "azure_env_complete": false,
+      "cosmos_if_enabled_is_healthy": true,
+      "provider_detected": false,
+      "sql_pool_configured": false,
+      "status_ok": false
+    },
+    "readiness_score": "1/5",
+    "recommendations": [
+      "Start Azure Functions host: func host start",
+      "Set provider-related environment variables",
+      "Populate missing Azure OpenAI vars: AZURE_OPENAI_API_KEY, AZURE_OPENAI_ENDPOINT, AZURE_OPENAI_DEPLOYMENT, AZURE_OPENAI_API_VERSION"
+    ],
+    "warnings": [
+      "Connection failed"
+    ]
+  },
+  "result": {
+    "final_status": "ACTION_NEEDED",
+    "readiness_score": "1/5",
+    "recommendation_count": 3,
+    "warning_count": 1
+  },
+  "status": {
+    "detail": "[Errno 111] Connection refused",
+    "error": "Connection failed",
+    "ok": false
+  },
+  "summary": {
+    "cosmos_enabled": null,
+    "cosmos_healthy": null,
+    "missing_azure_env": [
+      "AZURE_OPENAI_API_KEY",
+      "AZURE_OPENAI_ENDPOINT",
+      "AZURE_OPENAI_DEPLOYMENT",
+      "AZURE_OPENAI_API_VERSION"
+    ],
+    "overall_ok": false,
+    "provider": "unknown",
+    "sql_pool_size": null,
+    "sql_pool_used": null,
+    "warnings": [
+      "Connection failed"
+    ]
+  }
+}

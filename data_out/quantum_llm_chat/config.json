@@ -1,0 +1,13 @@
+{
+  "vocab_size": 45,
+  "d_model": 64,
+  "n_heads": 2,
+  "n_transformer_layers": 2,
+  "n_layers": 2,
+  "n_qubits": 2,
+  "n_quantum_layers": 2,
+  "max_seq_len": 64,
+  "max_seq_length": 64,
+  "trained_at": "2026-03-29T14:17:11.612379",
+  "quantum_available": true
+}

@@ -1,0 +1,184 @@
+{
+  "runs": [
+    {
+      "run_id": "20260329T085752",
+      "total_jobs": 1,
+      "max_parallel": 3,
+      "total_duration_seconds": 0.211581,
+      "timestamp": "2026-03-29T08:57:52.916105",
+      "aggregate_train_samples": 17,
+      "aggregate_test_samples": 3,
+      "jobs": [
+        {
+          "name": "github_actions_chat",
+          "status": "error",
+          "error": "[Errno 2] No such file or directory: '/workspaces/Aria/AI/microsoft_phi-silica-3.6_v1/venv/Scripts/python.exe'",
+          "device": 0,
+          "start_time": "2026-03-29T08:57:52.704567",
+          "log_file": "/workspaces/Aria/data_out/parallel_training/github_actions_chat/20260329T085752Z/stdout.log",
+          "dataset_path": "/workspaces/Aria/datasets/chat/github_actions",
+          "dataset_train_samples": 17,
+          "dataset_test_samples": 3
+        }
+      ]
+    },
+    {
+      "run_id": "20260329T090021",
+      "total_jobs": 1,
+      "max_parallel": 3,
+      "total_duration_seconds": 0.114591,
+      "timestamp": "2026-03-29T09:00:21.824659",
+      "aggregate_train_samples": 17,
+      "aggregate_test_samples": 3,
+      "jobs": [
+        {
+          "name": "github_actions_chat",
+          "status": "error",
+          "error": "[Errno 2] No such file or directory: '/workspaces/Aria/AI/microsoft_phi-silica-3.6_v1/venv/Scripts/python.exe'",
+          "device": 0,
+          "start_time": "2026-03-29T09:00:21.710120",
+          "log_file": "/workspaces/Aria/data_out/parallel_training/github_actions_chat/20260329T090021Z/stdout.log",
+          "dataset_path": "/workspaces/Aria/datasets/chat/github_actions",
+          "dataset_train_samples": 17,
+          "dataset_test_samples": 3
+        }
+      ]
+    },
+    {
+      "run_id": "20260329T100343",
+      "total_jobs": 1,
+      "max_parallel": 3,
+      "total_duration_seconds": 0.219426,
+      "timestamp": "2026-03-29T10:03:43.895131",
+      "aggregate_train_samples": 17,
+      "aggregate_test_samples": 3,
+      "jobs": [
+        {
+          "name": "github_actions_chat",
+          "status": "error",
+          "error": "[Errno 2] No such file or directory: '/workspaces/Aria/AI/microsoft_phi-silica-3.6_v1/venv/Scripts/python.exe'",
+          "device": 0,
+          "start_time": "2026-03-29T10:03:43.675767",
+          "log_file": "/workspaces/Aria/data_out/parallel_training/github_actions_chat/20260329T100343Z/stdout.log",
+          "dataset_path": "/workspaces/Aria/datasets/chat/github_actions",
+          "dataset_train_samples": 17,
+          "dataset_test_samples": 3
+        }
+      ]
+    },
+    {
+      "run_id": "20260329T100612",
+      "total_jobs": 1,
+      "max_parallel": 3,
+      "total_duration_seconds": 0.178664,
+      "timestamp": "2026-03-29T10:06:12.763069",
+      "aggregate_train_samples": 17,
+      "aggregate_test_samples": 3,
+      "jobs": [
+        {
+          "name": "github_actions_chat",
+          "status": "error",
+          "error": "[Errno 2] No such file or directory: '/workspaces/Aria/AI/microsoft_phi-silica-3.6_v1/venv/Scripts/python.exe'",
+          "device": 0,
+          "start_time": "2026-03-29T10:06:12.584459",
+          "log_file": "/workspaces/Aria/data_out/parallel_training/github_actions_chat/20260329T100612Z/stdout.log",
+          "dataset_path": "/workspaces/Aria/datasets/chat/github_actions",
+          "dataset_train_samples": 17,
+          "dataset_test_samples": 3
+        }
+      ]
+    },
+    {
+      "run_id": "20260329T110912",
+      "total_jobs": 1,
+      "max_parallel": 3,
+      "total_duration_seconds": 0.129786,
+      "timestamp": "2026-03-29T11:09:12.593430",
+      "aggregate_train_samples": 17,
+      "aggregate_test_samples": 3,
+      "jobs": [
+        {
+          "name": "github_actions_chat",
+          "status": "error",
+          "error": "[Errno 2] No such file or directory: '/workspaces/Aria/AI/microsoft_phi-silica-3.6_v1/venv/Scripts/python.exe'",
+          "device": 0,
+          "start_time": "2026-03-29T11:09:12.463712",
+          "log_file": "/workspaces/Aria/data_out/parallel_training/github_actions_chat/20260329T110912Z/stdout.log",
+          "dataset_path": "/workspaces/Aria/datasets/chat/github_actions",
+          "dataset_train_samples": 17,
+          "dataset_test_samples": 3
+        }
+      ]
+    },
+    {
+      "run_id": "20260329T111136",
+      "total_jobs": 1,
+      "max_parallel": 3,
+      "total_duration_seconds": 0.204963,
+      "timestamp": "2026-03-29T11:11:36.814144",
+      "aggregate_train_samples": 17,
+      "aggregate_test_samples": 3,
+      "jobs": [
+        {
+          "name": "github_actions_chat",
+          "status": "error",
+          "error": "[Errno 2] No such file or directory: '/workspaces/Aria/AI/microsoft_phi-silica-3.6_v1/venv/Scripts/python.exe'",
+          "device": 0,
+          "start_time": "2026-03-29T11:11:36.609255",
+          "log_file": "/workspaces/Aria/data_out/parallel_training/github_actions_chat/20260329T111136Z/stdout.log",
+          "dataset_path": "/workspaces/Aria/datasets/chat/github_actions",
+          "dataset_train_samples": 17,
+          "dataset_test_samples": 3
+        }
+      ]
+    },
+    {
+      "run_id": "20260329T121406",
+      "total_jobs": 1,
+      "max_parallel": 3,
+      "total_duration_seconds": 0.06427,
+      "timestamp": "2026-03-29T12:14:06.846491",
+      "aggregate_train_samples": 17,
+      "aggregate_test_samples": 3,
+      "jobs": [
+        {
+          "name": "github_actions_chat",
+          "status": "error",
+          "error": "[Errno 2] No such file or directory: '/workspaces/Aria/AI/microsoft_phi-silica-3.6_v1/venv/Scripts/python.exe'",
+          "device": 0,
+          "start_time": "2026-03-29T12:14:06.782346",
+          "log_file": "/workspaces/Aria/data_out/parallel_training/github_actions_chat/20260329T121406Z/stdout.log",
+          "dataset_path": "/workspaces/Aria/datasets/chat/github_actions",
+          "dataset_train_samples": 17,
+          "dataset_test_samples": 3
+        }
+      ]
+    },
+    {
+      "run_id": "20260329T121636",
+      "total_jobs": 1,
+      "max_parallel": 3,
+      "total_duration_seconds": 0.08304,
+      "timestamp": "2026-03-29T12:16:36.832870",
+      "aggregate_train_samples": 17,
+      "aggregate_test_samples": 3,
+      "jobs": [
+        {
+          "name": "github_actions_chat",
+          "status": "error",
+          "error": "[Errno 2] No such file or directory: '/workspaces/Aria/AI/microsoft_phi-silica-3.6_v1/venv/Scripts/python.exe'",
+          "device": 0,
+          "start_time": "2026-03-29T12:16:36.749892",
+          "log_file": "/workspaces/Aria/data_out/parallel_training/github_actions_chat/20260329T121636Z/stdout.log",
+          "dataset_path": "/workspaces/Aria/datasets/chat/github_actions",
+          "dataset_train_samples": 17,
+          "dataset_test_samples": 3
+        }
+      ]
+    }
+  ],
+  "total_runs": 8,
+  "last_updated": "2026-03-29T12:16:36.832870",
+  "cumulative_train_samples": 136,
+  "cumulative_test_samples": 24
+}

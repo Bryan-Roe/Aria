@@ -1,0 +1,18 @@
+Metadata-Version: 2.4
+Name: opentelemetry-semantic-conventions-ai
+Version: 0.5.1
+Summary: OpenTelemetry Semantic Conventions Extension for Large Language Models
+Author-email: Gal Kleinman <gal@traceloop.com>, Nir Gazit <nir@traceloop.com>, Tomer Friedman <tomer@traceloop.com>
+License-Expression: Apache-2.0
+Requires-Python: <4,>=3.9
+Requires-Dist: opentelemetry-sdk<2,>=1.38.0
+Requires-Dist: opentelemetry-semantic-conventions>=0.59b0
+Description-Content-Type: text/markdown
+
+# OpenTelemetry Semantic Conventions extensions for gen-AI applications
+
+<a href="https://pypi.org/project/opentelemetry-semantic-conventions-ai/">
+    <img src="https://badge.fury.io/py/opentelemetry-semantic-conventions-ai.svg">
+</a>
+
+This is an extension of the standard [OpenTelemetry Semantic Conventions](https://github.com/open-telemetry/semantic-conventions) for gen AI applications. It defines additional attributes for spans that are useful for debugging and monitoring prompts, completions, token usage, etc.

@@ -1,0 +1,3 @@
+[console_scripts]
+agentdev=agentdev.cli:main
+

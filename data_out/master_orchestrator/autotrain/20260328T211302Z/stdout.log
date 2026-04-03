@@ -1,0 +1,16 @@
+📋 AutoTrain — 12 job(s) from /workspaces/Aria/config/training/autotrain.yaml
+  [warn] phi35_comprehensive_full: missing ['dataset path not found: datasets/chat/comprehensive', 'train script not found: AI/microsoft_phi-silica-3.6_v1/scripts/train_lora.py', 'lora config not found: AI/microsoft_phi-silica-3.6_v1/lora/lora.yaml']
+  [warn] qwen25_comprehensive_full: missing ['dataset path not found: datasets/chat/comprehensive', 'train script not found: AI/microsoft_phi-silica-3.6_v1/scripts/train_lora.py', 'lora config not found: AI/microsoft_phi-silica-3.6_v1/lora/lora.yaml']
+  [warn] phi35_mixed_chat: missing ['dataset path not found: datasets/chat/mixed_chat', 'train script not found: AI/microsoft_phi-silica-3.6_v1/scripts/train_lora.py', 'lora config not found: AI/microsoft_phi-silica-3.6_v1/lora/lora.yaml']
+  [warn] qwen25_3b_mixed_chat: missing ['dataset path not found: datasets/chat/mixed_chat', 'train script not found: AI/microsoft_phi-silica-3.6_v1/scripts/train_lora.py', 'lora config not found: AI/microsoft_phi-silica-3.6_v1/lora/lora.yaml']
+  [warn] phi35_max_performance: missing ['dataset path not found: datasets/chat/dolly', 'train script not found: AI/microsoft_phi-silica-3.6_v1/scripts/train_lora.py', 'lora config not found: AI/microsoft_phi-silica-3.6_v1/lora/lora.yaml']
+  [warn] phi35_repo_augmented: missing ['dataset path not found: datasets/chat/app_repo_augmented', 'train script not found: AI/microsoft_phi-silica-3.6_v1/scripts/train_lora.py', 'lora config not found: AI/microsoft_phi-silica-3.6_v1/lora/lora.yaml']
+  [warn] qwen25_repo_augmented: missing ['dataset path not found: datasets/chat/app_repo_augmented', 'train script not found: AI/microsoft_phi-silica-3.6_v1/scripts/train_lora.py', 'lora config not found: AI/microsoft_phi-silica-3.6_v1/lora/lora.yaml']
+  [warn] phi35_mixed_chat_lr_low: missing ['dataset path not found: datasets/chat/mixed_chat', 'train script not found: AI/microsoft_phi-silica-3.6_v1/scripts/train_lora.py', 'lora config not found: AI/microsoft_phi-silica-3.6_v1/lora/lora.yaml']
+  [warn] phi35_mixed_chat_lr_high: missing ['dataset path not found: datasets/chat/mixed_chat', 'train script not found: AI/microsoft_phi-silica-3.6_v1/scripts/train_lora.py', 'lora config not found: AI/microsoft_phi-silica-3.6_v1/lora/lora.yaml']
+  [warn] phi35_mixed_chat_dropout_low: missing ['dataset path not found: datasets/chat/mixed_chat', 'train script not found: AI/microsoft_phi-silica-3.6_v1/scripts/train_lora.py', 'lora config not found: AI/microsoft_phi-silica-3.6_v1/lora/lora.yaml']
+  [warn] anime_avatar: missing ['dataset path not found: datasets/chat/anime_avatar', 'train script not found: AI/microsoft_phi-silica-3.6_v1/scripts/train_lora.py', 'lora config not found: AI/microsoft_phi-silica-3.6_v1/lora/lora.yaml']
+  [warn] phi35_mixed_chat_dropout_high: missing ['dataset path not found: datasets/chat/mixed_chat', 'train script not found: AI/microsoft_phi-silica-3.6_v1/scripts/train_lora.py', 'lora config not found: AI/microsoft_phi-silica-3.6_v1/lora/lora.yaml']
+
+📄 Status written to /workspaces/Aria/data_out/autotrain/status.json
+ℹ️  Use --dry-run to validate, --run to execute, --list to list jobs

@@ -1,0 +1,32 @@
+{
+  "version": 8,
+  "promoted_at": "2026-03-29T10:40:57.542275",
+  "cycle": 385,
+  "accuracy": 0.956931,
+  "dataset_inventory": {
+    "chat": {
+      "count": 1,
+      "paths": [
+        "datasets/chat/github_actions/train.json"
+      ]
+    },
+    "synthetic:aria_commands": {
+      "count": 1,
+      "paths": [
+        "data_out/autonomous_datasets/aria_commands/train.jsonl"
+      ]
+    },
+    "synthetic:python_help": {
+      "count": 1,
+      "paths": [
+        "data_out/autonomous_datasets/python_help/train.jsonl"
+      ]
+    },
+    "synthetic:quantum": {
+      "count": 1,
+      "paths": [
+        "data_out/autonomous_datasets/quantum/train.jsonl"
+      ]
+    }
+  }
+}

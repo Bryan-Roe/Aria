@@ -1,0 +1,667 @@
+nohup: ignoring input
+ These are optional — start them as needed
+  ⚠️  Azure Functions: not running on :7071
+  ✅ Aria Character: listening on :8080
+
+⚠️  Azure Functions Core Tools: func not found — use local_dev_adapter.py as fallback
+
+❌ MCP servers
+  ❌ quantum-ai MCP: missing imports: qiskit, mcp.server
+  ❌ llm-maker MCP: missing imports: mcp.server
+  ✅ .vscode/mcp.json: 3 servers configured
+
+✅ local.settings.json: 14 env vars configured
+
+─────────────────────────────────────────────────────────────────
+  ❌ Summary: 7/11 OK  2 warnings  2 failures
+═════════════════════════════════════════════════════════════════
+
+
+ These are optional — start them as needed
+  ⚠️  Azure Functions: not running on :7071
+  ✅ Aria Character: listening on :8080
+
+⚠️  Azure Functions Core Tools: func not found — use local_dev_adapter.py as fallback
+
+❌ MCP servers
+  ❌ quantum-ai MCP: missing imports: qiskit, mcp.server
+  ❌ llm-maker MCP: missing imports: mcp.server
+  ✅ .vscode/mcp.json: 3 servers configured
+
+✅ local.settings.json: 14 env vars configured
+
+─────────────────────────────────────────────────────────────────
+  ❌ Summary: 7/11 OK  2 warnings  2 failures
+═════════════════════════════════════════════════════════════════
+
+
+ces: These are optional — start them as needed
+  ✅ Azure Functions: listening on :7071
+  ✅ Aria Character: listening on :8080
+
+⚠️  Azure Functions Core Tools: func not found — use local_dev_adapter.py as fallback
+
+❌ MCP servers
+  ❌ quantum-ai MCP: missing imports: qiskit, mcp.server
+  ❌ llm-maker MCP: missing imports: mcp.server
+  ✅ .vscode/mcp.json: 3 servers configured
+
+✅ local.settings.json: 14 env vars configured
+
+─────────────────────────────────────────────────────────────────
+  ❌ Summary: 8/11 OK  1 warnings  2 failures
+═════════════════════════════════════════════════════════════════
+
+
+ces: These are optional — start them as needed
+  ✅ Azure Functions: listening on :7071
+  ✅ Aria Character: listening on :8080
+
+⚠️  Azure Functions Core Tools: func not found — use local_dev_adapter.py as fallback
+
+❌ MCP servers
+  ❌ quantum-ai MCP: missing imports: qiskit, mcp.server
+  ❌ llm-maker MCP: missing imports: mcp.server
+  ✅ .vscode/mcp.json: 3 servers configured
+
+✅ local.settings.json: 14 env vars configured
+
+─────────────────────────────────────────────────────────────────
+  ❌ Summary: 8/11 OK  1 warnings  2 failures
+═════════════════════════════════════════════════════════════════
+
+
+ces: These are optional — start them as needed
+  ✅ Azure Functions: listening on :7071
+  ✅ Aria Character: listening on :8080
+
+⚠️  Azure Functions Core Tools: func not found — use local_dev_adapter.py as fallback
+
+❌ MCP servers
+  ❌ quantum-ai MCP: missing imports: qiskit, mcp.server
+  ❌ llm-maker MCP: missing imports: mcp.server
+  ✅ .vscode/mcp.json: 3 servers configured
+
+✅ local.settings.json: 14 env vars configured
+
+─────────────────────────────────────────────────────────────────
+  ❌ Summary: 8/11 OK  1 warnings  2 failures
+═════════════════════════════════════════════════════════════════
+
+
+ces: These are optional — start them as needed
+  ✅ Azure Functions: listening on :7071
+  ✅ Aria Character: listening on :8080
+
+⚠️  Azure Functions Core Tools: func not found — use local_dev_adapter.py as fallback
+
+❌ MCP servers
+  ❌ quantum-ai MCP: missing imports: qiskit, mcp.server
+  ❌ llm-maker MCP: missing imports: mcp.server
+  ✅ .vscode/mcp.json: 3 servers configured
+
+✅ local.settings.json: 14 env vars configured
+
+─────────────────────────────────────────────────────────────────
+  ❌ Summary: 8/11 OK  1 warnings  2 failures
+═════════════════════════════════════════════════════════════════
+
+
+ces: These are optional — start them as needed
+  ✅ Azure Functions: listening on :7071
+  ✅ Aria Character: listening on :8080
+
+⚠️  Azure Functions Core Tools: func not found — use local_dev_adapter.py as fallback
+
+❌ MCP servers
+  ❌ quantum-ai MCP: missing imports: qiskit, mcp.server
+  ❌ llm-maker MCP: missing imports: mcp.server
+  ✅ .vscode/mcp.json: 3 servers configured
+
+✅ local.settings.json: 14 env vars configured
+
+─────────────────────────────────────────────────────────────────
+  ❌ Summary: 8/11 OK  1 warnings  2 failures
+═════════════════════════════════════════════════════════════════
+
+
+ces: These are optional — start them as needed
+  ✅ Azure Functions: listening on :7071
+  ✅ Aria Character: listening on :8080
+
+⚠️  Azure Functions Core Tools: func not found — use local_dev_adapter.py as fallback
+
+❌ MCP servers
+  ❌ quantum-ai MCP: missing imports: qiskit, mcp.server
+  ❌ llm-maker MCP: missing imports: mcp.server
+  ✅ .vscode/mcp.json: 3 servers configured
+
+✅ local.settings.json: 14 env vars configured
+
+─────────────────────────────────────────────────────────────────
+  ❌ Summary: 8/11 OK  1 warnings  2 failures
+═════════════════════════════════════════════════════════════════
+
+
+ces: These are optional — start them as needed
+  ✅ Azure Functions: listening on :7071
+  ✅ Aria Character: listening on :8080
+
+⚠️  Azure Functions Core Tools: func not found — use local_dev_adapter.py as fallback
+
+❌ MCP servers
+  ❌ quantum-ai MCP: missing imports: qiskit, mcp.server
+  ❌ llm-maker MCP: missing imports: mcp.server
+  ✅ .vscode/mcp.json: 3 servers configured
+
+✅ local.settings.json: 14 env vars configured
+
+─────────────────────────────────────────────────────────────────
+  ❌ Summary: 8/11 OK  1 warnings  2 failures
+═════════════════════════════════════════════════════════════════
+
+
+ces: These are optional — start them as needed
+  ✅ Azure Functions: listening on :7071
+  ✅ Aria Character: listening on :8080
+
+⚠️  Azure Functions Core Tools: func not found — use local_dev_adapter.py as fallback
+
+❌ MCP servers
+  ❌ quantum-ai MCP: missing imports: qiskit, mcp.server
+  ❌ llm-maker MCP: missing imports: mcp.server
+  ✅ .vscode/mcp.json: 3 servers configured
+
+✅ local.settings.json: 14 env vars configured
+
+─────────────────────────────────────────────────────────────────
+  ❌ Summary: 8/11 OK  1 warnings  2 failures
+═════════════════════════════════════════════════════════════════
+
+
+ These are optional — start them as needed
+  ⚠️  Azure Functions: not running on :7071
+  ✅ Aria Character: listening on :8080
+
+⚠️  Azure Functions Core Tools: func not found — use local_dev_adapter.py as fallback
+
+❌ MCP servers
+  ❌ quantum-ai MCP: missing imports: qiskit, mcp.server
+  ❌ llm-maker MCP: missing imports: mcp.server
+  ✅ .vscode/mcp.json: 3 servers configured
+
+✅ local.settings.json: 14 env vars configured
+
+─────────────────────────────────────────────────────────────────
+  ❌ Summary: 7/11 OK  2 warnings  2 failures
+═════════════════════════════════════════════════════════════════
+
+
+ These are optional — start them as needed
+  ⚠️  Azure Functions: not running on :7071
+  ✅ Aria Character: listening on :8080
+
+⚠️  Azure Functions Core Tools: func not found — use local_dev_adapter.py as fallback
+
+❌ MCP servers
+  ❌ quantum-ai MCP: missing imports: qiskit, mcp.server
+  ❌ llm-maker MCP: missing imports: mcp.server
+  ✅ .vscode/mcp.json: 3 servers configured
+
+✅ local.settings.json: 14 env vars configured
+
+─────────────────────────────────────────────────────────────────
+  ❌ Summary: 7/11 OK  2 warnings  2 failures
+═════════════════════════════════════════════════════════════════
+
+
+ These are optional — start them as needed
+  ⚠️  Azure Functions: not running on :7071
+  ✅ Aria Character: listening on :8080
+
+⚠️  Azure Functions Core Tools: func not found — use local_dev_adapter.py as fallback
+
+❌ MCP servers
+  ❌ quantum-ai MCP: missing imports: qiskit, mcp.server
+  ❌ llm-maker MCP: missing imports: mcp.server
+  ✅ .vscode/mcp.json: 3 servers configured
+
+✅ local.settings.json: 14 env vars configured
+
+─────────────────────────────────────────────────────────────────
+  ❌ Summary: 7/11 OK  2 warnings  2 failures
+═════════════════════════════════════════════════════════════════
+
+
+ These are optional — start them as needed
+  ⚠️  Azure Functions: not running on :7071
+  ✅ Aria Character: listening on :8080
+
+⚠️  Azure Functions Core Tools: func not found — use local_dev_adapter.py as fallback
+
+❌ MCP servers
+  ❌ quantum-ai MCP: missing imports: qiskit, mcp.server
+  ❌ llm-maker MCP: missing imports: mcp.server
+  ✅ .vscode/mcp.json: 3 servers configured
+
+✅ local.settings.json: 14 env vars configured
+
+─────────────────────────────────────────────────────────────────
+  ❌ Summary: 7/11 OK  2 warnings  2 failures
+═════════════════════════════════════════════════════════════════
+
+
+ These are optional — start them as needed
+  ⚠️  Azure Functions: not running on :7071
+  ✅ Aria Character: listening on :8080
+
+⚠️  Azure Functions Core Tools: func not found — use local_dev_adapter.py as fallback
+
+❌ MCP servers
+  ❌ quantum-ai MCP: missing imports: qiskit, mcp.server
+  ❌ llm-maker MCP: missing imports: mcp.server
+  ✅ .vscode/mcp.json: 3 servers configured
+
+✅ local.settings.json: 14 env vars configured
+
+─────────────────────────────────────────────────────────────────
+  ❌ Summary: 7/11 OK  2 warnings  2 failures
+═════════════════════════════════════════════════════════════════
+
+
+ These are optional — start them as needed
+  ⚠️  Azure Functions: not running on :7071
+  ✅ Aria Character: listening on :8080
+
+⚠️  Azure Functions Core Tools: func not found — use local_dev_adapter.py as fallback
+
+❌ MCP servers
+  ❌ quantum-ai MCP: missing imports: qiskit, mcp.server
+  ❌ llm-maker MCP: missing imports: mcp.server
+  ✅ .vscode/mcp.json: 3 servers configured
+
+✅ local.settings.json: 14 env vars configured
+
+─────────────────────────────────────────────────────────────────
+  ❌ Summary: 7/11 OK  2 warnings  2 failures
+═════════════════════════════════════════════════════════════════
+
+
+ These are optional — start them as needed
+  ⚠️  Azure Functions: not running on :7071
+  ✅ Aria Character: listening on :8080
+
+⚠️  Azure Functions Core Tools: func not found — use local_dev_adapter.py as fallback
+
+❌ MCP servers
+  ❌ quantum-ai MCP: missing imports: qiskit, mcp.server
+  ❌ llm-maker MCP: missing imports: mcp.server
+  ✅ .vscode/mcp.json: 3 servers configured
+
+✅ local.settings.json: 14 env vars configured
+
+─────────────────────────────────────────────────────────────────
+  ❌ Summary: 7/11 OK  2 warnings  2 failures
+═════════════════════════════════════════════════════════════════
+
+
+ These are optional — start them as needed
+  ⚠️  Azure Functions: not running on :7071
+  ✅ Aria Character: listening on :8080
+
+⚠️  Azure Functions Core Tools: func not found — use local_dev_adapter.py as fallback
+
+❌ MCP servers
+  ❌ quantum-ai MCP: missing imports: qiskit, mcp.server
+  ❌ llm-maker MCP: missing imports: mcp.server
+  ✅ .vscode/mcp.json: 3 servers configured
+
+✅ local.settings.json: 14 env vars configured
+
+─────────────────────────────────────────────────────────────────
+  ❌ Summary: 7/11 OK  2 warnings  2 failures
+═════════════════════════════════════════════════════════════════
+
+
+ These are optional — start them as needed
+  ⚠️  Azure Functions: not running on :7071
+  ✅ Aria Character: listening on :8080
+
+⚠️  Azure Functions Core Tools: func not found — use local_dev_adapter.py as fallback
+
+❌ MCP servers
+  ❌ quantum-ai MCP: missing imports: qiskit, mcp.server
+  ❌ llm-maker MCP: missing imports: mcp.server
+  ✅ .vscode/mcp.json: 3 servers configured
+
+✅ local.settings.json: 14 env vars configured
+
+─────────────────────────────────────────────────────────────────
+  ❌ Summary: 7/11 OK  2 warnings  2 failures
+═════════════════════════════════════════════════════════════════
+
+
+ These are optional — start them as needed
+  ⚠️  Azure Functions: not running on :7071
+  ✅ Aria Character: listening on :8080
+
+⚠️  Azure Functions Core Tools: func not found — use local_dev_adapter.py as fallback
+
+❌ MCP servers
+  ❌ quantum-ai MCP: missing imports: qiskit, mcp.server
+  ❌ llm-maker MCP: missing imports: mcp.server
+  ✅ .vscode/mcp.json: 3 servers configured
+
+✅ local.settings.json: 14 env vars configured
+
+─────────────────────────────────────────────────────────────────
+  ❌ Summary: 7/11 OK  2 warnings  2 failures
+═════════════════════════════════════════════════════════════════
+
+
+ These are optional — start them as needed
+  ⚠️  Azure Functions: not running on :7071
+  ✅ Aria Character: listening on :8080
+
+⚠️  Azure Functions Core Tools: func not found — use local_dev_adapter.py as fallback
+
+❌ MCP servers
+  ❌ quantum-ai MCP: missing imports: qiskit, mcp.server
+  ❌ llm-maker MCP: missing imports: mcp.server
+  ✅ .vscode/mcp.json: 3 servers configured
+
+✅ local.settings.json: 14 env vars configured
+
+─────────────────────────────────────────────────────────────────
+  ❌ Summary: 7/11 OK  2 warnings  2 failures
+═════════════════════════════════════════════════════════════════
+
+
+ These are optional — start them as needed
+  ⚠️  Azure Functions: not running on :7071
+  ✅ Aria Character: listening on :8080
+
+⚠️  Azure Functions Core Tools: func not found — use local_dev_adapter.py as fallback
+
+❌ MCP servers
+  ❌ quantum-ai MCP: missing imports: qiskit, mcp.server
+  ❌ llm-maker MCP: missing imports: mcp.server
+  ✅ .vscode/mcp.json: 3 servers configured
+
+✅ local.settings.json: 14 env vars configured
+
+─────────────────────────────────────────────────────────────────
+  ❌ Summary: 7/11 OK  2 warnings  2 failures
+═════════════════════════════════════════════════════════════════
+
+
+ These are optional — start them as needed
+  ⚠️  Azure Functions: not running on :7071
+  ✅ Aria Character: listening on :8080
+
+⚠️  Azure Functions Core Tools: func not found — use local_dev_adapter.py as fallback
+
+❌ MCP servers
+  ❌ quantum-ai MCP: missing imports: qiskit, mcp.server
+  ❌ llm-maker MCP: missing imports: mcp.server
+  ✅ .vscode/mcp.json: 3 servers configured
+
+✅ local.settings.json: 14 env vars configured
+
+─────────────────────────────────────────────────────────────────
+  ❌ Summary: 7/11 OK  2 warnings  2 failures
+═════════════════════════════════════════════════════════════════
+
+
+ These are optional — start them as needed
+  ⚠️  Azure Functions: not running on :7071
+  ✅ Aria Character: listening on :8080
+
+⚠️  Azure Functions Core Tools: func not found — use local_dev_adapter.py as fallback
+
+❌ MCP servers
+  ❌ quantum-ai MCP: missing imports: qiskit, mcp.server
+  ❌ llm-maker MCP: missing imports: mcp.server
+  ✅ .vscode/mcp.json: 3 servers configured
+
+✅ local.settings.json: 14 env vars configured
+
+─────────────────────────────────────────────────────────────────
+  ❌ Summary: 7/11 OK  2 warnings  2 failures
+═════════════════════════════════════════════════════════════════
+
+
+ These are optional — start them as needed
+  ⚠️  Azure Functions: not running on :7071
+  ✅ Aria Character: listening on :8080
+
+⚠️  Azure Functions Core Tools: func not found — use local_dev_adapter.py as fallback
+
+❌ MCP servers
+  ❌ quantum-ai MCP: missing imports: qiskit, mcp.server
+  ❌ llm-maker MCP: missing imports: mcp.server
+  ✅ .vscode/mcp.json: 3 servers configured
+
+✅ local.settings.json: 14 env vars configured
+
+─────────────────────────────────────────────────────────────────
+  ❌ Summary: 7/11 OK  2 warnings  2 failures
+═════════════════════════════════════════════════════════════════
+
+
+ These are optional — start them as needed
+  ⚠️  Azure Functions: not running on :7071
+  ✅ Aria Character: listening on :8080
+
+⚠️  Azure Functions Core Tools: func not found — use local_dev_adapter.py as fallback
+
+❌ MCP servers
+  ❌ quantum-ai MCP: missing imports: qiskit, mcp.server
+  ❌ llm-maker MCP: missing imports: mcp.server
+  ✅ .vscode/mcp.json: 3 servers configured
+
+✅ local.settings.json: 14 env vars configured
+
+─────────────────────────────────────────────────────────────────
+  ❌ Summary: 7/11 OK  2 warnings  2 failures
+═════════════════════════════════════════════════════════════════
+
+
+ These are optional — start them as needed
+  ⚠️  Azure Functions: not running on :7071
+  ✅ Aria Character: listening on :8080
+
+⚠️  Azure Functions Core Tools: func not found — use local_dev_adapter.py as fallback
+
+❌ MCP servers
+  ❌ quantum-ai MCP: missing imports: qiskit, mcp.server
+  ❌ llm-maker MCP: missing imports: mcp.server
+  ✅ .vscode/mcp.json: 3 servers configured
+
+✅ local.settings.json: 14 env vars configured
+
+─────────────────────────────────────────────────────────────────
+  ❌ Summary: 7/11 OK  2 warnings  2 failures
+═════════════════════════════════════════════════════════════════
+
+
+ These are optional — start them as needed
+  ⚠️  Azure Functions: not running on :7071
+  ✅ Aria Character: listening on :8080
+
+⚠️  Azure Functions Core Tools: func not found — use local_dev_adapter.py as fallback
+
+❌ MCP servers
+  ❌ quantum-ai MCP: missing imports: qiskit, mcp.server
+  ❌ llm-maker MCP: missing imports: mcp.server
+  ✅ .vscode/mcp.json: 3 servers configured
+
+✅ local.settings.json: 14 env vars configured
+
+─────────────────────────────────────────────────────────────────
+  ❌ Summary: 7/11 OK  2 warnings  2 failures
+═════════════════════════════════════════════════════════════════
+
+
+ These are optional — start them as needed
+  ⚠️  Azure Functions: not running on :7071
+  ✅ Aria Character: listening on :8080
+
+⚠️  Azure Functions Core Tools: func not found — use local_dev_adapter.py as fallback
+
+❌ MCP servers
+  ❌ quantum-ai MCP: missing imports: qiskit, mcp.server
+  ❌ llm-maker MCP: missing imports: mcp.server
+  ✅ .vscode/mcp.json: 3 servers configured
+
+✅ local.settings.json: 14 env vars configured
+
+─────────────────────────────────────────────────────────────────
+  ❌ Summary: 7/11 OK  2 warnings  2 failures
+═════════════════════════════════════════════════════════════════
+
+
+ These are optional — start them as needed
+  ⚠️  Azure Functions: not running on :7071
+  ✅ Aria Character: listening on :8080
+
+⚠️  Azure Functions Core Tools: func not found — use local_dev_adapter.py as fallback
+
+❌ MCP servers
+  ❌ quantum-ai MCP: missing imports: qiskit, mcp.server
+  ❌ llm-maker MCP: missing imports: mcp.server
+  ✅ .vscode/mcp.json: 3 servers configured
+
+✅ local.settings.json: 14 env vars configured
+
+─────────────────────────────────────────────────────────────────
+  ❌ Summary: 7/11 OK  2 warnings  2 failures
+═════════════════════════════════════════════════════════════════
+
+
+ These are optional — start them as needed
+  ⚠️  Azure Functions: not running on :7071
+  ✅ Aria Character: listening on :8080
+
+⚠️  Azure Functions Core Tools: func not found — use local_dev_adapter.py as fallback
+
+❌ MCP servers
+  ❌ quantum-ai MCP: missing imports: qiskit, mcp.server
+  ❌ llm-maker MCP: missing imports: mcp.server
+  ✅ .vscode/mcp.json: 3 servers configured
+
+✅ local.settings.json: 14 env vars configured
+
+─────────────────────────────────────────────────────────────────
+  ❌ Summary: 7/11 OK  2 warnings  2 failures
+═════════════════════════════════════════════════════════════════
+
+
+ These are optional — start them as needed
+  ⚠️  Azure Functions: not running on :7071
+  ✅ Aria Character: listening on :8080
+
+⚠️  Azure Functions Core Tools: func not found — use local_dev_adapter.py as fallback
+
+❌ MCP servers
+  ❌ quantum-ai MCP: missing imports: qiskit, mcp.server
+  ❌ llm-maker MCP: missing imports: mcp.server
+  ✅ .vscode/mcp.json: 3 servers configured
+
+✅ local.settings.json: 14 env vars configured
+
+─────────────────────────────────────────────────────────────────
+  ❌ Summary: 7/11 OK  2 warnings  2 failures
+═════════════════════════════════════════════════════════════════
+
+
+ These are optional — start them as needed
+  ⚠️  Azure Functions: not running on :7071
+  ✅ Aria Character: listening on :8080
+
+⚠️  Azure Functions Core Tools: func not found — use local_dev_adapter.py as fallback
+
+❌ MCP servers
+  ❌ quantum-ai MCP: missing imports: qiskit, mcp.server
+  ❌ llm-maker MCP: missing imports: mcp.server
+  ✅ .vscode/mcp.json: 3 servers configured
+
+✅ local.settings.json: 14 env vars configured
+
+─────────────────────────────────────────────────────────────────
+  ❌ Summary: 7/11 OK  2 warnings  2 failures
+═════════════════════════════════════════════════════════════════
+
+
+ These are optional — start them as needed
+  ⚠️  Azure Functions: not running on :7071
+  ✅ Aria Character: listening on :8080
+
+⚠️  Azure Functions Core Tools: func not found — use local_dev_adapter.py as fallback
+
+❌ MCP servers
+  ❌ quantum-ai MCP: missing imports: qiskit, mcp.server
+  ❌ llm-maker MCP: missing imports: mcp.server
+  ✅ .vscode/mcp.json: 3 servers configured
+
+✅ local.settings.json: 14 env vars configured
+
+─────────────────────────────────────────────────────────────────
+  ❌ Summary: 7/11 OK  2 warnings  2 failures
+═════════════════════════════════════════════════════════════════
+
+
+ These are optional — start them as needed
+  ⚠️  Azure Functions: not running on :7071
+  ✅ Aria Character: listening on :8080
+
+⚠️  Azure Functions Core Tools: func not found — use local_dev_adapter.py as fallback
+
+❌ MCP servers
+  ❌ quantum-ai MCP: missing imports: qiskit, mcp.server
+  ❌ llm-maker MCP: missing imports: mcp.server
+  ✅ .vscode/mcp.json: 3 servers configured
+
+✅ local.settings.json: 14 env vars configured
+
+─────────────────────────────────────────────────────────────────
+  ❌ Summary: 7/11 OK  2 warnings  2 failures
+═════════════════════════════════════════════════════════════════
+
+
+ These are optional — start them as needed
+  ⚠️  Azure Functions: not running on :7071
+  ✅ Aria Character: listening on :8080
+
+⚠️  Azure Functions Core Tools: func not found — use local_dev_adapter.py as fallback
+
+❌ MCP servers
+  ❌ quantum-ai MCP: missing imports: qiskit, mcp.server
+  ❌ llm-maker MCP: missing imports: mcp.server
+  ✅ .vscode/mcp.json: 3 servers configured
+
+✅ local.settings.json: 14 env vars configured
+
+─────────────────────────────────────────────────────────────────
+  ❌ Summary: 7/11 OK  2 warnings  2 failures
+═════════════════════════════════════════════════════════════════
+
+
+ These are optional — start them as needed
+  ⚠️  Azure Functions: not running on :7071
+  ✅ Aria Character: listening on :8080
+
+⚠️  Azure Functions Core Tools: func not found — use local_dev_adapter.py as fallback
+
+❌ MCP servers
+  ❌ quantum-ai MCP: missing imports: qiskit, mcp.server
+  ❌ llm-maker MCP: missing imports: mcp.server
+  ✅ .vscode/mcp.json: 3 servers configured
+
+✅ local.settings.json: 14 env vars configured
+
+─────────────────────────────────────────────────────────────────
+  ❌ Summary: 7/11 OK  2 warnings  2 failures
+═════════════════════════════════════════════════════════════════
+
+

@@ -1,0 +1,399 @@
+nohup: ignoring input
+[Cycle 1] QuantumLLM training: quantum
+ults.json
+2026-03-29 07:57:29,067 - __main__ - INFO - 
+Training Summary:
+2026-03-29 07:57:29,067 - __main__ - INFO -   Status: success
+2026-03-29 07:57:29,067 - __main__ - INFO -   Epochs: 3
+2026-03-29 07:57:29,067 - __main__ - INFO -   Fina[Cycle 2] Quantum LLM training...
+(no output)
+ERR: 'circular', 'dropout': 0.1, 'use_quantum_attention': True, 'use_quantum_ffn': True, 'tie_embeddings': True}
+2026-03-29 08:23:54,488 - __main__ - ERROR - --dataset is required for active training mode
+
+[Cycle 2] Sleeping 1800s...
+[Cycle 3] Quantum LLM training...
+(no output)
+ERR: 'circular', 'dropout': 0.1, 'use_quantum_attention': True, 'use_quantum_ffn': True, 'tie_embeddings': True}
+2026-03-29 08:56:58,464 - __main__ - ERROR - --dataset is required for active training mode
+
+[Cycle 3] Sleeping 1800s...
+[Cycle 4] Quantum LLM training...
+(no output)
+ERR: 'circular', 'dropout': 0.1, 'use_quantum_attention': True, 'use_quantum_ffn': True, 'tie_embeddings': True}
+2026-03-29 09:30:21,516 - __main__ - ERROR - --dataset is required for active training mode
+
+[Cycle 4] Sleeping 1800s...
+[Cycle 5] Quantum LLM training...
+(no output)
+ERR: 'circular', 'dropout': 0.1, 'use_quantum_attention': True, 'use_quantum_ffn': True, 'tie_embeddings': True}
+2026-03-29 10:03:27,417 - __main__ - ERROR - --dataset is required for active training mode
+
+[Cycle 5] Sleeping 1800s...
+[Cycle 6] Quantum LLM training...
+(no output)
+ERR: 'circular', 'dropout': 0.1, 'use_quantum_attention': True, 'use_quantum_ffn': True, 'tie_embeddings': True}
+2026-03-29 10:36:33,849 - __main__ - ERROR - --dataset is required for active training mode
+
+[Cycle 6] Sleeping 1800s...
+[Cycle 7] Quantum LLM training...
+(no output)
+ERR: 'circular', 'dropout': 0.1, 'use_quantum_attention': True, 'use_quantum_ffn': True, 'tie_embeddings': True}
+2026-03-29 11:09:36,851 - __main__ - ERROR - --dataset is required for active training mode
+
+[Cycle 7] Sleeping 1800s...
+[Cycle 8] Quantum LLM training...
+(no output)
+ERR: 'circular', 'dropout': 0.1, 'use_quantum_attention': True, 'use_quantum_ffn': True, 'tie_embeddings': True}
+2026-03-29 11:42:42,697 - __main__ - ERROR - --dataset is required for active training mode
+
+[Cycle 8] Sleeping 1800s...
+[Cycle 9] Quantum LLM training...
+(no output)
+ERR: 'circular', 'dropout': 0.1, 'use_quantum_attention': True, 'use_quantum_ffn': True, 'tie_embeddings': True}
+2026-03-29 12:15:31,808 - __main__ - ERROR - --dataset is required for active training mode
+
+[Cycle 9] Sleeping 1800s...
+[Cycle 10] Quantum LLM training...
+(no output)
+ERR: 'circular', 'dropout': 0.1, 'use_quantum_attention': True, 'use_quantum_ffn': True, 'tie_embeddings': True}
+2026-03-29 12:48:04,643 - __main__ - ERROR - --dataset is required for active training mode
+
+[Cycle 10] Sleeping 1800s...
+[Cycle 11] Quantum LLM training...
+(no output)
+ERR: 'circular', 'dropout': 0.1, 'use_quantum_attention': True, 'use_quantum_ffn': True, 'tie_embeddings': True}
+2026-03-29 13:20:34,288 - __main__ - ERROR - --dataset is required for active training mode
+
+[Cycle 11] Sleeping 1800s...
+[Cycle 12] Quantum LLM training...
+(no output)
+ERR: 'circular', 'dropout': 0.1, 'use_quantum_attention': True, 'use_quantum_ffn': True, 'tie_embeddings': True}
+2026-03-29 13:53:17,131 - __main__ - ERROR - --dataset is required for active training mode
+
+[Cycle 12] Sleeping 1800s...
+[Cycle 13] Quantum LLM training...
+(no output)
+ERR: 'circular', 'dropout': 0.1, 'use_quantum_attention': True, 'use_quantum_ffn': True, 'tie_embeddings': True}
+2026-03-29 14:25:46,132 - __main__ - ERROR - --dataset is required for active training mode
+
+[Cycle 13] Sleeping 1800s...
+hon_help
+ults.json
+2026-03-29 09:04:58,745 - __main__ - INFO - 
+Training Summary:
+2026-03-29 09:04:58,745 - __main__ - INFO -   Status: success
+2026-03-29 09:04:58,749 - __main__ - INFO -   Epochs: 3
+2026-03-29 09:04:58,749 - __main__ - INFO -   Final Loss: 0.6039
+2026-03-29 09:04:58,749 - __main__ - INFO -   Best Loss: 0.6038502369341551
+2026-03-29 09:04:58,749 - __main__ - INFO -   Cir[Cycle 4] Training on quantum...
+ults.json
+2026-03-29 [Cycle 4] QuantumLLM training: quantum
+ults.json
+2026-03-29 09:38:30,798 - __main__ - INFO - 
+Training Summary:
+2026-03-29 09:38:30,798 - __main__ - INFO -   Status: success
+2026-03-29 09:38:30,798 - __main__ - INFO -   Epochs: 3
+2026-03-29 09:38:30,798 - __main__ - INFO -   Final Loss: 0.6919
+2026-03-29 09:38:30,798 - __main__ - INFO -   Best Loss: 0.6918979804144669
+2026-03-29 09:38:30,798 - __main__ - INFO -   Circuit Executions: 3
+
+[Cycle 4] QuantumLLM training: aria_commands
+ults.json
+2026-03-29 09:38:45,381 - __main__ - INFO - 
+Training Summary:
+2026-03-29 09:38:45,381 - __main__ - INFO -   Status: success
+2026-03-29 09:38:45,381 - __main__ - INFO -   Epochs: 3
+2026-03-29 09:38:45,381 - __main__ - INFO -   Final Loss: 0.6081
+2026-03-29 09:38:45,381 - __main__ - INFO -   Best Loss: 0.6080564665291026
+2026-03-29 09:38:45,381 - __main__ - INFO -   Circuit Executions: 3
+
+[Cycle 4] QuantumLLM training: python_help
+ults.json
+2026-03-29 09:39:03,465 - __main__ - INFO - 
+Training Summary:
+2026-03-29 09:39:03,465 - __main__ - INFO -   Status: success
+2026-03-29 09:39:03,465 - __main__ - INFO -   Epochs: 3
+2026-03-29 09:39:03,465 - __main__ - INFO -   Final Loss: 0.7118
+2026-03-29 09:39:03,466 - __main__ - INFO -   Best Loss: 0.7118428201145035
+2026-03-29 09:39:03,466 - __mai[Cycle 5] Training on quantum...
+ults.json
+2026-03-29 10:08:05,936 - __m[Cycle 5] QuantumLLM training: quantum
+ults.json
+2026-03-29 10:11:56,963 - __main__ - INFO - 
+Training Summary:
+2026-03-29 10:11:56,963 - __main__ - INFO -   Status: success
+2026-03-29 10:11:56,963 - __main__ - INFO -   Epochs: 3
+2026-03-29 10:11:56,963 - __main__ - INFO -   Final Loss: 0.5971
+2026-03-29 10:11:56,963 - __main__ - INFO -   Best Loss: 0.5971068397032105
+2026-03-29 10:11:56,963 - __main__ - INFO -   Circuit Executions: 3
+
+[Cycle 5] QuantumLLM training: aria_commands
+ults.json
+2026-03-29 10:12:17,813 - __main__ - INFO - 
+Training Summary:
+2026-03-29 10:12:17,813 - __main__ - INFO -   Status: success
+2026-03-29 10:12:17,813 - __main__ - INFO -   Epochs: 3
+2026-03-29 10:12:17,813 - __main__ - INFO -   Final Loss: 0.7301
+2026-03-29 10:12:17,813 - __main__ - INFO -   Best Loss: 0.7301333420427794
+2026-03-29 10:12:17,813 - __main__ - INFO -   Circuit Executions: 3
+
+[Cycle 5] QuantumLLM training: python_help
+ults.json
+2026-03-29 10:12:43,611 - __main__ - INFO - 
+Training Summary:
+2026-03-29 10:12:43,611 - __main__ - INFO -   Status: success
+2026-03-29 10:12:43,611 - __main__ - INFO -   Epochs: 3
+2026-03-29 10:12:43,611 - __main__ - INFO -   Final Loss: 0.7404
+2026-03-29 10:12:43,611 - __main__ - INFO -   Best Loss: 0.7404216435292986
+2026-03-29 10[Cycle 6] Training on quantum...
+sults.json
+2026-03-29 10:41:58,046 - __main__ - INFO - 
+T[Cycle 6] QuantumLLM training: quantum
+ults.json
+2026-03-29 10:45:58,952 - __main__ - INFO - 
+Training Summary:
+2026-03-29 10:45:58,953 - __main__ - INFO -   Status: success
+2026-03-29 10:45:58,953 - __main__ - INFO -   Epochs: 3
+2026-03-29 10:45:58,953 - __main__ - INFO -   Final Loss: 0.7249
+2026-03-29 10:45:58,953 - __main__ - INFO -   Best Loss: 0.7249237975923563
+2026-03-29 10:45:58,953 - __main__ - INFO -   Circuit Executions: 3
+
+[Cycle 6] QuantumLLM training: aria_commands
+ults.json
+2026-03-29 10:46:15,575 - __main__ - INFO - 
+Training Summary:
+2026-03-29 10:46:15,588 - __main__ - INFO -   Status: success
+2026-03-29 10:46:15,588 - __main__ - INFO -   Epochs: 3
+2026-03-29 10:46:15,588 - __main__ - INFO -   Final Loss: 0.7489
+2026-03-29 10:46:15,588 - __main__ - INFO -   Best Loss: 0.7489110616540562
+2026-03-29 10:46:15,588 - __main__ - INFO -   Circuit Executions: 3
+
+[Cycle 6] QuantumLLM training: python_help
+ults.json
+2026-03-29 10:46:30,354 - __main__ - INFO - 
+Training Summary:
+2026-03-29 10:46:30,354 - __main__ - INFO -   Status: success
+2026-03-29 10:46:30,354 - __main__ - INFO -   Epochs: 3
+2026-03-29 10:46:30,354 - __main__ - INFO -   Final Loss: 0.6394
+2026-03-29 10:46:30,354 - __main__ - INFO -   Best Loss: 0.639355511323[Cycle 7] Training on quantum...
+ults.json
+2026-03-29 11:15:54,777 - __main__ - INFO - 
+Training Summary:
+20[Cycle 7] QuantumLLM training: quantum
+ults.json
+2026-03-29 11:19:09,353 - __main__ - INFO - 
+Training Summary:
+2026-03-29 11:19:09,353 - __main__ - INFO -   Status: success
+2026-03-29 11:19:09,353 - __main__ - INFO -   Epochs: 3
+2026-03-29 11:19:09,353 - __main__ - INFO -   Final Loss: 0.6644
+2026-03-29 11:19:09,353 - __main__ - INFO -   Best Loss: 0.6643992861148998
+2026-03-29 11:19:09,353 - __main__ - INFO -   Circuit Executions: 3
+
+[Cycle 7] QuantumLLM training: aria_commands
+sults.json
+2026-03-29 11:19:24,394 - __main__ - INFO - 
+Training Summary:
+2026-03-29 11:19:24,394 - __main__ - INFO -   Status: success
+2026-03-29 11:19:24,394 - __main__ - INFO -   Epochs: 3
+2026-03-29 11:19:24,394 - __main__ - INFO -   Final Loss: 0.7458
+2026-03-29 11:19:24,394 - __main__ - INFO -   Best Loss: 0.745785608989133
+2026-03-29 11:19:24,394 - __main__ - INFO -   Circuit Executions: 3
+
+[Cycle 7] QuantumLLM training: python_help
+ults.json
+2026-03-29 11:19:47,831 - __main__ - INFO - 
+Training Summary:
+2026-03-29 11:19:47,831 - __main__ - INFO -   Status: success
+2026-03-29 11:19:47,831 - __main__ - INFO -   Epochs: 3
+2026-03-29 11:19:47,831 - __main__ - INFO -   Final Loss: 0.5950
+2026-03-29 11:19:47,832 - __main__ - INFO -   Best Lo[Cycle 8] Training on quantum...
+ults.json
+2026-03-29 11:49:19,177 - __main__ - INFO - 
+Training Summary:
+2026-03-29 11:49:19,[Cycle 8] QuantumLLM training: quantum
+ults.json
+2026-03-29 11:52:33,087 - __main__ - INFO - 
+Training Summary:
+2026-03-29 11:52:33,088 - __main__ - INFO -   Status: success
+2026-03-29 11:52:33,088 - __main__ - INFO -   Epochs: 3
+2026-03-29 11:52:33,088 - __main__ - INFO -   Final Loss: 0.7071
+2026-03-29 11:52:33,088 - __main__ - INFO -   Best Loss: 0.7071313769442252
+2026-03-29 11:52:33,088 - __main__ - INFO -   Circuit Executions: 3
+
+[Cycle 8] QuantumLLM training: aria_commands
+ults.json
+2026-03-29 11:52:56,138 - __main__ - INFO - 
+Training Summary:
+2026-03-29 11:52:56,139 - __main__ - INFO -   Status: success
+2026-03-29 11:52:56,139 - __main__ - INFO -   Epochs: 3
+2026-03-29 11:52:56,139 - __main__ - INFO -   Final Loss: 0.6577
+2026-03-29 11:52:56,139 - __main__ - INFO -   Best Loss: 0.6577414040462738
+2026-03-29 11:52:56,139 - __main__ - INFO -   Circuit Executions: 3
+
+[Cycle 8] QuantumLLM training: python_help
+ults.json
+2026-03-29 11:53:25,932 - __main__ - INFO - 
+Training Summary:
+2026-03-29 11:53:25,932 - __main__ - INFO -   Status: success
+2026-03-29 11:53:25,932 - __main__ - INFO -   Epochs: 3
+2026-03-29 11:53:25,932 - __main__ - INFO -   Final Loss: 0.7067
+2026-03-29 11:53:25,932 - __main__ [Cycle 9] Training on quantum...
+ults.json
+2026-03-29 12:22:40,392 - __main__ - INFO - 
+Training Summary:
+2026-03-29 12:22:40,392 - __main__ - I[Cycle 9] QuantumLLM training: quantum
+sults.json
+2026-03-29 12:26:10,142 - __main__ - INFO - 
+Training Summary:
+2026-03-29 12:26:10,142 - __main__ - INFO -   Status: success
+2026-03-29 12:26:10,142 - __main__ - INFO -   Epochs: 3
+2026-03-29 12:26:10,142 - __main__ - INFO -   Final Loss: 0.7767
+2026-03-29 12:26:10,142 - __main__ - INFO -   Best Loss: 0.776662558211133
+2026-03-29 12:26:10,142 - __main__ - INFO -   Circuit Executions: 3
+
+[Cycle 9] QuantumLLM training: aria_commands
+ults.json
+2026-03-29 12:26:25,407 - __main__ - INFO - 
+Training Summary:
+2026-03-29 12:26:25,407 - __main__ - INFO -   Status: success
+2026-03-29 12:26:25,407 - __main__ - INFO -   Epochs: 3
+2026-03-29 12:26:25,407 - __main__ - INFO -   Final Loss: 0.6889
+2026-03-29 12:26:25,407 - __main__ - INFO -   Best Loss: 0.6889404290529187
+2026-03-29 12:26:25,407 - __main__ - INFO -   Circuit Executions: 3
+
+[Cycle 9] QuantumLLM training: python_help
+ults.json
+2026-03-29 12:26:36,949 - __main__ - INFO - 
+Training Summary:
+2026-03-29 12:26:36,949 - __main__ - INFO -   Status: success
+2026-03-29 12:26:36,949 - __main__ - INFO -   Epochs: 3
+2026-03-29 12:26:36,949 - __main__ - INFO -   Final Loss: 0.6859
+2026-03-29 12:26:[Cycle 10] Training on quantum...
+ults.json
+2026-03-29 12:55:42,707 - __main__ - INFO - 
+Training Summary:
+2026-03-29 12:55:42,707 - __main__ - INFO -   Status: s[Cycle 10] QuantumLLM training: quantum
+ults.json
+2026-03-29 12:59:12,343 - __main__ - INFO - 
+Training Summary:
+2026-03-29 12:59:12,343 - __main__ - INFO -   Status: success
+2026-03-29 12:59:12,343 - __main__ - INFO -   Epochs: 3
+2026-03-29 12:59:12,343 - __main__ - INFO -   Final Loss: 0.6272
+2026-03-29 12:59:12,343 - __main__ - INFO -   Best Loss: 0.6272138030495801
+2026-03-29 12:59:12,343 - __main__ - INFO -   Circuit Executions: 3
+
+[Cycle 10] QuantumLLM training: aria_commands
+ults.json
+2026-03-29 12:59:24,780 - __main__ - INFO - 
+Training Summary:
+2026-03-29 12:59:24,781 - __main__ - INFO -   Status: success
+2026-03-29 12:59:24,781 - __main__ - INFO -   Epochs: 3
+2026-03-29 12:59:24,781 - __main__ - INFO -   Final Loss: 0.7458
+2026-03-29 12:59:24,781 - __main__ - INFO -   Best Loss: 0.7458341423516632
+2026-03-29 12:59:24,781 - __main__ - INFO -   Circuit Executions: 3
+
+[Cycle 10] QuantumLLM training: python_help
+ults.json
+2026-03-29 12:59:41,848 - __main__ - INFO - 
+Training Summary:
+2026-03-29 12:59:41,848 - __main__ - INFO -   Status: success
+2026-03-29 12:59:41,848 - __main__ - INFO -   Epochs: 3
+2026-03-29 12:59:41,848 - __main__ - INFO -   Final Loss: 0.6425
+[Cycle 11] Training on quantum...
+ults.json
+2026-03-29 13:28:46,775 - __main__ - INFO - 
+Training Summary:
+2026-03-29 13:28:46,775 - __main__ - INFO -   Status: success
+2026-03-29 [Cycle 11] QuantumLLM training: quantum
+ults.json
+2026-03-29 13:32:16,229 - __main__ - INFO - 
+Training Summary:
+2026-03-29 13:32:16,229 - __main__ - INFO -   Status: success
+2026-03-29 13:32:16,229 - __main__ - INFO -   Epochs: 3
+2026-03-29 13:32:16,229 - __main__ - INFO -   Final Loss: 0.7425
+2026-03-29 13:32:16,229 - __main__ - INFO -   Best Loss: 0.7424620927200691
+2026-03-29 13:32:16,229 - __main__ - INFO -   Circuit Executions: 3
+
+[Cycle 11] QuantumLLM training: aria_commands
+ults.json
+2026-03-29 13:32:31,425 - __main__ - INFO - 
+Training Summary:
+2026-03-29 13:32:31,425 - __main__ - INFO -   Status: success
+2026-03-29 13:32:31,425 - __main__ - INFO -   Epochs: 3
+2026-03-29 13:32:31,425 - __main__ - INFO -   Final Loss: 0.5994
+2026-03-29 13:32:31,425 - __main__ - INFO -   Best Loss: 0.5993933088479854
+2026-03-29 13:32:31,425 - __main__ - INFO -   Circuit Executions: 3
+
+[Cycle 11] QuantumLLM training: python_help
+ults.json
+2026-03-29 13:32:41,827 - __main__ - INFO - 
+Training Summary:
+2026-03-29 13:32:41,828 - __main__ - INFO -   Status: success
+2026-03-29 13:32:41,828 - __main__ - INFO -   Epochs: 3
+2026-03-29 13:32:41,829 - __main__ - INFO -   F[Cycle 12] Training on quantum...
+sults.json
+2026-03-29 14:02:03,016 - __main__ - INFO - 
+Training Summary:
+2026-03-29 14:02:03,016 - __main__ - INFO -   Status: success
+2026-03-29 14:02:03,016 - __[Cycle 12] QuantumLLM training: quantum
+ults.json
+2026-03-29 14:05:16,331 - __main__ - INFO - 
+Training Summary:
+2026-03-29 14:05:16,331 - __main__ - INFO -   Status: success
+2026-03-29 14:05:16,331 - __main__ - INFO -   Epochs: 3
+2026-03-29 14:05:16,331 - __main__ - INFO -   Final Loss: 0.6689
+2026-03-29 14:05:16,331 - __main__ - INFO -   Best Loss: 0.6689392793446733
+2026-03-29 14:05:16,333 - __main__ - INFO -   Circuit Executions: 3
+
+[Cycle 12] QuantumLLM training: aria_commands
+ults.json
+2026-03-29 14:05:27,389 - __main__ - INFO - 
+Training Summary:
+2026-03-29 14:05:27,389 - __main__ - INFO -   Status: success
+2026-03-29 14:05:27,389 - __main__ - INFO -   Epochs: 3
+2026-03-29 14:05:27,389 - __main__ - INFO -   Final Loss: 0.7801
+2026-03-29 14:05:27,389 - __main__ - INFO -   Best Loss: 0.7801281539088046
+2026-03-29 14:05:27,389 - __main__ - INFO -   Circuit Executions: 3
+
+[Cycle 12] QuantumLLM training: python_help
+ults.json
+2026-03-29 14:05:39,934 - __main__ - INFO - 
+Training Summary:
+2026-03-29 14:05:39,934 - __main__ - INFO -   Status: success
+2026-03-29 14:05:39,934 - __main__ - INFO -   Epochs: 3
+2026-03-29 14:05:39,934 - __m[Cycle 13] Training on quantum...
+ults.json
+2026-03-29 14:34:53,468 - __main__ - INFO - 
+Training Summary:
+2026-03-29 14:34:53,468 - __main__ - INFO -   Status: success
+2026-03-29 14:34:53,468 - __main__ - INFO -   E[Cycle 13] QuantumLLM training: quantum
+sults.json
+2026-03-29 14:38:14,354 - __main__ - INFO - 
+Training Summary:
+2026-03-29 14:38:14,354 - __main__ - INFO -   Status: success
+2026-03-29 14:38:14,354 - __main__ - INFO -   Epochs: 3
+2026-03-29 14:38:14,354 - __main__ - INFO -   Final Loss: 0.7005
+2026-03-29 14:38:14,355 - __main__ - INFO -   Best Loss: 0.700468291529283
+2026-03-29 14:38:14,355 - __main__ - INFO -   Circuit Executions: 3
+
+[Cycle 13] QuantumLLM training: aria_commands
+ults.json
+2026-03-29 14:38:24,377 - __main__ - INFO - 
+Training Summary:
+2026-03-29 14:38:24,378 - __main__ - INFO -   Status: success
+2026-03-29 14:38:24,378 - __main__ - INFO -   Epochs: 3
+2026-03-29 14:38:24,378 - __main__ - INFO -   Final Loss: 0.7817
+2026-03-29 14:38:24,378 - __main__ - INFO -   Best Loss: 0.7817134397911697
+2026-03-29 14:38:24,378 - __main__ - INFO -   Circuit Executions: 3
+
+[Cycle 13] QuantumLLM training: python_help
+ults.json
+2026-03-29 14:38:35,048 - __main__ - INFO - 
+Training Summary:
+2026-03-29 14:38:35,048 - __main__ - INFO -   Status: success
+2026-03-29 14:38:35,048 - __main__ - INFO -   Epochs: 3
+2026-03-29 14:38:35,048 - __main__ - INFO -   Final Loss: 0.7543
+2026-03-29 14:38:35,048 - __main__ - INFO -   Best Loss: 0.7543364953476782
+2026-03-29 14:38:35,048 - __main__ - INFO -   Circuit Executions: 3
+
+[Cycle 13] Done. Sleeping 1800s...

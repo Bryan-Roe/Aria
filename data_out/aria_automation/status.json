@@ -1,0 +1,33 @@
+{
+  "mode": "full",
+  "started": "2026-03-29T12:54:49.705007",
+  "uptime_seconds": 6223.529533,
+  "server_running": true,
+  "backend_running": false,
+  "training_active": false,
+  "last_health_check": "2026-03-29T14:38:33.234683",
+  "processes": [
+    {
+      "name": "aria_server",
+      "pid": 6442,
+      "command": "python server.py",
+      "started": "2026-03-29T12:54:49.728193",
+      "status": "running",
+      "port": 8080,
+      "health_url": "http://localhost:8080"
+    }
+  ],
+  "training_cycles": 0,
+  "errors": [
+    "Training cycle failed: /usr/local/bin/python3: can't open file '/workspaces/Aria/scripts/automate_aria_movement.py': [Errno 2] No such file or directory\n",
+    "Training cycle failed: /usr/local/bin/python3: can't open file '/workspaces/Aria/scripts/automate_aria_movement.py': [Errno 2] No such file or directory\n",
+    "Training cycle failed: /usr/local/bin/python3: can't open file '/workspaces/Aria/scripts/automate_aria_movement.py': [Errno 2] No such file or directory\n",
+    "Training cycle failed: /usr/local/bin/python3: can't open file '/workspaces/Aria/scripts/automate_aria_movement.py': [Errno 2] No such file or directory\n",
+    "Training cycle failed: /usr/local/bin/python3: can't open file '/workspaces/Aria/scripts/automate_aria_movement.py': [Errno 2] No such file or directory\n",
+    "Training cycle failed: /usr/local/bin/python3: can't open file '/workspaces/Aria/scripts/automate_aria_movement.py': [Errno 2] No such file or directory\n",
+    "Training cycle failed: /usr/local/bin/python3: can't open file '/workspaces/Aria/scripts/automate_aria_movement.py': [Errno 2] No such file or directory\n",
+    "Training cycle failed: /usr/local/bin/python3: can't open file '/workspaces/Aria/scripts/automate_aria_movement.py': [Errno 2] No such file or directory\n",
+    "Training cycle failed: /usr/local/bin/python3: can't open file '/workspaces/Aria/scripts/automate_aria_movement.py': [Errno 2] No such file or directory\n",
+    "Training cycle failed: /usr/local/bin/python3: can't open file '/workspaces/Aria/scripts/automate_aria_movement.py': [Errno 2] No such file or directory\n"
+  ]
+}

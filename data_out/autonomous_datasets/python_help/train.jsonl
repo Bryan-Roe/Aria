@@ -1,0 +1,20 @@
+{"messages": [{"role": "user", "content": "How do I read JSON from a file in Python?"}, {"role": "assistant", "content": "Use json.load() with an open file handle in a with-statement for safe IO."}]}
+{"messages": [{"role": "user", "content": "Why use type hints?"}, {"role": "assistant", "content": "Type hints improve readability and enable static analysis tools to catch bugs earlier."}]}
+{"messages": [{"role": "user", "content": "How can I avoid KeyError?"}, {"role": "assistant", "content": "Use dict.get(key, default) or check key existence with 'in' before access."}]}
+{"messages": [{"role": "user", "content": "How do I read JSON from a file in Python?"}, {"role": "assistant", "content": "Use json.load() with an open file handle in a with-statement for safe IO."}]}
+{"messages": [{"role": "user", "content": "Why use type hints?"}, {"role": "assistant", "content": "Type hints improve readability and enable static analysis tools to catch bugs earlier."}]}
+{"messages": [{"role": "user", "content": "How can I avoid KeyError?"}, {"role": "assistant", "content": "Use dict.get(key, default) or check key existence with 'in' before access."}]}
+{"messages": [{"role": "user", "content": "How do I read JSON from a file in Python?"}, {"role": "assistant", "content": "Use json.load() with an open file handle in a with-statement for safe IO."}]}
+{"messages": [{"role": "user", "content": "Why use type hints?"}, {"role": "assistant", "content": "Type hints improve readability and enable static analysis tools to catch bugs earlier."}]}
+{"messages": [{"role": "user", "content": "How can I avoid KeyError?"}, {"role": "assistant", "content": "Use dict.get(key, default) or check key existence with 'in' before access."}]}
+{"messages": [{"role": "user", "content": "How do I read JSON from a file in Python?"}, {"role": "assistant", "content": "Use json.load() with an open file handle in a with-statement for safe IO."}]}
+{"messages": [{"role": "user", "content": "Why use type hints?"}, {"role": "assistant", "content": "Type hints improve readability and enable static analysis tools to catch bugs earlier."}]}
+{"messages": [{"role": "user", "content": "How can I avoid KeyError?"}, {"role": "assistant", "content": "Use dict.get(key, default) or check key existence with 'in' before access."}]}
+{"messages": [{"role": "user", "content": "How do I read JSON from a file in Python?"}, {"role": "assistant", "content": "Use json.load() with an open file handle in a with-statement for safe IO."}]}
+{"messages": [{"role": "user", "content": "Why use type hints?"}, {"role": "assistant", "content": "Type hints improve readability and enable static analysis tools to catch bugs earlier."}]}
+{"messages": [{"role": "user", "content": "How can I avoid KeyError?"}, {"role": "assistant", "content": "Use dict.get(key, default) or check key existence with 'in' before access."}]}
+{"messages": [{"role": "user", "content": "How do I read JSON from a file in Python?"}, {"role": "assistant", "content": "Use json.load() with an open file handle in a with-statement for safe IO."}]}
+{"messages": [{"role": "user", "content": "Why use type hints?"}, {"role": "assistant", "content": "Type hints improve readability and enable static analysis tools to catch bugs earlier."}]}
+{"messages": [{"role": "user", "content": "How can I avoid KeyError?"}, {"role": "assistant", "content": "Use dict.get(key, default) or check key existence with 'in' before access."}]}
+{"messages": [{"role": "user", "content": "How do I read JSON from a file in Python?"}, {"role": "assistant", "content": "Use json.load() with an open file handle in a with-statement for safe IO."}]}
+{"messages": [{"role": "user", "content": "Why use type hints?"}, {"role": "assistant", "content": "Type hints improve readability and enable static analysis tools to catch bugs earlier."}]}

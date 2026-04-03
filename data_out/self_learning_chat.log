@@ -1,0 +1,5 @@
+nohup: ignoring input
+Traceback (most recent call last):
+  File "/workspaces/Aria/scripts/self_learning_chat.py", line 3, in <module>
+    from scripts.training.cli.self_learning_chat import main
+ModuleNotFoundError: No module named 'scripts'

@@ -1,0 +1,25 @@
+{
+  "status": "ok",
+  "started": "2026-03-17T15:41:19.119524+00:00",
+  "completed": "2026-03-17T15:41:19.149772+00:00",
+  "checks": {
+    "python": {
+      "status": "ok",
+      "python_version": "3.14.0",
+      "detail": "ok"
+    },
+    "requirements": {
+      "status": "ok",
+      "requirement_count": 26
+    },
+    "configs": {
+      "status": "ok",
+      "missing_configs": []
+    },
+    "scripts": {
+      "status": "ok",
+      "missing_scripts": []
+    }
+  },
+  "orchestrators": {}
+}

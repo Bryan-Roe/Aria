@@ -1,0 +1,28 @@
+{
+  "status": "success",
+  "epochs_completed": 3,
+  "final_loss": 0.7543364953476782,
+  "quantum_metrics": {
+    "circuit_executions": 3,
+    "optimization_steps": 3,
+    "quantum_available": true
+  },
+  "model_config": {
+    "vocab_size": 256,
+    "d_model": 64,
+    "n_heads": 4,
+    "n_transformer_layers": 2,
+    "n_qubits": 4,
+    "n_quantum_layers": 2,
+    "max_seq_len": 32,
+    "entanglement": "circular",
+    "dropout": 0.1,
+    "use_quantum_attention": true,
+    "use_quantum_ffn": true,
+    "tie_embeddings": true
+  },
+  "started_at": "2026-03-29T14:38:34.592696",
+  "completed_at": "2026-03-29T14:38:34.991354",
+  "best_loss": 0.7543364953476782,
+  "checkpoint_path": "data_out/quantum_llm_training/best_quantum_llm.pt"
+}

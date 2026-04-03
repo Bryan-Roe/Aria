@@ -1,0 +1,1711 @@
+nohup: ignoring input
+
+==============================================================================
+[repo_health_automation] cycle=1 started_at=2026-03-28T19:51:47.307722+00:00
+==============================================================================
+
+--> pre_commit_check: /usr/local/bin/python3 scripts/pre_commit_check.py
+[PASS] pre_commit_check rc=0 duration=263.36s
+
+--> integration_contract_gate: bash scripts/integration_contract_gate.sh --strict-endpoints
+[PASS] integration_contract_gate rc=0 duration=9.50s
+
+------------------------------------------------------------------------------
+[repo_health_automation] cycle=1 succeeded=True duration=272.86s
+------------------------------------------------------------------------------
+Sleeping 300s before next cycle...
+
+==============================================================================
+[repo_health_automation] cycle=2 started_at=2026-03-28T20:02:14.642618+00:00
+==============================================================================
+
+--> pre_commit_check: /usr/local/bin/python3 scripts/pre_commit_check.py
+[PASS] pre_commit_check rc=0 duration=195.35s
+
+--> integration_contract_gate: bash scripts/integration_contract_gate.sh --strict-endpoints
+[PASS] integration_contract_gate rc=0 duration=8.93s
+
+------------------------------------------------------------------------------
+[repo_health_automation] cycle=2 succeeded=True duration=204.28s
+------------------------------------------------------------------------------
+Sleeping 300s before next cycle...
+
+==============================================================================
+[repo_health_automation] cycle=3 started_at=2026-03-28T20:11:26.553112+00:00
+==============================================================================
+
+--> pre_commit_check: /usr/local/bin/python3 scripts/pre_commit_check.py
+[PASS] pre_commit_check rc=0 duration=190.66s
+
+--> integration_contract_gate: bash scripts/integration_contract_gate.sh --strict-endpoints
+[PASS] integration_contract_gate rc=0 duration=8.76s
+
+------------------------------------------------------------------------------
+[repo_health_automation] cycle=3 succeeded=True duration=199.42s
+------------------------------------------------------------------------------
+Sleeping 300s before next cycle...
+
+==============================================================================
+[repo_health_automation] cycle=4 started_at=2026-03-28T20:20:36.445719+00:00
+==============================================================================
+
+--> pre_commit_check: /usr/local/bin/python3 scripts/pre_commit_check.py
+[PASS] pre_commit_check rc=0 duration=215.49s
+
+--> integration_contract_gate: bash scripts/integration_contract_gate.sh --strict-endpoints
+[PASS] integration_contract_gate rc=0 duration=9.63s
+
+------------------------------------------------------------------------------
+[repo_health_automation] cycle=4 succeeded=True duration=225.12s
+------------------------------------------------------------------------------
+Sleeping 300s before next cycle...
+
+==============================================================================
+[repo_health_automation] cycle=5 started_at=2026-03-28T20:30:12.242712+00:00
+==============================================================================
+
+--> pre_commit_check: /usr/local/bin/python3 scripts/pre_commit_check.py
+[PASS] pre_commit_check rc=0 duration=197.60s
+
+--> integration_contract_gate: bash scripts/integration_contract_gate.sh --strict-endpoints
+[PASS] integration_contract_gate rc=0 duration=9.59s
+
+------------------------------------------------------------------------------
+[repo_health_automation] cycle=5 succeeded=True duration=207.19s
+------------------------------------------------------------------------------
+Sleeping 300s before next cycle...
+
+==============================================================================
+[repo_health_automation] cycle=6 started_at=2026-03-28T20:39:29.610585+00:00
+==============================================================================
+
+--> pre_commit_check: /usr/local/bin/python3 scripts/pre_commit_check.py
+[PASS] pre_commit_check rc=0 duration=236.29s
+
+--> integration_contract_gate: bash scripts/integration_contract_gate.sh --strict-endpoints
+[PASS] integration_contract_gate rc=0 duration=9.85s
+
+------------------------------------------------------------------------------
+[repo_health_automation] cycle=6 succeeded=True duration=246.13s
+------------------------------------------------------------------------------
+Sleeping 300s before next cycle...
+
+==============================================================================
+[repo_health_automation] cycle=7 started_at=2026-03-28T20:49:27.383455+00:00
+==============================================================================
+
+--> pre_commit_check: /usr/local/bin/python3 scripts/pre_commit_check.py
+[PASS] pre_commit_check rc=0 duration=206.50s
+
+--> integration_contract_gate: bash scripts/integration_contract_gate.sh --strict-endpoints
+[PASS] integration_contract_gate rc=0 duration=8.22s
+
+------------------------------------------------------------------------------
+[repo_health_automation] cycle=7 succeeded=True duration=214.73s
+------------------------------------------------------------------------------
+Sleeping 300s before next cycle...
+
+==============================================================================
+[repo_health_automation] cycle=8 started_at=2026-03-28T20:58:50.221591+00:00
+==============================================================================
+
+--> pre_commit_check: /usr/local/bin/python3 scripts/pre_commit_check.py
+[PASS] pre_commit_check rc=0 duration=254.97s
+
+--> integration_contract_gate: bash scripts/integration_contract_gate.sh --strict-endpoints
+[PASS] integration_contract_gate rc=0 duration=12.78s
+
+------------------------------------------------------------------------------
+[repo_health_automation] cycle=8 succeeded=True duration=267.75s
+------------------------------------------------------------------------------
+Sleeping 300s before next cycle...
+
+==============================================================================
+[repo_health_automation] cycle=9 started_at=2026-03-28T21:09:00.376204+00:00
+==============================================================================
+
+--> pre_commit_check: /usr/local/bin/python3 scripts/pre_commit_check.py
+[FAIL] pre_commit_check rc=1 duration=287.61s
+
+--> integration_contract_gate: bash scripts/integration_contract_gate.sh --strict-endpoints
+[PASS] integration_contract_gate rc=0 duration=12.34s
+
+------------------------------------------------------------------------------
+[repo_health_automation] cycle=9 succeeded=False duration=299.95s
+------------------------------------------------------------------------------
+First failed step: pre_commit_check
+--- stdout tail ---
+
+[1m═══════════════════════════════════════════════════════════════════[0m
+[1m[96mQAI PRE-COMMIT VALIDATION[0m
+[1m═══════════════════════════════════════════════════════════════════[0m
+
+[96m[1m[1/5] Running unit tests...[0m
+[92m✓ 1321 tests passed[0m
+
+[96m[1m[2/5] Linting code...[0m
+[91m✗ Found critical linting issues (E9,F63,F7,F82,B904) in 50 staged file(s)[0m
+  invalid-syntax: Expected `,`, found name
+   --> scripts/autonomous_code_agent.py:1:7
+    |
+  1 | [Echo Plan]
+    |       ^^^^
+  2 | 1. Understand the task requirements
+  3 | 2. Identify the files that need modification
+    |
+  invalid-syntax: Simple statements must be separated by newlines or semicolons
+   --> scripts/autonomous_code_agent.py:2:4
+
+[96m[1m[3/5] Security scan...[0m
+[92m✓ No security issues detected[0m
+
+[96m[1m[4/5] Git hygiene...[0m
+[92m✓ Git staging area looks clean[0m
+
+[96m[1m[5/5] Checking documentation...[0m
+[92m✓ All key documentation present[0m
+
+[1m═══════════════════════════════════════════════════════════════════[0m
+[91m[1mRESULT: Some checks failed (4/5 passed)[0m
+[1m═══════════════════════════════════════════════════════════════════[0m
+
+
+Sleeping 300s before next cycle...
+
+==============================================================================
+[repo_health_automation] cycle=10 started_at=2026-03-28T21:19:44.553398+00:00
+==============================================================================
+
+--> pre_commit_check: /usr/local/bin/python3 scripts/pre_commit_check.py
+[FAIL] pre_commit_check rc=1 duration=274.54s
+
+--> integration_contract_gate: bash scripts/integration_contract_gate.sh --strict-endpoints
+[PASS] integration_contract_gate rc=0 duration=9.76s
+
+------------------------------------------------------------------------------
+[repo_health_automation] cycle=10 succeeded=False duration=284.30s
+------------------------------------------------------------------------------
+First failed step: pre_commit_check
+--- stdout tail ---
+
+[1m═══════════════════════════════════════════════════════════════════[0m
+[1m[96mQAI PRE-COMMIT VALIDATION[0m
+[1m═══════════════════════════════════════════════════════════════════[0m
+
+[96m[1m[1/5] Running unit tests...[0m
+[92m✓ 1321 tests passed[0m
+
+[96m[1m[2/5] Linting code...[0m
+[91m✗ Found critical linting issues (E9,F63,F7,F82,B904) in 52 staged file(s)[0m
+  invalid-syntax: Expected `,`, found name
+   --> scripts/autonomous_agent_tasks.py:1:7
+    |
+  1 | [Echo Plan]
+    |       ^^^^
+  2 | 1. Understand the task requirements
+  3 | 2. Identify the files that need modification
+    |
+  invalid-syntax: Simple statements must be separated by newlines or semicolons
+   --> scripts/autonomous_agent_tasks.py:2:4
+
+[96m[1m[3/5] Security scan...[0m
+[92m✓ No security issues detected[0m
+
+[96m[1m[4/5] Git hygiene...[0m
+[92m✓ Git staging area looks clean[0m
+
+[96m[1m[5/5] Checking documentation...[0m
+[92m✓ All key documentation present[0m
+
+[1m═══════════════════════════════════════════════════════════════════[0m
+[91m[1mRESULT: Some checks failed (4/5 passed)[0m
+[1m═══════════════════════════════════════════════════════════════════[0m
+
+
+Sleeping 300s before next cycle...
+
+==============================================================================
+[repo_health_automation] cycle=11 started_at=2026-03-28T21:30:14.175754+00:00
+==============================================================================
+
+--> pre_commit_check: /usr/local/bin/python3 scripts/pre_commit_check.py
+[FAIL] pre_commit_check rc=1 duration=289.77s
+
+--> integration_contract_gate: bash scripts/integration_contract_gate.sh --strict-endpoints
+[FAIL] integration_contract_gate rc=1 duration=25.65s
+
+------------------------------------------------------------------------------
+[repo_health_automation] cycle=11 succeeded=False duration=315.43s
+------------------------------------------------------------------------------
+First failed step: pre_commit_check
+--- stdout tail ---
+
+[1m═══════════════════════════════════════════════════════════════════[0m
+[1m[96mQAI PRE-COMMIT VALIDATION[0m
+[1m═══════════════════════════════════════════════════════════════════[0m
+
+[96m[1m[1/5] Running unit tests...[0m
+[92m✓ 1321 tests passed[0m
+
+[96m[1m[2/5] Linting code...[0m
+[91m✗ Found critical linting issues (E9,F63,F7,F82,B904) in 52 staged file(s)[0m
+  invalid-syntax: Expected `,`, found name
+   --> scripts/autonomous_agent_tasks.py:1:7
+    |
+  1 | [Echo Plan]
+    |       ^^^^
+  2 | 1. Understand the task requirements
+  3 | 2. Identify the files that need modification
+    |
+  invalid-syntax: Simple statements must be separated by newlines or semicolons
+   --> scripts/autonomous_agent_tasks.py:2:4
+
+[96m[1m[3/5] Security scan...[0m
+[92m✓ No security issues detected[0m
+
+[96m[1m[4/5] Git hygiene...[0m
+[92m✓ Git staging area looks clean[0m
+
+[96m[1m[5/5] Checking documentation...[0m
+[92m✓ All key documentation present[0m
+
+[1m═══════════════════════════════════════════════════════════════════[0m
+[91m[1mRESULT: Some checks failed (4/5 passed)[0m
+[1m═══════════════════════════════════════════════════════════════════[0m
+
+
+Sleeping 300s before next cycle...
+
+==============================================================================
+[repo_health_automation] cycle=12 started_at=2026-03-28T21:41:22.920895+00:00
+==============================================================================
+
+--> pre_commit_check: /usr/local/bin/python3 scripts/pre_commit_check.py
+[FAIL] pre_commit_check rc=1 duration=243.07s
+
+--> integration_contract_gate: bash scripts/integration_contract_gate.sh --strict-endpoints
+[FAIL] integration_contract_gate rc=1 duration=25.71s
+
+------------------------------------------------------------------------------
+[repo_health_automation] cycle=12 succeeded=False duration=268.78s
+------------------------------------------------------------------------------
+First failed step: pre_commit_check
+--- stdout tail ---
+
+[1m═══════════════════════════════════════════════════════════════════[0m
+[1m[96mQAI PRE-COMMIT VALIDATION[0m
+[1m═══════════════════════════════════════════════════════════════════[0m
+
+[96m[1m[1/5] Running unit tests...[0m
+[91m✗ Tests failed[0m
+egates_autonomous_training
+FAILED tests/test_orchestrator_health_integration.py::test_orchestrator_health_status_endpoint
+FAILED tests/test_orchestrator_health_integration.py::test_orchestrator_health_overall_status_logic
+FAILED tests/test_orchestrator_health_integration.py::test_orchestrator_health_endpoint_resilience
+FAILED tests/test_orchestrator_health_integration.py::test_orchestrator_health_last_checked_utc_z
+============ 9 failed, 1312 passed, 52 skipped in 74.11s (0:01:14) =============
+
+
+[96m[1m[2/5] Linting code...[0m
+[91m✗ Found critical linting issues (E9,F63,F7,F82,B904) in 54 staged file(s)[0m
+  invalid-syntax: Expected `,`, found name
+   --> scripts/autonomous_agent_tasks.py:1:7
+    |
+  1 | [Echo Plan]
+    |       ^^^^
+  2 | 1. Understand the task requirements
+  3 | 2. Identify the files that need modification
+    |
+  invalid-syntax: Simple statements must be separated by newlines or semicolons
+   --> scripts/autonomous_agent_tasks.py:2:4
+
+[96m[1m[3/5] Security scan...[0m
+[92m✓ No security issues detected[0m
+
+[96m[1m[4/5] Git hygiene...[0m
+[92m✓ Git staging area looks clean[0m
+
+[96m[1m[5/5] Checking documentation...[0m
+[92m✓ All key documentation present[0m
+
+[1m═══════════════════════════════════════════════════════════════════[0m
+[91m[1mRESULT: Some checks failed (3/5 passed)[0m
+[1m═══════════════════════════════════════════════════════════════════[0m
+
+
+Sleeping 300s before next cycle...
+
+==============================================================================
+[repo_health_automation] cycle=13 started_at=2026-03-28T21:51:41.881618+00:00
+==============================================================================
+
+--> pre_commit_check: /usr/local/bin/python3 scripts/pre_commit_check.py
+[FAIL] pre_commit_check rc=1 duration=292.64s
+
+--> integration_contract_gate: bash scripts/integration_contract_gate.sh --strict-endpoints
+[FAIL] integration_contract_gate rc=1 duration=28.25s
+
+------------------------------------------------------------------------------
+[repo_health_automation] cycle=13 succeeded=False duration=320.89s
+------------------------------------------------------------------------------
+First failed step: pre_commit_check
+--- stdout tail ---
+
+[1m═══════════════════════════════════════════════════════════════════[0m
+[1m[96mQAI PRE-COMMIT VALIDATION[0m
+[1m═══════════════════════════════════════════════════════════════════[0m
+
+[96m[1m[1/5] Running unit tests...[0m
+[91m✗ Tests failed[0m
+egates_autonomous_training
+FAILED tests/test_orchestrator_health_integration.py::test_orchestrator_health_status_endpoint
+FAILED tests/test_orchestrator_health_integration.py::test_orchestrator_health_overall_status_logic
+FAILED tests/test_orchestrator_health_integration.py::test_orchestrator_health_endpoint_resilience
+FAILED tests/test_orchestrator_health_integration.py::test_orchestrator_health_last_checked_utc_z
+============ 9 failed, 1312 passed, 52 skipped in 86.51s (0:01:26) =============
+
+
+[96m[1m[2/5] Linting code...[0m
+[92m✓ No linting issues found[0m
+
+[96m[1m[3/5] Security scan...[0m
+[92m✓ No security issues detected[0m
+
+[96m[1m[4/5] Git hygiene...[0m
+[92m✓ Git staging area looks clean[0m
+
+[96m[1m[5/5] Checking documentation...[0m
+[92m✓ All key documentation present[0m
+
+[1m═══════════════════════════════════════════════════════════════════[0m
+[91m[1mRESULT: Some checks failed (4/5 passed)[0m
+[1m═══════════════════════════════════════════════════════════════════[0m
+
+
+Sleeping 300s before next cycle...
+
+==============================================================================
+[repo_health_automation] cycle=14 started_at=2026-03-28T22:03:01.259611+00:00
+==============================================================================
+
+--> pre_commit_check: /usr/local/bin/python3 scripts/pre_commit_check.py
+[FAIL] pre_commit_check rc=1 duration=194.80s
+
+--> integration_contract_gate: bash scripts/integration_contract_gate.sh --strict-endpoints
+[FAIL] integration_contract_gate rc=1 duration=25.57s
+
+------------------------------------------------------------------------------
+[repo_health_automation] cycle=14 succeeded=False duration=220.36s
+------------------------------------------------------------------------------
+First failed step: pre_commit_check
+--- stdout tail ---
+
+[1m═══════════════════════════════════════════════════════════════════[0m
+[1m[96mQAI PRE-COMMIT VALIDATION[0m
+[1m═══════════════════════════════════════════════════════════════════[0m
+
+[96m[1m[1/5] Running unit tests...[0m
+[91m✗ Tests failed[0m
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scripts/autonomous_code_agent.py:1: in <module>
+    scripts/autonomous_code_agent.py
+    ^^^^^^^
+E   NameError: name 'scripts' is not defined
+=========================== short test summary info ============================
+ERROR tests/test_autonomous_code_agent.py - NameError: name 'scripts' is not ...
+!!!!!!!!!!!!!!!!!!!! Interrupted: 1 error during collection !!!!!!!!!!!!!!!!!!!!
+========================= 3 skipped, 1 error in 13.14s =========================
+
+
+[96m[1m[2/5] Linting code...[0m
+[91m✗ Found critical linting issues (E9,F63,F7,F82,B904) in 55 staged file(s)[0m
+  F821 Undefined name `scripts`
+   --> scripts/autonomous_agent_tasks.py:1:1
+    |
+  1 | scripts/autonomous_code_agent.py
+    | ^^^^^^^
+  2 | scripts/autonomous_agent_tasks.py
+    |
+  F821 Undefined name `autonomous_code_agent`
+   --> scripts/autonomous_agent_tasks.py:1:9
+    |
+
+[96m[1m[3/5] Security scan...[0m
+[92m✓ No security issues detected[0m
+
+[96m[1m[4/5] Git hygiene...[0m
+[92m✓ Git staging area looks clean[0m
+
+[96m[1m[5/5] Checking documentation...[0m
+[92m✓ All key documentation present[0m
+
+[1m═══════════════════════════════════════════════════════════════════[0m
+[91m[1mRESULT: Some checks failed (3/5 passed)[0m
+[1m═══════════════════════════════════════════════════════════════════[0m
+
+
+Sleeping 300s before next cycle...
+
+==============================================================================
+[repo_health_automation] cycle=15 started_at=2026-03-28T22:12:28.857668+00:00
+==============================================================================
+
+--> pre_commit_check: /usr/local/bin/python3 scripts/pre_commit_check.py
+[FAIL] pre_commit_check rc=1 duration=181.54s
+
+--> integration_contract_gate: bash scripts/integration_contract_gate.sh --strict-endpoints
+[FAIL] integration_contract_gate rc=1 duration=27.40s
+
+------------------------------------------------------------------------------
+[repo_health_automation] cycle=15 succeeded=False duration=208.94s
+------------------------------------------------------------------------------
+First failed step: pre_commit_check
+--- stdout tail ---
+═════════════════════════════════════════[0m
+
+[96m[1m[1/5] Running unit tests...[0m
+[91m✗ Tests failed[0m
+egates_autonomous_training
+FAILED tests/test_orchestrator_health_integration.py::test_orchestrator_health_status_endpoint
+FAILED tests/test_orchestrator_health_integration.py::test_orchestrator_health_overall_status_logic
+FAILED tests/test_orchestrator_health_integration.py::test_orchestrator_health_endpoint_resilience
+FAILED tests/test_orchestrator_health_integration.py::test_orchestrator_health_last_checked_utc_z
+============ 18 failed, 1303 passed, 52 skipped in 64.67s (0:01:04) ============
+
+
+[96m[1m[2/5] Linting code...[0m
+[91m✗ Found critical linting issues (E9,F63,F7,F82,B904) in 55 staged file(s)[0m
+  B904 Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None` to distinguish them from errors in exception handling
+     --> scripts/autonomous_code_agent.py:295:13
+      |
+  293 |                   return result.get("response", "").strip()
+  294 |           except urllib.error.URLError as e:
+  295 | /             raise ConnectionError(
+  296 | |                 f"Cannot connect to Ollama at {self.base_url}: {e}")
+      | |____________________________________________________________________^
+  297 |
+  298 |       def _query_lmstudio(self, prompt: str, max_tokens: int) -> str:
+
+[96m[1m[3/5] Security scan...[0m
+[92m✓ No security issues detected[0m
+
+[96m[1m[4/5] Git hygiene...[0m
+[92m✓ Git staging area looks clean[0m
+
+[96m[1m[5/5] Checking documentation...[0m
+[92m✓ All key documentation present[0m
+
+[1m═══════════════════════════════════════════════════════════════════[0m
+[91m[1mRESULT: Some checks failed (3/5 passed)[0m
+[1m═══════════════════════════════════════════════════════════════════[0m
+
+
+Sleeping 300s before next cycle...
+
+==============================================================================
+[repo_health_automation] cycle=16 started_at=2026-03-28T22:21:45.193903+00:00
+==============================================================================
+
+--> pre_commit_check: /usr/local/bin/python3 scripts/pre_commit_check.py
+[FAIL] pre_commit_check rc=1 duration=231.80s
+
+--> integration_contract_gate: bash scripts/integration_contract_gate.sh --strict-endpoints
+[FAIL] integration_contract_gate rc=1 duration=25.09s
+
+------------------------------------------------------------------------------
+[repo_health_automation] cycle=16 succeeded=False duration=256.89s
+------------------------------------------------------------------------------
+First failed step: pre_commit_check
+--- stdout tail ---
+═════════════════════════════════════════[0m
+
+[96m[1m[1/5] Running unit tests...[0m
+[91m✗ Tests failed[0m
+egates_autonomous_training
+FAILED tests/test_orchestrator_health_integration.py::test_orchestrator_health_status_endpoint
+FAILED tests/test_orchestrator_health_integration.py::test_orchestrator_health_overall_status_logic
+FAILED tests/test_orchestrator_health_integration.py::test_orchestrator_health_endpoint_resilience
+FAILED tests/test_orchestrator_health_integration.py::test_orchestrator_health_last_checked_utc_z
+============ 19 failed, 1302 passed, 52 skipped in 80.03s (0:01:20) ============
+
+
+[96m[1m[2/5] Linting code...[0m
+[91m✗ Found critical linting issues (E9,F63,F7,F82,B904) in 55 staged file(s)[0m
+  B904 Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None` to distinguish them from errors in exception handling
+     --> scripts/autonomous_code_agent.py:295:13
+      |
+  293 |                   return result.get("response", "").strip()
+  294 |           except urllib.error.URLError as e:
+  295 | /             raise ConnectionError(
+  296 | |                 f"Cannot connect to Ollama at {self.base_url}: {e}")
+      | |____________________________________________________________________^
+  297 |
+  298 |       def _query_lmstudio(self, prompt: str, max_tokens: int) -> str:
+
+[96m[1m[3/5] Security scan...[0m
+[92m✓ No security issues detected[0m
+
+[96m[1m[4/5] Git hygiene...[0m
+[92m✓ Git staging area looks clean[0m
+
+[96m[1m[5/5] Checking documentation...[0m
+[92m✓ All key documentation present[0m
+
+[1m═══════════════════════════════════════════════════════════════════[0m
+[91m[1mRESULT: Some checks failed (3/5 passed)[0m
+[1m═══════════════════════════════════════════════════════════════════[0m
+
+
+Sleeping 300s before next cycle...
+
+==============================================================================
+[repo_health_automation] cycle=17 started_at=2026-03-28T22:31:53.875335+00:00
+==============================================================================
+
+--> pre_commit_check: /usr/local/bin/python3 scripts/pre_commit_check.py
+[FAIL] pre_commit_check rc=1 duration=207.77s
+
+--> integration_contract_gate: bash scripts/integration_contract_gate.sh --strict-endpoints
+[FAIL] integration_contract_gate rc=1 duration=25.09s
+
+------------------------------------------------------------------------------
+[repo_health_automation] cycle=17 succeeded=False duration=232.86s
+------------------------------------------------------------------------------
+First failed step: pre_commit_check
+--- stdout tail ---
+═════════════════════════════════════════[0m
+
+[96m[1m[1/5] Running unit tests...[0m
+[91m✗ Tests failed[0m
+egates_autonomous_training
+FAILED tests/test_orchestrator_health_integration.py::test_orchestrator_health_status_endpoint
+FAILED tests/test_orchestrator_health_integration.py::test_orchestrator_health_overall_status_logic
+FAILED tests/test_orchestrator_health_integration.py::test_orchestrator_health_endpoint_resilience
+FAILED tests/test_orchestrator_health_integration.py::test_orchestrator_health_last_checked_utc_z
+============ 19 failed, 1302 passed, 52 skipped in 60.34s (0:01:00) ============
+
+
+[96m[1m[2/5] Linting code...[0m
+[91m✗ Found critical linting issues (E9,F63,F7,F82,B904) in 55 staged file(s)[0m
+  B904 Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None` to distinguish them from errors in exception handling
+     --> scripts/autonomous_code_agent.py:302:13
+      |
+  300 |                   return result.get("response", "").strip()
+  301 |           except urllib.error.URLError as e:
+  302 | /             raise ConnectionError(
+  303 | |                 f"Cannot connect to Ollama at {self.base_url}: {e}")
+      | |____________________________________________________________________^
+  304 |
+  305 |       def _query_lmstudio(self, prompt: str, max_tokens: int) -> str:
+
+[96m[1m[3/5] Security scan...[0m
+[92m✓ No security issues detected[0m
+
+[96m[1m[4/5] Git hygiene...[0m
+[92m✓ Git staging area looks clean[0m
+
+[96m[1m[5/5] Checking documentation...[0m
+[92m✓ All key documentation present[0m
+
+[1m═══════════════════════════════════════════════════════════════════[0m
+[91m[1mRESULT: Some checks failed (3/5 passed)[0m
+[1m═══════════════════════════════════════════════════════════════════[0m
+
+
+Sleeping 300s before next cycle...
+
+==============================================================================
+[repo_health_automation] cycle=18 started_at=2026-03-28T22:41:34.604284+00:00
+==============================================================================
+
+--> pre_commit_check: /usr/local/bin/python3 scripts/pre_commit_check.py
+[FAIL] pre_commit_check rc=1 duration=176.35s
+
+--> integration_contract_gate: bash scripts/integration_contract_gate.sh --strict-endpoints
+[FAIL] integration_contract_gate rc=1 duration=25.14s
+
+------------------------------------------------------------------------------
+[repo_health_automation] cycle=18 succeeded=False duration=201.50s
+------------------------------------------------------------------------------
+First failed step: pre_commit_check
+--- stdout tail ---
+═════════════════════════════════════════[0m
+
+[96m[1m[1/5] Running unit tests...[0m
+[91m✗ Tests failed[0m
+egates_autonomous_training
+FAILED tests/test_orchestrator_health_integration.py::test_orchestrator_health_status_endpoint
+FAILED tests/test_orchestrator_health_integration.py::test_orchestrator_health_overall_status_logic
+FAILED tests/test_orchestrator_health_integration.py::test_orchestrator_health_endpoint_resilience
+FAILED tests/test_orchestrator_health_integration.py::test_orchestrator_health_last_checked_utc_z
+============ 19 failed, 1302 passed, 52 skipped in 62.87s (0:01:02) ============
+
+
+[96m[1m[2/5] Linting code...[0m
+[91m✗ Found critical linting issues (E9,F63,F7,F82,B904) in 55 staged file(s)[0m
+  B904 Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None` to distinguish them from errors in exception handling
+     --> scripts/autonomous_code_agent.py:302:13
+      |
+  300 |                   return result.get("response", "").strip()
+  301 |           except urllib.error.URLError as e:
+  302 | /             raise ConnectionError(
+  303 | |                 f"Cannot connect to Ollama at {self.base_url}: {e}")
+      | |____________________________________________________________________^
+  304 |
+  305 |       def _query_lmstudio(self, prompt: str, max_tokens: int) -> str:
+
+[96m[1m[3/5] Security scan...[0m
+[92m✓ No security issues detected[0m
+
+[96m[1m[4/5] Git hygiene...[0m
+[92m✓ Git staging area looks clean[0m
+
+[96m[1m[5/5] Checking documentation...[0m
+[92m✓ All key documentation present[0m
+
+[1m═══════════════════════════════════════════════════════════════════[0m
+[91m[1mRESULT: Some checks failed (3/5 passed)[0m
+[1m═══════════════════════════════════════════════════════════════════[0m
+
+
+Sleeping 300s before next cycle...
+
+==============================================================================
+[repo_health_automation] cycle=19 started_at=2026-03-28T22:50:44.273524+00:00
+==============================================================================
+
+--> pre_commit_check: /usr/local/bin/python3 scripts/pre_commit_check.py
+[FAIL] pre_commit_check rc=1 duration=348.75s
+
+--> integration_contract_gate: bash scripts/integration_contract_gate.sh --strict-endpoints
+[FAIL] integration_contract_gate rc=1 duration=25.29s
+
+------------------------------------------------------------------------------
+[repo_health_automation] cycle=19 succeeded=False duration=374.04s
+------------------------------------------------------------------------------
+First failed step: pre_commit_check
+--- stdout tail ---
+═════════════════════════════════════════[0m
+
+[96m[1m[1/5] Running unit tests...[0m
+[91m✗ Tests failed[0m
+egates_autonomous_training
+FAILED tests/test_orchestrator_health_integration.py::test_orchestrator_health_status_endpoint
+FAILED tests/test_orchestrator_health_integration.py::test_orchestrator_health_overall_status_logic
+FAILED tests/test_orchestrator_health_integration.py::test_orchestrator_health_endpoint_resilience
+FAILED tests/test_orchestrator_health_integration.py::test_orchestrator_health_last_checked_utc_z
+============ 19 failed, 1302 passed, 52 skipped in 69.84s (0:01:09) ============
+
+
+[96m[1m[2/5] Linting code...[0m
+[91m✗ Found critical linting issues (E9,F63,F7,F82,B904) in 55 staged file(s)[0m
+  B904 Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None` to distinguish them from errors in exception handling
+     --> scripts/autonomous_code_agent.py:303:13
+      |
+  301 |                   return result.get("response", "").strip()
+  302 |           except urllib.error.URLError as e:
+  303 | /             raise ConnectionError(
+  304 | |                 f"Cannot connect to Ollama at {self.base_url}: {e}")
+      | |____________________________________________________________________^
+  305 |
+  306 |       def _query_lmstudio(self, prompt: str, max_tokens: int) -> str:
+
+[96m[1m[3/5] Security scan...[0m
+[92m✓ No security issues detected[0m
+
+[96m[1m[4/5] Git hygiene...[0m
+[92m✓ Git staging area looks clean[0m
+
+[96m[1m[5/5] Checking documentation...[0m
+[92m✓ All key documentation present[0m
+
+[1m═══════════════════════════════════════════════════════════════════[0m
+[91m[1mRESULT: Some checks failed (3/5 passed)[0m
+[1m═══════════════════════════════════════════════════════════════════[0m
+
+
+Sleeping 300s before next cycle...
+
+==============================================================================
+[repo_health_automation] cycle=20 started_at=2026-03-28T23:02:59.461585+00:00
+==============================================================================
+
+--> pre_commit_check: /usr/local/bin/python3 scripts/pre_commit_check.py
+[FAIL] pre_commit_check rc=1 duration=224.00s
+
+--> integration_contract_gate: bash scripts/integration_contract_gate.sh --strict-endpoints
+[FAIL] integration_contract_gate rc=1 duration=25.96s
+
+------------------------------------------------------------------------------
+[repo_health_automation] cycle=20 succeeded=False duration=249.95s
+------------------------------------------------------------------------------
+First failed step: pre_commit_check
+--- stdout tail ---
+═════════════════════════════════════════[0m
+
+[96m[1m[1/5] Running unit tests...[0m
+[91m✗ Tests failed[0m
+ docsstring that effectively summarizes the purpose of the shared/chat_memory.py file in the context of the provided public helper:
+E          ^^^^^^^^
+E   SyntaxError: invalid syntax
+=========================== short test summary info ============================
+ERROR tests/test_chat_memory.py
+ERROR tests/test_database_integration.py
+!!!!!!!!!!!!!!!!!!! Interrupted: 2 errors during collection !!!!!!!!!!!!!!!!!!!!
+======================== 3 skipped, 2 errors in 21.14s =========================
+
+
+[96m[1m[2/5] Linting code...[0m
+[91m✗ Found critical linting issues (E9,F63,F7,F82,B904) in 55 staged file(s)[0m
+  B904 Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None` to distinguish them from errors in exception handling
+     --> scripts/autonomous_code_agent.py:303:13
+      |
+  301 |                   return result.get("response", "").strip()
+  302 |           except urllib.error.URLError as e:
+  303 | /             raise ConnectionError(
+  304 | |                 f"Cannot connect to Ollama at {self.base_url}: {e}")
+      | |____________________________________________________________________^
+  305 |
+  306 |       def _query_lmstudio(self, prompt: str, max_tokens: int) -> str:
+
+[96m[1m[3/5] Security scan...[0m
+[92m✓ No security issues detected[0m
+
+[96m[1m[4/5] Git hygiene...[0m
+[92m✓ Git staging area looks clean[0m
+
+[96m[1m[5/5] Checking documentation...[0m
+[92m✓ All key documentation present[0m
+
+[1m═══════════════════════════════════════════════════════════════════[0m
+[91m[1mRESULT: Some checks failed (3/5 passed)[0m
+[1m═══════════════════════════════════════════════════════════════════[0m
+
+
+Sleeping 300s before next cycle...
+
+==============================================================================
+[repo_health_automation] cycle=21 started_at=2026-03-28T23:13:02.481276+00:00
+==============================================================================
+
+--> pre_commit_check: /usr/local/bin/python3 scripts/pre_commit_check.py
+[FAIL] pre_commit_check rc=1 duration=231.21s
+
+--> integration_contract_gate: bash scripts/integration_contract_gate.sh --strict-endpoints
+[FAIL] integration_contract_gate rc=1 duration=26.40s
+
+------------------------------------------------------------------------------
+[repo_health_automation] cycle=21 succeeded=False duration=257.61s
+------------------------------------------------------------------------------
+First failed step: pre_commit_check
+--- stdout tail ---
+═════════════════════════════════════════[0m
+
+[96m[1m[1/5] Running unit tests...[0m
+[91m✗ Tests failed[0m
+ docsstring that effectively summarizes the purpose of the shared/chat_memory.py file in the context of the provided public helper:
+E          ^^^^^^^^
+E   SyntaxError: invalid syntax
+=========================== short test summary info ============================
+ERROR tests/test_chat_memory.py
+ERROR tests/test_database_integration.py
+!!!!!!!!!!!!!!!!!!! Interrupted: 2 errors during collection !!!!!!!!!!!!!!!!!!!!
+======================== 3 skipped, 2 errors in 21.28s =========================
+
+
+[96m[1m[2/5] Linting code...[0m
+[91m✗ Found critical linting issues (E9,F63,F7,F82,B904) in 55 staged file(s)[0m
+  B904 Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None` to distinguish them from errors in exception handling
+     --> scripts/autonomous_code_agent.py:303:13
+      |
+  301 |                   return result.get("response", "").strip()
+  302 |           except urllib.error.URLError as e:
+  303 | /             raise ConnectionError(
+  304 | |                 f"Cannot connect to Ollama at {self.base_url}: {e}")
+      | |____________________________________________________________________^
+  305 |
+  306 |       def _query_lmstudio(self, prompt: str, max_tokens: int) -> str:
+
+[96m[1m[3/5] Security scan...[0m
+[92m✓ No security issues detected[0m
+
+[96m[1m[4/5] Git hygiene...[0m
+[92m✓ Git staging area looks clean[0m
+
+[96m[1m[5/5] Checking documentation...[0m
+[92m✓ All key documentation present[0m
+
+[1m═══════════════════════════════════════════════════════════════════[0m
+[91m[1mRESULT: Some checks failed (3/5 passed)[0m
+[1m═══════════════════════════════════════════════════════════════════[0m
+
+
+Sleeping 300s before next cycle...
+
+==============================================================================
+[repo_health_automation] cycle=22 started_at=2026-03-28T23:23:13.191427+00:00
+==============================================================================
+
+--> pre_commit_check: /usr/local/bin/python3 scripts/pre_commit_check.py
+[FAIL] pre_commit_check rc=1 duration=272.72s
+
+--> integration_contract_gate: bash scripts/integration_contract_gate.sh --strict-endpoints
+[FAIL] integration_contract_gate rc=1 duration=28.90s
+
+------------------------------------------------------------------------------
+[repo_health_automation] cycle=22 succeeded=False duration=301.63s
+------------------------------------------------------------------------------
+First failed step: pre_commit_check
+--- stdout tail ---
+═════════════════════════════════════════[0m
+
+[96m[1m[1/5] Running unit tests...[0m
+[91m✗ Tests failed[0m
+ docsstring that effectively summarizes the purpose of the shared/chat_memory.py file in the context of the provided public helper:
+E          ^^^^^^^^
+E   SyntaxError: invalid syntax
+=========================== short test summary info ============================
+ERROR tests/test_chat_memory.py
+ERROR tests/test_database_integration.py
+!!!!!!!!!!!!!!!!!!! Interrupted: 2 errors during collection !!!!!!!!!!!!!!!!!!!!
+======================== 3 skipped, 2 errors in 21.85s =========================
+
+
+[96m[1m[2/5] Linting code...[0m
+[91m✗ Found critical linting issues (E9,F63,F7,F82,B904) in 55 staged file(s)[0m
+  B904 Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None` to distinguish them from errors in exception handling
+     --> scripts/autonomous_code_agent.py:303:13
+      |
+  301 |                   return result.get("response", "").strip()
+  302 |           except urllib.error.URLError as e:
+  303 | /             raise ConnectionError(
+  304 | |                 f"Cannot connect to Ollama at {self.base_url}: {e}")
+      | |____________________________________________________________________^
+  305 |
+  306 |       def _query_lmstudio(self, prompt: str, max_tokens: int) -> str:
+
+[96m[1m[3/5] Security scan...[0m
+[92m✓ No security issues detected[0m
+
+[96m[1m[4/5] Git hygiene...[0m
+[92m✓ Git staging area looks clean[0m
+
+[96m[1m[5/5] Checking documentation...[0m
+[92m✓ All key documentation present[0m
+
+[1m═══════════════════════════════════════════════════════════════════[0m
+[91m[1mRESULT: Some checks failed (3/5 passed)[0m
+[1m═══════════════════════════════════════════════════════════════════[0m
+
+
+Sleeping 300s before next cycle...
+
+==============================================================================
+[repo_health_automation] cycle=23 started_at=2026-03-28T23:34:15.186318+00:00
+==============================================================================
+
+--> pre_commit_check: /usr/local/bin/python3 scripts/pre_commit_check.py
+[FAIL] pre_commit_check rc=1 duration=233.83s
+
+--> integration_contract_gate: bash scripts/integration_contract_gate.sh --strict-endpoints
+[FAIL] integration_contract_gate rc=1 duration=25.37s
+
+------------------------------------------------------------------------------
+[repo_health_automation] cycle=23 succeeded=False duration=259.20s
+------------------------------------------------------------------------------
+First failed step: pre_commit_check
+--- stdout tail ---
+═════════════════════════════════════════[0m
+
+[96m[1m[1/5] Running unit tests...[0m
+[91m✗ Tests failed[0m
+ docsstring that effectively summarizes the purpose of the shared/chat_memory.py file in the context of the provided public helper:
+E          ^^^^^^^^
+E   SyntaxError: invalid syntax
+=========================== short test summary info ============================
+ERROR tests/test_chat_memory.py
+ERROR tests/test_database_integration.py
+!!!!!!!!!!!!!!!!!!! Interrupted: 2 errors during collection !!!!!!!!!!!!!!!!!!!!
+======================== 3 skipped, 2 errors in 19.13s =========================
+
+
+[96m[1m[2/5] Linting code...[0m
+[91m✗ Found critical linting issues (E9,F63,F7,F82,B904) in 55 staged file(s)[0m
+  B904 Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None` to distinguish them from errors in exception handling
+     --> scripts/autonomous_code_agent.py:303:13
+      |
+  301 |                   return result.get("response", "").strip()
+  302 |           except urllib.error.URLError as e:
+  303 | /             raise ConnectionError(
+  304 | |                 f"Cannot connect to Ollama at {self.base_url}: {e}")
+      | |____________________________________________________________________^
+  305 |
+  306 |       def _query_lmstudio(self, prompt: str, max_tokens: int) -> str:
+
+[96m[1m[3/5] Security scan...[0m
+[92m✓ No security issues detected[0m
+
+[96m[1m[4/5] Git hygiene...[0m
+[92m✓ Git staging area looks clean[0m
+
+[96m[1m[5/5] Checking documentation...[0m
+[92m✓ All key documentation present[0m
+
+[1m═══════════════════════════════════════════════════════════════════[0m
+[91m[1mRESULT: Some checks failed (3/5 passed)[0m
+[1m═══════════════════════════════════════════════════════════════════[0m
+
+
+Sleeping 300s before next cycle...
+
+==============================================================================
+[repo_health_automation] cycle=24 started_at=2026-03-28T23:44:28.390260+00:00
+==============================================================================
+
+--> pre_commit_check: /usr/local/bin/python3 scripts/pre_commit_check.py
+[FAIL] pre_commit_check rc=1 duration=271.67s
+
+--> integration_contract_gate: bash scripts/integration_contract_gate.sh --strict-endpoints
+[FAIL] integration_contract_gate rc=1 duration=25.61s
+
+------------------------------------------------------------------------------
+[repo_health_automation] cycle=24 succeeded=False duration=297.28s
+------------------------------------------------------------------------------
+First failed step: pre_commit_check
+--- stdout tail ---
+═════════════════════════════════════════[0m
+
+[96m[1m[1/5] Running unit tests...[0m
+[91m✗ Tests failed[0m
+ docsstring that effectively summarizes the purpose of the shared/chat_memory.py file in the context of the provided public helper:
+E          ^^^^^^^^
+E   SyntaxError: invalid syntax
+=========================== short test summary info ============================
+ERROR tests/test_chat_memory.py
+ERROR tests/test_database_integration.py
+!!!!!!!!!!!!!!!!!!! Interrupted: 2 errors during collection !!!!!!!!!!!!!!!!!!!!
+======================== 3 skipped, 2 errors in 16.30s =========================
+
+
+[96m[1m[2/5] Linting code...[0m
+[91m✗ Found critical linting issues (E9,F63,F7,F82,B904) in 55 staged file(s)[0m
+  B904 Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None` to distinguish them from errors in exception handling
+     --> scripts/autonomous_code_agent.py:303:13
+      |
+  301 |                   return result.get("response", "").strip()
+  302 |           except urllib.error.URLError as e:
+  303 | /             raise ConnectionError(
+  304 | |                 f"Cannot connect to Ollama at {self.base_url}: {e}")
+      | |____________________________________________________________________^
+  305 |
+  306 |       def _query_lmstudio(self, prompt: str, max_tokens: int) -> str:
+
+[96m[1m[3/5] Security scan...[0m
+[92m✓ No security issues detected[0m
+
+[96m[1m[4/5] Git hygiene...[0m
+[92m✓ Git staging area looks clean[0m
+
+[96m[1m[5/5] Checking documentation...[0m
+[92m✓ All key documentation present[0m
+
+[1m═══════════════════════════════════════════════════════════════════[0m
+[91m[1mRESULT: Some checks failed (3/5 passed)[0m
+[1m═══════════════════════════════════════════════════════════════════[0m
+
+
+Sleeping 300s before next cycle...
+
+==============================================================================
+[repo_health_automation] cycle=25 started_at=2026-03-28T23:55:21.595560+00:00
+==============================================================================
+
+--> pre_commit_check: /usr/local/bin/python3 scripts/pre_commit_check.py
+[FAIL] pre_commit_check rc=1 duration=236.72s
+
+--> integration_contract_gate: bash scripts/integration_contract_gate.sh --strict-endpoints
+[FAIL] integration_contract_gate rc=1 duration=26.50s
+
+------------------------------------------------------------------------------
+[repo_health_automation] cycle=25 succeeded=False duration=263.22s
+------------------------------------------------------------------------------
+First failed step: pre_commit_check
+--- stdout tail ---
+═════════════════════════════════════════[0m
+
+[96m[1m[1/5] Running unit tests...[0m
+[91m✗ Tests failed[0m
+ docsstring that effectively summarizes the purpose of the shared/chat_memory.py file in the context of the provided public helper:
+E          ^^^^^^^^
+E   SyntaxError: invalid syntax
+=========================== short test summary info ============================
+ERROR tests/test_chat_memory.py
+ERROR tests/test_database_integration.py
+!!!!!!!!!!!!!!!!!!! Interrupted: 2 errors during collection !!!!!!!!!!!!!!!!!!!!
+======================== 3 skipped, 2 errors in 21.89s =========================
+
+
+[96m[1m[2/5] Linting code...[0m
+[91m✗ Found critical linting issues (E9,F63,F7,F82,B904) in 55 staged file(s)[0m
+  B904 Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None` to distinguish them from errors in exception handling
+     --> scripts/autonomous_code_agent.py:303:13
+      |
+  301 |                   return result.get("response", "").strip()
+  302 |           except urllib.error.URLError as e:
+  303 | /             raise ConnectionError(
+  304 | |                 f"Cannot connect to Ollama at {self.base_url}: {e}")
+      | |____________________________________________________________________^
+  305 |
+  306 |       def _query_lmstudio(self, prompt: str, max_tokens: int) -> str:
+
+[96m[1m[3/5] Security scan...[0m
+[92m✓ No security issues detected[0m
+
+[96m[1m[4/5] Git hygiene...[0m
+[92m✓ Git staging area looks clean[0m
+
+[96m[1m[5/5] Checking documentation...[0m
+[92m✓ All key documentation present[0m
+
+[1m═══════════════════════════════════════════════════════════════════[0m
+[91m[1mRESULT: Some checks failed (3/5 passed)[0m
+[1m═══════════════════════════════════════════════════════════════════[0m
+
+
+Sleeping 300s before next cycle...
+
+==============================================================================
+[repo_health_automation] cycle=26 started_at=2026-03-29T00:05:40.704193+00:00
+==============================================================================
+
+--> pre_commit_check: /usr/local/bin/python3 scripts/pre_commit_check.py
+[FAIL] pre_commit_check rc=1 duration=212.95s
+
+--> integration_contract_gate: bash scripts/integration_contract_gate.sh --strict-endpoints
+[FAIL] integration_contract_gate rc=1 duration=25.01s
+
+------------------------------------------------------------------------------
+[repo_health_automation] cycle=26 succeeded=False duration=237.96s
+------------------------------------------------------------------------------
+First failed step: pre_commit_check
+--- stdout tail ---
+═════════════════════════════════════════[0m
+
+[96m[1m[1/5] Running unit tests...[0m
+[91m✗ Tests failed[0m
+ docsstring that effectively summarizes the purpose of the shared/chat_memory.py file in the context of the provided public helper:
+E          ^^^^^^^^
+E   SyntaxError: invalid syntax
+=========================== short test summary info ============================
+ERROR tests/test_chat_memory.py
+ERROR tests/test_database_integration.py
+!!!!!!!!!!!!!!!!!!! Interrupted: 2 errors during collection !!!!!!!!!!!!!!!!!!!!
+======================== 3 skipped, 2 errors in 20.26s =========================
+
+
+[96m[1m[2/5] Linting code...[0m
+[91m✗ Found critical linting issues (E9,F63,F7,F82,B904) in 55 staged file(s)[0m
+  B904 Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None` to distinguish them from errors in exception handling
+     --> scripts/autonomous_code_agent.py:303:13
+      |
+  301 |                   return result.get("response", "").strip()
+  302 |           except urllib.error.URLError as e:
+  303 | /             raise ConnectionError(
+  304 | |                 f"Cannot connect to Ollama at {self.base_url}: {e}")
+      | |____________________________________________________________________^
+  305 |
+  306 |       def _query_lmstudio(self, prompt: str, max_tokens: int) -> str:
+
+[96m[1m[3/5] Security scan...[0m
+[92m✓ No security issues detected[0m
+
+[96m[1m[4/5] Git hygiene...[0m
+[92m✓ Git staging area looks clean[0m
+
+[96m[1m[5/5] Checking documentation...[0m
+[92m✓ All key documentation present[0m
+
+[1m═══════════════════════════════════════════════════════════════════[0m
+[91m[1mRESULT: Some checks failed (3/5 passed)[0m
+[1m═══════════════════════════════════════════════════════════════════[0m
+
+
+Sleeping 300s before next cycle...
+
+==============================================================================
+[repo_health_automation] cycle=27 started_at=2026-03-29T00:15:29.980034+00:00
+==============================================================================
+
+--> pre_commit_check: /usr/local/bin/python3 scripts/pre_commit_check.py
+[FAIL] pre_commit_check rc=1 duration=211.81s
+
+--> integration_contract_gate: bash scripts/integration_contract_gate.sh --strict-endpoints
+[FAIL] integration_contract_gate rc=1 duration=25.51s
+
+------------------------------------------------------------------------------
+[repo_health_automation] cycle=27 succeeded=False duration=237.32s
+------------------------------------------------------------------------------
+First failed step: pre_commit_check
+--- stdout tail ---
+═════════════════════════════════════════[0m
+
+[96m[1m[1/5] Running unit tests...[0m
+[91m✗ Tests failed[0m
+ docsstring that effectively summarizes the purpose of the shared/chat_memory.py file in the context of the provided public helper:
+E          ^^^^^^^^
+E   SyntaxError: invalid syntax
+=========================== short test summary info ============================
+ERROR tests/test_chat_memory.py
+ERROR tests/test_database_integration.py
+!!!!!!!!!!!!!!!!!!! Interrupted: 2 errors during collection !!!!!!!!!!!!!!!!!!!!
+======================== 3 skipped, 2 errors in 18.16s =========================
+
+
+[96m[1m[2/5] Linting code...[0m
+[91m✗ Found critical linting issues (E9,F63,F7,F82,B904) in 55 staged file(s)[0m
+  B904 Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None` to distinguish them from errors in exception handling
+     --> scripts/autonomous_code_agent.py:303:13
+      |
+  301 |                   return result.get("response", "").strip()
+  302 |           except urllib.error.URLError as e:
+  303 | /             raise ConnectionError(
+  304 | |                 f"Cannot connect to Ollama at {self.base_url}: {e}")
+      | |____________________________________________________________________^
+  305 |
+  306 |       def _query_lmstudio(self, prompt: str, max_tokens: int) -> str:
+
+[96m[1m[3/5] Security scan...[0m
+[92m✓ No security issues detected[0m
+
+[96m[1m[4/5] Git hygiene...[0m
+[92m✓ Git staging area looks clean[0m
+
+[96m[1m[5/5] Checking documentation...[0m
+[92m✓ All key documentation present[0m
+
+[1m═══════════════════════════════════════════════════════════════════[0m
+[91m[1mRESULT: Some checks failed (3/5 passed)[0m
+[1m═══════════════════════════════════════════════════════════════════[0m
+
+
+Sleeping 300s before next cycle...
+
+==============================================================================
+[repo_health_automation] cycle=28 started_at=2026-03-29T00:25:20.469367+00:00
+==============================================================================
+
+--> pre_commit_check: /usr/local/bin/python3 scripts/pre_commit_check.py
+[FAIL] pre_commit_check rc=1 duration=248.72s
+
+--> integration_contract_gate: bash scripts/integration_contract_gate.sh --strict-endpoints
+[FAIL] integration_contract_gate rc=1 duration=26.52s
+
+------------------------------------------------------------------------------
+[repo_health_automation] cycle=28 succeeded=False duration=275.25s
+------------------------------------------------------------------------------
+First failed step: pre_commit_check
+--- stdout tail ---
+═════════════════════════════════════════[0m
+
+[96m[1m[1/5] Running unit tests...[0m
+[91m✗ Tests failed[0m
+ docsstring that effectively summarizes the purpose of the shared/chat_memory.py file in the context of the provided public helper:
+E          ^^^^^^^^
+E   SyntaxError: invalid syntax
+=========================== short test summary info ============================
+ERROR tests/test_chat_memory.py
+ERROR tests/test_database_integration.py
+!!!!!!!!!!!!!!!!!!! Interrupted: 2 errors during collection !!!!!!!!!!!!!!!!!!!!
+======================== 3 skipped, 2 errors in 19.90s =========================
+
+
+[96m[1m[2/5] Linting code...[0m
+[91m✗ Found critical linting issues (E9,F63,F7,F82,B904) in 55 staged file(s)[0m
+  B904 Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None` to distinguish them from errors in exception handling
+     --> scripts/autonomous_code_agent.py:303:13
+      |
+  301 |                   return result.get("response", "").strip()
+  302 |           except urllib.error.URLError as e:
+  303 | /             raise ConnectionError(
+  304 | |                 f"Cannot connect to Ollama at {self.base_url}: {e}")
+      | |____________________________________________________________________^
+  305 |
+  306 |       def _query_lmstudio(self, prompt: str, max_tokens: int) -> str:
+
+[96m[1m[3/5] Security scan...[0m
+[92m✓ No security issues detected[0m
+
+[96m[1m[4/5] Git hygiene...[0m
+[92m✓ Git staging area looks clean[0m
+
+[96m[1m[5/5] Checking documentation...[0m
+[92m✓ All key documentation present[0m
+
+[1m═══════════════════════════════════════════════════════════════════[0m
+[91m[1mRESULT: Some checks failed (3/5 passed)[0m
+[1m═══════════════════════════════════════════════════════════════════[0m
+
+
+Sleeping 300s before next cycle...
+
+==============================================================================
+[repo_health_automation] cycle=29 started_at=2026-03-29T00:35:52.543124+00:00
+==============================================================================
+
+--> pre_commit_check: /usr/local/bin/python3 scripts/pre_commit_check.py
+[FAIL] pre_commit_check rc=1 duration=266.76s
+
+--> integration_contract_gate: bash scripts/integration_contract_gate.sh --strict-endpoints
+[FAIL] integration_contract_gate rc=1 duration=25.27s
+
+------------------------------------------------------------------------------
+[repo_health_automation] cycle=29 succeeded=False duration=292.03s
+------------------------------------------------------------------------------
+First failed step: pre_commit_check
+--- stdout tail ---
+═════════════════════════════════════════[0m
+
+[96m[1m[1/5] Running unit tests...[0m
+[91m✗ Tests failed[0m
+ docsstring that effectively summarizes the purpose of the shared/chat_memory.py file in the context of the provided public helper:
+E          ^^^^^^^^
+E   SyntaxError: invalid syntax
+=========================== short test summary info ============================
+ERROR tests/test_chat_memory.py
+ERROR tests/test_database_integration.py
+!!!!!!!!!!!!!!!!!!! Interrupted: 2 errors during collection !!!!!!!!!!!!!!!!!!!!
+======================== 3 skipped, 2 errors in 19.73s =========================
+
+
+[96m[1m[2/5] Linting code...[0m
+[91m✗ Found critical linting issues (E9,F63,F7,F82,B904) in 55 staged file(s)[0m
+  B904 Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None` to distinguish them from errors in exception handling
+     --> scripts/autonomous_code_agent.py:303:13
+      |
+  301 |                   return result.get("response", "").strip()
+  302 |           except urllib.error.URLError as e:
+  303 | /             raise ConnectionError(
+  304 | |                 f"Cannot connect to Ollama at {self.base_url}: {e}")
+      | |____________________________________________________________________^
+  305 |
+  306 |       def _query_lmstudio(self, prompt: str, max_tokens: int) -> str:
+
+[96m[1m[3/5] Security scan...[0m
+[92m✓ No security issues detected[0m
+
+[96m[1m[4/5] Git hygiene...[0m
+[92m✓ Git staging area looks clean[0m
+
+[96m[1m[5/5] Checking documentation...[0m
+[92m✓ All key documentation present[0m
+
+[1m═══════════════════════════════════════════════════════════════════[0m
+[91m[1mRESULT: Some checks failed (3/5 passed)[0m
+[1m═══════════════════════════════════════════════════════════════════[0m
+
+
+Sleeping 300s before next cycle...
+
+==============================================================================
+[repo_health_automation] cycle=30 started_at=2026-03-29T00:46:35.731479+00:00
+==============================================================================
+
+--> pre_commit_check: /usr/local/bin/python3 scripts/pre_commit_check.py
+[FAIL] pre_commit_check rc=1 duration=257.60s
+
+--> integration_contract_gate: bash scripts/integration_contract_gate.sh --strict-endpoints
+[FAIL] integration_contract_gate rc=1 duration=29.04s
+
+------------------------------------------------------------------------------
+[repo_health_automation] cycle=30 succeeded=False duration=286.64s
+------------------------------------------------------------------------------
+First failed step: pre_commit_check
+--- stdout tail ---
+═════════════════════════════════════════[0m
+
+[96m[1m[1/5] Running unit tests...[0m
+[91m✗ Tests failed[0m
+ docsstring that effectively summarizes the purpose of the shared/chat_memory.py file in the context of the provided public helper:
+E          ^^^^^^^^
+E   SyntaxError: invalid syntax
+=========================== short test summary info ============================
+ERROR tests/test_chat_memory.py
+ERROR tests/test_database_integration.py
+!!!!!!!!!!!!!!!!!!! Interrupted: 2 errors during collection !!!!!!!!!!!!!!!!!!!!
+======================== 3 skipped, 2 errors in 17.30s =========================
+
+
+[96m[1m[2/5] Linting code...[0m
+[91m✗ Found critical linting issues (E9,F63,F7,F82,B904) in 55 staged file(s)[0m
+  B904 Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None` to distinguish them from errors in exception handling
+     --> scripts/autonomous_code_agent.py:303:13
+      |
+  301 |                   return result.get("response", "").strip()
+  302 |           except urllib.error.URLError as e:
+  303 | /             raise ConnectionError(
+  304 | |                 f"Cannot connect to Ollama at {self.base_url}: {e}")
+      | |____________________________________________________________________^
+  305 |
+  306 |       def _query_lmstudio(self, prompt: str, max_tokens: int) -> str:
+
+[96m[1m[3/5] Security scan...[0m
+[92m✓ No security issues detected[0m
+
+[96m[1m[4/5] Git hygiene...[0m
+[92m✓ Git staging area looks clean[0m
+
+[96m[1m[5/5] Checking documentation...[0m
+[92m✓ All key documentation present[0m
+
+[1m═══════════════════════════════════════════════════════════════════[0m
+[91m[1mRESULT: Some checks failed (3/5 passed)[0m
+[1m═══════════════════════════════════════════════════════════════════[0m
+
+
+Sleeping 300s before next cycle...
+
+==============================================================================
+[repo_health_automation] cycle=31 started_at=2026-03-29T00:57:01.840047+00:00
+==============================================================================
+
+--> pre_commit_check: /usr/local/bin/python3 scripts/pre_commit_check.py
+[FAIL] pre_commit_check rc=1 duration=211.32s
+
+--> integration_contract_gate: bash scripts/integration_contract_gate.sh --strict-endpoints
+[FAIL] integration_contract_gate rc=1 duration=25.40s
+
+------------------------------------------------------------------------------
+[repo_health_automation] cycle=31 succeeded=False duration=236.72s
+------------------------------------------------------------------------------
+First failed step: pre_commit_check
+--- stdout tail ---
+═════════════════════════════════════════[0m
+
+[96m[1m[1/5] Running unit tests...[0m
+[91m✗ Tests failed[0m
+ docsstring that effectively summarizes the purpose of the shared/chat_memory.py file in the context of the provided public helper:
+E          ^^^^^^^^
+E   SyntaxError: invalid syntax
+=========================== short test summary info ============================
+ERROR tests/test_chat_memory.py
+ERROR tests/test_database_integration.py
+!!!!!!!!!!!!!!!!!!! Interrupted: 2 errors during collection !!!!!!!!!!!!!!!!!!!!
+======================== 3 skipped, 2 errors in 21.40s =========================
+
+
+[96m[1m[2/5] Linting code...[0m
+[91m✗ Found critical linting issues (E9,F63,F7,F82,B904) in 55 staged file(s)[0m
+  B904 Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None` to distinguish them from errors in exception handling
+     --> scripts/autonomous_code_agent.py:303:13
+      |
+  301 |                   return result.get("response", "").strip()
+  302 |           except urllib.error.URLError as e:
+  303 | /             raise ConnectionError(
+  304 | |                 f"Cannot connect to Ollama at {self.base_url}: {e}")
+      | |____________________________________________________________________^
+  305 |
+  306 |       def _query_lmstudio(self, prompt: str, max_tokens: int) -> str:
+
+[96m[1m[3/5] Security scan...[0m
+[92m✓ No security issues detected[0m
+
+[96m[1m[4/5] Git hygiene...[0m
+[92m✓ Git staging area looks clean[0m
+
+[96m[1m[5/5] Checking documentation...[0m
+[92m✓ All key documentation present[0m
+
+[1m═══════════════════════════════════════════════════════════════════[0m
+[91m[1mRESULT: Some checks failed (3/5 passed)[0m
+[1m═══════════════════════════════════════════════════════════════════[0m
+
+
+Sleeping 300s before next cycle...
+
+==============================================================================
+[repo_health_automation] cycle=32 started_at=2026-03-29T01:06:41.977612+00:00
+==============================================================================
+
+--> pre_commit_check: /usr/local/bin/python3 scripts/pre_commit_check.py
+[FAIL] pre_commit_check rc=1 duration=236.92s
+
+--> integration_contract_gate: bash scripts/integration_contract_gate.sh --strict-endpoints
+[FAIL] integration_contract_gate rc=1 duration=27.26s
+
+------------------------------------------------------------------------------
+[repo_health_automation] cycle=32 succeeded=False duration=264.18s
+------------------------------------------------------------------------------
+First failed step: pre_commit_check
+--- stdout tail ---
+═════════════════════════════════════════[0m
+
+[96m[1m[1/5] Running unit tests...[0m
+[91m✗ Tests failed[0m
+ docsstring that effectively summarizes the purpose of the shared/chat_memory.py file in the context of the provided public helper:
+E          ^^^^^^^^
+E   SyntaxError: invalid syntax
+=========================== short test summary info ============================
+ERROR tests/test_chat_memory.py
+ERROR tests/test_database_integration.py
+!!!!!!!!!!!!!!!!!!! Interrupted: 2 errors during collection !!!!!!!!!!!!!!!!!!!!
+======================== 3 skipped, 2 errors in 17.75s =========================
+
+
+[96m[1m[2/5] Linting code...[0m
+[91m✗ Found critical linting issues (E9,F63,F7,F82,B904) in 55 staged file(s)[0m
+  B904 Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None` to distinguish them from errors in exception handling
+     --> scripts/autonomous_code_agent.py:303:13
+      |
+  301 |                   return result.get("response", "").strip()
+  302 |           except urllib.error.URLError as e:
+  303 | /             raise ConnectionError(
+  304 | |                 f"Cannot connect to Ollama at {self.base_url}: {e}")
+      | |____________________________________________________________________^
+  305 |
+  306 |       def _query_lmstudio(self, prompt: str, max_tokens: int) -> str:
+
+[96m[1m[3/5] Security scan...[0m
+[92m✓ No security issues detected[0m
+
+[96m[1m[4/5] Git hygiene...[0m
+[92m✓ Git staging area looks clean[0m
+
+[96m[1m[5/5] Checking documentation...[0m
+[92m✓ All key documentation present[0m
+
+[1m═══════════════════════════════════════════════════════════════════[0m
+[91m[1mRESULT: Some checks failed (3/5 passed)[0m
+[1m═══════════════════════════════════════════════════════════════════[0m
+
+
+Sleeping 300s before next cycle...
+
+==============================================================================
+[repo_health_automation] cycle=33 started_at=2026-03-29T01:16:46.836414+00:00
+==============================================================================
+
+--> pre_commit_check: /usr/local/bin/python3 scripts/pre_commit_check.py
+[FAIL] pre_commit_check rc=1 duration=330.34s
+
+--> integration_contract_gate: bash scripts/integration_contract_gate.sh --strict-endpoints
+[FAIL] integration_contract_gate rc=1 duration=29.50s
+
+------------------------------------------------------------------------------
+[repo_health_automation] cycle=33 succeeded=False duration=359.83s
+------------------------------------------------------------------------------
+First failed step: pre_commit_check
+--- stdout tail ---
+═════════════════════════════════════════[0m
+
+[96m[1m[1/5] Running unit tests...[0m
+[91m✗ Tests failed[0m
+ docsstring that effectively summarizes the purpose of the shared/chat_memory.py file in the context of the provided public helper:
+E          ^^^^^^^^
+E   SyntaxError: invalid syntax
+=========================== short test summary info ============================
+ERROR tests/test_chat_memory.py
+ERROR tests/test_database_integration.py
+!!!!!!!!!!!!!!!!!!! Interrupted: 2 errors during collection !!!!!!!!!!!!!!!!!!!!
+======================== 3 skipped, 2 errors in 27.39s =========================
+
+
+[96m[1m[2/5] Linting code...[0m
+[91m✗ Found critical linting issues (E9,F63,F7,F82,B904) in 55 staged file(s)[0m
+  B904 Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None` to distinguish them from errors in exception handling
+     --> scripts/autonomous_code_agent.py:303:13
+      |
+  301 |                   return result.get("response", "").strip()
+  302 |           except urllib.error.URLError as e:
+  303 | /             raise ConnectionError(
+  304 | |                 f"Cannot connect to Ollama at {self.base_url}: {e}")
+      | |____________________________________________________________________^
+  305 |
+  306 |       def _query_lmstudio(self, prompt: str, max_tokens: int) -> str:
+
+[96m[1m[3/5] Security scan...[0m
+[92m✓ No security issues detected[0m
+
+[96m[1m[4/5] Git hygiene...[0m
+[92m✓ Git staging area looks clean[0m
+
+[96m[1m[5/5] Checking documentation...[0m
+[92m✓ All key documentation present[0m
+
+[1m═══════════════════════════════════════════════════════════════════[0m
+[91m[1mRESULT: Some checks failed (3/5 passed)[0m
+[1m═══════════════════════════════════════════════════════════════════[0m
+
+
+Sleeping 300s before next cycle...
+
+==============================================================================
+[repo_health_automation] cycle=34 started_at=2026-03-29T01:28:42.910136+00:00
+==============================================================================
+
+--> pre_commit_check: /usr/local/bin/python3 scripts/pre_commit_check.py
+[FAIL] pre_commit_check rc=1 duration=231.39s
+
+--> integration_contract_gate: bash scripts/integration_contract_gate.sh --strict-endpoints
+[FAIL] integration_contract_gate rc=1 duration=25.38s
+
+------------------------------------------------------------------------------
+[repo_health_automation] cycle=34 succeeded=False duration=256.77s
+------------------------------------------------------------------------------
+First failed step: pre_commit_check
+--- stdout tail ---
+═════════════════════════════════════════[0m
+
+[96m[1m[1/5] Running unit tests...[0m
+[91m✗ Tests failed[0m
+ docsstring that effectively summarizes the purpose of the shared/chat_memory.py file in the context of the provided public helper:
+E          ^^^^^^^^
+E   SyntaxError: invalid syntax
+=========================== short test summary info ============================
+ERROR tests/test_chat_memory.py
+ERROR tests/test_database_integration.py
+!!!!!!!!!!!!!!!!!!! Interrupted: 2 errors during collection !!!!!!!!!!!!!!!!!!!!
+======================== 3 skipped, 2 errors in 19.26s =========================
+
+
+[96m[1m[2/5] Linting code...[0m
+[91m✗ Found critical linting issues (E9,F63,F7,F82,B904) in 55 staged file(s)[0m
+  B904 Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None` to distinguish them from errors in exception handling
+     --> scripts/autonomous_code_agent.py:303:13
+      |
+  301 |                   return result.get("response", "").strip()
+  302 |           except urllib.error.URLError as e:
+  303 | /             raise ConnectionError(
+  304 | |                 f"Cannot connect to Ollama at {self.base_url}: {e}")
+      | |____________________________________________________________________^
+  305 |
+  306 |       def _query_lmstudio(self, prompt: str, max_tokens: int) -> str:
+
+[96m[1m[3/5] Security scan...[0m
+[92m✓ No security issues detected[0m
+
+[96m[1m[4/5] Git hygiene...[0m
+[92m✓ Git staging area looks clean[0m
+
+[96m[1m[5/5] Checking documentation...[0m
+[92m✓ All key documentation present[0m
+
+[1m═══════════════════════════════════════════════════════════════════[0m
+[91m[1mRESULT: Some checks failed (3/5 passed)[0m
+[1m═══════════════════════════════════════════════════════════════════[0m
+
+
+Sleeping 300s before next cycle...
+
+==============================================================================
+[repo_health_automation] cycle=35 started_at=2026-03-29T01:38:49.112233+00:00
+==============================================================================
+
+--> pre_commit_check: /usr/local/bin/python3 scripts/pre_commit_check.py
+[FAIL] pre_commit_check rc=1 duration=210.36s
+
+--> integration_contract_gate: bash scripts/integration_contract_gate.sh --strict-endpoints
+[FAIL] integration_contract_gate rc=1 duration=28.29s
+
+------------------------------------------------------------------------------
+[repo_health_automation] cycle=35 succeeded=False duration=238.65s
+------------------------------------------------------------------------------
+First failed step: pre_commit_check
+--- stdout tail ---
+═════════════════════════════════════════[0m
+
+[96m[1m[1/5] Running unit tests...[0m
+[91m✗ Tests failed[0m
+ docsstring that effectively summarizes the purpose of the shared/chat_memory.py file in the context of the provided public helper:
+E          ^^^^^^^^
+E   SyntaxError: invalid syntax
+=========================== short test summary info ============================
+ERROR tests/test_chat_memory.py
+ERROR tests/test_database_integration.py
+!!!!!!!!!!!!!!!!!!! Interrupted: 2 errors during collection !!!!!!!!!!!!!!!!!!!!
+======================== 3 skipped, 2 errors in 19.16s =========================
+
+
+[96m[1m[2/5] Linting code...[0m
+[91m✗ Found critical linting issues (E9,F63,F7,F82,B904) in 55 staged file(s)[0m
+  B904 Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None` to distinguish them from errors in exception handling
+     --> scripts/autonomous_code_agent.py:303:13
+      |
+  301 |                   return result.get("response", "").strip()
+  302 |           except urllib.error.URLError as e:
+  303 | /             raise ConnectionError(
+  304 | |                 f"Cannot connect to Ollama at {self.base_url}: {e}")
+      | |____________________________________________________________________^
+  305 |
+  306 |       def _query_lmstudio(self, prompt: str, max_tokens: int) -> str:
+
+[96m[1m[3/5] Security scan...[0m
+[92m✓ No security issues detected[0m
+
+[96m[1m[4/5] Git hygiene...[0m
+[92m✓ Git staging area looks clean[0m
+
+[96m[1m[5/5] Checking documentation...[0m
+[92m✓ All key documentation present[0m
+
+[1m═══════════════════════════════════════════════════════════════════[0m
+[91m[1mRESULT: Some checks failed (3/5 passed)[0m
+[1m═══════════════════════════════════════════════════════════════════[0m
+
+
+Sleeping 300s before next cycle...
+
+==============================================================================
+[repo_health_automation] cycle=36 started_at=2026-03-29T01:48:40.139499+00:00
+==============================================================================
+
+--> pre_commit_check: /usr/local/bin/python3 scripts/pre_commit_check.py
+[FAIL] pre_commit_check rc=1 duration=226.11s
+
+--> integration_contract_gate: bash scripts/integration_contract_gate.sh --strict-endpoints
+[FAIL] integration_contract_gate rc=1 duration=28.51s
+
+------------------------------------------------------------------------------
+[repo_health_automation] cycle=36 succeeded=False duration=254.62s
+------------------------------------------------------------------------------
+First failed step: pre_commit_check
+--- stdout tail ---
+═════════════════════════════════════════[0m
+
+[96m[1m[1/5] Running unit tests...[0m
+[91m✗ Tests failed[0m
+ docsstring that effectively summarizes the purpose of the shared/chat_memory.py file in the context of the provided public helper:
+E          ^^^^^^^^
+E   SyntaxError: invalid syntax
+=========================== short test summary info ============================
+ERROR tests/test_chat_memory.py
+ERROR tests/test_database_integration.py
+!!!!!!!!!!!!!!!!!!! Interrupted: 2 errors during collection !!!!!!!!!!!!!!!!!!!!
+======================== 3 skipped, 2 errors in 19.26s =========================
+
+
+[96m[1m[2/5] Linting code...[0m
+[91m✗ Found critical linting issues (E9,F63,F7,F82,B904) in 55 staged file(s)[0m
+  B904 Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None` to distinguish them from errors in exception handling
+     --> scripts/autonomous_code_agent.py:303:13
+      |
+  301 |                   return result.get("response", "").strip()
+  302 |           except urllib.error.URLError as e:
+  303 | /             raise ConnectionError(
+  304 | |                 f"Cannot connect to Ollama at {self.base_url}: {e}")
+      | |____________________________________________________________________^
+  305 |
+  306 |       def _query_lmstudio(self, prompt: str, max_tokens: int) -> str:
+
+[96m[1m[3/5] Security scan...[0m
+[92m✓ No security issues detected[0m
+
+[96m[1m[4/5] Git hygiene...[0m
+[92m✓ Git staging area looks clean[0m
+
+[96m[1m[5/5] Checking documentation...[0m
+[92m✓ All key documentation present[0m
+
+[1m═══════════════════════════════════════════════════════════════════[0m
+[91m[1mRESULT: Some checks failed (3/5 passed)[0m
+[1m═══════════════════════════════════════════════════════════════════[0m
+

@@ -1,0 +1,12 @@
+[
+  {
+    "task": "Smoke test forced file routing",
+    "llm_type": "echo",
+    "files": [
+      "scripts/multi_agent.py",
+      "shared/consensus_engine.py"
+    ],
+    "dry_run": true,
+    "skip_tests": true
+  }
+]
