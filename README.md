@@ -1,3 +1,14 @@
+---
+title: Aria
+emoji: 🤖
+colorFrom: blue
+colorTo: purple
+sdk: gradio
+sdk_version: "6.12.0"
+app_file: app.py
+pinned: false
+---
+
 # Aria — Interactive AI Character Platform
 
 [![CI Pipeline](https://github.com/Bryan-Roe/Aria/actions/workflows/ci-pipeline.yml/badge.svg)](https://github.com/Bryan-Roe/Aria/actions/workflows/ci-pipeline.yml)
@@ -25,6 +36,26 @@ The project is organized around four core areas:
 | **Model fine-tuning** | `AI/` | LoRA fine-tuning for Aria's language understanding |
 
 Supporting infrastructure lives in `shared/`, `scripts/`, `config/`, and `function_app.py` (Azure Functions API layer).
+
+---
+
+## 🤗 Hugging Face Spaces
+
+This repository is also configured to run as a **Gradio Hugging Face Space**.
+
+- Spaces entry point: `app.py`
+- Reusable demo helper: `scripts/gradio_hello.py`
+- SDK: `gradio`
+
+The Spaces deployment now exposes a **lightweight AI chat app** backed by the repository's existing provider abstraction. It can use the same provider layer as the rest of Aria (`auto`, local fallback, OpenAI, Azure OpenAI, LM Studio, Ollama, and AGI where configured), while remaining simpler than the full local Aria stack (`apps/aria/`, Azure Functions, training scripts, and quantum components).
+
+If you want to run the Space locally:
+
+```bash
+./.venv/bin/python app.py
+```
+
+If you want the full Aria platform instead, use the Quick Start steps below.
 
 ---
 
