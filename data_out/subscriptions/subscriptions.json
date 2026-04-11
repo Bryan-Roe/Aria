@@ -1,0 +1,78 @@
+{
+  "test_user_1": {
+    "user_id": "test_user_1",
+    "tier": "pro",
+    "tier_name": "PRO",
+    "price": 49,
+    "is_active": true,
+    "start_date": "2026-03-08T22:25:47.969627",
+    "end_date": "2026-04-07T22:25:47.969628",
+    "payment_method": "test",
+    "stripe_subscription_id": null,
+    "usage": {
+      "chat_messages": 0,
+      "quantum_jobs": 0,
+      "training_hours": 0,
+      "api_requests": 0,
+      "websites_created": 0
+    },
+    "usage_reset_date": "2026-04-07T22:25:47.969234",
+    "limits": {
+      "chat_messages": 10000,
+      "quantum_jobs": 50,
+      "training_hours": 20,
+      "api_requests": 10000,
+      "websites_created": 10
+    },
+    "features": {
+      "basic_chat": true,
+      "aria_character": true,
+      "quantum_computing": true,
+      "advanced_training": true,
+      "website_maker": true,
+      "api_access": true,
+      "priority_support": false,
+      "custom_models": false,
+      "unlimited_requests": false,
+      "commercial_license": true
+    }
+  },
+  "test_user_2": {
+    "user_id": "test_user_2",
+    "tier": "enterprise",
+    "tier_name": "ENTERPRISE",
+    "price": 199,
+    "is_active": true,
+    "start_date": "2026-03-08T22:25:47.970684",
+    "end_date": "2026-04-07T22:25:47.970685",
+    "payment_method": "test",
+    "stripe_subscription_id": null,
+    "usage": {
+      "chat_messages": 0,
+      "quantum_jobs": 0,
+      "training_hours": 0,
+      "api_requests": 0,
+      "websites_created": 0
+    },
+    "usage_reset_date": "2026-04-07T22:25:47.970472",
+    "limits": {
+      "chat_messages": -1,
+      "quantum_jobs": -1,
+      "training_hours": -1,
+      "api_requests": -1,
+      "websites_created": -1
+    },
+    "features": {
+      "basic_chat": true,
+      "aria_character": true,
+      "quantum_computing": true,
+      "advanced_training": true,
+      "website_maker": true,
+      "api_access": true,
+      "priority_support": true,
+      "custom_models": true,
+      "unlimited_requests": true,
+      "commercial_license": true
+    }
+  }
+}

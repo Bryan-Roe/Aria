@@ -1,0 +1,59 @@
+version: 1
+# Quantum AutoRun jobs: define quick local training runs for quantum-ai
+# Notes:
+# - Local jobs (mode: train_custom_dataset) are FREE and use local simulators
+# - Azure jobs (mode: azure_hardware) can incur costs for QPU usage
+# - Keep epochs small for smoke tests. Increase later for real training.
+# - Choose either 'preset' or 'csv' per job (do not set both).
+
+jobs:
+  # === LOCAL SIMULATOR JOBS (FREE) ===
+  - name: heart_quick
+    mode: train_custom_dataset
+    preset: heart
+    # csv: datasets/quantum/heart_disease.csv   # alternative to preset
+    # label_col: class
+    # drop_cols: ''                             # comma-separated list
+    n_qubits: 4
+    epochs: 50
+    batch_size: 16
+    learning_rate: 0.001
+    test_size: 0.2
+    enabled: true
+
+  - name: ionosphere_quick
+    mode: train_custom_dataset
+    preset: ionosphere
+    n_qubits: 4
+    epochs: 100
+    batch_size: 16
+    learning_rate: 0.001
+    test_size: 0.2
+    enabled: true  # ENABLED for quantum training
+
+  # === AZURE QUANTUM JOBS (MAY INCUR COSTS) ===
+  # IMPORTANT: Set azure_confirm_cost: true to acknowledge hardware costs
+  # Use simulators (*.simulator) for free Azure testing
+
+  - name: azure_quantinuum_simulator
+    mode: azure_hardware
+    azure_backend: quantinuum.sim.h2-1sc  # FREE: Quantinuum cloud simulator
+    azure_shots: 100
+    qubits: 3
+    enabled: true  # ENABLED for Azure testing
+    # Note: Requires Azure credentials and quantum workspace
+    # Run: az login before executing this job
+
+  - name: azure_ionq_qpu_test
+    mode: azure_hardware
+    azure_backend: ionq.qpu  # PAID: Real IonQ quantum hardware
+    azure_shots: 100
+    n_qubits: 3
+    azure_confirm_cost: false  # SAFETY: Set to true to enable (acknowledges costs)
+    enabled: false
+    # Cost estimate: ~$0.00003 per gate-shot
+    # Always test on simulator first!
+    # Requires: az login, valid Azure Quantum workspace
+    extra_args:
+      - --circuit-file
+      - ai-projects/quantum-ml/results/sample_circuit.qasm  # path to QASM circuit file

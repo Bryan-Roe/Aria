@@ -1,0 +1,37 @@
+adam_beta1: !!float 0.9
+adam_beta2: !!float 0.95
+adam_epsilon: !!float 1E-08
+early_stopping_patience: 5
+epochs: 1
+eval_accumulation_steps: null
+eval_delay: 0
+eval_steps: 64
+eval_strategy: "steps"
+save_dir: "data_out/lora_training"
+finetune_dataset: "data"
+finetune_test_batch_size: 8
+finetune_test_nsamples: 16
+finetune_test_seqlen: 512
+finetune_train_batch_size: 1
+finetune_train_nsamples: 64
+finetune_train_seqlen: 512
+gradient_accumulation_steps: 4  # Effective batch size = 1 * 4 = 4
+gradient_checkpointing: true  # Enable to reduce memory usage
+learning_rate: !!float 0.0002
+lora_dropout: !!float 0.1
+lr_scheduler_type: "cosine"  # Cosine annealing for better convergence
+max_grad_norm: 1
+warmup_steps: 100  # Warmup for stable training start
+early_stopping_threshold: !!float 0.01  # Stop if improvement < 1%
+model: "gpt2"  # For LoRA training with GPT-2
+model_path: "model"
+num_training_steps: 100
+num_warmup_steps: 10
+save_steps: 64
+seed: 42
+weight_decay: 0
+
+# LoRA/PEFT target modules for GPT-2
+target_modules:
+  - "c_attn"
+  - "c_proj"

@@ -1,0 +1,156 @@
+{
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "language": "markdown"
+      },
+      "source": [
+        "# Generated Code: End-to-End Record Pipeline\n",
+        "\n",
+        "This notebook builds a complete processing pipeline using generated utility modules."
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "language": "python"
+      },
+      "source": [
+        "from generated_tools.data_record_utils import (\n",
+        "    select_fields,\n",
+        "    rename_fields,\n",
+        "    filter_records,\n",
+        "    map_field,\n",
+        "    deduplicate_records,\n",
+        "    sort_records,\n",
+        "    aggregate_sum,\n",
+        ")\n",
+        "from generated_tools.data_validation_utils import (\n",
+        "    is_non_empty_string,\n",
+        "    is_valid_email,\n",
+        "    in_numeric_range,\n",
+        "    pick_validation_errors,\n",
+        ")\n",
+        "from generated_tools.data_stats_utils import mean, median, five_number_summary\n",
+        "\n",
+        "print('Imports ready')"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "language": "python"
+      },
+      "source": [
+        "# Input records\n",
+        "records = [\n",
+        "    {\"id\": 1, \"name\": \"Aria\", \"email\": \"aria@example.com\", \"team\": \"alpha\", \"score\": 10},\n",
+        "    {\"id\": 2, \"name\": \" Nora \", \"email\": \"nora@example.com\", \"team\": \"beta\", \"score\": 7},\n",
+        "    {\"id\": 3, \"name\": \"\", \"email\": \"bad@\", \"team\": \"alpha\", \"score\": 5},\n",
+        "    {\"id\": 3, \"name\": \"\", \"email\": \"bad@\", \"team\": \"alpha\", \"score\": 5},\n",
+        "    {\"id\": 4, \"name\": None, \"email\": \"zed@example.com\", \"team\": None, \"score\": \"n/a\"},\n",
+        "]\n",
+        "\n",
+        "records"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "language": "python"
+      },
+      "source": [
+        "# Validation helper\n",
+        "def validate_record(record: dict) -> list[str]:\n",
+        "    errors = []\n",
+        "    errors.extend(\n",
+        "        pick_validation_errors(\n",
+        "            record,\n",
+        "            required_keys=[\"id\", \"name\", \"email\", \"team\", \"score\"],\n",
+        "            expected_types={\n",
+        "                \"id\": int,\n",
+        "                \"name\": (str, type(None)),\n",
+        "                \"email\": str,\n",
+        "                \"score\": (int, float, str),\n",
+        "            },\n",
+        "        )\n",
+        "    )\n",
+        "\n",
+        "    if not is_non_empty_string(record.get(\"name\")):\n",
+        "        errors.append(\"name must be non-empty\")\n",
+        "    if not is_valid_email(record.get(\"email\", \"\")):\n",
+        "        errors.append(\"email must be valid\")\n",
+        "    if isinstance(record.get(\"score\"), (int, float)) and not in_numeric_range(record[\"score\"], 0, 100):\n",
+        "        errors.append(\"score must be in range 0..100\")\n",
+        "\n",
+        "    return errors\n",
+        "\n",
+        "validation_results = [\n",
+        "    {\"id\": r.get(\"id\"), \"errors\": validate_record(r)} for r in records\n",
+        "]\n",
+        "validation_results"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "language": "python"
+      },
+      "source": [
+        "# Transform pipeline\n",
+        "step1 = select_fields(records, [\"id\", \"name\", \"email\", \"team\", \"score\"])\n",
+        "step2 = rename_fields(step1, {\"name\": \"display_name\"})\n",
+        "step3 = map_field(step2, \"display_name\", lambda v: v.strip().title() if isinstance(v, str) else v)\n",
+        "step4 = deduplicate_records(step3, [\"id\", \"email\", \"team\", \"score\"])\n",
+        "step5 = filter_records(\n",
+        "    step4,\n",
+        "    lambda r: (\n",
+        "        isinstance(r.get(\"score\"), (int, float))\n",
+        "        and r[\"score\"] >= 6\n",
+        "        and is_non_empty_string(r.get(\"display_name\"))\n",
+        "        and is_valid_email(r.get(\"email\", \"\"))\n",
+        "    ),\n",
+        ")\n",
+        "cleaned = sort_records(step5, key=\"score\", descending=True)\n",
+        "cleaned"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "language": "python"
+      },
+      "source": [
+        "# Aggregation + stats\n",
+        "team_totals = aggregate_sum(cleaned, group_key=\"team\", value_key=\"score\")\n",
+        "scores = [r[\"score\"] for r in cleaned]\n",
+        "\n",
+        "summary = {\n",
+        "    \"rows_in\": len(records),\n",
+        "    \"rows_cleaned\": len(cleaned),\n",
+        "    \"team_totals\": team_totals,\n",
+        "    \"score_mean\": mean(scores) if scores else None,\n",
+        "    \"score_median\": median(scores) if scores else None,\n",
+        "    \"score_five_number\": five_number_summary(scores) if scores else None,\n",
+        "}\n",
+        "summary"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "language": "python"
+      },
+      "source": [
+        "# Final payload for downstream API/CLI use\n",
+        "payload = {\n",
+        "    \"cleaned_records\": cleaned,\n",
+        "    \"validation_results\": validation_results,\n",
+        "    \"summary\": summary,\n",
+        "}\n",
+        "payload"
+      ]
+    }
+  ]
+}

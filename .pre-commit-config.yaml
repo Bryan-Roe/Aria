@@ -1,0 +1,42 @@
+repos:
+  - repo: https://github.com/psf/black
+    rev: 24.8.0
+    hooks:
+      - id: black
+        language_version: python3
+
+  - repo: https://github.com/pycqa/isort
+    rev: 5.12.0
+    hooks:
+      - id: isort
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.4.0
+    hooks:
+      - id: ruff
+
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.8.0
+    hooks:
+      - id: mypy
+
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+
+  - repo: local
+    hooks:
+      - id: check-cli-sys-path
+        name: Check CLI sys.path pattern
+        entry: scripts/check_cli_scripts_sys_path.py
+        language: python
+        files: ^scripts/.*\.py$
+        description: "Ensure CLI scripts add repo root to sys.path before importing local packages"
+      - id: check-docs-cli-note
+        name: Check docs reference CLI sys.path note
+        entry: scripts/check_docs_for_cli_note.py
+        language: python
+        files: ^(docs/|.*\.md$)
+        description: "If docs reference `scripts/`, ensure they include the CLI sys.path guidance"

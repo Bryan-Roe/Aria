@@ -1,0 +1,23 @@
+{
+  "top_level_required": [
+    "generated_at",
+    "run_id",
+    "config_path",
+    "config_paths",
+    "total_steps",
+    "succeeded",
+    "failed",
+    "skipped",
+    "results"
+  ],
+  "config_paths_required": [
+    "autotrain",
+    "quantum_autorun",
+    "evaluation_autorun",
+    "master_orchestrator"
+  ],
+  "result_required": [
+    "name",
+    "status"
+  ]
+}

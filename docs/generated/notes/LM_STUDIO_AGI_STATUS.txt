@@ -1,0 +1,58 @@
+LM STUDIO + AGI PROVIDER INTEGRATION - FINAL STATUS
+====================================================
+
+WHAT'S COMPLETE:
+✓ Added "lmstudio-specialist" agent to _AGENT_REGISTRY in agi_provider.py
+  File: /workspaces/Aria/ai-projects/chat-cli/src/agi_provider.py
+  Location: After line 108 (reasoning-specialist), before general agent
+  Status: Successfully added with all required fields
+
+WHAT'S REMAINING:
+✗ Update detect_provider() in chat_providers.py to handle explicit="lmstudio"
+  File: /workspaces/Aria/ai-projects/chat-cli/src/chat_providers.py
+  Function: detect_provider() at line 1257
+  Action: Add elif case for explicit=="lmstudio"
+
+CODE TO ADD IN chat_providers.py detect_provider() function (as new elif case):
+
+elif explicit == "lmstudio":
+    base_url = os.getenv("LMSTUDIO_BASE_URL", "http://127.0.0.1:1234/v1")
+    model = os.getenv("LMSTUDIO_MODEL", "local-model")
+    try:
+        import urllib.request
+        request = urllib.request.Request(f"{base_url}/models")
+        with urllib.request.urlopen(request, timeout=2) as _:
+            pass
+        if hasattr(ProviderChoice, 'from_provider'):
+            info = ProviderChoice.from_provider("lmstudio", model)
+        else:
+            info = ProviderChoice(name="lmstudio", model=model)
+        return LMStudioProvider(base_url=base_url, model=model), info
+    except Exception as e:
+        raise RuntimeError(f"LM Studio not available at {base_url}: {e}")
+
+HOW TO FIND THE RIGHT LOCATION:
+- Open: /workspaces/Aria/ai-projects/chat-cli/src/chat_providers.py
+- Search for: "def detect_provider"
+- Find the section with "if explicit:" and "elif explicit ==" patterns
+- Add the code block BEFORE the final fallback/return statements
+
+TESTING AFTER CHANGE:
+cd /workspaces/Aria/ai-projects/chat-cli
+python3 src/chat_cli.py --provider lmstudio --once "Hello LM Studio"
+python3 src/chat_cli.py --once "What is machine learning?"
+
+ENV STATUS:
+LMSTUDIO_BASE_URL=http://127.0.0.1:1234/v1 (in .env)
+LMSTUDIO_MODEL=local-model (in .env)
+LM Studio running on port 1234 and tested working
+
+Total status: ABOUT 50% COMPLETE
+Agent added: YES
+Provider detection updated: NO (NEXT TASK)
+
+Files changed so far:
+- /workspaces/Aria/ai-projects/chat-cli/src/agi_provider.py (DONE)
+
+Files to change next:
+- /workspaces/Aria/ai-projects/chat-cli/src/chat_providers.py (IN PROGRESS)

@@ -1,0 +1,11 @@
+{
+  "hooks": {
+    "Stop": [
+      {
+        "type": "command",
+        "command": "python3 .github/hooks/scripts/pr_checklist_guard.py",
+        "timeout": 10
+      }
+    ]
+  }
+}

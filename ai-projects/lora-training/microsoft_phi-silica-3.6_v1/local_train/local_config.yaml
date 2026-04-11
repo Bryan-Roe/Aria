@@ -1,0 +1,45 @@
+# Local LoRA fine-tuning configuration
+# Optimized for consumer hardware (single GPU or CPU)
+
+# Model (choose one - uncomment your preference)
+model_id: "mistralai/Mistral-7B-Instruct-v0.3"  # Mistral 7B v0.3 - excellent performance
+# model_id: "mistralai/Mixtral-8x7B-Instruct-v0.1"  # Mixtral 8x7B - MoE, very powerful
+# model_id: "Qwen/Qwen2.5-3B-Instruct"  # Qwen 2.5 3B (Sep 2024) - lighter option
+# model_id: "microsoft/Phi-3.5-mini-instruct"  # Phi-3.5 3.8B - Microsoft's latest open
+# model_id: "TinyLlama/TinyLlama-1.1B-Chat-v1.0"  # Legacy fallback for very limited hardware
+
+# Data files (relative to data directory)
+train_file: "train.json"
+eval_file: "test.json"
+
+# Output
+output_dir: "outputs"
+
+# Training hyperparameters
+num_epochs: 1
+batch_size: 1
+gradient_accumulation_steps: 1  # Effective batch size = batch_size * gradient_accumulation_steps
+learning_rate: 0.0002
+max_seq_length: 256  # Reduce for limited VRAM
+warmup_steps: 20
+
+# LoRA configuration
+lora_r: 16  # Rank (higher = more parameters, better quality, slower)
+lora_alpha: 32  # Scaling factor (usually 2*r)
+lora_dropout: 0.05
+
+# Optimization flags
+use_fp16: false  # Use FP16 (for older GPUs)
+use_bf16: false  # CPU training, disable BF16
+gradient_checkpointing: true  # Save VRAM at cost of speed
+use_8bit: false  # 8-bit quantization (saves VRAM)
+use_4bit: false  # 4-bit quantization (QLoRA - saves even more VRAM)
+
+# Logging and checkpointing
+logging_steps: 5
+eval_steps: 20
+save_steps: 100
+save_total_limit: 1  # Keep only N best checkpoints
+
+# Random seed
+seed: 42

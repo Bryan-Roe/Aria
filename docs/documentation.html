@@ -1,0 +1,1514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Documentation - Aria Platform</title>
+    <meta name="description" content="Search the Aria documentation hub for quick references, training guides, deployment notes, architecture decisions, and performance reports.">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='24' fill='%23122033'/%3E%3Ctext x='50' y='60' text-anchor='middle' font-size='52'%3E%F0%9F%93%9A%3C/text%3E%3C/svg%3E">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; }
+
+        :root {
+            --paper: #f7f2e8;
+            --paper-soft: #f2eadc;
+            --ink: #122033;
+            --ink-soft: #5f6874;
+            --line: rgba(18, 32, 51, 0.12);
+            --panel: rgba(255, 255, 255, 0.76);
+            --panel-strong: rgba(255, 255, 255, 0.92);
+            --shadow: 0 24px 64px rgba(18, 32, 51, 0.12);
+            --shadow-soft: 0 16px 36px rgba(18, 32, 51, 0.08);
+            --teal: #0f9d89;
+            --coral: #d95b43;
+            --gold: #d3a53e;
+            --slate: #22405c;
+            --radius-xl: 30px;
+            --radius-lg: 22px;
+            --radius-md: 16px;
+            --radius-sm: 12px;
+            --transition: 220ms cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: "Instrument Sans", system-ui, sans-serif;
+            color: var(--ink);
+            background: linear-gradient(180deg, #fbf7ef 0%, #f7f2e8 56%, #efe5d6 100%);
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            z-index: -2;
+            background:
+                radial-gradient(circle at 12% 16%, rgba(15, 157, 137, 0.16), transparent 28%),
+                radial-gradient(circle at 84% 10%, rgba(217, 91, 67, 0.14), transparent 24%),
+                radial-gradient(circle at 64% 76%, rgba(211, 165, 62, 0.18), transparent 26%);
+            pointer-events: none;
+        }
+
+        body::after {
+            content: "";
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            background-image:
+                linear-gradient(rgba(18, 32, 51, 0.032) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(18, 32, 51, 0.032) 1px, transparent 1px);
+            background-size: 34px 34px;
+            mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.82), transparent 92%);
+            pointer-events: none;
+        }
+
+        button, input { font: inherit; }
+
+        .shell {
+            width: min(1280px, calc(100vw - 32px));
+            margin: 0 auto;
+        }
+
+        .site-header {
+            position: sticky;
+            top: 0;
+            z-index: 40;
+            backdrop-filter: blur(18px) saturate(1.4);
+            background: rgba(247, 242, 232, 0.78);
+            border-bottom: 1px solid rgba(18, 32, 51, 0.08);
+        }
+
+        .nav-shell {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 18px;
+            padding: 14px 0;
+        }
+
+        .brand {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: var(--ink);
+        }
+
+        .brand-mark {
+            width: 42px;
+            height: 42px;
+            border-radius: 14px;
+            background:
+                radial-gradient(circle at 50% 34%, var(--teal) 0 11px, transparent 12px),
+                linear-gradient(180deg, var(--slate), #16283d);
+            position: relative;
+            box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.16);
+        }
+
+        .brand-mark::after {
+            content: "";
+            position: absolute;
+            left: 9px;
+            right: 9px;
+            bottom: 8px;
+            height: 11px;
+            border-radius: 999px 999px 8px 8px;
+            border: 3px solid rgba(247, 242, 232, 0.96);
+            border-top: 0;
+        }
+
+        .brand-copy {
+            display: grid;
+            gap: 2px;
+        }
+
+        .brand-copy strong {
+            font-family: "Space Grotesk", sans-serif;
+            font-size: 1.08rem;
+            line-height: 1;
+            letter-spacing: -0.03em;
+        }
+
+        .brand-copy span {
+            font-size: 0.78rem;
+            color: var(--ink-soft);
+        }
+
+        .nav-toggle {
+            display: none;
+            align-items: center;
+            justify-content: center;
+            width: 44px;
+            height: 44px;
+            border-radius: 14px;
+            border: 1px solid var(--line);
+            background: rgba(255, 255, 255, 0.55);
+            color: var(--ink);
+            cursor: pointer;
+        }
+
+        .site-nav {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .site-nav a {
+            text-decoration: none;
+            padding: 10px 14px;
+            border-radius: 999px;
+            color: var(--ink-soft);
+            font-size: 0.94rem;
+            transition: background var(--transition), color var(--transition), transform var(--transition);
+        }
+
+        .site-nav a:hover,
+        .site-nav a:focus-visible,
+        .site-nav a.is-active {
+            background: rgba(255, 255, 255, 0.72);
+            color: var(--ink);
+            transform: translateY(-1px);
+            outline: none;
+        }
+
+        .layout {
+            display: grid;
+            grid-template-columns: 320px minmax(0, 1fr);
+            gap: 24px;
+            padding: 28px 0 42px;
+        }
+
+        .sidebar {
+            position: sticky;
+            top: 92px;
+            align-self: start;
+            display: grid;
+            gap: 16px;
+        }
+
+        .sidebar-card,
+        .hero-card,
+        .featured-card,
+        .category-card,
+        .content-shell,
+        .error-card,
+        .loading-card,
+        .category-block {
+            background: var(--panel);
+            border: 1px solid rgba(255, 255, 255, 0.62);
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(10px);
+        }
+
+        .sidebar-card {
+            border-radius: var(--radius-xl);
+            padding: 18px;
+        }
+
+        .sidebar-card h2,
+        .content-hero h1,
+        .content-hero h2,
+        .welcome-block h2,
+        .content-markdown h1,
+        .content-markdown h2,
+        .content-markdown h3 {
+            font-family: "Space Grotesk", sans-serif;
+            letter-spacing: -0.04em;
+        }
+
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            margin: 0 0 14px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.14em;
+            color: var(--slate);
+        }
+
+        .eyebrow::before {
+            content: "";
+            width: 28px;
+            height: 2px;
+            border-radius: 999px;
+            background: linear-gradient(90deg, var(--teal), var(--coral));
+        }
+
+        .sidebar-copy {
+            margin: 0;
+            color: var(--ink-soft);
+            font-size: 0.93rem;
+            line-height: 1.65;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 10px;
+            margin-top: 18px;
+        }
+
+        .stat {
+            padding: 14px;
+            border-radius: var(--radius-md);
+            background: rgba(255, 255, 255, 0.7);
+            border: 1px solid rgba(18, 32, 51, 0.08);
+        }
+
+        .stat strong {
+            display: block;
+            font-family: "Space Grotesk", sans-serif;
+            font-size: 1.4rem;
+            line-height: 1;
+        }
+
+        .stat span {
+            display: block;
+            margin-top: 8px;
+            font-size: 0.84rem;
+            color: var(--ink-soft);
+            line-height: 1.45;
+        }
+
+        .sidebar-search {
+            position: relative;
+        }
+
+        .sidebar-search input {
+            width: 100%;
+            min-height: 52px;
+            padding: 0 16px 0 48px;
+            border-radius: 16px;
+            border: 1px solid rgba(18, 32, 51, 0.1);
+            background: rgba(255, 255, 255, 0.8);
+            color: var(--ink);
+        }
+
+        .sidebar-search input:focus {
+            outline: 2px solid rgba(15, 157, 137, 0.22);
+            outline-offset: 1px;
+        }
+
+        .sidebar-search span {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--ink-soft);
+        }
+
+        .sidebar-list {
+            display: grid;
+            gap: 8px;
+            margin-top: 14px;
+        }
+
+        .sidebar-empty {
+            margin: 12px 2px 0;
+            padding: 10px 12px;
+            border-radius: 12px;
+            border: 1px dashed rgba(18, 32, 51, 0.18);
+            background: rgba(255, 255, 255, 0.56);
+            color: var(--ink-soft);
+            font-size: 0.86rem;
+            line-height: 1.55;
+        }
+
+        .sidebar-category {
+            border-radius: var(--radius-md);
+            background: rgba(255, 255, 255, 0.58);
+            border: 1px solid rgba(18, 32, 51, 0.08);
+        }
+
+        .sidebar-category.is-collapsed .sidebar-items {
+            display: none;
+        }
+
+        .category-toggle {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 13px 14px;
+            border: 0;
+            border-radius: var(--radius-md);
+            background: transparent;
+            cursor: pointer;
+            color: var(--ink);
+            text-align: left;
+        }
+
+        .category-toggle:hover,
+        .category-toggle:focus-visible {
+            background: rgba(255, 255, 255, 0.48);
+            outline: none;
+        }
+
+        .category-title {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.86rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--slate);
+        }
+
+        .category-meta {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--ink-soft);
+            font-size: 0.8rem;
+        }
+
+        .count-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 26px;
+            height: 26px;
+            padding: 0 8px;
+            border-radius: 999px;
+            background: rgba(15, 157, 137, 0.1);
+            color: var(--slate);
+            font-weight: 700;
+        }
+
+        .sidebar-items {
+            display: grid;
+            gap: 6px;
+            padding: 0 10px 10px;
+        }
+
+        .sidebar-item {
+            width: 100%;
+            border: 0;
+            border-radius: 12px;
+            background: transparent;
+            color: var(--ink-soft);
+            text-align: left;
+            padding: 10px 12px;
+            cursor: pointer;
+            transition: background var(--transition), color var(--transition), transform var(--transition);
+        }
+
+        .sidebar-item:hover,
+        .sidebar-item:focus-visible,
+        .sidebar-item.is-active {
+            background: rgba(255, 255, 255, 0.72);
+            color: var(--ink);
+            transform: translateX(2px);
+            outline: none;
+        }
+
+        .main {
+            display: grid;
+            gap: 18px;
+            min-width: 0;
+        }
+
+        .hero-card,
+        .content-shell,
+        .loading-card,
+        .error-card {
+            border-radius: var(--radius-xl);
+        }
+
+        .hero-card {
+            padding: 28px;
+        }
+
+        .content-hero h1,
+        .content-hero h2 {
+            margin: 0;
+            font-size: clamp(2rem, 5vw, 3.2rem);
+            line-height: 0.98;
+        }
+
+        .content-hero p {
+            margin: 16px 0 0;
+            max-width: 64ch;
+            color: var(--ink-soft);
+            line-height: 1.72;
+        }
+
+        .hero-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        .button-link {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 48px;
+            padding: 0 18px;
+            border-radius: 999px;
+            border: 1px solid rgba(18, 32, 51, 0.1);
+            text-decoration: none;
+            color: var(--ink);
+            background: rgba(255, 255, 255, 0.74);
+            font-weight: 700;
+            transition: transform var(--transition), background var(--transition), box-shadow var(--transition);
+        }
+
+        .button-link:hover,
+        .button-link:focus-visible {
+            transform: translateY(-2px);
+            background: rgba(255, 255, 255, 0.92);
+            outline: none;
+        }
+
+        .button-link.primary {
+            background: linear-gradient(135deg, var(--teal), #1bb6a4);
+            color: #f6fffd;
+            border-color: transparent;
+            box-shadow: 0 14px 28px rgba(15, 157, 137, 0.24);
+        }
+
+        .hero-strip {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        .hero-metric {
+            padding: 16px;
+            border-radius: var(--radius-md);
+            background: rgba(255, 255, 255, 0.7);
+            border: 1px solid rgba(18, 32, 51, 0.08);
+            box-shadow: var(--shadow-soft);
+        }
+
+        .hero-metric strong {
+            display: block;
+            font-family: "Space Grotesk", sans-serif;
+            font-size: 1.45rem;
+            line-height: 1;
+        }
+
+        .hero-metric span {
+            display: block;
+            margin-top: 8px;
+            color: var(--ink-soft);
+            font-size: 0.84rem;
+            line-height: 1.45;
+        }
+
+        .content-shell {
+            padding: 24px;
+            min-height: 420px;
+        }
+
+        .welcome-grid,
+        .featured-grid,
+        .category-grid {
+            display: grid;
+            gap: 14px;
+        }
+
+        .featured-grid {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            margin-top: 18px;
+        }
+
+        .category-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            margin-top: 18px;
+        }
+
+        .featured-card,
+        .category-card {
+            border-radius: var(--radius-lg);
+            padding: 20px;
+        }
+
+        .featured-card {
+            display: block;
+            text-decoration: none;
+            color: inherit;
+            transition: transform var(--transition), background var(--transition), border-color var(--transition);
+        }
+
+        .featured-card:hover,
+        .featured-card:focus-visible {
+            transform: translateY(-2px);
+            background: var(--panel-strong);
+            outline: none;
+        }
+
+        .chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 7px 10px;
+            border-radius: 999px;
+            background: rgba(18, 32, 51, 0.06);
+            color: var(--ink-soft);
+            font-size: 0.74rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .featured-card h3,
+        .category-card h3,
+        .content-markdown h1,
+        .content-markdown h2,
+        .content-markdown h3 {
+            margin: 14px 0 0;
+        }
+
+        .featured-card p,
+        .category-card p,
+        .welcome-note,
+        .doc-meta,
+        .content-markdown p,
+        .content-markdown li,
+        .content-markdown blockquote {
+            color: var(--ink-soft);
+            line-height: 1.72;
+        }
+
+        .featured-card strong {
+            display: inline-flex;
+            margin-top: 16px;
+            color: var(--slate);
+            font-size: 0.88rem;
+        }
+
+        .category-card {
+            background: rgba(255, 255, 255, 0.66);
+            border: 1px solid rgba(18, 32, 51, 0.08);
+        }
+
+        .category-card .category-links {
+            display: grid;
+            gap: 8px;
+            margin-top: 16px;
+        }
+
+        .doc-link {
+            width: 100%;
+            border: 0;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.7);
+            color: var(--ink);
+            text-align: left;
+            padding: 11px 12px;
+            cursor: pointer;
+            transition: background var(--transition), transform var(--transition);
+        }
+
+        .doc-link:hover,
+        .doc-link:focus-visible {
+            background: rgba(255, 255, 255, 0.92);
+            transform: translateX(2px);
+            outline: none;
+        }
+
+        .category-block {
+            border-radius: var(--radius-lg);
+            padding: 18px;
+            margin-top: 24px;
+        }
+
+        .category-block ol {
+            margin: 14px 0 0 20px;
+            color: var(--ink-soft);
+            line-height: 1.8;
+        }
+
+        .loading-card,
+        .error-card {
+            padding: 48px 24px;
+            text-align: center;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            margin: 0 auto 14px;
+            border-radius: 50%;
+            border: 3px solid rgba(18, 32, 51, 0.12);
+            border-top-color: var(--teal);
+            animation: spin 0.9s linear infinite;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .error-card a,
+        .content-hero a,
+        .content-markdown a {
+            color: var(--teal);
+            text-decoration: none;
+        }
+
+        .error-card a:hover,
+        .content-hero a:hover,
+        .content-markdown a:hover {
+            text-decoration: underline;
+        }
+
+        .breadcrumb {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 14px;
+            color: var(--ink-soft);
+            font-size: 0.88rem;
+        }
+
+        .breadcrumb span:last-child {
+            color: var(--ink);
+            font-weight: 600;
+        }
+
+        .content-markdown {
+            color: var(--ink);
+            line-height: 1.75;
+        }
+
+        .content-markdown h1 { font-size: 2rem; }
+        .content-markdown h2 { font-size: 1.5rem; }
+        .content-markdown h3 { font-size: 1.18rem; }
+        .content-markdown h4 {
+            margin: 20px 0 0;
+            font-size: 1.02rem;
+        }
+
+        .content-markdown ul,
+        .content-markdown ol {
+            padding-left: 22px;
+        }
+
+        .content-markdown code {
+            padding: 2px 6px;
+            border-radius: 6px;
+            background: rgba(18, 32, 51, 0.08);
+            font-family: "IBM Plex Mono", monospace;
+            font-size: 0.88em;
+        }
+
+        .content-markdown pre {
+            padding: 18px;
+            border-radius: 18px;
+            background: #122033;
+            overflow-x: auto;
+            box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+        }
+
+        .content-markdown pre code {
+            padding: 0;
+            background: transparent;
+            color: #eef6ff;
+        }
+
+        .content-markdown blockquote {
+            margin: 18px 0;
+            padding: 14px 18px;
+            border-left: 4px solid var(--teal);
+            background: rgba(15, 157, 137, 0.08);
+            border-radius: 0 16px 16px 0;
+        }
+
+        .content-markdown table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 18px 0;
+            overflow: hidden;
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.72);
+            box-shadow: var(--shadow-soft);
+        }
+
+        .content-markdown th,
+        .content-markdown td {
+            padding: 12px 14px;
+            border-bottom: 1px solid rgba(18, 32, 51, 0.08);
+            text-align: left;
+        }
+
+        .content-markdown th {
+            color: var(--slate);
+            font-size: 0.82rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        .content-markdown img {
+            max-width: 100%;
+            border-radius: 18px;
+        }
+
+        .content-markdown hr {
+            border: 0;
+            border-top: 1px solid rgba(18, 32, 51, 0.12);
+            margin: 26px 0;
+        }
+
+        .sidebar-toggle {
+            display: none;
+            position: fixed;
+            right: 18px;
+            bottom: 18px;
+            z-index: 45;
+            width: 54px;
+            height: 54px;
+            border: 0;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--teal), #1bb6a4);
+            color: #f6fffd;
+            box-shadow: 0 14px 28px rgba(15, 157, 137, 0.24);
+            cursor: pointer;
+        }
+
+        footer {
+            padding: 0 0 42px;
+        }
+
+        .footer-shell {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            padding-top: 18px;
+            border-top: 1px solid rgba(18, 32, 51, 0.12);
+        }
+
+        .footer-shell p {
+            margin: 0;
+            color: var(--ink-soft);
+            font-size: 0.92rem;
+        }
+
+        .footer-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .footer-links a {
+            text-decoration: none;
+            padding: 10px 12px;
+            border-radius: 999px;
+            color: var(--ink-soft);
+            transition: background var(--transition), color var(--transition);
+        }
+
+        .footer-links a:hover,
+        .footer-links a:focus-visible {
+            background: rgba(255, 255, 255, 0.62);
+            color: var(--ink);
+            outline: none;
+        }
+
+        @media (max-width: 1080px) {
+            .layout,
+            .hero-strip,
+            .featured-grid,
+            .category-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .layout {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                position: static;
+            }
+        }
+
+        @media (max-width: 820px) {
+            .shell {
+                width: min(1280px, calc(100vw - 20px));
+            }
+
+            .nav-toggle {
+                display: inline-flex;
+            }
+
+            .site-nav {
+                position: absolute;
+                left: 10px;
+                right: 10px;
+                top: calc(100% + 8px);
+                padding: 10px;
+                border-radius: 22px;
+                background: rgba(247, 242, 232, 0.96);
+                border: 1px solid rgba(18, 32, 51, 0.1);
+                box-shadow: var(--shadow);
+                display: none;
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .site-nav.open {
+                display: flex;
+            }
+
+            .site-nav a {
+                border-radius: 14px;
+            }
+
+            .sidebar {
+                position: fixed;
+                inset: 82px 10px auto 10px;
+                z-index: 44;
+                display: none;
+                max-height: calc(100vh - 120px);
+                overflow-y: auto;
+            }
+
+            .sidebar.open {
+                display: grid;
+            }
+
+            .sidebar-toggle {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .layout,
+            .hero-strip,
+            .featured-grid,
+            .category-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .hero-card,
+            .content-shell,
+            .sidebar-card,
+            .featured-card,
+            .category-card,
+            .category-block {
+                padding: 20px;
+            }
+
+            .footer-shell {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            html { scroll-behavior: auto; }
+
+            *, *::before, *::after {
+                animation: none !important;
+                transition: none !important;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="global-upgrade.css">
+</head>
+<body>
+    <header class="site-header">
+        <div class="shell nav-shell">
+            <a class="brand" href="./">
+                <span class="brand-mark" aria-hidden="true"></span>
+                <span class="brand-copy">
+                    <strong>Aria</strong>
+                    <span>interactive AI character platform</span>
+                </span>
+            </a>
+            <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav" aria-label="Toggle navigation">Menu</button>
+            <nav class="site-nav" id="site-nav">
+                <a href="./">Home</a>
+                <a class="is-active" href="documentation.html">Docs</a>
+                <a href="aria/">Aria</a>
+                <a href="chat/">Chat</a>
+                <a href="dashboard/hub.html">Dashboards</a>
+                <a href="store/">Store</a>
+                <a href="https://github.com/Bryan-Roe/Aria" target="_blank" rel="noreferrer">GitHub</a>
+            </nav>
+        </div>
+    </header>
+
+    <div class="shell layout">
+        <aside class="sidebar" id="sidebar">
+            <section class="sidebar-card">
+                <p class="eyebrow">Docs navigation</p>
+                <h2>Find the right guide quickly.</h2>
+                <p class="sidebar-copy">This hub is for operational docs, training notes, deployment references, architecture summaries, and performance reports.</p>
+                <div class="stats-grid" id="sidebar-stats"></div>
+            </section>
+
+            <section class="sidebar-card">
+                <div class="sidebar-search">
+                    <span aria-hidden="true">🔎</span>
+                    <input id="docSearch" type="search" placeholder="Search docs, categories, and paths..." aria-label="Search documentation">
+                </div>
+                <div class="sidebar-list" id="sidebarContent"></div>
+                <p class="sidebar-empty" id="sidebarEmpty" hidden>No docs match that search. Try broader terms like training, dashboard, deployment, or quickref.</p>
+            </section>
+        </aside>
+
+        <main class="main">
+            <section class="hero-card content-hero" id="heroArea"></section>
+            <section class="content-shell" id="contentArea"></section>
+        </main>
+    </div>
+
+    <button class="sidebar-toggle" id="sidebarToggle" type="button" aria-label="Toggle docs navigation">Docs</button>
+
+    <footer>
+        <div class="shell footer-shell">
+            <p>Documentation for Aria spans quick references, training workflows, deployment notes, architecture, and performance work.</p>
+            <div class="footer-links">
+                <a href="./">Home</a>
+                <a href="aria/">Aria</a>
+                <a href="dashboard/hub.html">Dashboards</a>
+                <a href="store/">Store</a>
+                <a href="https://github.com/Bryan-Roe/Aria/issues" target="_blank" rel="noreferrer">Issues</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        const DOCS = {
+            "Quick References": {
+                icon: "⚡",
+                items: [
+                    { title: "Quick Reference", path: "quickref/QUICK_REFERENCE.md" },
+                    { title: "Quick Start Chat", path: "quickref/QUICK_START_CHAT.md" },
+                    { title: "Training Commands", path: "quickref/TRAINING_COMMANDS_QUICKREF.md" },
+                    { title: "Automation", path: "quickref/AUTOMATION_QUICKREF.md" },
+                    { title: "Batch Evaluation", path: "quickref/BATCH_EVAL_QUICKREF.md" },
+                    { title: "Datasets", path: "quickref/DATASETS_QUICK_REF.md" },
+                    { title: "QAI Hub", path: "quickref/QAI_HUB_QUICKREF.md" },
+                    { title: "SQL Integration", path: "quickref/SQL_QUICKREF.md" },
+                    { title: "Training Tab", path: "quickref/TRAINING_TAB_QUICKREF.md" },
+                    { title: "VS Code Testing", path: "quickref/VSCODE_TESTING_QUICKREF.md" }
+                ]
+            },
+            "Training & Models": {
+                icon: "🤖",
+                items: [
+                    { title: "AutoTrain Guide", path: "training/AUTOTRAIN_README.md" },
+                    { title: "Automated Pipeline", path: "training/AUTOMATED_TRAINING_PIPELINE.md" },
+                    { title: "Autonomous Training", path: "training/AUTONOMOUS_TRAINING_README.md" },
+                    { title: "Batch Evaluation", path: "training/BATCH_EVALUATION_GUIDE.md" },
+                    { title: "Evaluation AutoRun", path: "training/EVALUATION_AUTORUN_README.md" },
+                    { title: "Fast Training", path: "training/FAST_TRAINING_GUIDE.md" },
+                    { title: "Marathon Training", path: "training/EXTENDED_MARATHON_TRAINING.md" },
+                    { title: "Training Tab Enhancements", path: "training/TRAINING_TAB_ENHANCEMENTS.md" },
+                    { title: "Training Validation", path: "training/TRAINING_VALIDATION_RESULTS.md" }
+                ]
+            },
+            "Quantum Computing": {
+                icon: "⚛️",
+                items: [
+                    { title: "Quantum AutoRun", path: "quantum/QUANTUM_AUTORUN_README.md" },
+                    { title: "Azure Quantum Examples", path: "quantum/QUANTUM_AZURE_EXAMPLES.md" },
+                    { title: "Quantum LLM Development", path: "QUANTUM_LLM_DEVELOPMENT_SUMMARY.md" }
+                ]
+            },
+            "Database & Infrastructure": {
+                icon: "🗄️",
+                items: [
+                    { title: "Database Setup", path: "database/DATABASE_SQL_SETUP.md" },
+                    { title: "Database Integration", path: "database/DATABASE_INTEGRATION_GUIDE.md" },
+                    { title: "Azure Monitor SQL", path: "database/AZURE_MONITOR_SQL_SETUP.md" },
+                    { title: "SQL Automation", path: "database/SQL_AUTOMATION_COMPLETE.md" },
+                    { title: "Telemetry & Cosmos", path: "database/TELEMETRY_COSMOS_ENABLEMENT.md" }
+                ]
+            },
+            "Deployment": {
+                icon: "🚀",
+                items: [
+                    { title: "Deployment Guide", path: "DEPLOYMENT_GUIDE.md" },
+                    { title: "Azure ML Training", path: "deployment/AZURE_ML_TRAINING_GUIDE.md" },
+                    { title: "Deploy Chat to Azure", path: "deployment/DEPLOY_CHAT_TO_AZURE.md" },
+                    { title: "Production Plan", path: "deployment/PRODUCTION_DEPLOYMENT_PLAN.md" },
+                    { title: "Azure Anime Avatar", path: "deployment/AZURE_DEPLOYMENT_ANIME_AVATAR.md" },
+                    { title: "GitHub Pages Setup", path: "GITHUB_PAGES_SETUP.md" }
+                ]
+            },
+            "Aria Character": {
+                icon: "🎭",
+                items: [
+                    { title: "Aria Visual System", path: "aria/ARIA_VISUAL_SYSTEM.md" },
+                    { title: "Movement System", path: "aria/ARIA_MOVEMENT_COMPLETE.md" },
+                    { title: "Movement Training", path: "aria/ARIA_MOVEMENT_TRAINING.md" }
+                ]
+            },
+            "Guides": {
+                icon: "📖",
+                items: [
+                    { title: "Advanced Features", path: "guides/ADVANCED_FEATURES_GUIDE.md" },
+                    { title: "Aria Automation", path: "guides/ARIA_AUTOMATION_GUIDE.md" },
+                    { title: "Chat Website", path: "guides/CHAT_WEBSITE_GUIDE.md" },
+                    { title: "Dashboard Guide", path: "guides/DASHBOARD_COMPLETE_GUIDE.md" },
+                    { title: "Datasets Catalog", path: "guides/AI_DATASETS_CATALOG.md" },
+                    { title: "Monitoring Guide", path: "guides/MONITORING_GUIDE.md" },
+                    { title: "Notification System", path: "guides/NOTIFICATION_SYSTEM_GUIDE.md" },
+                    { title: "QAI Hub Guide", path: "guides/QAI_HUB_GUIDE.md" },
+                    { title: "Repo Automation", path: "guides/REPO_AUTOMATION_GUIDE.md" },
+                    { title: "Vision API", path: "guides/VISION_API_GUIDE.md" },
+                    { title: "VS Code Testing", path: "guides/VSCODE_TESTING_GUIDE.md" },
+                    { title: "Web Architecture", path: "guides/WEB_PAGE_ARCHITECTURE.md" },
+                    { title: "Monetization", path: "guides/MONETIZATION_GUIDE.md" },
+                    { title: "Quantum LLM Training", path: "guides/QUANTUM_LLM_TRAINING.md" },
+                    { title: "Advanced Automation", path: "guides/ADVANCED_AUTOMATION.md" }
+                ]
+            },
+            "Architecture": {
+                icon: "🏗️",
+                items: [
+                    { title: "Phase 24 Improvements", path: "architecture/QAI_PHASE_24_IMPROVEMENTS.md" },
+                    { title: "Phase 25 Improvements", path: "architecture/PHASE_25_IMPROVEMENTS.md" },
+                    { title: "Phase 26 Improvements", path: "architecture/PHASE_26_IMPROVEMENTS.md" },
+                    { title: "Phase 27 Complete", path: "architecture/PHASE27_COMPLETE.md" }
+                ]
+            },
+            "Performance": {
+                icon: "⚡",
+                items: [
+                    { title: "Performance Index", path: "PERFORMANCE_INDEX.md" },
+                    { title: "Optimization Guide", path: "PERFORMANCE_OPTIMIZATION_GUIDE.md" },
+                    { title: "Quick Fixes", path: "PERFORMANCE_QUICK_FIXES.md" },
+                    { title: "Implementation Guide", path: "PERFORMANCE_IMPLEMENTATION_GUIDE.md" },
+                    { title: "Critical Fixes 2026", path: "PERFORMANCE_CRITICAL_FIXES_2026.md" },
+                    { title: "Analysis", path: "PERFORMANCE_ANALYSIS.md" },
+                    { title: "Regex Optimization", path: "REGEX_OPTIMIZATION_2026-02-17.md" }
+                ]
+            }
+        };
+
+        const FEATURED_DOCS = [
+            { label: "Quick Start", title: "Quick Reference", description: "Best first stop for commands, startup flow, and repo-wide navigation.", path: "quickref/QUICK_REFERENCE.md" },
+            { label: "Training", title: "AutoTrain Guide", description: "Understand fine-tuning, autonomous training, evaluation, and model promotion paths.", path: "training/AUTOTRAIN_README.md" },
+            { label: "Operations", title: "Dashboard Guide", description: "Get oriented on monitoring pages, analytics, and operator-facing workflows.", path: "guides/DASHBOARD_COMPLETE_GUIDE.md" },
+            { label: "Deployment", title: "Deployment Guide", description: "Find deployment notes for local runs, GitHub Pages, Azure-related setup, and production planning.", path: "DEPLOYMENT_GUIDE.md" },
+            { label: "Automation", title: "Repo Automation Guide", description: "Follow orchestration, automation, and recurring execution flows across the platform.", path: "guides/REPO_AUTOMATION_GUIDE.md" },
+            { label: "Performance", title: "Performance Index", description: "Start from the top-level map of performance work before diving into deep reports.", path: "PERFORMANCE_INDEX.md" }
+        ];
+
+        const DOC_LAST_OPEN_KEY = "ariaDocsLastOpen";
+        const DOC_SEARCH_KEY = "ariaDocsSearch";
+
+        const navToggle = document.querySelector(".nav-toggle");
+        const siteNav = document.getElementById("site-nav");
+        const sidebar = document.getElementById("sidebar");
+        const sidebarToggle = document.getElementById("sidebarToggle");
+        const heroArea = document.getElementById("heroArea");
+        const contentArea = document.getElementById("contentArea");
+        const sidebarContent = document.getElementById("sidebarContent");
+        const sidebarStats = document.getElementById("sidebar-stats");
+        const sidebarEmpty = document.getElementById("sidebarEmpty");
+        const docSearch = document.getElementById("docSearch");
+
+        let currentDoc = null;
+
+        navToggle?.addEventListener("click", () => {
+            const isOpen = siteNav.classList.toggle("open");
+            navToggle.setAttribute("aria-expanded", String(isOpen));
+        });
+
+        siteNav.querySelectorAll("a").forEach((link) => {
+            link.addEventListener("click", () => {
+                siteNav.classList.remove("open");
+                navToggle?.setAttribute("aria-expanded", "false");
+            });
+        });
+
+        sidebarToggle?.addEventListener("click", () => {
+            sidebar.classList.toggle("open");
+        });
+
+        document.addEventListener("click", (event) => {
+            if (siteNav.classList.contains("open")) {
+                const clickedNav = siteNav.contains(event.target);
+                const clickedToggle = navToggle && navToggle.contains(event.target);
+                if (!clickedNav && !clickedToggle) {
+                    siteNav.classList.remove("open");
+                    navToggle?.setAttribute("aria-expanded", "false");
+                }
+            }
+
+            if (sidebar.classList.contains("open")) {
+                const clickedSidebar = sidebar.contains(event.target);
+                const clickedSidebarToggle = sidebarToggle && sidebarToggle.contains(event.target);
+                if (!clickedSidebar && !clickedSidebarToggle) {
+                    closeSidebarMobile();
+                }
+            }
+        });
+
+        docSearch?.addEventListener("input", filterDocs);
+
+        function getTotalDocs() {
+            return Object.values(DOCS).reduce((sum, category) => sum + category.items.length, 0);
+        }
+
+        function getAllDocPaths() {
+            return Object.values(DOCS).flatMap((category) => category.items.map((item) => item.path));
+        }
+
+        const ALL_DOC_PATHS = new Set(getAllDocPaths());
+
+        function hasKnownDoc(path) {
+            return ALL_DOC_PATHS.has(path);
+        }
+
+        function saveLastDoc(path) {
+            try {
+                localStorage.setItem(DOC_LAST_OPEN_KEY, path);
+            } catch (error) {
+                // Ignore storage issues.
+            }
+        }
+
+        function readLastDoc() {
+            try {
+                return localStorage.getItem(DOC_LAST_OPEN_KEY) || "";
+            } catch (error) {
+                return "";
+            }
+        }
+
+        function saveSearchTerm(term) {
+            try {
+                localStorage.setItem(DOC_SEARCH_KEY, term);
+            } catch (error) {
+                // Ignore storage issues.
+            }
+        }
+
+        function readSearchTerm() {
+            try {
+                return localStorage.getItem(DOC_SEARCH_KEY) || "";
+            } catch (error) {
+                return "";
+            }
+        }
+
+        function buildSidebarStats() {
+            const totalDocs = getTotalDocs();
+            const totalCategories = Object.keys(DOCS).length;
+            const trainingCount = DOCS["Training & Models"].items.length;
+            const guideCount = DOCS["Guides"].items.length;
+            sidebarStats.innerHTML = `
+                <div class="stat"><strong>${totalDocs}</strong><span>Total docs</span></div>
+                <div class="stat"><strong>${totalCategories}</strong><span>Categories</span></div>
+                <div class="stat"><strong>${trainingCount}</strong><span>Training docs</span></div>
+                <div class="stat"><strong>${guideCount}</strong><span>Platform guides</span></div>
+            `;
+        }
+
+        function buildSidebar() {
+            let html = "";
+            for (const [category, data] of Object.entries(DOCS)) {
+                const itemButtons = data.items.map((item) => `
+                    <button type="button" class="sidebar-item" data-path="${item.path}" title="${item.title}" onclick="loadDoc('${item.path}')">${item.title}</button>
+                `).join("");
+
+                html += `
+                    <div class="sidebar-category" data-category="${category}">
+                        <button type="button" class="category-toggle" onclick="toggleCategory(this)">
+                            <span class="category-title"><span>${data.icon}</span><span>${category}</span></span>
+                            <span class="category-meta"><span class="count-badge">${data.items.length}</span><span>▾</span></span>
+                        </button>
+                        <div class="sidebar-items">${itemButtons}</div>
+                    </div>
+                `;
+            }
+            sidebarContent.innerHTML = html;
+        }
+
+        function showWelcome() {
+            currentDoc = null;
+            history.replaceState(null, "", "documentation.html");
+            highlightSidebar(null);
+
+            const totalDocs = getTotalDocs();
+            const totalCategories = Object.keys(DOCS).length;
+            const lastDoc = readLastDoc();
+            const resumeAction = hasKnownDoc(lastDoc)
+                ? `<a class="button-link" href="#" onclick="event.preventDefault(); loadDoc('${lastDoc}');">Resume last doc</a>`
+                : "";
+
+            heroArea.innerHTML = `
+                <p class="eyebrow">Documentation hub</p>
+                <h1>Browse the operational memory of the platform.</h1>
+                <p>Use this page when you want fast access to startup commands, training workflows, deployment notes, automation behavior, architecture decisions, and performance findings.</p>
+                <div class="hero-actions">
+                    <a class="button-link primary" href="#" onclick="event.preventDefault(); loadDoc('quickref/QUICK_REFERENCE.md');">Open quick reference</a>
+                    <a class="button-link" href="#" onclick="event.preventDefault(); loadDoc('guides/DASHBOARD_COMPLETE_GUIDE.md');">Open dashboard guide</a>
+                    ${resumeAction}
+                </div>
+                <div class="hero-strip">
+                    <div class="hero-metric"><strong>${totalDocs}</strong><span>Pages wired into the docs hub.</span></div>
+                    <div class="hero-metric"><strong>${totalCategories}</strong><span>Category groups for faster filtering.</span></div>
+                    <div class="hero-metric"><strong>MD</strong><span>Rendered on demand with syntax highlighting.</span></div>
+                    <div class="hero-metric"><strong>Hash</strong><span>Direct links work with back and forward history.</span></div>
+                </div>
+            `;
+
+            const featuredHtml = FEATURED_DOCS.map((doc) => `
+                <a class="featured-card" href="#" onclick="event.preventDefault(); loadDoc('${doc.path}');">
+                    <span class="chip">${doc.label}</span>
+                    <h3>${doc.title}</h3>
+                    <p>${doc.description}</p>
+                    <strong>Open document</strong>
+                </a>
+            `).join("");
+
+            const categoryHtml = Object.entries(DOCS).map(([category, data]) => {
+                const links = data.items.slice(0, 3).map((item) => `
+                    <button type="button" class="doc-link" onclick="loadDoc('${item.path}')">${item.title}</button>
+                `).join("");
+
+                return `
+                    <article class="category-card">
+                        <span class="chip">${data.icon} ${data.items.length} docs</span>
+                        <h3>${category}</h3>
+                        <p>Jump into the main pages in this area without scanning the full sidebar.</p>
+                        <div class="category-links">${links}</div>
+                    </article>
+                `;
+            }).join("");
+
+            contentArea.innerHTML = `
+                <p class="welcome-note">Pick a document from the sidebar, start from a featured reference, or browse categories by intent.</p>
+                <div class="featured-grid">${featuredHtml}</div>
+                <div class="category-block">
+                    <h2>Recommended entry sequence</h2>
+                    <ol>
+                        <li>Open Quick Reference for repo navigation and common commands.</li>
+                        <li>Read Dashboard Guide if you want to operate the training and monitoring surfaces.</li>
+                        <li>Read AutoTrain Guide before changing training workflows.</li>
+                        <li>Use Deployment Guide before preparing public or cloud-facing rollouts.</li>
+                    </ol>
+                </div>
+                <div class="category-grid">${categoryHtml}</div>
+            `;
+
+            closeSidebarMobile();
+        }
+
+        async function loadDoc(path) {
+            if (!path) {
+                return;
+            }
+
+            currentDoc = path;
+            saveLastDoc(path);
+            highlightSidebar(path);
+            closeSidebarMobile();
+            history.pushState(null, "", `#${encodeURIComponent(path)}`);
+
+            heroArea.innerHTML = `
+                <div class="breadcrumb"><span>Docs</span><span>›</span><span>Loading</span></div>
+                <h2>Loading document...</h2>
+                <p>Fetching markdown content and rendering the selected page.</p>
+            `;
+
+            contentArea.innerHTML = `
+                <div class="loading-card">
+                    <div class="spinner"></div>
+                    <p>Loading document...</p>
+                </div>
+            `;
+
+            try {
+                const response = await fetch(path, { cache: "no-store" });
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+
+                const markdown = await response.text();
+                const meta = findDocMeta(path);
+                const html = marked.parse(markdown, {
+                    gfm: true,
+                    breaks: true,
+                    highlight(code, language) {
+                        if (language && hljs.getLanguage(language)) {
+                            return hljs.highlight(code, { language }).value;
+                        }
+                        return hljs.highlightAuto(code).value;
+                    }
+                });
+
+                heroArea.innerHTML = `
+                    <div class="breadcrumb">
+                        <span>Docs</span>
+                        <span>›</span>
+                        <span>${meta.category}</span>
+                        <span>›</span>
+                        <span>${meta.title}</span>
+                    </div>
+                    <h2>${meta.title}</h2>
+                    <p>${meta.category} documentation. <a href="https://github.com/Bryan-Roe/Aria/blob/main/docs/${path}" target="_blank" rel="noreferrer">View source on GitHub</a>.</p>
+                `;
+
+                contentArea.innerHTML = `<article class="content-markdown">${html}</article>`;
+                contentArea.querySelectorAll("pre code").forEach((block) => hljs.highlightElement(block));
+                window.scrollTo({ top: 0, behavior: "smooth" });
+            } catch (error) {
+                heroArea.innerHTML = `
+                    <div class="breadcrumb"><span>Docs</span><span>›</span><span>Error</span></div>
+                    <h2>Could not load that document.</h2>
+                    <p>The hub could not fetch ${path}. You can still open the source directly on GitHub.</p>
+                `;
+
+                contentArea.innerHTML = `
+                    <div class="error-card">
+                        <p><strong>Load failed:</strong> ${error.message}</p>
+                        <p><a href="https://github.com/Bryan-Roe/Aria/blob/main/docs/${path}" target="_blank" rel="noreferrer">Open the document on GitHub</a></p>
+                    </div>
+                `;
+            }
+        }
+
+        function findDocMeta(path) {
+            for (const [category, data] of Object.entries(DOCS)) {
+                const match = data.items.find((item) => item.path === path);
+                if (match) {
+                    return { category, title: match.title };
+                }
+            }
+
+            return {
+                category: "Documentation",
+                title: path.split("/").pop().replace(/\.md$/, "").replace(/_/g, " ")
+            };
+        }
+
+        function highlightSidebar(path) {
+            document.querySelectorAll(".sidebar-item").forEach((item) => {
+                item.classList.toggle("is-active", item.dataset.path === path);
+            });
+        }
+
+        function filterDocs() {
+            const term = docSearch.value.trim().toLowerCase();
+            let totalVisible = 0;
+            document.querySelectorAll(".sidebar-category").forEach((category) => {
+                let visibleCount = 0;
+                category.querySelectorAll(".sidebar-item").forEach((item) => {
+                    const haystack = `${item.textContent} ${item.dataset.path || ""}`.toLowerCase();
+                    const match = !term || haystack.includes(term);
+                    item.hidden = !match;
+                    if (match) {
+                        visibleCount += 1;
+                        totalVisible += 1;
+                    }
+                });
+
+                category.hidden = visibleCount === 0;
+                if (term && visibleCount > 0) {
+                    category.classList.remove("is-collapsed");
+                }
+            });
+
+            if (sidebarEmpty) {
+                sidebarEmpty.hidden = totalVisible > 0 || !term;
+            }
+
+            saveSearchTerm(term);
+        }
+
+        function toggleCategory(button) {
+            button.closest(".sidebar-category").classList.toggle("is-collapsed");
+        }
+
+        function closeSidebarMobile() {
+            sidebar.classList.remove("open");
+        }
+
+        window.toggleCategory = toggleCategory;
+        window.loadDoc = loadDoc;
+
+        window.addEventListener("popstate", () => {
+            if (location.hash) {
+                loadDoc(decodeURIComponent(location.hash.slice(1)));
+            } else {
+                showWelcome();
+            }
+        });
+
+        document.addEventListener("keydown", (event) => {
+            const activeEl = document.activeElement;
+            const tag = activeEl?.tagName?.toLowerCase();
+            const isTyping = tag === "input" || tag === "textarea" || activeEl?.isContentEditable;
+
+            if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k") {
+                event.preventDefault();
+                docSearch?.focus();
+                docSearch?.select();
+                return;
+            }
+
+            if (event.key === "/" && !isTyping) {
+                event.preventDefault();
+                docSearch?.focus();
+                return;
+            }
+
+            if (event.key === "Escape") {
+                let handled = false;
+
+                if (siteNav.classList.contains("open")) {
+                    siteNav.classList.remove("open");
+                    navToggle?.setAttribute("aria-expanded", "false");
+                    handled = true;
+                }
+
+                if (sidebar.classList.contains("open")) {
+                    closeSidebarMobile();
+                    handled = true;
+                }
+
+                if (docSearch && docSearch.value) {
+                    docSearch.value = "";
+                    filterDocs();
+                    handled = true;
+                }
+
+                if (handled) {
+                    event.preventDefault();
+                }
+            }
+        });
+
+        buildSidebarStats();
+        buildSidebar();
+
+        const savedSearch = readSearchTerm();
+        if (savedSearch) {
+            docSearch.value = savedSearch;
+            filterDocs();
+        }
+
+        showWelcome();
+
+        if (location.hash) {
+            loadDoc(decodeURIComponent(location.hash.slice(1)));
+        }
+    </script>
+    <script src="global-upgrade.js"></script>
+</body>
+</html>

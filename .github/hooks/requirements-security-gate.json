@@ -1,0 +1,18 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "type": "command",
+        "command": "python3 .github/hooks/scripts/requirements_security_gate.py",
+        "timeout": 90
+      }
+    ],
+    "PostToolUse": [
+      {
+        "type": "command",
+        "command": "python3 .github/hooks/scripts/requirements_security_gate.py",
+        "timeout": 90
+      }
+    ]
+  }
+}

@@ -1,0 +1,2 @@
+{"role": "user", "content": "Continue with the fix", "timestamp": "2026-03-28T19:14:54.815015", "provider": "local", "model": "test-model"}
+{"role": "assistant", "content": "Recovered reply", "timestamp": "2026-03-28T19:14:54.815044", "provider": "local", "model": "test-model"}

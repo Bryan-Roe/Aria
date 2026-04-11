@@ -1,0 +1,133 @@
+version: 1
+
+# Evaluation AutoRun Configuration
+# Automates model evaluation against test datasets with multiple metrics
+
+jobs:
+  # Quick smoke test evaluation (fast, minimal samples)
+  - name: eval_smoke_test
+    enabled: true
+    model_type: lora  # "lora" | "azure" | "openai" | "local"
+    model_path: data_out/lora_training/phi35
+    dataset: datasets/chat/mixed_chat
+    max_samples: 10
+    metrics:
+      - accuracy
+      - response_time
+    output_format: json
+    save_results: true
+
+  # Full LoRA adapter evaluation
+  - name: eval_lora_phi35_full
+    enabled: true
+    model_type: lora
+    model_path: data_out/lora_training/phi35
+    dataset: datasets/chat/dolly
+    max_samples: 100
+    metrics:
+      - accuracy
+      - bleu
+      - rouge
+      - response_time
+      - token_efficiency
+    output_format: json
+    save_results: true
+    batch_size: 4
+
+  # Azure OpenAI baseline comparison
+  - name: eval_azure_baseline
+    enabled: false  # Requires Azure creds
+    model_type: azure
+    azure_deployment: gpt-4o-mini
+    dataset: datasets/chat/mixed_chat
+    max_samples: 50
+    metrics:
+      - accuracy
+      - response_time
+      - cost_per_token
+    output_format: json
+    save_results: true
+
+  # Quantum classifier evaluation
+  - name: eval_quantum_heart
+    enabled: true
+    model_type: quantum
+    model_path: ai-projects/quantum-ml/results/heart_disease_model.json
+    dataset: datasets/quantum/heart_disease.csv
+    max_samples: null  # Use full test set
+    metrics:
+      - accuracy
+      - precision
+      - recall
+      - f1_score
+    output_format: json
+    save_results: true
+
+  # Local provider baseline (free, offline)
+  - name: eval_local_baseline
+    enabled: true
+    model_type: local
+    dataset: datasets/chat/mixed_chat
+    max_samples: 20
+    metrics:
+      - response_time
+      - determinism
+    output_format: json
+    save_results: true
+
+  # Hyperparameter variant evaluations (fast, small sample)
+  - name: eval_phi35_lr_low
+    enabled: true
+    model_type: lora
+    model_path: data_out/lora_training/phi35_lr_low
+    dataset: datasets/chat/mixed_chat
+    max_samples: 20
+    metrics:
+      - accuracy
+      - bleu
+      - rouge
+      - response_time
+    output_format: json
+    save_results: true
+
+  - name: eval_phi35_lr_high
+    enabled: true
+    model_type: lora
+    model_path: data_out/lora_training/phi35_lr_high
+    dataset: datasets/chat/mixed_chat
+    max_samples: 20
+    metrics:
+      - accuracy
+      - bleu
+      - rouge
+      - response_time
+    output_format: json
+    save_results: true
+
+  - name: eval_phi35_drop_low
+    enabled: true
+    model_type: lora
+    model_path: data_out/lora_training/phi35_drop_low
+    dataset: datasets/chat/mixed_chat
+    max_samples: 20
+    metrics:
+      - accuracy
+      - bleu
+      - rouge
+      - response_time
+    output_format: json
+    save_results: true
+
+  - name: eval_phi35_drop_high
+    enabled: true
+    model_type: lora
+    model_path: data_out/lora_training/phi35_drop_high
+    dataset: datasets/chat/mixed_chat
+    max_samples: 20
+    metrics:
+      - accuracy
+      - bleu
+      - rouge
+      - response_time
+    output_format: json
+    save_results: true

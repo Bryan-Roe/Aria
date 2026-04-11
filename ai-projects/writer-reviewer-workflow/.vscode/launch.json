@@ -1,0 +1,31 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Debug Writer-Reviewer HTTP Server",
+      "type": "debugpy",
+      "request": "attach",
+      "connect": {
+        "host": "localhost",
+        "port": 5679
+      },
+      "preLaunchTask": "Open Agent Inspector",
+      "internalConsoleOptions": "neverOpen",
+      "postDebugTask": "Terminate All Tasks",
+      "justMyCode": false
+    },
+    {
+      "name": "Debug Writer-Reviewer CLI",
+      "type": "debugpy",
+      "request": "attach",
+      "connect": {
+        "host": "localhost",
+        "port": 5679
+      },
+      "preLaunchTask": "Run Writer-Reviewer CLI",
+      "internalConsoleOptions": "neverOpen",
+      "postDebugTask": "Terminate All Tasks",
+      "justMyCode": false
+    }
+  ]
+}

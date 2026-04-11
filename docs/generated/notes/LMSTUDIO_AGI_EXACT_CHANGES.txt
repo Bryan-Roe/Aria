@@ -1,0 +1,99 @@
+# CRITICAL: LM Studio + AGI Provider Integration Implementation
+# Save this before continuing!
+
+## EXACT CODE CHANGES NEEDED
+
+### CHANGE 1: Add LM Studio Agent to _AGENT_REGISTRY
+FILE: /workspaces/Aria/ai-projects/chat-cli/src/agi_provider.py
+LOCATION: After line 108 (before "general" agent), in the _AGENT_REGISTRY dict
+
+OLD CODE (lines 100-110):
+    "reasoning-specialist": {
+        "domains": ["ai"],
+        "intents": ["explanation", "question", "reasoning"],
+        "provider": "agi",
+        "confidence_boost": 0.1,
+        "subtask_templates": [
+            "Identify core question and key concepts",
+            "Build analogies from familiar domains",
+            "Explain step by step from simple to complex",
+            "Summarize with a concrete example",
+        ],
+        "description": "Deep reasoning and explanation using AGI chain-of-thought",
+    },
+    "general": {
+
+NEW CODE (same as above, but INSERT this BEFORE "general"):
+    "reasoning-specialist": {
+        "domains": ["ai"],
+        "intents": ["explanation", "question", "reasoning"],
+        "provider": "agi",
+        "confidence_boost": 0.1,
+        "subtask_templates": [
+            "Identify core question and key concepts",
+            "Build analogies from familiar domains",
+            "Explain step by step from simple to complex",
+            "Summarize with a concrete example",
+        ],
+        "description": "Deep reasoning and explanation using AGI chain-of-thought",
+    },
+    "lmstudio-specialist": {
+        "domains": [],
+        "intents": ["explanation", "question", "coding", "creation"],
+        "provider": "lmstudio",
+        "confidence_boost": 0.05,
+        "subtask_templates": [
+            "Understand the query: identify key concepts and requirements",
+            "Formulate response: structure thoughts logically and clearly",
+            "Review: ensure accuracy, completeness, and helpful presentation",
+        ],
+        "description": "Local LM Studio inference for general-purpose reasoning and Q&A",
+    },
+    "general": {
+
+### CHANGE 2: Update detect_provider() in chat_providers.py
+FILE: /workspaces/Aria/ai-projects/chat-cli/src/chat_providers.py
+LOCATION: detect_provider() function starting at line 1257
+
+NEED TO:
+1. Add case handling for explicit="lmstudio"
+2. Either modify existing detection logic OR add new lmstudio case
+3. Return (LMStudioProvider instance, info) tuple
+
+CURRENT PATTERN (for reference):
+if explicit in ("lora", ):
+    # check available, return provider
+elif explicit == "agi":
+    # check available, return provider
+etc.
+
+ADD CASE:
+elif explicit == "lmstudio":
+    base_url = os.getenv("LMSTUDIO_BASE_URL", "http://127.0.0.1:1234/v1")
+    model = os.getenv("LMSTUDIO_MODEL", "local-model")
+    try:
+        # Test connection to verify LM Studio is running
+        import urllib.request
+        request = urllib.request.Request(f"{base_url}/models")
+        with urllib.request.urlopen(request, timeout=2) as _:
+            pass
+        return (
+            LMStudioProvider(base_url=base_url, model=model),
+            ProviderChoice(name="lmstudio", model=model)
+        )
+    except Exception as e:
+        raise RuntimeError(f"LM Studio not available at {base_url}: {e}")
+
+## TEST CASES
+# Test 1: Agent selection includes lmstudio-specialist
+# Test 2: Query routes to lmstudio-specialist  when appropriate
+# Test 3: detect_provider(explicit="lmstudio") returns LMStudioProvider
+# Test 4: Streaming responses work with LM Studio backend
+# Test 5: Fallback works if LM Studio unavailable
+
+## VERIFICATION
+After changes:
+1. Restart any services
+2. Run: python3 scripts/setup_env_check.py
+3. Test: cd ai-projects/chat-cli && python3 src/chat_cli.py --once "Explain machine learning"
+   Expected: May route to lmstudio-specialist or general, but should work

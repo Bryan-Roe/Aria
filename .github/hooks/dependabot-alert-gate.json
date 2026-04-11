@@ -1,0 +1,11 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "type": "command",
+        "command": "python3 .github/hooks/scripts/dependabot_alert_gate.py",
+        "timeout": 35
+      }
+    ]
+  }
+}

@@ -1,0 +1,55 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "integration:contract-gate",
+			"type": "shell",
+			"command": "bash",
+			"args": [
+				"-lc",
+				"./scripts/integration_contract_gate.sh"
+			],
+			"problemMatcher": []
+		},
+		{
+			"label": "integration:contract-gate-strict",
+			"type": "shell",
+			"command": "bash",
+			"args": [
+				"-lc",
+				"./scripts/integration_contract_gate.sh --strict-endpoints"
+			],
+			"problemMatcher": []
+		},
+		{
+			"label": "repo-health:once-strict",
+			"type": "shell",
+			"command": "bash",
+			"args": [
+				"-lc",
+				"./scripts/start_repo_health_automation.sh once --strict"
+			],
+			"problemMatcher": []
+		},
+		{
+			"label": "repo-health:once-strict-full-pytest",
+			"type": "shell",
+			"command": "bash",
+			"args": [
+				"-lc",
+				"./scripts/start_repo_health_automation.sh once --strict --full-pytest"
+			],
+			"problemMatcher": []
+		},
+		{
+			"label": "repo-health:watch-strict",
+			"type": "shell",
+			"command": "bash",
+			"args": [
+				"-lc",
+				"./scripts/start_repo_health_automation.sh watch --strict --interval 300"
+			],
+			"problemMatcher": []
+		}
+	]
+}

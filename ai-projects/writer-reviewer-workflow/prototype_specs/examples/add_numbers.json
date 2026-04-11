@@ -1,0 +1,15 @@
+{
+  "module_name": "math_helpers",
+  "function_name": "add_numbers",
+  "description": "Add two integers and return the sum.",
+  "arguments": [
+    {"name": "left", "type": "int"},
+    {"name": "right", "type": "int"}
+  ],
+  "return_type": "int",
+  "expression": "left + right",
+  "examples": [
+    {"inputs": {"left": 2, "right": 3}, "output": 5},
+    {"inputs": {"left": -1, "right": 4}, "output": 3}
+  ]
+}

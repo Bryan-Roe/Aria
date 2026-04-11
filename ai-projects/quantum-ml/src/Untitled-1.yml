@@ -1,0 +1,14 @@
+name: Quantum Automation
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  run-quantum:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Run Orchestration
+      shell: pwsh
+      run: ./azure/quantum_master_orchestration.ps1

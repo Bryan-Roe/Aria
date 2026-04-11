@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools>=78.1.1", "wheel>=0.46.2"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "aria"
+version = "0.0.0"
+description = "Aria — Interactive AI Character Platform"
+requires-python = ">=3.9"
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=7.0,<8.0",
+  "watchdog>=2.1.0",
+  "pre-commit>=3.0",
+  "ruff>=0.4.0",
+  "mypy>=1.8.0",
+]
+
+[tool.ruff]
+line-length = 120
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B"]
+ignore = []
+
+[tool.mypy]
+python_version = "3.10"
+ignore_missing_imports = true
+check_untyped_defs = true
+warn_unused_ignores = true

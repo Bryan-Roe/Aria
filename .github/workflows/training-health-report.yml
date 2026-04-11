@@ -1,0 +1,201 @@
+# =============================================================================
+# Training Health Report
+# =============================================================================
+# Purpose: Weekly digest of the autonomous training pipeline health.
+#          Reads data_out/ status artifacts, posts a rich Step Summary, and
+#          opens a GitHub Issue if accuracy has degraded or cycles have stalled.
+# Triggers: Every Monday at 08:00 UTC, manual dispatch
+# =============================================================================
+
+name: Training Health Report
+
+on:
+  schedule:
+    - cron: '0 8 * * 1'  # 08:00 UTC every Monday
+  workflow_dispatch:
+    inputs:
+      open-issue:
+        description: 'Always open a summary issue (even if healthy)'
+        required: false
+        default: 'false'
+        type: choice
+        options:
+          - 'false'
+          - 'true'
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  health-report:
+    name: Generate Training Health Report
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: ./.github/actions/setup-python-env
+        with:
+          python-version: '3.11'
+          extra-packages: 'tabulate'
+
+      - name: Validate analytics script
+        run: python -m py_compile scripts/training_analytics.py 2>/dev/null || echo "analytics script unavailable"
+
+      - name: Read training status
+        id: status
+        run: |
+          python3 - << 'PYEOF'
+          import json, os, sys
+          from pathlib import Path
+
+          def read_json(path):
+              try:
+                  return json.loads(Path(path).read_text())
+              except Exception:
+                  return {}
+
+          training = read_json("data_out/autonomous_training_status.json")
+          ci       = read_json("data_out/ci_orchestrator/status.json")
+          autotrain = read_json("data_out/autotrain/status.json")
+
+          cycles       = training.get("cycles_completed", 0)
+          best_acc     = training.get("best_accuracy", 0.0)
+          history      = training.get("performance_history", [])
+          dataset_inv  = training.get("dataset_inventory", {})
+
+          # Recent trend (last 5 entries)
+          recent_acc = [h.get("accuracy", 0) for h in history[-5:] if isinstance(h, dict)]
+          trend = "stable"
+          if len(recent_acc) >= 2:
+              delta = recent_acc[-1] - recent_acc[0]
+              if delta < -0.05:
+                  trend = "degrading"
+              elif delta > 0.02:
+                  trend = "improving"
+
+          # CI totals
+          ci_succeeded = ci.get("succeeded", 0)
+          ci_failed    = ci.get("failed", 0)
+          ci_total     = ci.get("total_jobs", 0)
+
+          # Autotrain totals
+          at_succeeded = autotrain.get("succeeded", 0)
+          at_failed    = autotrain.get("failed", 0)
+
+          degraded = best_acc < 0.6 or trend == "degrading" or (ci_failed > 0 and ci_total > 0 and ci_failed / ci_total > 0.2)
+
+          with open(os.environ["GITHUB_OUTPUT"], "a") as f:
+              f.write(f"cycles={cycles}\n")
+              f.write(f"best_acc={best_acc:.4f}\n")
+              f.write(f"trend={trend}\n")
+              f.write(f"datasets={json.dumps(dataset_inv)}\n")
+              f.write(f"ci_succeeded={ci_succeeded}\n")
+              f.write(f"ci_failed={ci_failed}\n")
+              f.write(f"ci_total={ci_total}\n")
+              f.write(f"at_succeeded={at_succeeded}\n")
+              f.write(f"at_failed={at_failed}\n")
+              f.write(f"degraded={'true' if degraded else 'false'}\n")
+
+          print(f"Cycles={cycles}  BestAcc={best_acc:.4f}  Trend={trend}  Degraded={degraded}")
+          PYEOF
+
+      - name: Run training analytics (if available)
+        run: python scripts/training_analytics.py 2>/dev/null || echo "training analytics skipped"
+        continue-on-error: true
+
+      - name: Generate step summary
+        run: |
+          echo "## 📊 Weekly Training Health Report" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Report date:** $(date -u +'%Y-%m-%d %H:%M UTC')" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          # Overall health badge
+          if [ "${{ steps.status.outputs.degraded }}" == "true" ]; then
+            echo "### ⚠️ Health Status: DEGRADED" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "### ✅ Health Status: Healthy" >> $GITHUB_STEP_SUMMARY
+          fi
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          echo "### Autonomous Training" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Metric | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Cycles completed | ${{ steps.status.outputs.cycles }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Best accuracy | ${{ steps.status.outputs.best_acc }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Recent trend | ${{ steps.status.outputs.trend }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          echo "### CI Orchestrator" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Metric | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Total jobs | ${{ steps.status.outputs.ci_total }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Succeeded | ${{ steps.status.outputs.ci_succeeded }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Failed | ${{ steps.status.outputs.ci_failed }} |" >> $GITHUB_STEP_SUMMARY
+
+      - name: Open degradation issue
+        if: steps.status.outputs.degraded == 'true' || github.event.inputs.open-issue == 'true'
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const week = new Date().toISOString().slice(0, 10);
+            const degraded = '${{ steps.status.outputs.degraded }}' === 'true';
+            const title = degraded
+              ? `⚠️ Training Health Degraded — week of ${week}`
+              : `📊 Training Health Report — week of ${week}`;
+
+            const body = [
+              `## Weekly Training Health Report`,
+              ``,
+              `**Report date:** ${new Date().toUTCString()}`,
+              `**Status:** ${degraded ? '⚠️ DEGRADED' : '✅ Healthy'}`,
+              ``,
+              `### Autonomous Training`,
+              ``,
+              `| Metric | Value |`,
+              `|--------|-------|`,
+              `| Cycles completed | ${{ steps.status.outputs.cycles }} |`,
+              `| Best accuracy | ${{ steps.status.outputs.best_acc }} |`,
+              `| Recent trend | ${{ steps.status.outputs.trend }} |`,
+              ``,
+              `### CI Orchestrator`,
+              ``,
+              `| Metric | Value |`,
+              `|--------|-------|`,
+              `| Total jobs | ${{ steps.status.outputs.ci_total }} |`,
+              `| Succeeded | ${{ steps.status.outputs.ci_succeeded }} |`,
+              `| Failed | ${{ steps.status.outputs.ci_failed }} |`,
+              ``,
+              `**Workflow run:** ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}`,
+            ].join('\n');
+
+            const labels = degraded
+              ? ['training', 'automated', 'performance']
+              : ['training', 'automated'];
+
+            // Avoid duplicates this week
+            const issues = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: 'training,automated',
+            });
+            if (issues.data.find(i => i.title.includes(week))) {
+              console.log('Issue for this week already exists, skipping.');
+              return;
+            }
+
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title,
+              body,
+              labels,
+            });

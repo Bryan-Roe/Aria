@@ -1,0 +1,162 @@
+╔══════════════════════════════════════════════════════════════════════════════╗
+║              🚀 REPOSITORY AUTOMATION QUICK REFERENCE 🚀                     ║
+║                     Complete Aria Repository Automation                      ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+⚡ QUICK START COMMANDS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  Start Everything:
+    ./scripts/start_repo_automation.sh full
+
+  Start Aria Only:
+    ./scripts/start_repo_automation.sh aria
+
+  Training Pipeline:
+    ./scripts/start_repo_automation.sh training
+
+  Custom Selection:
+    ./scripts/start_repo_automation.sh components aria,training,quantum
+
+  Check Status:
+    ./scripts/start_repo_automation.sh status
+
+  Stop All:
+    ./scripts/start_repo_automation.sh stop
+
+  Background Mode:
+    ./scripts/start_repo_automation.sh full --background
+
+  Interactive Menu:
+    ./scripts/start_repo_automation.sh
+
+  Run Tests:
+    python3 scripts/test_repo_automation.py
+
+  Integration Smoke:
+    python3 scripts/integration_smoke.py
+
+  Demo:
+    ./scripts/demo_repo_automation.sh
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🤖 AUTOMATED COMPONENTS (7 Total)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  1. aria       ✨ Aria Character (server + training)
+  2. training   🎓 LoRA Training Pipelines
+  3. quantum    ⚛️  Quantum Computing Workflows
+  4. evaluation 📊 Model Evaluation System
+  5. datasets   📦 Auto Dataset Discovery
+  6. monitoring 🏥 System Health Monitoring
+  7. backup     💾 Automated Backups (daily)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📊 MONITORING
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  Status Dashboard:
+    ./scripts/start_repo_automation.sh status
+
+  Status JSON:
+    cat data_out/repo_automation/status.json | jq
+
+  Automation Log:
+    tail -f data_out/repo_automation/automation.log
+
+  Component Logs:
+    tail -f data_out/aria_automation/*.log
+    tail -f data_out/autotrain/*.log
+    tail -f data_out/quantum_autorun/*.log
+
+  Health Check:
+    python3 scripts/system_health_check.py --once
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🔧 PYTHON API USAGE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  python3 scripts/repo_automation.py --start              # Start all
+  python3 scripts/repo_automation.py --start --daemon     # Daemon mode
+  python3 scripts/repo_automation.py --start --components aria,training
+  python3 scripts/repo_automation.py --status             # Check status
+  python3 scripts/repo_automation.py --stop               # Stop all
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🚀 PRODUCTION DEPLOYMENT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  Systemd Service:
+    sudo systemctl enable aria-repo-automation
+    sudo systemctl start aria-repo-automation
+    sudo systemctl status aria-repo-automation
+    sudo systemctl stop aria-repo-automation
+
+  Cron Schedule:
+    */30 * * * * cd /path/to/Aria && ./scripts/start_repo_automation.sh full -b
+
+  Docker:
+    docker run -v $(pwd):/app aria-automation python3 scripts/repo_automation.py --start --daemon
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🔍 TROUBLESHOOTING
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  Component won't start:
+    - Check: ./scripts/start_repo_automation.sh status
+    - Test manually: python3 scripts/aria_automation.py --help
+    - View logs: tail -f data_out/repo_automation/automation.log
+
+  Auto-restart loop:
+    - Check logs: tail -f data_out/<component>/
+    - Disable: Edit scripts/repo_automation.py, set auto_restart=False
+
+  High resource usage:
+    - Monitor: tail -f data_out/system_health_check/health.log
+    - Reduce: Start fewer components
+
+  Force kill stuck processes:
+    pkill -f repo_automation.py
+    pkill -f aria_automation.py
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📚 DOCUMENTATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  Full Guide:           cat docs/guides/REPO_AUTOMATION_GUIDE.md
+  Aria Guide:           cat ARIA_AUTOMATION_GUIDE.md
+  Main README:          cat README.md
+  Master Orchestrator:  python3 scripts/master_orchestrator.py --help
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🌐 ACCESS POINTS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  Aria Web UI:          http://localhost:8080
+  Azure Functions:      http://localhost:7071
+  API Status:           http://localhost:7071/api/ai/status
+  Chat API:             http://localhost:7071/api/chat
+  Quantum Dashboard:    http://localhost:5000 (if enabled)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+✨ FEATURES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ✅ One-command startup for entire repository
+  ✅ 7 automated components with health monitoring
+  ✅ Auto-restart on failure
+  ✅ Dependency management (components wait for dependencies)
+  ✅ Background/daemon mode
+  ✅ Status tracking with JSON output
+  ✅ Comprehensive logging
+  ✅ Production-ready (systemd/cron/docker)
+  ✅ Interactive menu for easy selection
+  ✅ Integration with master orchestrator
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+For help: ./scripts/start_repo_automation.sh --help
+For demo: ./scripts/demo_repo_automation.sh
+
+Happy Automating! 🚀

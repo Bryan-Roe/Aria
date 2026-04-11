@@ -1,0 +1,38 @@
+name: Workflow Lint
+
+on:
+    pull_request:
+        paths:
+            - ".github/workflows/**"
+            - ".github/actions/**"
+    push:
+        branches: [main]
+        paths:
+            - ".github/workflows/**"
+            - ".github/actions/**"
+    workflow_dispatch:
+
+concurrency:
+    group: actionlint-${{ github.ref }}
+    cancel-in-progress: true
+
+permissions:
+    checks: write
+
+jobs:
+    actionlint:
+        name: actionlint
+        runs-on: ubuntu-latest
+        timeout-minutes: 10
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+
+            - name: Setup ShellCheck
+              run: sudo apt-get update && sudo apt-get install -y shellcheck
+
+            - name: Run actionlint
+              uses: reviewdog/action-actionlint@v1
+              with:
+                  fail_level: failure
+                  reporter: github-check
