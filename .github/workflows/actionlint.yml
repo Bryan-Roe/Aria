@@ -16,6 +16,9 @@ concurrency:
     group: actionlint-${{ github.ref }}
     cancel-in-progress: true
 
+permissions:
+    checks: write
+
 jobs:
     actionlint:
         name: actionlint
@@ -32,4 +35,4 @@ jobs:
               uses: reviewdog/action-actionlint@v1
               with:
                   fail_level: failure
-                  reporter: github-pr-check
+                  reporter: github-check
