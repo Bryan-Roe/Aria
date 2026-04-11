@@ -30,14 +30,16 @@ jobs:
           import sys
 
           failed = False
-          for yml_file in Path('.github/workflows').glob('*.yml'):
-              try:
-                  with open(yml_file) as f:
-                      yaml.safe_load(f)
-                  print(f'✓ {yml_file}')
-              except Exception as e:
-                  print(f'✗ {yml_file}: {e}')
-                  failed = True
+          workflow_dir = Path('.github/workflows')
+          files = sorted(set(workflow_dir.glob('*.yml')) | set(workflow_dir.glob('*.yaml')))
+          for yml_file in files:
+            try:
+              with open(yml_file) as f:
+                yaml.safe_load(f)
+              print(f'✓ {yml_file}')
+            except Exception as e:
+              print(f'✗ {yml_file}: {e}')
+              failed = True
 
           sys.exit(1 if failed else 0)
           "
@@ -45,7 +47,18 @@ jobs:
       - name: Check for common issues
         run: |
           echo "Checking for TODO/FIXME markers in modified files..."
-          git diff origin/${{ github.base_ref }}...HEAD --name-only | xargs grep -n "TODO\|FIXME" || echo "No TODO/FIXME found"
+          CHANGED_FILES="$(git diff origin/${{ github.base_ref }}...HEAD --name-only)"
+          if [ -z "$CHANGED_FILES" ]; then
+            echo "No modified files found in diff range"
+            exit 0
+          fi
+
+          # Scan only changed files, safely handling spaces and empty input.
+          echo "$CHANGED_FILES" | while IFS= read -r file; do
+            [ -n "$file" ] || continue
+            [ -f "$file" ] || continue
+            grep -nE "TODO|FIXME" "$file" || true
+          done
         continue-on-error: true
 
       - name: Fast validation

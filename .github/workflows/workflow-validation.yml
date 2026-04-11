@@ -38,16 +38,23 @@ jobs:
           workflows_dir = Path('.github/workflows')
 
           print('Validating workflow files...')
-          for yml_file in workflows_dir.glob('*.yml'):
+            workflow_files = sorted(set(workflows_dir.glob('*.yml')) | set(workflows_dir.glob('*.yaml')))
+            for yml_file in workflow_files:
               try:
                   with open(yml_file) as f:
                       content = yaml.safe_load(f)
+                if not isinstance(content, dict):
+                  raise ValueError('Top-level YAML node must be a mapping')
+
+                # NOTE: In YAML 1.1, unquoted `on:` may be parsed as boolean True by PyYAML.
+                has_on_key = ('on' in content) or (True in content)
+
                   print(f'✓ {yml_file.name}')
 
                   # Basic structure validation
                   if 'name' not in content:
                       print(f'  ⚠️  Warning: Missing name field')
-                  if 'on' not in content:
+                    if not has_on_key:
                       print(f'  ⚠️  Warning: Missing on field')
                   if 'jobs' not in content:
                       print(f'  ⚠️  Warning: Missing jobs field')
@@ -72,7 +79,7 @@ jobs:
             echo "⚠️  Warning: Found deprecated checkout action versions (v1/v2). Consider upgrading to v4."
           fi
 
-          if grep -r "actions/setup-python@v[123]" .github/workflows/; then
+          if grep -r "actions/setup-python@v[1-4]" .github/workflows/; then
             echo "⚠️  Warning: Found old setup-python action versions. Consider upgrading to v5."
           fi
 

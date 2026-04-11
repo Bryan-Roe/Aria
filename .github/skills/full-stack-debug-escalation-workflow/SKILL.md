@@ -1,6 +1,6 @@
 ---
 name: full-stack-debug-escalation-workflow
-description: 'Escalate debugging across browser UI, JavaScript clients, Azure Functions routes, shared Python infrastructure, and orchestrator status artifacts. Use when a bug crosses layers, the visible symptom is far from the root cause, or you need a disciplined path from frontend repro to backend fix.'
+description: 'Escalate debugging across browser UI, JavaScript clients, Azure Functions routes, shared Python infrastructure, and orchestrator status artifacts. Use when a bug crosses layers, runtime errors/tracebacks need cross-layer correlation, the visible symptom is far from the root cause, or you need a disciplined path from frontend repro to backend fix.'
 argument-hint: 'Describe the symptom, affected surface, and the first failing request, page, or workflow you can reproduce.'
 ---
 

@@ -77,7 +77,7 @@ jobs:
         id: parse
         run: |
           # Extract "X passed, Y failed, Z skipped" from pytest output
-          SUMMARY=$(tail -20 pytest-output.txt | grep -E "[0-9]+ passed" || echo "0 passed")
+          SUMMARY=$(grep -E "[0-9]+ passed" pytest-output.txt | tail -1 || echo "0 passed")
           PASSED=$(echo "$SUMMARY" | grep -oE "[0-9]+ passed" | grep -oE "[0-9]+" || echo "0")
           FAILED=$(echo "$SUMMARY" | grep -oE "[0-9]+ failed" | grep -oE "[0-9]+" || echo "0")
           SKIPPED=$(echo "$SUMMARY" | grep -oE "[0-9]+ skipped" | grep -oE "[0-9]+" || echo "0")
@@ -96,6 +96,7 @@ jobs:
             test-results.xml
             coverage.xml
             pytest-output.txt
+          if-no-files-found: warn
 
       - name: Generate summary
         if: always()
@@ -143,8 +144,9 @@ jobs:
           CURRENT_FAILED: ${{ needs.full-test-suite.outputs.failed }}
         run: |
           PREV_PASSED=0
-          if [ -f pytest-output.txt ]; then
-            PREV_PASSED=$(grep -oE "[0-9]+ passed" pytest-output.txt | tail -1 | grep -oE "[0-9]+" || echo "0")
+          PREV_OUTPUT_FILE=$(find . -type f -name 'pytest-output.txt' | head -1)
+          if [ -n "$PREV_OUTPUT_FILE" ] && [ -f "$PREV_OUTPUT_FILE" ]; then
+            PREV_PASSED=$(grep -oE "[0-9]+ passed" "$PREV_OUTPUT_FILE" | tail -1 | grep -oE "[0-9]+" || echo "0")
           fi
 
           echo "Previous passed: $PREV_PASSED"

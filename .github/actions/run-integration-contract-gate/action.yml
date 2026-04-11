@@ -1,0 +1,26 @@
+name: 'Run Integration Contract Gate'
+description: 'Run scripts/integration_contract_gate.sh with optional strict-endpoint mode'
+
+inputs:
+  strict-endpoints:
+    description: 'Run with --strict-endpoints'
+    required: false
+    default: 'false'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Run integration contract gate
+      shell: bash
+      run: |
+        set -euo pipefail
+        if [ ! -f ./scripts/integration_contract_gate.sh ]; then
+          echo "scripts/integration_contract_gate.sh not found" >&2
+          exit 1
+        fi
+
+        if [ "${{ inputs.strict-endpoints }}" = "true" ]; then
+          bash ./scripts/integration_contract_gate.sh --strict-endpoints
+        else
+          bash ./scripts/integration_contract_gate.sh
+        fi

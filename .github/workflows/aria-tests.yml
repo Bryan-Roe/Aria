@@ -73,6 +73,7 @@ jobs:
           path: |
             test-results/
             .coverage
+          if-no-files-found: warn
           retention-days: 14
 
   playwright-e2e:
@@ -103,15 +104,27 @@ jobs:
       - name: Start Aria server (background)
         run: |
           cd aria_web
-          python server.py &
+          python server.py > /tmp/aria_server.log 2>&1 &
           echo $! > /tmp/aria_server.pid
-          sleep 3
         env:
           PYTHONPATH: ${{ github.workspace }}
 
       - name: Wait for server
         run: |
-          timeout 30 bash -c 'until curl -f http://localhost:8080/api/aria/state; do sleep 1; done'
+          READY=0
+          for _ in $(seq 1 60); do
+            if curl -sSf http://localhost:8080/api/aria/state >/dev/null; then
+              READY=1
+              break
+            fi
+            sleep 0.5
+          done
+
+          if [ "$READY" -ne 1 ]; then
+            echo "Aria server did not become ready in Playwright job" >&2
+            tail -n 120 /tmp/aria_server.log || true
+            exit 1
+          fi
 
       - name: Run Playwright E2E tests
         run: |
@@ -124,7 +137,10 @@ jobs:
         if: always()
         run: |
           if [ -f /tmp/aria_server.pid ]; then
-            kill $(cat /tmp/aria_server.pid) || true
+            PID=$(cat /tmp/aria_server.pid)
+            if kill -0 "$PID" 2>/dev/null; then
+              kill "$PID"
+            fi
           fi
 
       - name: Upload E2E test results
@@ -135,6 +151,7 @@ jobs:
           path: |
             test-results/
             playwright-report/
+          if-no-files-found: warn
           retention-days: 14
 
   pyppeteer-e2e:
@@ -183,15 +200,27 @@ jobs:
       - name: Start Aria server (background)
         run: |
           cd aria_web
-          python server.py &
+          python server.py > /tmp/aria_server.log 2>&1 &
           echo $! > /tmp/aria_server.pid
-          sleep 3
         env:
           PYTHONPATH: ${{ github.workspace }}
 
       - name: Wait for server
         run: |
-          timeout 30 bash -c 'until curl -f http://localhost:8080/api/aria/state; do sleep 1; done'
+          READY=0
+          for _ in $(seq 1 60); do
+            if curl -sSf http://localhost:8080/api/aria/state >/dev/null; then
+              READY=1
+              break
+            fi
+            sleep 0.5
+          done
+
+          if [ "$READY" -ne 1 ]; then
+            echo "Aria server did not become ready in Pyppeteer job" >&2
+            tail -n 120 /tmp/aria_server.log || true
+            exit 1
+          fi
 
       - name: Run Pyppeteer E2E tests
         run: |
@@ -204,7 +233,10 @@ jobs:
         if: always()
         run: |
           if [ -f /tmp/aria_server.pid ]; then
-            kill $(cat /tmp/aria_server.pid) || true
+            PID=$(cat /tmp/aria_server.pid)
+            if kill -0 "$PID" 2>/dev/null; then
+              kill "$PID"
+            fi
           fi
 
       - name: Upload E2E test results
@@ -213,6 +245,7 @@ jobs:
         with:
           name: pyppeteer-e2e-results
           path: test-results/
+          if-no-files-found: warn
 
   containerized-chrome-e2e:
     name: Containerized Chrome E2E Tests
@@ -244,19 +277,43 @@ jobs:
       - name: Start Aria server (background)
         run: |
           cd aria_web
-          python server.py &
+          python server.py > /tmp/aria_server.log 2>&1 &
           echo $! > /tmp/aria_server.pid
-          sleep 3
         env:
           PYTHONPATH: ${{ github.workspace }}
 
       - name: Wait for server
         run: |
-          timeout 30 bash -c 'until curl -f http://localhost:8080/api/aria/state; do sleep 1; done'
+          READY=0
+          for _ in $(seq 1 60); do
+            if curl -sSf http://localhost:8080/api/aria/state >/dev/null; then
+              READY=1
+              break
+            fi
+            sleep 0.5
+          done
+
+          if [ "$READY" -ne 1 ]; then
+            echo "Aria server did not become ready in Selenium job" >&2
+            tail -n 120 /tmp/aria_server.log || true
+            exit 1
+          fi
 
       - name: Wait for Selenium Chrome
         run: |
-          timeout 30 bash -c 'until curl -f http://localhost:4444/wd/hub/status; do sleep 1; done'
+          READY=0
+          for _ in $(seq 1 60); do
+            if curl -sSf http://localhost:4444/wd/hub/status >/dev/null; then
+              READY=1
+              break
+            fi
+            sleep 0.5
+          done
+
+          if [ "$READY" -ne 1 ]; then
+            echo "Selenium Chrome service did not become ready" >&2
+            exit 1
+          fi
 
       - name: Run containerized Chrome E2E tests
         run: |
@@ -270,7 +327,10 @@ jobs:
         if: always()
         run: |
           if [ -f /tmp/aria_server.pid ]; then
-            kill $(cat /tmp/aria_server.pid) || true
+            PID=$(cat /tmp/aria_server.pid)
+            if kill -0 "$PID" 2>/dev/null; then
+              kill "$PID"
+            fi
           fi
 
       - name: Upload E2E test results
@@ -279,6 +339,7 @@ jobs:
         with:
           name: selenium-e2e-results
           path: test-results/
+          if-no-files-found: warn
 
   test-summary:
     name: Test Summary

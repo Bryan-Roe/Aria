@@ -72,6 +72,7 @@ jobs:
               with:
                   name: coverage-main-baseline
                   path: coverage.xml
+                  if-no-files-found: warn
                   retention-days: 90
                   overwrite: true
 
@@ -82,6 +83,7 @@ jobs:
               with:
                   name: coverage-pr-${{ github.event.pull_request.number }}
                   path: coverage.xml
+                  if-no-files-found: warn
                   retention-days: 30
                   overwrite: true
 

@@ -24,9 +24,9 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
-          python-version: '3.x'
+          python-version: '3.11'
 
       - name: Install dev dependencies
         run: |
@@ -59,6 +59,7 @@ jobs:
 
       - name: Run test watcher (runs tests once then exits via timeout)
         run: |
-          timeout 10m python3 scripts/test_watcher.py --cmd "pytest tests -q --maxfail=1"
+          timeout "${{ github.event.inputs.watcher_timeout_minutes || '10' }}m" \
+            python3 scripts/test_watcher.py --cmd "pytest tests -q --maxfail=1"
         env:
           CI: true

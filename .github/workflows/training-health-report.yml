@@ -43,7 +43,12 @@ jobs:
           extra-packages: 'tabulate'
 
       - name: Validate analytics script
-        run: python -m py_compile scripts/training_analytics.py 2>/dev/null || echo "analytics script unavailable"
+        run: |
+          if [ -f scripts/training_analytics.py ]; then
+            python -m py_compile scripts/training_analytics.py
+          else
+            echo "analytics script unavailable"
+          fi
 
       - name: Read training status
         id: status
