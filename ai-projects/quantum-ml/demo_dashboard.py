@@ -52,7 +52,7 @@ response = requests.post(
 )
 if response.status_code != 200:
     print(f"   ❌ Failed to start training: {response.text}")
-    exit(1)
+    sys.exit(1)
 
 session = response.json()
 session_id = session["session_id"]
