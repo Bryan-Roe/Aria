@@ -54,6 +54,22 @@ QLCM_EPOCHS=10 QLCM_QUBITS=6 python quantum-ai/examples/quantum_code_llm_demo.py
 QLCM_BACKEND=classical python quantum-ai/examples/quantum_code_llm_demo.py
 ```
 
+## Fast Smoke Check (Local/CI-Friendly)
+
+```bash
+# Fast deterministic path (recommended for CI/local sanity checks)
+python3 quantum-ai/scripts/smoke_quantum_code_llm.py
+
+# Override backend/epochs if needed
+python3 quantum-ai/scripts/smoke_quantum_code_llm.py --backend auto --epochs 1
+```
+
+If dependencies are missing, install minimum runtime packages first:
+
+```bash
+python3 -m pip install -r quantum-ai/requirements-smoke.txt
+```
+
 ## Config Reference
 
 | Parameter | Default | Description |

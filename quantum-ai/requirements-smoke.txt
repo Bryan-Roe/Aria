@@ -1,0 +1,3 @@
+# Minimal dependencies for quantum-ai smoke checks
+numpy
+torch

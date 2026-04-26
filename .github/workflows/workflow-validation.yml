@@ -44,31 +44,18 @@ jobs:
           functions-path: functions
           require-http-route: 'true'
 
+      - name: Validate Foundry deployment config
+        uses: ./.github/actions/validate-foundry-config
+
       - name: Validate generated site bundles contract
         uses: ./.github/actions/validate-site-bundles
         with:
           strict-metadata: 'true'
 
       - name: Check for common issues
-        run: |
-          echo "Checking for common workflow issues..."
-
-          # Check for deprecated actions
-          if grep -r "actions/checkout@v[12]" .github/workflows/; then
-            echo "⚠️  Warning: Found deprecated checkout action versions (v1/v2). Consider upgrading to v4."
-          fi
-
-          if grep -r "actions/setup-python@v[1-4]" .github/workflows/; then
-            echo "⚠️  Warning: Found old setup-python action versions. Consider upgrading to v5."
-          fi
-
-          # Check for hardcoded secrets
-          if grep -r "ghp_\|github_pat_" .github/workflows/ 2>/dev/null; then
-            echo "❌ ERROR: Found hardcoded GitHub tokens!"
-            exit 1
-          fi
-
-          echo "✅ Common issues check completed"
+        uses: ./.github/actions/check-workflow-common-issues
+        with:
+          workflows-path: .github/workflows
 
       - name: Validate action references
         uses: ./.github/actions/validate-action-references

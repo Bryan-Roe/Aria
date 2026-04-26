@@ -1,0 +1,48 @@
+name: Quantum AI Smoke
+
+on:
+  pull_request:
+    paths:
+      - 'quantum-ai/**'
+      - '.github/workflows/quantum-ai-smoke.yml'
+      - '.vscode/tasks.json'
+  push:
+    branches: [ main ]
+    paths:
+      - 'quantum-ai/**'
+      - '.github/workflows/quantum-ai-smoke.yml'
+  workflow_dispatch:
+
+jobs:
+  smoke-quantum-ai:
+    name: Smoke Quantum Code LLM
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: ./.github/actions/setup-python-env
+        with:
+          install-requirements: 'false'
+
+      - name: Install quantum-ai smoke dependencies
+        run: |
+          python3 -m pip install -r quantum-ai/requirements-smoke.txt
+
+      - name: Run quantum-ai smoke script
+        uses: ./.github/actions/run-quantum-ai-smoke
+        with:
+          backend: classical
+          epochs: '1'
+
+      - name: Upload smoke context
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: quantum-ai-smoke-${{ github.run_number }}
+          retention-days: 7
+          if-no-files-found: warn
+          path: |
+            quantum-ai/results/

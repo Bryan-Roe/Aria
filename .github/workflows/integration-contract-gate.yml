@@ -68,8 +68,9 @@ jobs:
           strict-metadata: 'true'
 
       - name: Validate local composite actions
-        run: |
-          python3 scripts/validate_composite_actions.py
+        uses: ./.github/actions/validate-composite-actions
+        with:
+          script-path: scripts/validate_composite_actions.py
 
       - name: Run contract gate (standard)
         if: steps.mode.outputs.strict == 'false'

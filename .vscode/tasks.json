@@ -60,6 +60,26 @@
 			"problemMatcher": []
 		},
 		{
+			"label": "smoke: quantum-ai-code-llm",
+			"type": "shell",
+			"command": "bash",
+			"args": [
+				"-lc",
+				"python3 quantum-ai/scripts/smoke_quantum_code_llm.py --backend classical --epochs 1"
+			],
+			"problemMatcher": []
+		},
+		{
+			"label": "validate: foundry-config",
+			"type": "shell",
+			"command": "bash",
+			"args": [
+				"-lc",
+				"python3 scripts/validate_foundry_config.py"
+			],
+			"problemMatcher": []
+		},
+		{
 			"label": "Run Gradio AI Chat app",
 			"type": "shell",
 			"command": "${command:python.interpreterPath}",
