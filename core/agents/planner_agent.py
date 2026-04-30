@@ -1,6 +1,6 @@
 """
 Planner Agent
-Generates task plans from goals using memory context and autonomous reasoning.
+Generates task plans from goals using memory context and LLM-style reasoning.
 """
 
 from typing import Dict, Any, List
@@ -23,7 +23,7 @@ class PlannerAgent(BaseAgent):
         payload = task.payload or {}
         goal = payload.get("goal") or payload.get("input") or ""
 
-        history = self.memory.last(10)
+        history = self.memory.last(20)
 
         plan = self._create_plan(goal, history)
 
@@ -41,30 +41,49 @@ class PlannerAgent(BaseAgent):
 
     def _create_plan(self, goal: str, history: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         """
-        Simple deterministic planner (will later be replaced with LLM planning).
+        LLM-style planning layer (currently deterministic scaffold,
+        designed for later model integration).
         """
-        steps = []
 
         if not goal:
             return [{"error": "No goal provided"}]
 
-        # Basic decomposition logic
-        steps.append({
-            "id": str(uuid.uuid4()),
-            "type": "llm",
-            "payload": {"prompt": goal},
-        })
+        context_summary = self._summarize_history(history)
 
-        steps.append({
-            "id": str(uuid.uuid4()),
-            "type": "evaluate",
-            "payload": {"source": "llm_output"},
-        })
+        # Simulated structured reasoning output
+        # Future: replace with real LLM JSON schema response
+        plan = [
+            {
+                "id": str(uuid.uuid4()),
+                "type": "llm",
+                "payload": {
+                    "prompt": f"Goal: {goal}\nContext: {context_summary}\n\nProduce solution step output"
+                },
+            },
+            {
+                "id": str(uuid.uuid4()),
+                "type": "tool",
+                "payload": {
+                    "tool": "evaluate_output",
+                    "args": {"mode": "auto"},
+                },
+            },
+            {
+                "id": str(uuid.uuid4()),
+                "type": "train",
+                "payload": {
+                    "signal": "auto_improve",
+                },
+            },
+        ]
 
-        steps.append({
-            "id": str(uuid.uuid4()),
-            "type": "optimize",
-            "payload": {"strategy": "auto"},
-        })
+        return plan
 
-        return steps
+    def _summarize_history(self, history: List[Dict[str, Any]]) -> str:
+        if not history:
+            return "No prior context"
+
+        last_events = history[-5:]
+        return " | ".join(
+            f"{e.get('type', 'event')}" for e in last_events
+        )
