@@ -1,16 +1,23 @@
-<!-- Describe the change in this PR -->
+<!-- Required: Replace ALL placeholder text below before submitting. PRs with unfilled templates will fail CI. -->
 
 ## Summary
 
-What does this change do? Why is it needed?
+<!-- 1–3 sentences describing WHAT changed and WHY it is needed. -->
 
 ## Changes
-- List of user-visible changes
+
+<!-- Bullet list of user-visible or behaviorally significant changes. At minimum one bullet. -->
+-
 
 ## Testing
-- How was this tested? Commands and outcomes.
+
+<!-- Describe how you validated the change. Include commands run and their outcomes. -->
+-
 
 ## Checklist
-- [ ] I added tests for new behavior
-- [ ] I updated relevant documentation (README, CONTRIBUTING)
-- [ ] All tests pass locally
+
+- [ ] I added or updated tests for new behavior
+- [ ] I updated relevant documentation (README, `.github/copilot-instructions.md`, instruction files)
+- [ ] All unit tests pass locally (`python scripts/test_runner.py --unit`)
+- [ ] No hardcoded secrets or API keys introduced
+- [ ] PR title clearly describes the change (not a generic codespace/branch name)

@@ -53,6 +53,59 @@ jobs:
             echo "Fast validate script not found, skipping"
           fi
 
+  description-check:
+    name: PR Description Check
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+    env:
+      MIN_DESCRIPTION_LENGTH: 100
+    steps:
+      - name: Check PR description is filled in
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          MIN_DESCRIPTION_LENGTH: ${{ env.MIN_DESCRIPTION_LENGTH }}
+        run: |
+          UNFILLED_PATTERNS=(
+            "What does this change do"
+            "List of user-visible changes"
+            "How was this tested"
+            "Replace ALL placeholder text"
+          )
+
+          FAILED=0
+          for pattern in "${UNFILLED_PATTERNS[@]}"; do
+            if echo "$PR_BODY" | grep -qF "$pattern"; then
+              echo "❌ PR description still contains unfilled placeholder: '$pattern'"
+              FAILED=1
+            fi
+          done
+
+          # Require a minimum body length (more than just the template boilerplate)
+          BODY_LENGTH=$(echo "$PR_BODY" | wc -c)
+          if [ "$BODY_LENGTH" -lt "$MIN_DESCRIPTION_LENGTH" ]; then
+            echo "❌ PR description is too short ($BODY_LENGTH chars, minimum $MIN_DESCRIPTION_LENGTH). Please fill in the Summary, Changes, and Testing sections."
+            FAILED=1
+          fi
+
+          # Warn if the PR title looks like a default codespace/branch name (advisory only)
+          if echo "$PR_TITLE" | grep -qiE "^(pending changes|exported from|codespace|untitled|draft|wip)"; then
+            echo "⚠️  PR title looks like a default/generated name: '$PR_TITLE'. Consider using a descriptive title."
+          fi
+
+          if [ "$FAILED" -eq 1 ]; then
+            echo ""
+            echo "Please update the PR description with:"
+            echo "  - Summary: What changed and why"
+            echo "  - Changes: Bullet list of user-visible changes"
+            echo "  - Testing: Commands run and their outcomes"
+            exit 1
+          fi
+
+          echo "✓ PR description looks filled in ($BODY_LENGTH chars)"
+
   size-check:
     name: PR Size Check
     runs-on: ubuntu-latest
