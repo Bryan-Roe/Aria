@@ -1091,17 +1091,27 @@ def load_checkpoint():
         checkpoint = np.load(str(resolved_path), allow_pickle=False)
         weights = checkpoint["weights"]
         epoch = int(checkpoint["epoch"])
-        config_value = checkpoint["config"]
-        if isinstance(config_value, np.ndarray):
-            config = (
-                config_value.item()
-                if config_value.ndim == 0
-                else config_value.tolist()
+        try:
+            config_value = checkpoint["config"]
+            if isinstance(config_value, np.ndarray):
+                config = (
+                    config_value.item()
+                    if config_value.ndim == 0
+                    else config_value.tolist()
+                )
+            elif isinstance(config_value, np.generic):
+                config = config_value.item()
+            else:
+                config = config_value
+        except ValueError:
+            return (
+                jsonify(
+                    {
+                        "error": "Unsupported checkpoint format; re-save checkpoint in safe format"
+                    }
+                ),
+                422,
             )
-        elif isinstance(config_value, np.generic):
-            config = config_value.item()
-        else:
-            config = config_value
 
         return jsonify(
             {
