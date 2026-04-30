@@ -6,18 +6,18 @@
   "workflows_parsed": 13,
   "workflow_names": [
     "QAI CI Pipeline",
+    "Workflow Validation",
     "Stale Issues and PRs",
+    "Deploy to GitHub Pages",
+    "Aria E2E Tests",
+    "E2E + Integration Tests",
+    "AzureML LoRA Train",
+    "Quantum Automation",
+    "Auto Validation",
     "PR Checks",
     "Release",
     "CodeQL Security Scanning",
-    "Workflow Validation",
-    "AzureML LoRA Train",
-    "Aria E2E Tests",
-    "Quantum Automation",
-    "E2E + Integration Tests",
-    "Auto Validation",
-    "Code Quality",
-    "Deploy to GitHub Pages"
+    "Code Quality"
   ],
-  "generation_date": "2026-03-09T19:24:52.566230"
+  "generation_date": "2026-03-26T17:47:40.871477"
 }

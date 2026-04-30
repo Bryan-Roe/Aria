@@ -136,28 +136,28 @@ for target_id in ids_to_find:
 def read_tail(filepath: Path, max_lines: int = 500):
     """Efficiently read last N lines from large files."""
     size = filepath.stat().st_size
-    
+
     if size <= 65536:  # Small file: fast path
         with open(filepath) as f:
             return f.readlines()[-max_lines:]
-    
+
     # Large file: stream backwards
     with open(filepath, 'rb') as f:
         f.seek(0, 2)  # End
         remaining = f.tell()
         chunks = []
-        
+
         while remaining > 0:
             block_size = min(32768, remaining)
             f.seek(remaining - block_size)
             chunks.insert(0, f.read(block_size))
             remaining -= block_size
-            
+
             # Check if we have enough lines
             decoded = b''.join(chunks).decode('utf-8', errors='ignore')
             if decoded.count('\n') >= max_lines:
                 break
-        
+
         return decoded.splitlines(keepends=True)[-max_lines:]
 ```
 
@@ -183,8 +183,8 @@ for key in my_dict:
 ### Phase 2 Changes
 - `dashboard/serve.py` - File streaming
 - `dashboard/app.py` - Dict iteration
-- `quantum-ai/benchmark_all_datasets.py` - Dict iteration
-- `quantum-ai/scripts/visualize_hardware_results.py` - Dict iteration
+- `ai-projects/quantum-ml/benchmark_all_datasets.py` - Dict iteration
+- `ai-projects/quantum-ml/scripts/visualize_hardware_results.py` - Dict iteration
 - `scripts/automate_aria_movement.py` - Dict iteration
 - `scripts/test_aria_dataset.py` - Dict iteration
 
@@ -228,10 +228,10 @@ Not yet implemented but identified:
 
 1. **String concatenation in loops** (10+ files)
    - Use `''.join(list)` instead of `+= string`
-   
+
 2. **Regex compilation** (dashboard, llm-maker)
    - Compile patterns at module level
-   
+
 3. **Repeated file checks** (function_app.py)
    - Add caching with TTL
 

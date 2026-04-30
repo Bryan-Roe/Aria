@@ -18,15 +18,17 @@ import sys
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-# Add shared directory to path for imports
-script_dir = Path(__file__).parent
-repo_root = script_dir.parent
-sys.path.insert(0, str(repo_root))
+# Ensure repository root is on sys.path before importing local shared modules.
+REPO_ROOT = Path(__file__).resolve().parent.parent
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
 
 from shared.evaluation_utils import load_labels_from_dataset
 
 
-def load_model_predictions(model_path: Path, max_samples: Optional[int] = None) -> List[Any]:
+def load_model_predictions(
+    model_path: Path, max_samples: Optional[int] = None
+) -> List[Any]:
     if not model_path.exists():
         raise FileNotFoundError(model_path)
     with model_path.open("r", encoding="utf-8") as f:
@@ -69,12 +71,22 @@ def compute_binary_metrics(y_true: List[Any], y_pred: List[Any]) -> Dict[str, fl
     accuracy = (tp + tn) / total if total else 0.0
     precision = tp / (tp + fp) if (tp + fp) else 0.0
     recall = tp / (tp + fn) if (tp + fn) else 0.0
-    f1 = 2 * precision * recall / \
-        (precision + recall) if (precision + recall) else 0.0
-    return {"accuracy": round(accuracy, 4), "precision": round(precision, 4), "recall": round(recall, 4), "f1_score": round(f1, 4)}
+    f1 = 2 * precision * recall / (precision + recall) if (precision + recall) else 0.0
+    return {
+        "accuracy": round(accuracy, 4),
+        "precision": round(precision, 4),
+        "recall": round(recall, 4),
+        "f1_score": round(f1, 4),
+    }
 
 
-def run(dataset: Path, model: Path, max_samples: Optional[int], metrics: List[str], save_dir: Optional[Path]) -> Dict[str, Any]:
+def run(
+    dataset: Path,
+    model: Path,
+    max_samples: Optional[int],
+    metrics: List[str],
+    save_dir: Optional[Path],
+) -> Dict[str, Any]:
     y_true = load_labels_from_dataset(dataset, max_samples)
     y_pred = load_model_predictions(model, max_samples)
 
@@ -93,16 +105,21 @@ def run(dataset: Path, model: Path, max_samples: Optional[int], metrics: List[st
 
     if save_dir:
         save_dir.mkdir(parents=True, exist_ok=True)
-        out = {"summary": summary, "predictions": [
-            {"pred": p, "expected": t} for p, t in zip(y_pred, y_true)]}
-        (save_dir / "results.json").write_text(json.dumps(out, indent=2), encoding="utf-8")
+        out = {
+            "summary": summary,
+            "predictions": [{"pred": p, "expected": t} for p, t in zip(y_pred, y_true)],
+        }
+        (save_dir / "results.json").write_text(
+            json.dumps(out, indent=2), encoding="utf-8"
+        )
 
     return summary
 
 
 def parse_args():
     ap = argparse.ArgumentParser(
-        description="Evaluate lightweight quantum model artifacts")
+        description="Evaluate lightweight quantum model artifacts"
+    )
     ap.add_argument("--dataset", required=True)
     ap.add_argument("--model", required=True)
     ap.add_argument("--max-samples", type=int, default=None)

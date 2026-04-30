@@ -6,19 +6,17 @@ from pathlib import Path
 
 import pytest
 
-from scripts.config_paths import (
-    canonical_config_path,
-    get_config_candidates,
-    known_config_keys,
-    resolve_config_path,
-    resolve_existing_config_path,
-)
+from scripts.config_paths import (canonical_config_path, get_config_candidates,
+                                  known_config_keys, resolve_config_path,
+                                  resolve_existing_config_path)
 
 
 @pytest.mark.unit
 def test_known_keys_include_orchestrators() -> None:
     keys = set(known_config_keys())
-    assert {"master_orchestrator", "quantum_autorun", "evaluation_autorun"}.issubset(keys)
+    assert {"master_orchestrator", "quantum_autorun", "evaluation_autorun"}.issubset(
+        keys
+    )
 
 
 @pytest.mark.unit

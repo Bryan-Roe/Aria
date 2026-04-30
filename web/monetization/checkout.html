@@ -272,7 +272,7 @@
 <body>
     <div class="container">
         <a href="pricing.html" class="back-link">← Back to Pricing</a>
-        
+
         <div class="header">
             <h1>🛒 Complete Your Purchase</h1>
             <p>Join thousands of users powering their AI with Aria</p>
@@ -286,7 +286,7 @@
             <!-- Payment Form -->
             <div class="card">
                 <h2>Payment Information</h2>
-                
+
                 <form id="checkout-form">
                     <div class="form-group">
                         <label for="email">Email Address</label>
@@ -359,9 +359,9 @@
             <!-- Order Summary -->
             <div class="card">
                 <h2>Order Summary</h2>
-                
+
                 <div id="plan-badge" class="plan-badge plan-pro">Pro Plan</div>
-                
+
                 <div class="order-summary">
                     <div class="summary-row">
                         <span>Plan</span>
@@ -494,11 +494,11 @@
         // Form submission
         document.getElementById('checkout-form').addEventListener('submit', function(e) {
             e.preventDefault();
-            
+
             // In production, this would integrate with Stripe
             const email = document.getElementById('email').value;
             const plan = plans[selectedPlan];
-            
+
             // Show processing state
             const submitBtn = e.target.querySelector('button[type="submit"]');
             submitBtn.textContent = '⏳ Processing...';

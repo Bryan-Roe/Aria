@@ -7,14 +7,13 @@ Outputs:
 - Summary chart of entanglement ratio for all 2-qubit results
 - Azure job list charts: status distribution and provider x status stacked bar
 
-Charts saved to: quantum-ai/results/visualizations/
+Charts saved to: ai-projects/quantum-ml/results/visualizations/
 """
+
 from __future__ import annotations
 
 import json
 import subprocess
-import sys
-from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
@@ -40,7 +39,11 @@ def load_config() -> Dict:
 
 def find_local_results(results_dir: Path) -> List[Path]:
     # Look for files saved by test_azure_quantum.py (bell_state_results_*.json, optimized_circuit_results_*.json)
-    patterns = ["bell_state_results_*.json", "optimized_circuit_results_*.json", "*results*.json"]
+    patterns = [
+        "bell_state_results_*.json",
+        "optimized_circuit_results_*.json",
+        "*results*.json",
+    ]
     found: List[Path] = []
     for pat in patterns:
         found.extend(results_dir.glob(pat))
@@ -85,18 +88,22 @@ def try_load_metadata(p: Path) -> Optional[Dict]:
             "max_entropy": meta.get("max_entropy"),
         }
         noise = meta.get("noise", {}) or {}
-        flat.update({
-            "noise_pauli_px": noise.get("pauli_px", 0.0),
-            "noise_pauli_pz": noise.get("pauli_pz", 0.0),
-            "noise_depolarizing_p": noise.get("depolarizing_p", 0.0),
-            "noise_amp_damp_gamma": noise.get("amp_damp_gamma", 0.0),
-        })
+        flat.update(
+            {
+                "noise_pauli_px": noise.get("pauli_px", 0.0),
+                "noise_pauli_pz": noise.get("pauli_pz", 0.0),
+                "noise_depolarizing_p": noise.get("depolarizing_p", 0.0),
+                "noise_amp_damp_gamma": noise.get("amp_damp_gamma", 0.0),
+            }
+        )
         stab = meta.get("stabilizer", {}) or {}
-        flat.update({
-            "stabilizer_type": stab.get("type"),
-            "clifford_layers": stab.get("clifford_layers"),
-            "twoq_density": stab.get("twoq_density"),
-        })
+        flat.update(
+            {
+                "stabilizer_type": stab.get("type"),
+                "clifford_layers": stab.get("clifford_layers"),
+                "twoq_density": stab.get("twoq_density"),
+            }
+        )
         return flat
     except Exception:
         return None
@@ -122,7 +129,9 @@ def _abbr_label(label: str, max_len: int = 24) -> str:
     return f"{label[:8]}…{label[-8:]}"
 
 
-def plot_counts_bar(counts: Dict[str, int], title: str, out_path: Path, top_n: int = 10) -> None:
+def plot_counts_bar(
+    counts: Dict[str, int], title: str, out_path: Path, top_n: int = 10
+) -> None:
     total = sum(counts.values())
     items = sorted(counts.items(), key=lambda x: x[1], reverse=True)[:top_n]
     labels = [k for k, _ in items]
@@ -144,8 +153,10 @@ def plot_counts_bar(counts: Dict[str, int], title: str, out_path: Path, top_n: i
 
 def plot_2qubit_heatmap(counts: Dict[str, int], title: str, out_path: Path) -> None:
     # Build 2x2 matrix in order [00, 01, 10, 11]
-    mat = [[counts.get("00", 0), counts.get("01", 0)],
-           [counts.get("10", 0), counts.get("11", 0)]]
+    mat = [
+        [counts.get("00", 0), counts.get("01", 0)],
+        [counts.get("10", 0), counts.get("11", 0)],
+    ]
     fig, ax = plt.subplots(figsize=(4.5, 4))
     im = ax.imshow(mat, cmap="Blues")
     ax.set_xticks([0, 1], labels=["0", "1"])  # measured qubit 1
@@ -187,13 +198,22 @@ def plot_hamming_weight_hist(counts: Dict[str, int], out_path: Path) -> None:
     plt.close(fig)
 
 
-def try_fetch_azure_job_list(resource_group: str, workspace: str, location: str) -> Optional[pd.DataFrame]:
+def try_fetch_azure_job_list(
+    resource_group: str, workspace: str, location: str
+) -> Optional[pd.DataFrame]:
     cmd = [
-        "az", "quantum", "job", "list",
-        "--resource-group", resource_group,
-        "--workspace-name", workspace,
-        "--location", location,
-        "--output", "json",
+        "az",
+        "quantum",
+        "job",
+        "list",
+        "--resource-group",
+        resource_group,
+        "--workspace-name",
+        workspace,
+        "--location",
+        location,
+        "--output",
+        "json",
     ]
     try:
         out = subprocess.check_output(cmd, text=True)
@@ -203,7 +223,12 @@ def try_fetch_azure_job_list(resource_group: str, workspace: str, location: str)
         # Normalize to a DataFrame
         df = pd.json_normalize(data)
         # Coerce timestamps
-        for col in ("creationTime", "beginExecutionTime", "endExecutionTime", "lastModifiedTime"):
+        for col in (
+            "creationTime",
+            "beginExecutionTime",
+            "endExecutionTime",
+            "lastModifiedTime",
+        ):
             if col in df.columns:
                 df[col] = pd.to_datetime(df[col], errors="coerce")
         return df
@@ -227,7 +252,14 @@ def plot_job_status_distribution(df: pd.DataFrame, out_path: Path) -> None:
 def plot_provider_status_stacked(df: pd.DataFrame, out_path: Path) -> None:
     if df is None or df.empty or not {"providerId", "status"}.issubset(df.columns):
         return
-    pivot = pd.pivot_table(df, index="providerId", columns="status", values="id", aggfunc="count", fill_value=0)
+    pivot = pd.pivot_table(
+        df,
+        index="providerId",
+        columns="status",
+        values="id",
+        aggfunc="count",
+        fill_value=0,
+    )
     fig, ax = plt.subplots(figsize=(8, 5))
     pivot.plot(kind="bar", stacked=True, ax=ax)
     ax.set_title("Jobs by Provider and Status")
@@ -250,6 +282,7 @@ def build_summary_df(files: List[Path]) -> pd.DataFrame:
     # Compute entropy_pct
     if not df.empty and {"entropy", "max_entropy"}.issubset(df.columns):
         df["entropy_pct"] = (df["entropy"] / df["max_entropy"]) * 100.0
+
     # Noise label
     def _noise_label(r):
         px = r.get("noise_pauli_px", 0) or 0
@@ -264,6 +297,7 @@ def build_summary_df(files: List[Path]) -> pd.DataFrame:
         if amp:
             labels.append(f"amp_damp(gamma={amp})")
         return "clean" if not labels else "+".join(labels)
+
     if not df.empty:
         df["noise_label"] = df.apply(_noise_label, axis=1)
     return df
@@ -286,10 +320,19 @@ def main() -> int:
 
     if local_files:
         # If they came from RESULTS_DIR this message is accurate; otherwise a message was already printed.
-        if all(p.is_relative_to(RESULTS_DIR) if hasattr(p, "is_relative_to") else str(p).startswith(str(RESULTS_DIR)) for p in local_files):
+        if all(
+            (
+                p.is_relative_to(RESULTS_DIR)
+                if hasattr(p, "is_relative_to")
+                else str(p).startswith(str(RESULTS_DIR))
+            )
+            for p in local_files
+        ):
             print(f"Found {len(local_files)} local result file(s) in {RESULTS_DIR}")
     else:
-        print("No local result JSON files found in results/. We'll still generate Azure job charts if available.")
+        print(
+            "No local result JSON files found in results/. We'll still generate Azure job charts if available."
+        )
 
     for p in local_files:
         counts = load_counts_from_json(p)
@@ -297,22 +340,36 @@ def main() -> int:
             continue
         stem = p.stem
         # Bar chart (top-10) with abbreviated labels for long bitstrings
-        plot_counts_bar(counts, title=f"Counts: {stem}", out_path=VIZ_DIR / f"{stem}_bar.png", top_n=10)
+        plot_counts_bar(
+            counts,
+            title=f"Counts: {stem}",
+            out_path=VIZ_DIR / f"{stem}_bar.png",
+            top_n=10,
+        )
         # 2-qubit heatmap
         bit_lengths = {len(k) for k in counts}
         if bit_lengths == {2}:
-            plot_2qubit_heatmap(counts, title=f"2-Qubit Heatmap: {stem}", out_path=VIZ_DIR / f"{stem}_heatmap.png")
+            plot_2qubit_heatmap(
+                counts,
+                title=f"2-Qubit Heatmap: {stem}",
+                out_path=VIZ_DIR / f"{stem}_heatmap.png",
+            )
             ratio = compute_entanglement_ratio(counts)
             if ratio is not None:
                 entanglement_summary.append((stem, ratio))
         # For large bitstrings, add Hamming weight histogram
         if max(bit_lengths) > 32:
-            plot_hamming_weight_hist(counts, out_path=VIZ_DIR / f"{stem}_hamming_weight.png")
+            plot_hamming_weight_hist(
+                counts, out_path=VIZ_DIR / f"{stem}_hamming_weight.png"
+            )
 
     # 1b) Summary charts for variational MPS runs by entanglement
     df_all = build_summary_df(local_files)
     if not df_all.empty:
-        df_mps = df_all[(df_all["method"] == "matrix_product_state") & (df_all["circuit"].str.contains("variational"))]
+        df_mps = df_all[
+            (df_all["method"] == "matrix_product_state")
+            & (df_all["circuit"].str.contains("variational"))
+        ]
         if not df_mps.empty:
             # For each (n_qubits, layers), plot entanglement vs entropy_pct for clean and noise separately
             for (nq, L), sub in df_mps.groupby(["n_qubits", "layers"]):
@@ -320,23 +377,33 @@ def main() -> int:
                     if part.empty:
                         continue
                     pivot = (
-                        part.dropna(subset=["entanglement", "entropy_pct"]).groupby("entanglement")["entropy_pct"].mean()
+                        part.dropna(subset=["entanglement", "entropy_pct"])
+                        .groupby("entanglement")["entropy_pct"]
+                        .mean()
                     )
                     if pivot.empty:
                         continue
                     fig, ax = plt.subplots(figsize=(6, 4))
-                    pivot.reindex(["linear", "circular", "full"]).plot(kind="bar", ax=ax, color="#4C78A8")
+                    pivot.reindex(["linear", "circular", "full"]).plot(
+                        kind="bar", ax=ax, color="#4C78A8"
+                    )
                     ax.set_title(f"Entropy% by entanglement (n={nq}, L={L}, {nlbl})")
                     ax.set_xlabel("Entanglement")
                     ax.set_ylabel("Entropy %")
                     ax.set_ylim(0, 100)
-                    out = VIZ_DIR / f"summary_entropy_mps_n{nq}_L{L}_{nlbl.replace('=','').replace(',','_').replace('(','').replace(')','').replace(' ','')}.png"
+                    out = (
+                        VIZ_DIR
+                        / f"summary_entropy_mps_n{nq}_L{L}_{nlbl.replace('=','').replace(',','_').replace('(','').replace(')','').replace(' ','')}.png"
+                    )
                     fig.savefig(out)
                     plt.close(fig)
 
     # 1c) Summary for stabilizer random: weight coverage vs layers
     if not df_all.empty:
-        df_stab = df_all[(df_all["circuit"].str.contains("stabilizer")) & (df_all["stabilizer_type"] == "random")]
+        df_stab = df_all[
+            (df_all["circuit"].str.contains("stabilizer"))
+            & (df_all["stabilizer_type"] == "random")
+        ]
         if not df_stab.empty:
             # Compute weight coverage from counts
             coverage_rows = []
@@ -350,22 +417,28 @@ def main() -> int:
                     if c > 0:
                         nonzero_weights.add(bitstr.count("1"))
                 coverage = len(nonzero_weights) / (n + 1) if n > 0 else 0.0
-                coverage_rows.append({
-                    "n_qubits": n,
-                    "clifford_layers": int(row.get("clifford_layers") or 0),
-                    "coverage": coverage * 100.0,
-                })
+                coverage_rows.append(
+                    {
+                        "n_qubits": n,
+                        "clifford_layers": int(row.get("clifford_layers") or 0),
+                        "coverage": coverage * 100.0,
+                    }
+                )
             if coverage_rows:
                 df_cov = pd.DataFrame(coverage_rows)
                 for nq, part in df_cov.groupby("n_qubits"):
                     fig, ax = plt.subplots(figsize=(6, 4))
                     part = part.sort_values("clifford_layers")
                     ax.plot(part["clifford_layers"], part["coverage"], marker="o")
-                    ax.set_title(f"Stabilizer random: weight coverage vs layers (n={nq})")
+                    ax.set_title(
+                        f"Stabilizer random: weight coverage vs layers (n={nq})"
+                    )
                     ax.set_xlabel("Clifford layers")
                     ax.set_ylabel("Coverage % of weights (0..n)")
                     ax.set_ylim(0, 100)
-                    fig.savefig(VIZ_DIR / f"stabilizer_random_weight_coverage_n{nq}.png")
+                    fig.savefig(
+                        VIZ_DIR / f"stabilizer_random_weight_coverage_n{nq}.png"
+                    )
                     plt.close(fig)
 
     # Summary entanglement chart for 2-qubit results
@@ -392,7 +465,9 @@ def main() -> int:
             plot_provider_status_stacked(df, VIZ_DIR / "azure_jobs_provider_status.png")
             print("Azure job charts saved under visualizations/.")
         else:
-            print("Azure job list not available or empty (no charts generated for jobs).")
+            print(
+                "Azure job list not available or empty (no charts generated for jobs)."
+            )
     else:
         print("Azure config incomplete; skipping Azure job charts.")
 

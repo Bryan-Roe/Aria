@@ -85,7 +85,7 @@ ml:
     n_qubits: 4        # Try: 6, 8
     n_layers: 2        # Try: 3, 4
     entanglement: "linear"  # Try: "circular", "full"
-  
+
   training:
     epochs: 100        # Try: 200
     learning_rate: 0.01  # Try: 0.001-0.1

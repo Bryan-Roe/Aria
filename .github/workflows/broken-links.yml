@@ -1,0 +1,51 @@
+name: Broken Links Check
+
+on:
+    pull_request:
+        branches: [main, dev]
+        paths:
+            - "**/*.md"
+            - "docs/**"
+            - ".github/workflows/broken-links.yml"
+    push:
+        branches: [main]
+        paths:
+            - "**/*.md"
+            - "docs/**"
+            - ".github/workflows/broken-links.yml"
+    workflow_dispatch:
+
+concurrency:
+    group: broken-links-${{ github.ref }}
+    cancel-in-progress: true
+
+jobs:
+    link-check:
+        name: Link Validation
+        runs-on: ubuntu-latest
+        timeout-minutes: 15
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+
+            - name: Check links in docs and markdown
+              uses: lycheeverse/lychee-action@8646ba30535128ac92d33dfc9133794bfdd9b411  # v2.8.0
+              with:
+                  fail: true
+                  args: >-
+                      --verbose
+                      --no-progress
+                      --max-concurrency 8
+                      --exclude-mail
+                      --accept 200,204,206,301,302,307,308,401,403,429
+                      '**/*.md'
+                      'docs/**/*.md'
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+            - name: Summary
+              if: always()
+              run: |
+                  echo "## Broken Links Check" >> $GITHUB_STEP_SUMMARY
+                  echo "" >> $GITHUB_STEP_SUMMARY
+                  echo "Scanned markdown and docs links using Lychee." >> $GITHUB_STEP_SUMMARY

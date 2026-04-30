@@ -6,7 +6,7 @@ This document provides step-by-step instructions for integrating the QAI databas
 
 The database integration adds automatic logging of:
 - **Quantum training runs** → `QuantumTrainingRuns` table
-- **LoRA training runs** → `LoRATrainingRuns` table  
+- **LoRA training runs** → `LoRATrainingRuns` table
 - **Chat messages** → `ChatConversations` + `ChatMessages` tables
 
 ## Files Created
@@ -65,7 +65,7 @@ sys.path.insert(0, str(talk_to_ai_path))
 ```python
         # Get completion (non-streaming for HTTP simplicity)
         result = provider.complete(pruned_messages, stream=False)
-        
+
         # If result is still a generator, consume it
         if hasattr(result, '__iter__') and not isinstance(result, str):
             result = ''.join(result)
@@ -88,7 +88,7 @@ sys.path.insert(0, str(talk_to_ai_path))
 ```python
         # Get completion (non-streaming for HTTP simplicity)
         result = provider.complete(pruned_messages, stream=False)
-        
+
         # If result is still a generator, consume it
         if hasattr(result, '__iter__') and not isinstance(result, str):
             result = ''.join(result)
@@ -175,7 +175,7 @@ sys.path.insert(0, str(talk_to_ai_path))
 ```python
         gen = provider.complete(pruned_messages, stream=True)
         session_id = body.get("session_id") or req.headers.get("X-Session-Id") or str(uuid4())
-        
+
         # Log initial user prompt once
         try:
             if pruned_messages and pruned_messages[-1].role == "user":
@@ -225,7 +225,7 @@ sys.path.insert(0, str(talk_to_ai_path))
                     )
                 except Exception as e:  # noqa: BLE001
                     logging.warning(f"Stream assistant log skipped: {e}")
-                
+
                 yield b"event: done\ndata: {}\n\n"
 ```
 

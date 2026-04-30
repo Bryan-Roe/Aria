@@ -29,14 +29,14 @@
 
 | Issue | Location | Impact | Status |
 |-------|----------|--------|--------|
-| O(n³) gradient computation | quantum-ai/web_app.py:217-246 | 10-100x | Not fixed |
+| O(n³) gradient computation | ai-projects/quantum-ml/web_app.py:217-246 | 10-100x | Not fixed |
 | Repeated JSON file I/O | dashboard/serve.py:273-515 | 5-10x | Not fixed |
-| Linear keyword searches | talk-to-ai/src/agi_provider.py:343-372 | 3-30x | Not fixed |
+| Linear keyword searches | ai-projects/chat-cli/src/agi_provider.py:343-372 | 3-30x | Not fixed |
 | Inconsistent keyword patterns | aria_web/server.py:554-557 | 2-5x | Partial |
-| Multi-pass statistics | quantum-ai/web_app.py:952-958 | 4x | Not fixed |
+| Multi-pass statistics | ai-projects/quantum-ml/web_app.py:952-958 | 4x | Not fixed |
 | Inefficient directory traversal | dashboard/serve.py:700,761,766 | 5-20% | Not fixed |
 | Rate limiting filtering | dashboard/serve.py:39-40 | 2-5x | Not fixed |
-| Minor list comprehensions | quantum-ai/web_app.py:440-443 | <5% | Not fixed |
+| Minor list comprehensions | ai-projects/quantum-ml/web_app.py:440-443 | <5% | Not fixed |
 
 ## Historical Documentation
 

@@ -1,0 +1,46 @@
+name: Site Bundle Validation
+
+on:
+  pull_request:
+    paths:
+      - 'generated_sites/**'
+      - 'scripts/validate_site_bundles.py'
+      - '.github/actions/validate-site-bundles/**'
+      - '.github/workflows/site-bundle-validation.yml'
+  push:
+    branches: [ main ]
+    paths:
+      - 'generated_sites/**'
+      - 'scripts/validate_site_bundles.py'
+      - '.github/actions/validate-site-bundles/**'
+      - '.github/workflows/site-bundle-validation.yml'
+  workflow_dispatch:
+
+jobs:
+  validate-generated-sites:
+    name: Validate Generated Site Bundles
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: ./.github/actions/setup-python-env
+        with:
+          install-requirements: 'false'
+
+      - name: Validate generated site bundles (strict)
+        uses: ./.github/actions/validate-site-bundles
+        with:
+          strict-metadata: 'true'
+
+      - name: Upload validation context
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: generated-site-bundles-${{ github.run_number }}
+          retention-days: 7
+          if-no-files-found: warn
+          path: |
+            generated_sites/**/metadata.json

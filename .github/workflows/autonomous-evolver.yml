@@ -1,0 +1,42 @@
+name: Aria Autonomous Evolver
+
+on:
+  workflow_run:
+    workflows: ["Aria Telemetry Trigger Engine"]
+    types:
+      - completed
+  workflow_dispatch:
+
+jobs:
+  evolve:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Evaluate evolution conditions
+        run: |
+          node -e "
+          console.log('Evaluating evolution readiness...');
+
+          const fitness = Math.random() * 100;
+          const stability = Math.random() * 100;
+
+          console.log('fitness:', fitness);
+          console.log('stability:', stability);
+
+          if (fitness > 60 && stability < 70) {
+            console.log('EVOLUTION TRIGGERED');
+            process.exit(0);
+          } else {
+            console.log('No evolution required');
+            process.exit(0);
+          }
+          "
+
+      - name: Trigger experiment fork signal
+        run: echo "evolution cycle complete"

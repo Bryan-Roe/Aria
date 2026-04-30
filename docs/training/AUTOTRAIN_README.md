@@ -268,7 +268,7 @@ jobs:
     dataset: datasets/chat/mixed_chat
     epochs: 1
     max_train_samples: 64
-  
+
   - name: extended
     runner: hf
     dataset: datasets/chat/dolly
@@ -288,27 +288,27 @@ Jobs run sequentially. If `baseline` fails, `extended` is skipped. Check `status
 
 ### Missing Config File
 
-**Error:** `Config not found: autotrain.yaml`  
+**Error:** `Config not found: autotrain.yaml`
 **Fix:** Ensure you're running from the repo root or specify `--config` with the full path.
 
 ### Job Not Found
 
-**Error:** `Job not found in config: my_job`  
+**Error:** `Job not found in config: my_job`
 **Fix:** Verify the job name in `autotrain.yaml` matches exactly (case-sensitive).
 
 ### Dry-Run Shows Missing Files
 
-**Output:** `"status": "missing"`, `"missing": ["datasets/chat/missing_data"]`  
+**Output:** `"status": "missing"`, `"missing": ["datasets/chat/missing_data"]`
 **Fix:** Update dataset paths to point to existing directories or create placeholder data.
 
 ### Training Fails with Return Code 1
 
-**Output:** `"status": "failed"`, `"return_code": 1`  
+**Output:** `"status": "failed"`, `"return_code": 1`
 **Fix:** Open the stdout.log at `data_out/autotrain/<job>/<timestamp>/stdout.log` for detailed error traces (OOM, missing deps, etc.).
 
 ### Local Runner Venv Issues
 
-**Symptom:** `ModuleNotFoundError` after updating dependencies.  
+**Symptom:** `ModuleNotFoundError` after updating dependencies.
 **Fix:** Add `reinstall: true` to the job config or use `--reinstall` flag:
 
 ```powershell
@@ -355,23 +355,23 @@ python .\scripts\autotrain.py --job my_local_job --reinstall
 
 ## FAQ
 
-**Q: Can I use multiple configs in one job?**  
+**Q: Can I use multiple configs in one job?**
 A: No. Each job uses one config file. For different hyperparams, define separate jobs.
 
-**Q: Can I run AutoTrain in CI/CD?**  
+**Q: Can I run AutoTrain in CI/CD?**
 A: Yes. Use `--dry-run` in CI to validate configs. For training, run in GitHub Actions with self-hosted runners or cloud VMs with GPUs.
 
-**Q: How do I resume a failed job?**  
+**Q: How do I resume a failed job?**
 A: The HF runner supports `--resume-from <checkpoint-dir>`. Add it to `extra_args`:
 
 ```yaml
 extra_args: ["--resume-from", "data_out/lora_training/checkpoint-500"]
 ```
 
-**Q: Can I schedule jobs to run automatically?**  
+**Q: Can I schedule jobs to run automatically?**
 A: Not yet. Use OS-level schedulers (Windows Task Scheduler, cron) or integrate AutoTrain into Azure Container Apps Jobs with a timer trigger.
 
-**Q: Does AutoTrain support other models (GPT-2, Llama)?**  
+**Q: Does AutoTrain support other models (GPT-2, Llama)?**
 A: Yes. Update `hf_model_id` and ensure the training script supports the model architecture. The HF runner is model-agnostic.
 
 ---

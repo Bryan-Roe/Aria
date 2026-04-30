@@ -3,7 +3,8 @@
 Quantum AI Training Web Application
 Interactive dashboard for training and visualizing quantum machine learning models
 """
-from flask import Flask, render_template, jsonify, request, send_from_directory
+from flask import Flask, jsonify, request, send_from_directory
+
 try:
     from flask_cors import CORS
 except Exception:  # pragma: no cover
@@ -11,6 +12,8 @@ except Exception:  # pragma: no cover
     class CORS:  # type: ignore
         def __init__(self, *args, **kwargs):
             pass
+
+
 try:
     import pennylane as qml
 except Exception:  # pragma: no cover
@@ -23,22 +26,24 @@ try:
     import pandas as pd
 except Exception:  # pragma: no cover
     pd = None
-from pathlib import Path
 import json
 import re
-import time
 import threading
+import time
 from datetime import datetime
+from pathlib import Path
+
 try:
-    from sklearn.model_selection import train_test_split
-    from sklearn.preprocessing import StandardScaler
     from sklearn.decomposition import PCA
     from sklearn.impute import SimpleImputer
-    from sklearn.metrics import confusion_matrix, precision_recall_fscore_support, roc_auc_score
+    from sklearn.metrics import (confusion_matrix,
+                                 precision_recall_fscore_support,
+                                 roc_auc_score)
+    from sklearn.model_selection import train_test_split
+    from sklearn.preprocessing import StandardScaler
 except Exception:  # pragma: no cover
     train_test_split = StandardScaler = PCA = SimpleImputer = None
     confusion_matrix = precision_recall_fscore_support = roc_auc_score = None
-from collections import deque
 import logging
 import sys
 
@@ -47,7 +52,8 @@ src_path = Path(__file__).parent / "src"
 sys.path.insert(0, str(src_path))
 
 try:
-    from src.dataset_loader import load_dataset as load_dataset_shared, preprocess_for_qubits as preprocess_shared
+    from src.dataset_loader import load_dataset as load_dataset_shared
+    from src.dataset_loader import preprocess_for_qubits as preprocess_shared
 except Exception:  # pragma: no cover
     # Fallback if module not available
     load_dataset_shared = None
@@ -63,6 +69,28 @@ CORS(app)
 # Global training state
 training_sessions = {}
 training_lock = threading.Lock()
+
+# Resource limits to prevent DoS
+MAX_ACTIVE_SESSIONS = 10  # Max concurrent running sessions
+MAX_TOTAL_SESSIONS = 100  # Max sessions kept in memory at once
+SESSION_TTL_SECONDS = 3600  # Prune completed/errored sessions after 1 hour
+
+
+def _prune_old_sessions() -> None:
+    """Remove completed/errored sessions older than SESSION_TTL_SECONDS.
+
+    Must be called while holding training_lock.
+    """
+    cutoff = time.time() - SESSION_TTL_SECONDS
+    stale = [
+        sid
+        for sid, s in training_sessions.items()
+        if s.status in ("completed", "error", "stopped")
+        and s.end_time is not None
+        and s.end_time < cutoff
+    ]
+    for sid in stale:
+        del training_sessions[sid]
 
 
 class TrainingSession:
@@ -81,7 +109,7 @@ class TrainingSession:
             "train_loss": [],
             "val_loss": [],
             "val_accuracy": [],
-            "timestamps": []
+            "timestamps": [],
         }
         self.best_val_acc = 0.0
         self.current_loss = 0.0
@@ -93,10 +121,10 @@ class TrainingSession:
         self.error_message = None
         self.samples_trained = 0
         self.current_val_acc = 0.0
-        self.learning_rate = config.get('learning_rate', 0.01)
+        self.learning_rate = config.get("learning_rate", 0.01)
         self.checkpoint_path = None
         self.gradient_norm = 0.0
-        self.optimizer_type = config.get('optimizer', 'adam')
+        self.optimizer_type = config.get("optimizer", "adam")
         self.epochs_without_improvement = 0
 
     def to_dict(self):
@@ -126,7 +154,11 @@ class TrainingSession:
             "optimizer": self.optimizer_type,
             "epochs_without_improvement": self.epochs_without_improvement,
             "metrics": self.metrics_history,
-            "progress_percent": (self.current_epoch / self.total_epochs * 100) if self.total_epochs > 0 else 0
+            "progress_percent": (
+                (self.current_epoch / self.total_epochs * 100)
+                if self.total_epochs > 0
+                else 0
+            ),
         }
 
 
@@ -136,7 +168,7 @@ def load_dataset(name: str):
     if load_dataset_shared is not None:
         X, y, feature_names = load_dataset_shared(name, return_feature_names=True)
         return X, y, feature_names
-    
+
     # Fallback to inline implementation for testing/compatibility
     base = Path(__file__).parent.parent / "datasets" / "quantum"
     presets = {
@@ -155,7 +187,7 @@ def load_dataset(name: str):
         y = df.iloc[:, -1]
         X = df.iloc[:, :-1]
         if X.isnull().any().any():
-            imputer = SimpleImputer(strategy='median')
+            imputer = SimpleImputer(strategy="median")
             X = pd.DataFrame(imputer.fit_transform(X), columns=X.columns)
         y = (y > 0).astype(int).values
         return X.values, y, list(X.columns)
@@ -164,7 +196,7 @@ def load_dataset(name: str):
         y = df.iloc[:, -1].values
         X = df.iloc[:, :-1]
         if X.isnull().any().any():
-            imputer = SimpleImputer(strategy='median')
+            imputer = SimpleImputer(strategy="median")
             X = pd.DataFrame(imputer.fit_transform(X), columns=X.columns)
         if not np.issubdtype(y.dtype, np.integer):
             vals, y = np.unique(y, return_inverse=True)
@@ -199,13 +231,14 @@ def preprocess_data(X, y, n_qubits):
 
 def create_quantum_circuit(n_qubits, n_layers):
     """Create variational quantum circuit"""
-    dev = qml.device('default.qubit', wires=n_qubits)
+    dev = qml.device("default.qubit", wires=n_qubits)
 
-    @qml.qnode(dev, interface='autograd')
+    @qml.qnode(dev, interface="autograd")
     def circuit(inputs, weights):
         # Amplitude embedding
-        qml.AmplitudeEmbedding(features=inputs, wires=range(
-            n_qubits), pad_with=0.0, normalize=True)
+        qml.AmplitudeEmbedding(
+            features=inputs, wires=range(n_qubits), pad_with=0.0, normalize=True
+        )
 
         # Variational layers
         for layer in range(n_layers):
@@ -234,16 +267,17 @@ def compute_loss(circuit, X, y, weights):
 
 def compute_gradient(circuit, X, y, weights, use_parameter_shift=True):
     """Compute gradient using PennyLane's built-in automatic differentiation
-    
+
     This is dramatically faster than manual parameter-shift implementation as it:
     - Uses vectorized operations internally
     - Leverages hardware acceleration when available
     - Avoids redundant circuit evaluations
     """
+
     # Create a loss function for a single sample that PennyLane can differentiate
     def loss_fn(w):
         return compute_loss(circuit, X, y, w)
-    
+
     # Use PennyLane's built-in gradient computation
     # This leverages the autograd interface we specified in @qml.qnode
     try:
@@ -254,7 +288,7 @@ def compute_gradient(circuit, X, y, weights, use_parameter_shift=True):
         # Fallback to manual parameter-shift if autograd fails
         # This path is much slower but ensures compatibility
         grad = np.zeros_like(weights)
-        
+
         if use_parameter_shift:
             # Parameter-shift rule: more accurate for quantum circuits
             shift = np.pi / 2
@@ -293,7 +327,7 @@ class AdamOptimizer:
         self.epsilon = epsilon
         self.m = None  # First moment
         self.v = None  # Second moment
-        self.t = 0     # Timestep
+        self.t = 0  # Timestep
 
     def update(self, weights, gradient):
         """Apply Adam update"""
@@ -307,15 +341,16 @@ class AdamOptimizer:
         self.m = self.beta1 * self.m + (1 - self.beta1) * gradient
 
         # Update biased second moment estimate
-        self.v = self.beta2 * self.v + (1 - self.beta2) * (gradient ** 2)
+        self.v = self.beta2 * self.v + (1 - self.beta2) * (gradient**2)
 
         # Compute bias-corrected moment estimates
-        m_hat = self.m / (1 - self.beta1 ** self.t)
-        v_hat = self.v / (1 - self.beta2 ** self.t)
+        m_hat = self.m / (1 - self.beta1**self.t)
+        v_hat = self.v / (1 - self.beta2**self.t)
 
         # Update weights
-        weights_new = weights - self.learning_rate * \
-            m_hat / (np.sqrt(v_hat) + self.epsilon)
+        weights_new = weights - self.learning_rate * m_hat / (
+            np.sqrt(v_hat) + self.epsilon
+        )
 
         return weights_new
 
@@ -366,9 +401,9 @@ def train_model(session: TrainingSession):
         config = session.config
 
         # Load and preprocess data
-        X, y, feature_names = load_dataset(config['dataset'])
-        n_qubits = config['n_qubits']
-        n_layers = config['n_layers']
+        X, y, feature_names = load_dataset(config["dataset"])
+        n_qubits = config["n_qubits"]
+        n_layers = config["n_layers"]
 
         session.status = "preprocessing"
         X_train, X_val, y_train, y_val = preprocess_data(X, y, n_qubits)
@@ -382,27 +417,26 @@ def train_model(session: TrainingSession):
         weights = np.random.randn(n_layers, n_qubits, 3) * 0.01
 
         # Training params
-        learning_rate = config.get('learning_rate', 0.01)
+        learning_rate = config.get("learning_rate", 0.01)
         initial_lr = learning_rate
-        duration_minutes = config.get('duration_minutes', 10)
-        batch_size = config.get('batch_size', 32)
-        use_lr_decay = config.get('use_lr_decay', True)
-        checkpoint_every = config.get('checkpoint_every', 100)
+        duration_minutes = config.get("duration_minutes", 10)
+        batch_size = config.get("batch_size", 32)
+        use_lr_decay = config.get("use_lr_decay", True)
+        checkpoint_every = config.get("checkpoint_every", 100)
         # 'adam', 'momentum', or 'sgd'
-        optimizer_type = config.get('optimizer', 'adam')
-        early_stopping_patience = config.get('early_stopping_patience', 20)
-        use_parameter_shift = config.get('use_parameter_shift', True)
-        use_gradient_clipping = config.get('use_gradient_clipping', True)
-        max_grad_norm = config.get('max_grad_norm', 1.0)
-        use_warmup = config.get('use_warmup', True)
-        warmup_epochs = config.get('warmup_epochs', 10)
+        optimizer_type = config.get("optimizer", "adam")
+        early_stopping_patience = config.get("early_stopping_patience", 20)
+        use_parameter_shift = config.get("use_parameter_shift", True)
+        use_gradient_clipping = config.get("use_gradient_clipping", True)
+        max_grad_norm = config.get("max_grad_norm", 1.0)
+        use_warmup = config.get("use_warmup", True)
+        warmup_epochs = config.get("warmup_epochs", 10)
 
         # Initialize optimizer
-        if optimizer_type == 'adam':
+        if optimizer_type == "adam":
             optimizer = AdamOptimizer(learning_rate=learning_rate)
-        elif optimizer_type == 'momentum':
-            optimizer = MomentumOptimizer(
-                learning_rate=learning_rate, momentum=0.9)
+        elif optimizer_type == "momentum":
+            optimizer = MomentumOptimizer(learning_rate=learning_rate, momentum=0.9)
         else:
             optimizer = None  # Plain SGD
 
@@ -413,7 +447,7 @@ def train_model(session: TrainingSession):
         epoch = 0
         samples_trained = 0
         best_weights = weights.copy()
-        best_val_loss = float('inf')
+        best_val_loss = float("inf")
         epochs_without_improvement = 0
 
         # Create checkpoints directory
@@ -426,8 +460,7 @@ def train_model(session: TrainingSession):
 
             # Apply warmup schedule
             if use_warmup and epoch <= warmup_epochs:
-                current_lr = warmup_lr_schedule(
-                    epoch, initial_lr, warmup_epochs)
+                current_lr = warmup_lr_schedule(epoch, initial_lr, warmup_epochs)
                 session.learning_rate = current_lr
                 if optimizer is not None:
                     optimizer.learning_rate = current_lr
@@ -447,13 +480,18 @@ def train_model(session: TrainingSession):
                 if time.time() >= deadline or session.should_stop:
                     break
 
-                batch_idx = indices[i:i+batch_size]
+                batch_idx = indices[i : i + batch_size]
                 X_batch = X_train[batch_idx]
                 y_batch = y_train[batch_idx]
 
                 # Compute gradient for this batch
                 gradient = compute_gradient(
-                    circuit, X_batch, y_batch, weights, use_parameter_shift=use_parameter_shift)
+                    circuit,
+                    X_batch,
+                    y_batch,
+                    weights,
+                    use_parameter_shift=use_parameter_shift,
+                )
 
                 # Apply gradient clipping
                 if use_gradient_clipping:
@@ -475,8 +513,7 @@ def train_model(session: TrainingSession):
 
             # Track gradient norm
             if epoch_gradients:
-                avg_gradient = np.mean([np.linalg.norm(g)
-                                       for g in epoch_gradients])
+                avg_gradient = np.mean([np.linalg.norm(g) for g in epoch_gradients])
                 session.gradient_norm = float(avg_gradient)
 
             # Validation
@@ -485,7 +522,7 @@ def train_model(session: TrainingSession):
             for xi, yi in zip(X_val, y_val):
                 expectation = circuit(xi, weights)
                 prediction = np.mean(expectation)
-                val_loss += (prediction - (2*yi - 1))**2
+                val_loss += (prediction - (2 * yi - 1)) ** 2
                 val_predictions.append(1 if prediction > 0 else 0)
 
             val_loss /= len(X_val)
@@ -505,7 +542,8 @@ def train_model(session: TrainingSession):
             # Stop if no improvement for patience epochs
             if epochs_without_improvement >= early_stopping_patience:
                 logger.info(
-                    f"Early stopping triggered after {epoch} epochs (no improvement for {early_stopping_patience} epochs)")
+                    f"Early stopping triggered after {epoch} epochs (no improvement for {early_stopping_patience} epochs)"
+                )
                 session.status = "early_stopped"
                 break
 
@@ -515,13 +553,17 @@ def train_model(session: TrainingSession):
 
             # Checkpoint saving
             if epoch % checkpoint_every == 0:
-                checkpoint_path = checkpoint_dir / \
-                    f"checkpoint_{session.session_id}_epoch_{epoch}.npz"
-                np.savez(checkpoint_path,
-                         weights=weights,
-                         epoch=epoch,
-                         val_acc=val_acc,
-                         config=config)
+                checkpoint_path = (
+                    checkpoint_dir
+                    / f"checkpoint_{session.session_id}_epoch_{epoch}.npz"
+                )
+                np.savez(
+                    checkpoint_path,
+                    weights=weights,
+                    epoch=epoch,
+                    val_acc=val_acc,
+                    config=config,
+                )
                 session.checkpoint_path = str(checkpoint_path)
                 logger.info(f"Checkpoint saved: {checkpoint_path}")
 
@@ -536,40 +578,52 @@ def train_model(session: TrainingSession):
             # Calculate performance metrics
             if session.last_epoch_time:
                 session.epochs_per_second = 1.0 / epoch_time
-                remaining_epochs = (deadline - time.time()) * \
-                    session.epochs_per_second
-                session.eta_seconds = remaining_epochs / \
-                    session.epochs_per_second if session.epochs_per_second > 0 else None
+                remaining_epochs = (deadline - time.time()) * session.epochs_per_second
+                session.eta_seconds = (
+                    remaining_epochs / session.epochs_per_second
+                    if session.epochs_per_second > 0
+                    else None
+                )
             session.last_epoch_time = epoch_time
 
-            session.metrics_history['epochs'].append(epoch)
-            session.metrics_history['train_loss'].append(float(train_loss))
-            session.metrics_history['val_loss'].append(float(val_loss))
-            session.metrics_history['val_accuracy'].append(float(val_acc))
-            session.metrics_history['timestamps'].append(
-                time.time() - session.start_time)
+            session.metrics_history["epochs"].append(epoch)
+            session.metrics_history["train_loss"].append(float(train_loss))
+            session.metrics_history["val_loss"].append(float(val_loss))
+            session.metrics_history["val_accuracy"].append(float(val_acc))
+            session.metrics_history["timestamps"].append(
+                time.time() - session.start_time
+            )
 
             # Keep only recent history for memory efficiency
-            if len(session.metrics_history['epochs']) > 1000:
-                session.metrics_history = {key: values[-1000:] for key, values in session.metrics_history.items()}
+            if len(session.metrics_history["epochs"]) > 1000:
+                session.metrics_history = {
+                    key: values[-1000:]
+                    for key, values in session.metrics_history.items()
+                }
 
-            logger.info(f"Epoch {epoch}: Loss={train_loss:.4f}, Val Acc={val_acc:.4f}, Val Loss={val_loss:.4f}, Speed={session.epochs_per_second:.2f} ep/s, LR={session.learning_rate:.6f}, Grad Norm={session.gradient_norm:.6f}")
+            logger.info(
+                f"Epoch {epoch}: Loss={train_loss:.4f}, Val Acc={val_acc:.4f}, Val Loss={val_loss:.4f}, Speed={session.epochs_per_second:.2f} ep/s, LR={session.learning_rate:.6f}, Grad Norm={session.gradient_norm:.6f}"
+            )
 
         # Use best weights for final model
         weights = best_weights
 
-        session.status = "completed" if session.status != "early_stopped" else "early_stopped"
+        session.status = (
+            "completed" if session.status != "early_stopped" else "early_stopped"
+        )
         session.end_time = time.time()
         session.total_epochs = epoch
 
         # Save final checkpoint with best weights
         final_checkpoint = checkpoint_dir / f"final_{session.session_id}.npz"
-        np.savez(final_checkpoint,
-                 weights=best_weights,
-                 epoch=epoch,
-                 val_acc=session.best_val_acc,
-                 config=config,
-                 metrics=session.metrics_history)
+        np.savez(
+            final_checkpoint,
+            weights=best_weights,
+            epoch=epoch,
+            val_acc=session.best_val_acc,
+            config=config,
+            metrics=session.metrics_history,
+        )
         session.checkpoint_path = str(final_checkpoint)
 
         # Optional evaluation at end of training
@@ -583,13 +637,12 @@ def train_model(session: TrainingSession):
         results_dir.mkdir(exist_ok=True)
 
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        result_file = results_dir / \
-            f"training_{config['dataset']}_{timestamp}.json"
+        result_file = results_dir / f"training_{config['dataset']}_{timestamp}.json"
 
-        with open(result_file, 'w') as f:
+        with open(result_file, "w") as f:
             doc = session.to_dict()
             if eval_result is not None:
-                doc['evaluation'] = eval_result
+                doc["evaluation"] = eval_result
             json.dump(doc, f, indent=2)
 
         logger.info(f"Training completed: {session.session_id}")
@@ -600,24 +653,25 @@ def train_model(session: TrainingSession):
         session.error_message = str(e)
         session.end_time = time.time()
 
+
 # ============================================================================
 # API Endpoints
 # ============================================================================
 
 
-@app.route('/')
+@app.route("/")
 def index():
     """Serve main dashboard"""
-    return send_from_directory('web_ui', 'index.html')
+    return send_from_directory("web_ui", "index.html")
 
 
-@app.route('/static/<path:path>')
+@app.route("/static/<path:path>")
 def serve_static(path):
     """Serve static files"""
-    return send_from_directory('web_ui/static', path)
+    return send_from_directory("web_ui/static", path)
 
 
-@app.route('/api/datasets', methods=['GET'])
+@app.route("/api/datasets", methods=["GET"])
 def list_datasets():
     """List available datasets"""
     base = Path(__file__).parent.parent / "datasets" / "quantum"
@@ -625,40 +679,69 @@ def list_datasets():
 
     for csv_file in base.glob("*.csv"):
         df = pd.read_csv(csv_file, nrows=1)
-        datasets.append({
-            "name": csv_file.stem,
-            "path": str(csv_file),
-            "features": len(df.columns) - 1,
-            "exists": csv_file.exists()
-        })
+        datasets.append(
+            {
+                "name": csv_file.stem,
+                "path": str(csv_file),
+                "features": len(df.columns) - 1,
+                "exists": csv_file.exists(),
+            }
+        )
 
     return jsonify(datasets)
 
 
-@app.route('/api/train/start', methods=['POST'])
+@app.route("/api/train/start", methods=["POST"])
 def start_training():
     """Start a new training session"""
     config = request.json
 
+    if not isinstance(config, dict):
+        return jsonify({"error": "Invalid request body: expected JSON object"}), 400
+
     # Validate config
-    required = ['dataset', 'n_qubits', 'n_layers']
+    required = ["dataset", "n_qubits", "n_layers"]
     for key in required:
         if key not in config:
             return jsonify({"error": f"Missing required field: {key}"}), 400
 
     # Validate ranges
-    if not (1 <= config['n_qubits'] <= 10):
+    if not (1 <= config["n_qubits"] <= 10):
         return jsonify({"error": "n_qubits must be between 1 and 10"}), 400
-    if not (1 <= config['n_layers'] <= 20):
+    if not (1 <= config["n_layers"] <= 20):
         return jsonify({"error": "n_layers must be between 1 and 20"}), 400
-    if config.get('learning_rate', 0.01) <= 0 or config.get('learning_rate', 0.01) > 1:
+    if config.get("learning_rate", 0.01) <= 0 or config.get("learning_rate", 0.01) > 1:
         return jsonify({"error": "learning_rate must be between 0 and 1"}), 400
 
-    # Create session
-    session_id = f"session_{int(time.time()*1000)}"
-    session = TrainingSession(session_id, config)
-
     with training_lock:
+        # Prune stale sessions before checking limits.
+        _prune_old_sessions()
+
+        # Reject if too many sessions are already active.
+        active = sum(
+            1
+            for s in training_sessions.values()
+            if s.status not in ("completed", "error", "stopped")
+        )
+        if active >= MAX_ACTIVE_SESSIONS:
+            return (
+                jsonify(
+                    {"error": "Too many active training sessions. Try again later."}
+                ),
+                429,
+            )
+
+        if len(training_sessions) >= MAX_TOTAL_SESSIONS:
+            return (
+                jsonify(
+                    {"error": "Session limit reached. Too many sessions in memory."}
+                ),
+                429,
+            )
+
+        # Create session
+        session_id = f"session_{int(time.time()*1000)}"
+        session = TrainingSession(session_id, config)
         training_sessions[session_id] = session
 
     # Start training thread
@@ -666,13 +749,10 @@ def start_training():
     session.thread.daemon = True
     session.thread.start()
 
-    return jsonify({
-        "session_id": session_id,
-        "status": "started"
-    })
+    return jsonify({"session_id": session_id, "status": "started"})
 
 
-@app.route('/api/train/stop/<session_id>', methods=['POST'])
+@app.route("/api/train/stop/<session_id>", methods=["POST"])
 def stop_training(session_id):
     """Stop a training session"""
     with training_lock:
@@ -686,7 +766,7 @@ def stop_training(session_id):
     return jsonify({"status": "stopped"})
 
 
-@app.route('/api/train/status/<session_id>', methods=['GET'])
+@app.route("/api/train/status/<session_id>", methods=["GET"])
 def get_training_status(session_id):
     """Get current training status and metrics"""
     with training_lock:
@@ -697,7 +777,7 @@ def get_training_status(session_id):
         return jsonify(session.to_dict())
 
 
-@app.route('/api/train/sessions', methods=['GET'])
+@app.route("/api/train/sessions", methods=["GET"])
 def list_sessions():
     """List all training sessions"""
     with training_lock:
@@ -706,7 +786,7 @@ def list_sessions():
     return jsonify(sessions)
 
 
-@app.route('/api/results', methods=['GET'])
+@app.route("/api/results", methods=["GET"])
 def list_results():
     """List saved training results"""
     results_dir = Path(__file__).parent / "results"
@@ -717,13 +797,15 @@ def list_results():
             try:
                 with open(json_file) as f:
                     data = json.load(f)
-                    results.append({
-                        "filename": json_file.name,
-                        "timestamp": json_file.stem.split('_')[-2:],
-                        "dataset": data['config']['dataset'],
-                        "best_acc": data.get('best_val_acc', 0),
-                        "epochs": data.get('total_epochs', 0)
-                    })
+                    results.append(
+                        {
+                            "filename": json_file.name,
+                            "timestamp": json_file.stem.split("_")[-2:],
+                            "dataset": data["config"]["dataset"],
+                            "best_acc": data.get("best_val_acc", 0),
+                            "epochs": data.get("total_epochs", 0),
+                        }
+                    )
             except Exception as e:
                 logger.error(f"Error reading {json_file}: {e}")
 
@@ -742,19 +824,19 @@ def reject_results_double_slash():
     # Only consider the results listing/detail endpoints
     path = request.path or ""
     # If there's an explicit double slash after the /api/results base, reject it
-    if path.startswith('/api/results//'):
+    if path.startswith("/api/results//"):
         return jsonify({"error": "Invalid filename"}), 400
 
 
-@app.route('/api/results/<path:filename>', methods=['GET'])
-@app.route('/api/results//<path:filename>', methods=['GET'])
+@app.route("/api/results/<path:filename>", methods=["GET"])
+@app.route("/api/results//<path:filename>", methods=["GET"])
 def get_result_detail(filename):
     """Get detailed results for a training session"""
     results_dir = Path(__file__).parent / "results"
 
     # Validate filename to prevent path traversal attacks
     # Only allow alphanumeric, underscores, dashes, and .json extension
-    if not re.match(r'^[A-Za-z0-9_\-]+\.json$', filename):
+    if not re.match(r"^[A-Za-z0-9_\-]+\.json$", filename):
         return jsonify({"error": "Invalid filename"}), 400
 
     result_file = results_dir / filename
@@ -785,11 +867,12 @@ def get_result_detail(filename):
     return jsonify(data)
 
 
-@app.route('/api/export/metrics/<session_id>', methods=['GET'])
+@app.route("/api/export/metrics/<session_id>", methods=["GET"])
 def export_metrics(session_id):
     """Export training metrics as CSV"""
-    from flask import make_response
     import io
+
+    from flask import make_response
 
     with training_lock:
         session = training_sessions.get(session_id)
@@ -801,25 +884,26 @@ def export_metrics(session_id):
         output.write("epoch,train_loss,val_loss,val_accuracy,timestamp\n")
 
         metrics = session.metrics_history
-        for i in range(len(metrics['epochs'])):
+        for i in range(len(metrics["epochs"])):
+            output.write(f"{metrics['epochs'][i]},{metrics['train_loss'][i]:.6f},")
             output.write(
-                f"{metrics['epochs'][i]},{metrics['train_loss'][i]:.6f},")
-            output.write(
-                f"{metrics['val_loss'][i]:.6f},{metrics['val_accuracy'][i]:.6f},")
+                f"{metrics['val_loss'][i]:.6f},{metrics['val_accuracy'][i]:.6f},"
+            )
             output.write(f"{metrics['timestamps'][i]:.2f}\n")
 
         # Create response
         response = make_response(output.getvalue())
-        response.headers[
-            "Content-Disposition"] = f"attachment; filename=metrics_{session_id}.csv"
+        response.headers["Content-Disposition"] = (
+            f"attachment; filename=metrics_{session_id}.csv"
+        )
         response.headers["Content-Type"] = "text/csv"
         return response
 
 
-@app.route('/api/compare', methods=['POST'])
+@app.route("/api/compare", methods=["POST"])
 def compare_sessions():
     """Compare multiple training sessions"""
-    session_ids = request.json.get('session_ids', [])
+    session_ids = request.json.get("session_ids", [])
 
     if not session_ids:
         return jsonify({"error": "No session IDs provided"}), 400
@@ -829,18 +913,32 @@ def compare_sessions():
         for sid in session_ids:
             session = training_sessions.get(sid)
             if session:
-                comparisons.append({
-                    "session_id": sid,
-                    "config": session.config,
-                    "best_val_acc": session.best_val_acc,
-                    "total_epochs": session.total_epochs,
-                    "status": session.status,
-                    "final_metrics": {
-                        "train_loss": session.metrics_history['train_loss'][-1] if session.metrics_history['train_loss'] else None,
-                        "val_loss": session.metrics_history['val_loss'][-1] if session.metrics_history['val_loss'] else None,
-                        "val_accuracy": session.metrics_history['val_accuracy'][-1] if session.metrics_history['val_accuracy'] else None
+                comparisons.append(
+                    {
+                        "session_id": sid,
+                        "config": session.config,
+                        "best_val_acc": session.best_val_acc,
+                        "total_epochs": session.total_epochs,
+                        "status": session.status,
+                        "final_metrics": {
+                            "train_loss": (
+                                session.metrics_history["train_loss"][-1]
+                                if session.metrics_history["train_loss"]
+                                else None
+                            ),
+                            "val_loss": (
+                                session.metrics_history["val_loss"][-1]
+                                if session.metrics_history["val_loss"]
+                                else None
+                            ),
+                            "val_accuracy": (
+                                session.metrics_history["val_accuracy"][-1]
+                                if session.metrics_history["val_accuracy"]
+                                else None
+                            ),
+                        },
                     }
-                })
+                )
 
     return jsonify({"comparisons": comparisons})
 
@@ -848,11 +946,11 @@ def compare_sessions():
 def evaluate_session_internal(config, weights):
     """Compute evaluation metrics on the validation set given config and weights"""
     # Reload dataset and reproduce split (random_state fixed in preprocess_data)
-    X, y, _ = load_dataset(config['dataset'])
-    X_train, X_val, y_train, y_val = preprocess_data(X, y, config['n_qubits'])
+    X, y, _ = load_dataset(config["dataset"])
+    X_train, X_val, y_train, y_val = preprocess_data(X, y, config["n_qubits"])
 
     # Rebuild circuit
-    circuit = create_quantum_circuit(config['n_qubits'], config['n_layers'])
+    circuit = create_quantum_circuit(config["n_qubits"], config["n_layers"])
 
     # Predictions
     y_scores = []
@@ -860,7 +958,7 @@ def evaluate_session_internal(config, weights):
     for xi in X_val:
         expectation = circuit(xi, weights)
         score = float(np.mean(expectation))  # in [-1, 1]
-        prob = (score + 1.0) / 2.0          # map to [0, 1]
+        prob = (score + 1.0) / 2.0  # map to [0, 1]
         y_scores.append(prob)
         y_pred.append(1 if score > 0 else 0)
 
@@ -870,7 +968,11 @@ def evaluate_session_internal(config, weights):
     # Metrics
     cm = confusion_matrix(y_val, y_pred)
     precision, recall, f1, _ = precision_recall_fscore_support(
-        y_val, y_pred, average='binary' if len(np.unique(y_val)) == 2 else 'macro', zero_division=0)
+        y_val,
+        y_pred,
+        average="binary" if len(np.unique(y_val)) == 2 else "macro",
+        zero_division=0,
+    )
     accuracy = float(np.mean(y_pred == y_val))
     roc = None
     try:
@@ -887,12 +989,12 @@ def evaluate_session_internal(config, weights):
             "precision": float(precision),
             "recall": float(recall),
             "f1": float(f1),
-            "roc_auc": roc
-        }
+            "roc_auc": roc,
+        },
     }
 
 
-@app.route('/api/train/evaluate/<session_id>', methods=['GET'])
+@app.route("/api/train/evaluate/<session_id>", methods=["GET"])
 def evaluate_session(session_id):
     """Evaluate a completed training session using its final checkpoint"""
     with training_lock:
@@ -900,13 +1002,16 @@ def evaluate_session(session_id):
         if not session:
             return jsonify({"error": "Session not found"}), 404
         if not session.checkpoint_path or not Path(session.checkpoint_path).exists():
-            return jsonify({"error": "No checkpoint available for this session yet"}), 400
+            return (
+                jsonify({"error": "No checkpoint available for this session yet"}),
+                400,
+            )
         config = session.config
         checkpoint_path = session.checkpoint_path
 
     try:
         data = np.load(checkpoint_path, allow_pickle=True)
-        weights = data['weights']
+        weights = data["weights"]
         result = evaluate_session_internal(config, weights)
         return jsonify(result)
     except Exception as e:
@@ -914,7 +1019,7 @@ def evaluate_session(session_id):
         return jsonify({"error": str(e)}), 500
 
 
-@app.route('/api/checkpoint/<session_id>', methods=['GET'])
+@app.route("/api/checkpoint/<session_id>", methods=["GET"])
 def get_checkpoint(session_id):
     """Download checkpoint file for a session"""
     from flask import send_file
@@ -931,10 +1036,14 @@ def get_checkpoint(session_id):
         return send_file(checkpoint_file, as_attachment=True)
 
 
-@app.route('/api/load_checkpoint', methods=['POST'])
+@app.route("/api/load_checkpoint", methods=["POST"])
 def load_checkpoint():
     """Load a checkpoint and resume training"""
-    checkpoint_path = request.json.get('checkpoint_path')
+    payload = request.json
+    if not isinstance(payload, dict):
+        return jsonify({"error": "Invalid request body: expected JSON object"}), 400
+
+    checkpoint_path = payload.get("checkpoint_path")
 
     if not checkpoint_path:
         return jsonify({"error": "No checkpoint path provided"}), 400
@@ -948,79 +1057,115 @@ def load_checkpoint():
         try:
             resolved_path = checkpoint_path.resolve()
             allowed_dir = checkpoint_dir.resolve()
-        except (OSError, RuntimeError) as e:
+        except (OSError, RuntimeError):
             return jsonify({"error": "Invalid checkpoint path"}), 400
 
         # Verify the resolved path is within allowed_dir (path containment check)
         # Python 3.9+: use is_relative_to; fallback for earlier versions
         if hasattr(resolved_path, "is_relative_to"):
             if not resolved_path.is_relative_to(allowed_dir):
-                return jsonify({"error": "Invalid checkpoint path: must be within checkpoints directory"}), 403
+                return (
+                    jsonify(
+                        {
+                            "error": "Invalid checkpoint path: must be within checkpoints directory"
+                        }
+                    ),
+                    403,
+                )
         else:
             try:
                 resolved_path.relative_to(allowed_dir)
             except ValueError:
-                return jsonify({"error": "Invalid checkpoint path: must be within checkpoints directory"}), 403
+                return (
+                    jsonify(
+                        {
+                            "error": "Invalid checkpoint path: must be within checkpoints directory"
+                        }
+                    ),
+                    403,
+                )
 
         if not resolved_path.exists():
             return jsonify({"error": "Checkpoint file not found"}), 404
 
         checkpoint = np.load(str(resolved_path), allow_pickle=True)
-        weights = checkpoint['weights']
-        epoch = int(checkpoint['epoch'])
-        config = checkpoint['config'].item() if isinstance(
-            checkpoint['config'], np.ndarray) else checkpoint['config']
+        weights = checkpoint["weights"]
+        epoch = int(checkpoint["epoch"])
+        config = (
+            checkpoint["config"].item()
+            if isinstance(checkpoint["config"], np.ndarray)
+            else checkpoint["config"]
+        )
 
-        return jsonify({
-            "success": True,
-            "epoch": epoch,
-            "config": config,
-            "message": f"Checkpoint loaded from epoch {epoch}"
-        })
+        return jsonify(
+            {
+                "success": True,
+                "epoch": epoch,
+                "config": config,
+                "message": f"Checkpoint loaded from epoch {epoch}",
+            }
+        )
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
 
-@app.route('/api/stats', methods=['GET'])
+@app.route("/api/stats", methods=["GET"])
 def get_global_stats():
     """Get global statistics across all sessions"""
     with training_lock:
         total_sessions = len(training_sessions)
         active_sessions = sum(
-            1 for s in training_sessions.values() if s.status == "training")
+            1 for s in training_sessions.values() if s.status == "training"
+        )
         completed_sessions = sum(
-            1 for s in training_sessions.values() if s.status == "completed")
+            1 for s in training_sessions.values() if s.status == "completed"
+        )
         total_epochs = sum(s.current_epoch for s in training_sessions.values())
-        avg_accuracy = np.mean([s.best_val_acc for s in training_sessions.values(
-        ) if s.best_val_acc > 0]) if training_sessions else 0
+        avg_accuracy = (
+            np.mean(
+                [
+                    s.best_val_acc
+                    for s in training_sessions.values()
+                    if s.best_val_acc > 0
+                ]
+            )
+            if training_sessions
+            else 0
+        )
 
-    return jsonify({
-        "total_sessions": total_sessions,
-        "active_sessions": active_sessions,
-        "completed_sessions": completed_sessions,
-        "total_epochs_trained": total_epochs,
-        "average_best_accuracy": float(avg_accuracy),
-        "server_uptime": time.time() - app.config.get('START_TIME', time.time())
-    })
+    return jsonify(
+        {
+            "total_sessions": total_sessions,
+            "active_sessions": active_sessions,
+            "completed_sessions": completed_sessions,
+            "total_epochs_trained": total_epochs,
+            "average_best_accuracy": float(avg_accuracy),
+            "server_uptime": time.time() - app.config.get("START_TIME", time.time()),
+        }
+    )
 
 
-@app.route('/api/health', methods=['GET'])
+@app.route("/api/health", methods=["GET"])
 def health_check():
     """Health check endpoint"""
-    return jsonify({
-        "status": "healthy",
-        "timestamp": time.time(),
-        "active_sessions": sum(1 for s in training_sessions.values() if s.status == "training")
-    })
+    return jsonify(
+        {
+            "status": "healthy",
+            "timestamp": time.time(),
+            "active_sessions": sum(
+                1 for s in training_sessions.values() if s.status == "training"
+            ),
+        }
+    )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # Set start time for uptime tracking
-    app.config['START_TIME'] = time.time()
+    app.config["START_TIME"] = time.time()
 
-    print("\n" + "="*70)
+    print("\n" + "=" * 70)
     print("  🚀 QUANTUM AI TRAINING WEB APP - ADVANCED ML ENGINE")
-    print("="*70)
+    print("=" * 70)
     print("\n📡 Server starting on http://localhost:5000")
     print("\n✨ Advanced Optimization Features:")
     print("   • Adam, Momentum, and SGD optimizers")
@@ -1044,9 +1189,10 @@ if __name__ == '__main__':
     print("   • SGD: Vanilla stochastic gradient descent")
     print("\n💡 Open your browser to: http://localhost:5000")
     print("📊 API Documentation: http://localhost:5000/api/health")
-    print("\n" + "="*70 + "\n")
+    print("\n" + "=" * 70 + "\n")
 
     import os
+
     debug_mode = os.environ.get("FLASK_DEBUG", "false").lower() == "true"
     # Default to localhost for security
     host = os.environ.get("FLASK_HOST", "127.0.0.1")

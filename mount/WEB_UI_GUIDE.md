@@ -208,7 +208,7 @@ python app.py
 **Solution:** Check the Logs tab for detailed error messages
 
 ### Chat Not Working
-**Solution:** 
+**Solution:**
 - Local provider always works (no setup needed)
 - For Azure/OpenAI: Set environment variables
 - For LoRA: Train an adapter first

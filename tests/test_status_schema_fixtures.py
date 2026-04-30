@@ -100,9 +100,17 @@ def test_integration_smoke_matches_fixture_contract(
         smoke_module,
         "resolve_existing_config_path",
         lambda _repo_root, key: {
-            "master_orchestrator": smoke_module.REPO_ROOT / "config" / "master_orchestrator.yaml",
-            "quantum_autorun": smoke_module.REPO_ROOT / "config" / "quantum" / "quantum_autorun.yaml",
-            "evaluation_autorun": smoke_module.REPO_ROOT / "config" / "evaluation" / "evaluation_autorun.yaml",
+            "master_orchestrator": smoke_module.REPO_ROOT
+            / "config"
+            / "master_orchestrator.yaml",
+            "quantum_autorun": smoke_module.REPO_ROOT
+            / "config"
+            / "quantum"
+            / "quantum_autorun.yaml",
+            "evaluation_autorun": smoke_module.REPO_ROOT
+            / "config"
+            / "evaluation"
+            / "evaluation_autorun.yaml",
         }.get(key),
     )
 

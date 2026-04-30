@@ -8,6 +8,7 @@ Experiments:
 
 Outputs are JSON files under quantum-ai/results/ used by visualize_hardware_results.py.
 """
+
 from __future__ import annotations
 
 import subprocess
@@ -35,19 +36,71 @@ def main() -> int:
             shots = 500 if n == 64 else 1000
             for ent in ("linear", "circular", "full"):
                 # Clean
-                run([py, str(SCRIPT), "--n-qubits", str(n), "--layers", str(L), "--entanglement", ent,
-                     "--method", "matrix_product_state", "--shots", str(shots)])
+                run(
+                    [
+                        py,
+                        str(SCRIPT),
+                        "--n-qubits",
+                        str(n),
+                        "--layers",
+                        str(L),
+                        "--entanglement",
+                        ent,
+                        "--method",
+                        "matrix_product_state",
+                        "--shots",
+                        str(shots),
+                    ]
+                )
                 # With small Pauli noise
-                run([py, str(SCRIPT), "--n-qubits", str(n), "--layers", str(L), "--entanglement", ent,
-                     "--method", "matrix_product_state", "--shots", str(shots),
-                     "--noise-pauli-px", "0.005", "--noise-pauli-pz", "0.005", "--noise-seed", "1234"])  
+                run(
+                    [
+                        py,
+                        str(SCRIPT),
+                        "--n-qubits",
+                        str(n),
+                        "--layers",
+                        str(L),
+                        "--entanglement",
+                        ent,
+                        "--method",
+                        "matrix_product_state",
+                        "--shots",
+                        str(shots),
+                        "--noise-pauli-px",
+                        "0.005",
+                        "--noise-pauli-pz",
+                        "0.005",
+                        "--noise-seed",
+                        "1234",
+                    ]
+                )
 
     # 2) Stabilizer random experiments
     for n in (128, 256):
         for layers in (2, 4, 8):
-            run([py, str(SCRIPT), "--n-qubits", str(n), "--circuit", "stabilizer_random",
-                 "--stabilizer-type", "random", "--clifford-layers", str(layers),
-                 "--twoq-density", "0.5", "--method", "stabilizer", "--shots", "500", "--noise-seed", "42"]) 
+            run(
+                [
+                    py,
+                    str(SCRIPT),
+                    "--n-qubits",
+                    str(n),
+                    "--circuit",
+                    "stabilizer_random",
+                    "--stabilizer-type",
+                    "random",
+                    "--clifford-layers",
+                    str(layers),
+                    "--twoq-density",
+                    "0.5",
+                    "--method",
+                    "stabilizer",
+                    "--shots",
+                    "500",
+                    "--noise-seed",
+                    "42",
+                ]
+            )
 
     return 0
 

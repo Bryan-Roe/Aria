@@ -1,0 +1,158 @@
+# AI Projects Entry Points Registry
+#
+# This YAML file documents the public APIs and entry points for all ai-projects.
+# Used by:
+# - shared/core/module_registry.py (when loading modules)
+# - shared/core/config_loader.py (when validating project availability)
+# - scripts/ai_projects_status.py (when reporting capabilities)
+# - function_app.py (when deciding what services are available)
+#
+# Format:
+#   project_name:
+#     venv_isolated: bool (True if separate venv required)
+#     depends_on: list (other projects this depends on)
+#     entry_points:
+#       entry_name:
+#         path: file path relative to repo root
+#         type: script|module|server|asgi|mcp
+#         port: port number (if applicable)
+#         description: what this entry point does
+
+projects:
+  chat-cli:
+    venv_isolated: true
+    depends_on: []
+    description: Multi-provider chat CLI with provider detection, streaming, token management
+    entry_points:
+      cli:
+        path: ai-projects/chat-cli/src/chat_cli.py
+        type: script
+        description: Interactive chat CLI with /new, /save, /exit commands
+      
+      provider_api:
+        path: ai-projects/chat-cli/src/api.py
+        type: module
+        description: Public API module (detect_provider, BaseChatProvider, token utilities)
+        exports:
+          - detect_provider
+          - prune_messages
+          - count_tokens
+          - create_agi
+      
+      providers_module:
+        path: ai-projects/chat-cli/src/chat_providers.py
+        type: module
+        description: Chat provider implementations and detection chain
+      
+      token_utils:
+        path: ai-projects/chat-cli/src/token_utils.py
+        type: module
+        description: Token counting and context pruning utilities
+      
+      agi_provider:
+        path: ai-projects/chat-cli/src/agi_provider.py
+        type: module
+        description: AGI reasoning provider with chain-of-thought
+
+  quantum-ml:
+    venv_isolated: true
+    depends_on: []
+    description: Quantum ML platform with circuits, simulation, and Azure Quantum integration
+    entry_points:
+      mcp_server:
+        path: ai-projects/quantum-ml/quantum_mcp_server.py
+        type: mcp
+        port: 9999
+        description: MCP server exposing 8 quantum tools (simulate, submit jobs, etc.)
+      
+      web_dashboard:
+        path: ai-projects/quantum-ml/web_app.py
+        type: asgi
+        port: 5000
+        description: Web UI for quantum pipeline monitoring and job submission
+      
+      api:
+        path: ai-projects/quantum-ml/src/api.py
+        type: module
+        description: Public API module (QuantumLLMPipeline, QuantumClassifier, Azure client)
+        exports:
+          - QuantumLLMPipeline
+          - QuantumClassifier
+          - AzureQuantumClient
+          - submit_quantum_job
+          - poll_quantum_job
+      
+      integrated_pipeline:
+        path: ai-projects/quantum-ml/src/quantum_llm_integrated.py
+        type: module
+        description: Hybrid quantum-LLM pipeline for training and inference
+
+  lora-training:
+    venv_isolated: true
+    depends_on: []
+    description: LoRA fine-tuning for Phi-Silica models
+    entry_points:
+      trainer:
+        path: ai-projects/lora-training/microsoft_phi-silica-3.6_v1/scripts/train_lora.py
+        type: script
+        description: Main LoRA training script with dataset loading and checkpoint saving
+      
+      inference:
+        path: ai-projects/lora-training/microsoft_phi-silica-3.6_v1/scripts/infer_lora.py
+        type: script
+        description: LoRA inference script for testing fine-tuned adapters
+
+  llm-maker:
+    venv_isolated: false
+    depends_on: []
+    description: Autonomous tool generation system powered by LLMs
+    entry_points:
+      tool_maker:
+        path: ai-projects/llm-maker/src/tool_maker.py
+        type: module
+        description: Python tool generation with AST validation and sandboxing
+      
+      web_server:
+        path: ai-projects/llm-maker/web_server.py
+        type: asgi
+        port: 8000
+        description: Web UI for interactive tool generation
+      
+      mcp_server:
+        path: ai-projects/llm-maker/llm_maker_mcp_server.py
+        type: mcp
+        port: 9998
+        description: MCP server for unified tool generation and validation
+
+  cooking-ai:
+    venv_isolated: false
+    depends_on: []
+    description: Cooking-focused AI assistant with recipe agent
+    entry_points:
+      cli:
+        path: ai-projects/cooking-ai/src/main.py
+        type: script
+        description: Command-line interface for recipe queries and meal planning
+      
+      recipe_agent:
+        path: ai-projects/cooking-ai/src/agents/recipe_agent.py
+        type: module
+        description: Recipe generation and analysis agent
+
+  writer-reviewer-workflow:
+    venv_isolated: false
+    depends_on: []
+    description: Multi-agent workflow for code review and writing
+    entry_points:
+      main:
+        path: ai-projects/writer-reviewer-workflow/main.py
+        type: script
+        description: Standalone script with HTTP server and CLI modes
+
+# Registry metadata
+metadata:
+  version: "1.0"
+  last_updated: "2026-04-11"
+  total_projects: 6
+  tier_system_enabled: true
+  central_registry: shared/core/module_registry.py

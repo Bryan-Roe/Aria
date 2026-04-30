@@ -18,7 +18,7 @@ count = sum(1 for d in dir.iterdir() if d.is_dir())
 ```
 
 ### 2. Gradient Norm Optimization
-**File:** `quantum-ai/web_app.py` line 440
+**File:** `ai-projects/quantum-ml/web_app.py` line 440
 
 ```python
 # BEFORE
@@ -29,7 +29,7 @@ avg_gradient = np.mean(np.linalg.norm(g) for g in epoch_gradients)
 ```
 
 ### 3. Single-Pass Statistics
-**File:** `quantum-ai/web_app.py` lines 952-958
+**File:** `ai-projects/quantum-ml/web_app.py` lines 952-958
 
 ```python
 # BEFORE (4 iterations)
@@ -94,7 +94,7 @@ def _load_json_cached(filepath: Path) -> dict:
 ```
 
 ### 5. Keyword Matching with Frozensets
-**File:** `talk-to-ai/src/agi_provider.py` lines 343-372
+**File:** `ai-projects/chat-cli/src/agi_provider.py` lines 343-372
 
 ```python
 # Add at module level (top of file)
@@ -206,7 +206,7 @@ def check_rate_limit(client_ip: str) -> bool:
 ## Complex Optimization (2-4 hours)
 
 ### 8. Quantum Gradient Optimization
-**File:** `quantum-ai/web_app.py` lines 217-246
+**File:** `ai-projects/quantum-ml/web_app.py` lines 217-246
 
 ```python
 def compute_gradient_optimized(circuit, X, y, weights):

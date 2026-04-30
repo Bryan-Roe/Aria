@@ -1,10 +1,41 @@
 {
     "version": "0.2.0",
     "configurations": [
-    
+        {
+            "name": "Python Debugger: FastAPI",
+            "type": "python",
+            "request": "launch",
+            "module": "uvicorn",
+            "args": [
+                "main:app",
+                "--reload"
+            ],
+            "jinja": true
+        },
+        {
+            "name": "Python Debugger: Aria Gradio Chat App",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/app.py",
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal",
+            "justMyCode": true
+        },
+        {
+            "name": "Debug Writer-Reviewer Workflow HTTP Server",
+            "type": "python",
+            "request": "attach",
+            "connect": {
+                "host": "localhost",
+                "port": 5679
+            },
+            "preLaunchTask": "Open writer-reviewer Agent Inspector",
+            "internalConsoleOptions": "neverOpen",
+            "postDebugTask": "Terminate All Tasks"
+        },
         {
             "name": "Attach to Python Functions",
-            "type": "debugpy",
+            "type": "python",
             "request": "attach",
             "connect": {
                 "host": "localhost",
@@ -13,7 +44,28 @@
             "preLaunchTask": "func: host start"
         },
         {
-            "type": "pwa-msedge",
+            "name": "Attach to Python Functions + routes smoke",
+            "type": "python",
+            "request": "attach",
+            "connect": {
+                "host": "localhost",
+                "port": 9091
+            },
+            "preLaunchTask": "func: host start",
+            "postDebugTask": "smoke: ai/routes"
+        },
+        {
+            "name": "Run Gradio AI Chat app (task)",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/app.py",
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal",
+            "preLaunchTask": "Run Gradio AI Chat app",
+            "justMyCode": true
+        },
+        {
+            "type": "msedge",
             "name": "Launch Microsoft Edge",
             "request": "launch",
             "runtimeArgs": [
@@ -25,23 +77,14 @@
             }
         },
         {
-            "type": "pwa-msedge",
+            "type": "msedge",
             "name": "Launch Microsoft Edge in headless mode",
             "request": "launch",
             "runtimeArgs": [
                 "--headless",
                 "--remote-debugging-port=9222"
             ],
-            "url": "c:\\Users\\Bryan\\.vscode\\extensions\\ms-edgedevtools.vscode-edge-devtools-2.1.10\\out\\startpage\\index.html",
-            "presentation": {
-                "hidden": true
-            }
-        },
-        {
-            "type": "vscode-edge-devtools.debug",
-            "name": "Open Edge DevTools",
-            "request": "attach",
-            "url": "c:\\Users\\Bryan\\.vscode\\extensions\\ms-edgedevtools.vscode-edge-devtools-2.1.10\\out\\startpage\\index.html",
+            "url": "file://dev-container.localhost/7b22686f737450617468223a22633a5c5c55736572735c5c427279616e5c5c41726961222c226c6f63616c446f636b6572223a66616c73652c22636f6e66696746696c65223a7b22246d6964223a312c2270617468223a222f433a2f55736572732f427279616e2f417269612f2e646576636f6e7461696e65722f646576636f6e7461696e65722e6a736f6e222c22736368656d65223a2266696c65227d7d//workspaces/Aria/.pxt/mkc-cache/https_58__47__47_arcade.makecode.com_47_-asseteditor.html",
             "presentation": {
                 "hidden": true
             }
@@ -49,17 +92,10 @@
     ],
     "compounds": [
         {
-            "name": "Launch Edge Headless and attach DevTools",
-            "configurations": [
-                "Launch Microsoft Edge in headless mode",
-                "Open Edge DevTools"
-            ]
-        },
-        {
-            "name": "Launch Edge and attach DevTools",
+            "name": "Launch Edge browsers",
             "configurations": [
                 "Launch Microsoft Edge",
-                "Open Edge DevTools"
+                "Launch Microsoft Edge in headless mode"
             ]
         }
     ]

@@ -9,7 +9,9 @@ import pytest
 
 @pytest.mark.unit
 def test_integration_contract_gate_script_has_expected_commands() -> None:
-    script_path = Path(__file__).resolve().parents[1] / "scripts" / "integration_contract_gate.sh"
+    script_path = (
+        Path(__file__).resolve().parents[1] / "scripts" / "integration_contract_gate.sh"
+    )
     assert script_path.exists(), "Expected gate wrapper script to exist"
 
     content = script_path.read_text(encoding="utf-8")

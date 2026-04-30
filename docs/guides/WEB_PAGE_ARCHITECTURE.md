@@ -152,7 +152,7 @@ Embedded script focuses solely on:
    ```
 2. Displays loading state (optional)
 3. Receives image URL or base64 data
-4. Sets `<img id="ariaAvatarImage" src="...">` 
+4. Sets `<img id="ariaAvatarImage" src="...">`
 5. Shows avatar container
 
 ### Fallback (SVG Gradient)
@@ -395,6 +395,6 @@ For most use cases, **keep `ARIA_EMBEDDED = false`** and let `chat.js` do the wo
 
 ---
 
-**Last Updated**: November 26, 2025  
-**Version**: 1.0.0  
+**Last Updated**: November 26, 2025
+**Version**: 1.0.0
 **Maintainer**: QAI Development Team

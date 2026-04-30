@@ -23,7 +23,7 @@ Advanced: http://localhost:8000/advanced.html  ⭐ RECOMMENDED
 ### **Real-Time GPU Monitoring**
 ✅ **Live Metrics** (updates every 5 seconds):
 - GPU utilization percentage with visual progress bar
-- VRAM usage (current / total) 
+- VRAM usage (current / total)
 - Core temperature with color-coded warnings:
   - 🟢 Green < 70°C (optimal)
   - 🟡 Yellow 70-80°C (warm)

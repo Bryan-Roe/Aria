@@ -1,0 +1,28 @@
+name: Dependency Review
+
+on:
+    pull_request:
+        branches: [main, dev]
+
+permissions:
+    contents: read
+
+concurrency:
+    group: dep-review-${{ github.event.pull_request.number }}
+    cancel-in-progress: true
+
+jobs:
+    dependency-review:
+        name: Review Dependency Changes
+        runs-on: ubuntu-latest
+        timeout-minutes: 10
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+
+            - name: Dependency Review
+              uses: actions/dependency-review-action@v4
+              with:
+                  fail-on-severity: high
+                  deny-licenses: GPL-2.0, GPL-3.0, AGPL-3.0
+                  comment-summary-in-pr: always

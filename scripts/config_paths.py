@@ -20,6 +20,7 @@ _CONFIG_CANDIDATES: Dict[str, Tuple[str, ...]] = {
         "evaluation_autorun.yaml",
     ),
     "autotrain": (
+        "config/training/autotrain.yaml",
         "autotrain.yaml",
     ),
 }

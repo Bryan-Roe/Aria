@@ -14,16 +14,16 @@ function Test-Endpoint {
         [string]$Method = "GET",
         [object]$Body = $null
     )
-    
+
     try {
         Write-Host "Testing: $Name... " -NoNewline
-        
+
         if ($Method -eq "GET") {
             $response = Invoke-RestMethod -Uri $Url -Method Get -TimeoutSec 5
         } else {
             $response = Invoke-RestMethod -Uri $Url -Method Post -Body ($Body | ConvertTo-Json) -ContentType "application/json" -TimeoutSec 5
         }
-        
+
         Write-Host "✓ PASSED" -ForegroundColor Green
         return $true
     }

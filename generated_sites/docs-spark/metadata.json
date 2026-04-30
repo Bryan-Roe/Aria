@@ -1,0 +1,20 @@
+{
+  "name": "docs-spark",
+  "description": "Documentation site starter with sidebar and API table",
+  "style": "clean-docs",
+  "pages": [
+    "index"
+  ],
+  "features": [
+    "sidebar nav",
+    "code block",
+    "api table"
+  ],
+  "created_at": "2026-04-11T00:00:00Z",
+  "files": [
+    "index.html",
+    "style.css",
+    "script.js",
+    "metadata.json"
+  ]
+}

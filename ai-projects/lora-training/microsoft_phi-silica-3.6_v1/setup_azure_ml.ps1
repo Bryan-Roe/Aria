@@ -4,16 +4,16 @@
 param(
     [Parameter(Mandatory=$true)]
     [string]$SubscriptionId,
-    
+
     [Parameter(Mandatory=$false)]
     [string]$ResourceGroup = "rg-phi36-ml",
-    
+
     [Parameter(Mandatory=$false)]
     [string]$WorkspaceName = "phi36-ml-workspace",
-    
+
     [Parameter(Mandatory=$false)]
     [string]$Location = "eastus",
-    
+
     [Parameter(Mandatory=$false)]
     [switch]$SkipDatasetUpload
 )

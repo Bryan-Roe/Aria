@@ -1,11 +1,13 @@
 from __future__ import annotations
 
-import re
 import json
-from typing import List, Dict
+import re
+from typing import Dict, List
 
 # Pre-compile regex pattern for performance
-_RE_QUANTITY = re.compile(r"^(?P<qty>(\d+\/\d+|\d+(\.\d+)?))\s*(?P<unit>[a-zA-Z]+)?\s*(?P<name>.*)")
+_RE_QUANTITY = re.compile(
+    r"^(?P<qty>(\d+\/\d+|\d+(\.\d+)?))\s*(?P<unit>[a-zA-Z]+)?\s*(?P<name>.*)"
+)
 
 SAMPLE_RECIPES = [
     {
@@ -66,7 +68,9 @@ class LocalProvider:
     Returns JSON strings for predictable testing.
     """
 
-    def complete(self, messages: List[Dict[str, str]], json_mode: bool = False) -> str:  # noqa: D401
+    def complete(
+        self, messages: List[Dict[str, str]], json_mode: bool = False
+    ) -> str:  # noqa: D401
         last_user = next(
             (m["content"] for m in reversed(messages) if m.get("role") == "user"),
             "",
@@ -83,8 +87,8 @@ class LocalProvider:
         q_match = re.search(r"Query:\s*(.*)", prompt)
         query = (q_match.group(1).strip() if q_match else "").lower()
         f_match = re.search(r"Filters:\s*(.*)", prompt)
-        filters_raw = (f_match.group(1).strip() if f_match else "")
-        filters = [f.strip().lower() for f in filters_raw.split(',') if f.strip()]
+        filters_raw = f_match.group(1).strip() if f_match else ""
+        filters = [f.strip().lower() for f in filters_raw.split(",") if f.strip()]
         l_match = re.search(r"Limit:\s*(\d+)", prompt)
         limit = int(l_match.group(1)) if l_match else 5
 

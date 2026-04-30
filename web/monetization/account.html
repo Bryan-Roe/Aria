@@ -310,7 +310,7 @@
         <!-- Profile Tab -->
         <div id="profile-tab" class="card active">
             <h2>Profile Information</h2>
-            
+
             <form id="profile-form">
                 <div class="form-row">
                     <div class="form-group">
@@ -389,7 +389,7 @@
             </div>
 
             <h3 style="margin: 30px 0 15px;">Your API Keys</h3>
-            
+
             <div class="api-key-display">
                 <div>
                     <div><strong>Production Key</strong></div>
@@ -454,7 +454,7 @@
             <h2>Security Settings</h2>
 
             <h3 style="margin-bottom: 20px;">Change Password</h3>
-            
+
             <form id="password-form">
                 <div class="form-group">
                     <label for="current-password">Current Password</label>
@@ -475,7 +475,7 @@
             </form>
 
             <h3 style="margin: 40px 0 20px;">Two-Factor Authentication</h3>
-            
+
             <div class="info-box">
                 <h4>Enhance Your Security</h4>
                 <p>Two-factor authentication adds an extra layer of security to your account.</p>
@@ -483,7 +483,7 @@
             </div>
 
             <h3 style="margin: 40px 0 20px;">Active Sessions</h3>
-            
+
             <div class="payment-method" style="margin-bottom: 10px;">
                 <div class="payment-method-info">
                     <span>🖥️</span>
@@ -498,7 +498,7 @@
             <button class="button button-danger" style="margin-top: 15px;">🚪 Sign Out All Other Sessions</button>
 
             <h3 style="margin: 40px 0 20px;">Danger Zone</h3>
-            
+
             <div style="padding: 20px; background: #fee; border-radius: 8px; border-left: 4px solid #f44336;">
                 <h4 style="color: #c62828; margin-bottom: 10px;">Delete Account</h4>
                 <p style="color: #666; margin-bottom: 15px;">Once you delete your account, there is no going back. Please be certain.</p>
@@ -529,21 +529,36 @@
         // Form submissions
         document.getElementById('profile-form').addEventListener('submit', function(e) {
             e.preventDefault();
-            alert('Profile updated successfully! (Demo mode)');
+            showToast('Profile updated successfully! (Demo mode)');
         });
 
         document.getElementById('password-form').addEventListener('submit', function(e) {
             e.preventDefault();
             const newPass = document.getElementById('new-password').value;
             const confirmPass = document.getElementById('confirm-password').value;
-            
+
             if (newPass !== confirmPass) {
-                alert('Passwords do not match!');
+                showToast('Passwords do not match!', 'warn');
                 return;
             }
-            
-            alert('Password updated successfully! (Demo mode)');
+
+            showToast('Password updated successfully! (Demo mode)');
         });
+    </script>
+    <div id="aria-toast" style="position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(120%);background:#1e1e2e;color:#fff;padding:14px 24px;border-radius:10px;box-shadow:0 8px 32px rgba(0,0,0,0.35);font-size:0.95em;z-index:9999;transition:transform 0.3s cubic-bezier(.22,1,.36,1),opacity 0.3s;opacity:0;max-width:90vw;text-align:center;pointer-events:none"></div>
+    <script>
+    function showToast(msg, type, duration) {
+        var t = document.getElementById('aria-toast');
+        t.textContent = msg;
+        t.style.background = type === 'warn' ? '#b45309' : '#1e1e2e';
+        t.style.transform = 'translateX(-50%) translateY(0)';
+        t.style.opacity = '1';
+        clearTimeout(t._timer);
+        t._timer = setTimeout(function() {
+            t.style.transform = 'translateX(-50%) translateY(120%)';
+            t.style.opacity = '0';
+        }, duration || 3500);
+    }
     </script>
 </body>
 </html>

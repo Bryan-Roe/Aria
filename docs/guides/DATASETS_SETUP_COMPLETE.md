@@ -1,7 +1,7 @@
 # AI Training Datasets - Setup Complete! ✅
 
-**Status**: Ready for AI training  
-**Date**: October 31, 2025  
+**Status**: Ready for AI training
+**Date**: October 31, 2025
 **Location**: `C:\Users\Bryan\OneDrive\AI\datasets`
 
 ---
@@ -231,9 +231,9 @@ Get-ChildItem .\datasets -Recurse | Measure-Object -Property Length -Sum
 - **Papers with Code**: Research-quality datasets
 
 ### Training Tutorials:
-- Quantum AI: `quantum-ai/README.md`
+- Quantum AI: `ai-projects/quantum-ml/README.md`
 - Phi-3.6 Fine-tuning: `AI/microsoft_phi-silica-3.6_v1/README.md`
-- Custom datasets: `quantum-ai/train_custom_dataset.py`
+- Custom datasets: `ai-projects/quantum-ml/train_custom_dataset.py`
 
 ### Tools:
 - Hugging Face `datasets` library (streaming, caching)

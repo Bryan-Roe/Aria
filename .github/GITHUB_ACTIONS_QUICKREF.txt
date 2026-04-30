@@ -15,10 +15,10 @@
 
   ci-pipeline.yml          Main CI: validation → training → deployment
                            Triggers: push to main/dev, PRs, daily 2 AM UTC
-                           
+
   code-quality.yml    ⭐   Linting: flake8, black, isort, mypy, safety
                            Triggers: push, PRs to main/dev
-                           
+
   codeql.yml          ⭐   Security: Python & JS vulnerability scanning
                            Triggers: push, PRs, weekly Monday 8 AM UTC
 
@@ -31,7 +31,7 @@
                            - PR size check (warns if >50 files or >1000 lines)
                            - TODO/FIXME detection
                            - Auto-label by changed files
-                           
+
   Auto-Labels:             documentation, tests, dependencies, github-actions,
                            aria-character, chat-interface, quantum-ai, training,
                            azure-functions, config, scripts, security
@@ -42,10 +42,10 @@
 
   auto-validation.yml      Orchestrator dry-run validation
                            Triggers: push (specific paths), daily 5 AM, manual
-                           
+
   e2e-tests.yml            End-to-end: Playwright, Pyppeteer, Selenium
                            Triggers: push to main, PRs to main
-                           
+
   aria-tests.yml           Aria-specific tests (Python 3.10, 3.11, 3.12)
                            Triggers: push/PR (aria_web changes), manual
 
@@ -55,7 +55,7 @@
 
   quantum-orchestration.yml  Quantum computing automation
                              Triggers: push to main, manual
-                             
+
   azureml-train.yml          Azure ML LoRA training jobs
                              Triggers: manual only
 
@@ -66,12 +66,12 @@
   release.yml         ⭐   Automated releases on version tags
                            Triggers: git tag v*.*.* (e.g., v1.0.0)
                            Creates: GitHub release, changelog, source archives
-                           
+
   stale.yml           ⭐   Auto-close stale issues/PRs
                            Issues: stale after 60d, close after 14d
                            PRs: stale after 30d, close after 7d
                            Triggers: daily midnight UTC, manual
-                           
+
   workflow-validation.yml⭐  Validates workflow syntax
                            Triggers: workflow file changes, push to main
 
@@ -84,19 +84,19 @@
     flake8 . --exclude=venv,venv_*,data_out
     black --check --exclude="venv|data_out" .
     isort --check-only --skip-glob="venv*" .
-    
+
   Create Release:
     git tag v1.0.0
     git push origin v1.0.0
     # Release workflow creates GitHub release automatically
-    
+
   Manual Workflow Trigger:
     1. Go to Actions tab: https://github.com/Bryan-Roe/Aria/actions
     2. Select workflow from left sidebar
     3. Click "Run workflow"
     4. Configure inputs (if any)
     5. Click "Run workflow"
-    
+
   Check Workflow Logs:
     Actions tab → Select run → Click job → View logs
 
@@ -105,7 +105,7 @@
 └─────────────────────────────────────────────────────────────────────────────────┘
 
   Add to markdown files:
-  
+
   ![CI Pipeline](https://github.com/Bryan-Roe/Aria/actions/workflows/ci-pipeline.yml/badge.svg)
   ![Code Quality](https://github.com/Bryan-Roe/Aria/actions/workflows/code-quality.yml/badge.svg)
   ![CodeQL](https://github.com/Bryan-Roe/Aria/actions/workflows/codeql.yml/badge.svg)
@@ -129,17 +129,17 @@
     • Check trigger conditions (branches, paths)
     • Verify workflow file syntax
     • Check if workflow is disabled in Actions tab
-    
+
   Tests failing:
     • Check logs in Actions tab
     • Download test artifacts for detailed reports
     • Run tests locally to reproduce
-    
+
   Authentication errors:
     • Verify secrets are configured (Settings → Secrets)
     • Check token permissions
     • Ensure service principal credentials are valid
-    
+
   Workflow syntax errors:
     • Run workflow-validation.yml workflow
     • Validate locally: python -c "import yaml; yaml.safe_load(open('file.yml'))"
@@ -151,7 +151,7 @@
   .github/WORKFLOWS.md              Comprehensive workflow documentation
   .github/GITHUB_ACTIONS_SETUP.md   Setup summary and details
   .github/GITHUB_ACTIONS_QUICKREF.txt  This quick reference
-  
+
   External Resources:
     GitHub Actions Docs:  https://docs.github.com/en/actions
     Actions Marketplace:  https://github.com/marketplace?type=actions

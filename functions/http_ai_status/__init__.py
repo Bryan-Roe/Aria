@@ -1,9 +1,10 @@
+import importlib.util as _iu
 import json
 import os
-import sys
 import subprocess
+import sys
 from pathlib import Path
-import importlib.util as _iu
+
 import azure.functions as func
 import yaml
 
@@ -65,7 +66,12 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                 "\n\ttry:\n\t\tvers[m]=md.version(m)\n\texcept Exception:\n\t\tvers[m]=None;"
                 "print(json.dumps({'available':avail,'versions':vers}))"
             )
-            proc = subprocess.run([str(venv_python), "-c", code], capture_output=True, text=True, timeout=10)
+            proc = subprocess.run(
+                [str(venv_python), "-c", code],
+                capture_output=True,
+                text=True,
+                timeout=10,
+            )
             if proc.returncode == 0:
                 data = json.loads(proc.stdout.strip() or "{}")
                 venv_info["packages"] = data
@@ -85,9 +91,10 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         "tokenizer_dir_exists": tokenizer_dir.exists(),
         "base_model": None,
         "inproc_ready": all(inproc_ml.values()),
-        "subprocess_ready": venv_info["exists"] and bool(venv_info.get("packages",{}).get("available",{}).get("torch"))
-            and bool(venv_info.get("packages",{}).get("available",{}).get("transformers"))
-            and bool(venv_info.get("packages",{}).get("available",{}).get("peft")),
+        "subprocess_ready": venv_info["exists"]
+        and bool(venv_info.get("packages", {}).get("available", {}).get("torch"))
+        and bool(venv_info.get("packages", {}).get("available", {}).get("transformers"))
+        and bool(venv_info.get("packages", {}).get("available", {}).get("peft")),
     }
     if lora_info["adapter_config_exists"]:
         try:
@@ -129,7 +136,13 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
 
             # Build Azure Quantum context and job list if metadata present
             try:
-                cfg_path = repo_root / "quantum-ai" / "config" / "quantum_config.yaml"
+                cfg_path = (
+                    repo_root
+                    / "ai-projects"
+                    / "quantum-ml"
+                    / "config"
+                    / "quantum_config.yaml"
+                )
                 azure_ctx = None
                 workspace_url = None
                 if cfg_path.exists():
@@ -158,15 +171,19 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                     meta = j.get("meta", {}) if isinstance(j, dict) else {}
                     job_id = meta.get("azure_job_id")
                     if job_id:
-                        azure_jobs.append({
-                            "name": j.get("name"),
-                            "mode": j.get("mode"),
-                            "job_id": job_id,
-                            "backend": meta.get("azure_backend") or meta.get("backend") or j.get("mode"),
-                            "success": meta.get("azure_success"),
-                            "counts": meta.get("azure_counts"),
-                            "results_file": meta.get("azure_results_file"),
-                        })
+                        azure_jobs.append(
+                            {
+                                "name": j.get("name"),
+                                "mode": j.get("mode"),
+                                "job_id": job_id,
+                                "backend": meta.get("azure_backend")
+                                or meta.get("backend")
+                                or j.get("mode"),
+                                "success": meta.get("azure_success"),
+                                "counts": meta.get("azure_counts"),
+                                "results_file": meta.get("azure_results_file"),
+                            }
+                        )
                 if azure_ctx or azure_jobs:
                     quantum_azure = {
                         "workspace": azure_ctx,
@@ -214,7 +231,9 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
             ],
             "status": "ok",
         }
-        return func.HttpResponse(json.dumps(payload), status_code=200, mimetype="application/json")
+        return func.HttpResponse(
+            json.dumps(payload), status_code=200, mimetype="application/json"
+        )
     except Exception as e:  # noqa: BLE001
         payload = {
             "status": "error",
@@ -224,4 +243,6 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                 "openai": openai_env,
             },
         }
-        return func.HttpResponse(json.dumps(payload), status_code=500, mimetype="application/json")
+        return func.HttpResponse(
+            json.dumps(payload), status_code=500, mimetype="application/json"
+        )

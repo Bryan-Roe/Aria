@@ -9,7 +9,7 @@ User-friendly web interface for creating and managing AI tools with LLM Maker.
    cd llm-maker
    python web_server.py
    ```
-   
+
    Or use the helper script:
    ```bash
    ./start_web_ui.sh

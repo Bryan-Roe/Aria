@@ -1,7 +1,7 @@
 -- Azure Quantum cost tracking and job statistics
 CREATE VIEW [dbo].[vw_AzureQuantumCostTracking]
 AS
-SELECT 
+SELECT
     Provider,
     Target,
     COUNT(*) AS TotalJobs,

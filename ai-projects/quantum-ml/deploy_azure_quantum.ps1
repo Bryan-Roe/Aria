@@ -5,16 +5,16 @@
 param(
     [Parameter(Mandatory=$false)]
     [string]$SubscriptionId,
-    
+
     [Parameter(Mandatory=$false)]
     [string]$ResourceGroupName = "rg-quantum-ai",
-    
+
     [Parameter(Mandatory=$false)]
     [string]$Location = "eastus",
-    
+
     [Parameter(Mandatory=$false)]
     [string]$WorkspaceName = "quantum-ai-workspace",
-    
+
     [Parameter(Mandatory=$false)]
     [string]$StorageAccountName = "quantumstorage"
 )
@@ -69,12 +69,12 @@ if (-not $azInstalled) {
     Write-Host "  3. Restart PowerShell"
     Write-Host "  4. Run this script again"
     Write-Host ""
-    
+
     $response = Read-Host "Would you like to open the download page now? (yes/no)"
     if ($response -eq "yes") {
         Start-Process "https://aka.ms/installazurecliwindows"
     }
-    
+
     Write-Host ""
     Write-Info "After installing Azure CLI, run this script again:"
     Write-Host "  .\deploy_azure_quantum.ps1" -ForegroundColor White
@@ -100,14 +100,14 @@ try {
     Write-Host "  A browser window will open for authentication..." -ForegroundColor Yellow
     Write-Host "  Please sign in with your Azure credentials" -ForegroundColor Yellow
     Write-Host ""
-    
+
     az login
-    
+
     if ($LASTEXITCODE -ne 0) {
         Write-Error-Custom "Azure login failed"
         exit
     }
-    
+
     Write-Success "Successfully logged in to Azure!"
 }
 
@@ -117,7 +117,7 @@ Write-Step "STEP 3: Selecting Azure Subscription"
 if (-not $SubscriptionId) {
     Write-Info "Fetching your Azure subscriptions..."
     $subscriptions = az account list --query "[].{Name:name, ID:id, State:state}" -o json | ConvertFrom-Json
-    
+
     if ($subscriptions.Count -eq 0) {
         Write-Error-Custom "No Azure subscriptions found"
         Write-Host ""
@@ -127,7 +127,7 @@ if (-not $SubscriptionId) {
         Write-Host ""
         exit
     }
-    
+
     Write-Host ""
     Write-Host "Available Subscriptions:" -ForegroundColor Yellow
     for ($i = 0; $i -lt $subscriptions.Count; $i++) {
@@ -137,7 +137,7 @@ if (-not $SubscriptionId) {
         Write-Host "      State: $($sub.State)" -ForegroundColor Gray
         Write-Host ""
     }
-    
+
     if ($subscriptions.Count -eq 1) {
         Write-Info "Using the only available subscription"
         $SubscriptionId = $subscriptions[0].ID
@@ -167,13 +167,13 @@ $customize = Read-Host "Use default names? (yes/no)"
 if ($customize -eq "no") {
     $ResourceGroupName = Read-Host "Resource Group Name [$ResourceGroupName]"
     if ([string]::IsNullOrWhiteSpace($ResourceGroupName)) { $ResourceGroupName = "rg-quantum-ai" }
-    
+
     $Location = Read-Host "Location [$Location]"
     if ([string]::IsNullOrWhiteSpace($Location)) { $Location = "eastus" }
-    
+
     $WorkspaceName = Read-Host "Workspace Name (must be globally unique) [$WorkspaceName]"
     if ([string]::IsNullOrWhiteSpace($WorkspaceName)) { $WorkspaceName = "quantum-ai-workspace" }
-    
+
     $StorageAccountName = Read-Host "Storage Account Name (lowercase, no hyphens) [$StorageAccountName]"
     if ([string]::IsNullOrWhiteSpace($StorageAccountName)) { $StorageAccountName = "quantumstorage" }
 }
@@ -199,7 +199,7 @@ if ($rgExists -eq "true") {
 } else {
     Write-Info "Creating resource group in $Location..."
     az group create --name $ResourceGroupName --location $Location --output none
-    
+
     if ($LASTEXITCODE -eq 0) {
         Write-Success "Resource group created successfully"
     } else {
@@ -216,12 +216,12 @@ $templatePath = Join-Path $PSScriptRoot "azure\quantum_workspace.bicep"
 
 if (Test-Path $parametersPath) {
     Write-Info "Updating parameters file..."
-    
+
     $parameters = Get-Content $parametersPath -Raw | ConvertFrom-Json
     $parameters.parameters.workspaceName.value = $WorkspaceName
     $parameters.parameters.storageAccountName.value = $StorageAccountName
     $parameters.parameters.location.value = $Location
-    
+
     $parameters | ConvertTo-Json -Depth 10 | Set-Content $parametersPath
     Write-Success "Parameters updated"
 } else {
@@ -292,14 +292,14 @@ $configPath = Join-Path $PSScriptRoot "config\quantum_config.yaml"
 
 if (Test-Path $configPath) {
     Write-Info "Updating quantum_config.yaml..."
-    
+
     $configContent = Get-Content $configPath -Raw
     $configContent = $configContent -replace "subscription_id: ''", "subscription_id: '$SubscriptionId'"
     $configContent = $configContent -replace "resource_group: .*", "resource_group: $ResourceGroupName"
     $configContent = $configContent -replace "workspace_name: .*", "workspace_name: $WorkspaceName"
     $configContent = $configContent -replace "location: .*", "location: $Location"
     $configContent = $configContent -replace "storage_account: .*", "storage_account: $StorageAccountName"
-    
+
     Set-Content $configPath $configContent
     Write-Success "Configuration file updated"
 } else {
@@ -322,14 +322,14 @@ if ($workspace) {
     Write-Host "  Location: $($workspace.location)" -ForegroundColor White
     Write-Host "  Status: $($workspace.provisioningState)" -ForegroundColor Green
     Write-Host ""
-    
+
     # List providers
     Write-Info "Available Quantum Providers:"
     $providers = az quantum workspace show `
         --resource-group $ResourceGroupName `
         --name $WorkspaceName `
         --query "providers[].providerId" -o json | ConvertFrom-Json
-    
+
     foreach ($provider in $providers) {
         Write-Host "  ✓ $provider" -ForegroundColor Green
     }
@@ -396,7 +396,7 @@ if ($runTests -eq "yes") {
     Write-Host ""
     Write-Info "Starting quantum hardware tests..."
     Write-Host ""
-    
+
     # Activate virtual environment and run tests
     $venvPath = Join-Path $PSScriptRoot "venv\Scripts\Activate.ps1"
     if (Test-Path $venvPath) {

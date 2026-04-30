@@ -1,0 +1,8 @@
+*{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,sans-serif;background:#0d1224;color:#eef3ff}
+.hero{padding:2rem 1.25rem 4rem;background:linear-gradient(135deg,#4f46e5,#7c3aed)}
+nav{display:flex;gap:1rem;align-items:center}nav a{color:#fff;text-decoration:none;opacity:.9}
+h1{font-size:clamp(1.8rem,4vw,3rem);margin:2rem 0 .6rem}
+button{border:0;border-radius:10px;padding:.75rem 1rem;font-weight:600;cursor:pointer}
+main{padding:1.25rem;max-width:900px;margin:0 auto}.grid{display:grid;gap:1rem;grid-template-columns:repeat(auto-fit,minmax(180px,1fr))}
+article,section{background:#131a33;border:1px solid #2a3668;border-radius:14px;padding:1rem;margin:1rem 0}
+input{padding:.6rem .7rem;border-radius:8px;border:1px solid #39467c;background:#0f1530;color:#eef3ff}

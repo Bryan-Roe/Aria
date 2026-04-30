@@ -11,8 +11,8 @@ You'll deploy an Azure Quantum workspace and test your optimized quantum classif
 1. **FREE simulators** (unlimited usage)
 2. **Real quantum hardware** (optional, ~$0.36 per test)
 
-**Total time:** 15-20 minutes  
-**Cost:** $0.00 with simulators  
+**Total time:** 15-20 minutes
+**Cost:** $0.00 with simulators
 **Result:** Your quantum AI running on actual quantum computers! 🎉
 
 ---
@@ -64,7 +64,7 @@ cd c:\Users\Bryan\OneDrive\AI\quantum-ai
 
    ```text
    ✗ Azure CLI is not installed
-   
+
    To install Azure CLI:
      1. Download from: https://aka.ms/installazurecliwindows
      2. Run the installer
@@ -449,7 +449,7 @@ Available Quantum Backends:
 ========================================
 
 Bell State Circuit:
-     ┌───┐     
+     ┌───┐
 q_0: ┤ H ├──■──
      └───┘┌─┴─┐
 q_1: ─────┤ X ├
@@ -526,7 +526,7 @@ Optimized Configuration (90% accuracy):
   Learning Rate: 0.1
 
 Quantum Circuit Structure:
-     ┌───┐┌────────┐┌────────┐     ┌───┐┌────────┐┌────────┐     
+     ┌───┐┌────────┐┌────────┐     ┌───┐┌────────┐┌────────┐
 q_0: ┤ H ├┤ Ry(π/4)├┤ Rz(π/3)├──■──┤ H ├┤ Ry(π/2)├┤ Rz(2π/3)├──■──...
      ├───┤├────────┤├────────┤┌─┴─┐├───┤├────────┤├────────┤┌─┴─┐
 q_1: ┤ H ├┤ Ry(π/4)├┤ Rz(π/3)├┤ X ├┤ H ├┤ Ry(π/2)├┤ Rz(2π/3)├┤ X ├...
@@ -835,11 +835,11 @@ python .\src\quantum_classifier.py --use-azure-data
 
 **Congratulations!** You've successfully:
 
-✅ Deployed Azure Quantum infrastructure  
-✅ Connected to real quantum hardware  
-✅ Tested quantum entanglement (Bell state)  
-✅ Ran your optimized 90% accuracy circuit  
-✅ Validated quantum superposition and ML readiness  
+✅ Deployed Azure Quantum infrastructure
+✅ Connected to real quantum hardware
+✅ Tested quantum entanglement (Bell state)
+✅ Ran your optimized 90% accuracy circuit
+✅ Validated quantum superposition and ML readiness
 
 **You're now running quantum machine learning on real quantum computers!**
 

@@ -18,7 +18,7 @@ Tokens → Embedding + Positional Encoding
 ## Quantum Backend Auto-Detection
 
 | Priority | Backend | Requires |
-|----------|---------|---------|
+| -------- | ------- | --------- |
 | 1st | `qiskit.aer` | `pennylane-qiskit` + `qiskit-aer` |
 | 2nd | `default.qubit` | `pennylane` (already in repo) |
 | 3rd | classical MLP | nothing (always available) |
@@ -30,7 +30,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path("quantum-ai/src").resolve()))
-from quantum_code_llm import generate, train
+from api import generate, train
 
 # Train on built-in Python code snippets
 model, tokenizer = train(
@@ -54,6 +54,22 @@ QLCM_EPOCHS=10 QLCM_QUBITS=6 python quantum-ai/examples/quantum_code_llm_demo.py
 QLCM_BACKEND=classical python quantum-ai/examples/quantum_code_llm_demo.py
 ```
 
+## Fast Smoke Check (Local/CI-Friendly)
+
+```bash
+# Fast deterministic path (recommended for CI/local sanity checks)
+python3 quantum-ai/scripts/smoke_quantum_code_llm.py
+
+# Override backend/epochs if needed
+python3 quantum-ai/scripts/smoke_quantum_code_llm.py --backend auto --epochs 1
+```
+
+If dependencies are missing, install minimum runtime packages first:
+
+```bash
+python3 -m pip install -r quantum-ai/requirements-smoke.txt
+```
+
 ## Config Reference
 
 | Parameter | Default | Description |
@@ -73,7 +89,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path("quantum-ai/src").resolve()))
-from quantum_code_llm import generate, train
+from api import generate, train
 
 MY_CODE = [
     "def hello(name):\n    print('Hi ' + name)\n",
@@ -91,7 +107,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path("quantum-ai/src").resolve()))
-from quantum_code_llm import load_checkpoint, save_checkpoint
+from api import load_checkpoint, save_checkpoint
 
 checkpoint = Path("data_out/quantum_code_llm/checkpoint.pt")
 save_checkpoint(model, tok, checkpoint, extra={"run": "quickstart"})

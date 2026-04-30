@@ -613,8 +613,8 @@ Real-time job updates.
 
 ---
 
-**Version**: 3.0  
-**Last Updated**: November 25, 2025  
+**Version**: 3.0
+**Last Updated**: November 25, 2025
 **Contributors**: QAI Development Team
 
 **Happy Training! 🎉🤖📊**

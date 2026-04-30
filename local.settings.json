@@ -4,6 +4,16 @@
     "AzureWebJobsStorage": "UseDevelopmentStorage=true",
     "FUNCTIONS_WORKER_RUNTIME": "python",
     "QAI_DB_CONN": "sqlite:///data_out/qai.db",
-    "QAI_SQL_POOL_SIZE": "10"
+    "QAI_SQL_POOL_SIZE": "10",
+    "OLLAMA_BASE_URL": "http://127.0.0.1:11434/v1",
+    "OLLAMA_MODEL": "tinyllama",
+    "LMSTUDIO_BASE_URL": "http://192.168.1.153:1234/v1",
+    "LMSTUDIO_MODEL": "nvidia/nemotron-3-nano-4b",
+    "CHAT_TEMPERATURE": "0.7",
+    "CHAT_MAX_TOKENS": "2048",
+    "QAI_ENABLE_LOCAL_TTS": "true",
+    "QAI_ENABLE_COSMOS": "false",
+    "ARIA_PORT": "8080",
+    "ARIA_RENDER_MODE": "ue5"
   }
 }

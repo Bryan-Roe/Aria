@@ -18,7 +18,9 @@ _CANONICAL = (
     / "lora_infer_bridge.py"
 )
 
-_spec = importlib.util.spec_from_file_location("_canonical_lora_infer_bridge_root", _CANONICAL)
+_spec = importlib.util.spec_from_file_location(
+    "_canonical_lora_infer_bridge_root", _CANONICAL
+)
 if _spec is None or _spec.loader is None:
     raise ImportError(f"Unable to load canonical bridge: {_CANONICAL}")
 

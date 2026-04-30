@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /
+
+# Private / user-session pages — not useful for crawlers
+Disallow: /Aria/monetization/account.html
+Disallow: /Aria/monetization/checkout.html
+Disallow: /Aria/monetization/my-subscription.html
+Disallow: /Aria/monetization/subscription-success.html
+Disallow: /Aria/monetization/admin_dashboard.html
+
+Sitemap: https://bryan-roe.github.io/Aria/sitemap.xml

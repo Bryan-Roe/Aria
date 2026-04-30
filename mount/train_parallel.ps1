@@ -70,61 +70,61 @@ while ($running) {
     Write-Host "⚡ PARALLEL TRAINING STATUS" -ForegroundColor Cyan
     Write-Host "=" * 70
     Write-Host ""
-    
+
     # Check job statuses
     Write-Host "Job 1 (LoRA Dolly):     " -NoNewline
-    if ($job1.State -eq "Running") { 
-        Write-Host "🟢 RUNNING" -ForegroundColor Green 
-    } elseif ($job1.State -eq "Completed") { 
-        Write-Host "✅ COMPLETED" -ForegroundColor Green 
-    } else { 
-        Write-Host "❌ $($job1.State)" -ForegroundColor Red 
+    if ($job1.State -eq "Running") {
+        Write-Host "🟢 RUNNING" -ForegroundColor Green
+    } elseif ($job1.State -eq "Completed") {
+        Write-Host "✅ COMPLETED" -ForegroundColor Green
+    } else {
+        Write-Host "❌ $($job1.State)" -ForegroundColor Red
     }
-    
+
     Write-Host "Job 2 (Quantum Heart):  " -NoNewline
-    if ($job2.State -eq "Running") { 
-        Write-Host "🟢 RUNNING" -ForegroundColor Green 
-    } elseif ($job2.State -eq "Completed") { 
-        Write-Host "✅ COMPLETED" -ForegroundColor Green 
-    } else { 
-        Write-Host "❌ $($job2.State)" -ForegroundColor Red 
+    if ($job2.State -eq "Running") {
+        Write-Host "🟢 RUNNING" -ForegroundColor Green
+    } elseif ($job2.State -eq "Completed") {
+        Write-Host "✅ COMPLETED" -ForegroundColor Green
+    } else {
+        Write-Host "❌ $($job2.State)" -ForegroundColor Red
     }
-    
+
     Write-Host "Job 3 (LoRA Mixed):     " -NoNewline
-    if ($job3.State -eq "Running") { 
-        Write-Host "🟢 RUNNING" -ForegroundColor Green 
-    } elseif ($job3.State -eq "Completed") { 
-        Write-Host "✅ COMPLETED" -ForegroundColor Green 
-    } else { 
-        Write-Host "❌ $($job3.State)" -ForegroundColor Red 
+    if ($job3.State -eq "Running") {
+        Write-Host "🟢 RUNNING" -ForegroundColor Green
+    } elseif ($job3.State -eq "Completed") {
+        Write-Host "✅ COMPLETED" -ForegroundColor Green
+    } else {
+        Write-Host "❌ $($job3.State)" -ForegroundColor Red
     }
-    
+
     Write-Host ""
     Write-Host "=" * 70
     Write-Host ""
-    
+
     # System resources
     $cpu = Get-Counter '\Processor(_Total)\% Processor Time' -ErrorAction SilentlyContinue
     $mem = Get-Counter '\Memory\% Committed Bytes In Use' -ErrorAction SilentlyContinue
-    
+
     if ($cpu) {
         Write-Host "💻 CPU Usage:  " -NoNewline
         Write-Host "$([math]::Round($cpu.CounterSamples[0].CookedValue, 1))%" -ForegroundColor Yellow
     }
-    
+
     if ($mem) {
         Write-Host "💾 RAM Usage:  " -NoNewline
         Write-Host "$([math]::Round($mem.CounterSamples[0].CookedValue, 1))%" -ForegroundColor Yellow
     }
-    
+
     Write-Host ""
     Write-Host "Press Ctrl+C to stop monitoring (jobs will continue in background)" -ForegroundColor Gray
-    
+
     # Check if all jobs are done
     if ($job1.State -ne "Running" -and $job2.State -ne "Running" -and $job3.State -ne "Running") {
         $running = $false
     }
-    
+
     Start-Sleep -Seconds 5
 }
 

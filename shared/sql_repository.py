@@ -11,6 +11,7 @@ Columns:
 Graceful degradation: If an engine or driver is unavailable, operations return
 fallback values instead of raising.
 """
+
 from __future__ import annotations
 
 import logging
@@ -36,6 +37,7 @@ _SQLITE_CONN: Optional[sqlite3.Connection] = None
 # Helpers (fallback)
 # ----------------------------------------------------------------------------
 
+
 def _sqlite_path_from_url(url: str) -> str:
     """Resolve sqlite database path from SQLAlchemy-style URL.
     Supports file paths (sqlite:///path/to.db) and in-memory (:memory:).
@@ -43,7 +45,7 @@ def _sqlite_path_from_url(url: str) -> str:
     if url.endswith(":memory:"):
         return ":memory:"
     if url.startswith("sqlite:///"):
-        path = url[len("sqlite:///"):]
+        path = url[len("sqlite:///") :]
         return os.path.normpath(path)
     # Default to in-memory if unrecognized format
     return ":memory:"
@@ -64,9 +66,11 @@ def _get_sqlite_conn() -> sqlite3.Connection:
     _SQLITE_CONN = sqlite3.connect(db_path, check_same_thread=False)
     return _SQLITE_CONN
 
+
 # ----------------------------------------------------------------------------
 # Table Creation (idempotent)
 # ----------------------------------------------------------------------------
+
 
 def _ensure_table():
     global _TABLE_CREATED
@@ -86,7 +90,9 @@ def _ensure_table():
             _TABLE_CREATED = True
             return True
         except Exception as e:  # noqa: BLE001
-            logging.warning(f"[sql_repository] sqlite fallback table create failed: {e}")
+            logging.warning(
+                f"[sql_repository] sqlite fallback table create failed: {e}"
+            )
             return False
 
     if not engine:
@@ -127,9 +133,11 @@ def _ensure_table():
         logging.warning(f"[sql_repository] table create failed: {e}")
         return False
 
+
 # ----------------------------------------------------------------------------
 # CRUD Operations
 # ----------------------------------------------------------------------------
+
 
 def put_value(key: str, value: str) -> bool:
     if not _ensure_table():
@@ -157,13 +165,37 @@ def put_value(key: str, value: str) -> bool:
     try:
         with engine.begin() as conn:
             if vendor == "sqlite":
-                conn.execute(text("REPLACE INTO QAI_KeyValue (key_name,value_data,updated_at) VALUES (:key_name,:value_data,:ts)"), {"key_name": key, "value_data": value, "ts": datetime.now(timezone.utc).isoformat()})
+                conn.execute(
+                    text(
+                        "REPLACE INTO QAI_KeyValue (key_name,value_data,updated_at) VALUES (:key_name,:value_data,:ts)"
+                    ),
+                    {
+                        "key_name": key,
+                        "value_data": value,
+                        "ts": datetime.now(timezone.utc).isoformat(),
+                    },
+                )
             elif vendor in {"postgresql", "postgres"}:
-                conn.execute(text("INSERT INTO QAI_KeyValue (key_name,value_data) VALUES (:key_name,:value_data) ON CONFLICT (key_name) DO UPDATE SET value_data=EXCLUDED.value_data, updated_at=CURRENT_TIMESTAMP"), {"key_name": key, "value_data": value})
+                conn.execute(
+                    text(
+                        "INSERT INTO QAI_KeyValue (key_name,value_data) VALUES (:key_name,:value_data) ON CONFLICT (key_name) DO UPDATE SET value_data=EXCLUDED.value_data, updated_at=CURRENT_TIMESTAMP"
+                    ),
+                    {"key_name": key, "value_data": value},
+                )
             elif vendor == "mysql":
-                conn.execute(text("INSERT INTO QAI_KeyValue (key_name,value_data) VALUES (:key_name,:value_data) ON DUPLICATE KEY UPDATE value_data=VALUES(value_data)"), {"key_name": key, "value_data": value})
+                conn.execute(
+                    text(
+                        "INSERT INTO QAI_KeyValue (key_name,value_data) VALUES (:key_name,:value_data) ON DUPLICATE KEY UPDATE value_data=VALUES(value_data)"
+                    ),
+                    {"key_name": key, "value_data": value},
+                )
             else:  # SQL Server
-                conn.execute(text("MERGE dbo.QAI_KeyValue AS tgt USING (SELECT :key_name AS key_name, :value_data AS value_data) AS src ON tgt.key_name=src.key_name WHEN MATCHED THEN UPDATE SET value_data=src.value_data, updated_at=SYSUTCDATETIME() WHEN NOT MATCHED THEN INSERT (key_name,value_data,updated_at) VALUES (src.key_name, src.value_data, SYSUTCDATETIME());"), {"key_name": key, "value_data": value})
+                conn.execute(
+                    text(
+                        "MERGE dbo.QAI_KeyValue AS tgt USING (SELECT :key_name AS key_name, :value_data AS value_data) AS src ON tgt.key_name=src.key_name WHEN MATCHED THEN UPDATE SET value_data=src.value_data, updated_at=SYSUTCDATETIME() WHEN NOT MATCHED THEN INSERT (key_name,value_data,updated_at) VALUES (src.key_name, src.value_data, SYSUTCDATETIME());"
+                    ),
+                    {"key_name": key, "value_data": value},
+                )
         return True
     except Exception as e:  # noqa: BLE001
         logging.warning(f"[sql_repository] put_value failed: {e}")
@@ -178,7 +210,9 @@ def get_value(key: str) -> Optional[str]:
     if not engine and not _SQLALCHEMY_AVAILABLE:
         try:
             conn = _get_sqlite_conn()
-            cur = conn.execute("SELECT value_data FROM QAI_KeyValue WHERE key_name=?", (key,))
+            cur = conn.execute(
+                "SELECT value_data FROM QAI_KeyValue WHERE key_name=?", (key,)
+            )
             row = cur.fetchone()
             return None if not row else row[0]
         except Exception as e:  # noqa: BLE001
@@ -190,7 +224,10 @@ def get_value(key: str) -> Optional[str]:
 
     try:
         with engine.connect() as conn:
-            res = conn.execute(text("SELECT value_data FROM QAI_KeyValue WHERE key_name=:key_name"), {"key_name": key}).fetchone()
+            res = conn.execute(
+                text("SELECT value_data FROM QAI_KeyValue WHERE key_name=:key_name"),
+                {"key_name": key},
+            ).fetchone()
             return None if not res else res[0]
     except Exception as e:  # noqa: BLE001
         logging.warning(f"[sql_repository] get_value failed: {e}")
@@ -209,7 +246,9 @@ def delete_value(key: str) -> bool:
             conn.commit()
             return True
         except Exception as e:  # noqa: BLE001
-            logging.warning(f"[sql_repository] sqlite fallback delete_value failed: {e}")
+            logging.warning(
+                f"[sql_repository] sqlite fallback delete_value failed: {e}"
+            )
             return False
 
     if not engine:
@@ -217,7 +256,10 @@ def delete_value(key: str) -> bool:
 
     try:
         with engine.begin() as conn:
-            conn.execute(text("DELETE FROM QAI_KeyValue WHERE key_name=:key_name"), {"key_name": key})
+            conn.execute(
+                text("DELETE FROM QAI_KeyValue WHERE key_name=:key_name"),
+                {"key_name": key},
+            )
         return True
     except Exception as e:  # noqa: BLE001
         logging.warning(f"[sql_repository] delete_value failed: {e}")
@@ -250,7 +292,9 @@ def list_values(limit: int = 100) -> list[dict]:  # noqa: ANN001
     try:
         with engine.connect() as conn:
             res = conn.execute(
-                text("SELECT key_name, value_data, updated_at FROM QAI_KeyValue ORDER BY updated_at DESC LIMIT :limit"),
+                text(
+                    "SELECT key_name, value_data, updated_at FROM QAI_KeyValue ORDER BY updated_at DESC LIMIT :limit"
+                ),
                 {"limit": limit},
             )
             return [
@@ -260,5 +304,6 @@ def list_values(limit: int = 100) -> list[dict]:  # noqa: ANN001
     except Exception as e:  # noqa: BLE001
         logging.warning(f"[sql_repository] list_values failed: {e}")
         return []
+
 
 __all__ = ["put_value", "get_value", "delete_value", "list_values"]

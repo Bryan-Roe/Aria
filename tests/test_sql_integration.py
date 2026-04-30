@@ -1,11 +1,13 @@
-import os
 import logging
+import os
+
 import pytest
 
 # Check if SQLAlchemy is available for these tests
 
 try:
-    # import sqlalchemy (unused)
+    import sqlalchemy as _sqlalchemy  # noqa: F401
+
     _sqlalchemy_available = True
 except ImportError:
     _sqlalchemy_available = False
@@ -13,16 +15,40 @@ SQLALCHEMY_AVAILABLE = _sqlalchemy_available
 
 pytestmark = pytest.mark.skipif(
     not SQLALCHEMY_AVAILABLE,
-    reason="SQLAlchemy not installed - SQL integration tests require sqlalchemy"
+    reason="SQLAlchemy not installed - SQL integration tests require sqlalchemy",
 )
 
 # Ensure an in-memory SQLite URL for isolated tests
-os.environ.setdefault("QAI_SQL_URL", "sqlite:///:memory:")
+os.environ["QAI_SQL_URL"] = "sqlite:///:memory:"
+
+
+@pytest.fixture(autouse=True)
+def _reset_sql_engine():
+    """Reset cached engine so tests pick up the in-memory URL."""
+    import shared.sql_engine as _eng
+    import shared.sql_repository as _repo
+
+    _eng._ENGINE = None
+    _eng._LAST_URL = None
+    _repo._TABLE_CREATED = False
+    _repo._SQLITE_CONN = None
+    yield
+    _eng._ENGINE = None
+    _eng._LAST_URL = None
+    _repo._TABLE_CREATED = False
+    if _repo._SQLITE_CONN is not None:
+        try:
+            _repo._SQLITE_CONN.close()
+        except Exception:
+            pass
+    _repo._SQLITE_CONN = None
 
 
 def test_sql_engine_health():
-    from shared.sql_engine import sql_health, get_engine
-    from typing import Dict, Any
+    from typing import Any, Dict
+
+    from shared.sql_engine import get_engine, sql_health
+
     info: Dict[str, Any] = sql_health()  # Explicit type annotation for clarity
     assert info["enabled"] is True
     assert info["vendor"] == "sqlite"
@@ -31,7 +57,8 @@ def test_sql_engine_health():
 
 
 def test_sql_repository_crud():
-    from shared.sql_repository import put_value, get_value, delete_value, list_values
+    from shared.sql_repository import (delete_value, get_value, list_values,
+                                       put_value)
 
     assert put_value("alpha", "one") is True
     assert get_value("alpha") == "one"
@@ -50,12 +77,14 @@ def test_sql_repository_crud():
 
 def test_quick_query_select_one():
     from shared.sql_engine import quick_query
+
     rows = quick_query("SELECT 1 AS x")
     assert rows and rows[0]["x"] == 1
 
 
 def test_engine_stats_presence():
     from shared.sql_engine import engine_stats
+
     stats = engine_stats()
     # Enabled for in-memory SQLite (pool still exists but metrics may be None)
     assert stats["enabled"] is True
@@ -71,8 +100,9 @@ def test_slow_query_warning(caplog):
     in all test environments; this test primarily confirms no crash occurs.
     Integration verification can also rely on manual review of function logs.
     """
+
     from shared.sql_engine import quick_query
-    import logging as _log
+
     # Set very low threshold so artificial delay triggers warning
     os.environ["QAI_SQL_SLOW_MS"] = "5"  # 5 ms
     # Attempt to capture logs (may fail if logging not propagated to root)
@@ -86,6 +116,7 @@ def test_slow_query_warning(caplog):
 def test_saturation_detection():
     """Validate pool saturation alert logic with mock pool state."""
     from shared.sql_engine import engine_stats
+
     # Note: In-memory SQLite uses StaticPool or NullPool, which may not expose size/checkedout.
     # This test verifies that engine_stats does not crash when pool metrics are unavailable.
     stats = engine_stats()

@@ -233,7 +233,7 @@ notepad config\quantum_config.yaml
 ## 📝 File Tree
 
 ```text
-quantum-ai/
+ai-projects/quantum-ml/
 ├── 📖 README.md                    ← Main documentation
 ├── 📋 QUICK_REFERENCE.md           ← Quick commands
 ├── 📊 DEMONSTRATION_SUMMARY.md     ← Demo results
@@ -269,7 +269,7 @@ quantum-ai/
 ### Plain-text file tree (no emoji)
 
 ```text
-quantum-ai/
+ai-projects/quantum-ml/
 ├── README.md                    ← Main documentation
 ├── QUICK_REFERENCE.md           ← Quick commands
 ├── DEMONSTRATION_SUMMARY.md     ← Demo results

@@ -232,7 +232,7 @@ python .\talk-to-ai\src\chat_cli.py --provider lora --model data_out\aria_models
 
 # Test commands
 > Move Aria left
-> Make her wave  
+> Make her wave
 > Walk right then jump
 > Go to center and dance
 ```

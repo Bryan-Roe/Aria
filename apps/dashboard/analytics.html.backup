@@ -12,19 +12,19 @@
             padding: 0;
             box-sizing: border-box;
         }
-        
+
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
             color: #eee;
             padding: 20px;
         }
-        
+
         .container {
             max-width: 1800px;
             margin: 0 auto;
         }
-        
+
         header {
             background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
             border-radius: 15px;
@@ -34,21 +34,21 @@
             text-align: center;
             position: relative;
         }
-        
+
         h1 {
             color: #fff;
             font-size: 2.5em;
             margin-bottom: 10px;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
         }
-        
+
         .controls {
             display: flex;
             gap: 15px;
             margin-bottom: 30px;
             flex-wrap: wrap;
         }
-        
+
         .control-group {
             background: rgba(255,255,255,0.1);
             backdrop-filter: blur(10px);
@@ -58,7 +58,7 @@
             flex: 1;
             min-width: 200px;
         }
-        
+
         .control-group label {
             display: block;
             margin-bottom: 8px;
@@ -67,7 +67,7 @@
             text-transform: uppercase;
             letter-spacing: 1px;
         }
-        
+
         select, button {
             width: 100%;
             padding: 10px;
@@ -79,12 +79,12 @@
             cursor: pointer;
             transition: all 0.3s;
         }
-        
+
         select:hover, button:hover {
             background: rgba(255,255,255,0.25);
             border-color: rgba(255,255,255,0.5);
         }
-        
+
         button {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             border: none;
@@ -92,19 +92,19 @@
             text-transform: uppercase;
             letter-spacing: 1px;
         }
-        
+
         button:hover {
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
         }
-        
+
         .charts-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
             gap: 25px;
             margin-bottom: 30px;
         }
-        
+
         .chart-container {
             background: rgba(255,255,255,0.08);
             backdrop-filter: blur(10px);
@@ -114,13 +114,13 @@
             box-shadow: 0 8px 32px rgba(0,0,0,0.2);
             transition: all 0.3s;
         }
-        
+
         .chart-container:hover {
             transform: translateY(-5px);
             box-shadow: 0 12px 40px rgba(0,0,0,0.3);
             border-color: rgba(255,255,255,0.3);
         }
-        
+
         .chart-title {
             color: #fff;
             font-size: 1.3em;
@@ -129,7 +129,7 @@
             align-items: center;
             gap: 10px;
         }
-        
+
         .chart-title .badge {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             padding: 5px 12px;
@@ -139,19 +139,19 @@
             text-transform: uppercase;
             letter-spacing: 1px;
         }
-        
+
         .chart-canvas {
             position: relative;
             height: 350px;
         }
-        
+
         .stats-bar {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 15px;
             margin-bottom: 30px;
         }
-        
+
         .stat-card {
             background: rgba(255,255,255,0.1);
             backdrop-filter: blur(10px);
@@ -161,26 +161,26 @@
             text-align: center;
             transition: all 0.3s;
         }
-        
+
         .stat-card:hover {
             transform: translateY(-3px);
             background: rgba(255,255,255,0.15);
         }
-        
+
         .stat-value {
             font-size: 2.5em;
             font-weight: 700;
             color: #fff;
             margin-bottom: 5px;
         }
-        
+
         .stat-label {
             color: #aaa;
             font-size: 0.9em;
             text-transform: uppercase;
             letter-spacing: 1px;
         }
-        
+
         .live-indicator {
             display: inline-block;
             width: 10px;
@@ -190,25 +190,25 @@
             animation: pulse 2s infinite;
             margin-left: 10px;
         }
-        
+
         @keyframes pulse {
             0%, 100% { opacity: 1; transform: scale(1); }
             50% { opacity: 0.5; transform: scale(1.2); }
         }
-        
+
         .comparison-table {
             width: 100%;
             margin-top: 20px;
             border-collapse: collapse;
         }
-        
+
         .comparison-table th,
         .comparison-table td {
             padding: 12px;
             text-align: left;
             border-bottom: 1px solid rgba(255,255,255,0.1);
         }
-        
+
         .comparison-table th {
             background: rgba(255,255,255,0.1);
             color: #fff;
@@ -217,11 +217,11 @@
             font-size: 0.85em;
             letter-spacing: 1px;
         }
-        
+
         .comparison-table tr:hover {
             background: rgba(255,255,255,0.05);
         }
-        
+
         .metric-good { color: #4ade80; }
         .metric-warning { color: #fbbf24; }
         .metric-bad { color: #f87171; }
@@ -265,7 +265,7 @@
             <p>Real-time training performance & model comparison</p>
             <button id="darkModeToggle" onclick="toggleDarkModeAnalytics()" style="position:absolute;top:20px;right:20px;padding:10px 16px;border:none;border-radius:8px;background:#222;color:#fff;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,0.3)" title="Toggle Dark Mode (D)">🌙</button>
         </header>
-        
+
         <div class="stats-bar">
             <div class="stat-card">
                 <div class="stat-value" id="totalJobs">0</div>
@@ -284,7 +284,7 @@
                 <div class="stat-label">Total Training Time</div>
             </div>
         </div>
-        
+
         <div class="controls">
             <div class="control-group">
                 <label for="modelSelect">Select Model</label>
@@ -310,7 +310,7 @@
                 <button onclick="exportCharts()">📥 Export Charts</button>
             </div>
         </div>
-        
+
         <div class="charts-grid">
             <div class="chart-container">
                 <div class="chart-title">
@@ -322,7 +322,7 @@
                     <canvas id="lossChart"></canvas>
                 </div>
             </div>
-            
+
             <div class="chart-container">
                 <div class="chart-title">
                     GPU Utilization History
@@ -332,7 +332,7 @@
                     <canvas id="gpuChart"></canvas>
                 </div>
             </div>
-            
+
             <div class="chart-container">
                 <div class="chart-title">
                     Model Performance Comparison
@@ -342,7 +342,7 @@
                     <canvas id="performanceChart"></canvas>
                 </div>
             </div>
-            
+
             <div class="chart-container">
                 <div class="chart-title">
                     Training Time Distribution
@@ -353,7 +353,7 @@
                 </div>
             </div>
         </div>
-        
+
         <div class="chart-container">
             <div class="chart-title">Model Comparison Matrix</div>
             <table class="comparison-table" id="comparisonTable">
@@ -373,11 +373,11 @@
             </table>
         </div>
     </div>
-    
+
     <script>
         let charts = {};
         let wsConnection = null;
-        
+
         // Chart.js configuration
         const chartColors = {
             primary: 'rgb(102, 126, 234)',
@@ -387,27 +387,27 @@
             danger: 'rgb(248, 113, 113)',
             info: 'rgb(96, 165, 250)'
         };
-        
+
         // Initialize WebSocket connection
         function initWebSocket() {
             try {
                 wsConnection = new WebSocket('ws://localhost:8765');
-                
+
                 wsConnection.onopen = () => {
                     console.log('WebSocket connected');
                     showToast('Connected to live updates', 'success');
                 };
-                
+
                 wsConnection.onmessage = (event) => {
                     const data = JSON.parse(event.data);
                     handleWebSocketMessage(data);
                 };
-                
+
                 wsConnection.onerror = (error) => {
                     console.error('WebSocket error:', error);
                     showToast('Live updates unavailable, using polling', 'warning');
                 };
-                
+
                 wsConnection.onclose = () => {
                     console.log('WebSocket disconnected');
                     setTimeout(initWebSocket, 5000); // Retry connection
@@ -418,7 +418,7 @@
                 setInterval(refreshData, 30000);
             }
         }
-        
+
         // Track progress notifications to avoid spamming
         const progressNotified = {};
         function handleWebSocketMessage(data) {
@@ -447,7 +447,7 @@
                 } catch (e) { console.warn('Notification bridge error', e); }
             }
         }
-        
+
         // Initialize charts
         function initCharts() {
             // Loss Chart
@@ -478,7 +478,7 @@
                     }
                 }
             });
-            
+
             // GPU Chart
             const gpuCtx = document.getElementById('gpuChart').getContext('2d');
             charts.gpu = new Chart(gpuCtx, {
@@ -502,7 +502,7 @@
                     },
                     scales: {
                         x: { ticks: { color: '#aaa' }, grid: { color: 'rgba(255,255,255,0.1)' } },
-                        y: { 
+                        y: {
                             ticks: { color: '#aaa' },
                             grid: { color: 'rgba(255,255,255,0.1)' },
                             min: 0,
@@ -511,7 +511,7 @@
                     }
                 }
             });
-            
+
             // Performance Chart (Bar)
             const perfCtx = document.getElementById('performanceChart').getContext('2d');
             charts.performance = new Chart(perfCtx, {
@@ -543,7 +543,7 @@
                     }
                 }
             });
-            
+
             // Time Chart (Doughnut)
             const timeCtx = document.getElementById('timeChart').getContext('2d');
             charts.time = new Chart(timeCtx, {
@@ -563,7 +563,7 @@
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        legend: { 
+                        legend: {
                             display: true,
                             position: 'bottom',
                             labels: { color: '#fff' }
@@ -572,27 +572,27 @@
                 }
             });
         }
-        
+
         // Fetch data from API
         async function refreshData() {
             try {
                 const response = await fetch('/api/history');
                 const data = await response.json();
-                
+
                 updateCharts(data);
                 updateStats(data);
                 updateComparisonTable(data);
-                
+
                 showToast('Data refreshed successfully', 'success');
             } catch (error) {
                 console.error('Error fetching data:', error);
                 showToast('Failed to fetch data', 'error');
             }
         }
-        
+
         function updateCharts(data) {
             if (!data.jobs) return;
-            
+
             // Update loss chart
             const lossData = data.jobs.map((j, i) => ({
                 x: i + 1,
@@ -601,7 +601,7 @@
             charts.loss.data.labels = data.jobs.map((_, i) => `Job ${i + 1}`);
             charts.loss.data.datasets[0].data = lossData.map(d => d.y);
             charts.loss.update();
-            
+
             // Update performance chart
             charts.performance.data.labels = data.jobs.slice(0, 5).map(j => j.name || 'Unknown');
             charts.performance.data.datasets[0].data = data.jobs.slice(0, 5).map(j => {
@@ -609,24 +609,24 @@
                 return (1 / loss * 100).toFixed(2);
             });
             charts.performance.update();
-            
+
             // Update time distribution
             const quick = data.jobs.filter(j => (j.duration || 0) < 600).length;
             const medium = data.jobs.filter(j => (j.duration || 0) >= 600 && (j.duration || 0) < 3600).length;
             const long = data.jobs.filter(j => (j.duration || 0) >= 3600).length;
-            
+
             charts.time.data.datasets[0].data = [quick, medium, long];
             charts.time.update();
         }
-        
+
         function updateStats(data) {
             document.getElementById('totalJobs').textContent = data.jobs ? data.jobs.length : 0;
-            
+
             const avgLoss = data.jobs && data.jobs.length > 0
                 ? (data.jobs.reduce((sum, j) => sum + (j.post_loss || j.final_loss || 0), 0) / data.jobs.length).toFixed(3)
                 : '0.00';
             document.getElementById('avgLoss').textContent = avgLoss;
-            
+
             const bestJob = data.jobs && data.jobs.length > 0
                 ? data.jobs.reduce((best, j) => {
                     const loss = j.post_loss || j.final_loss || Infinity;
@@ -635,25 +635,25 @@
                 })
                 : null;
             document.getElementById('bestModel').textContent = bestJob ? (bestJob.name || 'Unknown') : 'N/A';
-            
+
             const totalTime = data.jobs && data.jobs.length > 0
                 ? Math.round(data.jobs.reduce((sum, j) => sum + (j.duration || 0), 0) / 3600)
                 : 0;
             document.getElementById('totalTime').textContent = totalTime + 'h';
         }
-        
+
         function updateComparisonTable(data) {
             const tbody = document.querySelector('#comparisonTable tbody');
             tbody.innerHTML = '';
-            
+
             if (!data.jobs || data.jobs.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#aaa;">No jobs found</td></tr>';
                 return;
             }
-            
+
             data.jobs.forEach(job => {
                 const row = document.createElement('tr');
-                
+
                 const finalLoss = job.post_loss || job.final_loss || 0;
                 const improvement = job.pre_loss && job.post_loss
                     ? ((job.pre_loss - job.post_loss) / job.pre_loss * 100).toFixed(2)
@@ -663,9 +663,9 @@
                     : 'N/A';
                 const rank = job.lora_rank || 'N/A';
                 const score = finalLoss > 0 ? (1 / finalLoss * 100).toFixed(2) : '0';
-                
+
                 const scoreClass = score > 80 ? 'metric-good' : score > 50 ? 'metric-warning' : 'metric-bad';
-                
+
                 row.innerHTML = `
                     <td>${job.name || 'Unknown'}</td>
                     <td>${finalLoss.toFixed(4)}</td>
@@ -674,15 +674,15 @@
                     <td>${rank}</td>
                     <td class="${scoreClass}">${score}</td>
                 `;
-                
+
                 tbody.appendChild(row);
             });
         }
-        
+
         function showToast(message, type) {
             console.log(`[${type.toUpperCase()}] ${message}`);
         }
-        
+
         // Desktop notification system (same as unified.html)
         let notificationsEnabled = false;
         try {
@@ -691,7 +691,7 @@
                 notificationsEnabled = true;
             }
         } catch(e) { console.warn('Notif storage unavailable', e); }
-        
+
         function initNotifications() {
             if ("Notification" in window) {
                 if (Notification.permission === "granted") {
@@ -705,10 +705,10 @@
                 }
             }
         }
-        
+
         function sendDesktopNotification(title, message, icon = '🔔') {
             if (!notificationsEnabled) return;
-            
+
             try {
                 const notification = new Notification(title, {
                     body: message,
@@ -716,7 +716,7 @@
                     requireInteraction: false,
                     tag: 'qai-analytics'
                 });
-                
+
                 notification.onclick = () => {
                     window.focus();
                     notification.close();
@@ -725,10 +725,10 @@
                 console.error("Notification error:", e);
             }
         }
-        
+
         // Initialize notifications on load
         initNotifications();
-        
+
         async function exportCharts() {
             const modal = document.createElement('div');
             modal.style.cssText = `
@@ -744,7 +744,7 @@
                 color: #333;
                 min-width: 400px;
             `;
-            
+
             modal.innerHTML = `
                 <h2 style="margin: 0 0 20px 0; color: #667eea;">📥 Export Options</h2>
                 <div style="margin-bottom: 20px;">
@@ -762,7 +762,7 @@
                     Close
                 </button>
             `;
-            
+
             const overlay = document.createElement('div');
             overlay.style.cssText = `
                 position: fixed;
@@ -773,10 +773,10 @@
                 background: rgba(0,0,0,0.7);
                 z-index: 9999;
             `;
-            
+
             document.body.appendChild(overlay);
             document.body.appendChild(modal);
-            
+
             document.getElementById('closeExportBtn').onclick = () => {
                 modal.remove();
                 overlay.remove();
@@ -786,7 +786,7 @@
                 overlay.remove();
             };
         }
-        
+
         function exportAsPNG() {
             ['lossChart', 'gpuChart', 'performanceChart', 'timeChart'].forEach((chartId, index) => {
                 setTimeout(() => {
@@ -799,11 +799,11 @@
             });
             showToast('Charts exported as PNG!', 'success');
         }
-        
+
         function exportAsCSV() {
             const response = fetch('/api/history').then(res => res.json()).then(data => {
                 let csv = 'Job Name,Final Loss,Pre Loss,Post Loss,Improvement %,Duration (min),LoRA Rank\n';
-                
+
                 data.jobs.forEach(job => {
                     const finalLoss = (job.post_loss || job.final_loss || 0).toFixed(4);
                     const preLoss = (job.pre_loss || 0).toFixed(4);
@@ -813,50 +813,50 @@
                         : 'N/A';
                     const duration = job.duration ? Math.round(job.duration / 60) : 'N/A';
                     const rank = job.lora_rank || 'N/A';
-                    
+
                     csv += `"${job.name || 'Unknown'}",${finalLoss},${preLoss},${postLoss},${improvement},${duration},${rank}\n`;
                 });
-                
+
                 const blob = new Blob([csv], { type: 'text/csv' });
                 const link = document.createElement('a');
                 link.download = `qai_training_data_${new Date().toISOString().split('T')[0]}.csv`;
                 link.href = URL.createObjectURL(blob);
                 link.click();
-                
+
                 showToast('Data exported as CSV!', 'success');
             }).catch(err => {
                 showToast('Export failed: ' + err.message, 'error');
             });
         }
-        
+
         function exportReport() {
             fetch('/api/history').then(res => res.json()).then(data => {
                 let report = `QAI TRAINING ANALYTICS REPORT\n`;
                 report += `Generated: ${new Date().toLocaleString()}\n`;
                 report += `${'='.repeat(60)}\n\n`;
-                
+
                 report += `SUMMARY STATISTICS\n`;
                 report += `${'='.repeat(60)}\n`;
                 report += `Total Jobs: ${data.jobs.length}\n`;
-                
+
                 const avgLoss = data.jobs.length > 0
                     ? (data.jobs.reduce((sum, j) => sum + (j.post_loss || j.final_loss || 0), 0) / data.jobs.length).toFixed(3)
                     : '0.000';
                 report += `Average Final Loss: ${avgLoss}\n`;
-                
+
                 const bestJob = data.jobs.reduce((best, j) => {
                     const loss = j.post_loss || j.final_loss || Infinity;
                     const bestLoss = best.post_loss || best.final_loss || Infinity;
                     return loss < bestLoss ? j : best;
                 }, data.jobs[0] || {});
                 report += `Best Model: ${bestJob.name || 'N/A'}\n`;
-                
+
                 const totalTime = Math.round(data.jobs.reduce((sum, j) => sum + (j.duration || 0), 0) / 3600);
                 report += `Total Training Time: ${totalTime} hours\n\n`;
-                
+
                 report += `DETAILED JOB RESULTS\n`;
                 report += `${'='.repeat(60)}\n\n`;
-                
+
                 data.jobs.forEach((job, index) => {
                     report += `${index + 1}. ${job.name || 'Unknown'}\n`;
                     report += `   Final Loss: ${(job.post_loss || job.final_loss || 0).toFixed(4)}\n`;
@@ -872,13 +872,13 @@
                     }
                     report += `\n`;
                 });
-                
+
                 const blob = new Blob([report], { type: 'text/plain' });
                 const link = document.createElement('a');
                 link.download = `qai_report_${new Date().toISOString().split('T')[0]}.txt`;
                 link.href = URL.createObjectURL(blob);
                 link.click();
-                
+
                 showToast('Report generated!', 'success');
             }).catch(err => {
                 showToast('Report generation failed: ' + err.message, 'error');
@@ -953,13 +953,13 @@
         }
         applyDarkModePreference();
         document.addEventListener('keydown', (e) => { if (e.key.toLowerCase() === 'd') toggleDarkModeAnalytics(); });
-        
+
         // Initialize on load
         window.addEventListener('DOMContentLoaded', () => {
             initCharts();
             initWebSocket();
             refreshData();
-            
+
             // Refresh data every 30 seconds as fallback
             setInterval(refreshData, 30000);
         });

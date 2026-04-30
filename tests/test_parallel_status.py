@@ -15,10 +15,17 @@ def test_parallel_status_structure():
     runs = data["runs"]
     assert data.get("total_runs") == len(runs), "total_runs mismatch"
     for run in runs:
-        assert "jobs" in run and isinstance(run["jobs"], list) and run["jobs"], "run missing jobs list"
+        assert (
+            "jobs" in run and isinstance(run["jobs"], list) and run["jobs"]
+        ), "run missing jobs list"
         for job in run["jobs"]:
             assert job.get("name"), "job name missing"
-            assert job.get("status") in {"succeeded", "failed", "skipped", "error"}, "unexpected job status"
+            assert job.get("status") in {
+                "succeeded",
+                "failed",
+                "skipped",
+                "error",
+            }, "unexpected job status"
         ranking = run.get("job_ranking")
         if ranking:
             # Ranking size should not exceed succeeded jobs
@@ -31,6 +38,14 @@ def test_parallel_status_structure():
                 metric = entry["metric"]
                 if metric == "distinct_diversity":
                     # diversity_avg must equal score
-                    assert entry.get("diversity_avg") == entry.get("score"), "alias score mismatch"
-                if metric == "perplexity_improvement" and "perplexity_improvement" in entry:
-                    assert pytest.approx(entry["perplexity_improvement"], rel=1e-3) == entry["score"], "improvement score mismatch"
+                    assert entry.get("diversity_avg") == entry.get(
+                        "score"
+                    ), "alias score mismatch"
+                if (
+                    metric == "perplexity_improvement"
+                    and "perplexity_improvement" in entry
+                ):
+                    assert (
+                        pytest.approx(entry["perplexity_improvement"], rel=1e-3)
+                        == entry["score"]
+                    ), "improvement score mismatch"

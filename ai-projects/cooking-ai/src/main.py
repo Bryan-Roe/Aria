@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import argparse
 import os
-import sys
 from typing import List
 
 from agents.recipe_agent import RecipeAgent
@@ -22,12 +21,16 @@ def detect_provider(name: str):
             try:
                 return GitHubModelsProvider(api_key=api_key)
             except Exception as e:  # pragma: no cover
-                print(f"[warn] Failed to init GitHubModelsProvider: {e}. Falling back to local.")
+                print(
+                    f"[warn] Failed to init GitHubModelsProvider: {e}. Falling back to local."
+                )
     return LocalProvider()
 
 
 def interactive_loop(agent: RecipeAgent, provider_name: str):
-    print(f"Cooking AI - provider: {provider_name}\nCommands: /search <query>; /extract <text>; /exit")
+    print(
+        f"Cooking AI - provider: {provider_name}\nCommands: /search <query>; /extract <text>; /exit"
+    )
     while True:
         try:
             line = input("cooking> ").strip()
@@ -38,12 +41,12 @@ def interactive_loop(agent: RecipeAgent, provider_name: str):
         if line == "/exit":
             break
         if line.startswith("/search"):
-            query = line[len("/search"):].strip() or "pasta"
+            query = line[len("/search") :].strip() or "pasta"
             data = agent.search_recipes(query=query, filters=[], limit=5)
             print(data)
             continue
         if line.startswith("/extract"):
-            text = line[len("/extract"):].strip() or "2 eggs, 1 cup milk"
+            text = line[len("/extract") :].strip() or "2 eggs, 1 cup milk"
             data = agent.extract_ingredients(text)
             print(data)
             continue
@@ -52,17 +55,23 @@ def interactive_loop(agent: RecipeAgent, provider_name: str):
 
 def run_once(agent: RecipeAgent, args):
     if args.recipe_search:
-        data = agent.search_recipes(query=args.recipe_search, filters=args.filter or [], limit=args.limit)
+        data = agent.search_recipes(
+            query=args.recipe_search, filters=args.filter or [], limit=args.limit
+        )
         print(data)
     elif args.extract:
         data = agent.extract_ingredients(args.extract)
         print(data)
     else:
-        print("No action specified. Use --recipe-search or --extract, or run without --once for interactive mode.")
+        print(
+            "No action specified. Use --recipe-search or --extract, or run without --once for interactive mode."
+        )
 
 
 def build_parser():
-    p = argparse.ArgumentParser(description="Cooking AI - recipe search and ingredient extraction")
+    p = argparse.ArgumentParser(
+        description="Cooking AI - recipe search and ingredient extraction"
+    )
     p.add_argument("--provider", default="local", help="Provider: github or local")
     p.add_argument("--model", help="Model override (GitHub Models only)")
     p.add_argument("--recipe-search", dest="recipe_search", help="Recipe search query")

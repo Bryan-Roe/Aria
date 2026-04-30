@@ -11,19 +11,19 @@ Implements:
 Config schema (YAML):
 jobs:
   - name: heart_quick
-	preset: heart
-	epochs: 1
-	n_qubits: 4
+        preset: heart
+        epochs: 1
+        n_qubits: 4
 """
 
 from __future__ import annotations
-from dataclasses import dataclass, field
 
 import argparse
 import json
 import sys
-from pathlib import Path
+from dataclasses import dataclass, field
 from datetime import datetime
+from pathlib import Path
 from typing import Any, Dict, List
 
 try:
@@ -44,8 +44,10 @@ STATUS_FILE = STATUS_DIR / "status.json"
 DATA_OUT = REPO_ROOT / "data_out"
 
 # Paths for helper scripts used by jobs
-TRAIN_SCRIPT = REPO_ROOT / "quantum-ai" / "train_custom_dataset.py"
-AZURE_SUBMIT_SCRIPT = REPO_ROOT / "quantum-ai" / "deploy_to_azure_quantum.py"
+TRAIN_SCRIPT = REPO_ROOT / "ai-projects" / "quantum-ml" / "train_custom_dataset.py"
+AZURE_SUBMIT_SCRIPT = (
+    REPO_ROOT / "ai-projects" / "quantum-ml" / "deploy_to_azure_quantum.py"
+)
 
 # Known preset datasets
 PRESETS = ("heart", "ionosphere", "sonar", "banknote")
@@ -58,6 +60,7 @@ class QJob:
     Tests expect a minimal set of attributes and stable defaults so this
     class mirrors the structure used across the repo.
     """
+
     name: str
     mode: str = "train_custom_dataset"
     enabled: bool = True
@@ -223,7 +226,11 @@ def validate_job(job: QJob) -> Dict[str, Any]:
             missing.append(str(AZURE_SUBMIT_SCRIPT.name))
 
         # QPU requires explicit cost confirmation
-        if job.azure_backend and ".qpu" in str(job.azure_backend) and not job.azure_confirm_cost:
+        if (
+            job.azure_backend
+            and ".qpu" in str(job.azure_backend)
+            and not job.azure_confirm_cost
+        ):
             missing.append("azure_confirm_cost")
 
     status = "ok" if not missing else "missing"
@@ -300,16 +307,17 @@ def write_status(jobs: List[Dict[str, Any]]) -> None:
 
 
 def main(argv: List[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(
-        description="Quantum AutoRun Orchestrator")
-    parser.add_argument("--config", type=str,
-                        default=str(DEFAULT_CONFIG), help="Path to YAML config")
-    parser.add_argument("--list", action="store_true",
-                        help="List jobs as JSON")
-    parser.add_argument("--dry-run", action="store_true",
-                        help="Validate config and write status.json")
-    parser.add_argument("--job", type=str, default=None,
-                        help="Filter to a specific job by name")
+    parser = argparse.ArgumentParser(description="Quantum AutoRun Orchestrator")
+    parser.add_argument(
+        "--config", type=str, default=str(DEFAULT_CONFIG), help="Path to YAML config"
+    )
+    parser.add_argument("--list", action="store_true", help="List jobs as JSON")
+    parser.add_argument(
+        "--dry-run", action="store_true", help="Validate config and write status.json"
+    )
+    parser.add_argument(
+        "--job", type=str, default=None, help="Filter to a specific job by name"
+    )
     args = parser.parse_args(argv)
 
     cfg_path = Path(args.config)

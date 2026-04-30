@@ -33,7 +33,7 @@ CREATE TABLE [dbo].[DatasetUsage]
     [UsageDate] DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
     [NumSamplesUsed] INT NULL,
     [Notes] NVARCHAR(MAX) NULL,
-    CONSTRAINT FK_DatasetUsage_Dataset FOREIGN KEY ([DatasetId]) 
+    CONSTRAINT FK_DatasetUsage_Dataset FOREIGN KEY ([DatasetId])
         REFERENCES [dbo].[Datasets]([DatasetId]) ON DELETE CASCADE,
     INDEX IX_DatasetUsage_DatasetId NONCLUSTERED ([DatasetId], [UsageDate] DESC),
     INDEX IX_DatasetUsage_UsageType NONCLUSTERED ([UsageType])

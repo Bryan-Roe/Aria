@@ -1,0 +1,1 @@
+document.getElementById('demoBtn')?.addEventListener('click',()=>alert('Quantum demo launched ⚛️'));document.getElementById('contactForm')?.addEventListener('submit',(e)=>{e.preventDefault();const s=document.getElementById('status');if(s)s.textContent='Thanks! We'll reach out soon.';});

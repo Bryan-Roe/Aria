@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -26,7 +27,7 @@
         .hero h1 {
             font-size: 4em;
             margin-bottom: 20px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
         }
 
         .hero p {
@@ -61,17 +62,17 @@
 
         .button-primary:hover {
             transform: translateY(-3px);
-            box-shadow: 0 10px 30px rgba(255,255,255,0.3);
+            box-shadow: 0 10px 30px rgba(255, 255, 255, 0.3);
         }
 
         .button-secondary {
-            background: rgba(255,255,255,0.2);
+            background: rgba(255, 255, 255, 0.2);
             color: white;
             border: 2px solid white;
         }
 
         .button-secondary:hover {
-            background: rgba(255,255,255,0.3);
+            background: rgba(255, 255, 255, 0.3);
         }
 
         .container {
@@ -85,7 +86,7 @@
             border-radius: 20px;
             padding: 40px;
             margin-bottom: 30px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
         }
 
         .section h2 {
@@ -184,7 +185,7 @@
 
         .stat-item {
             padding: 20px;
-            background: rgba(255,255,255,0.2);
+            background: rgba(255, 255, 255, 0.2);
             border-radius: 10px;
         }
 
@@ -253,12 +254,13 @@
         }
     </style>
 </head>
+
 <body>
     <div class="hero">
         <h1>🎭 Aria Platform</h1>
         <p>AI-Powered Platform with Complete Monetization System</p>
         <div class="hero-buttons">
-            <a href="aria_web/index.html" class="button button-primary">👤 Try Aria</a>
+            <a href="../../apps/aria/index.html" class="button button-primary">👤 Try Aria</a>
             <a href="pricing.html" class="button button-secondary">💰 View Pricing</a>
             <a href="my-subscription.html" class="button button-secondary">📊 My Subscription</a>
             <a href="admin_dashboard.html" class="button button-secondary">👑 Admin Dashboard</a>
@@ -335,14 +337,15 @@
         <div class="section">
             <h2>📄 Platform Pages</h2>
             <div class="pages-list">
-                <a href="aria_web/index.html" class="page-link">
+                <a href="../../apps/aria/index.html" class="page-link">
                     <h3>👤 Aria Character</h3>
                     <p>Interactive 3D AI character with natural language commands. The main platform experience.</p>
                 </a>
 
                 <a href="pricing.html" class="page-link">
                     <h3>💰 Pricing Page</h3>
-                    <p>View all subscription tiers and features. Beautiful 3-tier comparison with revenue projections.</p>
+                    <p>View all subscription tiers and features. Beautiful 3-tier comparison with revenue projections.
+                    </p>
                 </a>
 
                 <a href="admin_dashboard.html" class="page-link">
@@ -375,14 +378,14 @@
         <!-- Getting Started Section -->
         <div class="section">
             <h2>🚀 Getting Started</h2>
-            
+
             <div class="quick-links">
                 <h3>Quick Links</h3>
                 <ul>
-                    <li>📖 <a href="QUICK_START_MONETIZATION.md">Quick Start Guide</a></li>
-                    <li>📚 <a href="MONETIZATION_GUIDE.md">Complete Documentation</a></li>
-                    <li>📊 <a href="INCOME_STREAM_SUMMARY.md">Revenue Summary</a></li>
-                    <li>🔧 <a href="#" onclick="alert('Run: python3 setup_monetization.py'); return false;">Setup Script</a></li>
+                    <li>📖 <a href="../../docs/guides/QUICK_START_MONETIZATION.md">Quick Start Guide</a></li>
+                    <li>📚 <a href="../../docs/guides/MONETIZATION_GUIDE.md">Complete Documentation</a></li>
+                    <li>📊 <a href="../../docs/summaries/INCOME_STREAM_SUMMARY.md">Revenue Summary</a></li>
+                    <li>🔧 <a href="#" onclick="showSetupHint(); return false;">Setup Script</a></li>
                 </ul>
             </div>
 
@@ -419,7 +422,8 @@
                     <p>100 chat messages/mo<br>Basic Aria character<br>Perfect for trying out</p>
                 </div>
 
-                <div class="feature-card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                <div class="feature-card"
+                    style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
                     <div class="feature-icon">⭐</div>
                     <h3>Pro Tier</h3>
                     <p><strong>$49/month</strong></p>
@@ -443,16 +447,32 @@
         <p>© 2026 Aria Platform | <a href="https://github.com/Bryan-Roe/Aria" style="color: white;">GitHub</a></p>
     </div>
 
+    <div id="aria-toast"
+        style="position:fixed;bottom:24px;right:24px;background:#333;color:#fff;padding:12px 20px;border-radius:8px;font-size:14px;z-index:9999;opacity:0;transition:opacity 0.3s;pointer-events:none;max-width:340px">
+    </div>
+
     <script>
+        function showToast(msg, type, duration) {
+            var t = document.getElementById('aria-toast');
+            t.textContent = msg;
+            t.style.background = type === 'warn' ? '#b45309' : type === 'ok' ? '#166534' : '#1e293b';
+            t.style.opacity = '1';
+            clearTimeout(t._tid);
+            t._tid = setTimeout(function () { t.style.opacity = '0'; }, duration || 3500);
+        }
+        function showSetupHint() {
+            showToast('Run: python3 setup_monetization.py', 'info', 5000);
+        }
+
         // Add some animation on load
-        window.addEventListener('load', function() {
+        window.addEventListener('load', function () {
             // Fade in sections
             const sections = document.querySelectorAll('.section, .stats-banner');
             sections.forEach((section, index) => {
                 section.style.opacity = '0';
                 section.style.transform = 'translateY(20px)';
                 section.style.transition = 'all 0.5s ease-out';
-                
+
                 setTimeout(() => {
                     section.style.opacity = '1';
                     section.style.transform = 'translateY(0)';
@@ -461,4 +481,5 @@
         });
     </script>
 </body>
+
 </html>

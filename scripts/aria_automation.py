@@ -12,19 +12,19 @@ Comprehensive automation system for Aria AI character platform:
 Usage:
     # Start full automation (server + training + monitoring)
     python scripts/aria_automation.py --mode full
-    
+
     # Server only (no training)
     python scripts/aria_automation.py --mode server
-    
+
     # Training only (no server)
     python scripts/aria_automation.py --mode training
-    
+
     # Single training cycle
     python scripts/aria_automation.py --mode training --once
-    
+
     # Check status
     python scripts/aria_automation.py --status
-    
+
     # Stop all Aria processes
     python scripts/aria_automation.py --stop
 
@@ -39,16 +39,16 @@ Features:
 
 import argparse
 import json
-import os
 import signal
 import subprocess
 import sys
-import time
 import threading
+import time
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Dict, List, Optional, Any
+from typing import Any, Dict, List, Optional
+
 import psutil
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -64,6 +64,7 @@ DATA_OUT.mkdir(parents=True, exist_ok=True)
 @dataclass
 class ProcessInfo:
     """Track running processes"""
+
     name: str
     pid: int
     command: str
@@ -76,6 +77,7 @@ class ProcessInfo:
 @dataclass
 class AriaAutomationStatus:
     """Overall automation status"""
+
     mode: str
     started: str
     uptime_seconds: float = 0
@@ -98,11 +100,11 @@ class AriaAutomation:
         self.start_time = datetime.now()
         self.training_cycles = 0
         self.errors: List[str] = []
-        
+
         # Performance optimization: cache port checks
         self._port_cache: Dict[int, tuple[bool, float]] = {}
         self._port_cache_ttl = 5.0  # Cache port checks for 5 seconds
-        
+
         # Performance optimization: cache process listings
         self._process_cache: Optional[List[psutil.Process]] = None
         self._process_cache_time = 0
@@ -125,7 +127,7 @@ class AriaAutomation:
         # Skip if status hasn't changed and not forced
         if not self._status_dirty and not force:
             return
-        
+
         status = AriaAutomationStatus(
             mode=self.mode,
             started=self.start_time.isoformat(),
@@ -136,12 +138,12 @@ class AriaAutomation:
             last_health_check=datetime.now().isoformat(),
             processes=[vars(p) for p in self.processes.values()],
             training_cycles=self.training_cycles,
-            errors=self.errors[-10:]  # Last 10 errors
+            errors=self.errors[-10:],  # Last 10 errors
         )
 
         with open(STATUS_FILE, "w") as f:
             json.dump(vars(status), f, indent=2)
-        
+
         self._status_dirty = False
 
     def load_pids(self) -> Dict[str, int]:
@@ -176,33 +178,34 @@ class AriaAutomation:
     def _check_port(self, port: int) -> bool:
         """Check if port is in use with caching"""
         import socket
+
         current_time = time.time()
-        
+
         # Check cache
         if port in self._port_cache:
             cached_result, cache_time = self._port_cache[port]
             if current_time - cache_time < self._port_cache_ttl:
                 return cached_result
-        
+
         # Cache miss or expired - check port
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
-            result = sock.connect_ex(('localhost', port)) == 0
-        
+            result = sock.connect_ex(("localhost", port)) == 0
+
         # Update cache
         self._port_cache[port] = (result, current_time)
         return result
-    
+
     def _get_process_list(self) -> List[psutil.Process]:
         """Get cached process listing to avoid expensive psutil.process_iter() calls"""
         current_time = time.time()
-        
+
         # Check cache
         if self._process_cache is not None:
             if current_time - self._process_cache_time < self._process_cache_ttl:
                 return self._process_cache
-        
+
         # Cache miss or expired - get process list
-        self._process_cache = list(psutil.process_iter(['pid', 'name', 'cmdline']))
+        self._process_cache = list(psutil.process_iter(["pid", "name", "cmdline"]))
         self._process_cache_time = current_time
         return self._process_cache
 
@@ -215,22 +218,19 @@ class AriaAutomation:
             print("⚠️  Port 8080 already in use")
             # Try to find existing process using cached process list
             for proc in self._get_process_list():
-            # Try to find existing process (optimized: search keyword once outside loop)
-            for proc in psutil.process_iter(['pid', 'name', 'cmdline']):
                 try:
-                    cmdline = proc.info['cmdline']
+                    cmdline = proc.info["cmdline"]
                     if cmdline:
-                        cmdline_str = ' '.join(cmdline)
-                        if 'server.py' in cmdline_str:
-                            print(
-                                f"ℹ️  Found existing server (PID {proc.info['pid']})")
+                        cmdline_str = " ".join(cmdline)
+                        if "server.py" in cmdline_str:
+                            print(f"ℹ️  Found existing server (PID {proc.info['pid']})")
                             self.processes["aria_server"] = ProcessInfo(
                                 name="aria_server",
-                                pid=proc.info['pid'],
+                                pid=proc.info["pid"],
                                 command="python server.py",
                                 started=datetime.now().isoformat(),
                                 port=8080,
-                                health_url="http://localhost:8080"
+                                health_url="http://localhost:8080",
                             )
                             return True
                 except (psutil.AccessDenied, psutil.NoSuchProcess):
@@ -244,7 +244,7 @@ class AriaAutomation:
                 cwd=ARIA_WEB_DIR,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
-                text=True
+                text=True,
             )
 
             # Wait for server to start with exponential backoff
@@ -252,22 +252,23 @@ class AriaAutomation:
             max_wait = 10  # seconds
             check_interval = 0.1  # Start with 100ms checks
             elapsed = 0
-            
+
             while elapsed < max_wait:
                 if self._check_port(8080):
                     print(
-                        f"✅ Aria server started on http://localhost:8080 (PID {proc.pid})")
+                        f"✅ Aria server started on http://localhost:8080 (PID {proc.pid})"
+                    )
                     self.processes["aria_server"] = ProcessInfo(
                         name="aria_server",
                         pid=proc.pid,
                         command="python server.py",
                         started=datetime.now().isoformat(),
                         port=8080,
-                        health_url="http://localhost:8080"
+                        health_url="http://localhost:8080",
                     )
                     self.save_pids()
                     return True
-                
+
                 # Exponential backoff: 0.1s, 0.2s, 0.4s, 0.8s, then cap at 1s
                 time.sleep(check_interval)
                 elapsed += check_interval
@@ -296,16 +297,14 @@ class AriaAutomation:
         try:
             # Check if func is available
             result = subprocess.run(
-                ["func", "--version"],
-                capture_output=True,
-                text=True,
-                timeout=5
+                ["func", "--version"], capture_output=True, text=True, timeout=5
             )
 
             if result.returncode != 0:
                 print("⚠️  Azure Functions Core Tools not installed")
                 print(
-                    "   Install from: https://docs.microsoft.com/azure/azure-functions/functions-run-local")
+                    "   Install from: https://docs.microsoft.com/azure/azure-functions/functions-run-local"
+                )
                 return False
 
             # Start Functions host
@@ -314,7 +313,7 @@ class AriaAutomation:
                 cwd=REPO_ROOT,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
-                text=True
+                text=True,
             )
 
             # Wait for backend to start
@@ -323,14 +322,15 @@ class AriaAutomation:
                 time.sleep(1)
                 if self._check_port(7071):
                     print(
-                        f"✅ Functions backend started on http://localhost:7071 (PID {proc.pid})")
+                        f"✅ Functions backend started on http://localhost:7071 (PID {proc.pid})"
+                    )
                     self.processes["functions_backend"] = ProcessInfo(
                         name="functions_backend",
                         pid=proc.pid,
                         command="func host start",
                         started=datetime.now().isoformat(),
                         port=7071,
-                        health_url="http://localhost:7071/api/ai/status"
+                        health_url="http://localhost:7071/api/ai/status",
                     )
                     self.save_pids()
                     return True
@@ -358,7 +358,8 @@ class AriaAutomation:
 
             if not script.exists():
                 print(
-                    "⚠️  aria_quick_train.py not found, using automate_aria_movement.py")
+                    "⚠️  aria_quick_train.py not found, using automate_aria_movement.py"
+                )
                 script = REPO_ROOT / "scripts" / "automate_aria_movement.py"
 
             cmd = [sys.executable, str(script)]
@@ -372,7 +373,7 @@ class AriaAutomation:
                 cwd=REPO_ROOT,
                 capture_output=True,
                 text=True,
-                timeout=600  # 10 minute timeout
+                timeout=600,  # 10 minute timeout
             )
 
             if result.returncode == 0:
@@ -402,11 +403,7 @@ class AriaAutomation:
 
     def health_check(self) -> Dict[str, bool]:
         """Check health of all components"""
-        health = {
-            "aria_server": False,
-            "functions_backend": False,
-            "training": False
-        }
+        health = {"aria_server": False, "functions_backend": False, "training": False}
 
         # Check Aria server
         if self._is_process_running("aria_server"):
@@ -451,22 +448,20 @@ class AriaAutomation:
 
     def training_loop(self, interval: int = 1800, once: bool = False):
         """Continuous training loop"""
-        print(
-            f"\n🎓 Starting training loop (interval: {interval}s, once: {once})")
+        print(f"\n🎓 Starting training loop (interval: {interval}s, once: {once})")
 
         while self.running:
             success = self.run_training_cycle(quick=True)
 
             if once:
-                print(
-                    f"\n✅ Single training cycle completed (success: {success})")
+                print(f"\n✅ Single training cycle completed (success: {success})")
                 break
 
             if success:
                 print(f"\n⏳ Waiting {interval}s until next training cycle...")
                 time.sleep(interval)
             else:
-                print(f"\n⚠️  Training failed, waiting 5 minutes before retry...")
+                print("\n⚠️  Training failed, waiting 5 minutes before retry...")
                 time.sleep(300)
 
     def start(self, once: bool = False):
@@ -492,7 +487,7 @@ class AriaAutomation:
             training_thread = threading.Thread(
                 target=self.training_loop,
                 args=(1800, once),  # 30 minute interval
-                daemon=True
+                daemon=True,
             )
             training_thread.start()
 
@@ -552,33 +547,34 @@ class AriaAutomation:
             with open(STATUS_FILE, "r") as f:
                 status = json.load(f)
 
-            print("\n" + "="*80)
+            print("\n" + "=" * 80)
             print("🤖 Aria Automation Status")
-            print("="*80)
+            print("=" * 80)
             print(f"Mode: {status['mode']}")
             print(f"Started: {status['started']}")
-            print(
-                f"Uptime: {timedelta(seconds=int(status['uptime_seconds']))}")
+            print(f"Uptime: {timedelta(seconds=int(status['uptime_seconds']))}")
             print(f"Training Cycles: {status['training_cycles']}")
-            print(f"\nComponents:")
+            print("\nComponents:")
             print(
-                f"  - Aria Server: {'✅ Running' if status['server_running'] else '❌ Stopped'}")
+                f"  - Aria Server: {'✅ Running' if status['server_running'] else '❌ Stopped'}"
+            )
             print(
-                f"  - Functions Backend: {'✅ Running' if status['backend_running'] else '❌ Stopped'}")
+                f"  - Functions Backend: {'✅ Running' if status['backend_running'] else '❌ Stopped'}"
+            )
             print(
-                f"  - Training: {'✅ Active' if status['training_active'] else '❌ Inactive'}")
+                f"  - Training: {'✅ Active' if status['training_active'] else '❌ Inactive'}"
+            )
 
-            if status['errors']:
+            if status["errors"]:
                 print(f"\nRecent Errors ({len(status['errors'])}):")
-                for error in status['errors'][-5:]:
+                for error in status["errors"][-5:]:
                     print(f"  - {error}")
 
             print("\nProcesses:")
-            for proc in status['processes']:
-                print(
-                    f"  - {proc['name']} (PID {proc['pid']}): {proc['status']}")
+            for proc in status["processes"]:
+                print(f"  - {proc['name']} (PID {proc['pid']}): {proc['status']}")
 
-            print("="*80 + "\n")
+            print("=" * 80 + "\n")
 
         except Exception as e:
             print(f"❌ Error reading status: {e}")
@@ -592,41 +588,37 @@ def main():
 Examples:
   # Start full automation (recommended)
   python scripts/aria_automation.py --mode full
-  
+
   # Server only (no training)
   python scripts/aria_automation.py --mode server
-  
+
   # Single training run
   python scripts/aria_automation.py --mode training --once
-  
+
   # Check status
   python scripts/aria_automation.py --status
-  
+
   # Stop all
   python scripts/aria_automation.py --stop
-        """
+        """,
     )
 
     parser.add_argument(
         "--mode",
         choices=["full", "server", "training"],
         default="full",
-        help="Automation mode: full (server+training), server only, or training only"
+        help="Automation mode: full (server+training), server only, or training only",
     )
     parser.add_argument(
         "--once",
         action="store_true",
-        help="Run training once and exit (only applies to training mode)"
+        help="Run training once and exit (only applies to training mode)",
     )
     parser.add_argument(
-        "--status",
-        action="store_true",
-        help="Show current automation status"
+        "--status", action="store_true", help="Show current automation status"
     )
     parser.add_argument(
-        "--stop",
-        action="store_true",
-        help="Stop all Aria automation processes"
+        "--stop", action="store_true", help="Stop all Aria automation processes"
     )
 
     args = parser.parse_args()

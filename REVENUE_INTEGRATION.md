@@ -58,54 +58,67 @@ graph LR
 ### Aria Character Interface (`aria_web/index.html`)
 
 **Added CSS:**
+
 ```css
 /* Navigation Bar */
 .nav-bar {
-    background: rgba(255, 255, 255, 0.95);
-    border-radius: 50px;
-    padding: 10px 20px;
-    /* ... responsive design ... */
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 50px;
+  padding: 10px 20px;
+  /* ... responsive design ... */
 }
 
 /* Subscription Badge */
 .subscription-badge {
-    background: #4caf50;
-    color: white;
-    padding: 5px 12px;
-    border-radius: 15px;
+  background: #4caf50;
+  color: white;
+  padding: 5px 12px;
+  border-radius: 15px;
 }
 
-.subscription-badge.free { background: #9e9e9e; }
-.subscription-badge.pro { background: linear-gradient(135deg, #667eea, #764ba2); }
-.subscription-badge.enterprise { background: linear-gradient(135deg, #ffd700, #ffed4e); }
+.subscription-badge.free {
+  background: #9e9e9e;
+}
+.subscription-badge.pro {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+}
+.subscription-badge.enterprise {
+  background: linear-gradient(135deg, #ffd700, #ffed4e);
+}
 ```
 
 **Added JavaScript:**
+
 ```javascript
 // Fetch and display subscription status dynamically
 async function loadSubscriptionStatus() {
-    const response = await fetch('/api/subscription/status?user_id=demo_user');
-    if (response.ok) {
-        const data = await response.json();
-        // Update badge based on tier
-        badge.textContent = `${data.tier_name} Tier`;
-        badge.className = `subscription-badge ${data.tier.toLowerCase()}`;
-    }
+  const response = await fetch("/api/subscription/status?user_id=demo_user");
+  if (response.ok) {
+    const data = await response.json();
+    // Update badge based on tier
+    badge.textContent = `${data.tier_name} Tier`;
+    badge.className = `subscription-badge ${data.tier.toLowerCase()}`;
+  }
 }
 ```
 
 ### Monetization Hub (`monetization-index.html`)
 
 **Added Hero Button:**
+
 ```html
 <a href="aria_web/index.html" class="button button-primary">👤 Try Aria</a>
 ```
 
 **Added Platform Section:**
+
 ```html
 <a href="aria_web/index.html" class="page-link">
-    <h3>👤 Aria Character</h3>
-    <p>Interactive 3D AI character with natural language commands. The main platform experience.</p>
+  <h3>👤 Aria Character</h3>
+  <p>
+    Interactive 3D AI character with natural language commands. The main
+    platform experience.
+  </p>
 </a>
 ```
 
@@ -113,25 +126,25 @@ async function loadSubscriptionStatus() {
 
 ### Subscription Tiers
 
-| Tier | Price | Target | Revenue |
-|------|-------|--------|---------|
-| **Free** | $0/mo | Unlimited | $0 |
-| **Pro** | $49/mo | 5 users | $245 |
-| **Enterprise** | $199/mo | 10 users | $1,990 |
-| **Total** | - | 15 users | **$2,235/mo** |
+| Tier           | Price   | Target    | Revenue       |
+| -------------- | ------- | --------- | ------------- |
+| **Free**       | $0/mo   | Unlimited | $0            |
+| **Pro**        | $49/mo  | 5 users   | $245          |
+| **Enterprise** | $199/mo | 10 users  | $1,990        |
+| **Total**      | -       | 15 users  | **$2,235/mo** |
 
 **Annual Revenue:** $26,820
 
 ### Feature Gates
 
-| Feature | Free | Pro | Enterprise |
-|---------|------|-----|------------|
-| Chat Messages | 100/mo | 10,000/mo | Unlimited |
-| Aria Character | Basic | Full | Full |
-| Quantum Computing | ❌ | 50 jobs/mo | Unlimited |
-| Model Training | ❌ | 20 hrs/mo | Unlimited |
-| API Access | ❌ | 10K req/mo | Unlimited |
-| Commercial License | ❌ | ✅ | ✅ |
+| Feature            | Free   | Pro        | Enterprise |
+| ------------------ | ------ | ---------- | ---------- |
+| Chat Messages      | 100/mo | 10,000/mo  | Unlimited  |
+| Aria Character     | Basic  | Full       | Full       |
+| Quantum Computing  | ❌     | 50 jobs/mo | Unlimited  |
+| Model Training     | ❌     | 20 hrs/mo  | Unlimited  |
+| API Access         | ❌     | 10K req/mo | Unlimited  |
+| Commercial License | ❌     | ✅         | ✅         |
 
 ## API Integration
 
@@ -142,6 +155,7 @@ GET /api/subscription/status?user_id=demo_user
 ```
 
 **Response:**
+
 ```json
 {
   "user_id": "demo_user",
@@ -165,23 +179,26 @@ GET /api/subscription/status?user_id=demo_user
 ### Local Testing
 
 1. **Start Aria Server:**
+
 ```bash
 cd aria_web
 python server.py
 ```
 
-2. **Start HTTP Server for Monetization Pages:**
+1. **Start HTTP Server for Monetization Pages:**
+
 ```bash
 python -m http.server 8000
 ```
 
-3. **Test Navigation:**
-   - Visit: http://localhost:8080/ (Aria character)
-   - Click "Home" → Should go to monetization hub
-   - Click "Pricing" → Should show pricing page
-   - Click "Upgrade" → Should show pricing page
-   - Visit: http://localhost:8000/monetization-index.html
-   - Click "Try Aria" → Should go to character interface
+1. **Test Navigation:**
+
+- Visit: <http://localhost:8080/> (Aria character)
+- Click "Home" → Should go to monetization hub
+- Click "Pricing" → Should show pricing page
+- Click "Upgrade" → Should show pricing page
+- Visit: <http://localhost:8000/monetization-index.html>
+- Click "Try Aria" → Should go to character interface
 
 ### Visual Verification
 
@@ -201,12 +218,14 @@ python -m http.server 8000
 ## Next Steps
 
 ### Phase 1: Complete ✅
+
 - [x] Integrate navigation into Aria character interface
 - [x] Add subscription badge
 - [x] Connect monetization hub to character interface
 - [x] Document integration
 
 ### Phase 2: Future Enhancements (Optional)
+
 - [ ] Add usage tracking for character interactions
 - [ ] Implement feature gating (e.g., limit free tier to 100 commands/day)
 - [ ] Add upgrade prompts when approaching limits
@@ -214,6 +233,7 @@ python -m http.server 8000
 - [ ] Add analytics tracking (Google Analytics, Mixpanel)
 
 ### Phase 3: Production Deployment (When Ready)
+
 - [ ] Configure Stripe payment processing
 - [ ] Set up webhook handlers for subscription events
 - [ ] Add email notifications for subscription changes
@@ -222,19 +242,20 @@ python -m http.server 8000
 
 ## Resources
 
-- **Complete Guide:** [MONETIZATION_GUIDE.md](MONETIZATION_GUIDE.md)
-- **Quick Start:** [QUICK_START_MONETIZATION.md](QUICK_START_MONETIZATION.md)
-- **Income Summary:** [INCOME_STREAM_SUMMARY.md](INCOME_STREAM_SUMMARY.md)
+- **Complete Guide:** [docs/guides/MONETIZATION_GUIDE.md](docs/guides/MONETIZATION_GUIDE.md)
+- **Quick Start:** [docs/guides/QUICK_START_MONETIZATION.md](docs/guides/QUICK_START_MONETIZATION.md)
+- **Income Summary:** [docs/summaries/INCOME_STREAM_SUMMARY.md](docs/summaries/INCOME_STREAM_SUMMARY.md)
 - **Setup Script:** `python setup_monetization.py`
 
 ## Support
 
 For questions or issues:
+
 - 📖 See documentation above
 - 🐛 Open an issue on GitHub
-- 💬 Contact: support@aria-platform.com
+- 💬 Contact: <mailto:support@aria-platform.com>
 
 ---
 
-**Revenue Stream Status:** ✅ Active - Achieving 111.8% of $2,000 target  
+**Revenue Stream Status:** ✅ Active - Achieving 111.8% of $2,000 target
 **Last Updated:** February 17, 2026

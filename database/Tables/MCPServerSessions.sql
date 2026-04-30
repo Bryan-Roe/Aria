@@ -26,7 +26,7 @@ CREATE TABLE [dbo].[MCPToolCalls]
     [ResultSummary] NVARCHAR(MAX) NULL, -- JSON or text summary
     [ErrorMessage] NVARCHAR(MAX) NULL,
     [Timestamp] DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
-    CONSTRAINT FK_MCPToolCalls_Session FOREIGN KEY ([SessionId]) 
+    CONSTRAINT FK_MCPToolCalls_Session FOREIGN KEY ([SessionId])
         REFERENCES [dbo].[MCPServerSessions]([SessionId]) ON DELETE CASCADE,
     INDEX IX_MCPToolCalls_SessionId NONCLUSTERED ([SessionId], [Timestamp]),
     INDEX IX_MCPToolCalls_ToolName NONCLUSTERED ([ToolName]),

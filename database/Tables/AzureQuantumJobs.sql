@@ -26,7 +26,7 @@ CREATE TABLE [dbo].[AzureQuantumJobs]
     [Metadata] NVARCHAR(MAX) NULL, -- JSON metadata from Azure
     [ErrorMessage] NVARCHAR(MAX) NULL,
     [LocalResultsPath] NVARCHAR(500) NULL, -- Path to local results JSON
-    CONSTRAINT FK_AzureQuantumJobs_LocalRun FOREIGN KEY ([LocalRunId]) 
+    CONSTRAINT FK_AzureQuantumJobs_LocalRun FOREIGN KEY ([LocalRunId])
         REFERENCES [dbo].[QuantumTrainingRuns]([RunId]) ON DELETE SET NULL,
     INDEX IX_AzureQuantumJobs_AzureJobId NONCLUSTERED ([AzureJobId]),
     INDEX IX_AzureQuantumJobs_Provider NONCLUSTERED ([Provider]),

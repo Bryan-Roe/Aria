@@ -7,7 +7,7 @@ I've created a **beautiful, interactive web application** for training and visua
 ## 📁 Files Created
 
 ```
-quantum-ai/
+ai-projects/quantum-ml/
 ├── web_app.py                      # Flask backend with REST API
 ├── start_dashboard.sh              # One-command startup script
 ├── web-requirements.txt            # Python dependencies
@@ -200,14 +200,14 @@ Edit `create_quantum_circuit()` in `web_app.py`:
 ```python
 def create_quantum_circuit(n_qubits, n_layers):
     dev = qml.device('default.qubit', wires=n_qubits)
-    
+
     @qml.qnode(dev, interface='autograd')
     def circuit(inputs, weights):
         # Your custom quantum circuit here
         qml.AmplitudeEmbedding(features=inputs, wires=range(n_qubits))
         # ... custom gates ...
         return [qml.expval(qml.PauliZ(i)) for i in range(n_qubits)]
-    
+
     return circuit
 ```
 
@@ -230,16 +230,16 @@ Built with:
 
 ## 🎉 Success Metrics
 
-✅ Complete web application with 5 HTML/CSS/JS files  
-✅ Flask backend with 8 RESTful API endpoints  
-✅ Real-time visualization with Chart.js  
-✅ Threaded training execution (non-blocking)  
-✅ Session management with thread safety  
-✅ Automatic result persistence (JSON)  
-✅ Training history browser  
-✅ One-command startup script  
-✅ Comprehensive documentation  
-✅ Working demo with test datasets  
+✅ Complete web application with 5 HTML/CSS/JS files
+✅ Flask backend with 8 RESTful API endpoints
+✅ Real-time visualization with Chart.js
+✅ Threaded training execution (non-blocking)
+✅ Session management with thread safety
+✅ Automatic result persistence (JSON)
+✅ Training history browser
+✅ One-command startup script
+✅ Comprehensive documentation
+✅ Working demo with test datasets
 
 ---
 

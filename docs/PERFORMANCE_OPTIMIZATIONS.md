@@ -24,7 +24,7 @@ class Orchestrator:
         self._status_dirty = False
         self._last_status_write = 0
         self._status_write_interval = 2.0
-    
+
     def save_status(self, force: bool = False):
         current_time = time.time()
         if force or (current_time - self._last_status_write >= self._status_write_interval):
@@ -50,12 +50,12 @@ class Orchestrator:
 def _cached_glob(self, path: Path, pattern: str) -> List[Path]:
     cache_key = f"{path}::{pattern}"
     current_time = time.time()
-    
+
     if cache_key in self._glob_cache:
         cache_time = self._glob_cache_time.get(cache_key, 0)
         if current_time - cache_time < self._glob_cache_ttl:
             return self._glob_cache[cache_key]
-    
+
     results = list(path.glob(pattern))
     self._glob_cache[cache_key] = results
     self._glob_cache_time[cache_key] = current_time
@@ -79,7 +79,7 @@ def _get_process_list(self) -> List[psutil.Process]:
     if self._process_cache is not None:
         if current_time - self._process_cache_time < self._process_cache_ttl:
             return self._process_cache
-    
+
     self._process_cache = list(psutil.process_iter(['pid', 'name', 'cmdline']))
     self._process_cache_time = current_time
     return self._process_cache
@@ -118,11 +118,11 @@ while elapsed < max_wait:
 class BatchEvaluator:
     def __init__(self):
         self._results_cache: Dict[str, EvaluationResult] = {}
-    
+
     def process_result(self, result):
         self.results.append(result)
         self._results_cache[result.model_id] = result
-    
+
     def get_model(self, model_id):
         return self._results_cache.get(model_id)  # O(1) instead of O(n)
 ```

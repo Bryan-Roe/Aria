@@ -427,7 +427,7 @@
                         <i class="fas fa-plus-circle"></i>
                         Create New Website
                     </h2>
-                    
+
                     <form id="createWebsiteForm">
                         <div class="form-group">
                             <label for="websiteName">Website Name *</label>
@@ -492,7 +492,7 @@
                         <i class="fas fa-edit"></i>
                         Update Existing Website
                     </h2>
-                    
+
                     <form id="updateWebsiteForm">
                         <div class="form-group">
                             <label for="updateWebsiteName">Website Name *</label>
@@ -529,7 +529,7 @@
                         <i class="fas fa-sync-alt"></i> Refresh
                     </button>
                 </h2>
-                
+
                 <div id="websitesList" class="website-list">
                     <p style="text-align: center; color: #999; padding: 40px;">
                         <i class="fas fa-info-circle" style="font-size: 3em; margin-bottom: 15px; display: block;"></i>
@@ -562,11 +562,11 @@
         // Create website form submission
         document.getElementById('createWebsiteForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            
+
             const name = document.getElementById('websiteName').value.trim();
             const description = document.getElementById('websiteDescription').value.trim();
             const style = document.getElementById('websiteStyle').value;
-            
+
             if (!name || !description) {
                 showStatus('createStatus', 'Please fill in all required fields', 'error');
                 return;
@@ -575,7 +575,7 @@
             const createBtn = document.getElementById('createBtn');
             createBtn.disabled = true;
             createBtn.innerHTML = '<span class="loading"></span> Generating...';
-            
+
             showStatus('createStatus', 'AI is generating your website... This may take 20-30 seconds.', 'info');
 
             try {
@@ -600,7 +600,7 @@
                     features = ['responsive design', 'modern styling'];
                     updateChips();
                     refreshWebsites();
-                    
+
                     // Show preview
                     setTimeout(() => viewWebsite(result.metadata.name), 1000);
                 } else {
@@ -617,7 +617,7 @@
         // Update website form submission
         document.getElementById('updateWebsiteForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            
+
             const name = document.getElementById('updateWebsiteName').value;
             const updateDescription = document.getElementById('updateDescription').value.trim();
             const targetFile = document.getElementById('targetFile').value.trim() || null;
@@ -630,7 +630,7 @@
             const updateBtn = document.getElementById('updateBtn');
             updateBtn.disabled = true;
             updateBtn.innerHTML = '<span class="loading"></span> Updating...';
-            
+
             showStatus('updateStatus', 'AI is updating your website...', 'info');
 
             try {
@@ -650,7 +650,7 @@
                     showStatus('updateStatus', `✅ ${result.message}`, 'success');
                     document.getElementById('updateWebsiteForm').reset();
                     refreshWebsites();
-                    
+
                     // Show updated preview
                     setTimeout(() => viewWebsite(name), 1000);
                 } else {
@@ -669,7 +669,7 @@
                 const response = await fetch('/api/websites');
                 const data = await response.json();
                 websites = data.websites || [];
-                
+
                 // Update dropdown
                 const select = document.getElementById('updateWebsiteName');
                 select.innerHTML = '<option value="">Select a website...</option>';
@@ -679,7 +679,7 @@
                     option.textContent = site.name;
                     select.appendChild(option);
                 });
-                
+
                 // Update list
                 displayWebsites();
             } catch (error) {
@@ -689,7 +689,7 @@
 
         function displayWebsites() {
             const container = document.getElementById('websitesList');
-            
+
             if (websites.length === 0) {
                 container.innerHTML = `
                     <p style="text-align: center; color: #999; padding: 40px;">
@@ -728,12 +728,12 @@
             try {
                 const response = await fetch(`/api/websites/${name}`);
                 const data = await response.json();
-                
+
                 if (data.success) {
                     const site = data.website;
                     const filesContent = site.files_content || {};
                     const fileNames = Object.keys(filesContent);
-                    
+
                     let content = `
                         <p><strong>Description:</strong> ${site.description}</p>
                         <p><strong>Style:</strong> ${site.style}</p>
@@ -751,7 +751,7 @@
                             </div>
                         `).join('')}
                     `;
-                    
+
                     document.getElementById('modalTitle').textContent = `Website: ${name}`;
                     document.getElementById('modalContent').innerHTML = content;
                     document.getElementById('viewModal').style.display = 'block';
@@ -765,7 +765,7 @@
             // Hide all code previews
             document.querySelectorAll('.code-preview').forEach(el => el.style.display = 'none');
             document.querySelectorAll('.file-tab').forEach(el => el.classList.remove('active'));
-            
+
             // Show selected
             document.getElementById(`file-${idx}`).style.display = 'block';
             document.querySelectorAll('.file-tab')[idx].classList.add('active');
@@ -782,7 +782,7 @@
                 });
 
                 const result = await response.json();
-                
+
                 if (result.success) {
                     alert(`✅ ${result.message}`);
                     refreshWebsites();
@@ -797,7 +797,7 @@
         function addPage() {
             const input = document.getElementById('newPage');
             const page = input.value.trim();
-            
+
             if (page && !pages.includes(page)) {
                 pages.push(page);
                 updateChips();
@@ -808,7 +808,7 @@
         function addFeature() {
             const input = document.getElementById('newFeature');
             const feature = input.value.trim();
-            
+
             if (feature && !features.includes(feature)) {
                 features.push(feature);
                 updateChips();
@@ -820,22 +820,22 @@
             const chip = element.parentElement;
             const text = chip.textContent.replace('✕', '').trim();
             const container = chip.parentElement;
-            
+
             if (container.id === 'pagesContainer') {
                 pages = pages.filter(p => p !== text);
             } else if (container.id === 'featuresContainer') {
                 features = features.filter(f => f !== text);
             }
-            
+
             chip.remove();
         }
 
         function updateChips() {
-            document.getElementById('pagesContainer').innerHTML = pages.map(page => 
+            document.getElementById('pagesContainer').innerHTML = pages.map(page =>
                 `<span class="chip">${page} <span class="chip-remove" onclick="removeChip(this)">✕</span></span>`
             ).join('');
-            
-            document.getElementById('featuresContainer').innerHTML = features.map(feature => 
+
+            document.getElementById('featuresContainer').innerHTML = features.map(feature =>
                 `<span class="chip">${feature} <span class="chip-remove" onclick="removeChip(this)">✕</span></span>`
             ).join('');
         }
@@ -845,7 +845,7 @@
             status.textContent = message;
             status.className = `status ${type}`;
             status.style.display = 'block';
-            
+
             if (type === 'success') {
                 setTimeout(() => {
                     status.style.display = 'none';

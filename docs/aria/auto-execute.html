@@ -3,7 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aria Auto-Execute Test</title>
+    <title>Aria Auto-Execute — Multi-Step Action Planner</title>
+    <meta name="description" content="Preview and run multi-step action plans for the Aria character with plan and execute modes.">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://bryan-roe.github.io/Aria/aria/auto-execute.html">
+    <meta name="theme-color" content="#0f9d89">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://bryan-roe.github.io/Aria/aria/auto-execute.html">
+    <meta property="og:title" content="Aria Auto-Execute — Multi-Step Action Planner">
+    <meta property="og:description" content="Preview and run multi-step action plans for the Aria character with plan and execute modes.">
+    <meta property="og:image" content="https://bryan-roe.github.io/Aria/og-image.svg">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Aria Auto-Execute — Multi-Step Action Planner">
+    <meta name="twitter:image" content="https://bryan-roe.github.io/Aria/og-image.svg">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='24' fill='%23122033'/%3E%3Ccircle cx='50' cy='36' r='16' fill='%230f9d89'/%3E%3Cpath d='M24 78c5-14 18-22 26-22s21 8 26 22' stroke='%23f7f2e8' stroke-width='10' stroke-linecap='round' fill='none'/%3E%3C/svg%3E">
     <style>
         * {
             margin: 0;
@@ -262,6 +275,7 @@
             color: #d19a66;
         }
     </style>
+    <link rel="stylesheet" href="../global-upgrade.css">
 </head>
 <body>
     <div class="container">
@@ -269,7 +283,7 @@
             <h1>🤖 Aria Auto-Execute</h1>
             <p>LLM-Powered Automatic Action Generation & Execution</p>
         </div>
-        
+
         <div class="content">
             <div class="examples">
                 <h4>📝 Example Commands (click to use):</h4>
@@ -282,14 +296,14 @@
                     <li onclick="setCommand('Throw the ball toward the right side of the stage')">Throw the ball toward the right side of the stage</li>
                 </ul>
             </div>
-            
+
             <div class="control-panel">
                 <div class="input-group">
                     <label for="command">Command:</label>
-                    <input type="text" id="command" placeholder="Type a natural language command for Aria..." 
+                    <input type="text" id="command" placeholder="Type a natural language command for Aria..."
                            value="Walk to the table and pick up the apple">
                 </div>
-                
+
                 <div class="checkbox-group">
                     <label>
                         <input type="checkbox" id="use-llm" checked>
@@ -300,19 +314,19 @@
                         Show updated state
                     </label>
                 </div>
-                
+
                 <div class="button-group">
                     <button class="btn-plan" onclick="planActions()">📋 Plan Actions Only</button>
                     <button class="btn-execute" onclick="executeActions()">▶️ Execute Actions</button>
                     <button class="btn-clear" onclick="clearResults()">🗑️ Clear</button>
                 </div>
             </div>
-            
+
             <div class="loading" id="loading">
                 <div class="spinner"></div>
                 <p>Processing command...</p>
             </div>
-            
+
             <div class="results" id="results"></div>
         </div>
     </div>
@@ -338,15 +352,18 @@
             const command = document.getElementById('command').value.trim();
             const useLlm = document.getElementById('use-llm').checked;
             const showState = document.getElementById('show-state').checked;
-            
+
             if (!command) {
-                alert('Please enter a command');
+                var el = document.getElementById('command');
+                el.focus();
+                el.placeholder = '⚠️ Please enter a command first...';
+                setTimeout(function() { el.placeholder = 'e.g. Walk left and pick up the ball...'; }, 2000);
                 return;
             }
 
             const loading = document.getElementById('loading');
             const results = document.getElementById('results');
-            
+
             loading.classList.add('active');
             results.innerHTML = '';
 
@@ -402,7 +419,7 @@
                     <div class="section">
                         <h3>🎯 Planned Actions</h3>
                 `;
-                
+
                 data.actions.forEach((action, index) => {
                     html += `
                         <div class="action-card">
@@ -411,7 +428,7 @@
                         </div>
                     `;
                 });
-                
+
                 html += `</div>`;
             }
 
@@ -421,7 +438,7 @@
                     <div class="section">
                         <h3>✅ Execution Results</h3>
                 `;
-                
+
                 data.results.forEach((result, index) => {
                     const status = result.result.status;
                     html += `
@@ -439,7 +456,7 @@
                         </div>
                     `;
                 });
-                
+
                 html += `</div>`;
             }
 
@@ -476,5 +493,7 @@
                 .replace(/\b(\d+)\b/g, '<span class="json-number">$1</span>');
         }
     </script>
+    <script src="../aria-nav.js"></script>
+    <script src="../global-upgrade.js"></script>
 </body>
 </html>

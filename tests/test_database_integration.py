@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import os
 import math
 import sys
 from pathlib import Path
@@ -19,7 +18,9 @@ def test_generate_embedding_hash_fallback(monkeypatch):
     monkeypatch.delenv("AZURE_OPENAI_ENDPOINT", raising=False)
     monkeypatch.delenv("AZURE_OPENAI_EMBEDDING_DEPLOYMENT", raising=False)
     monkeypatch.delenv("OPENAI_API_KEY", raising=False)
-    emb = chat_memory.generate_embedding("Hello world this is a test message for embedding")
+    emb = chat_memory.generate_embedding(
+        "Hello world this is a test message for embedding"
+    )
     assert isinstance(emb, list)
     assert len(emb) == 256  # local hash fallback dimension
     # Normalized

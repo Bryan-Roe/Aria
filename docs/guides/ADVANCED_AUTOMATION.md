@@ -179,16 +179,16 @@ jobs:
       - uses: actions/setup-python@v4
         with:
           python-version: '3.11'
-      
+
       - name: Install dependencies
         run: pip install pyyaml pytest
-      
+
       - name: Validate All Orchestrators
         run: python scripts/orchestrators/ci_orchestrator.py --validate-all
-      
+
       - name: Run Unit Tests
         run: python scripts/orchestrators/ci_orchestrator.py --quick-test
-      
+
       - name: Upload Results
         uses: actions/upload-artifact@v3
         with:

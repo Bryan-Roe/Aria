@@ -18,7 +18,9 @@ _CANONICAL = (
     / "token_utils.py"
 )
 
-_spec = importlib.util.spec_from_file_location("_canonical_token_utils_root", _CANONICAL)
+_spec = importlib.util.spec_from_file_location(
+    "_canonical_token_utils_root", _CANONICAL
+)
 if _spec is None or _spec.loader is None:
     raise ImportError(f"Unable to load canonical token utils: {_CANONICAL}")
 

@@ -13,12 +13,13 @@ Usage:
 Example:
   python .\\quantum-ai\\scripts\\submit_small_stabilizer.py --backend rigetti.sim.qvm --shots 1000
 """
+
 from __future__ import annotations
 
 import argparse
 import json
 import sys
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 import numpy as np
@@ -54,14 +55,30 @@ def compute_entropy(counts: dict[str, int]) -> float:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Submit a small stabilizer circuit to Azure Quantum")
-    parser.add_argument("--backend", type=str, default="rigetti.sim.qvm", help="Backend name (default: rigetti.sim.qvm)")
-    parser.add_argument("--shots", type=int, default=1000, help="Number of shots (default: 1000)")
-    parser.add_argument("--n-qubits", type=int, default=4, help="Number of qubits for GHZ circuit (default: 4)")
+    parser = argparse.ArgumentParser(
+        description="Submit a small stabilizer circuit to Azure Quantum"
+    )
+    parser.add_argument(
+        "--backend",
+        type=str,
+        default="rigetti.sim.qvm",
+        help="Backend name (default: rigetti.sim.qvm)",
+    )
+    parser.add_argument(
+        "--shots", type=int, default=1000, help="Number of shots (default: 1000)"
+    )
+    parser.add_argument(
+        "--n-qubits",
+        type=int,
+        default=4,
+        help="Number of qubits for GHZ circuit (default: 4)",
+    )
     args = parser.parse_args()
 
     cfg = yaml.safe_load(CONFIG_PATH.read_text(encoding="utf-8"))
-    results_dir = (REPO_ROOT / Path(cfg["logging"]["results_dir"]).expanduser()).resolve()
+    results_dir = (
+        REPO_ROOT / Path(cfg["logging"]["results_dir"]).expanduser()
+    ).resolve()
     results_dir.mkdir(parents=True, exist_ok=True)
 
     print("\n=== Azure Quantum Stabilizer Submission ===")
@@ -101,7 +118,9 @@ def main() -> int:
     print(f"\nSubmitting job to {args.backend}...")
     job_name = f"ghz_{args.n_qubits}q_stabilizer_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')}"
     try:
-        job = azure.submit_circuit(qc, backend_name=args.backend, shots=args.shots, job_name=job_name)
+        job = azure.submit_circuit(
+            qc, backend_name=args.backend, shots=args.shots, job_name=job_name
+        )
         print(f"Job submitted: {job.id()}")
         print("Waiting for results...")
         result_data = azure.get_job_results(job)
@@ -149,7 +168,9 @@ def main() -> int:
     out_path.write_text(json.dumps(out, indent=2), encoding="utf-8")
     print(f"\nResults saved to {out_path}")
     print(f"Unique states: {len(counts)} / {2 ** args.n_qubits}")
-    print(f"Entropy: {entropy:.3f} / {max_entropy:.3f} ({(entropy/max_entropy*100 if max_entropy>0 else 0):.1f}%)")
+    print(
+        f"Entropy: {entropy:.3f} / {max_entropy:.3f} ({(entropy/max_entropy*100 if max_entropy>0 else 0):.1f}%)"
+    )
     print("\nTip: Now run the visualizer to see side-by-side comparison:")
     print("  python .\\quantum-ai\\scripts\\visualize_hardware_results.py")
 

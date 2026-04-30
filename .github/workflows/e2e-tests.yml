@@ -18,6 +18,13 @@ on:
   pull_request:
     branches: [ main ]
 
+permissions:
+  contents: read
+
+concurrency:
+  group: e2e-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   integration:
     name: Unit & Integration tests
@@ -26,19 +33,26 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Setup Python
-        uses: actions/setup-python@v4
+        uses: ./.github/actions/setup-python-env
         with:
-          python-version: '3.11'
-      - name: Upgrade pip
-        run: python -m pip install --upgrade pip
-      - name: Install test deps
-        run: python -m pip install pytest requests pytest-asyncio
+          install-requirements: 'false'
+          extra-packages: 'pytest requests pytest-asyncio'
       - name: Start server and run integration tests
         run: |
           python3 aria_web/server.py > /tmp/aria_server.log 2>&1 &
+          READY=0
           for i in $(seq 1 50); do
-            curl -sSf http://127.0.0.1:8080/api/aria/state && break || sleep 0.25
+            if curl -sSf http://127.0.0.1:8080/api/aria/state >/dev/null; then
+              READY=1
+              break
+            fi
+            sleep 0.25
           done
+          if [ "$READY" -ne 1 ]; then
+            echo "Aria server did not become ready in integration job" >&2
+            tail -n 100 /tmp/aria_server.log || true
+            exit 1
+          fi
           pytest -q tests/test_aria_server.py tests/test_object_api_integration.py
 
   e2e_playwright:
@@ -48,21 +62,28 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Setup Python
-        uses: actions/setup-python@v4
+        uses: ./.github/actions/setup-python-env
         with:
-          python-version: '3.11'
-      - name: Upgrade pip
-        run: python -m pip install --upgrade pip
-      - name: Install Playwright & test deps
-        run: |
-          python -m pip install pytest playwright pytest-asyncio requests
-          python -m playwright install chromium
+          install-requirements: 'false'
+          extra-packages: 'pytest playwright pytest-asyncio requests'
+      - name: Install Playwright browsers
+        run: python -m playwright install chromium --with-deps
       - name: Start server and run Playwright tests
         run: |
           python3 aria_web/server.py > /tmp/aria_server.log 2>&1 &
+          READY=0
           for i in $(seq 1 60); do
-            curl -sSf http://127.0.0.1:8080/api/aria/state && break || sleep 0.25
+            if curl -sSf http://127.0.0.1:8080/api/aria/state >/dev/null; then
+              READY=1
+              break
+            fi
+            sleep 0.25
           done
+          if [ "$READY" -ne 1 ]; then
+            echo "Aria server did not become ready in Playwright job" >&2
+            tail -n 100 /tmp/aria_server.log || true
+            exit 1
+          fi
           pytest -q tests/test_ui_playwright.py
 
   containerized_chrome:
@@ -79,9 +100,27 @@ jobs:
           apt-get install -y wget gnupg ca-certificates xz-utils fonts-liberation libgtk-3-0 libxss1 libasound2 libnss3 libatk-bridge2.0-0 libx11-xcb1 libgbm1
       - name: Install Chromium (stable)
         run: |
-          # Use Debian repo for chromium; package name varies, try both
-          apt-get install -y chromium chromium-driver || apt-get install -y chromium-browser || true
-          which chromium || which chromium-browser || true
+          set -e
+          # Use Debian repo for chromium; package name varies by image/repo.
+          if apt-get install -y chromium chromium-driver; then
+            echo "Installed chromium + chromium-driver"
+          elif apt-get install -y chromium-browser; then
+            echo "Installed chromium-browser"
+          else
+            echo "Failed to install Chromium packages" >&2
+            exit 1
+          fi
+
+          # Normalize executable path expected by CHROME_PATH.
+          if command -v chromium >/dev/null 2>&1; then
+            command -v chromium
+          elif command -v chromium-browser >/dev/null 2>&1; then
+            command -v chromium-browser
+            ln -sf "$(command -v chromium-browser)" /usr/bin/chromium
+          else
+            echo "Chromium executable not found after installation" >&2
+            exit 1
+          fi
       - name: Install Python test deps
         run: python -m pip install --upgrade pip && python -m pip install pytest pytest-asyncio pyppeteer requests
       - name: Start server and run pyppeteer tests
@@ -89,7 +128,17 @@ jobs:
           CHROME_PATH: /usr/bin/chromium
         run: |
           python3 aria_web/server.py > /tmp/aria_server.log 2>&1 &
+          READY=0
           for i in $(seq 1 60); do
-            curl -sSf http://127.0.0.1:8080/api/aria/state && break || sleep 0.25
+            if curl -sSf http://127.0.0.1:8080/api/aria/state >/dev/null; then
+              READY=1
+              break
+            fi
+            sleep 0.25
           done
+          if [ "$READY" -ne 1 ]; then
+            echo "Aria server did not become ready in pyppeteer job" >&2
+            tail -n 100 /tmp/aria_server.log || true
+            exit 1
+          fi
           pytest -q tests/test_ui_pyppeteer.py

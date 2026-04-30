@@ -80,7 +80,7 @@ def _get_conn():
                 conn.close()
             except Exception:
                 pass
-    
+
     # Create new connection
     return pyodbc.connect(conn_str, timeout=4)
 
@@ -157,8 +157,8 @@ else:
 
 **Locations**: 6 files across codebase
 - `dashboard/app.py`
-- `quantum-ai/benchmark_all_datasets.py`
-- `quantum-ai/scripts/visualize_hardware_results.py`
+- `ai-projects/quantum-ml/benchmark_all_datasets.py`
+- `ai-projects/quantum-ml/scripts/visualize_hardware_results.py`
 - `scripts/automate_aria_movement.py`
 - `scripts/test_aria_dataset.py`
 
@@ -331,7 +331,7 @@ To monitor the impact of these optimizations:
    ```bash
    # Profile aria web server
    python -m cProfile -o profile.stats aria_web/server.py
-   
+
    # Analyze with snakeviz
    snakeviz profile.stats
    ```

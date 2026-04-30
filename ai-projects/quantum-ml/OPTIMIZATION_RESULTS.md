@@ -1,7 +1,7 @@
 # 🎯 Hyperparameter Optimization Results
 
-**Date:** October 31, 2025  
-**Experiment:** Layer Depth Optimization  
+**Date:** October 31, 2025
+**Experiment:** Layer Depth Optimization
 **Dataset:** Moons (160 training, 40 validation samples)
 
 ---

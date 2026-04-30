@@ -1,7 +1,7 @@
 -- Unified view of all training runs (Quantum + LoRA)
 CREATE VIEW [dbo].[vw_TrainingRunsSummary]
 AS
-SELECT 
+SELECT
     q.RunId,
     'Quantum' AS TrainingType,
     q.JobName,
@@ -20,7 +20,7 @@ FROM [dbo].[QuantumTrainingRuns] q
 
 UNION ALL
 
-SELECT 
+SELECT
     l.RunId,
     'LoRA' AS TrainingType,
     l.JobName,

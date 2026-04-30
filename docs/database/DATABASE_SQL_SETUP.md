@@ -82,7 +82,7 @@ pip install -r requirements.txt
     "overflow": null,
     "recycle": 1800,
     "timeout": 30,
-    "status": "Pool size: ..." 
+    "status": "Pool size: ..."
   }
 }
 ```

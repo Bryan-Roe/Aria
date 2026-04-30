@@ -3,23 +3,24 @@ Email notification system for Aria monetization
 Handles subscription events, usage alerts, and billing notifications
 """
 
+import json
 import logging
 import re
-from typing import Dict, List, Optional, Any
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
-import json
+from typing import Any, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 
 # Pre-compile regex patterns for performance
-_RE_HTML_TAGS = re.compile(r'<[^<]+?>')
-_RE_WHITESPACE = re.compile(r'\s+')
+_RE_HTML_TAGS = re.compile(r"<[^<]+?>")
+_RE_WHITESPACE = re.compile(r"\s+")
 
 
 class EmailTemplate(Enum):
     """Email template types"""
+
     WELCOME = "welcome"
     SUBSCRIPTION_ACTIVATED = "subscription_activated"
     SUBSCRIPTION_CANCELLED = "subscription_cancelled"
@@ -36,35 +37,35 @@ class EmailTemplate(Enum):
 
 class EmailNotificationSystem:
     """Handles email notifications for subscription events"""
-    
+
     def __init__(self, smtp_host: Optional[str] = None, smtp_port: int = 587):
         self.smtp_host = smtp_host or "localhost"
         self.smtp_port = smtp_port
         self.from_email = "noreply@aria-platform.com"
         self.template_dir = Path("templates/emails")
         self.template_dir.mkdir(parents=True, exist_ok=True)
-        
+
         # Store sent emails for testing/demo
         self.sent_emails: List[Dict[str, Any]] = []
         self.notification_log = Path("data_out/notifications/email_log.json")
         self.notification_log.parent.mkdir(parents=True, exist_ok=True)
-    
+
     def send_email(
         self,
         to_email: str,
         subject: str,
         body_html: str,
-        body_text: Optional[str] = None
+        body_text: Optional[str] = None,
     ) -> bool:
         """
         Send an email notification
-        
+
         Args:
             to_email: Recipient email address
             subject: Email subject line
             body_html: HTML email body
             body_text: Plain text email body (optional)
-        
+
         Returns:
             True if sent successfully, False otherwise
         """
@@ -76,40 +77,37 @@ class EmailNotificationSystem:
                 "body_html": body_html,
                 "body_text": body_text or self._strip_html(body_html),
                 "timestamp": datetime.now().isoformat(),
-                "status": "sent"
+                "status": "sent",
             }
-            
+
             # In production, use actual SMTP library
             # import smtplib
             # from email.mime.multipart import MIMEMultipart
             # from email.mime.text import MIMEText
             # ... send via SMTP
-            
+
             # For demo/testing, log the email
             self.sent_emails.append(email_data)
             self._log_notification(email_data)
-            
+
             logger.info(f"Email sent to {to_email}: {subject}")
             return True
-            
+
         except Exception as e:
             logger.error(f"Failed to send email to {to_email}: {str(e)}")
             return False
-    
+
     def send_template_email(
-        self,
-        to_email: str,
-        template: EmailTemplate,
-        context: Dict[str, Any]
+        self, to_email: str, template: EmailTemplate, context: Dict[str, Any]
     ) -> bool:
         """
         Send an email using a template
-        
+
         Args:
             to_email: Recipient email address
             template: Email template to use
             context: Template context variables
-        
+
         Returns:
             True if sent successfully
         """
@@ -117,113 +115,94 @@ class EmailNotificationSystem:
         subject = self._render_template(template_data["subject"], context)
         body_html = self._render_template(template_data["body_html"], context)
         body_text = self._render_template(template_data["body_text"], context)
-        
+
         return self.send_email(to_email, subject, body_html, body_text)
-    
+
     def notify_subscription_activated(
-        self,
-        user_email: str,
-        tier: str,
-        price: float
+        self, user_email: str, tier: str, price: float
     ) -> bool:
         """Notify user that subscription is activated"""
         context = {
             "tier": tier,
             "price": price,
             "date": datetime.now().strftime("%B %d, %Y"),
-            "dashboard_url": "https://aria-platform.com/my-subscription.html"
+            "dashboard_url": "https://aria-platform.com/my-subscription.html",
         }
         return self.send_template_email(
-            user_email,
-            EmailTemplate.SUBSCRIPTION_ACTIVATED,
-            context
+            user_email, EmailTemplate.SUBSCRIPTION_ACTIVATED, context
         )
-    
+
     def notify_usage_warning(
         self,
         user_email: str,
         resource: str,
         percentage: float,
         current: int,
-        limit: int
+        limit: int,
     ) -> bool:
         """Notify user about approaching usage limits"""
         template = (
-            EmailTemplate.USAGE_WARNING_90 if percentage >= 90
+            EmailTemplate.USAGE_WARNING_90
+            if percentage >= 90
             else EmailTemplate.USAGE_WARNING_80
         )
-        
+
         context = {
             "resource": resource,
             "percentage": int(percentage),
             "current": current,
             "limit": limit,
             "remaining": limit - current,
-            "upgrade_url": "https://aria-platform.com/pricing.html"
+            "upgrade_url": "https://aria-platform.com/pricing.html",
         }
-        
+
         return self.send_template_email(user_email, template, context)
-    
+
     def notify_usage_limit_reached(
-        self,
-        user_email: str,
-        resource: str,
-        limit: int
+        self, user_email: str, resource: str, limit: int
     ) -> bool:
         """Notify user that usage limit has been reached"""
         context = {
             "resource": resource,
             "limit": limit,
             "upgrade_url": "https://aria-platform.com/pricing.html",
-            "reset_date": self._get_next_reset_date()
+            "reset_date": self._get_next_reset_date(),
         }
-        
+
         return self.send_template_email(
-            user_email,
-            EmailTemplate.USAGE_LIMIT_REACHED,
-            context
+            user_email, EmailTemplate.USAGE_LIMIT_REACHED, context
         )
-    
+
     def notify_payment_succeeded(
-        self,
-        user_email: str,
-        amount: float,
-        invoice_id: str
+        self, user_email: str, amount: float, invoice_id: str
     ) -> bool:
         """Notify user of successful payment"""
         context = {
             "amount": amount,
             "invoice_id": invoice_id,
             "date": datetime.now().strftime("%B %d, %Y"),
-            "invoice_url": f"https://aria-platform.com/invoices/{invoice_id}"
+            "invoice_url": f"https://aria-platform.com/invoices/{invoice_id}",
         }
-        
+
         return self.send_template_email(
-            user_email,
-            EmailTemplate.PAYMENT_SUCCEEDED,
-            context
+            user_email, EmailTemplate.PAYMENT_SUCCEEDED, context
         )
-    
+
     def notify_payment_failed(
-        self,
-        user_email: str,
-        amount: float,
-        reason: str
+        self, user_email: str, amount: float, reason: str
     ) -> bool:
         """Notify user of failed payment"""
         context = {
             "amount": amount,
             "reason": reason,
             "date": datetime.now().strftime("%B %d, %Y"),
-            "billing_url": "https://aria-platform.com/account.html"
+            "billing_url": "https://aria-platform.com/account.html",
         }
-        
+
         return self.send_template_email(
-            user_email,
-            EmailTemplate.PAYMENT_FAILED,
-            context
+            user_email, EmailTemplate.PAYMENT_FAILED, context
         )
-    
+
     def _get_template(self, template: EmailTemplate) -> Dict[str, str]:
         """Get email template data"""
         templates = {
@@ -240,17 +219,17 @@ class EmailNotificationSystem:
                 """,
                 "body_text": """
                     Welcome to Aria {tier}!
-                    
+
                     Your subscription has been activated successfully.
-                    
+
                     Plan: {tier}
                     Price: ${price}/month
                     Date: {date}
-                    
+
                     View your dashboard: {dashboard_url}
-                    
+
                     Thank you for choosing Aria!
-                """
+                """,
             },
             EmailTemplate.USAGE_WARNING_80: {
                 "subject": "⚠️ Usage Alert: {percentage}% of {resource} limit used",
@@ -263,14 +242,14 @@ class EmailNotificationSystem:
                 """,
                 "body_text": """
                     Usage Alert
-                    
+
                     You've used {percentage}% of your {resource} limit.
-                    
+
                     Current usage: {current} / {limit}
                     Remaining: {remaining}
-                    
+
                     Consider upgrading: {upgrade_url}
-                """
+                """,
             },
             EmailTemplate.USAGE_WARNING_90: {
                 "subject": "🚨 Urgent: {percentage}% of {resource} limit used",
@@ -283,15 +262,15 @@ class EmailNotificationSystem:
                 """,
                 "body_text": """
                     Urgent Usage Alert
-                    
+
                     You've used {percentage}% of your {resource} limit!
-                    
+
                     Current usage: {current} / {limit}
                     Remaining: {remaining}
-                    
+
                     Action needed: Upgrade now to avoid service interruption.
                     {upgrade_url}
-                """
+                """,
             },
             EmailTemplate.USAGE_LIMIT_REACHED: {
                 "subject": "🛑 {resource} limit reached",
@@ -303,13 +282,13 @@ class EmailNotificationSystem:
                 """,
                 "body_text": """
                     Usage Limit Reached
-                    
+
                     You've reached your {resource} limit of {limit}.
-                    
+
                     Your limit will reset on {reset_date}.
-                    
+
                     To continue, upgrade your plan: {upgrade_url}
-                """
+                """,
             },
             EmailTemplate.PAYMENT_SUCCEEDED: {
                 "subject": "✅ Payment Received - Invoice #{invoice_id}",
@@ -323,16 +302,16 @@ class EmailNotificationSystem:
                 """,
                 "body_text": """
                     Payment Successful
-                    
+
                     We've received your payment of ${amount}.
-                    
+
                     Invoice: #{invoice_id}
                     Date: {date}
-                    
+
                     View invoice: {invoice_url}
-                    
+
                     Thank you for your business!
-                """
+                """,
             },
             EmailTemplate.PAYMENT_FAILED: {
                 "subject": "❌ Payment Failed - Action Required",
@@ -345,65 +324,69 @@ class EmailNotificationSystem:
                 """,
                 "body_text": """
                     Payment Failed - Action Required
-                    
+
                     We were unable to process your payment of ${amount}.
-                    
+
                     Reason: {reason}
                     Date: {date}
-                    
+
                     Please update your payment method: {billing_url}
-                """
-            }
+                """,
+            },
         }
-        
-        return templates.get(template, {
-            "subject": "Notification from Aria",
-            "body_html": "<p>Notification</p>",
-            "body_text": "Notification"
-        })
-    
+
+        return templates.get(
+            template,
+            {
+                "subject": "Notification from Aria",
+                "body_html": "<p>Notification</p>",
+                "body_text": "Notification",
+            },
+        )
+
     def _render_template(self, template: str, context: Dict[str, Any]) -> str:
         """Simple template rendering"""
         result = template
         for key, value in context.items():
             result = result.replace(f"{{{key}}}", str(value))
         return result
-    
+
     def _strip_html(self, html: str) -> str:
         """Strip HTML tags for plain text version"""
-        text = _RE_HTML_TAGS.sub('', html)
-        text = _RE_WHITESPACE.sub(' ', text)
+        text = _RE_HTML_TAGS.sub("", html)
+        text = _RE_WHITESPACE.sub(" ", text)
         return text.strip()
-    
+
     def _get_next_reset_date(self) -> str:
         """Get next monthly reset date"""
         from datetime import timedelta
+
         next_month = datetime.now() + timedelta(days=30)
         return next_month.strftime("%B %d, %Y")
-    
+
     def _log_notification(self, email_data: Dict[str, Any]) -> None:
         """Log notification to file"""
         try:
             # Load existing log
             log_data = []
             if self.notification_log.exists():
-                with open(self.notification_log, 'r') as f:
+                with open(self.notification_log, "r") as f:
                     log_data = json.load(f)
-            
+
             # Append new notification
             log_data.append(email_data)
-            
+
             # Keep only last 1000 notifications
             if len(log_data) > 1000:
                 log_data = log_data[-1000:]
-            
+
             # Save log
-            with open(self.notification_log, 'w') as f:
+            with open(self.notification_log, "w") as f:
                 json.dump(log_data, f, indent=2)
-        
+
         except Exception as e:
             logger.error(f"Failed to log notification: {str(e)}")
-    
+
     def get_sent_emails(self, user_email: Optional[str] = None) -> List[Dict[str, Any]]:
         """Get sent emails (for testing/demo)"""
         if user_email:

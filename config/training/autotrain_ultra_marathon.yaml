@@ -6,7 +6,7 @@ version: 1
 
 jobs:
   # ===== EXISTING JOBS (keep for continuity) =====
-  
+
   - name: phi35_mega_synthetic_full
     category: ultra_marathon
     runner: hf
@@ -36,7 +36,7 @@ jobs:
     device: auto
 
   # ===== COMPREHENSIVE ULTRA TRAINING =====
-  
+
   - name: phi35_comprehensive_ultra_10epoch
     category: ultra_marathon
     runner: hf
@@ -66,7 +66,7 @@ jobs:
     device: auto
 
   # ===== DOLLY ULTRA TRAINING =====
-  
+
   - name: phi35_dolly_ultra_full
     category: ultra_marathon
     runner: hf
@@ -96,7 +96,7 @@ jobs:
     device: auto
 
   # ===== MIXED CHAT ULTRA =====
-  
+
   - name: phi35_mixed_ultra_8epoch
     category: ultra_marathon
     runner: hf
@@ -126,7 +126,7 @@ jobs:
     device: auto
 
   # ===== REPOSITORY AUGMENTED ULTRA =====
-  
+
   - name: phi35_repo_ultra_6epoch
     category: ultra_marathon
     runner: hf
@@ -156,7 +156,7 @@ jobs:
     device: auto
 
   # ===== EXTENSIVE HYPERPARAMETER GRID SEARCH =====
-  
+
   # Learning rate variations (Phi-3.5)
   - name: phi35_lr_00005_comprehensive
     category: ultra_hpo
@@ -244,7 +244,7 @@ jobs:
     device: auto
 
   # ===== CROSS-DATASET TRAINING =====
-  
+
   # Train on multiple datasets sequentially
   - name: phi35_mega_then_comprehensive
     category: ultra_multi
@@ -275,7 +275,7 @@ jobs:
     device: auto
 
   # ===== MAXIMUM DEPTH TRAINING =====
-  
+
   # Very long training runs for deep learning
   - name: phi35_comprehensive_max_depth
     category: ultra_deep
@@ -306,7 +306,7 @@ jobs:
     device: auto
 
   # ===== COMBINED OPTIMAL SETTINGS =====
-  
+
   # Best of both models with optimal discovered hyperparameters
   - name: phi35_optimal_combined
     category: ultra_optimal
@@ -337,7 +337,7 @@ jobs:
     device: auto
 
   # ===== MEGA BATCH TRAINING =====
-  
+
   # Maximum samples with careful learning rate
   - name: phi35_mega_batch_all_samples
     category: ultra_mega

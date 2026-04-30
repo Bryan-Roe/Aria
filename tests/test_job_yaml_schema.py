@@ -1,6 +1,7 @@
-import yaml
 from pathlib import Path
+
 import pytest
+import yaml
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 AML_DIR = REPO_ROOT / ".azureml"
@@ -22,4 +23,6 @@ def test_job_yaml_schema_basic():
     env = data["environment"]
     for key in ["image", "conda_file", "name"]:
         assert key in env, f"Environment missing {key}"
-    assert data.get("resources", {}).get("instance_count") == 1, "Instance count should be 1"
+    assert (
+        data.get("resources", {}).get("instance_count") == 1
+    ), "Instance count should be 1"

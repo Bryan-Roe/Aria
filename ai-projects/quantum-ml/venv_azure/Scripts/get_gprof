@@ -53,9 +53,11 @@ if __name__ == "__main__":
     name = getattr(objtype, '__name__', getattr(objtype, '__class__', objtype))
 
     # profile dumping an object
-    import dill
-    import os
     import cProfile
+    import os
+
+    import dill
+
     #name = os.path.splitext(os.path.basename(__file__))[0]
     cProfile.run("dill.dumps(obj)", filename="%s.prof" % name)
     msg = "gprof2dot -f pstats %s %s.prof | dot -Tpng -o %s.call.png" % (args, name, name)

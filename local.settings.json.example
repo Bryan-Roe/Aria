@@ -14,7 +14,20 @@
     "AZURE_OPENAI_DEPLOYMENT": "",
     "OPENAI_API_KEY": "",
 
-    "# Optional local fallback for TTS. Set to ""true"" to allow server-side local synthesis when Azure Speech is not configured": "",
+    "# Optional: Ollama local AI - install from https://ollama.ai and run 'ollama serve'": "",
+    "# Then pull a model: ollama pull llama3.2  (or mistral, codellama, phi3, etc.)": "",
+    "# Leave OLLAMA_BASE_URL blank to use default http://127.0.0.1:11434/v1 (auto-detected)": "",
+    "OLLAMA_BASE_URL": "",
+    "OLLAMA_MODEL": "llama3.2",
+
+    "# Optional: LM Studio local AI - https://lmstudio.ai - enable local server in the app": "",
+    "# Optional: LM Studio token auth (required if your LM Studio server has API authentication enabled)": "",
+    "LM_API_TOKEN": "",
+    "LMSTUDIO_API_KEY": "",
+    "LMSTUDIO_BASE_URL": "",
+    "LMSTUDIO_MODEL": "local-model",
+
+    "# Optional local fallback for TTS. Set to true to allow server-side local synthesis when Azure Speech is not configured": "",
     "QAI_ENABLE_LOCAL_TTS": "true"
   }
 }

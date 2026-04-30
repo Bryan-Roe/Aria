@@ -89,9 +89,9 @@ Best practices:
 - Never select training checkpoints solely on one metric—track multiple to avoid overfitting.
 - For chat datasets, ensure reference = last assistant message; prompt = last user message.
 
-  
+
 ### RAG Pipeline
-  
+
 ```bash
 # Build index
 python scripts\rag_pipeline.py --model data_out\lora_training --docs ..\..\datasets --rebuild-index
@@ -130,9 +130,9 @@ data_out/
 
 ## 💡 Common Patterns
 
-  
+
 ### Pattern 1: Quick Iteration
-  
+
 ```bash
 
 # Test on 64 samples
@@ -141,9 +141,9 @@ python scripts\train_lora.py --dataset data --config lora\lora.yaml --max-train-
 python scripts\auto_eval.py --model data_out\lora_training --dataset test.jsonl --num-samples 10
 ```
 
-  
+
 ### Pattern 2: Production Training
-  
+
 ```bash
 
 # Full quality pipeline
@@ -153,10 +153,10 @@ python scripts\train_lora.py --dataset data --config lora\lora.yaml
 python scripts\auto_eval.py --model data_out\lora_training --dataset test.jsonl --num-samples 500 --metrics perplexity inference_time bleu rouge
 ```
 
-  
+
 ### Pattern 3: RAG Deployment
 
-  
+
 ```bash
 # Train + RAG
 python scripts\train_lora.py --dataset data --config lora\lora.yaml
@@ -164,9 +164,9 @@ python scripts\rag_pipeline.py --model data_out\lora_training --docs ..\..\datas
 python scripts\rag_pipeline.py --model data_out\lora_training --docs ..\..\datasets --interactive
 ```
 
-  
+
 ### Pattern 4: Full Orchestrated Pipeline With Metrics
-  
+
 ```bash
 python scripts\run_pipeline.py \
   --input-dataset ..\..\datasets\chat\dolly\train.jsonl \
@@ -191,7 +191,7 @@ python scripts\run_pipeline.py \
 # For semantic features
 pip install sentence-transformers
 
-# For quality metrics  
+# For quality metrics
 pip install rouge-score sacrebleu
 
 # For quantization

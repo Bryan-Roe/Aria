@@ -20,10 +20,10 @@ paths:
 # Quantum AI Configuration
 quantum:
   enabled: true
-  config_file: ../quantum-ai/config/quantum_config.yaml
+  config_file: ../ai-projects/quantum-ml/config/quantum_config.yaml
   mcp_server_enabled: true
   default_backend: qiskit_aer
-  results_dir: ../quantum-ai/results
+  results_dir: ../ai-projects/quantum-ml/results
 
 # Chat Configuration
 chat:

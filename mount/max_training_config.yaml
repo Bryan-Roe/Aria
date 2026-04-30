@@ -5,34 +5,34 @@ training:
   # Aggressive batch sizes (adjust down if OOM)
   batch_size: 8  # Increase if you have good GPU
   gradient_accumulation_steps: 4  # Effective batch = 8 * 4 = 32
-  
+
   # Use all available CPU cores
   dataloader_num_workers: 8  # Adjust based on your CPU cores
-  
+
   # Memory optimization
   use_fp16: true  # Mixed precision for speed
   gradient_checkpointing: true  # Save memory, slight speed cost
-  
+
   # Training intensity
   max_train_samples: null  # Use full dataset
   max_eval_samples: 500
   epochs: 3
-  
+
   # Learning rate
   learning_rate: 0.0003
   warmup_steps: 500
-  
+
   # Optimizer settings (aggressive)
   adam_beta1: 0.9
   adam_beta2: 0.999
   weight_decay: 0.01
   max_grad_norm: 1.0
-  
+
   # Logging (frequent for monitoring)
   logging_steps: 10
   eval_steps: 100
   save_steps: 500
-  
+
   # LoRA config (larger for more capacity)
   lora_r: 16  # Rank (8-64, higher = more parameters)
   lora_alpha: 32  # Scaling factor
@@ -57,7 +57,7 @@ hardware:
   use_mps: false  # Mac M1/M2
   pin_memory: true
   non_blocking: true
-  
+
 # Output
 output:
   save_dir: ../../data_out/lora_training/max_performance

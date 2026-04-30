@@ -4,7 +4,7 @@ p = LocalProvider()
 prompt = """
 TASK:RECIPE_SEARCH
 Query: vegan pasta
-Filters: 
+Filters:
 Limit: 5
 """
 print(p._handle_search(prompt))

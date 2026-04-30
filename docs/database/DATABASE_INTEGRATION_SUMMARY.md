@@ -190,7 +190,7 @@ curl -X POST http://localhost:7071/api/chat -H "Content-Type: application/json" 
 
 ```sql
 -- Training success rate by dataset
-SELECT DatasetName, AVG(TestAccuracy) AS AvgAccuracy, 
+SELECT DatasetName, AVG(TestAccuracy) AS AvgAccuracy,
        SUM(CASE WHEN Status = 'completed' THEN 1 ELSE 0 END) * 100.0 / COUNT(*) AS SuccessRate
 FROM vw_TrainingRunsSummary
 WHERE TrainingType = 'Quantum'

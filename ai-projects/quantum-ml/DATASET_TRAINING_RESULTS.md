@@ -1,7 +1,7 @@
 # Quantum AI Training Results - Downloaded Datasets
 
-**Date**: October 31, 2025  
-**Models**: Hybrid Quantum-Classical Classifiers (8 qubits, 4 layers)  
+**Date**: October 31, 2025
+**Models**: Hybrid Quantum-Classical Classifiers (8 qubits, 4 layers)
 **Training**: 2 epochs each (quick validation)
 
 ## Summary
@@ -42,7 +42,7 @@ C:\Users\Bryan\OneDrive\AI\quantum-ai\venv\Scripts\python.exe .\quantum-ai\scrip
 
 All training summaries saved to:
 ```
-quantum-ai/results/datasets/
+ai-projects/quantum-ml/results/datasets/
 ├── banknote/training_summary.json
 ├── ionosphere/training_summary.json
 ├── sonar/training_summary.json
@@ -64,7 +64,7 @@ quantum-ai/results/datasets/
 ```
 
 ### 3. Experiment with Quantum Config
-Edit `quantum-ai/config/quantum_config.yaml`:
+Edit `ai-projects/quantum-ml/config/quantum_config.yaml`:
 - Try `n_qubits: 6` or `n_qubits: 10`
 - Test `entanglement: linear` vs `full`
 - Adjust `n_layers: 3` or `n_layers: 5`
@@ -102,9 +102,9 @@ Edit `quantum-ai/config/quantum_config.yaml`:
 
 ## Validation
 
-✅ **All datasets successfully loaded** from `datasets/dataset_index.json`  
-✅ **All models trained** without errors  
-✅ **All results saved** to JSON summaries  
+✅ **All datasets successfully loaded** from `datasets/dataset_index.json`
+✅ **All models trained** without errors
+✅ **All results saved** to JSON summaries
 ✅ **End-to-end workflow verified** from download → train → save
 
 ## Usage Demonstrated
@@ -112,7 +112,7 @@ Edit `quantum-ai/config/quantum_config.yaml`:
 The complete pipeline is now operational:
 1. ✅ Download datasets → `scripts/download_datasets.py`
 2. ✅ Validate datasets → `scripts/validate_datasets.py`
-3. ✅ Train quantum models → `quantum-ai/scripts/train_from_dataset.py`
+3. ✅ Train quantum models → `ai-projects/quantum-ml/scripts/train_from_dataset.py`
 4. ✅ Save/track results → `results/datasets/<name>/`
 
 **Ready for production use with longer training runs!**

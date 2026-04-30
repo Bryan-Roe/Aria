@@ -46,7 +46,7 @@ Quick test configurations accessible from Test Explorer dropdown:
 - **Test Output:** Click any test to see stdout/stderr
 - **Coverage:** Run with coverage profile, then open `htmlcov/index.html`
 - **Filters:** Use Test Explorer search box to find specific tests
-- **Test Status:** 
+- **Test Status:**
   - ✅ = Passed
   - ❌ = Failed
   - ⏭️ = Skipped

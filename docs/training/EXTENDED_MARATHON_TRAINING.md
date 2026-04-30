@@ -1,7 +1,7 @@
 # Extended Marathon Training Session
 # ====================================
 # Multi-hour comprehensive AI training with automatic data generation
-# 
+#
 # Created: 2025-11-25
 # Estimated Runtime: 4-6 hours
 # Expected Output: 13 trained LoRA adapters

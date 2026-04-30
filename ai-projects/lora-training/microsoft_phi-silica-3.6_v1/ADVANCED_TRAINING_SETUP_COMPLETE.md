@@ -243,7 +243,7 @@ python scripts\rag_pipeline.py \
    ```bash
    # Check output directory
    dir data_out\
-   
+
    # View pipeline results
    type data_out\pipeline_results.json
    ```

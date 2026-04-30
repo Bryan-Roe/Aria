@@ -1,10 +1,12 @@
 """JSON parsing, validation, and light repair utilities for Cooking AI."""
+
 from __future__ import annotations
 
 import json
 import re
-from typing import Any, Tuple, Optional
-from jsonschema import validate, ValidationError
+from typing import Optional, Tuple
+
+from jsonschema import ValidationError, validate
 
 # Basic schemas
 RECIPE_SEARCH_SCHEMA = {

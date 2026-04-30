@@ -6,7 +6,7 @@
 ```powershell
 python .\dashboard\serve.py
 ```
-**Hub**: http://localhost:8000/  
+**Hub**: http://localhost:8000/
 **Training Dashboard**: http://localhost:8000/unified.html
 
 ---
@@ -313,8 +313,8 @@ curl http://localhost:7071/api/ai/status | ConvertFrom-Json
 
 ---
 
-**Cheat Sheet Version**: 1.0  
-**Last Updated**: 2025-11-25  
+**Cheat Sheet Version**: 1.0
+**Last Updated**: 2025-11-25
 **Print-Friendly**: Yes (A4/Letter)
 
 ---

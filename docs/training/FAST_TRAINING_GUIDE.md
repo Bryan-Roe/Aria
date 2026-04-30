@@ -159,7 +159,7 @@ Get-Content data_out\parallel_training\<job_name>\*\stdout.log
 ## Next Steps
 
 After fast training completes:
-1. Test models with `talk-to-ai/src/chat_cli.py`
+1. Test models with `ai-projects/chat-cli/src/chat_cli.py`
 2. Deploy best model to Azure Functions
 3. Run evaluation suite for quality metrics
 4. If quality insufficient, run focused or full training

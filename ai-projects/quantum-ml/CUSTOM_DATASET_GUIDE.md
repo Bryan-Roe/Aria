@@ -1,6 +1,6 @@
 # 📊 Training Quantum AI on Your Custom Dataset - Complete Guide
 
-**Quick Start Guide for Custom Data**  
+**Quick Start Guide for Custom Data**
 **Date:** October 31, 2025
 
 ---
@@ -106,7 +106,7 @@ print(f"Classes: {np.unique(y)}")
 
 # Split into train/validation
 X_train, X_val, y_train, y_val = train_test_split(
-    X, y, 
+    X, y,
     test_size=0.2,
     random_state=42,
     stratify=y  # Keeps class balance
@@ -126,11 +126,11 @@ if n_features < n_qubits:
     # Pad with zeros
     padding = np.zeros((X_train.shape[0], n_qubits - n_features))
     X_train = np.hstack([X_train, padding])
-    
+
     padding_val = np.zeros((X_val.shape[0], n_qubits - n_features))
     X_val = np.hstack([X_val, padding_val])
     print(f"Padded features from {n_features} to {n_qubits}")
-    
+
 elif n_features > n_qubits:
     # Use PCA to reduce
     from sklearn.decomposition import PCA
@@ -194,15 +194,15 @@ def predict_new_data(new_X, model, scaler):
     """Predict on new unseen data"""
     # Preprocess
     new_X_scaled = scaler.transform(new_X)
-    
+
     # Pad/reduce if needed
     if new_X_scaled.shape[1] < n_qubits:
         padding = np.zeros((new_X_scaled.shape[0], n_qubits - new_X_scaled.shape[1]))
         new_X_scaled = np.hstack([new_X_scaled, padding])
-    
+
     # Convert to tensor
     new_X_tensor = torch.FloatTensor(new_X_scaled)
-    
+
     # Predict
     model.eval()
     with torch.no_grad():
@@ -211,7 +211,7 @@ def predict_new_data(new_X, model, scaler):
             predictions = (predictions > 0.5).float()
         else:
             predictions = (predictions > 0.5).float()
-    
+
     return predictions.numpy()
 
 # Example: Predict on validation set

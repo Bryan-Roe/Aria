@@ -1,13 +1,13 @@
 """Integration tests for Quantum AutoRun orchestrator."""
+
 import json
 import subprocess
 from pathlib import Path
 
 import pytest
 
-
 REPO_ROOT = Path(__file__).resolve().parents[1]
-Q_SCRIPT = REPO_ROOT / "scripts" / "evaluation" / "quantum_autorun.py"
+Q_SCRIPT = REPO_ROOT / "scripts" / "quantum_autorun.py"
 
 
 @pytest.fixture
@@ -29,16 +29,18 @@ jobs:
 class TestCLI:
     def test_help(self):
         import sys
-        proc = subprocess.run([sys.executable, str(
-            Q_SCRIPT), "--help"], capture_output=True, text=True)
+
+        proc = subprocess.run(
+            [sys.executable, str(Q_SCRIPT), "--help"], capture_output=True, text=True
+        )
         assert proc.returncode == 0
         assert "Quantum AutoRun" in proc.stdout or "usage" in proc.stdout.lower()
 
     def test_list(self, sample_qconfig):
         import sys
+
         proc = subprocess.run(
-            [sys.executable, str(Q_SCRIPT), "--config",
-             str(sample_qconfig), "--list"],
+            [sys.executable, str(Q_SCRIPT), "--config", str(sample_qconfig), "--list"],
             capture_output=True,
             text=True,
             cwd=str(REPO_ROOT),
@@ -52,9 +54,15 @@ class TestCLI:
 class TestDryRun:
     def test_dry_run_validates(self, sample_qconfig):
         import sys
+
         proc = subprocess.run(
-            [sys.executable, str(Q_SCRIPT), "--config",
-             str(sample_qconfig), "--dry-run"],
+            [
+                sys.executable,
+                str(Q_SCRIPT),
+                "--config",
+                str(sample_qconfig),
+                "--dry-run",
+            ],
             capture_output=True,
             text=True,
             cwd=str(REPO_ROOT),
@@ -78,6 +86,7 @@ class TestDryRun:
 """
             )
         import sys
+
         proc = subprocess.run(
             [
                 sys.executable,
@@ -98,6 +107,7 @@ class TestDryRun:
 
     def test_nonexistent_job_fails(self, sample_qconfig):
         import sys
+
         proc = subprocess.run(
             [
                 sys.executable,

@@ -31,7 +31,7 @@ All four requested tasks have been successfully completed! Your Quantum AI syste
 **Average Accuracy: 88.10%**
 
 **Files Modified:**
-- `quantum-ai/benchmark_all_datasets.py` - Enhanced preprocessing
+- `ai-projects/quantum-ml/benchmark_all_datasets.py` - Enhanced preprocessing
 
 **Note:** Heart disease was previously trained separately with **95.08% accuracy** (50 epochs) and **91.80% accuracy** (10 epochs). The benchmark script improvements ensure it will work in automated runs.
 
@@ -78,8 +78,8 @@ python deploy_banknote_to_azure.py
 ```
 
 **Files Created:**
-- `quantum-ai/deploy_banknote_to_azure.py` - Azure deployment script
-- `quantum-ai/results/azure_deployment_report.json` - Execution report (generated on run)
+- `ai-projects/quantum-ml/deploy_banknote_to_azure.py` - Azure deployment script
+- `ai-projects/quantum-ml/results/azure_deployment_report.json` - Execution report (generated on run)
 
 **Prerequisites:**
 ```bash
@@ -128,15 +128,15 @@ Current gaps vs classical baselines:
 Check progress:
 ```bash
 # View live output
-cat quantum-ai/results/hpo_optimization_report.json
+cat ai-projects/quantum-ml/results/hpo_optimization_report.json
 
 # Monitor terminal
 # (Currently running - will take 1-2 hours for 72 configs × 50 epochs max)
 ```
 
 **Files:**
-- `quantum-ai/hyperparameter_optimization.py` - HPO script (running)
-- `quantum-ai/results/hpo_optimization_report.json` - Results (generated on completion)
+- `ai-projects/quantum-ml/hyperparameter_optimization.py` - HPO script (running)
+- `ai-projects/quantum-ml/results/hpo_optimization_report.json` - Results (generated on completion)
 
 ---
 
@@ -144,7 +144,7 @@ cat quantum-ai/results/hpo_optimization_report.json
 
 ### What Was Done
 
-✅ **Created complete production-ready deployment package** in `quantum-ai/production/`
+✅ **Created complete production-ready deployment package** in `ai-projects/quantum-ml/production/`
 
 A fully functional REST API with comprehensive documentation, Docker support, and test suite.
 
@@ -228,7 +228,7 @@ Model architecture and performance metrics.
 
 ```bash
 # Navigate to production directory
-cd quantum-ai/production
+cd ai-projects/quantum-ml/production
 
 # Install dependencies
 pip install -r requirements.txt
@@ -336,17 +336,17 @@ curl -X POST http://localhost:8080/api/predict \
 ### Files Created/Modified
 
 **New Files (11):**
-1. `quantum-ai/deploy_banknote_to_azure.py`
-2. `quantum-ai/production/banknote_api.py`
-3. `quantum-ai/production/README.md`
-4. `quantum-ai/production/requirements.txt`
-5. `quantum-ai/production/Dockerfile`
-6. `quantum-ai/production/docker-compose.yml`
-7. `quantum-ai/production/test_api.py`
+1. `ai-projects/quantum-ml/deploy_banknote_to_azure.py`
+2. `ai-projects/quantum-ml/production/banknote_api.py`
+3. `ai-projects/quantum-ml/production/README.md`
+4. `ai-projects/quantum-ml/production/requirements.txt`
+5. `ai-projects/quantum-ml/production/Dockerfile`
+6. `ai-projects/quantum-ml/production/docker-compose.yml`
+7. `ai-projects/quantum-ml/production/test_api.py`
 8. This summary document
 
 **Modified Files (1):**
-1. `quantum-ai/benchmark_all_datasets.py` (fixed preprocessing)
+1. `ai-projects/quantum-ml/benchmark_all_datasets.py` (fixed preprocessing)
 
 ---
 
@@ -357,12 +357,12 @@ curl -X POST http://localhost:8080/api/predict \
 1. **Monitor Hyperparameter Optimization**
    ```bash
    # Check if HPO completed
-   ls -lh quantum-ai/results/hpo_optimization_report.json
+   ls -lh ai-projects/quantum-ml/results/hpo_optimization_report.json
    ```
 
 2. **Test Production API**
    ```bash
-   cd quantum-ai/production
+   cd ai-projects/quantum-ml/production
    python banknote_api.py
    # In another terminal:
    python test_api.py
@@ -436,24 +436,24 @@ Everything needed for production: API, tests, Docker, docs, deployment scripts, 
 ## 📚 Documentation Index
 
 ### User Guides
-- `quantum-ai/production/README.md` - Production API documentation
-- `quantum-ai/README.md` - Main project documentation
-- `quantum-ai/CUSTOM_DATASET_GUIDE.md` - Training on custom data
+- `ai-projects/quantum-ml/production/README.md` - Production API documentation
+- `ai-projects/quantum-ml/README.md` - Main project documentation
+- `ai-projects/quantum-ml/CUSTOM_DATASET_GUIDE.md` - Training on custom data
 
 ### Scripts
-- `quantum-ai/train_custom_dataset.py` - Train on any CSV dataset
-- `quantum-ai/benchmark_all_datasets.py` - Comprehensive benchmarking
-- `quantum-ai/hyperparameter_optimization.py` - Automated HPO
-- `quantum-ai/deploy_banknote_to_azure.py` - Azure Quantum deployment
-- `quantum-ai/production/banknote_api.py` - Production REST API
-- `quantum-ai/production/test_api.py` - API test suite
+- `ai-projects/quantum-ml/train_custom_dataset.py` - Train on any CSV dataset
+- `ai-projects/quantum-ml/benchmark_all_datasets.py` - Comprehensive benchmarking
+- `ai-projects/quantum-ml/hyperparameter_optimization.py` - Automated HPO
+- `ai-projects/quantum-ml/deploy_banknote_to_azure.py` - Azure Quantum deployment
+- `ai-projects/quantum-ml/production/banknote_api.py` - Production REST API
+- `ai-projects/quantum-ml/production/test_api.py` - API test suite
 
 ### Results & Reports
-- `quantum-ai/results/benchmark_comparison.png` - Performance visualization
-- `quantum-ai/results/benchmark_report.md` - Detailed benchmark report
-- `quantum-ai/results/custom_training_summary.json` - Training metrics
-- `quantum-ai/results/azure_deployment_report.json` - Azure execution report (after deployment)
-- `quantum-ai/results/hpo_optimization_report.json` - HPO results (after completion)
+- `ai-projects/quantum-ml/results/benchmark_comparison.png` - Performance visualization
+- `ai-projects/quantum-ml/results/benchmark_report.md` - Detailed benchmark report
+- `ai-projects/quantum-ml/results/custom_training_summary.json` - Training metrics
+- `ai-projects/quantum-ml/results/azure_deployment_report.json` - Azure execution report (after deployment)
+- `ai-projects/quantum-ml/results/hpo_optimization_report.json` - HPO results (after completion)
 
 ---
 

@@ -14,16 +14,19 @@ The Autonomous Training Orchestrator automatically manages the complete AI train
 ## Quick Start
 
 ### 1. Single Training Cycle (Test Mode)
+
 ```powershell
 python .\scripts\autonomous_training_orchestrator.py --once
 ```
 
 ### 2. Continuous Autonomous Mode
+
 ```powershell
 python .\scripts\autonomous_training_orchestrator.py
 ```
 
 ### 3. Check Status
+
 ```powershell
 python .\scripts\autonomous_training_orchestrator.py --status
 ```
@@ -95,6 +98,7 @@ The system intelligently increases training epochs across cycles:
 - **Cycle 4+**: 200 epochs (maximum performance)
 
 If accuracy plateaus or degrades, the system automatically adjusts:
+
 - Low accuracy → increase epochs
 - Plateau detected → boost epochs further
 - Degradation → alert and investigate
@@ -102,6 +106,7 @@ If accuracy plateaus or degrades, the system automatically adjusts:
 ## Monitoring
 
 ### Status File
+
 Real-time status: `data_out/autonomous_training_status.json`
 
 ```json
@@ -116,28 +121,34 @@ Real-time status: `data_out/autonomous_training_status.json`
 ```
 
 ### Logs
+
 Detailed logs: `data_out/autonomous_training.log`
 
 ### Results
+
 Training results: `data_out/autonomous_results/`
 
 ## Use Cases
 
 ### 1. Continuous Improvement
+
 Run 24/7 to continuously improve models:
+
 ```powershell
 # Terminal 1: Start orchestrator
 python .\scripts\autonomous_training_orchestrator.py
 
 # Terminal 2: Monitor status
-while ($true) { 
+while ($true) {
     python .\scripts\autonomous_training_orchestrator.py --status
     Start-Sleep -Seconds 300
 }
 ```
 
 ### 2. Daily Training Cycles
+
 Run scheduled training sessions:
+
 ```yaml
 # config/autonomous_training.yaml
 autonomous_mode:
@@ -147,7 +158,9 @@ autonomous_mode:
 ```
 
 ### 3. Dataset-Driven Training
+
 Automatically train when new data arrives:
+
 ```yaml
 data_collection:
   auto_discover: true
@@ -156,7 +169,9 @@ data_collection:
 ```
 
 ### 4. Production Deployment Pipeline
+
 Automatically deploy best models:
+
 ```yaml
 deployment:
   auto_deploy_best: true
@@ -167,16 +182,19 @@ deployment:
 ## Advanced Features
 
 ### Adaptive Learning
+
 - **Curriculum Learning**: Start with easier datasets
 - **Active Learning**: Focus on uncertain predictions
 - **Transfer Learning**: Use pre-trained models
 
 ### Resource Management
+
 - Automatic GPU/CPU allocation
 - Disk space monitoring
 - Memory optimization
 
 ### Notifications
+
 - Email alerts on completion/errors
 - Slack integration
 - Performance degradation warnings
@@ -226,6 +244,7 @@ python .\scripts\autonomous_training_orchestrator.py
 ## Integration with Existing Systems
 
 ### Talk-to-AI Chat
+
 ```python
 # Chat provider can query training status
 from scripts.autonomous_training_orchestrator import AutonomousTrainingOrchestrator
@@ -236,6 +255,7 @@ print(f"Current best model: {status['best_accuracy']:.2%}")
 ```
 
 ### Azure Functions
+
 ```python
 # Function can trigger training cycles
 import azure.functions as func
@@ -248,6 +268,7 @@ async def main(req: func.HttpRequest):
 ```
 
 ### Quantum AI
+
 ```python
 # Use best trained models for quantum classification
 from scripts.autonomous_training_orchestrator import AutonomousTrainingOrchestrator
@@ -260,6 +281,7 @@ best_accuracy = orchestrator.status['best_accuracy']
 ## Troubleshooting
 
 ### Orchestrator Won't Start
+
 ```powershell
 # Check Python environment
 python --version  # Should be 3.8+
@@ -272,6 +294,7 @@ python -c "import yaml; yaml.safe_load(open('config/autonomous_training.yaml'))"
 ```
 
 ### Training Fails
+
 ```powershell
 # Check datasets exist
 Get-ChildItem datasets\massive_quantum\*.csv | Measure-Object | Select-Object Count
@@ -284,6 +307,7 @@ Get-Content data_out\autonomous_training.log -Tail 50
 ```
 
 ### Performance Degradation
+
 ```powershell
 # Check status history
 python .\scripts\autonomous_training_orchestrator.py --status
@@ -326,6 +350,21 @@ Typical performance on 552 datasets:
 - [ ] Cost optimization for cloud resources
 
 ## Contributing
+
+### Note on CLI scripts
+
+Training orchestration and helper scripts are often executed from CI or as subprocesses. When creating new CLI scripts under `scripts/`, add the repository root to `sys.path` at the top of the file to ensure imports from `shared/` work regardless of CWD. Example:
+
+```python
+from pathlib import Path
+import sys
+
+REPO_ROOT = Path(__file__).resolve().parent.parent
+if str(REPO_ROOT) not in sys.path:
+  sys.path.insert(0, str(REPO_ROOT))
+
+from shared.json_utils import load_status_json
+```
 
 To extend the autonomous training system:
 

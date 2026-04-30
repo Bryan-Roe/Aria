@@ -1,0 +1,59 @@
+name: 'Smoke HTTP Endpoint'
+description: 'Perform a simple HTTP smoke check against an endpoint with expected status validation'
+
+inputs:
+  url:
+    description: 'Absolute endpoint URL to call'
+    required: true
+  method:
+    description: 'HTTP method (GET|POST)'
+    required: false
+    default: 'GET'
+  body:
+    description: 'Optional JSON body for POST requests'
+    required: false
+    default: ''
+  expected-status:
+    description: 'Expected HTTP status code'
+    required: false
+    default: '200'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Smoke check endpoint
+      shell: bash
+      run: |
+        set -euo pipefail
+
+        URL='${{ inputs.url }}'
+        METHOD='${{ inputs.method }}'
+        BODY='${{ inputs.body }}'
+        EXPECTED='${{ inputs.expected-status }}'
+
+        if [ -z "$URL" ]; then
+          echo "Input 'url' is required" >&2
+          exit 1
+        fi
+
+        if [ "$METHOD" = "POST" ] && [ -n "$BODY" ]; then
+          STATUS=$(curl -sS -o /tmp/smoke_http_body.txt -w "%{http_code}" \
+            -X POST \
+            -H "Content-Type: application/json" \
+            -d "$BODY" \
+            "$URL")
+        else
+          STATUS=$(curl -sS -o /tmp/smoke_http_body.txt -w "%{http_code}" \
+            -X "$METHOD" \
+            "$URL")
+        fi
+
+        echo "HTTP status: $STATUS"
+        echo "Response excerpt:"
+        head -c 300 /tmp/smoke_http_body.txt || true
+        echo
+
+        if [ "$STATUS" != "$EXPECTED" ]; then
+          echo "Expected HTTP $EXPECTED but got $STATUS" >&2
+          exit 1
+        fi

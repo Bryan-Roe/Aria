@@ -52,7 +52,7 @@ jobs:
   - name: eval_quantum_heart
     enabled: true
     model_type: quantum
-    model_path: quantum-ai/results/heart_disease_model.json
+    model_path: ai-projects/quantum-ml/results/heart_disease_model.json
     dataset: datasets/quantum/heart_disease.csv
     max_samples: null  # Use full test set
     metrics:

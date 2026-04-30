@@ -117,8 +117,8 @@ This document provides a complete index of all experimental results, documentati
 ## 🧪 Experimental Results Summary
 
 ### Result Files Count
-- **Total:** 57 JSON files in `quantum-ai/results/`
-- **Visualizations:** ~115 PNG charts in `quantum-ai/results/visualizations/`
+- **Total:** 57 JSON files in `ai-projects/quantum-ml/results/`
+- **Visualizations:** ~115 PNG charts in `ai-projects/quantum-ml/results/visualizations/`
 
 ### Result Breakdown
 
@@ -174,7 +174,7 @@ This document provides a complete index of all experimental results, documentati
 - **Azure job charts:** Hardware test distributions
 
 ### Access
-All charts in: `quantum-ai/results/visualizations/`
+All charts in: `ai-projects/quantum-ml/results/visualizations/`
 
 ---
 
@@ -339,8 +339,8 @@ submit_circuit_azure.py                 # Direct circuit submission
 
 ### Results (57 JSON + 115 PNG)
 ```
-quantum-ai/results/*.json               # All simulation and hardware results
-quantum-ai/results/visualizations/*.png # All generated charts
+ai-projects/quantum-ml/results/*.json               # All simulation and hardware results
+ai-projects/quantum-ml/results/visualizations/*.png # All generated charts
 ```
 
 ### Source Code (`src/`)
@@ -363,5 +363,5 @@ mcp-requirements.txt            # MCP server dependencies
 
 **End of Complete Results Index**
 
-*For quick commands and workflows, see [`QUICK_REFERENCE.md`](./QUICK_REFERENCE.md)*  
+*For quick commands and workflows, see [`QUICK_REFERENCE.md`](./QUICK_REFERENCE.md)*
 *For detailed hardware findings, see [`PROVIDER_COMPARISON_RESULTS.md`](./PROVIDER_COMPARISON_RESULTS.md)*

@@ -1,0 +1,38 @@
+# Aria-Bot — self-modifying codebase configuration.
+#
+# This file documents the operating envelope for the deterministic
+# self-improvement loop. The Python package also enforces a hard-coded set
+# of protected paths (see aria_bot/risk_manager.py) which CANNOT be
+# disabled from this YAML — narrowing them here is allowed, widening is
+# silently ignored.
+
+# Cap on plans applied per cycle. Keep small to enforce incrementalism.
+max_plans: 50
+
+# Cap on bytes a single plan is allowed to change.
+max_plan_delta_bytes: 16384
+
+# Cap on the size of files the analyzer will read.
+max_file_bytes: 524288
+
+# File suffixes the analyzer is allowed to consider.
+suffixes:
+  - .py
+  - .md
+  - .yaml
+  - .yml
+  - .txt
+
+# Paths that must never be modified by the loop. Hard-coded defaults are
+# ALWAYS merged with this list — see aria_bot/risk_manager.py.
+protected_prefixes:
+  - .git/
+  - .github/agents/
+  - datasets/
+  - data_out/
+  - secrets/
+  - AI/
+
+# Behaviour flags. The CLI flags --apply / --commit override these.
+apply: false
+commit: false

@@ -282,13 +282,13 @@ def benchmark(func, *args, iterations=1000):
     # Warm-up
     for _ in range(10):
         func(*args)
-    
+
     # Measure
     start = time.perf_counter()
     for _ in range(iterations):
         func(*args)
     elapsed = time.perf_counter() - start
-    
+
     print(f"{func.__name__}: {elapsed:.3f}s total, {elapsed/iterations*1000:.3f}ms avg")
     return elapsed
 

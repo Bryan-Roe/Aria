@@ -18,23 +18,23 @@ CREATE PROCEDURE [dbo].[sp_LogChatConversation]
 AS
 BEGIN
     SET NOCOUNT ON;
-    
+
     -- Check if conversation exists for this session
     IF @SessionId IS NOT NULL
     BEGIN
-        SELECT @ConversationId = ConversationId 
-        FROM [dbo].[ChatConversations] 
+        SELECT @ConversationId = ConversationId
+        FROM [dbo].[ChatConversations]
         WHERE SessionId = @SessionId AND IsArchived = 0
         ORDER BY UpdatedAt DESC;
     END
-    
+
     -- Create new conversation if needed
     IF @ConversationId IS NULL
     BEGIN
         SET @ConversationId = NEWID();
-        
+
         INSERT INTO [dbo].[ChatConversations] (
-            ConversationId, SessionId, Provider, Model, Title, 
+            ConversationId, SessionId, Provider, Model, Title,
             CreatedAt, UpdatedAt, MessageCount, LogFilePath
         )
         VALUES (
@@ -42,10 +42,10 @@ BEGIN
             GETUTCDATE(), GETUTCDATE(), 0, @LogFilePath
         );
     END
-    
+
     -- Insert message
     SET @MessageId = NEWID();
-    
+
     INSERT INTO [dbo].[ChatMessages] (
         MessageId, ConversationId, Role, Content, TokenCount,
         PromptTokens, CompletionTokens, TotalTokens, ExecutionTimeMs,
@@ -57,7 +57,7 @@ BEGIN
         GETUTCDATE(), COALESCE(@Model, (SELECT Model FROM [dbo].[ChatConversations] WHERE ConversationId = @ConversationId)),
         @FinishReason
     );
-    
+
     -- Update conversation stats
     UPDATE [dbo].[ChatConversations]
     SET MessageCount = MessageCount + 1,

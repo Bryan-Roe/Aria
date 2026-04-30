@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import io
 import json
 import sys
 from pathlib import Path
@@ -51,8 +50,8 @@ def main() -> int:
 
     try:
         import torch
-        from transformers import AutoModelForCausalLM, AutoTokenizer
         from peft import PeftModel
+        from transformers import AutoModelForCausalLM, AutoTokenizer
     except Exception as e:
         print(f"Bridge missing ML deps: {e}", file=sys.stderr)
         return 3
@@ -60,8 +59,7 @@ def main() -> int:
     # Determine base model id from adapter config
     adapter_cfg_path = adapter_dir / "adapter_config.json"
     if not adapter_cfg_path.exists():
-        print(
-            f"adapter_config.json not found in {adapter_dir}", file=sys.stderr)
+        print(f"adapter_config.json not found in {adapter_dir}", file=sys.stderr)
         return 4
     try:
         with open(adapter_cfg_path, "r", encoding="utf-8") as f:
@@ -71,7 +69,8 @@ def main() -> int:
         return 5
 
     base_model_id = adapter_cfg.get(
-        "base_model_name_or_path", "microsoft/Phi-3.5-mini-instruct")
+        "base_model_name_or_path", "microsoft/Phi-3.5-mini-instruct"
+    )
     if base_model_id == "Phi-3.6-mini-instruct":
         base_model_id = "microsoft/Phi-3.5-mini-instruct"
 
@@ -103,7 +102,7 @@ def main() -> int:
             )
         # Strip the prompt portion and decode only the completion
         response = tokenizer.decode(
-            output[0][inputs["input_ids"].shape[-1]:],
+            output[0][inputs["input_ids"].shape[-1] :],
             skip_special_tokens=True,
         )
         sys.stdout.write(response)

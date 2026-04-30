@@ -70,7 +70,7 @@ dep_ok = (status.get("dependency_status", {}).get(
 ```
 **Impact**: Repository automation system could not start or check status
 
-### 4. quantum-ai/production/test_api.py
+### 4. ai-projects/quantum-ml/production/test_api.py
 **Issues**:
 - Missing opening `"""` for module docstring (line 1)
 - Duplicate code section (lines 293-578 - entire file duplicated)
@@ -83,7 +83,7 @@ dep_ok = (status.get("dependency_status", {}).get(
 
 **Impact**: Production API tests could not run
 
-### 5. quantum-ai/production/banknote_api.py
+### 5. ai-projects/quantum-ml/production/banknote_api.py
 **Issues**:
 - Missing opening `"""` for module docstring (line 1)
 - Duplicate code section (lines 310-618 - entire file duplicated)
@@ -133,8 +133,8 @@ self.azureai = ChatCompletionsClient(
 ✅ AI/microsoft_phi-silica-3.6_v1/scripts/train_lora.py
 ✅ scripts/validate_datasets.py
 ✅ scripts/repo_automation.py
-✅ quantum-ai/production/test_api.py
-✅ quantum-ai/production/banknote_api.py
+✅ ai-projects/quantum-ml/production/test_api.py
+✅ ai-projects/quantum-ml/production/banknote_api.py
 ✅ AI/microsoft_phi-silica-3.6_v1/python mcp.py
 ```
 
@@ -156,7 +156,7 @@ python scripts/test_ai_improvements.py
 
 ### Smoke Test
 ```bash
-cd talk-to-ai/src && python _smoke_test.py
+cd ai-projects/chat-cli/src && python _smoke_test.py
 ```
 
 **Result**: ✅ Chat provider working correctly
@@ -198,8 +198,8 @@ python -m py_compile scripts/repo_automation.py
 python -m py_compile scripts/validate_datasets.py
 
 # Production APIs
-python -m py_compile quantum-ai/production/test_api.py
-python -m py_compile quantum-ai/production/banknote_api.py
+python -m py_compile ai-projects/quantum-ml/production/test_api.py
+python -m py_compile ai-projects/quantum-ml/production/banknote_api.py
 
 # MCP integration
 python -m py_compile "AI/microsoft_phi-silica-3.6_v1/python mcp.py"
@@ -226,8 +226,8 @@ With syntax errors resolved, the following components are now ready for use:
 
 4. **Production APIs**: Quantum ML APIs deployable
    ```bash
-   python quantum-ai/production/banknote_api.py
-   python quantum-ai/production/test_api.py
+   python ai-projects/quantum-ml/production/banknote_api.py
+   python ai-projects/quantum-ml/production/test_api.py
    ```
 
 ## Conclusion

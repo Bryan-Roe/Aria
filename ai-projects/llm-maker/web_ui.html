@@ -550,7 +550,7 @@
                     <p style="font-size: 0.9em; color: #666; margin-bottom: 15px;">
                         Use these endpoints to integrate LLM Maker into your apps:
                     </p>
-                    
+
                     <strong style="font-size: 0.9em; display: block; margin-top: 15px; color: #555;">List all tools:</strong>
                     <div class="code-snippet">
                         <button class="copy-btn" onclick="copyToClipboard('GET http://localhost:8090/api/tools')">Copy</button>
@@ -625,7 +625,7 @@
         // Load tools on page load
         document.addEventListener('DOMContentLoaded', function() {
             loadTools();
-            
+
             // Setup form submission
             document.getElementById('createToolForm').addEventListener('submit', function(e) {
                 e.preventDefault();
@@ -711,7 +711,7 @@
             try {
                 // Simulate API call (replace with actual API endpoint)
                 const response = await mockLoadTools();
-                
+
                 tools = response.tools || [];
                 updateStats(response.stats);
                 renderTools();
@@ -728,7 +728,7 @@
 
         function renderTools() {
             const container = document.getElementById('toolsList');
-            
+
             if (tools.length === 0) {
                 container.innerHTML = `
                     <div class="empty-state">

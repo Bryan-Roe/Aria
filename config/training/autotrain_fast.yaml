@@ -5,7 +5,7 @@ version: 1
 
 jobs:
   # ===== QUICK VALIDATION (64 samples, ~2-5 min each) =====
-  
+
   - name: phi35_quick_test
     category: fast
     runner: hf
@@ -39,7 +39,7 @@ jobs:
     device: auto
 
   # ===== MEDIUM TRAINING (256 samples, ~10-15 min each) =====
-  
+
   - name: phi35_medium_mixed
     category: fast
     runner: hf
@@ -71,7 +71,7 @@ jobs:
     device: auto
 
   # ===== FOCUSED TRAINING (500 samples, ~20-30 min each) =====
-  
+
   - name: phi35_focused_comprehensive
     category: fast
     runner: hf

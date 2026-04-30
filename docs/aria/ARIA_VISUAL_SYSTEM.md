@@ -1,8 +1,8 @@
 # 🎨 Aria Visual Command System
 
-**Status**: ✅ Trained & Operational  
-**Model**: TinyLlama-1.1B + LoRA (aria_expanded_v2)  
-**Training**: 10 epochs, 63 samples, LR 0.005  
+**Status**: ✅ Trained & Operational
+**Model**: TinyLlama-1.1B + LoRA (aria_expanded_v2)
+**Training**: 10 epochs, 63 samples, LR 0.005
 **Perplexity**: 14.15 → 1.53 (10x improvement)
 
 ---
@@ -170,18 +170,18 @@ python .\scripts\aria_quick_train.py
 
 **Full Command**:
 ```
-train_lora.py 
-  --dataset datasets/chat/aria_expanded 
-  --hf-model-id TinyLlama/TinyLlama-1.1B-Chat-v1.0 
-  --learning-rate 0.005 
-  --lora-dropout 0.0 
-  --epochs 10 
-  --max-train-samples 63 
-  --train-batch-size 4 
+train_lora.py
+  --dataset datasets/chat/aria_expanded
+  --hf-model-id TinyLlama/TinyLlama-1.1B-Chat-v1.0
+  --learning-rate 0.005
+  --lora-dropout 0.0
+  --epochs 10
+  --max-train-samples 63
+  --train-batch-size 4
   --save-dir data_out/aria_models/aria_expanded_v2
 ```
 
-**Hardware**: NVIDIA GPU (CUDA), 22s training time  
+**Hardware**: NVIDIA GPU (CUDA), 22s training time
 **Output**: `data_out/aria_models/aria_expanded_v2/lora_adapter/`
 
 ---
@@ -198,5 +198,5 @@ train_lora.py
 
 ---
 
-**Last Updated**: 2025-11-27  
+**Last Updated**: 2025-11-27
 **Status**: Operational prototype, 50% accuracy, ready for game integration testing

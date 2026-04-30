@@ -9,15 +9,15 @@ Features:
 
 Usage examples (run from repo root or quantum-ai directory):
 
-    python quantum-ai/scripts/upgrade_qiskit_to_1x.py --dry-run
-    python quantum-ai/scripts/upgrade_qiskit_to_1x.py --install
-    python quantum-ai/scripts/upgrade_qiskit_to_1x.py --target-version 1.0.2 --ml-version 0.7.0 --install
-    python quantum-ai/scripts/upgrade_qiskit_to_1x.py --revert
+    python ai-projects/quantum-ml/scripts/upgrade_qiskit_to_1x.py --dry-run
+    python ai-projects/quantum-ml/scripts/upgrade_qiskit_to_1x.py --install
+    python ai-projects/quantum-ml/scripts/upgrade_qiskit_to_1x.py --target-version 1.0.2 --ml-version 0.7.0 --install
+    python ai-projects/quantum-ml/scripts/upgrade_qiskit_to_1x.py --revert
 
 Post-upgrade validation:
     1. Delete any stale interpreter caches.
-    2. Run: quantum-ai/venv/Scripts/python quantum-ai/scripts/validate_qiskit_env.py
-    3. Run a smoke test: quantum-ai/venv/Scripts/python quantum-ai/src/quantum_classifier.py
+    2. Run: ai-projects/quantum-ml/venv/Scripts/python ai-projects/quantum-ml/scripts/validate_qiskit_env.py
+    3. Run a smoke test: ai-projects/quantum-ml/venv/Scripts/python ai-projects/quantum-ml/src/quantum_classifier.py
 
 Caveats:
   * Qiskit 1.x reorganizes subpackages; some algorithms previously accessed via
@@ -25,15 +25,17 @@ Caveats:
   * Pennylane-qiskit compatibility with 1.x may lag behind; verify any advanced
     hybrid workflows after upgrade.
 """
+
 from __future__ import annotations
+
 import argparse
 import datetime as _dt
-import os
 import re
 import shutil
 import subprocess
-from pathlib import Path
 import sys
+from datetime import timezone
+from pathlib import Path
 
 REQ_PATTERN_QISKIT = re.compile(r"^qiskit==.*$", re.IGNORECASE)
 REQ_PATTERN_QISKIT_AER = re.compile(r"^qiskit-aer==.*$", re.IGNORECASE)
@@ -97,9 +99,7 @@ def perform_install(venv_dir: Path, req_path: Path):
     subprocess.check_call([str(pip_exe), "-m", "pip", "install", "--upgrade", "pip"])
     subprocess.check_call([str(pip_exe), "-m", "pip", "install", "-r", str(req_path)])
     # Quick version report
-    code = (
-        "import qiskit, json; print(json.dumps({'qiskit': qiskit.__version__}))"
-    )
+    code = "import qiskit, json; print(json.dumps({'qiskit': qiskit.__version__}))"
     out = subprocess.check_output([str(pip_exe), "-c", code], text=True).strip()
     print(f"[install] Version check: {out}")
 
@@ -116,11 +116,29 @@ def revert(req_path: Path, req_dir: Path):
 
 def main():
     parser = argparse.ArgumentParser(description="Upgrade Qiskit environment to 1.x")
-    parser.add_argument("--target-version", default=DEFAULT_TARGET, help="Target Qiskit 1.x version (default 1.0.2)")
-    parser.add_argument("--ml-version", default=DEFAULT_QML_VERSION, help="Target qiskit-machine-learning version (default 0.7.0)")
-    parser.add_argument("--dry-run", action="store_true", help="Show planned changes without writing")
-    parser.add_argument("--install", action="store_true", help="After updating requirements, recreate venv and install")
-    parser.add_argument("--revert", action="store_true", help="Revert requirements.txt from latest backup")
+    parser.add_argument(
+        "--target-version",
+        default=DEFAULT_TARGET,
+        help="Target Qiskit 1.x version (default 1.0.2)",
+    )
+    parser.add_argument(
+        "--ml-version",
+        default=DEFAULT_QML_VERSION,
+        help="Target qiskit-machine-learning version (default 0.7.0)",
+    )
+    parser.add_argument(
+        "--dry-run", action="store_true", help="Show planned changes without writing"
+    )
+    parser.add_argument(
+        "--install",
+        action="store_true",
+        help="After updating requirements, recreate venv and install",
+    )
+    parser.add_argument(
+        "--revert",
+        action="store_true",
+        help="Revert requirements.txt from latest backup",
+    )
     args = parser.parse_args()
 
     quantum_root = Path(__file__).resolve().parents[1]
@@ -140,6 +158,7 @@ def main():
     current_version = None
     try:
         import qiskit  # type: ignore
+
         current_version = getattr(qiskit, "__version__", None)
     except Exception:
         pass

@@ -19,14 +19,15 @@ from pathlib import Path
 from typing import Any, Dict, List
 
 # Add shared directory to path for imports
-script_dir = Path(__file__).parent
-repo_root = script_dir.parent
-sys.path.insert(0, str(repo_root))
+REPO_ROOT = Path(__file__).resolve().parent.parent
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
 
-from shared.evaluation_utils import load_jsonl, naive_predict, compute_accuracy
+from shared.evaluation_utils import compute_accuracy, load_jsonl, naive_predict
 
 try:
     import openai  # type: ignore
+
     HAS_AZURE_OPENAI = True
 except Exception:
     openai = None
@@ -39,24 +40,37 @@ def azure_call(example: Dict[str, Any], deployment: str | None) -> str:
         return naive_predict(example)
 
     prompt = example.get("input") or " ".join(
-        [m.get("content", "") for m in (example.get("messages") or [])])
+        [m.get("content", "") for m in (example.get("messages") or [])]
+    )
     try:
         # Minimal safe attempt – real deployments may differ in invocation
-        resp = openai.ChatCompletion.create(deployment_id=deployment, messages=[
-                                            {"role": "user", "content": prompt}], max_tokens=200)
+        resp = openai.ChatCompletion.create(
+            deployment_id=deployment,
+            messages=[{"role": "user", "content": prompt}],
+            max_tokens=200,
+        )
         return resp.choices[0].message.content.strip()
     except Exception:
         return naive_predict(example)
 
 
-def run(dataset: Path, max_samples: int | None, metrics: List[str], deployment: str | None, save_dir: Path | None) -> Dict[str, Any]:
+def run(
+    dataset: Path,
+    max_samples: int | None,
+    metrics: List[str],
+    deployment: str | None,
+    save_dir: Path | None,
+) -> Dict[str, Any]:
     data = load_jsonl(dataset, max_samples)
     preds: List[str] = []
     expects: List[str | None] = []
     timings: List[float] = []
 
-    use_azure = HAS_AZURE_OPENAI and os.getenv(
-        "AZURE_OPENAI_API_KEY") and os.getenv("AZURE_OPENAI_ENDPOINT")
+    use_azure = (
+        HAS_AZURE_OPENAI
+        and os.getenv("AZURE_OPENAI_API_KEY")
+        and os.getenv("AZURE_OPENAI_ENDPOINT")
+    )
 
     for ex in data:
         t0 = time.perf_counter()
@@ -70,23 +84,29 @@ def run(dataset: Path, max_samples: int | None, metrics: List[str], deployment: 
 
     summary: Dict[str, Any] = {"samples": len(preds)}
     if "response_time" in metrics:
-        summary["response_time_ms"] = round(
-            sum(timings) / len(timings), 3) if timings else 0.0
+        summary["response_time_ms"] = (
+            round(sum(timings) / len(timings), 3) if timings else 0.0
+        )
     if "accuracy" in metrics:
         summary["accuracy"] = round(compute_accuracy(preds, expects), 4)
 
     if save_dir:
         save_dir.mkdir(parents=True, exist_ok=True)
-        out = {"summary": summary, "predictions": [
-            {"pred": p, "expected": e} for p, e in zip(preds, expects)]}
-        (save_dir / "results.json").write_text(json.dumps(out, indent=2), encoding="utf-8")
+        out = {
+            "summary": summary,
+            "predictions": [{"pred": p, "expected": e} for p, e in zip(preds, expects)],
+        }
+        (save_dir / "results.json").write_text(
+            json.dumps(out, indent=2), encoding="utf-8"
+        )
 
     return summary
 
 
 def parse_args():
     ap = argparse.ArgumentParser(
-        description="Evaluate Azure OpenAI deployment (offline fallback for CI)")
+        description="Evaluate Azure OpenAI deployment (offline fallback for CI)"
+    )
     ap.add_argument("--dataset", required=True)
     ap.add_argument("--max-samples", type=int, default=None)
     ap.add_argument("--metric", action="append", dest="metrics")
@@ -102,8 +122,7 @@ def main():
     save = Path(args.save_dir) if args.save_dir else None
 
     try:
-        summary = run(dataset, args.max_samples,
-                      metrics, args.deployment, save)
+        summary = run(dataset, args.max_samples, metrics, args.deployment, save)
         print(json.dumps({"summary": summary}))
         return 0
     except Exception as e:

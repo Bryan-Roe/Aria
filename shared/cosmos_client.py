@@ -13,10 +13,12 @@ Partition key strategy:
   /userId for chat sessions (high cardinality recommended)
   For quantum jobs, you may create a separate container with /jobGroup or HPK later.
 """
+
 from __future__ import annotations
-import os
+
 import logging
-from typing import Optional, Dict, Any, Union
+import os
+from typing import Any, Dict, Optional, Union
 
 try:
     from azure.cosmos import CosmosClient, PartitionKey  # type: ignore
@@ -43,10 +45,14 @@ def init() -> bool:
     if _CLIENT is not None:
         return True
     if CosmosClient is None:
-        logging.warning("[cosmos] azure-cosmos package not available; cannot initialize.")
+        logging.warning(
+            "[cosmos] azure-cosmos package not available; cannot initialize."
+        )
         return False
     if not _settings_present():
-        logging.warning("[cosmos] Missing required settings (COSMOS_ENDPOINT / COSMOS_KEY).")
+        logging.warning(
+            "[cosmos] Missing required settings (COSMOS_ENDPOINT / COSMOS_KEY)."
+        )
         return False
 
     endpoint = os.getenv("COSMOS_ENDPOINT")
@@ -73,7 +79,9 @@ def init() -> bool:
         except Exception as e:
             logging.error(f"[cosmos] Failed creating container {container_name}: {e}")
             return False
-        logging.info(f"[cosmos] Initialized container {container_name} in database {database_name}.")
+        logging.info(
+            f"[cosmos] Initialized container {container_name} in database {database_name}."
+        )
         return True
     except Exception as e:
         logging.error(f"[cosmos] Initialization error: {e}")
@@ -115,7 +123,9 @@ def health() -> Dict[str, Any]:
     return status
 
 
-def record_chat_message(user_id: str, message: Dict[str, Any], provider: str, model: str) -> bool:
+def record_chat_message(
+    user_id: str, message: Dict[str, Any], provider: str, model: str
+) -> bool:
     """Persist a single chat message. user_id may be 'anonymous' if not provided."""
     if not init():  # ensures initialization or early exit
         return False
@@ -124,16 +134,25 @@ def record_chat_message(user_id: str, message: Dict[str, Any], provider: str, mo
         return False
     try:
         import uuid
+
+        # Validate content is non-empty before storing (vulnerability fix)
+        content = message.get("content", "")
+        if not content or not str(content).strip():
+            logging.warning(
+                f"[cosmos] Skipping empty message content for user {user_id}"
+            )
+            return False
+
         # Use UUID to prevent ID collisions (CRITICAL FIX: data loss prevention)
         doc_id = f"{user_id}-{uuid.uuid4().hex}"
         doc = {
             "id": doc_id,
             "userId": user_id,
             "role": message.get("role"),
-            "content": message.get("content"),
+            "content": content,
             "provider": provider,
             "model": model,
-            "timestamp": message.get('timestamp'),  # Keep for querying
+            "timestamp": message.get("timestamp"),  # Keep for querying
         }
         c.upsert_item(doc)
         return True
@@ -142,7 +161,9 @@ def record_chat_message(user_id: str, message: Dict[str, Any], provider: str, mo
         return False
 
 
-def record_chat_session(user_id: str, messages: list[Dict[str, Any]], provider: str, model: str) -> bool:
+def record_chat_session(
+    user_id: str, messages: list[Dict[str, Any]], provider: str, model: str
+) -> bool:
     """Persist entire chat session as one document (alternative strategy)."""
     if not init():
         return False
@@ -150,7 +171,9 @@ def record_chat_session(user_id: str, messages: list[Dict[str, Any]], provider: 
     if c is None:
         return False
     try:
+        import time
         import uuid
+
         # Use UUID to prevent ID collisions
         doc_id = f"session-{user_id}-{uuid.uuid4().hex}"
         doc = {
@@ -167,6 +190,7 @@ def record_chat_session(user_id: str, messages: list[Dict[str, Any]], provider: 
     except Exception as e:
         logging.warning(f"[cosmos] Failed to upsert chat session: {e}")
         return False
+
 
 # ---------------- Worlds Container & Helpers -----------------
 _WORLDS_CONTAINER = None  # lazy-created container for aria worlds
@@ -187,10 +211,13 @@ def worlds_container():
     if _WORLDS_CONTAINER is not None:
         return _WORLDS_CONTAINER
     try:
-        db = _CLIENT.get_database_client(os.getenv("COSMOS_DATABASE", "qai"))  # type: ignore
+        db = _CLIENT.get_database_client(
+            os.getenv("COSMOS_DATABASE", "qai")
+        )  # type: ignore
         worlds_name = os.getenv("COSMOS_WORLDS_CONTAINER", "aria_worlds")
         # Create if not exists with partition key /theme_seed
         from azure.cosmos import PartitionKey  # type: ignore
+
         _WORLDS_CONTAINER = db.create_container_if_not_exists(
             id=worlds_name,
             partition_key=PartitionKey(path="/theme_seed"),
@@ -254,6 +281,7 @@ def list_worlds(limit: int = 100) -> list[Dict[str, Any]]:
     except Exception as e:
         logging.warning(f"[cosmos] list_worlds error: {e}")
         return []
+
 
 __all__ = [
     "init",

@@ -447,11 +447,11 @@ def upload_to_cloud(backup_path: Path):
 
 ## Support
 
-- **Main Docs**: [README.md](../README.md)
+- **Main Docs**: [README.md](../../README.md)
 - **Aria Automation**: [ARIA_AUTOMATION_GUIDE.md](ARIA_AUTOMATION_GUIDE.md)
 - **Master Orchestrator**: `scripts/master_orchestrator.py --help`
 - **Component Docs**: See individual script help messages
 
 ## License
 
-Same as repository - see [LICENSE](../LICENSE)
+Same as repository - see [README.md](../../README.md)

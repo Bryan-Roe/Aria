@@ -1,6 +1,6 @@
 # QAI Workspace - Fixed and Verified ✅
 
-**Date:** November 15, 2025  
+**Date:** November 15, 2025
 **Status:** All systems operational
 
 ## Summary of Fixes Applied
@@ -34,10 +34,10 @@
 - numpy (latest)
 
 **Quantum-AI venv:**
-- All requirements from `quantum-ai/requirements.txt`
+- All requirements from `ai-projects/quantum-ml/requirements.txt`
 
 **Talk-to-AI venv:**
-- All requirements from `talk-to-ai/requirements.txt`
+- All requirements from `ai-projects/chat-cli/requirements.txt`
 
 ## Verification Results
 
@@ -47,17 +47,17 @@ All components tested and verified:
 ✓ PASS: Chat Providers
   - Local echo provider working
   - Provider completion functional
-  
+
 ✓ PASS: Quantum Classifier
   - Initialization successful (4 qubits, 2 layers)
   - Forward pass functional with correct output shapes
-  
+
 ✓ PASS: Quantum Provider
   - Created successfully with quantum-enhanced-local model
   - Quantum classifier available in provider
   - Completion works with quantum insights
   - Responses contain quantum enhancements (🔬 indicators)
-  
+
 ✓ PASS: Function App Imports
   - All chat provider imports OK
   - Quantum classifier import OK
@@ -66,7 +66,7 @@ All components tested and verified:
 
 ## New Files Created
 
-1. **`talk-to-ai/src/quantum_provider.py`**: Quantum-enhanced chat provider
+1. **`ai-projects/chat-cli/src/quantum_provider.py`**: Quantum-enhanced chat provider
    - Uses variational quantum circuits for sentiment analysis
    - Integrates with QuantumClassifier from quantum-ai
    - Provides quantum-flavored responses with analysis insights
@@ -90,7 +90,7 @@ All components tested and verified:
    - Implemented 3 quantum endpoints (classify, circuit, info)
    - Full quantum classification with PennyLane integration
 
-2. **`talk-to-ai/src/chat_providers.py`**:
+2. **`ai-projects/chat-cli/src/chat_providers.py`**:
    - Added quantum provider detection
    - Integrated quantum_provider module
    - Updated provider priority (quantum → Azure → OpenAI → local)
@@ -151,7 +151,7 @@ cd quantum-ai
 │           │                       │             │
 │           ▼                       ▼             │
 │  ┌────────────────────────────────────────┐    │
-│  │      talk-to-ai/src/                   │    │
+│  │      ai-projects/chat-cli/src/                   │    │
 │  │  • chat_providers.py (5 providers)     │    │
 │  │  • quantum_provider.py (NEW)           │    │
 │  │  • token_utils.py                      │    │
@@ -159,7 +159,7 @@ cd quantum-ai
 │                 │                               │
 │                 ▼                               │
 │  ┌────────────────────────────────────────┐    │
-│  │      quantum-ai/src/                   │    │
+│  │      ai-projects/quantum-ml/src/                   │    │
 │  │  • quantum_classifier.py               │    │
 │  │  • QuantumClassifier (PennyLane)       │    │
 │  │  • Variational circuits (4q, 2l)       │    │
@@ -253,8 +253,8 @@ This will:
 - Test quantum endpoints
 
 For specific help:
-- Quantum issues → See `quantum-ai/README.md`
-- Chat issues → See `talk-to-ai/README.md`
+- Quantum issues → See `ai-projects/quantum-ml/README.md`
+- Chat issues → See `ai-projects/chat-cli/README.md`
 - Deployment → See `DEPLOY_CHAT_TO_AZURE.md`
 
 ---

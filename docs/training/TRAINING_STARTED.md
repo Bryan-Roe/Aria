@@ -1,8 +1,8 @@
 # 🚀 Comprehensive Training Started
 
-**Status:** Active  
-**Started:** 2025-11-21 15:02 UTC  
-**Estimated Completion:** 6-12 hours  
+**Status:** Active
+**Started:** 2025-11-21 15:02 UTC
+**Estimated Completion:** 6-12 hours
 
 ## Training Jobs Running
 
@@ -11,12 +11,12 @@
   - Dataset: mixed_chat (full)
   - Epochs: 3
   - Output: `data_out/lora_training/phi35/`
-  
+
 - **Qwen2.5 3B** (Qwen/Qwen2.5-3B-Instruct)
   - Dataset: mixed_chat (full)
   - Epochs: 3
   - Output: `data_out/lora_training/qwen25_3b/`
-  
+
 - **Phi-3.5 MAX** (microsoft/Phi-3.5-mini-instruct)
   - Dataset: Dolly 15k (full)
   - Epochs: 3
@@ -27,13 +27,13 @@
   - Dataset: heart_disease.csv
   - Qubits: 4
   - Epochs: 50
-  - Output: `quantum-ai/results/`
-  
+  - Output: `ai-projects/quantum-ml/results/`
+
 - **Ionosphere Classifier**
   - Dataset: ionosphere.csv
   - Qubits: 4
   - Epochs: 100
-  - Output: `quantum-ai/results/`
+  - Output: `ai-projects/quantum-ml/results/`
 
 ## Monitoring
 
@@ -112,7 +112,7 @@ python .\src\quantum_classifier.py --load results/heart_disease_quantum_model.pt
    ```powershell
    # Test LoRA adapter
    python .\AI\microsoft_phi-silica-3.6_v1\scripts\train_lora.py --dry-run
-   
+
    # Test quantum model
    cd quantum-ai; python .\train_custom_dataset.py --preset heart --epochs 1
    ```

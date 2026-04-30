@@ -12,7 +12,7 @@ Five high-impact optimizations targeting hot paths in data processing, command p
 | `scripts/job_queue.py` | Set intersection for tag filtering | 5-50x | 3 |
 | `function_app.py` | Command pattern table | 5-20x | 30 |
 | `scripts/generate_evaluation_set.py` | Single-pass file reading | 2-3x | 35 |
-| `quantum-ai/web_app.py` | PennyLane autograd gradients | 10-100x | 40 |
+| `ai-projects/quantum-ml/web_app.py` | PennyLane autograd gradients | 10-100x | 40 |
 
 **Total estimated impact:** 24-175x cumulative speedup across affected code paths.
 
@@ -20,8 +20,8 @@ Five high-impact optimizations targeting hot paths in data processing, command p
 
 ## 1. Single-Pass Role Checking
 
-**File:** `scripts/extract_chat_logs_dataset.py`  
-**Lines:** 65-73  
+**File:** `scripts/extract_chat_logs_dataset.py`
+**Lines:** 65-73
 **Impact:** 2x speedup in rolling window validation
 
 ### Problem
@@ -58,8 +58,8 @@ This reduces complexity from O(2n) to O(n).
 
 ## 2. Set Intersection for Tag Filtering
 
-**File:** `scripts/job_queue.py`  
-**Lines:** 294-296  
+**File:** `scripts/job_queue.py`
+**Lines:** 294-296
 **Impact:** 5-50x speedup in job filtering by tags
 
 ### Problem
@@ -99,8 +99,8 @@ This reduces complexity from O(n³) to O(n_jobs × n_tags) where n_tags is typic
 
 ## 3. Command Pattern Table
 
-**File:** `function_app.py`  
-**Lines:** 560-602 (before) → 560-590 (after)  
+**File:** `function_app.py`
+**Lines:** 560-602 (before) → 560-590 (after)
 **Impact:** 5-20x speedup in movement command parsing
 
 ### Problem
@@ -140,12 +140,12 @@ def parse_movement_commands(text: str) -> dict:
     """Parse movement commands from AI response text using optimized pattern matching"""
     lower_text = text.lower()
     commands = []
-    
+
     # Single pass through command patterns - check each pattern once
     for patterns, command in _COMMAND_PATTERNS:
         if any(pattern in lower_text for pattern in patterns):
             commands.append(command)
-    
+
     return {'commands': commands} if commands else {}
 ```
 
@@ -165,8 +165,8 @@ Benefits:
 
 ## 4. Single-Pass File Reading
 
-**File:** `scripts/generate_evaluation_set.py`  
-**Lines:** 50-99 (before) → 50-95 (after)  
+**File:** `scripts/generate_evaluation_set.py`
+**Lines:** 50-99 (before) → 50-95 (after)
 **Impact:** 2-3x speedup in evaluation dataset generation
 
 ### Problem
@@ -241,8 +241,8 @@ all_records = source_records_cache.get(str(src_path), [])
 
 ## 5. PennyLane Autograd for Gradient Computation
 
-**File:** `quantum-ai/web_app.py`  
-**Lines:** 217-246  
+**File:** `ai-projects/quantum-ml/web_app.py`
+**Lines:** 217-246
 **Impact:** 10-100x speedup in quantum circuit training
 
 ### Problem
@@ -252,7 +252,7 @@ The original code manually implemented the parameter-shift rule using triple-nes
 ```python
 def compute_gradient(circuit, X, y, weights, use_parameter_shift=True):
     grad = np.zeros_like(weights)
-    
+
     if use_parameter_shift:
         shift = np.pi / 2
         for i in range(weights.shape[0]):           # Layer
@@ -283,7 +283,7 @@ Leverage PennyLane's built-in automatic differentiation:
 ```python
 def compute_gradient(circuit, X, y, weights, use_parameter_shift=True):
     """Compute gradient using PennyLane's built-in automatic differentiation
-    
+
     This is dramatically faster than manual parameter-shift implementation as it:
     - Uses vectorized operations internally
     - Leverages hardware acceleration when available
@@ -291,7 +291,7 @@ def compute_gradient(circuit, X, y, weights, use_parameter_shift=True):
     """
     def loss_fn(w):
         return compute_loss(circuit, X, y, w)
-    
+
     try:
         # Use PennyLane's built-in gradient computation
         grad_fn = qml.grad(loss_fn)
@@ -342,7 +342,7 @@ These optimizations follow established patterns from the repository:
 
 4. **Library-native optimizations** (Memory: "best practices")
    - Use framework features (PennyLane autograd)
-   - Used in `quantum-ai/web_app.py`
+   - Used in `ai-projects/quantum-ml/web_app.py`
 
 ---
 
@@ -372,7 +372,7 @@ Additional optimizations identified but not yet implemented:
    - Opportunity: Pre-compile keyword sets as frozensets
    - Estimated impact: 2-10x speedup
 
-2. **quantum-ai/web_app.py** (lines 516-518)
+2. **ai-projects/quantum-ml/web_app.py** (lines 516-518)
    - Repeated list slicing in loops
    - Opportunity: Slice once, reuse
    - Estimated impact: 1.5-2x speedup

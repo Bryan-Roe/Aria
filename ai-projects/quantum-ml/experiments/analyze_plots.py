@@ -2,10 +2,8 @@
 Visual Analysis Guide for Generated Plots
 Reviews and explains the quantum AI training results
 """
+
 from pathlib import Path
-from PIL import Image
-import matplotlib.pyplot as plt
-import matplotlib.patches as mpatches
 
 results_dir = Path(__file__).parent.parent / "results"
 
@@ -23,28 +21,28 @@ plot_file = results_dir / "state_evolution.png"
 if plot_file.exists():
     print(f"✓ File found: {plot_file}")
     print(f"  Size: {plot_file.stat().st_size / 1024:.1f} KB")
-    
+
     print("\n🔍 What This Shows:")
     print("-" * 70)
     print("• X-axis: Rotation angle (0 to 2π radians)")
     print("• Y-axis: Expectation value ⟨Z⟩ (quantum measurement)")
     print("• Curve: Cosine-like pattern showing quantum state evolution")
-    
+
     print("\n💡 Key Insights:")
     print("-" * 70)
     print("1. SMOOTH CURVE: Quantum states evolve continuously")
     print("   - RY rotation creates superposition of |0⟩ and |1⟩")
     print("   - Measurement shows probability amplitude oscillation")
-    
+
     print("\n2. RANGE [-1, 1]:")
     print("   - ⟨Z⟩ = +1: Qubit definitely in |0⟩ state")
     print("   - ⟨Z⟩ =  0: Equal superposition |0⟩ and |1⟩")
     print("   - ⟨Z⟩ = -1: Qubit definitely in |1⟩ state")
-    
+
     print("\n3. PERIODICITY:")
     print("   - Full cycle at 2π (360°) confirms quantum mechanics")
     print("   - Symmetry shows reversible quantum operations")
-    
+
     print("\n📖 Physics Explanation:")
     print("-" * 70)
     print("The RY(θ) gate rotates a qubit around the Y-axis:")
@@ -64,35 +62,35 @@ plot_file = results_dir / "training_moons.png"
 if plot_file.exists():
     print(f"✓ File found: {plot_file}")
     print(f"  Size: {plot_file.stat().st_size / 1024:.1f} KB")
-    
+
     print("\n🔍 What This Shows:")
     print("-" * 70)
     print("LEFT PANEL: Loss Curves")
     print("  • Blue line: Training loss (decreasing)")
     print("  • Orange line: Validation loss (decreasing)")
     print("  • X-axis: Training epochs (0-100)")
-    
+
     print("\nRIGHT PANEL: Accuracy Curve")
     print("  • Green line: Validation accuracy (increasing)")
     print("  • Final accuracy: ~85% (0.85)")
-    
+
     print("\n💡 Key Insights:")
     print("-" * 70)
     print("1. CONVERGENCE:")
     print("   - Both losses decrease smoothly → model learning")
     print("   - No oscillations → stable learning rate")
     print("   - Accuracy increases steadily → effective training")
-    
+
     print("\n2. OVERFITTING CHECK:")
     print("   - Train vs validation loss stay close → no overfitting")
     print("   - Quantum circuits act as regularizers")
     print("   - Small gap indicates good generalization")
-    
+
     print("\n3. PERFORMANCE:")
     print("   - 85% accuracy on Moons dataset is excellent")
     print("   - Comparable to classical neural networks")
     print("   - Quantum advantage: fewer parameters needed")
-    
+
     print("\n📖 Machine Learning Explanation:")
     print("-" * 70)
     print("Training loss measures how well model fits training data")
@@ -112,38 +110,38 @@ plot_file = results_dir / "model_comparison.png"
 if plot_file.exists():
     print(f"✓ File found: {plot_file}")
     print(f"  Size: {plot_file.stat().st_size / 1024:.1f} KB")
-    
+
     print("\n🔍 What This Shows:")
     print("-" * 70)
     print("Bar chart comparing quantum classifier on 3 datasets:")
     print("  • Moons: Non-linear crescents (HARD)")
     print("  • Circles: Concentric rings (VERY HARD)")
     print("  • Iris: Flower species classification (MEDIUM)")
-    
+
     print("\n💡 Key Insights:")
     print("-" * 70)
     print("1. MOONS (85%):")
     print("   ⭐⭐⭐⭐⭐ Excellent performance")
     print("   - Non-linear decision boundary learned successfully")
     print("   - Quantum entanglement helps capture correlations")
-    
+
     print("\n2. CIRCLES (50%):")
     print("   ⭐⭐ Challenging for current architecture")
     print("   - Concentric patterns need radial basis features")
     print("   - Could improve with more qubits or different encoding")
-    
+
     print("\n3. IRIS (67%):")
     print("   ⭐⭐⭐ Good binary classification")
     print("   - Setosa vs Others: reasonably separable")
     print("   - Natural dataset with real-world noise")
-    
+
     print("\n📊 Performance Analysis:")
     print("-" * 70)
     print("Dataset Difficulty Ranking:")
     print("  1. Circles (hardest) - Requires radial symmetry")
     print("  2. Iris (medium) - Real data with noise")
     print("  3. Moons (easier) - Non-linear but smooth boundary")
-    
+
     print("\n🔬 Scientific Insight:")
     print("Quantum computers excel at problems with:")
     print("  ✓ Non-linear correlations (Moons)")

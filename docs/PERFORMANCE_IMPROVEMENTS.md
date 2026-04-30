@@ -114,7 +114,7 @@ For each requested model ID, the code performs a linear search through all resul
 ```python
 def compare_models(self, model_ids: List[str]) -> Dict:
     comparison = []
-    
+
     for model_id in model_ids:
         result = next((r for r in self.results if r.model_id == model_id), None)
         if result:
@@ -127,7 +127,7 @@ def compare_models(self, model_ids: List[str]) -> Dict:
 def compare_models(self, model_ids: List[str]) -> Dict:
     # Build index for O(1) lookups
     results_by_id = {r.model_id: r for r in self.results}
-    
+
     comparison = []
     for model_id in model_ids:
         result = results_by_id.get(model_id)
@@ -187,7 +187,7 @@ for row in range(chart_height - 1, -1, -1):
 ### 12. AGI Provider - Tag Concatenation Optimization
 
 #### Location
-`talk-to-ai/src/agi_provider.py` - Lines 697-701 in reflection improvement
+`ai-projects/chat-cli/src/agi_provider.py` - Lines 697-701 in reflection improvement
 
 #### Problem
 Multiple `response +=` operations for adding Aria movement tags.
@@ -227,7 +227,7 @@ if tag:
 ## 1. Token Utils - Repeated Tokenizer Instantiation
 
 ### Location
-`talk-to-ai/src/token_utils.py` - `_get_text_encoder()` function
+`ai-projects/chat-cli/src/token_utils.py` - `_get_text_encoder()` function
 
 ### Problem
 Every call to `count_messages_tokens()` or `prune_messages()` creates a new tokenizer instance. For Hugging Face tokenizers, this involves:
@@ -300,7 +300,7 @@ except ImportError:
 def _cosine(a: Sequence[float], b: Sequence[float]) -> float:
     if not a or not b or len(a) != len(b):
         return 0.0
-    
+
     if _HAS_NUMPY:
         a_arr = np.asarray(a, dtype=np.float32)
         b_arr = np.asarray(b, dtype=np.float32)
@@ -310,7 +310,7 @@ def _cosine(a: Sequence[float], b: Sequence[float]) -> float:
         if na == 0.0 or nb == 0.0:
             return 0.0
         return float(dot / (na * nb))
-    
+
     # Fallback to pure Python
     dot = sum(x * y for x, y in zip(a, b))
     na = math.sqrt(sum(x * x for x in a))
@@ -358,7 +358,7 @@ def _get_embedding_client(provider: str) -> Any:
     """Get or create a cached embedding client."""
     if provider in _embedding_clients:
         return _embedding_clients[provider]
-    
+
     if provider == "azure":
         az_key = os.getenv("AZURE_OPENAI_API_KEY")
         az_ep = os.getenv("AZURE_OPENAI_ENDPOINT")
@@ -394,7 +394,7 @@ Reads entire file into memory with `f.readlines()` which is inefficient for larg
 def validate_jsonl(self, filepath: Path, verbose: bool = False) -> Dict:
     with open(filepath, 'r', encoding='utf-8') as f:
         lines = f.readlines()  # LOADS ENTIRE FILE INTO MEMORY
-    
+
     for i, line in enumerate(lines, 1):
         # ... validate line
 ```
@@ -417,7 +417,7 @@ def validate_jsonl(self, filepath: Path, verbose: bool = False) -> Dict:
 ## 5. Chat Providers - LM Studio Health Check On Every Auto-Detect
 
 ### Location
-`talk-to-ai/src/chat_providers.py` - `detect_provider()` function
+`ai-projects/chat-cli/src/chat_providers.py` - `detect_provider()` function
 
 ### Problem
 In auto mode, the function makes an HTTP request to check if LM Studio is running on every call, adding latency even when LM Studio isn't being used.
@@ -446,14 +446,14 @@ def _check_lmstudio_available(url: str) -> bool:
     now = time.time()
     if _lmstudio_cache["available"] is not None and (now - _lmstudio_cache["checked_at"]) < _LMSTUDIO_CACHE_TTL:
         return _lmstudio_cache["available"]
-    
+
     try:
         req = urllib.request.Request(url.replace("/v1", "") + "/v1/models", headers={"User-Agent": "QAI"})
         urllib.request.urlopen(req, timeout=1)
         _lmstudio_cache["available"] = True
     except Exception:
         _lmstudio_cache["available"] = False
-    
+
     _lmstudio_cache["checked_at"] = now
     return _lmstudio_cache["available"]
 ```
@@ -467,7 +467,7 @@ def _check_lmstudio_available(url: str) -> bool:
 ## 6. Quantum Classifier - Sequential Batch Processing
 
 ### Location
-`quantum-ai/src/quantum_classifier.py` - `forward()` method
+`ai-projects/quantum-ml/src/quantum_classifier.py` - `forward()` method
 
 ### Problem
 Processes batch items sequentially in a Python loop, which is slow for quantum circuit execution.
@@ -477,12 +477,12 @@ Processes batch items sequentially in a Python loop, which is slow for quantum c
 def forward(self, inputs: torch.Tensor, weights: torch.Tensor) -> torch.Tensor:
     batch_size = inputs.shape[0]
     outputs = torch.empty(batch_size, self.n_qubits, dtype=torch.float32)
-    
+
     for i, inp in enumerate(inputs):  # SEQUENTIAL LOOP
         result = self.qnode(inp, weights)
         # ... convert result
         outputs[i] = result
-    
+
     return outputs
 ```
 
@@ -583,7 +583,7 @@ chart.append("            │" + "".join(chars))
 ### 9. Quantum Web App - Dictionary Iteration Efficiency
 
 #### Location
-`quantum-ai/web_app.py` - metrics history trimming (line 516)
+`ai-projects/quantum-ml/web_app.py` - metrics history trimming (line 516)
 
 #### Problem
 Inefficient loop-based dictionary updates:
@@ -607,7 +607,7 @@ session.metrics_history = {key: values[-1000:] for key, values in session.metric
 ### 10. Quantum Circuit - Performance Documentation
 
 #### Location
-`quantum-ai/src/hybrid_qnn.py` - QuantumLayer class
+`ai-projects/quantum-ml/src/hybrid_qnn.py` - QuantumLayer class
 
 #### Problem
 Missing documentation about O(n²) complexity of full entanglement pattern.

@@ -64,7 +64,7 @@ tool = maker.create_tool(
 if maker.validate_tool(tool):
     # Register it
     registry.register(tool)
-    
+
     # Use it
     result = registry.execute("calculate_fibonacci", {"n": 10})
     print(f"Result: {result}")

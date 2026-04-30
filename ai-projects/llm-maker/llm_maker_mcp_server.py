@@ -2,12 +2,12 @@
 LLM Maker MCP Server
 Exposes tool creation and execution capabilities via Model Context Protocol
 """
+
 import asyncio
 import json
 import logging
 import sys
 from pathlib import Path
-from typing import Any, Dict
 
 # Add src directory to path
 src_path = Path(__file__).parent / "src"
@@ -17,7 +17,8 @@ sys.path.insert(0, str(src_path))
 try:
     from mcp.server import Server
     from mcp.server.stdio import stdio_server
-    from mcp.types import Tool as MCPTool, TextContent
+    from mcp.types import TextContent
+    from mcp.types import Tool as MCPTool
 except ImportError as e:
     print("Error: MCP package not installed.")
     print("\nTo install MCP dependencies, run:")
@@ -25,11 +26,11 @@ except ImportError as e:
     print(f"\nDetails: {e}")
     sys.exit(1)
 
+from src.tool_executor import ToolExecutor
 # Import LLM Maker components
 from src.tool_maker import ToolMaker
+from src.tool_registry import ToolRegistry
 from src.tool_validator import ToolValidator
-from src.tool_executor import ToolExecutor
-from src.tool_registry import ToolRegistry, Tool
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
@@ -55,29 +56,29 @@ async def list_tools() -> list[MCPTool]:
                 "properties": {
                     "name": {
                         "type": "string",
-                        "description": "Function name (valid Python identifier)"
+                        "description": "Function name (valid Python identifier)",
                     },
                     "description": {
                         "type": "string",
-                        "description": "What the tool should do"
+                        "description": "What the tool should do",
                     },
                     "parameters": {
                         "type": "object",
-                        "description": "Parameter names and types (e.g., {'n': 'int', 'text': 'str'})"
+                        "description": "Parameter names and types (e.g., {'n': 'int', 'text': 'str'})",
                     },
                     "return_type": {
                         "type": "string",
                         "description": "Expected return type",
-                        "default": "Any"
+                        "default": "Any",
                     },
                     "examples": {
                         "type": "array",
                         "description": "Optional list of example inputs/outputs",
-                        "items": {"type": "object"}
-                    }
+                        "items": {"type": "object"},
+                    },
                 },
-                "required": ["name", "description", "parameters"]
-            }
+                "required": ["name", "description", "parameters"],
+            },
         ),
         MCPTool(
             name="execute_tool",
@@ -85,17 +86,14 @@ async def list_tools() -> list[MCPTool]:
             inputSchema={
                 "type": "object",
                 "properties": {
-                    "tool_id": {
-                        "type": "string",
-                        "description": "Tool ID or name"
-                    },
+                    "tool_id": {"type": "string", "description": "Tool ID or name"},
                     "arguments": {
                         "type": "object",
-                        "description": "Arguments to pass to the tool"
-                    }
+                        "description": "Arguments to pass to the tool",
+                    },
                 },
-                "required": ["tool_id", "arguments"]
-            }
+                "required": ["tool_id", "arguments"],
+            },
         ),
         MCPTool(
             name="list_registered_tools",
@@ -106,10 +104,10 @@ async def list_tools() -> list[MCPTool]:
                     "tags": {
                         "type": "array",
                         "description": "Optional filter by tags",
-                        "items": {"type": "string"}
+                        "items": {"type": "string"},
                     }
-                }
-            }
+                },
+            },
         ),
         MCPTool(
             name="get_tool",
@@ -117,13 +115,10 @@ async def list_tools() -> list[MCPTool]:
             inputSchema={
                 "type": "object",
                 "properties": {
-                    "tool_id": {
-                        "type": "string",
-                        "description": "Tool ID or name"
-                    }
+                    "tool_id": {"type": "string", "description": "Tool ID or name"}
                 },
-                "required": ["tool_id"]
-            }
+                "required": ["tool_id"],
+            },
         ),
         MCPTool(
             name="delete_tool",
@@ -131,13 +126,10 @@ async def list_tools() -> list[MCPTool]:
             inputSchema={
                 "type": "object",
                 "properties": {
-                    "tool_id": {
-                        "type": "string",
-                        "description": "Tool ID to delete"
-                    }
+                    "tool_id": {"type": "string", "description": "Tool ID to delete"}
                 },
-                "required": ["tool_id"]
-            }
+                "required": ["tool_id"],
+            },
         ),
         MCPTool(
             name="validate_tool",
@@ -145,19 +137,16 @@ async def list_tools() -> list[MCPTool]:
             inputSchema={
                 "type": "object",
                 "properties": {
-                    "tool_id": {
-                        "type": "string",
-                        "description": "Tool ID or name"
-                    }
+                    "tool_id": {"type": "string", "description": "Tool ID or name"}
                 },
-                "required": ["tool_id"]
-            }
+                "required": ["tool_id"],
+            },
         ),
         MCPTool(
             name="registry_stats",
             description="Get statistics about the tool registry",
-            inputSchema={"type": "object", "properties": {}}
-        )
+            inputSchema={"type": "object", "properties": {}},
+        ),
     ]
 
 
@@ -193,17 +182,17 @@ async def handle_create_tool(args: dict) -> list[TextContent]:
     parameters = args["parameters"]
     return_type = args.get("return_type", "Any")
     examples = args.get("examples", [])
-    
+
     logger.info(f"Creating tool: {name}")
-    
+
     tool = maker.create_tool(
         name=name,
         description=description,
         parameters=parameters,
         return_type=return_type,
-        examples=examples
+        examples=examples,
     )
-    
+
     if tool:
         tool_id = registry.register(tool)
         result = {
@@ -211,14 +200,14 @@ async def handle_create_tool(args: dict) -> list[TextContent]:
             "tool_id": tool_id,
             "name": tool.name,
             "message": f"Tool '{name}' created and registered successfully",
-            "code": tool.code
+            "code": tool.code,
         }
     else:
         result = {
             "success": False,
-            "error": "Failed to create tool - validation errors or generation failure"
+            "error": "Failed to create tool - validation errors or generation failure",
         }
-    
+
     return [TextContent(type="text", text=json.dumps(result, indent=2))]
 
 
@@ -226,34 +215,34 @@ async def handle_execute_tool(args: dict) -> list[TextContent]:
     """Handle execute_tool command"""
     tool_id = args["tool_id"]
     arguments = args["arguments"]
-    
+
     # Get tool by ID or name
     tool = registry.get(tool_id)
     if not tool:
         tool = registry.get_by_name(tool_id)
-    
+
     if not tool:
         result = {"success": False, "error": f"Tool '{tool_id}' not found"}
         return [TextContent(type="text", text=json.dumps(result, indent=2))]
-    
+
     logger.info(f"Executing tool: {tool.name}")
-    
+
     # Execute the tool
     exec_result = executor.execute(tool.code, tool.name, arguments)
-    
+
     # Update statistics
     if exec_result.get("success"):
         registry.update_stats(tool.id)
-    
+
     return [TextContent(type="text", text=json.dumps(exec_result, indent=2))]
 
 
 async def handle_list_tools(args: dict) -> list[TextContent]:
     """Handle list_registered_tools command"""
     tags = args.get("tags", None)
-    
+
     tools = registry.list_tools(tags=tags)
-    
+
     result = {
         "count": len(tools),
         "tools": [
@@ -265,69 +254,66 @@ async def handle_list_tools(args: dict) -> list[TextContent]:
                 "return_type": t.return_type,
                 "validated": t.validated,
                 "execution_count": t.execution_count,
-                "created_at": t.created_at
+                "created_at": t.created_at,
             }
             for t in tools
-        ]
+        ],
     }
-    
+
     return [TextContent(type="text", text=json.dumps(result, indent=2))]
 
 
 async def handle_get_tool(args: dict) -> list[TextContent]:
     """Handle get_tool command"""
     tool_id = args["tool_id"]
-    
+
     tool = registry.get(tool_id)
     if not tool:
         tool = registry.get_by_name(tool_id)
-    
+
     if not tool:
         result = {"success": False, "error": f"Tool '{tool_id}' not found"}
     else:
-        result = {
-            "success": True,
-            "tool": tool.to_dict()
-        }
-    
+        result = {"success": True, "tool": tool.to_dict()}
+
     return [TextContent(type="text", text=json.dumps(result, indent=2))]
 
 
 async def handle_delete_tool(args: dict) -> list[TextContent]:
     """Handle delete_tool command"""
     tool_id = args["tool_id"]
-    
+
     success = registry.delete(tool_id)
-    
+
     result = {
         "success": success,
-        "message": f"Tool deleted" if success else f"Tool '{tool_id}' not found"
+        "message": "Tool deleted" if success else f"Tool '{tool_id}' not found",
     }
-    
+
     return [TextContent(type="text", text=json.dumps(result, indent=2))]
 
 
 async def handle_validate_tool(args: dict) -> list[TextContent]:
     """Handle validate_tool command"""
     tool_id = args["tool_id"]
-    
+
     tool = registry.get(tool_id)
     if not tool:
         tool = registry.get_by_name(tool_id)
-    
+
     if not tool:
         result = {"success": False, "error": f"Tool '{tool_id}' not found"}
         return [TextContent(type="text", text=json.dumps(result, indent=2))]
-    
+
     is_valid, errors = validator.validate(tool.code)
-    
+
     result = {
         "tool_id": tool.id,
         "tool_name": tool.name,
         "is_valid": is_valid,
-        "errors": errors if not is_valid else []
+        "errors": errors if not is_valid else [],
     }
-    
+
     return [TextContent(type="text", text=json.dumps(result, indent=2))]
 
 
@@ -340,13 +326,9 @@ async def handle_registry_stats(args: dict) -> list[TextContent]:
 async def main():
     """Run the MCP server"""
     logger.info("Starting LLM Maker MCP Server...")
-    
+
     async with stdio_server() as (read_stream, write_stream):
-        await app.run(
-            read_stream,
-            write_stream,
-            app.create_initialization_options()
-        )
+        await app.run(read_stream, write_stream, app.create_initialization_options())
 
 
 if __name__ == "__main__":

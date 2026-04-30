@@ -1,0 +1,90 @@
+workflow:
+  id: ProductDocumentation
+  inputs:
+    events:
+      cloud_events:
+        - type: input_message_received
+          data_schema:
+            type: string
+  nodes:
+    - id: GetProductInfoStep
+      type: dotnet
+      description: Gather information about the product
+      agent:
+        type: Steps.GetProductInfoStep, ProductDocumentation
+      on_complete:
+        - on_condition:
+            type: default
+            emits:
+              - event_type: GetProductInfo.OnResult
+
+    - id: GenerateDocumentationStep
+      type: dotnet
+      description: Generate structured product documentation with LLM
+      agent:
+        type: Steps.GenerateDocumentationStep, ProductDocumentation
+      on_complete:
+        - on_condition:
+            type: default
+            emits:
+              - event_type: GenerateDocumentation.OnResult
+
+    - id: ReviewDocumentationStep
+      type: dotnet
+      description: AI quality review — scores documentation 1-10 and provides feedback
+      agent:
+        type: Steps.ReviewDocumentationStep, ProductDocumentation
+      on_complete:
+        - on_condition:
+            type: custom
+            condition: result.Approved == true
+            emits:
+              - event_type: ReviewDocumentation.Approved
+        - on_condition:
+            type: custom
+            condition: result.Approved == false
+            emits:
+              - event_type: ReviewDocumentation.NeedsRevision
+
+    - id: PublishDocumentationStep
+      type: dotnet
+      description: Publish the approved documentation to disk with metadata
+      agent:
+        type: Steps.PublishDocumentationStep, ProductDocumentation
+      on_complete:
+        - on_condition:
+            type: default
+            emits:
+              - event_type: ProcessCompleted
+
+  orchestration:
+    - listen_for:
+        event: input_message_received
+        from: _workflow_
+      then:
+        - node: GetProductInfoStep
+
+    - listen_for:
+        event: GetProductInfo.OnResult
+        from: GetProductInfoStep
+      then:
+        - node: GenerateDocumentationStep
+
+    - listen_for:
+        event: GenerateDocumentation.OnResult
+        from: GenerateDocumentationStep
+      then:
+        - node: ReviewDocumentationStep
+
+    - listen_for:
+        event: ReviewDocumentation.Approved
+        from: ReviewDocumentationStep
+      then:
+        - node: PublishDocumentationStep
+
+    - listen_for:
+        event: ReviewDocumentation.NeedsRevision
+        from: ReviewDocumentationStep
+      then:
+        - node: GenerateDocumentationStep
+          function: RegenerateWithFeedbackAsync

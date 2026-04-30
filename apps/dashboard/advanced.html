@@ -7,16 +7,16 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: #333;
             padding: 15px;
         }
-        
+
         .container { max-width: 1800px; margin: 0 auto; }
-        
+
         header {
             background: white;
             border-radius: 12px;
@@ -24,7 +24,7 @@
             margin-bottom: 15px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
-        
+
         h1 {
             color: #667eea;
             font-size: 2.2em;
@@ -33,7 +33,7 @@
             align-items: center;
             gap: 10px;
         }
-        
+
         .live-indicator {
             width: 12px;
             height: 12px;
@@ -41,33 +41,33 @@
             border-radius: 50%;
             animation: pulse-dot 2s infinite;
         }
-        
+
         @keyframes pulse-dot {
             0%, 100% { opacity: 1; transform: scale(1); }
             50% { opacity: 0.6; transform: scale(1.1); }
         }
-        
+
         .grid-2col {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 15px;
             margin-bottom: 15px;
         }
-        
+
         .grid-3col {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 15px;
             margin-bottom: 15px;
         }
-        
+
         .card {
             background: white;
             border-radius: 10px;
             padding: 20px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
-        
+
         .card-title {
             font-size: 1.3em;
             font-weight: bold;
@@ -76,41 +76,41 @@
             border-bottom: 2px solid #667eea;
             padding-bottom: 8px;
         }
-        
+
         .gpu-card {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
         }
-        
+
         .gpu-card .card-title {
             color: white;
             border-bottom-color: rgba(255,255,255,0.3);
         }
-        
+
         .gpu-metrics {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             gap: 15px;
             margin-top: 15px;
         }
-        
+
         .gpu-metric {
             background: rgba(255,255,255,0.15);
             padding: 12px;
             border-radius: 8px;
         }
-        
+
         .gpu-metric-label {
             font-size: 0.85em;
             opacity: 0.9;
             margin-bottom: 5px;
         }
-        
+
         .gpu-metric-value {
             font-size: 1.8em;
             font-weight: bold;
         }
-        
+
         .progress-bar-container {
             background: rgba(255,255,255,0.2);
             border-radius: 8px;
@@ -118,7 +118,7 @@
             margin-top: 8px;
             overflow: hidden;
         }
-        
+
         .progress-bar-fill {
             height: 100%;
             background: rgba(255,255,255,0.9);
@@ -131,13 +131,13 @@
             font-weight: bold;
             color: #667eea;
         }
-        
+
         .stat-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
             gap: 12px;
         }
-        
+
         .stat-item {
             text-align: center;
             padding: 15px;
@@ -145,36 +145,36 @@
             border-radius: 8px;
             transition: transform 0.2s;
         }
-        
+
         .stat-item:hover {
             transform: translateY(-3px);
         }
-        
+
         .stat-value {
             font-size: 2em;
             font-weight: bold;
             color: #667eea;
             margin-bottom: 5px;
         }
-        
+
         .stat-label {
             font-size: 0.8em;
             color: #666;
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
-        
+
         .chart-container {
             position: relative;
             height: 300px;
             margin-top: 15px;
         }
-        
+
         .job-list-compact {
             max-height: 400px;
             overflow-y: auto;
         }
-        
+
         .job-item-compact {
             display: flex;
             justify-content: space-between;
@@ -186,35 +186,35 @@
             border-left: 4px solid #667eea;
             transition: all 0.2s;
         }
-        
+
         .job-item-compact:hover {
             background: #e9ecef;
             transform: translateX(5px);
         }
-        
+
         .job-item-compact.succeeded { border-left-color: #28a745; }
         .job-item-compact.failed { border-left-color: #dc3545; }
-        .job-item-compact.running { 
+        .job-item-compact.running {
             border-left-color: #ffc107;
             animation: pulse 2s infinite;
         }
-        
+
         @keyframes pulse {
             0%, 100% { opacity: 1; }
             50% { opacity: 0.7; }
         }
-        
+
         .job-name-compact {
             font-weight: 600;
             color: #333;
             font-size: 0.95em;
         }
-        
+
         .job-metric-compact {
             font-size: 0.85em;
             color: #666;
         }
-        
+
         .job-status-dot {
             width: 10px;
             height: 10px;
@@ -222,19 +222,19 @@
             display: inline-block;
             margin-right: 8px;
         }
-        
+
         .status-succeeded { background: #28a745; }
         .status-failed { background: #dc3545; }
         .status-running { background: #ffc107; animation: pulse-dot 2s infinite; }
         .status-pending { background: #6c757d; }
-        
+
         .controls {
             display: flex;
             gap: 10px;
             align-items: center;
             flex-wrap: wrap;
         }
-        
+
         .btn {
             padding: 10px 20px;
             border: none;
@@ -244,28 +244,28 @@
             transition: all 0.3s;
             font-weight: 600;
         }
-        
+
         .btn-primary {
             background: #667eea;
             color: white;
         }
-        
+
         .btn-primary:hover {
             background: #5568d3;
             transform: translateY(-2px);
         }
-        
+
         .btn-secondary {
             background: #6c757d;
             color: white;
         }
-        
+
         .toggle-switch {
             display: flex;
             align-items: center;
             gap: 8px;
         }
-        
+
         .temperature-warning {
             background: #fff3cd;
             border: 1px solid #ffc107;
@@ -275,23 +275,23 @@
             margin-top: 10px;
             font-size: 0.9em;
         }
-        
+
         .system-card {
             background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
             color: white;
         }
-        
+
         .system-card .card-title {
             color: white;
             border-bottom-color: rgba(255,255,255,0.3);
         }
-        
+
         .last-update {
             color: #666;
             font-size: 0.85em;
             margin-left: auto;
         }
-        
+
         .notification {
             position: fixed;
             top: 20px;
@@ -304,27 +304,50 @@
             display: none;
             animation: slideIn 0.3s;
         }
-        
+
         @keyframes slideIn {
             from { transform: translateX(400px); opacity: 0; }
             to { transform: translateX(0); opacity: 1; }
         }
-        
+
         .notification.show {
             display: block;
         }
-        
+
         .notification.success {
             border-left: 4px solid #28a745;
         }
-        
+
         .notification.error {
             border-left: 4px solid #dc3545;
         }
+        /* Cross-app nav */
+        .app-nav { display:flex; gap:8px; padding:10px 20px; background:rgba(0,0,0,0.2); border-radius:12px; margin-bottom:16px; align-items:center; flex-wrap:wrap; }
+        .app-nav a { color:rgba(255,255,255,0.85); text-decoration:none; padding:6px 14px; border-radius:8px; font-size:0.88em; font-weight:500; transition:all 0.2s; background:rgba(255,255,255,0.06); }
+        .app-nav a:hover { background:rgba(255,255,255,0.15); transform:translateY(-1px); }
+        .app-nav a.active { background:rgba(102,126,234,0.35); color:#fff; }
+        .app-nav .nav-label { color:rgba(255,255,255,0.4); font-size:0.78em; text-transform:uppercase; letter-spacing:0.5px; margin-right:4px; }
+        .breadcrumb { display:flex; gap:6px; align-items:center; font-size:0.82em; color:rgba(255,255,255,0.5); margin-bottom:12px; }
+        .breadcrumb a { color:rgba(255,255,255,0.7); text-decoration:none; }
+        .breadcrumb a:hover { color:#fff; }
+        .breadcrumb .sep { margin:0 2px; }
     </style>
+    <link rel="stylesheet" href="../global-upgrade.css">
 </head>
 <body>
     <div class="container">
+        <nav class="app-nav">
+            <span class="nav-label">Navigate</span>
+            <a href="../aria/">👤 Aria</a>
+            <a href="../chat/">💬 Chat</a>
+            <a href="./" class="active">📊 Dashboard</a>
+            <a href="../store/">🛒 Store</a>
+        </nav>
+        <div class="breadcrumb">
+            <a href="./">Dashboard</a>
+            <span class="sep">›</span>
+            <span>Advanced</span>
+        </div>
         <header>
             <h1>
                 <span class="live-indicator"></span>
@@ -439,7 +462,7 @@
                 const data = await response.json();
                 updateQuickStats(data);
                 updateJobLists(data);
-                
+
                 // Check for new completions
                 const completedJobs = (data.jobs || []).filter(j => j.status === 'succeeded').length;
                 if (completedJobs > lastJobCount && lastJobCount > 0) {
@@ -463,7 +486,7 @@
 
         function displayGPUStatus(data) {
             const container = document.getElementById('gpuStatus');
-            
+
             if (!data.available) {
                 container.innerHTML = '<p style="opacity: 0.8;">GPU not available or nvidia-smi not found</p>';
                 return;
@@ -471,7 +494,7 @@
 
             const gpu = data.gpus[0]; // Primary GPU
             const tempColor = gpu.temperature > 80 ? '#dc3545' : gpu.temperature > 70 ? '#ffc107' : '#28a745';
-            
+
             container.innerHTML = `
                 <div style="margin-bottom: 10px;">
                     <strong style="font-size: 1.1em;">${gpu.name}</strong>
@@ -511,7 +534,7 @@
 
         function displaySystemStatus(data) {
             const container = document.getElementById('systemStatus');
-            
+
             if (data.error) {
                 container.innerHTML = '<p style="opacity: 0.8;">System info not available</p>';
                 return;
@@ -612,7 +635,7 @@
         function createCompactJobItem(job) {
             const statusClass = job.status || 'pending';
             const perplexity = job.metrics?.post_eval_perplexity;
-            
+
             return `
                 <div class="job-item-compact ${statusClass}">
                     <div>
@@ -628,10 +651,10 @@
 
         function updateCharts(data) {
             const jobs = data.jobs.filter(j => j.status === 'succeeded');
-            
+
             // Perplexity Chart
             if (perplexityChart) perplexityChart.destroy();
-            
+
             const ctx1 = document.getElementById('perplexityChart').getContext('2d');
             perplexityChart = new Chart(ctx1, {
                 type: 'bar',
@@ -664,7 +687,7 @@
 
             // Duration Chart
             if (durationChart) durationChart.destroy();
-            
+
             const ctx2 = document.getElementById('durationChart').getContext('2d');
             durationChart = new Chart(ctx2, {
                 type: 'line',
@@ -702,7 +725,7 @@
         }
 
         function updateTimestamp() {
-            document.getElementById('lastUpdate').textContent = 
+            document.getElementById('lastUpdate').textContent =
                 `Updated: ${new Date().toLocaleTimeString()}`;
         }
 
@@ -724,7 +747,7 @@
             document.getElementById('notifTitle').textContent = title;
             document.getElementById('notifMessage').textContent = message;
             notif.className = `notification ${type} show`;
-            
+
             setTimeout(() => {
                 notif.classList.remove('show');
             }, 5000);
@@ -745,13 +768,33 @@
                 });
         }
 
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            const isTyping = document.activeElement && (
+                document.activeElement.tagName === 'INPUT' ||
+                document.activeElement.tagName === 'TEXTAREA' ||
+                document.activeElement.tagName === 'SELECT' ||
+                document.activeElement.isContentEditable
+            );
+            if (isTyping) return;
+            const withMod = e.ctrlKey || e.metaKey;
+            if (withMod && e.key.toLowerCase() === 'r') { e.preventDefault(); refreshAll(); }
+        });
+
         // Initialize
         refreshAll();
-        
+
         // Request notification permission
         if ('Notification' in window && Notification.permission === 'default') {
             Notification.requestPermission();
         }
     </script>
+    <footer style="text-align:center;padding:24px 0 12px;color:rgba(255,255,255,0.45);font-size:0.82em;">
+        <a href="./" style="color:inherit;text-decoration:underline">Dashboard Hub</a> ·
+        <a href="unified.html" style="color:inherit;text-decoration:underline">Training</a> ·
+        <a href="analytics.html" style="color:inherit;text-decoration:underline">Analytics</a>
+        <div style="margin-top:6px">Part of the <a href="../aria/" style="color:inherit;text-decoration:underline">Aria</a> platform</div>
+    </footer>
+    <script src="../global-upgrade.js"></script>
 </body>
 </html>

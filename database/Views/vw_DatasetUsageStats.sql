@@ -1,7 +1,7 @@
 -- Dataset usage statistics and popularity
 CREATE VIEW [dbo].[vw_DatasetUsageStats]
 AS
-SELECT 
+SELECT
     d.DatasetId,
     d.Name,
     d.Category,
@@ -16,7 +16,7 @@ SELECT
     d.ValidationStatus
 FROM [dbo].[Datasets] d
 LEFT JOIN [dbo].[DatasetUsage] u ON d.DatasetId = u.DatasetId
-GROUP BY 
-    d.DatasetId, d.Name, d.Category, d.License, d.IsCommercialOk, 
+GROUP BY
+    d.DatasetId, d.Name, d.Category, d.License, d.IsCommercialOk,
     d.NumSamples, d.LastValidated, d.ValidationStatus;
 GO

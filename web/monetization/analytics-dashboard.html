@@ -342,7 +342,7 @@
         // Revenue Over Time Chart
         function initRevenueChart() {
             const ctx = document.getElementById('revenueChart').getContext('2d');
-            
+
             const data = {
                 labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
                 datasets: [{
@@ -392,7 +392,7 @@
         // Subscribers by Tier Chart
         function initTierChart() {
             const ctx = document.getElementById('tierChart').getContext('2d');
-            
+
             const data = {
                 labels: ['Free', 'Pro', 'Enterprise'],
                 datasets: [{
@@ -424,7 +424,7 @@
         // Revenue by Tier Chart
         function initRevenueByTierChart() {
             const ctx = document.getElementById('revenueByTierChart').getContext('2d');
-            
+
             const data = {
                 labels: ['Pro', 'Enterprise'],
                 datasets: [{
@@ -465,7 +465,7 @@
         // Usage Analytics Chart
         function initUsageChart() {
             const ctx = document.getElementById('usageChart').getContext('2d');
-            
+
             const data = {
                 labels: ['Chat Messages', 'Quantum Jobs', 'Training Hours', 'API Requests', 'Websites'],
                 datasets: [{
@@ -507,7 +507,7 @@
         // Populate top subscribers table
         function populateSubscribersTable() {
             const tbody = document.getElementById('subscribersBody');
-            
+
             const subscribers = [
                 { rank: 1, userId: 'ent_user_1', tier: 'Enterprise', mrr: 199, ltv: 2388, status: 'Active' },
                 { rank: 2, userId: 'ent_user_2', tier: 'Enterprise', mrr: 199, ltv: 2388, status: 'Active' },
@@ -547,7 +547,7 @@
         function refreshData() {
             console.log('Refreshing analytics data...');
             // In production, fetch latest data from API
-            alert('Data refreshed! (Demo mode)');
+            showToast('Data refreshed! (Demo mode)');
         }
 
         // Initialize everything on page load
@@ -558,6 +558,20 @@
             initUsageChart();
             populateSubscribersTable();
         });
+    </script>
+    <div id="aria-toast" style="position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(120%);background:#1e1e2e;color:#fff;padding:14px 24px;border-radius:10px;box-shadow:0 8px 32px rgba(0,0,0,0.35);font-size:0.95em;z-index:9999;transition:transform 0.3s cubic-bezier(.22,1,.36,1),opacity 0.3s;opacity:0;max-width:90vw;text-align:center;pointer-events:none"></div>
+    <script>
+    function showToast(msg, duration) {
+        var t = document.getElementById('aria-toast');
+        t.textContent = msg;
+        t.style.transform = 'translateX(-50%) translateY(0)';
+        t.style.opacity = '1';
+        clearTimeout(t._timer);
+        t._timer = setTimeout(function() {
+            t.style.transform = 'translateX(-50%) translateY(120%)';
+            t.style.opacity = '0';
+        }, duration || 3000);
+    }
     </script>
 </body>
 </html>

@@ -31,12 +31,18 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
     body = _parse_body(req)
 
     prompt = params.get("prompt") or body.get("prompt")
-    provider_choice = params.get("provider") or body.get("provider") or os.getenv("DEFAULT_AI_PROVIDER", "local")
+    provider_choice = (
+        params.get("provider")
+        or body.get("provider")
+        or os.getenv("DEFAULT_AI_PROVIDER", "local")
+    )
     model = params.get("model") or body.get("model")
 
     if not prompt:
         return func.HttpResponse(
-            json.dumps({"error": "Missing 'prompt'"}), status_code=400, mimetype="application/json"
+            json.dumps({"error": "Missing 'prompt'"}),
+            status_code=400,
+            mimetype="application/json",
         )
 
     try:
@@ -49,7 +55,13 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
             "provider": info.name,
             "model": info.model,
         }
-        return func.HttpResponse(json.dumps(payload, ensure_ascii=False), status_code=200, mimetype="application/json")
+        return func.HttpResponse(
+            json.dumps(payload, ensure_ascii=False),
+            status_code=200,
+            mimetype="application/json",
+        )
     except Exception as e:  # noqa: BLE001
         logging.exception("AI HTTP run failed")
-        return func.HttpResponse(json.dumps({"error": str(e)}), status_code=500, mimetype="application/json")
+        return func.HttpResponse(
+            json.dumps({"error": str(e)}), status_code=500, mimetype="application/json"
+        )

@@ -66,10 +66,16 @@ Run a single-turn chat using the built-in local provider:
 python .\ai-projects\chat-cli\src\chat_cli.py --provider local --once "Hello there!"
 ```
 
-Start an interactive chat (local fallback):
+Start continuous autonomous chat (local fallback, default behavior):
 
 ```powershell
 python .\ai-projects\chat-cli\src\chat_cli.py --provider local
+```
+
+Force interactive stdin mode if you want to type messages manually:
+
+```powershell
+python .\ai-projects\chat-cli\src\chat_cli.py --provider local --interactive
 ```
 
 ## Use with OpenAI
@@ -95,11 +101,17 @@ Required environment variables (defaults shown):
 - `LMSTUDIO_BASE_URL` (default `http://127.0.0.1:1234/v1`)
 - `LMSTUDIO_MODEL` (default `local-model`)
 
+Optional authentication variables (for LM Studio servers with API token enabled):
+
+- `LM_API_TOKEN` (preferred)
+- `LMSTUDIO_API_KEY` (legacy compatibility)
+
 Example:
 
 ```powershell
 $env:LMSTUDIO_BASE_URL = "http://127.0.0.1:1234/v1"
 $env:LMSTUDIO_MODEL = "qwen2.5-coder-7b-instruct"
+$env:LM_API_TOKEN = "<your-lmstudio-token>"   # only if your LM Studio server requires auth
 python .\ai-projects\chat-cli\src\chat_cli.py --provider lmstudio
 ```
 
@@ -139,7 +151,7 @@ python .\ai-projects\chat-cli\src\chat_cli.py --provider azure
 
 ## Usage
 
-Basic interactive chat:
+Basic default launch:
 
 ```powershell
 python .\ai-projects\chat-cli\src\chat_cli.py
@@ -151,12 +163,20 @@ Useful flags:
 - `--system "..."` – set a custom system prompt
 - `--model <name>` – override model/deployment name (provider-specific)
 - `--once "message"` – run one message and exit
+- `--interactive` – use stdin-driven chat instead of the default autonomous loop
+- `--autonomous` – run unattended continuous chat without prompting for stdin
+- `--auto-seed "..."` – initial autonomous user message
+- `--auto-followup "..."` – follow-up message reused after each autonomous turn
+- `--auto-delay <seconds>` – pause between autonomous turns
+- `--max-turns <n>` – cap autonomous turns for testing; omit to run forever
 
 In interactive mode, commands:
 
 - `/new` – start a new conversation
 - `/save` – save current conversation to `logs/`
 - `/exit` – quit
+
+Autonomous mode is now the default. It uses a seed prompt for the first turn, then keeps sending a reusable follow-up prompt so the provider can continue without asking you for input. Stop it with `Ctrl+C`. Use `--interactive` to bring back manual stdin chat.
 
 ## Install dependencies
 

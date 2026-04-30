@@ -31,9 +31,9 @@ CREATE PROCEDURE [dbo].[sp_LogQuantumTrainingRun]
 AS
 BEGIN
     SET NOCOUNT ON;
-    
+
     SET @RunId = NEWID();
-    
+
     INSERT INTO [dbo].[QuantumTrainingRuns] (
         RunId, JobName, DatasetName, Backend, NumQubits, NumLayers, Entanglement,
         LearningRate, Epochs, BatchSize, TrainAccuracy, ValAccuracy, TestAccuracy,
@@ -50,11 +50,11 @@ BEGIN
         @CircuitDepth, @NumParameters, @StatusJsonPath, @ResultsJsonPath,
         @Status, @ErrorMessage, GETUTCDATE(), GETUTCDATE()
     );
-    
+
     -- Log dataset usage
     DECLARE @DatasetId UNIQUEIDENTIFIER;
     SELECT @DatasetId = DatasetId FROM [dbo].[Datasets] WHERE Name = @DatasetName;
-    
+
     IF @DatasetId IS NOT NULL
     BEGIN
         INSERT INTO [dbo].[DatasetUsage] (DatasetId, UsageType, ReferenceId, UsageDate)

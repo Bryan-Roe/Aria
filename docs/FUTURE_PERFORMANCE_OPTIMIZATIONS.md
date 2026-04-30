@@ -38,7 +38,7 @@ image_bytes = _fetch_image_cached(image_url)
 img = Image.open(io.BytesIO(image_bytes))
 ```
 
-**Estimated Impact**: 
+**Estimated Impact**:
 - Low frequency endpoint (vision inference)
 - Significant speedup (eliminates network I/O) for repeated URLs
 - **Priority**: Low (implement if vision endpoint becomes high-traffic)
@@ -81,15 +81,15 @@ def _cosine_batch(query: Sequence[float], embeddings: List[Sequence[float]]) -> 
     if _HAS_NUMPY and len(embeddings) > 10:
         query_arr = np.array(query, dtype=np.float32)
         emb_matrix = np.array(embeddings, dtype=np.float32)
-        
+
         # Normalize
         query_norm = query_arr / np.linalg.norm(query_arr)
         emb_norms = emb_matrix / np.linalg.norm(emb_matrix, axis=1, keepdims=True)
-        
+
         # Batch dot product
         similarities = np.dot(emb_norms, query_norm)
         return similarities.tolist()
-    
+
     # Fallback to Python loop
     return [_cosine(query, emb) for emb in embeddings]
 ```
@@ -131,7 +131,7 @@ def _exists_cached(path: str) -> bool:
         cached_val, cached_time = _file_cache[path]
         if now - cached_time < _CACHE_TTL:
             return cached_val
-    
+
     exists = os.path.exists(path)
     _file_cache[path] = (exists, now)
     return exists
@@ -146,7 +146,7 @@ def _exists_cached(path: str) -> bool:
 
 ### 4. Batch Processing Optimization Opportunities
 
-#### 4.1 quantum-ai/src/quantum_classifier.py - Batch Processing
+#### 4.1 ai-projects/quantum-ml/src/quantum_classifier.py - Batch Processing
 **Location**: `quantum_classifier.py` - `forward()` method
 
 **Issue**: Sequential processing of batch items in quantum circuit execution.

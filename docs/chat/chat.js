@@ -110,7 +110,7 @@ document.addEventListener('DOMContentLoaded', () => {
             e.preventDefault();
             sendMessage();
         }
-        if (e.key === 'k' && e.ctrlKey) {
+        if (e.key === 'k' && (e.ctrlKey || e.metaKey)) {
             e.preventDefault();
             newChat();
         }
@@ -198,7 +198,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Load saved conversations and settings
     loadFromStorage();
-    
+
     // Focus input
     messageInput.focus();
 
@@ -239,7 +239,7 @@ async function sendMessage() {
     console.log('- isProcessing:', isProcessing);
     console.log('- sendButton.disabled:', sendButton.disabled);
     console.log('- quantumMode:', quantumMode);
-    
+
     const text = messageInput.value.trim();
     if (!text || isProcessing) return;
 
@@ -276,14 +276,14 @@ async function sendMessage() {
     } catch (error) {
         console.error('Error:', error);
         typingIndicator.remove();
-        
+
         // Attempt retry if within limits
         if (retryCount < MAX_RETRIES && error.message.includes('HTTP')) {
             retryCount++;
             const delay = RETRY_DELAY * Math.pow(2, retryCount - 1);
             addMessage('system', `⚠️ Request failed. Retrying in ${delay/1000}s... (${retryCount}/${MAX_RETRIES})`);
             updateStatus(`Retrying ${retryCount}/${MAX_RETRIES}...`);
-            
+
             setTimeout(() => {
                 // Re-send by simulating button click
                 messages.pop(); // Remove the failed user message
@@ -312,8 +312,8 @@ async function sendMessage() {
 
 async function oneShotResponse(typingIndicator) {
     // Prepare messages with system prompt if provided
-    const apiMessages = systemPrompt ? 
-        [{ role: 'system', content: systemPrompt }, ...messages] : 
+    const apiMessages = systemPrompt ?
+        [{ role: 'system', content: systemPrompt }, ...messages] :
         messages;
 
     console.log('Sending non-streaming request to:', API_BASE);
@@ -329,24 +329,24 @@ async function oneShotResponse(typingIndicator) {
             stream: false
         })
     });
-    
+
     console.log('Response status:', response.status, response.statusText);
-    
+
     if (!response.ok) {
         const errorText = await response.text();
         console.error('Error response:', errorText);
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
     }
-    
+
     const data = await response.json();
     console.log('Response data:', data);
-    
+
     retryCount = 0;
     typingIndicator.remove();
     // Handle QAI backend response format
     const assistantMessage = data.response || data.choices?.[0]?.message?.content || 'No response received.';
     console.log('Assistant message:', assistantMessage);
-    
+
     addMessage('assistant', assistantMessage, true);
     messages.push({ role: 'assistant', content: assistantMessage });
     updateMessageCount();
@@ -374,15 +374,15 @@ async function streamResponse(typingIndicator) {
     chatMessages.scrollTop = chatMessages.scrollHeight;
 
     activeAbortController = new AbortController();
-    
+
     // Prepare messages with system prompt if provided
-    const apiMessages = systemPrompt ? 
-        [{ role: 'system', content: systemPrompt }, ...messages] : 
+    const apiMessages = systemPrompt ?
+        [{ role: 'system', content: systemPrompt }, ...messages] :
         messages;
-    
+
     console.log('Sending streaming request to:', STREAM_API);
     console.log('Request body:', { messages: apiMessages, temperature, max_tokens: maxOutputTokens, stream: true });
-    
+
     try {
         const response = await fetch(STREAM_API, {
             method: 'POST',
@@ -395,9 +395,9 @@ async function streamResponse(typingIndicator) {
             }),
             signal: activeAbortController.signal
         });
-        
+
         console.log('Stream response status:', response.status, response.statusText);
-        
+
         if (!response.ok || !response.body) {
             throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         }
@@ -412,7 +412,7 @@ async function streamResponse(typingIndicator) {
         while (true) {
             const { value, done } = await reader.read();
             if (done) break;
-            
+
             // QAI backend sends plain text chunks, not SSE
             const chunk = decoder.decode(value, { stream: true });
             if (chunk) {
@@ -423,7 +423,7 @@ async function streamResponse(typingIndicator) {
                 chatMessages.scrollTop = chatMessages.scrollHeight;
             }
         }
-        
+
         // After stream completes, render as markdown
         if (fullText) {
             try {
@@ -449,7 +449,7 @@ async function streamResponse(typingIndicator) {
     } catch (error) {
         typingIndicator.remove();
         assistantDiv.remove();
-        
+
         if (error.name === 'AbortError') {
             streamAborted = true;
             addMessage('system', '❌ Streaming cancelled by user.');
@@ -470,14 +470,14 @@ async function streamResponse(typingIndicator) {
 function addMessage(role, content, useMarkdown = false) {
     const messageDiv = document.createElement('div');
     messageDiv.className = `message ${role}`;
-    
+
     const contentDiv = document.createElement('div');
     contentDiv.className = 'message-content';
-    
+
     if (useMarkdown && typeof marked !== 'undefined' && role === 'assistant') {
         // Render markdown
         contentDiv.innerHTML = marked.parse(content);
-        
+
         // Add copy buttons to code blocks
         const codeBlocks = contentDiv.querySelectorAll('pre');
         codeBlocks.forEach(block => {
@@ -497,13 +497,13 @@ function addMessage(role, content, useMarkdown = false) {
     } else {
         contentDiv.textContent = content;
     }
-    
+
     messageDiv.appendChild(contentDiv);
     chatMessages.appendChild(messageDiv);
-    
+
     // Scroll to bottom
     chatMessages.scrollTop = chatMessages.scrollHeight;
-    
+
     messageCounter++;
     return messageDiv;
 }
@@ -511,15 +511,15 @@ function addMessage(role, content, useMarkdown = false) {
 function showTypingIndicator() {
     const indicatorDiv = document.createElement('div');
     indicatorDiv.className = 'message assistant';
-    
+
     const typingDiv = document.createElement('div');
     typingDiv.className = 'typing-indicator active';
     typingDiv.innerHTML = '<span></span><span></span><span></span>';
-    
+
     indicatorDiv.appendChild(typingDiv);
     chatMessages.appendChild(indicatorDiv);
     chatMessages.scrollTop = chatMessages.scrollHeight;
-    
+
     return indicatorDiv;
 }
 
@@ -567,13 +567,13 @@ function clearChat(preserveMessages = false) {
 
 function exportChat() {
     if (messages.length === 0) {
-        alert('No messages to export');
+        if (typeof showToast === 'function') showToast('No messages to export', 3000);
         return;
     }
 
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
     const filename = `chat-export-${timestamp}.json`;
-    
+
     const exportData = {
         timestamp: new Date().toISOString(),
         provider: currentProvider,
@@ -588,7 +588,7 @@ function exportChat() {
     a.download = filename;
     a.click();
     URL.revokeObjectURL(url);
-    
+
     updateStatus(`Exported ${messages.length} messages`);
 }
 
@@ -599,7 +599,7 @@ function importChat() {
     input.onchange = (e) => {
         const file = e.target.files[0];
         if (!file) return;
-        
+
         const reader = new FileReader();
         reader.onload = (event) => {
             try {
@@ -621,7 +621,7 @@ function importChat() {
                     throw new Error('Invalid chat export format');
                 }
             } catch (error) {
-                alert(`Failed to import: ${error.message}`);
+                if (typeof showToast === 'function') showToast(`Import failed: ${error.message}`, 4000);
             }
         };
         reader.readAsText(file);
@@ -645,7 +645,7 @@ function updateMessageCount() {
 async function generateAriaAvatar(regenerate = false) {
     const ariaAvatarContainer = document.getElementById('ariaAvatarContainer');
     const ariaAvatarImage = document.getElementById('ariaAvatarImage');
-    
+
     if (!regenerate && ariaAvatarGenerated) {
         ariaAvatarContainer.style.display = 'block';
         return;
@@ -656,11 +656,11 @@ async function generateAriaAvatar(regenerate = false) {
     try {
         // Use a more descriptive prompt for Aria's character
         const prompt = "Portrait of Aria, anime-style AI assistant character, purple gradient hair, cute anime girl, friendly expression, digital art, high quality, detailed, vibrant colors, soft lighting";
-        
+
         const response = await fetch(IMAGE_GEN_API, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
+            body: JSON.stringify({
                 prompt: prompt,
                 size: "512x512",
                 style: "anime"
@@ -672,14 +672,14 @@ async function generateAriaAvatar(regenerate = false) {
         }
 
         const result = await response.json();
-        
+
         if (result.image_url || result.image_data) {
             ariaAvatarUrl = result.image_url || `data:image/png;base64,${result.image_data}`;
             ariaAvatarImage.src = ariaAvatarUrl;
             ariaAvatarContainer.style.display = 'block';
             ariaAvatarGenerated = true;
             updateStatus('✅ Aria\'s avatar generated!');
-            
+
             // Add a chat message from Aria about her new appearance
             if (regenerate) {
                 addMessage('assistant', '✨ How do I look? I just got a fresh new appearance from the AI! 💜');
@@ -690,7 +690,7 @@ async function generateAriaAvatar(regenerate = false) {
     } catch (error) {
         console.error('Avatar generation error:', error);
         updateStatus(`⚠️ Avatar generation unavailable: ${error.message}`);
-        
+
         // Fallback: Use a placeholder or emoji-based avatar
         const ariaAvatarImage = document.getElementById('ariaAvatarImage');
         ariaAvatarImage.src = 'data:image/svg+xml,' + encodeURIComponent(`
@@ -733,7 +733,7 @@ async function handleImageUpload(event) {
     reader.onload = async (e) => {
         uploadedImageBase64 = e.target.result.split(',')[1]; // Remove data:image/...;base64, prefix
         uploadedImage = file.name;
-        
+
         // Show preview
         visionPreview.innerHTML = `
             <img src="${e.target.result}" alt="Preview">
@@ -761,7 +761,7 @@ async function handleImageUpload(event) {
             }
 
             const result = await response.json();
-            
+
             // Add AI message with vision results
             const visionMessage = `🖼️ **Image Analysis**: ${file.name}\n\n` +
                 `**Expression**: ${result.label} (${(result.confidence * 100).toFixed(1)}% confidence)\n\n` +
@@ -769,7 +769,7 @@ async function handleImageUpload(event) {
                     .sort((a, b) => b[1] - a[1])
                     .map(([label, score]) => `- ${label}: ${(score * 100).toFixed(1)}%`)
                     .join('\n')}`;
-            
+
             addMessage('assistant', visionMessage);
             updateStatus('✅ Image analyzed successfully');
         } catch (error) {
@@ -801,7 +801,7 @@ function updateStatus(text) {
     } else {
         statusText.style.color = '';
     }
-    
+
     setTimeout(() => {
         if (statusText.textContent === text) {
             statusText.textContent = 'Ready';
@@ -830,14 +830,14 @@ function loadFromStorage() {
         const savedTemp = localStorage.getItem('chatTemp');
         const savedMax = localStorage.getItem('chatMaxTokens');
         const savedSys = localStorage.getItem('chatSystemPrompt');
-        
+
         if (savedTheme === 'dark') {
             document.body.classList.add('dark-theme');
             toggleThemeButton.textContent = '☀️ Light';
                 } else {
                     toggleThemeButton.textContent = '🌙 Dark';
         }
-        
+
         if (saved) {
             messages = JSON.parse(saved);
             // Restore messages to UI
@@ -881,7 +881,7 @@ function loadFromStorage() {
 
 function toggleQuantumMode() {
     quantumMode = !quantumMode;
-    
+
     if (quantumMode) {
         quantumModeButton.textContent = '🔬 Quantum ON';
         quantumModeButton.classList.add('active');
@@ -889,7 +889,7 @@ function toggleQuantumMode() {
         quantumPanel.style.display = 'block';
         currentProvider = 'quantum';
         updateStatus('Quantum mode enabled');
-        
+
         // Fetch quantum info
         fetchQuantumInfo();
     } else {
@@ -900,7 +900,7 @@ function toggleQuantumMode() {
         currentProvider = 'auto';
         updateStatus('Quantum mode disabled');
     }
-    
+
     saveToStorage();
 }
 
@@ -922,11 +922,11 @@ async function fetchQuantumInfo() {
 
 async function performQuantumAnalysis(text) {
     if (!quantumMode) return null;
-    
+
     try {
         // Convert text to features (simple hash-based approach)
         const features = textToFeatures(text);
-        
+
         const response = await fetch(QUANTUM_CLASSIFY_API, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -936,26 +936,26 @@ async function performQuantumAnalysis(text) {
                 n_layers: 2
             })
         });
-        
+
         if (!response.ok) {
             throw new Error(`Quantum API error: ${response.status}`);
         }
-        
+
         const data = await response.json();
-        
+
         // Update quantum panel
-        document.getElementById('quantumClassification').textContent = 
+        document.getElementById('quantumClassification').textContent =
             data.classification.toUpperCase();
-        document.getElementById('quantumConfidence').textContent = 
+        document.getElementById('quantumConfidence').textContent =
             (data.confidence * 100).toFixed(1) + '%';
-        document.getElementById('quantumQubits').textContent = 
+        document.getElementById('quantumQubits').textContent =
             data.quantum_state.n_qubits;
-        document.getElementById('quantumLayers').textContent = 
+        document.getElementById('quantumLayers').textContent =
             data.quantum_state.n_layers;
-        
+
         // Get circuit visualization
         await fetchCircuitVisualization(data.quantum_state.n_qubits, data.quantum_state.n_layers);
-        
+
         return data;
     } catch (error) {
         console.error('Quantum analysis failed:', error);
@@ -975,7 +975,7 @@ async function fetchCircuitVisualization(nQubits, nLayers) {
                 entanglement: 'linear'
             })
         });
-        
+
         if (response.ok) {
             const data = await response.json();
             const vizElement = document.querySelector('.circuit-display');
@@ -993,27 +993,26 @@ function textToFeatures(text) {
     // Using character codes and length statistics
     const features = [];
     const normalized = text.toLowerCase();
-    
+
     // Add basic statistics
     features.push(normalized.length / 100.0);  // Normalized length
     features.push(normalized.split(' ').length / 50.0);  // Word count
     features.push(normalized.split('?').length / 10.0);  // Question marks
     features.push(normalized.split('!').length / 10.0);  // Exclamation marks
-    
+
     // Add character distribution (simple hash)
     let sum = 0;
     for (let i = 0; i < Math.min(normalized.length, 20); i++) {
         sum += normalized.charCodeAt(i);
     }
     features.push((sum % 256) / 256.0);
-    
+
     // Pad or truncate to 8 features
     while (features.length < 8) {
         features.push(0.0);
     }
-    
+
     return features.slice(0, 8);
 }
 
 })();
-

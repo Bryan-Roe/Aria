@@ -34,7 +34,7 @@ To achieve the $2,000 monthly recurring revenue (MRR) target:
 - ❌ Priority Support
 - ❌ Commercial License
 
-**Conversion Strategy:** 
+**Conversion Strategy:**
 - Upsell to Pro after 100 messages
 - Show feature comparisons
 - Offer 7-day Pro trial

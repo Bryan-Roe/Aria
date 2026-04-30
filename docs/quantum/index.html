@@ -3,9 +3,154 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quantum AI Training Dashboard</title>
-    <link rel="stylesheet" href="/static/styles.css">
+    <title>Quantum ML Dashboard — Aria Demo</title>
+    <meta name="description" content="Quantum-enhanced classification, circuit inspection, and hybrid quantum-classical training workflow demo for the Aria platform.">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://bryan-roe.github.io/Aria/quantum/">
+    <meta name="theme-color" content="#0f9d89">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://bryan-roe.github.io/Aria/quantum/">
+    <meta property="og:title" content="Quantum ML Dashboard — Aria Demo">
+    <meta property="og:description" content="Quantum-enhanced classification, circuit inspection, and hybrid quantum-classical training workflow demo.">
+    <meta property="og:image" content="https://bryan-roe.github.io/Aria/og-image.svg">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Quantum ML Dashboard — Aria Demo">
+    <meta name="twitter:image" content="https://bryan-roe.github.io/Aria/og-image.svg">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='24' fill='%23122033'/%3E%3Ccircle cx='50' cy='36' r='16' fill='%230f9d89'/%3E%3Cpath d='M24 78c5-14 18-22 26-22s21 8 26 22' stroke='%23f7f2e8' stroke-width='10' stroke-linecap='round' fill='none'/%3E%3C/svg%3E">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+        :root{
+            --bg:#0a0a1a;--surface:rgba(255,255,255,.04);--surface-hover:rgba(255,255,255,.07);
+            --border:rgba(255,255,255,.08);--text:#e2e8f0;--text-muted:#94a3b8;
+            --primary:#6366f1;--primary-light:#818cf8;--danger:#ef4444;--success:#10b981;
+            --warning:#f59e0b;--radius:16px;
+        }
+        html{scroll-behavior:smooth}
+        body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+
+        /* Background effects */
+        .bg-particles{position:fixed;inset:0;overflow:hidden;pointer-events:none;z-index:0}
+        .bg-gradient-orb{position:fixed;border-radius:50%;filter:blur(120px);opacity:.15;pointer-events:none;z-index:0}
+        .orb-1{width:600px;height:600px;background:var(--primary);top:-200px;left:-200px}
+        .orb-2{width:500px;height:500px;background:#ec4899;bottom:-150px;right:-150px}
+        .orb-3{width:400px;height:400px;background:#3b82f6;top:50%;left:50%;transform:translate(-50%,-50%)}
+
+        .container{position:relative;z-index:1;max-width:1400px;margin:0 auto;padding:24px}
+        .back-link{display:inline-flex;align-items:center;gap:6px;color:var(--primary-light);text-decoration:none;font-size:.9em;margin-bottom:20px}
+        .back-link:hover{text-decoration:underline}
+
+        /* Header */
+        .header{text-align:center;padding:40px 0 32px}
+        .quantum-logo{position:relative;width:80px;height:80px;margin:0 auto 20px}
+        .logo-ring{position:absolute;border:2px solid;border-radius:50%;animation:spin linear infinite}
+        .ring-1{inset:0;border-color:var(--primary);animation-duration:4s}
+        .ring-2{inset:8px;border-color:#ec4899;animation-duration:3s;animation-direction:reverse}
+        .ring-3{inset:16px;border-color:#3b82f6;animation-duration:5s}
+        .logo-core{position:absolute;inset:24px;display:grid;place-items:center;font-weight:800;font-size:1.4em;color:var(--primary-light);background:rgba(99,102,241,.1);border-radius:50%}
+        @keyframes spin{to{transform:rotate(360deg)}}
+        .gradient-text{font-size:2.2em;font-weight:800;background:linear-gradient(135deg,#fff,var(--primary-light),#ec4899);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+        .subtitle{color:var(--text-muted);margin-top:8px}
+        .status-badge{display:inline-flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--border);border-radius:100px;padding:6px 16px;margin-top:16px;font-size:.85em}
+        .pulse-dot{width:8px;height:8px;border-radius:50%;background:var(--success);animation:pulse 2s ease infinite}
+        @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+        .demo-badge{display:inline-block;background:rgba(245,158,11,.15);color:var(--warning);padding:4px 14px;border-radius:100px;font-size:.8em;font-weight:600;margin-top:12px}
+
+        /* Glass panels */
+        .glass-panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;backdrop-filter:blur(12px);margin-bottom:20px}
+        .panel-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+        .panel-header h2{font-size:1.15em;font-weight:700;display:flex;align-items:center;gap:8px}
+        .icon-gradient{font-size:1.2em}
+        .panel-badge{font-size:.75em;font-weight:600;padding:3px 10px;border-radius:6px;background:rgba(99,102,241,.15);color:var(--primary-light)}
+
+        /* Layout */
+        .main-content{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+        @media(max-width:900px){.main-content{grid-template-columns:1fr}}
+
+        /* Form elements */
+        .form-group{margin-bottom:14px}
+        .form-group label{display:block;font-size:.85em;font-weight:600;color:var(--text-muted);margin-bottom:4px}
+        .form-control{width:100%;padding:10px 12px;background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:.95em}
+        .form-control:focus{outline:none;border-color:var(--primary)}
+        select.form-control{cursor:pointer}
+        .form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+        .info-text{font-size:.85em;color:var(--text-muted);margin-top:4px}
+
+        /* Buttons */
+        .button-group{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+        .btn{display:inline-flex;align-items:center;gap:6px;padding:10px 18px;border-radius:10px;font-weight:600;font-size:.9em;border:none;cursor:pointer;transition:all .2s}
+        .btn-primary{background:linear-gradient(135deg,var(--primary),#8b5cf6);color:#fff;box-shadow:0 4px 15px rgba(99,102,241,.3)}
+        .btn-primary:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(99,102,241,.4)}
+        .btn-danger{background:var(--danger);color:#fff}
+        .btn-danger:disabled{opacity:.4;cursor:not-allowed}
+        .btn-secondary{background:var(--surface);color:var(--text);border:1px solid var(--border)}
+        .btn-secondary:disabled{opacity:.4;cursor:not-allowed}
+        .btn-icon{font-size:1.1em}
+
+        /* Advanced settings */
+        details.advanced-settings{margin-top:12px}
+        details.advanced-settings summary{cursor:pointer;color:var(--primary-light);font-weight:600;font-size:.9em;padding:8px 0}
+        .advanced-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:8px}
+        .toggles{display:flex;flex-direction:column;gap:6px}
+        .checkbox{display:flex;align-items:center;gap:8px;font-size:.85em;cursor:pointer}
+
+        /* Circuit canvas */
+        .canvas-container{background:rgba(0,0,0,.2);border-radius:12px;padding:12px;text-align:center}
+        .canvas-container canvas{max-width:100%;border-radius:8px}
+        .circuit-stats{display:flex;gap:16px;font-size:.8em;color:var(--text-muted)}
+        .stat-label{font-weight:600}
+
+        /* Status panel */
+        .status-message{text-align:center;padding:20px}
+        .status-icon{font-size:2.5em;margin-bottom:8px}
+        .status-icon.spinning{animation:spin 2s linear infinite}
+        .status-details{text-align:left}
+        .status-item{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:.9em}
+        .status-item .label{color:var(--text-muted)}
+        .status-item .value{font-weight:600}
+        .live-indicator{display:flex;align-items:center;gap:6px;font-size:.8em;font-weight:600;color:var(--success)}
+        .live-dot{width:6px;height:6px;border-radius:50%;background:var(--success);animation:pulse 2s ease infinite}
+
+        /* Progress bar */
+        .progress-bar-container{margin-top:16px}
+        .progress-bar{height:8px;background:rgba(255,255,255,.08);border-radius:4px;overflow:hidden}
+        .progress-fill{height:100%;background:linear-gradient(90deg,var(--primary),var(--success));border-radius:4px;transition:width .3s}
+        .progress-text{font-size:.8em;color:var(--text-muted);margin-top:4px;text-align:center}
+
+        /* Accuracy display */
+        .accuracy-display{display:flex;align-items:center;gap:10px;flex:1}
+        .accuracy-bar{height:12px;background:linear-gradient(90deg,var(--primary),var(--success));border-radius:6px;transition:width .5s}
+        .accuracy-percent{font-weight:700;font-size:1.1em;color:var(--success)}
+        .metric-large{border-bottom:none;padding-top:12px}
+
+        /* Chart container */
+        .chart-container{background:rgba(0,0,0,.15);border-radius:12px;padding:16px;margin-bottom:12px}
+
+        /* Metrics legend */
+        .metrics-legend{display:flex;gap:16px;font-size:.8em}
+        .legend-item{display:flex;align-items:center;gap:4px}
+        .legend-color{width:12px;height:3px;border-radius:2px}
+
+        /* Results history */
+        .results-list{max-height:300px;overflow-y:auto}
+        .result-item{padding:12px;border-bottom:1px solid rgba(255,255,255,.04);display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center}
+        .result-item:hover{background:var(--surface-hover)}
+        .result-name{font-weight:600;font-size:.9em}
+        .result-meta{font-size:.8em;color:var(--text-muted)}
+        .result-acc{font-weight:700;color:var(--success)}
+        .refresh-btn{background:none;border:1px solid var(--border);border-radius:8px;padding:4px 12px;color:var(--text-muted);cursor:pointer;font-size:.85em}
+        .refresh-btn:hover{border-color:var(--primary);color:var(--primary-light)}
+        .error-message{color:var(--danger);font-size:.85em;margin-top:8px}
+
+        /* Evaluation */
+        .evaluation-section{margin-top:16px;padding-top:16px;border-top:1px solid var(--border)}
+
+        /* Footer */
+        .footer{text-align:center;padding:40px 0 24px;color:var(--text-muted);font-size:.85em}
+        .version{background:var(--surface);padding:2px 8px;border-radius:4px;font-size:.85em}
+        .footer-tech{margin-top:4px;font-size:.8em;opacity:.6}
+    </style>
+    <link rel="stylesheet" href="../global-upgrade.css">
 </head>
 <body>
     <!-- Background Effects -->
@@ -13,18 +158,18 @@
     <div class="bg-gradient-orb orb-1"></div>
     <div class="bg-gradient-orb orb-2"></div>
     <div class="bg-gradient-orb orb-3"></div>
-    
+
     <div class="container">
+        <a href="../" class="back-link">← Back to Aria Home</a>
+
         <!-- Header -->
         <header class="header">
             <div class="header-content">
-                <div class="logo-container">
-                    <div class="quantum-logo">
-                        <div class="logo-ring ring-1"></div>
-                        <div class="logo-ring ring-2"></div>
-                        <div class="logo-ring ring-3"></div>
-                        <div class="logo-core">Q</div>
-                    </div>
+                <div class="quantum-logo">
+                    <div class="logo-ring ring-1"></div>
+                    <div class="logo-ring ring-2"></div>
+                    <div class="logo-ring ring-3"></div>
+                    <div class="logo-core">Q</div>
                 </div>
                 <h1 class="gradient-text">Quantum AI Training Platform</h1>
                 <p class="subtitle">Enterprise-grade quantum machine learning with real-time visualization</p>
@@ -32,6 +177,7 @@
                     <span class="pulse-dot"></span>
                     <span>System Online</span>
                 </div>
+                <div class="demo-badge">Demo Mode — Simulated Data</div>
             </div>
         </header>
 
@@ -43,13 +189,15 @@
                     <h2><span class="icon-gradient">🎛️</span> Training Configuration</h2>
                     <div class="panel-badge">Advanced</div>
                 </div>
-                
+
                 <div class="form-group">
                     <label for="dataset-select">Dataset</label>
                     <select id="dataset-select" class="form-control">
-                        <option value="">Loading datasets...</option>
+                        <option value="iris">Iris (4 features, 3 classes)</option>
+                        <option value="wine">Wine (13 features, 3 classes)</option>
+                        <option value="moons">Two Moons (2 features, 2 classes)</option>
+                        <option value="circles">Concentric Circles (2 features, 2 classes)</option>
                     </select>
-                    <div id="dataset-info" class="info-text"></div>
                 </div>
 
                 <div class="form-row">
@@ -82,7 +230,7 @@
                 </div>
 
                 <!-- Advanced Settings -->
-                <details class="advanced-settings" id="advanced-settings">
+                <details class="advanced-settings">
                     <summary>Advanced Settings</summary>
                     <div class="advanced-grid">
                         <div class="form-group">
@@ -119,20 +267,16 @@
                 </details>
 
                 <div class="button-group">
-                    <button id="start-training-btn" class="btn btn-primary">
+                    <button id="start-training-btn" class="btn btn-primary" onclick="startDemoTraining()">
                         <span class="btn-icon">🚀</span> Start Training
                     </button>
-                    <button id="stop-training-btn" class="btn btn-danger" disabled>
+                    <button id="stop-training-btn" class="btn btn-danger" disabled onclick="stopDemoTraining()">
                         <span class="btn-icon">⏹️</span> Stop Training
                     </button>
                     <button id="export-metrics-btn" class="btn btn-secondary" disabled>
                         <span class="btn-icon">📥</span> Export Metrics
                     </button>
-                    <button id="evaluate-btn" class="btn btn-secondary" disabled>
-                        <span class="btn-icon">🧪</span> Evaluate
-                    </button>
                 </div>
-                <div id="validation-error" class="error-message" style="display: none;"></div>
             </div>
 
             <!-- Quantum Circuit Visualization -->
@@ -145,9 +289,9 @@
                     </div>
                 </div>
                 <div class="canvas-container">
-                    <canvas id="circuit-canvas" width="400" height="300"></canvas>
+                    <canvas id="circuit-canvas" width="400" height="200"></canvas>
                 </div>
-                <div id="circuit-info" class="info-text">Circuit will appear when training starts</div>
+                <div class="info-text" style="margin-top:8px">Circuit visualization updates during training</div>
             </div>
 
             <!-- Training Status Panel -->
@@ -159,67 +303,34 @@
                         <span>LIVE</span>
                     </div>
                 </div>
-                
+
                 <div id="status-idle" class="status-message">
                     <div class="status-icon">💤</div>
                     <p>Ready to train. Configure your model and click "Start Training".</p>
                 </div>
 
-                <div id="status-training" class="status-message" style="display: none;">
+                <div id="status-training" class="status-message" style="display:none">
                     <div class="status-icon spinning">⚛️</div>
                     <div class="status-details">
-                        <div class="status-item">
-                            <span class="label">Status:</span>
-                            <span id="status-text" class="value">Initializing...</span>
-                        </div>
-                        <div class="status-item">
-                            <span class="label">Epoch:</span>
-                            <span id="current-epoch" class="value">0</span>
-                        </div>
-                        <div class="status-item">
-                            <span class="label">Elapsed:</span>
-                            <span id="elapsed-time" class="value">0:00</span>
-                        </div>
-                        <div class="status-item">
-                            <span class="label">Current Loss:</span>
-                            <span id="current-loss" class="value">-</span>
-                        </div>
-                        <div class="status-item">
-                            <span class="label">Best Val Acc:</span>
-                            <span id="best-val-acc" class="value">0.00%</span>
-                        </div>
-                        <div class="status-item">
-                            <span class="label">Speed:</span>
-                            <span id="training-speed" class="value">- ep/s</span>
-                        </div>
-                        <div class="status-item">
-                            <span class="label">ETA:</span>
-                            <span id="eta-time" class="value">-</span>
-                        </div>
+                        <div class="status-item"><span class="label">Status:</span><span id="status-text" class="value">Initializing...</span></div>
+                        <div class="status-item"><span class="label">Epoch:</span><span id="current-epoch" class="value">0</span></div>
+                        <div class="status-item"><span class="label">Elapsed:</span><span id="elapsed-time" class="value">0:00</span></div>
+                        <div class="status-item"><span class="label">Current Loss:</span><span id="current-loss" class="value">—</span></div>
+                        <div class="status-item"><span class="label">Best Val Acc:</span><span id="best-val-acc" class="value">0.00%</span></div>
+                        <div class="status-item"><span class="label">Speed:</span><span id="training-speed" class="value">— ep/s</span></div>
                         <div class="status-item metric-large">
                             <span class="label">Live Accuracy:</span>
                             <div class="accuracy-display">
-                                <div id="accuracy-bar" class="accuracy-bar"></div>
+                                <div id="accuracy-bar" class="accuracy-bar" style="width:0"></div>
                                 <span id="accuracy-percent" class="accuracy-percent">0%</span>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="progress-bar-container" id="progress-container" style="display: none;">
-                    <div class="progress-bar">
-                        <div id="progress-fill" class="progress-fill"></div>
-                    </div>
+                <div class="progress-bar-container" id="progress-container" style="display:none">
+                    <div class="progress-bar"><div id="progress-fill" class="progress-fill" style="width:0"></div></div>
                     <div id="progress-text" class="progress-text">0% complete</div>
-                </div>
-
-                <!-- Evaluation Results -->
-                <div id="evaluation-section" class="evaluation-section" style="display: none;">
-                    <div class="panel-header small">
-                        <h3><span class="icon-gradient">🧪</span> Evaluation</h3>
-                    </div>
-                    <div id="eval-metrics" class="eval-metrics info-text"></div>
-                    <div id="confusion-matrix" class="confusion-matrix"></div>
                 </div>
             </div>
 
@@ -228,42 +339,176 @@
                 <div class="panel-header">
                     <h2><span class="icon-gradient">📈</span> Training Metrics</h2>
                     <div class="metrics-legend">
-                        <span class="legend-item"><span class="legend-color" style="background: #ef4444;"></span>Training</span>
-                        <span class="legend-item"><span class="legend-color" style="background: #10b981;"></span>Validation</span>
+                        <span class="legend-item"><span class="legend-color" style="background:#ef4444"></span>Training Loss</span>
+                        <span class="legend-item"><span class="legend-color" style="background:#10b981"></span>Validation Acc</span>
                     </div>
                 </div>
-                
-                <div class="chart-container">
-                    <canvas id="loss-chart"></canvas>
-                </div>
-                
-                <div class="chart-container">
-                    <canvas id="accuracy-chart"></canvas>
-                </div>
+                <div class="chart-container"><canvas id="loss-chart"></canvas></div>
+                <div class="chart-container"><canvas id="accuracy-chart"></canvas></div>
             </div>
 
-            <!-- Results History Panel -->
+            <!-- Results History -->
             <div class="panel results-panel glass-panel">
                 <div class="panel-header">
                     <h2><span class="icon-gradient">📚</span> Training History</h2>
-                    <button class="refresh-btn" onclick="loadResults()">🔄 Refresh</button>
                 </div>
                 <div id="results-list" class="results-list">
-                    <p class="info-text">No training sessions yet. Start training to see results here.</p>
+                    <div class="result-item"><div><div class="result-name">Iris — 4 qubits, 2 layers</div><div class="result-meta">200 epochs · 4m 32s · Adam</div></div><div class="result-acc">94.7%</div></div>
+                    <div class="result-item"><div><div class="result-name">Moons — 3 qubits, 3 layers</div><div class="result-meta">150 epochs · 3m 18s · Momentum</div></div><div class="result-acc">91.2%</div></div>
+                    <div class="result-item"><div><div class="result-name">Wine — 6 qubits, 2 layers</div><div class="result-meta">300 epochs · 8m 45s · Adam</div></div><div class="result-acc">87.3%</div></div>
+                    <div class="result-item"><div><div class="result-name">Circles — 2 qubits, 4 layers</div><div class="result-meta">100 epochs · 1m 56s · SGD</div></div><div class="result-acc">82.1%</div></div>
                 </div>
             </div>
         </div>
 
         <!-- Footer -->
         <footer class="footer">
-            <div class="footer-content">
-                <p class="footer-brand">Quantum AI Platform <span class="version">v2.0</span></p>
-                <p class="footer-tech">Powered by PennyLane • Flask • Chart.js</p>
-                <p class="footer-copyright">© 2025 Quantum Computing Research</p>
-            </div>
+            <p>Quantum AI Platform <span class="version">v2.0</span></p>
+            <p class="footer-tech">Powered by PennyLane · Qiskit · Chart.js</p>
         </footer>
     </div>
 
-    <script src="/static/app.js"></script>
+    <script>
+    // Chart.js configuration
+    const chartOpts = {responsive:true,animation:{duration:300},plugins:{legend:{display:false}},scales:{x:{grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'#94a3b8'}},y:{grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'#94a3b8'}}}};
+
+    const lossChart = new Chart(document.getElementById('loss-chart'),{
+        type:'line',
+        data:{labels:[],datasets:[{label:'Training Loss',data:[],borderColor:'#ef4444',borderWidth:2,pointRadius:0,tension:.3,fill:false}]},
+        options:{...chartOpts,scales:{...chartOpts.scales,y:{...chartOpts.scales.y,title:{display:true,text:'Loss',color:'#94a3b8'}}}}
+    });
+
+    const accChart = new Chart(document.getElementById('accuracy-chart'),{
+        type:'line',
+        data:{labels:[],datasets:[{label:'Validation Accuracy',data:[],borderColor:'#10b981',borderWidth:2,pointRadius:0,tension:.3,fill:false}]},
+        options:{...chartOpts,scales:{...chartOpts.scales,y:{...chartOpts.scales.y,min:0,max:1,title:{display:true,text:'Accuracy',color:'#94a3b8'}}}}
+    });
+
+    // Draw demo quantum circuit
+    function drawCircuit(nQubits, nLayers) {
+        const canvas = document.getElementById('circuit-canvas');
+        const ctx = canvas.getContext('2d');
+        const W = canvas.width, H = canvas.height;
+        ctx.clearRect(0,0,W,H);
+
+        const qSpacing = H / (nQubits + 1);
+        const lSpacing = (W - 80) / (nLayers * 2 + 1);
+        let gateCount = 0;
+
+        // Draw qubit wires
+        ctx.strokeStyle = 'rgba(255,255,255,.15)';
+        ctx.lineWidth = 1;
+        for (let q = 0; q < nQubits; q++) {
+            const y = qSpacing * (q + 1);
+            ctx.beginPath(); ctx.moveTo(30, y); ctx.lineTo(W - 30, y); ctx.stroke();
+            ctx.fillStyle = '#94a3b8'; ctx.font = '12px monospace';
+            ctx.fillText('q' + q, 8, y + 4);
+        }
+
+        // Draw gates per layer
+        const gateColors = ['#6366f1','#ec4899','#3b82f6','#f59e0b','#10b981'];
+        for (let l = 0; l < nLayers; l++) {
+            const x1 = 60 + l * 2 * lSpacing;
+            const x2 = x1 + lSpacing;
+
+            // RY gates
+            for (let q = 0; q < nQubits; q++) {
+                const y = qSpacing * (q + 1);
+                ctx.fillStyle = gateColors[l % gateColors.length];
+                ctx.beginPath(); ctx.arc(x1, y, 12, 0, Math.PI * 2); ctx.fill();
+                ctx.fillStyle = '#fff'; ctx.font = 'bold 10px sans-serif';
+                ctx.textAlign = 'center'; ctx.fillText('Ry', x1, y + 4);
+                gateCount++;
+            }
+
+            // CNOT gates (entanglement)
+            for (let q = 0; q < nQubits - 1; q++) {
+                const y1 = qSpacing * (q + 1), y2 = qSpacing * (q + 2);
+                ctx.strokeStyle = gateColors[(l + 1) % gateColors.length];
+                ctx.lineWidth = 2;
+                ctx.beginPath(); ctx.moveTo(x2, y1); ctx.lineTo(x2, y2); ctx.stroke();
+                ctx.fillStyle = gateColors[(l + 1) % gateColors.length];
+                ctx.beginPath(); ctx.arc(x2, y1, 4, 0, Math.PI * 2); ctx.fill();
+                ctx.beginPath(); ctx.arc(x2, y2, 8, 0, Math.PI * 2); ctx.fill();
+                ctx.strokeStyle = '#fff'; ctx.lineWidth = 1.5;
+                ctx.beginPath(); ctx.moveTo(x2 - 5, y2); ctx.lineTo(x2 + 5, y2); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(x2, y2 - 5); ctx.lineTo(x2, y2 + 5); ctx.stroke();
+                gateCount++;
+            }
+        }
+
+        ctx.textAlign = 'start';
+        document.getElementById('gate-count').textContent = gateCount;
+        document.getElementById('circuit-depth').textContent = nLayers * 2;
+    }
+
+    // Initialize circuit
+    drawCircuit(4, 2);
+    document.getElementById('n-qubits').addEventListener('change', () => drawCircuit(+document.getElementById('n-qubits').value, +document.getElementById('n-layers').value));
+    document.getElementById('n-layers').addEventListener('change', () => drawCircuit(+document.getElementById('n-qubits').value, +document.getElementById('n-layers').value));
+
+    // Demo training simulation
+    let trainingInterval = null;
+    let epoch = 0;
+    let startTime = 0;
+
+    function startDemoTraining() {
+        if (trainingInterval) return;
+        epoch = 0;
+        startTime = Date.now();
+        const maxEpochs = 200;
+
+        document.getElementById('status-idle').style.display = 'none';
+        document.getElementById('status-training').style.display = 'block';
+        document.getElementById('progress-container').style.display = 'block';
+        document.getElementById('start-training-btn').disabled = true;
+        document.getElementById('stop-training-btn').disabled = false;
+
+        lossChart.data.labels = [];
+        lossChart.data.datasets[0].data = [];
+        accChart.data.labels = [];
+        accChart.data.datasets[0].data = [];
+
+        trainingInterval = setInterval(() => {
+            epoch++;
+            const progress = epoch / maxEpochs;
+            const loss = 1.5 * Math.exp(-3 * progress) + 0.05 + (Math.random() - 0.5) * 0.08;
+            const acc = Math.min(0.95, 0.3 + 0.65 * (1 - Math.exp(-4 * progress)) + (Math.random() - 0.5) * 0.04);
+            const elapsed = ((Date.now() - startTime) / 1000).toFixed(0);
+            const mins = Math.floor(elapsed / 60);
+            const secs = String(elapsed % 60).padStart(2, '0');
+
+            document.getElementById('current-epoch').textContent = epoch;
+            document.getElementById('elapsed-time').textContent = mins + ':' + secs;
+            document.getElementById('current-loss').textContent = loss.toFixed(4);
+            document.getElementById('best-val-acc').textContent = (acc * 100).toFixed(1) + '%';
+            document.getElementById('training-speed').textContent = (epoch / elapsed * 1).toFixed(1) + ' ep/s';
+            document.getElementById('status-text').textContent = 'Training...';
+            document.getElementById('accuracy-bar').style.width = (acc * 100) + '%';
+            document.getElementById('accuracy-percent').textContent = (acc * 100).toFixed(1) + '%';
+            document.getElementById('progress-fill').style.width = (progress * 100) + '%';
+            document.getElementById('progress-text').textContent = Math.round(progress * 100) + '% complete';
+
+            lossChart.data.labels.push(epoch);
+            lossChart.data.datasets[0].data.push(loss);
+            lossChart.update('none');
+            accChart.data.labels.push(epoch);
+            accChart.data.datasets[0].data.push(acc);
+            accChart.update('none');
+
+            if (epoch >= maxEpochs) stopDemoTraining();
+        }, 80);
+    }
+
+    function stopDemoTraining() {
+        clearInterval(trainingInterval);
+        trainingInterval = null;
+        document.getElementById('status-text').textContent = 'Completed';
+        document.getElementById('start-training-btn').disabled = false;
+        document.getElementById('stop-training-btn').disabled = true;
+    }
+    </script>
+    <script src="../aria-nav.js"></script>
+    <script src="../global-upgrade.js"></script>
 </body>
 </html>

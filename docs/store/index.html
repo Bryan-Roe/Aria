@@ -1,0 +1,917 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aria Store - Plans, Access, and Adoption</title>
+  <meta name="description" content="Choose a plan, browse product surfaces, and navigate pricing, checkout, account, and enterprise adoption paths for the Aria platform.">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://bryan-roe.github.io/Aria/store/">
+  <meta name="theme-color" content="#0f9d89">
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://bryan-roe.github.io/Aria/store/">
+  <meta property="og:title" content="Aria Store — Plans, Access, and Adoption">
+  <meta property="og:description" content="Choose a plan, browse product surfaces, and navigate pricing, checkout, account, and enterprise adoption paths for the Aria platform.">
+  <meta property="og:image" content="https://bryan-roe.github.io/Aria/og-image.svg">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Aria Store — Plans, Access, and Adoption">
+  <meta name="twitter:description" content="Choose a plan, browse products, and navigate pricing, checkout, account, and enterprise adoption for the Aria platform.">
+  <meta name="twitter:image" content="https://bryan-roe.github.io/Aria/og-image.svg">
+
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='24' fill='%23122033'/%3E%3Ccircle cx='50' cy='36' r='16' fill='%230f9d89'/%3E%3Cpath d='M24 78c5-14 18-22 26-22s21 8 26 22' stroke='%23f7f2e8' stroke-width='10' stroke-linecap='round' fill='none'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../global-upgrade.css">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+
+    :root {
+      --paper: #f7f2e8;
+      --paper-soft: #f2eadc;
+      --ink: #122033;
+      --ink-soft: #5f6874;
+      --line: rgba(18, 32, 51, 0.12);
+      --panel: rgba(255, 255, 255, 0.76);
+      --panel-strong: rgba(255, 255, 255, 0.92);
+      --shadow: 0 24px 64px rgba(18, 32, 51, 0.12);
+      --shadow-soft: 0 16px 36px rgba(18, 32, 51, 0.08);
+      --teal: #0f9d89;
+      --coral: #d95b43;
+      --gold: #d3a53e;
+      --slate: #22405c;
+      --radius-xl: 30px;
+      --radius-lg: 22px;
+      --radius-md: 16px;
+      --radius-sm: 12px;
+      --transition: 220ms cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Instrument Sans", system-ui, sans-serif;
+      color: var(--ink);
+      background: linear-gradient(180deg, #fbf7ef 0%, #f7f2e8 56%, #efe5d6 100%);
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: -2;
+      background:
+        radial-gradient(circle at 16% 18%, rgba(15, 157, 137, 0.16), transparent 30%),
+        radial-gradient(circle at 86% 14%, rgba(217, 91, 67, 0.16), transparent 24%),
+        radial-gradient(circle at 60% 78%, rgba(211, 165, 62, 0.18), transparent 28%);
+      pointer-events: none;
+    }
+
+    body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      background-image:
+        linear-gradient(rgba(18, 32, 51, 0.032) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(18, 32, 51, 0.032) 1px, transparent 1px);
+      background-size: 34px 34px;
+      mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.82), transparent 92%);
+      pointer-events: none;
+    }
+
+    a { color: inherit; }
+
+    .shell {
+      width: min(1220px, calc(100vw - 32px));
+      margin: 0 auto;
+    }
+
+    .site-header {
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      backdrop-filter: blur(18px) saturate(1.4);
+      background: rgba(247, 242, 232, 0.78);
+      border-bottom: 1px solid rgba(18, 32, 51, 0.08);
+    }
+
+    .nav-shell {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      padding: 14px 0;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: var(--ink);
+    }
+
+    .brand-mark {
+      width: 42px;
+      height: 42px;
+      border-radius: 14px;
+      background:
+        radial-gradient(circle at 50% 34%, var(--teal) 0 11px, transparent 12px),
+        linear-gradient(180deg, var(--slate), #16283d);
+      position: relative;
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.16);
+    }
+
+    .brand-mark::after {
+      content: "";
+      position: absolute;
+      left: 9px;
+      right: 9px;
+      bottom: 8px;
+      height: 11px;
+      border-radius: 999px 999px 8px 8px;
+      border: 3px solid rgba(247, 242, 232, 0.96);
+      border-top: 0;
+    }
+
+    .brand-copy {
+      display: grid;
+      gap: 2px;
+    }
+
+    .brand-copy strong {
+      font-family: "Space Grotesk", sans-serif;
+      font-size: 1.08rem;
+      line-height: 1;
+      letter-spacing: -0.03em;
+    }
+
+    .brand-copy span {
+      font-size: 0.78rem;
+      color: var(--ink-soft);
+    }
+
+    .nav-toggle {
+      display: none;
+      align-items: center;
+      justify-content: center;
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.55);
+      color: var(--ink);
+      cursor: pointer;
+    }
+
+    .site-nav {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .site-nav a {
+      text-decoration: none;
+      padding: 10px 14px;
+      border-radius: 999px;
+      color: var(--ink-soft);
+      font-size: 0.94rem;
+      transition: background var(--transition), color var(--transition), transform var(--transition);
+    }
+
+    .site-nav a:hover,
+    .site-nav a:focus-visible,
+    .site-nav a.is-active {
+      background: rgba(255, 255, 255, 0.72);
+      color: var(--ink);
+      transform: translateY(-1px);
+      outline: none;
+    }
+
+    main {
+      padding: 28px 0 40px;
+      display: grid;
+      gap: 18px;
+    }
+
+    .hero-grid,
+    .paths-grid,
+    .plans-grid,
+    .signal-grid,
+    .links-grid {
+      display: grid;
+      gap: 16px;
+    }
+
+    .hero-grid {
+      grid-template-columns: minmax(0, 1.05fr) minmax(320px, 0.95fr);
+    }
+
+    .hero-card,
+    .route-card,
+    .plan-card,
+    .signal-card,
+    .link-card,
+    .comparison-card,
+    .footer-card {
+      background: var(--panel);
+      border: 1px solid rgba(255, 255, 255, 0.62);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+    }
+
+    .hero-card,
+    .route-card,
+    .plan-card,
+    .signal-card,
+    .link-card,
+    .comparison-card,
+    .footer-card {
+      border-radius: var(--radius-xl);
+    }
+
+    .hero-card,
+    .comparison-card,
+    .footer-card {
+      padding: 28px;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      margin: 0 0 14px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: var(--slate);
+    }
+
+    .eyebrow::before {
+      content: "";
+      width: 28px;
+      height: 2px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--teal), var(--coral));
+    }
+
+    h1, h2, h3, .metric strong, .plan-price {
+      font-family: "Space Grotesk", sans-serif;
+      letter-spacing: -0.04em;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(2.8rem, 6vw, 5rem);
+      line-height: 0.96;
+      max-width: 11ch;
+    }
+
+    h1 span { color: var(--coral); }
+
+    .hero-copy,
+    .hero-panel p,
+    .route-card p,
+    .plan-card p,
+    .signal-card p,
+    .link-card p,
+    .comparison-card p,
+    .metric span,
+    .plan-list li,
+    .comparison-list li,
+    .footer-card p {
+      color: var(--ink-soft);
+      line-height: 1.7;
+    }
+
+    .hero-copy {
+      margin: 16px 0 0;
+      max-width: 62ch;
+      font-size: 1.05rem;
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 24px;
+    }
+
+    .button-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 48px;
+      padding: 0 18px;
+      border-radius: 999px;
+      border: 1px solid rgba(18, 32, 51, 0.1);
+      text-decoration: none;
+      color: var(--ink);
+      background: rgba(255, 255, 255, 0.74);
+      font-weight: 700;
+      transition: transform var(--transition), background var(--transition), box-shadow var(--transition);
+    }
+
+    .button-link:hover,
+    .button-link:focus-visible {
+      transform: translateY(-2px);
+      background: rgba(255, 255, 255, 0.92);
+      outline: none;
+    }
+
+    .button-link.primary {
+      background: linear-gradient(135deg, var(--teal), #1bb6a4);
+      color: #f6fffd;
+      border-color: transparent;
+      box-shadow: 0 14px 28px rgba(15, 157, 137, 0.24);
+    }
+
+    .metrics-row {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 24px;
+    }
+
+    .metric {
+      padding: 16px;
+      border-radius: var(--radius-md);
+      background: rgba(255, 255, 255, 0.7);
+      border: 1px solid rgba(18, 32, 51, 0.08);
+      box-shadow: var(--shadow-soft);
+    }
+
+    .metric strong {
+      display: block;
+      font-size: 1.4rem;
+      line-height: 1;
+    }
+
+    .metric span {
+      display: block;
+      margin-top: 8px;
+      font-size: 0.84rem;
+      line-height: 1.45;
+    }
+
+    .hero-panel {
+      display: grid;
+      gap: 12px;
+    }
+
+    .signal-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      margin-top: 12px;
+    }
+
+    .signal-card,
+    .route-card,
+    .plan-card,
+    .link-card {
+      padding: 22px;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 10px;
+      border-radius: 999px;
+      background: rgba(18, 32, 51, 0.06);
+      color: var(--ink-soft);
+      font-size: 0.74rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    .paths-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .route-card,
+    .plan-card,
+    .link-card {
+      text-decoration: none;
+      color: inherit;
+      transition: transform var(--transition), background var(--transition), border-color var(--transition);
+    }
+
+    .route-card:hover,
+    .route-card:focus-visible,
+    .plan-card:hover,
+    .plan-card:focus-visible,
+    .link-card:hover,
+    .link-card:focus-visible {
+      transform: translateY(-2px);
+      background: var(--panel-strong);
+      outline: none;
+    }
+
+    .route-card[data-tone="teal"] { border-top: 5px solid rgba(15, 157, 137, 0.86); }
+    .route-card[data-tone="coral"] { border-top: 5px solid rgba(217, 91, 67, 0.86); }
+    .route-card[data-tone="gold"] { border-top: 5px solid rgba(211, 165, 62, 0.92); }
+
+    .route-card h3,
+    .plan-card h3,
+    .link-card h3,
+    .comparison-card h2 {
+      margin: 16px 0 0;
+      font-size: 1.34rem;
+      line-height: 1.1;
+    }
+
+    .route-card strong,
+    .plan-card strong,
+    .link-card strong {
+      display: inline-flex;
+      margin-top: 16px;
+      color: var(--slate);
+      font-size: 0.88rem;
+    }
+
+    .plans-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .plan-card.featured {
+      border: 1px solid rgba(15, 157, 137, 0.35);
+      box-shadow: 0 24px 64px rgba(15, 157, 137, 0.14);
+    }
+
+    .plan-price {
+      margin-top: 14px;
+      font-size: 2.3rem;
+      line-height: 1;
+    }
+
+    .plan-price span {
+      font-family: "Instrument Sans", system-ui, sans-serif;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--ink-soft);
+      letter-spacing: normal;
+    }
+
+    .plan-list,
+    .comparison-list {
+      list-style: none;
+      padding: 0;
+      margin: 18px 0 0;
+      display: grid;
+      gap: 10px;
+    }
+
+    .plan-list li,
+    .comparison-list li {
+      position: relative;
+      padding-left: 22px;
+      font-size: 0.92rem;
+    }
+
+    .plan-list li::before,
+    .comparison-list li::before {
+      content: "•";
+      position: absolute;
+      left: 0;
+      color: var(--teal);
+      font-weight: 800;
+    }
+
+    .plan-cta {
+      margin-top: 20px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 46px;
+      padding: 0 16px;
+      border-radius: 999px;
+      text-decoration: none;
+      font-weight: 700;
+      color: var(--ink);
+      background: rgba(255, 255, 255, 0.82);
+      border: 1px solid rgba(18, 32, 51, 0.1);
+    }
+
+    .plan-card.featured .plan-cta {
+      background: linear-gradient(135deg, var(--teal), #1bb6a4);
+      color: #f6fffd;
+      border-color: transparent;
+    }
+
+    .comparison-card {
+      display: grid;
+      grid-template-columns: minmax(0, 0.9fr) minmax(320px, 1.1fr);
+      gap: 24px;
+      align-items: start;
+    }
+
+    .comparison-table {
+      width: 100%;
+      border-collapse: collapse;
+      overflow: hidden;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.74);
+      box-shadow: var(--shadow-soft);
+    }
+
+    .comparison-table th,
+    .comparison-table td {
+      padding: 12px 14px;
+      border-bottom: 1px solid rgba(18, 32, 51, 0.08);
+      text-align: left;
+    }
+
+    .comparison-table th {
+      color: var(--slate);
+      font-size: 0.82rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .yes { color: var(--teal); font-weight: 700; }
+    .no { color: var(--coral); font-weight: 700; }
+
+    .links-grid {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    footer {
+      padding: 0 0 42px;
+    }
+
+    .footer-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .footer-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .footer-links a {
+      text-decoration: none;
+      padding: 10px 12px;
+      border-radius: 999px;
+      color: var(--ink-soft);
+      transition: background var(--transition), color var(--transition);
+    }
+
+    .footer-links a:hover,
+    .footer-links a:focus-visible {
+      background: rgba(255, 255, 255, 0.62);
+      color: var(--ink);
+      outline: none;
+    }
+
+    @media (max-width: 1080px) {
+      .hero-grid,
+      .comparison-card {
+        grid-template-columns: 1fr;
+      }
+
+      .paths-grid,
+      .plans-grid,
+      .links-grid,
+      .metrics-row,
+      .signal-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 820px) {
+      .shell {
+        width: min(1220px, calc(100vw - 20px));
+      }
+
+      .nav-toggle {
+        display: inline-flex;
+      }
+
+      .site-nav {
+        position: absolute;
+        left: 10px;
+        right: 10px;
+        top: calc(100% + 8px);
+        padding: 10px;
+        border-radius: 22px;
+        background: rgba(247, 242, 232, 0.96);
+        border: 1px solid rgba(18, 32, 51, 0.1);
+        box-shadow: var(--shadow);
+        display: none;
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .site-nav.open {
+        display: flex;
+      }
+
+      .site-nav a {
+        border-radius: 14px;
+      }
+
+      .paths-grid,
+      .plans-grid,
+      .links-grid,
+      .metrics-row,
+      .signal-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .hero-card,
+      .comparison-card,
+      .footer-card,
+      .route-card,
+      .plan-card,
+      .signal-card,
+      .link-card {
+        padding: 20px;
+      }
+
+      .footer-card {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+
+      *, *::before, *::after {
+        animation: none !important;
+        transition: none !important;
+      }
+    }
+
+    .skip-link {
+      position: absolute;
+      left: -9999px;
+      top: auto;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+    }
+
+    .skip-link:focus {
+      position: fixed;
+      top: 10px;
+      left: 10px;
+      width: auto;
+      height: auto;
+      padding: 10px 18px;
+      border-radius: 12px;
+      background: var(--ink);
+      color: var(--paper);
+      font-weight: 700;
+      font-size: 0.94rem;
+      text-decoration: none;
+      z-index: 9999;
+      outline: 2px solid var(--teal);
+      outline-offset: 2px;
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  <header class="site-header">
+    <div class="shell nav-shell">
+      <a class="brand" href="../">
+        <span class="brand-mark" aria-hidden="true"></span>
+        <span class="brand-copy">
+          <strong>Aria</strong>
+          <span>interactive AI character platform</span>
+        </span>
+      </a>
+      <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav" aria-label="Toggle navigation">Menu</button>
+      <nav class="site-nav" id="site-nav">
+        <a href="../">Home</a>
+        <a href="../documentation.html">Docs</a>
+        <a href="../aria/">Aria</a>
+        <a href="../chat/">Chat</a>
+        <a href="../dashboard/hub.html">Dashboards</a>
+        <a class="is-active" href="./">Store</a>
+        <a class="button-link primary" style="font-size:0.88rem;min-height:38px;padding:0 14px;" href="https://github.com/Bryan-Roe/Aria" target="_blank" rel="noreferrer">★ Star on GitHub</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="shell" id="main-content">
+    <section class="hero-grid">
+      <article class="hero-card">
+        <p class="eyebrow">Storefront and pricing</p>
+        <h1>Decide how to <span>adopt Aria</span> without decoding the repo.</h1>
+        <p class="hero-copy">The store should answer three questions immediately: what the platform unlocks, which plan fits the workload, and where a buyer or operator should go next. This page now routes all three cleanly.</p>
+        <div class="hero-actions">
+          <a class="button-link primary" href="../monetization/pricing.html">See pricing</a>
+          <a class="button-link" href="products.html">Browse catalog</a>
+          <a class="button-link" href="contact.html">Talk to sales</a>
+        </div>
+        <div class="metrics-row">
+          <div class="metric"><strong>3</strong><span>Adoption paths from free exploration to enterprise deployment.</span></div>
+          <div class="metric"><strong>35+</strong><span>APIs available across chat, vision, subscriptions, and quantum workflows.</span></div>
+          <div class="metric"><strong>6</strong><span>Provider routes including Azure OpenAI, OpenAI, LMStudio, LoRA, and local fallback.</span></div>
+          <div class="metric"><strong>1</strong><span>Commercial entry point that links pricing, checkout, account, and product pages.</span></div>
+        </div>
+      </article>
+
+      <aside class="hero-card hero-panel">
+        <div>
+          <p class="eyebrow">Buying signals</p>
+          <h2>Match the plan to the operating mode.</h2>
+          <p>If you are exploring local use, you should not land on enterprise language. If you need deployment, billing, or managed capacity, the path should be explicit.</p>
+        </div>
+        <div class="signal-grid">
+          <article class="signal-card">
+            <span class="chip">Free</span>
+            <h3>Local experimentation</h3>
+            <p>Best when you want the character demo, local fallback chat, and source access without account setup.</p>
+          </article>
+          <article class="signal-card">
+            <span class="chip">Pro</span>
+            <h3>Cloud-backed production work</h3>
+            <p>Move to managed providers, richer actions, training access, and operational dashboards.</p>
+          </article>
+          <article class="signal-card">
+            <span class="chip">Enterprise</span>
+            <h3>Dedicated capacity</h3>
+            <p>Use this path when you need real quantum workloads, managed infrastructure, or procurement support.</p>
+          </article>
+          <article class="signal-card">
+            <span class="chip">Operator</span>
+            <h3>Account and billing</h3>
+            <p>Return to account, subscription, checkout, or referral surfaces without bouncing through unrelated pages.</p>
+          </article>
+        </div>
+      </aside>
+    </section>
+
+    <section class="paths-grid">
+      <a class="route-card" data-tone="teal" href="../documentation.html">
+        <span class="chip">Evaluate</span>
+        <h3>Start with docs and local usage</h3>
+        <p>Use the docs hub when you need startup commands, architecture notes, training guides, and repo-wide navigation before buying anything.</p>
+        <strong>Open documentation</strong>
+      </a>
+      <a class="route-card" data-tone="coral" href="../monetization/pricing.html">
+        <span class="chip">Buy</span>
+        <h3>Compare plans and upgrade paths</h3>
+        <p>Go straight to pricing when the question is plan fit, commercial packaging, or feature access by tier.</p>
+        <strong>Open pricing</strong>
+      </a>
+      <a class="route-card" data-tone="gold" href="../monetization/account.html">
+        <span class="chip">Operate</span>
+        <h3>Manage active subscriptions</h3>
+        <p>Use the account and subscription surfaces for renewals, plan changes, referrals, and operational customer actions.</p>
+        <strong>Manage account</strong>
+      </a>
+    </section>
+
+    <section class="plans-grid">
+      <article class="plan-card">
+        <span class="chip">Explorer</span>
+        <h3>Free</h3>
+        <div class="plan-price">$0 <span>/ month</span></div>
+        <p>Use Aria locally, explore the character interface, and test provider fallbacks without commercial commitment.</p>
+        <ul class="plan-list">
+          <li>Local fallback chat and core character controls.</li>
+          <li>Source access and self-hosted experimentation.</li>
+          <li>Good fit for evaluation, demos, and developer onboarding.</li>
+        </ul>
+        <a class="plan-cta" href="../monetization/pricing.html">Compare free tier</a>
+      </article>
+
+      <article class="plan-card featured">
+        <span class="chip">Builder</span>
+        <h3>Pro</h3>
+        <div class="plan-price">$29 <span>/ month</span></div>
+        <p>For teams that need managed providers, full character workflows, dashboards, and richer model-backed features.</p>
+        <ul class="plan-list">
+          <li>Azure OpenAI and OpenAI provider routes.</li>
+          <li>LoRA fine-tuning allowance and world generation access.</li>
+          <li>Dashboard visibility with higher API throughput.</li>
+        </ul>
+        <a class="plan-cta" href="../monetization/checkout.html">Start Pro</a>
+      </article>
+
+      <article class="plan-card">
+        <span class="chip">Operator</span>
+        <h3>Enterprise</h3>
+        <div class="plan-price">Custom <span>engagement</span></div>
+        <p>For organizations that need managed infrastructure, real quantum workflows, custom deployment, or procurement support.</p>
+        <ul class="plan-list">
+          <li>Dedicated capacity and managed cloud resources.</li>
+          <li>Advanced training, deployment, and operator support paths.</li>
+          <li>Best fit for production rollout and platform integration.</li>
+        </ul>
+        <a class="plan-cta" href="contact.html">Talk to sales</a>
+      </article>
+    </section>
+
+    <section class="comparison-card">
+      <div>
+        <p class="eyebrow">Decision support</p>
+        <h2>What changes as you move up the stack.</h2>
+        <p>The store should show the operational consequences of each tier, not just a price. This comparison keeps the differences practical.</p>
+        <ul class="comparison-list">
+          <li>Free is for local evaluation and source-first exploration.</li>
+          <li>Pro is for provider-backed usage, richer runtime features, and faster execution paths.</li>
+          <li>Enterprise is for managed deployment, special access, and organizational onboarding.</li>
+        </ul>
+      </div>
+
+      <div style="overflow-x:auto;">
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Capability</th>
+              <th>Free</th>
+              <th>Pro</th>
+              <th>Enterprise</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>Local character demo</td><td class="yes">Yes</td><td class="yes">Yes</td><td class="yes">Yes</td></tr>
+            <tr><td>Managed AI providers</td><td class="no">No</td><td class="yes">Yes</td><td class="yes">Yes</td></tr>
+            <tr><td>LoRA fine-tuning access</td><td class="no">No</td><td class="yes">Yes</td><td class="yes">Yes</td></tr>
+            <tr><td>Quantum simulator access</td><td class="no">No</td><td class="yes">Yes</td><td class="yes">Yes</td></tr>
+            <tr><td>Real quantum workloads</td><td class="no">No</td><td class="no">No</td><td class="yes">Yes</td></tr>
+            <tr><td>Managed onboarding</td><td class="no">No</td><td class="no">No</td><td class="yes">Yes</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="links-grid">
+      <a class="link-card" href="products.html">
+        <span class="chip">Catalog</span>
+        <h3>Browse products</h3>
+        <p>Open the catalog surfaces when you want to view packaged product pages and storefront content.</p>
+        <strong>Open products</strong>
+      </a>
+      <a class="link-card" href="about.html">
+        <span class="chip">Context</span>
+        <h3>Read about the platform</h3>
+        <p>Use the about page for positioning, background, and broader product framing.</p>
+        <strong>Open about</strong>
+      </a>
+      <a class="link-card" href="../monetization/referrals.html">
+        <span class="chip">Growth</span>
+        <h3>Referral and incentive flows</h3>
+        <p>Jump directly to referral pages when the next step is growth, sharing, or campaign work.</p>
+        <strong>Open referrals</strong>
+      </a>
+      <a class="link-card" href="contact.html">
+        <span class="chip">Contact</span>
+        <h3>Talk to a human</h3>
+        <p>Use the contact page when the buyer needs answers before selecting a tier or moving to checkout.</p>
+        <strong>Open contact</strong>
+      </a>
+    </section>
+  </main>
+
+  <footer class="shell">
+    <div class="footer-card">
+      <p>The store now routes evaluation, pricing, account management, and enterprise contact as one coherent buying surface.</p>
+      <div class="footer-links">
+        <a href="../">Home</a>
+        <a href="../documentation.html">Docs</a>
+        <a href="../monetization/pricing.html">Pricing</a>
+        <a href="../monetization/account.html">Account</a>
+        <a href="https://github.com/Bryan-Roe/Aria/issues" target="_blank" rel="noreferrer">Issues</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    const navToggle = document.querySelector('.nav-toggle');
+    const siteNav = document.getElementById('site-nav');
+
+    navToggle?.addEventListener('click', () => {
+      const isOpen = siteNav.classList.toggle('open');
+      navToggle.setAttribute('aria-expanded', String(isOpen));
+    });
+
+    siteNav.querySelectorAll('a').forEach((link) => {
+      link.addEventListener('click', () => {
+        siteNav.classList.remove('open');
+        navToggle?.setAttribute('aria-expanded', 'false');
+      });
+    });
+  </script>
+  <script src="../global-upgrade.js"></script>
+</body>
+</html>

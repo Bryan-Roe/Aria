@@ -40,7 +40,7 @@ Or run the startup script:
          ↓
 ┌─────────────────┐
 │  Chat Providers │
-│(talk-to-ai/src) │
+│(ai-projects/chat-cli/src) │
 └─────────────────┘
 ```
 
@@ -70,7 +70,7 @@ Or run the startup script:
 
 ### 2. OpenAI
 - **Cost**: Pay per token (~$0.002/1K tokens for GPT-4o-mini)
-- **Setup**: 
+- **Setup**:
   ```powershell
   $env:OPENAI_API_KEY = "sk-..."
   ```
@@ -216,7 +216,7 @@ Edit `function_app.py`, add to the messages array:
 
 ```python
 messages.insert(0, {
-    "role": "system", 
+    "role": "system",
     "content": "You are a friendly cooking assistant."
 })
 ```
@@ -235,17 +235,17 @@ Then pass `?code=YOUR_FUNCTION_KEY` in API calls.
 
 ### "Cannot GET /api/chat-web"
 
-**Problem**: Function not found  
+**Problem**: Function not found
 **Solution**: Ensure `func start` is running and shows all 4 functions
 
 ### CORS Errors
 
-**Problem**: Browser blocks API calls  
+**Problem**: Browser blocks API calls
 **Solution**: CORS headers are included. Try opening directly at `http://localhost:7071/api/chat-web`
 
 ### "Import could not be resolved"
 
-**Problem**: Python linting errors  
+**Problem**: Python linting errors
 **Solution**: These are false positives. Run:
 ```powershell
 pip install azure-functions colorama
@@ -254,13 +254,13 @@ cd talk-to-ai; pip install -r requirements.txt
 
 ### Provider Errors
 
-**Problem**: "Configuration error" messages  
+**Problem**: "Configuration error" messages
 **Solution**: Check environment variables match your provider choice
 
 ### Server Won't Start
 
-**Problem**: `func start` fails  
-**Solution**: 
+**Problem**: `func start` fails
+**Solution**:
 1. Check Python version: `python --version` (need 3.8-3.11)
 2. Install Core Tools: `npm install -g azure-functions-core-tools@4`
 3. Check `local.settings.json` exists
@@ -302,7 +302,7 @@ View logs in Azure Portal:
 
 1. **Try Different Providers**: Set API keys and compare responses
 2. **Customize UI**: Change colors, fonts, layout
-3. **Add Features**: 
+3. **Add Features**:
    - Message history persistence
    - User authentication
    - File upload support
@@ -312,7 +312,7 @@ View logs in Azure Portal:
 ## 🆘 Support
 
 - Report issues in the main QAI repo
-- Check `talk-to-ai/README.md` for provider details
+- Check `ai-projects/chat-cli/README.md` for provider details
 - Review `.github/copilot-instructions.md` for architecture
 
 ## 🎉 Congratulations!

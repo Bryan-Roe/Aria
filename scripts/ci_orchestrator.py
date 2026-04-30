@@ -70,29 +70,39 @@ class CIOrchestrator:
         resolved: Dict[str, Optional[str]] = {}
         for key in config_keys:
             selected = resolve_existing_config_path(self.repo_root, key)
-            resolved[key] = str(selected.relative_to(self.repo_root)) if selected else None
+            resolved[key] = (
+                str(selected.relative_to(self.repo_root)) if selected else None
+            )
         return resolved
-    
+
     def validate_all_orchestrators(self) -> bool:
         """Run --dry-run on all orchestrators in parallel."""
         print("\n[ci] ========================================")
         print("[ci] Validating All Orchestrators")
         print("[ci] ========================================\n")
-        
+
         jobs = [
-            ValidationJob("autotrain", [sys.executable, "scripts/autotrain.py", "--dry-run"]),
-            ValidationJob("quantum_autorun", [sys.executable, "scripts/quantum_autorun.py", "--dry-run"]),
-            ValidationJob("evaluation_autorun", [sys.executable, "scripts/evaluation_autorun.py", "--dry-run"]),
+            ValidationJob(
+                "autotrain", [sys.executable, "scripts/autotrain.py", "--dry-run"]
+            ),
+            ValidationJob(
+                "quantum_autorun",
+                [sys.executable, "scripts/quantum_autorun.py", "--dry-run"],
+            ),
+            ValidationJob(
+                "evaluation_autorun",
+                [sys.executable, "scripts/evaluation_autorun.py", "--dry-run"],
+            ),
         ]
-        
+
         return self._run_parallel_jobs(jobs)
-    
+
     def run_unit_tests(self) -> bool:
         """Run all unit tests using test_runner."""
         print("\n[ci] Running Unit Tests")
         cmd = [sys.executable, "scripts/test_runner.py", "--unit"]
         return self._run_command("unit_tests", cmd)
-    
+
     def run_integration_tests(self) -> bool:
         """Run integration tests using test_runner."""
         print("\n[ci] Running Integration Tests")
@@ -119,15 +129,16 @@ class CIOrchestrator:
             "tests/test_integration_smoke_schema.py",
             "tests/test_status_schema_fixtures.py",
             "tests/test_integration_contract_gate_script.py",
+            "tests/test_agent_mode_delegation_contracts.py",
         ]
         return self._run_command("integration_contract_tests", cmd)
-    
+
     def validate_datasets(self) -> bool:
         """Validate dataset integrity."""
         print("\n[ci] Validating Datasets")
         cmd = [sys.executable, "scripts/validate_datasets.py", "--category", "chat"]
         return self._run_command("validate_datasets", cmd, critical=False)
-    
+
     def check_code_quality(self) -> bool:
         """Run code quality checks."""
         print("\n[ci] Checking Code Quality")
@@ -140,7 +151,7 @@ class CIOrchestrator:
         }
         self.results.append(result)
         return True
-    
+
     def security_scan(self) -> bool:
         """Run security vulnerability scanning."""
         print("\n[ci] Security Scanning")
@@ -152,29 +163,39 @@ class CIOrchestrator:
         }
         self.results.append(result)
         return True
-    
+
     def prepare_deployment(self) -> bool:
         """Prepare deployment artifacts."""
         print("\n[ci] Preparing Deployment Artifacts")
-        
+
         artifacts = {
             "timestamp": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
             "configurations": [],
             "models": [],
             "scripts": [],
         }
-        
+
         # Check for trained models
         lora_dir = self.repo_root / "data_out" / "lora_training"
         if lora_dir.exists():
             for adapter_dir in lora_dir.iterdir():
-                if adapter_dir.is_dir() and (adapter_dir / "adapter_config.json").exists():
-                    artifacts["models"].append({
-                        "type": "lora",
-                        "path": str(adapter_dir.relative_to(self.repo_root)),
-                        "size_mb": sum(f.stat().st_size for f in adapter_dir.rglob("*") if f.is_file()) / (1024 * 1024),
-                    })
-        
+                if (
+                    adapter_dir.is_dir()
+                    and (adapter_dir / "adapter_config.json").exists()
+                ):
+                    artifacts["models"].append(
+                        {
+                            "type": "lora",
+                            "path": str(adapter_dir.relative_to(self.repo_root)),
+                            "size_mb": sum(
+                                f.stat().st_size
+                                for f in adapter_dir.rglob("*")
+                                if f.is_file()
+                            )
+                            / (1024 * 1024),
+                        }
+                    )
+
         # List key configuration files
         config_candidates = {
             "autotrain",
@@ -185,20 +206,24 @@ class CIOrchestrator:
         for config_key in sorted(config_candidates):
             selected = resolve_existing_config_path(self.repo_root, config_key)
             if selected is not None:
-                artifacts["configurations"].append(str(selected.relative_to(self.repo_root)))
+                artifacts["configurations"].append(
+                    str(selected.relative_to(self.repo_root))
+                )
 
         local_settings = self.repo_root / "local.settings.json"
         if local_settings.exists():
-            artifacts["configurations"].append(str(local_settings.relative_to(self.repo_root)))
-        
+            artifacts["configurations"].append(
+                str(local_settings.relative_to(self.repo_root))
+            )
+
         # Save artifacts manifest
         manifest_file = self.data_out / "deployment_artifacts.json"
         with manifest_file.open("w") as f:
             json.dump(artifacts, f, indent=2)
-        
+
         print(f"[ci] Deployment artifacts manifest: {manifest_file}")
         print(f"[ci] Found {len(artifacts['models'])} trained models")
-        
+
         result = {
             "name": "prepare_deployment",
             "status": "succeeded",
@@ -215,34 +240,69 @@ class CIOrchestrator:
         print("\n[ci] Azure ML Job Spec Validation")
         aml_dir = self.repo_root / ".azureml"
         if not aml_dir.exists():
-            self.results.append({"name": "azureml_validate", "status": "skipped", "message": ".azureml directory missing"})
+            self.results.append(
+                {
+                    "name": "azureml_validate",
+                    "status": "skipped",
+                    "message": ".azureml directory missing",
+                }
+            )
             return True
-        job_specs = sorted(aml_dir.glob("job_*.yaml"), key=lambda p: p.stat().st_mtime, reverse=True)
+        job_specs = sorted(
+            aml_dir.glob("job_*.yaml"), key=lambda p: p.stat().st_mtime, reverse=True
+        )
         if not job_specs:
-            self.results.append({"name": "azureml_validate", "status": "skipped", "message": "No job_*.yaml files found"})
+            self.results.append(
+                {
+                    "name": "azureml_validate",
+                    "status": "skipped",
+                    "message": "No job_*.yaml files found",
+                }
+            )
             return True
         latest = job_specs[0]
         # Check az CLI presence
         try:
-            az_check = subprocess.run(["az", "version"], capture_output=True, text=True, timeout=30)
+            az_check = subprocess.run(
+                ["az", "version"], capture_output=True, text=True, timeout=30
+            )
         except Exception as e:
-            self.results.append({"name": "azureml_validate", "status": "skipped", "message": f"Azure CLI not available: {e}"})
+            self.results.append(
+                {
+                    "name": "azureml_validate",
+                    "status": "skipped",
+                    "message": f"Azure CLI not available: {e}",
+                }
+            )
             return True
         if az_check.returncode != 0:
-            self.results.append({"name": "azureml_validate", "status": "skipped", "message": "Azure CLI not installed or not in PATH"})
+            self.results.append(
+                {
+                    "name": "azureml_validate",
+                    "status": "skipped",
+                    "message": "Azure CLI not installed or not in PATH",
+                }
+            )
             return True
         # Perform validation
         try:
-            val_proc = subprocess.run(["az", "ml", "job", "validate", "--file", str(latest)], capture_output=True, text=True, timeout=120)
+            val_proc = subprocess.run(
+                ["az", "ml", "job", "validate", "--file", str(latest)],
+                capture_output=True,
+                text=True,
+                timeout=120,
+            )
             status = "succeeded" if val_proc.returncode == 0 else "failed"
-            self.results.append({
-                "name": "azureml_validate",
-                "status": status,
-                "job_file": str(latest.relative_to(self.repo_root)),
-                "return_code": val_proc.returncode,
-                "stdout_tail": val_proc.stdout[-500:] if val_proc.stdout else "",
-                "stderr_tail": val_proc.stderr[-500:] if val_proc.stderr else "",
-            })
+            self.results.append(
+                {
+                    "name": "azureml_validate",
+                    "status": status,
+                    "job_file": str(latest.relative_to(self.repo_root)),
+                    "return_code": val_proc.returncode,
+                    "stdout_tail": val_proc.stdout[-500:] if val_proc.stdout else "",
+                    "stderr_tail": val_proc.stderr[-500:] if val_proc.stderr else "",
+                }
+            )
             if status == "failed":
                 print(f"[ci] [FAIL] Azure ML validation failed for {latest}")
                 if val_proc.stderr:
@@ -251,18 +311,26 @@ class CIOrchestrator:
                 print(f"[ci] [OK] Azure ML validation passed: {latest}")
             return status == "succeeded"
         except subprocess.TimeoutExpired:
-            self.results.append({"name": "azureml_validate", "status": "timeout", "job_file": str(latest.relative_to(self.repo_root))})
+            self.results.append(
+                {
+                    "name": "azureml_validate",
+                    "status": "timeout",
+                    "job_file": str(latest.relative_to(self.repo_root)),
+                }
+            )
             return False
         except Exception as e:
-            self.results.append({"name": "azureml_validate", "status": "error", "message": str(e)})
+            self.results.append(
+                {"name": "azureml_validate", "status": "error", "message": str(e)}
+            )
             return False
-    
+
     def run_ci_pipeline(self) -> bool:
         """Run the full CI pipeline."""
         print("\n[ci] ========================================")
         print("[ci] Starting Full CI Pipeline")
         print("[ci] ========================================\n")
-        
+
         pipeline_steps = [
             ("Validate Orchestrators", self.validate_all_orchestrators),
             ("Integration Smoke", self.run_integration_smoke),
@@ -275,7 +343,7 @@ class CIOrchestrator:
             ("Prepare Deployment", self.prepare_deployment),
             ("Azure ML Validate", self.azureml_validate),
         ]
-        
+
         all_passed = True
         for step_name, step_func in pipeline_steps:
             print(f"\n[ci] Step: {step_name}")
@@ -285,17 +353,19 @@ class CIOrchestrator:
                 # Continue with remaining steps even on failure
             else:
                 print(f"[ci] [OK] Step passed: {step_name}")
-        
+
         self._save_results()
         return all_passed
-    
+
     def _run_parallel_jobs(self, jobs: List[ValidationJob]) -> bool:
         """Run multiple jobs in parallel."""
         all_passed = True
-        
+
         with ThreadPoolExecutor(max_workers=len(jobs)) as executor:
-            futures = {executor.submit(self._run_validation_job, job): job for job in jobs}
-            
+            futures = {
+                executor.submit(self._run_validation_job, job): job for job in jobs
+            }
+
             for future in as_completed(futures):
                 job = futures[future]
                 try:
@@ -306,26 +376,26 @@ class CIOrchestrator:
                 except Exception as e:
                     print(f"[ci] Exception in job {job.name}: {e}")
                     all_passed = False
-        
+
         return all_passed
-    
+
     def _run_validation_job(self, job: ValidationJob) -> Dict[str, Any]:
         """Run a single validation job."""
         print(f"[ci] Validating: {job.name}")
         t0 = time.perf_counter()
-        
+
         try:
             result = subprocess.run(
                 job.cmd,
                 cwd=str(self.repo_root),
                 capture_output=True,
                 text=True,
-                timeout=300  # 5 minute timeout
+                timeout=300,  # 5 minute timeout
             )
-            
+
             duration = time.perf_counter() - t0
             status = "succeeded" if result.returncode == 0 else "failed"
-            
+
             return {
                 "name": job.name,
                 "cmd": job.cmd,
@@ -347,57 +417,63 @@ class CIOrchestrator:
                 "message": str(e),
                 "critical": job.critical,
             }
-    
+
     def _run_command(self, name: str, cmd: List[str], critical: bool = True) -> bool:
         """Run a single command and track result."""
         t0 = time.perf_counter()
-        
+
         try:
             result = subprocess.run(
                 cmd,
                 cwd=str(self.repo_root),
                 capture_output=True,
                 text=True,
-                timeout=600  # 10 minute timeout
+                timeout=600,  # 10 minute timeout
             )
-            
+
             duration = time.perf_counter() - t0
             status = "succeeded" if result.returncode == 0 else "failed"
-            
-            self.results.append({
-                "name": name,
-                "cmd": cmd,
-                "status": status,
-                "return_code": result.returncode,
-                "duration_sec": round(duration, 2),
-                "critical": critical,
-            })
-            
+
+            self.results.append(
+                {
+                    "name": name,
+                    "cmd": cmd,
+                    "status": status,
+                    "return_code": result.returncode,
+                    "duration_sec": round(duration, 2),
+                    "critical": critical,
+                }
+            )
+
             if status != "succeeded":
                 print(f"[ci] Failed: {name}")
                 if result.stdout:
                     print(f"[ci] stdout: {result.stdout[-500:]}")  # Last 500 chars
                 if result.stderr:
                     print(f"[ci] stderr: {result.stderr[-500:]}")
-            
+
             return status == "succeeded"
-        
+
         except subprocess.TimeoutExpired:
-            self.results.append({
-                "name": name,
-                "status": "timeout",
-                "critical": critical,
-            })
+            self.results.append(
+                {
+                    "name": name,
+                    "status": "timeout",
+                    "critical": critical,
+                }
+            )
             return False
         except Exception as e:
-            self.results.append({
-                "name": name,
-                "status": "error",
-                "message": str(e),
-                "critical": critical,
-            })
+            self.results.append(
+                {
+                    "name": name,
+                    "status": "error",
+                    "message": str(e),
+                    "critical": critical,
+                }
+            )
             return False
-    
+
     def _save_results(self):
         """Save CI results to disk."""
         summary = {
@@ -411,44 +487,62 @@ class CIOrchestrator:
             "skipped": sum(1 for r in self.results if r["status"] == "skipped"),
             "results": self.results,
         }
-        
+
         results_file = self.data_out / "ci_results.json"
         with results_file.open("w") as f:
             json.dump(summary, f, indent=2, default=str)
-        
+
         print(f"\n[ci] Results saved: {results_file}")
         print(f"[ci] Summary: {summary['succeeded']}/{summary['total_steps']} passed")
 
 
 def main():
     ap = argparse.ArgumentParser(description="CI/CD Orchestrator")
-    ap.add_argument("--validate-all", action="store_true", help="Validate all orchestrators")
-    ap.add_argument("--quick-test", action="store_true", help="Run quick tests (unit only)")
+    ap.add_argument(
+        "--validate-all", action="store_true", help="Validate all orchestrators"
+    )
+    ap.add_argument(
+        "--quick-test", action="store_true", help="Run quick tests (unit only)"
+    )
     ap.add_argument("--full-test", action="store_true", help="Run all tests")
-    ap.add_argument("--prepare-deployment", action="store_true", help="Prepare deployment artifacts")
+    ap.add_argument(
+        "--prepare-deployment", action="store_true", help="Prepare deployment artifacts"
+    )
     ap.add_argument("--ci-pipeline", action="store_true", help="Run full CI pipeline")
-    ap.add_argument("--validate-azureml", action="store_true", help="Validate latest Azure ML job spec and schema")
-    ap.add_argument("--integration-smoke", action="store_true", help="Run fast integration smoke checks")
-    ap.add_argument("--integration-contract-tests", action="store_true", help="Run focused integration contract unit tests")
+    ap.add_argument(
+        "--validate-azureml",
+        action="store_true",
+        help="Validate latest Azure ML job spec and schema",
+    )
+    ap.add_argument(
+        "--integration-smoke",
+        action="store_true",
+        help="Run fast integration smoke checks",
+    )
+    ap.add_argument(
+        "--integration-contract-tests",
+        action="store_true",
+        help="Run focused integration contract unit tests",
+    )
     args = ap.parse_args()
-    
+
     ci = CIOrchestrator()
-    
+
     if args.validate_all:
         success = ci.validate_all_orchestrators()
         ci._save_results()
         sys.exit(0 if success else 1)
-    
+
     if args.quick_test:
         success = ci.run_unit_tests()
         ci._save_results()
         sys.exit(0 if success else 1)
-    
+
     if args.full_test:
         success = ci.run_unit_tests() and ci.run_integration_tests()
         ci._save_results()
         sys.exit(0 if success else 1)
-    
+
     if args.prepare_deployment:
         success = ci.prepare_deployment()
         ci._save_results()
@@ -463,7 +557,7 @@ def main():
         success = ci.run_integration_contract_tests()
         ci._save_results()
         sys.exit(0 if success else 1)
-    
+
     if args.ci_pipeline:
         success = ci.run_ci_pipeline()
         sys.exit(0 if success else 1)
@@ -472,7 +566,7 @@ def main():
         success = ci.azureml_validate()
         ci._save_results()
         sys.exit(0 if success else 1)
-    
+
     # Default: show help
     ap.print_help()
 

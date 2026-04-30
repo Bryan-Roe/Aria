@@ -13,23 +13,22 @@ Usage (PowerShell):
     --endpoint-name phi36-lora-ep `
     --base-model-id microsoft/Phi-3.5-mini-instruct
 """
-from pathlib import Path
+
 import argparse
 import time
+from pathlib import Path
 
 try:
-    from azure.identity import AzureCliCredential, DefaultAzureCredential
     from azure.ai.ml import MLClient
-    from azure.ai.ml.entities import (
-        ManagedOnlineEndpoint,
-        ManagedOnlineDeployment,
-        Model,
-        Environment,
-        CodeConfiguration,
-    )
     from azure.ai.ml.constants import AssetTypes
+    from azure.ai.ml.entities import (CodeConfiguration, Environment,
+                                      ManagedOnlineDeployment,
+                                      ManagedOnlineEndpoint, Model)
+    from azure.identity import AzureCliCredential, DefaultAzureCredential
 except Exception:
-    raise SystemExit("Install Azure ML SDK: pip install azure-ai-ml azure-identity")
+    raise SystemExit(
+        "Install Azure ML SDK: pip install azure-ai-ml azure-identity"
+    ) from None
 
 
 def get_credential():
@@ -69,13 +68,15 @@ def create_environment(ml: MLClient, env_name: str) -> Environment:
             "dependencies": [
                 "python=3.10",
                 "pip",
-                {"pip": [
-                    "transformers>=4.40.0",
-                    "peft>=0.10.0",
-                    "accelerate>=0.27.0",
-                    "torch>=2.2.0",
-                ]}
-            ]
+                {
+                    "pip": [
+                        "transformers>=4.40.0",
+                        "peft>=0.10.0",
+                        "accelerate>=0.27.0",
+                        "torch>=2.2.0",
+                    ]
+                },
+            ],
         },
     )
     try:
@@ -89,7 +90,11 @@ def main():
     ap.add_argument("--subscription-id", required=True)
     ap.add_argument("--resource-group", required=True)
     ap.add_argument("--workspace-name", required=True)
-    ap.add_argument("--adapter-path", default=None, help="Local path to lora_adapter (registers as model)")
+    ap.add_argument(
+        "--adapter-path",
+        default=None,
+        help="Local path to lora_adapter (registers as model)",
+    )
     ap.add_argument("--model-name", default="phi36-lora-adapter")
     ap.add_argument("--endpoint-name", default=None)
     ap.add_argument("--deployment-name", default="blue")
@@ -122,7 +127,9 @@ def main():
         name=args.deployment_name,
         endpoint_name=endpoint_name,
         model=f"azureml:{model.name}:{model.version}",
-        code_configuration=CodeConfiguration(code=str(code_dir), scoring_script="score_foundry.py"),
+        code_configuration=CodeConfiguration(
+            code=str(code_dir), scoring_script="score_foundry.py"
+        ),
         environment=f"{env.name}:{env.version}",
         instance_type=args.instance_type,
         instance_count=args.instance_count,

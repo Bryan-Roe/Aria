@@ -1,10 +1,9 @@
 import argparse
 import csv
 import json
-import os
 import random
 from pathlib import Path
-from typing import Iterable, Dict, Any, List, Tuple
+from typing import Any, Dict, Iterable, List, Tuple
 
 # Minimal, robust dataset converter and splitter for chat-style SFT
 # Input formats supported:
@@ -30,7 +29,12 @@ def read_csv(path: Path) -> Iterable[Dict[str, Any]]:
     with path.open("r", encoding="utf-8", newline="") as f:
         reader = csv.DictReader(f)
         # Accept common column pairs
-        col_pairs = [("prompt", "response"), ("input", "output"), ("question", "answer"), ("user", "assistant")]
+        col_pairs = [
+            ("prompt", "response"),
+            ("input", "output"),
+            ("question", "answer"),
+            ("user", "assistant"),
+        ]
         chosen: Tuple[str, str] | None = None
         cols = [c.lower() for c in reader.fieldnames or []]
         for a, b in col_pairs:
@@ -38,7 +42,9 @@ def read_csv(path: Path) -> Iterable[Dict[str, Any]]:
                 chosen = (a, b)
                 break
         if chosen is None:
-            raise ValueError(f"CSV must have one of column pairs: {col_pairs}; got: {reader.fieldnames}")
+            raise ValueError(
+                f"CSV must have one of column pairs: {col_pairs}; got: {reader.fieldnames}"
+            )
         a, b = chosen
         for row in reader:
             prompt = row.get(a) or ""
@@ -78,7 +84,9 @@ def normalize_record(obj: Dict[str, Any]) -> Dict[str, Any]:
                     {"role": "assistant", "content": str(obj[b])},
                 ]
             }
-    raise ValueError("Unsupported record format; expected messages[] or prompt/completion-style fields")
+    raise ValueError(
+        "Unsupported record format; expected messages[] or prompt/completion-style fields"
+    )
 
 
 def discover_inputs(input_path: Path) -> List[Path]:
@@ -105,13 +113,22 @@ def load_records(paths: List[Path]) -> Iterable[Dict[str, Any]]:
             raise ValueError(f"Unsupported file type: {p}")
 
 
-def stream_split_and_write(records: Iterable[Dict[str, Any]], train_path: Path, test_path: Path, train_ratio: float, seed: int) -> Tuple[int, int]:
+def stream_split_and_write(
+    records: Iterable[Dict[str, Any]],
+    train_path: Path,
+    test_path: Path,
+    train_ratio: float,
+    seed: int,
+) -> Tuple[int, int]:
     rnd = random.Random(seed)
     train_path.parent.mkdir(parents=True, exist_ok=True)
     test_path.parent.mkdir(parents=True, exist_ok=True)
     n_train = 0
     n_test = 0
-    with train_path.open("w", encoding="utf-8") as ftrain, test_path.open("w", encoding="utf-8") as ftest:
+    with (
+        train_path.open("w", encoding="utf-8") as ftrain,
+        test_path.open("w", encoding="utf-8") as ftest,
+    ):
         for obj in records:
             if rnd.random() < train_ratio:
                 ftrain.write(json.dumps(obj, ensure_ascii=False) + "\n")
@@ -144,11 +161,19 @@ def write_jsonl(path: Path, records: Iterable[Dict[str, Any]]) -> None:
 
 def main():
     ap = argparse.ArgumentParser(description="Prepare chat dataset for SFT (JSONL)")
-    ap.add_argument("--input", required=True, help="Path to source file or folder (jsonl/json/csv)")
-    ap.add_argument("--output-dir", default=str(Path(__file__).resolve().parents[1] / "data"), help="Output folder for train/test JSONL")
+    ap.add_argument(
+        "--input", required=True, help="Path to source file or folder (jsonl/json/csv)"
+    )
+    ap.add_argument(
+        "--output-dir",
+        default=str(Path(__file__).resolve().parents[1] / "data"),
+        help="Output folder for train/test JSONL",
+    )
     ap.add_argument("--train-file", default="train.json", help="Output train file name")
     ap.add_argument("--test-file", default="test.json", help="Output test file name")
-    ap.add_argument("--train-ratio", type=float, default=0.98, help="Train split ratio (0-1)")
+    ap.add_argument(
+        "--train-ratio", type=float, default=0.98, help="Train split ratio (0-1)"
+    )
     ap.add_argument("--seed", type=int, default=42)
     args = ap.parse_args()
 
@@ -159,7 +184,9 @@ def main():
 
     files = discover_inputs(input_path)
     # Stream through input to avoid memory blow-up on huge datasets
-    n_train, n_test = stream_split_and_write(load_records(files), train_path, test_path, args.train_ratio, args.seed)
+    n_train, n_test = stream_split_and_write(
+        load_records(files), train_path, test_path, args.train_ratio, args.seed
+    )
     if n_train + n_test == 0:
         raise RuntimeError("No valid records parsed from input")
     print(f"Wrote {n_train} train and {n_test} test examples to {out_dir}")

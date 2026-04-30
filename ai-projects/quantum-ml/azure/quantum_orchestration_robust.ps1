@@ -38,7 +38,7 @@ function Send-TeamsNotification([string]$title, [string]$message, [hashtable]$fa
 function Send-LogicAppNotification([string]$message, [string]$status){
   if (-not $LogicAppUrl) { return }
   try {
-    $payload = @{ 
+    $payload = @{
       message = $message;
       status = $status;
       workspace = $WorkspaceName;

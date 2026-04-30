@@ -20,11 +20,11 @@ stages:
         scriptType: 'pscore'
         scriptLocation: 'inlineScript'
         inlineScript: |
-          pwsh -NoLogo -NonInteractive -File "$(Build.SourcesDirectory)/quantum-ai/azure/quantum_master_orchestration.ps1" -ResourceGroup rg-quantum-ai -WorkspaceName quantum-ai-workspace -Location eastus
+          pwsh -NoLogo -NonInteractive -File "$(Build.SourcesDirectory)/ai-projects/quantum-ml/azure/quantum_master_orchestration.ps1" -ResourceGroup rg-quantum-ai -WorkspaceName quantum-ai-workspace -Location eastus
           # Or run the Logic App version and pass the URL:
-          # pwsh -File "$(Build.SourcesDirectory)/quantum-ai/azure/quantum_full_logicapp_orchestration.ps1" -LogicAppUrl "$(LOGIC_APP_URL)"
+          # pwsh -File "$(Build.SourcesDirectory)/ai-projects/quantum-ml/azure/quantum_full_logicapp_orchestration.ps1" -LogicAppUrl "$(LOGIC_APP_URL)"
     - task: PublishBuildArtifacts@1
       inputs:
-        PathtoPublish: '$(Build.SourcesDirectory)' 
+        PathtoPublish: '$(Build.SourcesDirectory)'
         ArtifactName: 'repo'
         publishLocation: 'Container'

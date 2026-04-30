@@ -11,7 +11,7 @@
     <!-- Configuration -->
     <None Include=".vscode\tasks.json" />
     <None Include="README.md" />
-    
+
     <!-- Tables -->
     <Build Include="Tables\QuantumTrainingRuns.sql" />
     <Build Include="Tables\LoRATrainingRuns.sql" />
@@ -20,12 +20,12 @@
     <Build Include="Tables\AzureQuantumJobs.sql" />
     <Build Include="Tables\OrchestratorJobs.sql" />
     <Build Include="Tables\MCPServerSessions.sql" />
-    
+
     <!-- Views -->
     <Build Include="Views\vw_TrainingRunsSummary.sql" />
     <Build Include="Views\vw_DatasetUsageStats.sql" />
     <Build Include="Views\vw_AzureQuantumCostTracking.sql" />
-    
+
     <!-- Stored Procedures -->
     <Build Include="StoredProcedures\sp_LogQuantumTrainingRun.sql" />
     <Build Include="StoredProcedures\sp_LogLoRATrainingRun.sql" />

@@ -474,9 +474,9 @@ while ($true) {
     Clear-Host
     Write-Host "=== AUTONOMOUS TRAINING MONITOR ===" -ForegroundColor Cyan
     Write-Host ""
-    
+
     python .\scripts\monitor_autonomous_training.py --summary
-    
+
     Write-Host "`nPress Ctrl+C to exit"
     Start-Sleep -Seconds 30
 }

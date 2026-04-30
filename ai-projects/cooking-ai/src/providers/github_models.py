@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import os
-from typing import List, Dict, Any, Optional
+from typing import Any, Dict, List, Optional
 
 try:
     from openai import OpenAI  # type: ignore
@@ -30,15 +30,15 @@ class GitHubModelsProvider:
             raise RuntimeError(
                 "openai package not available. Install with: pip install openai>=1.43.0"
             )
-        api_key = api_key or os.getenv("GITHUB_MODELS_API_KEY") or os.getenv("GITHUB_TOKEN")
+        api_key = (
+            api_key or os.getenv("GITHUB_MODELS_API_KEY") or os.getenv("GITHUB_TOKEN")
+        )
         if not api_key:
             raise RuntimeError(
                 "GitHub Models provider requires GITHUB_MODELS_API_KEY or GITHUB_TOKEN to be set."
             )
         self.model = model or os.getenv("GITHUB_MODELS_MODEL", "gpt-4o-mini")
-        self.temperature = (
-            0.4 if temperature is None else float(temperature)
-        )
+        self.temperature = 0.4 if temperature is None else float(temperature)
         # Create client with custom base URL
         self.client = OpenAI(api_key=api_key, base_url=base_url)
 

@@ -1,6 +1,6 @@
 # SQL Integration Automation Suite
 
-**Complete automation tools for deployment, monitoring, and maintenance**
+Complete automation tools for deployment, monitoring, and maintenance.
 
 ## Overview
 
@@ -9,11 +9,13 @@ This automation suite provides end-to-end management of the SQL integration with
 ## Automation Components
 
 ### 1. Master Deployment Script
+
 **File**: `scripts/deploy_sql_integration.ps1`
 
 One-command deployment orchestrating all integration steps.
 
 **Features**:
+
 - Environment validation (prerequisites, Azure CLI, packages)
 - Database migrations with rollback on failure
 - Comprehensive test execution
@@ -22,6 +24,7 @@ One-command deployment orchestrating all integration steps.
 - Status tracking and logging
 
 **Usage**:
+
 ```powershell
 # Local development
 .\scripts\deploy_sql_integration.ps1 -Environment Local
@@ -38,15 +41,18 @@ One-command deployment orchestrating all integration steps.
 ```
 
 **Exit Codes**:
+
 - `0`: Success
 - `1`: Failure (check log file in `data_out/`)
 
 ### 2. Threshold Auto-Tuning
+
 **File**: `scripts/tune_sql_thresholds.ps1`
 
 Analyzes Application Insights metrics and recommends optimal slow query thresholds.
 
 **Features**:
+
 - P50/P95/P99 percentile analysis
 - Alert frequency tracking
 - Environment-aware recommendations
@@ -54,6 +60,7 @@ Analyzes Application Insights metrics and recommends optimal slow query threshol
 - JSON analysis reports
 
 **Usage**:
+
 ```powershell
 # Analyze current metrics
 .\scripts\tune_sql_thresholds.ps1 `
@@ -77,17 +84,20 @@ Analyzes Application Insights metrics and recommends optimal slow query threshol
 **Output**: Analysis report saved to `data_out/threshold_analysis_*.json`
 
 ### 3. Query Metrics Cleanup
+
 **File**: `scripts/cleanup_query_metrics.py`
 
 Automated retention management for query performance tracking data.
 
 **Features**:
+
 - Configurable retention period
 - Table statistics before/after cleanup
 - Dry-run mode
 - Timestamped logging
 
 **Usage**:
+
 ```powershell
 # Default 7-day retention
 python .\scripts\cleanup_query_metrics.py
@@ -100,6 +110,7 @@ python .\scripts\cleanup_query_metrics.py --retention-days 7 --dry-run
 ```
 
 **Scheduling** (Windows Task Scheduler):
+
 ```powershell
 # Run weekly on Sundays at 2 AM
 $action = New-ScheduledTaskAction -Execute "python" -Argument ".\scripts\cleanup_query_metrics.py --retention-days 7" -WorkingDirectory "C:\path\to\repo"
@@ -108,11 +119,13 @@ Register-ScheduledTask -TaskName "QAI SQL Cleanup" -Action $action -Trigger $tri
 ```
 
 ### 4. Health Monitoring
+
 **File**: `scripts/sql_health_monitor.py`
 
 Continuous health monitoring with alerting capabilities.
 
 **Features**:
+
 - Connectivity probes
 - Pool saturation detection
 - Slow query frequency tracking
@@ -121,6 +134,7 @@ Continuous health monitoring with alerting capabilities.
 - JSON output mode
 
 **Usage**:
+
 ```powershell
 # Single health check
 python .\scripts\sql_health_monitor.py --once
@@ -139,22 +153,26 @@ python .\scripts\sql_health_monitor.py `
 ```
 
 **Exit Codes** (--once mode):
+
 - `0`: Healthy
 - `1`: Warning
 - `2`: Critical
 
 ### 5. PowerShell Module
+
 **File**: `scripts/QAI-SQL.psm1`
 
 Unified PowerShell cmdlet library for all SQL operations.
 
 **Features**:
+
 - 13 cmdlets covering all automation tasks
 - Auto-completion support
 - Inline help documentation
 - Session configuration management
 
 **Usage**:
+
 ```powershell
 # Import module
 Import-Module .\scripts\QAI-SQL.psm1
@@ -189,6 +207,7 @@ Enable-QAISQLQueryTracking
 ## Automation Workflows
 
 ### Workflow 1: Initial Deployment
+
 ```powershell
 # 1. Import module
 Import-Module .\scripts\QAI-SQL.psm1
@@ -204,6 +223,7 @@ Test-QAISQLHealth
 ```
 
 ### Workflow 2: Production Deployment
+
 ```powershell
 # 1. Dry-run first
 .\scripts\deploy_sql_integration.ps1 `
@@ -225,6 +245,7 @@ python .\scripts\sql_health_monitor.py --interval 60 --threshold-critical 90
 ```
 
 ### Workflow 3: Weekly Maintenance
+
 ```powershell
 # 1. Analyze and tune thresholds
 .\scripts\tune_sql_thresholds.ps1 `
@@ -240,19 +261,20 @@ python .\scripts\sql_health_monitor.py --once --json > health_report.json
 ```
 
 ### Workflow 4: CI/CD Integration
+
 ```yaml
 # Azure DevOps Pipeline example
 steps:
   - task: PowerShell@2
-    displayName: 'Deploy SQL Integration'
+    displayName: "Deploy SQL Integration"
     inputs:
-      filePath: 'scripts/deploy_sql_integration.ps1'
-      arguments: '-Environment Production -ResourceGroup $(resourceGroup) -FunctionAppName $(functionAppName) -EmailRecipient $(alertEmail)'
-  
+      filePath: "scripts/deploy_sql_integration.ps1"
+      arguments: "-Environment Production -ResourceGroup $(resourceGroup) -FunctionAppName $(functionAppName) -EmailRecipient $(alertEmail)"
+
   - task: PowerShell@2
-    displayName: 'Health Check'
+    displayName: "Health Check"
     inputs:
-      targetType: 'inline'
+      targetType: "inline"
       script: |
         python .\scripts\sql_health_monitor.py --once
         if ($LASTEXITCODE -ne 0) {
@@ -264,6 +286,7 @@ steps:
 ## Scheduled Tasks Setup
 
 ### Windows Task Scheduler
+
 ```powershell
 # Weekly cleanup (Sundays at 2 AM)
 $action = New-ScheduledTaskAction -Execute "python" -Argument ".\scripts\cleanup_query_metrics.py" -WorkingDirectory "C:\QAI"
@@ -277,6 +300,7 @@ Register-ScheduledTask -TaskName "QAI SQL Threshold Tuning" -Action $action -Tri
 ```
 
 ### Azure Automation Runbook
+
 ```powershell
 # Create runbook for query cleanup
 $runbookName = "QAI-SQL-Cleanup"
@@ -303,11 +327,12 @@ New-AzAutomationSchedule `
 ## Monitoring Integration
 
 ### Application Insights Integration
+
 ```powershell
 # Custom metric tracking in health monitor
 python .\scripts\sql_health_monitor.py --interval 60 --json | ForEach-Object {
     $health = $_ | ConvertFrom-Json
-    
+
     # Send custom metric to Application Insights
     az monitor app-insights metrics create `
         --app qai-func `
@@ -317,6 +342,7 @@ python .\scripts\sql_health_monitor.py --interval 60 --json | ForEach-Object {
 ```
 
 ### Slack/Teams Webhook Example
+
 ```powershell
 # Health monitor with Slack webhook
 $webhookUrl = "https://hooks.slack.com/services/YOUR/WEBHOOK/URL"
@@ -330,6 +356,7 @@ python .\scripts\sql_health_monitor.py `
 ## Error Handling and Recovery
 
 ### Deployment Failures
+
 ```powershell
 # Check deployment status
 $statusFile = ".\data_out\sql_deployment_status.json"
@@ -337,12 +364,12 @@ $status = Get-Content $statusFile | ConvertFrom-Json
 
 if (-not $status.success) {
     Write-Host "Deployment failed. Check log: $($status.logFile)"
-    
+
     # Rollback steps
     if (-not $status.steps.Migrations) {
         Write-Host "Migrations failed - no rollback needed"
     }
-    
+
     if ($status.steps.Migrations -and -not $status.steps.Tests) {
         Write-Host "Consider rolling back migrations if database is corrupt"
     }
@@ -350,6 +377,7 @@ if (-not $status.success) {
 ```
 
 ### Alert Deployment Failures
+
 ```powershell
 # Retry with skip flags
 .\scripts\deploy_sql_integration.ps1 `
@@ -373,23 +401,23 @@ if (-not $status.success) {
 
 ## Troubleshooting
 
-| Issue | Solution |
-|-------|----------|
-| Deployment fails at prerequisites | Run `pip install -r requirements.txt` |
-| Health monitor shows "critical" | Check `QAI_SQL_URL` environment variable |
-| Threshold tuning finds no data | Verify Application Insights is logging traces |
-| Cleanup script fails | Ensure 002 migration applied and tracking enabled |
-| Module import fails | Run from repo root: `Import-Module .\scripts\QAI-SQL.psm1` |
+| Issue                             | Solution                                                   |
+| --------------------------------- | ---------------------------------------------------------- |
+| Deployment fails at prerequisites | Run `pip install -r requirements.txt`                      |
+| Health monitor shows "critical"   | Check `QAI_SQL_URL` environment variable                   |
+| Threshold tuning finds no data    | Verify Application Insights is logging traces              |
+| Cleanup script fails              | Ensure 002 migration applied and tracking enabled          |
+| Module import fails               | Run from repo root: `Import-Module .\scripts\QAI-SQL.psm1` |
 
 ## Files Created
 
-| File | Purpose | Lines |
-|------|---------|-------|
-| `scripts/deploy_sql_integration.ps1` | Master deployment orchestrator | 450+ |
-| `scripts/tune_sql_thresholds.ps1` | Automated threshold tuning | 300+ |
-| `scripts/cleanup_query_metrics.py` | Retention cleanup automation | 200+ |
-| `scripts/sql_health_monitor.py` | Health monitoring daemon | 300+ |
-| `scripts/QAI-SQL.psm1` | PowerShell cmdlet module | 400+ |
+| File                                 | Purpose                        | Lines |
+| ------------------------------------ | ------------------------------ | ----- |
+| `scripts/deploy_sql_integration.ps1` | Master deployment orchestrator | 450+  |
+| `scripts/tune_sql_thresholds.ps1`    | Automated threshold tuning     | 300+  |
+| `scripts/cleanup_query_metrics.py`   | Retention cleanup automation   | 200+  |
+| `scripts/sql_health_monitor.py`      | Health monitoring daemon       | 300+  |
+| `scripts/QAI-SQL.psm1`               | PowerShell cmdlet module       | 400+  |
 
 **Total**: ~1,650 lines of automation code
 
@@ -405,8 +433,9 @@ if (-not $status.success) {
 ---
 
 **Related Documentation**:
+
 - [DATABASE_SQL_SETUP.md](./DATABASE_SQL_SETUP.md) - Core setup and configuration
 - [AZURE_MONITOR_SQL_SETUP.md](./AZURE_MONITOR_SQL_SETUP.md) - Azure monitoring and KQL queries
-- [SQL_QUICKREF.md](./SQL_QUICKREF.md) - Quick reference card
+- [SQL_QUICKREF.md](../quickref/SQL_QUICKREF.md) - Quick reference card
 
 **Status**: All automation components complete and production-ready.

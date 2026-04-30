@@ -18,7 +18,7 @@
   ```powershell
   # Check if installed
   az --version
-  
+
   # If not installed, download from:
   # https://aka.ms/installazurecliwindows
   ```
@@ -35,7 +35,7 @@
   ```powershell
   # View your subscriptions
   az account list --output table
-  
+
   # Copy the SubscriptionId - you'll need this!
   ```
 
@@ -48,11 +48,11 @@
   ```
 
 - [ ] **Update parameters file**
-  
+
   Edit `quantum_workspace.parameters.json` and update:
   - `workspaceName`: Must be globally unique (e.g., `quantum-ai-bryan-2025`)
   - `storageAccountName`: Must be globally unique, lowercase, no hyphens (e.g., `quantumstoragebr2025`)
-  
+
   **Example:**
 
   ```json
@@ -87,7 +87,7 @@
     --parameters quantum_workspace.parameters.json `
     --name quantum-deployment-$(Get-Date -Format 'yyyyMMddHHmmss')
   ```
-  
+
   ⏱️ **This takes 2-3 minutes** - wait for "Succeeded"
 
 - [ ] **Verify deployment**
@@ -103,9 +103,9 @@
 ### Step 3: Update Configuration (2 min)
 
 - [ ] **Edit quantum config**
-  
+
   Open: `c:\Users\Bryan\OneDrive\AI\quantum-ai\config\quantum_config.yaml`
-  
+
   Update the `azure` section:
 
   ```yaml
@@ -257,8 +257,8 @@ The Bicep template creates:
 3. **Quantum Providers** - Connections to IonQ, Quantinuum, Microsoft
 4. **Resource Tags** - For organization and cost tracking
 
-**Total Resources:** 4  
-**Deployment Time:** 2-3 minutes  
+**Total Resources:** 4
+**Deployment Time:** 2-3 minutes
 **Monthly Cost (with free simulators):** ~$0.02-$0.05
 
 ---
@@ -303,19 +303,19 @@ Once deployed and tested:
 
 **Common Questions:**
 
-**Q: Do I need quantum hardware credits?**  
+**Q: Do I need quantum hardware credits?**
 A: No! Start with free simulators (`ionq.simulator`). Only use hardware when you're ready to see real quantum effects.
 
-**Q: How much will this cost?**  
+**Q: How much will this cost?**
 A: Testing with simulators is **completely free**. Real hardware costs ~$0.36 per circuit.
 
-**Q: How long does testing take?**  
+**Q: How long does testing take?**
 A: Simulator results in 10-30 seconds. Hardware takes 2-10 minutes (includes queue time).
 
-**Q: Can I use my existing Azure subscription?**  
+**Q: Can I use my existing Azure subscription?**
 A: Yes! Just update `quantum_config.yaml` with your subscription ID.
 
-**Q: What if deployment fails?**  
+**Q: What if deployment fails?**
 A: Check troubleshooting section above. Most issues are due to unique naming requirements.
 
 ---
@@ -339,8 +339,8 @@ python test_azure_quantum.py
 - 🏆 Your optimized 90% accuracy circuit
 - 🔬 Simulator vs hardware comparison
 
-**Total time:** 10-15 minutes  
-**Cost (with simulator):** $0.00  
+**Total time:** 10-15 minutes
+**Cost (with simulator):** $0.00
 
 ---
 

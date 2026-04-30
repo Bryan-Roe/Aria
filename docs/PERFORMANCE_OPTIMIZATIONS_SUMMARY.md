@@ -1,2 +1,1 @@
 # Performance Optimizations Summary
-

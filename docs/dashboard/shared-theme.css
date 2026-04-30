@@ -452,15 +452,15 @@ tbody tr:hover {
     .metrics-grid {
         grid-template-columns: 1fr;
     }
-    
+
     .container {
         padding: 10px;
     }
-    
+
     .card {
         padding: 15px;
     }
-    
+
     .btn {
         padding: 8px 16px;
         font-size: 0.9em;

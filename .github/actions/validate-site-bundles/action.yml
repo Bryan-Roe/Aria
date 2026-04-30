@@ -1,0 +1,19 @@
+name: Validate Site Bundles
+description: Validate generated_sites bundle contract using scripts/validate_site_bundles.py
+inputs:
+  strict-metadata:
+    description: Enforce metadata.json presence and metadata.files completeness
+    required: false
+    default: 'true'
+runs:
+  using: composite
+  steps:
+    - name: Run generated sites validator
+      shell: bash
+      run: |
+        set -euo pipefail
+        if [[ "${{ inputs.strict-metadata }}" == "true" ]]; then
+          python3 scripts/validate_site_bundles.py --strict-metadata
+        else
+          python3 scripts/validate_site_bundles.py
+        fi

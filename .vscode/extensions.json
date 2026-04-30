@@ -1,7 +1,28 @@
 {
   "recommendations": [
+    "GitHub.copilot",
+    "GitHub.copilot-chat",
     "ms-azuretools.vscode-azurefunctions",
     "ms-python.python",
-    "ms-windows-ai-studio.windows-ai-studio"
-  ]
+    "ms-windows-ai-studio.windows-ai-studio",
+    "ms-vscode.makefile-tools",
+    "charliermarsh.ruff",
+    "ms-vscode.vscode-typescript-next",
+    "ms-vscode.makefile-tools",
+    "eamodio.gitlens",
+    "ms-vscode-remote.remote-containers",
+    "ms-vscode.remote-server"
+  ],
+  "extensions": {
+    "GitHub.copilot": "GitHub Copilot - AI code completions",
+    "GitHub.copilot-chat": "GitHub Copilot Chat - Chat interface with agents and custom modes",
+    "ms-azuretools.vscode-azurefunctions": "Azure Functions - Deploy and manage function apps",
+    "ms-python.python": "Python - Full Python language support and debugging",
+    "ms-windows-ai-studio.windows-ai-studio": "Windows AI Studio - AI model management and integration",
+    "ms-vscode.makefile-tools": "Makefile Tools - Build system integration",
+    "charliermarsh.ruff": "Ruff - Fast Python linter",
+    "eamodio.gitlens": "GitLens - Git history and blame integration",
+    "ms-vscode-remote.remote-containers": "Dev Containers - Work in Docker containers",
+    "ms-vscode.remote-server": "Remote - SSH integration for remote development"
+  }
 }

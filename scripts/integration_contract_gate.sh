@@ -16,6 +16,16 @@ if [[ "$#" -gt 0 ]]; then
 fi
 
 pushd "$REPO_ROOT" >/dev/null
+cleanup() {
+  popd >/dev/null || true
+}
+trap cleanup EXIT
+
+# Enforce generated site bundle contract first for fast failure and CI/local parity.
+python3 scripts/validate_site_bundles.py --strict-metadata
+
+# Enforce local composite action contracts for CI/local parity.
+python3 scripts/validate_composite_actions.py
 
 if [[ "$STRICT_ENDPOINTS" -eq 1 ]]; then
   python scripts/integration_smoke.py --strict-endpoints --json
@@ -25,7 +35,5 @@ fi
 
 python scripts/ci_orchestrator.py --integration-contract-tests
 python scripts/ci_orchestrator.py --validate-all
-
-popd >/dev/null
 
 echo "[integration_contract_gate] passed"

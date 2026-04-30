@@ -13,55 +13,63 @@ A hybrid quantum-classical machine learning framework leveraging Azure Quantum f
 
 **Four powerful new capabilities for quantum computing:**
 
-### 1. **Grover's Search Algorithm** ([grover_circuit.py](src/grover_circuit.py))
-Quantum search algorithm finding marked items in O(√N) time:
-```python
-from src.grover_circuit import GroverCircuit
+### 1. **Quantum Classifier** ([quantum_classifier.py](src/quantum_classifier.py))
 
-grover = GroverCircuit(n_qubits=3, shots=1000)
-results = grover.search(marked_states=[5])  # Search for item 5 in 8-item database
-print(f"Success probability: {results['success_probability']:.1%}")
-grover.visualize_amplitudes(marked_states=[5])  # Amplitude amplification plot
+Core variational quantum classifier for hybrid ML workflows:
+
+```python
+from src.quantum_classifier import QuantumClassifier
+
+qc = QuantumClassifier()
+weights = qc.initialize_weights()
+predictions = qc.predict([[0.1, 0.2, 0.3, 0.4]], weights)
+print(predictions)
 ```
 
-### 2. **Enhanced Variational Circuits** ([enhanced_variational_circuit.py](src/enhanced_variational_circuit.py))
-Advanced VQC with multiple encoding strategies:
+### 2. **Hybrid Quantum Neural Networks** ([hybrid_qnn.py](src/hybrid_qnn.py))
+
+Hybrid quantum-classical neural networks with configurable depth:
+
 ```python
-from src.enhanced_variational_circuit import EnhancedVariationalCircuit
+from src.hybrid_qnn import HybridQNN
 import torch
 
-circuit = EnhancedVariationalCircuit(
-    n_qubits=4,
-    n_layers=3,
-    encoding="hybrid",  # Options: angle, amplitude, iqp, hybrid
-    entanglement="pyramid",  # Options: linear, circular, full, pyramid, alternating
-    use_data_reuploading=True
+model = HybridQNN(
+  input_dim=10,
+  hidden_dim=16,
+  n_qubits=4,
+  n_quantum_layers=2,
+  output_dim=1
 )
-output = circuit(torch.randn(4))
+output = model(torch.randn(8, 10))
 ```
 
-### 3. **Circuit Visualization** ([circuit_visualizer.py](src/circuit_visualizer.py))
-Unified visualization for PennyLane and Qiskit circuits:
+### 3. **Circuit Optimization** ([quantum_circuit_optimizer.py](src/quantum_circuit_optimizer.py))
+
+Utilities for optimizing circuit structures and execution settings:
+
 ```python
-from src.circuit_visualizer import CircuitVisualizer
+from src.quantum_circuit_optimizer import QuantumCircuitOptimizer
 
-viz = CircuitVisualizer(output_dir="circuit_visualizations")
-viz.visualize_pennylane(qnode, sample_input=[0.5, 1.0, 0.3])
-viz.visualize_qiskit(qiskit_circuit, style="mpl")
-viz.export_html(circuit, title="My Circuit", filename="circuit.html")
+optimizer = QuantumCircuitOptimizer()
+optimized = optimizer.optimize(None)  # Replace None with your circuit object
+print(optimized)
 ```
 
-### 4. **Azure Quantum Tester** ([azure_quantum_tester.py](src/azure_quantum_tester.py))
-Simplified Azure Quantum job submission:
+### 4. **Azure Quantum Integration** ([azure_quantum_integration.py](src/azure_quantum_integration.py))
+
+Azure backend connection and job submission helpers:
+
 ```python
-from src.azure_quantum_tester import AzureQuantumTester
+from src.azure_quantum_integration import AzureQuantumIntegration
 
-tester = AzureQuantumTester()
-tester.list_targets()  # Show available quantum hardware
-results = tester.run_test_suite(target_name='ionq.simulator', shots=100)
+azure = AzureQuantumIntegration()
+workspace = azure.connect()
+backends = azure.list_backends()
+print(backends)
 ```
 
-**🚀 Try all tools:** `python demo_quantum_circuits.py`
+**🚀 Explore examples:** [`examples/README.md`](examples/README.md)
 
 ---
 
@@ -72,11 +80,12 @@ results = tester.run_test_suite(target_name='ionq.simulator', shots=100)
 **Train and visualize quantum AI models in your browser!**
 
 ```bash
-cd quantum-ai
+cd ai-projects/quantum-ml
 ./start_dashboard.sh
 ```
 
-Then open **http://localhost:5000** for:
+Then open **<http://localhost:5000>** for:
+
 - 📊 Real-time training visualization with live charts
 - 🎛️ Interactive hyperparameter tuning
 - 💾 Training session management and history
@@ -92,7 +101,7 @@ Then open **http://localhost:5000** for:
 Run the Flask API for the fraud/ionosphere demo on port 5050.
 
 ```bash
-cd quantum-ai
+cd ai-projects/quantum-ml
 # Start on port 5050 (recommended to avoid conflicts)
 PORT=5050 python fraud_detection_api.py
 ```
@@ -113,6 +122,7 @@ curl -s http://localhost:5050/model_info | python -m json.tool
 ```
 
 Notes:
+
 - Configure host/port via `HOST` and `PORT` env vars; defaults are `0.0.0.0:5001`.
 - If port 5000 is busy, use `PORT=5050` as shown above.
 - This uses Flask’s development server; for production, deploy behind a WSGI server (gunicorn/uvicorn).
@@ -125,13 +135,14 @@ Minimal Gunicorn command:
 
 ```bash
 pip install gunicorn
-cd quantum-ai
+cd ai-projects/quantum-ml
 gunicorn -w 2 -b 0.0.0.0:5050 fraud_detection_api:app
 # or
 # gunicorn -w 2 -b 0.0.0.0:5050 wsgi:app
 ```
 
 Notes:
+
 - The entrypoint is `fraud_detection_api:app` (Flask app object).
 - Ensure the working directory is `quantum-ai` so model files in `results/` resolve.
 
@@ -184,19 +195,28 @@ If your code and model files live elsewhere, update `WorkingDirectory` according
    - Perfect for learning and experimentation
    - No coding required - just configure and train
 
-2. **Hardware Testing Results:** [`HARDWARE_TEST_RESULTS.md`](./HARDWARE_TEST_RESULTS.md)
-  - Multi-backend validation (Rigetti ✅, Quantinuum ⚠️)
-  - GHZ and variational circuit tests
-  - Hardware vs simulator comparison
+## Hardware Testing Results
 
-3. **Provider Comparison:** [`PROVIDER_COMPARISON_RESULTS.md`](./PROVIDER_COMPARISON_RESULTS.md)
-  - Detailed gate pattern analysis
-  - MPS simulation validation (90.5% vs 91.5% entropy)
-  - Quantinuum bug investigation
-  - Production recommendations
+[`HARDWARE_TEST_RESULTS.md`](./HARDWARE_TEST_RESULTS.md)
 
-4. **Quick Reference:** [`QUICK_REFERENCE.md`](./QUICK_REFERENCE.md)
-  - All commands, workflows, and tips in one place
+- Multi-backend validation (Rigetti ✅, Quantinuum ⚠️)
+- GHZ and variational circuit tests
+- Hardware vs simulator comparison
+
+## Provider Comparison
+
+[`PROVIDER_COMPARISON_RESULTS.md`](./PROVIDER_COMPARISON_RESULTS.md)
+
+- Detailed gate pattern analysis
+- MPS simulation validation (90.5% vs 91.5% entropy)
+- Quantinuum bug investigation
+- Production recommendations
+
+## Quick Reference
+
+[`QUICK_REFERENCE.md`](./QUICK_REFERENCE.md)
+
+- All commands, workflows, and tips in one place
 
 **Key Finding (Nov 2025):** Rigetti backend validated for production use. MPS simulations accurate within 1% of hardware. Avoid Quantinuum H-series simulators until Azure fixes fundamental bug.
 
@@ -416,7 +436,7 @@ python .\quantum-ai\scripts\visualize_hardware_results.py
 
 Outputs:
 
-- Per-run charts under `quantum-ai/results/visualizations/`:
+- Per-run charts under `ai-projects/quantum-ml/results/visualizations/`:
   - `<result>_bar.png` – top measurement states
   - `<result>_heatmap.png` – 2-qubit heatmap (Bell)
   - `entanglement_summary.png` – entanglement quality across Bell tests
@@ -427,7 +447,7 @@ Outputs:
 
 Notes:
 
-- Results JSON may be saved to either `quantum-ai/results/` or repo-root `results/` depending on where the test was launched; the visualizer scans both.
+- Results JSON may be saved to either `ai-projects/quantum-ml/results/` or repo-root `results/` depending on where the test was launched; the visualizer scans both.
 - Use `--optimized` with `run_hardware_tests.py` to also run and save the optimized circuit results.
 
 ### Using the MCP Server
@@ -459,7 +479,7 @@ See [MCP_SERVER_README.md](MCP_SERVER_README.md) for complete documentation.
 ## 📊 Project Structure
 
 ```text
-quantum-ai/
+ai-projects/quantum-ml/
 ├── src/
 │   ├── quantum_classifier.py      # Quantum classification models
 │   ├── hybrid_qnn.py               # Hybrid quantum-classical networks
@@ -481,7 +501,7 @@ Edit `config/quantum_config.yaml` to customize:
 
 ```yaml
 quantum:
-  provider: "ionq"  # or quantinuum, rigetti
+  provider: "ionq" # or quantinuum, rigetti
   simulator:
     backend: "qiskit_aer"
     shots: 1024
@@ -493,7 +513,7 @@ ml:
   model:
     n_qubits: 4
     n_layers: 2
-    entanglement: "linear"  # linear, circular, full
+    entanglement: "linear" # linear, circular, full
   training:
     epochs: 100
     batch_size: 32
@@ -531,11 +551,11 @@ print(circuit)
 
 Benchmark results on standard datasets:
 
-| Dataset | Classical NN | Quantum Classifier | Hybrid QNN |
-|---------|--------------|-------------------|------------|
-| Iris | 96.7% | 94.2% | **97.5%** |
-| Wine | 95.3% | 92.8% | **96.1%** |
-| Breast Cancer | 97.2% | 95.1% | **97.8%** |
+| Dataset       | Classical NN | Quantum Classifier | Hybrid QNN |
+| ------------- | ------------ | ------------------ | ---------- |
+| Iris          | 96.7%        | 94.2%              | **97.5%**  |
+| Wine          | 95.3%        | 92.8%              | **96.1%**  |
+| Breast Cancer | 97.2%        | 95.1%              | **97.8%**  |
 
 > **Note:** Results may vary based on circuit configuration and training parameters
 

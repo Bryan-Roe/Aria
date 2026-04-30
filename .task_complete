@@ -1,0 +1,15 @@
+{
+  "tool": "task_complete",
+  "name": "task_complete",
+  "taskComplete": true,
+  "task_complete": true,
+  "status": "complete",
+  "timestamp": "2026-03-28T22:26:01.151896Z",
+  "summary": "LLM endpoint probe task finished. Results: /api/tags->200OK(Ollama), /api/generate->405POST-only(Ollama), /v1/models->200OK(OpenAI-compat). Model: mistral:latest. LMSTUDIO_BASE_URL not set.",
+  "result": {
+    "ollama_style": "working",
+    "openai_compatible": "working",
+    "lmstudio": "not_configured",
+    "active_model": "mistral:latest"
+  }
+}

@@ -60,7 +60,7 @@ training:
   batch_size: 32
   datasets_dir: "datasets/massive_quantum"
   output_dir: "data_out/distributed_benchmark"
-  
+
   # Backend selection
   backends:
     - type: "classical"
@@ -126,7 +126,7 @@ except ImportError:
 class AutonomousOrchestrator:
     """
     Production-grade autonomous training orchestrator with scaling.
-    
+
     Key Features:
     - Async/await for non-blocking operations
     - Resource-aware worker allocation
@@ -134,18 +134,18 @@ class AutonomousOrchestrator:
     - Configurable scaling (multiprocessing or Ray)
     - Graceful error handling and recovery
     """
-    
+
     def __init__(self, config_path: str):
         """Initialize with YAML configuration."""
         self.config_path = Path(config_path)
         self.config = self._load_config()
-        
+
         # Scaling configuration
         self.scaling_mode = self.config.get("scaling", {}).get("mode", "multiprocessing")
         self.max_workers = self.config.get("scaling", {}).get("max_workers", None)
         self.batch_size = self.config.get("scaling", {}).get("batch_size", 100)
         self.resource_limits = self.config.get("scaling", {}).get("resource_limits", {})
-        
+
         # State tracking
         self.status = {
             "phase": "initialized",
@@ -154,16 +154,16 @@ class AutonomousOrchestrator:
             "models_deployed": 0,
             "errors": []
         }
-        
+
     def _load_config(self) -> Dict:
         """Load and validate YAML configuration."""
         with open(self.config_path) as f:
             return yaml.safe_load(f)
-    
+
     async def run_cycle(self, once: bool = False):
         """
         Execute complete orchestration cycle.
-        
+
         Args:
             once: Run single cycle and exit (vs continuous loop)
         """
@@ -172,54 +172,54 @@ class AutonomousOrchestrator:
                 # Phase 1: Discovery
                 if self.config["discovery"]["enabled"]:
                     await self.discover_datasets()
-                
+
                 # Phase 2: Training (RESOURCE-AWARE)
                 await self.train_models()
-                
+
                 # Phase 3: Optimization
                 if self.config["optimization"]["enabled"]:
                     await self.optimize_models()
-                
+
                 # Phase 4: Deployment
                 if self.config["deployment"]["enabled"]:
                     await self.deploy_models()
-                
+
                 # Save status
                 self._save_status()
-                
+
                 if once:
                     break
-                    
+
                 # Wait before next cycle
                 await asyncio.sleep(3600)  # 1 hour
-                
+
             except Exception as e:
                 self.status["errors"].append(str(e))
                 if once:
                     raise
-    
+
     async def train_models(self):
         """
         Train models with resource-aware scaling.
-        
+
         KEY PATTERN: Dynamic worker allocation based on CPU availability
         """
         self.status["phase"] = "training"
-        
+
         # Get CPU count for resource-aware allocation
         cpu_count = multiprocessing.cpu_count()
-        
+
         # Calculate optimal workers
         config_workers = self.config["training"]["workers"]
         max_workers = self.max_workers or min(cpu_count, config_workers)
-        
+
         print(f"Training with {max_workers} workers (CPU count: {cpu_count})")
-        
+
         # Build command for distributed training
         benchmark_script = Path(__file__).parent / "distributed_benchmark.py"
         datasets_dir = Path(self.config["training"]["datasets_dir"])
         epochs = self.config["training"]["epochs"]
-        
+
         cmd = [
             sys.executable,
             str(benchmark_script),
@@ -227,16 +227,16 @@ class AutonomousOrchestrator:
             "--workers", str(max_workers),
             "--epochs", str(epochs)
         ]
-        
+
         # Execute training (async subprocess)
         process = await asyncio.create_subprocess_exec(
             *cmd,
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE
         )
-        
+
         stdout, stderr = await process.communicate()
-        
+
         if process.returncode == 0:
             print("Training completed successfully")
             self.status["datasets_trained"] += 1
@@ -244,25 +244,25 @@ class AutonomousOrchestrator:
             error_msg = stderr.decode()
             print(f"Training failed: {error_msg}")
             self.status["errors"].append(error_msg)
-    
+
     def _save_status(self):
         """Persist orchestrator status to JSON."""
         import json
         status_file = Path("data_out/autonomous_training_status.json")
         status_file.parent.mkdir(parents=True, exist_ok=True)
-        
+
         with open(status_file, 'w') as f:
             json.dump(self.status, f, indent=2)
 
 # CLI Entry Point
 if __name__ == "__main__":
     import argparse
-    
+
     parser = argparse.ArgumentParser(description="Autonomous Training Orchestrator")
     parser.add_argument("--config", default="config/autonomous_training.yaml")
     parser.add_argument("--once", action="store_true", help="Run single cycle")
     args = parser.parse_args()
-    
+
     orchestrator = AutonomousOrchestrator(args.config)
     asyncio.run(orchestrator.run_cycle(once=args.once))
 ```
@@ -283,40 +283,40 @@ from sklearn.metrics import accuracy_score
 def train_single_dataset(args) -> Dict:
     """
     Train model on single dataset (worker function).
-    
+
     Args:
         args: Tuple of (dataset_path, epochs, output_dir)
-    
+
     Returns:
         Dict with training results
     """
     dataset_path, epochs, output_dir = args
-    
+
     try:
         # Load data
         df = pd.read_csv(dataset_path)
         X = df.iloc[:, :-1].values
         y = df.iloc[:, -1].values
-        
+
         # Split
         X_train, X_test, y_train, y_test = train_test_split(
             X, y, test_size=0.2, random_state=42
         )
-        
+
         # Train
         model = RandomForestClassifier(n_estimators=100, random_state=42)
         model.fit(X_train, y_train)
-        
+
         # Evaluate
         accuracy = accuracy_score(y_test, model.predict(X_test))
-        
+
         return {
             "dataset": dataset_path.name,
             "accuracy": accuracy,
             "status": "success",
             "samples": len(df)
         }
-        
+
     except Exception as e:
         return {
             "dataset": dataset_path.name,
@@ -332,46 +332,46 @@ def train_all_datasets(
 ) -> List[Dict]:
     """
     Train models on all datasets using multiprocessing.
-    
+
     KEY PATTERN: ProcessPoolExecutor for CPU-bound ML training
     """
     # Discover datasets
     dataset_paths = list(datasets_dir.glob("*.csv"))
     print(f"Found {len(dataset_paths)} datasets")
-    
+
     # Prepare arguments for workers
     tasks = [(path, epochs, output_dir) for path in dataset_paths]
-    
+
     # Execute in parallel
     results = []
     with ProcessPoolExecutor(max_workers=workers) as executor:
         for result in executor.map(train_single_dataset, tasks):
             results.append(result)
-            
+
             # Progress logging
             completed = len(results)
             if completed % 10 == 0:
                 print(f"Progress: {completed}/{len(dataset_paths)} datasets")
-    
+
     return results
 
 if __name__ == "__main__":
     import argparse
-    
+
     parser = argparse.ArgumentParser()
     parser.add_argument("--datasets-dir", required=True)
     parser.add_argument("--workers", type=int, default=4)
     parser.add_argument("--epochs", type=int, default=100)
     parser.add_argument("--output-dir", default="data_out/benchmark")
     args = parser.parse_args()
-    
+
     results = train_all_datasets(
         Path(args.datasets_dir),
         args.workers,
         args.epochs,
         Path(args.output_dir)
     )
-    
+
     # Save results
     import json
     output_file = Path(args.output_dir) / "results.json"
@@ -392,47 +392,47 @@ class QuantumMLBackend:
     """
     Unified interface for quantum ML training (local + cloud).
     """
-    
+
     def __init__(self, backend_type: str = "simulator"):
         """
         Args:
             backend_type: "simulator" or "azure"
         """
         self.backend_type = backend_type
-        
+
         if backend_type == "azure":
             self.workspace = Workspace(
                 subscription_id="YOUR_SUBSCRIPTION_ID",
                 resource_group="YOUR_RESOURCE_GROUP",
                 name="YOUR_WORKSPACE_NAME"
             )
-    
+
     def create_variational_circuit(self, n_qubits: int, n_layers: int) -> QuantumCircuit:
         """Create parameterized quantum circuit for ML."""
         qc = QuantumCircuit(n_qubits)
-        
+
         for layer in range(n_layers):
             # Rotation layer
             for qubit in range(n_qubits):
                 qc.ry(0.5, qubit)  # Placeholder, use parameters in production
-            
+
             # Entanglement layer
             for qubit in range(n_qubits - 1):
                 qc.cx(qubit, qubit + 1)
-        
+
         qc.measure_all()
         return qc
-    
+
     def train(self, X_train, y_train, n_qubits: int = 4, shots: int = 1024):
         """Train quantum classifier."""
         circuit = self.create_variational_circuit(n_qubits, n_layers=2)
-        
+
         if self.backend_type == "simulator":
             backend = AerSimulator()
             job = backend.run(circuit, shots=shots)
             result = job.result()
             return result.get_counts()
-        
+
         elif self.backend_type == "azure":
             target = self.workspace.get_targets("ionq.simulator")
             job = target.submit(circuit, shots=shots)
@@ -557,9 +557,9 @@ class AutonomousOrchestrator:
         with mlflow.start_run():
             mlflow.log_param("workers", max_workers)
             mlflow.log_param("datasets", len(dataset_paths))
-            
+
             # ... training code ...
-            
+
             mlflow.log_metric("accuracy", avg_accuracy)
             mlflow.log_metric("training_time", elapsed_time)
 ```
@@ -574,11 +574,11 @@ def create_status_table(orchestrator):
     table = Table(title="Training Status")
     table.add_column("Metric", style="cyan")
     table.add_column("Value", style="green")
-    
+
     table.add_row("Phase", orchestrator.status["phase"])
     table.add_row("Datasets Trained", str(orchestrator.status["datasets_trained"]))
     table.add_row("Models Deployed", str(orchestrator.status["models_deployed"]))
-    
+
     return table
 
 # Use in orchestrator
@@ -619,7 +619,7 @@ import psutil
 def check_resources():
     cpu_percent = psutil.cpu_percent()
     memory_percent = psutil.virtual_memory().percent
-    
+
     if cpu_percent > 90 or memory_percent > 90:
         # Reduce workers or pause training
         pass
@@ -640,7 +640,7 @@ logging.basicConfig(encoding='utf-8', ...)
 
 ### Issue: Out of memory with many workers
 **Cause:** Each worker loads model/data into memory.
-**Solution:** 
+**Solution:**
 - Reduce worker count
 - Use batch processing
 - Enable swap/pagefile
@@ -722,6 +722,6 @@ Feel free to adapt this model to your specific needs. Key patterns to preserve:
 
 ---
 
-**Version:** 1.0  
-**Last Updated:** November 2025  
+**Version:** 1.0
+**Last Updated:** November 2025
 **Tested On:** Windows 11, Python 3.11, 552 datasets, 20 workers

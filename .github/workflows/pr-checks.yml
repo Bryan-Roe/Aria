@@ -4,6 +4,10 @@ on:
   pull_request:
     types: [opened, synchronize, reopened]
 
+concurrency:
+  group: pr-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
 jobs:
   validate:
     name: Quick Validation
@@ -13,42 +17,32 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - name: Setup Python
+        uses: ./.github/actions/setup-python-env
         with:
-          python-version: '3.11'
-          cache: 'pip'
+          extra-packages: 'pyyaml'
 
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install pyyaml
-          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+      - name: Validate workflow YAML files
+        uses: ./.github/actions/validate-workflow-yaml
+        with:
+          workflows-path: .github/workflows
+          require-jobs: 'true'
 
-      - name: Validate YAML files
-        run: |
-          python -c "
-          import yaml
-          from pathlib import Path
-          import sys
-          
-          failed = False
-          for yml_file in Path('.github/workflows').glob('*.yml'):
-              try:
-                  with open(yml_file) as f:
-                      yaml.safe_load(f)
-                  print(f'✓ {yml_file}')
-              except Exception as e:
-                  print(f'✗ {yml_file}: {e}')
-                  failed = True
-          
-          sys.exit(1 if failed else 0)
-          "
+      - name: Validate Azure Function bindings
+        uses: ./.github/actions/validate-function-bindings
+        with:
+          functions-path: functions
+          require-http-route: 'true'
 
-      - name: Check for common issues
-        run: |
-          echo "Checking for TODO/FIXME markers in modified files..."
-          git diff origin/${{ github.base_ref }}...HEAD --name-only | xargs grep -n "TODO\|FIXME" || echo "No TODO/FIXME found"
+      - name: Validate generated site bundles (strict)
+        uses: ./.github/actions/validate-site-bundles
+        with:
+          strict-metadata: 'true'
+
+      - name: Check for TODO/FIXME in changed files
+        uses: ./.github/actions/scan-todo-fixme
+        with:
+          base-ref: ${{ github.base_ref }}
         continue-on-error: true
 
       - name: Fast validation
@@ -58,6 +52,64 @@ jobs:
           else
             echo "Fast validate script not found, skipping"
           fi
+
+  description-check:
+    name: PR Description Check
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+    env:
+      MIN_DESCRIPTION_LENGTH: 100
+    steps:
+      - name: Check PR description is filled in
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          MIN_DESCRIPTION_LENGTH: ${{ env.MIN_DESCRIPTION_LENGTH }}
+        run: |
+          UNFILLED_PATTERNS=(
+            "What does this change do"
+            "List of user-visible changes"
+            "How was this tested"
+            "Replace ALL placeholder text"
+            "1–3 sentences describing WHAT changed"
+            "Do not leave this as the default text"
+          )
+
+          FAILED=0
+          for pattern in "${UNFILLED_PATTERNS[@]}"; do
+            if echo "$PR_BODY" | grep -qF "$pattern"; then
+              echo "❌ PR description still contains unfilled placeholder: '$pattern'"
+              FAILED=1
+            fi
+          done
+
+          # Require a minimum body length (more than just the template boilerplate)
+          BODY_LENGTH=$(echo "$PR_BODY" | wc -c)
+          if [ "$BODY_LENGTH" -lt "$MIN_DESCRIPTION_LENGTH" ]; then
+            echo "❌ PR description is too short ($BODY_LENGTH chars, minimum $MIN_DESCRIPTION_LENGTH). Please fill in the Summary, Changes, and Testing sections."
+            FAILED=1
+          fi
+
+          # Fail if the PR title looks like a default codespace/branch name
+          if echo "$PR_TITLE" | grep -qiE "^(pending changes|exported from (your )?codespace|codespace[- ]|untitled|draft|wip)"; then
+            echo "❌ PR title looks like a default/generated name: '$PR_TITLE'. Please use a descriptive title that explains what the PR does."
+            FAILED=1
+          fi
+
+          if [ "$FAILED" -eq 1 ]; then
+            echo ""
+            echo "Please update the PR description with:"
+            echo "  - Summary: What changed and why (1-3 sentences)"
+            echo "  - Changes: Bullet list of user-visible changes"
+            echo "  - Testing: Commands run and their outcomes"
+            echo ""
+            echo "See the PR template for a filled-in example."
+            exit 1
+          fi
+
+          echo "✓ PR description looks filled in ($BODY_LENGTH chars)"
 
   size-check:
     name: PR Size Check
@@ -69,20 +121,21 @@ jobs:
           fetch-depth: 0
 
       - name: Check PR size
+        id: size
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         run: |
-          BASE_SHA=${{ github.event.pull_request.base.sha }}
-          HEAD_SHA=${{ github.event.pull_request.head.sha }}
-          
-          ADDITIONS=$(git diff $BASE_SHA...$HEAD_SHA --numstat | awk '{sum+=$1} END {print sum}')
-          DELETIONS=$(git diff $BASE_SHA...$HEAD_SHA --numstat | awk '{sum+=$2} END {print sum}')
-          FILES_CHANGED=$(git diff $BASE_SHA...$HEAD_SHA --name-only | wc -l)
-          
+          ADDITIONS=$(git diff "$BASE_SHA"..."$HEAD_SHA" --numstat | awk '{sum+=$1} END {print sum}')
+          DELETIONS=$(git diff "$BASE_SHA"..."$HEAD_SHA" --numstat | awk '{sum+=$2} END {print sum}')
+          FILES_CHANGED=$(git diff "$BASE_SHA"..."$HEAD_SHA" --name-only | wc -l)
+
           echo "Files changed: $FILES_CHANGED"
           echo "Lines added: $ADDITIONS"
           echo "Lines deleted: $DELETIONS"
-          
+
           # Warn if PR is very large
-          if [ $FILES_CHANGED -gt 50 ] || [ $ADDITIONS -gt 1000 ]; then
+          if [ "$FILES_CHANGED" -gt 50 ] || [ "$ADDITIONS" -gt 1000 ]; then
             echo "⚠️ Warning: This is a large PR. Consider breaking it into smaller PRs for easier review."
             echo "pr_size=large" >> $GITHUB_OUTPUT
           else
@@ -101,7 +154,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Label PR based on files changed
-        uses: actions/labeler@v5
+        uses: actions/labeler@634933edcd8ababfe52f92936142cc22ac488b1b  # v6
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           configuration-path: .github/labeler.yml

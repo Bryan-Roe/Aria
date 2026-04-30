@@ -10,7 +10,7 @@ Quick reference for the 5 major performance optimizations completed in February 
 | 2 | `scripts/job_queue.py:295` | Nested `any()` in list comprehension | Set intersection | **5-50x faster** |
 | 3 | `function_app.py:560` | 12 separate `if` statements | Command pattern table | **5-20x faster** |
 | 4 | `scripts/generate_evaluation_set.py:74` | Reading same files 2-3 times | Cache file contents | **2-3x faster** |
-| 5 | `quantum-ai/web_app.py:217` | Manual parameter-shift loops | PennyLane autograd | **10-100x faster** |
+| 5 | `ai-projects/quantum-ml/web_app.py:217` | Manual parameter-shift loops | PennyLane autograd | **10-100x faster** |
 
 **Cumulative Impact:** 24-175x speedup across affected code paths
 
@@ -132,7 +132,7 @@ python -m pytest tests/test_performance_optimizations.py -v
 Not yet implemented but identified:
 
 1. **aria_web/server.py** - Pre-compile keyword sets (2-10x speedup)
-2. **quantum-ai/web_app.py** - Eliminate repeated list slicing (1.5-2x speedup)
+2. **ai-projects/quantum-ml/web_app.py** - Eliminate repeated list slicing (1.5-2x speedup)
 3. **Multiple files** - Pre-compile regex patterns (2-5x speedup)
 
 ---

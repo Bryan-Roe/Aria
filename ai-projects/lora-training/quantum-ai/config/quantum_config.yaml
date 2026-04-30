@@ -3,125 +3,125 @@
 quantum:
   # Number of qubits for quantum circuits
   num_qubits: 4
-  
+
   # Circuit depth/layers
   circuit_depth: 3
-  
+
   # Number of repetitions in variational forms
   reps: 2
-  
+
   # Optimizer selection: COBYLA, SPSA, ADAM, L_BFGS_B
   optimizer: COBYLA
-  
+
   # Maximum optimizer iterations
   max_iterations: 100
-  
+
   # Number of measurement shots
   shots: 1024
-  
+
   # Feature map type: ZZFeatureMap, ZFeatureMap, PauliFeatureMap
   feature_map: ZZFeatureMap
-  
+
   # Ansatz type: RealAmplitudes, EfficientSU2, TwoLocal
   ansatz: RealAmplitudes
 
 azure_quantum:
   # Azure region
   location: eastus
-  
+
   # Default backend for execution
   # Options: ionq.simulator, ionq.qpu, quantinuum.sim.h1-1e, quantinuum.qpu.h1-1
   default_backend: ionq.simulator
-  
+
   # Auto-retry failed jobs
   auto_retry: true
-  
+
   # Maximum retry attempts
   max_retries: 3
-  
+
   # Job timeout in seconds
   job_timeout: 300
-  
+
   # Enable cost estimation before running
   estimate_cost: true
 
 training:
   # Learning rate for classical optimizers
   learning_rate: 0.001
-  
+
   # Batch size
   batch_size: 16
-  
+
   # Number of training epochs
   epochs: 10
-  
+
   # Validation split ratio
   validation_split: 0.2
-  
+
   # Early stopping patience
   early_stopping_patience: 5
-  
+
   # Dropout rate for hybrid models
   dropout: 0.2
-  
+
   # Weight decay (L2 regularization)
   weight_decay: 0.0001
 
 hybrid_model:
   # Hidden layer dimensions for classical parts
   hidden_dims: [64, 32]
-  
+
   # Number of quantum layers
   quantum_layers: 2
-  
+
   # Activation function: relu, tanh, sigmoid
   activation: relu
-  
+
   # Use batch normalization
   batch_norm: true
-  
+
   # Device: cpu, cuda, mps
   device: cpu
 
 data:
   # Feature scaling method: standard, minmax, robust
   scaler: standard
-  
+
   # Handle imbalanced classes
   balance_classes: false
-  
+
   # Random seed for reproducibility
   random_seed: 42
-  
+
   # Cross-validation folds
   cv_folds: 5
 
 logging:
   # Logging level: DEBUG, INFO, WARNING, ERROR
   level: INFO
-  
+
   # Log file path
   log_file: logs/quantum_ai.log
-  
+
   # Enable console logging
   console: true
-  
+
   # Enable file logging
   file: true
 
 experiment:
   # Experiment tracking directory
   output_dir: experiments
-  
+
   # Save model checkpoints
   save_checkpoints: true
-  
+
   # Checkpoint frequency (epochs)
   checkpoint_frequency: 5
-  
+
   # Save best model only
   save_best_only: true
-  
+
   # Metrics to track
   metrics:
     - accuracy
@@ -132,15 +132,15 @@ experiment:
 advanced:
   # Use gradient descent for quantum parameters
   quantum_gradient_descent: false
-  
+
   # Parameter shift rule for gradients
   parameter_shift: true
-  
+
   # Circuit transpilation optimization level (0-3)
   transpile_optimization: 2
-  
+
   # Use error mitigation
   error_mitigation: false
-  
+
   # Noise model for simulation
   noise_model: null

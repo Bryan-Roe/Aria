@@ -6,6 +6,7 @@ import json
 import os
 import sys
 import urllib.request
+from datetime import timezone
 from pathlib import Path
 from typing import Any, Dict, Optional
 
@@ -17,9 +18,11 @@ except Exception:
 
 try:
     from opentelemetry import trace  # type: ignore
+    from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import \
+        OTLPSpanExporter  # type: ignore
     from opentelemetry.sdk.trace import TracerProvider  # type: ignore
-    from opentelemetry.sdk.trace.export import BatchSpanProcessor  # type: ignore
-    from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter  # type: ignore
+    from opentelemetry.sdk.trace.export import \
+        BatchSpanProcessor  # type: ignore
 except Exception:
     trace = None  # type: ignore
     TracerProvider = OTLPSpanExporter = BatchSpanProcessor = None  # type: ignore
@@ -37,10 +40,10 @@ class MetricsLogger:
         - AZURE_LOG_ANALYTICS_WORKSPACE_ID
         - AZURE_LOG_ANALYTICS_SHARED_KEY
         - AZURE_LOG_TYPE (optional, default: LLMTrainingMetrics)
-      
+
       Application Insights:
         - APPLICATIONINSIGHTS_CONNECTION_STRING
-      
+
       OpenTelemetry:
         - OTEL_EXPORTER_OTLP_ENDPOINT (e.g., http://localhost:4317)
         - OTEL_SERVICE_NAME (optional, default: lora-training)
@@ -50,12 +53,12 @@ class MetricsLogger:
         self.save_dir = Path(save_dir)
         self.save_dir.mkdir(parents=True, exist_ok=True)
         self.file_path = self.save_dir / "metrics.jsonl"
-        
+
         # Azure Log Analytics
         self.workspace_id = os.environ.get("AZURE_LOG_ANALYTICS_WORKSPACE_ID")
         self.shared_key = os.environ.get("AZURE_LOG_ANALYTICS_SHARED_KEY")
         self.log_type = os.environ.get("AZURE_LOG_TYPE", "LLMTrainingMetrics")
-        
+
         # Application Insights
         self.appinsights_client: Optional[Any] = None
         appinsights_conn = os.environ.get("APPLICATIONINSIGHTS_CONNECTION_STRING")
@@ -63,12 +66,21 @@ class MetricsLogger:
             try:
                 self.appinsights_client = TelemetryClient(appinsights_conn)
             except Exception as e:
-                print(f"[metrics] Failed to init Application Insights: {e}", file=sys.stderr)
-        
+                print(
+                    f"[metrics] Failed to init Application Insights: {e}",
+                    file=sys.stderr,
+                )
+
         # OpenTelemetry
         self.otel_tracer: Optional[Any] = None
         otel_endpoint = os.environ.get("OTEL_EXPORTER_OTLP_ENDPOINT")
-        if otel_endpoint and trace and TracerProvider and OTLPSpanExporter and BatchSpanProcessor:
+        if (
+            otel_endpoint
+            and trace
+            and TracerProvider
+            and OTLPSpanExporter
+            and BatchSpanProcessor
+        ):
             try:
                 provider = TracerProvider()
                 exporter = OTLPSpanExporter(endpoint=otel_endpoint, insecure=True)
@@ -111,9 +123,13 @@ class MetricsLogger:
         self.appinsights_client.track_event(event_name, props)
         # If we have numeric metrics, also track them
         if "eval_loss" in record:
-            self.appinsights_client.track_metric("eval_loss", float(record["eval_loss"]))
+            self.appinsights_client.track_metric(
+                "eval_loss", float(record["eval_loss"])
+            )
         if "eval_perplexity" in record:
-            self.appinsights_client.track_metric("eval_perplexity", float(record["eval_perplexity"]))
+            self.appinsights_client.track_metric(
+                "eval_perplexity", float(record["eval_perplexity"])
+            )
         self.appinsights_client.flush()
 
     def _emit_otel_event(self, record: Dict[str, Any]) -> None:
@@ -125,22 +141,26 @@ class MetricsLogger:
             if "eval_loss" in record:
                 span.set_attribute("metric.eval_loss", float(record["eval_loss"]))
             if "eval_perplexity" in record:
-                span.set_attribute("metric.eval_perplexity", float(record["eval_perplexity"]))
+                span.set_attribute(
+                    "metric.eval_perplexity", float(record["eval_perplexity"])
+                )
             if "step" in record:
                 span.set_attribute("training.step", int(record["step"]))
 
     # --- Azure Log Analytics HTTP Data Collector ---
     def _build_signature(self, content_length: int, rfc1123date: str) -> str:
-        string_to_hash = (
-            f"POST\n{content_length}\napplication/json\nx-ms-date:{rfc1123date}\n/api/logs"
-        )
+        string_to_hash = f"POST\n{content_length}\napplication/json\nx-ms-date:{rfc1123date}\n/api/logs"
         decoded_key = base64.b64decode(self.shared_key)  # type: ignore[arg-type]
-        digest = hmac.new(decoded_key, string_to_hash.encode("utf-8"), hashlib.sha256).digest()
+        digest = hmac.new(
+            decoded_key, string_to_hash.encode("utf-8"), hashlib.sha256
+        ).digest()
         return base64.b64encode(digest).decode()
 
     def _post_to_azure(self, record: Dict[str, Any]) -> None:
         body = json.dumps([record]).encode("utf-8")
-        rfc1123date = dt.datetime.now(timezone.utc).strftime("%a, %d %b %Y %H:%M:%S GMT")
+        rfc1123date = dt.datetime.now(timezone.utc).strftime(
+            "%a, %d %b %Y %H:%M:%S GMT"
+        )
         signature = self._build_signature(len(body), rfc1123date)
         url = f"https://{self.workspace_id}.ods.opinsights.azure.com/api/logs?api-version=2016-04-01"
         headers = {

@@ -22,19 +22,19 @@
 
 'chat-interface':
   - changed-files:
-    - any-glob-to-any-file: ['talk-to-ai/**/*', 'chat-web/**/*']
+    - any-glob-to-any-file: ['ai-projects/chat-cli/**/*', 'apps/chat/**/*']
 
 'quantum-ai':
   - changed-files:
-    - any-glob-to-any-file: ['quantum-ai/**/*']
+    - any-glob-to-any-file: ['ai-projects/quantum-ml/**/*']
 
 'training':
   - changed-files:
-    - any-glob-to-any-file: ['AI/**/*', 'scripts/autotrain*.py', 'scripts/train*.py']
+    - any-glob-to-any-file: ['AI/**/*', 'ai-projects/lora-training/**/*', 'scripts/autotrain*.py', 'scripts/train*.py']
 
 'azure-functions':
   - changed-files:
-    - any-glob-to-any-file: ['function_app.py', 'host.json', 'http_*/**/*']
+    - any-glob-to-any-file: ['function_app.py', 'host.json', 'functions/**/*']
 
 'config':
   - changed-files:

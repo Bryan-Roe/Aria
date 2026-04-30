@@ -442,14 +442,14 @@ Create custom monitoring:
 
 while true; do
     STATUS=$(python3 scripts/aria_automation.py --status 2>&1)
-    
+
     if [[ $STATUS == *"Running"* ]]; then
         echo "$(date): ✅ Aria healthy"
     else
         echo "$(date): ❌ Aria unhealthy"
         # Send alert (email, Slack, etc.)
     fi
-    
+
     sleep 300
 done
 ```
@@ -542,7 +542,7 @@ python3 scripts/aria_automation.py --stop
    ```bash
    # Windows
    npm install -g azure-functions-core-tools@4
-   
+
    # Linux
    curl https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > microsoft.gpg
    sudo mv microsoft.gpg /etc/apt/trusted.gpg.d/microsoft.gpg

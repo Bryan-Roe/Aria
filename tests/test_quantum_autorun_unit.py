@@ -1,21 +1,15 @@
 """Unit tests for Quantum AutoRun orchestrator components."""
-import json
-from pathlib import Path
-from unittest.mock import patch
 
 import sys
+from pathlib import Path
+from unittest.mock import patch
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(REPO_ROOT / "scripts" / "evaluation") not in sys.path:
     sys.path.insert(0, str(REPO_ROOT / "scripts" / "evaluation"))
 
-from quantum_autorun import (  # type: ignore
-    QJob,
-    read_yaml,
-    load_jobs,
-    build_command,
-    validate_job,
-)
+from quantum_autorun import load_jobs  # type: ignore
+from quantum_autorun import QJob, build_command, read_yaml, validate_job
 
 
 class TestQJobDataclass:
@@ -103,7 +97,11 @@ class TestCommandBuilder:
         cmd = build_command(j)
         assert len(cmd) >= 2
         # Check for python executable (python, python.exe, python3, python3.14, etc.)
-        assert cmd[0].endswith("python.exe") or cmd[0].endswith("python") or "python3" in cmd[0]
+        assert (
+            cmd[0].endswith("python.exe")
+            or cmd[0].endswith("python")
+            or "python3" in cmd[0]
+        )
         assert "train_custom_dataset.py" in cmd[1]
         assert "--preset" in cmd
         assert "heart" in cmd
@@ -111,7 +109,12 @@ class TestCommandBuilder:
         assert "1" in cmd
 
     def test_command_with_csv_and_fields(self):
-        j = QJob(name="t", csv="datasets/quantum/banknote.csv", label_col="class", drop_cols="c1,c2")
+        j = QJob(
+            name="t",
+            csv="datasets/quantum/banknote.csv",
+            label_col="class",
+            drop_cols="c1,c2",
+        )
         cmd = build_command(j)
         # '--csv' flag present and path argument contains the filename
         assert "--csv" in cmd
@@ -171,7 +174,9 @@ class TestValidation:
         # Should report missing file
         assert res["status"] == "missing" or "missing" in res
 
-    @patch("quantum_autorun.AZURE_SUBMIT_SCRIPT", Path("/fake/deploy_to_azure_quantum.py"))
+    @patch(
+        "quantum_autorun.AZURE_SUBMIT_SCRIPT", Path("/fake/deploy_to_azure_quantum.py")
+    )
     def test_missing_azure_script(self):
         from quantum_autorun import validate_job  # type: ignore
 

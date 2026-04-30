@@ -2,22 +2,24 @@
 Detects mixed installations of Qiskit 1.x and legacy (<1.0) components that cause ImportError.
 Run with the quantum-ai venv interpreter:
 
-    python quantum-ai/scripts/validate_qiskit_env.py
+    python ai-projects/quantum-ml/scripts/validate_qiskit_env.py
 
 Exit codes:
  0 - OK (single coherent Qiskit environment)
  1 - Conflict detected
 """
+
 from __future__ import annotations
+
 import importlib
+import json
 import pkgutil
 import sys
-import json
 from typing import Dict, List
 
 LEGACY_PACKAGES = [
     "qiskit_terra",  # legacy terra dist name (often 'qiskit-terra')
-    "qiskit-aer",    # old namespace dist style
+    "qiskit-aer",  # old namespace dist style
     "qiskit_ibmq_provider",  # deprecated provider
 ]
 MODERN_ROOT = "qiskit"
@@ -53,7 +55,11 @@ def classify(versions: Dict[str, str]) -> Dict[str, List[str]]:
         else:
             # ancillary packages (machine learning, optimization, etc.)
             modern.append(name)
-    return {"modern": sorted(modern), "legacy": sorted(legacy), "errors": sorted(errors)}
+    return {
+        "modern": sorted(modern),
+        "legacy": sorted(legacy),
+        "errors": sorted(errors),
+    }
 
 
 def detect_conflict(versions: Dict[str, str]) -> Dict[str, object]:
@@ -88,18 +94,12 @@ def detect_conflict(versions: Dict[str, str]) -> Dict[str, object]:
 
     if conflict:
         if groups["errors"]:
-            recommendation = (
-                "One or more qiskit-related packages failed to import. Recreate the environment and ensure compatible versions."
-            )
+            recommendation = "One or more qiskit-related packages failed to import. Recreate the environment and ensure compatible versions."
         else:
-            recommendation = (
-                "Environment mixes Qiskit >=1.x root package with legacy (<1.0) components. Recreate a clean venv and install only modern (>=1.x) packages or pin everything to <1.0 consistently."
-            )
+            recommendation = "Environment mixes Qiskit >=1.x root package with legacy (<1.0) components. Recreate a clean venv and install only modern (>=1.x) packages or pin everything to <1.0 consistently."
     else:
         if root_major is not None and root_major < 1:
-            recommendation = (
-                f"Pre-1.0 Qiskit environment detected (qiskit=={qiskit_root_version}). Presence of qiskit_aer and related extras is expected; no conflict."
-            )
+            recommendation = f"Pre-1.0 Qiskit environment detected (qiskit=={qiskit_root_version}). Presence of qiskit_aer and related extras is expected; no conflict."
         else:
             recommendation = "No mixed legacy components detected."
 

@@ -93,7 +93,7 @@ curriculum_stages:
     batch_size: 16
     freeze_classical_layers: false
     enable_quantum_layers: []
-    
+
   - name: "quantum_transition"
     quantum_ratio: 0.3
     num_epochs: 3
@@ -102,7 +102,7 @@ curriculum_stages:
     freeze_classical_layers: false
     enable_quantum_layers:
       - "attention"
-    
+
   - name: "full_quantum"
     quantum_ratio: 0.7
     num_epochs: 10

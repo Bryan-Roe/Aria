@@ -1,7 +1,7 @@
 # Performance Optimization Implementation Summary
 
-**Date:** 2026-02-17  
-**PR:** Improve Slow Code Efficiency  
+**Date:** 2026-02-17
+**PR:** Improve Slow Code Efficiency
 **Status:** ✅ Complete
 
 ## Overview
@@ -165,7 +165,7 @@ python -c "from batch_evaluator import BatchEvaluator"
 
 ```python
 from shared.performance_utils import (
-    tail_file, stream_jsonl, find_json_in_output, 
+    tail_file, stream_jsonl, find_json_in_output,
     FileCache, timeit, memoize_with_ttl
 )
 

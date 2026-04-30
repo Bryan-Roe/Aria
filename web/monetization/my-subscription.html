@@ -356,7 +356,7 @@
             <div class="card">
                 <h2>Current Plan</h2>
                 <div id="tier-badge" class="tier-badge tier-free">Free Tier</div>
-                
+
                 <div class="info-row">
                     <span class="info-label">Status</span>
                     <span class="info-value" id="sub-status">Active</span>
@@ -385,7 +385,7 @@
             <div class="card">
                 <h2>Usage Statistics</h2>
                 <p style="color: #666; margin-bottom: 20px;">Current billing period usage</p>
-                
+
                 <div class="usage-section" id="usage-stats">
                     <div class="usage-item">
                         <div class="usage-header">
@@ -546,7 +546,7 @@
             // Update subscription info
             document.getElementById('monthly-cost').textContent = '$' + data.price;
             document.getElementById('sub-status').textContent = data.is_active ? 'Active ✓' : 'Inactive';
-            
+
             if (data.tier !== 'free') {
                 document.getElementById('billing-cycle').textContent = 'Monthly';
                 const nextDate = new Date();
@@ -578,13 +578,13 @@
                 const current = usage[item.key] || 0;
                 const limit = limits[item.key];
                 const percentage = limit > 0 ? (current / limit) * 100 : 0;
-                
+
                 let progressClass = '';
                 if (percentage >= 90) progressClass = 'danger';
                 else if (percentage >= 75) progressClass = 'warning';
 
-                const statsText = limit === -1 ? 'Unlimited' : 
-                                 limit === 0 ? 'Not Available' : 
+                const statsText = limit === -1 ? 'Unlimited' :
+                                 limit === 0 ? 'Not Available' :
                                  `${current} / ${limit}`;
 
                 const div = document.createElement('div');
@@ -632,11 +632,11 @@
                     const icon = enabled ? '✓' : '✗';
                     const iconClass = enabled ? 'feature-enabled' : 'feature-disabled';
                     let featureName = featureNames[key];
-                    
+
                     if (key === 'basic_chat' || key === 'aria_character') {
                         featureName += limits[tier] || '';
                     }
-                    
+
                     li.innerHTML = `<span class="feature-icon ${iconClass}">${icon}</span> ${featureName}`;
                     list.appendChild(li);
                 }
@@ -653,12 +653,27 @@
 
         function cancelSubscription() {
             if (confirm('Are you sure you want to cancel your subscription? You will retain access until the end of your billing period.')) {
-                alert('Subscription cancellation coming soon! For now, please contact support@aria-platform.com');
+                showToast('Subscription cancellation coming soon. Contact support@aria-platform.com for assistance.', 'info', 5000);
             }
         }
 
         // Load data on page load
         window.addEventListener('load', loadSubscriptionData);
+    </script>
+    <div id="aria-toast" style="position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(120%);background:#1e1e2e;color:#fff;padding:14px 24px;border-radius:10px;box-shadow:0 8px 32px rgba(0,0,0,0.35);font-size:0.95em;z-index:9999;transition:transform 0.3s cubic-bezier(.22,1,.36,1),opacity 0.3s;opacity:0;max-width:90vw;text-align:center;pointer-events:none"></div>
+    <script>
+    function showToast(msg, type, duration) {
+        var t = document.getElementById('aria-toast');
+        t.textContent = msg;
+        t.style.background = type === 'warn' ? '#b45309' : '#1e1e2e';
+        t.style.transform = 'translateX(-50%) translateY(0)';
+        t.style.opacity = '1';
+        clearTimeout(t._timer);
+        t._timer = setTimeout(function() {
+            t.style.transform = 'translateX(-50%) translateY(120%)';
+            t.style.opacity = '0';
+        }, duration || 3500);
+    }
     </script>
 </body>
 </html>

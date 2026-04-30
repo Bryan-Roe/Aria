@@ -270,16 +270,16 @@ Set `QAI_ENABLE_COSMOS=false` or remove the environment variable. The system wil
   "Values": {
     "AzureWebJobsStorage": "UseDevelopmentStorage=true",
     "FUNCTIONS_WORKER_RUNTIME": "python",
-    
+
     "APPLICATIONINSIGHTS_CONNECTION_STRING": "InstrumentationKey=abc-123;IngestionEndpoint=https://eastus-8.in.applicationinsights.azure.com/",
-    
+
     "QAI_ENABLE_COSMOS": "true",
     "COSMOS_ENDPOINT": "https://qai-cosmos.documents.azure.com:443/",
     "COSMOS_KEY": "your_primary_key_here",
     "COSMOS_DATABASE": "qai",
     "COSMOS_CONTAINER": "chat_sessions",
     "QAI_COSMOS_PERSIST_STRATEGY": "messages",
-    
+
     "AZURE_OPENAI_API_KEY": "your_azure_openai_key",
     "AZURE_OPENAI_ENDPOINT": "https://your-resource.openai.azure.com/",
     "AZURE_OPENAI_DEPLOYMENT": "gpt-4o-mini",
@@ -389,12 +389,12 @@ Set `QAI_ENABLE_COSMOS=false` or remove the environment variable. The system wil
 }
 ```
 
-**This indicates:** Mixed Qiskit ≥1.x with legacy aer/machine-learning packages detected in the root Functions environment. This is **expected** if root venv has Qiskit 1.x while `quantum-ai/venv` has the downgraded 0.46.0 stack.
+**This indicates:** Mixed Qiskit ≥1.x with legacy aer/machine-learning packages detected in the root Functions environment. This is **expected** if root venv has Qiskit 1.x while `ai-projects/quantum-ml/venv` has the downgraded 0.46.0 stack.
 
 **Resolution options:**
 
 1. **Ignore** (recommended if quantum endpoints aren't used in production):
-   - Root venv conflict doesn't affect isolated `quantum-ai/` training
+   - Root venv conflict doesn't affect isolated `ai-projects/quantum-ml/` training
    - Quantum MCP server uses dedicated venv
 
 2. **Upgrade root venv to Qiskit 1.x** (use upgrade script):
@@ -467,8 +467,8 @@ Set `QAI_ENABLE_COSMOS=false` or remove the environment variable. The system wil
 
 ## See Also
 
-- **Upgrade Script**: `quantum-ai/scripts/upgrade_qiskit_to_1x.py` (Qiskit 1.x migration)
-- **Validation Script**: `quantum-ai/scripts/validate_qiskit_env.py` (conflict detection)
+- **Upgrade Script**: `ai-projects/quantum-ml/scripts/upgrade_qiskit_to_1x.py` (Qiskit 1.x migration)
+- **Validation Script**: `ai-projects/quantum-ml/scripts/validate_qiskit_env.py` (conflict detection)
 - **Unit Tests**: `tests/test_validate_qiskit_env.py` (conflict detection logic)
 - **Azure Documentation**:
   - [Application Insights for Azure Functions](https://learn.microsoft.com/azure/azure-functions/functions-monitoring)

@@ -227,7 +227,7 @@ quantum:
 azure:
   location: eastus
   default_backend: ionq.simulator
-  
+
 training:
   learning_rate: 0.001
   batch_size: 16

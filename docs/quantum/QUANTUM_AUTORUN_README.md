@@ -1,6 +1,6 @@
 # Quantum AutoRun
 
-A lightweight orchestrator to automate quantum training runs using `quantum-ai/train_custom_dataset.py` (local simulators) and `quantum-ai/deploy_to_azure_quantum.py` (Azure Quantum hardware). It mirrors the AutoTrain pattern used for LoRA fine-tuning and supports both free local execution and cloud hardware submission.
+A lightweight orchestrator to automate quantum training runs using `ai-projects/quantum-ml/train_custom_dataset.py` (local simulators) and `ai-projects/quantum-ml/deploy_to_azure_quantum.py` (Azure Quantum hardware). It mirrors the AutoTrain pattern used for LoRA fine-tuning and supports both free local execution and cloud hardware submission.
 
 ## What it does
 
@@ -74,7 +74,7 @@ jobs:
     enabled: false
     extra_args:
       - --circuit-file
-      - quantum-ai/results/circuit.qasm
+      - ai-projects/quantum-ml/results/circuit.qasm
 ```
 
 Notes:
@@ -96,7 +96,7 @@ The `/api/ai/status` Azure Function now includes a `quantum_autorun` field when 
 1. **Azure account** with an active subscription
 2. **Azure Quantum workspace** created (see [Azure Quantum quickstart](https://learn.microsoft.com/azure/quantum/))
 3. **Azure CLI** installed and authenticated: `az login`
-4. **Config file** updated: `quantum-ai/config/quantum_config.yaml` with your workspace details
+4. **Config file** updated: `ai-projects/quantum-ml/config/quantum_config.yaml` with your workspace details
 
 ### Quick Azure setup
 
@@ -108,9 +108,9 @@ az login
 az group create --name rg-quantum-ai --location eastus
 
 # Create quantum workspace (via Portal or Bicep)
-# See: quantum-ai/azure/DEPLOYMENT.md
+# See: ai-projects/quantum-ml/azure/DEPLOYMENT.md
 
-# Update quantum-ai/config/quantum_config.yaml with your:
+# Update ai-projects/quantum-ml/config/quantum_config.yaml with your:
 # - subscription_id
 # - resource_group
 # - workspace_name

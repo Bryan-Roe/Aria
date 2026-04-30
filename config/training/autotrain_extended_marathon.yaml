@@ -6,7 +6,7 @@ version: 1
 
 jobs:
   # ===== MEGA SYNTHETIC DATA TRAINING (New Generated Data) =====
-  
+
   # Train on freshly generated synthetic data - Phi-3.5
   - name: phi35_mega_synthetic_full
     category: marathon
@@ -38,7 +38,7 @@ jobs:
     device: auto
 
   # ===== COMPREHENSIVE DATASET MARATHON (All merged data) =====
-  
+
   # Phi-3.5 on comprehensive merged dataset - Extended training
   - name: phi35_comprehensive_marathon
     category: marathon
@@ -70,7 +70,7 @@ jobs:
     device: auto
 
   # ===== DOLLY FULL DATASET TRAINING =====
-  
+
   # Phi-3.5 on full Dolly dataset with maximum epochs
   - name: phi35_dolly_marathon
     category: marathon
@@ -102,7 +102,7 @@ jobs:
     device: auto
 
   # ===== MIXED CHAT EXTENDED TRAINING =====
-  
+
   # Phi-3.5 on mixed_chat with many epochs
   - name: phi35_mixed_extended
     category: marathon
@@ -134,7 +134,7 @@ jobs:
     device: auto
 
   # ===== REPOSITORY-AUGMENTED EXTENDED TRAINING =====
-  
+
   # Phi-3.5 on repo data with extended epochs
   - name: phi35_repo_marathon
     category: marathon
@@ -166,7 +166,7 @@ jobs:
     device: auto
 
   # ===== HYPERPARAMETER VARIATIONS (Extended) =====
-  
+
   # Lower learning rate, more epochs
   - name: phi35_comprehensive_lr_low_extended
     category: marathon_hpo
@@ -211,4 +211,3 @@ jobs:
     lora_dropout: 0.15
     hf_model_id: Qwen/Qwen2.5-3B-Instruct
     device: auto
-

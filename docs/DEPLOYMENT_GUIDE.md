@@ -141,9 +141,9 @@ async function mockApiCall(endpoint, options) {
     if (!DEMO_MODE) {
         return fetch(endpoint, options);
     }
-    
+
     await new Promise(resolve => setTimeout(resolve, DEMO_API_DELAY));
-    
+
     if (endpoint === '/api/aria/command') {
         return {
             ok: true,
@@ -177,7 +177,7 @@ const DEMO_RESPONSES = [
 2. **Add HTML/CSS/JS files with demo mode**
    ```javascript
    const DEMO_MODE = true;
-   
+
    async function mockApiCall(endpoint, options) {
        await new Promise(resolve => setTimeout(resolve, 300));
        return { ok: true, json: async () => ({ demo: true }) };

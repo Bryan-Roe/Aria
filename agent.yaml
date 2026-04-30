@@ -1,0 +1,5 @@
+name: Aria
+dockerfile_path: Dockerfile
+resources:
+  cpu: '3.5'
+  memory: 7.0Gi

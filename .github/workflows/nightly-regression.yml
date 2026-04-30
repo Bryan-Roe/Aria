@@ -1,0 +1,215 @@
+# =============================================================================
+# Nightly Regression Baseline
+# =============================================================================
+# Purpose: Runs the full test suite nightly, archives results as artifacts,
+#          and opens a GitHub Issue if the pass-rate drops compared to the
+#          previous run (regression detection).
+# Triggers: Nightly at 03:00 UTC, manual dispatch
+# =============================================================================
+
+name: Nightly Regression Baseline
+
+on:
+  schedule:
+    - cron: '0 3 * * *'  # 03:00 UTC daily
+  workflow_dispatch:
+    inputs:
+      fail-fast:
+        description: 'Stop after first failure'
+        required: false
+        default: 'false'
+        type: choice
+        options:
+          - 'false'
+          - 'true'
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: nightly-regression
+  cancel-in-progress: false  # Never cancel a nightly run mid-flight
+
+jobs:
+  full-test-suite:
+    name: Full Test Suite
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    outputs:
+      passed: ${{ steps.parse.outputs.passed }}
+      failed: ${{ steps.parse.outputs.failed }}
+      skipped: ${{ steps.parse.outputs.skipped }}
+      exit-code: ${{ steps.run-tests.outputs.exit-code }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: ./.github/actions/setup-python-env
+        with:
+          python-version: '3.11'
+          extra-packages: 'pytest pytest-timeout pytest-cov'
+
+      - name: Verify critical dependencies
+        run: |
+          echo "Verifying critical test dependencies are installed..."
+          python -c "import azure.functions; print('✓ azure-functions installed')"
+          python -c "import openai; print('✓ openai installed')"
+          python -c "import pytest; print('✓ pytest installed')"
+          echo "All critical dependencies verified."
+
+      - name: Resolve pytest flags
+        id: flags
+        run: |
+          if [[ "${{ github.event.inputs.fail-fast }}" == "true" ]]; then
+            echo "extra=--maxfail=1" >> $GITHUB_OUTPUT
+          else
+            echo "extra=" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Run full test suite
+        id: run-tests
+        run: |
+          set +e
+          python -m pytest tests/ -q --tb=short \
+            --junitxml=test-results.xml \
+            --cov=. \
+            --cov-report=xml:coverage.xml \
+            ${{ steps.flags.outputs.extra }} \
+            2>&1 | tee pytest-output.txt
+          echo "exit-code=$?" >> $GITHUB_OUTPUT
+
+      - name: Parse results
+        id: parse
+        run: |
+          # Extract "X passed, Y failed, Z skipped" from pytest output
+          SUMMARY=$(grep -E "[0-9]+ passed" pytest-output.txt | tail -1 || echo "0 passed")
+          PASSED=$(echo "$SUMMARY" | grep -oE "[0-9]+ passed" | grep -oE "[0-9]+" || echo "0")
+          FAILED=$(echo "$SUMMARY" | grep -oE "[0-9]+ failed" | grep -oE "[0-9]+" || echo "0")
+          SKIPPED=$(echo "$SUMMARY" | grep -oE "[0-9]+ skipped" | grep -oE "[0-9]+" || echo "0")
+          echo "passed=$PASSED" >> $GITHUB_OUTPUT
+          echo "failed=$FAILED" >> $GITHUB_OUTPUT
+          echo "skipped=$SKIPPED" >> $GITHUB_OUTPUT
+          echo "Passed=$PASSED  Failed=$FAILED  Skipped=$SKIPPED"
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: nightly-test-results-${{ github.run_number }}
+          retention-days: 30
+          path: |
+            test-results.xml
+            coverage.xml
+            pytest-output.txt
+          if-no-files-found: warn
+
+      - name: Generate summary
+        if: always()
+        run: |
+          echo "## Nightly Regression Baseline" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Result | Count |" >> $GITHUB_STEP_SUMMARY
+          echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| ✅ Passed | ${{ steps.parse.outputs.passed }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| ❌ Failed | ${{ steps.parse.outputs.failed }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| ⏭️ Skipped | ${{ steps.parse.outputs.skipped }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Run date:** $(date -u +'%Y-%m-%d %H:%M UTC')" >> $GITHUB_STEP_SUMMARY
+
+  # ── Regression detection ─────────────────────────────────────────────────────
+  detect-regression:
+    name: Detect Regression
+    needs: full-test-suite
+    runs-on: ubuntu-latest
+    if: always()
+    timeout-minutes: 5
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download previous baseline artifact
+        id: download-prev
+        uses: dawidd6/action-download-artifact@bf251b5aa9c2f7eeb574a96ee720e24f801b7c11  # v6
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          workflow: nightly-regression.yml
+          # Get the most recent *successful* prior run
+          workflow_conclusion: completed
+          run_id: ${{ github.run_id }}
+          skip_unpack: false
+          name: nightly-test-results-*
+          # Use the run before the current one
+          if_no_artifact_found: warn
+        continue-on-error: true
+
+      - name: Compare against baseline
+        id: compare
+        env:
+          CURRENT_PASSED: ${{ needs.full-test-suite.outputs.passed }}
+          CURRENT_FAILED: ${{ needs.full-test-suite.outputs.failed }}
+        run: |
+          PREV_PASSED=0
+          PREV_OUTPUT_FILE=$(find . -type f -name 'pytest-output.txt' | head -1)
+          if [ -n "$PREV_OUTPUT_FILE" ] && [ -f "$PREV_OUTPUT_FILE" ]; then
+            PREV_PASSED=$(grep -oE "[0-9]+ passed" "$PREV_OUTPUT_FILE" | tail -1 | grep -oE "[0-9]+" || echo "0")
+          fi
+
+          echo "Previous passed: $PREV_PASSED"
+          echo "Current passed:  $CURRENT_PASSED"
+          echo "Current failed:  $CURRENT_FAILED"
+
+          REGRESSION=false
+          if [ "$CURRENT_FAILED" -gt "0" ]; then
+            REGRESSION=true
+            echo "Failures detected: $CURRENT_FAILED"
+          fi
+          echo "regression=$REGRESSION" >> $GITHUB_OUTPUT
+          echo "prev-passed=$PREV_PASSED" >> $GITHUB_OUTPUT
+
+      - name: Open regression issue
+        if: steps.compare.outputs.regression == 'true'
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const title = `🚨 Nightly Regression — ${new Date().toISOString().slice(0,10)}`;
+            const body = [
+              `## Nightly Regression Detected`,
+              ``,
+              `The nightly test suite detected failures on **${new Date().toUTCString()}**.`,
+              ``,
+              `| Metric | Value |`,
+              `|--------|-------|`,
+              `| ✅ Passed | ${{ needs.full-test-suite.outputs.passed }} |`,
+              `| ❌ Failed | ${{ needs.full-test-suite.outputs.failed }} |`,
+              `| ⏭️ Skipped | ${{ needs.full-test-suite.outputs.skipped }} |`,
+              ``,
+              `**Workflow run:** ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}`,
+              ``,
+              `Please investigate and resolve failures before the next release.`,
+            ].join('\n');
+
+            // Avoid duplicate issues: search for an open regression issue from today
+            const today = new Date().toISOString().slice(0, 10);
+            const issues = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: 'regression,automated',
+            });
+            const existing = issues.data.find(i => i.title.includes(today));
+            if (existing) {
+              console.log(`Regression issue already open: #${existing.number}`);
+              return;
+            }
+
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title,
+              body,
+              labels: ['regression', 'automated', 'bug'],
+            });

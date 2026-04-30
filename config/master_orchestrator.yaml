@@ -12,7 +12,7 @@ orchestrators:
     retry_on_failure: 3
     timeout_minutes: 240
     dependencies: []
-    
+
   - name: quantum_autorun
     script: scripts/quantum_autorun.py
     enabled: true
@@ -21,7 +21,7 @@ orchestrators:
     retry_on_failure: 2
     timeout_minutes: 180
     dependencies: []
-    
+
   - name: evaluation_autorun
     script: scripts/evaluation_autorun.py
     enabled: true
@@ -30,7 +30,7 @@ orchestrators:
     retry_on_failure: 1
     timeout_minutes: 120
     dependencies: [autotrain, quantum_autorun]  # Wait for training to complete
-    
+
   - name: autonomous_training
     script: scripts/autonomous_training_orchestrator.py
     enabled: false  # Enable for continuous learning
@@ -39,7 +39,7 @@ orchestrators:
     retry_on_failure: -1  # Infinite retries
     timeout_minutes: 0  # No timeout
     dependencies: []
-    
+
   - name: aria_automation
     script: scripts/aria_automation.py
     enabled: true
@@ -69,7 +69,7 @@ workflows:
     on_failure:
       - notify_slack
       - create_issue
-      
+
   # Quick validation pipeline (for CI/CD)
   - name: quick_validation
     enabled: true
@@ -84,7 +84,7 @@ workflows:
       - log_result
     on_failure:
       - fail_build
-      
+
   # Weekly comprehensive evaluation
   - name: weekly_comprehensive
     enabled: true
@@ -104,7 +104,7 @@ workflows:
     on_failure:
       - notify_slack
       - create_incident
-      
+
   # Aria continuous operation (server + periodic training)
   - name: aria_full_stack
     enabled: false  # Enable to run Aria 24/7
@@ -118,7 +118,7 @@ workflows:
     on_failure:
       - restart_aria
       - notify_admin
-      
+
   # Aria server only (no training)
   - name: aria_server_only
     enabled: false
@@ -137,7 +137,7 @@ automation:
     enabled: true
     keep_last_n_runs: 10
     clean_older_than_days: 30
-    
+
   auto_backup:
     enabled: true
     schedule: "0 3 * * *"  # Daily at 3 AM
@@ -146,13 +146,13 @@ automation:
       - data_out/quantum_autorun
       - data_out/evaluation_autorun
     destination: backup/
-    
+
   auto_optimization:
     enabled: true
     analyze_results: true
     suggest_hyperparams: true
     auto_tune_jobs: false  # Set true to apply suggestions automatically
-    
+
   dependency_management:
     auto_update_packages: false
     check_compatibility: true
@@ -174,13 +174,13 @@ monitoring:
       to: "${ADMIN_EMAIL}"
       on_failure: true
       on_degradation: true
-      
+
 resource_limits:
   max_concurrent_orchestrators: 2
   max_cpu_percent: 80
   max_memory_gb: 16
   pause_on_resource_exhaustion: true
-  
+
 notifications:
   slack_enabled: false
   email_enabled: false

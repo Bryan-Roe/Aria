@@ -1,0 +1,32 @@
+{
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "type": "command",
+        "command": "python3 .github/hooks/scripts/enforce_task_complete.py",
+        "timeout": 5
+      }
+    ],
+    "Stop": [
+      {
+        "type": "command",
+        "command": "python3 .github/hooks/scripts/enforce_task_complete.py",
+        "timeout": 5
+      }
+    ],
+    "SuggestFixForIssue": [
+      {
+        "type": "command",
+        "command": "python3 .github/hooks/scripts/suggest_fix_for_issue.py",
+        "timeout": 10
+      }
+    ],
+    "GenerateCode": [
+      {
+        "type": "command",
+        "command": "python3 .github/hooks/scripts/enforce_task_complete.py",
+        "timeout": 5
+      }
+    ]
+  }
+}

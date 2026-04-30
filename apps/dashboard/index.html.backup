@@ -20,7 +20,7 @@
             border-radius: 12px;
             overflow-x: auto;
         }
-        
+
         .tab-btn {
             padding: 12px 24px;
             background: var(--bg-secondary);
@@ -39,27 +39,27 @@
             box-shadow: 0 8px 32px rgba(102, 126, 234, 0.3);
             border: 1px solid rgba(255,255,255,0.1);
         }
-        
+
         h1 {
             color: #fff;
             font-size: 3em;
             margin-bottom: 10px;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
         }
-        
+
         .subtitle {
             color: rgba(255,255,255,0.9);
             font-size: 1.2em;
             margin-bottom: 20px;
         }
-        
+
         .system-status {
             display: flex;
             gap: 15px;
             margin-top: 20px;
             flex-wrap: wrap;
         }
-        
+
         .status-badge {
             background: rgba(255,255,255,0.2);
             padding: 8px 16px;
@@ -70,12 +70,12 @@
             gap: 8px;
             backdrop-filter: blur(10px);
         }
-        
+
         .status-badge.online {
             background: rgba(40, 167, 69, 0.3);
             border: 1px solid rgba(40, 167, 69, 0.5);
         }
-        
+
         .status-dot {
             width: 10px;
             height: 10px;
@@ -83,19 +83,19 @@
             background: #28a745;
             animation: pulse-dot 2s infinite;
         }
-        
+
         @keyframes pulse-dot {
             0%, 100% { opacity: 1; }
             50% { opacity: 0.5; }
         }
-        
+
         .systems-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
             gap: 25px;
             margin-bottom: 30px;
         }
-        
+
         .system-card {
             background: rgba(255,255,255,0.05);
             border: 1px solid rgba(255,255,255,0.1);
@@ -108,7 +108,7 @@
             position: relative;
             overflow: hidden;
         }
-        
+
         .system-card::before {
             content: '';
             position: absolute;
@@ -120,36 +120,36 @@
             transform: scaleX(0);
             transition: transform 0.3s ease;
         }
-        
+
         .system-card:hover::before {
             transform: scaleX(1);
         }
-        
+
         .system-card:hover {
             transform: translateY(-8px);
             box-shadow: 0 12px 48px rgba(102, 126, 234, 0.4);
             border-color: rgba(102, 126, 234, 0.5);
         }
-        
+
         .stat-icon {
             font-size: 2.5em;
             margin-bottom: 10px;
         }
-        
+
         .stat-value {
             font-size: 2em;
             font-weight: bold;
             color: #667eea;
             margin-bottom: 5px;
         }
-        
+
         .stat-label {
             color: #666;
             font-size: 0.9em;
             text-transform: uppercase;
             letter-spacing: 1px;
         }
-        
+
         .jobs-section {
             background: white;
             border-radius: 12px;
@@ -157,7 +157,7 @@
             margin-bottom: 20px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
-        
+
         .section-title {
             font-size: 1.8em;
             color: #333;
@@ -165,12 +165,12 @@
             border-bottom: 3px solid #667eea;
             padding-bottom: 10px;
         }
-        
+
         .job-list {
             display: grid;
             gap: 15px;
         }
-        
+
         .job-item {
             display: flex;
             align-items: center;
@@ -179,54 +179,54 @@
             border-radius: 8px;
             border-left: 4px solid #667eea;
         }
-        
+
         .job-item.succeeded {
             border-left-color: #28a745;
         }
-        
+
         .job-item.failed {
             border-left-color: #dc3545;
         }
-        
+
         .job-item.running {
             border-left-color: #ffc107;
             animation: pulse 2s infinite;
         }
-        
+
         @keyframes pulse {
             0%, 100% { opacity: 1; }
             50% { opacity: 0.7; }
         }
-        
+
         .job-status {
             font-size: 1.5em;
             margin-right: 15px;
         }
-        
+
         .job-info {
             flex: 1;
         }
-        
+
         .job-name {
             font-weight: bold;
             font-size: 1.1em;
             margin-bottom: 5px;
         }
-        
+
         .job-details {
             color: #666;
             font-size: 0.9em;
         }
-        
+
         .job-metrics {
             text-align: right;
         }
-        
+
         .metric-value {
             font-weight: bold;
             color: #667eea;
         }
-        
+
         .progress-bar {
             width: 100%;
             height: 30px;
@@ -235,7 +235,7 @@
             overflow: hidden;
             margin: 20px 0;
         }
-        
+
         .progress-fill {
             height: 100%;
             background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
@@ -246,7 +246,7 @@
             font-weight: bold;
             transition: width 0.5s;
         }
-        
+
         .gpu-status {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
@@ -255,7 +255,7 @@
             margin-bottom: 20px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
-        
+
         .gpu-bar {
             background: rgba(255,255,255,0.3);
             border-radius: 10px;
@@ -263,13 +263,13 @@
             margin-top: 10px;
             overflow: hidden;
         }
-        
+
         .gpu-bar-fill {
             height: 100%;
             background: rgba(255,255,255,0.9);
             transition: width 0.5s;
         }
-        
+
         .refresh-btn {
             background: #667eea;
             color: white;
@@ -280,21 +280,21 @@
             cursor: pointer;
             transition: background 0.3s;
         }
-        
+
         .refresh-btn:hover {
             background: #764ba2;
         }
-        
+
         .auto-refresh {
             display: inline-flex;
             align-items: center;
             margin-left: 15px;
         }
-        
+
         .auto-refresh input {
             margin-right: 8px;
         }
-        
+
         .last-update {
             color: #666;
             font-size: 0.9em;
@@ -366,13 +366,13 @@
             try {
                 const response = await fetch('http://localhost:8000/status');
                 const data = await response.json();
-                
+
                 updateStats(data);
                 updateJobs(data);
                 updateLastUpdate();
             } catch (error) {
                 console.error('Failed to load data:', error);
-                document.getElementById('jobList').innerHTML = 
+                document.getElementById('jobList').innerHTML =
                     '<p style="text-align: center; color: #dc3545; padding: 40px;">❌ Failed to load data. Make sure training is running.</p>';
             }
         }
@@ -404,14 +404,14 @@
             // Simulate GPU usage (you can replace with real GPU data)
             const gpuUsage = running > 0 ? Math.random() * 30 + 70 : 0;
             document.getElementById('gpuBar').style.width = gpuUsage + '%';
-            document.getElementById('gpuInfo').textContent = 
+            document.getElementById('gpuInfo').textContent =
                 running > 0 ? `GPU Utilization: ${gpuUsage.toFixed(0)}% | VRAM: ~5.8GB / 6.1GB` : 'GPU Idle';
         }
 
         function updateJobs(data) {
             const jobs = data.jobs || [];
             const jobList = document.getElementById('jobList');
-            
+
             if (jobs.length === 0) {
                 jobList.innerHTML = '<p style="text-align: center; color: #666; padding: 40px;">No jobs found</p>';
                 return;
@@ -426,7 +426,7 @@
                 }[job.status] || '❓';
 
                 const statusClass = job.status || 'pending';
-                
+
                 let details = '';
                 if (job.duration_human) {
                     details += `Duration: ${job.duration_human}`;
@@ -459,7 +459,7 @@
 
         function updateLastUpdate() {
             const now = new Date();
-            document.getElementById('lastUpdate').textContent = 
+            document.getElementById('lastUpdate').textContent =
                 `Last updated: ${now.toLocaleTimeString()}`;
         }
 

@@ -19,15 +19,16 @@ Environment variables:
 
 Table schema created in database/Tables/ChatMessageEmbeddings.sql
 """
+
 from __future__ import annotations
 
 import hashlib
 import heapq
-import os
 import math
+import os
 import struct
 from threading import RLock
-from typing import Iterable, List, Optional, Sequence
+from typing import List, Optional, Sequence
 
 try:
     import pyodbc  # type: ignore
@@ -35,23 +36,36 @@ except Exception:  # pragma: no cover
     pyodbc = None  # type: ignore
 
 try:  # OpenAI unified SDK
-    from openai import OpenAI, AzureOpenAI  # type: ignore
+    from openai import AzureOpenAI, OpenAI  # type: ignore
 except Exception:  # pragma: no cover
     OpenAI = None  # type: ignore
     AzureOpenAI = None  # type: ignore
 
 try:
-    from shared.azure_utils import is_quota_error, format_quota_message
+    from shared.azure_utils import format_quota_message, is_quota_error
 except Exception:  # pragma: no cover - best effort import
     # Provide simple fallbacks if helper isn't available
     def is_quota_error(e: Exception) -> bool:  # noqa: D401
         if e is None:
             return False
         txt = str(e).lower()
-        return any(k in txt for k in ("quota", "premium", "exceed", "allowance", "insufficient", "billing"))
+        return any(
+            k in txt
+            for k in (
+                "quota",
+                "premium",
+                "exceed",
+                "allowance",
+                "insufficient",
+                "billing",
+            )
+        )
 
-    def format_quota_message(e: Exception, service_name: str = "Azure OpenAI") -> str:  # noqa: D401
+    def format_quota_message(
+        e: Exception, service_name: str = "Azure OpenAI"
+    ) -> str:  # noqa: D401
         return f"{service_name} quota/premium limit reached. Details: {str(e)}"
+
 
 # ------------------------- DB Helpers with Connection Pooling -------------------------
 
@@ -148,6 +162,7 @@ def _return_conn(conn):  # noqa: ANN001
     except Exception:
         pass
 
+
 # ------------------------- Embedding Generation -------------------------
 
 
@@ -204,8 +219,7 @@ def generate_embedding(text: str) -> List[float]:  # noqa: ANN001
                     import logging
 
                     logging.getLogger(__name__).warning(
-                        "Azure embedding call detected quota/premium error: %s", str(
-                            e)
+                        "Azure embedding call detected quota/premium error: %s", str(e)
                     )
                 except Exception:
                     pass
@@ -218,12 +232,14 @@ def generate_embedding(text: str) -> List[float]:  # noqa: ANN001
         try:
             client = OpenAI(api_key=oi_key)
             resp = client.embeddings.create(
-                model="text-embedding-3-small", input=[text])
+                model="text-embedding-3-small", input=[text]
+            )
             return resp.data[0].embedding  # type: ignore[attr-defined]
         except Exception:
             pass
     # Fallback
     return _hash_embedding(text)
+
 
 # ------------------------- Embedding Persistence -------------------------
 
@@ -232,7 +248,9 @@ def _serialize_f32(vec: Sequence[float]) -> bytes:
     return struct.pack(f"<{len(vec)}f", *[float(v) for v in vec])
 
 
-def store_embedding(message_id: Optional[str], embedding: Sequence[float], model: str) -> bool:  # noqa: ANN001
+def store_embedding(
+    message_id: Optional[str], embedding: Sequence[float], model: str
+) -> bool:  # noqa: ANN001
     if not message_id or not embedding:
         return False
     conn = _get_conn()
@@ -256,6 +274,7 @@ def store_embedding(message_id: Optional[str], embedding: Sequence[float], model
         # Return connection to pool instead of closing
         _return_conn(conn)
 
+
 # ------------------------- Similarity Search -------------------------
 
 
@@ -269,7 +288,7 @@ def _deserialize_f32(blob: bytes, dim: int) -> List[float]:
         # Fallback slice-based
         out = []
         for i in range(dim):
-            chunk = blob[i * 4: (i + 1) * 4]
+            chunk = blob[i * 4 : (i + 1) * 4]
             if len(chunk) == 4:
                 out.append(struct.unpack("<f", chunk)[0])
             else:
@@ -286,7 +305,9 @@ def _cosine(a: Sequence[float], b: Sequence[float]) -> float:
     return dot / (na * nb)
 
 
-def fetch_similar_messages(query_embedding: Sequence[float], top_k: int = 5, session_id: Optional[str] = None) -> List[dict]:  # noqa: ANN001
+def fetch_similar_messages(
+    query_embedding: Sequence[float], top_k: int = 5, session_id: Optional[str] = None
+) -> List[dict]:  # noqa: ANN001
     """Return top_k similar past messages using Python-side cosine similarity.
 
     If session_id is provided, restrict search to that session's conversation(s).
@@ -326,12 +347,14 @@ def fetch_similar_messages(query_embedding: Sequence[float], top_k: int = 5, ses
             emb = _deserialize_f32(r.EmbeddingVector, dim)
             sim = _cosine(query_embedding, emb)
             if sim > 0:
-                scored.append({
-                    "message_id": r.MessageId,
-                    "content": r.Content,
-                    "similarity": sim,
-                    "embedding_model": r.EmbeddingModel,
-                })
+                scored.append(
+                    {
+                        "message_id": r.MessageId,
+                        "content": r.Content,
+                        "similarity": sim,
+                        "embedding_model": r.EmbeddingModel,
+                    }
+                )
 
         # Use heapq.nlargest for efficient top-k selection (O(n log k) vs O(n log n))
         # This is more efficient when top_k << len(scored)

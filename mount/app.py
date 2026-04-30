@@ -4,22 +4,22 @@ Unified API for quantum AI, chat, and training operations
 """
 
 import sys
-from pathlib import Path
-from typing import Dict, List, Optional, Any
 from contextlib import asynccontextmanager
+from pathlib import Path
+from typing import Optional
 
-from fastapi import FastAPI, HTTPException, BackgroundTasks
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
-from pydantic import BaseModel, Field
 import yaml
+from fastapi import BackgroundTasks, FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
+from pydantic import BaseModel, Field
 
 # Add parent directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent))
 
-from quantum_integration import QuantumIntegration
 from chat_integration import ChatIntegration
+from quantum_integration import QuantumIntegration
 from training_integration import TrainingIntegration
 
 
@@ -46,7 +46,7 @@ class TrainQuantumRequest(BaseModel):
     n_qubits: int = Field(default=4, ge=2, le=20)
     n_layers: int = Field(default=2, ge=1, le=10)
     epochs: int = Field(default=10, ge=1, le=1000)
-    backend: str = 'qiskit_aer'
+    backend: str = "qiskit_aer"
 
 
 class TrainLoRARequest(BaseModel):
@@ -62,7 +62,7 @@ class OrchestratorRequest(BaseModel):
 
 
 # Load configuration
-config_path = Path(__file__).parent / 'config.yaml'
+config_path = Path(__file__).parent / "config.yaml"
 with open(config_path) as f:
     config = yaml.safe_load(f)
 
@@ -90,15 +90,15 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title="QAI Integration Service",
     description="Unified API for Quantum AI, Chat, and Training operations",
-    version=config['service']['version'],
-    lifespan=lifespan
+    version=config["service"]["version"],
+    lifespan=lifespan,
 )
 
 # CORS configuration
-if config['api']['cors_enabled']:
+if config["api"]["cors_enabled"]:
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=config['api']['cors_origins'],
+        allow_origins=config["api"]["cors_origins"],
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
@@ -114,25 +114,26 @@ if static_path.exists():
 # Root & Health Endpoints
 # ============================================================================
 
+
 @app.get("/")
 async def root():
     """Serve the web UI"""
     static_index = Path(__file__).parent / "static" / "index.html"
     if static_index.exists():
         return FileResponse(str(static_index))
-    
+
     # Fallback to API info if no UI
     return {
-        "service": config['service']['name'],
-        "version": config['service']['version'],
+        "service": config["service"]["name"],
+        "version": config["service"]["version"],
         "status": "operational",
         "endpoints": {
             "health": "/health",
             "status": "/status",
             "quantum": "/quantum/*",
             "chat": "/chat/*",
-            "training": "/training/*"
-        }
+            "training": "/training/*",
+        },
     }
 
 
@@ -141,8 +142,8 @@ async def health_check():
     """Health check endpoint"""
     return {
         "status": "healthy",
-        "service": config['service']['name'],
-        "version": config['service']['version']
+        "service": config["service"]["name"],
+        "version": config["service"]["version"],
     }
 
 
@@ -152,19 +153,20 @@ async def get_full_status():
     quantum_status = await quantum_integration.get_status()
     chat_status = await chat_integration.get_status()
     training_status = await training_integration.get_status()
-    
+
     return {
-        "service": config['service']['name'],
-        "version": config['service']['version'],
+        "service": config["service"]["name"],
+        "version": config["service"]["version"],
         "quantum": quantum_status,
         "chat": chat_status,
-        "training": training_status
+        "training": training_status,
     }
 
 
 # ============================================================================
 # Quantum Endpoints
 # ============================================================================
+
 
 @app.get("/quantum/status")
 async def get_quantum_status():
@@ -183,20 +185,22 @@ async def list_quantum_backends():
     """List available quantum backends"""
     status = await quantum_integration.get_status()
     return {
-        "backends": status['available_backends'],
-        "azure_connected": status['azure_connected']
+        "backends": status["available_backends"],
+        "azure_connected": status["azure_connected"],
     }
 
 
 @app.post("/quantum/train")
-async def train_quantum_classifier(request: TrainQuantumRequest, background_tasks: BackgroundTasks):
+async def train_quantum_classifier(
+    request: TrainQuantumRequest, background_tasks: BackgroundTasks
+):
     """Train a quantum classifier"""
     result = await quantum_integration.train_classifier(
         dataset=request.dataset,
         n_qubits=request.n_qubits,
         n_layers=request.n_layers,
         epochs=request.epochs,
-        backend=request.backend
+        backend=request.backend,
     )
     return result
 
@@ -206,16 +210,15 @@ async def run_quantum_autorun(request: OrchestratorRequest):
     """Run a quantum autorun job"""
     if not request.job_name:
         raise HTTPException(status_code=400, detail="job_name is required")
-    
+
     result = await quantum_integration.run_autorun_job(
-        job_name=request.job_name,
-        dry_run=request.dry_run
+        job_name=request.job_name, dry_run=request.dry_run
     )
     return result
 
 
 @app.get("/quantum/circuit-info")
-async def get_circuit_info(circuit_type: str = 'variational'):
+async def get_circuit_info(circuit_type: str = "variational"):
     """Get quantum circuit information"""
     return await quantum_integration.get_circuit_info(circuit_type)
 
@@ -223,6 +226,7 @@ async def get_circuit_info(circuit_type: str = 'variational'):
 # ============================================================================
 # Chat Endpoints
 # ============================================================================
+
 
 @app.get("/chat/status")
 async def get_chat_status():
@@ -237,7 +241,7 @@ async def send_chat_message(request: ChatRequest):
         message=request.message,
         provider=request.provider,
         stream=request.stream,
-        conversation_id=request.conversation_id
+        conversation_id=request.conversation_id,
     )
     return ChatResponse(**result)
 
@@ -246,7 +250,7 @@ async def send_chat_message(request: ChatRequest):
 async def get_chat_providers():
     """Get available chat providers"""
     status = await chat_integration.get_status()
-    return status['providers']
+    return status["providers"]
 
 
 @app.get("/chat/detect-provider")
@@ -275,6 +279,7 @@ async def get_conversation(filename: str):
 # Training Endpoints
 # ============================================================================
 
+
 @app.get("/training/status")
 async def get_training_status():
     """Get training system status"""
@@ -294,7 +299,7 @@ async def train_lora(request: TrainLoRARequest, background_tasks: BackgroundTask
         dataset=request.dataset,
         max_train_samples=request.max_train_samples,
         max_eval_samples=request.max_eval_samples,
-        epochs=request.epochs
+        epochs=request.epochs,
     )
     return result
 
@@ -303,8 +308,7 @@ async def train_lora(request: TrainLoRARequest, background_tasks: BackgroundTask
 async def run_autotrain(request: OrchestratorRequest):
     """Run AutoTrain orchestrator"""
     result = await training_integration.run_autotrain(
-        job_name=request.job_name,
-        dry_run=request.dry_run
+        job_name=request.job_name, dry_run=request.dry_run
     )
     return result
 
@@ -320,22 +324,22 @@ async def list_autotrain_jobs():
 async def get_lora_adapter_info():
     """Get LoRA adapter information"""
     status = await training_integration.get_status()
-    return status['lora_adapter']
+    return status["lora_adapter"]
 
 
 @app.get("/training/runs")
 async def list_training_runs():
     """List recent training runs"""
     status = await training_integration.get_status()
-    return status['recent_trainings']
+    return status["recent_trainings"]
 
 
 @app.get("/training/runs/{run_name}")
 async def get_training_metrics(run_name: str):
     """Get metrics for a specific training run"""
     metrics = await training_integration.get_training_metrics(run_name)
-    if 'error' in metrics:
-        raise HTTPException(status_code=404, detail=metrics['error'])
+    if "error" in metrics:
+        raise HTTPException(status_code=404, detail=metrics["error"])
     return metrics
 
 
@@ -345,10 +349,10 @@ async def get_training_metrics(run_name: str):
 
 if __name__ == "__main__":
     import uvicorn
-    
+
     uvicorn.run(
         "app:app",
-        host=config['service']['host'],
-        port=config['service']['port'],
-        reload=config['service']['debug']
+        host=config["service"]["host"],
+        port=config["service"]["port"],
+        reload=config["service"]["debug"],
     )

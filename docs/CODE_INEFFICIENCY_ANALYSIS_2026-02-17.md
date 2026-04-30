@@ -11,7 +11,7 @@ This document identifies inefficient code patterns discovered through comprehens
 
 ### 1. Triple-Nested Gradient Loop with Repeated Loss Computation
 
-**File:** `quantum-ai/web_app.py`
+**File:** `ai-projects/quantum-ml/web_app.py`
 **Lines:** 217-246
 **Severity:** Critical
 **Complexity:** O(layers × qubits × gates × batch_size × dataset_size)
@@ -159,7 +159,7 @@ def get_job_progress(self, job_id):
 
 ### 3. Linear Keyword Search Patterns
 
-**File:** `talk-to-ai/src/agi_provider.py`
+**File:** `ai-projects/chat-cli/src/agi_provider.py`
 **Lines:** 343-372
 **Severity:** High
 **Complexity:** O(keywords × query_length)
@@ -307,7 +307,7 @@ elif _contains_any_keyword(cmd, MOVE_RIGHT_KEYWORDS):
 
 ### 5. Multi-Pass Session Statistics Collection
 
-**File:** `quantum-ai/web_app.py`
+**File:** `ai-projects/quantum-ml/web_app.py`
 **Lines:** 952-958
 **Severity:** Medium
 **Pattern:** Multiple iterations over same collection
@@ -462,7 +462,7 @@ def check_rate_limit(client_ip: str) -> bool:
 
 ### 8. Gradient Norm with Intermediate List
 
-**File:** `quantum-ai/web_app.py`
+**File:** `ai-projects/quantum-ml/web_app.py`
 **Lines:** 440-443
 **Severity:** Low
 

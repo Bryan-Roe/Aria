@@ -5,19 +5,19 @@ param(
     [Parameter(Position = 0, Mandatory = $false)]
     [ValidateSet("train", "quick-test", "resume", "evaluate", "help")]
     [string]$Action = "help",
-    
+
     [Parameter(Mandatory = $false)]
     [string]$Config = "local_config.yaml",
-    
+
     [Parameter(Mandatory = $false)]
     [string]$Checkpoint = "",
-    
+
     [Parameter(Mandatory = $false)]
     [int]$MaxSamples = 0,
-    
+
     [Parameter(Mandatory = $false)]
     [switch]$Use4Bit,
-    
+
     [Parameter(Mandatory = $false)]
     [switch]$Use8Bit
 )
@@ -81,33 +81,33 @@ function Invoke-Training {
         [bool]$Quant4Bit,
         [bool]$Quant8Bit
     )
-    
+
     # Build command
     $cmd = "python train_local.py --config `"$ConfigPath`""
-    
+
     if ($Samples -gt 0) {
         $cmd += " --max-samples $Samples"
     }
-    
+
     if ($CheckpointPath) {
         $cmd += " --resume-from `"$CheckpointPath`""
     }
-    
+
     if ($EvalOnly) {
         $cmd += " --eval-only"
     }
-    
+
     if ($Quant4Bit) {
         $cmd += " --use-4bit"
     }
-    
+
     if ($Quant8Bit) {
         $cmd += " --use-8bit"
     }
-    
+
     Write-Host "Running: $cmd" -ForegroundColor Cyan
     Write-Host ""
-    
+
     Invoke-Expression $cmd
 }
 
@@ -125,44 +125,44 @@ switch ($Action) {
         Invoke-Training -ConfigPath $Config -Samples $MaxSamples `
                         -Quant4Bit:$Use4Bit -Quant8Bit:$Use8Bit
     }
-    
+
     "quick-test" {
         Write-Host "=== Quick Test (10 samples) ===" -ForegroundColor Green
         $testSamples = if ($MaxSamples -gt 0) { $MaxSamples } else { 10 }
         Invoke-Training -ConfigPath $Config -Samples $testSamples `
                         -Quant4Bit:$Use4Bit -Quant8Bit:$Use8Bit
     }
-    
+
     "resume" {
         if (-not $Checkpoint) {
             Write-Host "ERROR: -Checkpoint is required for resume action" -ForegroundColor Red
             Write-Host "Example: .\run.ps1 resume -Checkpoint outputs/checkpoint-500" -ForegroundColor Yellow
             exit 1
         }
-        
+
         Write-Host "=== Resuming from Checkpoint ===" -ForegroundColor Green
         Write-Host "Checkpoint: $Checkpoint" -ForegroundColor Cyan
         Invoke-Training -ConfigPath $Config -CheckpointPath $Checkpoint `
                         -Samples $MaxSamples -Quant4Bit:$Use4Bit -Quant8Bit:$Use8Bit
     }
-    
+
     "evaluate" {
         if (-not $Checkpoint) {
             Write-Host "ERROR: -Checkpoint is required for evaluate action" -ForegroundColor Red
             Write-Host "Example: .\run.ps1 evaluate -Checkpoint outputs/final_model" -ForegroundColor Yellow
             exit 1
         }
-        
+
         Write-Host "=== Evaluating Model ===" -ForegroundColor Green
         Write-Host "Checkpoint: $Checkpoint" -ForegroundColor Cyan
         Invoke-Training -ConfigPath $Config -CheckpointPath $Checkpoint `
                         -EvalOnly $true -Quant4Bit:$Use4Bit -Quant8Bit:$Use8Bit
     }
-    
+
     "help" {
         Show-Help
     }
-    
+
     default {
         Write-Host "Unknown action: $Action" -ForegroundColor Red
         Write-Host ""

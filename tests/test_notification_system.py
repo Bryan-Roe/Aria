@@ -1,8 +1,10 @@
 """Unit tests for notification_system security fixes."""
-from unittest.mock import patch, MagicMock
+
 import subprocess
 import sys
 from pathlib import Path
+from unittest.mock import MagicMock, patch
+
 REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO_ROOT))
 
@@ -12,15 +14,15 @@ try:
 except ImportError:
     # Try scripts directory
     import importlib.util
+
     notif_path = REPO_ROOT / "scripts" / "notification_system.py"
-    spec = importlib.util.spec_from_file_location(
-        "notification_system", notif_path)
+    spec = importlib.util.spec_from_file_location("notification_system", notif_path)
     if spec is not None and spec.loader is not None:
         notification_system = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(notification_system)
         NotificationManager = notification_system.NotificationManager
     else:
-        raise ImportError(f"Could not load spec or loader for {notif_path}")
+        raise ImportError(f"Could not load spec or loader for {notif_path}") from None
 
 
 class TestNotificationManagerSecurity:
@@ -46,7 +48,7 @@ class TestNotificationManagerSecurity:
 
             call_args = mock_run.call_args[0][0]
             script = call_args[2]
-            assert '\"' in script  # Escaped quote
+            assert '"' in script  # Escaped quote
 
     def test_macos_escapes_newlines(self):
         """Verify newlines are replaced to prevent script termination."""
@@ -119,8 +121,7 @@ class TestNotificationManagerSecurity:
         """Verify timeout is set and handled properly."""
         manager = NotificationManager()
         with patch("subprocess.run") as mock_run:
-            mock_run.side_effect = subprocess.TimeoutExpired(
-                cmd="osascript", timeout=5)
+            mock_run.side_effect = subprocess.TimeoutExpired(cmd="osascript", timeout=5)
             # Should not raise - error is printed instead
             manager._send_macos("Test", "Message")
 
@@ -129,7 +130,8 @@ class TestNotificationManagerSecurity:
         manager = NotificationManager()
         with patch("subprocess.run") as mock_run:
             mock_run.side_effect = subprocess.TimeoutExpired(
-                cmd="notify-send", timeout=5)
+                cmd="notify-send", timeout=5
+            )
             # Should not raise - error is printed instead
             manager._send_linux("Test", "Message", "info")
 

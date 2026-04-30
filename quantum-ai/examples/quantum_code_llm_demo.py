@@ -3,7 +3,7 @@
 
 Usage
 -----
-    python quantum-ai/examples/quantum_code_llm_demo.py
+    python ai-projects/quantum-ml/examples/quantum_code_llm_demo.py
 
 Options (set via env vars or edit the CONFIG dicts below):
     QLCM_EPOCHS    number of training epochs    (default 3)
@@ -59,6 +59,7 @@ PROMPTS = [
 ]
 
 # ── Main ───────────────────────────────────────────────────────────────────
+
 
 def main() -> None:
     print("=" * 60)

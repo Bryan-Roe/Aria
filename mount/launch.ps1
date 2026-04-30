@@ -43,7 +43,7 @@ $ready = $false
 while ($attempt -lt $maxAttempts -and -not $ready) {
     $attempt++
     Start-Sleep -Seconds 1
-    
+
     try {
         $response = Invoke-RestMethod -Uri "http://localhost:8000/health" -TimeoutSec 2 -ErrorAction Stop
         $ready = $true
@@ -65,10 +65,10 @@ if ($ready) {
     Write-Host "Opening browser..." -ForegroundColor Cyan
     Start-Sleep -Seconds 2
     Start-Process "http://localhost:8000"
-    
+
     Write-Host ""
     Write-Host "Press Ctrl+C to stop the service" -ForegroundColor Yellow
-    
+
     # Keep showing job output
     Receive-Job -Job $job -Wait
 }

@@ -1,9 +1,23 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>👤 Aria Visual Command System</title>
+    <title>Aria — Interactive Character Stage</title>
+    <meta name="description" content="Aria's interactive character stage with natural-language movement, gestures, object interaction, and world generation.">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://bryan-roe.github.io/Aria/aria/">
+    <meta name="theme-color" content="#0f9d89">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://bryan-roe.github.io/Aria/aria/">
+    <meta property="og:title" content="Aria — Interactive Character Stage">
+    <meta property="og:description" content="Interactive character stage with natural-language movement, gestures, object interaction, and world generation.">
+    <meta property="og:image" content="https://bryan-roe.github.io/Aria/og-image.svg">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Aria — Interactive Character Stage">
+    <meta name="twitter:image" content="https://bryan-roe.github.io/Aria/og-image.svg">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='24' fill='%23122033'/%3E%3Ccircle cx='50' cy='36' r='16' fill='%230f9d89'/%3E%3Cpath d='M24 78c5-14 18-22 26-22s21 8 26 22' stroke='%23f7f2e8' stroke-width='10' stroke-linecap='round' fill='none'/%3E%3C/svg%3E">
     <style>
         * {
             margin: 0;
@@ -35,7 +49,7 @@
         h1 {
             font-size: 2.5em;
             margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
             background: linear-gradient(135deg, #4a90e2, #5a9fe5, #6aaff0);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -73,7 +87,7 @@
             border-radius: 15px;
             padding: 20px;
             margin-bottom: 20px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
         }
 
         .object-manager h3 {
@@ -103,7 +117,7 @@
 
         .object-btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         }
 
         .object-btn.active {
@@ -128,7 +142,7 @@
             background: rgba(255, 255, 255, 0.95);
             border-radius: 20px;
             padding: 30px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
         }
 
         .stage {
@@ -143,7 +157,7 @@
             perspective-origin: 50% 50%;
             transform-style: preserve-3d;
         }
-        
+
         /* Table */
         .table {
             position: absolute;
@@ -154,11 +168,11 @@
             height: 15px;
             background: linear-gradient(to bottom, #8B4513 0%, #A0522D 50%, #8B4513 100%);
             border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
             z-index: 5;
             transform-style: preserve-3d;
         }
-        
+
         .table-leg {
             position: absolute;
             top: 100%;
@@ -168,7 +182,7 @@
             border-radius: 3px;
             transform: translateX(-50%);
         }
-        
+
         /* Interactive Objects */
         .object {
             position: absolute;
@@ -177,44 +191,77 @@
             transition: all 0.3s ease;
             z-index: 10;
             user-select: none;
-            filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.3));
+            filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.3));
             transform-style: preserve-3d;
             transform: translateZ(-50px);
         }
-        
+
         .object:hover {
             transform: scale(1.15);
-            filter: drop-shadow(3px 3px 8px rgba(255,215,0,0.6));
+            filter: drop-shadow(3px 3px 8px rgba(255, 215, 0, 0.6));
         }
-        
+
         .object.grabbed {
             cursor: grabbing;
             z-index: 100;
-            filter: drop-shadow(0 0 15px rgba(255,215,0,0.8));
+            filter: drop-shadow(0 0 15px rgba(255, 215, 0, 0.8));
             animation: float 0.5s ease-in-out infinite;
         }
-        
+
         .object.held {
             z-index: 15;
             animation: bobbing 0.6s ease-in-out infinite;
         }
-        
+
         @keyframes float {
-            0%, 100% { transform: translateY(0) scale(1.1); }
-            50% { transform: translateY(-8px) scale(1.15); }
+
+            0%,
+            100% {
+                transform: translateY(0) scale(1.1);
+            }
+
+            50% {
+                transform: translateY(-8px) scale(1.15);
+            }
         }
-        
+
         @keyframes bobbing {
-            0%, 100% { transform: translateY(-3px); }
-            50% { transform: translateY(3px); }
+
+            0%,
+            100% {
+                transform: translateY(-3px);
+            }
+
+            50% {
+                transform: translateY(3px);
+            }
         }
-        
+
         /* Object initial positions on table */
-        #apple { bottom: 35%; left: 55%; }
-        #book { bottom: 35%; left: 48%; }
-        #cup { bottom: 35%; left: 62%; }
-        #ball { bottom: 35%; left: 70%; }
-        #flower { bottom: 35%; left: 52%; }
+        #apple {
+            bottom: 35%;
+            left: 55%;
+        }
+
+        #book {
+            bottom: 35%;
+            left: 48%;
+        }
+
+        #cup {
+            bottom: 35%;
+            left: 62%;
+        }
+
+        #ball {
+            bottom: 35%;
+            left: 70%;
+        }
+
+        #flower {
+            bottom: 35%;
+            left: 52%;
+        }
 
         .aria-character {
             position: absolute;
@@ -224,51 +271,113 @@
             width: 160px;
             height: 260px;
             transition: all 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-            filter: drop-shadow(0 8px 16px rgba(0,0,0,0.25));
+            filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.25));
             transform-style: preserve-3d;
             z-index: 10;
             animation: breathe 4s ease-in-out infinite;
         }
-        
+
         /* Walking animation states */
         .aria-character.walking {
             animation: walk-bounce 0.4s ease-in-out infinite;
         }
-        
+
         .aria-character.running {
             animation: run-bounce 0.25s ease-in-out infinite !important;
         }
 
+        .aria-character.walking .aria-body {
+            animation: torso-sway 0.45s ease-in-out infinite;
+            transform-origin: 50% 12px;
+        }
+
+        .aria-character.running .aria-body {
+            animation: torso-sway-run 0.24s ease-in-out infinite;
+            transform-origin: 50% 12px;
+        }
+
         .aria-character.arrived {
-            animation: arrival-bounce 0.9s cubic-bezier(.2,.9,.2,1);
-            filter: drop-shadow(0 18px 30px rgba(255,215,0,0.25)) brightness(1.12);
+            animation: arrival-bounce 0.9s cubic-bezier(.2, .9, .2, 1);
+            filter: drop-shadow(0 18px 30px rgba(255, 215, 0, 0.25)) brightness(1.12);
             transform: translateX(-50%) translateZ(10px) translateY(-6px) scale(1.06);
         }
 
         @keyframes arrival-bounce {
-            0% { transform: translateX(-50%) translateZ(0px) translateY(0) scale(1); }
-            40% { transform: translateX(-50%) translateZ(18px) translateY(-16px) scale(1.08); }
-            70% { transform: translateX(-50%) translateZ(8px) translateY(-6px) scale(1.03); }
-            100% { transform: translateX(-50%) translateZ(0px) translateY(0) scale(1); }
+            0% {
+                transform: translateX(-50%) translateZ(0px) translateY(0) scale(1);
+            }
+
+            40% {
+                transform: translateX(-50%) translateZ(18px) translateY(-16px) scale(1.08);
+            }
+
+            70% {
+                transform: translateX(-50%) translateZ(8px) translateY(-6px) scale(1.03);
+            }
+
+            100% {
+                transform: translateX(-50%) translateZ(0px) translateY(0) scale(1);
+            }
         }
 
         @keyframes breathe {
-            0%, 100% { 
+
+            0%,
+            100% {
                 transform: translateX(-50%) scaleY(1) translateY(0);
             }
-            50% { 
+
+            50% {
                 transform: translateX(-50%) scaleY(0.985) translateY(1px);
             }
         }
-        
+
         @keyframes walk-bounce {
-            0%, 100% { transform: translateX(-50%) translateY(0); }
-            50% { transform: translateX(-50%) translateY(-5px); }
+
+            0%,
+            100% {
+                transform: translateX(-50%) translateY(0);
+            }
+
+            50% {
+                transform: translateX(-50%) translateY(-5px);
+            }
         }
-        
+
         @keyframes run-bounce {
-            0%, 100% { transform: translateX(-50%) translateY(0) scaleY(0.95); }
-            50% { transform: translateX(-50%) translateY(-8px) scaleY(1.05); }
+
+            0%,
+            100% {
+                transform: translateX(-50%) translateY(0) scaleY(0.95);
+            }
+
+            50% {
+                transform: translateX(-50%) translateY(-8px) scaleY(1.05);
+            }
+        }
+
+        @keyframes torso-sway {
+
+            0%,
+            100% {
+                transform: translateX(-50%) rotate(-1.6deg) translateY(0);
+            }
+
+            50% {
+                transform: translateX(-50%) rotate(1.6deg) translateY(-1px);
+            }
+        }
+
+        @keyframes torso-sway-run {
+
+            0%,
+            100% {
+                transform: translateX(-50%) rotate(-2.8deg) translateY(1px);
+            }
+
+            50% {
+                transform: translateX(-50%) rotate(2.8deg) translateY(-2px);
+            }
         }
 
         /* Head - Realistic skin tone with subtle contours */
@@ -284,8 +393,8 @@
             border: 2px solid rgba(60, 50, 45, 0.6);
             z-index: 4;
             box-shadow: inset -3px -3px 12px rgba(232, 196, 168, 0.4),
-                        inset 3px 3px 15px rgba(255, 255, 255, 0.5),
-                        0 6px 18px rgba(0,0,0,0.15);
+                inset 3px 3px 15px rgba(255, 255, 255, 0.5),
+                0 6px 18px rgba(0, 0, 0, 0.15);
         }
 
         /* Hair - Natural flowing brown with dimensional highlights */
@@ -302,17 +411,8 @@
             border-bottom: none;
             z-index: 5;
             box-shadow: inset 2px 2px 10px rgba(155, 125, 106, 0.3),
-                        inset -2px -2px 12px rgba(0,0,0,0.25),
-                        0 3px 8px rgba(0,0,0,0.2);
-        }
-            position: absolute;
-            top: -12px;
-            left: 50%;
-            transform: translateX(-50%);
-            border: 2px solid #2c2c2c;
-            border-bottom: none;
-            z-index: 5;
-            box-shadow: inset 0 -3px 8px rgba(0,0,0,0.2);
+                inset -2px -2px 12px rgba(0, 0, 0, 0.25),
+                0 3px 8px rgba(0, 0, 0, 0.2);
         }
 
         /* Hair bangs - Natural brown */
@@ -334,12 +434,22 @@
             border-radius: 50% 50% 60% 60%;
             border: 2px solid rgba(60, 50, 45, 0.6);
             box-shadow: inset 1px 1px 3px rgba(155, 125, 106, 0.3),
-                        1px 2px 4px rgba(0,0,0,0.15);
+                1px 2px 4px rgba(0, 0, 0, 0.15);
         }
 
-        .aria-bang:nth-child(1) { left: 5px; transform: rotate(-12deg); }
-        .aria-bang:nth-child(2) { left: 21px; }
-        .aria-bang:nth-child(3) { right: 5px; transform: rotate(12deg); }
+        .aria-bang:nth-child(1) {
+            left: 5px;
+            transform: rotate(-12deg);
+        }
+
+        .aria-bang:nth-child(2) {
+            left: 21px;
+        }
+
+        .aria-bang:nth-child(3) {
+            right: 5px;
+            transform: rotate(12deg);
+        }
 
         /* Hair ponytails - Natural brown */
         .aria-ponytail {
@@ -381,8 +491,8 @@
             border-radius: 52% 48% 50% 50%;
             border: 2px solid rgba(60, 50, 45, 0.7);
             position: relative;
-            box-shadow: inset 0 1px 3px rgba(255,255,255,0.6),
-                        0 2px 5px rgba(0,0,0,0.12);
+            box-shadow: inset 0 1px 3px rgba(255, 255, 255, 0.6),
+                0 2px 5px rgba(0, 0, 0, 0.12);
         }
 
         .aria-eye::before {
@@ -395,7 +505,7 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            box-shadow: inset 0 1px 2px rgba(0,0,0,0.3);
+            box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.3);
         }
 
         .aria-eye::after {
@@ -403,7 +513,7 @@
             position: absolute;
             width: 3px;
             height: 3px;
-            background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.95), rgba(255,255,255,0.7));
+            background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.7));
             border-radius: 50%;
             top: 32%;
             left: 32%;
@@ -418,13 +528,28 @@
             background: linear-gradient(180deg, #3c322d 0%, rgba(60, 50, 45, 0.4) 100%);
             top: -5px;
             border-radius: 50%;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.15);
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
         }
 
-        .aria-eyelash:nth-child(2) { left: -2px; transform: rotate(-20deg); }
-        .aria-eyelash:nth-child(3) { left: 4px; transform: rotate(-10deg); }
-        .aria-eyelash:nth-child(4) { right: 4px; transform: rotate(10deg); }
-        .aria-eyelash:nth-child(5) { right: -2px; transform: rotate(20deg); }
+        .aria-eyelash:nth-child(2) {
+            left: -2px;
+            transform: rotate(-20deg);
+        }
+
+        .aria-eyelash:nth-child(3) {
+            left: 4px;
+            transform: rotate(-10deg);
+        }
+
+        .aria-eyelash:nth-child(4) {
+            right: 4px;
+            transform: rotate(10deg);
+        }
+
+        .aria-eyelash:nth-child(5) {
+            right: -2px;
+            transform: rotate(20deg);
+        }
 
         /* Blush - Natural rosy cheeks */
         .aria-blush {
@@ -437,8 +562,13 @@
             filter: blur(1px);
         }
 
-        .aria-blush.left { left: 8px; }
-        .aria-blush.right { right: 8px; }
+        .aria-blush.left {
+            left: 8px;
+        }
+
+        .aria-blush.right {
+            right: 8px;
+        }
 
         /* Mouth - Natural lips with gentle curves */
         .aria-mouth {
@@ -453,7 +583,7 @@
             border-top: none;
             border-radius: 0 0 18px 18px;
             z-index: 6;
-            box-shadow: inset 0 1px 2px rgba(255,200,200,0.3);
+            box-shadow: inset 0 1px 2px rgba(255, 200, 200, 0.3);
         }
 
         .aria-mouth.smile {
@@ -473,35 +603,80 @@
 
         /* Body - Soft casual top with natural draping */
         .aria-body {
-            width: 55px;
-            height: 70px;
-            background: linear-gradient(135deg, #5fa3ee 0%, #4a90e2 40%, #6db0f5 70%, #5a9fe5 100%);
-            border-radius: 38% 38% 48% 48%;
+            width: 70px;
+            height: 84px;
+            background: linear-gradient(160deg, #73b5f7 0%, #4f97e7 38%, #3f86d6 100%);
+            border-radius: 48% 48% 32% 32% / 22% 22% 62% 62%;
             position: absolute;
-            top: 75px;
+            top: 74px;
             left: 50%;
             transform: translateX(-50%);
-            border: 2px solid rgba(60, 50, 45, 0.5);
+            border: 2px solid rgba(60, 50, 45, 0.48);
             z-index: 2;
-            box-shadow: inset -2px -3px 8px rgba(74, 144, 226, 0.3),
-                        inset 2px 3px 10px rgba(255,255,255,0.4),
-                        0 4px 12px rgba(0,0,0,0.15);
+            box-shadow: inset -3px -4px 10px rgba(52, 118, 190, 0.35),
+                inset 3px 4px 12px rgba(255, 255, 255, 0.34),
+                0 4px 12px rgba(0, 0, 0, 0.14);
+        }
+
+        .aria-body::before {
+            content: '';
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 20px;
+            height: 50px;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0.08) 42%, rgba(0, 0, 0, 0.08) 100%);
+            border-radius: 12px;
+            opacity: 0.45;
+            pointer-events: none;
+        }
+
+        .aria-body::after {
+            content: '';
+            position: absolute;
+            left: 50%;
+            bottom: -6px;
+            transform: translateX(-50%);
+            width: 40px;
+            height: 16px;
+            background: linear-gradient(180deg, #5da6eb 0%, #3f86d6 100%);
+            border: 2px solid rgba(60, 50, 45, 0.4);
+            border-top: none;
+            border-radius: 0 0 16px 16px;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.08);
+        }
+
+        /* Neck - skin-tone bridge between head and shirt collar */
+        .aria-neck {
+            position: absolute;
+            top: 62px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 24px;
+            height: 22px;
+            background: linear-gradient(180deg, #f5d4b8 0%, #e8c4a8 65%, #ddb89a 100%);
+            border-radius: 7px 7px 5px 5px;
+            z-index: 3;
+            border: 1.5px solid rgba(60, 50, 45, 0.3);
+            border-top: none;
+            box-shadow: inset -1px 0 4px rgba(200, 160, 130, 0.25);
         }
 
         /* Shirt collar with subtle detail */
         .aria-bow {
             position: absolute;
-            top: 79px;
+            top: 77px;
             left: 50%;
             transform: translateX(-50%);
-            width: 30px;
-            height: 8px;
+            width: 32px;
+            height: 9px;
             background: linear-gradient(180deg, #ffffff 0%, #f8f8f8 50%, #f0f0f0 100%);
             border: 2px solid rgba(60, 50, 45, 0.4);
             border-radius: 4px;
             z-index: 3;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1),
-                        inset 0 1px 2px rgba(255,255,255,0.6);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1),
+                inset 0 1px 2px rgba(255, 255, 255, 0.6);
         }
 
         .aria-bow::before {
@@ -514,8 +689,8 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            box-shadow: inset 0 1px 2px rgba(255,255,255,0.3),
-                        0 1px 2px rgba(0,0,0,0.15);
+            box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.3),
+                0 1px 2px rgba(0, 0, 0, 0.15);
         }
 
         .aria-bow::after {
@@ -525,18 +700,25 @@
         /* Shoulders */
         .aria-shoulder {
             position: absolute;
-            width: 11px;
-            height: 11px;
-            background: #4a90e2;
+            width: 21px;
+            height: 21px;
+            background: linear-gradient(135deg, #68aef6 0%, #4a90e2 55%, #5a9fe5 100%);
             border-radius: 50%;
-            border: 2px solid #2c2c2c;
-            top: 77px;
+            border: 2px solid rgba(60, 50, 45, 0.35);
+            top: 81px;
             z-index: 3;
-            display: none;
+            display: block;
+            box-shadow: inset -1px -1px 4px rgba(74, 144, 226, 0.25),
+                inset 1px 1px 4px rgba(255, 255, 255, 0.35);
         }
 
-        .aria-shoulder.left { left: 39px; }
-        .aria-shoulder.right { right: 39px; }
+        .aria-shoulder.left {
+            left: 35px;
+        }
+
+        .aria-shoulder.right {
+            right: 35px;
+        }
 
         /* Upper Arms - Natural skin with subtle shading */
         .aria-upper-arm {
@@ -545,23 +727,23 @@
             background: linear-gradient(180deg, #fef5e7 0%, #f5d4b8 40%, #e8c4a8 100%);
             border-radius: 11px;
             position: absolute;
-            top: 78px;
+            top: 82px;
             border: 2px solid rgba(60, 50, 45, 0.4);
             z-index: 1;
             box-shadow: inset -1px -1px 4px rgba(232, 196, 168, 0.3),
-                        inset 1px 1px 4px rgba(255,255,255,0.4),
-                        1px 2px 6px rgba(0,0,0,0.12);
+                inset 1px 1px 4px rgba(255, 255, 255, 0.4),
+                1px 2px 6px rgba(0, 0, 0, 0.12);
             transition: transform 0.3s ease;
         }
 
         .aria-upper-arm.left {
-            left: 33px;
+            left: 35px;
             transform: rotate(-20deg);
             transform-origin: top center;
         }
 
         .aria-upper-arm.right {
-            right: 33px;
+            right: 35px;
             transform: rotate(20deg);
             transform-origin: top center;
         }
@@ -591,8 +773,8 @@
             border: 2px solid rgba(60, 50, 45, 0.4);
             z-index: 1;
             box-shadow: inset -1px -1px 4px rgba(232, 196, 168, 0.3),
-                        inset 1px 1px 4px rgba(255,255,255,0.4),
-                        1px 2px 6px rgba(0,0,0,0.12);
+                inset 1px 1px 4px rgba(255, 255, 255, 0.4),
+                1px 2px 6px rgba(0, 0, 0, 0.12);
             transition: transform 0.3s ease;
         }
 
@@ -634,8 +816,8 @@
             border-radius: 48% 48% 52% 52%;
             border: 2px solid rgba(60, 50, 45, 0.4);
             z-index: 1;
-            box-shadow: inset 1px 1px 3px rgba(255,255,255,0.3),
-                        1px 2px 5px rgba(0,0,0,0.1);
+            box-shadow: inset 1px 1px 3px rgba(255, 255, 255, 0.3),
+                1px 2px 5px rgba(0, 0, 0, 0.1);
             transition: transform 0.3s ease;
         }
 
@@ -661,42 +843,64 @@
             bottom: -5px;
         }
 
-        .aria-finger:nth-child(1) { left: 1px; }
-        .aria-finger:nth-child(2) { left: 4px; }
-        .aria-finger:nth-child(3) { right: 4px; }
-        .aria-finger:nth-child(4) { right: 1px; }
+        .aria-finger:nth-child(1) {
+            left: 1px;
+        }
+
+        .aria-finger:nth-child(2) {
+            left: 4px;
+        }
+
+        .aria-finger:nth-child(3) {
+            right: 4px;
+        }
+
+        .aria-finger:nth-child(4) {
+            right: 1px;
+        }
 
         /* Hips */
         .aria-hip {
             position: absolute;
-            width: 11px;
-            height: 11px;
-            background: #3d5a80;
+            width: 15px;
+            height: 12px;
+            background: linear-gradient(180deg, #46688d 0%, #3d5a80 100%);
             border-radius: 50%;
-            border: 2px solid #2c2c2c;
-            top: 140px;
+            border: 2px solid rgba(60, 50, 45, 0.35);
+            top: 150px;
             z-index: 3;
-            display: none;
+            display: block;
+            box-shadow: inset 1px 1px 3px rgba(255, 255, 255, 0.15);
         }
 
-        .aria-hip.left { left: 48px; }
-        .aria-hip.right { right: 48px; }
+        .aria-hip.left {
+            left: 51px;
+        }
+
+        .aria-hip.right {
+            right: 51px;
+        }
 
         /* Upper Legs (Thighs) */
         .aria-upper-leg {
             width: 16px;
-            height: 35px;
+            height: 36px;
             background: linear-gradient(180deg, #3d5a80 0%, #4a6a90 100%);
             border-radius: 8px;
             position: absolute;
-            top: 142px;
-            border: 2px solid #2c2c2c;
+            top: 152px;
+            border: 2px solid rgba(60, 50, 45, 0.5);
             z-index: 1;
             transition: transform 0.3s ease;
         }
 
-        .aria-upper-leg.left { left: 54px; }
-        .aria-upper-leg.right { right: 54px; }
+        .aria-upper-leg.left {
+            left: 51px;
+        }
+
+        .aria-upper-leg.right {
+            right: 51px;
+        }
 
         /* Knees */
         .aria-knee {
@@ -726,8 +930,13 @@
             transition: transform 0.3s ease;
         }
 
-        .aria-lower-leg.left { left: 54px; }
-        .aria-lower-leg.right { right: 54px; }
+        .aria-lower-leg.left {
+            left: 54px;
+        }
+
+        .aria-lower-leg.right {
+            right: 54px;
+        }
 
         /* Ankles */
         .aria-ankle {
@@ -753,7 +962,7 @@
             position: absolute;
             top: 206px;
             border: 2px solid #2c2c2c;
-            box-shadow: inset 0 1px 3px rgba(255,255,255,0.4);
+            box-shadow: inset 0 1px 3px rgba(255, 255, 255, 0.4);
         }
 
         .aria-foot.left {
@@ -794,28 +1003,66 @@
             animation: wave 1s ease-in-out;
         }
 
-@keyframes jump {
-    0%, 100% { transform: translateX(-50%) translateY(0) scale(1); }
-    50% { transform: translateX(-50%) translateY(-250px) scale(1.15); }
-}        @keyframes dance {
-            0%, 100% { transform: translateX(-50%) rotate(-45deg) scale(1.1); }
-            50% { transform: translateX(-50%) rotate(45deg) scale(1.3); }
+        @keyframes jump {
+
+            0%,
+            100% {
+                transform: translateX(-50%) translateY(0) scale(1);
+            }
+
+            50% {
+                transform: translateX(-50%) translateY(-250px) scale(1.15);
+            }
+        }
+
+        @keyframes dance {
+
+            0%,
+            100% {
+                transform: translateX(-50%) rotate(-45deg) scale(1.1);
+            }
+
+            50% {
+                transform: translateX(-50%) rotate(45deg) scale(1.3);
+            }
         }
 
         @keyframes spin {
-            0% { transform: translateX(-50%) rotate(0deg); }
-            100% { transform: translateX(-50%) rotate(360deg); }
+            0% {
+                transform: translateX(-50%) rotate(0deg);
+            }
+
+            100% {
+                transform: translateX(-50%) rotate(360deg);
+            }
         }
 
         @keyframes wave {
-            0%, 100% { transform: translateX(-50%) scale(1); }
-            25% { transform: translateX(-50%) scale(1.1) rotate(5deg); }
-            75% { transform: translateX(-50%) scale(1.1) rotate(-5deg); }
+
+            0%,
+            100% {
+                transform: translateX(-50%) scale(1);
+            }
+
+            25% {
+                transform: translateX(-50%) scale(1.1) rotate(5deg);
+            }
+
+            75% {
+                transform: translateX(-50%) scale(1.1) rotate(-5deg);
+            }
         }
 
         @keyframes pulse {
-            0%, 100% { transform: translateX(-50%) scale(1); }
-            50% { transform: translateX(-50%) scale(1.1); }
+
+            0%,
+            100% {
+                transform: translateX(-50%) scale(1);
+            }
+
+            50% {
+                transform: translateX(-50%) scale(1.1);
+            }
         }
 
         .effect {
@@ -834,21 +1081,39 @@
         }
 
         @keyframes fadeOut {
-            0% { opacity: 1; transform: scale(0); }
-            50% { opacity: 1; transform: scale(1); }
-            100% { opacity: 0; transform: scale(1.5); }
+            0% {
+                opacity: 1;
+                transform: scale(0);
+            }
+
+            50% {
+                opacity: 1;
+                transform: scale(1);
+            }
+
+            100% {
+                opacity: 0;
+                transform: scale(1.5);
+            }
         }
 
         @keyframes floatUp {
-            0% { opacity: 1; transform: translateY(0); }
-            100% { opacity: 0; transform: translateY(-200px); }
+            0% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+
+            100% {
+                opacity: 0;
+                transform: translateY(-200px);
+            }
         }
 
         .control-panel {
             background: rgba(255, 255, 255, 0.95);
             border-radius: 20px;
             padding: 25px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
             color: #333;
         }
 
@@ -875,7 +1140,7 @@
         input[type="text"]:focus {
             outline: none;
             border-color: #ff8fab;
-            box-shadow: 0 0 8px rgba(255,107,157,0.3);
+            box-shadow: 0 0 8px rgba(255, 107, 157, 0.3);
         }
 
         button {
@@ -889,12 +1154,12 @@
             font-weight: bold;
             cursor: pointer;
             transition: transform 0.2s;
-            box-shadow: 0 4px 8px rgba(255,107,157,0.3);
+            box-shadow: 0 4px 8px rgba(255, 107, 157, 0.3);
         }
 
         button:hover {
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
         }
 
         button:active {
@@ -903,11 +1168,11 @@
 
         .quick-commands {
             margin-top: 20px;
+        }
+
         .quick-commands h3 {
             color: #ff6b9d;
             margin-bottom: 10px;
-            font-size: 1.2em;
-        }   margin-bottom: 10px;
             font-size: 1.2em;
         }
 
@@ -916,6 +1181,7 @@
             grid-template-columns: repeat(2, 1fr);
             gap: 8px;
         }
+
         .quick-btn {
             padding: 8px;
             background: #f0f0f0;
@@ -931,8 +1197,7 @@
             background: #ff6b9d;
             color: white;
             transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(255,107,157,0.3);
-        }   color: white;
+            box-shadow: 0 4px 8px rgba(255, 107, 157, 0.3);
         }
 
         /* Chat panel styles */
@@ -941,19 +1206,19 @@
             flex-direction: column;
             gap: 10px;
             padding: 12px;
-            background: linear-gradient(180deg, rgba(255,255,255,0.95), rgba(248,250,255,0.9));
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.95), rgba(248, 250, 255, 0.9));
             border-radius: 12px;
-            border: 1px solid rgba(100,110,230,0.08);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+            border: 1px solid rgba(100, 110, 230, 0.08);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
         }
 
         .chat-messages {
             height: 220px;
             overflow-y: auto;
             padding: 12px;
-            background: rgba(255,255,255,0.9);
+            background: rgba(255, 255, 255, 0.9);
             border-radius: 10px;
-            border: 1px solid rgba(0,0,0,0.03);
+            border: 1px solid rgba(0, 0, 0, 0.03);
             display: flex;
             flex-direction: column;
             gap: 8px;
@@ -965,10 +1230,19 @@
             align-items: flex-start;
         }
 
-        .chat-msg.user { justify-content: flex-end; }
-        .chat-msg.aria { justify-content: flex-start; }
+        .chat-msg.user {
+            justify-content: flex-end;
+        }
 
-        .chat-msg .sender { font-size: 0.75rem; color: #666; margin-bottom: 3px; }
+        .chat-msg.aria {
+            justify-content: flex-start;
+        }
+
+        .chat-msg .sender {
+            font-size: 0.75rem;
+            color: #666;
+            margin-bottom: 3px;
+        }
 
         .chat-msg .bubble {
             max-width: 70%;
@@ -976,14 +1250,31 @@
             border-radius: 14px;
             font-size: 0.95rem;
             line-height: 1.2;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
         }
 
-        .chat-msg.user .bubble { background: linear-gradient(135deg,#667eea,#764ba2); color: white; }
-        .chat-msg.aria .bubble { background: #f3f6ff; color: #24324a; }
+        .chat-msg.user .bubble {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
 
-        .chat-input-block { display:flex; gap:8px; align-items:center; }
-        .chat-input-block input { flex:1; padding:10px 12px; border-radius:10px; border:1px solid #ddd; }
+        .chat-msg.aria .bubble {
+            background: #f3f6ff;
+            color: #24324a;
+        }
+
+        .chat-input-block {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .chat-input-block input {
+            flex: 1;
+            padding: 10px 12px;
+            border-radius: 10px;
+            border: 1px solid #ddd;
+        }
 
         .status-log {
             margin-top: 20px;
@@ -991,6 +1282,8 @@
             background: #f9f9f9;
             border-radius: 10px;
             max-height: 200px;
+        }
+
         .status-log h3 {
             color: #ff6b9d;
             margin-bottom: 10px;
@@ -1004,17 +1297,16 @@
             padding-left: 10px;
             font-size: 0.9em;
             color: #555;
-        }   padding-left: 10px;
-            font-size: 0.9em;
-            color: #555;
         }
 
         .command-categories {
             background: rgba(255, 255, 255, 0.95);
             border-radius: 20px;
             padding: 25px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
             color: #333;
+        }
+
         .command-categories h2 {
             color: #ff6b9d;
             margin-bottom: 15px;
@@ -1026,9 +1318,6 @@
 
         .category-title {
             font-weight: bold;
-            color: #ff8fab;
-            margin-bottom: 5px;
-        }   font-weight: bold;
             color: #764ba2;
             margin-bottom: 5px;
         }
@@ -1038,18 +1327,43 @@
             font-size: 0.9em;
             line-height: 1.6;
         }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: #4a90e2;
+            text-decoration: none;
+            margin-bottom: 16px;
+            font-size: 0.95em;
+            font-weight: 500;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
+    <link rel="stylesheet" href="../global-upgrade.css">
 </head>
+
 <body>
     <div class="container">
+        <a href="../" class="back-link">← Back to Aria Home</a>
+
         <header>
             <h1>👤 Aria - Human-Like AI Character</h1>
             <p class="subtitle">Natural movement and realistic appearance with articulated joints! 🦾</p>
         </header>
 
         <div class="demo-notice">
-            <strong>🌐 Demo Mode:</strong> Running in GitHub Pages demo mode with simulated API responses. 
-            For full AI capabilities, run locally with Python backend. 
+            <strong>🌐 Demo Mode:</strong> Running in GitHub Pages demo mode with simulated API responses.
+            For full AI capabilities, run locally with Python backend.
             <a href="https://github.com/Bryan-Roe/Aria" target="_blank">View on GitHub</a>
         </div>
 
@@ -1082,14 +1396,14 @@
                         <div class="table-leg" style="left: 10%;"></div>
                         <div class="table-leg" style="left: 90%;"></div>
                     </div>
-                    
+
                     <!-- Interactive Objects -->
                     <div id="apple" class="object apple" data-object="apple">🍎</div>
                     <div id="book" class="object book" data-object="book">📚</div>
                     <div id="cup" class="object cup" data-object="cup">☕</div>
                     <div id="ball" class="object ball" data-object="ball">⚽</div>
                     <div id="flower" class="object flower" data-object="flower">🌸</div>
-                    
+
                     <div class="aria-character" id="aria">
                         <div class="aria-ponytail left"></div>
                         <div class="aria-ponytail right"></div>
@@ -1120,9 +1434,10 @@
                             </div>
                             <div class="aria-mouth" id="ariaMouth"></div>
                         </div>
+                        <div class="aria-neck"></div>
                         <div class="aria-bow"></div>
                         <div class="aria-body"></div>
-                        
+
                         <!-- Left Arm with Joints -->
                         <div class="aria-shoulder left"></div>
                         <div class="aria-upper-arm left" id="ariaUpperArmLeft">
@@ -1137,7 +1452,7 @@
                             <div class="aria-finger"></div>
                             <div class="aria-finger"></div>
                         </div>
-                        
+
                         <!-- Right Arm with Joints -->
                         <div class="aria-shoulder right"></div>
                         <div class="aria-upper-arm right" id="ariaUpperArmRight">
@@ -1152,7 +1467,7 @@
                             <div class="aria-finger"></div>
                             <div class="aria-finger"></div>
                         </div>
-                        
+
                         <!-- Left Leg with Joints -->
                         <div class="aria-hip left"></div>
                         <div class="aria-upper-leg left" id="ariaUpperLegLeft">
@@ -1162,7 +1477,7 @@
                             <div class="aria-ankle"></div>
                         </div>
                         <div class="aria-foot left"></div>
-                        
+
                         <!-- Right Leg with Joints -->
                         <div class="aria-hip right"></div>
                         <div class="aria-upper-leg right" id="ariaUpperLegRight">
@@ -1179,8 +1494,9 @@
             <div class="control-panel">
                 <h2>🎮 Command Input</h2>
                 <div class="command-input">
-                    <input type="text" id="commandInput" placeholder="Type a command (e.g., 'aria smile', 'jump', 'dance with sparkles')" 
-                           onkeypress="if(event.key === 'Enter') sendCommand()">
+                    <input type="text" id="commandInput"
+                        placeholder="Type a command (e.g., 'aria smile', 'jump', 'dance with sparkles')"
+                        onkeypress="if(event.key === 'Enter') sendCommand()">
                     <button onclick="sendCommand()">Execute Command</button>
                 </div>
 
@@ -1190,12 +1506,15 @@
                         <div id="chatMessages" class="chat-messages" aria-live="polite"></div>
 
                         <div class="chat-input-block">
-                            <input id="chatInput" type="text" placeholder="Type a chat message or /goto front-left — hit Enter to send"
-                                   onkeypress="if (event.key === 'Enter') sendChat()">
+                            <input id="chatInput" type="text"
+                                placeholder="Type a chat message or /goto front-left — hit Enter to send"
+                                onkeypress="if (event.key === 'Enter') sendChat()">
                             <button class="quick-btn" onclick="sendChat()">Send</button>
                         </div>
 
-                        <div style="margin-top:8px;font-size:0.85em;color:#666">Commands: <code>/goto &lt;waypoint&gt;</code>, <code>/waypoints</code>, <code>/circle</code>, <code>/spiral</code></div>
+                        <div style="margin-top:8px;font-size:0.85em;color:#666">Commands:
+                            <code>/goto &lt;waypoint&gt;</code>, <code>/waypoints</code>, <code>/circle</code>,
+                            <code>/spiral</code></div>
                     </div>
                 </div>
 
@@ -1208,5 +1527,41 @@
     </div>
 
     <script src="aria_controller.js"></script>
+    <script src="../aria-nav.js"></script>
+    <script>
+        // Keyboard shortcuts for docs/aria
+        (function () {
+            var THEME_KEY = 'aria-theme';
+            function toggleTheme() {
+                var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+                document.documentElement.setAttribute('data-theme', isDark ? 'light' : 'dark');
+                try { localStorage.setItem(THEME_KEY, isDark ? 'light' : 'dark'); } catch (e) { }
+            }
+            // Restore saved theme
+            try {
+                if (localStorage.getItem(THEME_KEY) === 'dark')
+                    document.documentElement.setAttribute('data-theme', 'dark');
+            } catch (e) { }
+            document.addEventListener('keydown', function (e) {
+                var isTyping = document.activeElement && (
+                    document.activeElement.tagName === 'INPUT' ||
+                    document.activeElement.tagName === 'TEXTAREA' ||
+                    document.activeElement.tagName === 'SELECT' ||
+                    document.activeElement.isContentEditable
+                );
+                if (isTyping) {
+                    if (e.key === 'Enter' && document.activeElement.id === 'commandInput') return; // handled inline
+                    if (e.key === 'Escape') { document.activeElement.blur(); return; }
+                    return;
+                }
+                var withMod = e.ctrlKey || e.metaKey;
+                if (withMod && e.key.toLowerCase() === 'd') { e.preventDefault(); toggleTheme(); }
+                if (e.key === '/') { e.preventDefault(); var ci = document.getElementById('commandInput'); if (ci) ci.focus(); }
+                if (e.key === 'Escape') { document.activeElement.blur(); }
+            });
+        })();
+    </script>
+    <script src="../global-upgrade.js"></script>
 </body>
+
 </html>

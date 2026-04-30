@@ -1,0 +1,23 @@
+name: Run Quantum AI Smoke
+description: Run the quantum-ai smoke script with configurable backend/epochs
+
+inputs:
+  backend:
+    description: Backend passed to smoke_quantum_code_llm.py
+    required: false
+    default: classical
+  epochs:
+    description: Epoch count passed to smoke_quantum_code_llm.py
+    required: false
+    default: '1'
+
+runs:
+  using: composite
+  steps:
+    - name: Execute quantum-ai smoke script
+      shell: bash
+      run: |
+        set -euo pipefail
+        python3 quantum-ai/scripts/smoke_quantum_code_llm.py \
+          --backend "${{ inputs.backend }}" \
+          --epochs "${{ inputs.epochs }}"

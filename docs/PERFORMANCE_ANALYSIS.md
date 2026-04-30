@@ -1,8 +1,8 @@
 # Performance Analysis Report - Aria Repository
 
-**Generated:** 2026-02-17  
-**Analysis Type:** Static code analysis for performance anti-patterns  
-**Scope:** Python codebase (scripts/, shared/, quantum-ai/, aria_web/, function_app.py)
+**Generated:** 2026-02-17
+**Analysis Type:** Static code analysis for performance anti-patterns
+**Scope:** Python codebase (scripts/, shared/, ai-projects/quantum-ml/, aria_web/, function_app.py)
 
 ---
 
@@ -24,8 +24,8 @@ This report identifies **15 performance improvement opportunities** across the A
 
 ### 1. Repeated Keyword Lookups in Hot Path (aria_web/server.py)
 
-**Location:** `aria_web/server.py`, lines 496-521  
-**Severity:** Critical  
+**Location:** `aria_web/server.py`, lines 496-521
+**Severity:** Critical
 **Impact:** High - This function is called for every user command
 
 **Problem:**
@@ -66,7 +66,7 @@ _ACTION_KEYWORDS = {
 def _extract_action_position(cmd: str, ...) -> Optional[str]:
     """Extract position from command (optimized)."""
     cmd_lower = cmd.lower()
-    
+
     # Single pass through actions with pre-compiled keywords
     for action, (keywords, position) in _ACTION_KEYWORDS.items():
         if any(k in cmd_lower for k in keywords):
@@ -75,7 +75,7 @@ def _extract_action_position(cmd: str, ...) -> Optional[str]:
                 if action == 'sit':
                     return f'[aria:position:{table_pos["x"] - 5}:{table_pos["y"] + 35}]'
             return position
-    
+
     # ... rest of logic
 ```
 
@@ -85,8 +85,8 @@ def _extract_action_position(cmd: str, ...) -> Optional[str]:
 
 ### 2. Database Connection Per Embedding (chat_memory.py)
 
-**Location:** `shared/chat_memory.py`, lines 151-175  
-**Severity:** Critical  
+**Location:** `shared/chat_memory.py`, lines 151-175
+**Severity:** Critical
 **Impact:** High - Affects all chat embedding storage
 
 **Problem:**
@@ -120,20 +120,20 @@ def store_embedding(message_id: Optional[str], embedding: Sequence[float], model
 ```python
 def store_embeddings_batch(embeddings: List[Tuple[str, Sequence[float], str]]) -> int:
     """Store multiple embeddings in a single transaction (bulk insert).
-    
+
     Args:
         embeddings: List of (message_id, embedding, model) tuples
-        
+
     Returns:
         Number of embeddings successfully stored
     """
     if not embeddings:
         return 0
-    
+
     conn = _get_conn()
     if not conn:
         return 0
-    
+
     try:
         cursor = conn.cursor()
         # Prepare batch insert
@@ -141,7 +141,7 @@ def store_embeddings_batch(embeddings: List[Tuple[str, Sequence[float], str]]) -
         for message_id, embedding, model in embeddings:
             blob = _serialize_f32(embedding)
             values.append((message_id, model or "unknown-model", len(embedding), blob))
-        
+
         # Bulk insert - single transaction
         cursor.executemany(
             "INSERT INTO dbo.ChatMessageEmbeddings (MessageId, EmbeddingModel, EmbeddingDim, EmbeddingVector) VALUES (?,?,?,?)",
@@ -166,8 +166,8 @@ def store_embedding(message_id: Optional[str], embedding: Sequence[float], model
 
 ### 3. Linear Search in Model Comparison (batch_evaluator.py)
 
-**Location:** `scripts/batch_evaluator.py`, lines 305-312  
-**Severity:** Critical  
+**Location:** `scripts/batch_evaluator.py`, lines 305-312
+**Severity:** Critical
 **Impact:** High - O(n²) complexity when comparing multiple models
 
 **Problem:**
@@ -175,7 +175,7 @@ def store_embedding(message_id: Optional[str], embedding: Sequence[float], model
 def compare_models(self, model_ids: List[str]) -> Dict:
     """Compare specific models side-by-side."""
     comparison = []
-    
+
     for model_id in model_ids:
         # O(n) search for EACH model_id = O(n²) total
         result = next((r for r in self.results if r.model_id == model_id), None)
@@ -196,12 +196,12 @@ class BatchEvaluator:
         self.results: List[EvaluationResult] = []
         # Add results index (updated in add_result method)
         self._results_index: Dict[str, EvaluationResult] = {}
-    
+
     def add_result(self, result: EvaluationResult):
         """Add evaluation result."""
         self.results.append(result)
         self._results_index[result.model_id] = result  # O(1) indexing
-    
+
     def compare_models(self, model_ids: List[str]) -> Dict:
         """Compare specific models side-by-side (optimized)."""
         # O(1) lookup per model = O(n) total
@@ -210,7 +210,7 @@ class BatchEvaluator:
             for model_id in model_ids
             if model_id in self._results_index
         ]
-        
+
         return {
             "models": [r.model_id for r in comparison],
             "comparison": [
@@ -234,8 +234,8 @@ class BatchEvaluator:
 
 ### 4. Inefficient Average Calculation in Loop (training_analytics.py)
 
-**Location:** `scripts/training_analytics.py`, lines 82-86  
-**Severity:** High  
+**Location:** `scripts/training_analytics.py`, lines 82-86
+**Severity:** High
 **Impact:** Medium - Called during analytics generation
 
 **Problem:**
@@ -277,8 +277,8 @@ best_epochs, best_avg = max(
 
 ### 5. String Concatenation in Loop (training_analytics.py)
 
-**Location:** `scripts/training_analytics.py`, lines 109-110  
-**Severity:** High  
+**Location:** `scripts/training_analytics.py`, lines 109-110
+**Severity:** High
 **Impact:** Low - Only affects report generation
 
 **Problem:**
@@ -320,8 +320,8 @@ line = "".join(chars)
 
 ### 6. Redundant Failed List Iteration (batch_evaluator.py)
 
-**Location:** `scripts/batch_evaluator.py`, lines 287  
-**Severity:** High  
+**Location:** `scripts/batch_evaluator.py`, lines 287
+**Severity:** High
 **Impact:** Medium - Duplicates work already done
 
 **Problem:**
@@ -334,9 +334,9 @@ def aggregate_results(self) -> Dict:
             succeeded.append(r)
         else:
             failed.append(r)
-    
+
     # ... lines 238-284 work with these lists ...
-    
+
     # Line 287: Rebuilds failed list AGAIN
     failed = [r for r in self.results if r.status != "succeeded"]
 ```
@@ -353,7 +353,7 @@ def aggregate_results(self) -> Dict:
     succeeded = []
     failed = []
     total_duration = 0.0
-    
+
     # Single pass through results for classification and duration sum
     for r in self.results:
         total_duration += r.duration
@@ -361,16 +361,16 @@ def aggregate_results(self) -> Dict:
             succeeded.append(r)
         else:
             failed.append(r)
-    
+
     # Rank succeeded models
     ranked = sorted(
         succeeded,
         key=lambda r: r.metrics.get("accuracy", r.metrics.get("perplexity", 0)),
         reverse=True
     )
-    
+
     # ... use already-built 'failed' list ...
-    
+
     return {
         "evaluated_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "total_models": len(self.results),
@@ -390,8 +390,8 @@ def aggregate_results(self) -> Dict:
 
 ### 7. High Cyclomatic Complexity Functions (function_app.py)
 
-**Location:** `function_app.py`, multiple functions  
-**Severity:** High  
+**Location:** `function_app.py`, multiple functions
+**Severity:** High
 **Impact:** High - Affects maintainability and performance
 
 **Problem:**
@@ -421,17 +421,17 @@ Example for `tts` function (complexity 34 → 15):
 # After: Extract helper functions
 def _validate_tts_request(req_body: Dict) -> Tuple[Optional[str], Optional[Dict]]:
     """Validate TTS request and extract parameters.
-    
+
     Returns:
         (error_message, params) - error_message is None on success
     """
     text = req_body.get("text", "").strip()
     if not text:
         return ("No text provided", None)
-    
+
     if len(text) > 5000:
         return (f"Text too long: {len(text)} chars (max 5000)", None)
-    
+
     params = {
         "text": text,
         "voice": req_body.get("voice", "en-US-JennyNeural"),
@@ -442,7 +442,7 @@ def _validate_tts_request(req_body: Dict) -> Tuple[Optional[str], Optional[Dict]
 
 def _try_azure_tts(text: str, voice: str, rate: str, pitch: str) -> Optional[bytes]:
     """Attempt Azure TTS synthesis.
-    
+
     Returns:
         Audio bytes on success, None on failure
     """
@@ -451,7 +451,7 @@ def _try_azure_tts(text: str, voice: str, rate: str, pitch: str) -> Optional[byt
 
 def _try_local_tts(text: str) -> Optional[bytes]:
     """Attempt local TTS fallback.
-    
+
     Returns:
         Audio bytes on success, None on failure
     """
@@ -466,12 +466,12 @@ def tts(req: func.HttpRequest) -> func.HttpResponse:
         req_body = req.get_json()
     except ValueError:
         return func.HttpResponse("Invalid JSON", status_code=400)
-    
+
     # Validate
     error, params = _validate_tts_request(req_body)
     if error:
         return func.HttpResponse(error, status_code=400)
-    
+
     # Try Azure first
     audio = _try_azure_tts(**params)
     if audio:
@@ -479,7 +479,7 @@ def tts(req: func.HttpRequest) -> func.HttpResponse:
             body=json.dumps({"audio_base64": base64.b64encode(audio).decode(), "format": "mp3"}),
             mimetype="application/json"
         )
-    
+
     # Fallback to local
     audio = _try_local_tts(params["text"])
     if audio:
@@ -487,7 +487,7 @@ def tts(req: func.HttpRequest) -> func.HttpResponse:
             body=json.dumps({"audio_base64": base64.b64encode(audio).decode(), "format": "wav"}),
             mimetype="application/json"
         )
-    
+
     return func.HttpResponse("TTS failed", status_code=500)
 ```
 
@@ -497,8 +497,8 @@ def tts(req: func.HttpRequest) -> func.HttpResponse:
 
 ### 8. Cosine Similarity Not Vectorized (chat_memory.py)
 
-**Location:** `shared/chat_memory.py`, lines 241-251  
-**Severity:** High  
+**Location:** `shared/chat_memory.py`, lines 241-251
+**Severity:** High
 **Impact:** Medium - Called for every similarity search
 
 **Problem:**
@@ -523,10 +523,10 @@ import numpy as np
 def retrieve_similar(query_embedding: Sequence[float], top_k: int = 5) -> List[Dict]:
     """Retrieve similar messages (vectorized)."""
     # ... fetch rows ...
-    
+
     if not rows:
         return []
-    
+
     # Batch deserialize all embeddings
     embeddings = []
     metadata = []
@@ -538,16 +538,16 @@ def retrieve_similar(query_embedding: Sequence[float], top_k: int = 5) -> List[D
             "content": r.Content,
             "embedding_model": r.EmbeddingModel,
         })
-    
+
     # Vectorized cosine similarity (all at once)
     query_np = np.array(query_embedding)
     embeddings_np = np.array(embeddings)
-    
+
     # Compute all similarities in one operation (uses SIMD)
     norms = np.linalg.norm(embeddings_np, axis=1)
     query_norm = np.linalg.norm(query_np)
     similarities = np.dot(embeddings_np, query_np) / (norms * query_norm + 1e-8)
-    
+
     # Filter and build results
     scored = []
     for idx, sim in enumerate(similarities):
@@ -555,7 +555,7 @@ def retrieve_similar(query_embedding: Sequence[float], top_k: int = 5) -> List[D
             meta = metadata[idx]
             meta["similarity"] = float(sim)
             scored.append(meta)
-    
+
     return heapq.nlargest(top_k, scored, key=lambda x: x["similarity"])
 ```
 
@@ -567,8 +567,8 @@ def retrieve_similar(query_embedding: Sequence[float], top_k: int = 5) -> List[D
 
 ### 9. Unnecessary List Conversion (auto_data_train.py)
 
-**Location:** `scripts/auto_data_train.py`, line 221  
-**Severity:** Medium  
+**Location:** `scripts/auto_data_train.py`, line 221
+**Severity:** Medium
 **Impact:** Low - Only affects data collection metadata
 
 **Problem:**
@@ -597,15 +597,15 @@ sources = {item.get("source", "unknown") for item in all_data}
 
 ### 10. Repeated Status Checks with Lists (aria_automation.py, master_orchestrator.py)
 
-**Location:** Multiple files  
-**Severity:** Medium  
+**Location:** Multiple files
+**Severity:** Medium
 **Impact:** Low - Not in hot path
 
 **Problem:**
 ```python
 # aria_automation.py:368
 if not health["aria_server"] and self.mode in ["full", "server"]:
-    
+
 # master_orchestrator.py:235
 if result["status"] not in ["succeeded", "skipped"]:
 ```
@@ -631,17 +631,17 @@ if result["status"] not in SUCCESSFUL_STATUSES:
 
 ### 11. No Caching for Subprocess Calls (function_app.py)
 
-**Location:** `function_app.py`, lines 1091-1100  
-**Severity:** Medium  
+**Location:** `function_app.py`, lines 1091-1100
+**Severity:** Medium
 **Impact:** Medium - Called on every /api/ai/status request
 
 **Problem:**
 ```python
 # Every status request spawns subprocess to check venv
 proc = subprocess.run(
-    [str(venv_python), "-c", code], 
-    capture_output=True, 
-    text=True, 
+    [str(venv_python), "-c", code],
+    capture_output=True,
+    text=True,
     timeout=12
 )
 ```
@@ -659,23 +659,23 @@ from functools import lru_cache
 @lru_cache(maxsize=1)
 def _get_venv_info(venv_path: str, cache_time: float) -> Dict:
     """Get venv info with caching (5-minute TTL).
-    
+
     cache_time parameter forces cache invalidation every 5 minutes.
     """
     venv_python = Path(venv_path)
     if not venv_python.exists():
         return {"exists": False, "packages": {}, "error": "Not found"}
-    
+
     # ... subprocess logic ...
     return venv_info
 
 def ai_status(req: func.HttpRequest) -> func.HttpResponse:
     # ...
-    
+
     # Cache results for 5 minutes
     current_cache_slot = int(time.time() / 300)  # 300s = 5min
     venv_info = _get_venv_info(str(venv_python), current_cache_slot)
-    
+
     # ...
 ```
 
@@ -685,8 +685,8 @@ def ai_status(req: func.HttpRequest) -> func.HttpResponse:
 
 ### 12. Inefficient Variance Calculation (training_analytics.py)
 
-**Location:** `scripts/training_analytics.py`, lines 100-103  
-**Severity:** Medium  
+**Location:** `scripts/training_analytics.py`, lines 100-103
+**Severity:** Medium
 **Impact:** Low - Only affects plateau detection
 
 **Problem:**
@@ -718,8 +718,8 @@ variance = statistics.pvariance(accuracies, mu=avg)
 
 ### 13. GPU Metrics Parsing (dashboard/gpu_monitor.py)
 
-**Location:** `dashboard/gpu_monitor.py`, lines 36-42  
-**Severity:** Low  
+**Location:** `dashboard/gpu_monitor.py`, lines 36-42
+**Severity:** Low
 **Impact:** Low - Monitoring only
 
 **Problem:**
@@ -753,8 +753,8 @@ def _safe_float(value: str) -> float:
 
 ### 14. Pre-commit Check File Filtering (scripts/pre_commit_check.py)
 
-**Location:** `scripts/pre_commit_check.py`, line 190  
-**Severity:** Low  
+**Location:** `scripts/pre_commit_check.py`, line 190
+**Severity:** Low
 **Impact:** Low - Development tool only
 
 **Problem:**
@@ -781,8 +781,8 @@ if any(pattern in file_path for pattern in _IGNORE_PATTERNS):
 
 ### 15. Command Line Parsing (quantum-ai files)
 
-**Location:** Multiple files in quantum-ai/  
-**Severity:** Low  
+**Location:** Multiple files in ai-projects/quantum-ml/
+**Severity:** Low
 **Impact:** Low - Startup only
 
 **Problem:**
@@ -867,17 +867,17 @@ def benchmark_keyword_lookup():
         "jump high", "dance around", "wave hello",
         # ... 100 test commands
     ]
-    
+
     # Warm-up
     for cmd in commands[:10]:
         _extract_action_position(cmd)
-    
+
     # Measure
     start = time.perf_counter()
     for cmd in commands:
         _extract_action_position(cmd)
     elapsed = time.perf_counter() - start
-    
+
     print(f"Processed {len(commands)} commands in {elapsed:.3f}s")
     print(f"Average: {elapsed/len(commands)*1000:.2f}ms per command")
 ```
@@ -943,4 +943,3 @@ The codebase already demonstrates several strong performance patterns, particula
 3. Add performance benchmarks
 4. Monitor improvements in production
 5. Iterate on remaining issues
-

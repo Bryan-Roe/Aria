@@ -34,7 +34,7 @@ jobs:
   # === AZURE QUANTUM JOBS (MAY INCUR COSTS) ===
   # IMPORTANT: Set azure_confirm_cost: true to acknowledge hardware costs
   # Use simulators (*.simulator) for free Azure testing
-  
+
   - name: azure_quantinuum_simulator
     mode: azure_hardware
     azure_backend: quantinuum.sim.h2-1sc  # FREE: Quantinuum cloud simulator
@@ -56,4 +56,4 @@ jobs:
     # Requires: az login, valid Azure Quantum workspace
     extra_args:
       - --circuit-file
-      - quantum-ai/results/sample_circuit.qasm  # path to QASM circuit file
+      - ai-projects/quantum-ml/results/sample_circuit.qasm  # path to QASM circuit file

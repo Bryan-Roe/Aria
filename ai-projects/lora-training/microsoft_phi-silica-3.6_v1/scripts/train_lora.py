@@ -4,39 +4,36 @@ import math
 import os
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, Any, Iterable, List
+from typing import Any, Dict, Iterable, List
 
 try:
     import yaml  # type: ignore
-except Exception as e:
-    raise SystemExit("pyyaml is required. Install with: pip install pyyaml")
-
-# Optional imports for real training
+except Exception:
+    raise SystemExit("pyyaml is required. Install with: pip install pyyaml") from None
 try:
     # Optional: install torch if missing
     try:
         import torch  # pip install torch  # type: ignore[reportMissingImports]
     except ImportError:
         raise SystemExit(
-            "PyTorch is required. Install with: pip install torch")
+            "PyTorch is required. Install with: pip install torch"
+        ) from None
     from datasets import load_dataset  # type: ignore[import]
+
     try:
-        from transformers import (
-            AutoModelForCausalLM,
-            AutoTokenizer,
-            Trainer,
-            TrainingArguments,
-            DataCollatorForLanguageModeling,
-        )
-        from peft import LoraConfig, get_peft_model, PeftModel
-        from transformers import TrainerCallback, EarlyStoppingCallback
+        from peft import LoraConfig, PeftModel, get_peft_model
+        from transformers import (AutoModelForCausalLM, AutoTokenizer,
+                                  DataCollatorForLanguageModeling,
+                                  EarlyStoppingCallback, Trainer,
+                                  TrainerCallback, TrainingArguments)
     except ImportError:
         raise SystemExit(
             "Transformers is required. Install with: pip install transformers"
-        )
+        ) from None
 except Exception as e:
     # Provide visibility into which dependency import failed
     import traceback
+
     print(f"[import-debug] training dependency import failed: {e}")
     traceback.print_exc()
     # We'll allow dry-run without these by nulling all symbols
@@ -124,10 +121,13 @@ def build_text_from_messages(messages: List[Dict[str, str]]) -> str:
     return "".join(parts)
 
 
-def make_hf_dataset_from_files(train_files: List[str], eval_files: List[str], streaming: bool = True):
+def make_hf_dataset_from_files(
+    train_files: List[str], eval_files: List[str], streaming: bool = True
+):
     if load_dataset is None:
         raise RuntimeError(
-            "HuggingFace datasets not available. Install 'datasets' to load datasets.")
+            "HuggingFace datasets not available. Install 'datasets' to load datasets."
+        )
     data_files = {"train": train_files, "validation": eval_files}
     ds = load_dataset("json", data_files=data_files, streaming=streaming)
     return ds
@@ -136,6 +136,7 @@ def make_hf_dataset_from_files(train_files: List[str], eval_files: List[str], st
 def _read_text_source(path_or_url: str) -> Iterable[str]:
     if path_or_url.startswith("http://") or path_or_url.startswith("https://"):
         import urllib.request
+
         with urllib.request.urlopen(path_or_url) as resp:  # nosec B310
             for line in resp.read().decode("utf-8").splitlines():
                 yield line
@@ -151,8 +152,10 @@ def parse_manifest(path_or_url: str) -> List[str]:
     lower = path_or_url.lower()
     if lower.endswith(".json"):
         import json as _json
+
         if path_or_url.startswith("http://") or path_or_url.startswith("https://"):
             import urllib.request
+
             with urllib.request.urlopen(path_or_url) as resp:  # nosec B310
                 obj = _json.loads(resp.read().decode("utf-8"))
         else:
@@ -169,6 +172,7 @@ def parse_manifest(path_or_url: str) -> List[str]:
             urls.extend([str(x) for x in obj])
     elif lower.endswith(".jsonl"):
         import json as _json
+
         for line in _read_text_source(path_or_url):
             if not line.strip():
                 continue
@@ -196,44 +200,95 @@ def parse_manifest(path_or_url: str) -> List[str]:
 
 def main():
     ap = argparse.ArgumentParser(
-        description="Train LoRA on chat dataset using lora.yaml config")
+        description="Train LoRA on chat dataset using lora.yaml config"
+    )
     ap.add_argument(
-        "--config", default=str(Path(__file__).resolve().parents[1] / "lora" / "lora.yaml"))
+        "--config",
+        default=str(Path(__file__).resolve().parents[1] / "lora" / "lora.yaml"),
+    )
     ap.add_argument(
-        "--dataset", default=str(Path(__file__).resolve().parents[1] / "data"))
-    ap.add_argument("--dry-run", action="store_true",
-                    help="Validate dataset/config only; no model download")
-    ap.add_argument("--max-train-samples", type=int, default=None,
-                    help="Limit train examples (for smoke test)")
-    ap.add_argument("--max-eval-samples", type=int, default=None,
-                    help="Limit eval examples (for smoke test)")
-    ap.add_argument("--hf-model-id", default=None,
-                    help="Override HF model id (e.g., microsoft/Phi-3.5-mini-instruct)")
-    ap.add_argument("--no-stream", action="store_true",
-                    help="Disable streaming mode for datasets")
-    ap.add_argument("--deepspeed", default=None,
-                    help="Path to DeepSpeed config JSON to enable ZeRO (multi-GPU)")
-    ap.add_argument("--train-manifest", default=None,
-                    help="Path or URL to manifest of training files (txt/json/jsonl)")
-    ap.add_argument("--eval-manifest", default=None,
-                    help="Path or URL to manifest of eval files (txt/json/jsonl)")
-    ap.add_argument("--save-dir", default=None,
-                    help="Override output directory (else from config or defaults)")
-    ap.add_argument("--device", default="auto", choices=["auto", "cuda", "cpu", "directml", "mps"],
-                    help="Device preference: auto selects best available (cuda>mps>directml>cpu)")
+        "--dataset", default=str(Path(__file__).resolve().parents[1] / "data")
+    )
+    ap.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Validate dataset/config only; no model download",
+    )
+    ap.add_argument(
+        "--max-train-samples",
+        type=int,
+        default=None,
+        help="Limit train examples (for smoke test)",
+    )
+    ap.add_argument(
+        "--max-eval-samples",
+        type=int,
+        default=None,
+        help="Limit eval examples (for smoke test)",
+    )
+    ap.add_argument(
+        "--hf-model-id",
+        default=None,
+        help="Override HF model id (e.g., microsoft/Phi-3.5-mini-instruct)",
+    )
+    ap.add_argument(
+        "--no-stream", action="store_true", help="Disable streaming mode for datasets"
+    )
+    ap.add_argument(
+        "--deepspeed",
+        default=None,
+        help="Path to DeepSpeed config JSON to enable ZeRO (multi-GPU)",
+    )
+    ap.add_argument(
+        "--train-manifest",
+        default=None,
+        help="Path or URL to manifest of training files (txt/json/jsonl)",
+    )
+    ap.add_argument(
+        "--eval-manifest",
+        default=None,
+        help="Path or URL to manifest of eval files (txt/json/jsonl)",
+    )
+    ap.add_argument(
+        "--save-dir",
+        default=None,
+        help="Override output directory (else from config or defaults)",
+    )
+    ap.add_argument(
+        "--device",
+        default="auto",
+        choices=["auto", "cuda", "cpu", "directml", "mps"],
+        help="Device preference: auto selects best available (cuda>mps>directml>cpu)",
+    )
     # Optional overrides for HPO/cloud runs
-    ap.add_argument("--learning-rate", type=float, default=None,
-                    help="Override learning_rate from config")
-    ap.add_argument("--lora-dropout", type=float, default=None,
-                    help="Override lora_dropout from config")
-    ap.add_argument("--epochs", type=int, default=None,
-                    help="Override epochs from config")
-    ap.add_argument("--train-batch-size", type=int, default=None,
-                    help="Override finetune_train_batch_size from config")
-    ap.add_argument("--eval-batch-size", type=int, default=None,
-                    help="Override finetune_test_batch_size from config")
-    ap.add_argument("--seed", type=int, default=None,
-                    help="Override seed from config")
+    ap.add_argument(
+        "--learning-rate",
+        type=float,
+        default=None,
+        help="Override learning_rate from config",
+    )
+    ap.add_argument(
+        "--lora-dropout",
+        type=float,
+        default=None,
+        help="Override lora_dropout from config",
+    )
+    ap.add_argument(
+        "--epochs", type=int, default=None, help="Override epochs from config"
+    )
+    ap.add_argument(
+        "--train-batch-size",
+        type=int,
+        default=None,
+        help="Override finetune_train_batch_size from config",
+    )
+    ap.add_argument(
+        "--eval-batch-size",
+        type=int,
+        default=None,
+        help="Override finetune_test_batch_size from config",
+    )
+    ap.add_argument("--seed", type=int, default=None, help="Override seed from config")
     args = ap.parse_args()
 
     # Initialize tracing (best-effort). This allows the optional
@@ -241,6 +296,7 @@ def main():
     # Optional tracing import (ignore if missing)
     try:
         from shared.tracing import init_tracing  # type: ignore
+
         init_tracing(service_name="train_lora")
     except Exception as _e:
         print(f"[tracing] init skipped in train_lora: {_e}")
@@ -248,35 +304,32 @@ def main():
     cfg_raw = read_yaml(Path(args.config))
     cfg = Config(
         model=cfg_raw.get("model") or "Phi-3.6-mini-instruct",
-        finetune_dataset=cfg_raw.get(
-            "finetune_dataset") or str(Path(args.dataset)),
-        save_dir=(args.save_dir or cfg_raw.get("save_dir") or str(
-            Path(__file__).resolve().parents[1] / "outputs")),
+        finetune_dataset=cfg_raw.get("finetune_dataset") or str(Path(args.dataset)),
+        save_dir=(
+            args.save_dir
+            or cfg_raw.get("save_dir")
+            or str(Path(__file__).resolve().parents[1] / "outputs")
+        ),
         finetune_train_nsamples=cfg_raw.get("finetune_train_nsamples"),
         finetune_test_nsamples=cfg_raw.get("finetune_test_nsamples"),
-        finetune_train_batch_size=int(
-            cfg_raw.get("finetune_train_batch_size") or 2),
-        finetune_test_batch_size=int(
-            cfg_raw.get("finetune_test_batch_size") or 2),
-        finetune_train_seqlen=int(cfg_raw.get(
-            "finetune_train_seqlen") or 1024),
+        finetune_train_batch_size=int(cfg_raw.get("finetune_train_batch_size") or 2),
+        finetune_test_batch_size=int(cfg_raw.get("finetune_test_batch_size") or 2),
+        finetune_train_seqlen=int(cfg_raw.get("finetune_train_seqlen") or 1024),
         finetune_test_seqlen=int(cfg_raw.get("finetune_test_seqlen") or 2048),
         learning_rate=float(cfg_raw.get("learning_rate") or 2e-4),
         lora_dropout=float(cfg_raw.get("lora_dropout") or 0.1),
         epochs=int(cfg_raw.get("epochs") or 1),
         eval_steps=int(cfg_raw.get("eval_steps", 64)),
         save_steps=int(cfg_raw.get("save_steps") or 64),
-        gradient_checkpointing=bool(cfg_raw.get(
-            "gradient_checkpointing") or False),
+        gradient_checkpointing=bool(cfg_raw.get("gradient_checkpointing") or False),
         seed=int(cfg_raw.get("seed") or 42),
         warmup_steps=int(cfg_raw.get("warmup_steps") or 100),
         gradient_accumulation_steps=int(
-            cfg_raw.get("gradient_accumulation_steps") or 4),
+            cfg_raw.get("gradient_accumulation_steps") or 4
+        ),
         max_grad_norm=float(cfg_raw.get("max_grad_norm") or 1.0),
-        early_stopping_patience=int(
-            cfg_raw.get("early_stopping_patience") or 3),
-        early_stopping_threshold=float(
-            cfg_raw.get("early_stopping_threshold") or 0.01),
+        early_stopping_patience=int(cfg_raw.get("early_stopping_patience") or 3),
+        early_stopping_threshold=float(cfg_raw.get("early_stopping_threshold") or 0.01),
     )
 
     # Apply CLI overrides for HPO or cloud jobs
@@ -310,8 +363,9 @@ def main():
             # Fallback: use a small subset of train for eval
             eval_files = train_files[:1]
     else:
-        dataset_path = Path(args.dataset) if args.dataset else resolve_path(
-            cfg.finetune_dataset)
+        dataset_path = (
+            Path(args.dataset) if args.dataset else resolve_path(cfg.finetune_dataset)
+        )
         if dataset_path.is_file():
             # Allow direct file usage (.json or .jsonl)
             if dataset_path.suffix.lower() in (".json", ".jsonl"):
@@ -319,7 +373,8 @@ def main():
                 eval_files = [str(dataset_path)]
             else:
                 raise FileNotFoundError(
-                    f"Unsupported dataset file type: {dataset_path}")
+                    f"Unsupported dataset file type: {dataset_path}"
+                )
         else:
             # Directory: accept train.json/test.json or train.jsonl/test.jsonl; fallback to single train file present
             candidates = [
@@ -335,62 +390,85 @@ def main():
                     break
             if not found:
                 # Fallbacks: if any train.* exists, use it for both train/val
-                t_candidates = [dataset_path / "train.json",
-                                dataset_path / "train.jsonl"]
+                t_candidates = [
+                    dataset_path / "train.json",
+                    dataset_path / "train.jsonl",
+                ]
                 t_use = next((p for p in t_candidates if p.exists()), None)
                 if t_use is None:
                     raise FileNotFoundError(
-                        f"Expected dataset files at: {dataset_path}/train.json[.l] and optionally test.json[.l]")
+                        f"Expected dataset files at: {dataset_path}/train.json[.l] and optionally test.json[.l]"
+                    )
                 train_files = [str(t_use)]
-                eval_candidates = [dataset_path /
-                                   "test.json", dataset_path / "test.jsonl"]
+                eval_candidates = [
+                    dataset_path / "test.json",
+                    dataset_path / "test.jsonl",
+                ]
                 v_use = next((p for p in eval_candidates if p.exists()), None)
                 eval_files = [str(v_use)] if v_use else [str(t_use)]
 
     # Determine and report device early (even for dry-run)
     chosen_device = "cpu"
     if args.device == "auto":
-        if torch is not None and getattr(torch, "cuda", None) and getattr(torch.cuda, "is_available", lambda: False)():
+        if (
+            torch is not None
+            and getattr(torch, "cuda", None)
+            and getattr(torch.cuda, "is_available", lambda: False)()
+        ):
             chosen_device = "cuda"
-        elif torch is not None and getattr(torch, "backends", None) and getattr(torch.backends, "mps", None) and getattr(torch.backends.mps, "is_available", lambda: False)():
+        elif (
+            torch is not None
+            and getattr(torch, "backends", None)
+            and getattr(torch.backends, "mps", None)
+            and getattr(torch.backends.mps, "is_available", lambda: False)()
+        ):
             chosen_device = "mps"
         else:
             # Optional DirectML detection
             try:
-                import torch_directml  # type: ignore
                 chosen_device = "directml"
             except Exception:
                 chosen_device = "cpu"
     else:
         chosen_device = args.device
     print(
-        f"[device] selection={args.device} resolved={chosen_device} cuda_available={(getattr(torch, 'cuda', None) and getattr(torch.cuda, 'is_available', lambda: False)() if torch else False)}")
+        f"[device] selection={args.device} resolved={chosen_device} cuda_available={(getattr(torch, 'cuda', None) and getattr(torch.cuda, 'is_available', lambda: False)() if torch else False)}"
+    )
 
     # Dry run: count/validate records only (no model/tokenizer downloads)
     if args.dry_run:
         if train_manifest or eval_manifest:
             print("Dry run OK.")
-            print({
-                "device": chosen_device,
-                "train_files": train_files[:5],
-                "eval_files": eval_files[:5],
-                "note": "Counting skipped for remote manifests"
-            })
+            print(
+                {
+                    "device": chosen_device,
+                    "train_files": train_files[:5],
+                    "eval_files": eval_files[:5],
+                    "note": "Counting skipped for remote manifests",
+                }
+            )
             return
         n_train = count_records(Path(train_files[0]))
         n_test = count_records(Path(eval_files[0]))
         sample = validate_sample(Path(train_files[0]))
         print("Dry run OK.")
-        print({
-            "device": chosen_device,
-            "train_examples": n_train,
-            "test_examples": n_test,
-            "sample": sample,
-        })
+        print(
+            {
+                "device": chosen_device,
+                "train_examples": n_train,
+                "test_examples": n_test,
+                "sample": sample,
+            }
+        )
         return
 
     # Real training requires heavy deps
-    if AutoTokenizer is None or AutoModelForCausalLM is None or load_dataset is None or torch is None:
+    if (
+        AutoTokenizer is None
+        or AutoModelForCausalLM is None
+        or load_dataset is None
+        or torch is None
+    ):
         missing = []
         if torch is None:
             missing.append("torch")
@@ -431,60 +509,81 @@ def main():
             try:
                 print(f"[preprocess] messages type: {type(msgs)}")
                 if isinstance(msgs, dict):
-                    print(
-                        f"[preprocess] messages dict keys: {list(msgs.keys())}")
+                    print(f"[preprocess] messages dict keys: {list(msgs.keys())}")
                     # Attempt to reconstruct per-sample conversations if messages is a dict of lists
                     # Expect shape: msgs[key][i] gives ith sample's list of that field
                     keys = list(msgs.keys())
-                    batch_size = len(msgs[keys[0]]) if keys and isinstance(
-                        msgs[keys[0]], list) else 0
-                    print(
-                        f"[preprocess] inferred batch_size from dict: {batch_size}")
+                    batch_size = (
+                        len(msgs[keys[0]])
+                        if keys and isinstance(msgs[keys[0]], list)
+                        else 0
+                    )
+                    print(f"[preprocess] inferred batch_size from dict: {batch_size}")
                     for i in range(batch_size):
                         # Reconstruct sample i as list of dicts using available fields
                         sample_messages = []
                         # Try common fields 'role' and 'content'
-                        roles = msgs.get('role', [])[
-                            i] if 'role' in msgs else None
-                        contents = msgs.get('content', [])[
-                            i] if 'content' in msgs else None
-                        if isinstance(roles, list) and isinstance(contents, list) and len(roles) == len(contents):
+                        roles = msgs.get("role", [])[i] if "role" in msgs else None
+                        contents = (
+                            msgs.get("content", [])[i] if "content" in msgs else None
+                        )
+                        if (
+                            isinstance(roles, list)
+                            and isinstance(contents, list)
+                            and len(roles) == len(contents)
+                        ):
                             for r, c in zip(roles, contents):
-                                sample_messages.append(
-                                    {"role": r, "content": c})
+                                sample_messages.append({"role": r, "content": c})
                         else:
                             # Fallback: try to rebuild from a generic list of dicts if present
                             # msgs may have a single key representing the full objects
                             for k in keys:
-                                candidate = msgs[k][i] if isinstance(
-                                    msgs[k], list) else None
-                                if isinstance(candidate, list) and candidate and isinstance(candidate[0], dict):
+                                candidate = (
+                                    msgs[k][i] if isinstance(msgs[k], list) else None
+                                )
+                                if (
+                                    isinstance(candidate, list)
+                                    and candidate
+                                    and isinstance(candidate[0], dict)
+                                ):
                                     sample_messages = candidate
                                     break
                         if sample_messages:
-                            text = tokenizer.apply_chat_template(
-                                sample_messages,
-                                tokenize=False,
-                                add_generation_prompt=False,
-                            ) if hasattr(tokenizer, "apply_chat_template") else build_text_from_messages(sample_messages)
+                            text = (
+                                tokenizer.apply_chat_template(
+                                    sample_messages,
+                                    tokenize=False,
+                                    add_generation_prompt=False,
+                                )
+                                if hasattr(tokenizer, "apply_chat_template")
+                                else build_text_from_messages(sample_messages)
+                            )
                             texts.append(text)
                 # Batched: list of lists
                 elif isinstance(msgs, list) and msgs and isinstance(msgs[0], list):
                     for obj in msgs:
                         if obj and isinstance(obj[0], dict):
-                            text = tokenizer.apply_chat_template(
-                                obj,
-                                tokenize=False,
-                                add_generation_prompt=False,
-                            ) if hasattr(tokenizer, "apply_chat_template") else build_text_from_messages(obj)
+                            text = (
+                                tokenizer.apply_chat_template(
+                                    obj,
+                                    tokenize=False,
+                                    add_generation_prompt=False,
+                                )
+                                if hasattr(tokenizer, "apply_chat_template")
+                                else build_text_from_messages(obj)
+                            )
                             texts.append(text)
                 # Single example: list of dicts
                 elif isinstance(msgs, list) and msgs and isinstance(msgs[0], dict):
-                    text = tokenizer.apply_chat_template(
-                        msgs,
-                        tokenize=False,
-                        add_generation_prompt=False,
-                    ) if hasattr(tokenizer, "apply_chat_template") else build_text_from_messages(msgs)
+                    text = (
+                        tokenizer.apply_chat_template(
+                            msgs,
+                            tokenize=False,
+                            add_generation_prompt=False,
+                        )
+                        if hasattr(tokenizer, "apply_chat_template")
+                        else build_text_from_messages(msgs)
+                    )
                     texts.append(text)
             except Exception as e:
                 print(f"[preprocess] error reconstructing messages: {e}")
@@ -494,11 +593,15 @@ def main():
             if isinstance(msgs, list) and msgs and isinstance(msgs[0], list):
                 for obj in msgs:
                     if obj and isinstance(obj[0], dict):
-                        text = tokenizer.apply_chat_template(
-                            obj,
-                            tokenize=False,
-                            add_generation_prompt=False,
-                        ) if hasattr(tokenizer, "apply_chat_template") else build_text_from_messages(obj)
+                        text = (
+                            tokenizer.apply_chat_template(
+                                obj,
+                                tokenize=False,
+                                add_generation_prompt=False,
+                            )
+                            if hasattr(tokenizer, "apply_chat_template")
+                            else build_text_from_messages(obj)
+                        )
                         texts.append(text)
 
         if not texts:
@@ -506,19 +609,20 @@ def main():
             print("[preprocess] empty texts batch")
             return {"input_ids": [], "attention_mask": []}
         tokenized = tokenizer(
-            texts, truncation=True, max_length=cfg.finetune_train_seqlen, padding=False)
+            texts, truncation=True, max_length=cfg.finetune_train_seqlen, padding=False
+        )
         try:
             n_in = len(texts)
             n_out = len(tokenized.get("input_ids", []))
-            print(
-                f"[preprocess] batch texts={n_in} -> tokenized input_ids={n_out}")
+            print(f"[preprocess] batch texts={n_in} -> tokenized input_ids={n_out}")
         except Exception:
             pass
         # Return as dict of lists for batched mapping
         return tokenized
 
     ds = make_hf_dataset_from_files(
-        train_files, eval_files, streaming=not args.no_stream)
+        train_files, eval_files, streaming=not args.no_stream
+    )
 
     # For streaming datasets, map with batched=False
     train_ds = ds["train"]
@@ -530,10 +634,12 @@ def main():
         print(f"[debug] raw train sample0 keys: {list(sample0.keys())}")
         if "messages" in sample0:
             print(
-                f"[debug] raw train sample0 messages type: {type(sample0['messages'])}")
+                f"[debug] raw train sample0 messages type: {type(sample0['messages'])}"
+            )
             if isinstance(sample0["messages"], list) and sample0["messages"]:
                 print(
-                    f"[debug] raw train sample0 messages[0] type: {type(sample0['messages'][0])}")
+                    f"[debug] raw train sample0 messages[0] type: {type(sample0['messages'][0])}"
+                )
     except Exception as e:
         print(f"[debug] error inspecting raw dataset: {e}")
 
@@ -544,11 +650,12 @@ def main():
 
     # Load base model
     # DType selection: prefer bfloat16 on CUDA, else float32. (MPS/directml kept at float32 for stability.)
-    use_cuda = (chosen_device == "cuda" and torch.cuda.is_available())
-    dtype = torch.bfloat16 if use_cuda and hasattr(
-        torch, "bfloat16") else torch.float32
+    use_cuda = chosen_device == "cuda" and torch.cuda.is_available()
+    dtype = torch.bfloat16 if use_cuda and hasattr(torch, "bfloat16") else torch.float32
     # Use explicit device for single GPU to avoid meta device issues with device_map="auto"
-    device_map_param = "cuda:0" if use_cuda and torch.cuda.device_count() == 1 else "auto"
+    device_map_param = (
+        "cuda:0" if use_cuda and torch.cuda.device_count() == 1 else "auto"
+    )
     base_model = AutoModelForCausalLM.from_pretrained(
         hf_model_id,
         torch_dtype=dtype,
@@ -561,13 +668,14 @@ def main():
             base_model.config.use_cache = False
 
     # Use target_modules from config if present, else default to Phi-3.5 list
-    default_target_modules = ["q_proj", "v_proj",
-                              "k_proj", "o_proj", "fc1", "fc2"]
+    default_target_modules = ["q_proj", "v_proj", "k_proj", "o_proj", "fc1", "fc2"]
     config_target_modules = getattr(cfg, "target_modules", None)
     lora_config = LoraConfig(
         r=8,
         lora_alpha=16,
-        target_modules=config_target_modules if config_target_modules else default_target_modules,
+        target_modules=(
+            config_target_modules if config_target_modules else default_target_modules
+        ),
         lora_dropout=cfg.lora_dropout,
         bias="none",
         task_type="CAUSAL_LM",
@@ -580,8 +688,13 @@ def main():
             filtered = []
             for f in features:
                 if isinstance(f, dict):
-                    filtered.append({k: v for k, v in f.items() if k in (
-                        "input_ids", "attention_mask", "labels")})
+                    filtered.append(
+                        {
+                            k: v
+                            for k, v in f.items()
+                            if k in ("input_ids", "attention_mask", "labels")
+                        }
+                    )
                 else:
                     filtered.append(f)
             return super().torch_call(filtered)
@@ -596,6 +709,7 @@ def main():
         # Robustly check for streaming dataset
         try:
             from datasets import IterableDataset
+
             if isinstance(ds, IterableDataset):
                 return True
         except ImportError:
@@ -614,13 +728,13 @@ def main():
             or getattr(cfg, "finetune_train_nsamples", None)
             or 1000
         )
-        steps_per_epoch = max(1, math.ceil(
-            target_samples / max(1, cfg.finetune_train_batch_size)))
+        steps_per_epoch = max(
+            1, math.ceil(target_samples / max(1, cfg.finetune_train_batch_size))
+        )
         max_steps_override = max(1, steps_per_epoch * max(1, cfg.epochs))
 
     # Precision flags: enable bf16 if supported, otherwise leave fp16 False on CPU to avoid errors
-    bf16_flag = use_cuda and getattr(
-        torch.cuda, "is_bf16_supported", lambda: False)()
+    bf16_flag = use_cuda and getattr(torch.cuda, "is_bf16_supported", lambda: False)()
     fp16_flag = use_cuda and not bf16_flag
     training_args = TrainingArguments(
         output_dir=str(out_dir),
@@ -680,13 +794,14 @@ def main():
                         pass
             except Exception:
                 # Swallow unexpected callback errors
-                pass    
+                pass
 
     is_streaming = is_iterable_dataset(train_ds)
     # Remove 'messages' column so only tokenized output is kept
     # Note: IterableDataset.map() has limited parameter support compared to Dataset.map()
-    is_streaming = hasattr(
-        train_ds, "__class__") and "Iterable" in train_ds.__class__.__name__
+    is_streaming = (
+        hasattr(train_ds, "__class__") and "Iterable" in train_ds.__class__.__name__
+    )
 
     map_kwargs_train = {
         "batched": True,
@@ -704,21 +819,28 @@ def main():
         map_kwargs_eval["load_from_cache_file"] = False
         map_kwargs_eval["desc"] = "Tokenizing eval"
 
-    train_dataset = train_ds.map(
-        preprocess, **map_kwargs_train) if hasattr(train_ds, "map") else train_ds
-    eval_dataset = eval_ds.map(
-        preprocess, **map_kwargs_eval) if hasattr(eval_ds, "map") else eval_ds
+    train_dataset = (
+        train_ds.map(preprocess, **map_kwargs_train)
+        if hasattr(train_ds, "map")
+        else train_ds
+    )
+    eval_dataset = (
+        eval_ds.map(preprocess, **map_kwargs_eval)
+        if hasattr(eval_ds, "map")
+        else eval_ds
+    )
     # Remove all non-model columns to avoid DataCollator confusion
     # Note: IterableDataset doesn't support column_names or remove_columns
     keep_cols = {"input_ids", "attention_mask"}
-    if hasattr(train_dataset, "column_names") and train_dataset.column_names is not None:
-        drop_train = [
-            c for c in train_dataset.column_names if c not in keep_cols]
+    if (
+        hasattr(train_dataset, "column_names")
+        and train_dataset.column_names is not None
+    ):
+        drop_train = [c for c in train_dataset.column_names if c not in keep_cols]
         if drop_train:
             train_dataset = train_dataset.remove_columns(drop_train)
     if hasattr(eval_dataset, "column_names") and eval_dataset.column_names is not None:
-        drop_eval = [
-            c for c in eval_dataset.column_names if c not in keep_cols]
+        drop_eval = [c for c in eval_dataset.column_names if c not in keep_cols]
         if drop_eval:
             eval_dataset = eval_dataset.remove_columns(drop_eval)
     # Debug dataset sizes and sample
@@ -731,8 +853,7 @@ def main():
             print(f"[debug] first train sample keys: {list(first.keys())}")
             for k in ("input_ids", "attention_mask"):
                 if k in first:
-                    print(
-                        f"[debug] first train sample {k} len: {len(first[k])}")
+                    print(f"[debug] first train sample {k} len: {len(first[k])}")
     except Exception as e:
         print(f"[debug] dataset inspection error: {e}")
 
@@ -747,7 +868,8 @@ def main():
             )
             callbacks_list.append(early_stopping)
             print(
-                f"[training] Early stopping enabled (patience={cfg.early_stopping_patience}, threshold={cfg.early_stopping_threshold})")
+                f"[training] Early stopping enabled (patience={cfg.early_stopping_patience}, threshold={cfg.early_stopping_threshold})"
+            )
         except Exception as e:
             print(f"[debug] Failed to configure EarlyStoppingCallback: {e}")
 
@@ -765,12 +887,15 @@ def main():
         trainer.add_callback(PerplexityLoggingCallback(logger))
         # Add OpenTelemetry tracing callback if available and compatible
         try:
-            from otel_callback import OpenTelemetryTrainerCallback  # type: ignore
+            from otel_callback import \
+                OpenTelemetryTrainerCallback  # type: ignore
+
             if hasattr(OpenTelemetryTrainerCallback, "on_prediction_step"):
                 trainer.add_callback(OpenTelemetryTrainerCallback())
             else:
                 print(
-                    "[debug] Skipping OpenTelemetryTrainerCallback: missing on_prediction_step")
+                    "[debug] Skipping OpenTelemetryTrainerCallback: missing on_prediction_step"
+                )
         except Exception as e:
             print(f"[debug] Skipping OpenTelemetryTrainerCallback: {e}")
 
@@ -779,8 +904,11 @@ def main():
     if "eval_loss" in pre_metrics and pre_metrics["eval_loss"] is not None:
         try:
             ppl = math.exp(float(pre_metrics["eval_loss"]))
-            rec = {"phase": "pre", "eval_loss": float(
-                pre_metrics["eval_loss"]), "eval_perplexity": float(ppl)}
+            rec = {
+                "phase": "pre",
+                "eval_loss": float(pre_metrics["eval_loss"]),
+                "eval_perplexity": float(ppl),
+            }
             print(rec)
             logger.log(rec)
         except Exception:
@@ -792,8 +920,11 @@ def main():
     if "eval_loss" in post_metrics and post_metrics["eval_loss"] is not None:
         try:
             ppl = math.exp(float(post_metrics["eval_loss"]))
-            rec = {"phase": "post", "eval_loss": float(
-                post_metrics["eval_loss"]), "eval_perplexity": float(ppl)}
+            rec = {
+                "phase": "post",
+                "eval_loss": float(post_metrics["eval_loss"]),
+                "eval_perplexity": float(ppl),
+            }
             print(rec)
             logger.log(rec)
         except Exception:

@@ -6,7 +6,7 @@ Successfully consolidated **6 separate dashboard pages** into a **single unified
 
 ### Before (6 Pages)
 1. `hub.html` - Command Center landing page (1036 lines)
-2. `unified.html` - Training interface (2991 lines)  
+2. `unified.html` - Training interface (2991 lines)
 3. `analytics.html` - Performance charts (969 lines)
 4. `enhanced.html` - Enhanced features
 5. `advanced.html` - Advanced dashboard
@@ -127,26 +127,26 @@ function switchTab(tabName) {
     document.querySelectorAll('.tab-content').forEach(tab => {
         tab.classList.remove('active');
     });
-    
+
     // Remove active from all buttons
     document.querySelectorAll('.tab-btn').forEach(btn => {
         btn.classList.remove('active');
     });
-    
+
     // Show selected tab
     document.getElementById(`${tabName}-tab`).classList.add('active');
-    
+
     // Set active button
     const btnIndex = ['overview', 'training', 'analytics', 'history', 'tools'].indexOf(tabName);
     if (btnIndex >= 0) {
         document.querySelectorAll('.tab-btn')[btnIndex].classList.add('active');
     }
-    
+
     // Refresh data for specific tabs
     if (tabName === 'analytics') updateCharts();
     else if (tabName === 'history') updateHistoryView();
     else if (tabName === 'tools') updateAnomalyStatus();
-    
+
     // Store tab preference
     localStorage.setItem('qai-active-tab', tabName);
 }

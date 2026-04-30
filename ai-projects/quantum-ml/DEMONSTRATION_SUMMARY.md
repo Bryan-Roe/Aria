@@ -149,7 +149,7 @@ You've successfully explored all four major capabilities of the Quantum AI proje
 ## 📁 Generated Files
 
 ```text
-quantum-ai/
+ai-projects/quantum-ml/
 ├── results/
 │   ├── state_evolution.png      # Quantum state evolution
 │   ├── training_moons.png        # Training curves

@@ -13,7 +13,9 @@ on:
   push:
     branches: [ main ]
     paths:
+      - 'config/training/autotrain.yaml'
       - 'autotrain.yaml'
+      - 'config/quantum/quantum_autorun.yaml'
       - 'quantum_autorun.yaml'
       - 'scripts/autotrain.py'
       - 'scripts/quantum_autorun.py'
@@ -23,26 +25,40 @@ on:
     - cron: '0 5 * * *'
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 concurrency: auto-validation
 
 jobs:
   dry-run:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
       - name: Setup Python
-        uses: actions/setup-python@v5
+        uses: ./.github/actions/setup-python-env
         with:
-          python-version: '3.11'
-          cache: 'pip'
-      - name: Install root requirements
-        run: |
-          python -m pip install --upgrade pip
-          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-          pip install pyyaml
+          extra-packages: 'pyyaml'
       - name: Auto bootstrap (env + orchestrator validation)
         run: python scripts/auto_bootstrap.py
+
+      - name: Generate validation summary
+        if: always()
+        run: |
+          echo "## Auto-Validation Results" >> $GITHUB_STEP_SUMMARY
+          for f in data_out/autotrain/status.json data_out/quantum_autorun/status.json data_out/auto_bootstrap/status_summary.json; do
+            if [ -f "$f" ]; then
+              echo "### $(basename $f)" >> $GITHUB_STEP_SUMMARY
+              echo '```json' >> $GITHUB_STEP_SUMMARY
+              cat "$f" >> $GITHUB_STEP_SUMMARY
+              echo '' >> $GITHUB_STEP_SUMMARY
+              echo '```' >> $GITHUB_STEP_SUMMARY
+            fi
+          done
+
       - name: Upload status artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -51,3 +67,4 @@ jobs:
             data_out/autotrain/status.json
             data_out/quantum_autorun/status.json
             data_out/auto_bootstrap/status_summary.json
+          retention-days: 14

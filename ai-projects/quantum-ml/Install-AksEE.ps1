@@ -12,7 +12,7 @@ try
     {
         New-Item $InstallDir -ItemType Directory
     }
-    
+
     # Divide by 1MB is intentional as FreePhysicalMemory is in KB
     $freeMemInGB = (Get-WMIObject Win32_OperatingSystem).FreePhysicalMemory / 1MB
     $minMem = 4.5

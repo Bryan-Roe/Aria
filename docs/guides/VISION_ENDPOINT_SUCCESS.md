@@ -94,7 +94,7 @@ numpy>=1.24.0      # Array operations
    ```
    🖼️ Image Analysis: smile.jpg
    Expression: happy (87.3% confidence)
-   
+
    All Scores:
    - happy: 87.3%
    - neutral: 8.1%
@@ -170,7 +170,7 @@ func azure functionapp publish <app-name>
 
 ---
 
-**Implementation Date**: 2025-11-25  
-**Test Status**: ✅ 20/20 passing  
-**Lines of Code**: ~1000+ (inference module + endpoints + tests + frontend)  
+**Implementation Date**: 2025-11-25
+**Test Status**: ✅ 20/20 passing
+**Lines of Code**: ~1000+ (inference module + endpoints + tests + frontend)
 **Documentation**: VISION_API_GUIDE.md (comprehensive)

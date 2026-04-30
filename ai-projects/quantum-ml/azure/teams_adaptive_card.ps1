@@ -10,11 +10,11 @@ param(
 $factArray = @()
 foreach ($k in $Facts.Keys) { $factArray += @{ title = "$k"; value = "$($Facts[$k])" } }
 
-$card = @{ 
+$card = @{
   type = 'message';
   attachments = @(@{
     contentType = 'application/vnd.microsoft.card.adaptive';
-    content = @{ 
+    content = @{
       '$schema' = 'http://adaptivecards.io/schemas/adaptive-card.json';
       type = 'AdaptiveCard';
       version = '1.3';

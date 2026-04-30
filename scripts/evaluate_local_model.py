@@ -68,7 +68,12 @@ def basic_bleu(preds: List[str], expects: List[str]) -> float:
     return total / count if count else 0.0
 
 
-def run_evaluation(dataset_path: Path, max_samples: int | None, metrics: List[str], save_dir: Path | None) -> Dict[str, Any]:
+def run_evaluation(
+    dataset_path: Path,
+    max_samples: int | None,
+    metrics: List[str],
+    save_dir: Path | None,
+) -> Dict[str, Any]:
     data = load_dataset(dataset_path, max_samples)
     if not data:
         raise ValueError("No data found for evaluation")
@@ -114,9 +119,7 @@ def run_evaluation(dataset_path: Path, max_samples: int | None, metrics: List[st
         save_dir.mkdir(parents=True, exist_ok=True)
         out = {
             "summary": results,
-            "predictions": [
-                {"pred": p, "expected": e} for p, e in zip(preds, expects)
-            ],
+            "predictions": [{"pred": p, "expected": e} for p, e in zip(preds, expects)],
         }
         path = save_dir / "results.json"
         path.write_text(json.dumps(out, indent=2), encoding="utf-8")
@@ -126,17 +129,20 @@ def run_evaluation(dataset_path: Path, max_samples: int | None, metrics: List[st
 
 def parse_args():
     ap = argparse.ArgumentParser(
-        description="Evaluate a local model (lightweight, offline)")
-    ap.add_argument("--dataset", required=True,
-                    help="Path to dataset (json/jsonl/csv)")
-    ap.add_argument("--max-samples", type=int, default=None,
-                    help="Limit number of evaluation samples")
-    ap.add_argument("--metric", dest="metrics", action="append",
-                    help="Metric to compute (repeat)")
-    ap.add_argument("--output-format", default="json",
-                    choices=["json", "text"])
+        description="Evaluate a local model (lightweight, offline)"
+    )
+    ap.add_argument("--dataset", required=True, help="Path to dataset (json/jsonl/csv)")
     ap.add_argument(
-        "--save-dir", help="Directory to save results", default=None)
+        "--max-samples",
+        type=int,
+        default=None,
+        help="Limit number of evaluation samples",
+    )
+    ap.add_argument(
+        "--metric", dest="metrics", action="append", help="Metric to compute (repeat)"
+    )
+    ap.add_argument("--output-format", default="json", choices=["json", "text"])
+    ap.add_argument("--save-dir", help="Directory to save results", default=None)
     return ap.parse_args()
 
 

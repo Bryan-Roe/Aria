@@ -1,0 +1,47 @@
+name: Check Workflow Common Issues
+description: Scan workflows for deprecated action versions and hardcoded token patterns
+
+inputs:
+  workflows-path:
+    description: Path to workflow files
+    required: false
+    default: .github/workflows
+
+runs:
+  using: composite
+  steps:
+    - name: Run common workflow checks
+      shell: bash
+      run: |
+        set -euo pipefail
+
+        WORKFLOWS_PATH='${{ inputs.workflows-path }}'
+        if [ ! -d "$WORKFLOWS_PATH" ]; then
+          echo "Workflows path not found: $WORKFLOWS_PATH" >&2
+          exit 1
+        fi
+
+        echo "Checking for common workflow issues..."
+
+        if grep -RInE --include='*.yml' --include='*.yaml' "actions/checkout@v[12]" "$WORKFLOWS_PATH"; then
+          echo "⚠️  Warning: Found deprecated checkout action versions (v1/v2). Consider upgrading to v4."
+        fi
+
+        if grep -RInE --include='*.yml' --include='*.yaml' "actions/setup-python@v[1-4]" "$WORKFLOWS_PATH"; then
+          echo "⚠️  Warning: Found old setup-python action versions. Consider upgrading to v5."
+        fi
+
+        if grep -RInE --include='*.yml' --include='*.yaml' "actions/setup-node@v[1-3]" "$WORKFLOWS_PATH"; then
+          echo "⚠️  Warning: Found old setup-node action versions. Consider upgrading to v4."
+        fi
+
+        if grep -RInE --include='*.yml' --include='*.yaml' "actions/cache@v[1-3]" "$WORKFLOWS_PATH"; then
+          echo "⚠️  Warning: Found old cache action versions. Consider upgrading to v4."
+        fi
+
+        if grep -RInE --include='*.yml' --include='*.yaml' "ghp_|github_pat_" "$WORKFLOWS_PATH" 2>/dev/null; then
+          echo "❌ ERROR: Found hardcoded GitHub tokens!"
+          exit 1
+        fi
+
+        echo "✅ Common workflow issues check completed"

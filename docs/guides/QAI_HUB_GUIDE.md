@@ -322,7 +322,7 @@ The hub provides 6 one-click shortcuts:
 
 **Toast Messages**:
 - Quick actions that require CLI show instructional toasts
-- Example: "To use chat: python talk-to-ai/src/chat_cli.py --provider azure"
+- Example: "To use chat: python ai-projects/chat-cli/src/chat_cli.py --provider azure"
 
 ---
 
@@ -724,6 +724,6 @@ Same as main QAI repository (see root LICENSE file).
 
 ---
 
-**Last Updated**: 2025-11-25  
-**Version**: 2.0  
+**Last Updated**: 2025-11-25
+**Version**: 2.0
 **Author**: QAI Development Team

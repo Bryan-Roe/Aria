@@ -128,11 +128,11 @@ document.getElementById('visionImageInput').addEventListener('change', async (ev
 
         const result = await response.json();
         console.log('Vision result:', result);
-        
+
         // Display result in UI
         displayVisionResult(result, file.name);
     };
-    
+
     reader.readAsDataURL(file);
 });
 
@@ -143,7 +143,7 @@ function displayVisionResult(result, filename) {
             .sort((a, b) => b[1] - a[1])
             .map(([label, score]) => `- ${label}: ${(score * 100).toFixed(1)}%`)
             .join('\n')}`;
-    
+
     // Add to chat or display elsewhere
     addChatMessage('assistant', message);
 }

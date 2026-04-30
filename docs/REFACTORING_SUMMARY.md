@@ -1,6 +1,6 @@
 # Code Refactoring Summary
 
-**Date**: 2026-02-17  
+**Date**: 2026-02-17
 **Purpose**: Identify and eliminate duplicated code across the Aria repository
 
 ## Overview
@@ -13,7 +13,7 @@ This refactoring effort focused on identifying and eliminating code duplication 
 
 **Problem**: OpenAIProvider, LMStudioProvider, and AzureOpenAIProvider had ~95% identical streaming and non-streaming response handling code (~60-80 lines of duplication).
 
-**Solution**: 
+**Solution**:
 - Created helper methods in `BaseChatProvider`:
   - `_handle_openai_streaming_response()` - Extracts content from streaming responses
   - `_handle_openai_non_streaming_response()` - Extracts content from non-streaming responses
@@ -21,9 +21,9 @@ This refactoring effort focused on identifying and eliminating code duplication 
 - Kept AzureOpenAIProvider's custom quota handling logic intact
 
 **Files Modified**:
-- `talk-to-ai/src/chat_providers.py`
+- `ai-projects/chat-cli/src/chat_providers.py`
 
-**Impact**: 
+**Impact**:
 - Eliminated ~60 lines of duplicated code
 - Improved maintainability - changes to response handling now only need to be made once
 - Better testability - helper methods can be tested independently
@@ -52,7 +52,7 @@ This refactoring effort focused on identifying and eliminating code duplication 
 
 ### 3. HTTP Validation & File Serving (Medium Impact)
 
-**Problem**: 
+**Problem**:
 - Message validation logic duplicated in http_chat/function_app.py and function_app.py
 - CORS headers manually created in multiple places
 - File serving pattern duplicated in http_chat_web/function_app.py (lines 11-74)

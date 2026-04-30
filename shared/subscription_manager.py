@@ -2,18 +2,20 @@
 Subscription and monetization management for Aria platform.
 Handles subscription tiers, usage tracking, and feature gating.
 """
+
 import json
 import logging
-from enum import Enum
 from datetime import datetime, timedelta
-from typing import Dict, Optional, List, Any
+from enum import Enum
 from pathlib import Path
+from typing import Any, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 
 
 class SubscriptionTier(Enum):
     """Subscription tier levels"""
+
     FREE = "free"
     PRO = "pro"
     ENTERPRISE = "enterprise"
@@ -21,6 +23,7 @@ class SubscriptionTier(Enum):
 
 class Feature(Enum):
     """Platform features that can be gated"""
+
     BASIC_CHAT = "basic_chat"
     ARIA_CHARACTER = "aria_character"
     QUANTUM_COMPUTING = "quantum_computing"
@@ -108,7 +111,7 @@ TIER_LIMITS = {
 
 class Subscription:
     """Represents a user subscription"""
-    
+
     def __init__(
         self,
         user_id: str,
@@ -136,12 +139,12 @@ class Subscription:
         self._tier_limits = TIER_LIMITS.get(self._tier, {})
         if not self._tier_limits:
             logger.warning(f"Unknown tier {self._tier} - using empty limits")
-    
+
     @property
     def tier(self) -> SubscriptionTier:
         """Get subscription tier"""
         return self._tier
-    
+
     @tier.setter
     def tier(self, value: SubscriptionTier):
         """Set subscription tier and update cached limits"""
@@ -150,7 +153,7 @@ class Subscription:
         self._tier_limits = TIER_LIMITS.get(value, {})
         if not self._tier_limits:
             logger.warning(f"Unknown tier {value} - using empty limits")
-    
+
     def is_active(self) -> bool:
         """Check if subscription is currently active"""
         if self.tier == SubscriptionTier.FREE:
@@ -158,37 +161,37 @@ class Subscription:
         if self.end_date is None:
             return True
         return datetime.now() < self.end_date
-    
+
     def has_feature(self, feature: Feature) -> bool:
         """Check if subscription has access to a feature"""
         if not self.is_active():
             return False
         return TIER_FEATURES.get(self.tier, {}).get(feature, False)
-    
+
     def check_limit(self, resource: str, amount: int = 1) -> bool:
         """Check if usage is within limits - optimized with cached tier limits"""
         if not self.is_active():
             return False
-        
+
         # Reset usage if period expired
         if datetime.now() > self.usage_reset_date:
             self.reset_usage()
-        
+
         # Use cached tier limits
         limit = self._tier_limits.get(resource, 0)
         if limit == -1:  # unlimited
             return True
-        
+
         current_usage = self.usage.get(resource, 0)
         return (current_usage + amount) <= limit
-    
+
     def increment_usage(self, resource: str, amount: int = 1) -> bool:
         """Increment usage counter if within limits"""
         if self.check_limit(resource, amount):
             self.usage[resource] = self.usage.get(resource, 0) + amount
             return True
         return False
-    
+
     def reset_usage(self):
         """Reset monthly usage counters"""
         self.usage = {
@@ -199,7 +202,7 @@ class Subscription:
             "websites_created": 0,
         }
         self.usage_reset_date = datetime.now() + timedelta(days=30)
-    
+
     def get_usage_percentage(self, resource: str) -> float:
         """Get usage as percentage of limit - optimized with cached tier limits"""
         # Use cached tier limits
@@ -210,7 +213,7 @@ class Subscription:
             return 100.0
         current = self.usage.get(resource, 0)
         return (current / limit) * 100
-    
+
     def to_dict(self) -> Dict[str, Any]:
         """Convert subscription to dictionary"""
         return {
@@ -232,57 +235,68 @@ class Subscription:
 
 class SubscriptionManager:
     """Manages subscriptions and feature access"""
-    
+
     def __init__(self, storage_path: Optional[Path] = None):
         self.storage_path = storage_path or Path("data_out/subscriptions")
         self.storage_path.mkdir(parents=True, exist_ok=True)
         self.subscriptions: Dict[str, Subscription] = {}
         self._load_subscriptions()
-    
+
     def _load_subscriptions(self):
         """Load subscriptions from storage"""
         try:
             subscription_file = self.storage_path / "subscriptions.json"
             if subscription_file.exists():
-                with open(subscription_file, 'r') as f:
+                with open(subscription_file, "r") as f:
                     data = json.load(f)
                     for user_id, sub_data in data.items():
                         tier = SubscriptionTier(sub_data.get("tier", "free"))
                         sub = Subscription(
                             user_id=user_id,
                             tier=tier,
-                            start_date=datetime.fromisoformat(sub_data["start_date"]) if sub_data.get("start_date") else None,
-                            end_date=datetime.fromisoformat(sub_data["end_date"]) if sub_data.get("end_date") else None,
+                            start_date=(
+                                datetime.fromisoformat(sub_data["start_date"])
+                                if sub_data.get("start_date")
+                                else None
+                            ),
+                            end_date=(
+                                datetime.fromisoformat(sub_data["end_date"])
+                                if sub_data.get("end_date")
+                                else None
+                            ),
                             payment_method=sub_data.get("payment_method"),
-                            stripe_subscription_id=sub_data.get("stripe_subscription_id"),
+                            stripe_subscription_id=sub_data.get(
+                                "stripe_subscription_id"
+                            ),
                         )
                         sub.usage = sub_data.get("usage", sub.usage)
                         if sub_data.get("usage_reset_date"):
-                            sub.usage_reset_date = datetime.fromisoformat(sub_data["usage_reset_date"])
+                            sub.usage_reset_date = datetime.fromisoformat(
+                                sub_data["usage_reset_date"]
+                            )
                         self.subscriptions[user_id] = sub
         except Exception as e:
             logger.error(f"Failed to load subscriptions: {e}")
-    
+
     def _save_subscriptions(self):
         """Save subscriptions to storage"""
         try:
             subscription_file = self.storage_path / "subscriptions.json"
             data = {
-                user_id: sub.to_dict()
-                for user_id, sub in self.subscriptions.items()
+                user_id: sub.to_dict() for user_id, sub in self.subscriptions.items()
             }
-            with open(subscription_file, 'w') as f:
+            with open(subscription_file, "w") as f:
                 json.dump(data, f, indent=2)
         except Exception as e:
             logger.error(f"Failed to save subscriptions: {e}")
-    
+
     def get_subscription(self, user_id: str) -> Subscription:
         """Get or create subscription for user"""
         if user_id not in self.subscriptions:
             self.subscriptions[user_id] = Subscription(user_id)
             self._save_subscriptions()
         return self.subscriptions[user_id]
-    
+
     def upgrade_subscription(
         self,
         user_id: str,
@@ -301,7 +315,7 @@ class SubscriptionManager:
         self._save_subscriptions()
         logger.info(f"Upgraded {user_id} to {tier.value}")
         return sub
-    
+
     def cancel_subscription(self, user_id: str) -> bool:
         """Cancel user subscription (downgrade to free at end of period)"""
         if user_id in self.subscriptions:
@@ -311,12 +325,12 @@ class SubscriptionManager:
             self._save_subscriptions()
             return True
         return False
-    
+
     def check_access(self, user_id: str, feature: Feature) -> bool:
         """Check if user has access to a feature"""
         sub = self.get_subscription(user_id)
         return sub.has_feature(feature)
-    
+
     def track_usage(self, user_id: str, resource: str, amount: int = 1) -> bool:
         """Track resource usage, returns False if limit exceeded"""
         sub = self.get_subscription(user_id)
@@ -324,7 +338,7 @@ class SubscriptionManager:
         if result:
             self._save_subscriptions()
         return result
-    
+
     def get_revenue_stats(self) -> Dict[str, Any]:
         """Calculate revenue statistics"""
         stats = {
@@ -334,18 +348,18 @@ class SubscriptionManager:
             "monthly_recurring_revenue": 0,
             "annual_recurring_revenue": 0,
         }
-        
+
         for sub in self.subscriptions.values():
             if sub.is_active():
                 stats["active_subscribers"] += 1
                 stats["by_tier"][sub.tier.value] += 1
                 price = TIER_PRICING[sub.tier]
                 stats["monthly_recurring_revenue"] += price
-        
+
         stats["annual_recurring_revenue"] = stats["monthly_recurring_revenue"] * 12
-        
+
         return stats
-    
+
     def get_all_subscriptions(self) -> List[Dict[str, Any]]:
         """Get all subscriptions as dictionaries"""
         return [sub.to_dict() for sub in self.subscriptions.values()]

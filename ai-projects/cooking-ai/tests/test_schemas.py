@@ -11,11 +11,8 @@ SRC = ROOT / "src"
 if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
 
-from utils.json_utils import (
-    RECIPE_SEARCH_SCHEMA,
-    INGREDIENT_EXTRACTION_SCHEMA,
-    parse_and_validate,
-)
+from utils.json_utils import (INGREDIENT_EXTRACTION_SCHEMA,
+                              RECIPE_SEARCH_SCHEMA, parse_and_validate)
 
 
 @pytest.mark.unit
@@ -36,11 +33,19 @@ def test_parse_and_validate_search_with_extra_text():
 @pytest.mark.unit
 def test_parse_and_validate_extract_schema():
     """Test ingredient extraction JSON schema validation."""
-    raw = json.dumps({
-        "ingredients": [
-            {"raw": "2 cups flour", "name": "flour", "quantity": "2", "unit": "cups", "notes": None}
-        ]
-    })
+    raw = json.dumps(
+        {
+            "ingredients": [
+                {
+                    "raw": "2 cups flour",
+                    "name": "flour",
+                    "quantity": "2",
+                    "unit": "cups",
+                    "notes": None,
+                }
+            ]
+        }
+    )
     data, err = parse_and_validate(raw, INGREDIENT_EXTRACTION_SCHEMA)
     assert err is None, f"Validation error: {err}"
     assert isinstance(data, dict), "Parsed data should be a dict"

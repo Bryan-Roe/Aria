@@ -402,7 +402,7 @@ python AI\microsoft_phi-silica-3.6_v1\scripts\train_lora.py --dataset .\datasets
 - **Streaming**: Use `datasets` library for >10GB files
 
 ### For Talk-to-AI Chat:
-- **Logs**: Your own conversation history in `talk-to-ai/logs/*.jsonl`
+- **Logs**: Your own conversation history in `ai-projects/chat-cli/logs/*.jsonl`
 - **Fine-tune on**: Personal assistant style from your interactions
 - **Combine with**: OpenAssistant for general knowledge
 
@@ -494,7 +494,7 @@ Get-PSDrive C | Select-Object Used,Free
    # Quantum AI
    cd quantum-ai
    python .\train_custom_dataset.py
-   
+
    # Phi-3.6 Fine-tuning
    cd AI\microsoft_phi-silica-3.6_v1
    python .\scripts\train_lora.py --dataset ..\..\datasets\chat\dolly15k
@@ -524,6 +524,6 @@ Get-PSDrive C | Select-Object Used,Free
 - **DVC**: Dataset version control
 
 ### Tutorials:
-- Quantum dataset preparation: `quantum-ai/notebooks/`
+- Quantum dataset preparation: `ai-projects/quantum-ml/notebooks/`
 - JSONL conversion: `AI/microsoft_phi-silica-3.6_v1/scripts/prepare_dataset.py`
 - Chat template formatting: Phi-3 documentation

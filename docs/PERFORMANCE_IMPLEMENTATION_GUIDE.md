@@ -27,9 +27,9 @@ This guide provides step-by-step instructions for implementing the performance i
 
 ### Critical Fix #1: Aria Keyword Lookups
 
-**File:** `aria_web/server.py`  
-**Lines:** 496-521  
-**Estimated time:** 30 minutes  
+**File:** `aria_web/server.py`
+**Lines:** 496-521
+**Estimated time:** 30 minutes
 **Risk:** Low (pure optimization, same logic)
 
 #### Step 1: Add module-level constants
@@ -61,7 +61,7 @@ Replace lines 496-521 with:
 ```python
 def _extract_action_position(cmd: str, world_state: Dict) -> Optional[str]:
     """Extract position from command (optimized).
-    
+
     Uses pre-compiled keyword tuples to avoid creating lists on every call.
     """
     # Get table position for context-dependent positioning
@@ -71,7 +71,7 @@ def _extract_action_position(cmd: str, world_state: Dict) -> Optional[str]:
             if isinstance(obj_data, dict) and 'position' in obj_data:
                 table_pos = obj_data['position']
                 break
-    
+
     # Check for objects in command (pickup/drop context)
     for obj_name, obj_data in world_state.get('objects', {}).items():
         if obj_name.lower() in cmd:
@@ -79,7 +79,7 @@ def _extract_action_position(cmd: str, world_state: Dict) -> Optional[str]:
                 obj_pos = obj_data.get('position', {})
                 if isinstance(obj_pos, dict) and 'x' in obj_pos and 'y' in obj_pos:
                     return f'[aria:position:{max(10, obj_pos["x"] - 10)}:{obj_pos["y"] + 10}]'
-    
+
     # Action-based positioning (optimized with pre-compiled keywords)
     for action, (keywords, position) in _ACTION_KEYWORDS.items():
         if any(k in cmd for k in keywords):
@@ -90,15 +90,15 @@ def _extract_action_position(cmd: str, world_state: Dict) -> Optional[str]:
                 return '[aria:position:20:40]'
             elif action == 'sit':
                 return f'[aria:position:{table_pos["x"] - 5}:{table_pos["y"] + 35}]'
-            
+
             # Return standard position
             if position:
                 return position
-    
+
     # Handle add/create commands
     if any(word in cmd for word in ('add', 'create', 'spawn')):
         return f'[aria:position:{table_pos["x"] - 15}:{table_pos["y"] + 20}]'
-    
+
     # Default: context-aware positioning
     import hashlib
     pos_hash = int(hashlib.md5(cmd.encode()).hexdigest()[:4], 16)
@@ -114,19 +114,19 @@ def _extract_action_position(cmd: str, world_state: Dict) -> Optional[str]:
 def test_keyword_performance():
     """Test keyword lookup performance."""
     import time
-    
+
     test_commands = [
         "jump high", "dance around", "wave hello", "look at table",
         "sit down", "run fast", "hide quickly", "think deeply"
     ] * 100  # 800 total commands
-    
+
     world_state = {'objects': {'table': {'position': {'x': 60, 'y': 50}}}}
-    
+
     start = time.perf_counter()
     for cmd in test_commands:
         _extract_action_position(cmd, world_state)
     elapsed = time.perf_counter() - start
-    
+
     print(f"Processed {len(test_commands)} commands in {elapsed:.3f}s")
     print(f"Average: {elapsed/len(test_commands)*1000:.2f}ms per command")
 
@@ -140,9 +140,9 @@ Expected output: ~1-2ms per command (vs 3-4ms before)
 
 ### Critical Fix #3: Batch Evaluator Indexing
 
-**File:** `scripts/batch_evaluator.py`  
-**Lines:** 305-312  
-**Estimated time:** 20 minutes  
+**File:** `scripts/batch_evaluator.py`
+**Lines:** 305-312
+**Estimated time:** 20 minutes
 **Risk:** Low (backward compatible)
 
 #### Step 1: Add index to __init__
@@ -185,7 +185,7 @@ def compare_models(self, model_ids: List[str]) -> Dict:
         for model_id in model_ids
         if model_id in self._results_index
     ]
-    
+
     return {
         "models": [r.model_id for r in comparison],
         "comparison": [
@@ -210,9 +210,9 @@ def test_compare_performance():
     """Test model comparison performance."""
     import time
     from dataclasses import dataclass
-    
+
     evaluator = BatchEvaluator()
-    
+
     # Add 1000 mock results
     for i in range(1000):
         result = EvaluationResult(
@@ -224,15 +224,15 @@ def test_compare_performance():
             error=None
         )
         evaluator.add_result(result)
-    
+
     # Compare 100 models
     model_ids = [f"model_{i}" for i in range(0, 1000, 10)]
-    
+
     start = time.perf_counter()
     for _ in range(100):  # 100 iterations
         evaluator.compare_models(model_ids)
     elapsed = time.perf_counter() - start
-    
+
     print(f"100 comparisons in {elapsed:.3f}s")
     print(f"Average: {elapsed/100*1000:.2f}ms per comparison")
 ```
@@ -243,9 +243,9 @@ Expected: <1ms per comparison (vs 10-50ms before for large result sets)
 
 ### Critical Fix #6: Remove Redundant Iteration
 
-**File:** `scripts/batch_evaluator.py`  
-**Lines:** 287  
-**Estimated time:** 5 minutes  
+**File:** `scripts/batch_evaluator.py`
+**Lines:** 287
+**Estimated time:** 5 minutes
 **Risk:** None (just removes duplication)
 
 #### Step 1: Locate the redundant line
@@ -283,9 +283,9 @@ If line 287 is after other code that uses `failed`, ensure the first definition 
 
 ### High-Priority Fix #2: Batch Embedding API
 
-**File:** `shared/chat_memory.py`  
-**Lines:** 151-175  
-**Estimated time:** 1 hour  
+**File:** `shared/chat_memory.py`
+**Lines:** 151-175
+**Estimated time:** 1 hour
 **Risk:** Medium (requires testing)
 
 #### Step 1: Add batch storage function
@@ -295,13 +295,13 @@ Add this new function before `store_embedding`:
 ```python
 def store_embeddings_batch(embeddings: List[Tuple[str, Sequence[float], str]]) -> int:
     """Store multiple embeddings in a single transaction (bulk insert).
-    
+
     Args:
         embeddings: List of (message_id, embedding, model) tuples
-        
+
     Returns:
         Number of embeddings successfully stored
-    
+
     Performance: 5-10x faster than individual inserts due to:
     - Single connection/transaction
     - Bulk executemany() operation
@@ -309,14 +309,14 @@ def store_embeddings_batch(embeddings: List[Tuple[str, Sequence[float], str]]) -
     """
     if not embeddings:
         return 0
-    
+
     conn = _get_conn()
     if not conn:
         return 0
-    
+
     try:
         cursor = conn.cursor()
-        
+
         # Prepare batch values
         values = []
         for message_id, embedding, model in embeddings:
@@ -329,20 +329,20 @@ def store_embeddings_batch(embeddings: List[Tuple[str, Sequence[float], str]]) -
                 len(embedding),
                 blob
             ))
-        
+
         if not values:
             return 0
-        
+
         # Bulk insert - single transaction
         cursor.executemany(
-            """INSERT INTO dbo.ChatMessageEmbeddings 
-               (MessageId, EmbeddingModel, EmbeddingDim, EmbeddingVector) 
+            """INSERT INTO dbo.ChatMessageEmbeddings
+               (MessageId, EmbeddingModel, EmbeddingDim, EmbeddingVector)
                VALUES (?,?,?,?)""",
             values
         )
         conn.commit()
         return len(values)
-        
+
     except Exception as e:
         print(f"Batch embedding storage failed: {e}")
         return 0
@@ -360,12 +360,12 @@ Modify `store_embedding` to use batch API:
 ```python
 def store_embedding(message_id: Optional[str], embedding: Sequence[float], model: str) -> bool:
     """Store single embedding (backward compatible wrapper).
-    
+
     For multiple embeddings, use store_embeddings_batch() for better performance.
     """
     if not message_id or not embedding:
         return False
-    
+
     return store_embeddings_batch([(message_id, embedding, model)]) == 1
 ```
 
@@ -393,9 +393,9 @@ store_embeddings_batch(batch)
 
 ### High-Priority Fix #11: Cache Venv Info
 
-**File:** `function_app.py`  
-**Lines:** 1091-1100  
-**Estimated time:** 30 minutes  
+**File:** `function_app.py`
+**Lines:** 1091-1100
+**Estimated time:** 30 minutes
 **Risk:** Low (caching with TTL)
 
 #### Step 1: Add caching helper
@@ -418,14 +418,14 @@ Add this before the `ai_status` function:
 @lru_cache(maxsize=1)
 def _get_venv_info_cached(venv_path: str, cache_slot: int) -> Dict:
     """Get venv info with TTL-based caching.
-    
+
     Args:
         venv_path: Path to venv python executable
         cache_slot: Time-based cache key (changes every TTL seconds)
-        
+
     Returns:
         Venv info dict
-        
+
     Performance: Avoids expensive subprocess calls when cached.
     Cache invalidates every 5 minutes via cache_slot parameter.
     """
@@ -436,10 +436,10 @@ def _get_venv_info_cached(venv_path: str, cache_slot: int) -> Dict:
         "packages": {},
         "error": None
     }
-    
+
     if not venv_info["exists"]:
         return venv_info
-    
+
     try:
         code = (
             "import json, importlib.util, importlib.metadata as md;"
@@ -456,16 +456,16 @@ def _get_venv_info_cached(venv_path: str, cache_slot: int) -> Dict:
             text=True,
             timeout=12
         )
-        
+
         if proc.returncode == 0:
             data = json.loads(proc.stdout.strip() or "{}")
             venv_info["packages"] = data
         else:
             venv_info["error"] = proc.stderr.strip() or f"exit {proc.returncode}"
-            
+
     except Exception as e:
         venv_info["error"] = str(e)
-    
+
     return venv_info
 ```
 
@@ -495,12 +495,12 @@ def test_venv_cache():
     start = time.perf_counter()
     info1 = _get_venv_info_cached("/path/to/venv/python.exe", 1)
     elapsed1 = time.perf_counter() - start
-    
+
     # Second call (cache hit)
     start = time.perf_counter()
     info2 = _get_venv_info_cached("/path/to/venv/python.exe", 1)
     elapsed2 = time.perf_counter() - start
-    
+
     print(f"First call (miss): {elapsed1:.3f}s")
     print(f"Second call (hit): {elapsed2:.3f}s")
     print(f"Speedup: {elapsed1/elapsed2:.0f}x")
@@ -527,11 +527,11 @@ from shared.chat_memory import store_embeddings_batch
 
 class TestPerformanceOptimizations:
     """Test performance improvements."""
-    
+
     def test_batch_evaluator_indexing(self):
         """Test O(1) model lookup."""
         evaluator = BatchEvaluator()
-        
+
         # Add 100 results
         for i in range(100):
             result = EvaluationResult(
@@ -542,41 +542,41 @@ class TestPerformanceOptimizations:
                 duration=1.0
             )
             evaluator.add_result(result)
-        
+
         # Test lookup speed
         start = time.perf_counter()
         result = evaluator.compare_models([f"model_{i}" for i in range(50)])
         elapsed = time.perf_counter() - start
-        
+
         assert len(result["models"]) == 50
         assert elapsed < 0.01  # Should be < 10ms
-    
+
     def test_keyword_lookup_optimization(self):
         """Test Aria keyword lookup performance."""
         world_state = {"objects": {}}
-        
+
         commands = ["jump", "dance", "wave"] * 100
-        
+
         start = time.perf_counter()
         for cmd in commands:
             pos = _extract_action_position(cmd, world_state)
             assert pos is not None
         elapsed = time.perf_counter() - start
-        
+
         # Should process 300 commands in < 100ms
         assert elapsed < 0.1
-    
+
     def test_batch_embedding_storage(self):
         """Test batch embedding API."""
         embeddings = [
             (f"msg_{i}", [0.1] * 128, "test-model")
             for i in range(10)
         ]
-        
+
         start = time.perf_counter()
         count = store_embeddings_batch(embeddings)
         elapsed = time.perf_counter() - start
-        
+
         assert count == 10
         # Batch should be faster than 10 * single-insert time
         assert elapsed < 1.0  # Reasonable upper bound
@@ -622,7 +622,7 @@ def benchmark(
     # Warm-up
     for _ in range(warmup):
         func(*args)
-    
+
     # Measure
     times = []
     for _ in range(iterations):
@@ -630,22 +630,22 @@ def benchmark(
         func(*args)
         elapsed = time.perf_counter() - start
         times.append(elapsed)
-    
+
     mean_time = statistics.mean(times)
     std_dev = statistics.stdev(times) if len(times) > 1 else 0
-    
+
     print(f"{name}:")
     print(f"  Mean: {mean_time*1000:.3f}ms")
     print(f"  StdDev: {std_dev*1000:.3f}ms")
     print(f"  Min: {min(times)*1000:.3f}ms")
     print(f"  Max: {max(times)*1000:.3f}ms")
-    
+
     return mean_time
 
 if __name__ == "__main__":
     print("Performance Optimization Benchmarks")
     print("=" * 60)
-    
+
     # Add benchmarks for each optimization
     # ... (use examples from above)
 ```
@@ -692,4 +692,3 @@ If an optimization causes issues:
 3. Implement fixes one at a time
 4. Test thoroughly
 5. Submit PR with benchmarks
-

@@ -31,7 +31,7 @@ CREATE TABLE [dbo].[ChatMessages]
     [Timestamp] DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
     [Model] NVARCHAR(255) NULL, -- May differ from conversation default for multi-model chats
     [FinishReason] NVARCHAR(50) NULL, -- stop, length, content_filter, etc.
-    CONSTRAINT FK_ChatMessages_Conversation FOREIGN KEY ([ConversationId]) 
+    CONSTRAINT FK_ChatMessages_Conversation FOREIGN KEY ([ConversationId])
         REFERENCES [dbo].[ChatConversations]([ConversationId]) ON DELETE CASCADE,
     INDEX IX_ChatMessages_ConversationId NONCLUSTERED ([ConversationId], [Timestamp]),
     INDEX IX_ChatMessages_Timestamp NONCLUSTERED ([Timestamp] DESC)

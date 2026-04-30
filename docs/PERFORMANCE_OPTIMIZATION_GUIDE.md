@@ -91,7 +91,7 @@ def _tail_lines(path: Path, max_lines: int) -> List[str]:
         with path.open("r") as f:
             lines = f.readlines()
             return lines[-max_lines:]
-    
+
     # Large file: read backwards in blocks
     # ... (block-based backward reading)
 ```
@@ -111,7 +111,7 @@ with ThreadPoolExecutor(max_workers=3) as executor:
         executor.submit(evaluate_model, task): task
         for task in tasks
     }
-    
+
     for future in as_completed(futures):
         result = future.result()
         # Process result
@@ -166,7 +166,7 @@ for script in scripts:
 
 # ✅ GOOD: Parallel execution
 with ThreadPoolExecutor() as executor:
-    futures = [executor.submit(subprocess.run, ['python', s]) 
+    futures = [executor.submit(subprocess.run, ['python', s])
                for s in scripts]
     results = [f.result() for f in futures]
 ```
@@ -217,7 +217,7 @@ async def run_training_cycle():
         download_dataset('dataset2'),
         download_dataset('dataset3')
     )
-    
+
     # Sequential training (GPU bound)
     await train_model(results)
 ```
@@ -272,7 +272,7 @@ def expensive_computation(param):
 ```python
 class CosmosClient:
     _instance = None
-    
+
     def __new__(cls):
         if cls._instance is None:
             cls._instance = super().__new__(cls)

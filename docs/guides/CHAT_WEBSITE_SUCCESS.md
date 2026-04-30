@@ -89,19 +89,19 @@ c:\Users\Bryan\OneDrive\AI\
 
 ## Key Features
 
-✅ **Zero configuration** - Works immediately  
-✅ **Free tier** - No API costs with local provider  
-✅ **Beautiful UI** - Modern gradient design  
-✅ **Multiple providers** - Local/OpenAI/Azure  
-✅ **Production ready** - Error handling, CORS, logging  
-✅ **Mobile friendly** - Responsive design  
-✅ **Easy deploy** - Azure Functions ready  
+✅ **Zero configuration** - Works immediately
+✅ **Free tier** - No API costs with local provider
+✅ **Beautiful UI** - Modern gradient design
+✅ **Multiple providers** - Local/OpenAI/Azure
+✅ **Production ready** - Error handling, CORS, logging
+✅ **Mobile friendly** - Responsive design
+✅ **Easy deploy** - Azure Functions ready
 
 ## Documentation
 
 - **Complete Guide**: `CHAT_WEBSITE_GUIDE.md`
 - **Quick Reference**: `chat-web/README.md`
-- **Provider Details**: `talk-to-ai/README.md`
+- **Provider Details**: `ai-projects/chat-cli/README.md`
 - **Architecture**: `.github/copilot-instructions.md`
 
 ## Cost Summary

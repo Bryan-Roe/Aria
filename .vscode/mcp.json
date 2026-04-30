@@ -1,24 +1,30 @@
 {
   "servers": {
-    "quantum-mcp-server": {
+    "quantum-ai": {
       "type": "stdio",
-      "command": "${workspaceFolder}/quantum-ai/venv/bin/python",
+      "command": "python3",
       "args": [
-        "${workspaceFolder}/quantum-ai/quantum_mcp_server.py"
-      ]
+        "${workspaceFolder}/ai-projects/quantum-ml/quantum_mcp_server.py"
+      ],
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/ai-projects/quantum-ml"
+      }
     },
-    "phi-model-server": {
+    "llm-maker": {
       "type": "stdio",
-      "command": "${workspaceFolder}/AI/microsoft_phi-silica-3.6_v1/venv/bin/python",
+      "command": "python3",
       "args": [
-        "${workspaceFolder}/AI/microsoft_phi-silica-3.6_v1/scripts/model_server.py"
-      ]
+        "${workspaceFolder}/ai-projects/llm-maker/llm_maker_mcp_server.py"
+      ],
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/ai-projects/llm-maker:${workspaceFolder}"
+      }
     },
-    "phi-mcp-client": {
+    "task-complete": {
       "type": "stdio",
-      "command": "${workspaceFolder}/AI/microsoft_phi-silica-3.6_v1/venv/bin/python",
+      "command": "python3",
       "args": [
-        "${workspaceFolder}/AI/microsoft_phi-silica-3.6_v1/mcp.py"
+        "${workspaceFolder}/scripts/task_complete_mcp_server.py"
       ]
     }
   }

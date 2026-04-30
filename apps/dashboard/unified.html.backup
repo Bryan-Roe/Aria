@@ -7,16 +7,16 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             padding: 15px;
         }
-        
+
         .container { max-width: 1920px; margin: 0 auto; }
-        
+
         header {
             background: white;
             border-radius: 12px;
@@ -29,7 +29,7 @@
             flex-wrap: wrap;
             gap: 15px;
         }
-        
+
         h1 {
             color: #667eea;
             font-size: 2em;
@@ -37,7 +37,7 @@
             align-items: center;
             gap: 10px;
         }
-        
+
         .live-dot {
             width: 10px;
             height: 10px;
@@ -45,19 +45,19 @@
             border-radius: 50%;
             animation: pulse-dot 2s infinite;
         }
-        
+
         @keyframes pulse-dot {
             0%, 100% { opacity: 1; }
             50% { opacity: 0.5; }
         }
-        
+
         .controls {
             display: flex;
             gap: 12px;
             align-items: center;
             flex-wrap: wrap;
         }
-        
+
         .btn {
             padding: 8px 16px;
             border: none;
@@ -67,59 +67,59 @@
             transition: all 0.2s;
             font-weight: 600;
         }
-        
+
         .btn-primary {
             background: #667eea;
             color: white;
         }
-        
+
         .btn-primary:hover {
             background: #5568d3;
             transform: translateY(-2px);
         }
-        
+
         .btn-secondary {
             background: #6c757d;
             color: white;
         }
-        
+
         .toggle {
             display: flex;
             align-items: center;
             gap: 6px;
             font-size: 0.9em;
         }
-        
+
         .timestamp {
             color: #666;
             font-size: 0.85em;
         }
-        
+
         .grid {
             display: grid;
             gap: 15px;
             margin-bottom: 15px;
         }
-        
+
         .grid-2 { grid-template-columns: repeat(2, 1fr); }
         .grid-3 { grid-template-columns: repeat(3, 1fr); }
         .grid-4 { grid-template-columns: repeat(4, 1fr); }
-        
+
         @media (max-width: 1400px) {
             .grid-4 { grid-template-columns: repeat(2, 1fr); }
         }
-        
+
         @media (max-width: 768px) {
             .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
         }
-        
+
         .card {
             background: white;
             border-radius: 10px;
             padding: 18px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
-        
+
         .card-title {
             font-size: 1.2em;
             font-weight: bold;
@@ -131,46 +131,46 @@
             justify-content: space-between;
             align-items: center;
         }
-        
+
         .card-sm { padding: 12px; }
-        
+
         .gpu-card {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
         }
-        
+
         .gpu-card .card-title { color: white; border-bottom-color: rgba(255,255,255,0.3); }
-        
+
         .system-card {
             background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
             color: white;
         }
-        
+
         .system-card .card-title { color: white; border-bottom-color: rgba(255,255,255,0.3); }
-        
+
         .metrics-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             gap: 10px;
         }
-        
+
         .metric {
             background: rgba(255,255,255,0.15);
             padding: 10px;
             border-radius: 6px;
         }
-        
+
         .metric-label {
             font-size: 0.8em;
             opacity: 0.9;
             margin-bottom: 4px;
         }
-        
+
         .metric-value {
             font-size: 1.6em;
             font-weight: bold;
         }
-        
+
         .progress-bar {
             background: rgba(255,255,255,0.2);
             border-radius: 6px;
@@ -178,7 +178,7 @@
             margin-top: 6px;
             overflow: hidden;
         }
-        
+
         .progress-fill {
             height: 100%;
             background: rgba(255,255,255,0.9);
@@ -191,13 +191,13 @@
             font-weight: bold;
             color: #667eea;
         }
-        
+
         .stats-row {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
             gap: 10px;
         }
-        
+
         .stat-box {
             text-align: center;
             padding: 12px;
@@ -205,34 +205,34 @@
             border-radius: 6px;
             transition: transform 0.2s;
         }
-        
+
         .stat-box:hover { transform: translateY(-3px); }
-        
+
         .stat-value {
             font-size: 1.8em;
             font-weight: bold;
             color: #667eea;
             margin-bottom: 4px;
         }
-        
+
         .stat-label {
             font-size: 0.75em;
             color: #666;
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
-        
+
         .chart-wrapper {
             position: relative;
             height: 280px;
             margin-top: 10px;
         }
-        
+
         .job-list {
             max-height: 320px;
             overflow-y: auto;
         }
-        
+
         .job-item {
             display: flex;
             justify-content: space-between;
@@ -245,24 +245,24 @@
             cursor: pointer;
             transition: all 0.2s;
         }
-        
+
         .job-item:hover {
             background: #e9ecef;
             transform: translateX(5px);
         }
-        
+
         .job-item.succeeded { border-left-color: #28a745; }
         .job-item.failed { border-left-color: #dc3545; }
-        .job-item.running { 
+        .job-item.running {
             border-left-color: #ffc107;
             animation: pulse 2s infinite;
         }
-        
+
         @keyframes pulse {
             0%, 100% { opacity: 1; }
             50% { opacity: 0.75; }
         }
-        
+
         .job-name {
             font-weight: 600;
             color: #333;
@@ -271,60 +271,60 @@
             align-items: center;
             gap: 8px;
         }
-        
+
         .job-status-dot {
             width: 8px;
             height: 8px;
             border-radius: 50%;
             display: inline-block;
         }
-        
+
         .status-succeeded { background: #28a745; }
         .status-failed { background: #dc3545; }
         .status-running { background: #ffc107; animation: pulse-dot 2s infinite; }
         .status-pending { background: #6c757d; }
-        
+
         .job-metric {
             font-size: 0.85em;
             color: #666;
             font-weight: 600;
         }
-        
+
         .job-details {
             display: none;
             margin-top: 10px;
             padding-top: 10px;
             border-top: 1px solid #dee2e6;
         }
-        
+
         .job-details.expanded { display: block; }
-        
+
         .detail-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
             gap: 10px;
             margin: 10px 0;
         }
-        
+
         .detail-item {
             padding: 8px;
             background: white;
             border-radius: 4px;
         }
-        
+
         .detail-label {
             font-size: 0.75em;
             color: #666;
             text-transform: uppercase;
             margin-bottom: 4px;
         }
-        
+
         .detail-value {
             font-size: 1em;
             font-weight: bold;
             color: #667eea;
         }
-        
+
         .logs-viewer {
             background: #1e1e1e;
             color: #d4d4d4;
@@ -337,7 +337,7 @@
             white-space: pre-wrap;
             margin-top: 10px;
         }
-        
+
         .temp-warning {
             background: #fff3cd;
             border: 1px solid #ffc107;
@@ -347,7 +347,7 @@
             margin-top: 8px;
             font-size: 0.85em;
         }
-        
+
         .notification {
             position: fixed;
             top: 20px;
@@ -360,37 +360,37 @@
             display: none;
             max-width: 350px;
         }
-        
+
         .notification.show {
             display: block;
             animation: slideIn 0.3s;
         }
-        
+
         @keyframes slideIn {
             from { transform: translateX(400px); opacity: 0; }
             to { transform: translateX(0); opacity: 1; }
         }
-        
+
         .notification.success { border-left: 4px solid #28a745; }
         .notification.error { border-left: 4px solid #dc3545; }
-        
+
         .notification strong {
             display: block;
             margin-bottom: 5px;
             color: #333;
         }
-        
+
         .notification p {
             color: #666;
             font-size: 0.9em;
         }
-        
+
         .model-compare {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
             gap: 12px;
         }
-        
+
         .model-box {
             background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
             padding: 12px;
@@ -398,17 +398,17 @@
             border: 2px solid transparent;
             transition: all 0.3s;
         }
-        
+
         .model-box:hover {
             border-color: #667eea;
             transform: translateY(-3px);
         }
-        
+
         .model-box.winner {
             border-color: #28a745;
             background: linear-gradient(135deg, #28a74510 0%, #28a74520 100%);
         }
-        
+
         .model-name {
             font-weight: bold;
             font-size: 0.95em;
@@ -418,29 +418,29 @@
             justify-content: space-between;
             align-items: center;
         }
-        
+
         .crown { font-size: 1.2em; }
-        
+
         .model-score {
             font-size: 1.4em;
             font-weight: bold;
             color: #667eea;
             margin-bottom: 4px;
         }
-        
+
         .model-label {
             font-size: 0.75em;
             color: #666;
             text-transform: uppercase;
         }
-        
+
         .improvement {
             font-size: 0.8em;
             margin-top: 4px;
             color: #28a745;
             font-weight: 600;
         }
-        
+
         .tabs {
             display: flex;
             gap: 5px;
@@ -450,7 +450,7 @@
             border-radius: 12px 12px 0 0;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
-        
+
         .tab {
             padding: 12px 24px;
             border: none;
@@ -463,32 +463,32 @@
             transition: all 0.2s;
             border-bottom: 3px solid transparent;
         }
-        
+
         .tab:hover {
             background: #f8f9fa;
             color: #667eea;
         }
-        
+
         .tab.active {
             background: #667eea;
             color: white;
             border-bottom-color: #5568d3;
         }
-        
+
         .tab-content {
             display: none;
         }
-        
+
         .tab-content.active {
             display: block;
         }
-        
+
         .dataset-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
             gap: 15px;
         }
-        
+
         .dataset-card {
             background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
             padding: 20px;
@@ -499,7 +499,7 @@
             position: relative;
             overflow: hidden;
         }
-        
+
         .dataset-card::before {
             content: '';
             position: absolute;
@@ -511,30 +511,30 @@
             transform: scaleX(0);
             transition: transform 0.3s;
         }
-        
+
         .dataset-card:hover {
             border-color: #667eea;
             transform: translateY(-4px);
             box-shadow: 0 8px 16px rgba(102, 126, 234, 0.2);
         }
-        
+
         .dataset-card:hover::before {
             transform: scaleX(1);
         }
-        
+
         .dataset-name {
             font-weight: bold;
             color: #333;
             margin-bottom: 8px;
             font-size: 1.05em;
         }
-        
+
         .dataset-info {
             font-size: 0.85em;
             color: #666;
             margin-bottom: 6px;
         }
-        
+
         .config-card {
             background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
             padding: 20px;
@@ -545,55 +545,55 @@
             cursor: pointer;
             box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
-        
+
         .config-card:hover {
             transform: translateX(5px);
             box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
             border-left-width: 8px;
         }
-        
+
         .config-name {
             font-weight: bold;
             color: #333;
             margin-bottom: 8px;
             font-size: 1.05em;
         }
-        
+
         .config-params {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
             gap: 8px;
             font-size: 0.85em;
         }
-        
+
         .param {
             background: white;
             padding: 6px 10px;
             border-radius: 4px;
             color: #666;
         }
-        
+
         .param strong {
             color: #667eea;
         }
-        
+
         .train-form {
             background: #f8f9fa;
             padding: 20px;
             border-radius: 8px;
         }
-        
+
         .form-group {
             margin-bottom: 15px;
         }
-        
+
         .form-label {
             display: block;
             font-weight: 600;
             margin-bottom: 6px;
             color: #333;
         }
-        
+
         .form-input, .form-select {
             width: 100%;
             padding: 10px;
@@ -602,33 +602,33 @@
             font-size: 0.95em;
             transition: border-color 0.2s;
         }
-        
+
         .form-input:focus, .form-select:focus {
             outline: none;
             border-color: #667eea;
         }
-        
+
         .form-row {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 15px;
         }
-        
+
         /* Dark Mode */
         body.dark-mode {
             background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
         }
-        
+
         body.dark-mode .card {
             background: #2d3748;
             color: #e2e8f0;
         }
-        
+
         body.dark-mode header {
             background: #2d3748;
             color: #e2e8f0;
         }
-        
+
         body.dark-mode h1 { color: #818cf8; }
         body.dark-mode .card-title { color: #e2e8f0; border-bottom-color: #4a5568; }
         body.dark-mode .job-item { background: #374151; color: #e2e8f0; }
@@ -638,13 +638,13 @@
         body.dark-mode .tabs { background: #2d3748; }
         body.dark-mode .tab { color: #cbd5e0; }
         body.dark-mode .tab.active { background: #818cf8; color: white; }
-        
+
         /* Search Bar */
         .search-container {
             position: relative;
             margin-bottom: 15px;
         }
-        
+
         .search-input {
             width: 100%;
             padding: 12px 40px 12px 15px;
@@ -653,13 +653,13 @@
             font-size: 0.95em;
             transition: all 0.2s;
         }
-        
+
         .search-input:focus {
             outline: none;
             border-color: #667eea;
             box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
         }
-        
+
         .search-icon {
             position: absolute;
             right: 12px;
@@ -668,7 +668,7 @@
             color: #999;
             pointer-events: none;
         }
-        
+
         /* Keyboard Shortcuts Help */
         .shortcuts-help {
             position: fixed;
@@ -684,12 +684,12 @@
             font-size: 0.9em;
             transition: all 0.2s;
         }
-        
+
         .shortcuts-help:hover {
             background: #5568d3;
             transform: translateY(-2px);
         }
-        
+
         .shortcuts-modal {
             display: none;
             position: fixed;
@@ -704,9 +704,9 @@
             max-width: 500px;
             width: 90%;
         }
-        
+
         .shortcuts-modal.show { display: block; }
-        
+
         .modal-overlay {
             display: none;
             position: fixed;
@@ -717,16 +717,16 @@
             background: rgba(0,0,0,0.5);
             z-index: 1000;
         }
-        
+
         .modal-overlay.show { display: block; }
-        
+
         .shortcut-item {
             display: flex;
             justify-content: space-between;
             padding: 10px 0;
             border-bottom: 1px solid #e9ecef;
         }
-        
+
         .shortcut-key {
             background: #667eea;
             color: white;
@@ -735,7 +735,7 @@
             font-family: monospace;
             font-size: 0.85em;
         }
-        
+
         /* Progress Ring for Running Jobs */
         .progress-ring {
             display: inline-block;
@@ -746,11 +746,11 @@
             border-radius: 50%;
             animation: spin 1s linear infinite;
         }
-        
+
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
-        
+
         /* Connection Status */
         .connection-status {
             font-size: 0.8em;
@@ -759,11 +759,11 @@
             background: #28a745;
             color: white;
         }
-        
+
         .connection-status.offline {
             background: #dc3545;
         }
-        
+
         /* Performance Metrics */
         .perf-badge {
             display: inline-block;
@@ -773,16 +773,16 @@
             font-weight: bold;
             margin-left: 8px;
         }
-        
+
         .perf-fast { background: #28a745; color: white; }
         .perf-medium { background: #ffc107; color: #333; }
         .perf-slow { background: #dc3545; color: white; }
-        
+
         ::-webkit-scrollbar { width: 8px; height: 8px; }
         ::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px; }
         ::-webkit-scrollbar-thumb { background: #888; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #555; }
-        
+
         /* Tooltip styles */
         .tooltip {
             position: relative;
@@ -809,7 +809,7 @@
             opacity: 1;
             transform: translateX(-50%) translateY(-8px);
         }
-        
+
         /* Progress bar for jobs */
         .progress-bar {
             width: 100%;
@@ -839,7 +839,7 @@
             0% { transform: translateX(-100%); }
             100% { transform: translateX(100%); }
         }
-        
+
         /* Quick action buttons */
         .quick-actions {
             display: flex;
@@ -862,7 +862,7 @@
             border-color: #667eea;
             transform: translateY(-1px);
         }
-        
+
         /* Smooth transitions */
         .card, .btn, .tab, .job-item {
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -871,7 +871,7 @@
             transform: translateY(-2px);
             box-shadow: 0 8px 16px rgba(0,0,0,0.15);
         }
-        
+
         /* Toast notifications */
         .toast {
             position: fixed;
@@ -1044,7 +1044,7 @@
                         <input type="text" class="form-input" id="jobName" placeholder="my_custom_job" required>
                         <small style="color: #666; font-size: 0.85em;">Use lowercase, underscores, no spaces</small>
                     </div>
-                    
+
                     <div class="form-row">
                         <div class="form-group">
                             <label class="form-label tooltip" data-tooltip="Select the base model to fine-tune">
@@ -1066,7 +1066,7 @@
                             <small id="datasetInfo" style="color: #666; font-size: 0.85em;">Select a dataset</small>
                         </div>
                     </div>
-                    
+
                     <div class="form-row">
                         <div class="form-group">
                             <label class="form-label tooltip" data-tooltip="Number of training epochs (1-20)">
@@ -1090,14 +1090,14 @@
                             <small style="color: #666; font-size: 0.85em;">Default: 2e-4</small>
                         </div>
                     </div>
-                    
+
                     <!-- Advanced Options (Collapsible) -->
                     <div style="margin-top: 20px; border-top: 2px solid #e0e0e0; padding-top: 20px;">
                         <div style="display: flex; justify-content: space-between; align-items: center; cursor: pointer;" onclick="toggleAdvancedOptions()">
                             <strong style="color: #667eea; font-size: 1.1em;">🔧 Advanced Options</strong>
                             <span id="advancedToggleIcon" style="font-size: 1.2em; transition: transform 0.3s;">▼</span>
                         </div>
-                        
+
                         <div id="advancedOptions" style="display: none; margin-top: 15px;">
                             <div class="form-row">
                                 <div class="form-group">
@@ -1126,7 +1126,7 @@
                                     <small style="color: #666; font-size: 0.85em;">LR warmup period</small>
                                 </div>
                             </div>
-                            
+
                             <div class="form-row">
                                 <div class="form-group">
                                     <label class="form-label tooltip" data-tooltip="LoRA rank parameter">
@@ -1150,7 +1150,7 @@
                                     <small style="color: #666; font-size: 0.85em;">0.0 to 0.5 typical</small>
                                 </div>
                             </div>
-                            
+
                             <div class="form-row">
                                 <div class="form-group">
                                     <label class="form-label tooltip" data-tooltip="Weight decay for regularization">
@@ -1176,14 +1176,14 @@
                             </div>
                         </div>
                     </div>
-                    
+
                     <div class="form-group">
                         <label class="form-label tooltip" data-tooltip="Enable evaluation during training">
                             <input type="checkbox" id="enableEval" checked onchange="toggleEvalOptions()">
                             Enable Evaluation
                         </label>
                     </div>
-                    
+
                     <div id="evalOptions" class="form-row" style="margin-top: 10px;">
                         <div class="form-group">
                             <label class="form-label tooltip" data-tooltip="Maximum evaluation samples">
@@ -1198,7 +1198,7 @@
                             <input type="number" class="form-input" id="evalSteps" value="50" min="10" step="10">
                         </div>
                     </div>
-                    
+
                     <!-- Training Estimate -->
                     <div class="card" style="background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%); margin-top: 20px; padding: 15px;">
                         <div style="display: flex; justify-content: space-between; align-items: center;">
@@ -1212,7 +1212,7 @@
                             </div>
                         </div>
                     </div>
-                    
+
                     <!-- Action Buttons -->
                     <div style="display: flex; gap: 15px; margin-top: 20px;">
                         <button class="btn btn-primary" onclick="startTraining()" style="flex: 1; padding: 15px 24px; font-size: 1.1em;">
@@ -1228,7 +1228,7 @@
                             🔄 Reset
                         </button>
                     </div>
-                    
+
                     <!-- Quick Presets -->
                     <div style="margin-top: 20px;">
                         <strong style="color: #667eea; margin-bottom: 10px; display: block;">⚡ Quick Presets:</strong>
@@ -1251,7 +1251,7 @@
     </div>
 
     <div class="shortcuts-help" onclick="toggleShortcuts()">⌨️ Shortcuts</div>
-    
+
     <div class="modal-overlay" id="modalOverlay" onclick="toggleShortcuts()"></div>
     <div class="shortcuts-modal" id="shortcutsModal">
         <h2 style="margin-bottom: 15px; color: #667eea;">⌨️ Keyboard Shortcuts</h2>
@@ -1338,7 +1338,7 @@
                 updateStats(data);
                 updateJobLists(data);
                 updateTopModels(data);
-                
+
                 const completed = (data.jobs || []).filter(j => j.status === 'succeeded').length;
                 if (completed > lastJobCount && lastJobCount > 0) {
                     showNotif('Job Completed!', 'Training job finished successfully', 'success');
@@ -1450,18 +1450,18 @@
             const jobs = data.jobs || [];
             const running = jobs.filter(j => j.status === 'running');
             const completed = jobs.filter(j => j.status === 'succeeded').slice(-10).reverse();
-            
+
             document.getElementById('runningCount').textContent = running.length;
             document.getElementById('completedCount').textContent = completed.length;
-            
+
             document.getElementById('runningJobs').innerHTML = running.length > 0
                 ? running.map(createJobItem).join('')
                 : '<p style="color: rgba(255,255,255,0.7); padding: 20px; text-align: center;">No jobs running</p>';
-            
+
             document.getElementById('completedJobs').innerHTML = completed.length > 0
                 ? completed.map(createJobItem).join('')
                 : '<p style="color: #666; padding: 20px; text-align: center;">No completed jobs</p>';
-            
+
             const allJobsHtml = jobs.length > 0
                 ? jobs.map(createDetailedJobItem).join('')
                 : '<p style="color: #666; padding: 20px; text-align: center;">No jobs found</p>';
@@ -1485,7 +1485,7 @@
         function createDetailedJobItem(job) {
             const status = job.status || 'pending';
             const jobId = job.name.replace(/[^a-z0-9]/gi, '_');
-            
+
             // Progress bar for running jobs
             let progressHtml = '';
             if (status === 'running' && job.duration_sec) {
@@ -1497,7 +1497,7 @@
                     </div>
                 `;
             }
-            
+
             // Quick actions
             const quickActions = `
                 <div class="quick-actions">
@@ -1506,7 +1506,7 @@
                     <button class="quick-action" onclick="event.stopPropagation(); navigator.clipboard.writeText('${job.name}'); showToast('Copied: ${job.name}', 'success', 2000)">📋 Copy</button>
                 </div>
             `;
-            
+
             return `
                 <div class="job-item ${status}" onclick="toggleJobDetails('${jobId}')">
                     <div class="job-name">
@@ -1572,7 +1572,7 @@
             jobs.sort((a, b) => (a.metrics?.post_eval_perplexity || 999) - (b.metrics?.post_eval_perplexity || 999));
             const top = jobs.slice(0, 5);
             const all = jobs.slice(0, 20);
-            
+
             const topHtml = top.length > 0 ? `
                 <div class="model-compare">
                     ${top.map((job, i) => {
@@ -1593,9 +1593,9 @@
                     }).join('')}
                 </div>
             ` : '<p style="color: #666; padding: 20px; text-align: center;">No completed models</p>';
-            
+
             document.getElementById('topModels').innerHTML = topHtml;
-            
+
             document.getElementById('modelsLeaderboard').innerHTML = all.length > 0 ? `
                 <div class="model-compare">
                     ${all.map((job, i) => {
@@ -1621,7 +1621,7 @@
 
         function updateCharts(data) {
             const jobs = data.jobs.filter(j => j.status === 'succeeded');
-            
+
             if (perplexityChart) perplexityChart.destroy();
             const ctx1 = document.getElementById('perplexityChart').getContext('2d');
             perplexityChart = new Chart(ctx1, {
@@ -1692,7 +1692,7 @@
                 }
             }
         }
-        
+
         // Initialize notifications on first auto-refresh
         let notificationsInitialized = false;
         if (!notificationsInitialized) {
@@ -1725,10 +1725,10 @@
         function switchTab(tabName) {
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-            
+
             event.target.classList.add('active');
             document.getElementById(`tab-${tabName}`).classList.add('active');
-            
+
             // Load data for specific tabs
             if (tabName === 'datasets') {
                 loadDatasets();
@@ -1742,24 +1742,24 @@
         async function loadDatasets() {
             const el = document.getElementById('datasetsList');
             el.innerHTML = '<div style="text-align: center; padding: 40px; color: #667eea;">⏳ Loading datasets...</div>';
-            
+
             try {
                 const res = await fetch('/api/datasets');
                 if (!res.ok) throw new Error(`HTTP ${res.status}`);
-                
+
                 const data = await res.json();
-                
+
                 if (data.error) {
                     el.innerHTML = `<div style="text-align: center; padding: 40px; color: #dc3545;">❌ ${data.error}</div>`;
                     showToast('Failed to load datasets', data.error, 'error');
                     return;
                 }
-                
+
                 if (!data.datasets || data.datasets.length === 0) {
                     el.innerHTML = '<div style="text-align: center; padding: 40px; color: #666;">📂 No datasets found in datasets/chat/</div>';
                     return;
                 }
-                
+
                 el.innerHTML = data.datasets.map(ds => `
                     <div class="dataset-card tooltip" data-tooltip="Click to copy path">
                         <div class="dataset-name">${ds.name}</div>
@@ -1771,14 +1771,14 @@
                         </div>
                     </div>
                 `).join('');
-                
+
                 // Also populate the training form dropdown
                 const datasetSelect = document.getElementById('datasetSelect');
                 if (datasetSelect) {
-                    datasetSelect.innerHTML = '<option value="">Select a dataset...</option>' + 
+                    datasetSelect.innerHTML = '<option value="">Select a dataset...</option>' +
                         data.datasets.map(ds => `<option value="${ds.path}">${ds.name} (${ds.train_samples} samples)</option>`).join('');
                 }
-                
+
                 showToast('Datasets Loaded', `Found ${data.datasets.length} dataset(s)`, 'success', 2000);
             } catch (e) {
                 console.error('Load datasets error:', e);
@@ -1790,24 +1790,24 @@
         async function loadConfigs() {
             const el = document.getElementById('configsList');
             el.innerHTML = '<div style="text-align: center; padding: 40px; color: #667eea;">⏳ Loading configurations...</div>';
-            
+
             try {
                 const res = await fetch('/api/configs');
                 if (!res.ok) throw new Error(`HTTP ${res.status}`);
-                
+
                 const data = await res.json();
-                
+
                 if (data.error) {
                     el.innerHTML = `<div style="text-align: center; padding: 40px; color: #dc3545;">❌ ${data.error}</div>`;
                     showToast('Failed to load configs', data.error, 'error');
                     return;
                 }
-                
+
                 if (!data.configs || data.configs.length === 0) {
                     el.innerHTML = '<div style="text-align: center; padding: 40px; color: #666;">⚙️ No configuration files found<br><small>Create autotrain*.yaml files in the root directory</small></div>';
                     return;
                 }
-                
+
                 el.innerHTML = data.configs.map(cfg => `
                     <div class="config-card tooltip" data-tooltip="Training configuration file">
                         <div class="config-name">${cfg.name}</div>
@@ -1823,7 +1823,7 @@
                         </div>
                     </div>
                 `).join('');
-                
+
                 showToast('Configs Loaded', `Found ${data.configs.length} configuration(s)`, 'success', 2000);
             } catch (e) {
                 console.error('Load configs error:', e);
@@ -1837,7 +1837,7 @@
                 const res = await fetch('/api/datasets');
                 const data = await res.json();
                 const select = document.getElementById('datasetSelect');
-                select.innerHTML = data.datasets.map(ds => 
+                select.innerHTML = data.datasets.map(ds =>
                     `<option value="${ds.name}">${ds.name} (${ds.train_samples} samples)</option>`
                 ).join('');
             } catch (e) {
@@ -1852,7 +1852,7 @@
                 showNotif('Validation Error', errors.join('<br>'), 'error');
                 return;
             }
-            
+
             const jobData = {
                 name: document.getElementById('jobName').value.trim(),
                 model: document.getElementById('modelSelect').value,
@@ -1873,7 +1873,7 @@
                 max_eval_samples: parseInt(document.getElementById('maxEvalSamples').value),
                 eval_steps: parseInt(document.getElementById('evalSteps').value)
             };
-            
+
             // Show confirmation for long training jobs
             const estimatedMinutes = calculateEstimatedTime(jobData);
             if (estimatedMinutes > 60) {
@@ -1881,17 +1881,17 @@
                     return;
                 }
             }
-            
+
             try {
                 showToast('Starting...', 'Submitting training job...', 'info', 2000);
-                
+
                 const res = await fetch('/api/start-training', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(jobData)
                 });
                 const result = await res.json();
-                
+
                 if (result.success) {
                     showNotif('Training Started', `Job ${jobData.name} queued successfully`, 'success');
                     switchTab('jobs');
@@ -1903,13 +1903,13 @@
                 showNotif('Error', 'Failed to communicate with server', 'error');
             }
         }
-        
+
         function calculateEstimatedTime(jobData) {
             const stepsPerEpoch = Math.ceil(jobData.max_samples / jobData.batch_size);
             const totalSteps = stepsPerEpoch * jobData.epochs;
             return Math.ceil((totalSteps * 0.5) / 60); // minutes
         }
-        
+
         function updateModelInfo() {
             const model = document.getElementById('modelSelect').value;
             const info = document.getElementById('modelInfo');
@@ -1920,7 +1920,7 @@
             }
             updateEstimate();
         }
-        
+
         function updateDatasetInfo() {
             const dataset = document.getElementById('datasetSelect').value;
             const info = document.getElementById('datasetInfo');
@@ -1932,44 +1932,44 @@
             }
             updateEstimate();
         }
-        
+
         function toggleEvalOptions() {
             const enabled = document.getElementById('enableEval').checked;
             const evalOptions = document.getElementById('evalOptions');
             evalOptions.style.display = enabled ? 'flex' : 'none';
         }
-        
+
         function toggleAdvancedOptions() {
             const advancedOptions = document.getElementById('advancedOptions');
             const icon = document.getElementById('advancedToggleIcon');
             const isVisible = advancedOptions.style.display !== 'none';
-            
+
             advancedOptions.style.display = isVisible ? 'none' : 'block';
             icon.textContent = isVisible ? '▼' : '▲';
             icon.style.transform = isVisible ? 'rotate(0deg)' : 'rotate(180deg)';
         }
-        
+
         function updateEstimate() {
             const epochs = parseInt(document.getElementById('epochs').value) || 3;
             const samples = parseInt(document.getElementById('maxSamples').value) || 1000;
             const batchSize = parseInt(document.getElementById('batchSize').value) || 2;
             const loraRank = parseInt(document.getElementById('loraRank').value) || 8;
-            
+
             // Rough estimate: 0.5 seconds per sample per epoch with batch size 2
             const stepsPerEpoch = Math.ceil(samples / batchSize);
             const totalSteps = stepsPerEpoch * epochs;
             const estimatedMinutes = Math.ceil((totalSteps * 0.5) / 60);
-            
+
             // VRAM estimate based on LoRA rank
             const baseVram = 3.5; // GB for base model
             const loraVram = (loraRank / 8) * 0.5; // Additional VRAM for LoRA
             const totalVram = baseVram + loraVram;
-            
-            document.getElementById('estimatedTime').textContent = 
+
+            document.getElementById('estimatedTime').textContent =
                 estimatedMinutes < 60 ? `~${estimatedMinutes} minutes` : `~${Math.round(estimatedMinutes / 60)} hours`;
             document.getElementById('estimatedVram').textContent = `~${totalVram.toFixed(1)}GB`;
         }
-        
+
         function applyPreset(presetName) {
             const presets = {
                 quick: {
@@ -2013,7 +2013,7 @@
                     evalSteps: 200
                 }
             };
-            
+
             const preset = presets[presetName];
             if (preset) {
                 document.getElementById('epochs').value = preset.epochs;
@@ -2028,7 +2028,7 @@
                 showToast(`Applied ${presetName} preset`, 'success', 2000);
             }
         }
-        
+
         function saveAsConfig() {
             const jobData = {
                 name: document.getElementById('jobName').value,
@@ -2050,7 +2050,7 @@
                 max_eval_samples: parseInt(document.getElementById('maxEvalSamples').value),
                 eval_steps: parseInt(document.getElementById('evalSteps').value)
             };
-            
+
             const blob = new Blob([JSON.stringify(jobData, null, 2)], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
@@ -2060,7 +2060,7 @@
             URL.revokeObjectURL(url);
             showToast('Config saved', 'success', 2000);
         }
-        
+
         function resetForm() {
             document.getElementById('jobName').value = '';
             document.getElementById('modelSelect').value = 'phi35';
@@ -2083,7 +2083,7 @@
             updateEstimate();
             showToast('Form reset', 'info', 2000);
         }
-        
+
         function loadConfigFile() {
             const input = document.createElement('input');
             input.type = 'file';
@@ -2091,11 +2091,11 @@
             input.onchange = async (e) => {
                 const file = e.target.files[0];
                 if (!file) return;
-                
+
                 try {
                     const text = await file.text();
                     const config = JSON.parse(text);
-                    
+
                     // Apply config to form
                     if (config.name) document.getElementById('jobName').value = config.name;
                     if (config.model) document.getElementById('modelSelect').value = config.model;
@@ -2115,7 +2115,7 @@
                     if (config.enable_eval !== undefined) document.getElementById('enableEval').checked = config.enable_eval;
                     if (config.max_eval_samples) document.getElementById('maxEvalSamples').value = config.max_eval_samples;
                     if (config.eval_steps) document.getElementById('evalSteps').value = config.eval_steps;
-                    
+
                     updateModelInfo();
                     updateEstimate();
                     toggleEvalOptions();
@@ -2126,21 +2126,21 @@
             };
             input.click();
         }
-        
+
         function validateTrainingParams() {
             const jobName = document.getElementById('jobName').value;
             const dataset = document.getElementById('datasetSelect').value;
             const epochs = parseInt(document.getElementById('epochs').value);
             const maxSamples = parseInt(document.getElementById('maxSamples').value);
-            
+
             const errors = [];
-            
+
             if (!jobName || jobName.trim() === '') errors.push('Job name is required');
             if (jobName && !/^[a-z0-9_]+$/.test(jobName)) errors.push('Job name must be lowercase letters, numbers, and underscores only');
             if (!dataset) errors.push('Please select a dataset');
             if (epochs < 1 || epochs > 20) errors.push('Epochs must be between 1 and 20');
             if (maxSamples < 10 && maxSamples !== -1) errors.push('Max samples must be at least 10 or -1 for all');
-            
+
             return errors;
         }
 
@@ -2149,17 +2149,17 @@
             document.body.classList.toggle('dark-mode');
             localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
         }
-        
+
         // Load dark mode preference
         if (localStorage.getItem('darkMode') === 'true') {
             document.body.classList.add('dark-mode');
             document.getElementById('darkMode').checked = true;
         }
-        
+
         // Keyboard Shortcuts
         document.addEventListener('keydown', (e) => {
             if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
-            
+
             switch(e.key.toLowerCase()) {
                 case 'a':
                     document.getElementById('autoRefresh').click();
@@ -2205,7 +2205,7 @@
                     break;
             }
         });
-        
+
         function switchTabByName(tabName) {
             document.querySelectorAll('.tab').forEach((t, i) => {
                 const tabs = ['overview', 'jobs', 'models', 'datasets', 'configs', 'train'];
@@ -2214,37 +2214,37 @@
                 }
             });
         }
-        
+
         function toggleShortcuts() {
             document.getElementById('shortcutsModal').classList.toggle('show');
             document.getElementById('modalOverlay').classList.toggle('show');
         }
-        
+
         // Job Search/Filter
         let allJobsData = [];
-        
+
         function filterJobs() {
             const query = document.getElementById('jobSearch').value.toLowerCase();
             if (!query) {
                 document.getElementById('allJobsTab').innerHTML = allJobsData.map(createDetailedJobItem).join('');
                 return;
             }
-            
-            const filtered = allJobsData.filter(job => 
+
+            const filtered = allJobsData.filter(job =>
                 job.name.toLowerCase().includes(query) ||
                 (job.status || '').toLowerCase().includes(query) ||
                 (job.metrics?.post_eval_perplexity?.toString() || '').includes(query)
             );
-            
+
             document.getElementById('allJobsTab').innerHTML = filtered.length > 0
                 ? filtered.map(createDetailedJobItem).join('')
                 : '<p style="color: #666; padding: 20px; text-align: center;">No matching jobs found</p>';
         }
-        
+
         // Connection Monitoring
         let isOnline = true;
         let failedRequests = 0;
-        
+
         function updateConnectionStatus(success) {
             const el = document.getElementById('connectionStatus');
             if (success) {
@@ -2265,7 +2265,7 @@
                 }
             }
         }
-        
+
         // Enhanced refresh with error handling
         const originalRefreshAll = refreshAll;
         refreshAll = async function() {
@@ -2278,21 +2278,21 @@
                 console.error('Refresh failed:', e);
             }
         };
-        
+
         // Performance monitoring
         function addPerformanceBadge(duration) {
             if (duration < 180) return '<span class="perf-badge perf-fast">⚡ Fast</span>';
             if (duration < 600) return '<span class="perf-badge perf-medium">⚙️ Medium</span>';
             return '<span class="perf-badge perf-slow">🐢 Slow</span>';
         }
-        
+
         // Store jobs data for filtering
         const originalUpdateJobLists = updateJobLists;
         updateJobLists = function(data) {
             allJobsData = data.jobs || [];
             originalUpdateJobLists(data);
         };
-        
+
         // Enhanced job item with performance badge
         const originalCreateDetailedJobItem = createDetailedJobItem;
         createDetailedJobItem = function(job) {
@@ -2303,7 +2303,7 @@
             }
             return html;
         };
-        
+
         // Show loading indicator on running jobs
         const originalCreateJobItem = createJobItem;
         createJobItem = function(job) {
@@ -2313,36 +2313,36 @@
             }
             return html;
         };
-        
+
         // Toast notification system
         function showToast(message, type = 'info', duration = 3000) {
             const toast = document.createElement('div');
             toast.className = `toast toast-${type}`;
-            
+
             const icons = {
                 success: '✅',
                 error: '❌',
                 info: 'ℹ️',
                 warning: '⚠️'
             };
-            
+
             toast.innerHTML = `
                 <span class="toast-icon">${icons[type] || icons.info}</span>
                 <div>${message}</div>
             `;
-            
+
             document.body.appendChild(toast);
-            
+
             // Trigger animation
             setTimeout(() => toast.classList.add('show'), 10);
-            
+
             // Remove after duration
             setTimeout(() => {
                 toast.classList.remove('show');
                 setTimeout(() => document.body.removeChild(toast), 300);
             }, duration);
         }
-        
+
         // Desktop notification system
         let notificationsEnabled = false;
         // Restore persisted notification preference
@@ -2352,7 +2352,7 @@
                 notificationsEnabled = true;
             }
         } catch (e) { console.warn('Notif localStorage unavailable', e); }
-        
+
         function initNotifications() {
             if ("Notification" in window) {
                 if (Notification.permission === "granted") {
@@ -2370,10 +2370,10 @@
                 }
             }
         }
-        
+
         function sendDesktopNotification(title, message, icon = '🔔') {
             if (!notificationsEnabled) return;
-            
+
             try {
                 const notification = new Notification(title, {
                     body: message,
@@ -2382,7 +2382,7 @@
                     requireInteraction: false,
                     tag: 'qai-training'
                 });
-                
+
                 notification.onclick = () => {
                     window.focus();
                     notification.close();
@@ -2391,7 +2391,7 @@
                 console.error("Notification error:", e);
             }
         }
-        
+
         function notifyJobStarted(jobName) {
             sendDesktopNotification(
                 "🚀 Training Started",
@@ -2400,7 +2400,7 @@
             );
             showToast(`Training started: ${jobName}`, "info");
         }
-        
+
         function notifyJobCompleted(jobName, durationMin, finalLoss) {
             sendDesktopNotification(
                 "✅ Training Complete",
@@ -2409,7 +2409,7 @@
             );
             showToast(`Training complete: ${jobName}`, "success", 5000);
         }
-        
+
         function notifyJobFailed(jobName, error) {
             sendDesktopNotification(
                 "❌ Training Failed",
@@ -2418,7 +2418,7 @@
             );
             showToast(`Training failed: ${jobName}`, "error", 5000);
         }
-        
+
         function notifyMilestone(jobName, milestone, value) {
             sendDesktopNotification(
                 "🎯 Milestone Reached",
@@ -2426,7 +2426,7 @@
                 "🎯"
             );
         }
-        
+
         function notifyGPUAlert(gpuUtil, memoryUsed) {
             if (gpuUtil > 95) {
                 sendDesktopNotification(
@@ -2437,7 +2437,7 @@
                 showToast("GPU utilization critical!", "warning", 5000);
             }
         }
-        
+
         // Enhanced refresh with toast notifications
         const originalRefreshAllWithToast = refreshAll;
         refreshAll = async function() {
@@ -2450,29 +2450,29 @@
                 console.error('Refresh failed:', e);
             }
         };
-        
+
         // Show welcome toast
         setTimeout(() => {
             showToast('Dashboard loaded! Press ? for shortcuts', 'success', 4000);
         }, 500);
-        
+
         refreshAll();
-        
+
         if ('Notification' in window && Notification.permission === 'default') {
             Notification.requestPermission();
         }
-        
+
         // Model Comparison Feature
         async function compareModels() {
             try {
                 const response = await fetch('/api/models');
                 const data = await response.json();
-                
+
                 if (!data.models || data.models.length === 0) {
                     showToast('No models found to compare', 'warning');
                     return;
                 }
-                
+
                 // Create comparison modal
                 const modal = document.createElement('div');
                 modal.id = 'compareModal';
@@ -2491,11 +2491,11 @@
                     overflow-y: auto;
                     color: #333;
                 `;
-                
+
                 let tableHtml = `
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                         <h2 style="margin: 0; color: #667eea;">📊 Model Comparison</h2>
-                        <button onclick="document.getElementById('compareModal').remove(); document.getElementById('compareOverlay').remove();" 
+                        <button onclick="document.getElementById('compareModal').remove(); document.getElementById('compareOverlay').remove();"
                                 style="background: #f87171; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer;">
                             Close
                         </button>
@@ -2512,12 +2512,12 @@
                         </thead>
                         <tbody>
                 `;
-                
+
                 data.models.slice(0, 10).forEach((model, idx) => {
                     const perf = model.perplexity ? (1 / model.perplexity * 100).toFixed(2) : 'N/A';
                     const perfColor = perf !== 'N/A' && perf > 80 ? '#10b981' : perf > 50 ? '#f59e0b' : '#ef4444';
                     const rowBg = idx % 2 === 0 ? '#f9fafb' : '#ffffff';
-                    
+
                     tableHtml += `
                         <tr style="background: ${rowBg}; border-bottom: 1px solid #e5e7eb;">
                             <td style="padding: 12px; font-weight: 600;">${model.name || 'Unknown'}</td>
@@ -2528,20 +2528,20 @@
                         </tr>
                     `;
                 });
-                
+
                 tableHtml += `
                         </tbody>
                     </table>
                     <div style="margin-top: 20px; padding: 15px; background: #f3f4f6; border-radius: 8px; font-size: 0.9em; color: #666;">
                         <strong>Performance Score:</strong> Calculated as (1/perplexity × 100). Higher is better.<br>
-                        <span style="color: #10b981;">●</span> Excellent (>80) 
-                        <span style="color: #f59e0b;">●</span> Good (50-80) 
+                        <span style="color: #10b981;">●</span> Excellent (>80)
+                        <span style="color: #f59e0b;">●</span> Good (50-80)
                         <span style="color: #ef4444;">●</span> Needs Work (<50)
                     </div>
                 `;
-                
+
                 modal.innerHTML = tableHtml;
-                
+
                 // Create overlay
                 const overlay = document.createElement('div');
                 overlay.id = 'compareOverlay';
@@ -2558,16 +2558,16 @@
                     modal.remove();
                     overlay.remove();
                 };
-                
+
                 document.body.appendChild(overlay);
                 document.body.appendChild(modal);
-                
+
             } catch (error) {
                 console.error('Compare models error:', error);
                 showToast('Failed to load model comparison', 'error');
             }
         }
-        
+
         // Configuration Templates System
         const configTemplates = {
             'quick-test': {
@@ -2626,13 +2626,13 @@
                 }
             }
         };
-        
+
         function saveConfigTemplate() {
             const name = prompt('Enter template name:');
             if (!name) return;
-            
+
             const config = gatherTrainingConfig();
-            
+
             const templates = JSON.parse(localStorage.getItem('qai_config_templates') || '{}');
             templates[name] = {
                 name: name,
@@ -2640,26 +2640,26 @@
                 config: config,
                 created: new Date().toISOString()
             };
-            
+
             localStorage.setItem('qai_config_templates', JSON.stringify(templates));
             showToast(`Template '${name}' saved!`, 'success');
         }
-        
+
         function loadConfigTemplate(templateId) {
             let template;
-            
+
             if (configTemplates[templateId]) {
                 template = configTemplates[templateId];
             } else {
                 const customTemplates = JSON.parse(localStorage.getItem('qai_config_templates') || '{}');
                 template = customTemplates[templateId];
             }
-            
+
             if (!template) {
                 showToast('Template not found', 'error');
                 return;
             }
-            
+
             // Apply configuration to form
             Object.keys(template.config).forEach(key => {
                 const input = document.querySelector(`[name="${key}"], #${key}`);
@@ -2667,11 +2667,11 @@
                     input.value = template.config[key];
                 }
             });
-            
+
             showToast(`Loaded template: ${template.name}`, 'success');
             updateEstimates();
         }
-        
+
         function showConfigTemplates() {
             const modal = document.createElement('div');
             modal.id = 'templatesModal';
@@ -2690,24 +2690,24 @@
                 overflow-y: auto;
                 color: #333;
             `;
-            
+
             let html = `
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                     <h2 style="margin: 0; color: #667eea;">📋 Configuration Templates</h2>
-                    <button onclick="this.parentElement.parentElement.parentElement.remove(); document.getElementById('templatesOverlay').remove();" 
+                    <button onclick="this.parentElement.parentElement.parentElement.remove(); document.getElementById('templatesOverlay').remove();"
                             style="background: #f87171; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer;">
                         Close
                     </button>
                 </div>
                 <div style="margin-bottom: 20px;">
-                    <button onclick="saveConfigTemplate()" 
+                    <button onclick="saveConfigTemplate()"
                             style="background: #10b981; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; width: 100%; font-weight: 600;">
                         💾 Save Current Config as Template
                     </button>
                 </div>
                 <h3 style="color: #666; font-size: 0.9em; text-transform: uppercase; margin-bottom: 15px;">Built-in Templates</h3>
             `;
-            
+
             Object.keys(configTemplates).forEach(key => {
                 const t = configTemplates[key];
                 html += `
@@ -2717,7 +2717,7 @@
                                 <div style="font-weight: 600; color: #333; margin-bottom: 5px;">${t.name}</div>
                                 <div style="font-size: 0.85em; color: #666;">${t.description}</div>
                             </div>
-                            <button onclick="loadConfigTemplate('${key}'); document.getElementById('templatesModal').remove(); document.getElementById('templatesOverlay').remove();" 
+                            <button onclick="loadConfigTemplate('${key}'); document.getElementById('templatesModal').remove(); document.getElementById('templatesOverlay').remove();"
                                     style="background: #667eea; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer;">
                                 Load
                             </button>
@@ -2725,12 +2725,12 @@
                     </div>
                 `;
             });
-            
+
             // Custom templates
             const customTemplates = JSON.parse(localStorage.getItem('qai_config_templates') || '{}');
             if (Object.keys(customTemplates).length > 0) {
                 html += `<h3 style="color: #666; font-size: 0.9em; text-transform: uppercase; margin: 20px 0 15px;">Your Templates</h3>`;
-                
+
                 Object.keys(customTemplates).forEach(key => {
                     const t = customTemplates[key];
                     html += `
@@ -2741,11 +2741,11 @@
                                     <div style="font-size: 0.75em; color: #999;">Created: ${new Date(t.created).toLocaleDateString()}</div>
                                 </div>
                                 <div>
-                                    <button onclick="loadConfigTemplate('${key}'); document.getElementById('templatesModal').remove(); document.getElementById('templatesOverlay').remove();" 
+                                    <button onclick="loadConfigTemplate('${key}'); document.getElementById('templatesModal').remove(); document.getElementById('templatesOverlay').remove();"
                                             style="background: #10b981; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; margin-right: 5px;">
                                         Load
                                     </button>
-                                    <button onclick="deleteTemplate('${key}')" 
+                                    <button onclick="deleteTemplate('${key}')"
                                             style="background: #ef4444; color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer;">
                                         🗑️
                                     </button>
@@ -2755,9 +2755,9 @@
                     `;
                 });
             }
-            
+
             modal.innerHTML = html;
-            
+
             const overlay = document.createElement('div');
             overlay.id = 'templatesOverlay';
             overlay.style.cssText = `
@@ -2773,22 +2773,22 @@
                 modal.remove();
                 overlay.remove();
             };
-            
+
             document.body.appendChild(overlay);
             document.body.appendChild(modal);
         }
-        
+
         function deleteTemplate(templateName) {
             if (!confirm(`Delete template '${templateName}'?`)) return;
-            
+
             const templates = JSON.parse(localStorage.getItem('qai_config_templates') || '{}');
             delete templates[templateName];
             localStorage.setItem('qai_config_templates', JSON.stringify(templates));
-            
+
             showToast('Template deleted', 'success');
             showConfigTemplates(); // Refresh modal
         }
-        
+
         function gatherTrainingConfig() {
             return {
                 dataset: document.getElementById('dataset')?.value || '',
@@ -2805,7 +2805,7 @@
                 weight_decay: parseFloat(document.getElementById('weight_decay')?.value) || 0.01
             };
         }
-        
+
         // Add keyboard shortcuts for new features
         document.addEventListener('keydown', (e) => {
             if (e.ctrlKey && e.key === 'm') {
@@ -2821,7 +2821,7 @@
                 showTuningWizard();
             }
         });
-        
+
         // Welcome message
         setTimeout(() => {
             showNotif('Dashboard Ready', 'Press ? for keyboard shortcuts', 'success');
@@ -2893,7 +2893,7 @@
 
         // Store profiler recommendations globally
         window.__profilerRecommendations = null;
-        
+
         function buildSuggestions(samples) {
             // Check if we have profiler recommendations
             if (window.__profilerRecommendations) {
@@ -2901,13 +2901,13 @@
                 const baseTime = (s, b, e) => Math.max(1, Math.round((s / b) * e / 50));
                 return [
                     {
-                        name: '🎯 AI Recommended', 
-                        lr: rec.learning_rate || '1e-4', 
-                        batch: rec.batch_size || 8, 
-                        rank: rec.lora_rank || 16, 
+                        name: '🎯 AI Recommended',
+                        lr: rec.learning_rate || '1e-4',
+                        batch: rec.batch_size || 8,
+                        rank: rec.lora_rank || 16,
                         epochs: rec.epochs || 3,
-                        time: baseTime(samples, rec.batch_size || 8, rec.epochs || 3), 
-                        quality: 'Optimized', 
+                        time: baseTime(samples, rec.batch_size || 8, rec.epochs || 3),
+                        quality: 'Optimized',
                         qualityColor: '#8b5cf6',
                         reasoning: rec.reasoning || []
                     },
@@ -2916,7 +2916,7 @@
             }
             return buildHeuristicSuggestions(samples);
         }
-        
+
         function buildHeuristicSuggestions(samples) {
             // Heuristic tiers based on dataset size
             const small = samples < 500;
@@ -2941,7 +2941,7 @@
             });
             return suggestions;
         }
-        
+
         async function profileDatasetForWizard() {
             const dsSelect = document.getElementById('datasetSelect');
             const selectedDataset = dsSelect ? dsSelect.value : '';

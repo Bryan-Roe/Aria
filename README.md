@@ -1,17 +1,24 @@
-# Aria — Interactive AI Character Platform
+---
+title: Aria
+emoji: 🤖
+colorFrom: blue
+colorTo: purple
+sdk: gradio
+sdk_version: "6.12.0"
+app_file: app.py
+pinned: false
+---
 
-<div align="center">
+# Aria — Interactive AI Character Platform
 
 [![CI Pipeline](https://github.com/Bryan-Roe/Aria/actions/workflows/ci-pipeline.yml/badge.svg)](https://github.com/Bryan-Roe/Aria/actions/workflows/ci-pipeline.yml)
 [![Code Quality](https://github.com/Bryan-Roe/Aria/actions/workflows/code-quality.yml/badge.svg)](https://github.com/Bryan-Roe/Aria/actions/workflows/code-quality.yml)
 [![CodeQL](https://github.com/Bryan-Roe/Aria/actions/workflows/codeql.yml/badge.svg)](https://github.com/Bryan-Roe/Aria/actions/workflows/codeql.yml)
 [![E2E Tests](https://github.com/Bryan-Roe/Aria/actions/workflows/e2e-tests.yml/badge.svg)](https://github.com/Bryan-Roe/Aria/actions/workflows/e2e-tests.yml)
-
+[![Codespaces Prebuilds](https://github.com/Bryan-Roe/Aria/actions/workflows/codespaces/create_codespaces_prebuilds/badge.svg?branch=main)](https://github.com/Bryan-Roe/Aria/actions/workflows/codespaces/create_codespaces_prebuilds)
 **An intelligent, animated AI character with movement, gestures, and natural language interaction.**
 
 [Live Demo](https://bryan-roe.github.io/Aria) · [Aria Web UI](apps/aria/) · [Quick Start](#-quick-start)
-
-</div>
 
 ---
 
@@ -22,13 +29,33 @@ Aria is a full-stack interactive AI character platform. She lives on a virtual 3
 The project is organized around four core areas:
 
 | Area | Folder | Description |
-|------|--------|-------------|
+| --- | --- | --- |
 | **Character interface** | `apps/aria/` | Animated 3D character stage with object interaction |
 | **Chat / AI backends** | `ai-projects/chat-cli/` | Multi-provider CLI and streaming chat API |
 | **Quantum ML** | `ai-projects/quantum-ml/` | Hybrid quantum-classical training (experimental) |
 | **Model fine-tuning** | `AI/` | LoRA fine-tuning for Aria's language understanding |
 
 Supporting infrastructure lives in `shared/`, `scripts/`, `config/`, and `function_app.py` (Azure Functions API layer).
+
+---
+
+## 🤗 Hugging Face Spaces
+
+This repository is also configured to run as a **Gradio Hugging Face Space**.
+
+- Spaces entry point: `app.py`
+- Reusable demo helper: `scripts/gradio_hello.py`
+- SDK: `gradio`
+
+The Spaces deployment now exposes a **lightweight AI chat app** backed by the repository's existing provider abstraction. It can use the same provider layer as the rest of Aria (`auto`, local fallback, OpenAI, Azure OpenAI, LM Studio, Ollama, and AGI where configured), while remaining simpler than the full local Aria stack (`apps/aria/`, Azure Functions, training scripts, and quantum components).
+
+If you want to run the Space locally:
+
+```bash
+./.venv/bin/python app.py
+```
+
+If you want the full Aria platform instead, use the Quick Start steps below.
 
 ---
 
@@ -102,7 +129,7 @@ The Aria character runs at `http://localhost:8080` (or the [GitHub Pages demo](h
 **Natural language commands (examples):**
 
 | Command | Effect |
-|---------|--------|
+| --- | --- |
 | `move left` / `move right` | Walk to stage edge |
 | `wave` / `dance` / `jump` | Trigger gesture |
 | `pick up the ball` | Pick up a nearby object |
@@ -114,7 +141,7 @@ The auto-execute system parses complex multi-step requests ("walk to the table a
 **Aria web server API (port 8080):**
 
 | Method | Path | Description |
-|--------|------|-------------|
+| --- | --- | --- |
 | `GET` | `/api/aria/state` | Current stage state (position, objects, expressions) |
 | `POST` | `/api/aria/command` | Process a natural language command |
 | `POST` | `/api/aria/execute` | Auto-execute an action sequence |
@@ -276,7 +303,7 @@ Never commit secrets. All keys belong in environment variables or `local.setting
 **Optional services** (feature-flagged — safe to leave unset):
 
 | Service | How to enable |
-|---------|---------------|
+| --- | --- |
 | SQL persistence | `QAI_DB_CONN` env var (SQLite, PostgreSQL, or Azure SQL) |
 | Cosmos DB | `QAI_ENABLE_COSMOS=true` + `COSMOS_ENDPOINT`, `COSMOS_KEY`, `COSMOS_DATABASE`, `COSMOS_CONTAINER` |
 | Application Insights | `APPLICATIONINSIGHTS_CONNECTION_STRING` |
@@ -288,7 +315,7 @@ Never commit secrets. All keys belong in environment variables or `local.setting
 ## 📚 Documentation
 
 | Document | Purpose |
-|----------|---------|
+| --- | --- |
 | [apps/aria/README.md](apps/aria/README.md) | Character stage API reference |
 | [ai-projects/quantum-ml/README.md](ai-projects/quantum-ml/README.md) | Quantum ML platform guide |
 | [ai-projects/chat-cli/README.md](ai-projects/chat-cli/README.md) | Chat CLI reference |
@@ -311,3 +338,69 @@ Never commit secrets. All keys belong in environment variables or `local.setting
 ## 📄 License
 
 See individual project directories for license information.
+
+## PLAN (pseudocode)
+
+## 1) Validate OPENAI_API_KEY
+
+## 2) Read prompt from CLI args or stdin
+
+## 3) Call OpenAI Responses API
+
+## 4) Extract text safely from response.output_text with fallback parsing
+
+## 5) Print final text; fail gracefully on errors
+
+import os
+import sys
+from openai import OpenAI
+
+MODEL = "gpt-4o-mini"
+SYSTEM_PROMPT = "You are a concise AI coding assistant. Return practical code-focused responses."
+
+def _extract_text(resp) -> str:
+    if getattr(resp, "output_text", None):
+        return resp.output_text.strip()
+
+    parts = []
+    for item in getattr(resp, "output", []) or []:
+        for content in getattr(item, "content", []) or []:
+            if getattr(content, "type", "") == "output_text":
+                text = getattr(content, "text", "")
+                if text:
+                    parts.append(text)
+    return "\n".join(parts).strip()
+
+def ask_ai(client: OpenAI, prompt: str) -> str:
+    resp = client.responses.create(
+        model=MODEL,
+        input=[
+            {"role": "system", "content": SYSTEM_PROMPT},
+            {"role": "user", "content": prompt},
+        ],
+        temperature=0.2,
+    )
+    return _extract_text(resp)
+
+def main() -> None:
+    api_key = os.getenv("OPENAI_API_KEY")
+    if not api_key:
+        raise RuntimeError("Missing OPENAI_API_KEY environment variable.")
+
+    prompt = " ".join(sys.argv[1:]).strip()
+    if not prompt:
+        prompt = input("Prompt: ").strip()
+    if not prompt:
+        raise ValueError("Prompt cannot be empty.")
+
+    client = OpenAI(api_key=api_key)
+
+    try:
+        output = ask_ai(client, prompt)
+        print(output or "(No text returned.)")
+    except Exception as exc:
+        print(f"AI request failed: {exc}", file=sys.stderr)
+        sys.exit(1)
+
+if **name** == "**main**":
+    main()

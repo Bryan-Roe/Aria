@@ -19,7 +19,9 @@ _CANONICAL = (
     / "chat_providers.py"
 )
 
-_spec = importlib.util.spec_from_file_location("_canonical_chat_providers_root", _CANONICAL)
+_spec = importlib.util.spec_from_file_location(
+    "_canonical_chat_providers_root", _CANONICAL
+)
 if _spec is None or _spec.loader is None:
     raise ImportError(f"Unable to load canonical chat providers: {_CANONICAL}")
 

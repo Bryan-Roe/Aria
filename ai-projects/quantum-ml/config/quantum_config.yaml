@@ -29,4 +29,3 @@ quantum:
   simulator:
     backend: lightning.qubit
     shots: 128
-

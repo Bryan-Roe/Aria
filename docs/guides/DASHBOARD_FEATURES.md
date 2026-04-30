@@ -7,14 +7,14 @@
 #### 1. **Overview Tab**
 - **Live Statistics Cards**:
   - ✅ Completed Jobs
-  - 🏃 Running Jobs  
+  - 🏃 Running Jobs
   - ⏳ Pending Jobs
   - ⚡ Average Duration
   - 🎯 Best Model (lowest perplexity)
 - **Overall Progress Bar**: Visual completion percentage
 - **Recent Jobs**: Quick view of last 5 training runs
 
-#### 2. **Jobs Tab** 
+#### 2. **Jobs Tab**
 - **Expandable Job Cards**: Click any job to see detailed metrics
 - **Status-Based Coloring**:
   - 🟢 Green border = Succeeded

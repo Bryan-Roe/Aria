@@ -14,8 +14,8 @@ Classes:
     QuantumLLM              - Full language model with quantum transformer blocks
 """
 
-import math
 import logging
+import math
 from typing import Optional
 
 import torch
@@ -26,16 +26,19 @@ logger = logging.getLogger(__name__)
 
 try:
     from hybrid_qnn import QuantumLayer
+
     QUANTUM_AVAILABLE = True
     logger.info("QuantumLayer loaded successfully")
 except ImportError:
     try:
         import sys
         from pathlib import Path
+
         _src_dir = str(Path(__file__).parent)
         if _src_dir not in sys.path:
             sys.path.insert(0, _src_dir)
         from hybrid_qnn import QuantumLayer
+
         QUANTUM_AVAILABLE = True
         logger.info("QuantumLayer loaded from local src directory")
     except ImportError as e:
@@ -46,6 +49,7 @@ except ImportError:
 # ---------------------------------------------------------------------------
 # Classical fallbacks
 # ---------------------------------------------------------------------------
+
 
 class ClassicalSelfAttention(nn.Module):
     """Standard multi-head dot-product attention (fallback when quantum unavailable)."""
@@ -64,7 +68,9 @@ class ClassicalSelfAttention(nn.Module):
         self.W_O = nn.Linear(d_model, d_model)
         self.attn_dropout = nn.Dropout(dropout)
 
-    def forward(self, x: torch.Tensor, mask: Optional[torch.Tensor] = None) -> torch.Tensor:
+    def forward(
+        self, x: torch.Tensor, mask: Optional[torch.Tensor] = None
+    ) -> torch.Tensor:
         batch, seq_len, _ = x.shape
 
         Q = self.W_Q(x).view(batch, seq_len, self.n_heads, self.d_head).transpose(1, 2)
@@ -103,6 +109,7 @@ class ClassicalFeedForward(nn.Module):
 # Quantum components
 # ---------------------------------------------------------------------------
 
+
 class QuantumSelfAttention(nn.Module):
     """
     Multi-head attention using quantum circuits as learned feature maps.
@@ -132,7 +139,7 @@ class QuantumSelfAttention(nn.Module):
         self.n_heads = n_heads
         self.d_head = d_model // n_heads
         self.n_qubits = n_qubits
-        self.quantum_input_dim = 2 ** n_qubits
+        self.quantum_input_dim = 2**n_qubits
         self.scale = 1.0 / math.sqrt(n_qubits)
 
         # Classical projections
@@ -148,15 +155,17 @@ class QuantumSelfAttention(nn.Module):
             self.quantum_proj = None
 
         # One QuantumLayer per attention head
-        self.quantum_layers = nn.ModuleList([
-            QuantumLayer(
-                n_qubits=n_qubits,
-                n_layers=n_quantum_layers,
-                device="default.qubit",
-                entanglement=entanglement,
-            )
-            for _ in range(n_heads)
-        ])
+        self.quantum_layers = nn.ModuleList(
+            [
+                QuantumLayer(
+                    n_qubits=n_qubits,
+                    n_layers=n_quantum_layers,
+                    device="default.qubit",
+                    entanglement=entanglement,
+                )
+                for _ in range(n_heads)
+            ]
+        )
 
         self.attn_dropout = nn.Dropout(dropout)
 
@@ -175,7 +184,9 @@ class QuantumSelfAttention(nn.Module):
         x = F.normalize(x, p=2, dim=-1)
         return self.quantum_layers[head_idx](x)
 
-    def forward(self, x: torch.Tensor, mask: Optional[torch.Tensor] = None) -> torch.Tensor:
+    def forward(
+        self, x: torch.Tensor, mask: Optional[torch.Tensor] = None
+    ) -> torch.Tensor:
         batch, seq_len, _ = x.shape
 
         Q = self.W_Q(x).view(batch, seq_len, self.n_heads, self.d_head)
@@ -224,7 +235,7 @@ class QuantumFeedForward(nn.Module):
         dropout: float = 0.1,
     ):
         super().__init__()
-        self.quantum_input_dim = 2 ** n_qubits
+        self.quantum_input_dim = 2**n_qubits
         self.n_qubits = n_qubits
 
         self.down_proj = nn.Linear(d_model, self.quantum_input_dim)
@@ -255,6 +266,7 @@ class QuantumFeedForward(nn.Module):
 # ---------------------------------------------------------------------------
 # Transformer block and full LLM
 # ---------------------------------------------------------------------------
+
 
 class QuantumTransformerBlock(nn.Module):
     """
@@ -309,7 +321,9 @@ class QuantumTransformerBlock(nn.Module):
             self.ffn = ClassicalFeedForward(d_model, d_ffn=d_model * 4, dropout=dropout)
             logger.info("Using ClassicalFeedForward (fallback)")
 
-    def forward(self, x: torch.Tensor, mask: Optional[torch.Tensor] = None) -> torch.Tensor:
+    def forward(
+        self, x: torch.Tensor, mask: Optional[torch.Tensor] = None
+    ) -> torch.Tensor:
         x = x + self.drop1(self.attention(self.norm1(x), mask=mask))
         x = x + self.drop2(self.ffn(self.norm2(x)))
         return x
@@ -352,19 +366,21 @@ class QuantumLLM(nn.Module):
         self.pos_embedding = nn.Embedding(max_seq_len, d_model)
         self.embedding_dropout = nn.Dropout(dropout)
 
-        self.blocks = nn.ModuleList([
-            QuantumTransformerBlock(
-                d_model=d_model,
-                n_heads=n_heads,
-                n_qubits=n_qubits,
-                n_quantum_layers=n_quantum_layers,
-                entanglement=entanglement,
-                dropout=dropout,
-                use_quantum_attention=use_quantum_attention,
-                use_quantum_ffn=use_quantum_ffn,
-            )
-            for _ in range(n_transformer_layers)
-        ])
+        self.blocks = nn.ModuleList(
+            [
+                QuantumTransformerBlock(
+                    d_model=d_model,
+                    n_heads=n_heads,
+                    n_qubits=n_qubits,
+                    n_quantum_layers=n_quantum_layers,
+                    entanglement=entanglement,
+                    dropout=dropout,
+                    use_quantum_attention=use_quantum_attention,
+                    use_quantum_ffn=use_quantum_ffn,
+                )
+                for _ in range(n_transformer_layers)
+            ]
+        )
 
         self.final_norm = nn.LayerNorm(d_model)
         self.lm_head = nn.Linear(d_model, vocab_size, bias=False)
@@ -409,16 +425,18 @@ class QuantumLLM(nn.Module):
             logits: (batch, seq_len, vocab_size)
         """
         batch, seq_len = input_ids.shape
-        assert seq_len <= self.max_seq_len, (
-            f"Sequence length {seq_len} exceeds max {self.max_seq_len}"
-        )
+        assert (
+            seq_len <= self.max_seq_len
+        ), f"Sequence length {seq_len} exceeds max {self.max_seq_len}"
 
         positions = torch.arange(seq_len, device=input_ids.device).unsqueeze(0)
         x = self.token_embedding(input_ids) + self.pos_embedding(positions)
         x = self.embedding_dropout(x)
 
         if mask is None:
-            mask = torch.tril(torch.ones(seq_len, seq_len, device=x.device)).unsqueeze(0)
+            mask = torch.tril(torch.ones(seq_len, seq_len, device=x.device)).unsqueeze(
+                0
+            )
 
         for block in self.blocks:
             x = block(x, mask=mask)
@@ -438,7 +456,7 @@ class QuantumLLM(nn.Module):
         """Autoregressive token-by-token generation."""
         self.eval()
         for _ in range(max_new_tokens):
-            x = input_ids[:, -self.max_seq_len:]
+            x = input_ids[:, -self.max_seq_len :]
             logits = self.forward(x)
             next_logits = logits[:, -1, :] / temperature
 

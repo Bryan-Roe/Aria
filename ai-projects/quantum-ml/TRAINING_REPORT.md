@@ -1,7 +1,7 @@
 # 🧠 Quantum AI Training Report
 
-**Date:** October 31, 2025  
-**Model:** Hybrid Quantum-Classical Neural Network  
+**Date:** October 31, 2025
+**Model:** Hybrid Quantum-Classical Neural Network
 **Framework:** PennyLane + PyTorch
 
 ---
@@ -292,5 +292,5 @@ Your quantum AI has been successfully trained and validated across **7 different
 
 ---
 
-*Generated automatically by Quantum AI Training System*  
+*Generated automatically by Quantum AI Training System*
 *For questions or improvements, see documentation in `examples/` and `experiments/` directories*

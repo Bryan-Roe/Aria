@@ -4,12 +4,12 @@
 quantum_settings:
   # Quantum backend selection
   backend: "local"  # Options: "local" (simulator), "azure" (Azure Quantum)
-  
+
   # Quantum circuit parameters
   n_qubits: 4  # Number of qubits (higher = more expressive but slower)
   n_quantum_layers: 2  # Depth of quantum circuits
   entanglement: "circular"  # Options: "linear", "circular", "full"
-  
+
   # Azure Quantum settings (when backend: "azure")
   azure:
     resource_id: ""  # Azure Quantum workspace resource ID
@@ -33,7 +33,7 @@ llm_training:
   batch_size: 4
   gradient_accumulation_steps: 8
   max_seq_length: 512
-  
+
   # LoRA configuration
   lora:
     enabled: true
@@ -87,11 +87,11 @@ autonomous_integration:
   enabled: true
   report_to_orchestrator: true
   status_file: "data_out/quantum_llm_training/status.json"
-  
+
   # Performance thresholds
   min_loss_improvement: 0.01  # Minimum improvement to consider cycle successful
   max_loss_threshold: 5.0  # Alert if loss exceeds this value
-  
+
   # Auto-deployment
   auto_deploy: false
   deployment_loss_threshold: 1.0  # Deploy model if loss below this
@@ -101,14 +101,14 @@ monitoring:
   track_quantum_metrics: true
   log_circuit_executions: true
   log_interval: 100  # Log every N steps
-  
+
   # Metrics to track
   metrics:
     - loss
     - quantum_advantage_ratio
     - circuit_execution_time
     - attention_optimization_gain
-  
+
   # Alerts
   alerts:
     enabled: false

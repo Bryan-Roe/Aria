@@ -63,20 +63,20 @@ func start
 
 ## Features Working
 
-✅ Markdown rendering with Marked.js  
-✅ Code syntax highlighting with Highlight.js  
-✅ Dark/light theme toggle  
-✅ LocalStorage persistence  
-✅ JSON export  
-✅ Provider selection  
-✅ Multi-line input  
-✅ Keyboard shortcuts  
-✅ Message counter  
-✅ Status bar  
-✅ Copy code buttons  
-✅ Auto-scroll  
-✅ Error handling  
-✅ Mobile responsive  
+✅ Markdown rendering with Marked.js
+✅ Code syntax highlighting with Highlight.js
+✅ Dark/light theme toggle
+✅ LocalStorage persistence
+✅ JSON export
+✅ Provider selection
+✅ Multi-line input
+✅ Keyboard shortcuts
+✅ Message counter
+✅ Status bar
+✅ Copy code buttons
+✅ Auto-scroll
+✅ Error handling
+✅ Mobile responsive
 
 ## Files Modified
 

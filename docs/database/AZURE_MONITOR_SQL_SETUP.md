@@ -67,10 +67,10 @@ traces
 | where message has "[sql_engine] slow query"
 | extend sql_snippet = extract(@"sql=(.{1,120})", 1, message)
 | extend duration_ms = todouble(extract(@"slow query \((\d+\.\d+) ms", 1, message))
-| summarize 
-    Count = count(), 
-    AvgDuration = avg(duration_ms), 
-    MaxDuration = max(duration_ms) 
+| summarize
+    Count = count(),
+    AvgDuration = avg(duration_ms),
+    MaxDuration = max(duration_ms)
   by sql_snippet
 | order by Count desc
 | take 20
@@ -99,7 +99,7 @@ requests
 traces
 | where message has "[sql_engine] slow query"
 | extend duration_ms = todouble(extract(@"slow query \((\d+\.\d+) ms", 1, message))
-| summarize 
+| summarize
     P50 = percentile(duration_ms, 50),
     P95 = percentile(duration_ms, 95),
     P99 = percentile(duration_ms, 99),
@@ -173,12 +173,12 @@ Run **Query 5** in Application Insights and note P95 value.
 
 **Tuning Decision Matrix:**
 
-| P95 Latency | Recommended Threshold | Rationale |
-|-------------|----------------------|-----------|
-| < 100ms | 150ms | Catch outliers early |
-| 100-300ms | 400ms | Balanced sensitivity |
-| 300-500ms | 600ms | Reduce alert noise |
-| > 500ms | 750ms | Focus on severe cases |
+| P95 Latency | Recommended Threshold | Rationale             |
+| ----------- | --------------------- | --------------------- |
+| < 100ms     | 150ms                 | Catch outliers early  |
+| 100-300ms   | 400ms                 | Balanced sensitivity  |
+| 300-500ms   | 600ms                 | Reduce alert noise    |
+| > 500ms     | 750ms                 | Focus on severe cases |
 
 ### Step 3: Adjust Threshold
 
@@ -205,12 +205,12 @@ $env:QAI_SQL_URL = "mssql+pyodbc://user:pass@host/db?driver=ODBC+Driver+18+for+S
 
 **Common Pool Size Guidelines:**
 
-| Scenario | Pool Size | Max Overflow | Rationale |
-|----------|-----------|--------------|-----------|
-| Low traffic (< 10 req/s) | 10 | 5 | Minimize idle connections |
-| Medium traffic (10-50 req/s) | 20 | 10 | Balanced for burst capacity |
-| High traffic (> 50 req/s) | 30-50 | 20 | Prevent saturation under load |
-| Background workers | 5 | 2 | Dedicated pool for async jobs |
+| Scenario                     | Pool Size | Max Overflow | Rationale                     |
+| ---------------------------- | --------- | ------------ | ----------------------------- |
+| Low traffic (< 10 req/s)     | 10        | 5            | Minimize idle connections     |
+| Medium traffic (10-50 req/s) | 20        | 10           | Balanced for burst capacity   |
+| High traffic (> 50 req/s)    | 30-50     | 20           | Prevent saturation under load |
+| Background workers           | 5         | 2            | Dedicated pool for async jobs |
 
 ### Option 2: Engine Creation Override (Code)
 
@@ -261,7 +261,7 @@ Invoke-RestMethod -Uri "http://localhost:7071/api/ai/status" | ConvertTo-Json -D
 
 ```sql
 -- Top 10 slowest queries (last 24 hours)
-SELECT 
+SELECT
     query_hash,
     sql_snippet,
     COUNT(*) as execution_count,
@@ -382,4 +382,5 @@ python -c "from shared.sql_engine import get_engine; from sqlalchemy import text
 7. ✅ Schedule weekly retention cleanup job
 
 ---
-For additional support, refer to [DATABASE_SQL_SETUP.md](../DATABASE_SQL_SETUP.md) for core SQL configuration details.
+
+For additional support, refer to [DATABASE_SQL_SETUP.md](./DATABASE_SQL_SETUP.md) for core SQL configuration details.

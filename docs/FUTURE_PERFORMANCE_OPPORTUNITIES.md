@@ -6,9 +6,9 @@ This document identifies potential performance improvements found during code an
 
 ### 1. File I/O Optimization in Vision Training
 
-**File**: `scripts/train_vision.py`  
-**Lines**: 106-110  
-**Severity**: Low  
+**File**: `scripts/train_vision.py`
+**Lines**: 106-110
+**Severity**: Low
 
 **Current Pattern**:
 ```python
@@ -40,9 +40,9 @@ for img_path in self.root.rglob('*'):
 
 ### 2. Quantum Circuit Evaluation Caching
 
-**File**: `quantum-ai/web_app.py`  
-**Lines**: 448-452  
-**Severity**: Medium  
+**File**: `ai-projects/quantum-ml/web_app.py`
+**Lines**: 448-452
+**Severity**: Medium
 
 **Current Pattern**:
 ```python
@@ -87,9 +87,9 @@ for xi, yi in zip(X_val, y_val):
 
 ### 3. Generator Usage for Memory Efficiency
 
-**File**: `quantum-ai/web_app.py`  
-**Line**: 200  
-**Severity**: Low  
+**File**: `ai-projects/quantum-ml/web_app.py`
+**Line**: 200
+**Severity**: Low
 
 **Current Pattern**:
 ```python
@@ -117,11 +117,11 @@ return (qml.expval(qml.PauliZ(i)) for i in range(n_qubits))
 
 ### 4. Nested Loop Complexity (Algorithmic)
 
-**Files**: Multiple quantum circuit implementations  
+**Files**: Multiple quantum circuit implementations
 **Examples**:
-- `quantum-ai/src/hybrid_qnn.py:72-74`
-- `quantum-ai/web_app.py:193-197`
-- `quantum-ai/train_pennylane_simple.py:107-115`
+- `ai-projects/quantum-ml/src/hybrid_qnn.py:72-74`
+- `ai-projects/quantum-ml/web_app.py:193-197`
+- `ai-projects/quantum-ml/train_pennylane_simple.py:107-115`
 
 **Pattern**:
 ```python
@@ -214,5 +214,5 @@ Future optimization work should be driven by profiling data from real-world usag
 
 ---
 
-**Last Updated**: 2026-02-17  
+**Last Updated**: 2026-02-17
 **Review Date**: 2026-06-17 (review after 4 months of production data)

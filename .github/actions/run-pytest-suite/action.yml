@@ -1,0 +1,46 @@
+name: 'Run Pytest Suite'
+description: 'Run pytest with optional marker filter, extra args, and fail-fast controls'
+
+inputs:
+  test-path:
+    description: 'Test path, file, or expression to run (e.g., tests/ or tests/test_api.py)'
+    required: false
+    default: 'tests/'
+  marker-expression:
+    description: 'Optional pytest marker expression for -m'
+    required: false
+    default: ''
+  extra-args:
+    description: 'Additional pytest args'
+    required: false
+    default: '--maxfail=1 -q'
+  python-executable:
+    description: 'Python executable to invoke'
+    required: false
+    default: 'python'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Run pytest
+      shell: bash
+      run: |
+        set -euo pipefail
+
+        TEST_PATH='${{ inputs.test-path }}'
+        MARKERS='${{ inputs.marker-expression }}'
+        EXTRA='${{ inputs.extra-args }}'
+        PY='${{ inputs.python-executable }}'
+
+        if [ ! -e "$TEST_PATH" ]; then
+          echo "Test path does not exist: $TEST_PATH" >&2
+          exit 1
+        fi
+
+        if [ -n "$MARKERS" ]; then
+          echo "Running: $PY -m pytest $TEST_PATH -m \"$MARKERS\" $EXTRA"
+          $PY -m pytest "$TEST_PATH" -m "$MARKERS" $EXTRA
+        else
+          echo "Running: $PY -m pytest $TEST_PATH $EXTRA"
+          $PY -m pytest "$TEST_PATH" $EXTRA
+        fi

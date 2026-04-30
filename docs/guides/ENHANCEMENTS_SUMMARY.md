@@ -5,7 +5,7 @@
 Four major enhancements completed to improve quantum environment management, production observability, and upgrade pathways:
 
 1. **Quantum Status Integration**: `/api/ai/status` now includes quantum environment health, version info, and conflict detection
-2. **Scripted Qiskit 1.x Upgrade Path**: `quantum-ai/scripts/upgrade_qiskit_to_1x.py` provides controlled migration with backup/revert
+2. **Scripted Qiskit 1.x Upgrade Path**: `ai-projects/quantum-ml/scripts/upgrade_qiskit_to_1x.py` provides controlled migration with backup/revert
 3. **Telemetry & Cosmos Enablement**: Comprehensive guide for enabling Application Insights tracing and Cosmos DB persistence
 4. **Unit Test Coverage**: `tests/test_validate_qiskit_env.py` validates quantum environment conflict detection logic
 
@@ -20,7 +20,7 @@ Four major enhancements completed to improve quantum environment management, pro
 - Includes: qiskit version, pennylane version, conflict flag, optional Azure Quantum backend probe
 - Gated by `QAI_STATUS_CONNECT_AZURE_QUANTUM` environment variable (defaults to false to avoid latency)
 
-**File: `quantum-ai/scripts/validate_qiskit_env.py`**
+**File: `ai-projects/quantum-ml/scripts/validate_qiskit_env.py`**
 - Extracted `detect_conflict()` function for unit-testable logic
 - Refactored `main()` to use structured metadata return
 
@@ -68,7 +68,7 @@ $env:QAI_STATUS_CONNECT_AZURE_QUANTUM = "true"
 
 ### File Created
 
-`quantum-ai/scripts/upgrade_qiskit_to_1x.py`
+`ai-projects/quantum-ml/scripts/upgrade_qiskit_to_1x.py`
 
 ### Capabilities
 
@@ -264,7 +264,7 @@ ls quantum-ai\scripts\upgrade_qiskit_to_1x.py
 }
 ```
 - **Cause**: Root Functions venv has Qiskit 1.x (possibly from transitive deps or prior install)
-- **Impact**: None for quantum-ai training (uses isolated `quantum-ai/venv` with 0.46.0)
+- **Impact**: None for quantum-ai training (uses isolated `ai-projects/quantum-ml/venv` with 0.46.0)
 - **Resolution**: Either ignore (if quantum endpoints unused) or upgrade root venv using upgrade script
 
 **Telemetry disabled (expected):**
@@ -305,7 +305,7 @@ ls quantum-ai\scripts\upgrade_qiskit_to_1x.py
 
 ### New Files
 
-1. `quantum-ai/scripts/upgrade_qiskit_to_1x.py` (upgrade utility, ~350 lines)
+1. `ai-projects/quantum-ml/scripts/upgrade_qiskit_to_1x.py` (upgrade utility, ~350 lines)
 2. `tests/test_validate_qiskit_env.py` (unit tests, ~50 lines)
 3. `TELEMETRY_COSMOS_ENABLEMENT.md` (comprehensive guide, ~500 lines)
 4. `ENHANCEMENTS_SUMMARY.md` (this document)
@@ -313,7 +313,7 @@ ls quantum-ai\scripts\upgrade_qiskit_to_1x.py
 ### Modified Files
 
 1. `function_app.py` (added telemetry/quantum sections to ai/status endpoint)
-2. `quantum-ai/scripts/validate_qiskit_env.py` (extracted detect_conflict function)
+2. `ai-projects/quantum-ml/scripts/validate_qiskit_env.py` (extracted detect_conflict function)
 
 ### No Changes Required
 
@@ -370,8 +370,8 @@ ls quantum-ai\scripts\upgrade_qiskit_to_1x.py
 
 ## References
 
-- **Upgrade Script**: `quantum-ai/scripts/upgrade_qiskit_to_1x.py`
-- **Validation Script**: `quantum-ai/scripts/validate_qiskit_env.py`
+- **Upgrade Script**: `ai-projects/quantum-ml/scripts/upgrade_qiskit_to_1x.py`
+- **Validation Script**: `ai-projects/quantum-ml/scripts/validate_qiskit_env.py`
 - **Unit Tests**: `tests/test_validate_qiskit_env.py`
 - **Enablement Guide**: `TELEMETRY_COSMOS_ENABLEMENT.md`
 - **Status Endpoint**: `GET /api/ai/status` (function_app.py lines ~600-800)

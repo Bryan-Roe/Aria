@@ -5,8 +5,9 @@ This folder contains automation utilities, orchestrators, and tools for the QAI 
 ## 🎯 Quick Start Commands
 
 ### Directory Layout (CLI grouping)
-- Training CLI: [training/cli](training/cli) (auto_data_train, analyze_learning_progress, self_train_synthetic, self_learning_chat, fast_validate, final_validation)
-- Monitoring CLI: [monitoring/cli](monitoring/cli) (aria_diagnostic, validate_dashboard, validate_buttons, validate_workflows)
+
+- Training scripts: [training/](training/) (train_vision)
+- Monitoring utilities: [`status_dashboard.py`](status_dashboard.py), [`resource_monitor.py`](resource_monitor.py), [`system_health_check.py`](system_health_check.py)
 - Shims: legacy paths in [scripts/](.) still dispatch to the moved files for backwards compatibility.
 
 ### Training Automation
@@ -51,7 +52,42 @@ bash ./scripts/integration_contract_gate.sh
 
 # One-command local gate (VS Code task label)
 # integration:contract-gate
+
+# Automate the repeated local fix/validate loop (one-shot)
+python .\scripts\repo_health_automation.py --once --strict-endpoints
+
+# Same automation, but also run full pytest smoke
+python .\scripts\repo_health_automation.py --once --strict-endpoints --full-pytest
+
+# Continuous unattended loop every 5 minutes
+python .\scripts\repo_health_automation.py --watch --interval 300 --strict-endpoints
+
+# Shell wrapper (friendlier command UX)
+./scripts/start_repo_health_automation.sh once --strict
+./scripts/start_repo_health_automation.sh watch --strict --interval 300
+./scripts/start_repo_health_automation.sh status
+
+# VS Code task labels:
+# - repo-health:once-strict
+# - repo-health:once-strict-full-pytest
+# - repo-health:watch-strict
 ```
+
+#### `repo_health_automation.py`
+
+**Purpose:** Automate repeated repo-health cycles (pre-commit + integration contract gate + optional full pytest) so fix/validation can run unattended.
+
+**Key options:**
+
+- `--once` / `--watch` — run one cycle or continuous loop
+- `--strict-endpoints` — run integration gate in strict endpoint mode
+- `--full-pytest` — include `pytest tests -q --maxfail=1 --tb=short`
+- `--auto-fix-ruff` — run `ruff check --fix` on changed `.py` files before checks
+- `--continue-on-fail` — continue all steps even after a failed step
+
+**Status output:**
+
+- `data_out/repo_health_automation/status.json`
 
 ### Quantum Operations
 
@@ -68,9 +104,11 @@ python -m pytest tests\test_validate_qiskit_env.py -v
 ### Training Orchestrators
 
 #### `automated_training_pipeline.py`
+
 **Purpose:** Single entry point for multi-model LoRA training with data generation, evaluation, and Azure ML spec emission.
 
 **Key Features:**
+
 - Generate synthetic data (phi, qwen, tinyllama)
 - Sequential or parallel model training
 - Evaluation with perplexity & diversity metrics
@@ -79,6 +117,7 @@ python -m pytest tests\test_validate_qiskit_env.py -v
 - Checkpoint cleanup
 
 **Usage:**
+
 ```powershell
 # Quick both models with evaluation
 python .\scripts\automated_training_pipeline.py --quick
@@ -94,9 +133,11 @@ python .\scripts\automated_training_pipeline.py --azure-ml-spec --quick --models
 ```
 
 #### `parallel_train.py`
+
 **Purpose:** Parallel execution of multiple LoRA training jobs with shared evaluation and ranking.
 
 **Key Features:**
+
 - Concurrent training via ThreadPoolExecutor
 - Shared evaluation step (perplexity, diversity, echo ratio)
 - Configurable ranking metrics
@@ -104,6 +145,7 @@ python .\scripts\automated_training_pipeline.py --azure-ml-spec --quick --models
 - Supports 5+ ranking strategies
 
 **Usage:**
+
 ```powershell
 # Train all models in parallel
 python .\scripts\parallel_train.py --models phi,qwen,tinyllama --quick
@@ -113,9 +155,11 @@ python .\scripts\parallel_train.py --models phi,qwen --ranking-metric combined_i
 ```
 
 #### `auto_data_train.py`
+
 **Purpose:** Generate synthetic training data + single model LoRA training.
 
 **Usage:**
+
 ```powershell
 # Phi model with synthetic data
 python .\scripts\auto_data_train.py --model phi --quick
@@ -127,14 +171,17 @@ python .\scripts\auto_data_train.py --model tinyllama --samples 300
 ### Master Orchestrators
 
 #### `master_orchestrator.py`
+
 **Purpose:** High-level workflow coordination for complex training pipelines.
 
 **Workflows:**
+
 - `quick_validation`: Validate all configs
 - `full_training`: Complete training cycle
 - `evaluation_only`: Run evaluations on existing models
 
 **Usage:**
+
 ```powershell
 # Quick validation
 python .\scripts\master_orchestrator.py --workflow quick_validation
@@ -144,9 +191,11 @@ python .\scripts\master_orchestrator.py --status
 ```
 
 #### `autotrain.py`
+
 **Purpose:** HuggingFace AutoTrain wrapper with multi-job support.
 
 **Usage:**
+
 ```powershell
 # Dry run validation
 python .\scripts\autotrain.py --dry-run
@@ -161,15 +210,18 @@ python .\scripts\autotrain.py --job phi36_mixed_chat
 ### Testing Infrastructure
 
 #### `test_runner.py` ⭐ **Recommended**
+
 **Purpose:** Centralized test orchestrator with intelligent filtering and result aggregation.
 
 **Test Suites:**
+
 - `unit`: 40 fast tests (~0.5s)
 - `integration`: 30 external service tests (~3s)
 - `all_fast`: 83 tests excluding slow/azure (~10s)
 - `autotrain`, `quantum`, `database`, `chat`: Focused suites
 
 **Usage:**
+
 ```powershell
 # Run all fast tests
 python .\scripts\test_runner.py --all
@@ -185,6 +237,7 @@ python .\scripts\test_runner.py --list-suites
 ```
 
 **Features:**
+
 - ANSI escape code handling
 - Regex-based pytest output parsing
 - Marker filtering (`not slow and not azure`)
@@ -193,9 +246,11 @@ python .\scripts\test_runner.py --list-suites
 - Coverage integration
 
 #### `ci_orchestrator.py`
+
 **Purpose:** Continuous integration pipeline with staged validation gates.
 
 **Steps:**
+
 1. Orchestrator validations (autotrain, quantum, evaluation)
 2. Integration smoke checks (cross-component)
 3. Integration contract unit tests (resolver, scheduler, status schemas)
@@ -208,6 +263,7 @@ python .\scripts\test_runner.py --list-suites
 10. Azure ML validation
 
 **Usage:**
+
 ```powershell
 # Full CI pipeline
 python .\scripts\ci_orchestrator.py --ci-pipeline
@@ -229,9 +285,11 @@ bash ./scripts/integration_contract_gate.sh
 ### Evaluation & Analysis
 
 #### `batch_evaluator.py`
+
 **Purpose:** Parallel evaluation of multiple models with comprehensive result aggregation.
 
 **Features:**
+
 - Parallel model evaluation (ThreadPoolExecutor)
 - Support for LoRA, Azure, OpenAI, Local, Quantum models
 - Configurable metrics per model type
@@ -239,6 +297,7 @@ bash ./scripts/integration_contract_gate.sh
 - Export to JSON/Markdown/CSV
 
 **Usage:**
+
 ```powershell
 # Scan and evaluate all models
 python .\scripts\batch_evaluator.py --scan-models --evaluate-all
@@ -251,9 +310,11 @@ python .\scripts\batch_evaluator.py --export markdown --output report.md
 ```
 
 #### `training_analytics.py`
+
 **Purpose:** Analyze training metrics and generate performance reports.
 
 **Usage:**
+
 ```powershell
 # Analyze recent training runs
 python .\scripts\training_analytics.py --recent 5
@@ -265,15 +326,18 @@ python .\scripts\training_analytics.py --compare phi qwen tinyllama
 ### Azure ML Integration
 
 #### `azureml_ci_validate.py`
+
 **Purpose:** Validate and optionally submit Azure ML job specs.
 
 **Features:**
+
 - YAML schema validation
 - Environment spec checking
 - `.env` placeholder gating (prevents submission with unresolved credentials)
 - Graceful fallback when Azure CLI not installed
 
 **Usage:**
+
 ```powershell
 # Validate latest job spec
 python .\scripts\azureml_ci_validate.py
@@ -288,11 +352,13 @@ python .\scripts\azureml_ci_validate.py --submit --force-submit
 ### Dataset Management
 
 #### `validate_datasets.py`
+
 **Purpose:** Validate dataset integrity across all categories.
 
 **Categories:** `quantum`, `chat`, `all`
 
 **Usage:**
+
 ```powershell
 # Validate chat datasets
 python .\scripts\validate_datasets.py --category chat
@@ -302,9 +368,11 @@ python .\scripts\validate_datasets.py --category all
 ```
 
 #### `download_datasets.py`
+
 **Purpose:** Download and organize datasets from HuggingFace.
 
 **Usage:**
+
 ```powershell
 # Download all configured datasets
 python .\scripts\download_datasets.py
@@ -316,9 +384,11 @@ python .\scripts\download_datasets.py --dataset dolly-15k
 ### Monitoring & Diagnostics
 
 #### `resource_monitor.py`
+
 **Purpose:** Monitor system resources during training.
 
 **Usage:**
+
 ```powershell
 # Single snapshot
 python .\scripts\resource_monitor.py --snapshot
@@ -328,9 +398,11 @@ python .\scripts\resource_monitor.py --stream --duration 60
 ```
 
 #### `system_health_check.py`
+
 **Purpose:** Comprehensive system health validation.
 
 **Checks:**
+
 - Python environment
 - Required packages
 - GPU availability
@@ -338,6 +410,7 @@ python .\scripts\resource_monitor.py --stream --duration 60
 - Dataset accessibility
 
 **Usage:**
+
 ```powershell
 python .\scripts\system_health_check.py
 ```
@@ -345,18 +418,22 @@ python .\scripts\system_health_check.py
 ### SQL Integration
 
 #### `sql_migrate.py`
+
 **Purpose:** Database migration tool for chat/telemetry tables.
 
 **Usage:**
+
 ```powershell
 # Run migrations
 python .\scripts\sql_migrate.py
 ```
 
 #### `sql_health_monitor.py`
+
 **Purpose:** Monitor SQL connection pool and query performance.
 
 **Usage:**
+
 ```powershell
 python .\scripts\sql_health_monitor.py
 ```

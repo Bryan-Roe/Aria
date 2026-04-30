@@ -39,7 +39,7 @@ This workspace is configured for seamless test execution using VS Code's native 
 
 ### Test Discovery Patterns
 Tests are discovered using these patterns:
-- **Files**: `test_*.py` in `tests/`, `cooking-ai/tests/`, `quantum-ai/tests/`
+- **Files**: `test_*.py` in `tests/`, `cooking-ai/tests/`, `ai-projects/quantum-ml/tests/`
 - **Classes**: `Test*`
 - **Functions**: `test_*`
 
@@ -214,7 +214,7 @@ For quantum-ai and cooking-ai subprojects:
 ### `pytest.ini`
 ```ini
 [pytest]
-testpaths = tests cooking-ai/tests quantum-ai/tests
+testpaths = tests cooking-ai/tests ai-projects/quantum-ml/tests
 python_files = test_*.py
 addopts = -v --tb=short --no-header --color=yes
 markers =

@@ -1,6 +1,6 @@
 # Azure Quantum Hardware Test Results
 
-**Date:** October 31, 2025  
+**Date:** October 31, 2025
 
 ## Test Summary
 
@@ -52,7 +52,7 @@ Both runs demonstrate **high-fidelity GHZ state preparation**:
 
 ## Visualizations
 
-Generated charts available in `quantum-ai/results/visualizations/`:
+Generated charts available in `ai-projects/quantum-ml/results/visualizations/`:
 - `azure_ghz_4q_results_20251101_063833_bar.png` (hardware)
 - `sim_4q_results_20251101_063927_bar.png` (simulator)
 
@@ -170,10 +170,10 @@ Generated charts available in `quantum-ai/results/visualizations/`:
 ---
 
 **Files:**
-- Submission script: `quantum-ai/scripts/submit_small_stabilizer.py`
-- Results JSON: 
-  - `quantum-ai/results/azure_ghz_4q_results_20251101_063833.json` (rigetti)
-  - `quantum-ai/results/azure_ghz_6q_results_20251101_064210.json` (rigetti 6q)
-  - `quantum-ai/results/azure_ghz_4q_results_20251101_064243.json` (quantinuum)
-  - `quantum-ai/results/azure_ghz_4q_results_20251101_064323.json` (quantinuum 100 shots)
-- Visualizations: `quantum-ai/results/visualizations/azure_ghz_*.png`
+- Submission script: `ai-projects/quantum-ml/scripts/submit_small_stabilizer.py`
+- Results JSON:
+  - `ai-projects/quantum-ml/results/azure_ghz_4q_results_20251101_063833.json` (rigetti)
+  - `ai-projects/quantum-ml/results/azure_ghz_6q_results_20251101_064210.json` (rigetti 6q)
+  - `ai-projects/quantum-ml/results/azure_ghz_4q_results_20251101_064243.json` (quantinuum)
+  - `ai-projects/quantum-ml/results/azure_ghz_4q_results_20251101_064323.json` (quantinuum 100 shots)
+- Visualizations: `ai-projects/quantum-ml/results/visualizations/azure_ghz_*.png`

@@ -33,7 +33,9 @@ def test_should_run_now_matches_and_dedupes(monkeypatch: pytest.MonkeyPatch) -> 
 
     monkeypatch.setattr(master_module, "datetime", _FakeDateTime)
 
-    orchestrator = master_module.MasterOrchestrator.__new__(master_module.MasterOrchestrator)
+    orchestrator = master_module.MasterOrchestrator.__new__(
+        master_module.MasterOrchestrator
+    )
     orchestrator._last_schedule_run = {}
 
     assert orchestrator._should_run_now("wf", "30 12 * * *")
@@ -53,7 +55,9 @@ def test_should_run_now_dom_dow_or_semantics(monkeypatch: pytest.MonkeyPatch) ->
 
     monkeypatch.setattr(master_module, "datetime", _FakeDateTime)
 
-    orchestrator = master_module.MasterOrchestrator.__new__(master_module.MasterOrchestrator)
+    orchestrator = master_module.MasterOrchestrator.__new__(
+        master_module.MasterOrchestrator
+    )
     orchestrator._last_schedule_run = {}
 
     # dom matches, dow does not
@@ -65,7 +69,9 @@ def test_should_run_now_dom_dow_or_semantics(monkeypatch: pytest.MonkeyPatch) ->
 
 
 @pytest.mark.unit
-def test_should_run_now_rejects_invalid_or_continuous_schedule(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_should_run_now_rejects_invalid_or_continuous_schedule(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     fixed_now = datetime(2026, 3, 10, 12, 30, tzinfo=timezone.utc)
 
     class _FakeDateTime:
@@ -75,7 +81,9 @@ def test_should_run_now_rejects_invalid_or_continuous_schedule(monkeypatch: pyte
 
     monkeypatch.setattr(master_module, "datetime", _FakeDateTime)
 
-    orchestrator = master_module.MasterOrchestrator.__new__(master_module.MasterOrchestrator)
+    orchestrator = master_module.MasterOrchestrator.__new__(
+        master_module.MasterOrchestrator
+    )
     orchestrator._last_schedule_run = {}
 
     assert not orchestrator._should_run_now("wf", "continuous")

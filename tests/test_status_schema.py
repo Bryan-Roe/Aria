@@ -39,9 +39,13 @@ def test_repo_automation_save_status_includes_metadata(
 
 @pytest.mark.unit
 def test_master_get_status_includes_metadata() -> None:
-    orchestrator = master_module.MasterOrchestrator.__new__(master_module.MasterOrchestrator)
+    orchestrator = master_module.MasterOrchestrator.__new__(
+        master_module.MasterOrchestrator
+    )
     orchestrator.run_id = "20260313T000000Z"
-    orchestrator.config_path = master_module.REPO_ROOT / "config" / "master_orchestrator.yaml"
+    orchestrator.config_path = (
+        master_module.REPO_ROOT / "config" / "master_orchestrator.yaml"
+    )
     orchestrator.list_orchestrators = lambda: []
     orchestrator.list_workflows = lambda: []
     orchestrator._get_resource_usage = lambda: {"available": False}
@@ -78,4 +82,7 @@ def test_ci_results_include_run_and_config_metadata(
     payload = json.loads((tmp_path / "ci_results.json").read_text(encoding="utf-8"))
     assert payload["run_id"] == ci.run_id
     assert payload["config_path"] is None
-    assert payload["config_paths"]["master_orchestrator"] == "config/master_orchestrator.yaml"
+    assert (
+        payload["config_paths"]["master_orchestrator"]
+        == "config/master_orchestrator.yaml"
+    )

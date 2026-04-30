@@ -5,25 +5,26 @@ mode so we can reuse the provider auto-detection logic without refactoring.
 
 Environment variables influencing behavior:
   DEFAULT_AI_PROVIDER  -> provider passed when caller does not supply one (default: 'local')
-  WRITE_AI_RUN_LOG     -> if '1' (default), write output to talk-to-ai/logs/auto_run_<ts>.txt
+  WRITE_AI_RUN_LOG     -> if '1' (default), write output to ai-projects/chat-cli/logs/auto_run_<ts>.txt
   SYSTEM_PROMPT        -> optional system prompt override forwarded to CLI via --system
 
 The runner returns the raw assistant output as a string plus a metadata dict.
 """
+
 from __future__ import annotations
 
+import logging
+import os
+import re
 import subprocess
 import sys
-import os
-import logging
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Tuple, Dict, Optional
-import re
+from typing import Dict, Optional, Tuple
 
 ROOT_DIR = Path(__file__).resolve().parent.parent
-CHAT_CLI = ROOT_DIR / "talk-to-ai" / "src" / "chat_cli.py"
-LOG_DIR = ROOT_DIR / "talk-to-ai" / "logs"
+CHAT_CLI = ROOT_DIR / "ai-projects" / "chat-cli" / "src" / "chat_cli.py"
+LOG_DIR = ROOT_DIR / "ai-projects" / "chat-cli" / "logs"
 
 # Cached ANSI escape regex for performance across imports
 _ANSI_ESCAPE_RE = re.compile(r"\x1B\[[0-?]*[ -/]*[@-~]")
@@ -52,8 +53,7 @@ def run_chat_once(
     provider = provider or os.getenv("DEFAULT_AI_PROVIDER", "local")
     system = system or os.getenv("SYSTEM_PROMPT")
 
-    cmd = [sys.executable, str(CHAT_CLI), "--provider",
-           provider, "--once", prompt]
+    cmd = [sys.executable, str(CHAT_CLI), "--provider", provider, "--once", prompt]
     if model:
         cmd.extend(["--model", model])
     if system:
@@ -76,7 +76,7 @@ def run_chat_once(
     marker = "assistant> "
     idx = output.rfind(marker)
     if idx != -1:
-        reply = output[idx + len(marker):].rstrip()
+        reply = output[idx + len(marker) :].rstrip()
 
     metadata = {"provider": provider}
     if model:

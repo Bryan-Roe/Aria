@@ -59,7 +59,7 @@ pytest -m "not e2e"         # Run everything except E2E
 ```
 
 ### 4. Comprehensive Documentation
-**Files**: 
+**Files**:
 - `aria_web/TESTING.md` - Complete testing guide
 - `aria_web/README.md` - Project overview with API docs
 

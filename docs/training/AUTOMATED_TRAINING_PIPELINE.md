@@ -261,8 +261,8 @@ For training runs `run_id` links to the underlying last entry in `data_out/paral
 
 ## Version & Maintenance
 
-Last updated: 2025-11-25 (tinyllama + extended ranking metrics)  
-Script path: `scripts/automated_training_pipeline.py`  
+Last updated: 2025-11-25 (tinyllama + extended ranking metrics)
+Script path: `scripts/automated_training_pipeline.py`
 Maintain consistency with project instructions in `copilot-instructions.md` for dataset immutability & output conventions.
 
 ---

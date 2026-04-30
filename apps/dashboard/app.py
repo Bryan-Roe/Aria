@@ -1,37 +1,45 @@
-from flask import Flask, render_template, jsonify, request
-from flask_socketio import SocketIO
+# reuse orchestrator logic for retry
 import json
-from pathlib import Path
-from datetime import datetime, timedelta
-import yaml
+import os
+import signal
+import subprocess
+import sys
 import threading
 import time
-from typing import List, Optional, Dict, Any
-from datetime import datetime
 import traceback
-import subprocess
-import signal
-import os
-import sys
+from datetime import datetime, timedelta, timezone
+from pathlib import Path
+from typing import Any, Dict, List, Optional
+
+import yaml
+from flask import Flask, jsonify, render_template
+from flask_socketio import SocketIO
+
+from scripts.autotrain import Job, load_jobs, run_job
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO_ROOT))  # Ensure scripts module is importable
 
-from scripts.autotrain import load_jobs, Job, run_job  # reuse orchestrator logic for retry
 
 app = Flask(__name__)
 socketio = SocketIO(app, cors_allowed_origins="*")
 
 DATA_OUT = REPO_ROOT / "data_out"
 
+
 @app.route("/")
 def index():
     return render_template("index.html")
 
+
 @app.route("/status")
 def status():
     # Load orchestrator status
-    status_files = ["autotrain/status.json", "quantum_autorun/status.json", "evaluation_autorun/status.json"]
+    status_files = [
+        "autotrain/status.json",
+        "quantum_autorun/status.json",
+        "evaluation_autorun/status.json",
+    ]
     results = {}
     for fname in status_files:
         fpath = DATA_OUT / fname
@@ -39,6 +47,7 @@ def status():
             with fpath.open() as f:
                 results[fname] = json.load(f)
     return jsonify(results)
+
 
 @app.route("/resources")
 def resources():
@@ -49,14 +58,18 @@ def resources():
             return jsonify(json.load(f))
     return jsonify({"error": "No snapshot found"})
 
+
 @app.route("/results")
 def results():
     # Load latest exported results
-    res_path = Path(__file__).resolve().parents[1] / "exports" / "all_orchestrators.json"
+    res_path = (
+        Path(__file__).resolve().parents[1] / "exports" / "all_orchestrators.json"
+    )
     if res_path.exists():
         with res_path.open() as f:
             return jsonify(json.load(f))
     return jsonify({"error": "No results found"})
+
 
 def _compute_training_progress():
     """Compute incremental AutoTrain progress with ETA and success-only percentage.
@@ -69,7 +82,11 @@ def _compute_training_progress():
     """
     cfg_path = REPO_ROOT / "autotrain.yaml"
     try:
-        cfg = yaml.safe_load(cfg_path.read_text(encoding="utf-8")) if cfg_path.exists() else {}
+        cfg = (
+            yaml.safe_load(cfg_path.read_text(encoding="utf-8"))
+            if cfg_path.exists()
+            else {}
+        )
         configured_jobs = [j.get("name") for j in cfg.get("jobs", []) if j.get("name")]
     except Exception:
         configured_jobs = []
@@ -100,7 +117,7 @@ def _compute_training_progress():
         if rec.get("status") == "succeeded" and rec.get("duration_sec"):
             runner = rec.get("runner", "unknown")
             runner_durations.setdefault(runner, []).append(rec["duration_sec"])
-    runner_avg = {r: (sum(durs)/len(durs)) for r, durs in runner_durations.items()}
+    runner_avg = {r: (sum(durs) / len(durs)) for r, durs in runner_durations.items()}
 
     for name in all_job_names:
         rec = status_map.get(name)
@@ -124,7 +141,7 @@ def _compute_training_progress():
             running_log_path = rec.get("log")
         else:
             pending += 1
-        
+
         # Compute per-job ETA if running
         job_eta_sec = None
         if st in {"running", "retry_running"} and rec.get("start_time"):
@@ -138,18 +155,20 @@ def _compute_training_progress():
                     job_eta_sec = round(remaining, 1)
                 except Exception:
                     pass
-        
-        enriched.append({
-            "name": name,
-            "status": st,
-            "start_time": rec.get("start_time"),
-            "return_code": rec.get("return_code"),
-            "duration_sec": rec.get("duration_sec"),
-            "validated_type": rec.get("validated_type"),
-            "category": rec.get("category"),
-            "runner": rec.get("runner"),
-            "eta_sec": job_eta_sec,
-        })
+
+        enriched.append(
+            {
+                "name": name,
+                "status": st,
+                "start_time": rec.get("start_time"),
+                "return_code": rec.get("return_code"),
+                "duration_sec": rec.get("duration_sec"),
+                "validated_type": rec.get("validated_type"),
+                "category": rec.get("category"),
+                "runner": rec.get("runner"),
+                "eta_sec": job_eta_sec,
+            }
+        )
 
     total_jobs = len(all_job_names)
     if total_jobs:
@@ -161,7 +180,9 @@ def _compute_training_progress():
         avg = sum(succeeded_durations) / len(succeeded_durations)
         remaining_jobs = total_jobs - succeeded
         eta_seconds = avg * remaining_jobs
-        eta_iso = (datetime.now(timezone.utc) + timedelta(seconds=eta_seconds)).isoformat() + "Z"
+        eta_iso = (
+            datetime.now(timezone.utc) + timedelta(seconds=eta_seconds)
+        ).isoformat() + "Z"
     else:
         avg = None
         eta_seconds = None
@@ -182,6 +203,7 @@ def _compute_training_progress():
                 # Patterns: Epoch X/Y, global_step = Z, total_flos
                 # Compile regex patterns ONCE outside loop for performance
                 import re
+
                 epoch_pat = re.compile(r"Epoch\s+(\d+)/(\d+)")
                 step_pat = re.compile(r"global_step\s*=\s*(\d+)")
                 last_epoch = None
@@ -199,7 +221,9 @@ def _compute_training_progress():
                     current_epoch = last_epoch
                     total_epochs = last_total_epochs
                     # Compute epoch-based percent if no steps
-                    current_job_percent = round(((last_epoch - 1) / max(1, last_total_epochs)) * 100, 2)
+                    current_job_percent = round(
+                        ((last_epoch - 1) / max(1, last_total_epochs)) * 100, 2
+                    )
                 # If we have steps and epochs, approximate total steps
                 if last_step is not None and total_epochs is not None:
                     # Heuristic: use max observed step as current_step; total steps unknown until training end.
@@ -208,7 +232,9 @@ def _compute_training_progress():
                     trainer_state = log_file.parent / "trainer_state.json"
                     if trainer_state.exists():
                         try:
-                            st_obj = json.loads(trainer_state.read_text(encoding="utf-8"))
+                            st_obj = json.loads(
+                                trainer_state.read_text(encoding="utf-8")
+                            )
                             opt = st_obj.get("trainer_state", st_obj)
                             max_steps = opt.get("max_steps")
                             if isinstance(max_steps, int) and max_steps > 0:
@@ -216,7 +242,9 @@ def _compute_training_progress():
                         except Exception:
                             pass
                     if total_steps:
-                        step_percent = round((current_step / max(1, total_steps)) * 100, 2)
+                        step_percent = round(
+                            (current_step / max(1, total_steps)) * 100, 2
+                        )
                         # Prefer finer-grained step percent when available
                         current_job_percent = step_percent
         except Exception:
@@ -253,11 +281,15 @@ def _compute_training_progress():
     _append_progress_history(payload)
     return payload
 
+
 # ========================= RETRY SUPPORT =========================
+
 
 RETRY_LOCK = threading.Lock()
 ACTIVE_RETRY: Optional[str] = None
+ACTIVE_JOB_PIDS: Dict[str, int] = {}
 STATUS_PATH = DATA_OUT / "autotrain" / "status.json"
+
 
 def _read_status() -> Dict[str, Any]:
     if STATUS_PATH.exists():
@@ -267,6 +299,7 @@ def _read_status() -> Dict[str, Any]:
             return {"jobs": []}
     return {"jobs": []}
 
+
 def _write_status(obj: Dict[str, Any]) -> None:
     try:
         STATUS_PATH.parent.mkdir(parents=True, exist_ok=True)
@@ -274,11 +307,13 @@ def _write_status(obj: Dict[str, Any]) -> None:
     except Exception:
         pass
 
+
 def _find_job_entry(status_obj: Dict[str, Any], name: str) -> Optional[Dict[str, Any]]:
     for j in status_obj.get("jobs", []):
         if j.get("name") == name:
             return j
     return None
+
 
 @app.route("/api/retry_job/<job_name>", methods=["POST"])
 def retry_job(job_name: str):
@@ -293,7 +328,10 @@ def retry_job(job_name: str):
         status_obj = _read_status()
         jobs_list = status_obj.get("jobs", [])
         if ACTIVE_RETRY is not None:
-            return jsonify({"error": "retry_in_progress", "active_retry": ACTIVE_RETRY}), 409
+            return (
+                jsonify({"error": "retry_in_progress", "active_retry": ACTIVE_RETRY}),
+                409,
+            )
         # Disallow if any job currently running (avoid log collision / resource contention)
         if any(j.get("status") in {"running", "retry_running"} for j in jobs_list):
             return jsonify({"error": "job_currently_running"}), 409
@@ -314,16 +352,21 @@ def retry_job(job_name: str):
 
         # Prepare placeholder update
         retry_count = int(target_entry.get("retry_count", 0)) + 1
-        target_entry.update({
-            "status": "retry_running",
-            "retry_count": retry_count,
-            "retry_start_time": datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ"),
-        })
+        target_entry.update(
+            {
+                "status": "retry_running",
+                "retry_count": retry_count,
+                "retry_start_time": datetime.now(timezone.utc).strftime(
+                    "%Y%m%dT%H%M%SZ"
+                ),
+            }
+        )
         status_obj["generated_at"] = datetime.now(timezone.utc).isoformat() + "Z"
         _write_status(status_obj)
         ACTIVE_RETRY = job_name
 
         def _do_retry(job: Job, retry_num: int):
+            global ACTIVE_RETRY
             try:
                 result = run_job(job, dry_run=False, job_index=0, total_jobs=1)
             except Exception as e:  # capture unexpected exception
@@ -344,75 +387,101 @@ def retry_job(job_name: str):
                     preserved_retry = entry.get("retry_count", retry_num)
                     result["retry_count"] = preserved_retry
                     result["status"] = result.get("status")
-                    result["retry_completed_time"] = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+                    result["retry_completed_time"] = datetime.now(
+                        timezone.utc
+                    ).strftime("%Y%m%dT%H%M%SZ")
                     # Mark as succeeded/failed (no special retry_running state anymore)
-                    for k in ["status","return_code","duration_sec","duration_human","log","metrics","output_dir","cmd","start_time","retry_count","retry_completed_time"]:
+                    for k in [
+                        "status",
+                        "return_code",
+                        "duration_sec",
+                        "duration_human",
+                        "log",
+                        "metrics",
+                        "output_dir",
+                        "cmd",
+                        "start_time",
+                        "retry_count",
+                        "retry_completed_time",
+                    ]:
                         v = result.get(k)
                         if v is not None:
                             entry[k] = v
-                    current_status["generated_at"] = datetime.now(timezone.utc).isoformat() + "Z"
+                    current_status["generated_at"] = (
+                        datetime.now(timezone.utc).isoformat() + "Z"
+                    )
                     _write_status(current_status)
                 ACTIVE_RETRY = None
-        threading.Thread(target=_do_retry, args=(job_obj, retry_count), daemon=True).start()
+
+        threading.Thread(
+            target=_do_retry, args=(job_obj, retry_count), daemon=True
+        ).start()
 
         return jsonify({"accepted": True, "job": job_name, "retry_count": retry_count})
+
 
 @app.route("/api/cancel_job/<job_name>", methods=["POST"])
 def cancel_job(job_name: str):
     """Cancel a running or retry_running job by terminating its process.
-    
+
     Concurrency rules:
       - Only jobs with status running or retry_running can be cancelled
       - Requires active PID tracking
     """
-    global ACTIVE_JOB_PIDS
+    global ACTIVE_RETRY
     with RETRY_LOCK:
         status_obj = _read_status()
         target_entry = _find_job_entry(status_obj, job_name)
         if target_entry is None:
             return jsonify({"error": "job_not_found"}), 404
-        
+
         st = target_entry.get("status")
         if st not in {"running", "retry_running"}:
             return jsonify({"error": "job_not_running", "status": st}), 400
-        
+
         pid = ACTIVE_JOB_PIDS.get(job_name)
         if pid is None:
             return jsonify({"error": "pid_not_tracked"}), 400
-        
+
         # Attempt to terminate process
         try:
-            if os.name == 'nt':  # Windows
+            if os.name == "nt":  # Windows
                 subprocess.run(["taskkill", "/F", "/T", "/PID", str(pid)], check=False)
             else:
                 os.killpg(os.getpgid(pid), signal.SIGTERM)
-            
+
             # Update status to cancelled
             target_entry["status"] = "cancelled"
-            target_entry["cancelled_time"] = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+            target_entry["cancelled_time"] = datetime.now(timezone.utc).strftime(
+                "%Y%m%dT%H%M%SZ"
+            )
             if "start_time" in target_entry:
                 try:
-                    start = datetime.strptime(target_entry["start_time"], "%Y%m%dT%H%M%SZ")
+                    start = datetime.strptime(
+                        target_entry["start_time"], "%Y%m%dT%H%M%SZ"
+                    )
                     elapsed = (datetime.now(timezone.utc) - start).total_seconds()
                     target_entry["duration_sec"] = round(elapsed, 2)
                 except Exception:
                     pass
-            
+
             status_obj["generated_at"] = datetime.now(timezone.utc).isoformat() + "Z"
             _write_status(status_obj)
-            
+
             # Remove from active tracking
             del ACTIVE_JOB_PIDS[job_name]
             if ACTIVE_RETRY == job_name:
                 ACTIVE_RETRY = None
-            
+
             return jsonify({"cancelled": True, "job": job_name, "pid": pid})
         except Exception as e:
             return jsonify({"error": "termination_failed", "detail": str(e)}), 500
 
+
 @app.route("/api/training_progress")
 def training_progress():
     return jsonify(_compute_training_progress())
+
 
 def _extract_job_metrics(job_rec: Dict[str, Any]) -> Optional[Dict[str, Any]]:
     out_dir = job_rec.get("output_dir")
@@ -426,6 +495,7 @@ def _extract_job_metrics(job_rec: Dict[str, Any]) -> Optional[Dict[str, Any]]:
         # Read last ~200 lines to capture metrics
         lines = _tail_lines(p, 200)
         import json as _json
+
         for ln in lines:
             ln = ln.strip()
             if not ln:
@@ -455,6 +525,7 @@ def _extract_job_metrics(job_rec: Dict[str, Any]) -> Optional[Dict[str, Any]]:
     except Exception:
         return None
     return None
+
 
 def _tail_lines(path: Path, max_lines: int) -> List[str]:
     """Efficiently read the last max_lines from a potentially large file."""
@@ -493,8 +564,10 @@ def _tail_lines(path: Path, max_lines: int) -> List[str]:
     except Exception:
         return []
 
+
 HISTORY_PATH = DATA_OUT / "autotrain" / "progress_history.json"
 _history_lock = threading.Lock()
+
 
 def _append_progress_history(snapshot: dict, limit: int = 500):
     try:
@@ -515,7 +588,15 @@ def _append_progress_history(snapshot: dict, limit: int = 500):
                 "current_job_percent": snapshot.get("current_job_percent"),
                 "current_epoch": snapshot.get("current_epoch"),
             }
-            if not hist or any(new_entry.get(k) != hist[-1].get(k) for k in ("percent_complete","current_job_name","current_job_percent","current_epoch")):
+            if not hist or any(
+                new_entry.get(k) != hist[-1].get(k)
+                for k in (
+                    "percent_complete",
+                    "current_job_name",
+                    "current_job_percent",
+                    "current_epoch",
+                )
+            ):
                 hist.append(new_entry)
             if len(hist) > limit:
                 hist = hist[-limit:]
@@ -523,6 +604,7 @@ def _append_progress_history(snapshot: dict, limit: int = 500):
             HISTORY_PATH.write_text(json.dumps(hist), encoding="utf-8")
     except Exception:
         pass
+
 
 @app.route("/api/training_progress_history")
 def training_progress_history():
@@ -534,13 +616,24 @@ def training_progress_history():
     except Exception:
         return jsonify({"history": [], "count": 0, "error": "history_read_failed"})
 
+
 @app.route("/api/training_progress_history_csv")
 def training_progress_history_csv():
     # Provide CSV export of progress history snapshots
-    import io, csv
+    import csv
+    import io
+
     output = io.StringIO()
     writer = csv.writer(output)
-    writer.writerow(["generated_at","percent_complete","current_job_name","current_job_percent","current_epoch"])
+    writer.writerow(
+        [
+            "generated_at",
+            "percent_complete",
+            "current_job_name",
+            "current_job_percent",
+            "current_epoch",
+        ]
+    )
     try:
         hist = []
         if HISTORY_PATH.exists():
@@ -548,20 +641,24 @@ def training_progress_history_csv():
             if not isinstance(hist, list):
                 hist = []
         for row in hist:
-            writer.writerow([
-                row.get("generated_at"),
-                row.get("percent_complete"),
-                row.get("current_job_name"),
-                row.get("current_job_percent"),
-                row.get("current_epoch"),
-            ])
+            writer.writerow(
+                [
+                    row.get("generated_at"),
+                    row.get("percent_complete"),
+                    row.get("current_job_name"),
+                    row.get("current_job_percent"),
+                    row.get("current_epoch"),
+                ]
+            )
     except Exception:
         pass
     return output.getvalue(), 200, {"Content-Type": "text/csv"}
 
+
 def _start_progress_emitter(interval_sec: int = 5):
     """Background thread emitting training_progress via SocketIO when data changes."""
     last_json = None
+
     def loop():
         nonlocal last_json
         while True:
@@ -571,11 +668,12 @@ def _start_progress_emitter(interval_sec: int = 5):
                 socketio.emit("training_progress", payload)
                 last_json = current_json
             time.sleep(interval_sec)
+
     threading.Thread(target=loop, daemon=True).start()
+
 
 _start_progress_emitter()
 
 if __name__ == "__main__":
-    import os
     debug_mode = os.environ.get("FLASK_DEBUG", "false").lower() == "true"
     socketio.run(app, debug=debug_mode)

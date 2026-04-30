@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass
-from typing import Callable, List, Dict, Optional, Tuple
+from typing import Callable, Dict, List, Optional, Tuple
 
 RoleMessage = Dict[str, str]
 
@@ -58,16 +58,21 @@ def _get_text_encoder(provider: str, model: Optional[str]) -> Callable[[str], in
     mdl = (model or "").lower()
 
     # Try tiktoken for OpenAI/Azure
-    if tiktoken is not None and (prov in ("openai", "azure") or any(k in mdl for k in ("gpt-", "-o"))):
+    if tiktoken is not None and (
+        prov in ("openai", "azure") or any(k in mdl for k in ("gpt-", "-o"))
+    ):
         try:
             from tiktoken import encoding_for_model
+
             enc = None
             try:
                 enc = encoding_for_model(model or "gpt-4o-mini")
             except Exception:
                 enc = tiktoken.get_encoding("cl100k_base")
+
             def _count(text: str) -> int:
                 return len(enc.encode(text or ""))
+
             return _count
         except Exception:
             pass
@@ -76,8 +81,10 @@ def _get_text_encoder(provider: str, model: Optional[str]) -> Callable[[str], in
     if AutoTokenizer is not None and mdl:
         try:
             tok = AutoTokenizer.from_pretrained(model, use_fast=True)
+
             def _count(text: str) -> int:
                 return len(tok.encode(text or ""))
+
             return _count
         except Exception:
             pass
@@ -91,7 +98,12 @@ def _get_text_encoder(provider: str, model: Optional[str]) -> Callable[[str], in
     return _heuristic
 
 
-def count_messages_tokens(messages: List[RoleMessage], provider: str, model: Optional[str], system_prompt: Optional[str] = None) -> int:
+def count_messages_tokens(
+    messages: List[RoleMessage],
+    provider: str,
+    model: Optional[str],
+    system_prompt: Optional[str] = None,
+) -> int:
     enc = _get_text_encoder(provider, model)
     total = 0
     if system_prompt:
@@ -112,7 +124,7 @@ def prune_messages(
     """Prune conversation to fit within model context budget.
 
     Returns: (pruned_messages, stats, system_message)
-    
+
     Performance: Uses O(n) algorithm by pre-computing token counts per message
     and maintaining a running total, avoiding repeated tokenization.
     """
@@ -126,7 +138,9 @@ def prune_messages(
     system_msgs = [m for m in msgs if m.get("role") == "system"]
     non_system = [m for m in msgs if m.get("role") != "system"]
 
-    system_text = system_prompt or "\n\n".join(m.get("content", "") for m in system_msgs)
+    system_text = system_prompt or "\n\n".join(
+        m.get("content", "") for m in system_msgs
+    )
     system_msg = {"role": "system", "content": system_text} if system_text else None
 
     original_tokens = count_messages_tokens(msgs, provider, model, system_prompt)
@@ -137,23 +151,24 @@ def prune_messages(
     # Pre-compute token counts for each message (O(n) - done once)
     # Each message costs: role tokens + content tokens + 4 (framing)
     message_token_counts = [
-        enc(m.get("role", "")) + enc(m.get("content", "")) + 4
-        for m in non_system
+        enc(m.get("role", "")) + enc(m.get("content", "")) + 4 for m in non_system
     ]
-    
+
     # Calculate base system token cost (done once)
     system_tokens = (enc(system_text) + 4) if system_text else 0
-    
+
     # Calculate initial total tokens
     total_tokens = system_tokens + sum(message_token_counts)
-    
+
     # Prune from front (oldest messages) while over budget
     # Uses running total instead of recalculating each iteration (O(n) total)
     start_idx = 0
-    while start_idx < len(non_system) and (total_tokens + reserve_output_tokens) > budget:
+    while (
+        start_idx < len(non_system) and (total_tokens + reserve_output_tokens) > budget
+    ):
         total_tokens -= message_token_counts[start_idx]
         start_idx += 1
-    
+
     # Get pruned messages
     pruned = non_system[start_idx:]
     pruned_tokens = total_tokens

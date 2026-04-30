@@ -6,11 +6,12 @@ Usage example:
 
 Outputs JSON compatible with visualize_hardware_results.py under quantum-ai/results/.
 """
+
 from __future__ import annotations
 
 import argparse
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Dict, Optional
 
@@ -18,7 +19,8 @@ import numpy as np
 import yaml
 from qiskit import QuantumCircuit, transpile
 from qiskit_aer import AerSimulator
-from qiskit_aer.noise import NoiseModel, depolarizing_error, amplitude_damping_error
+from qiskit_aer.noise import (NoiseModel, amplitude_damping_error,
+                              depolarizing_error)
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 CONFIG_PATH = REPO_ROOT / "config" / "quantum_config.yaml"
@@ -57,7 +59,7 @@ def create_variational_circuit(
                 qc.cx(i, (i + 1) % n_qubits)
 
         # Monte Carlo Pauli noise injection (small px/pz), keeps simulation scalable for large N
-        if (noise_px > 0 or noise_pz > 0):
+        if noise_px > 0 or noise_pz > 0:
             if rng is None:
                 rng = np.random.default_rng()
             for i in range(n_qubits):
@@ -149,23 +151,59 @@ def compute_entropy(counts: Dict[str, int]) -> float:
 
 
 def parse_args() -> argparse.Namespace:
-    p = argparse.ArgumentParser(description="Run a local Qiskit Aer simulation (variational or stabilizer)")
-    p.add_argument("--n-qubits", type=int, default=16, help="Number of qubits (default: 16)")
-    p.add_argument("--layers", type=int, default=4, help="Number of variational layers (default: 4)")
+    p = argparse.ArgumentParser(
+        description="Run a local Qiskit Aer simulation (variational or stabilizer)"
+    )
+    p.add_argument(
+        "--n-qubits", type=int, default=16, help="Number of qubits (default: 16)"
+    )
+    p.add_argument(
+        "--layers",
+        type=int,
+        default=4,
+        help="Number of variational layers (default: 4)",
+    )
     p.add_argument(
         "--entanglement",
         choices=["linear", "circular", "full"],
         default="circular",
         help="Entanglement topology (default: circular)",
     )
-    p.add_argument("--shots", type=int, default=2000, help="Number of shots (default: 2000)")
+    p.add_argument(
+        "--shots", type=int, default=2000, help="Number of shots (default: 2000)"
+    )
     # Noise injection (Monte Carlo Pauli)
-    p.add_argument("--noise-pauli-px", type=float, default=0.0, help="Probability of X per qubit per layer (default: 0.0)")
-    p.add_argument("--noise-pauli-pz", type=float, default=0.0, help="Probability of Z per qubit per layer (default: 0.0)")
-    p.add_argument("--noise-seed", type=int, default=None, help="Seed for noise RNG (default: None)")
+    p.add_argument(
+        "--noise-pauli-px",
+        type=float,
+        default=0.0,
+        help="Probability of X per qubit per layer (default: 0.0)",
+    )
+    p.add_argument(
+        "--noise-pauli-pz",
+        type=float,
+        default=0.0,
+        help="Probability of Z per qubit per layer (default: 0.0)",
+    )
+    p.add_argument(
+        "--noise-seed",
+        type=int,
+        default=None,
+        help="Seed for noise RNG (default: None)",
+    )
     # NoiseModel options (Aer). If provided, a NoiseModel will be attached to the simulator.
-    p.add_argument("--noise-depolarizing-p", type=float, default=0.0, help="Depolarizing error probability p for 1q/2q gates (default: 0.0)")
-    p.add_argument("--noise-amp-damp-gamma", type=float, default=0.0, help="Amplitude damping gamma for 1q gates (default: 0.0)")
+    p.add_argument(
+        "--noise-depolarizing-p",
+        type=float,
+        default=0.0,
+        help="Depolarizing error probability p for 1q/2q gates (default: 0.0)",
+    )
+    p.add_argument(
+        "--noise-amp-damp-gamma",
+        type=float,
+        default=0.0,
+        help="Amplitude damping gamma for 1q gates (default: 0.0)",
+    )
     p.add_argument(
         "--method",
         choices=[
@@ -184,8 +222,18 @@ def parse_args() -> argparse.Namespace:
         default="variational",
         help="Circuit type to simulate (default: variational)",
     )
-    p.add_argument("--clifford-layers", type=int, default=4, help="Random Clifford layers (used for stabilizer_random)")
-    p.add_argument("--twoq-density", type=float, default=0.5, help="Fraction of qubits in 2-qubit CNOT pairs per layer [0,1] (stabilizer_random)")
+    p.add_argument(
+        "--clifford-layers",
+        type=int,
+        default=4,
+        help="Random Clifford layers (used for stabilizer_random)",
+    )
+    p.add_argument(
+        "--twoq-density",
+        type=float,
+        default=0.5,
+        help="Fraction of qubits in 2-qubit CNOT pairs per layer [0,1] (stabilizer_random)",
+    )
     p.add_argument(
         "--stabilizer-type",
         choices=["ghz", "random"],
@@ -200,17 +248,27 @@ def main() -> int:
 
     # Load config to resolve results_dir relative to project root
     cfg = yaml.safe_load(CONFIG_PATH.read_text(encoding="utf-8"))
-    results_dir = (REPO_ROOT / Path(cfg["logging"]["results_dir"]).expanduser()).resolve()
+    results_dir = (
+        REPO_ROOT / Path(cfg["logging"]["results_dir"]).expanduser()
+    ).resolve()
     results_dir.mkdir(parents=True, exist_ok=True)
 
     print("\n=== Local Aer Simulation ===")
     # Decide effective circuit kind and layer count for display/metadata
     using_stab_random = False
-    if args.circuit == "stabilizer_random" or (args.circuit == "variational" and args.stabilizer_type == "random"):
+    if args.circuit == "stabilizer_random" or (
+        args.circuit == "variational" and args.stabilizer_type == "random"
+    ):
         using_stab_random = True
-    effective_layers = args.clifford_layers if using_stab_random or args.circuit == "stabilizer_ghz" else args.layers
+    effective_layers = (
+        args.clifford_layers
+        if using_stab_random or args.circuit == "stabilizer_ghz"
+        else args.layers
+    )
     effective_circuit = (
-        "stabilizer_random" if using_stab_random else ("stabilizer_ghz" if args.circuit == "stabilizer_ghz" else "variational")
+        "stabilizer_random"
+        if using_stab_random
+        else ("stabilizer_ghz" if args.circuit == "stabilizer_ghz" else "variational")
     )
 
     print(
@@ -218,7 +276,11 @@ def main() -> int:
     )
     print(f"Method: {args.method}, Circuit: {effective_circuit}")
 
-    rng = np.random.default_rng(args.noise_seed) if (args.noise_pauli_px > 0 or args.noise_pauli_pz > 0) else None
+    rng = (
+        np.random.default_rng(args.noise_seed)
+        if (args.noise_pauli_px > 0 or args.noise_pauli_pz > 0)
+        else None
+    )
 
     if args.circuit == "stabilizer_ghz":
         qc = create_stabilizer_ghz_circuit(args.n_qubits)
@@ -249,7 +311,7 @@ def main() -> int:
             p = args.noise_depolarizing_p
             # Reasonable mapping: depol on rx/ry/rz/h/s/x/z and cx
             dep1 = depolarizing_error(p, 1)
-            dep2 = depolarizing_error(min(2*p, 1.0), 2)
+            dep2 = depolarizing_error(min(2 * p, 1.0), 2)
             for g in ["h", "s", "sdg", "x", "z", "ry", "rz", "rx", "id"]:
                 try:
                     noise_model.add_all_qubit_quantum_error(dep1, g)
@@ -270,11 +332,15 @@ def main() -> int:
                 except Exception:
                     pass
 
-    sim = AerSimulator(method=args.method, noise_model=noise_model) if noise_model else AerSimulator(method=args.method)
+    sim = (
+        AerSimulator(method=args.method, noise_model=noise_model)
+        if noise_model
+        else AerSimulator(method=args.method)
+    )
     # Avoid backend coupling_map limits during transpile for large-n; Aer will handle compilation.
     # For stabilizer method/circuits, restrict basis_gates to Clifford set to avoid u1/u2/u3 decomposition.
-    is_stabilizer_flow = (
-        args.method == "stabilizer" or args.circuit.startswith("stabilizer")
+    is_stabilizer_flow = args.method == "stabilizer" or args.circuit.startswith(
+        "stabilizer"
     )
     if is_stabilizer_flow:
         basis = ["h", "s", "sdg", "x", "z", "cx", "cz", "id", "measure"]
@@ -291,7 +357,9 @@ def main() -> int:
     max_entropy = float(args.n_qubits)
 
     print("Unique states:", len(counts), f"/ {2 ** args.n_qubits}")
-    print(f"Entropy: {entropy:.3f} / {max_entropy:.3f} ({(entropy/max_entropy*100 if max_entropy>0 else 0):.1f}%)")
+    print(
+        f"Entropy: {entropy:.3f} / {max_entropy:.3f} ({(entropy/max_entropy*100 if max_entropy>0 else 0):.1f}%)"
+    )
 
     # Save JSON in the same schema as Azure results so the visualizer can pick it up
     ts = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")

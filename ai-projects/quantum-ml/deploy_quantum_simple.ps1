@@ -58,7 +58,7 @@ if ($LASTEXITCODE -eq 0) {
 } else {
     Write-Host "`nWorkspace creation failed - it may already exist" -ForegroundColor Yellow
     Write-Host "Checking existing workspace..." -ForegroundColor Yellow
-    
+
     az quantum workspace show `
         --resource-group $ResourceGroup `
         --workspace-name $WorkspaceName `

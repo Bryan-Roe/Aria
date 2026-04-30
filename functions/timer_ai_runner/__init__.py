@@ -1,8 +1,8 @@
 import datetime
-from datetime import timezone
 import logging
 import os
 import sys
+from datetime import timezone
 from pathlib import Path
 
 import azure.functions as func
@@ -25,7 +25,12 @@ def main(myTimer: func.TimerRequest) -> None:
         provider, info = detect_provider(explicit=provider_choice, model_override=model)
         messages = [{"role": "user", "content": prompt}]
         reply = provider.complete(messages, stream=False)
-        logging.info("AI timer run succeeded. Provider=%s, Model=%s, Reply=%s", info.name, info.model, reply)
+        logging.info(
+            "AI timer run succeeded. Provider=%s, Model=%s, Reply=%s",
+            info.name,
+            info.model,
+            reply,
+        )
     except Exception as e:  # noqa: BLE001
         logging.exception("AI timer run failed: %s", e)
 

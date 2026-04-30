@@ -638,6 +638,6 @@ Improvements welcome! Focus areas:
 
 ---
 
-**Author:** Quantum AI Workspace  
-**Date:** March 9, 2026  
-**License:** MIT  
+**Author:** Quantum AI Workspace
+**Date:** March 9, 2026
+**License:** MIT

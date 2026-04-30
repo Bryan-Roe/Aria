@@ -4,7 +4,9 @@ Automated Azure Quantum job submission, monitoring, and hybrid experiment runner
 - Monitors job status and retrieves results
 - Can be adapted for hybrid/classical-quantum experiments
 """
+
 import time
+
 from azure.quantum import Workspace
 from azure.quantum.qiskit import AzureQuantumProvider
 from qiskit import QuantumCircuit
@@ -14,7 +16,7 @@ ws = Workspace(
     subscription_id="a07fbd16-e722-446d-8efd-0681e85b725c",
     resource_group="rg-quantum-ai",
     workspace_name="quantum-ai-workspace",
-    location="eastus"
+    location="eastus",
 )
 
 provider = AzureQuantumProvider(ws)

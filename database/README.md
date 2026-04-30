@@ -180,7 +180,7 @@ cursor = conn.cursor()
 
 cursor.execute("""
   DECLARE @RunId UNIQUEIDENTIFIER;
-  EXEC sp_LogQuantumTrainingRun 
+  EXEC sp_LogQuantumTrainingRun
     @JobName = ?,
     @DatasetName = ?,
     @Backend = ?,
@@ -195,7 +195,7 @@ cursor.execute("""
     @Status = ?,
     @RunId = @RunId OUTPUT;
   SELECT @RunId;
-""", 'heart_quick', 'heart_disease', 'qiskit_aer', 4, 2, 'linear', 
+""", 'heart_quick', 'heart_disease', 'qiskit_aer', 4, 2, 'linear',
    0.01, 10, 16, 0.85, 45.2, 'completed')
 
 run_id = cursor.fetchone()[0]
@@ -214,11 +214,11 @@ import pyodbc
 def log_to_database(job_config, results):
   conn = pyodbc.connect(DB_CONNECTION_STRING)
   cursor = conn.cursor()
-    
+
   cursor.execute("""
     DECLARE @RunId UNIQUEIDENTIFIER;
-    EXEC sp_LogQuantumTrainingRun 
-      @JobName = ?, @DatasetName = ?, @Backend = ?, 
+    EXEC sp_LogQuantumTrainingRun
+      @JobName = ?, @DatasetName = ?, @Backend = ?,
       @NumQubits = ?, @NumLayers = ?, @Entanglement = ?,
       @LearningRate = ?, @Epochs = ?, @BatchSize = ?,
       @TestAccuracy = ?, @TestLoss = ?, @ExecutionTimeSeconds = ?,
@@ -229,7 +229,7 @@ def log_to_database(job_config, results):
      job_config['learning_rate'], job_config['epochs'], job_config['batch_size'],
      results['test_accuracy'], results['test_loss'], results['execution_time'],
      results['status_json_path'], results['results_json_path'], 'completed')
-    
+
   conn.commit()
 ```
 
@@ -245,7 +245,7 @@ from azure.identity import DefaultAzureCredential
 def get_db_connection():
   credential = DefaultAzureCredential()
   token = credential.get_token("https://database.windows.net/")
-    
+
   conn_str = (
     f"Driver={{ODBC Driver 18 for SQL Server}};"
     f"Server=tcp:qai-sql-server.database.windows.net,1433;"
@@ -257,13 +257,13 @@ def get_db_connection():
 @app.route(route="chat", methods=["POST"])
 async def chat_endpoint(req: func.HttpRequest) -> func.HttpResponse:
   # ... existing chat logic ...
-    
+
   # Log conversation
   conn = get_db_connection()
   cursor = conn.cursor()
   cursor.execute("""
     DECLARE @ConvId UNIQUEIDENTIFIER, @MsgId UNIQUEIDENTIFIER;
-    EXEC sp_LogChatConversation 
+    EXEC sp_LogChatConversation
       @SessionId = ?, @Provider = ?, @Model = ?,
       @Role = ?, @Content = ?, @TotalTokens = ?,
       @ConversationId = @ConvId OUTPUT, @MessageId = @MsgId OUTPUT;
@@ -285,12 +285,12 @@ Implement retention policies to control costs:
 
 ```sql
 -- Archive old training runs (keep last 90 days)
-DELETE FROM QuantumTrainingRuns 
-WHERE CreatedAt < DATEADD(day, -90, GETUTCDATE()) 
+DELETE FROM QuantumTrainingRuns
+WHERE CreatedAt < DATEADD(day, -90, GETUTCDATE())
   AND Status IN ('completed', 'failed');
 
 -- Archive chat messages (keep last 30 days)
-DELETE FROM ChatMessages 
+DELETE FROM ChatMessages
 WHERE Timestamp < DATEADD(day, -30, GETUTCDATE());
 ```
 
@@ -309,7 +309,7 @@ Connect Power BI Desktop to Azure SQL:
 
 ```sql
 -- Training success rate by dataset
-SELECT 
+SELECT
     DatasetName,
     COUNT(*) AS TotalRuns,
     AVG(TestAccuracy) AS AvgAccuracy,
@@ -320,7 +320,7 @@ GROUP BY DatasetName
 ORDER BY AvgAccuracy DESC;
 
 -- Azure Quantum cost by month
-SELECT 
+SELECT
     DATEPART(year, SubmittedAt) AS Year,
     DATEPART(month, SubmittedAt) AS Month,
     Provider,
@@ -332,7 +332,7 @@ GROUP BY DATEPART(year, SubmittedAt), DATEPART(month, SubmittedAt), Provider
 ORDER BY Year DESC, Month DESC;
 
 -- Most active chat providers
-SELECT 
+SELECT
     Provider,
     COUNT(DISTINCT ConversationId) AS TotalConversations,
     COUNT(*) AS TotalMessages,

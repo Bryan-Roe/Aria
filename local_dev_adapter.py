@@ -11,26 +11,37 @@ Usage:
 
 Design notes:
 - Imports the `function_app` module and calls `ai_status()` directly.
-- Converts the returned `azure.functions.HttpResponse` into a Flask response.
+- Uses Flask when available, but falls back to a stdlib HTTP server so strict
+    integration smoke checks can run in minimal Python environments.
 """
+
 from __future__ import annotations
 
 import json
 import logging
 import sys
-from pathlib import Path
-from typing import Any, Dict, Tuple
-
-from flask import Flask, make_response, Response
 import types
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from pathlib import Path
+from typing import Any, Dict, Optional, Tuple
+
+try:
+    from flask import Flask, Response, make_response
+
+    HAS_FLASK = True
+except ModuleNotFoundError:  # pragma: no cover - exercised in minimal envs
+    Flask = None  # type: ignore[assignment]
+    Response = Any  # type: ignore[assignment]
+    make_response = None  # type: ignore[assignment]
+    HAS_FLASK = False
 
 # Ensure repo modules are importable when running from the repo root
 repo_root = Path(__file__).resolve().parent
 # Make sure common src paths are on sys.path BEFORE importing function_app
 # function_app imports modules like token_utils at module-import time, so we
 # must ensure those directories are available.
-sys.path.insert(0, str(repo_root / "talk-to-ai" / "src"))
-sys.path.insert(0, str(repo_root / "quantum-ai" / "src"))
+sys.path.insert(0, str(repo_root / "ai-projects" / "chat-cli" / "src"))
+sys.path.insert(0, str(repo_root / "ai-projects" / "quantum-ml" / "src"))
 sys.path.insert(0, str(repo_root / "scripts"))
 sys.path.insert(0, str(repo_root))
 
@@ -43,27 +54,36 @@ logger = logging.getLogger(__name__)
 # implements only what the local adapter needs: FunctionApp decorator, simple
 # HttpRequest/HttpResponse types and an AuthLevel constant.
 try:
-    import function_app
     from azure.functions import HttpResponse as AzureHttpResponse
+
+    import function_app
 except ModuleNotFoundError as e:
     # Provide a lightweight shim for azure.functions when it's not installed.
     if "azure.functions" in str(e):
         logger.debug(
-            "azure.functions not found; installing lightweight shim for local dev adapter")
+            "azure.functions not found; installing lightweight shim for local dev adapter"
+        )
         fake_mod = types.ModuleType("azure.functions")
 
         class AuthLevel:
             ANONYMOUS = "ANONYMOUS"
 
         class HttpRequest:  # minimal request placeholder with helpful helpers
-            def __init__(self, method: str = "GET", url: str = "/", params: dict | None = None, headers: dict | None = None, body: Any = None, route_params: dict | None = None):
+            def __init__(
+                self,
+                method: str = "GET",
+                url: str = "/",
+                params: dict | None = None,
+                headers: dict | None = None,
+                body: Any = None,
+                route_params: dict | None = None,
+            ):
                 self.method = method
                 self.url = url
                 self.params = params or {}
                 self.route_params = route_params or {}
                 # Normalize headers to lowercase keys for convenience
-                self.headers = {k.lower(): v for k, v in (
-                    headers or {}).items()}
+                self.headers = {k.lower(): v for k, v in (headers or {}).items()}
                 # Normalize body to bytes internally
                 if isinstance(body, bytes):
                     self._body = body
@@ -99,7 +119,13 @@ except ModuleNotFoundError as e:
                     raise ValueError("Failed to parse JSON body") from e
 
         class HttpResponse:
-            def __init__(self, body=b"", status_code: int = 200, mimetype: str | None = None, headers: dict | None = None):
+            def __init__(
+                self,
+                body=b"",
+                status_code: int = 200,
+                mimetype: str | None = None,
+                headers: dict | None = None,
+            ):
                 # Normalize to bytes to match real azure HttpResponse.get_body()
                 if isinstance(body, str):
                     self._body = body.encode("utf-8")
@@ -148,12 +174,10 @@ except ModuleNotFoundError as e:
         raise
 
 
-def _azure_to_flask(resp: AzureHttpResponse) -> Response:
-    """Convert an azure.functions.HttpResponse to a Flask Response.
-
-    We assert resp is an instance of AzureHttpResponse and extract body, status
-    code, mimetype and headers.
-    """
+def _azure_response_parts(
+    resp: AzureHttpResponse,
+) -> Tuple[bytes, int, Optional[str], Dict[str, Any]]:
+    """Extract body/status/mimetype/headers from azure.functions.HttpResponse."""
     body_bytes = resp.get_body()
     # Ensure bytes
     if not isinstance(body_bytes, (bytes, bytearray)):
@@ -162,12 +186,10 @@ def _azure_to_flask(resp: AzureHttpResponse) -> Response:
         except Exception:
             body_bytes = b""
 
-    # Try to detect JSON content-type if not provided
     mimetype = getattr(resp, "mimetype", None)
-    headers = getattr(resp, "headers", None) or {}
+    headers = dict(getattr(resp, "headers", None) or {})
     if not mimetype:
-        content_type = headers.get(
-            "Content-Type") or headers.get("content-type")
+        content_type = headers.get("Content-Type") or headers.get("content-type")
         if content_type:
             mimetype = content_type
         else:
@@ -178,7 +200,15 @@ def _azure_to_flask(resp: AzureHttpResponse) -> Response:
             except Exception:
                 mimetype = None
 
-    flask_resp = make_response(body_bytes, getattr(resp, "status_code", 200))
+    status_code = int(getattr(resp, "status_code", 200))
+    return bytes(body_bytes), status_code, mimetype, headers
+
+
+def _azure_to_flask(resp: AzureHttpResponse) -> Response:
+    """Convert an azure.functions.HttpResponse to a Flask Response."""
+    body_bytes, status_code, mimetype, headers = _azure_response_parts(resp)
+
+    flask_resp = make_response(body_bytes, status_code)
     if mimetype:
         flask_resp.mimetype = mimetype
 
@@ -189,7 +219,8 @@ def _azure_to_flask(resp: AzureHttpResponse) -> Response:
     except Exception:
         # best-effort fallback for unexpected header shapes
         logger.debug(
-            "Unexpected header shape when converting azure HttpResponse to Flask Response")
+            "Unexpected header shape when converting azure HttpResponse to Flask Response"
+        )
 
     return flask_resp
 
@@ -210,7 +241,9 @@ def get_ai_status_response() -> Tuple[Response, int]:
     if req is None or not hasattr(req, "get_body"):
         # Use shim's HttpRequest if available in sys.modules
         try:
-            from azure.functions import HttpRequest as ShimHttpRequest  # type: ignore
+            from azure.functions import \
+                HttpRequest as ShimHttpRequest  # type: ignore
+
             fake_req = ShimHttpRequest(method="GET", url="/api/ai/status")
         except Exception:
             fake_req = None
@@ -222,7 +255,32 @@ def get_ai_status_response() -> Tuple[Response, int]:
     return flask_resp
 
 
+def get_ai_status_parts() -> Tuple[bytes, int, Optional[str], Dict[str, Any]]:
+    """Return endpoint response components for non-Flask fallback servers."""
+    try:
+        req = getattr(function_app, "HttpRequest", None)
+    except Exception:
+        req = None
+
+    if req is None or not hasattr(req, "get_body"):
+        try:
+            from azure.functions import \
+                HttpRequest as ShimHttpRequest  # type: ignore
+
+            fake_req = ShimHttpRequest(method="GET", url="/api/ai/status")
+        except Exception:
+            fake_req = None
+    else:
+        fake_req = req(method="GET", url="/api/ai/status")
+
+    azure_resp = function_app.ai_status(fake_req)
+    return _azure_response_parts(azure_resp)
+
+
 def create_app() -> Flask:
+    if not HAS_FLASK:
+        raise RuntimeError("Flask is not installed")
+
     app = Flask(__name__)
 
     @app.get("/api/ai/status")
@@ -232,8 +290,62 @@ def create_app() -> Flask:
     return app
 
 
+def run_stdlib_server(host: str = "0.0.0.0", port: int = 7071) -> None:
+    """Serve /api/ai/status using stdlib HTTP server (no Flask dependency)."""
+
+    class _Handler(BaseHTTPRequestHandler):
+        def do_GET(self) -> None:  # noqa: N802
+            if self.path.split("?", 1)[0] != "/api/ai/status":
+                self.send_response(404)
+                self.send_header("Content-Type", "application/json")
+                self.end_headers()
+                self.wfile.write(b'{"error":"not found"}')
+                return
+
+            try:
+                body, status_code, mimetype, headers = get_ai_status_parts()
+            except Exception as exc:  # noqa: BLE001
+                logger.exception("Failed to build /api/ai/status response: %s", exc)
+                body = json.dumps({"error": str(exc)}).encode("utf-8")
+                status_code = 500
+                mimetype = "application/json"
+                headers = {}
+
+            self.send_response(status_code)
+            sent_content_type = False
+            if mimetype:
+                self.send_header("Content-Type", str(mimetype))
+                sent_content_type = True
+
+            for key, value in headers.items():
+                key_str = str(key)
+                if key_str.lower() == "content-type":
+                    if sent_content_type:
+                        continue
+                    sent_content_type = True
+                self.send_header(key_str, str(value))
+
+            if not sent_content_type:
+                self.send_header("Content-Type", "application/json")
+            self.end_headers()
+            self.wfile.write(body)
+
+        def log_message(self, _fmt: str, *_args: Any) -> None:
+            return
+
+    server = ThreadingHTTPServer((host, port), _Handler)
+    logger.info("Starting stdlib local dev adapter on http://%s:%s", host, port)
+    try:
+        server.serve_forever()
+    finally:
+        server.server_close()
+
+
 if __name__ == "__main__":
-    app = create_app()
     print("Starting local dev adapter for /api/ai/status on http://0.0.0.0:7071")
     # Use port 7071 to match Functions local host default
-    app.run(host="0.0.0.0", port=7071, debug=False)
+    if HAS_FLASK:
+        app = create_app()
+        app.run(host="0.0.0.0", port=7071, debug=False)
+    else:
+        run_stdlib_server(host="0.0.0.0", port=7071)

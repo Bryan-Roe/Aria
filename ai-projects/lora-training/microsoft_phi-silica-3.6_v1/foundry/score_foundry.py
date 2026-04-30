@@ -10,14 +10,15 @@ Input JSON:
 Output JSON:
   {"output":"..."}
 """
+
 import json
 import os
-import torch
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Dict, List
 
-from transformers import AutoTokenizer, AutoModelForCausalLM
+import torch
 from peft import PeftModel
+from transformers import AutoModelForCausalLM, AutoTokenizer
 
 _model = None
 _tokenizer = None
@@ -30,11 +31,17 @@ def _load_model():
     base_id = os.environ.get("BASE_MODEL_ID", "microsoft/Phi-3.5-mini-instruct")
     adapter_sub = os.environ.get("ADAPTER_SUBPATH", "lora_adapter")
     adapter_path = Path(__file__).resolve().parent / adapter_sub
-    dtype = torch.bfloat16 if (os.environ.get("USE_BF16") == "1" and torch.cuda.is_available()) else torch.float16
+    dtype = (
+        torch.bfloat16
+        if (os.environ.get("USE_BF16") == "1" and torch.cuda.is_available())
+        else torch.float16
+    )
     _tokenizer = AutoTokenizer.from_pretrained(base_id, use_fast=True)
     if _tokenizer.pad_token is None:
         _tokenizer.pad_token = _tokenizer.eos_token
-    base = AutoModelForCausalLM.from_pretrained(base_id, torch_dtype=dtype, device_map="auto")
+    base = AutoModelForCausalLM.from_pretrained(
+        base_id, torch_dtype=dtype, device_map="auto"
+    )
     if adapter_path.exists():
         _model = PeftModel.from_pretrained(base, str(adapter_path))
     else:
@@ -50,7 +57,9 @@ def init():  # Azure ML entrypoint
 def _apply_chat_template(messages: List[Dict[str, str]]) -> str:
     # Fallback simple format if tokenizer lacks chat template
     if hasattr(_tokenizer, "apply_chat_template"):
-        return _tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
+        return _tokenizer.apply_chat_template(
+            messages, tokenize=False, add_generation_prompt=True
+        )
     parts = []
     for m in messages:
         role = m.get("role", "user")
@@ -71,7 +80,13 @@ def run(raw: str) -> str:  # Azure ML entrypoint
         max_new = int(os.environ.get("MAX_NEW_TOKENS", "128"))
         inputs = _tokenizer(prompt, return_tensors="pt").to(_model.device)
         with torch.no_grad():
-            gen = _model.generate(**inputs, max_new_tokens=max_new, do_sample=True, temperature=0.8, top_p=0.95)
+            gen = _model.generate(
+                **inputs,
+                max_new_tokens=max_new,
+                do_sample=True,
+                temperature=0.8,
+                top_p=0.95,
+            )
         full = _tokenizer.decode(gen[0], skip_special_tokens=True)
         # Extract assistant portion if template used
         if "<|assistant|>" in full:

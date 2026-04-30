@@ -7,7 +7,7 @@ version: 1
 
 jobs:
   # ===== COMPREHENSIVE TRAINING - All Data =====
-  
+
   # Phi-3.5 on comprehensive merged dataset (15K+ samples)
   - name: phi35_comprehensive_full
     category: comprehensive
@@ -39,7 +39,7 @@ jobs:
     device: auto
 
   # ===== BASELINE TRAINING - Original Datasets =====
-  
+
   # Phi-3.5 Mini (Aug 2024) - Microsoft's latest open model (MOST EFFICIENT)
   - name: phi35_mixed_chat
     category: baseline
@@ -86,7 +86,7 @@ jobs:
     device: auto
 
   # ===== DOMAIN-SPECIFIC TRAINING =====
-  
+
   # Phi-3.5 on augmented repository data (code understanding)
   - name: phi35_repo_augmented
     category: domain
@@ -118,7 +118,7 @@ jobs:
     device: auto
 
   # ===== HYPERPARAMETER EXPLORATION (quick validation jobs) =====
-  
+
   - name: phi35_mixed_chat_lr_low
     category: hpo
     runner: hf
@@ -191,4 +191,3 @@ jobs:
     hf_model_id: microsoft/Phi-3.5-mini-instruct
     no_stream: true
     device: auto
-

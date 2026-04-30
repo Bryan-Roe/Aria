@@ -89,18 +89,18 @@ async def main():
         args=["quantum_mcp_server.py"],
         env={}
     )
-    
+
     async with stdio_client(server_params) as (read, write):
         async with ClientSession(read, write) as session:
             await session.initialize()
-            
+
             # Create a Bell state circuit
             result = await session.call_tool(
                 "create_quantum_circuit",
                 {"n_qubits": 2, "circuit_type": "bell"}
             )
             print(result.content[0].text)
-            
+
             # Simulate it
             circuit_id = "..."  # Extract from result
             sim_result = await session.call_tool(

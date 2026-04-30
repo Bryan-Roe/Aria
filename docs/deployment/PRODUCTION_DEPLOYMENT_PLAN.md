@@ -1,8 +1,8 @@
 # Production Deployment Plan: 5,000 Dataset Quantum ML System
 
-**Version:** 1.0  
-**Date:** November 16, 2025  
-**Status:** Architecture Complete, Scaling Phase  
+**Version:** 1.0
+**Date:** November 16, 2025
+**Status:** Architecture Complete, Scaling Phase
 
 ---
 
@@ -233,7 +233,7 @@ cost_limits:
 **Real-time Dashboard:**
 ```powershell
 # Start Flask dashboard
-python quantum-ai/demo_dashboard.py --port 5000
+python ai-projects/quantum-ml/demo_dashboard.py --port 5000
 
 # Metrics tracked:
 # - QPU vs simulator accuracy delta
@@ -467,7 +467,7 @@ python scripts\distributed_benchmark.py --datasets-dir datasets/massive_quantum 
 
 ---
 
-**Document Status:** Production Ready  
-**Next Review:** End of Week 2  
-**Owner:** Quantum AI Workspace Team  
+**Document Status:** Production Ready
+**Next Review:** End of Week 2
+**Owner:** Quantum AI Workspace Team
 **Approvers:** TBD

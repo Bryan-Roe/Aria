@@ -8,26 +8,26 @@ I've created a **production-ready web application** for training and visualizing
 
 ### Core Application Files
 
-1. **`quantum-ai/web_app.py`** (450 lines)
+1. **`ai-projects/quantum-ml/web_app.py`** (450 lines)
    - Flask REST API with 8 endpoints
    - Threaded training execution
    - Real-time session management
    - Automatic result persistence
 
-2. **`quantum-ai/web_ui/index.html`** (150 lines)
+2. **`ai-projects/quantum-ml/web_ui/index.html`** (150 lines)
    - Modern gradient UI design
    - Responsive layout
    - Training configuration panel
    - Real-time status display
    - Interactive charts
 
-3. **`quantum-ai/web_ui/static/styles.css`** (400 lines)
+3. **`ai-projects/quantum-ml/web_ui/static/styles.css`** (400 lines)
    - Beautiful dark theme with gradients
    - Smooth animations and transitions
    - Mobile-responsive design
    - Professional styling
 
-4. **`quantum-ai/web_ui/static/app.js`** (350 lines)
+4. **`ai-projects/quantum-ml/web_ui/static/app.js`** (350 lines)
    - Real-time metric visualization with Chart.js
    - 1-second polling for live updates
    - Session management logic
@@ -35,34 +35,34 @@ I've created a **production-ready web application** for training and visualizing
 
 ### Supporting Files
 
-5. **`quantum-ai/start_dashboard.sh`**
+5. **`ai-projects/quantum-ml/start_dashboard.sh`**
    - One-command startup script
    - Auto-installs dependencies
    - Activates virtual environment
 
-6. **`quantum-ai/web-requirements.txt`**
+6. **`ai-projects/quantum-ml/web-requirements.txt`**
    - Clean dependency list (Flask, PennyLane, etc.)
 
-7. **`quantum-ai/demo_dashboard.py`**
+7. **`ai-projects/quantum-ml/demo_dashboard.py`**
    - Automated demo script
    - Tests all API endpoints
    - Runs sample training session
 
 ### Documentation
 
-8. **`quantum-ai/WEB_DASHBOARD_README.md`** (500+ lines)
+8. **`ai-projects/quantum-ml/WEB_DASHBOARD_README.md`** (500+ lines)
    - Complete usage guide
    - API documentation
    - Hyperparameter tuning guide
    - Troubleshooting section
    - Architecture overview
 
-9. **`quantum-ai/WEB_DASHBOARD_SUCCESS.md`**
+9. **`ai-projects/quantum-ml/WEB_DASHBOARD_SUCCESS.md`**
    - Setup completion summary
    - Quick start guide
    - Feature highlights
 
-10. **Updated `quantum-ai/README.md`**
+10. **Updated `ai-projects/quantum-ml/README.md`**
     - Added web dashboard section at top
     - Quick start instructions
 
@@ -231,7 +231,7 @@ git push heroku main
 ## 📝 File Structure Summary
 
 ```
-quantum-ai/
+ai-projects/quantum-ml/
 ├── web_app.py                      # Flask backend (450 lines)
 ├── start_dashboard.sh              # Startup script
 ├── demo_dashboard.py               # Automated demo
@@ -307,7 +307,7 @@ cd /workspaces/AI/quantum-ai
 
 ### Before
 ```
-quantum-ai/
+ai-projects/quantum-ml/
 ├── src/              # Python modules
 ├── results/          # Training outputs
 └── datasets/         # CSV files
@@ -315,7 +315,7 @@ quantum-ai/
 
 ### After (Enhanced)
 ```
-quantum-ai/
+ai-projects/quantum-ml/
 ├── src/                          # Python modules
 ├── results/                      # Training outputs
 ├── datasets/                     # CSV files
@@ -337,12 +337,12 @@ quantum-ai/
 
 You now have a **production-ready, interactive web application** for training quantum AI models with:
 
-✨ Beautiful UI with real-time visualization  
-⚡ One-command startup (`./start_dashboard.sh`)  
-📊 Live charts showing loss and accuracy  
-🎛️ Interactive hyperparameter tuning  
-💾 Automatic session saving and history  
-📚 500+ lines of comprehensive documentation  
+✨ Beautiful UI with real-time visualization
+⚡ One-command startup (`./start_dashboard.sh`)
+📊 Live charts showing loss and accuracy
+🎛️ Interactive hyperparameter tuning
+💾 Automatic session saving and history
+📚 500+ lines of comprehensive documentation
 
 **The repository layout has been significantly improved** with a modern web app that makes quantum machine learning accessible, visual, and fun to experiment with!
 

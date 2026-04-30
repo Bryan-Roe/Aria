@@ -22,7 +22,7 @@ const activeObjects = {
 function toggleObject(objectId) {
     const obj = document.getElementById(objectId);
     const btn = document.getElementById('btn-' + objectId);
-    
+
     if (!obj) {
         log(`❌ toggleObject: unknown object ${objectId}`, true);
         return;
@@ -92,7 +92,7 @@ function showFeedback(message) {
 // AI-Driven Character Generation
 function analyzeAIResponse(text) {
     const lowerText = text.toLowerCase();
-    
+
     // Detect mood from response
     if (lowerText.includes('happy') || lowerText.includes('great') || lowerText.includes('wonderful') || lowerText.includes('excited')) {
         return { mood: 'happy', energy: 80 };
@@ -105,7 +105,7 @@ function analyzeAIResponse(text) {
     } else if (lowerText.includes('think') || lowerText.includes('consider') || lowerText.includes('perhaps')) {
         return { mood: 'thinking', energy: 60 };
     }
-    
+
     return { mood: 'neutral', energy: 50 };
 }
 
@@ -118,10 +118,10 @@ function generateCharacterFromMood(mood, energy) {
         thinking: { body: '#5a7fa8', hair: '#4a3728', accent: '#6b8fb3' },
         neutral: { body: '#4a90e2', hair: '#4a3728', accent: '#5a9fe5' }
     };
-    
+
     const colors = moodColors[mood] || moodColors.neutral;
     const size = 0.8 + (energy / 100) * 0.4; // Scale from 0.8 to 1.2 based on energy
-    
+
     return { colors, size, mood };
 }
 
@@ -131,36 +131,36 @@ function applyCharacterStyle(style) {
     const ariaHair = document.querySelector('.aria-hair');
     const ariaLegs = document.querySelectorAll('.aria-leg');
     const ariaFeet = document.querySelectorAll('.aria-foot');
-    
+
     // Create dramatic transformation sparkle effect
     for (let i = 0; i < 15; i++) {
         setTimeout(() => {
             createEffect('sparkle');
         }, i * 50);
     }
-    
+
     // Add glow pulse during transformation
     aria.style.filter = 'drop-shadow(0 0 30px ' + style.colors.body + ') brightness(1.5)';
     setTimeout(() => {
         aria.style.filter = 'none';
     }, 1000);
-    
+
     // Apply colors with smooth transition
     ariaHair.style.transition = 'background-color 1s ease, transform 1s ease';
     ariaHead.style.transition = 'background-color 1s ease';
     ariaBody.style.transition = 'background 1s ease, transform 1s ease';
     ariaLegs.forEach(leg => leg.style.transition = 'background-color 1s ease');
     ariaFeet.forEach(foot => foot.style.transition = 'background-color 1s ease');
-    
+
     ariaHair.style.backgroundColor = style.colors.hair;
     ariaBody.style.background = `linear-gradient(135deg, ${style.colors.body}, ${style.colors.accent})`;
-    
+
     // Apply size transformation
     aria.style.transform = `translateX(-50%) scale(${style.size})`;
-    
+
     // Update character state
     characterState = { ...characterState, ...style };
-    
+
     console.log('🎨 Character updated:', style.mood, 'Energy:', Math.round(style.size * 100) + '%');
     showFeedback('🎨 TRANSFORM: ' + style.mood.toUpperCase());
 }
@@ -169,7 +169,7 @@ function autoGenerateCharacter(responseText) {
     const analysis = analyzeAIResponse(responseText);
     const newStyle = generateCharacterFromMood(analysis.mood, analysis.energy);
     applyCharacterStyle(newStyle);
-    
+
     // Trigger automatic animation based on mood
     setTimeout(() => {
         if (analysis.mood === 'happy') {
@@ -203,7 +203,7 @@ function log(message, isError = false) {
     entry.style.color = isError ? '#e74c3c' : '#555';
     entry.textContent = `${new Date().toLocaleTimeString()}: ${message}`;
     logContainer.insertBefore(entry, logContainer.firstChild);
-    
+
     // Keep only last 10 entries
     while (logContainer.children.length > 10) {
         logContainer.removeChild(logContainer.lastChild);
@@ -428,19 +428,19 @@ async function sendChat() {
 async function sendCommand() {
     const command = commandInput.value.trim();
     if (!command) return;
-    
+
     log(`Command: "${command}"`);
     commandInput.value = '';
-    
+
     try {
         // Gather current stage state for AI to see
         const stageRect = stage.getBoundingClientRect();
         const ariaRect = aria.getBoundingClientRect();
-        
+
         // Calculate Aria's position as percentages
         const ariaX = ((ariaRect.left - stageRect.left) / stageRect.width) * 100;
         const ariaY = 100 - ((ariaRect.bottom - stageRect.top) / stageRect.height) * 100;
-        
+
         // Gather object positions
         const objectPositions = {};
         ['apple', 'book', 'cup', 'ball', 'flower'].forEach(objId => {
@@ -454,7 +454,7 @@ async function sendCommand() {
                 };
             }
         });
-        
+
         const currentStageState = {
             aria: {
                 position: { x: Math.round(ariaX), y: Math.round(ariaY) },
@@ -464,28 +464,28 @@ async function sendCommand() {
             },
             objects: objectPositions
         };
-        
+
         // Call backend API with stage state
         const response = await fetch('/api/aria/command', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
+            body: JSON.stringify({
                 command: command,
                 stage_state: currentStageState
             })
         });
-        
+
         if (!response.ok) {
             throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         }
-        
+
         const data = await response.json();
-        
+
         // AI automatically generates character based on response
         if (data.response) {
             autoGenerateCharacter(data.response);
         }
-        
+
         if (data.tags && data.tags.length > 0) {
             log(`✅ ${data.model}: ${data.tags.join(' ')}`);
             executeTags(data.tags);
@@ -510,21 +510,21 @@ function setPosition(xPercent, yPercent, zDepth = 0, rotateY = 0) {
     // AI-driven animated walking to position in 3D space (not teleporting)
     const stageRect = stage.getBoundingClientRect();
     const ariaRect = aria.getBoundingClientRect();
-    
+
     // Get current position
     const currentX = ((ariaRect.left - stageRect.left) / stageRect.width) * 100;
     const currentY = 100 - ((ariaRect.bottom - stageRect.top) / stageRect.height) * 100;
-    
+
     // Clamp target values
     xPercent = Math.max(5, Math.min(95, xPercent));
     yPercent = Math.max(5, Math.min(95, yPercent));
     zDepth = Math.max(-300, Math.min(200, zDepth)); // Z range: -300px (far) to 200px (near)
-    
+
     // Calculate distance and direction
     const deltaX = xPercent - currentX;
     const deltaY = yPercent - currentY;
     const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
-    
+
     // Don't move if already at target
     if (distance < 2) {
         log(`📍 Already at position (${Math.round(xPercent)}%, ${Math.round(yPercent)}%, Z:${Math.round(zDepth)}px)`);
@@ -534,11 +534,11 @@ function setPosition(xPercent, yPercent, zDepth = 0, rotateY = 0) {
         }
         return;
     }
-    
+
     // Determine walking speed and style based on distance
     let duration = Math.min(distance * 40, 2000); // 40ms per percent, max 2s
     let walkStyle = 'normal';
-    
+
     if (distance > 50) {
         walkStyle = 'run';
         duration = distance * 20; // Faster for long distances
@@ -546,7 +546,7 @@ function setPosition(xPercent, yPercent, zDepth = 0, rotateY = 0) {
         walkStyle = 'walk';
         duration = distance * 30;
     }
-    
+
     // Face the direction of movement in 3D
     let rotationAngle = rotateY || 0;
     if (deltaX > 2) {
@@ -554,38 +554,38 @@ function setPosition(xPercent, yPercent, zDepth = 0, rotateY = 0) {
     } else if (deltaX < -2) {
         rotationAngle = 180; // Face away (left)
     }
-    
+
     // Add walking animation
     aria.classList.add('walking');
     if (walkStyle === 'run') {
         aria.classList.add('running');
     }
-    
+
     // Animate legs while moving
     const walkInterval = setInterval(() => {
         animateWalkCycle();
     }, 200);
-    
+
     // Smooth 3D transition to target
     aria.style.transition = `left ${duration}ms ease-in-out, bottom ${duration}ms ease-in-out, transform ${duration}ms ease-in-out`;
-    
+
     const leftPercent = xPercent;
     const bottomPercent = 100 - yPercent;  // Invert Y (CSS bottom increases upward)
-    
+
     aria.style.left = leftPercent + '%';
     aria.style.bottom = bottomPercent + '%';
-    
+
     // Apply 3D transform with Z-depth and rotation
     const scaleX = rotationAngle === 180 ? -1 : 1;
     aria.style.transform = `translateX(-50%) translateZ(${zDepth}px) rotateY(${rotationAngle}deg) scaleX(${scaleX})`;
-    
+
     // Update character state
     characterState.position = { x: xPercent, y: yPercent, z: zDepth };
     characterState.rotation = rotationAngle;
-    
+
     log(`🚶 Walking to (${Math.round(xPercent)}%, ${Math.round(yPercent)}%, Z:${Math.round(zDepth)}px, Rot:${Math.round(rotationAngle)}°) - ${walkStyle} style`);
     showFeedback(`🚶 3D WALK: X${Math.round(xPercent)}% Y${Math.round(yPercent)}% Z${Math.round(zDepth)}px`);
-    
+
     // Stop walking animation when arrived
     setTimeout(() => {
         aria.classList.remove('walking', 'running');
@@ -606,9 +606,9 @@ function animateWalkCycle() {
     const rightLeg = document.querySelector('.aria-lower-leg.right');
     const leftArm = document.querySelector('.aria-lower-arm.left');
     const rightArm = document.querySelector('.aria-lower-arm.right');
-    
+
     if (!leftLeg || !rightLeg) return;
-    
+
     // Alternate leg swings
     if (leftLeg.style.transform.includes('rotate')) {
         leftLeg.style.transform = 'rotate(20deg)';
@@ -628,7 +628,7 @@ function resetWalkCycle() {
     const rightLeg = document.querySelector('.aria-lower-leg.right');
     const leftArm = document.querySelector('.aria-lower-arm.left');
     const rightArm = document.querySelector('.aria-lower-arm.right');
-    
+
     if (leftLeg) leftLeg.style.transform = '';
     if (rightLeg) rightLeg.style.transform = '';
     if (leftArm) leftArm.style.transform = '';
@@ -639,11 +639,11 @@ function executeLocalCommand(command) {
     // Simple local fallback without AI model
     const cmd = command.toLowerCase();
     let executed = false;
-    
+
     // Check if this is a limb command to avoid movement conflicts
     const isLimbCommand = ['left arm', 'arm left', 'left hand', 'right arm', 'arm right', 'right hand',
                           'left leg', 'leg left', 'right leg', 'leg right'].some(k => cmd.includes(k));
-    
+
     // Expressions
     if (cmd.includes('smile') || cmd.includes('happy')) {
         changeExpression('smile');
@@ -669,7 +669,7 @@ function executeLocalCommand(command) {
         changeExpression('wink');
         executed = true;
     }
-    
+
     // Animations
     if (cmd.includes('jump')) {
         animate('jumping');
@@ -687,7 +687,7 @@ function executeLocalCommand(command) {
         animate('waving');
         executed = true;
     }
-    
+
     // Effects
     if (cmd.includes('sparkle')) {
         createEffect('sparkle');
@@ -701,7 +701,7 @@ function executeLocalCommand(command) {
         createEffect('glow');
         executed = true;
     }
-    
+
     // Movement - only if not a limb command
     if (!isLimbCommand) {
         // Determine movement style
@@ -713,7 +713,7 @@ function executeLocalCommand(command) {
         } else if (cmd.includes('run')) {
             movementSpeed = 'run';
         }
-        
+
         if (cmd.includes('left')) {
             move('left', movementSpeed);
             executed = true;
@@ -731,7 +731,7 @@ function executeLocalCommand(command) {
             executed = true;
         }
     }
-    
+
     if (!executed) {
         log('❌ Command not recognized', true);
     }
@@ -746,14 +746,14 @@ function executeTags(tags) {
             console.log('⚠️ Failed to parse tag:', tag);
             return;
         }
-        
+
         const [, categoryRaw, actionRaw, paramRaw] = match;
         // Normalize category/action
         const category = (categoryRaw || '').toLowerCase();
         const action = (actionRaw || '').toLowerCase();
         const param = typeof paramRaw === 'string' ? paramRaw.trim() : undefined;
         console.log(`✅ Parsed tag - Category: ${category}, Action: ${action}, Param: ${param}`);
-        
+
         setTimeout(() => {
             switch (category) {
                 case 'expression':
@@ -836,14 +836,14 @@ function executeTags(tags) {
 
 function changeExpression(emotion) {
     ariaMouth.className = 'aria-mouth';
-    
+
     // Reset any previous expression modifications
     ariaMouth.style.borderRadius = '';
     ariaMouth.style.width = '';
     ariaMouth.style.height = '';
     ariaMouth.style.borderTop = '';
     ariaMouth.style.transform = '';
-    
+
     switch(emotion) {
         case 'smile':
         case 'happy':
@@ -888,7 +888,7 @@ function changeExpression(emotion) {
         default:
             ariaMouth.classList.add('smile');
     }
-    
+
     aria.style.transform = 'translateX(-50%) scale(1.1)';
     setTimeout(() => {
         aria.style.transform = 'translateX(-50%) scale(1)';
@@ -902,13 +902,13 @@ let isPerformingAction = false;
 // Start idle breathing animation
 function startIdleAnimation() {
     if (idleAnimationInterval) return;
-    
+
     idleAnimationInterval = setInterval(() => {
         if (!isPerformingAction) {
             // Subtle breathing effect
             ariaBody.style.transition = 'transform 2s ease-in-out';
             ariaBody.style.transform = 'scaleY(1.03)';
-            
+
             // Occasional blink
             if (Math.random() > 0.7) {
                 ariaEyeLeft.style.height = '2px';
@@ -918,7 +918,7 @@ function startIdleAnimation() {
                     ariaEyeRight.style.height = '12px';
                 }, 150);
             }
-            
+
             // Slight head bob
             if (Math.random() > 0.8) {
                 ariaHead.style.transition = 'transform 0.8s ease-in-out';
@@ -927,7 +927,7 @@ function startIdleAnimation() {
                     ariaHead.style.transform = 'translateY(0)';
                 }, 800);
             }
-            
+
             setTimeout(() => {
                 ariaBody.style.transform = 'scaleY(1)';
             }, 2000);
@@ -1080,27 +1080,27 @@ function walkCycle() {
     moveLeg(ariaLegRight, -25, 300);
     moveArm(ariaArmLeft, -15, 300);
     moveArm(ariaArmRight, 15, 300);
-    
+
     setTimeout(() => {
         moveLeg(ariaLegLeft, -25, 300);
         moveLeg(ariaLegRight, 25, 300);
         moveArm(ariaArmLeft, 15, 300);
         moveArm(ariaArmRight, -15, 300);
     }, 300);
-    
+
     setTimeout(() => resetLimbs(200), 600);
 }
 
 function strutWalk() {
     // Confident strut with head bob
     ariaHead.style.transition = 'transform 0.3s';
-    
+
     moveLeg(ariaLegLeft, 35, 250);
     moveLeg(ariaLegRight, -35, 250);
     moveArm(ariaArmLeft, -25, 250);
     moveArm(ariaArmRight, 25, 250);
     ariaHead.style.transform = 'translateY(-5px) rotate(3deg)';
-    
+
     setTimeout(() => {
         moveLeg(ariaLegLeft, -35, 250);
         moveLeg(ariaLegRight, 35, 250);
@@ -1108,13 +1108,13 @@ function strutWalk() {
         moveArm(ariaArmRight, -25, 250);
         ariaHead.style.transform = 'translateY(-5px) rotate(-3deg)';
     }, 300);
-    
+
     setTimeout(() => {
         moveLeg(ariaLegLeft, 20, 250);
         moveLeg(ariaLegRight, -20, 250);
         ariaHead.style.transform = 'translateY(0) rotate(0)';
     }, 600);
-    
+
     setTimeout(() => resetLimbs(200), 850);
 }
 
@@ -1138,7 +1138,7 @@ function moveToWaypoint(waypointName) {
         log(`❌ Unknown waypoint: ${waypointName}`, true);
         return false;
     }
-    
+
     log(`📍 Moving to waypoint: ${waypoint.name}`);
     showFeedback(`📍 WAYPOINT: ${waypoint.name}`);
     // Notify in chat that Aria is moving
@@ -1153,7 +1153,7 @@ function moveInCircle3D(radius = 30, steps = 12, duration = 6000) {
     const centerX = 50;
     const centerY = 50;
     const stepDuration = duration / steps;
-    
+
     const circleInterval = setInterval(() => {
         if (currentStep >= steps) {
             clearInterval(circleInterval);
@@ -1161,17 +1161,17 @@ function moveInCircle3D(radius = 30, steps = 12, duration = 6000) {
             addChatMessage('aria', 'Finished circular movement.');
             return;
         }
-        
+
         const angle = (currentStep / steps) * Math.PI * 2;
         const x = centerX + radius * Math.cos(angle);
         const y = centerY + radius * Math.sin(angle);
         const z = 100 * Math.sin(angle * 2); // Wave in/out on Z-axis
         const rotation = (angle * 180 / Math.PI) + 90; // Face tangent to circle
-        
+
         setPosition(x, y, z, rotation);
         currentStep++;
     }, stepDuration);
-    
+
     log('🔄 Starting 3D circle movement');
     showFeedback('🔄 3D CIRCLE');
     addChatMessage('aria', 'Starting circular 3D movement');
@@ -1183,7 +1183,7 @@ function performSpiral3D() {
     let currentStep = 0;
     const centerX = 50;
     const centerY = 50;
-    
+
     const spiralInterval = setInterval(() => {
         if (currentStep >= steps) {
             clearInterval(spiralInterval);
@@ -1191,7 +1191,7 @@ function performSpiral3D() {
             addChatMessage('aria', 'Finished spiral movement.');
             return;
         }
-        
+
         const progress = currentStep / steps;
         const radius = 40 * (1 - progress); // Shrink radius
         const angle = progress * Math.PI * 6; // Multiple rotations
@@ -1199,11 +1199,11 @@ function performSpiral3D() {
         const y = centerY + radius * Math.sin(angle);
         const z = -200 + progress * 300; // Move from back to front
         const rotation = angle * 180 / Math.PI;
-        
+
         setPosition(x, y, z, rotation);
         currentStep++;
     }, duration / steps);
-    
+
     log('🌀 Starting 3D spiral movement');
     showFeedback('🌀 3D SPIRAL');
     addChatMessage('aria', 'Starting 3D spiral movement');
@@ -1216,19 +1216,19 @@ function skipMove() {
     moveArm(ariaArmLeft, -30, 200);
     moveArm(ariaArmRight, -30, 200);
     aria.style.transform = 'translateX(-50%) scale(1.1) translateY(-20px)';
-    
+
     setTimeout(() => {
         moveLeg(ariaLegLeft, 30, 200);
         moveLeg(ariaLegRight, -45, 200);
         aria.style.transform = 'translateX(-50%) scale(1)';
     }, 250);
-    
+
     setTimeout(() => {
         moveLeg(ariaLegLeft, -30, 200);
         moveLeg(ariaLegRight, 20, 200);
         aria.style.transform = 'translateX(-50%) scale(1.1) translateY(-20px)';
     }, 500);
-    
+
     setTimeout(() => {
         resetLimbs(200);
         aria.style.transform = 'translateX(-50%) scale(1)';
@@ -1241,21 +1241,21 @@ function danceLimbs() {
     moveArm(ariaArmRight, -45, 200);
     moveLeg(ariaLegLeft, 15, 200);
     moveLeg(ariaLegRight, -15, 200);
-    
+
     setTimeout(() => {
         moveArm(ariaArmLeft, -90, 200);
         moveArm(ariaArmRight, -90, 200);
         moveLeg(ariaLegLeft, -15, 200);
         moveLeg(ariaLegRight, 15, 200);
     }, 200);
-    
+
     setTimeout(() => {
         moveArm(ariaArmLeft, -45, 200);
         moveArm(ariaArmRight, -45, 200);
         moveLeg(ariaLegLeft, 15, 200);
         moveLeg(ariaLegRight, -15, 200);
     }, 400);
-    
+
     setTimeout(() => resetLimbs(200), 600);
 }
 
@@ -1266,7 +1266,7 @@ function expressiveDance() {
     moveLeg(ariaLegLeft, 20, 150);
     moveLeg(ariaLegRight, -20, 150);
     ariaHead.style.transform = 'rotate(15deg)';
-    
+
     setTimeout(() => {
         moveArm(ariaArmLeft, 60, 150);
         moveArm(ariaArmRight, -120, 150);
@@ -1274,7 +1274,7 @@ function expressiveDance() {
         moveLeg(ariaLegRight, 20, 150);
         ariaHead.style.transform = 'rotate(-15deg)';
     }, 200);
-    
+
     setTimeout(() => {
         moveArm(ariaArmLeft, -90, 150);
         moveArm(ariaArmRight, -90, 150);
@@ -1282,7 +1282,7 @@ function expressiveDance() {
         moveLeg(ariaLegRight, -30, 150);
         ariaHead.style.transform = 'rotate(0)';
     }, 400);
-    
+
     setTimeout(() => resetLimbs(200), 600);
 }
 
@@ -1290,10 +1290,10 @@ let continuousDanceInterval = null;
 
 function startContinuousDance() {
     if (continuousDanceInterval) return;
-    
+
     isPerformingAction = true;
     showFeedback('🎉 PARTY MODE!');
-    
+
     continuousDanceInterval = setInterval(() => {
         const danceType = Math.random();
         if (danceType > 0.5) {
@@ -1325,13 +1325,13 @@ function animate(className) {
     showFeedback('🎬 ' + className.toUpperCase() + '!');
     aria.classList.remove('jumping', 'dancing', 'spinning', 'waving');
     void aria.offsetWidth; // Force reflow
-    
+
     // Mark as performing action
     isPerformingAction = true;
-    
+
     // Get current scale from characterState
     const currentScale = characterState.size || 1.0;
-    
+
     if (className === 'waving') {
         showFeedback('👋 WAVING!');
         console.log('Wave animation with arm movement');
@@ -1346,13 +1346,13 @@ function animate(className) {
         console.log('Jumping animation triggered with leg bending');
         aria.classList.add(className);
         aria.style.filter = 'brightness(1.5)';
-        
+
         // Pre-jump crouch
         moveLeg(ariaLegLeft, 45, 200);
         moveLeg(ariaLegRight, -45, 200);
         moveArm(ariaArmLeft, -20, 200);
         moveArm(ariaArmRight, -20, 200);
-        
+
         // During jump - legs extend
         setTimeout(() => {
             moveLeg(ariaLegLeft, -35, 300);
@@ -1360,7 +1360,7 @@ function animate(className) {
             moveArm(ariaArmLeft, -60, 300);
             moveArm(ariaArmRight, -60, 300);
         }, 300);
-        
+
         // Landing crouch
         setTimeout(() => {
             moveLeg(ariaLegLeft, 35, 300);
@@ -1369,7 +1369,7 @@ function animate(className) {
             moveArm(ariaArmRight, -10, 300);
             aria.style.filter = 'brightness(1)';
         }, 1500);
-        
+
         // Return to normal
         setTimeout(() => {
             resetLimbs(400);
@@ -1379,7 +1379,7 @@ function animate(className) {
     } else {
         console.log('Generic animation triggered:', className);
         aria.classList.add(className);
-        
+
         // Add limb movements based on animation type
         if (className === 'dancing') {
             console.log('Adding dance limb movements');
@@ -1391,7 +1391,7 @@ function animate(className) {
             console.log('Adding spin limb movements');
             spinLimbs();
         }
-        
+
         setTimeout(() => {
             aria.classList.remove(className);
             resetLimbs(300);
@@ -1416,17 +1416,17 @@ function getAnimationClass(action) {
 
 function move(direction, speed = 'normal') {
     console.log('🚶 Moving:', direction, 'at speed:', speed);
-    
+
     isPerformingAction = true;
-    
+
     const currentLeft = aria.style.left || '50%';
     const current = parseFloat(currentLeft);
-    
+
     let newPos = current;
     let distance = 25;
     let movementStyle = walkCycle;
     let duration = '1s';
-    
+
     // Choose movement style based on speed
     switch(speed) {
         case 'run':
@@ -1452,10 +1452,10 @@ function move(direction, speed = 'normal') {
         default:
             showFeedback('🚶 WALKING!');
     }
-    
+
     // Animate movement style
     movementStyle();
-    
+
     switch (direction) {
         case 'left':
             newPos = Math.max(5, current - distance);
@@ -1480,10 +1480,10 @@ function move(direction, speed = 'normal') {
             setTimeout(() => { isPerformingAction = false; }, 1000);
             return;
     }
-    
+
     aria.style.transition = `left ${duration} ease`;
     aria.style.left = newPos + '%';
-    
+
     setTimeout(() => { isPerformingAction = false; }, 1000);
 }
 
@@ -1493,9 +1493,9 @@ function createEffect(type) {
         'glow': '💫',
         'hearts': '💕'
     };
-    
+
     const emoji = effects[type] || '✨';
-    
+
     for (let i = 0; i < 5; i++) {
         setTimeout(() => {
             const effect = document.createElement('div');
@@ -1504,7 +1504,7 @@ function createEffect(type) {
             effect.style.left = (Math.random() * 80 + 10) + '%';
             effect.style.top = (Math.random() * 80 + 10) + '%';
             stage.appendChild(effect);
-            
+
             setTimeout(() => effect.remove(), 1500);
         }, i * 100);
     }
@@ -1567,9 +1567,9 @@ function randomCharacterEvolution() {
     const moods = ['happy', 'sad', 'calm', 'thinking', 'neutral'];
     const randomMood = moods[Math.floor(Math.random() * moods.length)];
     const randomEnergy = 30 + Math.floor(Math.random() * 70);
-    
+
     log('✨ Character evolving to: ' + randomMood + ' (' + randomEnergy + '% energy)');
-    
+
     const newStyle = generateCharacterFromMood(randomMood, randomEnergy);
     applyCharacterStyle(newStyle);
 }
@@ -1586,7 +1586,7 @@ setInterval(() => {
     if (evolutionCountdown <= 0) {
         evolutionCountdown = 30;
     }
-    
+
     // Update timer display
     if (timerDisplay) {
         timerDisplay.textContent = `⏰ Next evolution in: ${evolutionCountdown}s`;
@@ -1598,7 +1598,7 @@ setInterval(() => {
             timerDisplay.style.animation = 'none';
         }
     }
-    
+
     if (evolutionCountdown <= 5 && evolutionCountdown > 0) {
         log(`⏰ Character evolving in ${evolutionCountdown} seconds...`);
     }
@@ -1677,32 +1677,32 @@ function pickUpObject(objectId) {
         console.log('❌ Object not found:', objectId);
         return false;
     }
-    
+
     if (characterState.heldObject) {
         showFeedback('⚠️ Already holding ' + characterState.heldObject.toUpperCase() + '!');
         return false;
     }
-    
+
     console.log('🤏 Picking up:', objectId);
     showFeedback('🤏 PICKED UP ' + objectId.toUpperCase() + '!');
-    
+
     // Store held object
     characterState.heldObject = objectId;
     characterState.heldObjectElement = obj;
-    
+
     // Visual feedback
     obj.classList.add('held');
 
     // Sync server side: mark object as held
     sendObjectUpdate('update', objectId, { state: 'held' }).catch(() => {});
-    
+
     // Position object above character
     positionHeldObject();
-    
+
     // Arm reaching animation
     moveArm(ariaArmRight, -90, 300);
     setTimeout(() => moveArm(ariaArmRight, -45, 200), 300);
-    
+
     return true;
 }
 
@@ -1711,29 +1711,29 @@ function dropObject() {
         showFeedback('⚠️ Not holding anything!');
         return false;
     }
-    
+
     console.log('📦 Dropping:', characterState.heldObject);
     showFeedback('📦 DROPPED ' + characterState.heldObject.toUpperCase() + '!');
-    
+
     const obj = characterState.heldObjectElement;
-    
+
     // Remove held state
     obj.classList.remove('held');
-    
+
     // Drop at current Aria position
     const ariaRect = aria.getBoundingClientRect();
     const stageRect = stage.getBoundingClientRect();
-    
+
     const dropLeft = ((ariaRect.left - stageRect.left) / stageRect.width) * 100;
     const dropBottom = ((stageRect.bottom - ariaRect.bottom) / stageRect.height) * 100;
-    
+
     obj.style.left = dropLeft + '%';
     obj.style.bottom = (dropBottom + 10) + '%';
-    
+
     // Arm dropping animation
     moveArm(ariaArmRight, -90, 200);
     setTimeout(() => resetLimbs(300), 200);
-    
+
     // Clear held object
     characterState.heldObject = null;
     characterState.heldObjectElement = null;
@@ -1744,7 +1744,7 @@ function dropObject() {
     const tableX = 60; // server default table X
     const isOnTable = Math.abs(finalX - tableX) < 20 && Math.abs(finalY - 35) < 20;
     sendObjectUpdate('update', obj.id, { position: { x: finalX, y: finalY }, state: isOnTable ? 'on_table' : 'on_stage' }).catch(() => {});
-    
+
     return true;
 }
 
@@ -1753,27 +1753,27 @@ function throwObject(direction) {
         showFeedback('⚠️ Not holding anything to throw!');
         return false;
     }
-    
+
     console.log('🎯 Throwing:', characterState.heldObject, 'to', direction);
     showFeedback('🎯 THROWING ' + characterState.heldObject.toUpperCase() + '!');
-    
+
     const obj = characterState.heldObjectElement;
     obj.classList.remove('held');
-    
+
     // Throwing arm animation
     moveArm(ariaArmRight, -120, 150);
     setTimeout(() => {
         moveArm(ariaArmRight, -30, 200);
         setTimeout(() => resetLimbs(300), 100);
     }, 150);
-    
+
     // Calculate throw trajectory
     const currentLeft = parseFloat(obj.style.left);
     const currentBottom = parseFloat(obj.style.bottom);
-    
+
     let targetLeft = currentLeft;
     let targetBottom = currentBottom;
-    
+
     switch(direction) {
         case 'left':
             targetLeft = Math.max(5, currentLeft - 40);
@@ -1785,19 +1785,19 @@ function throwObject(direction) {
             targetBottom = Math.min(90, currentBottom + 30);
             break;
     }
-    
+
     // Animate throw with arc
     obj.style.transition = 'all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
     obj.style.left = targetLeft + '%';
     obj.style.bottom = targetBottom + '%';
     obj.style.transform = 'rotate(360deg) scale(0.9)';
-    
+
     // Reset after landing
     setTimeout(() => {
         obj.style.transition = 'all 0.3s ease';
         obj.style.transform = 'rotate(0deg) scale(1)';
     }, 800);
-    
+
     // Clear held object
     characterState.heldObject = null;
     characterState.heldObjectElement = null;
@@ -1808,27 +1808,27 @@ function throwObject(direction) {
         const bottom = Math.round(targetBottom);
         sendObjectUpdate('update', obj.id, { position: { x: left, y: bottom }, state: 'on_stage' }).catch(() => {});
     }, 900);
-    
+
     return true;
 }
 
 function positionHeldObject() {
     if (!characterState.heldObjectElement) return;
-    
+
     // Position object above and slightly in front of character
     const ariaRect = aria.getBoundingClientRect();
     const stageRect = stage.getBoundingClientRect();
-    
+
     const objLeft = ((ariaRect.left - stageRect.left + ariaRect.width * 0.6) / stageRect.width) * 100;
     const objBottom = ((stageRect.bottom - ariaRect.top + 20) / stageRect.height) * 100;
-    
+
     characterState.heldObjectElement.style.left = objLeft + '%';
     characterState.heldObjectElement.style.bottom = objBottom + '%';
 }
 
 function interactWithObject(action, objectId) {
     console.log('🔧 Interacting:', action, 'with', objectId);
-    
+
     switch(action) {
         case 'pickup':
         case 'grab':
@@ -1851,7 +1851,7 @@ function interactWithObject(action, objectId) {
 // Make objects draggable and clickable
 function initializeObjectInteractions() {
     const objects = document.querySelectorAll('.object');
-    
+
     objects.forEach(obj => {
         // Prevent adding duplicate event listeners when called multiple times
         if (obj.__interactionInitialized) return;
@@ -1859,46 +1859,46 @@ function initializeObjectInteractions() {
         obj.addEventListener('click', (e) => {
             e.stopPropagation();
             const objectId = obj.id;
-            
+
             if (!characterState.heldObject) {
                 pickUpObject(objectId);
             } else if (characterState.heldObject === objectId) {
                 dropObject();
             }
         });
-        
+
         // Drag functionality
         let isDragging = false;
         let startX, startY, startLeft, startBottom;
-        
+
         obj.addEventListener('mousedown', (e) => {
             if (characterState.heldObject === obj.id) return;
-            
+
             isDragging = true;
             obj.classList.add('grabbed');
-            
+
             const rect = obj.getBoundingClientRect();
             const stageRect = stage.getBoundingClientRect();
-            
+
             startX = e.clientX;
             startY = e.clientY;
             startLeft = ((rect.left - stageRect.left) / stageRect.width) * 100;
             startBottom = ((stageRect.bottom - rect.bottom) / stageRect.height) * 100;
-            
+
             e.preventDefault();
         });
-        
+
         document.addEventListener('mousemove', (e) => {
             if (!isDragging) return;
-            
+
             const stageRect = stage.getBoundingClientRect();
             const deltaX = ((e.clientX - startX) / stageRect.width) * 100;
             const deltaY = -((e.clientY - startY) / stageRect.height) * 100;
-            
+
             obj.style.left = Math.max(0, Math.min(100, startLeft + deltaX)) + '%';
             obj.style.bottom = Math.max(0, Math.min(100, startBottom + deltaY)) + '%';
         });
-        
+
         document.addEventListener('mouseup', () => {
             if (isDragging) {
                 isDragging = false;
@@ -1914,7 +1914,7 @@ function initializeObjectInteractions() {
 
 function addObject(objectName, emoji) {
     console.log('➕ Adding object:', objectName, emoji);
-    
+
     // Check if object already exists
     const existingObj = document.getElementById(objectName);
     if (existingObj) {
@@ -1922,25 +1922,25 @@ function addObject(objectName, emoji) {
         showFeedback('✅ ' + objectName + ' already on stage');
         return;
     }
-    
+
     // Create new object element
     const newObj = document.createElement('div');
     newObj.id = objectName;
     newObj.className = 'object';
     newObj.textContent = emoji;
-    
+
     // Position near Aria
     const ariaX = characterState.position.x;
     const ariaY = characterState.position.y;
     newObj.style.left = Math.max(10, Math.min(90, ariaX + 15)) + '%';
     newObj.style.bottom = Math.max(10, Math.min(90, ariaY + 5)) + '%';
-    
+
     // Add to stage
     stage.appendChild(newObj);
-    
+
     // Update tracking
     activeObjects[objectName] = true;
-    
+
     // Add to object manager if button doesn't exist
     if (!document.querySelector(`[onclick="toggleObject('${objectName}')"]`)) {
         const objectManager = document.getElementById('object-manager');
@@ -1951,13 +1951,13 @@ function addObject(objectName, emoji) {
         btn.onclick = () => toggleObject(objectName);
         objectManager.appendChild(btn);
     }
-    
+
     // Initialize interactions for new object (click/drag)
     initializeObjectInteractions();
 
     // Sync server: add new object to stage_state
     sendObjectUpdate('add', objectName, { position: objectPositionFromElement(newObj), state: 'on_stage', emoji: emoji }).catch(() => {});
-    
+
     showFeedback('✨ Added ' + objectName + ' to stage!');
     console.log('✅ Object added successfully:', objectName);
 }
@@ -1974,7 +1974,7 @@ function startAutoBehaviors() {
         if (Math.random() > 0.6) {
             const randomActions = ['shift weight', 'look around', 'adjust hair', 'stretch'];
             const action = randomActions[Math.floor(Math.random() * randomActions.length)];
-            
+
             switch(action) {
                 case 'shift weight':
                     animate('bouncing');
@@ -2002,7 +2002,7 @@ function startAutoBehaviors() {
             }
         }
     }, 8000 + Math.random() * 7000);
-    
+
     // Random expressions every 12-20 seconds
     setInterval(() => {
         if (Math.random() > 0.5) {
@@ -2012,7 +2012,7 @@ function startAutoBehaviors() {
             setTimeout(() => changeExpression('neutral'), 2000 + Math.random() * 3000);
         }
     }, 12000 + Math.random() * 8000);
-    
+
     // Occasional sparkles every 20-30 seconds
     setInterval(() => {
         if (Math.random() > 0.7) {
@@ -2042,4 +2042,3 @@ window.ariaTest = {
     pose: (name) => applyPose(name)
 };
 window.simulateTags = (arr) => Array.isArray(arr) && executeTags(arr);
-

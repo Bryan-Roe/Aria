@@ -7,7 +7,7 @@ Comprehensive analysis identified **8 distinct performance issues** across the c
 ## Critical Findings (Immediate Action Required)
 
 ### 1. Quantum Gradient Computation - O(n³) Complexity
-**Location:** `quantum-ai/web_app.py:217-246`
+**Location:** `ai-projects/quantum-ml/web_app.py:217-246`
 **Impact:** 10-100x slower than necessary
 **Status:** Not yet optimized
 
@@ -29,7 +29,7 @@ Comprehensive analysis identified **8 distinct performance issues** across the c
 ## High Priority Findings
 
 ### 3. Linear Keyword Searches
-**Location:** `talk-to-ai/src/agi_provider.py:343-372`
+**Location:** `ai-projects/chat-cli/src/agi_provider.py:343-372`
 **Impact:** 3-30x slower than optimal (varies with query length)
 **Status:** Not yet optimized
 
@@ -51,7 +51,7 @@ Comprehensive analysis identified **8 distinct performance issues** across the c
 ## Medium Priority Findings
 
 ### 5. Multi-Pass Collection Iteration
-**Location:** `quantum-ai/web_app.py:952-958`
+**Location:** `ai-projects/quantum-ml/web_app.py:952-958`
 **Impact:** 4x unnecessary iterations
 **Status:** Not yet optimized
 
@@ -83,7 +83,7 @@ Comprehensive analysis identified **8 distinct performance issues** across the c
 ## Low Priority Findings
 
 ### 8. Minor List Comprehension Issues
-**Location:** `quantum-ai/web_app.py:440-443`
+**Location:** `ai-projects/quantum-ml/web_app.py:440-443`
 **Impact:** <5% improvement
 **Status:** Not yet optimized
 

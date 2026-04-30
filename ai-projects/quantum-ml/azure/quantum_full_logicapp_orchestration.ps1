@@ -78,7 +78,7 @@ try {
     & "$PSScriptRoot/quantum_cost_monitor.ps1" -ResourceGroup $ResourceGroup -WorkspaceName $WorkspaceName
 
     # 4. Send Logic App notification
-    $payload = @{ 
+    $payload = @{
         message = "Quantum orchestration complete. All jobs and cost monitoring finished.";
         status = 'Succeeded';
         workspace = $WorkspaceName;
@@ -97,7 +97,7 @@ try {
 catch {
     Err "Orchestration failed: $_"
     # Failure notification to Logic App
-    $payload = @{ 
+    $payload = @{
         message = "Quantum orchestration failed: $_";
         status = 'Failed';
         workspace = $WorkspaceName;

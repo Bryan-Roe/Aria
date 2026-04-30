@@ -85,7 +85,7 @@ def _get_conn():
                 return conn
             except Exception:
                 pass  # Connection stale, create new
-    
+
     # Create new if pool empty
     return pyodbc.connect(conn_str, timeout=4)
 
@@ -120,7 +120,7 @@ def store_embedding(...):
 ```python
 tags = re.findall(r'\[aria:[^\]]+\]', response)  # COMPILED EVERY TIME
 say_match = re.search(
-    r"(?:\b(?:say|announce|shout|speak|tell)\b)...", 
+    r"(?:\b(?:say|announce|shout|speak|tell)\b)...",
     command, flags=re.I
 )  # COMPILED EVERY TIME
 ```
@@ -131,7 +131,7 @@ say_match = re.search(
 _RE_JSON_BLOCK = re.compile(r'\[.*\]', re.DOTALL)
 _RE_ARIA_TAGS = re.compile(r'\[aria:[^\]]+\]')
 _RE_SAY_COMMAND = re.compile(
-    r"(?:\b(?:say|announce|shout|speak|tell)\b)...", 
+    r"(?:\b(?:say|announce|shout|speak|tell)\b)...",
     re.IGNORECASE
 )
 _RE_SANITIZE_BRACKETS = re.compile(r'\]')
@@ -295,8 +295,8 @@ pytest tests/test_performance_keyword_sets.py -v
 
 ## ✨ Summary
 
-**Total optimizations implemented**: 5 critical/high-impact fixes  
-**Estimated aggregate speedup**: 1.5-2x for typical workloads  
+**Total optimizations implemented**: 5 critical/high-impact fixes
+**Estimated aggregate speedup**: 1.5-2x for typical workloads
 **Key hot paths optimized**:
 - ✅ Command keyword matching (aria_web)
 - ✅ Database connection management (shared/chat_memory)

@@ -10,25 +10,22 @@ Abstracts provider differences. Providers must implement:
   complete(messages: list[dict[str,str]], json_mode: bool=False) -> str
 """
 
-from typing import List, Dict, Any, Optional, Protocol, Tuple
+from typing import Any, Dict, List, Optional, Protocol
+
 try:
     # When running tests that inject src/ into sys.path
-    from utils.json_utils import (
-        RECIPE_SEARCH_SCHEMA,
-        INGREDIENT_EXTRACTION_SCHEMA,
-        parse_and_validate,
-    )
+    from utils.json_utils import (INGREDIENT_EXTRACTION_SCHEMA,
+                                  RECIPE_SEARCH_SCHEMA, parse_and_validate)
 except ImportError:  # pragma: no cover
     # Fallback for package-style execution (not typical here but defensive)
-    from ..utils.json_utils import (
-        RECIPE_SEARCH_SCHEMA,
-        INGREDIENT_EXTRACTION_SCHEMA,
-        parse_and_validate,
-    )
+    from ..utils.json_utils import (INGREDIENT_EXTRACTION_SCHEMA,
+                                    RECIPE_SEARCH_SCHEMA, parse_and_validate)
 
 
 class ProviderProtocol(Protocol):  # Structural typing for providers
-    def complete(self, messages: List[Dict[str, str]], json_mode: bool = False) -> str:  # pragma: no cover
+    def complete(
+        self, messages: List[Dict[str, str]], json_mode: bool = False
+    ) -> str:  # pragma: no cover
         ...
 
 
@@ -101,7 +98,8 @@ class RecipeAgent:
                 {"role": "system", "content": SYSTEM_PROMPT},
                 {
                     "role": "user",
-                    "content": user_content + "\nReturn ONLY a valid minified JSON object matching the schema. No comments.",
+                    "content": user_content
+                    + "\nReturn ONLY a valid minified JSON object matching the schema. No comments.",
                 },
             ]
 

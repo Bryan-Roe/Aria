@@ -1,8 +1,8 @@
 # Performance Improvements Implementation Report
 
-**Date:** February 17, 2026  
-**Author:** GitHub Copilot Agent  
-**Issue:** Identify and suggest improvements to slow or inefficient code  
+**Date:** February 17, 2026
+**Author:** GitHub Copilot Agent
+**Issue:** Identify and suggest improvements to slow or inefficient code
 **PR Branch:** `copilot/identify-code-improvements`
 
 ---
@@ -77,7 +77,7 @@ for x in window:
 ---
 
 #### 1.2 Set-Based Membership Checks
-**Files:** `quantum-ai/src/automate_quantum_job.py`, `scripts/job_queue.py` (3 locations), `scripts/master_orchestrator.py`
+**Files:** `ai-projects/quantum-ml/src/automate_quantum_job.py`, `scripts/job_queue.py` (3 locations), `scripts/master_orchestrator.py`
 
 **Problem:** O(n) list membership checks in hot paths
 ```python

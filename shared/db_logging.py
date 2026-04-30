@@ -16,7 +16,6 @@ from __future__ import annotations
 
 import json
 import os
-import re
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
@@ -38,6 +37,7 @@ def _get_conn():
         return None
     try:
         import pyodbc  # noqa: WPS433
+
         return pyodbc.connect(conn_str, timeout=5)
     except Exception as e:  # noqa: BLE001
         _warn_once(f"DB unavailable: {e}")
@@ -115,7 +115,13 @@ def log_chat_message_safe(
 
 
 def _parse_quantum_summary() -> Dict[str, Any]:
-    summary_path = REPO_ROOT / "quantum-ai" / "results" / "custom_training_summary.json"
+    summary_path = (
+        REPO_ROOT
+        / "ai-projects"
+        / "quantum-ml"
+        / "results"
+        / "custom_training_summary.json"
+    )
     if not summary_path.exists():
         return {}
     try:
@@ -131,7 +137,9 @@ def _parse_quantum_summary() -> Dict[str, Any]:
         return {}
 
 
-def log_quantum_run_safe(job, result: Dict[str, Any], dataset_name: str, log_path: str) -> Dict[str, Any]:  # noqa: ANN001
+def log_quantum_run_safe(
+    job, result: Dict[str, Any], dataset_name: str, log_path: str
+) -> Dict[str, Any]:  # noqa: ANN001
     conn = _get_conn()
     if not conn:
         return {"success": False, "skipped": True}
@@ -148,7 +156,11 @@ def log_quantum_run_safe(job, result: Dict[str, Any], dataset_name: str, log_pat
             "@StatusJsonPath=?, @ResultsJsonPath=?, @Status=?, @ErrorMessage=?, @RunId=@RunId OUTPUT; "
             "SELECT @RunId AS RunId;"
         )
-        backend = job.azure_backend if getattr(job, "mode", "") == "azure_hardware" else "qiskit_aer"
+        backend = (
+            job.azure_backend
+            if getattr(job, "mode", "") == "azure_hardware"
+            else "qiskit_aer"
+        )
         params = [
             job.name,
             dataset_name,
@@ -161,7 +173,8 @@ def log_quantum_run_safe(job, result: Dict[str, Any], dataset_name: str, log_pat
             getattr(job, "batch_size", None) or 16,
             None,  # TrainAccuracy (not explicitly tracked)
             metrics.get("val_acc_last"),  # ValAccuracy
-            metrics.get("val_acc_best"),  # TestAccuracy (reuse best val acc as proxy)
+            # TestAccuracy (reuse best val acc as proxy)
+            metrics.get("val_acc_best"),
             metrics.get("train_loss_last"),  # TrainLoss
             metrics.get("val_loss_last"),  # ValLoss
             None,  # TestLoss
@@ -199,6 +212,7 @@ def log_quantum_run_safe(job, result: Dict[str, Any], dataset_name: str, log_pat
 def _load_yaml(path: Path) -> Dict[str, Any]:
     try:
         import yaml  # noqa: WPS433
+
         return yaml.safe_load(path.read_text(encoding="utf-8")) or {}
     except Exception:
         return {}
@@ -210,7 +224,11 @@ def log_lora_run_safe(job, result: Dict[str, Any]) -> Dict[str, Any]:  # noqa: A
         return {"success": False, "skipped": True}
     try:
         cursor = conn.cursor()
-        cfg_path = Path(job.config) if getattr(job, "config", None) else REPO_ROOT / "AI" / "microsoft_phi-silica-3.6_v1" / "lora" / "lora.yaml"
+        cfg_path = (
+            Path(job.config)
+            if getattr(job, "config", None)
+            else REPO_ROOT / "AI" / "microsoft_phi-silica-3.6_v1" / "lora" / "lora.yaml"
+        )
         cfg = _load_yaml(cfg_path)
         # Extract values with fallbacks
         lora_rank = cfg.get("lora_rank", 8)  # Not present -> placeholder
@@ -218,7 +236,11 @@ def log_lora_run_safe(job, result: Dict[str, Any]) -> Dict[str, Any]:  # noqa: A
         lora_dropout = job.lora_dropout or cfg.get("lora_dropout", 0.1)
         sequence_len = cfg.get("finetune_train_seqlen", 512)
         learning_rate = job.learning_rate or cfg.get("learning_rate", 2e-4)
-        target_modules = cfg.get("lora_target_modules") or cfg.get("target_modules") or ["q_proj", "v_proj"]
+        target_modules = (
+            cfg.get("lora_target_modules")
+            or cfg.get("target_modules")
+            or ["q_proj", "v_proj"]
+        )
         dataset_path = job.dataset or cfg.get("finetune_dataset", "data")
         dataset_name = Path(str(dataset_path)).name
         sql = (
@@ -244,7 +266,8 @@ def log_lora_run_safe(job, result: Dict[str, Any]) -> Dict[str, Any]:  # noqa: A
             lora_alpha,
             lora_dropout,
             json.dumps(target_modules),
-            None,  # TrainLoss (available inside training script; could parse later)
+            # TrainLoss (available inside training script; could parse later)
+            None,
             None,  # EvalLoss
             None,  # TrainPerplexity
             None,  # EvalPerplexity

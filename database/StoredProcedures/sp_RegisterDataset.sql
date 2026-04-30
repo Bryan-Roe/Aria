@@ -17,15 +17,15 @@ CREATE PROCEDURE [dbo].[sp_RegisterDataset]
 AS
 BEGIN
     SET NOCOUNT ON;
-    
+
     -- Check if dataset already exists
     SELECT @DatasetId = DatasetId FROM [dbo].[Datasets] WHERE Name = @Name;
-    
+
     IF @DatasetId IS NULL
     BEGIN
         -- Insert new dataset
         SET @DatasetId = NEWID();
-        
+
         INSERT INTO [dbo].[Datasets] (
             DatasetId, Name, Category, Type, Path, Description, Source,
             License, IsCommercialOk, SizeBytes, NumSamples, NumFeatures,

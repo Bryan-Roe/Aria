@@ -140,15 +140,15 @@ python3 scripts/repo_automation.py --stop
 
 ## 🎭 Component Details
 
-| Component | Script | Health Check | Auto-Restart |
-|-----------|--------|--------------|--------------|
-| Aria | `aria_automation.py` | 60s | Yes |
-| Training | `autotrain.py` | 5min | Yes |
-| Quantum | `quantum_autorun.py` | 10min | Yes |
-| Evaluation | `evaluation_autorun.py` | 5min | Yes |
-| Datasets | `collect_more_datasets.py` | 1hr | Yes |
-| Monitoring | `system_health_check.py` | 60s | Yes |
-| Backup | `backup_manager.py` | 1hr | Yes |
+| Component  | Script                     | Health Check | Auto-Restart |
+| ---------- | -------------------------- | ------------ | ------------ |
+| Aria       | `aria_automation.py`       | 60s          | Yes          |
+| Training   | `autotrain.py`             | 5min         | Yes          |
+| Quantum    | `quantum_autorun.py`       | 10min        | Yes          |
+| Evaluation | `evaluation_autorun.py`    | 5min         | Yes          |
+| Datasets   | `collect_more_datasets.py` | 1hr          | Yes          |
+| Monitoring | `system_health_check.py`   | 60s          | Yes          |
+| Backup     | `backup_manager.py`        | 1hr          | Yes          |
 
 ## 🔍 Troubleshooting
 
@@ -180,10 +180,10 @@ pkill -f aria_automation.py
 
 ## 📚 Documentation
 
-- **Full Guide**: [REPO_AUTOMATION_GUIDE.md](REPO_AUTOMATION_GUIDE.md)
-- **Quick Ref**: [REPO_AUTOMATION_QUICKREF.txt](REPO_AUTOMATION_QUICKREF.txt)
-- **Aria Guide**: [ARIA_AUTOMATION_GUIDE.md](ARIA_AUTOMATION_GUIDE.md)
-- **Main README**: [README.md](README.md)
+- **Full Guide**: [REPO_AUTOMATION_GUIDE.md](../guides/REPO_AUTOMATION_GUIDE.md)
+- **Quick Ref**: [REPO_AUTOMATION_QUICKREF.txt](../../REPO_AUTOMATION_QUICKREF.txt)
+- **Aria Guide**: [ARIA_AUTOMATION_GUIDE.md](../guides/ARIA_AUTOMATION_GUIDE.md)
+- **Main README**: [README.md](../../README.md)
 
 ## 🌐 Access Points
 

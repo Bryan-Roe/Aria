@@ -58,13 +58,13 @@ function show_menu() {
 
 function check_dependencies() {
     echo -e "${YELLOW}Checking dependencies...${NC}"
-    
+
     if ! command -v python3 &> /dev/null; then
         echo -e "${RED}❌ Python 3 not found${NC}"
         exit 1
     fi
     echo -e "${GREEN}✅ Python 3: $(python3 --version)${NC}"
-    
+
     if ! python3 -c "import psutil" 2>/dev/null; then
         echo -e "${YELLOW}⚠️  psutil not installed, installing...${NC}"
         pip3 install psutil
@@ -94,12 +94,12 @@ function start_custom() {
     echo ""
     show_components
     read -p "Enter components (comma-separated, e.g., aria,training,quantum): " components
-    
+
     if [ -z "$components" ]; then
         echo -e "${RED}❌ No components specified${NC}"
         return
     fi
-    
+
     echo -e "${GREEN}🚀 Starting selected components...${NC}"
     echo ""
     python3 "$REPO_ROOT/scripts/repo_automation.py" --start --components "$components" --daemon
@@ -118,7 +118,7 @@ function stop_all() {
 function run_background() {
     local mode=$1
     echo -e "${GREEN}🚀 Starting in background mode...${NC}"
-    
+
     case "$mode" in
         full)
             nohup python3 "$REPO_ROOT/scripts/repo_automation.py" --start --daemon \
@@ -137,7 +137,7 @@ function run_background() {
                 > "$REPO_ROOT/data_out/repo_automation/automation.log" 2>&1 &
             ;;
     esac
-    
+
     local pid=$!
     echo -e "${GREEN}✅ Started with PID $pid${NC}"
     echo -e "${BLUE}ℹ️  View logs: tail -f $REPO_ROOT/data_out/repo_automation/automation.log${NC}"
@@ -229,7 +229,7 @@ fi
 # Interactive menu
 while true; do
     show_menu
-    
+
     case $choice in
         1)
             start_full_automation
@@ -261,7 +261,7 @@ while true; do
             echo -e "${RED}❌ Invalid choice${NC}"
             ;;
     esac
-    
+
     echo ""
     read -p "Press Enter to continue..."
     echo ""

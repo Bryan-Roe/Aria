@@ -244,6 +244,6 @@ az container create \
 
 ---
 
-**Created:** 2025-11-25  
-**Last Updated:** 2025-11-25  
+**Created:** 2025-11-25
+**Last Updated:** 2025-11-25
 **Status:** Ready for deployment after hyperparameter optimization

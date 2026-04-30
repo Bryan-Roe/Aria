@@ -36,6 +36,8 @@ MAX_GOALS = _mod.MAX_GOALS
 MAX_REASONING_CHAINS = _mod.MAX_REASONING_CHAINS
 _sanitize_input = _mod._sanitize_input
 _sanitize_for_logging = _mod._sanitize_for_logging
+_infer_aria_movement_tag = _mod._infer_aria_movement_tag
+_AGENT_REGISTRY = _mod._AGENT_REGISTRY
 
 __all__ = [
     "AGIProvider",
@@ -48,4 +50,6 @@ __all__ = [
     "MAX_REASONING_CHAINS",
     "_sanitize_input",
     "_sanitize_for_logging",
+    "_infer_aria_movement_tag",
+    "_AGENT_REGISTRY",
 ]

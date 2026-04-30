@@ -31,6 +31,8 @@ except Exception:  # pragma: no cover - optional dependency
     psutil = None
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
+# Add shared dir for config_validator import
+sys.path.insert(0, str(REPO_ROOT / "shared"))
 AUTOMATION_DIR = REPO_ROOT / "data_out" / "repo_automation"
 PID_FILE = AUTOMATION_DIR / "processes.json"
 STATUS_FILE = AUTOMATION_DIR / "status.json"
@@ -93,8 +95,7 @@ class AutomationStatus:
 
 
 class RepoAutomation:
-    """
-    """
+    """ """
 
     def __init__(self):
         self.components: Dict[str, ComponentConfig] = self._init_components()
@@ -122,8 +123,7 @@ class RepoAutomation:
             "aria": ComponentConfig(
                 name="Aria Character Automation",
                 script="scripts/aria_automation.py",
-                command=["python3", "scripts/aria_automation.py",
-                         "--mode", "full"],
+                command=["python3", "scripts/aria_automation.py", "--mode", "full"],
                 auto_restart=True,
                 health_check_interval=60,
                 required_packages=["psutil"],
@@ -159,8 +159,7 @@ class RepoAutomation:
                 health_check_interval=300,
                 dependencies=["training"],
                 enabled=False,  # Enabled if evaluation_autorun.yaml exists
-                required_packages=["scikit-learn",
-                                   "numpy", "matplotlib", "seaborn"],
+                required_packages=["scikit-learn", "numpy", "matplotlib", "seaborn"],
             ),
             "datasets": ComponentConfig(
                 name="Dataset Auto-Discovery (Integrated in training)",
@@ -201,7 +200,9 @@ class RepoAutomation:
             "evaluation": "evaluation_autorun",
         }
         for name, config_key in config_keys.items():
-            if name in self.components and resolve_existing_config_path(REPO_ROOT, config_key):
+            if name in self.components and resolve_existing_config_path(
+                REPO_ROOT, config_key
+            ):
                 self.components[name].enabled = True
 
     @staticmethod
@@ -236,7 +237,9 @@ class RepoAutomation:
         resolved: Dict[str, Optional[str]] = {}
         for name, key in config_keys.items():
             path = resolve_existing_config_path(REPO_ROOT, key)
-            resolved[name] = str(path.relative_to(REPO_ROOT)) if path is not None else None
+            resolved[name] = (
+                str(path.relative_to(REPO_ROOT)) if path is not None else None
+            )
         return resolved
 
     def _attach_existing_from_pidfile(self):
@@ -315,7 +318,9 @@ class RepoAutomation:
             started=self.start_time.strftime("%Y-%m-%dT%H:%M:%SZ"),
             config_path=None,
             config_paths=self._resolved_optional_config_paths(),
-            uptime_seconds=(datetime.now(timezone.utc) - self.start_time).total_seconds(),
+            uptime_seconds=(
+                datetime.now(timezone.utc) - self.start_time
+            ).total_seconds(),
             components_running={
                 name: self._is_component_running(name)
                 for name in self.components.keys()
@@ -362,8 +367,7 @@ class RepoAutomation:
         # Check dependencies
         for dep in component.dependencies:
             if not self._is_component_running(dep):
-                print(
-                    f"⚠️  Dependency '{dep}' not running, starting it first...")
+                print(f"⚠️  Dependency '{dep}' not running, starting it first...")
                 if not self.start_component(dep):
                     print(f"❌ Failed to start dependency '{dep}'")
                     return False
@@ -372,7 +376,8 @@ class RepoAutomation:
         existing = self._find_existing_process(component)
         if existing is not None:
             print(
-                f"\n🔗 Found existing process for {component.name} (PID {existing.pid}), attaching instead of starting new instance")
+                f"\n🔗 Found existing process for {component.name} (PID {existing.pid}), attaching instead of starting new instance"
+            )
             self.processes[name] = _ExistingProcessWrapper(existing.pid)
             # Assume satisfied if already running
             self.dependency_status[name] = True
@@ -385,7 +390,8 @@ class RepoAutomation:
         # Ensure dependencies (auto-install if missing)
         if not self._ensure_dependencies(name, component.required_packages):
             print(
-                f"❌ Cannot start {component.name} due to dependency installation failure")
+                f"❌ Cannot start {component.name} due to dependency installation failure"
+            )
             return False
 
         print(f"\n🚀 Starting {component.name}...")
@@ -400,17 +406,17 @@ class RepoAutomation:
             )
 
             self.processes[name] = proc
-            
+
             # Wait with short polling interval instead of fixed sleep
             max_wait = 2.0
             check_interval = 0.2
             elapsed = 0
-            
+
             while elapsed < max_wait:
                 if self._is_component_running(name):
                     print(f"✅ {component.name} started (PID {proc.pid})")
                     self._save_process_pids()
-            # Enforce single-instance: ensure no stray duplicates remain
+                    # Enforce single-instance: ensure no stray duplicates remain
                     self._enforce_single_instance(component, keep_pid=proc.pid)
                     return True
                 time.sleep(check_interval)
@@ -521,7 +527,9 @@ class RepoAutomation:
 
         return health
 
-    def _enforce_single_instance(self, component: ComponentConfig, keep_pid: Optional[int] = None):
+    def _enforce_single_instance(
+        self, component: ComponentConfig, keep_pid: Optional[int] = None
+    ):
         # Ensure only one process for the given component's script is running.
         # Terminates any extra instances beyond keep_pid.
         if psutil is None or not component.script:
@@ -529,8 +537,8 @@ class RepoAutomation:
         script_name = Path(component.script).name
         duplicates = []
         try:
-            for proc in psutil.process_iter(['pid', 'cmdline', 'create_time']):
-                cmd = proc.info.get('cmdline') or []
+            for proc in psutil.process_iter(["pid", "cmdline", "create_time"]):
+                cmd = proc.info.get("cmdline") or []
                 if any(script_name in part for part in cmd):
                     if keep_pid is not None and proc.pid == keep_pid:
                         continue
@@ -539,7 +547,8 @@ class RepoAutomation:
             return
         if len(duplicates) > 0:
             print(
-                f"\n⚖️  Enforcing single-instance for {component.name}: {len(duplicates)} duplicate(s) found")
+                f"\n⚖️  Enforcing single-instance for {component.name}: {len(duplicates)} duplicate(s) found"
+            )
             for p in duplicates:
                 try:
                     p.terminate()
@@ -550,8 +559,7 @@ class RepoAutomation:
                         p.kill()
                         print(f"   • Killed duplicate PID {p.pid}")
                     except Exception:
-                        print(
-                            f"   • Unable to terminate duplicate PID {p.pid}")
+                        print(f"   • Unable to terminate duplicate PID {p.pid}")
 
     def _find_existing_process(self, component: ComponentConfig):
         """Attempt to find an already-running process for the component's script"""
@@ -559,8 +567,8 @@ class RepoAutomation:
             return None
         script_name = Path(component.script).name
         try:
-            for proc in psutil.process_iter(['pid', 'cmdline']):
-                cmd = proc.info.get('cmdline') or []
+            for proc in psutil.process_iter(["pid", "cmdline"]):
+                cmd = proc.info.get("cmdline") or []
                 if any(script_name in part for part in cmd):
                     return proc
         except Exception:
@@ -574,8 +582,9 @@ class RepoAutomation:
             return True
         missing: List[str] = []
         for spec in required:
-            pip_name, import_name = (spec.split(
-                ":", 1) + [spec])[:2] if ":" in spec else (spec, spec)
+            pip_name, import_name = (
+                (spec.split(":", 1) + [spec])[:2] if ":" in spec else (spec, spec)
+            )
             try:
                 importlib.import_module(import_name)
             except Exception:
@@ -583,36 +592,45 @@ class RepoAutomation:
         if not missing:
             self.dependency_status[name] = True
             return True
-        print(
-            f"🔧 Installing missing dependencies for {name}: {', '.join(missing)}")
+        print(f"🔧 Installing missing dependencies for {name}: {', '.join(missing)}")
         for pkg in missing:
             try:
                 result = subprocess.run(
-                    [sys.executable, "-m", "pip", "install", pkg], capture_output=True, text=True)
+                    [sys.executable, "-m", "pip", "install", pkg],
+                    capture_output=True,
+                    text=True,
+                )
                 if result.returncode != 0:
-                    err = result.stderr.strip().splitlines(
-                    )[-1] if result.stderr else f"Unknown error installing {pkg}"
+                    err = (
+                        result.stderr.strip().splitlines()[-1]
+                        if result.stderr
+                        else f"Unknown error installing {pkg}"
+                    )
                     self.errors.append(
-                        f"Dependency install failed ({name}): {pkg} -> {err}")
+                        f"Dependency install failed ({name}): {pkg} -> {err}"
+                    )
                     self.dependency_status[name] = False
                     return False
             except Exception as e:
                 self.errors.append(
-                    f"Dependency install exception ({name}): {pkg} -> {e}")
+                    f"Dependency install exception ({name}): {pkg} -> {e}"
+                )
                 self.dependency_status[name] = False
                 return False
         # Verify imports post-install
         post_missing = []
         for spec in required:
-            pip_name, import_name = (spec.split(
-                ":", 1) + [spec])[:2] if ":" in spec else (spec, spec)
+            pip_name, import_name = (
+                (spec.split(":", 1) + [spec])[:2] if ":" in spec else (spec, spec)
+            )
             try:
                 importlib.import_module(import_name)
             except Exception:
                 post_missing.append(pip_name)
         if post_missing:
             self.errors.append(
-                f"Dependencies still missing after install ({name}): {', '.join(post_missing)}")
+                f"Dependencies still missing after install ({name}): {', '.join(post_missing)}"
+            )
             self.dependency_status[name] = False
             return False
         self.dependency_status[name] = True
@@ -620,11 +638,14 @@ class RepoAutomation:
 
     def _save_process_pids(self):
         """Persist current process PIDs for continuity"""
-        mapping = {name: getattr(proc, 'pid', None) for name,
-                   proc in self.processes.items() if proc is not None}
+        mapping = {
+            name: getattr(proc, "pid", None)
+            for name, proc in self.processes.items()
+            if proc is not None
+        }
         for pid_file in self._pid_files():
             try:
-                with open(pid_file, 'w') as f:
+                with open(pid_file, "w") as f:
                     json.dump(mapping, f, indent=2)
             except Exception:
                 continue
@@ -664,8 +685,7 @@ class RepoAutomation:
 
         if status:
             print(f"Started: {status.get('started', 'unknown')}")
-            print(
-                f"Uptime: {timedelta(seconds=int(status.get('uptime_seconds', 0)))}")
+            print(f"Uptime: {timedelta(seconds=int(status.get('uptime_seconds', 0)))}")
             print(f"Health Checks: {status.get('total_cycles', 0)}")
         else:
             print("Started: unknown (status file missing)")
@@ -679,11 +699,12 @@ class RepoAutomation:
             for name, pid in pid_map.items():
                 try:
                     p = psutil.Process(pid)
-                    dynamic_running[name] = p.is_running(
-                    ) and p.status() != psutil.STATUS_ZOMBIE
+                    dynamic_running[name] = (
+                        p.is_running() and p.status() != psutil.STATUS_ZOMBIE
+                    )
                 except Exception:
                     dynamic_running[name] = False
-        
+
         # Fallback: if PID not recorded, try discovering existing processes
         if psutil is not None:
             for name, component in self.components.items():
@@ -695,21 +716,21 @@ class RepoAutomation:
                         dynamic_running[name] = False
 
         # Prefer dynamic running info; fall back to status file content
-        components_running = status.get(
-            "components_running", {}) if status else {}
-        
+        components_running = status.get("components_running", {}) if status else {}
+
         for name in self.components.keys():
-            running = dynamic_running.get(
-                name, components_running.get(name, False))
+            running = dynamic_running.get(name, components_running.get(name, False))
             component = self.components.get(name)
             if component:
                 status_icon = "✅" if running else "❌"
-                dep_ok = (status.get("dependency_status", {}).get(
-                    name, True) if status else True)
+                dep_ok = (
+                    status.get("dependency_status", {}).get(name, True)
+                    if status
+                    else True
+                )
                 dep_icon = "🧩" if dep_ok else "⚠️"
                 pid_info = f" (PID {pid_map.get(name)})" if name in pid_map else ""
-                print(
-                    f"  {status_icon} {component.name}{pid_info} ({dep_icon} deps)")
+                print(f"  {status_icon} {component.name}{pid_info} ({dep_icon} deps)")
 
         # Recent errors
         if status and status.get("errors"):
@@ -718,7 +739,9 @@ class RepoAutomation:
                 print(f"  - {error}")
 
         if not status and not pid_map:
-            print("\nℹ️  No status or PID information found. If automation is running in another session, it may not have written status yet.")
+            print(
+                "\nℹ️  No status or PID information found. If automation is running in another session, it may not have written status yet."
+            )
 
         print("=" * 80 + "\n")
 
@@ -727,8 +750,7 @@ class RepoAutomation:
         print("\n🌙 Running in daemon mode...")
 
         # Start monitoring in background thread
-        monitor_thread = threading.Thread(
-            target=self.monitoring_loop, daemon=True)
+        monitor_thread = threading.Thread(target=self.monitoring_loop, daemon=True)
         monitor_thread.start()
 
         try:
@@ -768,9 +790,7 @@ Examples:
     parser.add_argument(
         "--stop", action="store_true", help="Stop all automation components"
     )
-    parser.add_argument(
-        "--status", action="store_true", help="Show current status"
-    )
+    parser.add_argument("--status", action="store_true", help="Show current status")
     parser.add_argument(
         "--daemon", action="store_true", help="Run as background daemon"
     )
@@ -778,8 +798,32 @@ Examples:
         "--components",
         help="Comma-separated list of components to start (aria,training,quantum,etc.)",
     )
+    parser.add_argument(
+        "--validate",
+        action="store_true",
+        help="Validate all orchestrator configs before starting",
+    )
 
     args = parser.parse_args()
+
+    # Validate configurations if requested or before daemon start
+    if args.validate or args.start:
+        try:
+            from shared.config_validator import validate_configs_before_daemon
+        except ImportError:
+            from config_validator import validate_configs_before_daemon
+
+        print("\n🔍 Pre-flight validation...")
+        all_valid, results = validate_configs_before_daemon(
+            repo_root=REPO_ROOT, exit_on_error=False, verbose=False
+        )
+
+        if args.validate:
+            # Exit after validation if --validate flag was used
+            sys.exit(0 if all_valid else 1)
+
+        if not all_valid:
+            print("\n⚠️  Configuration issues detected. Proceeding anyway...")
 
     automation = RepoAutomation()
 

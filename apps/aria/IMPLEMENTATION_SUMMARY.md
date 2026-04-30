@@ -12,7 +12,7 @@ Successfully added LLM-powered automatic action generation and execution system 
 - **Validation Ready**: Schema used for both LLM prompts and execution validation
 
 ### 2. AriaActionParser Class
-- **Dual-Mode Parsing**: 
+- **Dual-Mode Parsing**:
   - LLM-powered parsing using `shared.chat_providers.detect_provider()`
   - Rule-based fallback parser for offline/no-API operation
 - **System Prompt Generation**: Dynamic prompts include action schema + current stage state
@@ -20,12 +20,12 @@ Successfully added LLM-powered automatic action generation and execution system 
 - **Action Validation**: Filters invalid actions before returning
 
 ### 3. Action Execution Engine
-- **`execute_aria_action()` Function**: 
+- **`execute_aria_action()` Function**:
   - Validates action type and parameters
   - Updates global `stage_state` dict
   - Returns status, message, and visualization tags
   - Enforces rules (distance checks, single-object holding, etc.)
-- **State Management**: 
+- **State Management**:
   - Aria position, expression, held_object, facing
   - Object positions and states (on_table, held, dropped, thrown)
   - Environment data (table, stage bounds)
@@ -41,7 +41,7 @@ Successfully added LLM-powered automatic action generation and execution system 
   - Error handling: Graceful failures with detailed messages
 
 ### 5. Web Interface (auto-execute.html)
-- **Interactive UI**: 
+- **Interactive UI**:
   - Command input with example commands
   - Plan vs Execute buttons
   - LLM toggle and state display options

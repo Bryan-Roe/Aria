@@ -1,4 +1,5 @@
 """Unit tests for cleanup_query_metrics security fixes."""
+
 import sys
 from pathlib import Path
 

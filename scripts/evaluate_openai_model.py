@@ -19,22 +19,25 @@ import time
 from pathlib import Path
 from typing import Any, Dict, List
 
-# Add shared directory to path for imports
-script_dir = Path(__file__).parent
-repo_root = script_dir.parent
-sys.path.insert(0, str(repo_root))
+# Ensure repository root is on sys.path before importing local shared modules.
+REPO_ROOT = Path(__file__).resolve().parent.parent
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
 
-from shared.evaluation_utils import load_jsonl, naive_predict, compute_metrics
+from shared.evaluation_utils import compute_metrics, load_jsonl, naive_predict
 
 try:
     import openai  # type: ignore
+
     HAS_OPENAI = True
 except Exception:
     openai = None
     HAS_OPENAI = False
 
 
-def call_openai_completion(example: Dict[str, Any], deployment: str | None = None) -> str:
+def call_openai_completion(
+    example: Dict[str, Any], deployment: str | None = None
+) -> str:
     # Minimal safe wrapper; default to naive_predict when API unavailable
     if not HAS_OPENAI or not os.getenv("OPENAI_API_KEY"):
         return naive_predict(example)
@@ -45,8 +48,10 @@ def call_openai_completion(example: Dict[str, Any], deployment: str | None = Non
     else:
         msgs = example.get("messages") or []
         # join user messages
-        prompt = " ".join([m.get("content", "")
-                          for m in msgs if m.get("role") == "user"]) or ""
+        prompt = (
+            " ".join([m.get("content", "") for m in msgs if m.get("role") == "user"])
+            or ""
+        )
 
     if not prompt:
         return naive_predict(example)
@@ -64,14 +69,21 @@ def call_openai_completion(example: Dict[str, Any], deployment: str | None = Non
         else:
             # best-effort fallback when only older API present
             resp = openai.Completion.create(
-                model="text-davinci-003", prompt=prompt, max_tokens=200, temperature=0.0)
+                model="text-davinci-003", prompt=prompt, max_tokens=200, temperature=0.0
+            )
             return str(resp.choices[0].text).strip()
     except Exception:
         # When the API call fails, fall back (useful for CI)
         return naive_predict(example)
 
 
-def run(dataset: Path, max_samples: int | None, metrics: List[str], deployment: str | None, save_dir: Path | None) -> Dict[str, Any]:
+def run(
+    dataset: Path,
+    max_samples: int | None,
+    metrics: List[str],
+    deployment: str | None,
+    save_dir: Path | None,
+) -> Dict[str, Any]:
     data = load_jsonl(dataset, max_samples)
     preds = []
     expects = []
@@ -92,23 +104,29 @@ def run(dataset: Path, max_samples: int | None, metrics: List[str], deployment: 
 
     summary: Dict[str, Any] = {"samples": len(preds)}
     if "response_time" in metrics:
-        summary["response_time_ms"] = round(
-            sum(timings) / len(timings), 3) if timings else 0.0
+        summary["response_time_ms"] = (
+            round(sum(timings) / len(timings), 3) if timings else 0.0
+        )
     if "accuracy" in metrics:
         summary.update(compute_metrics(preds, expects))
 
     if save_dir:
         save_dir.mkdir(parents=True, exist_ok=True)
-        out = {"summary": summary, "predictions": [
-            {"pred": p, "expected": e} for p, e in zip(preds, expects)]}
-        (save_dir / "results.json").write_text(json.dumps(out, indent=2), encoding="utf-8")
+        out = {
+            "summary": summary,
+            "predictions": [{"pred": p, "expected": e} for p, e in zip(preds, expects)],
+        }
+        (save_dir / "results.json").write_text(
+            json.dumps(out, indent=2), encoding="utf-8"
+        )
 
     return summary
 
 
 def parse_args():
     ap = argparse.ArgumentParser(
-        description="Evaluate via OpenAI API (with local fallback for CI)")
+        description="Evaluate via OpenAI API (with local fallback for CI)"
+    )
     ap.add_argument("--dataset", required=True)
     ap.add_argument("--max-samples", type=int, default=None)
     ap.add_argument("--metric", action="append", dest="metrics")
@@ -124,8 +142,7 @@ def main():
     save = Path(args.save_dir) if args.save_dir else None
 
     try:
-        summary = run(dataset, args.max_samples,
-                      metrics, args.deployment, save)
+        summary = run(dataset, args.max_samples, metrics, args.deployment, save)
         print(json.dumps({"summary": summary}))
         return 0
     except Exception as e:

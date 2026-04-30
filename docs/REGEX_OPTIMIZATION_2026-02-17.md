@@ -1,6 +1,6 @@
 # Regex Pattern Compilation Performance Optimizations
 
-**Date**: 2026-02-17  
+**Date**: 2026-02-17
 **Status**: ✅ Implemented and Tested
 
 ## Overview
@@ -35,7 +35,7 @@ Based on benchmark tests (see `tests/test_regex_optimizations.py`):
 
 ### 1. `scripts/final_validation.py`
 
-**Changes**: 
+**Changes**:
 - Pre-compiled 5 regex patterns at module level
 - Optimized function name checking loop to pre-compile dynamic patterns
 
@@ -48,13 +48,13 @@ _RE_GET_BY_ID = re.compile(r"getElementById\(['\"]([^'\"]+)['\"]\)")
 _RE_FETCH_CALLS = re.compile(r"fetch\(['\"]([^'\"]+)['\"]\)")
 ```
 
-**Impact**: 
+**Impact**:
 - 9+ regex operations now use pre-compiled patterns
 - Dynamic function name patterns are compiled once per function instead of 4x per function
 
 ### 2. `scripts/validate_dashboard.py`
 
-**Changes**: 
+**Changes**:
 - Pre-compiled 9 regex patterns at module level
 
 **Patterns Compiled**:
@@ -71,13 +71,13 @@ _RE_LOCALSTORAGE = re.compile(r"localStorage\.(getItem|setItem|removeItem)\(['\"
 _RE_ONCLICK = re.compile(r'onclick=["\']([^"\']+)["\']')
 ```
 
-**Impact**: 
+**Impact**:
 - 10+ regex operations now use pre-compiled patterns
 - Validation script runs more efficiently
 
 ### 3. `function_app.py`
 
-**Changes**: 
+**Changes**:
 - Added `import re` at module level (was imported locally 4 times)
 - Pre-compiled word splitting pattern used in TTS functions
 - Removed 4 redundant local `import re` statements
@@ -87,14 +87,14 @@ _RE_ONCLICK = re.compile(r'onclick=["\']([^"\']+)["\']')
 _RE_WORD_SPLIT = re.compile(r"\S+")
 ```
 
-**Impact**: 
+**Impact**:
 - Pattern used 3x in TTS word timing generation (lines 845, 930, 978)
 - Eliminates repeated imports and compilations in hot path
 - TTS response generation is more efficient
 
 ### 4. `shared/email_notifications.py`
 
-**Changes**: 
+**Changes**:
 - Pre-compiled 2 regex patterns for HTML stripping
 - Added `import re` at module level
 - Removed local `import re` from `_strip_html()` method
@@ -105,13 +105,13 @@ _RE_HTML_TAGS = re.compile(r'<[^<]+?>')
 _RE_WHITESPACE = re.compile(r'\s+')
 ```
 
-**Impact**: 
+**Impact**:
 - HTML stripping in email body generation is more efficient
 - Pattern compilation eliminated from frequently-called method
 
 ### 5. `cooking-ai/src/providers/local.py`
 
-**Changes**: 
+**Changes**:
 - Moved quantity extraction pattern to module level
 - Pre-compiled pattern used in ingredient parsing
 
@@ -120,7 +120,7 @@ _RE_WHITESPACE = re.compile(r'\s+')
 _RE_QUANTITY = re.compile(r"^(?P<qty>(\d+\/\d+|\d+(\.\d+)?))\s*(?P<unit>[a-zA-Z]+)?\s*(?P<name>.*)")
 ```
 
-**Impact**: 
+**Impact**:
 - Pattern compiled once instead of on every `_handle_extract()` call
 - Ingredient extraction is more efficient
 

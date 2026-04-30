@@ -93,7 +93,7 @@ data_out/evaluation_autorun/
 - name: eval_quantum_heart
   enabled: true
   model_type: quantum
-  model_path: quantum-ai/results/heart_disease_model.json
+  model_path: ai-projects/quantum-ml/results/heart_disease_model.json
   dataset: datasets/quantum/heart_disease.csv
   max_samples: null  # Full test set
   metrics:
@@ -233,7 +233,7 @@ $env:OPENAI_MODEL = "gpt-4o-mini"  # Optional
   run: |
     python scripts/evaluation/evaluation_autorun.py --dry-run
     python scripts/evaluation/evaluation_autorun.py --job eval_smoke_test
-    
+
 - name: Upload evaluation results
   uses: actions/upload-artifact@v3
   with:
@@ -246,10 +246,10 @@ $env:OPENAI_MODEL = "gpt-4o-mini"  # Optional
 ```yaml
 - script: python scripts/evaluation/evaluation_autorun.py --dry-run
   displayName: 'Validate evaluation config'
-  
+
 - script: python scripts/evaluation/evaluation_autorun.py
   displayName: 'Run evaluation suite'
-  
+
 - task: PublishBuildArtifacts@1
   inputs:
     pathToPublish: 'data_out/evaluation_autorun'
@@ -258,14 +258,14 @@ $env:OPENAI_MODEL = "gpt-4o-mini"  # Optional
 
 ## Design Patterns Used
 
-✅ **YAML-driven declarative config** - Single source of truth for evaluation jobs  
-✅ **Sequential execution** - Jobs run in order with clear progress tracking  
-✅ **Dry-run validation** - Check paths and config before execution  
-✅ **Machine-readable status** - JSON output for automation  
-✅ **Timestamped runs** - No overwrites, full audit trail  
-✅ **Project venv isolation** - Uses correct Python environment per domain  
-✅ **Modular evaluation scripts** - One script per model type  
-✅ **Flexible metrics** - Configurable per job and model type  
+✅ **YAML-driven declarative config** - Single source of truth for evaluation jobs
+✅ **Sequential execution** - Jobs run in order with clear progress tracking
+✅ **Dry-run validation** - Check paths and config before execution
+✅ **Machine-readable status** - JSON output for automation
+✅ **Timestamped runs** - No overwrites, full audit trail
+✅ **Project venv isolation** - Uses correct Python environment per domain
+✅ **Modular evaluation scripts** - One script per model type
+✅ **Flexible metrics** - Configurable per job and model type
 
 ## Extending the Orchestrator
 

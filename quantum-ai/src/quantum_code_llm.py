@@ -75,10 +75,26 @@ def _make_device(n_qubits: int):
 # ─────────────────────────────────────────────────────────────────────────────
 
 _CODE_KEYWORDS = [
-    "def ", "class ", "return ", "import ", "from ", "with ",
+    "def ",
+    "class ",
+    "return ",
+    "import ",
+    "from ",
+    "with ",
     "    ",  # 4-space indent block
-    "if ", "else:", "elif ", "for ", "while ", "try:", "except ", "pass",
-    "None", "True", "False", "self.", "print(",
+    "if ",
+    "else:",
+    "elif ",
+    "for ",
+    "while ",
+    "try:",
+    "except ",
+    "pass",
+    "None",
+    "True",
+    "False",
+    "self.",
+    "print(",
 ]
 
 
@@ -116,7 +132,9 @@ class CodeTokenizer:
 
         self.vocab_size: int = idx
 
-    def encode(self, text: str, add_bos: bool = True, add_eos: bool = True) -> List[int]:
+    def encode(
+        self, text: str, add_bos: bool = True, add_eos: bool = True
+    ) -> List[int]:
         ids: List[int] = []
         if add_bos:
             ids.append(self.BOS)
@@ -124,7 +142,7 @@ class CodeTokenizer:
         while i < len(text):
             matched = False
             for kw in self._keywords:
-                if text[i:i + len(kw)] == kw:
+                if text[i : i + len(kw)] == kw:
                     ids.append(self._tok2id[kw])
                     i += len(kw)
                     matched = True
@@ -167,6 +185,7 @@ class CodeTokenizer:
 # 3. QUANTUM FEATURE MAP LAYER
 # ─────────────────────────────────────────────────────────────────────────────
 
+
 class QuantumFeatureMapLayer(nn.Module):
     """Variational quantum circuit used as a learnable feature map.
 
@@ -182,6 +201,7 @@ class QuantumFeatureMapLayer(nn.Module):
         self.quantum = device is not None
 
         if self.quantum:
+
             @qml.qnode(device, interface="torch", diff_method="best")
             def _circuit(inputs, weights):
                 qml.AngleEmbedding(inputs, wires=range(n_qubits), rotation="Y")
@@ -212,6 +232,7 @@ class QuantumFeatureMapLayer(nn.Module):
 # ─────────────────────────────────────────────────────────────────────────────
 # 4. QUANTUM KERNEL ATTENTION
 # ─────────────────────────────────────────────────────────────────────────────
+
 
 class QuantumKernelAttention(nn.Module):
     """Multi-head attention where Q and K are projected through a quantum
@@ -301,6 +322,7 @@ class QuantumKernelAttention(nn.Module):
 # 5. QUANTUM FEED-FORWARD NETWORK
 # ─────────────────────────────────────────────────────────────────────────────
 
+
 class QuantumFFN(nn.Module):
     """Feed-forward block with a quantum variational circuit in the middle.
 
@@ -343,6 +365,7 @@ class QuantumFFN(nn.Module):
 # 6. QUANTUM TRANSFORMER BLOCK
 # ─────────────────────────────────────────────────────────────────────────────
 
+
 class QuantumTransformerBlock(nn.Module):
     """Pre-norm transformer block with quantum attention and quantum FFN."""
 
@@ -375,6 +398,7 @@ class QuantumTransformerBlock(nn.Module):
 # 7. QUANTUM CODE LLM (MAIN MODEL)
 # ─────────────────────────────────────────────────────────────────────────────
 
+
 @dataclass
 class QuantumCodeLLMConfig:
     vocab_size: int = 120
@@ -382,10 +406,10 @@ class QuantumCodeLLMConfig:
     n_heads: int = 4
     n_layers: int = 2
     n_qubits: int = 4
-    n_var_layers: int = 2        # variational layers inside each quantum circuit
+    n_var_layers: int = 2  # variational layers inside each quantum circuit
     max_seq_len: int = 128
     dropout: float = 0.1
-    backend: str = "auto"        # "auto" | "qiskit.aer" | "default.qubit" | "classical"
+    backend: str = "auto"  # "auto" | "qiskit.aer" | "default.qubit" | "classical"
 
 
 class QuantumCodeLLM(nn.Module):
@@ -504,7 +528,9 @@ class QuantumCodeLLM(nn.Module):
             if top_k > 0:
                 k = min(top_k, next_logits.shape[-1])
                 kth_val = torch.topk(next_logits, k).values[:, -1, None]
-                next_logits = next_logits.masked_fill(next_logits < kth_val, float("-inf"))
+                next_logits = next_logits.masked_fill(
+                    next_logits < kth_val, float("-inf")
+                )
 
             probs = F.softmax(next_logits, dim=-1)
             next_id = torch.multinomial(probs, num_samples=1)  # (1, 1)
@@ -596,6 +622,7 @@ class CodeDataset(Dataset):
 # ─────────────────────────────────────────────────────────────────────────────
 # 9. TRAINER
 # ─────────────────────────────────────────────────────────────────────────────
+
 
 @dataclass
 class TrainConfig:
@@ -709,6 +736,7 @@ class QuantumCodeTrainer:
 # 10. PUBLIC ENTRY POINTS
 # ─────────────────────────────────────────────────────────────────────────────
 
+
 def train(
     model_cfg: Optional[dict] = None,
     train_cfg: Optional[dict] = None,
@@ -782,7 +810,7 @@ def load_checkpoint(
     if not path.exists():
         raise FileNotFoundError(f"Checkpoint not found: {path}")
 
-    payload = torch.load(path, map_location=map_location)
+    payload = torch.load(path, map_location=map_location, weights_only=False)
     if "model_state" not in payload:
         raise ValueError(f"Invalid checkpoint payload: missing model_state in {path}")
 

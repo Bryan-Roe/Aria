@@ -74,10 +74,10 @@ switch ($choice) {
             # Train on multiple datasets sequentially
             Write-Host "`nTraining on Dolly dataset..." -ForegroundColor Cyan
             python train_max_performance.py --dataset "$workspaceRoot\datasets\chat\dolly" --epochs 2
-            
+
             Write-Host "`nTraining on OpenAssistant dataset..." -ForegroundColor Cyan
             python train_max_performance.py --dataset "$workspaceRoot\datasets\chat\openassistant" --epochs 2
-            
+
             Write-Host "`nTraining on Mixed Chat dataset..." -ForegroundColor Cyan
             python train_max_performance.py --dataset "$workspaceRoot\datasets\chat\mixed_chat" --epochs 1
         } else {

@@ -5,7 +5,7 @@ version: 1
 
 jobs:
   # ===== ULTRA QUICK (32 samples, 1-2 min) =====
-  
+
   - name: phi35_ultra_quick
     category: ultrafast
     runner: hf
@@ -19,9 +19,9 @@ jobs:
     lora_dropout: 0.05
     lora_rank: 4
     hf_model_id: microsoft/Phi-3.5-mini-instruct
-    
+
   # ===== RAPID TEST (64 samples, 3-4 min) =====
-  
+
   - name: phi35_rapid_mixed
     category: ultrafast
     runner: hf

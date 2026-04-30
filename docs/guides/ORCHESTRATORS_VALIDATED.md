@@ -1,6 +1,6 @@
 # QAI Orchestrators - Validation Complete ✅
 
-**Date:** 2025-01-20  
+**Date:** 2025-01-20
 **Status:** ALL SYSTEMS OPERATIONAL
 
 ## Executive Summary
@@ -17,7 +17,7 @@ All three orchestrators in the QAI workspace have been tested, validated, and co
 
 **Solution:**
 - Added `_venv_python_ml()` to `scripts/training/autotrain.py` → routes to `AI/microsoft_phi-silica-3.6_v1/venv/Scripts/python.exe`
-- Added `_venv_python_quantum()` to `scripts/evaluation/quantum_autorun.py` → routes to `quantum-ai/venv/Scripts/python.exe`
+- Added `_venv_python_quantum()` to `scripts/evaluation/quantum_autorun.py` → routes to `ai-projects/quantum-ml/venv/Scripts/python.exe`
 
 **Impact:** Training jobs now execute with correct dependency isolation, preventing cross-contamination between quantum and ML environments.
 
@@ -41,10 +41,10 @@ All three orchestrators in the QAI workspace have been tested, validated, and co
 ## Validation Results
 
 ### AutoTrain (LoRA Fine-Tuning)
-**Config:** `autotrain.yaml`  
-**Jobs Configured:** 6  
-**Dry-Run:** ✅ PASSED  
-**Real Execution:** ✅ CONFIRMED (phi35_mixed_chat running)  
+**Config:** `autotrain.yaml`
+**Jobs Configured:** 6
+**Dry-Run:** ✅ PASSED
+**Real Execution:** ✅ CONFIRMED (phi35_mixed_chat running)
 **Venv Path:** `C:\Users\Bryan\OneDrive\AI\AI\microsoft_phi-silica-3.6_v1\venv\Scripts\python.exe`
 
 **Jobs:**
@@ -56,10 +56,10 @@ All three orchestrators in the QAI workspace have been tested, validated, and co
 6. `phi35_openassistant` - OpenAssistant dataset
 
 ### Quantum AutoRun (Quantum ML)
-**Config:** `quantum_autorun.yaml`  
-**Jobs Configured:** 3  
-**Dry-Run:** ✅ PASSED  
-**Real Execution:** ✅ STARTED (heart_quick interrupted by user)  
+**Config:** `quantum_autorun.yaml`
+**Jobs Configured:** 3
+**Dry-Run:** ✅ PASSED
+**Real Execution:** ✅ STARTED (heart_quick interrupted by user)
 **Venv Path:** `C:\Users\Bryan\OneDrive\AI\quantum-ai\venv\Scripts\python.exe`
 
 **Jobs:**
@@ -68,10 +68,10 @@ All three orchestrators in the QAI workspace have been tested, validated, and co
 3. `azure_ionq_qpu_test` - IonQ QPU hardware submission (PAID, requires confirmation)
 
 ### Autonomous Training (Continuous Optimization)
-**Config:** `config/autonomous_training.yaml`  
-**Status:** ✅ INITIALIZED  
-**Cycles Completed:** 1  
-**Current Phase:** `optimization`  
+**Config:** `config/autonomous_training.yaml`
+**Status:** ✅ INITIALIZED
+**Cycles Completed:** 1
+**Current Phase:** `optimization`
 **Dataset Inventory:** Active
 
 **Features:**
@@ -149,7 +149,7 @@ Loading checkpoint shards: 100%|##########| 2/2 [00:05<00:00,  2.99s/it]
 1. **Monitor phi35 training:** Check logs in `data_out\autotrain\phi35_mixed_chat\`
 2. **Run full quantum suite:** `python .\scripts\quantum_autorun.py` (all jobs, local simulators)
 3. **Enable autonomous loop:** `python .\scripts\autonomous_training_orchestrator.py` (continuous optimization)
-4. **Azure deployment:** Use Bicep templates in `quantum-ai/azure/` for cloud infrastructure
+4. **Azure deployment:** Use Bicep templates in `ai-projects/quantum-ml/azure/` for cloud infrastructure
 
 ## Files Modified in This Session
 
@@ -168,19 +168,19 @@ Loading checkpoint shards: 100%|##########| 2/2 [00:05<00:00,  2.99s/it]
 ## Troubleshooting Reference
 
 ### "Training dependencies not installed"
-**Cause:** Wrong venv activated or script not using orchestrator  
+**Cause:** Wrong venv activated or script not using orchestrator
 **Fix:** Run via orchestrator (`autotrain.py`, `quantum_autorun.py`) - they auto-route to correct venv
 
 ### "Dataset not found"
-**Cause:** Running from wrong directory  
+**Cause:** Running from wrong directory
 **Fix:** Always run orchestrators from repo root: `c:\Users\Bryan\OneDrive\AI`
 
 ### Quantum backend errors
-**Cause:** Azure credentials not configured or workspace doesn't exist  
+**Cause:** Azure credentials not configured or workspace doesn't exist
 **Fix:** Run `az login` and verify `quantum_config.yaml` matches Portal settings
 
 ### Chat provider not working
-**Cause:** Missing API keys or old openai SDK  
+**Cause:** Missing API keys or old openai SDK
 **Fix:** Set 4 Azure OpenAI env vars + `pip install --upgrade openai`
 
 ## Success Metrics

@@ -15,25 +15,26 @@ permissions:
   contents: write
   packages: write
 
+concurrency:
+  group: release
+  cancel-in-progress: false
+
 jobs:
   create-release:
     name: Create Release
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - name: Setup Python
+        uses: ./.github/actions/setup-python-env
         with:
-          python-version: '3.11'
-
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install build twine
+          install-requirements: 'false'
+          extra-packages: 'build twine'
 
       - name: Get version from tag
         id: version
@@ -51,7 +52,7 @@ jobs:
         run: |
           # Get previous tag
           PREV_TAG=$(git describe --abbrev=0 --tags $(git rev-list --tags --skip=1 --max-count=1) 2>/dev/null || echo "")
-          
+
           if [ -z "$PREV_TAG" ]; then
             echo "First release - no previous tag found"
             git log --pretty=format:"- %s (%h)" > CHANGELOG.md
@@ -59,11 +60,11 @@ jobs:
             echo "Changes since $PREV_TAG:" > CHANGELOG.md
             git log $PREV_TAG..HEAD --pretty=format:"- %s (%h)" >> CHANGELOG.md
           fi
-          
+
           cat CHANGELOG.md
 
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65  # v2.6.2
         with:
           tag_name: ${{ steps.version.outputs.version }}
           name: Release ${{ steps.version.outputs.version }}
@@ -76,15 +77,15 @@ jobs:
         run: |
           # Create release artifacts directory
           mkdir -p release-artifacts
-          
+
           # Create a source tarball
           git archive --format=tar.gz --prefix=aria-${{ steps.version.outputs.version_number }}/ HEAD > release-artifacts/aria-${{ steps.version.outputs.version_number }}.tar.gz
-          
+
           # Create a zip archive
           git archive --format=zip --prefix=aria-${{ steps.version.outputs.version_number }}/ HEAD > release-artifacts/aria-${{ steps.version.outputs.version_number }}.zip
 
       - name: Upload release artifacts
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65  # v2.6.2
         with:
           tag_name: ${{ steps.version.outputs.version }}
           files: |
