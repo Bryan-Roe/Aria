@@ -2,6 +2,9 @@ import argparse
 import json
 import math
 import os
+import ipaddress
+import socket
+from urllib.parse import urlparse
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, Iterable, List
@@ -133,11 +136,45 @@ def make_hf_dataset_from_files(
     return ds
 
 
+def _validated_remote_url(path_or_url: str) -> str:
+    parsed = urlparse(path_or_url)
+    if parsed.scheme not in ("http", "https"):
+        raise ValueError(f"Unsupported URL scheme for manifest source: {parsed.scheme!r}")
+    if not parsed.hostname:
+        raise ValueError("Remote manifest URL must include a hostname")
+
+    allowed_hosts = {h.strip().lower() for h in os.environ.get("LORA_MANIFEST_ALLOWED_HOSTS", "").split(",") if h.strip()}
+    host = parsed.hostname.lower()
+    if allowed_hosts and host not in allowed_hosts:
+        raise ValueError(f"Remote manifest host {host!r} is not in LORA_MANIFEST_ALLOWED_HOSTS")
+
+    try:
+        addrinfos = socket.getaddrinfo(parsed.hostname, parsed.port or (443 if parsed.scheme == "https" else 80), type=socket.SOCK_STREAM)
+    except socket.gaierror as e:
+        raise ValueError(f"Could not resolve remote manifest host {parsed.hostname!r}: {e}") from e
+
+    for ai in addrinfos:
+        ip_str = ai[4][0]
+        ip_obj = ipaddress.ip_address(ip_str)
+        if (
+            ip_obj.is_private
+            or ip_obj.is_loopback
+            or ip_obj.is_link_local
+            or ip_obj.is_reserved
+            or ip_obj.is_multicast
+            or ip_obj.is_unspecified
+        ):
+            raise ValueError(f"Remote manifest host resolves to disallowed address: {ip_str}")
+
+    return path_or_url
+
+
 def _read_text_source(path_or_url: str) -> Iterable[str]:
     if path_or_url.startswith("http://") or path_or_url.startswith("https://"):
         import urllib.request
 
-        with urllib.request.urlopen(path_or_url) as resp:  # nosec B310
+        safe_url = _validated_remote_url(path_or_url)
+        with urllib.request.urlopen(safe_url) as resp:  # nosec B310
             for line in resp.read().decode("utf-8").splitlines():
                 yield line
     else:
@@ -156,7 +193,8 @@ def parse_manifest(path_or_url: str) -> List[str]:
         if path_or_url.startswith("http://") or path_or_url.startswith("https://"):
             import urllib.request
 
-            with urllib.request.urlopen(path_or_url) as resp:  # nosec B310
+            safe_url = _validated_remote_url(path_or_url)
+            with urllib.request.urlopen(safe_url) as resp:  # nosec B310
                 obj = _json.loads(resp.read().decode("utf-8"))
         else:
             with Path(path_or_url).open("r", encoding="utf-8") as f:
