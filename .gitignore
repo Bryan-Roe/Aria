@@ -187,3 +187,4 @@ autotrain_autogen_*.yaml
 .push-worktrees/
 extensions/lmstudio-provider/node_modules/
 extensions/lmstudio-provider/*.vsix
+ai-projects/chat-cli/logs/
