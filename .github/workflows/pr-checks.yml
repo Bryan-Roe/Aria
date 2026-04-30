@@ -73,6 +73,8 @@ jobs:
             "List of user-visible changes"
             "How was this tested"
             "Replace ALL placeholder text"
+            "1–3 sentences describing WHAT changed"
+            "Do not leave this as the default text"
           )
 
           FAILED=0
@@ -90,17 +92,20 @@ jobs:
             FAILED=1
           fi
 
-          # Warn if the PR title looks like a default codespace/branch name (advisory only)
-          if echo "$PR_TITLE" | grep -qiE "^(pending changes|exported from|codespace|untitled|draft|wip)"; then
-            echo "⚠️  PR title looks like a default/generated name: '$PR_TITLE'. Consider using a descriptive title."
+          # Fail if the PR title looks like a default codespace/branch name
+          if echo "$PR_TITLE" | grep -qiE "^(pending changes|exported from (your )?codespace|codespace[- ]|untitled|draft|wip)"; then
+            echo "❌ PR title looks like a default/generated name: '$PR_TITLE'. Please use a descriptive title that explains what the PR does."
+            FAILED=1
           fi
 
           if [ "$FAILED" -eq 1 ]; then
             echo ""
             echo "Please update the PR description with:"
-            echo "  - Summary: What changed and why"
+            echo "  - Summary: What changed and why (1-3 sentences)"
             echo "  - Changes: Bullet list of user-visible changes"
             echo "  - Testing: Commands run and their outcomes"
+            echo ""
+            echo "See the PR template for a filled-in example."
             exit 1
           fi
 
