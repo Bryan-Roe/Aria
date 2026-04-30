@@ -90,21 +90,26 @@ jobs:
             FAILED=1
           fi
 
-          # Warn if the PR title looks like a default codespace/branch name (advisory only)
-          if echo "$PR_TITLE" | grep -qiE "^(pending changes|exported from|codespace|untitled|draft|wip)"; then
-            echo "⚠️  PR title looks like a default/generated name: '$PR_TITLE'. Consider using a descriptive title."
+          # Fail if the PR title looks like a default codespace/branch/export name
+          # Patterns matched: GitHub Codespace default titles and generic placeholder phrases
+          if echo "$PR_TITLE" | grep -qiE "^(pending changes( exported from)?|exported from (your )?codespace|untitled( pr)?|no title)"; then
+            echo "❌ PR title looks like a default/auto-generated name: '$PR_TITLE'"
+            echo "   Please update the title to clearly describe the change."
+            echo "   Example: 'feat: rewrite agi.prompt.md as execution-focused agent prompt'"
+            FAILED=1
           fi
 
           if [ "$FAILED" -eq 1 ]; then
             echo ""
-            echo "Please update the PR description with:"
+            echo "Please update the PR with:"
+            echo "  - Title: A short, descriptive summary of the change (not a codespace/branch export name)"
             echo "  - Summary: What changed and why"
             echo "  - Changes: Bullet list of user-visible changes"
             echo "  - Testing: Commands run and their outcomes"
             exit 1
           fi
 
-          echo "✓ PR description looks filled in ($BODY_LENGTH chars)"
+          echo "✓ PR title and description look filled in ($BODY_LENGTH chars)"
 
   size-check:
     name: PR Size Check
