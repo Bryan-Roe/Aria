@@ -171,3 +171,111 @@ class TestParseQuantumSummary:
         # No 'metrics' key → all values will be None (from .get())
         assert "train_loss_last" in result
         assert result["train_loss_last"] is None
+
+
+# ---------------------------------------------------------------------------
+# _load_yaml
+# ---------------------------------------------------------------------------
+
+
+class TestLoadYaml:
+    def test_returns_dict_from_valid_yaml(self, tmp_path):
+        yaml_file = tmp_path / "test.yaml"
+        yaml_file.write_text("key: value\nnumber: 42\n")
+        result = dbl._load_yaml(yaml_file)
+        assert result["key"] == "value"
+        assert result["number"] == 42
+
+    def test_returns_empty_dict_for_missing_file(self, tmp_path):
+        result = dbl._load_yaml(tmp_path / "nonexistent.yaml")
+        assert result == {}
+
+    def test_returns_empty_dict_for_malformed_yaml(self, tmp_path):
+        yaml_file = tmp_path / "bad.yaml"
+        yaml_file.write_text(": bad: yaml: content:\n  - incomplete")
+        _clear_warned()
+        result = dbl._load_yaml(yaml_file)
+        assert isinstance(result, dict)
+
+    def test_returns_empty_dict_for_empty_yaml(self, tmp_path):
+        yaml_file = tmp_path / "empty.yaml"
+        yaml_file.write_text("")
+        result = dbl._load_yaml(yaml_file)
+        assert result == {}
+
+
+# ---------------------------------------------------------------------------
+# log_lora_run_safe (no DB)
+# ---------------------------------------------------------------------------
+
+
+class TestLogLoraRunSafe:
+    def test_skipped_without_db(self):
+        class MockJob:
+            name = "lora-test"
+            config = None
+            hf_model_id = "TinyLlama"
+            max_train_samples = 100
+            max_eval_samples = 50
+            epochs = 2
+            lora_dropout = 0.1
+            learning_rate = 2e-4
+            dataset = "datasets/chat/test"
+            runner = "unsloth"
+
+        with patch.dict(os.environ, {}, clear=False):
+            os.environ.pop("QAI_DB_CONN", None)
+            result = dbl.log_lora_run_safe(
+                job=MockJob(),
+                result={"status": "succeeded", "duration_sec": 120},
+            )
+        assert result["success"] is False
+        assert result.get("skipped") is True
+
+    def test_returns_dict(self):
+        class MockJob:
+            name = "lora-test"
+            config = None
+            hf_model_id = None
+            max_train_samples = None
+            max_eval_samples = None
+            epochs = 1
+            lora_dropout = None
+            learning_rate = None
+            dataset = "data"
+            runner = "unsloth"
+
+        with patch.dict(os.environ, {}, clear=False):
+            os.environ.pop("QAI_DB_CONN", None)
+            result = dbl.log_lora_run_safe(
+                job=MockJob(),
+                result={"status": "failed"},
+            )
+        assert isinstance(result, dict)
+        assert "success" in result
+
+    def test_skipped_with_custom_config(self, tmp_path):
+        yaml_file = tmp_path / "lora.yaml"
+        yaml_file.write_text("lora_rank: 16\nlora_alpha: 32\n")
+
+        class MockJob:
+            name = "custom-lora"
+            config = str(yaml_file)
+            hf_model_id = "phi-3"
+            max_train_samples = 200
+            max_eval_samples = 100
+            epochs = 5
+            lora_dropout = 0.05
+            learning_rate = 1e-4
+            dataset = "datasets/my_data"
+            runner = "unsloth"
+
+        with patch.dict(os.environ, {}, clear=False):
+            os.environ.pop("QAI_DB_CONN", None)
+            result = dbl.log_lora_run_safe(
+                job=MockJob(),
+                result={"status": "succeeded", "duration_sec": 300},
+            )
+        assert result["success"] is False
+        assert result.get("skipped") is True
+
