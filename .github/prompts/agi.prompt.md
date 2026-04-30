@@ -48,5 +48,5 @@ create_agi_provider(reasoning_depth=3, enable_chain_of_thought=True, enable_self
 **Success Criteria:**
 - Solution is correct, complete, and verified
 - Follows existing codebase patterns and conventions
-- Clear reasoning chain showing decision process
+- Reasoning steps are completed internally; only the final answer is delivered
 - Minimal change surface (no unnecessary modifications)
