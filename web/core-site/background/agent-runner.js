@@ -1,9 +1,10 @@
 import { runAgent } from "../agent.js";
 import { runMultiAgentTask } from "../agents/orchestrator.js";
 import { addMemory } from "../memory.js";
+import { startAutonomyLoop } from "../autonomy/engine.js";
 
-// Aria Agent Runner (v1)
-// Processes queued tasks over time
+// Aria Agent Runner (v2)
+// Now includes autonomous system bootstrap
 
 let running = false;
 let queue = [];
@@ -26,6 +27,9 @@ export function startAgentRunner(interval = 5000) {
   running = true;
 
   addMemory({ type: "agent_runner_started" });
+
+  // START AUTONOMY SYSTEM
+  startAutonomyLoop(15000);
 
   setInterval(async () => {
     if (queue.length === 0) return;
