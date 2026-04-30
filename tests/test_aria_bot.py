@@ -32,7 +32,7 @@ def fake_repo(tmp_path: Path) -> Path:
 
     (tmp_path / "src").mkdir()
     (tmp_path / "src" / "needs_fix.py").write_bytes(
-        b"def foo():    \n    return 1   \n"  # trailing ws + no final newline at EOF? has \n
+        b"def foo():    \n    return 1   \n"  # trailing ws on both lines, has final newline
     )
     (tmp_path / "src" / "needs_newline.md").write_bytes(b"# heading")  # no trailing newline
     (tmp_path / "src" / "clean.py").write_bytes(b"def ok():\n    return 1\n")
@@ -64,7 +64,7 @@ def test_risk_manager_blocks_symlinks(tmp_path: Path) -> None:
 
 def test_risk_manager_caps_file_size(tmp_path: Path) -> None:
     big = tmp_path / "big.py"
-    big.write_bytes(b"a = 1\n" * 1)
+    big.write_bytes(b"a = 1\n" * 2)  # 12 bytes, well over the 1-byte cap
     rm = RiskManager(repo_root=tmp_path, max_file_bytes=1)
     assert not rm.assess_file(big).allowed
 

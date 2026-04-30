@@ -164,15 +164,16 @@ class Orchestrator:
 
     # ------------------------------------------------------------------
     def _commit_message(self, executions: List[ExecutionResult]) -> str:
+        # Only called when at least one execution applied; defend against
+        # accidental misuse by future callers.
+        applied = [e for e in executions if e.applied]
+        if not applied:
+            return "no applied changes"
         kinds: set[str] = set()
-        for e in executions:
-            if e.applied:
-                kinds.update(e.plan.kinds)
-        if not kinds:
-            return "no-op cycle"
-        files_changed = sum(1 for e in executions if e.applied)
+        for e in applied:
+            kinds.update(e.plan.kinds)
         kind_str = ",".join(sorted(kinds))
-        return f"apply {kind_str} to {files_changed} file(s)"
+        return f"apply {kind_str} to {len(applied)} file(s)"
 
     def _write_status(self, result: CycleResult) -> None:
         status_path = self.config.resolve_status_path()
