@@ -42,7 +42,7 @@ _WRITE_TOOLS = {
 _SHELL_TOOLS = {"run_in_terminal", "execute_code", "terminal"}
 
 _SHELL_WRITE_RE = re.compile(
-    r"(?:>""|>>|tee|cp\s|mv\s|touch\s|cat\s.*?>|write|echo.*?>)\s*[\"']?datasets/",
+    r'(?:>""|>>|tee|cp\s|mv\s|touch\s|cat\s.*?>|write|echo.*?>)\s*["\']?datasets/',
     re.IGNORECASE,
 )
 
