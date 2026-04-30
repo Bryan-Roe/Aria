@@ -1,5 +1,5 @@
 ---
-description: "Engage autonomous AGI reasoning with multi-step analysis, task decomposition, self-correction, and iterative improvement. For complex problems requiring structured autonomous thinking."
+description: "Engage autonomous AGI reasoning with multi-step analysis, task decomposition, self-correction, and iterative improvement. Chain-of-thought reasoning runs internally — only the final answer is delivered to the user. For visible step-by-step reasoning, use reason.prompt instead."
 name: "AGI Reasoning"
 argument-hint: "Problem or task description (example: analyze the auth flow for race conditions + constraints)"
 agent: agi-reasoning

@@ -2,7 +2,7 @@
 	"name": "Aria Dev Container",
 	"image": "mcr.microsoft.com/devcontainers/python:2-3.14-trixie",
 	"features": {},
-	"postCreateCommand": "python -m pip install --upgrade pip && if [ -f requirements-dev.txt ]; then pip install -r requirements-dev.txt; fi",
+	"postCreateCommand": "python -m pip install --upgrade pip && if [ -f requirements.txt ]; then pip install -r requirements.txt; fi && if [ -f requirements-dev.txt ]; then pip install -r requirements-dev.txt; fi",
 	"customizations": {
 		"vscode": {
 			"extensions": [

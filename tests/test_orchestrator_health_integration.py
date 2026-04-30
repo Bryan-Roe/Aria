@@ -25,7 +25,11 @@ def app_module():
         raise RuntimeError("Failed to load function_app module")
     module = importlib.util.module_from_spec(spec)
     sys.modules["function_app"] = module
-    spec.loader.exec_module(module)
+    try:
+        spec.loader.exec_module(module)
+    except Exception:
+        sys.modules.pop("function_app", None)
+        raise
     return module
 
 
