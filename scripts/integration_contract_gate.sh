@@ -28,12 +28,12 @@ python3 scripts/validate_site_bundles.py --strict-metadata
 python3 scripts/validate_composite_actions.py
 
 if [[ "$STRICT_ENDPOINTS" -eq 1 ]]; then
-  python3 scripts/integration_smoke.py --strict-endpoints --json
+  python scripts/integration_smoke.py --strict-endpoints --json
 else
-  python3 scripts/integration_smoke.py --json
+  python scripts/integration_smoke.py --json
 fi
 
-python3 scripts/ci_orchestrator.py --integration-contract-tests
-python3 scripts/ci_orchestrator.py --validate-all
+python scripts/ci_orchestrator.py --integration-contract-tests
+python scripts/ci_orchestrator.py --validate-all
 
 echo "[integration_contract_gate] passed"
