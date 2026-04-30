@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Aria Control Center</title>
+  <link rel="stylesheet" href="../assets/design-system.css" />
+</head>
+<body>
+  <div id="app">
+    <header class="topbar">
+      <div class="logo">ARIA</div>
+      <input id="commandInput" class="command-input" placeholder="Ask Aria or run a command..." />
+    </header>
+
+    <main class="layout">
+      <nav class="sidebar">
+        <button data-route="/chat">Chat</button>
+        <button data-route="/studio">Studio</button>
+        <button data-route="/store">Store</button>
+        <button data-route="/showcase">Showcase</button>
+      </nav>
+
+      <section id="view" class="view">
+        <div class="welcome">
+          <h1>Aria Control Center</h1>
+          <p>Command-first AI platform interface.</p>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="./router.js"></script>
+  <script src="./app.js"></script>
+</body>
+</html>
