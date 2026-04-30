@@ -52,6 +52,14 @@ jobs:
           python-version: '3.11'
           extra-packages: 'pytest pytest-timeout pytest-cov'
 
+      - name: Verify critical dependencies
+        run: |
+          echo "Verifying critical test dependencies are installed..."
+          python -c "import azure.functions; print('✓ azure-functions installed')"
+          python -c "import openai; print('✓ openai installed')"
+          python -c "import pytest; print('✓ pytest installed')"
+          echo "All critical dependencies verified."
+
       - name: Resolve pytest flags
         id: flags
         run: |
