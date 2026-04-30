@@ -3988,9 +3988,10 @@ def quantum_llm_stream(req: func.HttpRequest) -> func.HttpResponse:
         )
     except Exception as exc:  # noqa: BLE001
         logging.error("quantum-llm/stream error: %s", exc)
+        _exc = exc  # capture before exception binding is deleted at end of except block
 
         def _err():
-            yield f'data: {json.dumps({"error": str(exc)})}\n\n'.encode("utf-8")
+            yield f'data: {json.dumps({"error": str(_exc)})}\n\n'.encode("utf-8")
             yield b"data: [DONE]\n\n"
 
         return func.HttpResponse(

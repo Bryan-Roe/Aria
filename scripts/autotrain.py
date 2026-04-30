@@ -181,6 +181,7 @@ def load_config(path: Path) -> Dict[str, Any]:
         jobs = data.get("jobs", [])
         if not isinstance(jobs, list):
             return {"jobs": []}
+        data.setdefault("jobs", jobs)
         return data
 
     jobs: List[Dict[str, Any]] = []
