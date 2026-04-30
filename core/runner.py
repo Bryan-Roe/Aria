@@ -1,9 +1,9 @@
 """
 Aria Core Runner (Autonomous Runtime)
-Transforms Aria into a self-planning, self-executing multi-agent system.
+Transforms Aria into a self-planning, self-improving multi-agent system.
 """
 
-from typing import Dict, Any, List
+from typing import Dict, Any
 import time
 
 from core.task import Task
@@ -15,6 +15,7 @@ from core.agents.llm_agent import LLMAgent
 from core.agents.tool_agent import ToolAgent
 from core.agents.training_agent import TrainingAgent
 from core.agents.planner_agent import PlannerAgent
+from core.agents.goal_evolution_agent import GoalEvolutionAgent
 
 
 class AriaRunner:
@@ -28,16 +29,17 @@ class AriaRunner:
         self._setup_agents()
 
     def _setup_agents(self):
-        """Register all core agents."""
         planner = PlannerAgent(self.memory)
         llm = LLMAgent()
         tool = ToolAgent()
         training = TrainingAgent()
+        goal = GoalEvolutionAgent(self.memory)
 
         self.registry.register(planner)
         self.registry.register(llm)
         self.registry.register(tool)
         self.registry.register(training)
+        self.registry.register(goal)
 
     def _run_task(self, task: Task):
         result = self.router.route(task)
@@ -48,8 +50,16 @@ class AriaRunner:
         return result
 
     def _generate_goal(self) -> str:
-        """Simple autonomous goal generator."""
-        return "Improve system performance and generate useful outputs"
+        """Now delegated to GoalEvolutionAgent via routing."""
+
+        task = Task(
+            id="goal_evolve",
+            type="goal_evolve",
+            payload={}
+        )
+
+        result = self.router.route(task)
+        return result.get("result", {}).get("goal", "improve system performance")
 
     def _autonomous_cycle(self):
         goal = self._generate_goal()
@@ -77,7 +87,7 @@ class AriaRunner:
             self._run_task(task)
 
     def run(self):
-        print("[Aria] Autonomous runtime started.")
+        print("[Aria] Autonomous self-improving runtime started.")
 
         while True:
             try:
