@@ -1841,7 +1841,7 @@
             return;
         }
 
-        var candidates = ["main", "#mainContent", ".main", ".page", ".container", ".content"];
+        var candidates = ["main", "#main-content", "#mainContent", ".main", ".page", ".container", ".content"];
         var target = null;
 
         for (var i = 0; i < candidates.length; i += 1) {

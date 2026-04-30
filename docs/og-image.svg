@@ -1,0 +1,140 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#fbf7ef"/>
+      <stop offset="100%" stop-color="#efe5d6"/>
+    </linearGradient>
+    <radialGradient id="atmo-a" cx="12%" cy="18%" r="35%">
+      <stop offset="0%" stop-color="rgba(15,157,137,0.28)"/>
+      <stop offset="100%" stop-color="rgba(15,157,137,0)"/>
+    </radialGradient>
+    <radialGradient id="atmo-b" cx="88%" cy="12%" r="30%">
+      <stop offset="0%" stop-color="rgba(217,91,67,0.22)"/>
+      <stop offset="100%" stop-color="rgba(217,91,67,0)"/>
+    </radialGradient>
+    <radialGradient id="atmo-c" cx="50%" cy="86%" r="32%">
+      <stop offset="0%" stop-color="rgba(211,165,62,0.20)"/>
+      <stop offset="100%" stop-color="rgba(211,165,62,0)"/>
+    </radialGradient>
+    <linearGradient id="badge-grad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0f9d89"/>
+      <stop offset="100%" stop-color="#1bb6a4"/>
+    </linearGradient>
+    <linearGradient id="title-grad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#122033"/>
+      <stop offset="100%" stop-color="#22405c"/>
+    </linearGradient>
+    <linearGradient id="mark-bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#22405c"/>
+      <stop offset="100%" stop-color="#16283d"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <rect width="1200" height="630" fill="url(#atmo-a)"/>
+  <rect width="1200" height="630" fill="url(#atmo-b)"/>
+  <rect width="1200" height="630" fill="url(#atmo-c)"/>
+
+  <!-- Grid overlay -->
+  <g opacity="0.04">
+    <line x1="0" y1="34" x2="1200" y2="34" stroke="#122033" stroke-width="1"/>
+    <line x1="0" y1="68" x2="1200" y2="68" stroke="#122033" stroke-width="1"/>
+    <line x1="0" y1="102" x2="1200" y2="102" stroke="#122033" stroke-width="1"/>
+    <line x1="0" y1="136" x2="1200" y2="136" stroke="#122033" stroke-width="1"/>
+    <line x1="0" y1="170" x2="1200" y2="170" stroke="#122033" stroke-width="1"/>
+    <line x1="0" y1="204" x2="1200" y2="204" stroke="#122033" stroke-width="1"/>
+    <line x1="0" y1="238" x2="1200" y2="238" stroke="#122033" stroke-width="1"/>
+    <line x1="0" y1="272" x2="1200" y2="272" stroke="#122033" stroke-width="1"/>
+    <line x1="0" y1="306" x2="1200" y2="306" stroke="#122033" stroke-width="1"/>
+    <line x1="0" y1="340" x2="1200" y2="340" stroke="#122033" stroke-width="1"/>
+    <line x1="0" y1="374" x2="1200" y2="374" stroke="#122033" stroke-width="1"/>
+    <line x1="0" y1="408" x2="1200" y2="408" stroke="#122033" stroke-width="1"/>
+    <line x1="0" y1="442" x2="1200" y2="442" stroke="#122033" stroke-width="1"/>
+    <line x1="0" y1="476" x2="1200" y2="476" stroke="#122033" stroke-width="1"/>
+    <line x1="0" y1="510" x2="1200" y2="510" stroke="#122033" stroke-width="1"/>
+    <line x1="0" y1="544" x2="1200" y2="544" stroke="#122033" stroke-width="1"/>
+    <line x1="0" y1="578" x2="1200" y2="578" stroke="#122033" stroke-width="1"/>
+    <line x1="34" y1="0" x2="34" y2="630" stroke="#122033" stroke-width="1"/>
+    <line x1="68" y1="0" x2="68" y2="630" stroke="#122033" stroke-width="1"/>
+    <line x1="102" y1="0" x2="102" y2="630" stroke="#122033" stroke-width="1"/>
+    <line x1="136" y1="0" x2="136" y2="630" stroke="#122033" stroke-width="1"/>
+    <line x1="170" y1="0" x2="170" y2="630" stroke="#122033" stroke-width="1"/>
+    <line x1="204" y1="0" x2="204" y2="630" stroke="#122033" stroke-width="1"/>
+    <line x1="238" y1="0" x2="238" y2="630" stroke="#122033" stroke-width="1"/>
+    <line x1="272" y1="0" x2="272" y2="630" stroke="#122033" stroke-width="1"/>
+    <line x1="306" y1="0" x2="306" y2="630" stroke="#122033" stroke-width="1"/>
+    <line x1="340" y1="0" x2="340" y2="630" stroke="#122033" stroke-width="1"/>
+    <line x1="374" y1="0" x2="374" y2="630" stroke="#122033" stroke-width="1"/>
+    <line x1="408" y1="0" x2="408" y2="630" stroke="#122033" stroke-width="1"/>
+    <line x1="442" y1="0" x2="442" y2="630" stroke="#122033" stroke-width="1"/>
+    <line x1="476" y1="0" x2="476" y2="630" stroke="#122033" stroke-width="1"/>
+    <line x1="510" y1="0" x2="510" y2="630" stroke="#122033" stroke-width="1"/>
+    <line x1="544" y1="0" x2="544" y2="630" stroke="#122033" stroke-width="1"/>
+    <line x1="578" y1="0" x2="578" y2="630" stroke="#122033" stroke-width="1"/>
+    <line x1="612" y1="0" x2="612" y2="630" stroke="#122033" stroke-width="1"/>
+    <line x1="646" y1="0" x2="646" y2="630" stroke="#122033" stroke-width="1"/>
+    <line x1="680" y1="0" x2="680" y2="630" stroke="#122033" stroke-width="1"/>
+    <line x1="714" y1="0" x2="714" y2="630" stroke="#122033" stroke-width="1"/>
+    <line x1="748" y1="0" x2="748" y2="630" stroke="#122033" stroke-width="1"/>
+    <line x1="782" y1="0" x2="782" y2="630" stroke="#122033" stroke-width="1"/>
+    <line x1="816" y1="0" x2="816" y2="630" stroke="#122033" stroke-width="1"/>
+    <line x1="850" y1="0" x2="850" y2="630" stroke="#122033" stroke-width="1"/>
+    <line x1="884" y1="0" x2="884" y2="630" stroke="#122033" stroke-width="1"/>
+    <line x1="918" y1="0" x2="918" y2="630" stroke="#122033" stroke-width="1"/>
+    <line x1="952" y1="0" x2="952" y2="630" stroke="#122033" stroke-width="1"/>
+    <line x1="986" y1="0" x2="986" y2="630" stroke="#122033" stroke-width="1"/>
+    <line x1="1020" y1="0" x2="1020" y2="630" stroke="#122033" stroke-width="1"/>
+    <line x1="1054" y1="0" x2="1054" y2="630" stroke="#122033" stroke-width="1"/>
+    <line x1="1088" y1="0" x2="1088" y2="630" stroke="#122033" stroke-width="1"/>
+    <line x1="1122" y1="0" x2="1122" y2="630" stroke="#122033" stroke-width="1"/>
+    <line x1="1156" y1="0" x2="1156" y2="630" stroke="#122033" stroke-width="1"/>
+    <line x1="1190" y1="0" x2="1190" y2="630" stroke="#122033" stroke-width="1"/>
+  </g>
+
+  <!-- Content card -->
+  <rect x="64" y="72" width="1072" height="486" rx="28" fill="rgba(255,255,255,0.72)" stroke="rgba(255,255,255,0.70)" stroke-width="1.5"/>
+
+  <!-- Aria logo mark -->
+  <rect x="104" y="124" width="88" height="88" rx="22" fill="url(#mark-bg)"/>
+  <!-- Head circle -->
+  <circle cx="148" cy="155" r="22" fill="#0f9d89"/>
+  <!-- Shoulders arc -->
+  <path d="M122 196 Q148 174 174 196" stroke="rgba(247,242,232,0.96)" stroke-width="10" stroke-linecap="round" fill="none"/>
+
+  <!-- Eyebrow line -->
+  <rect x="104" y="248" width="40" height="3" rx="2" fill="url(#badge-grad)"/>
+
+  <!-- Eyebrow text -->
+  <text x="152" y="252" font-family="system-ui, sans-serif" font-size="18" font-weight="700" letter-spacing="3" text-transform="uppercase" fill="#22405c" text-decoration="none">INTERACTIVE AI CHARACTER PLATFORM</text>
+
+  <!-- Main title -->
+  <text x="104" y="340" font-family="Georgia, serif" font-size="96" font-weight="700" fill="#122033" letter-spacing="-4">Aria</text>
+
+  <!-- Subtitle -->
+  <text x="104" y="390" font-family="system-ui, sans-serif" font-size="24" fill="#5f6874">Animated character · Multi-provider chat · Autonomous training · Quantum ML</text>
+
+  <!-- Metric pills -->
+  <!-- Pill 1 -->
+  <rect x="104" y="430" width="140" height="52" rx="14" fill="rgba(15,157,137,0.10)" stroke="rgba(15,157,137,0.28)" stroke-width="1.5"/>
+  <text x="174" y="452" text-anchor="middle" font-family="system-ui, sans-serif" font-size="22" font-weight="700" fill="#0f9d89">35+</text>
+  <text x="174" y="472" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" fill="#5f6874">API routes</text>
+
+  <!-- Pill 2 -->
+  <rect x="256" y="430" width="140" height="52" rx="14" fill="rgba(15,157,137,0.10)" stroke="rgba(15,157,137,0.28)" stroke-width="1.5"/>
+  <text x="326" y="452" text-anchor="middle" font-family="system-ui, sans-serif" font-size="22" font-weight="700" fill="#0f9d89">6</text>
+  <text x="326" y="472" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" fill="#5f6874">AI providers</text>
+
+  <!-- Pill 3 -->
+  <rect x="408" y="430" width="140" height="52" rx="14" fill="rgba(15,157,137,0.10)" stroke="rgba(15,157,137,0.28)" stroke-width="1.5"/>
+  <text x="478" y="452" text-anchor="middle" font-family="system-ui, sans-serif" font-size="22" font-weight="700" fill="#0f9d89">30m</text>
+  <text x="478" y="472" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" fill="#5f6874">train cadence</text>
+
+  <!-- Pill 4 -->
+  <rect x="560" y="430" width="140" height="52" rx="14" fill="rgba(15,157,137,0.10)" stroke="rgba(15,157,137,0.28)" stroke-width="1.5"/>
+  <text x="630" y="452" text-anchor="middle" font-family="system-ui, sans-serif" font-size="22" font-weight="700" fill="#0f9d89">80+</text>
+  <text x="630" y="472" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" fill="#5f6874">doc guides</text>
+
+  <!-- GitHub URL -->
+  <text x="1072" y="500" text-anchor="end" font-family="monospace" font-size="18" fill="#5f6874">github.com/Bryan-Roe/Aria</text>
+</svg>
