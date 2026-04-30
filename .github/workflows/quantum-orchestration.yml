@@ -15,14 +15,16 @@ on:
     branches: [ main ]
   workflow_dispatch:
     inputs:
-      AZURE_CREDENTIALS:
-        description: "Service principal JSON for azure/login (optional; recommended via GitHub Secret)"
-        required: false
-        type: string
       LOGIC_APP_URL:
         description: "Logic App URL for optional notifications"
         required: false
         type: string
+
+# Credentials must come exclusively from the AZURE_CREDENTIALS repository secret.
+# Never pass service principal JSON as a workflow_dispatch input — it would be
+# visible in the GitHub Actions UI and potentially captured in runner logs.
+permissions:
+  contents: read
 
 jobs:
   run-quantum:
@@ -31,10 +33,10 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: Azure Login
-      if: ${{ inputs.AZURE_CREDENTIALS != '' }}
+      if: ${{ secrets.AZURE_CREDENTIALS != '' }}
       uses: azure/login@v2
       with:
-        creds: ${{ inputs.AZURE_CREDENTIALS }}
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
     - name: Run Orchestration
       shell: pwsh
       run: |

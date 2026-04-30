@@ -7,9 +7,14 @@ Verifies that LM Studio is properly integrated with the AGI Provider's multi-age
 
 import os
 import sys
+from pathlib import Path
+from unittest.mock import MagicMock, patch
 
-sys.path.insert(0, "/workspaces/Aria/ai-projects/chat-cli/src")
-sys.path.insert(0, "/workspaces/Aria/shared")
+_REPO_ROOT = Path(__file__).parent.parent
+_CHAT_SRC = _REPO_ROOT / "ai-projects" / "chat-cli" / "src"
+
+if str(_CHAT_SRC) not in sys.path:
+    sys.path.insert(0, str(_CHAT_SRC))
 
 
 def test_agent_registration():
@@ -33,12 +38,16 @@ def test_agent_registration():
 
 def test_provider_detection():
     """Test that detect_provider can create LMStudioProvider."""
-    from chat_providers import detect_provider
+    from chat_providers import LMStudioProvider, detect_provider
 
-    provider, choice = detect_provider(explicit="lmstudio")
+    with patch("chat_providers.OpenAI") as mock_openai_cls:
+        mock_openai_cls.return_value = MagicMock()
+        provider, choice = detect_provider(explicit="lmstudio")
+
     assert provider is not None, "Provider should be created"
     assert choice.name == "lmstudio", "Choice should be lmstudio"
     assert choice.model == "local-model", "Model should be local-model"
+    assert isinstance(provider, LMStudioProvider)
 
     print("✓ Provider detection test passed")
     print(f"   Provider type: {type(provider).__name__}")

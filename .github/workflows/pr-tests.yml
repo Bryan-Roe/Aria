@@ -16,6 +16,9 @@ on:
         required: false
         default: '10'
 
+permissions:
+  contents: read
+
 jobs:
   test:
     runs-on: ubuntu-latest

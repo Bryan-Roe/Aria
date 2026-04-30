@@ -330,7 +330,7 @@ Available agents in `.github/agents/`:
 - `Azure_Static_Web_App.agent.md` — Static web app deployment patterns
 
 **Prompts** (`.github/prompts/`):
-- `agi.prompt.md` — AGI reasoning with chain-of-thought
+- `agi.prompt.md` — Autonomous AGI reasoning with multi-step analysis and self-correction (chain-of-thought is internal, not exposed in output)
 - `reason.prompt.md` — Structured analysis
 - `debug.prompt.md` — Systematic diagnostic protocol
 - `review.prompt.md` — Code review (correctness, security, performance)

@@ -52,6 +52,14 @@ jobs:
           python-version: '3.11'
           extra-packages: 'pytest pytest-timeout pytest-cov'
 
+      - name: Verify critical dependencies
+        run: |
+          echo "Verifying critical test dependencies are installed..."
+          python -c "import azure.functions; print('✓ azure-functions installed')"
+          python -c "import openai; print('✓ openai installed')"
+          python -c "import pytest; print('✓ pytest installed')"
+          echo "All critical dependencies verified."
+
       - name: Resolve pytest flags
         id: flags
         run: |
@@ -124,7 +132,7 @@ jobs:
 
       - name: Download previous baseline artifact
         id: download-prev
-        uses: dawidd6/action-download-artifact@v6
+        uses: dawidd6/action-download-artifact@bf251b5aa9c2f7eeb574a96ee720e24f801b7c11  # v6
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           workflow: nightly-regression.yml

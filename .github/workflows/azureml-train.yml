@@ -55,12 +55,19 @@ jobs:
         with:
           inlineScript: |
             az extension add -n ml -y
-            az account set --subscription "${{ github.event.inputs.subscriptionId }}"
-            az configure --defaults group="${{ github.event.inputs.resourceGroup }}" workspace="${{ github.event.inputs.workspaceName }}"
+            az account set --subscription "$SUBSCRIPTION_ID"
+            az configure --defaults group="$RESOURCE_GROUP" workspace="$WORKSPACE_NAME"
+        env:
+          SUBSCRIPTION_ID: ${{ github.event.inputs.subscriptionId }}
+          RESOURCE_GROUP: ${{ github.event.inputs.resourceGroup }}
+          WORKSPACE_NAME: ${{ github.event.inputs.workspaceName }}
 
       - name: Submit Azure ML job
         uses: azure/cli@v2
         with:
           inlineScript: |
-            echo "Submitting job from ${{ github.event.inputs.jobFile }} ..."
-            az ml job create -f "${{ github.event.inputs.jobFile }}" --set compute="${{ github.event.inputs.compute }}" --stream
+            echo "Submitting job from $JOB_FILE ..."
+            az ml job create -f "$JOB_FILE" --set compute="$COMPUTE_TARGET" --stream
+        env:
+          JOB_FILE: ${{ github.event.inputs.jobFile }}
+          COMPUTE_TARGET: ${{ github.event.inputs.compute }}

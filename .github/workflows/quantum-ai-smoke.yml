@@ -13,6 +13,9 @@ on:
       - '.github/workflows/quantum-ai-smoke.yml'
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   smoke-quantum-ai:
     name: Smoke Quantum Code LLM

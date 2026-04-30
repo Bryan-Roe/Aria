@@ -1,4 +1,5 @@
 import { executeTool } from "./tools.js";
+import { runAgent } from "./agent.js";
 
 async function sendToAI(message, context = {}) {
   const res = await fetch("/api/chat", {
@@ -23,8 +24,10 @@ async function sendToAI(message, context = {}) {
 async function runCommandOrAI(input) {
   const trimmed = input.trim();
 
+  // 1. tool execution layer
   if (trimmed.startsWith("/")) {
     const [cmd, ...args] = trimmed.slice(1).split(" ");
+
     const result = await executeTool(cmd, { args });
 
     return {
@@ -33,12 +36,14 @@ async function runCommandOrAI(input) {
     };
   }
 
-  const ai = await sendToAI(trimmed);
+  // 2. FULL AGENT MODE (AI OS runtime)
+  const agent = await runAgent(trimmed);
 
   return {
-    type: "ai",
-    output: ai.response || ai,
-    tools: ai.tools || []
+    type: "agent",
+    output: agent.final,
+    trace: agent.steps,
+    memory: true
   };
 }
 

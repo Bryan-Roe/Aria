@@ -31,6 +31,9 @@ on:
       - '.github/workflows/aria-tests.yml'
   workflow_dispatch: # Manual trigger
 
+permissions:
+  contents: read
+
 concurrency:
   group: aria-tests-${{ github.ref }}
   cancel-in-progress: true

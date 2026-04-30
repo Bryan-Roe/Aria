@@ -9,6 +9,9 @@ on:
       - 'ai-projects/llm-maker/**'
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   test-llm-maker:
     runs-on: ubuntu-latest
