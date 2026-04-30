@@ -26,6 +26,9 @@ Short & actionable summary for AI agents editing Aria — an interactive AI char
   - `/api/tts` — Azure Speech TTS (falls back to local if enabled)
   - `/api/quantum/*` — quantum job submission/monitoring
   - `/api/ai/status` — health check showing active provider, env vars, DB pool, Cosmos status
+  - `/api/quantum-llm/status` — quantum-powered LLM backend info (backend, qubits, fallback, provider)
+  - `/api/quantum-llm/chat` — non-streaming quantum-augmented LLM completion
+  - `/api/quantum-llm/stream` — SSE streaming quantum-augmented LLM (same format as `/api/chat/stream`)
 - **Aria Web API endpoints** (via `apps/aria/server.py` on port 8080):
   - `GET /api/aria/state` — current stage state (position, objects, expressions)
   - `POST /api/aria/command` — process natural language commands
@@ -209,6 +212,11 @@ async def run_single_cycle(cycle_number):
 | Change | File(s) |
 |--------|---------|
 | Add/modify API endpoint | `function_app.py` |
+| Quantum LLM pipeline | `ai-projects/quantum-ml/src/quantum_llm/pipeline.py` |
+| Quantum token sampler | `ai-projects/quantum-ml/src/quantum_llm/quantum_sampler.py` |
+| Quantum embedding transformer | `ai-projects/quantum-ml/src/quantum_llm/quantum_embeddings.py` |
+| Quantum provider router | `ai-projects/quantum-ml/src/quantum_llm/quantum_router.py` |
+| Quantum LLM config | `ai-projects/quantum-ml/src/quantum_llm/config.py` |
 | Chat provider logic | `ai-projects/chat-cli/src/chat_providers.py` (re-exported by `shared/chat_providers.py`) |
 | Training orchestration | `scripts/autotrain.py` + root `autotrain.yaml` |
 | Autonomous training behavior | `scripts/autonomous_training_orchestrator.py` + `config/autonomous_training.yaml` |
