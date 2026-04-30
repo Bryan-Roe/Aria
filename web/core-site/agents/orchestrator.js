@@ -2,26 +2,24 @@ import { getRole } from "./roles.js";
 import { sendToAI } from "../api.js";
 import { executeTool } from "../tools.js";
 import { addMemory } from "../memory.js";
+import { evolveAgent } from "./evolver.js";
 
-// Multi-Agent Orchestrator (v1)
-// Coordinates specialized agents
+// Multi-Agent Orchestrator (v2)
+// Now supports evolution mode
 
-export async function runMultiAgentTask(task) {
-  addMemory({ type: "multi_agent_task_start", task });
+export async function runMultiAgentTask(task, options = {}) {
+  addMemory({ type: "multi_agent_task_start", task, options });
 
-  // 1. Planner phase
   const planner = getRole("planner");
   const planRes = await sendToAI(task, { system: planner.systemPrompt });
 
   addMemory({ type: "planner_output", planRes });
 
-  // 2. Execution phase
   const executor = getRole("executor");
   const execRes = await sendToAI(planRes.response || planRes, { system: executor.systemPrompt });
 
   addMemory({ type: "executor_output", execRes });
 
-  // 3. Tool execution if needed
   let toolResults = [];
   const tools = execRes.tools || [];
 
@@ -31,19 +29,30 @@ export async function runMultiAgentTask(task) {
     addMemory({ type: "tool_exec", tool: t, result });
   }
 
-  // 4. Analyst phase
   const analyst = getRole("analyst");
   const final = await sendToAI(
     JSON.stringify({ execRes, toolResults }),
     { system: analyst.systemPrompt }
   );
 
-  addMemory({ type: "multi_agent_final", final });
-
-  return {
+  let output = {
     plan: planRes,
     execution: execRes,
     tools: toolResults,
     final: final.response || final
   };
+
+  if (options.evolve) {
+    const evolved = await evolveAgent(
+      options.evolveSpec || { role: "auto" },
+      task,
+      options.iterations || 2
+    );
+
+    output.evolution = evolved;
+  }
+
+  addMemory({ type: "multi_agent_final", output });
+
+  return output;
 }
