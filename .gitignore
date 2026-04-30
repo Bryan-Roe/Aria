@@ -23,6 +23,7 @@ var/
 wheels/
 # Data output directories (generated artifacts)
 data_out/
+ai-projects/chat-cli/logs/
 deployed_models/
 pip-wheel-metadata/
 share/python-wheels/
