@@ -133,5 +133,4 @@ This policy may be updated from time to time.  The latest version is always
 available at:
 
 <https://github.com/Bryan-Roe/Aria/blob/main/SECURITY.md>
-
-Signed-off-by: Aria Maintainers
+
