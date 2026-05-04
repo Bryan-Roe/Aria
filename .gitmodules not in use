@@ -1,0 +1,4 @@
+[submodule "symengine"]
+  path = symengine
+  url = https://github.com/symengine/symengine.git
+  branch = master
