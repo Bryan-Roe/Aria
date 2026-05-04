@@ -51,7 +51,7 @@ jobs:
         id: changelog
         run: |
           # Get previous tag
-          PREV_TAG=$(git describe --abbrev=0 --tags $(git rev-list --tags --skip=1 --max-count=1) 2>/dev/null || echo "")
+          PREV_TAG=$(git describe --abbrev=0 --tags "$(git rev-list --tags --skip=1 --max-count=1)" 2>/dev/null || echo "")
 
           if [ -z "$PREV_TAG" ]; then
             echo "First release - no previous tag found"
