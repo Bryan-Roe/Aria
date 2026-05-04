@@ -1632,7 +1632,7 @@ class AriaRequestHandler(SimpleHTTPRequestHandler):
                     self.end_headers()
                     error = {"error": str(e), "tags": []}
                     self.wfile.write(json.dumps(error).encode("utf-8"))
-                except:
+                except Exception:
                     pass
         elif self.path == "/api/aria/object" or self.path == "/api/aria/objects":
             try:
@@ -1711,7 +1711,7 @@ class AriaRequestHandler(SimpleHTTPRequestHandler):
                     self.send_header("Content-Type", "application/json")
                     self.end_headers()
                     self.wfile.write(json.dumps({"error": str(e)}).encode("utf-8"))
-                except:
+                except Exception:
                     pass
                 return
 
@@ -1803,7 +1803,7 @@ class AriaRequestHandler(SimpleHTTPRequestHandler):
                             }
                         ).encode("utf-8")
                     )
-                except:
+                except Exception:
                     pass
                 return
 
