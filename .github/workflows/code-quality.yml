@@ -27,7 +27,16 @@ jobs:
         uses: ./.github/actions/setup-python-env
         with:
           install-requirements: 'false'
-          extra-packages: 'flake8 black isort mypy'
+          extra-packages: 'flake8 black isort mypy ruff'
+
+      - name: Run ruff (blocking — errors and undefined names)
+        run: |
+          ruff check --select=E9,F63,F7,F82 .
+
+      - name: Run ruff (advisory — full lint)
+        run: |
+          ruff check --exit-zero .
+        continue-on-error: true
 
       - name: Run flake8 (blocking — syntax errors)
         run: |
