@@ -57,9 +57,7 @@ jobs:
         run: |
           set -euo pipefail
           python -m pip install --upgrade pip
-
-          if [[ -f requirements.txt ]]; then pip install -r requirements.txt; fi
-
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
           if [[ -f requirements-dev.txt ]]; then
             python -m pip install -r requirements-dev.txt
           elif [[ -f pyproject.toml ]]; then
@@ -84,17 +82,10 @@ jobs:
           test-path: ${{ env.TEST_PATH }}
           extra-args: --maxfail=1 -q
         env:
-          CI: 'true'
+          CI: true
 
   watcher:
-    name: Test watcher
     needs: test
-    if: >-
-      ${
-        github.event_name == 'schedule' ||
-        github.event_name == 'workflow_dispatch' ||
-        (github.event_name == 'push' && github.ref == 'refs/heads/main')
-      } && (github.event.inputs.run_watcher || 'false') == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: ${{ fromJSON(github.event.inputs.watcher_timeout_minutes || '10') }}
     container:
@@ -104,24 +95,13 @@ jobs:
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
 
       - name: Install dev dependencies (in container)
-        shell: bash
         run: |
-          set -euo pipefail
           python -m pip install --upgrade pip
-
-          if [[ -f requirements.txt ]]; then pip install -r requirements.txt; fi
-
-          if [[ -f requirements-dev.txt ]]; then
-            python -m pip install -r requirements-dev.txt
-          else
-            python -m pip install pytest watchdog
-          fi
+          if [ -f requirements-dev.txt ]; then pip install -r requirements-dev.txt; else pip install pytest watchdog; fi
 
       - name: Run test watcher (runs tests once then exits via timeout)
-        shell: bash
         run: |
-          set -euo pipefail
           timeout "${{ github.event.inputs.watcher_timeout_minutes || '10' }}m" \
-            python3 scripts/test_watcher.py --cmd "pytest ${{ env.TEST_PATH }} -q --maxfail=1"
+            python3 scripts/test_watcher.py --cmd "pytest tests -q --maxfail=1"
         env:
-          CI: 'true'
+          CI: true

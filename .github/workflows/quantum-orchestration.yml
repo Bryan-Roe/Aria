@@ -12,13 +12,36 @@ name: Quantum Automation
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   workflow_dispatch:
     inputs:
       LOGIC_APP_URL:
         description: "Logic App URL for optional notifications"
         required: false
         type: string
+      RESOURCE_GROUP:
+        description: "Azure resource group containing the Azure Quantum workspace"
+        required: false
+        type: string
+        default: "rg-quantum-ai"
+      WORKSPACE_NAME:
+        description: "Azure Quantum workspace name"
+        required: false
+        type: string
+        default: "quantum-ai-workspace"
+      LOCATION:
+        description: "Azure region for the workspace (e.g., eastus)"
+        required: false
+        type: string
+        default: "eastus"
+      ORCHESTRATION_MODE:
+        description: "Which orchestration entrypoint to run: master or logicapp"
+        required: false
+        type: choice
+        default: "master"
+        options:
+          - master
+          - logicapp
 
 # Credentials must come exclusively from the AZURE_CREDENTIALS repository secret.
 # Never pass service principal JSON as a workflow_dispatch input — it would be
@@ -26,22 +49,75 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: quantum-orchestration-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: pwsh
+
 jobs:
   run-quantum:
+    name: Run Quantum Orchestration
     runs-on: windows-latest
     timeout-minutes: 30
+    env:
+      HAS_AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS != '' }}
+
     steps:
-    - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
-    - name: Azure Login
-      if: ${{ secrets.AZURE_CREDENTIALS != '' }}
-      uses: azure/login@a457da9ea143d694b1b9c7c869ebb04ebe844ef5  # v2
-      with:
-        creds: ${{ secrets.AZURE_CREDENTIALS }}
-    - name: Run Orchestration
-      shell: pwsh
-      run: |
-        ./ai-projects/quantum-ml/azure/quantum_master_orchestration.ps1 -ResourceGroup rg-quantum-ai -WorkspaceName quantum-ai-workspace -Location eastus
-        # Or the Logic App variant
-        # ./ai-projects/quantum-ml/azure/quantum_full_logicapp_orchestration.ps1 -LogicAppUrl $env:LOGIC_APP_URL
-      env:
-        LOGIC_APP_URL: ${{ inputs.LOGIC_APP_URL }}
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
+
+      - name: Validate inputs and required files
+        run: |
+          $ErrorActionPreference = 'Stop'
+
+          if ('${{ inputs.ORCHESTRATION_MODE }}' -eq 'logicapp' -and [string]::IsNullOrWhiteSpace($env:LOGIC_APP_URL)) {
+            throw "LOGIC_APP_URL is required when ORCHESTRATION_MODE=logicapp."
+          }
+
+          $master = './ai-projects/quantum-ml/azure/quantum_master_orchestration.ps1'
+          $logic  = './ai-projects/quantum-ml/azure/quantum_full_logicapp_orchestration.ps1'
+
+          if (-not (Test-Path -LiteralPath $master)) { throw "Missing script: $master" }
+          if (-not (Test-Path -LiteralPath $logic))  { throw "Missing script: $logic" }
+
+      - name: Azure Login
+        if: env.HAS_AZURE_CREDENTIALS == 'true'
+        uses: azure/login@a457da9ea143d694b1b9c7c869ebb04ebe844ef5  # v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Fail fast when Azure credentials are not configured
+        if: env.HAS_AZURE_CREDENTIALS != 'true'
+        run: |
+          throw "AZURE_CREDENTIALS secret is not configured. Add it as a repository secret to enable Azure Quantum orchestration."
+
+      - name: Run orchestration
+        env:
+          LOGIC_APP_URL: ${{ inputs.LOGIC_APP_URL }}
+          RESOURCE_GROUP: ${{ inputs.RESOURCE_GROUP }}
+          WORKSPACE_NAME: ${{ inputs.WORKSPACE_NAME }}
+          LOCATION: ${{ inputs.LOCATION }}
+          ORCHESTRATION_MODE: ${{ inputs.ORCHESTRATION_MODE }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+
+          $rg = $env:RESOURCE_GROUP
+          $ws = $env:WORKSPACE_NAME
+          $loc = $env:LOCATION
+
+          if ([string]::IsNullOrWhiteSpace($rg)) { throw "RESOURCE_GROUP is empty." }
+          if ([string]::IsNullOrWhiteSpace($ws)) { throw "WORKSPACE_NAME is empty." }
+          if ([string]::IsNullOrWhiteSpace($loc)) { throw "LOCATION is empty." }
+
+          if ($env:ORCHESTRATION_MODE -eq 'logicapp') {
+            ./ai-projects/quantum-ml/azure/quantum_full_logicapp_orchestration.ps1 -LogicAppUrl $env:LOGIC_APP_URL
+          } else {
+            ./ai-projects/quantum-ml/azure/quantum_master_orchestration.ps1 -ResourceGroup $rg -WorkspaceName $ws -Location $loc
+          }
+
+      - name: Azure Logout
+        if: always() && env.HAS_AZURE_CREDENTIALS == 'true'
+        run: |
+          az logout | Out-Null
