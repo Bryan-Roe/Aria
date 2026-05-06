@@ -82,9 +82,8 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
-          gh pr comment "$PR_URL" --body \
-            "🤖 **Auto-merge enabled.** This PR will merge automatically once all required status checks pass and required approvals are satisfied.
-            Remove the \`auto-merge\` label at any time to cancel."
+          COMMENT="🤖 **Auto-merge enabled.** This PR will merge automatically once all required status checks pass and required approvals are satisfied. Remove the \`auto-merge\` label at any time to cancel."
+          gh pr comment "$PR_URL" --body "$COMMENT"
 
       - name: Summary
         run: |
