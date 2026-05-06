@@ -1,0 +1,146 @@
+# =============================================================================
+# Auto Merge — Enable or disable GitHub native auto-merge via label
+# =============================================================================
+# Purpose: Automatically enable GitHub's built-in auto-merge (squash) on a PR
+#          when the `auto-merge` label is applied, and disable it when removed.
+#          The PR will merge automatically once ALL required branch-protection
+#          checks pass and the required number of reviews are met.
+#
+# How to use:
+#   1. Apply the `auto-merge` label to a PR (manually or via another workflow).
+#   2. This workflow enables `gh pr merge --auto --squash` on that PR.
+#   3. Remove the label at any time to cancel the pending auto-merge.
+#
+# Security:
+#   - Only same-repository PRs can trigger this workflow (forks produce a
+#     read-only GITHUB_TOKEN that cannot enable auto-merge).
+#   - The workflow does NOT bypass branch protection or required reviews.
+#     GitHub's auto-merge still waits for all required status checks.
+#
+# Label setup (one-time):
+#   Create a label named `auto-merge` in the repository:
+#     gh label create auto-merge --color 0075ca --description "Enable auto-merge when checks pass"
+# =============================================================================
+
+name: Auto Merge
+
+on:
+  pull_request:
+    types: [labeled, unlabeled]
+  pull_request_review:
+    types: [submitted]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  # Serialize enable/disable operations for the same PR to avoid races.
+  group: auto-merge-${{ github.event.pull_request.number }}
+  cancel-in-progress: false
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # Enable auto-merge when the `auto-merge` label is applied OR when an
+  # approving review arrives on a PR that already carries the label.
+  # ---------------------------------------------------------------------------
+  enable:
+    name: Enable Auto-Merge
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    if: >-
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      (
+        (
+          github.event_name == 'pull_request' &&
+          github.event.action == 'labeled' &&
+          github.event.label.name == 'auto-merge'
+        ) ||
+        (
+          github.event_name == 'pull_request_review' &&
+          github.event.review.state == 'approved' &&
+          contains(github.event.pull_request.labels.*.name, 'auto-merge')
+        )
+      )
+    steps:
+      - name: Enable auto-merge (squash)
+        env:
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          gh pr merge --auto --squash "$PR_URL"
+          echo "Auto-merge enabled for ${PR_URL}"
+
+      - name: Post status comment
+        env:
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          COMMENT="🤖 **Auto-merge enabled.** This PR will merge automatically once all required status checks pass and required approvals are satisfied. Remove the \`auto-merge\` label at any time to cancel."
+          gh pr comment "$PR_URL" --body "$COMMENT"
+
+      - name: Summary
+        run: |
+          set -euo pipefail
+          {
+            echo "## ✅ Auto-Merge Enabled"
+            echo ""
+            echo "| Field | Value |"
+            echo "|-------|-------|"
+            echo "| PR | ${{ github.event.pull_request.html_url }} |"
+            echo "| Triggered by | ${{ github.event_name }} |"
+            echo "| Strategy | squash |"
+            echo ""
+            echo "The PR will merge automatically when all branch-protection gates clear."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  # ---------------------------------------------------------------------------
+  # Disable auto-merge when the `auto-merge` label is removed.
+  # ---------------------------------------------------------------------------
+  disable:
+    name: Disable Auto-Merge
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    if: >-
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      github.event_name == 'pull_request' &&
+      github.event.action == 'unlabeled' &&
+      github.event.label.name == 'auto-merge'
+    steps:
+      - name: Disable auto-merge
+        env:
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          gh pr merge --disable-auto "$PR_URL"
+          echo "Auto-merge disabled for ${PR_URL}"
+
+      - name: Post status comment
+        env:
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          gh pr comment "$PR_URL" --body \
+            "🛑 **Auto-merge disabled.** The \`auto-merge\` label was removed. Re-apply the label to re-enable auto-merge."
+
+      - name: Summary
+        run: |
+          set -euo pipefail
+          {
+            echo "## 🛑 Auto-Merge Disabled"
+            echo ""
+            echo "| Field | Value |"
+            echo "|-------|-------|"
+            echo "| PR | ${{ github.event.pull_request.html_url }} |"
+            echo "| Reason | \`auto-merge\` label removed |"
+            echo ""
+            echo "Re-apply the \`auto-merge\` label to re-enable."
+          } >> "$GITHUB_STEP_SUMMARY"
