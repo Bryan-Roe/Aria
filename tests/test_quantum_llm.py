@@ -65,6 +65,41 @@ class TestQuantumLLMConfig:
         assert cfg.num_qubits == 2
         assert cfg.shots == 128
 
+    def test_from_env_invalid_numeric_values_fallback(self, monkeypatch):
+        monkeypatch.setenv("QUANTUM_LLM_QUBITS", "abc")
+        monkeypatch.setenv("QUANTUM_LLM_SHOTS", "NaN")
+        monkeypatch.setenv("QUANTUM_LLM_LAYERS", "bad")
+        monkeypatch.setenv("QUANTUM_LLM_TEMPERATURE", "oops")
+
+        cfg = QuantumLLMConfig.from_env()
+
+        assert cfg.num_qubits == 4
+        assert cfg.shots == 512
+        assert cfg.num_layers == 2
+        assert cfg.temperature == 0.7
+
+    def test_from_env_normalizes_ranges(self, monkeypatch):
+        monkeypatch.setenv("QUANTUM_LLM_BACKEND", "invalid-backend")
+        monkeypatch.setenv("QUANTUM_LLM_QUBITS", "0")
+        monkeypatch.setenv("QUANTUM_LLM_SHOTS", "-1")
+        monkeypatch.setenv("QUANTUM_LLM_LAYERS", "0")
+        monkeypatch.setenv("QUANTUM_LLM_TOP_K", "0")
+        monkeypatch.setenv("QUANTUM_LLM_TEMP_BLEND", "2.5")
+        monkeypatch.setenv("QUANTUM_LLM_TEMPERATURE", "-9")
+        monkeypatch.setenv("QUANTUM_LLM_MAX_TOKENS", "9999")
+        monkeypatch.setenv("QUANTUM_LLM_MAX_TOKENS_CAP", "128")
+
+        cfg = QuantumLLMConfig.from_env()
+
+        assert cfg.backend == "auto"
+        assert cfg.num_qubits == 1
+        assert cfg.shots == 1
+        assert cfg.num_layers == 1
+        assert cfg.top_k == 1
+        assert cfg.temperature_blend == 1.0
+        assert cfg.temperature == 0.0
+        assert cfg.max_tokens == 128
+
 
 # ===========================================================================
 # QuantumSampler tests
