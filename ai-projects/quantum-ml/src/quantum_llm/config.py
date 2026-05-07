@@ -82,8 +82,7 @@ class QuantumLLMConfig:
         if self.max_tokens > self.max_tokens_cap:
             self.max_tokens = self.max_tokens_cap
 
-        provider = (self.provider or "auto").strip()
-        self.provider = provider or "auto"
+        self.provider = (self.provider or "auto").strip()
 
     @classmethod
     def from_env(cls) -> "QuantumLLMConfig":
