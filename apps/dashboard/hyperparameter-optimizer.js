@@ -355,13 +355,18 @@ class HyperparameterOptimizer {
                 </div>
                 <div style="padding:20px">
                     <div class="alert alert-info">
-                        Running ${this.strategy} optimization with ${this.maxTrials} trials...
+                        <span id="hyperoptStatusText"></span>
                     </div>
                     <div id="trialsProgress"></div>
                     <div id="currentBest" style="margin-top:20px"></div>
                 </div>
             </div>
         `;
+
+        const statusText = document.getElementById('hyperoptStatusText');
+        if (statusText) {
+            statusText.textContent = `Running ${this.strategy} optimization with ${this.maxTrials} trials...`;
+        }
 
         container.style.display = 'block';
     }
