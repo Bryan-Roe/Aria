@@ -65,6 +65,11 @@ class TestQuantumLLMConfig:
         assert cfg.num_qubits == 2
         assert cfg.shots == 128
 
+    def test_from_env_preserves_valid_backend(self, monkeypatch):
+        monkeypatch.setenv("QUANTUM_LLM_BACKEND", "qiskit")
+        cfg = QuantumLLMConfig.from_env()
+        assert cfg.backend == "qiskit"
+
     def test_from_env_invalid_numeric_values_fallback(self, monkeypatch):
         monkeypatch.setenv("QUANTUM_LLM_QUBITS", "abc")
         monkeypatch.setenv("QUANTUM_LLM_SHOTS", "NaN")

@@ -79,8 +79,7 @@ class QuantumLLMConfig:
         self.max_prompt_chars = max(1, int(self.max_prompt_chars))
         self.max_tokens_cap = max(1, int(self.max_tokens_cap))
         self.max_tokens = max(1, int(self.max_tokens))
-        if self.max_tokens > self.max_tokens_cap:
-            self.max_tokens = self.max_tokens_cap
+        self.max_tokens = min(self.max_tokens, self.max_tokens_cap)
 
         self.provider = (self.provider or "auto").strip()
 
