@@ -1768,7 +1768,10 @@ class AriaRequestHandler(SimpleHTTPRequestHandler):
                     all_tags = []
 
                     if auto_execute:
-                        logger.info("Executing validated action sequence: %s", actions)
+                        actions_for_log = json.dumps(actions, ensure_ascii=False, separators=(",", ":"))
+                        actions_for_log = re.sub(r"[\r\n]+", " ", actions_for_log)
+                        actions_for_log = re.sub(r"[\x00-\x1f\x7f]", "", actions_for_log)
+                        logger.info("Executing validated action sequence: %s", actions_for_log)
                         for action in actions:
                             exec_result = execute_aria_action(action)
                             execution_results.append({"action": action, "result": exec_result})
