@@ -87,7 +87,7 @@ def benchmark_json_parsing():
                 if "metrics" in data:
                     result1 = data
                     break
-            except:
+            except Exception:
                 pass
     t_old = time.time() - t0
 

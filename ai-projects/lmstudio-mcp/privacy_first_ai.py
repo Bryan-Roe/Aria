@@ -342,7 +342,7 @@ async def example_healthcare_analysis():
     """
     print("\n" + "="*70)
     print("Example 1: Healthcare Data Analysis (HIPAA-Compliant)")
-    print("=""*70 + "\n")
+    print("=" * 70 + "\n")
 
     # Create private healthcare data
     patient_data = PrivateData(

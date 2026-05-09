@@ -257,8 +257,9 @@ def get_world(theme: str, seed: Union[str, int]) -> Optional[Dict[str, Any]]:
     try:
         seed_str = str(seed)
         theme_seed = f"{theme}_{seed_str}"
-        query = f"SELECT * FROM c WHERE c.theme_seed = '{theme_seed}'"
-        items = list(c.query_items(query=query, enable_cross_partition_query=True))
+        query = "SELECT * FROM c WHERE c.theme_seed = @theme_seed"
+        parameters = [{"name": "@theme_seed", "value": theme_seed}]
+        items = list(c.query_items(query=query, parameters=parameters, enable_cross_partition_query=True))
         return items[0] if items else None
     except Exception as e:
         logging.warning(f"[cosmos] get_world error: {e}")

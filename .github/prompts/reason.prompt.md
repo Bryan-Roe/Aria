@@ -1,8 +1,8 @@
 ---
-description: "Reason through a problem using chain-of-thought analysis, task decomposition, and self-reflection. Produces structured reasoning with confidence scores and verification steps."
+description: "Reason through a problem with visible chain-of-thought analysis, task decomposition, and self-reflection. Shows reasoning steps to the user, including confidence scores and verification. Use when the user wants to see the reasoning process, not just the final answer."
 name: "Reason"
 argument-hint: "Problem or question to analyze (example: decision + relevant context + constraints or trade-offs)"
-agent: agi-reasoning
+agent: visible-reasoning
 ---
 
 Apply the AGI reasoning framework to analyze and solve the following task.

@@ -3,6 +3,7 @@
 Quick demo of the Quantum AI Web Dashboard
 Tests that everything is working correctly
 """
+import sys
 import time
 
 import requests

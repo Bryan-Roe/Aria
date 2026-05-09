@@ -10,7 +10,7 @@ import sys
 # PREGENERATED EXAMPLES (What ToolMaker produces)
 # ============================================================================
 
-GENERATED_EMAIL_VALIDATOR = '''
+GENERATED_EMAIL_VALIDATOR = r'''
 def validate_email(email: str) -> bool:
     """Validates if a string is a valid email address using regex"""
     import re
