@@ -16,7 +16,6 @@ pinned: false
 [![CodeQL](https://github.com/Bryan-Roe/Aria/actions/workflows/codeql.yml/badge.svg)](https://github.com/Bryan-Roe/Aria/actions/workflows/codeql.yml)
 [![E2E Tests](https://github.com/Bryan-Roe/Aria/actions/workflows/e2e-tests.yml/badge.svg)](https://github.com/Bryan-Roe/Aria/actions/workflows/e2e-tests.yml)
 [![Codespaces Prebuilds](https://github.com/Bryan-Roe/Aria/actions/workflows/codespaces/create_codespaces_prebuilds/badge.svg?branch=main)](https://github.com/Bryan-Roe/Aria/actions/workflows/codespaces/create_codespaces_prebuilds)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 **An intelligent, animated AI character with movement, gestures, and natural language interaction.**
 
 [Live Demo](https://bryan-roe.github.io/Aria) · [Aria Web UI](apps/aria/) · [Quick Start](#-quick-start)
@@ -322,7 +321,6 @@ Never commit secrets. All keys belong in environment variables or `local.setting
 | [ai-projects/chat-cli/README.md](ai-projects/chat-cli/README.md) | Chat CLI reference |
 | [ai-projects/llm-maker/README.md](ai-projects/llm-maker/README.md) | Tool maker guide |
 | [docs/aria/](docs/aria/) | Aria movement & training documentation |
-| [CHANGELOG.md](CHANGELOG.md) | Version history and notable changes |
 | [MONETIZATION_GUIDE.md](MONETIZATION_GUIDE.md) | Subscription and revenue system |
 | [docs/guides/REPO_AUTOMATION_GUIDE.md](docs/guides/REPO_AUTOMATION_GUIDE.md) | Full repository automation reference |
 | [QUANTUM_LLM_TRAINING.md](QUANTUM_LLM_TRAINING.md) | Quantum-LLM concurrent training |
@@ -339,4 +337,70 @@ Never commit secrets. All keys belong in environment variables or `local.setting
 
 ## 📄 License
 
-This project is licensed under the [MIT License](LICENSE). See individual project sub-directories for any additional license information.
+See individual project directories for license information.
+
+## PLAN (pseudocode)
+
+## 1) Validate OPENAI_API_KEY
+
+## 2) Read prompt from CLI args or stdin
+
+## 3) Call OpenAI Responses API
+
+## 4) Extract text safely from response.output_text with fallback parsing
+
+## 5) Print final text; fail gracefully on errors
+
+import os
+import sys
+from openai import OpenAI
+
+MODEL = "gpt-4o-mini"
+SYSTEM_PROMPT = "You are a concise AI coding assistant. Return practical code-focused responses."
+
+def _extract_text(resp) -> str:
+    if getattr(resp, "output_text", None):
+        return resp.output_text.strip()
+
+    parts = []
+    for item in getattr(resp, "output", []) or []:
+        for content in getattr(item, "content", []) or []:
+            if getattr(content, "type", "") == "output_text":
+                text = getattr(content, "text", "")
+                if text:
+                    parts.append(text)
+    return "\n".join(parts).strip()
+
+def ask_ai(client: OpenAI, prompt: str) -> str:
+    resp = client.responses.create(
+        model=MODEL,
+        input=[
+            {"role": "system", "content": SYSTEM_PROMPT},
+            {"role": "user", "content": prompt},
+        ],
+        temperature=0.2,
+    )
+    return _extract_text(resp)
+
+def main() -> None:
+    api_key = os.getenv("OPENAI_API_KEY")
+    if not api_key:
+        raise RuntimeError("Missing OPENAI_API_KEY environment variable.")
+
+    prompt = " ".join(sys.argv[1:]).strip()
+    if not prompt:
+        prompt = input("Prompt: ").strip()
+    if not prompt:
+        raise ValueError("Prompt cannot be empty.")
+
+    client = OpenAI(api_key=api_key)
+
+    try:
+        output = ask_ai(client, prompt)
+        print(output or "(No text returned.)")
+    except Exception as exc:
+        print(f"AI request failed: {exc}", file=sys.stderr)
+        sys.exit(1)
+
+if **name** == "**main**":
+    main()

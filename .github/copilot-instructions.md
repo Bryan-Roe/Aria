@@ -316,7 +316,8 @@ Available agents in `.github/agents/`:
 |-------|---------|
 | `ai.agent.md` | Primary autonomous agent — task decomposition, multi-step execution |
 | `my-agent.agent.md` | QAI specialist — quantum-AI/ML development |
-| `agi-reasoning.agent.md` | Chain-of-thought reasoning, self-reflection |
+| `agi-reasoning.agent.md` | Chain-of-thought reasoning, self-reflection (CoT is internal, final answer only) |
+| `visible-reasoning.agent.md` | Visible step-by-step reasoning, shows CoT trace to users |
 | `aria-character.agent.md` | Interactive character commands, animations |
 | `autonomous-trainer.agent.md` | LoRA training lifecycle, model promotion |
 | `full-stack-debugger.agent.md` | Cross-stack issue diagnosis |
@@ -339,7 +340,7 @@ Available agents in `.github/agents/`:
 
 **Prompts** (`.github/prompts/`):
 - `agi.prompt.md` — Autonomous AGI reasoning with multi-step analysis and self-correction (chain-of-thought is internal, not exposed in output)
-- `reason.prompt.md` — Structured analysis
+- `reason.prompt.md` — Visible step-by-step reasoning that exposes chain-of-thought, confidence scores, and self-reflection to the user (uses `visible-reasoning` agent)
 - `debug.prompt.md` — Systematic diagnostic protocol
 - `review.prompt.md` — Code review (correctness, security, performance)
 - `aria-command.prompt.md` — Natural language → Aria actions
