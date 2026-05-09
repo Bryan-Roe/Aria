@@ -141,8 +141,8 @@ def _is_http_url(value: str) -> bool:
 def _validate_manifest_source(path_or_url: str, allow_remote_manifest: bool) -> None:
     if _is_http_url(path_or_url) and not allow_remote_manifest:
         raise ValueError(
-            "Remote manifest URLs are disabled by default for security. "
-            "Use --allow-remote-manifest to enable."
+            "Remote manifest URLs are disabled by default for security: "
+            f"{path_or_url!r}. Use --allow-remote-manifest to enable."
         )
 
 
