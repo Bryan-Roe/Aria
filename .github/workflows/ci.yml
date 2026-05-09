@@ -61,7 +61,7 @@ jobs:
         run: ruff check shared/ scripts/ apps/aria/server.py tests/ --output-format=github
 
       - name: Run black (check only)
-        run: black --check --quiet shared/ scripts/ apps/aria/server.py tests/ || true
+        run: black --check --quiet shared/ scripts/ apps/aria/server.py tests/
 
   # ---------------------------------------------------------------------------
   # Type checks (mypy)

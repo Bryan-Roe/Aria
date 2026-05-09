@@ -152,12 +152,19 @@ class TestActiveProvider:
         env = {
             k: v
             for k, v in os.environ.items()
-            if k not in {"AZURE_OPENAI_API_KEY", "OPENAI_API_KEY"}
+            if k
+            not in {
+                "AZURE_OPENAI_API_KEY",
+                "AZURE_OPENAI_ENDPOINT",
+                "AZURE_OPENAI_DEPLOYMENT",
+                "OPENAI_API_KEY",
+                "LMSTUDIO_BASE_URL",
+            }
         }
         env["LMSTUDIO_BASE_URL"] = "http://localhost:1234"
         with patch.dict(os.environ, env, clear=True):
             s = Settings()
-            assert s.active_provider() in ("lmstudio", "local")
+            assert s.active_provider() == "lmstudio"
 
 
 class TestSummary:

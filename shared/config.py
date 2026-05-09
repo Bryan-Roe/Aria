@@ -310,7 +310,10 @@ else:
 
 
 def _load_keyvault_secrets(settings: Settings) -> None:
-    """Populate env vars from Azure Key Vault when ``keyvault_url`` is set.
+    """Populate Settings fields from Azure Key Vault when ``keyvault_url`` is set.
+
+    Secrets are stored directly in settings fields rather than in ``os.environ``
+    to avoid leaking credentials to child processes or subprocess inheritance.
 
     Silently skips if the azure-keyvault-secrets package is not installed or
     if credentials are unavailable.
@@ -326,21 +329,26 @@ def _load_keyvault_secrets(settings: Settings) -> None:
         credential = DefaultAzureCredential()
         client = SecretClient(vault_url=keyvault_url, credential=credential)
 
-        # Map Key Vault secret names → env var names
+        # Map Key Vault secret names → Settings field names
         _SECRET_MAP = {
-            "azure-openai-api-key": "AZURE_OPENAI_API_KEY",
-            "openai-api-key": "OPENAI_API_KEY",
-            "qai-db-conn": "QAI_DB_CONN",
-            "cosmos-key": "COSMOS_KEY",
+            "azure-openai-api-key": "azure_openai_api_key",
+            "openai-api-key": "openai_api_key",
+            "qai-db-conn": "db_connection_string",
+            "cosmos-key": "cosmos_key",
         }
-        for secret_name, env_var in _SECRET_MAP.items():
+        loaded = 0
+        for secret_name, field_name in _SECRET_MAP.items():
             try:
                 secret = client.get_secret(secret_name)
-                if secret.value and not os.environ.get(env_var):
-                    os.environ[env_var] = secret.value
-                    _LOG.debug("Loaded secret '%s' from Key Vault", secret_name)
-            except Exception as exc:  # noqa: BLE001
-                _LOG.debug("Key Vault secret '%s' not found: %s", secret_name, exc)
+                if secret.value and not getattr(settings, field_name, None):
+                    # Set directly on the instance, bypassing pydantic validation
+                    object.__setattr__(settings, field_name, secret.value)
+                    loaded += 1
+            except Exception:  # noqa: BLE001
+                pass  # Secret not found or inaccessible; skip silently
+
+        if loaded:
+            _LOG.info("[config] Loaded %d secret(s) from Key Vault", loaded)
 
     except Exception as exc:  # noqa: BLE001
         _LOG.info("Key Vault integration skipped: %s", exc)
@@ -350,31 +358,25 @@ def _load_keyvault_secrets(settings: Settings) -> None:
 # Singleton accessor
 # ---------------------------------------------------------------------------
 
-_settings_instance: Optional[Settings] = None
-
 
 @lru_cache(maxsize=1)
 def get_settings() -> Settings:
     """Return the singleton Settings instance.
 
     On first call, loads Key Vault secrets (if configured) before returning.
-    Subsequent calls return the cached instance.
+    Subsequent calls return the cached instance via ``lru_cache``.
     """
-    global _settings_instance
     if _PYDANTIC_AVAILABLE:
         instance = Settings()  # type: ignore[call-arg]
     else:
         instance = Settings()
     _load_keyvault_secrets(instance)
-    _settings_instance = instance
     return instance
 
 
 def reset_settings() -> None:
     """Clear the cached settings (useful in tests)."""
     get_settings.cache_clear()
-    global _settings_instance
-    _settings_instance = None
 
 
 __all__ = ["Settings", "get_settings", "reset_settings"]

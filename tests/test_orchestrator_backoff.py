@@ -53,9 +53,8 @@ def _make_retry_fn(max_attempts: int = 3, wait_base: float = 0.0):
         def _fn(counter: list):  # type: ignore[misc]
             for attempt in range(1, max_attempts + 1):
                 counter[0] = attempt
-                if attempt < max_attempts:
-                    continue
-                return "ok"
+                if attempt >= max_attempts:
+                    return "ok"
             return "ok"
 
         return _fn

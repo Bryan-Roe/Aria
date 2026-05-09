@@ -126,7 +126,7 @@ type-check:
 
 ## Build Docker images
 docker-build:
-	docker build -f apps/aria/Dockerfile -t aria-server:local apps/aria/
+	docker build -f apps/aria/Dockerfile -t aria-server:local .
 	docker build -f Dockerfile -t aria-functions:local .
 	@echo "✅ Docker images built."
 

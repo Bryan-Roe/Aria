@@ -87,7 +87,7 @@ class TestProviderPriorityChain:
         env["LMSTUDIO_BASE_URL"] = "http://localhost:1234"
         with patch.dict(os.environ, env, clear=True):
             s = Settings()
-            assert s.active_provider() in ("lmstudio", "local")
+            assert s.active_provider() == "lmstudio"
 
     def test_azure_requires_all_four_vars(self):
         """Azure OpenAI is only 'ready' when all four required vars are set."""
