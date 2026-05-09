@@ -80,7 +80,17 @@ def read_yaml(yaml_path: Path) -> Dict[str, Any]:
 
 def resolve_path(p: str) -> Path:
     # allow tokens like mount/<run_id>/dataset to be overridden by --dataset
-    return Path(p).expanduser()
+    # Normalize and constrain to the current working directory to prevent
+    # uncontrolled path traversal from user-provided CLI/config values.
+    safe_root = Path.cwd().resolve()
+    candidate = Path(p).expanduser().resolve()
+    try:
+        candidate.relative_to(safe_root)
+    except ValueError as e:
+        raise ValueError(
+            f"Dataset path must be inside project directory '{safe_root}': {candidate}"
+        ) from e
+    return candidate
 
 
 def resolve_config_path(config_arg: str) -> Path:
@@ -419,7 +429,7 @@ def main():
             eval_files = train_files[:1]
     else:
         dataset_path = (
-            Path(args.dataset) if args.dataset else resolve_path(cfg.finetune_dataset)
+            resolve_path(args.dataset) if args.dataset else resolve_path(cfg.finetune_dataset)
         )
         if dataset_path.is_file():
             # Allow direct file usage (.json or .jsonl)
