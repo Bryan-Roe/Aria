@@ -77,8 +77,7 @@ def _ensure_table():
     if _TABLE_CREATED:
         return True
 
-    engine = get_engine()
-    if not engine and not _SQLALCHEMY_AVAILABLE:
+    if not _SQLALCHEMY_AVAILABLE:
         # Fallback path: sqlite3 direct
         try:
             conn = _get_sqlite_conn()
@@ -95,6 +94,7 @@ def _ensure_table():
             )
             return False
 
+    engine = get_engine()
     if not engine:
         return False
 
@@ -143,8 +143,7 @@ def put_value(key: str, value: str) -> bool:
     if not _ensure_table():
         return False
 
-    engine = get_engine()
-    if not engine and not _SQLALCHEMY_AVAILABLE:
+    if not _SQLALCHEMY_AVAILABLE:
         # Fallback: sqlite3 direct
         try:
             conn = _get_sqlite_conn()
@@ -158,6 +157,7 @@ def put_value(key: str, value: str) -> bool:
             logging.warning(f"[sql_repository] sqlite fallback put_value failed: {e}")
             return False
 
+    engine = get_engine()
     if not engine:
         return False
 
@@ -206,8 +206,7 @@ def get_value(key: str) -> Optional[str]:
     if not _ensure_table():
         return None
 
-    engine = get_engine()
-    if not engine and not _SQLALCHEMY_AVAILABLE:
+    if not _SQLALCHEMY_AVAILABLE:
         try:
             conn = _get_sqlite_conn()
             cur = conn.execute(
@@ -219,6 +218,7 @@ def get_value(key: str) -> Optional[str]:
             logging.warning(f"[sql_repository] sqlite fallback get_value failed: {e}")
             return None
 
+    engine = get_engine()
     if not engine:
         return None
 
@@ -238,8 +238,7 @@ def delete_value(key: str) -> bool:
     if not _ensure_table():
         return False
 
-    engine = get_engine()
-    if not engine and not _SQLALCHEMY_AVAILABLE:
+    if not _SQLALCHEMY_AVAILABLE:
         try:
             conn = _get_sqlite_conn()
             conn.execute("DELETE FROM QAI_KeyValue WHERE key_name=?", (key,))
@@ -251,6 +250,7 @@ def delete_value(key: str) -> bool:
             )
             return False
 
+    engine = get_engine()
     if not engine:
         return False
 
@@ -270,8 +270,7 @@ def list_values(limit: int = 100) -> list[dict]:  # noqa: ANN001
     if not _ensure_table():
         return []
 
-    engine = get_engine()
-    if not engine and not _SQLALCHEMY_AVAILABLE:
+    if not _SQLALCHEMY_AVAILABLE:
         try:
             conn = _get_sqlite_conn()
             cur = conn.execute(
@@ -286,6 +285,7 @@ def list_values(limit: int = 100) -> list[dict]:  # noqa: ANN001
             logging.warning(f"[sql_repository] sqlite fallback list_values failed: {e}")
             return []
 
+    engine = get_engine()
     if not engine:
         return []
 

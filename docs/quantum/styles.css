@@ -17,10 +17,10 @@
     --border-color: rgba(99, 102, 241, 0.2);
     --glass-bg: rgba(30, 41, 59, 0.3);
     --glass-border: rgba(148, 163, 184, 0.1);
-    --gradient-1: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    --gradient-2: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    --gradient-1: linear-gradient(135deg, #0f9d89 0%, #0a7a6d 100%);
+    --gradient-2: linear-gradient(135deg, #d95b43 0%, #b8432f 100%);
     --gradient-3: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-    --gradient-text: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+    --gradient-text: linear-gradient(135deg, #0f9d89 0%, #0a7a6d 50%, #d3a53e 100%);
     --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
     --shadow-lg: 0 20px 40px -10px rgba(0, 0, 0, 0.5);
     --shadow-xl: 0 25px 50px -12px rgba(0, 0, 0, 0.7);

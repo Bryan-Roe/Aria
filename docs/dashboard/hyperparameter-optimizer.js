@@ -539,7 +539,7 @@ class HyperparameterOptimizer {
                 datasets: [{
                     label: 'Trial Score',
                     data: this.trials.map(t => t.score),
-                    borderColor: '#667eea',
+                    borderColor: '#0f9d89',
                     backgroundColor: 'rgba(102, 126, 234, 0.1)',
                     tension: 0.4
                 }, {

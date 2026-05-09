@@ -234,7 +234,7 @@ class PerformanceMonitor:
                 metrics["gpu_memory_used_mb"] = self.torch.cuda.memory_allocated() / (
                     1024 * 1024
                 )
-            except:
+            except Exception:
                 pass
 
         self.performance_history.append(
