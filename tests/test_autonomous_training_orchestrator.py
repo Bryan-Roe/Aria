@@ -4,8 +4,11 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import os
 from datetime import datetime, timedelta
 from pathlib import Path
+
+import pytest
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 SCRIPT_PATH = REPO_ROOT / "scripts" / "autonomous_training_orchestrator.py"
@@ -143,3 +146,21 @@ def test_run_autonomously_one_cycle_skip_quantum_writes_status(
     assert payload["status"] == "completed"
     assert payload["quantum_llm"]["enabled"] is True
     assert payload["quantum_llm"]["status"] == "idle"
+
+
+def test_pidfile_prevents_duplicate_instance(tmp_path: Path, monkeypatch) -> None:
+    pidfile = tmp_path / "autonomous_training.pid"
+    monkeypatch.setattr(orchestrator, "PID_FILE", pidfile)
+    pidfile.write_text(str(os.getpid()), encoding="utf-8")
+
+    with pytest.raises(RuntimeError):
+        orchestrator._acquire_pidfile(force=False)
+
+
+def test_pidfile_force_run_allows_takeover(tmp_path: Path, monkeypatch) -> None:
+    pidfile = tmp_path / "autonomous_training.pid"
+    monkeypatch.setattr(orchestrator, "PID_FILE", pidfile)
+    pidfile.write_text("999999", encoding="utf-8")
+
+    orchestrator._acquire_pidfile(force=True)
+    assert pidfile.read_text(encoding="utf-8").strip() == str(os.getpid())

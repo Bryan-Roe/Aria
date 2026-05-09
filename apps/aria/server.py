@@ -5,6 +5,7 @@ Serves the HTML/JS frontend and provides API endpoint for command generation
 """
 import datetime
 import hashlib
+import importlib.util
 import json
 import logging
 import math
@@ -91,19 +92,35 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# Add project paths
-REPO_ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(REPO_ROOT / "AI" / "microsoft_phi-silica-3.6_v1"))
-sys.path.insert(0, str(REPO_ROOT))  # Add root for shared imports
+# Resolve repository root robustly (apps/aria/server.py -> repo root is parents[2]).
+REPO_ROOT = Path(__file__).resolve().parents[2]
 
-# Try to import shared chat providers for LLM integration
-try:
-    from shared.chat_providers import detect_provider
 
-    LLM_AVAILABLE = True
+def _load_detect_provider():
+    """Load shared.chat_providers.detect_provider without mutating sys.path."""
+    try:
+        from shared.chat_providers import detect_provider as _detect_provider
+
+        return _detect_provider
+    except Exception:
+        shared_chat_providers = REPO_ROOT / "shared" / "chat_providers.py"
+        if not shared_chat_providers.exists():
+            return None
+        spec = importlib.util.spec_from_file_location(
+            "_aria_shared_chat_providers", shared_chat_providers
+        )
+        if spec is None or spec.loader is None:
+            return None
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        return getattr(module, "detect_provider", None)
+
+
+detect_provider = _load_detect_provider()
+LLM_AVAILABLE = callable(detect_provider)
+if LLM_AVAILABLE:
     logger.info("✓ LLM providers available for automatic action generation")
-except ImportError:
-    LLM_AVAILABLE = False
+else:
     logger.warning("✗ LLM providers not available - will use rule-based fallback only")
 
 # Skip AI model loading for faster startup - use rule-based fallback
@@ -241,6 +258,66 @@ ARIA_ACTIONS = {
         "example": {"action": "wait", "duration": 2.0},
     },
 }
+
+
+def validate_action(action: dict) -> tuple[bool, str]:
+    """Validate one action against safe allowlist and parameter bounds."""
+    if not isinstance(action, dict):
+        return False, "Action must be an object"
+
+    action_type = action.get("action")
+    if action_type not in ARIA_ACTIONS:
+        return False, f"Unknown action: {action_type}"
+
+    if action_type in {"move", "throw", "drop"}:
+        coordinate_fields = []
+        if action_type == "move":
+            coordinate_fields.append(action.get("target"))
+        elif action_type == "throw":
+            coordinate_fields.append(action.get("target"))
+        elif action_type == "drop":
+            coordinate_fields.append(action.get("position"))
+
+        for coords in coordinate_fields:
+            if coords is None:
+                continue
+            if not isinstance(coords, dict):
+                return False, f"{action_type} coordinates must be an object"
+            x = coords.get("x")
+            y = coords.get("y")
+            if not isinstance(x, (int, float)) or not isinstance(y, (int, float)):
+                return False, f"{action_type} coordinates must contain numeric x/y"
+            if not (0 <= x <= 100 and 0 <= y <= 100):
+                return False, f"{action_type} coordinates must be between 0 and 100"
+
+    if action_type == "wait":
+        duration = action.get("duration", 1.0)
+        if not isinstance(duration, (int, float)) or duration < 0 or duration > 30:
+            return False, "wait duration must be between 0 and 30 seconds"
+
+    if action_type == "say":
+        text = str(action.get("text", ""))
+        if len(text) > 200:
+            return False, "say text exceeds 200 characters"
+
+    if action_type == "gesture":
+        if action.get("gesture_type") not in {"wave", "thumbs_up", "clap", "shrug", "bow", "nod"}:
+            return False, "unsupported gesture_type"
+
+    return True, ""
+
+
+def validate_action_sequence(actions: list[dict]) -> tuple[bool, str]:
+    """Validate an action sequence before plan/execution."""
+    if not isinstance(actions, list) or not actions:
+        return False, "actions must be a non-empty list"
+    if len(actions) > 25:
+        return False, "too many actions in a single request"
+    for action in actions:
+        ok, reason = validate_action(action)
+        if not ok:
+            return False, reason
+    return True, ""
 
 
 class AriaActionParser:
@@ -1563,13 +1640,21 @@ class AriaRequestHandler(SimpleHTTPRequestHandler):
                 post_data = self.rfile.read(content_length)
 
                 request_data = json.loads(post_data.decode("utf-8"))
+                if not isinstance(request_data, dict):
+                    raise ValueError("Request body must be a JSON object")
                 command = request_data.get("command", "")
+                if not isinstance(command, str) or not command.strip():
+                    raise ValueError("command must be a non-empty string")
+                if len(command) > 500:
+                    raise ValueError("command exceeds 500 characters")
                 use_llm = bool(request_data.get("use_llm", True))
                 provider_choice = request_data.get("provider")
                 model_override = request_data.get("model")
 
                 # Update stage state if provided
                 if "stage_state" in request_data:
+                    if not isinstance(request_data["stage_state"], dict):
+                        raise ValueError("stage_state must be an object")
                     stage_state.update(request_data["stage_state"])
 
                 print(f"📝 Command received: {command}")
@@ -1600,6 +1685,15 @@ class AriaRequestHandler(SimpleHTTPRequestHandler):
                     tags = (
                         legacy_tags if legacy_tags else generate_tags_fallback(command)
                     )
+                elif actions:
+                    valid_actions, validation_reason = validate_action_sequence(actions)
+                    if not valid_actions:
+                        logger.warning(
+                            "Rejecting invalid parsed action sequence for /api/aria/command: %s",
+                            validation_reason,
+                        )
+                        actions = []
+                        tags = generate_tags_fallback(command)
 
                 print(f"✨ Generated tags: {tags}")
 
@@ -1721,6 +1815,8 @@ class AriaRequestHandler(SimpleHTTPRequestHandler):
                 content_length = int(self.headers.get("Content-Length", 0))
                 body = self.rfile.read(content_length)
                 request_data = json.loads(body.decode("utf-8"))
+                if not isinstance(request_data, dict):
+                    raise ValueError("Request body must be a JSON object")
 
                 command = request_data.get("command", "")
                 auto_execute = request_data.get("auto_execute", False)
@@ -1728,8 +1824,12 @@ class AriaRequestHandler(SimpleHTTPRequestHandler):
                 provider_choice = request_data.get("provider")
                 model_override = request_data.get("model")
 
-                if not command:
-                    raise ValueError("command is required")
+                if not isinstance(command, str) or not command.strip():
+                    raise ValueError("command must be a non-empty string")
+                if len(command) > 500:
+                    raise ValueError("command exceeds 500 characters")
+                if not isinstance(auto_execute, bool):
+                    raise ValueError("auto_execute must be a boolean")
 
                 # Parse command into actions
                 actions = action_parser.parse(
@@ -1747,11 +1847,18 @@ class AriaRequestHandler(SimpleHTTPRequestHandler):
                         "actions": [],
                     }
                 else:
+                    valid_actions, validation_reason = validate_action_sequence(actions)
+                    if not valid_actions:
+                        raise ValueError(
+                            f"Action sequence failed validation: {validation_reason}"
+                        )
+
                     # Execute actions if auto_execute is True
                     execution_results = []
                     all_tags = []
 
                     if auto_execute:
+                        logger.info("Executing validated action sequence: %s", actions)
                         for action in actions:
                             exec_result = execute_aria_action(action)
                             execution_results.append(
@@ -1759,6 +1866,8 @@ class AriaRequestHandler(SimpleHTTPRequestHandler):
                             )
                             if exec_result.get("tags"):
                                 all_tags.extend(exec_result["tags"])
+                    else:
+                        logger.info("Dry-run plan mode for command '%s': %s", command, actions)
 
                     api_response = {
                         "status": "success",

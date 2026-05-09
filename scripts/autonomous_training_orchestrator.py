@@ -14,11 +14,14 @@ This module is simulator-first and never mutates files in datasets/.
 from __future__ import annotations
 
 import argparse
+import atexit
+import asyncio
 import json
 import logging
 import math
 import os
 import random
+import signal
 import sys
 import time
 from datetime import datetime, timedelta
@@ -26,6 +29,23 @@ from pathlib import Path
 from typing import Any, Dict
 
 import yaml
+try:
+    from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_exponential
+except Exception:  # pragma: no cover - optional dependency
+    def retry(*args, **kwargs):  # type: ignore
+        def _decorator(func):
+            return func
+
+        return _decorator
+
+    def retry_if_exception_type(*args, **kwargs):  # type: ignore
+        return Exception
+
+    def stop_after_attempt(*args, **kwargs):  # type: ignore
+        return None
+
+    def wait_exponential(*args, **kwargs):  # type: ignore
+        return None
 
 # ----------------------------------------------------------------------------
 # Logging
@@ -55,11 +75,13 @@ sys.path.insert(0, str(REPO_ROOT / "shared"))
 DATA_OUT_ROOT = REPO_ROOT / "data_out"
 STATUS_FILE = DATA_OUT_ROOT / "autonomous_training_status.json"
 HEARTBEAT_FILE = DATA_OUT_ROOT / "autonomous_training_heartbeat.json"
+PID_FILE = DATA_OUT_ROOT / "autonomous_training.pid"
 CONFIG_FILE = REPO_ROOT / "config" / "autonomous_training.yaml"
 
 PLATEAU_PROMOTION_CYCLES = 5
 PLATEAU_VARIANCE = 0.005
 MAX_HISTORY_CYCLES = 500
+_STOP_REQUESTED = False
 
 
 # ----------------------------------------------------------------------------
@@ -69,6 +91,51 @@ MAX_HISTORY_CYCLES = 500
 
 def _now_iso() -> str:
     return datetime.now().isoformat()
+
+
+def _request_stop(signum: int, _frame) -> None:
+    global _STOP_REQUESTED
+    logger.info("Received signal %s; graceful shutdown requested", signum)
+    _STOP_REQUESTED = True
+
+
+def _acquire_pidfile(*, force: bool = False) -> None:
+    PID_FILE.parent.mkdir(parents=True, exist_ok=True)
+    if PID_FILE.exists() and not force:
+        existing_pid = PID_FILE.read_text(encoding="utf-8").strip()
+        if existing_pid and existing_pid.isdigit():
+            try:
+                os.kill(int(existing_pid), 0)
+                raise RuntimeError(
+                    f"Another orchestrator instance is running (pid={existing_pid}). "
+                    "Use --force-run to take over."
+                )
+            except ProcessLookupError:
+                logger.warning("Stale pidfile detected (pid=%s); replacing", existing_pid)
+            except PermissionError:
+                raise RuntimeError(
+                    f"Unable to verify running process for pid {existing_pid}; "
+                    "refusing to continue without --force-run."
+                )
+    PID_FILE.write_text(str(os.getpid()), encoding="utf-8")
+
+
+def _release_pidfile() -> None:
+    try:
+        if PID_FILE.exists() and PID_FILE.read_text(encoding="utf-8").strip() == str(os.getpid()):
+            PID_FILE.unlink()
+    except Exception:  # noqa: BLE001
+        logger.debug("Failed to remove pidfile", exc_info=True)
+
+
+@retry(
+    retry=retry_if_exception_type(Exception),
+    wait=wait_exponential(multiplier=1, min=1, max=30),
+    stop=stop_after_attempt(3),
+    reraise=True,
+)
+def _run_training_cycle_with_retry(cycle_num: int, plateau_cycles: int) -> Dict[str, Any]:
+    return simulate_training_cycle(cycle_num, plateau_cycles=plateau_cycles)
 
 
 def load_config(config_path: Path = CONFIG_FILE) -> Dict[str, Any]:
@@ -427,6 +494,8 @@ def run_autonomously(
     cycle_interval_sec: int | None = None,
     skip_quantum: bool = False,
 ) -> int:
+    global _STOP_REQUESTED
+    _STOP_REQUESTED = False
     status = load_status()
 
     auto_cfg = (
@@ -470,6 +539,9 @@ def run_autonomously(
     try:
         cycle_num = start_cycle
         while True:
+            if _STOP_REQUESTED:
+                logger.info("Stop requested; ending autonomous loop")
+                break
             if not infinite_mode and end_cycle is not None and cycle_num >= end_cycle:
                 break
 
@@ -482,9 +554,8 @@ def run_autonomously(
             save_status(status)
             save_heartbeat("training", current_cycle=cycle_num + 1)
 
-            result = simulate_training_cycle(
-                cycle_num + 1,
-                plateau_cycles=int(status.get("plateau_cycles", 0)),
+            result = _run_training_cycle_with_retry(
+                cycle_num + 1, int(status.get("plateau_cycles", 0))
             )
 
             status["cycles_completed"] = cycle_num + 1
@@ -563,9 +634,15 @@ def run_autonomously(
                 break
 
             logger.info("Cycle complete. Next cycle in %ss...", cycle_interval_sec)
-            time.sleep(cycle_interval_sec)
+            if cycle_interval_sec > 0:
+                asyncio.run(asyncio.sleep(cycle_interval_sec))
 
-        if not infinite_mode:
+        if _STOP_REQUESTED:
+            status["status"] = "stopped"
+            status["next_cycle_eta"] = None
+            save_status(status)
+            save_heartbeat("stopped", current_cycle=status.get("cycles_completed", 0))
+        elif not infinite_mode:
             logger.info("\n%s", "=" * 70)
             logger.info("🎉 TRAINING COMPLETE")
             logger.info("%s", "=" * 70)
@@ -632,6 +709,11 @@ def main() -> int:
         action="store_true",
         help="Skip Quantum LLM step even if enabled",
     )
+    parser.add_argument(
+        "--force-run",
+        action="store_true",
+        help="Allow starting even when pidfile is present",
+    )
 
     args = parser.parse_args()
 
@@ -657,13 +739,19 @@ def main() -> int:
         return 1
 
     config = load_config(config_path)
-
-    return run_autonomously(
-        config=config,
-        max_cycles=args.cycles,
-        cycle_interval_sec=args.interval,
-        skip_quantum=args.skip_quantum,
-    )
+    signal.signal(signal.SIGINT, _request_stop)
+    signal.signal(signal.SIGTERM, _request_stop)
+    _acquire_pidfile(force=args.force_run)
+    atexit.register(_release_pidfile)
+    try:
+        return run_autonomously(
+            config=config,
+            max_cycles=args.cycles,
+            cycle_interval_sec=args.interval,
+            skip_quantum=args.skip_quantum,
+        )
+    finally:
+        _release_pidfile()
 
 
 if __name__ == "__main__":

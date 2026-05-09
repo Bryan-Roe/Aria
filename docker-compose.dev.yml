@@ -1,0 +1,23 @@
+version: "3.9"
+
+services:
+  aria-web:
+    build:
+      context: .
+      dockerfile: apps/aria/Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      ARIA_HOST: 0.0.0.0
+      ARIA_PORT: 8080
+
+  function-app:
+    build:
+      context: .
+      dockerfile: function_app.Dockerfile
+    ports:
+      - "7071:7071"
+    environment:
+      QAI_ENV: development
+      QAI_DEBUG: "false"
+
