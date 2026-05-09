@@ -24,11 +24,15 @@ def app_module():
     if spec is None or spec.loader is None:
         raise RuntimeError("Failed to load function_app module")
     module = importlib.util.module_from_spec(spec)
+    prev_module = sys.modules.get("function_app")
     sys.modules["function_app"] = module
     try:
         spec.loader.exec_module(module)
     except Exception:
-        sys.modules.pop("function_app", None)
+        if prev_module is None:
+            sys.modules.pop("function_app", None)
+        else:
+            sys.modules["function_app"] = prev_module
         raise
     return module
 
