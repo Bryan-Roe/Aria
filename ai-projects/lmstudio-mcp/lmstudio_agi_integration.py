@@ -171,7 +171,8 @@ class AGILMStudioRouter:
             )
 
             # Use the LM Studio client
-            assert self.lmstudio_client is not None
+            if self.lmstudio_client is None:
+                raise RuntimeError("LM Studio client is not initialized")
             response = await self.lmstudio_client.complete(
                 messages=messages,
                 temperature=0.7,

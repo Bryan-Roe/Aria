@@ -26,6 +26,9 @@ Short & actionable summary for AI agents editing Aria — an interactive AI char
   - `/api/tts` — Azure Speech TTS (falls back to local if enabled)
   - `/api/quantum/*` — quantum job submission/monitoring
   - `/api/ai/status` — health check showing active provider, env vars, DB pool, Cosmos status
+  - `/api/quantum-llm/status` — quantum-powered LLM backend info (backend, qubits, fallback, provider)
+  - `/api/quantum-llm/chat` — non-streaming quantum-augmented LLM completion
+  - `/api/quantum-llm/stream` — SSE streaming quantum-augmented LLM (same format as `/api/chat/stream`)
 - **Aria Web API endpoints** (via `apps/aria/server.py` on port 8080):
   - `GET /api/aria/state` — current stage state (position, objects, expressions)
   - `POST /api/aria/command` — process natural language commands
@@ -209,6 +212,11 @@ async def run_single_cycle(cycle_number):
 | Change | File(s) |
 |--------|---------|
 | Add/modify API endpoint | `function_app.py` |
+| Quantum LLM pipeline | `ai-projects/quantum-ml/src/quantum_llm/pipeline.py` |
+| Quantum token sampler | `ai-projects/quantum-ml/src/quantum_llm/quantum_sampler.py` |
+| Quantum embedding transformer | `ai-projects/quantum-ml/src/quantum_llm/quantum_embeddings.py` |
+| Quantum provider router | `ai-projects/quantum-ml/src/quantum_llm/quantum_router.py` |
+| Quantum LLM config | `ai-projects/quantum-ml/src/quantum_llm/config.py` |
 | Chat provider logic | `ai-projects/chat-cli/src/chat_providers.py` (re-exported by `shared/chat_providers.py`) |
 | Training orchestration | `scripts/autotrain.py` + root `autotrain.yaml` |
 | Autonomous training behavior | `scripts/autonomous_training_orchestrator.py` + `config/autonomous_training.yaml` |
@@ -308,7 +316,8 @@ Available agents in `.github/agents/`:
 |-------|---------|
 | `ai.agent.md` | Primary autonomous agent — task decomposition, multi-step execution |
 | `my-agent.agent.md` | QAI specialist — quantum-AI/ML development |
-| `agi-reasoning.agent.md` | Chain-of-thought reasoning, self-reflection |
+| `agi-reasoning.agent.md` | Chain-of-thought reasoning, self-reflection (CoT is internal, final answer only) |
+| `visible-reasoning.agent.md` | Visible step-by-step reasoning, shows CoT trace to users |
 | `aria-character.agent.md` | Interactive character commands, animations |
 | `autonomous-trainer.agent.md` | LoRA training lifecycle, model promotion |
 | `full-stack-debugger.agent.md` | Cross-stack issue diagnosis |
@@ -331,7 +340,7 @@ Available agents in `.github/agents/`:
 
 **Prompts** (`.github/prompts/`):
 - `agi.prompt.md` — Autonomous AGI reasoning with multi-step analysis and self-correction (chain-of-thought is internal, not exposed in output)
-- `reason.prompt.md` — Structured analysis
+- `reason.prompt.md` — Visible step-by-step reasoning that exposes chain-of-thought, confidence scores, and self-reflection to the user (uses `visible-reasoning` agent)
 - `debug.prompt.md` — Systematic diagnostic protocol
 - `review.prompt.md` — Code review (correctness, security, performance)
 - `aria-command.prompt.md` — Natural language → Aria actions

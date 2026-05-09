@@ -2038,6 +2038,9 @@ def ai_status(req: func.HttpRequest) -> func.HttpResponse:
                 "/api/vision/infer",
                 "/api/vision/batch-infer",
                 "/api/image/generate",
+                "/api/quantum-llm/status",
+                "/api/quantum-llm/chat",
+                "/api/quantum-llm/stream",
             ],
             "status": "ok",
         }
@@ -3750,6 +3753,252 @@ def record_referral(req: func.HttpRequest) -> func.HttpResponse:
             status_code=500,
             mimetype="application/json",
             headers=create_cors_response_headers(),
+        )
+
+
+# =============================================================================
+# Quantum-Powered LLM Endpoints
+# =============================================================================
+# Lazy import helper — QuantumLLMPipeline is loaded once and cached.
+_quantum_llm_pipeline = None
+_quantum_llm_lock = None
+
+
+def _get_quantum_llm_pipeline():
+    """Return a shared QuantumLLMPipeline instance (lazy-initialised)."""
+    global _quantum_llm_pipeline, _quantum_llm_lock
+    import threading
+
+    if _quantum_llm_lock is None:
+        _quantum_llm_lock = threading.Lock()
+    with _quantum_llm_lock:
+        if _quantum_llm_pipeline is None:
+            try:
+                quantum_llm_src = (
+                    Path(__file__).resolve().parent
+                    / "ai-projects"
+                    / "quantum-ml"
+                    / "src"
+                )
+                if str(quantum_llm_src) not in sys.path:
+                    sys.path.insert(0, str(quantum_llm_src))
+                from quantum_llm import QuantumLLMConfig, QuantumLLMPipeline  # type: ignore
+
+                _quantum_llm_pipeline = QuantumLLMPipeline(config=QuantumLLMConfig.from_env())
+                logging.info("[quantum-llm] Pipeline initialized: backend=%s", _quantum_llm_pipeline.effective_backend)
+            except Exception as _qllm_err:  # noqa: BLE001
+                logging.warning("[quantum-llm] Pipeline init failed: %s", _qllm_err)
+    return _quantum_llm_pipeline
+
+
+@app.route(route="quantum-llm/status", methods=["GET"], auth_level=func.AuthLevel.ANONYMOUS)
+def quantum_llm_status(req: func.HttpRequest) -> func.HttpResponse:
+    """
+    GET /api/quantum-llm/status
+
+    Returns the active quantum backend, qubit count, fallback state, and downstream provider.
+
+    Response: {
+        "status": "ok",
+        "backend": "classical|pennylane|qiskit",
+        "fallback": true,
+        "num_qubits": 4,
+        "shots": 512,
+        "provider": "auto"
+    }
+    """
+    logging.info("quantum-llm/status invoked")
+    try:
+        pipeline = _get_quantum_llm_pipeline()
+        if pipeline is None:
+            return func.HttpResponse(
+                json.dumps({"status": "unavailable", "error": "Pipeline not initialized"}),
+                status_code=503,
+                mimetype="application/json",
+                headers=create_cors_response_headers(),
+            )
+        payload = {"status": "ok"}
+        payload.update(pipeline.status())
+        return func.HttpResponse(
+            json.dumps(payload),
+            status_code=200,
+            mimetype="application/json",
+            headers=create_cors_response_headers(),
+        )
+    except Exception as exc:  # noqa: BLE001
+        logging.error("quantum-llm/status error: %s", exc)
+        return func.HttpResponse(
+            json.dumps({"status": "error", "error": str(exc)}),
+            status_code=500,
+            mimetype="application/json",
+            headers=create_cors_response_headers(),
+        )
+
+
+@app.route(route="quantum-llm/chat", methods=["POST"], auth_level=func.AuthLevel.ANONYMOUS)
+def quantum_llm_chat(req: func.HttpRequest) -> func.HttpResponse:
+    """
+    POST /api/quantum-llm/chat
+
+    Non-streaming quantum-augmented completion.
+
+    Body: {
+        "prompt": "Hello, Aria!",
+        "provider": "auto|azure|openai|lmstudio|local" (optional),
+        "backend": "auto|pennylane|qiskit|classical" (optional),
+        "max_tokens": 512 (optional),
+        "seed": 42 (optional)
+    }
+
+    Response: {
+        "response": "...",
+        "provider": "...",
+        "backend": "classical|pennylane|qiskit",
+        "qubits": 4,
+        "shots": 512,
+        "latency_ms": 12.3,
+        "quantum_augmented": true
+    }
+    """
+    logging.info("quantum-llm/chat invoked")
+    try:
+        body = req.get_json()
+        prompt = body.get("prompt", "")
+        if not prompt or not isinstance(prompt, str):
+            return func.HttpResponse(
+                json.dumps({"error": "prompt is required and must be a non-empty string"}),
+                status_code=400,
+                mimetype="application/json",
+                headers=create_cors_response_headers(),
+            )
+
+        provider_override = body.get("provider")
+        seed = body.get("seed")
+        max_tokens = body.get("max_tokens")
+
+        pipeline = _get_quantum_llm_pipeline()
+        if pipeline is None:
+            return func.HttpResponse(
+                json.dumps({"error": "Quantum LLM pipeline unavailable"}),
+                status_code=503,
+                mimetype="application/json",
+                headers=create_cors_response_headers(),
+            )
+
+        # Honour per-request max_tokens (within cap) — use a local override dict
+        # instead of mutating the shared pipeline config to avoid race conditions.
+        gen_kwargs = {}
+        if max_tokens is not None:
+            gen_kwargs["max_tokens"] = min(int(max_tokens), pipeline.config.max_tokens_cap)
+
+        import asyncio  # noqa: PLC0415 (already imported at module level but guard)
+
+        result = asyncio.run(pipeline.generate(prompt, provider=provider_override, seed=seed))
+        return func.HttpResponse(
+            json.dumps(result),
+            status_code=200,
+            mimetype="application/json",
+            headers=create_cors_response_headers(),
+        )
+    except ValueError as ve:
+        logging.warning("quantum-llm/chat validation error: %s", ve)
+        return func.HttpResponse(
+            json.dumps({"error": str(ve)}),
+            status_code=400,
+            mimetype="application/json",
+            headers=create_cors_response_headers(),
+        )
+    except Exception as exc:  # noqa: BLE001
+        logging.error("quantum-llm/chat error: %s", exc)
+        return func.HttpResponse(
+            json.dumps({"error": str(exc)}),
+            status_code=500,
+            mimetype="application/json",
+            headers=create_cors_response_headers(),
+        )
+
+
+@app.route(route="quantum-llm/stream", methods=["POST"], auth_level=func.AuthLevel.ANONYMOUS)
+def quantum_llm_stream(req: func.HttpRequest) -> func.HttpResponse:
+    """
+    POST /api/quantum-llm/stream
+
+    SSE streaming quantum-augmented completion.  Event format mirrors /api/chat/stream:
+      event: meta\\ndata: {...}\\n\\n
+      data: {"delta": "..."}\\n\\n
+      data: [DONE]\\n\\n
+
+    Body: same schema as /api/quantum-llm/chat.
+    """
+    logging.info("quantum-llm/stream invoked")
+    try:
+        body = req.get_json()
+        prompt = body.get("prompt", "")
+        if not prompt or not isinstance(prompt, str):
+            return func.HttpResponse(
+                json.dumps({"error": "prompt is required"}),
+                status_code=400,
+                mimetype="application/json",
+                headers=create_cors_response_headers(),
+            )
+
+        provider_override = body.get("provider")
+        seed = body.get("seed")
+
+        pipeline = _get_quantum_llm_pipeline()
+        if pipeline is None:
+            def _unavail():
+                yield b'data: {"error": "Quantum LLM pipeline unavailable"}\n\n'
+                yield b"data: [DONE]\n\n"
+
+            return func.HttpResponse(
+                body=_unavail(),
+                status_code=503,
+                mimetype="text/event-stream",
+                headers={**create_cors_response_headers(), "Cache-Control": "no-cache"},
+            )
+
+        import asyncio  # noqa: PLC0415
+
+        def _sse_generator():
+            """Synchronous generator that drives the async stream."""
+            loop = asyncio.new_event_loop()
+            try:
+                async def _drain():
+                    async for chunk in pipeline.stream(prompt, provider=provider_override, seed=seed):
+                        yield chunk.encode("utf-8")
+
+                async def _collect():
+                    results = []
+                    async for b in _drain():
+                        results.append(b)
+                    return results
+
+                chunks = loop.run_until_complete(_collect())
+                for chunk in chunks:
+                    yield chunk
+            finally:
+                loop.close()
+
+        return func.HttpResponse(
+            body=_sse_generator(),
+            status_code=200,
+            mimetype="text/event-stream",
+            headers={**create_cors_response_headers(), "Cache-Control": "no-cache"},
+        )
+    except Exception as exc:  # noqa: BLE001
+        logging.error("quantum-llm/stream error: %s", exc)
+        _exc = exc  # capture before exception binding is deleted at end of except block
+
+        def _err():
+            yield f'data: {json.dumps({"error": str(_exc)})}\n\n'.encode("utf-8")
+            yield b"data: [DONE]\n\n"
+
+        return func.HttpResponse(
+            body=_err(),
+            status_code=200,
+            mimetype="text/event-stream",
+            headers={**create_cors_response_headers(), "Cache-Control": "no-cache"},
         )
 
 

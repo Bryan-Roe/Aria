@@ -1,7 +1,7 @@
 /* QAI Control Center Styles */
 
 :root {
-    --primary: #667eea;
+    --primary: #0f9d89;
     --primary-dark: #5568d3;
     --secondary: #48bb78;
     --danger: #f56565;
@@ -23,7 +23,7 @@
 
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #0f9d89 0%, #0a7a6d 100%);
     color: var(--text);
     min-height: 100vh;
     padding: 20px;
@@ -40,7 +40,7 @@ body {
 
 /* Header */
 .header {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #0f9d89 0%, #0a7a6d 100%);
     color: white;
     padding: 30px;
     display: flex;

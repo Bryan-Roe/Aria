@@ -247,7 +247,7 @@ const expressions = {
 function log(message, isError = false) {
     const entry = document.createElement('div');
     entry.className = 'log-entry';
-    entry.style.borderLeftColor = isError ? '#e74c3c' : '#667eea';
+    entry.style.borderLeftColor = isError ? '#e74c3c' : '#0f9d89';
     entry.style.color = isError ? '#e74c3c' : '#555';
     entry.textContent = `${new Date().toLocaleTimeString()}: ${message}`;
     logContainer.insertBefore(entry, logContainer.firstChild);
@@ -1642,7 +1642,7 @@ setInterval(() => {
             timerDisplay.style.color = '#e74c3c';
             timerDisplay.style.animation = 'pulse 0.5s ease infinite';
         } else {
-            timerDisplay.style.color = '#667eea';
+            timerDisplay.style.color = '#0f9d89';
             timerDisplay.style.animation = 'none';
         }
     }
