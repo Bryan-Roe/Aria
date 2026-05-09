@@ -122,7 +122,7 @@ create_agi_provider(
 
 ## Workspace Context
 
-- **Provider chain**: Azure OpenAI → OpenAI → LMStudio → LoRA → Local
+- **Provider chain**: explicit choice → LM Studio → Ollama → AGI → Quantum → Azure OpenAI → OpenAI → Local fallback → LoRA (source of truth: `detect_provider()` in `ai-projects/chat-cli/src/chat_providers.py`)
 - **Config precedence**: YAML base < CLI flags < per-job YAML < env vars
 - **Data immutability**: Read-only `datasets/`, write-only `data_out/`
 - **Testing**: `python scripts/test_runner.py --unit` before committing
