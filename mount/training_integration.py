@@ -185,6 +185,14 @@ class TrainingIntegration:
     ) -> Dict[str, Any]:
         """Run LoRA training directly"""
         try:
+            available_datasets = await self.list_datasets()
+            allowed_datasets = set()
+            for names in available_datasets.values():
+                allowed_datasets.update(names)
+
+            if dataset not in allowed_datasets:
+                return {"success": False, "error": "Invalid dataset"}
+
             train_script = self.phi_path / "scripts" / "train_lora.py"
             config_file = self.phi_path / "lora" / "lora.yaml"
 
