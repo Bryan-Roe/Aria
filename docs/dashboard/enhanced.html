@@ -3,7 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QAI Training Dashboard - Enhanced</title>
+    <title>Enhanced Dashboard — Aria Platform</title>
+    <meta name="description" content="Extended dashboard variant with upgraded monitoring panels and richer training presentation for the Aria platform.">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://bryan-roe.github.io/Aria/dashboard/enhanced.html">
+    <meta name="theme-color" content="#0f9d89">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://bryan-roe.github.io/Aria/dashboard/enhanced.html">
+    <meta property="og:title" content="Enhanced Dashboard — Aria Platform">
+    <meta property="og:description" content="Extended dashboard with upgraded monitoring panels and richer training presentation.">
+    <meta property="og:image" content="https://bryan-roe.github.io/Aria/og-image.svg">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Enhanced Dashboard — Aria Platform">
+    <meta name="twitter:image" content="https://bryan-roe.github.io/Aria/og-image.svg">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='24' fill='%23122033'/%3E%3Ccircle cx='50' cy='36' r='16' fill='%230f9d89'/%3E%3Cpath d='M24 78c5-14 18-22 26-22s21 8 26 22' stroke='%23f7f2e8' stroke-width='10' stroke-linecap='round' fill='none'/%3E%3C/svg%3E">
     <style>
         * {
             margin: 0;
@@ -13,7 +26,7 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #0f9d89 0%, #0a7a6d 100%);
             color: #333;
             padding: 20px;
         }
@@ -32,7 +45,7 @@
         }
 
         h1 {
-            color: #667eea;
+            color: #0f9d89;
             font-size: 2.5em;
             margin-bottom: 10px;
         }
@@ -54,7 +67,7 @@
         }
 
         .tab.active {
-            background: #667eea;
+            background: #0f9d89;
             color: white;
         }
 
@@ -97,7 +110,7 @@
         .stat-value {
             font-size: 1.8em;
             font-weight: bold;
-            color: #667eea;
+            color: #0f9d89;
             margin-bottom: 5px;
         }
 
@@ -120,7 +133,7 @@
             font-size: 1.5em;
             color: #333;
             margin-bottom: 15px;
-            border-bottom: 2px solid #667eea;
+            border-bottom: 2px solid #0f9d89;
             padding-bottom: 8px;
         }
 
@@ -129,7 +142,7 @@
             border-radius: 10px;
             padding: 20px;
             margin-bottom: 15px;
-            border-left: 5px solid #667eea;
+            border-left: 5px solid #0f9d89;
             cursor: pointer;
             transition: all 0.3s;
         }
@@ -221,7 +234,7 @@
         .detail-value {
             font-size: 1.1em;
             font-weight: bold;
-            color: #667eea;
+            color: #0f9d89;
         }
 
         .job-expanded {
@@ -239,7 +252,7 @@
 
         .metric-card {
             padding: 15px;
-            background: linear-gradient(135deg, #667eea20 0%, #764ba220 100%);
+            background: linear-gradient(135deg, #0f9d8920 0%, #0a7a6d20 100%);
             border-radius: 8px;
             text-align: center;
         }
@@ -253,7 +266,7 @@
         .metric-value {
             font-size: 1.5em;
             font-weight: bold;
-            color: #667eea;
+            color: #0f9d89;
         }
 
         .improvement {
@@ -297,7 +310,7 @@
         }
 
         .model-card:hover {
-            border-color: #667eea;
+            border-color: #0f9d89;
             box-shadow: 0 5px 15px rgba(102,126,234,0.3);
         }
 
@@ -334,7 +347,7 @@
         }
 
         .btn-primary {
-            background: #667eea;
+            background: #0f9d89;
             color: white;
         }
 
@@ -386,7 +399,7 @@
 
         .form-select:focus {
             outline: none;
-            border-color: #667eea;
+            border-color: #0f9d89;
         }
 
         .datasets-list {
@@ -405,13 +418,13 @@
         }
 
         .dataset-card:hover {
-            border-color: #667eea;
+            border-color: #0f9d89;
             transform: translateY(-3px);
         }
 
         .dataset-card.selected {
-            border-color: #667eea;
-            background: linear-gradient(135deg, #667eea20 0%, #764ba220 100%);
+            border-color: #0f9d89;
+            background: linear-gradient(135deg, #0f9d8920 0%, #0a7a6d20 100%);
         }
 
         .dataset-name {
@@ -437,7 +450,7 @@
 
         .progress-fill {
             height: 100%;
-            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(90deg, #0f9d89 0%, #0a7a6d 100%);
             display: flex;
             align-items: center;
             justify-content: center;

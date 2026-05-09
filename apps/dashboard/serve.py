@@ -1036,7 +1036,7 @@ def main():
         # Open browser
         try:
             webbrowser.open(url)
-        except:
+        except Exception:
             pass
 
         try:

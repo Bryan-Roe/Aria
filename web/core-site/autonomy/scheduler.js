@@ -2,32 +2,39 @@ import { enqueueTask } from "../background/agent-runner.js";
 import { generateProjectIdea, expandProject } from "./project-factory.js";
 import { deployProject } from "./deployer.js";
 import { addMemory } from "../memory.js";
+import { runSwarmCompetition } from "../swarm/competition.js";
 
-// Autonomous Scheduler (v1)
-// Decides what Aria should do next forever
+// Autonomous Scheduler (v2)
+// Now uses swarm-based competition for task generation
 
 let active = false;
 
 async function cycle() {
-  // 1. Generate idea
-  const idea = await generateProjectIdea();
+  // 1. Generate competing swarm-driven ideas
+  const competition = await runSwarmCompetition(
+    "Generate best next software project to build",
+    3
+  );
 
-  // 2. Expand idea
+  const winner = competition.winner;
+
+  // 2. Expand winning idea
+  const idea = await generateProjectIdea();
   const expanded = await expandProject(idea);
 
-  // 3. Enqueue build task
+  // 3. Enqueue build task based on swarm winner
   enqueueTask({
     mode: "multi",
-    input: `Build this project: ${JSON.stringify(expanded)}`,
-    source: "scheduler"
+    input: `Build project inspired by swarm winner: ${JSON.stringify(winner)}`,
+    source: "swarm-scheduler"
   });
 
-  // 4. Optionally deploy simulated result
+  // 4. Optional deployment
   if (Math.random() > 0.5) {
     await deployProject(idea);
   }
 
-  addMemory({ type: "scheduler_cycle_complete", idea });
+  addMemory({ type: "scheduler_cycle_complete", winner });
 }
 
 export function startScheduler(interval = 30000) {

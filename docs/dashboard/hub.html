@@ -3,7 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QAI Hub - Command Center</title>
+    <title>QAI Command Center — Aria Dashboard Hub</title>
+    <meta name="description" content="Unified operations hub for Aria: orchestration status, training progress, monitoring shortcuts, and automation control surfaces.">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://bryan-roe.github.io/Aria/dashboard/hub.html">
+    <meta name="theme-color" content="#0f9d89">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://bryan-roe.github.io/Aria/dashboard/hub.html">
+    <meta property="og:title" content="QAI Command Center — Aria Dashboard Hub">
+    <meta property="og:description" content="Unified operations hub for Aria: orchestration status, training progress, monitoring shortcuts, and automation control surfaces.">
+    <meta property="og:image" content="https://bryan-roe.github.io/Aria/og-image.svg">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="QAI Command Center — Aria Dashboard Hub">
+    <meta name="twitter:image" content="https://bryan-roe.github.io/Aria/og-image.svg">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='24' fill='%23122033'/%3E%3Ccircle cx='50' cy='36' r='16' fill='%230f9d89'/%3E%3Cpath d='M24 78c5-14 18-22 26-22s21 8 26 22' stroke='%23f7f2e8' stroke-width='10' stroke-linecap='round' fill='none'/%3E%3C/svg%3E">
     <style>
         * {
             margin: 0;
@@ -42,7 +55,7 @@
         }
 
         header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #0f9d89 0%, #0a7a6d 100%);
             border-radius: 20px;
             padding: 50px;
             margin-bottom: 40px;
@@ -134,7 +147,7 @@
             left: 0;
             right: 0;
             height: 5px;
-            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(90deg, #0f9d89 0%, #0a7a6d 100%);
             transform: scaleX(0);
             transition: transform 0.4s ease;
         }
@@ -209,7 +222,7 @@
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #0f9d89 0%, #0a7a6d 100%);
             color: white;
             box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
         }
@@ -349,7 +362,7 @@
         .stat-value {
             font-size: 3em;
             font-weight: bold;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #0f9d89 0%, #0a7a6d 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
@@ -901,7 +914,7 @@
 
                 modal.innerHTML = `
                     <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
-                        <h2 style="margin: 0; color: #667eea;">📋 Job Queue Status</h2>
+                        <h2 style="margin: 0; color: #0f9d89;">📋 Job Queue Status</h2>
                         <button id="closeQueueBtn" style="background: #f87171; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer;">Close</button>
                     </div>
                     <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px;">
@@ -1129,7 +1142,7 @@
                     z-index: 9999;
                 `;
 
-                let html = '<h2 style="margin-bottom: 20px; color: #667eea;">📊 Training History</h2>';
+                let html = '<h2 style="margin-bottom: 20px; color: #0f9d89;">📊 Training History</h2>';
                 html += '<table style="width: 100%; border-collapse: collapse;">';
                 html += '<tr style="background: #f5f5f5; font-weight: bold;">';
                 html += '<td style="padding: 10px; border: 1px solid #ddd;">Job</td>';
@@ -1154,7 +1167,7 @@
                 });
 
                 html += '</table>';
-                html += '<button onclick="this.parentElement.remove(); document.querySelector(\'div[style*=\\"z-index: 9999\\"]\'').remove();" style="margin-top: 20px; padding: 10px 20px; background: #667eea; color: white; border: none; border-radius: 8px; cursor: pointer;">Close</button>';
+                html += '<button onclick="this.parentElement.remove(); document.querySelector(\'div[style*=\\"z-index: 9999\\"]\'').remove();" style="margin-top: 20px; padding: 10px 20px; background: #0f9d89; color: white; border: none; border-radius: 8px; cursor: pointer;">Close</button>';
 
                 modal.innerHTML = html;
                 document.body.appendChild(overlay);

@@ -3,6 +3,7 @@
 
 function getNavbar(activePage) {
   return `
+  <a class="skip-link" href="#main-content">Skip to main content</a>
   <div class="store-platform-bar">
     <div class="container store-platform-inner">
       <span class="store-platform-label">Aria Platform</span>
@@ -13,6 +14,7 @@ function getNavbar(activePage) {
         <a href="../chat/">Chat</a>
         <a href="../dashboard/hub.html">Dashboards</a>
         <a href="../monetization/pricing.html">Pricing</a>
+        <a href="https://github.com/Bryan-Roe/Aria" target="_blank" rel="noreferrer" style="font-weight:700">★ Star on GitHub</a>
       </div>
     </div>
   </div>
@@ -32,7 +34,7 @@ function getNavbar(activePage) {
         <a href="contact.html" class="${activePage === 'contact' ? 'active' : ''}">Contact</a>
       </nav>
       <div class="nav-search">
-        <input type="text" class="nav-search-input" placeholder="Search offers and services..." id="navSearchInput">
+        <input type="text" class="nav-search-input" placeholder="Search offers… (/ or ⌘K)" id="navSearchInput">
       </div>
       <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Toggle menu">
         <i class="fa-solid fa-bars"></i>

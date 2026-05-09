@@ -3,14 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QAI Advanced Dashboard</title>
+    <title>Advanced Dashboard — Aria Platform</title>
+    <meta name="description" content="Extra controls and advanced monitoring views for Aria training experiments and model tuning.">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://bryan-roe.github.io/Aria/dashboard/advanced.html">
+    <meta name="theme-color" content="#0f9d89">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://bryan-roe.github.io/Aria/dashboard/advanced.html">
+    <meta property="og:title" content="Advanced Dashboard — Aria Platform">
+    <meta property="og:description" content="Extra controls and advanced monitoring views for training experiments and model tuning.">
+    <meta property="og:image" content="https://bryan-roe.github.io/Aria/og-image.svg">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Advanced Dashboard — Aria Platform">
+    <meta name="twitter:image" content="https://bryan-roe.github.io/Aria/og-image.svg">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='24' fill='%23122033'/%3E%3Ccircle cx='50' cy='36' r='16' fill='%230f9d89'/%3E%3Cpath d='M24 78c5-14 18-22 26-22s21 8 26 22' stroke='%23f7f2e8' stroke-width='10' stroke-linecap='round' fill='none'/%3E%3C/svg%3E">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #0f9d89 0%, #0a7a6d 100%);
             color: #333;
             padding: 15px;
         }
@@ -26,7 +39,7 @@
         }
 
         h1 {
-            color: #667eea;
+            color: #0f9d89;
             font-size: 2.2em;
             margin-bottom: 8px;
             display: flex;
@@ -73,12 +86,12 @@
             font-weight: bold;
             margin-bottom: 15px;
             color: #333;
-            border-bottom: 2px solid #667eea;
+            border-bottom: 2px solid #0f9d89;
             padding-bottom: 8px;
         }
 
         .gpu-card {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #0f9d89 0%, #0a7a6d 100%);
             color: white;
         }
 
@@ -129,7 +142,7 @@
             justify-content: center;
             font-size: 0.75em;
             font-weight: bold;
-            color: #667eea;
+            color: #0f9d89;
         }
 
         .stat-grid {
@@ -153,7 +166,7 @@
         .stat-value {
             font-size: 2em;
             font-weight: bold;
-            color: #667eea;
+            color: #0f9d89;
             margin-bottom: 5px;
         }
 
@@ -183,7 +196,7 @@
             margin-bottom: 8px;
             background: #f8f9fa;
             border-radius: 6px;
-            border-left: 4px solid #667eea;
+            border-left: 4px solid #0f9d89;
             transition: all 0.2s;
         }
 
@@ -246,7 +259,7 @@
         }
 
         .btn-primary {
-            background: #667eea;
+            background: #0f9d89;
             color: white;
         }
 

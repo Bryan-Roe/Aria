@@ -49,7 +49,8 @@ def plan_mode(command: str) -> Dict:
     response = requests.post(
         f"{BASE_URL}/api/aria/execute",
         json={"command": command, "auto_execute": False, "use_llm": False},
-    , timeout=30)
+        timeout=30,
+    )
 
     data = response.json()
 
@@ -72,7 +73,8 @@ def execute_mode(command: str) -> Dict:
     response = requests.post(
         f"{BASE_URL}/api/aria/execute",
         json={"command": command, "auto_execute": True, "use_llm": False},
-    , timeout=30)
+        timeout=30,
+    )
 
     data = response.json()
 

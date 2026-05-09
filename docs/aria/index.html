@@ -4,23 +4,63 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>👤 Aria Visual Command System</title>
+    <title>Aria — Interactive Character Stage</title>
+    <meta name="description" content="Aria's interactive character stage with natural-language movement, gestures, object interaction, and world generation.">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://bryan-roe.github.io/Aria/aria/">
+    <meta name="theme-color" content="#0f9d89">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://bryan-roe.github.io/Aria/aria/">
+    <meta property="og:title" content="Aria — Interactive Character Stage">
+    <meta property="og:description" content="Interactive character stage with natural-language movement, gestures, object interaction, and world generation.">
+    <meta property="og:image" content="https://bryan-roe.github.io/Aria/og-image.svg">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Aria — Interactive Character Stage">
+    <meta name="twitter:image" content="https://bryan-roe.github.io/Aria/og-image.svg">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='24' fill='%23122033'/%3E%3Ccircle cx='50' cy='36' r='16' fill='%230f9d89'/%3E%3Cpath d='M24 78c5-14 18-22 26-22s21 8 26 22' stroke='%23f7f2e8' stroke-width='10' stroke-linecap='round' fill='none'/%3E%3C/svg%3E">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
     <style>
-        * {
+        *, *::before, *::after {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
 
+        :root {
+            --teal: #0f9d89;
+            --teal-hover: #0a7a6d;
+            --coral: #d95b43;
+            --gold: #d3a53e;
+            --ink: #122033;
+            --ink-soft: #5f6874;
+            --paper: #f7f2e8;
+            --line: rgba(18, 32, 51, 0.12);
+            --shadow: 0 10px 30px rgba(18, 32, 51, 0.12);
+        }
+
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #d4e4f7 0%, #b8d4ed 50%, #a8c5e3 100%);
+            font-family: "Instrument Sans", system-ui, sans-serif;
+            background: linear-gradient(180deg, #fbf7ef 0%, #f7f2e8 56%, #efe5d6 100%);
             min-height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
             padding: 20px;
-            color: #333;
+            color: var(--ink);
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            background:
+                radial-gradient(circle at 12% 18%, rgba(15, 157, 137, 0.14), transparent 30%),
+                radial-gradient(circle at 88% 12%, rgba(217, 91, 67, 0.12), transparent 26%),
+                radial-gradient(circle at 50% 78%, rgba(211, 165, 62, 0.12), transparent 28%);
+            pointer-events: none;
         }
 
         .container {
@@ -36,28 +76,25 @@
         h1 {
             font-size: 2.5em;
             margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
-            background: linear-gradient(135deg, #4a90e2, #5a9fe5, #6aaff0);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            font-family: "Space Grotesk", "Instrument Sans", sans-serif;
+            color: var(--ink);
+            letter-spacing: -0.03em;
         }
 
         .subtitle {
             font-size: 1.1em;
-            opacity: 0.9;
+            color: var(--ink-soft);
         }
 
         .demo-notice {
-            background: linear-gradient(135deg, #ff9800 0%, #ff6f00 100%);
-            color: white;
+            background: rgba(15, 157, 137, 0.12);
+            color: var(--teal-hover);
             padding: 12px 20px;
             border-radius: 10px;
             margin-bottom: 20px;
             text-align: center;
             font-size: 0.95em;
-            box-shadow: 0 4px 15px rgba(255, 152, 0, 0.3);
-            border: 2px solid rgba(255, 255, 255, 0.3);
+            border: 1.5px solid rgba(15, 157, 137, 0.3);
         }
 
         .demo-notice strong {
@@ -65,21 +102,22 @@
         }
 
         .demo-notice a {
-            color: white;
+            color: var(--teal);
             text-decoration: underline;
         }
 
         .object-manager {
-            background: rgba(255, 255, 255, 0.95);
+            background: rgba(255, 255, 255, 0.92);
             border-radius: 15px;
             padding: 20px;
             margin-bottom: 20px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            box-shadow: var(--shadow);
+            border: 1px solid var(--line);
         }
 
         .object-manager h3 {
             margin-bottom: 15px;
-            color: #4a90e2;
+            color: var(--teal);
         }
 
         .object-controls {
@@ -90,7 +128,7 @@
 
         .object-btn {
             padding: 12px;
-            border: 2px solid #ddd;
+            border: 2px solid var(--line);
             border-radius: 10px;
             background: white;
             cursor: pointer;
@@ -104,13 +142,13 @@
 
         .object-btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 4px 8px rgba(18, 32, 51, 0.12);
         }
 
         .object-btn.active {
-            background: linear-gradient(135deg, #667eea, #764ba2);
+            background: linear-gradient(135deg, var(--teal), #0a7a6d);
             color: white;
-            border-color: #667eea;
+            border-color: var(--teal);
         }
 
         .object-btn.inactive {
@@ -126,10 +164,11 @@
         }
 
         .stage-container {
-            background: rgba(255, 255, 255, 0.95);
+            background: rgba(255, 255, 255, 0.92);
             border-radius: 20px;
             padding: 30px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            box-shadow: var(--shadow);
+            border: 1px solid var(--line);
         }
 
         .stage {
@@ -139,7 +178,7 @@
             background: linear-gradient(180deg, #87CEEB 0%, #98D8E8 100%);
             border-radius: 15px;
             overflow: visible;
-            border: 3px solid #667eea;
+            border: 2px solid rgba(15, 157, 137, 0.3);
             perspective: 1200px;
             perspective-origin: 50% 50%;
             transform-style: preserve-3d;
@@ -1097,15 +1136,16 @@
         }
 
         .control-panel {
-            background: rgba(255, 255, 255, 0.95);
+            background: rgba(255, 255, 255, 0.92);
             border-radius: 20px;
             padding: 25px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-            color: #333;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--line);
+            color: var(--ink);
         }
 
         .control-panel h2 {
-            color: #ff6b9d;
+            color: var(--teal);
             margin-bottom: 15px;
             font-size: 1.5em;
         }
@@ -1117,36 +1157,38 @@
         input[type="text"] {
             width: 100%;
             padding: 12px;
-            border: 2px solid #ff6b9d;
+            border: 2px solid var(--line);
             border-radius: 10px;
             font-size: 1em;
             margin-bottom: 10px;
             transition: border-color 0.3s;
+            font-family: inherit;
         }
 
         input[type="text"]:focus {
             outline: none;
-            border-color: #ff8fab;
-            box-shadow: 0 0 8px rgba(255, 107, 157, 0.3);
+            border-color: var(--teal);
+            box-shadow: 0 0 0 3px rgba(15, 157, 137, 0.15);
         }
 
         button {
             width: 100%;
             padding: 12px;
-            background: linear-gradient(135deg, #ff6b9d 0%, #ffa5c5 100%);
+            background: linear-gradient(135deg, var(--teal) 0%, #0a7a6d 100%);
             color: white;
             border: none;
             border-radius: 10px;
             font-size: 1em;
-            font-weight: bold;
+            font-weight: 600;
             cursor: pointer;
-            transition: transform 0.2s;
-            box-shadow: 0 4px 8px rgba(255, 107, 157, 0.3);
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 4px 8px rgba(15, 157, 137, 0.3);
+            font-family: inherit;
         }
 
         button:hover {
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 6px 16px rgba(15, 157, 137, 0.35);
         }
 
         button:active {
@@ -1158,7 +1200,7 @@
         }
 
         .quick-commands h3 {
-            color: #ff6b9d;
+            color: var(--teal);
             margin-bottom: 10px;
             font-size: 1.2em;
         }
@@ -1171,20 +1213,22 @@
 
         .quick-btn {
             padding: 8px;
-            background: #f0f0f0;
-            color: #333;
-            border: 2px solid #ff6b9d;
+            background: rgba(15, 157, 137, 0.06);
+            color: var(--ink);
+            border: 1.5px solid rgba(15, 157, 137, 0.35);
             border-radius: 8px;
             font-size: 0.9em;
             cursor: pointer;
             transition: all 0.2s;
+            font-family: inherit;
         }
 
         .quick-btn:hover {
-            background: #ff6b9d;
+            background: var(--teal);
             color: white;
             transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(255, 107, 157, 0.3);
+            box-shadow: 0 4px 8px rgba(15, 157, 137, 0.3);
+        }
         }
 
         /* Chat panel styles */
@@ -1193,19 +1237,19 @@
             flex-direction: column;
             gap: 10px;
             padding: 12px;
-            background: linear-gradient(180deg, rgba(255, 255, 255, 0.95), rgba(248, 250, 255, 0.9));
+            background: rgba(255, 255, 255, 0.92);
             border-radius: 12px;
-            border: 1px solid rgba(100, 110, 230, 0.08);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
+            border: 1px solid var(--line);
+            box-shadow: 0 4px 12px rgba(18, 32, 51, 0.06);
         }
 
         .chat-messages {
             height: 220px;
             overflow-y: auto;
             padding: 12px;
-            background: rgba(255, 255, 255, 0.9);
+            background: rgba(247, 242, 232, 0.6);
             border-radius: 10px;
-            border: 1px solid rgba(0, 0, 0, 0.03);
+            border: 1px solid var(--line);
             display: flex;
             flex-direction: column;
             gap: 8px;
@@ -1227,7 +1271,7 @@
 
         .chat-msg .sender {
             font-size: 0.75rem;
-            color: #666;
+            color: var(--ink-soft);
             margin-bottom: 3px;
         }
 
@@ -1237,17 +1281,18 @@
             border-radius: 14px;
             font-size: 0.95rem;
             line-height: 1.2;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+            box-shadow: 0 2px 8px rgba(18, 32, 51, 0.06);
         }
 
         .chat-msg.user .bubble {
-            background: linear-gradient(135deg, #667eea, #764ba2);
+            background: linear-gradient(135deg, var(--teal), #0a7a6d);
             color: white;
         }
 
         .chat-msg.aria .bubble {
-            background: #f3f6ff;
-            color: #24324a;
+            background: white;
+            color: var(--ink);
+            border: 1px solid var(--line);
         }
 
         .chat-input-block {
@@ -1260,19 +1305,21 @@
             flex: 1;
             padding: 10px 12px;
             border-radius: 10px;
-            border: 1px solid #ddd;
+            border: 1.5px solid var(--line);
+            font-family: inherit;
         }
 
         .status-log {
             margin-top: 20px;
             padding: 15px;
-            background: #f9f9f9;
+            background: rgba(247, 242, 232, 0.7);
             border-radius: 10px;
             max-height: 200px;
+            border: 1px solid var(--line);
         }
 
         .status-log h3 {
-            color: #ff6b9d;
+            color: var(--teal);
             margin-bottom: 10px;
             font-size: 1.1em;
         }
@@ -1280,22 +1327,23 @@
         .log-entry {
             padding: 5px;
             margin-bottom: 5px;
-            border-left: 3px solid #ff6b9d;
+            border-left: 3px solid var(--teal);
             padding-left: 10px;
             font-size: 0.9em;
-            color: #555;
+            color: var(--ink-soft);
         }
 
         .command-categories {
-            background: rgba(255, 255, 255, 0.95);
+            background: rgba(255, 255, 255, 0.92);
             border-radius: 20px;
             padding: 25px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-            color: #333;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--line);
+            color: var(--ink);
         }
 
         .command-categories h2 {
-            color: #ff6b9d;
+            color: var(--teal);
             margin-bottom: 15px;
         }
 
@@ -1304,13 +1352,13 @@
         }
 
         .category-title {
-            font-weight: bold;
-            color: #764ba2;
+            font-weight: 600;
+            color: var(--ink);
             margin-bottom: 5px;
         }
 
         .category-examples {
-            color: #666;
+            color: var(--ink-soft);
             font-size: 0.9em;
             line-height: 1.6;
         }
@@ -1319,7 +1367,7 @@
             display: inline-flex;
             align-items: center;
             gap: 6px;
-            color: #4a90e2;
+            color: var(--teal);
             text-decoration: none;
             margin-bottom: 16px;
             font-size: 0.95em;

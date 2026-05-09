@@ -1,7 +1,7 @@
-# Jekyll configuration for GitHub Pages
+# GitHub Pages configuration (Jekyll is disabled via .nojekyll — this file
+# is used only for metadata reference, not for active Jekyll processing)
 title: Aria - Interactive AI Character Platform
 description: Hybrid quantum-AI/ML platform with 3D animated character, multi-provider chat, and autonomous learning
-theme: jekyll-theme-minimal
 
 # Build settings
 markdown: kramdown

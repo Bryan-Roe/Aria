@@ -69,17 +69,20 @@ Press `Ctrl+Shift+I` and type:
 ```
 
 **Landing Page:**
-```
+
+```text
 @llm-maker Build a modern SaaS landing page with hero section, feature list, pricing table, testimonials, and FAQ
 ```
 
 **Documentation:**
-```
+
+```text
 @llm-maker Generate API documentation website with quick start guide, code examples, and API reference table
 ```
 
 **E-Commerce:**
-```
+
+```text
 @llm-maker Create an e-commerce store with product catalog, shopping cart, checkout, and customer reviews
 ```
 
@@ -103,12 +106,14 @@ python3 code_generation_quickstart.py
 Each website includes:
 
 ✅ **HTML Pages**
+
 - Semantic HTML5
 - Proper meta tags
 - Mobile viewport tags
 - Open Graph for sharing
 
 ✅ **CSS Styling**
+
 - Modern responsive design
 - Gradient backgrounds
 - Smooth animations
@@ -116,6 +121,7 @@ Each website includes:
 - Dark mode support (blogs)
 
 ✅ **JavaScript Interactivity**
+
 - Smooth scrolling navigation
 - Form validation
 - Event handlers
@@ -123,6 +129,7 @@ Each website includes:
 - Dark mode toggle functionality
 
 ✅ **Production Ready**
+
 - Valid HTML5/CSS3
 - Cross-browser compatible
 - SEO optimized basics
@@ -133,7 +140,8 @@ Each website includes:
 
 ## 💡 Examples
 
-### Portfolio Example Generated:
+### Portfolio Example Generated
+
 ```html
 <!-- Navigation with smooth scroll -->
 <nav class="navbar">
@@ -164,14 +172,16 @@ Each website includes:
 </div>
 ```
 
-### Generated CSS Includes:
+### Generated CSS Includes
+
 - Responsive grid layouts
 - Gradient backgrounds with modern colors
 - Smooth hover animations
 - Mobile breakpoints
 - Flexbox and CSS Grid layouts
 
-### Generated JavaScript:
+### Generated JavaScript
+
 - Smooth scrolling navigation
 - Form submission handling
 - Scroll effects on navbar
@@ -183,31 +193,36 @@ Each website includes:
 ## 🎯 Real-World Use Cases
 
 ### 1. Freelancer Portfolio
-```
+
+```text
 Request: "Build a portfolio for a web designer with 15 projects, case studies, and testimonials"
 Result: Beautiful site attractive to clients, ready to share
 ```
 
 ### 2. SaaS Startup Landing Page
-```
+
+```text
 Request: "Create a landing page for our productivity app with pricing, features, and FAQ"
 Result: Professional marketing site with pricing comparison and CTA buttons
 ```
 
 ### 3. Tech Blog
-```
+
+```text
 Request: "Generate a tech blog with dark mode, categories, archives, and comment support"
 Result: Full-featured blog ready for content
 ```
 
 ### 4. API Documentation
-```
+
+```text
 Request: "Build API documentation for our REST API with examples and reference"
 Result: Professional docs site developers can reference
 ```
 
 ### 5. Online Store
-```
+
+```text
 Request: "Create an e-commerce site with product grid, cart, and checkout"
 Result: Online store ready for products
 ```
@@ -217,7 +232,8 @@ Result: Online store ready for products
 ## 🌐 Deploy Anywhere
 
 ### GitHub Pages
-```
+
+```text
 1. Create GitHub repo
 2. Push generated files
 3. Enable GitHub Pages in settings
@@ -225,21 +241,24 @@ Result: Online store ready for products
 ```
 
 ### Netlify
-```
+
+```text
 1. Connect GitHub repo or drag & drop files
 2. Click deploy
 3. Live in < 2 minutes (FREE)
 ```
 
 ### Vercel
-```
+
+```text
 1. Import project from GitHub
 2. Click deploy
 3. Optimized and online (FREE)
 ```
 
 ### AWS S3
-```
+
+```text
 1. Create S3 bucket
 2. Upload files
 3. Enable static website hosting
@@ -250,15 +269,17 @@ Result: Online store ready for products
 
 ## ✨ Features Included
 
-### All Generated Sites Include:
+### All Generated Sites Include
 
 ✅ **Responsive Design**
+
 - Mobile phones (320px+)
 - Tablets (768px+)
 - Desktop (1200px+)
 - CSS media queries
 
 ✅ **Modern Styling**
+
 - Gradient backgrounds
 - Smooth animations
 - Professional colors
@@ -266,6 +287,7 @@ Result: Online store ready for products
 - Smooth transitions
 
 ✅ **SEO Basics**
+
 - Semantic HTML
 - Meta descriptions
 - Open Graph tags
@@ -273,12 +295,14 @@ Result: Online store ready for products
 - Favicon support
 
 ✅ **Performance**
+
 - Minimal CSS/JS
 - No heavy dependencies
 - Fast load times
 - Optimized images support
 
 ✅ **Customization**
+
 - Easy to modify text
 - Color variables in CSS
 - Simple HTML structure
@@ -288,14 +312,16 @@ Result: Online store ready for products
 
 ## 🎨 Customization After Generation
 
-### Easy Changes:
+### Easy Changes
+
 - **Text**: Find and replace all content
 - **Colors**: Modify CSS color variables
 - **Images**: Replace image paths
 - **Fonts**: Change Google Fonts imports
 - **Layout**: Adjust HTML sections
 
-### Advanced Changes:
+### Advanced Changes
+
 - Add more features
 - Integrate form backends
 - Add more pages
@@ -307,6 +333,7 @@ Result: Online store ready for products
 ## 📊 Generation Statistics
 
 ### File Sizes
+
 - Portfolio: ~8 KB total
 - Blog: ~12 KB total
 - Landing Page: ~6 KB total
@@ -314,12 +341,14 @@ Result: Online store ready for products
 - E-Commerce: ~20 KB total
 
 ### Generation Time
+
 - Via Copilot Chat: < 30 seconds
 - Deployment: < 5 minutes
 - Customization: < 30 minutes
 - **Total to live**: < 1 hour
 
 ### Code Quality
+
 - Valid HTML5/CSS3
 - Semantic markup
 - Accessible components
@@ -331,6 +360,7 @@ Result: Online store ready for products
 ## 🎯 Next Steps
 
 1. **Run Demo**
+
    ```bash
    python3 website_generator_demo.py
    ```
@@ -376,4 +406,4 @@ A: Yes! The code is simple and easy to extend with additional features.
 
 ---
 
-**🚀 Ready to build? Press Ctrl+Shift+I and start generating! 🎨**
+🚀 Ready to build? Press Ctrl+Shift+I and start generating! 🎨
