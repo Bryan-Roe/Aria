@@ -32,7 +32,7 @@ pyyaml==6.0.3
 # Development Tools
 jupyter==1.1.1
 ipykernel==6.31.0
-pytest==8.4.2
+pytest==9.0.3
 black>=26.3.1,<27.0.0
 
 # Model Context Protocol (MCP) Server
