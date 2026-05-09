@@ -1830,6 +1830,8 @@ class AriaRequestHandler(SimpleHTTPRequestHandler):
                 body = self.rfile.read(content_length)
                 request_data = json.loads(body.decode("utf-8")) if body else {}
                 theme = request_data.get("theme", "forest")
+                # Sanitize user-controlled value before writing to logs (prevent log injection)
+                safe_theme_for_log = re.sub(r"[\r\n\t\x00-\x1f\x7f]+", " ", str(theme))
                 count = int(request_data.get("count", 6))
                 use_llm = bool(request_data.get("use_llm", True))
                 provider_choice = request_data.get("provider")
@@ -1882,7 +1884,7 @@ class AriaRequestHandler(SimpleHTTPRequestHandler):
                 self.send_header("Content-Type", "application/json")
                 self.end_headers()
                 self.wfile.write(json.dumps(response, indent=2).encode("utf-8"))
-                logger.info(f"✓ World generated (theme={theme}, llm={response['used_llm']}, count={response['count']})")
+                logger.info(f"✓ World generated (theme={safe_theme_for_log}, llm={response['used_llm']}, count={response['count']})")
                 return
             except Exception as e:
                 logger.error(f"World generation error: {e}")
