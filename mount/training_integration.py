@@ -22,7 +22,7 @@ DATASET_NAME_PATTERN = re.compile(r"^[A-Za-z0-9_.-]+$")
 
 
 def _normalize_dataset_name(name: str) -> str:
-    """Normalize dataset names for allowlist comparison and command usage."""
+    """Normalize dataset names for case-insensitive allowlist matching."""
     return name.strip().lower()
 
 
@@ -227,7 +227,8 @@ class TrainingIntegration:
         Hardening and validation added to prevent uncontrolled command-line and
         path-injection issues. This method validates the dataset against the
         discovered datasets and runs the training script using a safe argument
-        list, a restricted environment, and a bounded timeout.
+        list, a restricted environment, and a bounded timeout. Dataset matching
+        is case-insensitive via lower-case normalization.
         """
         try:
             # Basic type/format checks

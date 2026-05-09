@@ -46,7 +46,7 @@ def test_valid_dataset_runs_subprocess(tmp_path: Path):
         patch.object(
             TrainingIntegration,
             "list_datasets",
-            new=AsyncMock(return_value={"cat": ["DatasetA", "dataset_b"]}),
+            new=AsyncMock(return_value={"quantum": ["DatasetA", "dataset_b"]}),
         ),
         patch("subprocess.run", return_value=mock_result) as mock_run,
     ):
@@ -72,7 +72,7 @@ def test_invalid_chars_rejected(tmp_path: Path):
         patch.object(
             TrainingIntegration,
             "list_datasets",
-            new=AsyncMock(return_value={"cat": ["DatasetA", "dataset_b"]}),
+            new=AsyncMock(return_value={"quantum": ["DatasetA", "dataset_b"]}),
         ),
         patch("subprocess.run") as mock_run,
     ):
@@ -94,7 +94,7 @@ def test_unknown_dataset_rejected(tmp_path: Path):
         patch.object(
             TrainingIntegration,
             "list_datasets",
-            new=AsyncMock(return_value={"cat": ["DatasetA", "dataset_b"]}),
+            new=AsyncMock(return_value={"quantum": ["DatasetA", "dataset_b"]}),
         ),
         patch("subprocess.run") as mock_run,
     ):
