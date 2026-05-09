@@ -1,0 +1,20 @@
+{
+  "name": "dev-journal",
+  "description": "Simple searchable tech blog layout",
+  "style": "dark-minimal",
+  "pages": [
+    "index"
+  ],
+  "features": [
+    "search",
+    "post cards",
+    "sticky header"
+  ],
+  "created_at": "2026-04-11T00:00:00Z",
+  "files": [
+    "index.html",
+    "style.css",
+    "script.js",
+    "metadata.json"
+  ]
+}

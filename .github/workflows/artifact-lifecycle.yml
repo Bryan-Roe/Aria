@@ -1,0 +1,101 @@
+# =============================================================================
+# Artifact Lifecycle Management
+# =============================================================================
+# Purpose: Keep data_out/ artifacts under retention control using the repo's
+#          cleanup script. Scheduled runs are dry-run only; manual dispatch can
+#          optionally apply deletions.
+# =============================================================================
+
+name: Artifact Lifecycle
+
+on:
+    schedule:
+        - cron: "15 3 * * 0" # Weekly on Sunday 03:15 UTC
+    workflow_dispatch:
+        inputs:
+            apply:
+                description: "Set true to actually delete old artifacts"
+                required: false
+                default: "false"
+                type: choice
+                options:
+                    - "false"
+                    - "true"
+            max_age:
+                description: "Max artifact age in days"
+                required: false
+                default: "30"
+                type: string
+            max_count:
+                description: "Max retained files per cleanable directory"
+                required: false
+                default: "50"
+                type: string
+
+permissions:
+    contents: read
+
+concurrency:
+    group: artifact-lifecycle
+    cancel-in-progress: false
+
+jobs:
+    cleanup:
+        name: Cleanup data_out artifacts
+        runs-on: ubuntu-latest
+        timeout-minutes: 10
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4.3.1
+
+            - name: Setup Python
+              uses: ./.github/actions/setup-python-env
+              with:
+                  install-requirements: "false"
+
+            - name: Run cleanup dry-run (scheduled)
+              if: github.event_name == 'schedule'
+              run: |
+                  python scripts/cleanup_artifacts.py --max-age 30 --max-count 50
+
+            - name: Run cleanup (manual dry-run)
+              if: github.event_name == 'workflow_dispatch' && github.event.inputs.apply == 'false'
+              run: |
+                  python scripts/cleanup_artifacts.py \
+                    --max-age "${{ github.event.inputs.max_age }}" \
+                    --max-count "${{ github.event.inputs.max_count }}"
+
+            - name: Run cleanup (manual apply)
+              if: github.event_name == 'workflow_dispatch' && github.event.inputs.apply == 'true'
+              run: |
+                  python scripts/cleanup_artifacts.py --apply \
+                    --max-age "${{ github.event.inputs.max_age }}" \
+                    --max-count "${{ github.event.inputs.max_count }}"
+
+            - name: Upload cleanup summary
+              if: always()
+              uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4
+              with:
+                  name: artifact-lifecycle-${{ github.run_number }}
+                  retention-days: 30
+                  path: |
+                      data_out/cleanup_summary.json
+
+            - name: Step summary
+              if: always()
+              run: |
+                  echo "## Artifact Lifecycle" >> $GITHUB_STEP_SUMMARY
+                  echo "" >> $GITHUB_STEP_SUMMARY
+                  if [ "${{ github.event_name }}" = "schedule" ]; then
+                    echo "- Mode: scheduled dry-run" >> $GITHUB_STEP_SUMMARY
+                  else
+                    echo "- Mode: manual (apply=${{ github.event.inputs.apply }})" >> $GITHUB_STEP_SUMMARY
+                  fi
+                  if [ -f data_out/cleanup_summary.json ]; then
+                    echo "" >> $GITHUB_STEP_SUMMARY
+                    echo '```json' >> $GITHUB_STEP_SUMMARY
+                    cat data_out/cleanup_summary.json >> $GITHUB_STEP_SUMMARY
+                    echo '' >> $GITHUB_STEP_SUMMARY
+                    echo '```' >> $GITHUB_STEP_SUMMARY
+                  fi

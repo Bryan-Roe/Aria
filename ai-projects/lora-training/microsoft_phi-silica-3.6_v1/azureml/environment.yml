@@ -1,0 +1,18 @@
+name: qai-lora-train
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.10
+  - pip>=23.0
+  - cuda-version=12.1  # Comment out if using CPU compute
+  - pip:
+      - pyyaml>=6.0
+      - datasets>=2.19.0
+      - transformers>=4.43.0
+      - peft>=0.12.0
+      - accelerate>=0.33.0
+      - tqdm>=4.66.0
+      - einops>=0.7.0
+      # torch is provided by curated CUDA envs; if building from this file on CPU, uncomment a CPU wheel:
+      # - torch==2.4.0

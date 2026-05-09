@@ -1,0 +1,31 @@
+azure:
+  location: eastus
+  resource_group: rg-quantum-ai
+  storage_account: quantumstorage
+  subscription_id: a07fbd16-e722-446d-8efd-0681e85b725c
+  workspace_name: quantum-ai-workspace
+logging:
+  level: INFO
+  results_dir: ./results
+  save_results: true
+ml:
+  data:
+    feature_dimension: 4
+    train_test_split: 0.8
+  model:
+    entanglement: full
+    n_layers: 4
+    n_qubits: 8
+  training:
+    batch_size: 32
+    epochs: 2
+    learning_rate: 0.01
+    validation_split: 0.2
+quantum:
+  hardware:
+    optimization_level: 2
+    shots: 500
+  provider: ionq
+  simulator:
+    backend: default.qubit
+    shots: 1024

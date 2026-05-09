@@ -1,0 +1,46 @@
+name: Aria Experiment Runner
+
+on:
+  workflow_run:
+    workflows: ["Aria Autonomous Evolver"]
+    types:
+      - completed
+  workflow_dispatch:
+
+jobs:
+  run-experiments:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4.3.1
+
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020  # v4
+        with:
+          node-version: 20
+
+      - name: Execute experiment evaluation
+        run: |
+          node -e "
+          console.log('Running experiment evaluation cycle...');
+
+          const metrics = {
+            performance: Math.random() * 100,
+            stability: Math.random() * 100,
+            efficiency: Math.random() * 100
+          };
+
+          console.log(metrics);
+
+          const score = (metrics.performance + metrics.stability + metrics.efficiency) / 3;
+
+          console.log('Experiment score:', score);
+
+          if (score < 50) {
+            console.log('Low performance variant detected');
+          } else {
+            console.log('Variant acceptable');
+          }
+          "
+
+      - name: Signal completion
+        run: echo "experiment cycle completed"

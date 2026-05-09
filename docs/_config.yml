@@ -1,0 +1,35 @@
+# GitHub Pages configuration (Jekyll is disabled via .nojekyll — this file
+# is used only for metadata reference, not for active Jekyll processing)
+title: Aria - Interactive AI Character Platform
+description: Hybrid quantum-AI/ML platform with 3D animated character, multi-provider chat, and autonomous learning
+
+# Build settings
+markdown: kramdown
+plugins:
+  - jekyll-seo-tag
+  - jekyll-sitemap
+
+# Exclude from processing
+exclude:
+  - README.md
+  - Gemfile
+  - Gemfile.lock
+  - node_modules
+  - vendor
+
+# GitHub Pages settings
+baseurl: ""
+url: "https://bryan-roe.github.io/Aria"
+
+# Collection settings
+collections:
+  apps:
+    output: true
+    permalink: /:collection/:name/
+
+# Defaults
+defaults:
+  - scope:
+      path: ""
+    values:
+      layout: default

@@ -1,0 +1,6 @@
+{"role": "user", "content": "Continue with the fix", "timestamp": "2026-03-28T21:38:44.069671", "provider": "local", "model": "test-model"}
+{"role": "assistant", "content": "Recovered reply", "timestamp": "2026-03-28T21:38:44.069704", "provider": "local", "model": "test-model"}
+{"role": "user", "content": "Continue with the fix", "timestamp": "2026-03-28T21:38:44.205566", "provider": "local", "model": "test-model"}
+{"role": "assistant", "content": "Recovered reply", "timestamp": "2026-03-28T21:38:44.205600", "provider": "local", "model": "test-model"}
+{"role": "user", "content": "Continue with the fix", "timestamp": "2026-03-28T21:38:44.703523", "provider": "local", "model": "test-model"}
+{"role": "assistant", "content": "Recovered reply", "timestamp": "2026-03-28T21:38:44.703555", "provider": "local", "model": "test-model"}

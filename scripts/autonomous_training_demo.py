@@ -1,0 +1,431 @@
+#!/usr/bin/env python3
+"""
+Autonomous Training Orchestrator Demo
+Demonstrates continuous learning cycles with monitoring and reporting.
+This is a simplified version showing the autonomous training architecture.
+"""
+import json
+import logging
+import math
+import os
+import random
+import sys
+import time
+from datetime import datetime, timedelta
+from pathlib import Path
+
+# Setup logging
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(message)s",
+    handlers=[
+        logging.StreamHandler(sys.stdout),
+        logging.FileHandler("data_out/autonomous_training.log", mode="a"),
+    ],
+)
+logger = logging.getLogger(__name__)
+
+REPO_ROOT = Path(__file__).parent.parent
+DATA_OUT_ROOT = REPO_ROOT / "data_out"
+DEPLOYED_ROOT = REPO_ROOT / "deployed_models"
+STATUS_FILE = DATA_OUT_ROOT / "autonomous_training_status.json"
+HEARTBEAT_FILE = DATA_OUT_ROOT / "autonomous_training_heartbeat.json"
+
+# Promotion: auto-promote after this many stable cycles at peak accuracy
+PLATEAU_PROMOTION_CYCLES = 5
+# Accuracy variance added after plateau for realism (±)
+PLATEAU_VARIANCE = 0.005
+# Keep only recent cycle metrics in status to prevent unbounded growth
+MAX_HISTORY_CYCLES = 500
+
+
+def compact_status(history_limit: int = MAX_HISTORY_CYCLES) -> dict:
+    """Compact status history and persist result.
+
+    Useful for maintenance on long-running environments where older status
+    files may have very large performance_history arrays.
+    """
+    if history_limit < 1:
+        raise ValueError("history_limit must be >= 1")
+
+    status = load_status()
+    history = status.get("performance_history", [])
+    before = len(history)
+    if before > history_limit:
+        status["performance_history"] = history[-history_limit:]
+    after = len(status.get("performance_history", []))
+
+    save_status(status)
+    result = {
+        "status_file": str(STATUS_FILE),
+        "history_limit": history_limit,
+        "before": before,
+        "after": after,
+        "compacted": before != after,
+    }
+    return result
+
+
+def load_status():
+    """Load existing training status."""
+    if STATUS_FILE.exists():
+        with open(STATUS_FILE) as f:
+            status = json.load(f)
+
+        # One-time migration: cap oversized history from older runs
+        history = status.get("performance_history", [])
+        if len(history) > MAX_HISTORY_CYCLES:
+            status["performance_history"] = history[-MAX_HISTORY_CYCLES:]
+
+        # Normalize key runtime fields for old status schemas
+        status.setdefault("plateau_cycles", 0)
+        status.setdefault("promotions", [])
+        status.setdefault("dataset_inventory", {})
+        status.setdefault("status", "initializing")
+        return status
+    return {
+        "cycles_completed": 0,
+        "best_accuracy": 0.0,
+        "last_updated": None,
+        "performance_history": [],
+        "dataset_inventory": {},
+        "status": "initializing",
+    }
+
+
+def save_status(status):
+    """Save training status."""
+    status["last_updated"] = datetime.now().isoformat()
+    STATUS_FILE.parent.mkdir(parents=True, exist_ok=True)
+    with open(STATUS_FILE, "w") as f:
+        json.dump(status, f, indent=2)
+
+
+def save_heartbeat(
+    state: str,
+    current_cycle: int | None = None,
+    next_cycle_eta: str | None = None,
+    error: str | None = None,
+) -> None:
+    """Write lightweight heartbeat metadata for external monitors."""
+    payload = {
+        "timestamp": datetime.now().isoformat(),
+        "state": state,
+        "pid": os.getpid(),
+    }
+    if current_cycle is not None:
+        payload["current_cycle"] = current_cycle
+    if next_cycle_eta:
+        payload["next_cycle_eta"] = next_cycle_eta
+    if error:
+        payload["error"] = error
+
+    HEARTBEAT_FILE.parent.mkdir(parents=True, exist_ok=True)
+    with open(HEARTBEAT_FILE, "w") as f:
+        json.dump(payload, f, indent=2)
+
+
+def discover_datasets():
+    """Auto-discover datasets from repo + autonomous synthetic source."""
+    datasets_dir = REPO_ROOT / "datasets"
+    synthetic_dir = DATA_OUT_ROOT / "autonomous_datasets"
+    inventory = {}
+
+    def _scan_root(root: Path, prefix: str = ""):
+        if not root.exists():
+            return
+        for category_dir in root.iterdir():
+            if category_dir.is_dir():
+                files = list(category_dir.glob("**/train.json")) + list(
+                    category_dir.glob("**/train.jsonl")
+                )
+                if files:
+                    key = (
+                        f"{prefix}{category_dir.name}" if prefix else category_dir.name
+                    )
+                    inventory[key] = {
+                        "count": len(files),
+                        "paths": [str(f.relative_to(REPO_ROOT)) for f in files],
+                    }
+
+    _scan_root(datasets_dir)
+    # Non-production synthetic datasets generated by autonomous demos
+    _scan_root(synthetic_dir, prefix="synthetic:")
+
+    return inventory
+
+
+def _accuracy_cap(dataset_count: int) -> float:
+    """Accuracy ceiling grows with dataset diversity (log scale)."""
+    # 1 dataset → 0.95, 4 → 0.97, 9 → 0.99, 16+ → 0.995
+    base = 0.95
+    bonus = 0.005 * math.log1p(dataset_count - 1)  # 0 when count==1
+    return min(base + bonus, 0.995)
+
+
+def simulate_training_cycle(
+    cycle_num, accuracy_baseline=0.65, plateau_cycles=0
+) -> dict:
+    """Simulate a training cycle with performance metrics.
+
+    After the plateau sets in, slight variance is added so the accuracy
+    oscillates realistically rather than staying frozen. The accuracy
+    ceiling scales up when more dataset categories are discovered.
+    """
+    logger.info(f"Starting training cycle #{cycle_num}...")
+
+    # Discover datasets
+    datasets = discover_datasets()
+    n_cats = len(datasets)
+    logger.info(f"Found {n_cats} dataset categories: {list(datasets.keys())}")
+
+    # Simulate training with slight improvement
+    for i in range(3):
+        time.sleep(2)
+        progress = (i + 1) / 3
+        logger.info(f"  Training progress: {progress*100:.0f}%")
+
+    cap = _accuracy_cap(n_cats)
+
+    # Growth phase: standard sigmoid-like ramp toward cap
+    cycle_accuracy = (
+        accuracy_baseline + (cycle_num * 0.02) + (0.05 * (1 - (cycle_num * 0.1)))
+    )
+    cycle_accuracy = min(cycle_accuracy, cap)
+
+    # Post-plateau: add realistic noise so it isn't frozen
+    if plateau_cycles > 0:
+        noise = random.gauss(0, PLATEAU_VARIANCE)
+        cycle_accuracy = min(cap, max(cap - 0.01, cycle_accuracy + noise))
+
+    total_samples = sum(44968 if cat == "chat" else 10000 for cat in datasets)
+
+    return {
+        "cycle": cycle_num,
+        "accuracy": round(cycle_accuracy, 6),
+        "datasets_trained": n_cats,
+        "samples_processed": total_samples,
+        "training_time_sec": 6,
+        "timestamp": datetime.now().isoformat(),
+    }
+
+
+def promote_model(status: dict) -> None:
+    """Write a promotion artefact to deployed_models/."""
+    DEPLOYED_ROOT.mkdir(parents=True, exist_ok=True)
+    cycle = status.get("cycles_completed", 0)
+    accuracy = status.get("best_accuracy", 0.0)
+    version = len(status.get("promotions", [])) + 1
+    payload = {
+        "version": version,
+        "promoted_at": datetime.now().isoformat(),
+        "cycle": cycle,
+        "accuracy": accuracy,
+        "dataset_inventory": status.get("dataset_inventory", {}),
+    }
+    out = DEPLOYED_ROOT / f"chat_model_v{version}.json"
+    with open(out, "w") as f:
+        json.dump(payload, f, indent=2)
+    logger.info(f"🚀 Model v{version} promoted → {out} (accuracy={accuracy:.4f})")
+
+
+def run_autonomously(max_cycles=3, cycle_interval_sec=10):
+    """Run autonomous training with continuous cycles."""
+    status = load_status()
+    start_cycle = status.get("cycles_completed", 0)
+    infinite_mode = max_cycles <= 0
+    end_cycle = start_cycle + max_cycles if not infinite_mode else None
+
+    if "started_at" not in status:
+        status["started_at"] = datetime.now().isoformat()
+    status["run_mode"] = "infinite" if infinite_mode else "bounded"
+    status["cycle_interval_sec"] = cycle_interval_sec
+    status["status"] = "running"
+    status["current_cycle"] = start_cycle
+    status["next_cycle_eta"] = None
+    save_status(status)
+    save_heartbeat("running", current_cycle=start_cycle)
+
+    logger.info("=" * 70)
+    logger.info("🤖 AUTONOMOUS AI TRAINING ORCHESTRATOR")
+    logger.info("=" * 70)
+    if infinite_mode:
+        logger.info("Starting continuous training mode (infinite cycles)...")
+    else:
+        logger.info(f"Starting continuous training mode (max {max_cycles} cycles)...")
+    logger.info(f"Cycle interval: {cycle_interval_sec}s")
+
+    # Plateau tracking (persisted across restart via status)
+    if "plateau_cycles" not in status:
+        status["plateau_cycles"] = 0
+    if "promotions" not in status:
+        status["promotions"] = []
+
+    try:
+        cycle_num = start_cycle
+        while True:
+            if not infinite_mode and end_cycle is not None and cycle_num >= end_cycle:
+                break
+
+            logger.info(f"\n{'='*70}")
+            logger.info(f"CYCLE {cycle_num + 1}")
+            logger.info(f"{'='*70}")
+
+            status["status"] = "training"
+            status["current_cycle"] = cycle_num + 1
+            save_status(status)
+            save_heartbeat("training", current_cycle=cycle_num + 1)
+
+            # Run training cycle (pass plateau_cycles for noise injection)
+            result = simulate_training_cycle(
+                cycle_num + 1, plateau_cycles=status["plateau_cycles"]
+            )
+
+            # Update status
+            status["cycles_completed"] = cycle_num + 1
+            status["performance_history"].append(result)
+            if len(status["performance_history"]) > MAX_HISTORY_CYCLES:
+                status["performance_history"] = status["performance_history"][
+                    -MAX_HISTORY_CYCLES:
+                ]
+
+            prev_best = status["best_accuracy"]
+            if result["accuracy"] > status["best_accuracy"]:
+                status["best_accuracy"] = result["accuracy"]
+                status["plateau_cycles"] = 0
+                logger.info(f"✨ New best accuracy: {result['accuracy']:.4f}")
+            else:
+                status["plateau_cycles"] = status.get("plateau_cycles", 0) + 1
+                logger.info(
+                    f"Current accuracy: {result['accuracy']:.4f} "
+                    f"(best: {status['best_accuracy']:.4f}, "
+                    f"plateau: {status['plateau_cycles']} cycles)"
+                )
+
+            # Auto-promotion: stable at peak for N cycles → deploy
+            if (
+                status["plateau_cycles"] > 0
+                and status["plateau_cycles"] % PLATEAU_PROMOTION_CYCLES == 0
+            ):
+                logger.info(
+                    f"📦 Plateau reached {status['plateau_cycles']} stable cycles — promoting model..."
+                )
+                promote_model(status)
+                promotion_record = {
+                    "version": len(status["promotions"]) + 1,
+                    "cycle": status["cycles_completed"],
+                    "accuracy": status["best_accuracy"],
+                    "promoted_at": datetime.now().isoformat(),
+                }
+                status["promotions"].append(promotion_record)
+
+            # Discover datasets
+            status["dataset_inventory"] = discover_datasets()
+
+            cycle_num += 1
+
+            # Save status
+            status["status"] = "running"
+            if not infinite_mode and end_cycle is not None and cycle_num >= end_cycle:
+                status["next_cycle_eta"] = None
+            else:
+                status["next_cycle_eta"] = (
+                    datetime.now() + timedelta(seconds=cycle_interval_sec)
+                ).isoformat()
+            save_status(status)
+            save_heartbeat(
+                "running",
+                current_cycle=status["cycles_completed"],
+                next_cycle_eta=status.get("next_cycle_eta"),
+            )
+
+            # Wait before next cycle (unless last cycle in bounded mode)
+            if not infinite_mode and end_cycle is not None and cycle_num >= end_cycle:
+                break
+
+            logger.info(f"Cycle complete. Next cycle in {cycle_interval_sec}s...")
+            time.sleep(cycle_interval_sec)
+
+        # Final summary (bounded mode only)
+        if not infinite_mode:
+            logger.info(f"\n{'='*70}")
+            logger.info("🎉 TRAINING COMPLETE")
+            logger.info(f"{'='*70}")
+            logger.info(f"Cycles completed: {status['cycles_completed']}")
+            logger.info(f"Best accuracy: {status['best_accuracy']:.4f}")
+            logger.info(f"Datasets discovered: {len(status['dataset_inventory'])}")
+
+            status["status"] = "completed"
+            status["current_cycle"] = status["cycles_completed"]
+            status["next_cycle_eta"] = None
+            save_status(status)
+            save_heartbeat("completed", current_cycle=status["cycles_completed"])
+
+            # Print performance history
+            logger.info("\n📊 Performance History:")
+            for h in status["performance_history"][-20:]:
+                logger.info(
+                    f"  Cycle {h['cycle']}: accuracy={h['accuracy']:.4f}, samples={h['samples_processed']}"
+                )
+
+            return 0
+
+        return 0
+
+    except KeyboardInterrupt:
+        logger.info("\n⏸️  Training interrupted")
+        status["status"] = "paused"
+        status["next_cycle_eta"] = None
+        save_status(status)
+        save_heartbeat("paused", current_cycle=status.get("cycles_completed", 0))
+        return 130
+    except Exception as e:
+        logger.error(f"❌ Training failed: {e}", exc_info=True)
+        status["status"] = "error"
+        status["error"] = str(e)
+        status["next_cycle_eta"] = None
+        save_status(status)
+        save_heartbeat(
+            "error", current_cycle=status.get("cycles_completed", 0), error=str(e)
+        )
+        return 1
+
+
+if __name__ == "__main__":
+    import argparse
+
+    parser = argparse.ArgumentParser(description="Autonomous training orchestrator")
+    parser.add_argument(
+        "--cycles", type=int, default=3, help="Number of training cycles (0 = infinite)"
+    )
+    parser.add_argument(
+        "--interval", type=int, default=10, help="Seconds between cycles"
+    )
+    parser.add_argument(
+        "--status", action="store_true", help="Show current status and exit"
+    )
+    parser.add_argument(
+        "--compact-status",
+        action="store_true",
+        help="Compact performance_history in status and exit",
+    )
+    parser.add_argument(
+        "--history-limit",
+        type=int,
+        default=MAX_HISTORY_CYCLES,
+        help="History limit used with --compact-status",
+    )
+
+    args = parser.parse_args()
+
+    if args.compact_status:
+        result = compact_status(args.history_limit)
+        print(json.dumps(result, indent=2))
+        sys.exit(0)
+
+    if args.status:
+        status = load_status()
+        print(json.dumps(status, indent=2))
+        sys.exit(0)
+
+    sys.exit(run_autonomously(max_cycles=args.cycles, cycle_interval_sec=args.interval))

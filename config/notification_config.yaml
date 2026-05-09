@@ -1,0 +1,7 @@
+# Central notification config for all orchestrators/tools
+email_enabled: false
+email_from: "noreply@qai.local"
+email_to: "admin@qai.local"
+smtp_server: "localhost"
+local_alert: true
+log_file: "data_out/notifications.log"

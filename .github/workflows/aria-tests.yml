@@ -1,0 +1,362 @@
+# =============================================================================
+# Aria Comprehensive Tests - Full Aria character system testing
+# =============================================================================
+# Purpose: Comprehensive testing of Aria web interface with multiple browsers
+# Triggers: Changes to aria_web or test files (path-filtered)
+# Jobs:
+#   - unit-integration-tests: Tests across Python 3.10, 3.11, 3.12
+#   - playwright-e2e: Playwright browser automation tests
+#   - pyppeteer-e2e: Pyppeteer-based E2E tests
+#   - containerized-chrome-e2e: Selenium containerized tests
+#   - test-summary: Aggregates results from all test jobs
+# Note: More comprehensive but slower than e2e-tests.yml
+# =============================================================================
+
+name: Aria E2E Tests
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'aria_web/**'
+      - 'tests/test_*aria*.py'
+      - 'tests/test_*ui*.py'
+      - '.github/workflows/aria-tests.yml'
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - 'aria_web/**'
+      - 'tests/test_*aria*.py'
+      - 'tests/test_*ui*.py'
+      - '.github/workflows/aria-tests.yml'
+  workflow_dispatch: # Manual trigger
+
+permissions:
+  contents: read
+
+concurrency:
+  group: aria-tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  unit-integration-tests:
+    name: Unit & Integration Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      matrix:
+        python-version: ['3.10', '3.11', '3.12']
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4.3.1
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065  # v5.6.0
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest pytest-cov
+
+      - name: Run unit and integration tests
+        run: |
+          pytest tests/test_aria_server.py tests/test_object_api_integration.py -v --tb=short
+        env:
+          PYTHONPATH: ${{ github.workspace }}
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4.6.2
+        with:
+          name: test-results-${{ matrix.python-version }}
+          path: |
+            test-results/
+            .coverage
+          if-no-files-found: warn
+          retention-days: 14
+
+  playwright-e2e:
+    name: Playwright E2E Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: unit-integration-tests
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4.3.1
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065  # v5.6.0
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install Python dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest playwright
+
+      - name: Install Playwright browsers
+        run: |
+          playwright install chromium --with-deps
+
+      - name: Start Aria server (background)
+        run: |
+          cd aria_web
+          python server.py > /tmp/aria_server.log 2>&1 &
+          echo $! > /tmp/aria_server.pid
+        env:
+          PYTHONPATH: ${{ github.workspace }}
+
+      - name: Wait for server
+        run: |
+          READY=0
+          for _ in $(seq 1 60); do
+            if curl -sSf http://localhost:8080/api/aria/state >/dev/null; then
+              READY=1
+              break
+            fi
+            sleep 0.5
+          done
+
+          if [ "$READY" -ne 1 ]; then
+            echo "Aria server did not become ready in Playwright job" >&2
+            tail -n 120 /tmp/aria_server.log || true
+            exit 1
+          fi
+
+      - name: Run Playwright E2E tests
+        run: |
+          pytest tests/test_ui_playwright.py -v --tb=short
+        env:
+          PYTHONPATH: ${{ github.workspace }}
+          ARIA_SERVER_URL: http://localhost:8080
+
+      - name: Stop Aria server
+        if: always()
+        run: |
+          if [ -f /tmp/aria_server.pid ]; then
+            PID=$(cat /tmp/aria_server.pid)
+            if kill -0 "$PID" 2>/dev/null; then
+              kill "$PID"
+            fi
+          fi
+
+      - name: Upload E2E test results
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4.6.2
+        with:
+          name: playwright-e2e-results
+          path: |
+            test-results/
+            playwright-report/
+          if-no-files-found: warn
+          retention-days: 14
+
+  pyppeteer-e2e:
+    name: Pyppeteer E2E Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: unit-integration-tests
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4.3.1
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065  # v5.6.0
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install system dependencies for Chromium
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libnss3 \
+            libnspr4 \
+            libatk1.0-0 \
+            libatk-bridge2.0-0 \
+            libcups2 \
+            libdrm2 \
+            libxkbcommon0 \
+            libxcomposite1 \
+            libxdamage1 \
+            libxfixes3 \
+            libxrandr2 \
+            libgbm1 \
+            libasound2
+
+      - name: Install Python dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest pyppeteer
+
+      - name: Download Pyppeteer Chromium
+        run: |
+          python -m pyppeteer install
+
+      - name: Start Aria server (background)
+        run: |
+          cd aria_web
+          python server.py > /tmp/aria_server.log 2>&1 &
+          echo $! > /tmp/aria_server.pid
+        env:
+          PYTHONPATH: ${{ github.workspace }}
+
+      - name: Wait for server
+        run: |
+          READY=0
+          for _ in $(seq 1 60); do
+            if curl -sSf http://localhost:8080/api/aria/state >/dev/null; then
+              READY=1
+              break
+            fi
+            sleep 0.5
+          done
+
+          if [ "$READY" -ne 1 ]; then
+            echo "Aria server did not become ready in Pyppeteer job" >&2
+            tail -n 120 /tmp/aria_server.log || true
+            exit 1
+          fi
+
+      - name: Run Pyppeteer E2E tests
+        run: |
+          pytest tests/test_ui_pyppeteer.py -v --tb=short
+        env:
+          PYTHONPATH: ${{ github.workspace }}
+          ARIA_SERVER_URL: http://localhost:8080
+
+      - name: Stop Aria server
+        if: always()
+        run: |
+          if [ -f /tmp/aria_server.pid ]; then
+            PID=$(cat /tmp/aria_server.pid)
+            if kill -0 "$PID" 2>/dev/null; then
+              kill "$PID"
+            fi
+          fi
+
+      - name: Upload E2E test results
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4.6.2
+        with:
+          name: pyppeteer-e2e-results
+          path: test-results/
+          if-no-files-found: warn
+
+  containerized-chrome-e2e:
+    name: Containerized Chrome E2E Tests
+    runs-on: ubuntu-latest
+    needs: unit-integration-tests
+    services:
+      chrome:
+        image: selenium/standalone-chrome:latest
+        ports:
+          - 4444:4444
+          - 5900:5900
+        options: --shm-size=2gb
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4.3.1
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065  # v5.6.0
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install Python dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest selenium
+
+      - name: Start Aria server (background)
+        run: |
+          cd aria_web
+          python server.py > /tmp/aria_server.log 2>&1 &
+          echo $! > /tmp/aria_server.pid
+        env:
+          PYTHONPATH: ${{ github.workspace }}
+
+      - name: Wait for server
+        run: |
+          READY=0
+          for _ in $(seq 1 60); do
+            if curl -sSf http://localhost:8080/api/aria/state >/dev/null; then
+              READY=1
+              break
+            fi
+            sleep 0.5
+          done
+
+          if [ "$READY" -ne 1 ]; then
+            echo "Aria server did not become ready in Selenium job" >&2
+            tail -n 120 /tmp/aria_server.log || true
+            exit 1
+          fi
+
+      - name: Wait for Selenium Chrome
+        run: |
+          READY=0
+          for _ in $(seq 1 60); do
+            if curl -sSf http://localhost:4444/wd/hub/status >/dev/null; then
+              READY=1
+              break
+            fi
+            sleep 0.5
+          done
+
+          if [ "$READY" -ne 1 ]; then
+            echo "Selenium Chrome service did not become ready" >&2
+            exit 1
+          fi
+
+      - name: Run containerized Chrome E2E tests
+        run: |
+          pytest tests/test_ui_selenium.py -v --tb=short
+        env:
+          PYTHONPATH: ${{ github.workspace }}
+          ARIA_SERVER_URL: http://localhost:8080
+          SELENIUM_REMOTE_URL: http://localhost:4444/wd/hub
+
+      - name: Stop Aria server
+        if: always()
+        run: |
+          if [ -f /tmp/aria_server.pid ]; then
+            PID=$(cat /tmp/aria_server.pid)
+            if kill -0 "$PID" 2>/dev/null; then
+              kill "$PID"
+            fi
+          fi
+
+      - name: Upload E2E test results
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4.6.2
+        with:
+          name: selenium-e2e-results
+          path: test-results/
+          if-no-files-found: warn
+
+  test-summary:
+    name: Test Summary
+    runs-on: ubuntu-latest
+    needs: [unit-integration-tests, playwright-e2e, pyppeteer-e2e, containerized-chrome-e2e]
+    if: always()
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093  # v4.3.0
+
+      - name: Display test summary
+        run: |
+          {
+            echo "## Test Results Summary"
+            echo ""
+            echo "All test jobs completed. Check individual job outputs for details."
+          } >> "$GITHUB_STEP_SUMMARY"

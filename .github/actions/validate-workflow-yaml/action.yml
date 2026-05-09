@@ -1,0 +1,60 @@
+name: 'Validate Workflow YAML'
+description: 'Validate GitHub workflow YAML syntax and required top-level keys'
+
+inputs:
+  workflows-path:
+    description: 'Path glob or directory containing workflow YAML files'
+    required: false
+    default: '.github/workflows'
+  require-jobs:
+    description: 'Whether to require top-level jobs key'
+    required: false
+    default: 'true'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Validate workflow YAML files
+      shell: bash
+      run: |
+        set -euo pipefail
+        python - <<'PY'
+        import pathlib
+        import sys
+        import yaml
+
+        base = pathlib.Path('${{ inputs.workflows-path }}')
+        if base.is_dir():
+            files = sorted(list(base.glob('*.yml')) + list(base.glob('*.yaml')))
+        else:
+            files = sorted(pathlib.Path('.').glob('${{ inputs.workflows-path }}'))
+
+        if not files:
+            raise SystemExit(f'No workflow files found for: {base}')
+
+        errors = []
+        for wf in files:
+            try:
+                with wf.open('r', encoding='utf-8') as f:
+                    content = yaml.safe_load(f)
+                if not isinstance(content, dict):
+                    errors.append(f'{wf}: top-level YAML node must be a mapping')
+                    continue
+
+                has_on = ('on' in content) or (True in content)
+                if not has_on:
+                    errors.append(f"{wf}: missing top-level 'on' trigger")
+
+                if '${{ inputs.require-jobs }}' == 'true' and 'jobs' not in content:
+                    errors.append(f"{wf}: missing top-level 'jobs' key")
+            except Exception as exc:
+                errors.append(f'{wf}: {exc}')
+
+        if errors:
+            print('Workflow validation failed:', file=sys.stderr)
+            for e in errors:
+                print(f' - {e}', file=sys.stderr)
+            raise SystemExit(1)
+
+        print(f'Validated {len(files)} workflow files successfully.')
+        PY

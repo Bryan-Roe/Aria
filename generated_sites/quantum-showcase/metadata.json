@@ -1,0 +1,24 @@
+{
+  "name": "quantum-showcase",
+  "description": "Multi-page product showcase for quantum + AI offerings",
+  "style": "modern",
+  "pages": [
+    "index",
+    "about",
+    "contact"
+  ],
+  "features": [
+    "responsive nav",
+    "feature cards",
+    "contact form"
+  ],
+  "created_at": "2026-04-11T00:00:00Z",
+  "files": [
+    "index.html",
+    "about.html",
+    "contact.html",
+    "style.css",
+    "script.js",
+    "metadata.json"
+  ]
+}

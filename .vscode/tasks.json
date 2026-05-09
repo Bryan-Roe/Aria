@@ -1,0 +1,208 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "func: host start",
+			"type": "shell",
+			"command": "func",
+			"args": [
+				"host",
+				"start"
+			],
+			"isBackground": true,
+			"options": {
+				"cwd": "${workspaceFolder}"
+			},
+			"problemMatcher": {
+				"pattern": [
+					{
+						"regexp": "^.*$",
+						"file": 0,
+						"location": 1,
+						"message": 2
+					}
+				],
+				"background": {
+					"activeOnStart": true,
+					"beginsPattern": ".*",
+					"endsPattern": "Worker process started and initialized|Host lock lease acquired|Job host started|Http Functions:"
+				}
+			}
+		},
+		{
+			"label": "integration:contract-gate",
+			"type": "shell",
+			"command": "bash",
+			"args": [
+				"-lc",
+				"./scripts/integration_contract_gate.sh"
+			],
+			"problemMatcher": []
+		},
+		{
+			"label": "integration:contract-gate-strict",
+			"type": "shell",
+			"command": "bash",
+			"args": [
+				"-lc",
+				"./scripts/integration_contract_gate.sh --strict-endpoints"
+			],
+			"problemMatcher": []
+		},
+		{
+			"label": "validate:site-bundles-strict",
+			"type": "shell",
+			"command": "bash",
+			"args": [
+				"-lc",
+				"python3 scripts/validate_site_bundles.py --strict-metadata"
+			],
+			"problemMatcher": []
+		},
+		{
+			"label": "smoke: quantum-ai-code-llm",
+			"type": "shell",
+			"command": "bash",
+			"args": [
+				"-lc",
+				"python3 quantum-ai/scripts/smoke_quantum_code_llm.py --backend classical --epochs 1"
+			],
+			"problemMatcher": []
+		},
+		{
+			"label": "validate: foundry-config",
+			"type": "shell",
+			"command": "bash",
+			"args": [
+				"-lc",
+				"python3 scripts/validate_foundry_config.py"
+			],
+			"problemMatcher": []
+		},
+		{
+			"label": "Run Gradio AI Chat app",
+			"type": "shell",
+			"command": "${command:python.interpreterPath}",
+			"args": [
+				"app.py"
+			],
+			"isBackground": true,
+			"options": {
+				"cwd": "${workspaceFolder}"
+			},
+			"problemMatcher": {
+				"pattern": [
+					{
+						"regexp": "^.*$",
+						"file": 0,
+						"location": 1,
+						"message": 2
+					}
+				],
+				"background": {
+					"activeOnStart": true,
+					"beginsPattern": ".*",
+					"endsPattern": "Running on local URL|Uvicorn running on|To create a public link"
+				}
+			}
+		},
+		{
+			"label": "smoke: ai/routes",
+			"type": "shell",
+			"command": "bash",
+			"args": [
+				"-lc",
+				"curl -fsS http://127.0.0.1:7071/api/ai/routes | python3 -m json.tool"
+			],
+			"dependsOn": [
+				"func: host start"
+			],
+			"problemMatcher": []
+		},
+		{
+			"label": "smoke: ai/provider-probe",
+			"type": "shell",
+			"command": "bash",
+			"args": [
+				"-lc",
+				"curl -fsS -X POST http://127.0.0.1:7071/api/ai/provider-probe -H 'Content-Type: application/json' -d '{\"provider\":\"auto\"}' | python3 -m json.tool"
+			],
+			"dependsOn": [
+				"func: host start"
+			],
+			"problemMatcher": []
+		},
+		{
+			"label": "Validate writer-reviewer debug prerequisites",
+			"type": "aitk",
+			"command": "debug-check-prerequisites",
+			"args": {
+				"portOccupancy": [
+					5679,
+					8088
+				]
+			}
+		},
+		{
+			"label": "Run writer-reviewer HTTP server",
+			"type": "shell",
+			"command": "${command:python.interpreterPath} -m debugpy --listen 127.0.0.1:5679 -m agentdev run ai-projects/writer-reviewer-workflow/main.py --verbose --port 8088",
+			"isBackground": true,
+			"options": {
+				"cwd": "${workspaceFolder}"
+			},
+			"dependsOn": [
+				"Validate writer-reviewer debug prerequisites"
+			],
+			"problemMatcher": {
+				"pattern": [
+					{
+						"regexp": "^.*$",
+						"file": 0,
+						"location": 1,
+						"message": 2
+					}
+				],
+				"background": {
+					"activeOnStart": true,
+					"beginsPattern": ".*",
+					"endsPattern": "Application startup complete|running on|Started server process"
+				}
+			}
+		},
+		{
+			"label": "Open writer-reviewer Agent Inspector",
+			"type": "shell",
+			"command": "echo '${input:openWriterReviewerInspector}'",
+			"presentation": {
+				"reveal": "never"
+			},
+			"dependsOn": [
+				"Run writer-reviewer HTTP server"
+			]
+		},
+		{
+			"label": "Terminate All Tasks",
+			"type": "shell",
+			"command": "echo ${input:terminate}",
+			"problemMatcher": []
+		}
+	],
+	"inputs": [
+		{
+			"id": "openWriterReviewerInspector",
+			"type": "command",
+			"command": "ai-mlstudio.openTestTool",
+			"args": {
+				"triggeredFrom": "tasks",
+				"port": 8088
+			}
+		},
+		{
+			"id": "terminate",
+			"type": "command",
+			"command": "workbench.action.tasks.terminate",
+			"args": "terminateAll"
+		}
+	]
+}

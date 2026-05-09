@@ -1,0 +1,63 @@
+name: 'Validate Function Bindings'
+description: 'Validate Azure Functions function.json files for parseability and basic HTTP binding requirements'
+
+inputs:
+  functions-path:
+    description: 'Root directory containing Azure Functions subfolders'
+    required: false
+    default: 'functions'
+  require-http-route:
+    description: 'Require route on HTTP trigger bindings'
+    required: false
+    default: 'true'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Validate function bindings
+      shell: bash
+      run: |
+        set -euo pipefail
+        python - <<'PY'
+        import json
+        from pathlib import Path
+        import sys
+
+        root = Path('${{ inputs.functions-path }}')
+        if not root.exists() or not root.is_dir():
+            raise SystemExit(f'Functions path not found: {root}')
+
+        files = sorted(root.glob('*/function.json'))
+        if not files:
+            raise SystemExit(f'No function.json files found under {root}')
+
+        errors = []
+        for path in files:
+            try:
+                data = json.loads(path.read_text(encoding='utf-8'))
+            except Exception as exc:
+                errors.append(f'{path}: invalid JSON ({exc})')
+                continue
+
+            bindings = data.get('bindings')
+            if not isinstance(bindings, list) or not bindings:
+                errors.append(f'{path}: missing non-empty bindings array')
+                continue
+
+            http_triggers = [b for b in bindings if b.get('type') == 'httpTrigger']
+            for binding in http_triggers:
+                if binding.get('direction') != 'in':
+                    errors.append(f"{path}: httpTrigger must have direction 'in'")
+                if '${{ inputs.require-http-route }}' == 'true' and not binding.get('route'):
+                    errors.append(f'{path}: HTTP trigger missing route')
+                if 'methods' in binding and not isinstance(binding.get('methods'), list):
+                    errors.append(f'{path}: methods must be a list when present')
+
+        if errors:
+            print('Function binding validation failed:', file=sys.stderr)
+            for err in errors:
+                print(f' - {err}', file=sys.stderr)
+            raise SystemExit(1)
+
+        print(f'Validated {len(files)} function.json files successfully.')
+        PY

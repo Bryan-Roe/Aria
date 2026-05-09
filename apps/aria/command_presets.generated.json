@@ -1,0 +1,47 @@
+{
+  "version": "2026-04-11",
+  "description": "Generated Aria command presets for quick testing of new abilities",
+  "presets": [
+    {
+      "name": "Gesture Pack",
+      "commands": [
+        "wave",
+        "thumbs up",
+        "clap",
+        "nod",
+        "bow",
+        "shrug"
+      ]
+    },
+    {
+      "name": "Look + Facing",
+      "commands": [
+        "look left",
+        "look right",
+        "look up",
+        "look down",
+        "[aria:facing:left]",
+        "[aria:facing:right]"
+      ]
+    },
+    {
+      "name": "Pose + Wait",
+      "commands": [
+        "sit",
+        "stand",
+        "crouch",
+        "lie down",
+        "wait 1",
+        "wait 2.5"
+      ]
+    },
+    {
+      "name": "Object Interaction",
+      "commands": [
+        "pick up apple",
+        "drop",
+        "throw right"
+      ]
+    }
+  ]
+}

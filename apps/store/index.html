@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TechDrop - Electronics & Gadgets Store</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="../global-upgrade.css">
+</head>
+<body>
+
+  <div id="header-slot"></div>
+
+  <main>
+    <!-- Hero Section -->
+    <section class="hero">
+      <div class="container">
+        <h1>The Latest Tech,<br>Delivered to You</h1>
+        <p>Discover top-rated electronics and gadgets at unbeatable prices. From audio gear to smart wearables, we have it all.</p>
+        <a href="products.html" class="btn btn-primary">Browse Products <i class="fa-solid fa-arrow-right"></i></a>
+      </div>
+    </section>
+
+    <!-- Categories Section -->
+    <section class="section">
+      <div class="container">
+        <h2 class="section-title">Shop by Category</h2>
+        <p class="section-subtitle">Find exactly what you're looking for</p>
+        <div class="categories-grid" id="categoriesGrid">
+          <!-- Rendered by JS -->
+        </div>
+      </div>
+    </section>
+
+    <!-- Featured Products Section -->
+    <section class="section" style="background: var(--color-white);">
+      <div class="container">
+        <h2 class="section-title">Featured Products</h2>
+        <p class="section-subtitle">Our handpicked selection of top products</p>
+        <div class="products-grid" id="featuredGrid">
+          <!-- Rendered by JS -->
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA Banner -->
+    <section class="section" style="background: linear-gradient(135deg, var(--color-primary) 0%, #7c3aed 100%); color: white; text-align: center;">
+      <div class="container">
+        <h2 style="font-size: 2rem; margin-bottom: 12px;">Looking for Something Specific?</h2>
+        <p style="opacity: 0.9; max-width: 500px; margin: 0 auto 28px;">Can't find what you need? Get in touch and we'll help you find the perfect product.</p>
+        <a href="contact.html" class="btn btn-secondary">Contact Us <i class="fa-solid fa-envelope"></i></a>
+      </div>
+    </section>
+  </main>
+
+  <div id="footer-slot"></div>
+
+  <script src="js/products.js"></script>
+  <script src="js/components.js"></script>
+  <script src="js/app.js"></script>
+  <script>initHomePage();</script>
+    <script src="../global-upgrade.js"></script>
+</body>
+</html>

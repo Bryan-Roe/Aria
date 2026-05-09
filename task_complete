@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+cat >&2 <<'EOF'
+The shell command 'task_complete' is only a local placeholder and does NOT
+mark the chat task as complete.
+
+To finish work correctly:
+1. Send a brief summary in the chat response.
+2. Invoke the real task_complete tool from the agent/tooling layer.
+
+Running this shell command from the terminal cannot satisfy the completion hook.
+EOF
+
+exit 64

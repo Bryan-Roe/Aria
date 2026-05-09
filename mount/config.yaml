@@ -1,0 +1,71 @@
+# QAI Integration Service Configuration
+
+service:
+  name: qai-integration-service
+  version: 0.1.0
+  host: 0.0.0.0
+  port: 8000
+  debug: true
+
+# Paths (relative to workspace root)
+paths:
+  workspace_root: ..
+  quantum_ai: ../quantum-ai
+  talk_to_ai: ../talk-to-ai
+  phi_training: ../AI/microsoft_phi-silica-3.6_v1
+  datasets: ../datasets
+  data_out: ../data_out
+  scripts: ../scripts
+
+# Quantum AI Configuration
+quantum:
+  enabled: true
+  config_file: ../ai-projects/quantum-ml/config/quantum_config.yaml
+  mcp_server_enabled: true
+  default_backend: qiskit_aer
+  results_dir: ../ai-projects/quantum-ml/results
+
+# Chat Configuration
+chat:
+  enabled: true
+  default_provider: local  # local, azure, openai, lora
+  providers:
+    local:
+      enabled: true
+      offline: true
+    azure:
+      enabled: true
+      requires_env: true
+    lora:
+      enabled: true
+      adapter_path: ../data_out/lora_training/lora_adapter
+
+# Training Configuration
+training:
+  enabled: true
+  orchestrators:
+    autotrain:
+      config_file: ../autotrain.yaml
+      status_file: ../data_out/autotrain/status.json
+    quantum_autorun:
+      config_file: ../quantum_autorun.yaml
+      status_file: ../data_out/quantum_autorun/status.json
+  output_dir: ../data_out
+
+# Monitoring
+monitoring:
+  status_check_interval: 60  # seconds
+  log_level: INFO
+  metrics_enabled: true
+
+# API Configuration
+api:
+  cors_enabled: true
+  cors_origins:
+    - http://localhost:3000
+    - http://localhost:7071
+    - http://127.0.0.1:3000
+    - http://127.0.0.1:7071
+  rate_limiting:
+    enabled: false
+    requests_per_minute: 60

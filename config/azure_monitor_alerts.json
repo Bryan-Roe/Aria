@@ -1,0 +1,153 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "functionAppName": {
+      "type": "string",
+      "metadata": {
+        "description": "Name of the Azure Function App to monitor"
+      }
+    },
+    "actionGroupId": {
+      "type": "string",
+      "metadata": {
+        "description": "Resource ID of the Action Group for alert notifications"
+      }
+    }
+  },
+  "variables": {
+    "location": "[resourceGroup().location]"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Insights/metricAlerts",
+      "apiVersion": "2018-03-01",
+      "name": "[concat(parameters('functionAppName'), '-sql-pool-saturation')]",
+      "location": "global",
+      "properties": {
+        "description": "Alert when SQL connection pool saturation exceeds 80%",
+        "severity": 2,
+        "enabled": true,
+        "scopes": [
+          "[resourceId('Microsoft.Web/sites', parameters('functionAppName'))]"
+        ],
+        "evaluationFrequency": "PT1M",
+        "windowSize": "PT5M",
+        "criteria": {
+          "allOf": [
+            {
+              "threshold": 0,
+              "name": "PoolSaturationAlert",
+              "metricNamespace": "Microsoft.Web/sites",
+              "metricName": "CustomMetric",
+              "dimensions": [
+                {
+                  "name": "CustomMetricName",
+                  "operator": "Include",
+                  "values": ["sql_pool_saturation_pct"]
+                }
+              ],
+              "operator": "GreaterThan",
+              "timeAggregation": "Average",
+              "criterionType": "StaticThresholdCriterion"
+            }
+          ],
+          "odata.type": "Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria"
+        },
+        "actions": [
+          {
+            "actionGroupId": "[parameters('actionGroupId')]"
+          }
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.Insights/scheduledQueryRules",
+      "apiVersion": "2021-08-01",
+      "name": "[concat(parameters('functionAppName'), '-sql-slow-query-frequency')]",
+      "location": "[variables('location')]",
+      "properties": {
+        "displayName": "SQL Slow Query Frequency Alert",
+        "description": "Alert when more than 10 slow queries detected in 1 minute",
+        "severity": 3,
+        "enabled": true,
+        "evaluationFrequency": "PT5M",
+        "scopes": [
+          "[resourceId('Microsoft.Insights/components', parameters('functionAppName'))]"
+        ],
+        "windowSize": "PT5M",
+        "criteria": {
+          "allOf": [
+            {
+              "query": "traces\n| where message has 'slow query'\n| where timestamp > ago(1m)\n| summarize SlowQueryCount = count() by bin(timestamp, 1m)\n| where SlowQueryCount > 10",
+              "timeAggregation": "Count",
+              "dimensions": [],
+              "operator": "GreaterThan",
+              "threshold": 0,
+              "failingPeriods": {
+                "numberOfEvaluationPeriods": 1,
+                "minFailingPeriodsToAlert": 1
+              }
+            }
+          ]
+        },
+        "actions": {
+          "actionGroups": [
+            "[parameters('actionGroupId')]"
+          ]
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Insights/scheduledQueryRules",
+      "apiVersion": "2021-08-01",
+      "name": "[concat(parameters('functionAppName'), '-sql-saturation-alert')]",
+      "location": "[variables('location')]",
+      "properties": {
+        "displayName": "SQL Pool Saturation Alert",
+        "description": "Alert when saturation_alert field is present in status endpoint response",
+        "severity": 2,
+        "enabled": true,
+        "evaluationFrequency": "PT5M",
+        "scopes": [
+          "[resourceId('Microsoft.Insights/components', parameters('functionAppName'))]"
+        ],
+        "windowSize": "PT5M",
+        "criteria": {
+          "allOf": [
+            {
+              "query": "requests\n| where url endswith '/api/ai/status'\n| extend saturation_alert = tostring(customDimensions.sql_saturation_alert)\n| where isnotempty(saturation_alert)\n| summarize AlertCount = count() by bin(timestamp, 5m)\n| where AlertCount > 0",
+              "timeAggregation": "Count",
+              "dimensions": [],
+              "operator": "GreaterThan",
+              "threshold": 0,
+              "failingPeriods": {
+                "numberOfEvaluationPeriods": 2,
+                "minFailingPeriodsToAlert": 2
+              }
+            }
+          ]
+        },
+        "actions": {
+          "actionGroups": [
+            "[parameters('actionGroupId')]"
+          ]
+        }
+      }
+    }
+  ],
+  "outputs": {
+    "poolSaturationAlertId": {
+      "type": "string",
+      "value": "[resourceId('Microsoft.Insights/metricAlerts', concat(parameters('functionAppName'), '-sql-pool-saturation'))]"
+    },
+    "slowQueryAlertId": {
+      "type": "string",
+      "value": "[resourceId('Microsoft.Insights/scheduledQueryRules', concat(parameters('functionAppName'), '-sql-slow-query-frequency'))]"
+    },
+    "saturationStatusAlertId": {
+      "type": "string",
+      "value": "[resourceId('Microsoft.Insights/scheduledQueryRules', concat(parameters('functionAppName'), '-sql-saturation-alert'))]"
+    }
+  }
+}

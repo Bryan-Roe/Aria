@@ -1,0 +1,46 @@
+name: 'Scan TODO/FIXME in Changed Files'
+description: 'Scan changed files in a PR diff range for TODO/FIXME markers without failing the workflow'
+
+inputs:
+  base-ref:
+    description: 'Base branch/ref to diff against (e.g., main or github.base_ref)'
+    required: true
+  head-ref:
+    description: 'Head ref to diff (default HEAD)'
+    required: false
+    default: 'HEAD'
+  pattern:
+    description: 'Regex pattern to scan for'
+    required: false
+    default: 'TODO|FIXME'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Scan changed files
+      shell: bash
+      run: |
+        set -euo pipefail
+
+        BASE_REF='${{ inputs.base-ref }}'
+        HEAD_REF='${{ inputs.head-ref }}'
+        PATTERN='${{ inputs.pattern }}'
+
+        if [ -z "$BASE_REF" ]; then
+          echo "Input base-ref is required" >&2
+          exit 1
+        fi
+
+        RANGE="origin/${BASE_REF}...${HEAD_REF}"
+        CHANGED_FILES="$(git diff "$RANGE" --name-only)"
+
+        if [ -z "$CHANGED_FILES" ]; then
+          echo "No modified files found in diff range: $RANGE"
+          exit 0
+        fi
+
+        echo "$CHANGED_FILES" | while IFS= read -r file; do
+          [ -n "$file" ] || continue
+          [ -f "$file" ] || continue
+          grep -nE "$PATTERN" "$file" || true
+        done

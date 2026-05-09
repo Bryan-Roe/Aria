@@ -1,0 +1,4 @@
+{"role": "user", "content": "Continue with the fix", "timestamp": "2026-03-28T21:25:44.060603", "provider": "local", "model": "test-model"}
+{"role": "assistant", "content": "Recovered reply", "timestamp": "2026-03-28T21:25:44.060628", "provider": "local", "model": "test-model"}
+{"role": "user", "content": "Continue with the fix", "timestamp": "2026-03-28T21:25:44.310862", "provider": "local", "model": "test-model"}
+{"role": "assistant", "content": "Recovered reply", "timestamp": "2026-03-28T21:25:44.310889", "provider": "local", "model": "test-model"}

@@ -1,0 +1,72 @@
+# =============================================================================
+# Auto Validation - Orchestrator configuration validation
+# =============================================================================
+# Purpose: Validates autotrain.yaml and quantum_autorun.yaml configurations
+# Triggers: Changes to YAML configs, training scripts, or daily schedule
+# Jobs:
+#   - dry-run: Validates orchestrator configs without execution
+# =============================================================================
+
+name: Auto Validation
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'config/training/autotrain.yaml'
+      - 'autotrain.yaml'
+      - 'config/quantum/quantum_autorun.yaml'
+      - 'quantum_autorun.yaml'
+      - 'scripts/autotrain.py'
+      - 'scripts/quantum_autorun.py'
+      - 'AI/**'
+      - 'ai-projects/quantum-ml/**'
+  schedule:
+    - cron: '0 5 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency: auto-validation
+
+jobs:
+  dry-run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4.3.1
+
+      - name: Setup Python
+        uses: ./.github/actions/setup-python-env
+        with:
+          extra-packages: 'pyyaml'
+      - name: Auto bootstrap (env + orchestrator validation)
+        run: python scripts/auto_bootstrap.py
+
+      - name: Generate validation summary
+        if: always()
+        run: |
+          {
+            echo "## Auto-Validation Results"
+            for f in data_out/autotrain/status.json data_out/quantum_autorun/status.json data_out/auto_bootstrap/status_summary.json; do
+              if [ -f "$f" ]; then
+                echo "### $(basename "$f")"
+                echo '```json'
+                cat "$f"
+                echo ''
+                echo '```'
+              fi
+            done
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload status artifacts
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4.6.2
+        with:
+          name: auto-validation-status
+          path: |
+            data_out/autotrain/status.json
+            data_out/quantum_autorun/status.json
+            data_out/auto_bootstrap/status_summary.json
+          retention-days: 14

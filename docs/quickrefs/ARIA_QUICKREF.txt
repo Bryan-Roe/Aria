@@ -1,0 +1,259 @@
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                  🤖 ARIA AUTOMATION - QUICK REFERENCE 🤖                     ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ 🚀 QUICK START                                                               │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+  Interactive Menu:
+    ./scripts/start_aria.sh
+
+  Full Stack (Production):
+    ./scripts/start_aria.sh full
+
+  Background Mode:
+    ./scripts/start_aria.sh full --background
+
+  Server Only (Dev):
+    ./scripts/start_aria.sh server
+
+  Training Once:
+    ./scripts/start_aria.sh training --once
+
+  Check Status:
+    ./scripts/start_aria.sh status
+
+  Stop All:
+    ./scripts/start_aria.sh stop
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ 📊 MONITORING                                                                │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+  Status Check:
+    python3 scripts/aria_automation.py --status
+
+  View Logs:
+    tail -f data_out/aria_automation/aria_automation.log
+
+  Service Status (systemd):
+    sudo systemctl status aria_automation
+
+  Service Logs:
+    sudo journalctl -u aria_automation -f
+
+  Check Ports:
+    lsof -i :8080  # Aria server
+    lsof -i :7071  # Functions backend
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ 🌐 ACCESS POINTS                                                             │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+  Aria Web Interface:
+    http://localhost:8080
+
+  Auto-Execute Page:
+    http://localhost:8080/auto-execute.html
+
+  Backend Health:
+    http://localhost:7071/api/ai/status
+
+  Status JSON:
+    cat data_out/aria_automation/status.json
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ 🔧 SYSTEMD SERVICE (Linux)                                                   │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+  Install:
+    sudo cp config/aria_automation.service /etc/systemd/system/
+    sudo systemctl daemon-reload
+
+  Enable & Start:
+    sudo systemctl enable aria_automation
+    sudo systemctl start aria_automation
+
+  Control:
+    sudo systemctl stop aria_automation
+    sudo systemctl restart aria_automation
+    sudo systemctl status aria_automation
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ ⏰ CRON SCHEDULING                                                           │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+  Edit Cron:
+    crontab -e
+
+  Training Every 30 Minutes:
+    */30 * * * * cd /workspaces/Aria && python3 scripts/aria_automation.py --mode training --once
+
+  Start Server on Boot:
+    @reboot cd /workspaces/Aria && python3 scripts/aria_automation.py --mode server
+
+  View Cron Jobs:
+    crontab -l
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ 🎼 MASTER ORCHESTRATOR                                                       │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+  Start Aria Workflow:
+    python3 scripts/master_orchestrator.py --workflow aria_full_stack
+
+  Check All Status:
+    python3 scripts/master_orchestrator.py --status
+
+  Run as Daemon:
+    python3 scripts/master_orchestrator.py --daemon
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ 🆘 TROUBLESHOOTING                                                           │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+  Stop All Processes:
+    python3 scripts/aria_automation.py --stop
+
+  Kill by Port:
+    sudo kill $(sudo lsof -t -i:8080)
+
+  Check Dataset:
+    python3 scripts/validate_datasets.py --category chat
+
+  Test Training:
+    python3 scripts/aria_quick_train.py
+
+  Clean PIDs:
+    rm data_out/aria_automation/processes.json
+
+  View Errors:
+    cat data_out/aria_automation/status.json | grep -A 10 errors
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ 📖 DOCUMENTATION                                                             │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+  Quick Summary:        ARIA_AUTOMATION_SUMMARY.md
+  Complete Guide:       ARIA_AUTOMATION_GUIDE.md
+  Aria Web Docs:        aria_web/README.md
+  Auto-Execute:         aria_web/AUTO-EXECUTE.md
+  Main README:          README.md
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ 🎯 AUTOMATION MODES                                                          │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+  full      → Server + Backend + Training + Monitoring (Production)
+  server    → Web Interface Only (Development)
+  training  → Background Training Only (Batch Processing)
+
+  ┌──────────────────────────────────────────────────────────────────────────────┐
+  │ 🔬 QUANTUM LLM MONITORING                                                    │
+  └──────────────────────────────────────────────────────────────────────────────┘
+
+    Check Training Status (Human-Readable):
+      python3 scripts/quantum_llm_status_check.py
+
+    Check Status (JSON Output):
+      python3 scripts/quantum_llm_status_check.py --json
+
+    Watch Mode (Auto-Refresh Every 5s):
+      python3 scripts/quantum_llm_status_check.py --watch
+
+    Custom Output Directory:
+      python3 scripts/quantum_llm_status_check.py --output /path/to/training
+
+    Analyze Training Metrics:
+      python3 scripts/quantum_llm_metrics_analyzer.py
+
+    Export Metrics to CSV:
+      python3 scripts/quantum_llm_metrics_analyzer.py --export metrics.csv
+
+    Check Inference Readiness:
+      python3 scripts/quantum_llm_status_check.py --json | jq '.inference_ready'
+
+    View Full Status Details:
+      python3 scripts/quantum_llm_status_check.py --json | jq '.'
+
+    Monitor Training Progress:
+      watch -n 5 'python3 scripts/quantum_llm_status_check.py'
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ 🦙 LOCAL AI (OLLAMA & LM STUDIO)                                             │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+  OLLAMA — fully offline, no API key needed:
+    1. Install:  https://ollama.ai/download
+    2. Start:    ollama serve          (or it auto-starts on most platforms)
+    3. Get a model:
+         ollama pull llama3.2          # 3B, fast & capable
+         ollama pull mistral           # 7B, high quality
+         ollama pull codellama         # 7B, great for code
+         ollama pull phi3              # 3.8B lightweight
+    4. Use with Aria chat CLI:
+         python3 ai-projects/chat-cli/src/chat_cli.py --provider ollama
+         python3 ai-projects/chat-cli/src/chat_cli.py --provider ollama --model mistral
+    5. Point /api/chat at Ollama:
+         OLLAMA_BASE_URL=http://127.0.0.1:11434/v1 OLLAMA_MODEL=llama3.2 func host start
+    6. Check connection:
+         curl http://127.0.0.1:11434/api/tags
+         curl http://localhost:7071/api/ai/status | python3 -m json.tool | grep -A 10 ollama
+
+  LM STUDIO — GUI model runner:
+    1. Install:  https://lmstudio.ai
+    2. Open app → enable "Local Server" in the server tab
+    3. Use with Aria:
+         python3 ai-projects/chat-cli/src/chat_cli.py --provider lmstudio
+    4. Custom URL:
+         LMSTUDIO_BASE_URL=http://127.0.0.1:1234/v1 func host start
+
+  ENV VARS (add to local.settings.json to persist):
+    OLLAMA_BASE_URL    default: http://127.0.0.1:11434/v1
+    OLLAMA_MODEL       default: llama3.2
+    LMSTUDIO_BASE_URL  default: http://127.0.0.1:1234/v1
+    LMSTUDIO_MODEL     default: local-model
+
+  AUTO-DETECTION: if Ollama or LM Studio is running they are picked automatically
+  before Azure/OpenAI when no explicit --provider is given.
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ ✅ HEALTH CHECKS                                                             │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+  Component Health:
+    • Aria Server: curl http://localhost:8080
+    • Backend API: curl http://localhost:7071/api/ai/status
+    • Status File: cat data_out/aria_automation/status.json | jq
+      • Quantum LLM: python3 scripts/quantum_llm_status_check.py
+
+  Process Check:
+    ps aux | grep aria
+
+  Resource Usage:
+    htop -p $(pgrep -f aria_automation)
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ 🔐 FILES & PATHS                                                             │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+  Main Script:          scripts/aria_automation.py
+  Start Script:         scripts/start_aria.sh
+  Test Suite:           scripts/test_aria_automation.py
+  Service File:         config/aria_automation.service
+  Config:               config/master_orchestrator.yaml
+  Status JSON:          data_out/aria_automation/status.json
+  PID File:             data_out/aria_automation/processes.json
+  Logs:                 data_out/aria_automation/*.log
+
+    Quantum LLM Status:         data_out/quantum_llm_training/status.json
+    Quantum Status Script:      scripts/quantum_llm_status_check.py
+    Quantum Metrics Script:     scripts/quantum_llm_metrics_analyzer.py
+    Quantum Trainer:            scripts/quantum_llm_trainer.py
+
+╔══════════════════════════════════════════════════════════════════════════════╗
+║  Need Help? Check ARIA_AUTOMATION_GUIDE.md for detailed instructions        ║
+║  Quantum LLM Guide: docs/QUANTUM_LLM_STATUS_TRACKING.md                     ║
+║  All tests passing ✅ • Ready for production deployment • v1.0.1            ║
+╚══════════════════════════════════════════════════════════════════════════════╝

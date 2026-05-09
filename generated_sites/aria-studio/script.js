@@ -1,0 +1,1 @@
+document.querySelector('.hero h1')?.animate([{transform:'translateY(0)'},{transform:'translateY(-4px)'},{transform:'translateY(0)'}],{duration:1400,iterations:1});document.getElementById('contactForm')?.addEventListener('submit',(e)=>{e.preventDefault();const s=document.getElementById('status');if(s)s.textContent='Message sent. Thanks for contacting Aria Studio!';});

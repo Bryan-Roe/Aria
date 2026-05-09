@@ -1,0 +1,68 @@
+# CRITICAL: Next Immediate Step to Complete Integration
+
+## WHAT WAS DONE
+✓ COMPLETED: Added "lmstudio-specialist" agent to _AGENT_REGISTRY in:
+  File: /workspaces/Aria/ai-projects/chat-cli/src/agi_provider.py
+  Added after line 108 (reasoning-specialist), before general agent
+  New agent config with domains=[], intents for explanation/question/coding/creation, provider="lmstudio"
+
+## CRITICAL NEXT STEP - DO THIS NOW!
+
+### STEP 1: Update detect_provider() in chat_providers.py
+FILE: /workspaces/Aria/ai-projects/chat-cli/src/chat_providers.py
+FUNCTION: detect_provider() starting around line 1257
+ACTION: Find where explicit parameter is checked (likely if explicit in ("lora", ...))
+        ADD support for explicit=="lmstudio"
+
+CODE TO ADD (as new elif case):
+```python
+elif explicit == "lmstudio":
+    base_url = os.getenv("LMSTUDIO_BASE_URL", "http://127.0.0.1:1234/v1")
+    model = os.getenv("LMSTUDIO_MODEL", "local-model")
+    try:
+        import urllib.request
+        request = urllib.request.Request(f"{base_url}/models")
+        with urllib.request.urlopen(request, timeout=2) as _:
+            pass
+        if hasattr(ProviderChoice, 'from_provider'):
+            info = ProviderChoice.from_provider("lmstudio", model)
+        else:
+            info = ProviderChoice(name="lmstudio", model=model)
+        return LMStudioProvider(base_url=base_url, model=model), info
+    except Exception as e:
+        raise RuntimeError(f"LM Studio not available at {base_url}: {e}")
+```
+
+### STEP 2: Verify Integration
+Run:
+```bash
+cd /workspaces/Aria
+# Test that LM Studio is running
+curl -s http://127.0.0.1:1234/v1/models | python3 -m json.tool | head -5
+
+# Run quick test
+cd ai-projects/chat-cli
+python3 src/chat_cli.py --once "Explain machine learning briefly" 2>&1 | head -20
+```
+
+### STEP 3: Test With Explicit LM Studio
+```bash
+python3 src/chat_cli.py --provider lmstudio --once "Hello, LM Studio!" 2>&1
+```
+
+## FILES TO SEARCH IN
+- chat_providers.py: Find "def detect_provider" function
+- Look for patterns like: if explicit in ("lora", ) or elif explicit == "agi":
+- Add the lmstudio case in that same location
+
+## SUCCESS CRITERIA
+After implement, all should work:
+1. LM Studio agent shows in agent selection scoring
+2. `detect_provider(explicit="lmstudio")` returns LMStudioProvider
+3. Chat CLI can route to LM Studio specialist
+4. Streaming responses work with LM Studio backend
+
+## ENVIRONMENT IS READY
+- LMSTUDIO_BASE_URL=http://127.0.0.1:1234/v1 in .env
+- LMSTUDIO_MODEL=local-model in .env
+- LM Studio tested and running on port 1234

@@ -1,0 +1,35 @@
+adam_beta1: !!float 0.9
+adam_beta2: !!float 0.95
+adam_epsilon: !!float 1E-08
+early_stopping_patience: 3  # Reduced from 5 for faster training
+epochs: 1
+eval_accumulation_steps: null
+eval_delay: 0
+eval_steps: 32  # Reduced from 64 for more frequent checkpoints
+eval_strategy: "steps"
+save_dir: "data_out/lora_training"
+finetune_dataset: "data"
+finetune_test_batch_size: 16  # Increased from 8 for faster eval
+finetune_test_nsamples: 16
+finetune_test_seqlen: 384  # Reduced from 512 for speed
+finetune_train_batch_size: 2  # Increased from 1 for better GPU utilization
+finetune_train_nsamples: 64
+finetune_train_seqlen: 384  # Reduced from 512 for speed
+gradient_accumulation_steps: 2  # Added for larger effective batch size
+gradient_checkpointing: true  # Enabled for memory efficiency
+learning_rate: !!float 0.0003  # Increased for faster convergence
+lora_dropout: !!float 0.1
+lr_scheduler_type: "linear_with_warmup"
+max_grad_norm: 1
+model: "microsoft/Phi-3.5-mini-instruct"
+model_path: "model"
+num_training_steps: 100
+num_warmup_steps: 5  # Reduced from 10 for faster start
+save_steps: 32  # Reduced from 64 for more frequent saves
+seed: 42
+weight_decay: 0
+
+# Fast training optimizations
+use_flash_attention: true  # Enable if available for 2-3x speedup
+dataloader_num_workers: 4  # Parallel data loading
+pin_memory: true  # Faster GPU transfer

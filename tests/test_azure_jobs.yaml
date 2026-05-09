@@ -1,0 +1,30 @@
+version: 1
+jobs:
+  # Safe: Azure simulator (free)
+  - name: test_azure_simulator
+    mode: azure_hardware
+    azure_backend: ionq.simulator
+    azure_shots: 50
+    n_qubits: 3
+    enabled: true
+
+  # Unsafe: QPU without cost confirmation
+  - name: test_azure_qpu_blocked
+    mode: azure_hardware
+    azure_backend: ionq.qpu
+    azure_shots: 50
+    n_qubits: 3
+    azure_confirm_cost: false  # Will fail validation
+    enabled: true
+
+  # Safe: QPU with cost confirmation
+  - name: test_azure_qpu_confirmed
+    mode: azure_hardware
+    azure_backend: ionq.qpu
+    azure_shots: 50
+    n_qubits: 3
+    azure_confirm_cost: true  # Acknowledges costs
+    enabled: true
+    extra_args:
+      - --circuit-file
+      - test.qasm

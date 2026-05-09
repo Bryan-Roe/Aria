@@ -1,0 +1,72 @@
+{
+  "profiles": [
+    {
+      "id": "unit",
+      "label": "Unit Tests (Fast)",
+      "kind": "run",
+      "args": [
+        "-m",
+        "not slow and not azure",
+        "tests/test_*_unit.py"
+      ],
+      "icon": "zap"
+    },
+    {
+      "id": "integration",
+      "label": "Integration Tests",
+      "kind": "run",
+      "args": [
+        "-m",
+        "integration",
+        "tests/"
+      ],
+      "icon": "plug"
+    },
+    {
+      "id": "all-fast",
+      "label": "All Fast Tests",
+      "kind": "run",
+      "args": [
+        "-m",
+        "not slow and not azure",
+        "tests/"
+      ],
+      "icon": "rocket"
+    },
+    {
+      "id": "quantum",
+      "label": "Quantum Tests",
+      "kind": "run",
+      "args": [
+        "tests/test_quantum*.py",
+        "tests/test_validate_qiskit*.py"
+      ],
+      "icon": "beaker"
+    },
+    {
+      "id": "all",
+      "label": "All Tests",
+      "kind": "run",
+      "args": [
+        "-m",
+        "not azure",
+        "tests/"
+      ],
+      "icon": "check-all"
+    },
+    {
+      "id": "coverage",
+      "label": "All with Coverage",
+      "kind": "run",
+      "args": [
+        "--cov=.",
+        "--cov-report=html",
+        "--cov-report=term",
+        "-m",
+        "not azure",
+        "tests/"
+      ],
+      "icon": "graph"
+    }
+  ]
+}

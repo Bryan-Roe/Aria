@@ -1,0 +1,20 @@
+{
+  "name": "nebula-launch",
+  "description": "SaaS landing page starter",
+  "style": "modern",
+  "pages": [
+    "index"
+  ],
+  "features": [
+    "hero",
+    "pricing",
+    "contact form"
+  ],
+  "created_at": "2026-04-11T00:00:00Z",
+  "files": [
+    "index.html",
+    "style.css",
+    "script.js",
+    "metadata.json"
+  ]
+}

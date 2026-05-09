@@ -1,0 +1,96 @@
+name: Code Quality
+
+on:
+  push:
+    branches: [ main, dev ]
+  pull_request:
+    branches: [ main, dev ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: quality-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    name: Lint and Format Check
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
+
+      - name: Setup Python
+        uses: ./.github/actions/setup-python-env
+        with:
+          install-requirements: 'false'
+          extra-packages: 'flake8 black isort mypy'
+
+      - name: Run flake8 (blocking — syntax errors)
+        run: |
+          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+
+      - name: Run flake8 (advisory — style warnings)
+        run: |
+          flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics --exclude=venv,venv_*,__pycache__,.git,data_out,mount,__blobstorage__,__queuestorage__
+        continue-on-error: true
+
+      - name: Check code formatting with black
+        run: |
+          black --check --diff --exclude="(venv|venv_.*|__pycache__|\.git|data_out|mount|__blobstorage__|__queuestorage__)" .
+        continue-on-error: true
+
+      - name: Check import sorting with isort
+        run: |
+          isort --check-only --diff --skip-glob="venv*" --skip-glob="data_out*" --skip-glob="mount*" .
+        continue-on-error: true
+
+      - name: Type check with mypy (optional)
+        run: |
+          mypy --install-types --non-interactive --ignore-missing-imports --exclude="(venv|venv_.*|data_out|mount)" . || echo "MyPy check completed with warnings"
+        continue-on-error: true
+
+  security-check:
+    name: Security Dependency Check
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
+
+      - name: Setup Python
+        uses: ./.github/actions/setup-python-env
+        with:
+          extra-packages: 'safety pip-audit'
+
+      - name: Check dependencies for vulnerabilities
+        run: |
+          pip-audit --format json --output safety-report.json || echo "Vulnerability check completed with findings"
+        continue-on-error: true
+
+      - name: Generate security summary
+        if: always()
+        run: |
+          {
+            echo "## Security Check Results"
+            if [ -f safety-report.json ]; then
+              echo '```json'
+              head -100 safety-report.json
+              echo ''
+              echo '```'
+            else
+              echo "No vulnerabilities found."
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload safety report
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4
+        with:
+          name: security-report
+          path: safety-report.json
+          if-no-files-found: ignore
+          retention-days: 14

@@ -1,0 +1,191 @@
+version: 1
+
+# Master Orchestrator Configuration
+# Coordinates all sub-orchestrators and manages automated workflows
+
+orchestrators:
+  - name: autotrain
+    script: scripts/autotrain.py
+    enabled: true
+    schedule: "0 2 * * *"  # Daily at 2 AM
+    priority: 1
+    retry_on_failure: 3
+    timeout_minutes: 240
+    dependencies: []
+
+  - name: quantum_autorun
+    script: scripts/quantum_autorun.py
+    enabled: true
+    schedule: "0 4 * * *"  # Daily at 4 AM
+    priority: 2
+    retry_on_failure: 2
+    timeout_minutes: 180
+    dependencies: []
+
+  - name: evaluation_autorun
+    script: scripts/evaluation_autorun.py
+    enabled: true
+    schedule: "0 6 * * *"  # Daily at 6 AM after training
+    priority: 3
+    retry_on_failure: 1
+    timeout_minutes: 120
+    dependencies: [autotrain, quantum_autorun]  # Wait for training to complete
+
+  - name: autonomous_training
+    script: scripts/autonomous_training_orchestrator.py
+    enabled: false  # Enable for continuous learning
+    schedule: "continuous"  # Run continuously
+    priority: 4
+    retry_on_failure: -1  # Infinite retries
+    timeout_minutes: 0  # No timeout
+    dependencies: []
+
+  - name: aria_automation
+    script: scripts/aria_automation.py
+    enabled: true
+    schedule: "*/30 * * * *"  # Every 30 minutes
+    priority: 5
+    retry_on_failure: 3
+    timeout_minutes: 15
+    dependencies: []
+    flags:
+      mode: training
+      once: true
+
+workflows:
+  # Daily full training pipeline
+  - name: daily_full_pipeline
+    enabled: true
+    trigger: "schedule"  # schedule | manual | webhook
+    schedule: "0 1 * * *"  # Daily at 1 AM
+    orchestrators:
+      - autotrain
+      - quantum_autorun
+      - evaluation_autorun
+    on_success:
+      - notify_slack
+      - update_dashboard
+      - deploy_best_models
+    on_failure:
+      - notify_slack
+      - create_issue
+
+  # Quick validation pipeline (for CI/CD)
+  - name: quick_validation
+    enabled: true
+    trigger: "manual"
+    orchestrators:
+      - autotrain  # with --dry-run flag
+      - quantum_autorun  # with --dry-run flag
+      - evaluation_autorun  # with --dry-run flag
+    flags:
+      dry_run: true
+    on_success:
+      - log_result
+    on_failure:
+      - fail_build
+
+  # Weekly comprehensive evaluation
+  - name: weekly_comprehensive
+    enabled: true
+    trigger: "schedule"
+    schedule: "0 0 * * 0"  # Sundays at midnight
+    orchestrators:
+      - autotrain  # All jobs
+      - quantum_autorun  # All jobs
+      - evaluation_autorun  # All jobs with full datasets
+    flags:
+      max_train_samples: null  # Use full datasets
+      max_eval_samples: null
+    on_success:
+      - generate_report
+      - notify_slack
+      - backup_models
+    on_failure:
+      - notify_slack
+      - create_incident
+
+  # Aria continuous operation (server + periodic training)
+  - name: aria_full_stack
+    enabled: false  # Enable to run Aria 24/7
+    trigger: "manual"  # Start manually, runs continuously
+    orchestrators:
+      - aria_automation
+    flags:
+      mode: full  # server + training + monitoring
+    on_success:
+      - log_result
+    on_failure:
+      - restart_aria
+      - notify_admin
+
+  # Aria server only (no training)
+  - name: aria_server_only
+    enabled: false
+    trigger: "manual"
+    orchestrators:
+      - aria_automation
+    flags:
+      mode: server
+    on_success:
+      - log_result
+    on_failure:
+      - restart_aria
+
+automation:
+  auto_cleanup:
+    enabled: true
+    keep_last_n_runs: 10
+    clean_older_than_days: 30
+
+  auto_backup:
+    enabled: true
+    schedule: "0 3 * * *"  # Daily at 3 AM
+    targets:
+      - data_out/lora_training
+      - data_out/quantum_autorun
+      - data_out/evaluation_autorun
+    destination: backup/
+
+  auto_optimization:
+    enabled: true
+    analyze_results: true
+    suggest_hyperparams: true
+    auto_tune_jobs: false  # Set true to apply suggestions automatically
+
+  dependency_management:
+    auto_update_packages: false
+    check_compatibility: true
+    pin_versions: true
+
+monitoring:
+  health_check_interval_seconds: 60
+  metrics:
+    - orchestrator_status
+    - job_success_rate
+    - average_duration
+    - resource_utilization
+  alerts:
+    - type: slack
+      webhook: "${SLACK_WEBHOOK_URL}"
+      on_failure: true
+      on_success: false
+    - type: email
+      to: "${ADMIN_EMAIL}"
+      on_failure: true
+      on_degradation: true
+
+resource_limits:
+  max_concurrent_orchestrators: 2
+  max_cpu_percent: 80
+  max_memory_gb: 16
+  pause_on_resource_exhaustion: true
+
+notifications:
+  slack_enabled: false
+  email_enabled: false
+  webhook_url: ""
+  notify_on_start: false
+  notify_on_completion: true
+  notify_on_error: true
+  include_metrics: true

@@ -1,0 +1,10 @@
+# LM Studio MCP Server Requirements
+
+# Core MCP dependencies
+mcp>=0.9.0
+
+# HTTP client for LM Studio API
+httpx>=0.24.0
+
+# Optional: for better async support
+aiohttp>=3.8.0

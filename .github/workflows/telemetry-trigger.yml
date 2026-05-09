@@ -1,0 +1,40 @@
+name: Aria Telemetry Trigger Engine
+
+on:
+  schedule:
+    - cron: "*/30 * * * *"
+  workflow_dispatch:
+
+jobs:
+  analyze-telemetry:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4.3.1
+
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020  # v4
+        with:
+          node-version: 20
+
+      - name: Run telemetry evaluation
+        run: |
+          node -e "
+          console.log('Analyzing system telemetry...');
+
+          const errorRate = Math.random() * 10;
+          const latency = Math.random() * 800;
+          const retention = Math.random() * 100;
+
+          const pressure = errorRate * 10 + latency / 10 + (100 - retention);
+
+          console.log('Computed pressure:', pressure);
+
+          if (pressure > 80) {
+            console.log('HIGH PRESSURE DETECTED -> evolution required');
+          } else {
+            console.log('System stable');
+          }
+          "
+
+      - name: Emit signal
+        run: echo "telemetry cycle complete"

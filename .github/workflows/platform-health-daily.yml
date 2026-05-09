@@ -1,0 +1,69 @@
+# =============================================================================
+# Platform Health Daily
+# =============================================================================
+# Purpose: Run a daily platform health pulse using existing health scripts and
+#          archive machine-readable outputs for trend/debug follow-up.
+# =============================================================================
+
+name: Platform Health Daily
+
+on:
+    schedule:
+        - cron: "45 5 * * *" # Daily at 05:45 UTC
+    workflow_dispatch:
+
+permissions:
+    contents: read
+
+concurrency:
+    group: platform-health-daily
+    cancel-in-progress: false
+
+jobs:
+    health-pulse:
+        name: Platform Health Pulse
+        runs-on: ubuntu-latest
+        timeout-minutes: 15
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4.3.1
+
+            - name: Setup Python
+              uses: ./.github/actions/setup-python-env
+              with:
+                  install-requirements: "false"
+                  extra-packages: "psutil"
+
+            - name: Run system health report (JSON)
+              run: |
+                  mkdir -p data_out/platform_health
+                  python scripts/system_health_check.py --json > data_out/platform_health/system_health.json
+
+            - name: Run resource snapshot export
+              run: |
+                  python scripts/resource_monitor.py --snapshot --export data_out/platform_health/resource_snapshot.json
+
+            - name: Upload health artifacts
+              if: always()
+              uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4
+              with:
+                  name: platform-health-${{ github.run_number }}
+                  retention-days: 30
+                  path: |
+                      data_out/platform_health/system_health.json
+                      data_out/platform_health/resource_snapshot.json
+
+            - name: Summary
+              if: always()
+              run: |
+                  echo "## Platform Health Daily" >> $GITHUB_STEP_SUMMARY
+                  echo "" >> $GITHUB_STEP_SUMMARY
+                  echo "| Output | Path |" >> $GITHUB_STEP_SUMMARY
+                  echo "|--------|------|" >> $GITHUB_STEP_SUMMARY
+                  echo "| System health | data_out/platform_health/system_health.json |" >> $GITHUB_STEP_SUMMARY
+                  echo "| Resource snapshot | data_out/platform_health/resource_snapshot.json |" >> $GITHUB_STEP_SUMMARY
+                  echo "" >> $GITHUB_STEP_SUMMARY
+                  if [ -f data_out/platform_health/system_health.json ]; then
+                    python3 -c "import json,pathlib; p=pathlib.Path('data_out/platform_health/system_health.json'); d=json.loads(p.read_text()); checks=d.get('checks',[]) if isinstance(d,dict) else []; ok=sum(1 for c in checks if c.get('status')=='ok'); warn=sum(1 for c in checks if c.get('status')=='warn'); fail=sum(1 for c in checks if c.get('status')=='fail'); print(f'- Check counts: ✅ {ok}  ⚠️ {warn}  ❌ {fail}')" >> $GITHUB_STEP_SUMMARY || echo "- Could not parse system health JSON summary" >> $GITHUB_STEP_SUMMARY
+                  fi

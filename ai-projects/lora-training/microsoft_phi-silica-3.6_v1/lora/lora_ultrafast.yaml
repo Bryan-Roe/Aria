@@ -1,0 +1,38 @@
+adam_beta1: !!float 0.9
+adam_beta2: !!float 0.95
+adam_epsilon: !!float 1E-08
+early_stopping_patience: 2
+epochs: 1
+eval_accumulation_steps: null
+eval_delay: 0
+eval_steps: 16  # Very frequent checkpoints
+eval_strategy: "steps"
+save_dir: "data_out/lora_training"
+finetune_dataset: "data"
+finetune_test_batch_size: 32  # Maximum throughput for eval
+finetune_test_nsamples: 8
+finetune_test_seqlen: 192  # Further reduction for speed
+finetune_train_batch_size: 4  # Maximum stable batch size
+finetune_train_nsamples: 32
+finetune_train_seqlen: 192  # Further reduction (was 256)
+gradient_accumulation_steps: 4  # Larger effective batch (4*4=16)
+gradient_checkpointing: true
+learning_rate: !!float 0.0005  # Higher LR for faster convergence
+lora_dropout: !!float 0.05
+lr_scheduler_type: "linear_with_warmup"
+max_grad_norm: 1
+model: "microsoft/Phi-3.5-mini-instruct"
+model_path: "model"
+num_training_steps: 30  # Reduced from 50 for faster completion
+num_warmup_steps: 3  # Minimal warmup
+save_steps: 16
+seed: 42
+weight_decay: 0
+
+# Ultra-fast training optimizations
+use_flash_attention: true
+dataloader_num_workers: 6  # Maximum parallelism
+pin_memory: true
+bf16: true  # Mixed precision for speed
+tf32: true  # Enable TensorFloat-32 on Ampere+ GPUs
+optim: "adamw_torch_fused"  # Fused optimizer for 10-20% speedup

@@ -1,0 +1,20 @@
+{
+  "name": "portfolio-live",
+  "description": "Legacy generated site bundle: portfolio-live",
+  "style": "legacy",
+  "pages": [
+    "index"
+  ],
+  "features": [
+    "legacy-bundle"
+  ],
+  "created_at": "2026-04-11T00:00:00Z",
+  "files": [
+    "about.html",
+    "contact.html",
+    "index.html",
+    "metadata.json",
+    "script.js",
+    "style.css"
+  ]
+}

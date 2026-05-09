@@ -1,0 +1,32 @@
+name: Validate Action References
+description: Validate workflow `uses:` references and warn on unversioned external actions
+
+inputs:
+  workflows-path:
+    description: Path to workflow files
+    required: false
+    default: .github/workflows
+
+runs:
+  using: composite
+  steps:
+    - name: Check action references
+      shell: bash
+      run: |
+        set -euo pipefail
+        WORKFLOWS_PATH='${{ inputs.workflows-path }}'
+        if [ ! -d "$WORKFLOWS_PATH" ]; then
+          echo "Workflows path not found: $WORKFLOWS_PATH" >&2
+          exit 1
+        fi
+
+        echo "Validating action references..."
+        grep -r "uses:" "$WORKFLOWS_PATH" | while read -r line; do
+          action=$(echo "$line" | sed -n "s/.*uses: *\([^ ]*\).*/\1/p")
+          if [ -n "$action" ]; then
+            if [[ "$action" != *"@"* ]] && [[ "$action" != "./"* ]]; then
+              echo "⚠️  Warning: Action without version: $action"
+            fi
+          fi
+        done || true
+        echo "✅ Action reference validation completed"

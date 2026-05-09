@@ -1,0 +1,242 @@
+# =============================================================================
+# Dataset Integrity - Enforce datasets/ immutability and schema validation
+# =============================================================================
+# Purpose: Enforces the repository convention that datasets/ is READ-ONLY.
+#          Existing files must not be modified or deleted. Newly added files
+#          are allowed but must conform to the expected JSONL message schema.
+# Triggers: PRs and pushes that touch datasets/**
+# Jobs:
+#   - immutability-check: Fails if any existing dataset file is modified/deleted
+#   - schema-validate: Validates new .json/.jsonl files against message schema
+# =============================================================================
+
+name: Dataset Integrity
+
+on:
+    pull_request:
+        branches: [main, dev]
+        paths:
+            - "datasets/**"
+    push:
+        branches: [main]
+        paths:
+            - "datasets/**"
+    workflow_dispatch:
+
+concurrency:
+    group: dataset-integrity-${{ github.ref }}
+    cancel-in-progress: true
+
+jobs:
+    immutability-check:
+        name: Dataset Immutability Gate
+        runs-on: ubuntu-latest
+        timeout-minutes: 5
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4.3.1
+              with:
+                  fetch-depth: 0
+
+            - name: Resolve diff range
+              id: range
+              run: |
+                  if [ "${{ github.event_name }}" = "pull_request" ]; then
+                    echo "base=${{ github.event.pull_request.base.sha }}" >> $GITHUB_OUTPUT
+                    echo "head=${{ github.event.pull_request.head.sha }}" >> $GITHUB_OUTPUT
+                  elif [ "${{ github.event.before }}" = "0000000000000000000000000000000000000000" ] || \
+                       [ -z "${{ github.event.before }}" ]; then
+                    # Initial push to branch — compare against empty tree
+                    echo "base=$(git hash-object -t tree /dev/null)" >> $GITHUB_OUTPUT
+                    echo "head=${{ github.sha }}" >> $GITHUB_OUTPUT
+                  else
+                    echo "base=${{ github.event.before }}" >> $GITHUB_OUTPUT
+                    echo "head=${{ github.sha }}" >> $GITHUB_OUTPUT
+                  fi
+
+            - name: Detect modified or deleted dataset files
+              id: check
+              run: |
+                  BASE="${{ steps.range.outputs.base }}"
+                  HEAD="${{ steps.range.outputs.head }}"
+
+                  # Only Added (A) files are permitted — Modified (M), Deleted (D),
+                  # Renamed (R), Copied (C) are all immutability violations.
+                  VIOLATIONS=$(git diff --name-status "$BASE".."$HEAD" -- datasets/ \
+                    | grep -E '^[MDRCT]' | awk '{print $NF}' || true)
+
+                  if [ -n "$VIOLATIONS" ]; then
+                    echo "❌ Immutability violation — existing dataset files were changed:"
+                    echo "$VIOLATIONS"
+                    echo ""
+                    echo "The datasets/ directory is READ-ONLY. Existing files must not"
+                    echo "be modified, deleted, renamed, or moved. Only adding new files"
+                    echo "is allowed. See .github/copilot-instructions.md for details."
+                    echo ""
+                    echo "violations<<EOF" >> $GITHUB_OUTPUT
+                    echo "$VIOLATIONS" >> $GITHUB_OUTPUT
+                    echo "EOF" >> $GITHUB_OUTPUT
+                    exit 1
+                  fi
+
+                  echo "✅ No existing dataset files were modified"
+                  echo "violations=" >> $GITHUB_OUTPUT
+
+            - name: Write immutability summary
+              if: always()
+              run: |
+                  echo "## Dataset Immutability Gate" >> $GITHUB_STEP_SUMMARY
+                  echo "" >> $GITHUB_STEP_SUMMARY
+                  if [ -n "${{ steps.check.outputs.violations }}" ]; then
+                    echo "❌ **FAILED** — existing files modified:" >> $GITHUB_STEP_SUMMARY
+                    echo '```' >> $GITHUB_STEP_SUMMARY
+                    echo "${{ steps.check.outputs.violations }}" >> $GITHUB_STEP_SUMMARY
+                    echo '```' >> $GITHUB_STEP_SUMMARY
+                  else
+                    echo "✅ **PASSED** — no existing dataset files were changed" >> $GITHUB_STEP_SUMMARY
+                  fi
+
+    schema-validate:
+        name: Validate New Dataset Files
+        runs-on: ubuntu-latest
+        timeout-minutes: 5
+        needs: immutability-check
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4.3.1
+              with:
+                  fetch-depth: 0
+
+            - name: Setup Python
+              uses: ./.github/actions/setup-python-env
+              with:
+                  install-requirements: "false"
+
+            - name: Resolve diff range
+              id: range
+              run: |
+                  if [ "${{ github.event_name }}" = "pull_request" ]; then
+                    echo "base=${{ github.event.pull_request.base.sha }}" >> $GITHUB_OUTPUT
+                    echo "head=${{ github.event.pull_request.head.sha }}" >> $GITHUB_OUTPUT
+                  elif [ "${{ github.event.before }}" = "0000000000000000000000000000000000000000" ] || \
+                       [ -z "${{ github.event.before }}" ]; then
+                    echo "base=$(git hash-object -t tree /dev/null)" >> $GITHUB_OUTPUT
+                    echo "head=${{ github.sha }}" >> $GITHUB_OUTPUT
+                  else
+                    echo "base=${{ github.event.before }}" >> $GITHUB_OUTPUT
+                    echo "head=${{ github.sha }}" >> $GITHUB_OUTPUT
+                  fi
+
+            - name: Validate newly added dataset files
+              run: |
+                  BASE="${{ steps.range.outputs.base }}"
+                  HEAD="${{ steps.range.outputs.head }}"
+
+                  ADDED=$(git diff --name-status "$BASE".."$HEAD" -- datasets/ \
+                    | grep '^A' | awk '{print $2}' || true)
+
+                  if [ -z "$ADDED" ]; then
+                    echo "No newly added dataset files — nothing to validate"
+                    exit 0
+                  fi
+
+                  echo "Validating new dataset files:"
+                  echo "$ADDED"
+                  echo ""
+
+                  ADDED_FILES="$ADDED" python3 - <<'PYEOF'
+                  import sys, json, os
+
+                  VALID_ROLES = {'user', 'assistant', 'system', 'tool'}
+                  added_files = [f for f in os.environ.get('ADDED_FILES', '').strip().splitlines() if f]
+                  dataset_files = [f for f in added_files if f.endswith(('.json', '.jsonl'))]
+
+                  if not dataset_files:
+                      print("No JSON/JSONL dataset files to validate — skipping")
+                      sys.exit(0)
+
+                  errors = []
+                  passed = 0
+
+                  for filepath in dataset_files:
+                      if not os.path.exists(filepath):
+                          print(f"⚠ {filepath}: file not found (may be outside working tree)")
+                          continue
+                      try:
+                          with open(filepath) as fh:
+                              content = fh.read().strip()
+                          if not content:
+                              errors.append(f"{filepath}: file is empty")
+                              continue
+
+                          # Parse as JSONL (newline-delimited) or JSON array
+                          if filepath.endswith('.jsonl'):
+                              records = [json.loads(line) for line in content.splitlines() if line.strip()]
+                          else:
+                              data = json.loads(content)
+                              records = data if isinstance(data, list) else [data]
+
+                          if not records:
+                              errors.append(f"{filepath}: no records found")
+                              continue
+
+                          # Validate chat message schema: each record must have
+                          # {"messages": [{"role": "...", "content": "..."}]}
+                          file_errors = []
+                          for i, rec in enumerate(records[:20]):  # spot-check up to 20
+                              if not isinstance(rec, dict):
+                                  file_errors.append(f"  record[{i}]: expected dict, got {type(rec).__name__}")
+                                  continue
+                              if 'messages' not in rec:
+                                  file_errors.append(f"  record[{i}]: missing 'messages' key")
+                                  continue
+                              msgs = rec['messages']
+                              if not isinstance(msgs, list) or not msgs:
+                                  file_errors.append(f"  record[{i}]: 'messages' must be a non-empty list")
+                                  continue
+                              for j, msg in enumerate(msgs):
+                                  if not isinstance(msg, dict):
+                                      file_errors.append(f"  record[{i}].messages[{j}]: expected dict")
+                                  elif 'role' not in msg or 'content' not in msg:
+                                      file_errors.append(
+                                          f"  record[{i}].messages[{j}]: must have 'role' and 'content'"
+                                      )
+                                  elif msg['role'] not in VALID_ROLES:
+                                      file_errors.append(
+                                          f"  record[{i}].messages[{j}]: unknown role '{msg['role']}'"
+                                      )
+
+                          if file_errors:
+                              errors.append(f"{filepath}:")
+                              errors.extend(file_errors)
+                          else:
+                              print(f"✅ {filepath} ({len(records)} records)")
+                              passed += 1
+
+                      except json.JSONDecodeError as e:
+                          errors.append(f"{filepath}: JSON parse error — {e}")
+                      except Exception as e:
+                          errors.append(f"{filepath}: unexpected error — {e}")
+
+                  print(f"\n{passed}/{len(dataset_files)} file(s) passed validation")
+
+                  if errors:
+                      print("\n❌ Schema validation errors:")
+                      for err in errors:
+                          print(err)
+                      sys.exit(1)
+                  PYEOF
+
+            - name: Write schema summary
+              if: always()
+              run: |
+                  echo "## Dataset Schema Validation" >> $GITHUB_STEP_SUMMARY
+                  echo "" >> $GITHUB_STEP_SUMMARY
+                  echo "New files are validated against the chat message schema:" >> $GITHUB_STEP_SUMMARY
+                  echo '```json' >> $GITHUB_STEP_SUMMARY
+                  echo '[{"messages": [{"role": "user|assistant|system", "content": "..."}]}]' >> $GITHUB_STEP_SUMMARY
+                  echo '```' >> $GITHUB_STEP_SUMMARY
+                  echo "" >> $GITHUB_STEP_SUMMARY
+                  echo "See job logs for per-file validation results." >> $GITHUB_STEP_SUMMARY

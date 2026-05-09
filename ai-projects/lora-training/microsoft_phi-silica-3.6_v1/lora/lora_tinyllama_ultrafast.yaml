@@ -1,0 +1,37 @@
+adam_beta1: !!float 0.9
+adam_beta2: !!float 0.95
+adam_epsilon: !!float 1E-08
+early_stopping_patience: 2
+epochs: 1
+eval_accumulation_steps: null
+eval_delay: 0
+eval_steps: 16
+eval_strategy: "steps"
+save_dir: "data_out/lora_training"
+finetune_dataset: "data"
+finetune_test_batch_size: 32
+finetune_test_nsamples: 8
+finetune_test_seqlen: 192
+finetune_train_batch_size: 4
+finetune_train_nsamples: 32
+finetune_train_seqlen: 192
+gradient_accumulation_steps: 4
+gradient_checkpointing: true
+learning_rate: !!float 0.00035
+lora_dropout: !!float 0.05
+lr_scheduler_type: "linear_with_warmup"
+max_grad_norm: 1
+model: "TinyLlama/TinyLlama-1.1B-Chat-v1.0"
+model_path: "model"
+num_training_steps: 30
+num_warmup_steps: 3
+save_steps: 16
+seed: 42
+weight_decay: 0
+
+# TinyLlama ultrafast optimizations
+use_flash_attention: true
+dataloader_num_workers: 4
+pin_memory: true
+bf16: false  # disable by default for broad compatibility
+optim: "adamw_torch_fused"

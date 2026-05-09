@@ -1,0 +1,111 @@
+# =============================================================================
+# Integration Contract Gate
+# =============================================================================
+# Purpose: Validates that all module API contracts remain intact.
+#          Runs scripts/integration_contract_gate.sh on every PR and push.
+#          Strict-endpoint mode runs on pushes to main to catch regressions
+#          before they land in the default branch.
+# Triggers:
+#   - push to main (strict mode — 8/8 endpoint checks must pass)
+#   - pull_request to main/dev (non-strict, fast gate)
+#   - manual dispatch (choose mode via input)
+# =============================================================================
+
+name: Integration Contract Gate
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main, dev ]
+  workflow_dispatch:
+    inputs:
+      strict:
+        description: 'Run in strict-endpoints mode (all 8 endpoint checks)'
+        required: false
+        default: 'false'
+        type: choice
+        options:
+          - 'false'
+          - 'true'
+
+concurrency:
+  group: contract-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true  # Opt into Node.js 24 for JS actions ahead of June 2026 forced migration
+
+jobs:
+  contract-gate:
+    name: API Contract Validation
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4.3.1
+
+      - name: Setup Python
+        uses: ./.github/actions/setup-python-env
+        with:
+          python-version: '3.11'
+          extra-packages: 'pytest pytest-timeout'
+
+      - name: Determine gate mode
+        id: mode
+        run: |
+          if [[ "${{ github.event_name }}" == "push" && "${{ github.ref }}" == "refs/heads/main" ]]; then
+            echo "strict=true" >> $GITHUB_OUTPUT
+            echo "mode_label=strict (push to main)" >> $GITHUB_OUTPUT
+          elif [[ "${{ github.event_name }}" == "workflow_dispatch" && "${{ github.event.inputs.strict }}" == "true" ]]; then
+            echo "strict=true" >> $GITHUB_OUTPUT
+            echo "mode_label=strict (manual dispatch)" >> $GITHUB_OUTPUT
+          else
+            echo "strict=false" >> $GITHUB_OUTPUT
+            echo "mode_label=standard (PR)" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Validate generated site bundles (strict)
+        uses: ./.github/actions/validate-site-bundles
+        with:
+          strict-metadata: 'true'
+
+      - name: Validate local composite actions
+        uses: ./.github/actions/validate-composite-actions
+        with:
+          script-path: scripts/validate_composite_actions.py
+
+      - name: Run contract gate (standard)
+        if: steps.mode.outputs.strict == 'false'
+        uses: ./.github/actions/run-integration-contract-gate
+
+      - name: Run contract gate (strict)
+        if: steps.mode.outputs.strict == 'true'
+        uses: ./.github/actions/run-integration-contract-gate
+        with:
+          strict-endpoints: 'true'
+
+      - name: Upload contract results
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4
+        with:
+          name: contract-gate-results-${{ github.run_number }}
+          retention-days: 14
+          path: |
+            data_out/integration_smoke/
+            data_out/ci_orchestrator/status.json
+
+      - name: Generate summary
+        if: always()
+        run: |
+          echo "## Integration Contract Gate" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Mode:** ${{ steps.mode.outputs.mode_label }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [ -f data_out/ci_orchestrator/status.json ]; then
+            echo "### Orchestrator Status" >> $GITHUB_STEP_SUMMARY
+            echo '```json' >> $GITHUB_STEP_SUMMARY
+            cat data_out/ci_orchestrator/status.json >> $GITHUB_STEP_SUMMARY
+            echo '' >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+          fi

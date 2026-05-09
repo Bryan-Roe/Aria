@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aria Auto-Execute — Multi-Step Action Planner</title>
+    <meta name="description" content="Preview and run multi-step action plans for the Aria character with plan and execute modes.">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://bryan-roe.github.io/Aria/aria/auto-execute.html">
+    <meta name="theme-color" content="#0f9d89">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://bryan-roe.github.io/Aria/aria/auto-execute.html">
+    <meta property="og:title" content="Aria Auto-Execute — Multi-Step Action Planner">
+    <meta property="og:description" content="Preview and run multi-step action plans for the Aria character with plan and execute modes.">
+    <meta property="og:image" content="https://bryan-roe.github.io/Aria/og-image.svg">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Aria Auto-Execute — Multi-Step Action Planner">
+    <meta name="twitter:image" content="https://bryan-roe.github.io/Aria/og-image.svg">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='24' fill='%23122033'/%3E%3Ccircle cx='50' cy='36' r='16' fill='%230f9d89'/%3E%3Cpath d='M24 78c5-14 18-22 26-22s21 8 26 22' stroke='%23f7f2e8' stroke-width='10' stroke-linecap='round' fill='none'/%3E%3C/svg%3E">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --teal: #0f9d89;
+            --teal-hover: #0a7a6d;
+            --coral: #d95b43;
+            --gold: #d3a53e;
+            --ink: #122033;
+            --ink-soft: #5f6874;
+            --paper: #f7f2e8;
+            --line: rgba(18, 32, 51, 0.12);
+            --shadow: 0 10px 30px rgba(18, 32, 51, 0.12);
+        }
+
+        body {
+            font-family: "Instrument Sans", system-ui, sans-serif;
+            background: linear-gradient(180deg, #fbf7ef 0%, #f7f2e8 56%, #efe5d6 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: var(--ink);
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            background:
+                radial-gradient(circle at 12% 18%, rgba(15, 157, 137, 0.14), transparent 30%),
+                radial-gradient(circle at 88% 12%, rgba(217, 91, 67, 0.12), transparent 26%),
+                radial-gradient(circle at 50% 78%, rgba(211, 165, 62, 0.12), transparent 28%);
+            pointer-events: none;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.88);
+            border-radius: 20px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--line);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, var(--teal) 0%, var(--teal-hover) 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-family: "Space Grotesk", sans-serif;
+            letter-spacing: -0.02em;
+        }
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+        .content {
+            padding: 30px;
+        }
+        .control-panel {
+            background: rgba(247, 242, 232, 0.6);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid var(--line);
+        }
+        .input-group {
+            margin-bottom: 15px;
+        }
+        .input-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: var(--ink);
+        }
+        .input-group input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            border: 1.5px solid var(--line);
+            border-radius: 8px;
+            font-size: 1em;
+            font-family: inherit;
+            transition: border-color 0.3s;
+            background: white;
+        }
+        .input-group input[type="text"]:focus {
+            outline: none;
+            border-color: var(--teal);
+            box-shadow: 0 0 0 3px rgba(15, 157, 137, 0.15);
+        }
+        .checkbox-group {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            margin: 15px 0;
+        }
+        .checkbox-group label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+        .checkbox-group input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            accent-color: var(--teal);
+        }
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        button {
+            flex: 1;
+            padding: 13px 24px;
+            font-size: 1em;
+            font-weight: 600;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-family: inherit;
+        }
+        .btn-plan {
+            background: rgba(15, 157, 137, 0.1);
+            color: var(--teal);
+            border: 1.5px solid rgba(15, 157, 137, 0.4);
+        }
+        .btn-plan:hover {
+            background: var(--teal);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(15, 157, 137, 0.3);
+        }
+        .btn-execute {
+            background: var(--teal);
+            color: white;
+        }
+        .btn-execute:hover {
+            background: var(--teal-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(15, 157, 137, 0.3);
+        }
+        .btn-clear {
+            background: rgba(217, 91, 67, 0.1);
+            color: var(--coral);
+            border: 1.5px solid rgba(217, 91, 67, 0.3);
+            flex: 0.3;
+        }
+        .btn-clear:hover {
+            background: var(--coral);
+            color: white;
+        }
+        .results {
+            margin-top: 30px;
+        }
+        .section {
+            background: rgba(247, 242, 232, 0.5);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid var(--line);
+        }
+        .section h3 {
+            color: var(--teal);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .action-card {
+            background: white;
+            border-left: 4px solid var(--teal);
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            box-shadow: 0 2px 8px rgba(18, 32, 51, 0.06);
+        }
+        .action-card h4 {
+            color: var(--teal);
+            margin-bottom: 10px;
+        }
+        .action-params {
+            font-family: "IBM Plex Mono", "Courier New", monospace;
+            background: rgba(247, 242, 232, 0.7);
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 0.9em;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.85em;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+        .status-success {
+            background: rgba(15, 157, 137, 0.1);
+            color: var(--teal-hover);
+            border: 1px solid rgba(15, 157, 137, 0.3);
+        }
+        .status-error {
+            background: rgba(217, 91, 67, 0.1);
+            color: var(--coral);
+            border: 1px solid rgba(217, 91, 67, 0.3);
+        }
+        .tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-top: 10px;
+        }
+        .tag {
+            background: rgba(15, 157, 137, 0.08);
+            color: var(--teal);
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 0.85em;
+            font-family: "IBM Plex Mono", "Courier New", monospace;
+            border: 1px solid rgba(15, 157, 137, 0.2);
+        }
+        .examples {
+            background: rgba(211, 165, 62, 0.08);
+            border-left: 4px solid var(--gold);
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(211, 165, 62, 0.2);
+        }
+        .examples h4 {
+            color: #9a6f0a;
+            margin-bottom: 10px;
+        }
+        .example-list {
+            list-style: none;
+            padding: 0;
+        }
+        .example-list li {
+            padding: 8px;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background 0.2s;
+        }
+        .example-list li:hover {
+            background: rgba(211, 165, 62, 0.12);
+        }
+        .example-list li::before {
+            content: "→ ";
+            color: var(--gold);
+            font-weight: bold;
+        }
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+        .loading.active {
+            display: block;
+        }
+        .spinner {
+            border: 4px solid var(--line);
+            border-top: 4px solid var(--teal);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .state-view {
+            font-family: "IBM Plex Mono", "Courier New", monospace;
+            background: #1e2433;
+            color: #abb2bf;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 0.9em;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .json-key { color: #e06c75; }
+        .json-string { color: #98c379; }
+        .json-number { color: #d19a66; }
+    </style>
+    <link rel="stylesheet" href="../global-upgrade.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🤖 Aria Auto-Execute</h1>
+            <p>LLM-Powered Automatic Action Generation & Execution</p>
+        </div>
+
+        <div class="content">
+            <div class="examples">
+                <h4>📝 Example Commands (click to use):</h4>
+                <ul class="example-list">
+                    <li onclick="setCommand('Walk to the table and pick up the apple')">Walk to the table and pick up the apple</li>
+                    <li onclick="setCommand('Say hello and wave at the audience')">Say hello and wave at the audience</li>
+                    <li onclick="setCommand('Go to the center and do a little dance')">Go to the center and do a little dance</li>
+                    <li onclick="setCommand('Pick up the book, move to stage left, and drop it')">Pick up the book, move to stage left, and drop it</li>
+                    <li onclick="setCommand('Look at the flower and say how beautiful it is')">Look at the flower and say how beautiful it is</li>
+                    <li onclick="setCommand('Throw the ball toward the right side of the stage')">Throw the ball toward the right side of the stage</li>
+                </ul>
+            </div>
+
+            <div class="control-panel">
+                <div class="input-group">
+                    <label for="command">Command:</label>
+                    <input type="text" id="command" placeholder="Type a natural language command for Aria..."
+                           value="Walk to the table and pick up the apple">
+                </div>
+
+                <div class="checkbox-group">
+                    <label>
+                        <input type="checkbox" id="use-llm" checked>
+                        Use LLM (fallback to rules if unavailable)
+                    </label>
+                    <label>
+                        <input type="checkbox" id="show-state">
+                        Show updated state
+                    </label>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn-plan" onclick="planActions()">📋 Plan Actions Only</button>
+                    <button class="btn-execute" onclick="executeActions()">▶️ Execute Actions</button>
+                    <button class="btn-clear" onclick="clearResults()">🗑️ Clear</button>
+                </div>
+            </div>
+
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>Processing command...</p>
+            </div>
+
+            <div class="results" id="results"></div>
+        </div>
+    </div>
+
+    <script>
+        function setCommand(cmd) {
+            document.getElementById('command').value = cmd;
+        }
+
+        function clearResults() {
+            document.getElementById('results').innerHTML = '';
+        }
+
+        async function planActions() {
+            await sendCommand(false);
+        }
+
+        async function executeActions() {
+            await sendCommand(true);
+        }
+
+        async function sendCommand(autoExecute) {
+            const command = document.getElementById('command').value.trim();
+            const useLlm = document.getElementById('use-llm').checked;
+            const showState = document.getElementById('show-state').checked;
+
+            if (!command) {
+                var el = document.getElementById('command');
+                el.focus();
+                el.placeholder = '⚠️ Please enter a command first...';
+                setTimeout(function() { el.placeholder = 'e.g. Walk left and pick up the ball...'; }, 2000);
+                return;
+            }
+
+            const loading = document.getElementById('loading');
+            const results = document.getElementById('results');
+
+            loading.classList.add('active');
+            results.innerHTML = '';
+
+            try {
+                const response = await fetch('http://localhost:8080/api/aria/execute', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        command: command,
+                        auto_execute: autoExecute,
+                        use_llm: useLlm
+                    })
+                });
+
+                const data = await response.json();
+                displayResults(data, autoExecute, showState);
+
+            } catch (error) {
+                results.innerHTML = `
+                    <div class="section">
+                        <h3>❌ Error</h3>
+                        <p style="color: #721c24;">${error.message}</p>
+                        <p style="margin-top: 10px; font-size: 0.9em;">Make sure the server is running on port 8080</p>
+                    </div>
+                `;
+            } finally {
+                loading.classList.remove('active');
+            }
+        }
+
+        function displayResults(data, autoExecute, showState) {
+            const results = document.getElementById('results');
+            let html = '';
+
+            // Status
+            html += `
+                <div class="section">
+                    <h3>📊 Status</h3>
+                    <p><strong>Command:</strong> ${escapeHtml(data.command)}</p>
+                    <p><strong>Mode:</strong> ${autoExecute ? '▶️ Execute' : '📋 Plan Only'}</p>
+                    <p><strong>Actions Parsed:</strong> ${data.actions?.length || 0}</p>
+                    <span class="status-badge ${data.status === 'success' ? 'status-success' : 'status-error'}">
+                        ${data.status.toUpperCase()}
+                    </span>
+                </div>
+            `;
+
+            // Actions
+            if (data.actions && data.actions.length > 0) {
+                html += `
+                    <div class="section">
+                        <h3>🎯 Planned Actions</h3>
+                `;
+
+                data.actions.forEach((action, index) => {
+                    html += `
+                        <div class="action-card">
+                            <h4>${index + 1}. ${action.action.toUpperCase()}</h4>
+                            <div class="action-params">${JSON.stringify(action, null, 2)}</div>
+                        </div>
+                    `;
+                });
+
+                html += `</div>`;
+            }
+
+            // Execution Results
+            if (autoExecute && data.results) {
+                html += `
+                    <div class="section">
+                        <h3>✅ Execution Results</h3>
+                `;
+
+                data.results.forEach((result, index) => {
+                    const status = result.result.status;
+                    html += `
+                        <div class="action-card">
+                            <h4>${index + 1}. ${result.action.action.toUpperCase()}</h4>
+                            <p><strong>Message:</strong> ${escapeHtml(result.result.message)}</p>
+                            <span class="status-badge ${status === 'success' ? 'status-success' : 'status-error'}">
+                                ${status.toUpperCase()}
+                            </span>
+                            ${result.result.tags ? `
+                                <div class="tags">
+                                    ${result.result.tags.map(tag => `<span class="tag">${escapeHtml(tag)}</span>`).join('')}
+                                </div>
+                            ` : ''}
+                        </div>
+                    `;
+                });
+
+                html += `</div>`;
+            }
+
+            // Updated State
+            if (showState && data.state) {
+                html += `
+                    <div class="section">
+                        <h3>🔄 Updated Stage State</h3>
+                        <div class="state-view">${syntaxHighlightJson(data.state)}</div>
+                    </div>
+                `;
+            }
+
+            results.innerHTML = html;
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function syntaxHighlightJson(json) {
+            let jsonStr = JSON.stringify(json, null, 2);
+            jsonStr = jsonStr.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            return jsonStr
+                .replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?)/g, (match) => {
+                    let cls = 'json-string';
+                    if (/:$/.test(match)) {
+                        cls = 'json-key';
+                    }
+                    return '<span class="' + cls + '">' + match + '</span>';
+                })
+                .replace(/\b(\d+)\b/g, '<span class="json-number">$1</span>');
+        }
+    </script>
+    <script src="../aria-nav.js"></script>
+    <script src="../global-upgrade.js"></script>
+</body>
+</html>
