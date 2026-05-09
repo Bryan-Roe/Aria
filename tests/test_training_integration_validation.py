@@ -41,7 +41,7 @@ def test_valid_dataset_runs_subprocess(tmp_path: Path):
     config_file.write_text("dummy: true\n")
 
     ti = TrainingIntegration(cfg)
-    ti.list_datasets = AsyncMock(return_value={"cat": ["DatasetA", "dataset_b"]})
+    ti.list_datasets = AsyncMock(return_value={"quantum": ["DatasetA", "dataset_b"]})
     mock_result = SimpleNamespace(returncode=0, stdout="ok", stderr="")
 
     with patch("subprocess.run", return_value=mock_result) as mock_run:
@@ -61,7 +61,7 @@ def test_valid_dataset_runs_subprocess(tmp_path: Path):
 def test_invalid_chars_rejected(tmp_path: Path):
     cfg = make_config(tmp_path)
     ti = TrainingIntegration(cfg)
-    ti.list_datasets = AsyncMock(return_value={"cat": ["DatasetA", "dataset_b"]})
+    ti.list_datasets = AsyncMock(return_value={"quantum": ["DatasetA", "dataset_b"]})
 
     with patch("subprocess.run") as mock_run:
         result = asyncio.run(ti.train_lora("../secret"))
@@ -75,7 +75,7 @@ def test_invalid_chars_rejected(tmp_path: Path):
 def test_unknown_dataset_rejected(tmp_path: Path):
     cfg = make_config(tmp_path)
     ti = TrainingIntegration(cfg)
-    ti.list_datasets = AsyncMock(return_value={"cat": ["DatasetA", "dataset_b"]})
+    ti.list_datasets = AsyncMock(return_value={"quantum": ["DatasetA", "dataset_b"]})
 
     with patch("subprocess.run") as mock_run:
         result = asyncio.run(ti.train_lora("missing_dataset"))

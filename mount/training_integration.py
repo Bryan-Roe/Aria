@@ -249,14 +249,15 @@ class TrainingIntegration:
 
             # Build normalized allowlist and preserve canonical discovered name
             allowed_datasets = set()
-            allowed_dataset_names: Dict[str, str] = {}
+            normalized_to_canonical: Dict[str, str] = {}
             for names in available_datasets.values():
                 for name in names:
                     if isinstance(name, str):
-                        normalized = _normalize_dataset_name(name)
-                        if _is_safe_dataset_name(name):
+                        stripped_name = name.strip()
+                        normalized = _normalize_dataset_name(stripped_name)
+                        if _is_safe_dataset_name(stripped_name):
                             allowed_datasets.add(normalized)
-                            allowed_dataset_names[normalized] = name.strip()
+                            normalized_to_canonical[normalized] = stripped_name
 
             logger.debug(
                 "train_lora: allowed datasets for validation: %s",
@@ -268,6 +269,7 @@ class TrainingIntegration:
                     "unknown_dataset",
                     "Dataset not found. Call list_datasets() to see valid names.",
                 )
+            canonical_dataset = normalized_to_canonical[dataset_norm]
 
             train_script = self.phi_path / "scripts" / "train_lora.py"
             config_file = self.phi_path / "lora" / "lora.yaml"
@@ -280,7 +282,7 @@ class TrainingIntegration:
                 sys.executable,
                 str(train_script),
                 "--dataset",
-                allowed_dataset_names.get(dataset_norm, dataset.strip()),
+                canonical_dataset,
                 "--config",
                 str(config_file),
                 "--max-train-samples",
