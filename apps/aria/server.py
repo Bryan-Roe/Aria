@@ -1922,7 +1922,8 @@ def main():
     except OSError as e:
         # Graceful handling when a server is already bound to this port.
         if getattr(e, "errno", None) == 98:
-            state_url = f"http://{host}:{port}/api/aria/state"
+            probe_host = "127.0.0.1"
+            state_url = f"http://{probe_host}:{port}/api/aria/state"
             try:
                 with urllib.request.urlopen(state_url, timeout=1.0) as resp:
                     payload = json.loads(resp.read().decode("utf-8"))
@@ -1932,7 +1933,7 @@ def main():
                     and "objects" in payload
                 ):
                     print(
-                        f"⚠️ Aria server already running at http://{host}:{port} (detected healthy /api/aria/state)."
+                        f"⚠️ Aria server already running at http://{probe_host}:{port} (detected healthy /api/aria/state)."
                     )
                     print("ℹ️ Reusing existing server; exiting this process cleanly.")
                     return

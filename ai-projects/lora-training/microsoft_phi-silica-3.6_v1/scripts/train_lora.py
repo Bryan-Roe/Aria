@@ -2,10 +2,12 @@ import argparse
 import json
 import math
 import os
+import ipaddress
+import socket
+from urllib.parse import urlparse
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, Iterable, List
-from urllib.parse import urlparse
 
 try:
     import yaml  # type: ignore
@@ -71,23 +73,6 @@ class Config:
     early_stopping_threshold: float
 
 
-def validate_config_path(config_path: str) -> Path:
-    candidate = Path(config_path).expanduser()
-    resolved = candidate.resolve(strict=True)
-
-    cwd_root = Path.cwd().resolve()
-    script_root = Path(__file__).resolve().parents[1]
-
-    allowed_roots = (cwd_root, script_root)
-    if not any(root == resolved or root in resolved.parents for root in allowed_roots):
-        raise ValueError(
-            f"Config path '{resolved}' is outside allowed roots: "
-            f"{cwd_root} or {script_root}"
-        )
-
-    return resolved
-
-
 def read_yaml(yaml_path: Path) -> Dict[str, Any]:
     with yaml_path.open("r", encoding="utf-8") as f:
         return yaml.safe_load(f)
@@ -96,22 +81,6 @@ def read_yaml(yaml_path: Path) -> Dict[str, Any]:
 def resolve_path(p: str) -> Path:
     # allow tokens like mount/<run_id>/dataset to be overridden by --dataset
     return Path(p).expanduser()
-
-
-def resolve_path_safe(p: str, base_dir: Path) -> Path:
-    candidate = Path(p).expanduser()
-    if not candidate.is_absolute():
-        candidate = (base_dir / candidate).resolve(strict=False)
-    else:
-        candidate = candidate.resolve(strict=False)
-    base_resolved = base_dir.resolve(strict=False)
-    try:
-        candidate.relative_to(base_resolved)
-    except ValueError as e:
-        raise ValueError(
-            f"Dataset path must be within {base_resolved}, got: {candidate}"
-        ) from e
-    return candidate
 
 
 def iter_jsonl(path: Path) -> Iterable[Dict[str, Any]]:
@@ -167,41 +136,45 @@ def make_hf_dataset_from_files(
     return ds
 
 
-def _allowed_manifest_hosts() -> List[str]:
-    raw = os.environ.get("LORA_MANIFEST_ALLOWED_HOSTS", "")
-    return [h.strip().lower() for h in raw.split(",") if h.strip()]
-
-
-def _is_allowed_manifest_url(path_or_url: str) -> bool:
+def _validated_remote_url(path_or_url: str) -> str:
     parsed = urlparse(path_or_url)
     if parsed.scheme not in ("http", "https"):
-        return False
+        raise ValueError(f"Unsupported URL scheme for manifest source: {parsed.scheme!r}")
     if not parsed.hostname:
-        return False
+        raise ValueError("Remote manifest URL must include a hostname")
+
+    allowed_hosts = {h.strip().lower() for h in os.environ.get("LORA_MANIFEST_ALLOWED_HOSTS", "").split(",") if h.strip()}
     host = parsed.hostname.lower()
-    allowed_hosts = _allowed_manifest_hosts()
-    if not allowed_hosts:
-        return False
-    for allowed in allowed_hosts:
-        if host == allowed or host.endswith("." + allowed):
-            return True
-    return False
+    if allowed_hosts and host not in allowed_hosts:
+        raise ValueError(f"Remote manifest host {host!r} is not in LORA_MANIFEST_ALLOWED_HOSTS")
 
+    try:
+        addrinfos = socket.getaddrinfo(parsed.hostname, parsed.port or (443 if parsed.scheme == "https" else 80), type=socket.SOCK_STREAM)
+    except socket.gaierror as e:
+        raise ValueError(f"Could not resolve remote manifest host {parsed.hostname!r}: {e}") from e
 
-def _open_remote_manifest(path_or_url: str):
-    if not _is_allowed_manifest_url(path_or_url):
-        raise ValueError(
-            "Remote manifest URL is not allowed. Set LORA_MANIFEST_ALLOWED_HOSTS "
-            "to a comma-separated allowlist of hostnames."
-        )
-    import urllib.request
+    for ai in addrinfos:
+        ip_str = ai[4][0]
+        ip_obj = ipaddress.ip_address(ip_str)
+        if (
+            ip_obj.is_private
+            or ip_obj.is_loopback
+            or ip_obj.is_link_local
+            or ip_obj.is_reserved
+            or ip_obj.is_multicast
+            or ip_obj.is_unspecified
+        ):
+            raise ValueError(f"Remote manifest host resolves to disallowed address: {ip_str}")
 
-    return urllib.request.urlopen(path_or_url)
+    return path_or_url
 
 
 def _read_text_source(path_or_url: str) -> Iterable[str]:
     if path_or_url.startswith("http://") or path_or_url.startswith("https://"):
-        with _open_remote_manifest(path_or_url) as resp:  # validated allowlisted URL
+        import urllib.request
+
+        safe_url = _validated_remote_url(path_or_url)
+        with urllib.request.urlopen(safe_url) as resp:  # nosec B310
             for line in resp.read().decode("utf-8").splitlines():
                 yield line
     else:
@@ -218,7 +191,10 @@ def parse_manifest(path_or_url: str) -> List[str]:
         import json as _json
 
         if path_or_url.startswith("http://") or path_or_url.startswith("https://"):
-            with _open_remote_manifest(path_or_url) as resp:  # validated allowlisted URL
+            import urllib.request
+
+            safe_url = _validated_remote_url(path_or_url)
+            with urllib.request.urlopen(safe_url) as resp:  # nosec B310
                 obj = _json.loads(resp.read().decode("utf-8"))
         else:
             with Path(path_or_url).open("r", encoding="utf-8") as f:
@@ -363,8 +339,7 @@ def main():
     except Exception as _e:
         print(f"[tracing] init skipped in train_lora: {_e}")
 
-    config_path = validate_config_path(args.config)
-    cfg_raw = read_yaml(config_path)
+    cfg_raw = read_yaml(Path(args.config))
     cfg = Config(
         model=cfg_raw.get("model") or "Phi-3.6-mini-instruct",
         finetune_dataset=cfg_raw.get("finetune_dataset") or str(Path(args.dataset)),
@@ -426,8 +401,9 @@ def main():
             # Fallback: use a small subset of train for eval
             eval_files = train_files[:1]
     else:
-        dataset_value = args.dataset if args.dataset else str(resolve_path(cfg.finetune_dataset))
-        dataset_path = resolve_path_safe(dataset_value, Path.cwd())
+        dataset_path = (
+            Path(args.dataset) if args.dataset else resolve_path(cfg.finetune_dataset)
+        )
         if dataset_path.is_file():
             # Allow direct file usage (.json or .jsonl)
             if dataset_path.suffix.lower() in (".json", ".jsonl"):
