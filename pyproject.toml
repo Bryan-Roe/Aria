@@ -10,10 +10,14 @@ requires-python = ">=3.9"
 
 [project.optional-dependencies]
 dev = [
-  "pytest>=7.0,<8.0",
+  "pytest>=8.0.0",
+  "pytest-cov>=5.0.0",
+  "pytest-asyncio>=0.24.0",
   "watchdog>=2.1.0",
   "pre-commit>=3.0",
   "ruff>=0.4.0",
+  "black>=24.0.0",
+  "isort>=5.13.0",
   "mypy>=1.8.0",
 ]
 
@@ -21,11 +25,51 @@ dev = [
 line-length = 120
 
 [tool.ruff.lint]
-select = ["E", "F", "W", "I", "B"]
-ignore = []
+select = ["E", "F", "W", "I", "B", "UP"]
+ignore = ["E501"]  # E501 is redundant — Black auto-formats line length
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["F811"]   # F811 (redefinition of unused name) is intentional for pytest fixtures
+"scripts/*" = ["T201"] # allow print() in scripts
+
+[tool.black]
+line-length = 120
+target-version = ["py310", "py311"]
+exclude = '''
+/(
+    \.git
+  | \.venv
+  | venv
+  | data_out
+  | mount
+  | __pycache__
+)/
+'''
+
+[tool.isort]
+profile = "black"
+line_length = 120
+skip_glob = ["venv*", "data_out*", "mount*"]
 
 [tool.mypy]
 python_version = "3.10"
 ignore_missing_imports = true
 check_untyped_defs = true
 warn_unused_ignores = true
+warn_return_any = false
+exclude = ["data_out/", "mount/", "venv/"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q --tb=short"
+asyncio_mode = "auto"
+markers = [
+  "unit: Unit tests",
+  "slow: Slow tests that may take significant time",
+  "azure: Tests requiring Azure services",
+  "integration: Integration tests",
+  "e2e: End-to-end tests",
+  "playwright: Tests using Playwright browser automation",
+  "pyppeteer: Tests using Pyppeteer browser automation",
+  "selenium: Tests using Selenium browser automation",
+]

@@ -25,6 +25,9 @@ concurrency:
     group: api-health-${{ github.ref }}
     cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
+env:
+    FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true  # Opt into Node.js 24 for JS actions ahead of June 2026 forced migration
+
 jobs:
     smoke:
         name: API Smoke Validation
@@ -33,7 +36,7 @@ jobs:
 
         steps:
             - name: Checkout
-              uses: actions/checkout@v4
+              uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4.3.1
 
             - name: Setup Python
               uses: ./.github/actions/setup-python-env
@@ -55,7 +58,7 @@ jobs:
 
             - name: Upload smoke artifacts
               if: always()
-              uses: actions/upload-artifact@v4
+              uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4
               with:
                   name: api-health-smoke-${{ github.run_number }}
                   retention-days: 14
