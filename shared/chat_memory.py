@@ -22,8 +22,10 @@ from __future__ import annotations
 
 import hashlib
 import heapq
+import logging
 import math
 import os
+import queue
 import struct
 import logging
 import queue
@@ -80,6 +82,9 @@ _thread_local = threading.local()
 _thread_connections: Dict[int, Any] = {}
 _conn_lock = threading.RLock()
 
+_conn_lock = threading.RLock()
+_thread_local = threading.local()
+_thread_connections: Dict[int, Any] = {}
 
 class ConnectionPool:
     """Simple LIFO connection pool with thread-local fast-path.
@@ -160,9 +165,12 @@ class ConnectionPool:
                 return conn
             # Dead connection: close and continue to create
             try:
-                conn.close()
+                cursor.close()
             except Exception:
                 pass
+            return True
+        except Exception:
+            return False
 
         # 3) Create new connection (if allowed)
         conn = self._create_connection()
@@ -362,6 +370,20 @@ def store_embeddings_batch(embeddings: List[Tuple[str, Sequence[float], str]]) -
         return 0
 
     try:
+        values: List[Tuple[str, str, int, bytes]] = []
+        for message_id, embedding, model in embeddings:
+            if not message_id or not embedding:
+                continue
+            values.append(
+                (
+                    message_id,
+                    model or "unknown-model",
+                    len(embedding),
+                    _serialize_f32(embedding),
+                )
+            )
+        if not values:
+            return 0
         cursor = conn.cursor()
         values = []
         for message_id, embedding, model in embeddings:
