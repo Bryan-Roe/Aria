@@ -22,12 +22,31 @@ import os
 import pathlib
 import sys
 import urllib.error
+import urllib.parse
 import urllib.request
 from typing import Any
 
 
 DEFAULT_BASE_URL = os.getenv("LMSTUDIO_BASE_URL", "http://127.0.0.1:1234/v1")
 DEFAULT_MODEL = os.getenv("LMSTUDIO_MODEL", "openai/gpt-oss-120b")
+
+
+def _validate_base_url(base_url: str) -> str:
+    parsed = urllib.parse.urlparse(base_url)
+    if parsed.scheme not in {"http", "https"}:
+        raise ValueError("Invalid --base-url: only http/https are allowed")
+    if not parsed.hostname:
+        raise ValueError("Invalid --base-url: hostname is required")
+    if parsed.username or parsed.password:
+        raise ValueError("Invalid --base-url: userinfo is not allowed")
+    if parsed.query or parsed.fragment:
+        raise ValueError("Invalid --base-url: query/fragment are not allowed")
+
+    allowed_hosts = {"127.0.0.1", "localhost", "::1"}
+    if parsed.hostname not in allowed_hosts:
+        raise ValueError("Invalid --base-url: only local LM Studio endpoints are allowed")
+
+    return base_url.rstrip("/")
 
 
 def _post_json(url: str, payload: dict[str, Any], timeout: int = 120) -> dict[str, Any]:
@@ -172,6 +191,11 @@ def build_parser() -> argparse.ArgumentParser:
 
 def main() -> int:
     args = build_parser().parse_args()
+    try:
+        args.base_url = _validate_base_url(args.base_url)
+    except ValueError as exc:
+        print(str(exc), file=sys.stderr)
+        return 2
 
     if args.list_models:
         models = list_models(args.base_url)
