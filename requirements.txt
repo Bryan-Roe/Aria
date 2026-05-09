@@ -13,6 +13,11 @@ pyyaml>=6.0.1
 pyodbc>=5.0.1  # Database logging (Azure SQL / SQL Server)
 sqlalchemy>=2.0.36  # Optional higher-level DB access (future use)
 
+# Core robustness and resilience
+pydantic>=2.0.0
+pydantic-settings>=2.0.0
+tenacity>=8.2.0  # Retry/backoff for provider calls and orchestrator cycles
+
 # Optional relational drivers (uncomment if using these backends)
 # psycopg2-binary>=2.9.9  # PostgreSQL support
 # mysqlclient>=2.2.4      # MySQL/MariaDB support
