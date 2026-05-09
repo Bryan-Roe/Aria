@@ -58,7 +58,8 @@ def test_train_lora_invalid_dataset(tmp_path: Path):
 
     result = asyncio.run(ti.train_lora("nonexistent"))
     assert result["success"] is False
-    assert "Invalid dataset" in result["error"]
+    assert result["error"] == "unknown_dataset"
+    assert "Dataset not found" in result["message"]
 
 def test_train_lora_reject_path_like(tmp_path: Path):
     cfg = make_config(tmp_path)
@@ -70,7 +71,8 @@ def test_train_lora_reject_path_like(tmp_path: Path):
     # provide a path-like dataset
     result = asyncio.run(ti.train_lora("../etc/passwd"))
     assert result["success"] is False
-    assert "path characters" in result["error"]
+    assert result["error"] == "invalid_dataset"
+    assert "disallowed characters" in result["message"]
 
 def test_train_lora_calls_subprocess(tmp_path: Path):
     cfg = make_config(tmp_path)

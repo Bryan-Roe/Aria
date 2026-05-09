@@ -1,18 +1,40 @@
 """
 Training Integration Module
 Interfaces with LoRA training and orchestration systems
+
+Dataset validation policy for `train_lora`:
+- Reject path separators/traversal tokens (`/`, `\\`, `..`)
+- Allow only names matching `^[A-Za-z0-9_.-]+$`
 """
 
 import asyncio
 import json
 import logging
 import os
+import re
 import subprocess
 import sys
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
+
+_DATASET_NAME_PATTERN = re.compile(r"^[A-Za-z0-9_.-]+$")
+
+
+def _normalize_dataset_name(name: str) -> str:
+    return name.strip().lower()
+
+
+def _is_safe_dataset_name(name: str) -> bool:
+    name_norm = name.strip()
+    if any(token in name_norm for token in ("/", "\\", "..")):
+        return False
+    return bool(_DATASET_NAME_PATTERN.fullmatch(name_norm))
+
+
+def _error_response(code: str, message: str) -> Dict[str, Any]:
+    return {"success": False, "error": code, "message": message}
 
 
 class TrainingIntegration:
@@ -208,29 +230,44 @@ class TrainingIntegration:
         try:
             # Basic type/format checks
             if not isinstance(dataset, str) or not dataset.strip():
-                return {"success": False, "error": "Invalid dataset: must be a non-empty string"}
+                return _error_response(
+                    "invalid_dataset",
+                    "Dataset name must be a non-empty string.",
+                )
 
-            # Normalize input for comparison (strip only to preserve case semantics)
-            dataset_norm = dataset.strip()
+            dataset_norm = _normalize_dataset_name(dataset)
+
+            if not _is_safe_dataset_name(dataset):
+                logger.warning("train_lora: rejected unsafe dataset name: %s", dataset)
+                return _error_response(
+                    "invalid_dataset",
+                    "Dataset name contains disallowed characters or path traversal tokens.",
+                )
 
             # Fetch available datasets (list_datasets uses a thread for FS ops)
             available_datasets = await self.list_datasets()
 
-            # Build allowed set (normalized)
+            # Build normalized allowlist and preserve canonical discovered name
             allowed_datasets = set()
+            allowed_dataset_names: Dict[str, str] = {}
             for names in available_datasets.values():
                 for name in names:
                     if isinstance(name, str):
-                        allowed_datasets.add(name.strip())
+                        normalized = _normalize_dataset_name(name)
+                        if _is_safe_dataset_name(name):
+                            allowed_datasets.add(normalized)
+                            allowed_dataset_names[normalized] = name.strip()
 
-            # Reject obvious path traversal / separators
-            if any(tok in dataset_norm for tok in ("/", "\\", "..")):
-                logger.warning("train_lora: rejected dataset with path-like content: %s", dataset)
-                return {"success": False, "error": "Invalid dataset: path characters are not allowed"}
-
+            logger.debug(
+                "train_lora: allowed datasets for validation: %s",
+                sorted(allowed_datasets),
+            )
             if dataset_norm not in allowed_datasets:
                 logger.warning("train_lora: dataset not in allowlist: %s", dataset_norm)
-                return {"success": False, "error": "Invalid dataset"}
+                return _error_response(
+                    "unknown_dataset",
+                    "Dataset not found. Call list_datasets() to see valid names.",
+                )
 
             train_script = self.phi_path / "scripts" / "train_lora.py"
             config_file = self.phi_path / "lora" / "lora.yaml"
@@ -243,7 +280,7 @@ class TrainingIntegration:
                 sys.executable,
                 str(train_script),
                 "--dataset",
-                dataset_norm,
+                allowed_dataset_names.get(dataset_norm, dataset.strip()),
                 "--config",
                 str(config_file),
                 "--max-train-samples",
@@ -254,8 +291,11 @@ class TrainingIntegration:
                 str(int(epochs)),
             ]
 
-            # Restrict environment to a minimal PATH to avoid leaking secrets into child
-            env = {"PATH": os.environ.get("PATH", "")}
+            # Restrict environment to a minimal set to avoid leaking secrets into child
+            env = {
+                "PATH": os.environ.get("PATH", ""),
+                "LANG": "en_US.UTF-8",
+            }
 
             try:
                 # Use a reasonable timeout (2 hours) to prevent runaway processes
@@ -282,7 +322,7 @@ class TrainingIntegration:
             }
         except Exception as e:
             logger.exception("train_lora failed")
-            return {"success": False, "error": str(e)}
+            return _error_response("train_lora_failed", str(e))
 
     async def list_datasets(self) -> Dict[str, List[str]]:
         """List available training datasets.
