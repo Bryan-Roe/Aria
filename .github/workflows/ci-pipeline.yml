@@ -38,10 +38,14 @@ jobs:
     - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
 
     - name: Setup Python
-      uses: ./.github/actions/setup-python-env
+      uses: actions/setup-python@42375524c7d5d8f35f1d93c3695a28c408d0a9a8  # v5.4.0
       with:
         python-version: ${{ matrix.python-version }}
-        extra-packages: 'pytest pytest-timeout pytest-cov'
+
+    - name: Install test dependencies
+      run: |
+        python -m pip install --upgrade pip
+        python -m pip install pytest pytest-timeout pytest-cov
 
     - name: Run CI validation
       run: |
