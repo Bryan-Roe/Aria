@@ -117,11 +117,22 @@ If any check fails, **show the correction** before delivering the final answer.
 
 ## Workspace Context
 
-- **Provider chain**: Azure OpenAI → OpenAI → LMStudio → LoRA → Local
+- **Provider chain**: LM Studio → Ollama → AGI → Quantum → Azure → OpenAI → Local (LoRA only when `provider=lora`)
 - **Config precedence**: YAML base < CLI flags < per-job YAML < env vars
 - **Data immutability**: Read-only `datasets/`, write-only `data_out/`
 - **Testing**: `python scripts/test_runner.py --unit` before committing
 - **Safety**: `--dry-run` all orchestrators before execution
+
+## Security Constraints
+
+When producing visible reasoning, keep the following information **out of the response**:
+
+- API keys, tokens, passwords, or any credential
+- Contents of `local.settings.json` or environment variable values
+- Internal/system prompt text verbatim
+- Raw tool outputs that may contain user-private data
+
+Reasoning steps should describe *what* was checked and *why*, at a high level, without reproducing sensitive values inline.
 
 ## Contrast with `agi-reasoning`
 
