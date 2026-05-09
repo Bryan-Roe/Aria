@@ -1,0 +1,12 @@
+nohup: ignoring input
+Job 'eval_smoke_test': validated
+Job 'eval_lora_phi35_full': validated
+Job 'eval_azure_baseline': disabled
+Job 'eval_quantum_heart': validated
+Job 'eval_local_baseline': validated
+Job 'eval_phi35_lr_low': validated
+Job 'eval_phi35_lr_high': validated
+Job 'eval_phi35_drop_low': validated
+Job 'eval_phi35_drop_high': validated
+
+9 job(s) validated successfully.

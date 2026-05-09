@@ -1,0 +1,11 @@
+usage: quantum_autorun.py [-h] [--config CONFIG] [--list] [--dry-run]
+                          [--job JOB]
+
+Quantum AutoRun Orchestrator
+
+options:
+  -h, --help       show this help message and exit
+  --config CONFIG  Path to YAML config
+  --list           List jobs as JSON
+  --dry-run        Validate config and write status.json
+  --job JOB        Filter to a specific job by name

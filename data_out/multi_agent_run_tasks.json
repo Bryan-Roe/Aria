@@ -1,0 +1,62 @@
+[
+  {
+    "task": "Analyze shared/chat_providers.py for missing error handling — check provider fallback chain, verify each branch catches network errors, and report any unguarded calls",
+    "llm_type": "echo",
+    "dry_run": true,
+    "skip_tests": false
+  },
+  {
+    "task": "Review scripts/autonomous_training_orchestrator.py — inspect adaptive epoch logic, degradation detection thresholds, and promotion gate for edge cases",
+    "llm_type": "echo",
+    "dry_run": true,
+    "skip_tests": false
+  },
+  {
+    "task": "Audit function_app.py API endpoints — verify all routes return correct Content-Type headers, check SSE streaming contract for /api/chat, and flag any missing error responses",
+    "llm_type": "echo",
+    "dry_run": true,
+    "skip_tests": false
+  },
+  {
+    "task": "Inspect apps/aria/server.py for state management correctness — validate object lifecycle (add/pickup/drop/throw), check thread safety, and review port-collision handling",
+    "llm_type": "echo",
+    "dry_run": true,
+    "skip_tests": false
+  },
+  {
+    "task": "Validate YAML orchestrator configs in config/ — check autotrain.yaml, quantum_autorun.yaml, master_orchestrator.yaml for schema completeness and safety gate presence",
+    "llm_type": "echo",
+    "dry_run": true,
+    "skip_tests": false
+  },
+  {
+    "task": "Analyze shared/chat_memory.py embedding priority chain — verify tiktoken fallback, session isolation, cosine similarity thresholds, and DB unavailability graceful degradation",
+    "llm_type": "echo",
+    "dry_run": true,
+    "skip_tests": false
+  },
+  {
+    "task": "Review ai-projects/quantum-ml/quantum_mcp_server.py safety gates — confirm simulator-first ordering, check QPU cost confirmation flow, verify shot limit enforcement",
+    "llm_type": "echo",
+    "dry_run": true,
+    "skip_tests": false
+  },
+  {
+    "task": "Inspect tests/ suite for coverage gaps — identify modules with no corresponding test file and flag highest-risk untested paths in shared/ and scripts/",
+    "llm_type": "echo",
+    "dry_run": true,
+    "skip_tests": false
+  },
+  {
+    "task": "Analyze scripts/repo_automation.py component orchestration — review startup order, health-check retry logic, and graceful-shutdown flow for all managed processes",
+    "llm_type": "echo",
+    "dry_run": true,
+    "skip_tests": false
+  },
+  {
+    "task": "Review shared/db_logging.py fault-tolerance — verify stored-procedure wrappers handle connection failures silently, check pool saturation path, and confirm no blocking waits",
+    "llm_type": "echo",
+    "dry_run": true,
+    "skip_tests": false
+  }
+]

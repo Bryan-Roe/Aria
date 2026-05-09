@@ -128,7 +128,6 @@ def check_core_dependencies() -> bool:
     print_section("Core Dependencies")
 
     required_packages = {
-        "azure_functions": "Azure Functions",
         "openai": "OpenAI SDK",
         "flask": "Flask web framework",
         "pytest": "Testing framework",
@@ -146,6 +145,13 @@ def check_core_dependencies() -> bool:
         except ImportError:
             print_error(f"{name} (missing)")
             all_ok = False
+
+    # Optional dependency for local Azure Functions work.
+    try:
+        __import__("azure_functions")
+        print_ok("Azure Functions")
+    except ImportError:
+        print_warning("Azure Functions (optional; install if using Functions host)")
 
     return all_ok
 
@@ -177,28 +183,37 @@ def check_project_structure() -> bool:
     print_section("Project Structure")
 
     repo_root = Path(__file__).parent.parent.resolve()
-    expected_dirs = {
+    expected_required_dirs = {
         "ai-projects/chat-cli": "Chat CLI module",
         "ai-projects/quantum-ml": "Quantum ML module",
         "apps/aria": "Aria character interface",
-        "apps/chat": "Chat web interface",
         "apps/dashboard": "Dashboard interface",
         "shared": "Shared infrastructure",
         "scripts": "Automation scripts",
         "tests": "Test suite",
-        "config": "Configuration files",
         "data_out": "Output data directory",
     }
 
+    expected_optional_dirs = {
+        "apps/chat": "Chat web interface",
+        "config": "Configuration files",
+    }
+
     all_ok = True
-    for rel_path, description in expected_dirs.items():
+    for rel_path, description in expected_required_dirs.items():
         full_path = repo_root / rel_path
         if full_path.exists():
-            item_count = len(list(full_path.glob("*"))) if full_path.is_dir() else 1
             print_ok(f"{description} ({rel_path})")
         else:
             print_error(f"{description} ({rel_path}) - not found")
             all_ok = False
+
+    for rel_path, description in expected_optional_dirs.items():
+        full_path = repo_root / rel_path
+        if full_path.exists():
+            print_ok(f"{description} ({rel_path})")
+        else:
+            print_warning(f"{description} ({rel_path}) - optional and not found")
 
     return all_ok
 
@@ -256,6 +271,57 @@ def check_ollama_models() -> bool:
         return True  # Not a blocking issue
 
 
+def check_ai_token_health() -> bool:
+    """Check AI token health status emitted by scripts/generate_ai_tokens.py.
+
+    Advisory-only (non-blocking): this section helps developers quickly see
+    whether provider tokens were validated recently and if any provider is
+    currently healthy.
+    """
+    print_section("AI Token Health")
+
+    status_path = Path(__file__).parent.parent / "data_out" / "ai_token_status.json"
+    if not status_path.exists():
+        print_warning(
+            "No token health status found. Run: python3 scripts/generate_ai_tokens.py"
+        )
+        return True
+
+    try:
+        payload = json.loads(status_path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        print_warning(f"Token status file is invalid JSON: {exc}")
+        return True
+
+    healthy = int(payload.get("healthy", 0))
+    total = int(payload.get("total", 0))
+    last_updated = payload.get("last_updated", "unknown")
+
+    if healthy > 0:
+        print_ok(f"Token health: {healthy}/{total} providers healthy")
+    else:
+        print_warning("Token health: no healthy providers reported")
+
+    print_info(f"Last token check: {last_updated}")
+
+    providers = payload.get("providers", {})
+    if isinstance(providers, dict) and providers:
+        for name, details in providers.items():
+            if not isinstance(details, dict):
+                continue
+            status = details.get("status", "unknown")
+            model = details.get("model", "")
+            error = details.get("error", "")
+            line = f"  • {name}: {status}"
+            if model:
+                line += f" (model: {model})"
+            if error and status != "ok":
+                line += f" — {error}"
+            print(line)
+
+    return True
+
+
 def check_azure_functions() -> bool:
     """Check Azure Functions configuration."""
     print_section("Azure Functions")
@@ -281,7 +347,7 @@ def check_test_suite() -> bool:
     """Check if pytest is configured."""
     print_section("Test Suite")
 
-    repo_root = Path(__file__).parent.resolve()
+    repo_root = Path(__file__).parent.parent.resolve()
     pytest_ini = repo_root / "pytest.ini"
 
     if pytest_ini.exists():
@@ -316,8 +382,8 @@ def print_next_steps() -> None:
 
 {BOLD}3. Run Tests:{RESET}
    • All tests:       python3 -m pytest tests/ -v
-   • Specific module: python3 -m pytest tests/test_chat_providers.py -v
-   • Fast validation: python3 scripts/fast_validate.py
+    • Quick smoke:     python3 -m pytest -q tests --maxfail=1
+    • Setup check:     python3 scripts/setup_env_check.py
 
 {BOLD}4. Optional Configuration:{RESET}
    • Edit .env for cloud services (OpenAI, Azure OpenAI, etc.)
@@ -325,9 +391,9 @@ def print_next_steps() -> None:
    • Set up Cosmos DB or PostgreSQL for production
 
 {BOLD}5. More Information:{RESET}
-   • Quick start:     cat OLLAMA_USAGE_GUIDE.md
-   • Full guide:      cat README.md
-   • API docs:        curl http://localhost:7071/api/ai/status
+    • Quick start:     cat QUICK_START_AUTOMATION.md
+    • Automation:      cat AUTOMATION_RUNNER.md
+    • Watch status:    python3 scripts/watch_continuous_automation.py
 """
     )
 
@@ -344,6 +410,7 @@ def main() -> int:
         ("Project Structure", check_project_structure),
         ("Database Configuration", check_databases),
         ("Local Services", check_local_services),
+        ("AI Token Health", check_ai_token_health),
         ("Ollama Models", check_ollama_models),
         ("Azure Functions", check_azure_functions),
         ("Test Suite", check_test_suite),

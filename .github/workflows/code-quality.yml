@@ -21,7 +21,7 @@ jobs:
     timeout-minutes: 10
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
 
       - name: Setup Python
         uses: ./.github/actions/setup-python-env
@@ -59,7 +59,7 @@ jobs:
     timeout-minutes: 10
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
 
       - name: Setup Python
         uses: ./.github/actions/setup-python-env
@@ -74,19 +74,21 @@ jobs:
       - name: Generate security summary
         if: always()
         run: |
-          echo "## Security Check Results" >> $GITHUB_STEP_SUMMARY
-          if [ -f safety-report.json ]; then
-            echo '```json' >> $GITHUB_STEP_SUMMARY
-            head -100 safety-report.json >> $GITHUB_STEP_SUMMARY
-            echo '' >> $GITHUB_STEP_SUMMARY
-            echo '```' >> $GITHUB_STEP_SUMMARY
-          else
-            echo "No vulnerabilities found." >> $GITHUB_STEP_SUMMARY
-          fi
+          {
+            echo "## Security Check Results"
+            if [ -f safety-report.json ]; then
+              echo '```json'
+              head -100 safety-report.json
+              echo ''
+              echo '```'
+            else
+              echo "No vulnerabilities found."
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload safety report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4
         with:
           name: security-report
           path: safety-report.json

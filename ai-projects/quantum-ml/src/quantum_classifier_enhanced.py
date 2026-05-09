@@ -208,7 +208,7 @@ class EnhancedQuantumClassifier:
         try:
             drawer = qml.draw(self.qnode)
             circuit_str = drawer(dummy_inputs, dummy_weights)
-        except:
+        except Exception:
             circuit_str = "Circuit drawing not available"
 
         return {

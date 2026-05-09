@@ -1,0 +1,14 @@
+{
+  "total_jobs": 1,
+  "jobs": [
+    {
+      "name": "another",
+      "preset": "heart"
+    }
+  ],
+  "last_updated": null,
+  "succeeded": 0,
+  "failed": 0,
+  "running": 0,
+  "avg_duration": null
+}

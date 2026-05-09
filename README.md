@@ -245,7 +245,7 @@ tail -f data_out/autonomous_training.log
 An autonomous system where an LLM generates, validates, and sandboxes Python tools at runtime.
 
 ```bash
-cd llm-maker
+cd ai-projects/llm-maker
 python examples/quick_start.py        # create a tool from a description
 python llm_maker_mcp_server.py        # expose tools via MCP
 ```

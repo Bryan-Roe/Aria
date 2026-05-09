@@ -1,0 +1,11 @@
+usage: evaluation_autorun.py [-h] [--config CONFIG] [--list] [--dry-run]
+                             [--job JOB]
+
+Evaluation AutoRun Orchestrator — validate and run evaluation jobs
+
+options:
+  -h, --help       show this help message and exit
+  --config CONFIG  Path to YAML config file
+  --list           List jobs as JSON
+  --dry-run        Validate config without running
+  --job JOB        Filter to a specific job name

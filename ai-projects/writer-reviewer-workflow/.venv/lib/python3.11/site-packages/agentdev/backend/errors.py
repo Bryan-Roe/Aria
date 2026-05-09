@@ -1,0 +1,2 @@
+class ExecutorInputNotSupported(TypeError):
+    pass

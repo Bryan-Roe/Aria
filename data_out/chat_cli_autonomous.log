@@ -1,0 +1,538 @@
+Provider: local | Model: local-echo
+Autonomous mode active. Press Ctrl+C to stop.
+auto[1]> Start working autonomously on the most useful next step and keep driving the conversation without waiting for user input.
+assistant> Offline mode active. I can process Aria commands but can't generate AI responses without a configured provider.
+auto[2]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> Offline mode active. I can process Aria commands but can't generate AI responses without a configured provider.
+auto[3]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> No live model detected. Run with `--provider lmstudio` (LM Studio running locally), `--provider ollama`, `--provider openai`, or `--provider azure`.
+auto[4]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> Thanks for staying in the conversation! A live provider would give you much better answers here.
+auto[5]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> Thanks for staying in the conversation! A live provider would give you much better answers here.
+auto[6]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[7]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> Thanks for staying in the conversation! A live provider would give you much better answers here.
+auto[8]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[9]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> Thanks for staying in the conversation! A live provider would give you much better answers here.
+auto[10]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[11]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> Thanks for staying in the conversation! A live provider would give you much better answers here.
+auto[12]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> Thanks for staying in the conversation! A live provider would give you much better answers here.
+auto[13]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[14]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[15]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> Thanks for staying in the conversation! A live provider would give you much better answers here.
+auto[16]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> Thanks for staying in the conversation! A live provider would give you much better answers here.
+auto[17]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> Thanks for staying in the conversation! A live provider would give you much better answers here.
+auto[18]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> Thanks for staying in the conversation! A live provider would give you much better answers here.
+auto[19]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> Thanks for staying in the conversation! A live provider would give you much better answers here.
+auto[20]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> Thanks for staying in the conversation! A live provider would give you much better answers here.
+auto[21]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> Thanks for staying in the conversation! A live provider would give you much better answers here.
+auto[22]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[23]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[24]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> Thanks for staying in the conversation! A live provider would give you much better answers here.
+auto[25]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> Thanks for staying in the conversation! A live provider would give you much better answers here.
+auto[26]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> Thanks for staying in the conversation! A live provider would give you much better answers here.
+auto[27]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> Thanks for staying in the conversation! A live provider would give you much better answers here.
+auto[28]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> Thanks for staying in the conversation! A live provider would give you much better answers here.
+auto[29]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> Thanks for staying in the conversation! A live provider would give you much better answers here.
+auto[30]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> Thanks for staying in the conversation! A live provider would give you much better answers here.
+auto[31]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[32]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> Thanks for staying in the conversation! A live provider would give you much better answers here.
+auto[33]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> Thanks for staying in the conversation! A live provider would give you much better answers here.
+auto[34]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> Thanks for staying in the conversation! A live provider would give you much better answers here.
+auto[35]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[36]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[37]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[38]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> Thanks for staying in the conversation! A live provider would give you much better answers here.
+auto[39]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[40]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[41]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> Thanks for staying in the conversation! A live provider would give you much better answers here.
+auto[42]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[43]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> Thanks for staying in the conversation! A live provider would give you much better answers here.
+auto[44]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[45]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> Thanks for staying in the conversation! A live provider would give you much better answers here.
+auto[46]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> Thanks for staying in the conversation! A live provider would give you much better answers here.
+auto[47]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[48]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[49]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> Thanks for staying in the conversation! A live provider would give you much better answers here.
+auto[50]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[51]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[52]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[53]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[54]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[55]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[56]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> Thanks for staying in the conversation! A live provider would give you much better answers here.
+auto[57]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> Thanks for staying in the conversation! A live provider would give you much better answers here.
+auto[58]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[59]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> Thanks for staying in the conversation! A live provider would give you much better answers here.
+auto[60]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> Thanks for staying in the conversation! A live provider would give you much better answers here.
+auto[61]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[62]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[63]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[64]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> Thanks for staying in the conversation! A live provider would give you much better answers here.
+auto[65]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[66]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> Thanks for staying in the conversation! A live provider would give you much better answers here.
+auto[67]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> Thanks for staying in the conversation! A live provider would give you much better answers here.
+auto[68]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[69]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[70]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> Thanks for staying in the conversation! A live provider would give you much better answers here.
+auto[71]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> Thanks for staying in the conversation! A live provider would give you much better answers here.
+auto[72]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> Thanks for staying in the conversation! A live provider would give you much better answers here.
+auto[73]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> Thanks for staying in the conversation! A live provider would give you much better answers here.
+auto[74]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[75]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> Thanks for staying in the conversation! A live provider would give you much better answers here.
+auto[76]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[77]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> Thanks for staying in the conversation! A live provider would give you much better answers here.
+auto[78]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[79]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> Thanks for staying in the conversation! A live provider would give you much better answers here.
+auto[80]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> Thanks for staying in the conversation! A live provider would give you much better answers here.
+auto[81]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[82]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> Thanks for staying in the conversation! A live provider would give you much better answers here.
+auto[83]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[84]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[85]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> Thanks for staying in the conversation! A live provider would give you much better answers here.
+auto[86]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> Thanks for staying in the conversation! A live provider would give you much better answers here.
+auto[87]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> Thanks for staying in the conversation! A live provider would give you much better answers here.
+auto[88]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[89]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[90]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> Thanks for staying in the conversation! A live provider would give you much better answers here.
+auto[91]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[92]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> Thanks for staying in the conversation! A live provider would give you much better answers here.
+auto[93]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[94]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[95]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[96]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> Thanks for staying in the conversation! A live provider would give you much better answers here.
+auto[97]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[98]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[99]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[100]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> Thanks for staying in the conversation! A live provider would give you much better answers here.
+auto[101]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> Thanks for staying in the conversation! A live provider would give you much better answers here.
+auto[102]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[103]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> Thanks for staying in the conversation! A live provider would give you much better answers here.
+auto[104]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[105]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> Thanks for staying in the conversation! A live provider would give you much better answers here.
+auto[106]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> Thanks for staying in the conversation! A live provider would give you much better answers here.
+auto[107]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> Thanks for staying in the conversation! A live provider would give you much better answers here.
+auto[108]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[109]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[110]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> Thanks for staying in the conversation! A live provider would give you much better answers here.
+auto[111]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[112]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> Thanks for staying in the conversation! A live provider would give you much better answers here.
+auto[113]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[114]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> Thanks for staying in the conversation! A live provider would give you much better answers here.
+auto[115]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[116]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[117]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[118]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[119]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> Thanks for staying in the conversation! A live provider would give you much better answers here.
+auto[120]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[121]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> Thanks for staying in the conversation! A live provider would give you much better answers here.
+auto[122]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> Thanks for staying in the conversation! A live provider would give you much better answers here.
+auto[123]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[124]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[125]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[126]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[127]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[128]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> Thanks for staying in the conversation! A live provider would give you much better answers here.
+auto[129]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[130]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> Thanks for staying in the conversation! A live provider would give you much better answers here.
+auto[131]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[132]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> Thanks for staying in the conversation! A live provider would give you much better answers here.
+auto[133]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> Thanks for staying in the conversation! A live provider would give you much better answers here.
+auto[134]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[135]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[136]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[137]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> Thanks for staying in the conversation! A live provider would give you much better answers here.
+auto[138]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> Thanks for staying in the conversation! A live provider would give you much better answers here.
+auto[139]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[140]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> Thanks for staying in the conversation! A live provider would give you much better answers here.
+auto[141]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> Thanks for staying in the conversation! A live provider would give you much better answers here.
+auto[142]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> Thanks for staying in the conversation! A live provider would give you much better answers here.
+auto[143]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[144]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[145]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> Thanks for staying in the conversation! A live provider would give you much better answers here.
+auto[146]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> Thanks for staying in the conversation! A live provider would give you much better answers here.
+auto[147]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[148]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[149]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> Thanks for staying in the conversation! A live provider would give you much better answers here.
+auto[150]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> Thanks for staying in the conversation! A live provider would give you much better answers here.
+auto[151]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> Thanks for staying in the conversation! A live provider would give you much better answers here.
+auto[152]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[153]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[154]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[155]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> Thanks for staying in the conversation! A live provider would give you much better answers here.
+auto[156]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> Thanks for staying in the conversation! A live provider would give you much better answers here.
+auto[157]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[158]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[159]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> Thanks for staying in the conversation! A live provider would give you much better answers here.
+auto[160]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> Thanks for staying in the conversation! A live provider would give you much better answers here.
+auto[161]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> Thanks for staying in the conversation! A live provider would give you much better answers here.
+auto[162]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[163]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[164]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> Thanks for staying in the conversation! A live provider would give you much better answers here.
+auto[165]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[166]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> Thanks for staying in the conversation! A live provider would give you much better answers here.
+auto[167]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> Thanks for staying in the conversation! A live provider would give you much better answers here.
+auto[168]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[169]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[170]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[171]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[172]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> Thanks for staying in the conversation! A live provider would give you much better answers here.
+auto[173]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[174]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> Thanks for staying in the conversation! A live provider would give you much better answers here.
+auto[175]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[176]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[177]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> Thanks for staying in the conversation! A live provider would give you much better answers here.
+auto[178]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> Thanks for staying in the conversation! A live provider would give you much better answers here.
+auto[179]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[180]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[181]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> Thanks for staying in the conversation! A live provider would give you much better answers here.
+auto[182]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> Thanks for staying in the conversation! A live provider would give you much better answers here.
+auto[183]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> Thanks for staying in the conversation! A live provider would give you much better answers here.
+auto[184]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[185]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[186]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[187]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[188]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[189]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> Thanks for staying in the conversation! A live provider would give you much better answers here.
+auto[190]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> Thanks for staying in the conversation! A live provider would give you much better answers here.
+auto[191]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[192]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> Thanks for staying in the conversation! A live provider would give you much better answers here.
+auto[193]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[194]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> Thanks for staying in the conversation! A live provider would give you much better answers here.
+auto[195]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[196]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[197]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[198]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[199]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[200]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[201]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> Thanks for staying in the conversation! A live provider would give you much better answers here.
+auto[202]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> Thanks for staying in the conversation! A live provider would give you much better answers here.
+auto[203]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[204]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[205]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> Thanks for staying in the conversation! A live provider would give you much better answers here.
+auto[206]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> Thanks for staying in the conversation! A live provider would give you much better answers here.
+auto[207]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[208]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> Thanks for staying in the conversation! A live provider would give you much better answers here.
+auto[209]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[210]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[211]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> Thanks for staying in the conversation! A live provider would give you much better answers here.
+auto[212]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> Thanks for staying in the conversation! A live provider would give you much better answers here.
+auto[213]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> Thanks for staying in the conversation! A live provider would give you much better answers here.
+auto[214]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> Thanks for staying in the conversation! A live provider would give you much better answers here.
+auto[215]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[216]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> Thanks for staying in the conversation! A live provider would give you much better answers here.
+auto[217]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> Thanks for staying in the conversation! A live provider would give you much better answers here.
+auto[218]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[219]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[220]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> Thanks for staying in the conversation! A live provider would give you much better answers here.
+auto[221]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[222]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[223]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[224]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> Thanks for staying in the conversation! A live provider would give you much better answers here.
+auto[225]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> Thanks for staying in the conversation! A live provider would give you much better answers here.
+auto[226]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> Thanks for staying in the conversation! A live provider would give you much better answers here.
+auto[227]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> Thanks for staying in the conversation! A live provider would give you much better answers here.
+auto[228]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[229]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[230]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[231]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> Thanks for staying in the conversation! A live provider would give you much better answers here.
+auto[232]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> Thanks for staying in the conversation! A live provider would give you much better answers here.
+auto[233]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[234]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> Thanks for staying in the conversation! A live provider would give you much better answers here.
+auto[235]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> Thanks for staying in the conversation! A live provider would give you much better answers here.
+auto[236]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[237]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[238]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[239]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> Thanks for staying in the conversation! A live provider would give you much better answers here.
+auto[240]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[241]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[242]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> Thanks for staying in the conversation! A live provider would give you much better answers here.
+auto[243]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> Thanks for staying in the conversation! A live provider would give you much better answers here.
+auto[244]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> Thanks for staying in the conversation! A live provider would give you much better answers here.
+auto[245]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[246]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[247]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[248]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> Thanks for staying in the conversation! A live provider would give you much better answers here.
+auto[249]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[250]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[251]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[252]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[253]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> Thanks for staying in the conversation! A live provider would give you much better answers here.
+auto[254]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[255]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> Thanks for staying in the conversation! A live provider would give you much better answers here.
+auto[256]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[257]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> Thanks for staying in the conversation! A live provider would give you much better answers here.
+auto[258]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[259]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> Thanks for staying in the conversation! A live provider would give you much better answers here.
+auto[260]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> Thanks for staying in the conversation! A live provider would give you much better answers here.
+auto[261]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> Thanks for staying in the conversation! A live provider would give you much better answers here.
+auto[262]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[263]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> Thanks for staying in the conversation! A live provider would give you much better answers here.
+auto[264]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[265]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[266]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> Thanks for staying in the conversation! A live provider would give you much better answers here.
+auto[267]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to continue this conversation meaningfully.
+auto[268]> Continue autonomously. Build on the conversation so far, choose the next useful step yourself, and keep going without asking for user input.
+assistant> I'm still in offline mode — I can only give canned responses. Configure a provider to c

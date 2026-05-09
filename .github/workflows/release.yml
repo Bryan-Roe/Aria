@@ -26,7 +26,7 @@ jobs:
     timeout-minutes: 15
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4.3.1
         with:
           fetch-depth: 0
 
@@ -51,7 +51,7 @@ jobs:
         id: changelog
         run: |
           # Get previous tag
-          PREV_TAG=$(git describe --abbrev=0 --tags $(git rev-list --tags --skip=1 --max-count=1) 2>/dev/null || echo "")
+          PREV_TAG=$(git describe --abbrev=0 --tags "$(git rev-list --tags --skip=1 --max-count=1)" 2>/dev/null || echo "")
 
           if [ -z "$PREV_TAG" ]; then
             echo "First release - no previous tag found"
@@ -94,11 +94,13 @@ jobs:
 
       - name: Create release summary
         run: |
-          echo "# Release ${{ steps.version.outputs.version }}" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "## Changes" >> $GITHUB_STEP_SUMMARY
-          cat CHANGELOG.md >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "## Artifacts" >> $GITHUB_STEP_SUMMARY
-          echo "- Source tarball: aria-${{ steps.version.outputs.version_number }}.tar.gz" >> $GITHUB_STEP_SUMMARY
-          echo "- Source zip: aria-${{ steps.version.outputs.version_number }}.zip" >> $GITHUB_STEP_SUMMARY
+          {
+            echo "# Release ${{ steps.version.outputs.version }}"
+            echo ""
+            echo "## Changes"
+            cat CHANGELOG.md
+            echo ""
+            echo "## Artifacts"
+            echo "- Source tarball: aria-${{ steps.version.outputs.version_number }}.tar.gz"
+            echo "- Source zip: aria-${{ steps.version.outputs.version_number }}.zip"
+          } >> "$GITHUB_STEP_SUMMARY"

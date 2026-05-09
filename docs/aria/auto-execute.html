@@ -17,28 +17,59 @@
     <meta name="twitter:title" content="Aria Auto-Execute — Multi-Step Action Planner">
     <meta name="twitter:image" content="https://bryan-roe.github.io/Aria/og-image.svg">
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='24' fill='%23122033'/%3E%3Ccircle cx='50' cy='36' r='16' fill='%230f9d89'/%3E%3Cpath d='M24 78c5-14 18-22 26-22s21 8 26 22' stroke='%23f7f2e8' stroke-width='10' stroke-linecap='round' fill='none'/%3E%3C/svg%3E">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
     <style>
-        * {
+        *, *::before, *::after {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
+
+        :root {
+            --teal: #0f9d89;
+            --teal-hover: #0a7a6d;
+            --coral: #d95b43;
+            --gold: #d3a53e;
+            --ink: #122033;
+            --ink-soft: #5f6874;
+            --paper: #f7f2e8;
+            --line: rgba(18, 32, 51, 0.12);
+            --shadow: 0 10px 30px rgba(18, 32, 51, 0.12);
+        }
+
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: "Instrument Sans", system-ui, sans-serif;
+            background: linear-gradient(180deg, #fbf7ef 0%, #f7f2e8 56%, #efe5d6 100%);
             min-height: 100vh;
             padding: 20px;
+            color: var(--ink);
         }
+
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            background:
+                radial-gradient(circle at 12% 18%, rgba(15, 157, 137, 0.14), transparent 30%),
+                radial-gradient(circle at 88% 12%, rgba(217, 91, 67, 0.12), transparent 26%),
+                radial-gradient(circle at 50% 78%, rgba(211, 165, 62, 0.12), transparent 28%);
+            pointer-events: none;
+        }
+
         .container {
             max-width: 1200px;
             margin: 0 auto;
-            background: white;
+            background: rgba(255, 255, 255, 0.88);
             border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            box-shadow: var(--shadow);
+            border: 1px solid var(--line);
             overflow: hidden;
         }
         .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, var(--teal) 0%, var(--teal-hover) 100%);
             color: white;
             padding: 30px;
             text-align: center;
@@ -46,6 +77,8 @@
         .header h1 {
             font-size: 2.5em;
             margin-bottom: 10px;
+            font-family: "Space Grotesk", sans-serif;
+            letter-spacing: -0.02em;
         }
         .header p {
             font-size: 1.1em;
@@ -55,10 +88,11 @@
             padding: 30px;
         }
         .control-panel {
-            background: #f8f9fa;
+            background: rgba(247, 242, 232, 0.6);
             border-radius: 10px;
             padding: 20px;
             margin-bottom: 20px;
+            border: 1px solid var(--line);
         }
         .input-group {
             margin-bottom: 15px;
@@ -67,19 +101,22 @@
             display: block;
             font-weight: 600;
             margin-bottom: 5px;
-            color: #333;
+            color: var(--ink);
         }
         .input-group input[type="text"] {
             width: 100%;
             padding: 12px;
-            border: 2px solid #e0e0e0;
+            border: 1.5px solid var(--line);
             border-radius: 8px;
             font-size: 1em;
+            font-family: inherit;
             transition: border-color 0.3s;
+            background: white;
         }
         .input-group input[type="text"]:focus {
             outline: none;
-            border-color: #667eea;
+            border-color: var(--teal);
+            box-shadow: 0 0 0 3px rgba(15, 157, 137, 0.15);
         }
         .checkbox-group {
             display: flex;
@@ -95,9 +132,10 @@
             font-weight: 500;
         }
         .checkbox-group input[type="checkbox"] {
-            width: 20px;
-            height: 20px;
+            width: 18px;
+            height: 18px;
             cursor: pointer;
+            accent-color: var(--teal);
         }
         .button-group {
             display: flex;
@@ -106,51 +144,57 @@
         }
         button {
             flex: 1;
-            padding: 15px 30px;
-            font-size: 1.1em;
+            padding: 13px 24px;
+            font-size: 1em;
             font-weight: 600;
             border: none;
             border-radius: 8px;
             cursor: pointer;
             transition: all 0.3s;
+            font-family: inherit;
         }
         .btn-plan {
-            background: #4CAF50;
-            color: white;
+            background: rgba(15, 157, 137, 0.1);
+            color: var(--teal);
+            border: 1.5px solid rgba(15, 157, 137, 0.4);
         }
         .btn-plan:hover {
-            background: #45a049;
+            background: var(--teal);
+            color: white;
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.3);
+            box-shadow: 0 5px 15px rgba(15, 157, 137, 0.3);
         }
         .btn-execute {
-            background: #667eea;
+            background: var(--teal);
             color: white;
         }
         .btn-execute:hover {
-            background: #5568d3;
+            background: var(--teal-hover);
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+            box-shadow: 0 5px 15px rgba(15, 157, 137, 0.3);
         }
         .btn-clear {
-            background: #f44336;
-            color: white;
+            background: rgba(217, 91, 67, 0.1);
+            color: var(--coral);
+            border: 1.5px solid rgba(217, 91, 67, 0.3);
             flex: 0.3;
         }
         .btn-clear:hover {
-            background: #da190b;
+            background: var(--coral);
+            color: white;
         }
         .results {
             margin-top: 30px;
         }
         .section {
-            background: #f8f9fa;
+            background: rgba(247, 242, 232, 0.5);
             border-radius: 10px;
             padding: 20px;
             margin-bottom: 20px;
+            border: 1px solid var(--line);
         }
         .section h3 {
-            color: #667eea;
+            color: var(--teal);
             margin-bottom: 15px;
             display: flex;
             align-items: center;
@@ -158,19 +202,19 @@
         }
         .action-card {
             background: white;
-            border-left: 4px solid #667eea;
+            border-left: 4px solid var(--teal);
             padding: 15px;
             margin-bottom: 10px;
             border-radius: 5px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 2px 8px rgba(18, 32, 51, 0.06);
         }
         .action-card h4 {
-            color: #667eea;
+            color: var(--teal);
             margin-bottom: 10px;
         }
         .action-params {
-            font-family: 'Courier New', monospace;
-            background: #f8f9fa;
+            font-family: "IBM Plex Mono", "Courier New", monospace;
+            background: rgba(247, 242, 232, 0.7);
             padding: 10px;
             border-radius: 5px;
             font-size: 0.9em;
@@ -184,12 +228,14 @@
             margin-top: 10px;
         }
         .status-success {
-            background: #d4edda;
-            color: #155724;
+            background: rgba(15, 157, 137, 0.1);
+            color: var(--teal-hover);
+            border: 1px solid rgba(15, 157, 137, 0.3);
         }
         .status-error {
-            background: #f8d7da;
-            color: #721c24;
+            background: rgba(217, 91, 67, 0.1);
+            color: var(--coral);
+            border: 1px solid rgba(217, 91, 67, 0.3);
         }
         .tags {
             display: flex;
@@ -198,22 +244,24 @@
             margin-top: 10px;
         }
         .tag {
-            background: #e3f2fd;
-            color: #1976d2;
+            background: rgba(15, 157, 137, 0.08);
+            color: var(--teal);
             padding: 5px 10px;
             border-radius: 5px;
             font-size: 0.85em;
-            font-family: 'Courier New', monospace;
+            font-family: "IBM Plex Mono", "Courier New", monospace;
+            border: 1px solid rgba(15, 157, 137, 0.2);
         }
         .examples {
-            background: #fff3cd;
-            border-left: 4px solid #ffc107;
+            background: rgba(211, 165, 62, 0.08);
+            border-left: 4px solid var(--gold);
             padding: 15px;
             border-radius: 5px;
             margin-bottom: 20px;
+            border: 1px solid rgba(211, 165, 62, 0.2);
         }
         .examples h4 {
-            color: #856404;
+            color: #9a6f0a;
             margin-bottom: 10px;
         }
         .example-list {
@@ -227,11 +275,11 @@
             transition: background 0.2s;
         }
         .example-list li:hover {
-            background: rgba(0, 0, 0, 0.05);
+            background: rgba(211, 165, 62, 0.12);
         }
         .example-list li::before {
             content: "→ ";
-            color: #ffc107;
+            color: var(--gold);
             font-weight: bold;
         }
         .loading {
@@ -243,8 +291,8 @@
             display: block;
         }
         .spinner {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #667eea;
+            border: 4px solid var(--line);
+            border-top: 4px solid var(--teal);
             border-radius: 50%;
             width: 40px;
             height: 40px;
@@ -256,24 +304,18 @@
             100% { transform: rotate(360deg); }
         }
         .state-view {
-            font-family: 'Courier New', monospace;
-            background: #282c34;
+            font-family: "IBM Plex Mono", "Courier New", monospace;
+            background: #1e2433;
             color: #abb2bf;
             padding: 15px;
-            border-radius: 5px;
+            border-radius: 8px;
             font-size: 0.9em;
             max-height: 400px;
             overflow-y: auto;
         }
-        .json-key {
-            color: #e06c75;
-        }
-        .json-string {
-            color: #98c379;
-        }
-        .json-number {
-            color: #d19a66;
-        }
+        .json-key { color: #e06c75; }
+        .json-string { color: #98c379; }
+        .json-number { color: #d19a66; }
     </style>
     <link rel="stylesheet" href="../global-upgrade.css">
 </head>

@@ -1,0 +1,311 @@
+2026-03-28 21:22:43,744 MainThread INFO Multi-agent run 20260328_212243: 10 tasks, max_workers=5
+2026-03-28 21:22:43,744 agent_0 INFO Worker starting task: Analyze shared/chat_providers.py for missing error handling 
+2026-03-28 21:22:43,745 agent_1 INFO Worker starting task: Review scripts/autonomous_training_orchestrator.py — inspect
+2026-03-28 21:22:43,746 agent_2 INFO Worker starting task: Audit function_app.py API endpoints — verify all routes retu
+2026-03-28 21:22:43,746 agent_3 INFO Worker starting task: Inspect apps/aria/server.py for state management correctness
+2026-03-28 21:22:43,747 agent_4 INFO Worker starting task: Validate YAML orchestrator configs in config/ — check autotr
+2026-03-28 21:22:46,745 agent_4 INFO Starting task 20260328_212246 (dry_run=True): Validate YAML orchestrator configs in config/ — check autotrain.yaml, quantum_autorun.yaml, master_orchestrator.yaml for schema completeness and safety gate presence
+2026-03-28 21:22:46,747 agent_1 INFO Starting task 20260328_212246 (dry_run=True): Review scripts/autonomous_training_orchestrator.py — inspect adaptive epoch logic, degradation detection thresholds, and promotion gate for edge cases
+2026-03-28 21:22:46,762 agent_4 INFO Planning task [unknown]: Validate YAML orchestrator configs in config/ — check autotrain.yaml, quantum_autorun.yaml, master_orchestrator.yaml for schema completeness and safety gate presence
+2026-03-28 21:22:46,763 agent_4 INFO Planning complete: [Echo Plan]
+1. Understand the task requirements
+2. Identify the files that need modification
+3. Implement changes with proper error handling
+4. Validate with tests
+5. Commit changes with descriptive m
+2026-03-28 21:22:46,763 agent_1 INFO Planning task [unknown]: Review scripts/autonomous_training_orchestrator.py — inspect adaptive epoch logic, degradation detection thresholds, and promotion gate for edge cases
+2026-03-28 21:22:46,765 agent_1 INFO Planning complete: [Echo Plan]
+1. Understand the task requirements
+2. Identify the files that need modification
+3. Implement changes with proper error handling
+4. Validate with tests
+5. Commit changes with descriptive m
+2026-03-28 21:22:46,772 agent_4 INFO Identified 2 relevant file(s): ['scripts/autonomous_code_agent.py', 'scripts/autonomous_agent_tasks.py']
+2026-03-28 21:22:46,773 agent_1 INFO Identified 2 relevant file(s): ['scripts/autonomous_code_agent.py', 'scripts/autonomous_agent_tasks.py']
+2026-03-28 21:22:46,775 agent_4 INFO Identified files: ['scripts/autonomous_code_agent.py', 'scripts/autonomous_agent_tasks.py']
+2026-03-28 21:22:46,776 agent_1 INFO Identified files: ['scripts/autonomous_code_agent.py', 'scripts/autonomous_agent_tasks.py']
+2026-03-28 21:22:46,785 agent_4 INFO Dry-run mode: skipping file modifications
+2026-03-28 21:22:46,786 agent_1 INFO Dry-run mode: skipping file modifications
+2026-03-28 21:22:46,787 agent_4 INFO   Would read/modify: scripts/autonomous_code_agent.py
+2026-03-28 21:22:46,788 agent_1 INFO   Would read/modify: scripts/autonomous_code_agent.py
+2026-03-28 21:22:46,789 agent_4 INFO   Would read/modify: scripts/autonomous_agent_tasks.py
+2026-03-28 21:22:46,790 agent_1 INFO   Would read/modify: scripts/autonomous_agent_tasks.py
+2026-03-28 21:22:46,797 agent_4 INFO Running tests...
+2026-03-28 21:22:46,799 agent_1 INFO Running tests...
+2026-03-28 21:22:47,074 agent_2 INFO Starting task 20260328_212247 (dry_run=True): Audit function_app.py API endpoints — verify all routes return correct Content-Type headers, check SSE streaming contract for /api/chat, and flag any missing error responses
+2026-03-28 21:22:47,096 agent_2 INFO Planning task [unknown]: Audit function_app.py API endpoints — verify all routes return correct Content-Type headers, check SSE streaming contract for /api/chat, and flag any missing error responses
+2026-03-28 21:22:47,099 agent_2 INFO Planning complete: [Echo Plan]
+1. Understand the task requirements
+2. Identify the files that need modification
+3. Implement changes with proper error handling
+4. Validate with tests
+5. Commit changes with descriptive m
+2026-03-28 21:22:47,112 agent_2 INFO Identified 2 relevant file(s): ['scripts/autonomous_code_agent.py', 'scripts/autonomous_agent_tasks.py']
+2026-03-28 21:22:47,117 agent_2 INFO Identified files: ['scripts/autonomous_code_agent.py', 'scripts/autonomous_agent_tasks.py']
+2026-03-28 21:22:47,136 agent_2 INFO Dry-run mode: skipping file modifications
+2026-03-28 21:22:47,138 agent_2 INFO   Would read/modify: scripts/autonomous_code_agent.py
+2026-03-28 21:22:47,141 agent_2 INFO   Would read/modify: scripts/autonomous_agent_tasks.py
+2026-03-28 21:22:47,151 agent_2 INFO Running tests...
+2026-03-28 21:22:47,184 agent_0 INFO Starting task 20260328_212247 (dry_run=True): Analyze shared/chat_providers.py for missing error handling — check provider fallback chain, verify each branch catches network errors, and report any unguarded calls
+2026-03-28 21:22:47,213 agent_0 INFO Planning task [unknown]: Analyze shared/chat_providers.py for missing error handling — check provider fallback chain, verify each branch catches network errors, and report any unguarded calls
+2026-03-28 21:22:47,216 agent_0 INFO Planning complete: [Echo Plan]
+1. Understand the task requirements
+2. Identify the files that need modification
+3. Implement changes with proper error handling
+4. Validate with tests
+5. Commit changes with descriptive m
+2026-03-28 21:22:47,228 agent_0 INFO Identified 2 relevant file(s): ['scripts/autonomous_code_agent.py', 'scripts/autonomous_agent_tasks.py']
+2026-03-28 21:22:47,232 agent_0 INFO Identified files: ['scripts/autonomous_code_agent.py', 'scripts/autonomous_agent_tasks.py']
+2026-03-28 21:22:47,239 agent_0 INFO Dry-run mode: skipping file modifications
+2026-03-28 21:22:47,244 agent_0 INFO   Would read/modify: scripts/autonomous_code_agent.py
+2026-03-28 21:22:47,247 agent_0 INFO   Would read/modify: scripts/autonomous_agent_tasks.py
+2026-03-28 21:22:47,253 agent_0 INFO Running tests...
+2026-03-28 21:22:49,840 agent_3 INFO Starting task 20260328_212249 (dry_run=True): Inspect apps/aria/server.py for state management correctness — validate object lifecycle (add/pickup/drop/throw), check thread safety, and review port-collision handling
+2026-03-28 21:22:49,853 agent_3 INFO Planning task [unknown]: Inspect apps/aria/server.py for state management correctness — validate object lifecycle (add/pickup/drop/throw), check thread safety, and review port-collision handling
+2026-03-28 21:22:49,855 agent_3 INFO Planning complete: [Echo Plan]
+1. Understand the task requirements
+2. Identify the files that need modification
+3. Implement changes with proper error handling
+4. Validate with tests
+5. Commit changes with descriptive m
+2026-03-28 21:22:49,867 agent_3 INFO Identified 2 relevant file(s): ['scripts/autonomous_code_agent.py', 'scripts/autonomous_agent_tasks.py']
+2026-03-28 21:22:49,871 agent_3 INFO Identified files: ['scripts/autonomous_code_agent.py', 'scripts/autonomous_agent_tasks.py']
+2026-03-28 21:22:49,880 agent_3 INFO Dry-run mode: skipping file modifications
+2026-03-28 21:22:49,883 agent_3 INFO   Would read/modify: scripts/autonomous_code_agent.py
+2026-03-28 21:22:49,886 agent_3 INFO   Would read/modify: scripts/autonomous_agent_tasks.py
+2026-03-28 21:22:49,892 agent_3 INFO Running tests...
+2026-03-28 21:24:16,302 agent_4 DEBUG Test output: 
+============================================================
+  Running suite: unit  (Fast unit tests (~0.5s))
+============================================================
+
+============================= test session starts ==============================
+collected 1370 items / 17 deselected / 3 skipped / 1353 selected
+
+tests/test_agent_mode_delegation_contracts.py ............               [  0%]
+tests/test_agi_provider.py ............................................. [  4%]
+......              
+2026-03-28 21:24:16,306 agent_4 INFO Tests: passed=True results={'total': 1353, 'passed': 1304, 'failed': 0, 'success': True, 'output': '\n============================================================\n  Running suite: unit  (Fast unit tests (~0.5s))\n============================================================\n\n============================= test session starts ==============================\ncollected 1370 items / 17 deselected / 3 skipped / 1353 selected\n\ntests/test_agent_mode_delegation_contracts.py ............               [  0%]\ntests/test_agi_provider.py ............................................. [  4%]\n......              '}
+2026-03-28 21:24:16,311 agent_4 INFO Task 20260328_212246 complete in 82.55s (~338 tokens)
+2026-03-28 21:24:16,313 agent_4 INFO Worker starting task: Analyze shared/chat_memory.py embedding priority chain — ver
+2026-03-28 21:24:16,519 agent_1 DEBUG Test output: 
+============================================================
+  Running suite: unit  (Fast unit tests (~0.5s))
+============================================================
+
+============================= test session starts ==============================
+collected 1370 items / 17 deselected / 3 skipped / 1353 selected
+
+tests/test_agent_mode_delegation_contracts.py ............               [  0%]
+tests/test_agi_provider.py ............................................. [  4%]
+......              
+2026-03-28 21:24:16,526 agent_1 INFO Tests: passed=True results={'total': 1353, 'passed': 1304, 'failed': 0, 'success': True, 'output': '\n============================================================\n  Running suite: unit  (Fast unit tests (~0.5s))\n============================================================\n\n============================= test session starts ==============================\ncollected 1370 items / 17 deselected / 3 skipped / 1353 selected\n\ntests/test_agent_mode_delegation_contracts.py ............               [  0%]\ntests/test_agi_provider.py ............................................. [  4%]\n......              '}
+2026-03-28 21:24:16,534 agent_1 INFO Task 20260328_212246 complete in 82.77s (~331 tokens)
+2026-03-28 21:24:16,538 agent_1 INFO Worker starting task: Review ai-projects/quantum-ml/quantum_mcp_server.py safety g
+2026-03-28 21:24:17,577 agent_2 DEBUG Test output: 
+============================================================
+  Running suite: unit  (Fast unit tests (~0.5s))
+============================================================
+
+============================= test session starts ==============================
+collected 1370 items / 17 deselected / 3 skipped / 1353 selected
+
+tests/test_agent_mode_delegation_contracts.py ............               [  0%]
+tests/test_agi_provider.py ............................................. [  4%]
+......              
+2026-03-28 21:24:17,581 agent_2 INFO Tests: passed=True results={'total': 1353, 'passed': 1304, 'failed': 0, 'success': True, 'output': '\n============================================================\n  Running suite: unit  (Fast unit tests (~0.5s))\n============================================================\n\n============================= test session starts ==============================\ncollected 1370 items / 17 deselected / 3 skipped / 1353 selected\n\ntests/test_agent_mode_delegation_contracts.py ............               [  0%]\ntests/test_agi_provider.py ............................................. [  4%]\n......              '}
+2026-03-28 21:24:17,596 agent_2 INFO Task 20260328_212247 complete in 83.5s (~342 tokens)
+2026-03-28 21:24:17,599 agent_2 INFO Worker starting task: Inspect tests/ suite for coverage gaps — identify modules wi
+2026-03-28 21:24:17,664 agent_0 DEBUG Test output: 
+============================================================
+  Running suite: unit  (Fast unit tests (~0.5s))
+============================================================
+
+============================= test session starts ==============================
+collected 1370 items / 17 deselected / 3 skipped / 1353 selected
+
+tests/test_agent_mode_delegation_contracts.py ............               [  0%]
+tests/test_agi_provider.py ............................................. [  4%]
+......              
+2026-03-28 21:24:17,671 agent_0 INFO Tests: passed=True results={'total': 1353, 'passed': 1304, 'failed': 0, 'success': True, 'output': '\n============================================================\n  Running suite: unit  (Fast unit tests (~0.5s))\n============================================================\n\n============================= test session starts ==============================\ncollected 1370 items / 17 deselected / 3 skipped / 1353 selected\n\ntests/test_agent_mode_delegation_contracts.py ............               [  0%]\ntests/test_agi_provider.py ............................................. [  4%]\n......              '}
+2026-03-28 21:24:17,684 agent_0 INFO Task 20260328_212247 complete in 83.48s (~339 tokens)
+2026-03-28 21:24:17,692 agent_0 INFO Worker starting task: Analyze scripts/repo_automation.py component orchestration —
+2026-03-28 21:24:25,046 agent_4 INFO Starting task 20260328_212425 (dry_run=True): Analyze shared/chat_memory.py embedding priority chain — verify tiktoken fallback, session isolation, cosine similarity thresholds, and DB unavailability graceful degradation
+2026-03-28 21:24:25,069 agent_4 INFO Planning task [unknown]: Analyze shared/chat_memory.py embedding priority chain — verify tiktoken fallback, session isolation, cosine similarity thresholds, and DB unavailability graceful degradation
+2026-03-28 21:24:25,074 agent_4 INFO Planning complete: [Echo Plan]
+1. Understand the task requirements
+2. Identify the files that need modification
+3. Implement changes with proper error handling
+4. Validate with tests
+5. Commit changes with descriptive m
+2026-03-28 21:24:25,089 agent_4 INFO Identified 2 relevant file(s): ['scripts/autonomous_code_agent.py', 'scripts/autonomous_agent_tasks.py']
+2026-03-28 21:24:25,097 agent_4 INFO Identified files: ['scripts/autonomous_code_agent.py', 'scripts/autonomous_agent_tasks.py']
+2026-03-28 21:24:25,113 agent_4 INFO Dry-run mode: skipping file modifications
+2026-03-28 21:24:25,121 agent_4 INFO   Would read/modify: scripts/autonomous_code_agent.py
+2026-03-28 21:24:25,129 agent_4 INFO   Would read/modify: scripts/autonomous_agent_tasks.py
+2026-03-28 21:24:25,146 agent_4 INFO Running tests...
+2026-03-28 21:24:25,158 agent_1 INFO Starting task 20260328_212425 (dry_run=True): Review ai-projects/quantum-ml/quantum_mcp_server.py safety gates — confirm simulator-first ordering, check QPU cost confirmation flow, verify shot limit enforcement
+2026-03-28 21:24:25,183 agent_1 INFO Planning task [unknown]: Review ai-projects/quantum-ml/quantum_mcp_server.py safety gates — confirm simulator-first ordering, check QPU cost confirmation flow, verify shot limit enforcement
+2026-03-28 21:24:25,189 agent_1 INFO Planning complete: [Echo Plan]
+1. Understand the task requirements
+2. Identify the files that need modification
+3. Implement changes with proper error handling
+4. Validate with tests
+5. Commit changes with descriptive m
+2026-03-28 21:24:25,216 agent_1 INFO Identified 2 relevant file(s): ['scripts/autonomous_code_agent.py', 'scripts/autonomous_agent_tasks.py']
+2026-03-28 21:24:25,221 agent_1 INFO Identified files: ['scripts/autonomous_code_agent.py', 'scripts/autonomous_agent_tasks.py']
+2026-03-28 21:24:25,238 agent_1 INFO Dry-run mode: skipping file modifications
+2026-03-28 21:24:25,245 agent_1 INFO   Would read/modify: scripts/autonomous_code_agent.py
+2026-03-28 21:24:25,249 agent_1 INFO   Would read/modify: scripts/autonomous_agent_tasks.py
+2026-03-28 21:24:25,262 agent_1 INFO Running tests...
+2026-03-28 21:24:26,985 agent_2 INFO Starting task 20260328_212426 (dry_run=True): Inspect tests/ suite for coverage gaps — identify modules with no corresponding test file and flag highest-risk untested paths in shared/ and scripts/
+2026-03-28 21:24:27,019 agent_2 INFO Planning task [unknown]: Inspect tests/ suite for coverage gaps — identify modules with no corresponding test file and flag highest-risk untested paths in shared/ and scripts/
+2026-03-28 21:24:27,029 agent_2 INFO Planning complete: [Echo Plan]
+1. Understand the task requirements
+2. Identify the files that need modification
+3. Implement changes with proper error handling
+4. Validate with tests
+5. Commit changes with descriptive m
+2026-03-28 21:24:27,047 agent_2 INFO Identified 2 relevant file(s): ['scripts/autonomous_code_agent.py', 'scripts/autonomous_agent_tasks.py']
+2026-03-28 21:24:27,051 agent_2 INFO Identified files: ['scripts/autonomous_code_agent.py', 'scripts/autonomous_agent_tasks.py']
+2026-03-28 21:24:27,064 agent_2 INFO Dry-run mode: skipping file modifications
+2026-03-28 21:24:27,074 agent_2 INFO   Would read/modify: scripts/autonomous_code_agent.py
+2026-03-28 21:24:27,085 agent_2 INFO   Would read/modify: scripts/autonomous_agent_tasks.py
+2026-03-28 21:24:27,114 agent_2 INFO Running tests...
+2026-03-28 21:24:27,182 agent_0 INFO Starting task 20260328_212427 (dry_run=True): Analyze scripts/repo_automation.py component orchestration — review startup order, health-check retry logic, and graceful-shutdown flow for all managed processes
+2026-03-28 21:24:27,217 agent_0 INFO Planning task [unknown]: Analyze scripts/repo_automation.py component orchestration — review startup order, health-check retry logic, and graceful-shutdown flow for all managed processes
+2026-03-28 21:24:27,232 agent_0 INFO Planning complete: [Echo Plan]
+1. Understand the task requirements
+2. Identify the files that need modification
+3. Implement changes with proper error handling
+4. Validate with tests
+5. Commit changes with descriptive m
+2026-03-28 21:24:27,258 agent_0 INFO Identified 2 relevant file(s): ['scripts/autonomous_code_agent.py', 'scripts/autonomous_agent_tasks.py']
+2026-03-28 21:24:27,276 agent_0 INFO Identified files: ['scripts/autonomous_code_agent.py', 'scripts/autonomous_agent_tasks.py']
+2026-03-28 21:24:27,308 agent_0 INFO Dry-run mode: skipping file modifications
+2026-03-28 21:24:27,315 agent_0 INFO   Would read/modify: scripts/autonomous_code_agent.py
+2026-03-28 21:24:27,325 agent_0 INFO   Would read/modify: scripts/autonomous_agent_tasks.py
+2026-03-28 21:24:27,338 agent_0 INFO Running tests...
+2026-03-28 21:24:29,969 agent_3 DEBUG Test output: 
+============================================================
+  Running suite: unit  (Fast unit tests (~0.5s))
+============================================================
+
+============================= test session starts ==============================
+collected 1370 items / 17 deselected / 3 skipped / 1353 selected
+
+tests/test_agent_mode_delegation_contracts.py ............               [  0%]
+tests/test_agi_provider.py ............................................. [  4%]
+......              
+2026-03-28 21:24:29,973 agent_3 INFO Tests: passed=True results={'total': 1353, 'passed': 1304, 'failed': 0, 'success': True, 'output': '\n============================================================\n  Running suite: unit  (Fast unit tests (~0.5s))\n============================================================\n\n============================= test session starts ==============================\ncollected 1370 items / 17 deselected / 3 skipped / 1353 selected\n\ntests/test_agent_mode_delegation_contracts.py ............               [  0%]\ntests/test_agi_provider.py ............................................. [  4%]\n......              '}
+2026-03-28 21:24:29,983 agent_3 INFO Task 20260328_212249 complete in 93.13s (~340 tokens)
+2026-03-28 21:24:29,987 agent_3 INFO Worker starting task: Review shared/db_logging.py fault-tolerance — verify stored-
+2026-03-28 21:24:35,588 agent_3 INFO Starting task 20260328_212435 (dry_run=True): Review shared/db_logging.py fault-tolerance — verify stored-procedure wrappers handle connection failures silently, check pool saturation path, and confirm no blocking waits
+2026-03-28 21:24:35,606 agent_3 INFO Planning task [unknown]: Review shared/db_logging.py fault-tolerance — verify stored-procedure wrappers handle connection failures silently, check pool saturation path, and confirm no blocking waits
+2026-03-28 21:24:35,610 agent_3 INFO Planning complete: [Echo Plan]
+1. Understand the task requirements
+2. Identify the files that need modification
+3. Implement changes with proper error handling
+4. Validate with tests
+5. Commit changes with descriptive m
+2026-03-28 21:24:35,621 agent_3 INFO Identified 2 relevant file(s): ['scripts/autonomous_code_agent.py', 'scripts/autonomous_agent_tasks.py']
+2026-03-28 21:24:35,626 agent_3 INFO Identified files: ['scripts/autonomous_code_agent.py', 'scripts/autonomous_agent_tasks.py']
+2026-03-28 21:24:35,634 agent_3 INFO Dry-run mode: skipping file modifications
+2026-03-28 21:24:35,638 agent_3 INFO   Would read/modify: scripts/autonomous_code_agent.py
+2026-03-28 21:24:35,642 agent_3 INFO   Would read/modify: scripts/autonomous_agent_tasks.py
+2026-03-28 21:24:35,650 agent_3 INFO Running tests...
+2026-03-28 21:26:14,823 agent_4 DEBUG Test output: 
+============================================================
+  Running suite: unit  (Fast unit tests (~0.5s))
+============================================================
+
+============================= test session starts ==============================
+collected 1370 items / 17 deselected / 3 skipped / 1353 selected
+
+tests/test_agent_mode_delegation_contracts.py ............               [  0%]
+tests/test_agi_provider.py ............................................. [  4%]
+......              
+2026-03-28 21:26:14,844 agent_4 INFO Tests: passed=True results={'total': 1353, 'passed': 1304, 'failed': 0, 'success': True, 'output': '\n============================================================\n  Running suite: unit  (Fast unit tests (~0.5s))\n============================================================\n\n============================= test session starts ==============================\ncollected 1370 items / 17 deselected / 3 skipped / 1353 selected\n\ntests/test_agent_mode_delegation_contracts.py ............               [  0%]\ntests/test_agi_provider.py ............................................. [  4%]\n......              '}
+2026-03-28 21:26:14,859 agent_4 INFO Task 20260328_212425 complete in 101.95s (~343 tokens)
+2026-03-28 21:26:14,887 agent_1 DEBUG Test output: 
+============================================================
+  Running suite: unit  (Fast unit tests (~0.5s))
+============================================================
+
+============================= test session starts ==============================
+collected 1370 items / 17 deselected / 3 skipped / 1353 selected
+
+tests/test_agent_mode_delegation_contracts.py ............               [  0%]
+tests/test_agi_provider.py ............................................. [  4%]
+......              
+2026-03-28 21:26:14,896 agent_1 INFO Tests: passed=True results={'total': 1353, 'passed': 1304, 'failed': 0, 'success': True, 'output': '\n============================================================\n  Running suite: unit  (Fast unit tests (~0.5s))\n============================================================\n\n============================= test session starts ==============================\ncollected 1370 items / 17 deselected / 3 skipped / 1353 selected\n\ntests/test_agent_mode_delegation_contracts.py ............               [  0%]\ntests/test_agi_provider.py ............................................. [  4%]\n......              '}
+2026-03-28 21:26:14,912 agent_1 INFO Task 20260328_212425 complete in 101.89s (~338 tokens)
+2026-03-28 21:26:17,510 agent_0 DEBUG Test output: 
+============================================================
+  Running suite: unit  (Fast unit tests (~0.5s))
+============================================================
+
+============================= test session starts ==============================
+collected 1370 items / 17 deselected / 3 skipped / 1353 selected
+
+tests/test_agent_mode_delegation_contracts.py ............               [  0%]
+tests/test_agi_provider.py ............................................. [  4%]
+......              
+2026-03-28 21:26:17,518 agent_0 INFO Tests: passed=True results={'total': 1353, 'passed': 1304, 'failed': 0, 'success': True, 'output': '\n============================================================\n  Running suite: unit  (Fast unit tests (~0.5s))\n============================================================\n\n============================= test session starts ==============================\ncollected 1370 items / 17 deselected / 3 skipped / 1353 selected\n\ntests/test_agent_mode_delegation_contracts.py ............               [  0%]\ntests/test_agi_provider.py ............................................. [  4%]\n......              '}
+2026-03-28 21:26:17,533 agent_0 INFO Task 20260328_212427 complete in 102.48s (~336 tokens)
+2026-03-28 21:26:17,755 agent_2 DEBUG Test output: 
+============================================================
+  Running suite: unit  (Fast unit tests (~0.5s))
+============================================================
+
+============================= test session starts ==============================
+collected 1370 items / 17 deselected / 3 skipped / 1353 selected
+
+tests/test_agent_mode_delegation_contracts.py ............               [  0%]
+tests/test_agi_provider.py ............................................. [  4%]
+......              
+2026-03-28 21:26:17,762 agent_2 INFO Tests: passed=True results={'total': 1353, 'passed': 1304, 'failed': 0, 'success': True, 'output': '\n============================================================\n  Running suite: unit  (Fast unit tests (~0.5s))\n============================================================\n\n============================= test session starts ==============================\ncollected 1370 items / 17 deselected / 3 skipped / 1353 selected\n\ntests/test_agent_mode_delegation_contracts.py ............               [  0%]\ntests/test_agi_provider.py ............................................. [  4%]\n......              '}
+2026-03-28 21:26:17,777 agent_2 INFO Task 20260328_212426 complete in 102.93s (~331 tokens)
+2026-03-28 21:26:40,482 agent_3 DEBUG Test output: 
+============================================================
+  Running suite: unit  (Fast unit tests (~0.5s))
+============================================================
+
+============================= test session starts ==============================
+collected 1370 items / 17 deselected / 3 skipped / 1353 selected
+
+tests/test_agent_mode_delegation_contracts.py ............               [  0%]
+tests/test_agi_provider.py ............................................. [  4%]
+......              
+2026-03-28 21:26:40,487 agent_3 INFO Tests: passed=True results={'total': 1353, 'passed': 1304, 'failed': 0, 'success': True, 'output': '\n============================================================\n  Running suite: unit  (Fast unit tests (~0.5s))\n============================================================\n\n============================= test session starts ==============================\ncollected 1370 items / 17 deselected / 3 skipped / 1353 selected\n\ntests/test_agent_mode_delegation_contracts.py ............               [  0%]\ntests/test_agi_provider.py ............................................. [  4%]\n......              '}
+2026-03-28 21:26:40,500 agent_3 INFO Task 20260328_212435 complete in 113.89s (~342 tokens)
+
+Running 10 task(s) with up to 5 parallel worker(s)...
+
+  ✓ [complete    ] Validate YAML orchestrator configs in config/ — check a (82.55s)
+  ✓ [complete    ] Review scripts/autonomous_training_orchestrator.py — in (82.77s)
+  ✓ [complete    ] Audit function_app.py API endpoints — verify all routes (83.5s)
+  ✓ [complete    ] Analyze shared/chat_providers.py for missing error hand (83.48s)
+  ✓ [complete    ] Inspect apps/aria/server.py for state management correc (93.13s)
+  ✓ [complete    ] Analyze shared/chat_memory.py embedding priority chain  (101.95s)
+  ✓ [complete    ] Review ai-projects/quantum-ml/quantum_mcp_server.py saf (101.89s)
+  ✓ [complete    ] Analyze scripts/repo_automation.py component orchestrat (102.48s)
+  ✓ [complete    ] Inspect tests/ suite for coverage gaps — identify modul (102.93s)
+  ✓ [complete    ] Review shared/db_logging.py fault-tolerance — verify st (113.89s)
+
+====================================================================
+===================== MULTI-AGENT RUN SUMMARY ======================
+====================================================================
+  Run ID          : 20260328_212243
+  Total tasks     : 10
+  Succeeded       : 10
+  Failed          : 0
+  Rolled back     : 0
+  Tests skipped   : 0
+  Files modified  : 0
+  ~Tokens used    : 3380
+  Wall-clock time : 218.74s
+  Consensus       : reached=True winner=failure ratio=1.0 reason=ok
+====================================================================
+
+Report saved: /workspaces/Aria/data_out/multi_agent/report_20260328_212243.json

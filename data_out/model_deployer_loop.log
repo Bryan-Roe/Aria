@@ -1,0 +1,243 @@
+nohup: ignoring input
+[Cycle 1] 0 model artifacts found
+{
+  "models": [],
+  "active_model": null,
+  "last_updated": null
+}
+
+[Cycle 2] 0 model artifacts found
+{
+  "models": [],
+  "active_model": null,
+  "last_updated": null
+}
+
+[Cycle 3] 0 model artifacts found
+{
+  "models": [],
+  "active_model": null,
+  "last_updated": null
+}
+
+[Cycle 4] 0 model artifacts found
+{
+  "models": [],
+  "active_model": null,
+  "last_updated": null
+}
+
+[Cycle 5] 0 model artifacts found
+{
+  "models": [],
+  "active_model": null,
+  "last_updated": null
+}
+
+[Cycle 6] 0 model artifacts found
+{
+  "models": [],
+  "active_model": null,
+  "last_updated": null
+}
+
+[Cycle 7] 0 model artifacts found
+{
+  "models": [],
+  "active_model": null,
+  "last_updated": null
+}
+
+[Cycle 8] 0 model artifacts found
+{
+  "models": [],
+  "active_model": null,
+  "last_updated": null
+}
+
+[Cycle 9] 0 model artifacts found
+{
+  "models": [],
+  "active_model": null,
+  "last_updated": null
+}
+
+[Cycle 10] 0 model artifacts found
+{
+  "models": [],
+  "active_model": null,
+  "last_updated": null
+}
+
+[Cycle 11] 0 model artifacts found
+{
+  "models": [],
+  "active_model": null,
+  "last_updated": null
+}
+
+[Cycle 12] 0 model artifacts found
+{
+  "models": [],
+  "active_model": null,
+  "last_updated": null
+}
+
+[Cycle 13] 0 model artifacts found
+{
+  "models": [],
+  "active_model": null,
+  "last_updated": null
+}
+
+lp            show this help message and exit
+  --deploy TARGET       Model to deploy: 'best' or a model name
+  --strategy {canary,full}
+                        Deployment strategy
+  --list                List candidate models
+  --status              Print registry status
+
+status]
+                         {} ...
+
+Model deployer for Aria LoRA adapters
+
+positional arguments:
+  {}
+
+options:
+  -h, --help            show this help message and exit
+  --deploy TARGET       Model to deploy: 'best' or a model name
+  --strategy {canary,full}
+                        Deployment strategy
+  --list                List candidate models
+  --status              Print registry status
+
+status]
+                         {} ...
+
+Model deployer for Aria LoRA adapters
+
+positional arguments:
+  {}
+
+options:
+  -h, --help            show this help message and exit
+  --deploy TARGET       Model to deploy: 'best' or a model name
+  --strategy {canary,full}
+                        Deployment strategy
+  --list                List candidate models
+  --status              Print registry status
+
+status]
+                         {} ...
+
+Model deployer for Aria LoRA adapters
+
+positional arguments:
+  {}
+
+options:
+  -h, --help            show this help message and exit
+  --deploy TARGET       Model to deploy: 'best' or a model name
+  --strategy {canary,full}
+                        Deployment strategy
+  --list                List candidate models
+  --status              Print registry status
+
+status]
+                         {} ...
+
+Model deployer for Aria LoRA adapters
+
+positional arguments:
+  {}
+
+options:
+  -h, --help            show this help message and exit
+  --deploy TARGET       Model to deploy: 'best' or a model name
+  --strategy {canary,full}
+                        Deployment strategy
+  --list                List candidate models
+  --status              Print registry status
+
+status]
+                         {} ...
+
+Model deployer for Aria LoRA adapters
+
+positional arguments:
+  {}
+
+options:
+  -h, --help            show this help message and exit
+  --deploy TARGET       Model to deploy: 'best' or a model name
+  --strategy {canary,full}
+                        Deployment strategy
+  --list                List candidate models
+  --status              Print registry status
+
+status]
+                         {} ...
+
+Model deployer for Aria LoRA adapters
+
+positional arguments:
+  {}
+
+options:
+  -h, --help            show this help message and exit
+  --deploy TARGET       Model to deploy: 'best' or a model name
+  --strategy {canary,full}
+                        Deployment strategy
+  --list                List candidate models
+  --status              Print registry status
+
+status]
+                         {} ...
+
+Model deployer for Aria LoRA adapters
+
+positional arguments:
+  {}
+
+options:
+  -h, --help            show this help message and exit
+  --deploy TARGET       Model to deploy: 'best' or a model name
+  --strategy {canary,full}
+                        Deployment strategy
+  --list                List candidate models
+  --status              Print registry status
+
+status]
+                         {} ...
+
+Model deployer for Aria LoRA adapters
+
+positional arguments:
+  {}
+
+options:
+  -h, --help            show this help message and exit
+  --deploy TARGET       Model to deploy: 'best' or a model name
+  --strategy {canary,full}
+                        Deployment strategy
+  --list                List candidate models
+  --status              Print registry status
+
+status]
+                         {} ...
+
+Model deployer for Aria LoRA adapters
+
+positional arguments:
+  {}
+
+options:
+  -h, --help            show this help message and exit
+  --deploy TARGET       Model to deploy: 'best' or a model name
+  --strategy {canary,full}
+                        Deployment strategy
+  --list                List candidate models
+  --status              Print registry status
+

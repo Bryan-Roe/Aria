@@ -2965,8 +2965,62 @@
         <a href="../dashboard/">Dashboard</a> ·
         <a href="../chat/">Chat</a> ·
         <a href="../store/">Store</a>
+        <div id="quantumModeStatus" style="font-size:0.8em; color:var(--text-secondary); margin-top:4px;">
+            ⚛️ Quantum Mode: <span id="quantumModeLabel">Off</span>
+            &nbsp;|&nbsp; Backend: <span id="quantumBackendLabel">—</span>
+        </div>
         <div>Aria Interactive AI Character Platform</div>
     </footer>
+
+    <script>
+        // === Quantum Mode toggle ===
+        (function () {
+            var quantumMode = localStorage.getItem('aria-quantum-mode') === 'true';
+
+            function applyQuantumMode(enabled) {
+                quantumMode = enabled;
+                localStorage.setItem('aria-quantum-mode', enabled ? 'true' : 'false');
+                var label = document.getElementById('quantumModeLabel');
+                if (label) label.textContent = enabled ? 'On ⚛️' : 'Off';
+                // Surface backend info from status endpoint
+                if (enabled) {
+                    fetch('/api/quantum-llm/status')
+                        .then(function (r) { return r.ok ? r.json() : null; })
+                        .then(function (data) {
+                            var bl = document.getElementById('quantumBackendLabel');
+                            if (bl && data) {
+                                bl.textContent = (data.backend || '?') + (data.fallback ? ' (classical)' : '');
+                            }
+                        })
+                        .catch(function () { });
+                } else {
+                    var bl = document.getElementById('quantumBackendLabel');
+                    if (bl) bl.textContent = '—';
+                }
+            }
+
+            // Intercept sendChat to optionally route through quantum-llm/stream
+            if (typeof window !== 'undefined') {
+                window.isQuantumModeEnabled = function () { return quantumMode; };
+                window.toggleQuantumMode = function () { applyQuantumMode(!quantumMode); };
+            }
+
+            // Apply saved preference
+            applyQuantumMode(quantumMode);
+
+            // Expose toggle via provider select: enable/disable quantum mode based on selection
+            var providerSel = document.getElementById('providerSelect');
+            if (providerSel) {
+                providerSel.addEventListener('change', function () {
+                    if (providerSel.value === 'quantum-llm') {
+                        applyQuantumMode(true);
+                    } else {
+                        applyQuantumMode(false);
+                    }
+                });
+            }
+        })();
+    </script>
 </body>
 
 </html>

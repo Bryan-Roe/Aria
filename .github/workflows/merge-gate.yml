@@ -1,0 +1,227 @@
+# =============================================================================
+# Merge Gate — Required status check for pull requests targeting main
+# =============================================================================
+# Purpose: Aggregates all mandatory quality gates into a single named job
+#          (`All Gates Passed`) that branch protection rules reference.
+#          Every gate job runs concurrently; the fan-in job fails the check
+#          if any gate fails or is cancelled.
+#
+# Trigger:  pull_request → main (opened / synchronize / reopened /
+#           ready_for_review).  Draft PRs skip all gate jobs so they don't
+#           block development; the fan-in still succeeds (skipped is OK).
+#
+# Branch protection:  Add "Merge Gate / All Gates Passed" as the single
+#                     required status check on the main branch.
+# =============================================================================
+
+name: Merge Gate
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened, ready_for_review]
+
+# Cancel superseded runs for the same PR.
+concurrency:
+  group: merge-gate-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+# Least-privilege default; jobs opt-in to more below.
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # Gate 1 — Unit tests
+  # ---------------------------------------------------------------------------
+  unit-tests:
+    name: Unit Tests
+    if: github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4.3.1
+        with:
+          persist-credentials: false
+
+      - name: Setup Python
+        uses: ./.github/actions/setup-python-env
+        with:
+          extra-packages: 'pytest pytest-timeout'
+
+      - name: Run unit tests
+        uses: ./.github/actions/run-pytest-suite
+        with:
+          test-path: tests
+          marker-expression: 'not slow and not azure and not integration'
+          extra-args: '--maxfail=5 -q'
+        env:
+          CI: 'true'
+
+  # ---------------------------------------------------------------------------
+  # Gate 2 — PR structure validation
+  # ---------------------------------------------------------------------------
+  pr-validation:
+    name: PR Validation
+    if: github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4.3.1
+        with:
+          persist-credentials: false
+
+      - name: Setup Python
+        uses: ./.github/actions/setup-python-env
+        with:
+          extra-packages: 'pyyaml'
+
+      - name: Validate workflow YAML
+        uses: ./.github/actions/validate-workflow-yaml
+        with:
+          workflows-path: .github/workflows
+          require-jobs: 'true'
+
+      - name: Validate Azure Function bindings
+        uses: ./.github/actions/validate-function-bindings
+        with:
+          functions-path: functions
+          require-http-route: 'true'
+
+      - name: Fast validation
+        run: |
+          set -euo pipefail
+          if [[ -f scripts/fast_validate.py ]]; then
+            python scripts/fast_validate.py
+          else
+            echo "::notice::scripts/fast_validate.py not found, skipping"
+          fi
+
+  # ---------------------------------------------------------------------------
+  # Gate 3 — Dependency security review
+  # ---------------------------------------------------------------------------
+  security:
+    name: Security Review
+    if: github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      pull-requests: write  # dependency-review-action needs PR write to comment
+    steps:
+      - name: Checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4.3.1
+        with:
+          persist-credentials: false
+
+      - name: Dependency Review
+        uses: actions/dependency-review-action@2031cfc080254a8a887f58cffee85186f0e49e48  # v4.9.0
+        with:
+          fail-on-severity: high
+          deny-licenses: GPL-2.0, GPL-3.0, AGPL-3.0
+          comment-summary-in-pr: always
+
+  # ---------------------------------------------------------------------------
+  # Gate 4 — Integration contract gate
+  # ---------------------------------------------------------------------------
+  contract-gate:
+    name: Integration Contract Gate
+    if: github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4.3.1
+        with:
+          persist-credentials: false
+
+      - name: Setup Python
+        uses: ./.github/actions/setup-python-env
+        with:
+          python-version: '3.11'
+          extra-packages: 'pytest pytest-timeout'
+
+      - name: Validate site bundles
+        uses: ./.github/actions/validate-site-bundles
+        with:
+          strict-metadata: 'true'
+
+      - name: Validate composite actions
+        uses: ./.github/actions/validate-composite-actions
+        with:
+          script-path: scripts/validate_composite_actions.py
+
+      - name: Run contract gate
+        uses: ./.github/actions/run-integration-contract-gate
+
+  # ---------------------------------------------------------------------------
+  # Fan-in — All gates must pass.  This is the single required status check.
+  # ---------------------------------------------------------------------------
+  gates-passed:
+    name: All Gates Passed
+    needs: [unit-tests, pr-validation, security, contract-gate]
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Evaluate gate results
+        env:
+          UNIT_TESTS: ${{ needs.unit-tests.result }}
+          PR_VALIDATION: ${{ needs.pr-validation.result }}
+          SECURITY: ${{ needs.security.result }}
+          CONTRACT_GATE: ${{ needs.contract-gate.result }}
+        run: |
+          set -euo pipefail
+
+          FAILED=0
+
+          check_gate() {
+            local name="$1"
+            local result="$2"
+            case "$result" in
+              success)  echo "✓ ${name}: passed" ;;
+              skipped)  echo "⊘ ${name}: skipped (draft PR)" ;;
+              failure|cancelled)
+                echo "✗ ${name}: ${result}"
+                FAILED=1
+                ;;
+              *)
+                echo "? ${name}: ${result} (unexpected result)"
+                FAILED=1
+                ;;
+            esac
+          }
+
+          check_gate "unit-tests"    "$UNIT_TESTS"
+          check_gate "pr-validation" "$PR_VALIDATION"
+          check_gate "security"      "$SECURITY"
+          check_gate "contract-gate" "$CONTRACT_GATE"
+
+          {
+            echo "## Merge Gate Summary"
+            echo ""
+            echo "| Gate | Result |"
+            echo "|------|--------|"
+            echo "| Unit Tests | ${UNIT_TESTS} |"
+            echo "| PR Validation | ${PR_VALIDATION} |"
+            echo "| Security Review | ${SECURITY} |"
+            echo "| Contract Gate | ${CONTRACT_GATE} |"
+            echo ""
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          if (( FAILED == 1 )); then
+            echo "### ❌ One or more merge gates failed — PR cannot be merged." \
+              >> "$GITHUB_STEP_SUMMARY"
+            echo "::error::One or more merge gates failed. Review the job results above."
+            exit 1
+          fi
+
+          echo "### ✅ All merge gates passed — PR is ready to merge." \
+            >> "$GITHUB_STEP_SUMMARY"
+          echo "All merge gates passed."

@@ -69,7 +69,7 @@ class QuantumAzureMLDeployment:
             # Try to load from config
             self.workspace = Workspace.from_config()
             logger.info(f"✓ Loaded workspace from config: {self.workspace.name}")
-        except:
+        except Exception:
             # Connect with explicit parameters
             self.workspace = Workspace(
                 subscription_id=subscription_id,
@@ -108,7 +108,7 @@ class QuantumAzureMLDeployment:
             )
             logger.info(f"✓ Using existing cluster: {cluster_name}")
 
-        except:
+        except Exception:
             # Create new cluster
             logger.info("Creating new compute cluster...")
 
