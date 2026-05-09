@@ -382,7 +382,7 @@ Aria includes **20+ specialized prompts** in `.github/prompts/` that guide Copil
 
 | Prompt | Purpose |
 |--------|---------|
-| `agi.prompt.md` | Chain-of-thought AGI reasoning |
+| `agi.prompt.md` | Autonomous long-running work with internal reasoning (chain-of-thought is hidden) |
 | `debug.prompt.md` | Systematic debugging protocol |
 | `reason.prompt.md` | Structured analysis & planning |
 | `review.prompt.md` | Security, performance, correctness review |
@@ -394,7 +394,7 @@ Aria includes **20+ specialized prompts** in `.github/prompts/` that guide Copil
 
 **Explicit reference**:
 ```
-Use the agi.prompt for chain-of-thought reasoning about this architecture
+Use the agi.prompt for autonomous long-running work requiring internal reasoning
 Use the debug.prompt to systematically diagnose this error
 ```
 
