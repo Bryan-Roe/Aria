@@ -1,23 +1,21 @@
-"""Semantic chat memory backed by SQL embeddings.
+"""
+Semantic chat memory backed by SQL embeddings.
 
-Functions are fault-tolerant and degrade gracefully when the database
-or embedding APIs are unavailable.
+This module implements a robust, thread-safe connection pool for database
+operations and provides batch insertion for embeddings to reduce connection
+churn and per-row transaction overhead.
 
-Design:
-  - generate_embedding(text): attempts Azure OpenAI embeddings, then OpenAI,
-    then falls back to a lightweight local hashing embedding (fixed dim=256).
-  - store_embedding(message_id, embedding, model): persists embedding bytes
-    to [dbo].[ChatMessageEmbeddings]. Float32 little-endian layout.
-  - fetch_similar_messages(query_embedding, top_k=5, session_id=None): loads
-    recent embeddings (optionally scoped to a session) and computes cosine
-    similarity in Python, returning the top-k matches with message content.
+Design highlights:
+  - ConnectionPool: LIFO queue with thread-local fast path and configurable max size.
+  - store_embeddings_batch: Bulk insert using executemany() in a single transaction.
+  - store_embedding: Backward-compatible single-insert wrapper that delegates to batch API.
+  - close_all_connections: Clean shutdown helper to close pooled and cached connections.
 
 Environment variables:
   QAI_DB_CONN: SQL connection string (ODBC Driver 18 for SQL Server recommended)
+  QAI_DB_POOL_SIZE: Optional override for maximum pooled connections (default: 5)
   AZURE_OPENAI_API_KEY / AZURE_OPENAI_ENDPOINT / AZURE_OPENAI_EMBEDDING_DEPLOYMENT
   OPENAI_API_KEY (for public OpenAI embedding fallback)
-
-Table schema created in database/Tables/ChatMessageEmbeddings.sql
 """
 
 from __future__ import annotations
@@ -27,9 +25,13 @@ import heapq
 import math
 import os
 import struct
-from threading import RLock
-from typing import List, Optional, Sequence
+import logging
+import queue
+import threading
+from contextlib import contextmanager
+from typing import Any, Callable, Dict, Iterator, List, Optional, Sequence, Tuple
 
+# Third-party optional imports
 try:
     import pyodbc  # type: ignore
 except Exception:  # pragma: no cover
@@ -41,10 +43,10 @@ except Exception:  # pragma: no cover
     OpenAI = None  # type: ignore
     AzureOpenAI = None  # type: ignore
 
+# Optional helpers fallback
 try:
     from shared.azure_utils import format_quota_message, is_quota_error
 except Exception:  # pragma: no cover - best effort import
-    # Provide simple fallbacks if helper isn't available
     def is_quota_error(e: Exception) -> bool:  # noqa: D401
         if e is None:
             return False
@@ -61,110 +63,216 @@ except Exception:  # pragma: no cover - best effort import
             )
         )
 
-    def format_quota_message(
-        e: Exception, service_name: str = "Azure OpenAI"
-    ) -> str:  # noqa: D401
+    def format_quota_message(e: Exception, service_name: str = "Azure OpenAI") -> str:  # noqa: D401
         return f"{service_name} quota/premium limit reached. Details: {str(e)}"
 
+# Configure logger for the module
+_logger = logging.getLogger(__name__)
 
-# ------------------------- DB Helpers with Connection Pooling -------------------------
+# Default pooling parameters; override via QAI_DB_POOL_SIZE env var
+_DEFAULT_MAX_POOL_SIZE = 5
+_MAX_POOL_SIZE = int(os.getenv("QAI_DB_POOL_SIZE", str(_DEFAULT_MAX_POOL_SIZE)))
 
-# Connection pool for embedding operations (reduces connection overhead)
-_connection_pool = []
-_MAX_POOL_SIZE = 5
+# Thread-local storage for fast-path cached connection
+_thread_local = threading.local()
 
-# Per-thread connection cache for fast reuse without reconnecting.
-_thread_connections = {}
-
-# Backward-compatible aliases expected by existing tests and scripts.
-_conn_cache = _thread_connections
-_conn_lock = RLock()
+# Keep a mapping of thread_id -> conn for compatibility and inspection
+_thread_connections: Dict[int, Any] = {}
+_conn_lock = threading.RLock()
 
 
-def _get_conn():  # noqa: ANN001
-    """Get a database connection from pool/cache or create a new one.
+class ConnectionPool:
+    """Simple LIFO connection pool with thread-local fast-path.
 
-    Priority:
-    1. Shared pool connection (allows dead-connection replacement tests)
-    2. Per-thread cached connection
-    3. New connection
+    Behavior:
+      - Threads first attempt to reuse a thread-local cached connection.
+      - If none, a pooled connection is popped (LIFO) and validated.
+      - If pool empty and under max size, a new connection is created.
+      - Returned connections go back to the pool unless the pool is full,
+        in which case they are closed.
     """
-    conn_str = os.getenv("QAI_DB_CONN")
-    if not conn_str or not pyodbc:
-        return None
 
-    thread_id = __import__("threading").get_ident()
+    def __init__(self, max_size: int = _MAX_POOL_SIZE):
+        self._max_size = max_size
+        self._pool: "queue.LifoQueue[Any]" = queue.LifoQueue(maxsize=max_size)
+        # Count of total connections created and not closed (approximate)
+        self._total_created = 0
+        self._lock = threading.RLock()
 
-    # 1) Try shared pool first.
-    attempted_pool = False
-    while True:
-        with _conn_lock:
-            if not _connection_pool:
-                break
-            attempted_pool = True
-            conn = _connection_pool.pop()
+    def _create_connection(self):
+        conn_str = os.getenv("QAI_DB_CONN")
+        if not conn_str or not pyodbc:
+            return None
         try:
-            conn.cursor().execute("SELECT 1")
-            with _conn_lock:
-                _thread_connections[thread_id] = conn
+            conn = pyodbc.connect(conn_str, timeout=4)
+            with self._lock:
+                self._total_created += 1
             return conn
+        except Exception as e:
+            _logger.debug("Failed to create DB connection: %s", str(e))
+            return None
+
+    def _is_alive(self, conn: Any) -> bool:
+        try:
+            # Lightweight probe
+            cursor = conn.cursor()
+            cursor.execute("SELECT 1")
+            # Some drivers require fetchone()
+            try:
+                cursor.fetchone()
+            except Exception:
+                pass
+            cursor.close()
+            return True
         except Exception:
+            return False
+
+    def acquire(self, timeout: float = 0.0) -> Optional[Any]:
+        """Acquire a live connection (thread-local -> pool -> new)."""
+        thread_id = threading.get_ident()
+
+        # 1) Thread-local fast-path
+        cached = getattr(_thread_local, "conn", None)
+        if cached is not None:
+            if self._is_alive(cached):
+                _thread_connections[thread_id] = cached
+                return cached
+            # stale cached; close and remove
+            try:
+                cached.close()
+            except Exception:
+                pass
+            _thread_local.conn = None
+            with _conn_lock:
+                _thread_connections.pop(thread_id, None)
+
+        # 2) Try pool
+        try:
+            conn = self._pool.get(block=(timeout > 0.0), timeout=timeout if timeout > 0 else 0)
+        except Exception:
+            conn = None
+
+        if conn is not None:
+            if self._is_alive(conn):
+                # Cache in thread-local for fast reuse
+                _thread_local.conn = conn
+                _thread_connections[thread_id] = conn
+                return conn
+            # Dead connection: close and continue to create
             try:
                 conn.close()
             except Exception:
                 pass
 
-    # 2) Fast path: per-thread cached connection (only if pool wasn't consulted).
-    # If pooled connections were attempted and found dead, create a fresh
-    # connection below to avoid returning potentially stale thread cache.
-    if not attempted_pool:
-        with _conn_lock:
-            cached = _thread_connections.get(thread_id)
-        if cached is not None:
-            try:
-                cached.cursor().execute("SELECT 1")
-                return cached
-            except Exception:
-                try:
-                    cached.close()
-                except Exception:
-                    pass
-                with _conn_lock:
-                    _thread_connections.pop(thread_id, None)
-
-    # 3) No valid pooled/cached connections, create a new one
-    try:
-        conn = pyodbc.connect(conn_str, timeout=4)
-        with _conn_lock:
+        # 3) Create new connection (if allowed)
+        conn = self._create_connection()
+        if conn is not None:
+            _thread_local.conn = conn
             _thread_connections[thread_id] = conn
         return conn
-    except Exception:
-        return None
 
-
-def _return_conn(conn):  # noqa: ANN001
-    """Return a connection to the pool for reuse when not thread-cached."""
-    if not conn:
-        return
-
-    thread_id = __import__("threading").get_ident()
-    with _conn_lock:
-        # Keep current-thread cached connection hot for immediate reuse.
-        if _thread_connections.get(thread_id) is conn:
+    def release(self, conn: Any) -> None:
+        """Return a connection to pool or close it if pool is full."""
+        if not conn:
+            return
+        thread_id = threading.get_ident()
+        # If this is the same as thread-local, keep it cached (fast-path)
+        if getattr(_thread_local, "conn", None) is conn:
+            # keep cached for thread reuse; do not put back into shared pool
+            _thread_connections[thread_id] = conn
             return
 
-        if len(_connection_pool) < _MAX_POOL_SIZE:
-            _connection_pool.append(conn)
-            return
+        # Otherwise, try to put back into pool
+        try:
+            self._pool.put_nowait(conn)
+        except queue.Full:
+            # Pool full: close the connection
+            try:
+                conn.close()
+            except Exception:
+                pass
 
-    try:
-        conn.close()
-    except Exception:
-        pass
+    def close_all(self) -> None:
+        """Close and clear all pooled connections and thread-local caches."""
+        # Clear pool
+        while True:
+            try:
+                conn = self._pool.get_nowait()
+            except Exception:
+                break
+            try:
+                conn.close()
+            except Exception:
+                pass
+        # Clear thread-local mapping entries (best-effort)
+        with _conn_lock:
+            for tid, conn in list(_thread_connections.items()):
+                try:
+                    conn.close()
+                except Exception:
+                    pass
+                _thread_connections.pop(tid, None)
+        # Clear any thread-local conn in current thread
+        try:
+            if getattr(_thread_local, "conn", None) is not None:
+                try:
+                    _thread_local.conn.close()
+                except Exception:
+                    pass
+                _thread_local.conn = None
+        except Exception:
+            pass
+
+    def current_pool_items(self) -> List[Any]:
+        """Return a snapshot list of connections currently in the pool (debug view)."""
+        # queue doesn't provide a safe way to peek; build snapshot by draining/reloading
+        items: List[Any] = []
+        tmp: List[Any] = []
+        while True:
+            try:
+                item = self._pool.get_nowait()
+                items.append(item)
+                tmp.append(item)
+            except Exception:
+                break
+        # put them back
+        for item in tmp:
+            try:
+                self._pool.put_nowait(item)
+            except Exception:
+                try:
+                    item.close()
+                except Exception:
+                    pass
+        return items
+
+
+# Instantiate module-level pool
+_POOL = ConnectionPool(max_size=_MAX_POOL_SIZE)
+
+# Backwards-compatible exported names (views into new pool)
+_connection_pool = _POOL.current_pool_items  # callable to snapshot pool contents
+_conn_cache = _thread_connections
+# Keep lock object for external code that may import it
+_conn_lock = _conn_lock
+
+
+def _get_conn() -> Optional[Any]:
+    """Get a live database connection (module-level wrapper)."""
+    return _POOL.acquire(timeout=0.0)
+
+
+def _return_conn(conn: Any) -> None:
+    """Return a connection to the pool (module-level wrapper)."""
+    _POOL.release(conn)
+
+
+def close_all_connections() -> None:
+    """Close all connections in pool and thread-local caches."""
+    _POOL.close_all()
 
 
 # ------------------------- Embedding Generation -------------------------
-
 
 _LOCAL_DIM = 256  # dimension for lightweight local fallback
 
@@ -172,10 +280,8 @@ _LOCAL_DIM = 256  # dimension for lightweight local fallback
 def _hash_embedding(text: str, dim: int = _LOCAL_DIM) -> List[float]:
     """Very lightweight deterministic hashing embedding.
 
-    Not semantically rich but provides some signal for similarity
-    within the same workspace when no embedding API is configured.
-
-    Optimized: Uses module-level hashlib import and single-pass norm calculation.
+    Not semantically rich but provides some signal for similarity when no
+    embedding API is configured.
     """
     tokens = [t for t in text.lower().split() if t]
     vec = [0.0] * dim
@@ -196,10 +302,11 @@ def _hash_embedding(text: str, dim: int = _LOCAL_DIM) -> List[float]:
     return vec
 
 
-def generate_embedding(text: str) -> List[float]:  # noqa: ANN001
+def generate_embedding(text: str) -> List[float]:
     """Generate an embedding for text using Azure OpenAI > OpenAI > local hash.
 
-    Returns a list[float]; errors fall back to hash embedding.
+    Returns:
+        list[float]: embedding vector (fallback to _hash_embedding on errors).
     """
     text = text or ""
     # Azure first
@@ -212,31 +319,19 @@ def generate_embedding(text: str) -> List[float]:  # noqa: ANN001
             resp = client.embeddings.create(model=az_emb, input=[text])
             return resp.data[0].embedding  # type: ignore[attr-defined]
         except Exception as e:
-            # If this looks like a quota/premium issue, log and fall back to
-            # the lightweight local hash embedding so the app remains usable.
             if is_quota_error(e):
-                try:
-                    import logging
-
-                    logging.getLogger(__name__).warning(
-                        "Azure embedding call detected quota/premium error: %s", str(e)
-                    )
-                except Exception:
-                    pass
+                _logger.warning("Azure embedding quota/premium error: %s", str(e))
                 return _hash_embedding(text)
-            # Otherwise continue to try public OpenAI or local fallback
-            pass
+            _logger.debug("Azure embedding error, falling back: %s", str(e))
     # Public OpenAI
     oi_key = os.getenv("OPENAI_API_KEY")
     if oi_key and OpenAI is not None:
         try:
             client = OpenAI(api_key=oi_key)
-            resp = client.embeddings.create(
-                model="text-embedding-3-small", input=[text]
-            )
+            resp = client.embeddings.create(model="text-embedding-3-small", input=[text])
             return resp.data[0].embedding  # type: ignore[attr-defined]
-        except Exception:
-            pass
+        except Exception as e:
+            _logger.debug("OpenAI embedding error, falling back: %s", str(e))
     # Fallback
     return _hash_embedding(text)
 
@@ -245,47 +340,76 @@ def generate_embedding(text: str) -> List[float]:  # noqa: ANN001
 
 
 def _serialize_f32(vec: Sequence[float]) -> bytes:
+    """Serialize a sequence of floats to little-endian float32 bytes."""
     return struct.pack(f"<{len(vec)}f", *[float(v) for v in vec])
 
 
-def store_embedding(
-    message_id: Optional[str], embedding: Sequence[float], model: str
-) -> bool:  # noqa: ANN001
-    if not message_id or not embedding:
-        return False
+def store_embeddings_batch(embeddings: List[Tuple[str, Sequence[float], str]]) -> int:
+    """Store multiple embeddings in a single transaction (bulk insert).
+
+    Args:
+        embeddings: List of tuples (message_id, embedding, model)
+
+    Returns:
+        Number of embeddings successfully stored (0 on failure).
+    """
+    if not embeddings:
+        return 0
+
     conn = _get_conn()
     if not conn:
-        return False
+        _logger.debug("No DB connection available to store embeddings batch.")
+        return 0
+
     try:
         cursor = conn.cursor()
-        blob = _serialize_f32(embedding)
-        cursor.execute(
-            "INSERT INTO dbo.ChatMessageEmbeddings (MessageId, EmbeddingModel, EmbeddingDim, EmbeddingVector) VALUES (?,?,?,?)",
-            message_id,
-            model or "unknown-model",
-            len(embedding),
-            blob,
-        )
-        conn.commit()
-        return True
-    except Exception:
-        return False
+        values = []
+        for message_id, embedding, model in embeddings:
+            if not message_id or not embedding:
+                continue
+            blob = _serialize_f32(embedding)
+            values.append((message_id, model or "unknown-model", len(embedding), blob))
+
+        if not values:
+            return 0
+
+        try:
+            cursor.executemany(
+                "INSERT INTO dbo.ChatMessageEmbeddings "
+                "(MessageId, EmbeddingModel, EmbeddingDim, EmbeddingVector) VALUES (?,?,?,?)",
+                values,
+            )
+            conn.commit()
+            return len(values)
+        except Exception as e:
+            _logger.exception("Failed to execute batch insert for embeddings: %s", str(e))
+            try:
+                conn.rollback()
+            except Exception:
+                pass
+            return 0
     finally:
-        # Return connection to pool instead of closing
         _return_conn(conn)
+
+
+def store_embedding(message_id: Optional[str], embedding: Sequence[float], model: str) -> bool:
+    """Backward-compatible single-insert wrapper that delegates to batch insert."""
+    if not message_id or not embedding:
+        return False
+    inserted = store_embeddings_batch([(message_id, embedding, model)])
+    return inserted == 1
 
 
 # ------------------------- Similarity Search -------------------------
 
 
 def _deserialize_f32(blob: bytes, dim: int) -> List[float]:
+    """Deserialize float32 little-endian bytes to list[float]."""
     if not blob:
         return [0.0] * dim
-    # Expect exact length = dim * 4
     try:
         return list(struct.unpack(f"<{dim}f", blob[: dim * 4]))
     except Exception:
-        # Fallback slice-based
         out = []
         for i in range(dim):
             chunk = blob[i * 4 : (i + 1) * 4]
@@ -297,6 +421,7 @@ def _deserialize_f32(blob: bytes, dim: int) -> List[float]:
 
 
 def _cosine(a: Sequence[float], b: Sequence[float]) -> float:
+    """Compute cosine similarity between two equal-length vectors."""
     if not a or not b or len(a) != len(b):
         return 0.0
     dot = sum(x * y for x, y in zip(a, b))
@@ -307,21 +432,23 @@ def _cosine(a: Sequence[float], b: Sequence[float]) -> float:
 
 def fetch_similar_messages(
     query_embedding: Sequence[float], top_k: int = 5, session_id: Optional[str] = None
-) -> List[dict]:  # noqa: ANN001
+) -> List[dict]:
     """Return top_k similar past messages using Python-side cosine similarity.
 
     If session_id is provided, restrict search to that session's conversation(s).
     For performance we limit to the most recent 500 embeddings.
 
-    Optimization: Uses heapq.nlargest for O(n log k) top-k selection instead of
-    O(n log n) full sort when top_k is small relative to result set.
-    Uses connection pooling to avoid creating new connections for every query.
+    Returns:
+        List[dict]: each dict contains message_id, content, similarity, embedding_model
     """
     if not query_embedding:
         return []
+
     conn = _get_conn()
     if not conn:
+        _logger.debug("No DB connection available for similarity fetch.")
         return []
+
     try:
         cursor = conn.cursor()
         if session_id:
@@ -340,36 +467,37 @@ def fetch_similar_messages(
             )
         rows = cursor.fetchall()
 
-        # Build scored list with only positive similarities
-        scored = []
+        scored: List[dict] = []
         for r in rows:
-            dim = r.EmbeddingDim
-            emb = _deserialize_f32(r.EmbeddingVector, dim)
+            dim = getattr(r, "EmbeddingDim", None) or 0
+            emb = _deserialize_f32(getattr(r, "EmbeddingVector", b""), dim)
             sim = _cosine(query_embedding, emb)
             if sim > 0:
                 scored.append(
                     {
-                        "message_id": r.MessageId,
-                        "content": r.Content,
+                        "message_id": getattr(r, "MessageId", None),
+                        "content": getattr(r, "Content", None),
                         "similarity": sim,
-                        "embedding_model": r.EmbeddingModel,
+                        "embedding_model": getattr(r, "EmbeddingModel", None),
                     }
                 )
 
-        # Use heapq.nlargest for efficient top-k selection (O(n log k) vs O(n log n))
-        # This is more efficient when top_k << len(scored)
+        # Efficient top-k selection
         return heapq.nlargest(top_k, scored, key=lambda x: x["similarity"])
-    except Exception:
+    except Exception as e:
+        _logger.exception("Failed to fetch similar messages: %s", str(e))
         return []
     finally:
-        # Return connection to pool instead of closing
         _return_conn(conn)
 
 
+# Public API exports
 __all__ = [
     "generate_embedding",
     "store_embedding",
+    "store_embeddings_batch",
     "fetch_similar_messages",
+    "close_all_connections",
     "_get_conn",
     "_return_conn",
     "_conn_cache",
