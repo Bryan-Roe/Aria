@@ -70,6 +70,23 @@ class Config:
     early_stopping_threshold: float
 
 
+def validate_config_path(config_path: str) -> Path:
+    candidate = Path(config_path).expanduser()
+    resolved = candidate.resolve(strict=True)
+
+    cwd_root = Path.cwd().resolve()
+    script_root = Path(__file__).resolve().parents[1]
+
+    allowed_roots = (cwd_root, script_root)
+    if not any(root == resolved or root in resolved.parents for root in allowed_roots):
+        raise ValueError(
+            f"Config path '{resolved}' is outside allowed roots: "
+            f"{cwd_root} or {script_root}"
+        )
+
+    return resolved
+
+
 def read_yaml(yaml_path: Path) -> Dict[str, Any]:
     with yaml_path.open("r", encoding="utf-8") as f:
         return yaml.safe_load(f)
@@ -301,7 +318,8 @@ def main():
     except Exception as _e:
         print(f"[tracing] init skipped in train_lora: {_e}")
 
-    cfg_raw = read_yaml(Path(args.config))
+    config_path = validate_config_path(args.config)
+    cfg_raw = read_yaml(config_path)
     cfg = Config(
         model=cfg_raw.get("model") or "Phi-3.6-mini-instruct",
         finetune_dataset=cfg_raw.get("finetune_dataset") or str(Path(args.dataset)),
