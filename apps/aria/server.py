@@ -1607,9 +1607,10 @@ class AriaRequestHandler(SimpleHTTPRequestHandler):
                 elif actions:
                     valid_actions, validation_reason = validate_action_sequence(actions)
                     if not valid_actions:
+                        safe_validation_reason = validation_reason.replace("\r", "\\r").replace("\n", "\\n")
                         logger.warning(
                             "Rejecting invalid parsed action sequence for /api/aria/command: %s",
-                            validation_reason,
+                            safe_validation_reason,
                         )
                         actions = []
                         tags = generate_tags_fallback(command)
