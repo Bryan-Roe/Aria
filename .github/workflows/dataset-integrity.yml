@@ -8,6 +8,7 @@
 # Jobs:
 #   - immutability-check: Fails if any existing dataset file is modified/deleted
 #   - schema-validate: Validates new .json/.jsonl files against message schema
+#   - integrity-summary: Aggregates results into a single status check
 # =============================================================================
 
 name: Dataset Integrity
@@ -17,97 +18,167 @@ on:
         branches: [main, dev]
         paths:
             - "datasets/**"
+            - ".github/workflows/dataset-integrity.yml"
     push:
         branches: [main]
         paths:
             - "datasets/**"
+            - ".github/workflows/dataset-integrity.yml"
     workflow_dispatch:
+        inputs:
+            validate_all:
+                description: "Validate ALL records in each file (not just spot-check)"
+                required: false
+                type: boolean
+                default: false
+
+# Principle of least privilege: this workflow only needs to read repo contents.
+permissions:
+    contents: read
 
 concurrency:
     group: dataset-integrity-${{ github.ref }}
     cancel-in-progress: true
 
+defaults:
+    run:
+        shell: bash
+
+env:
+    # Maximum dataset file size (MiB). Keeps PRs reviewable and CI fast.
+    MAX_DATASET_FILE_MIB: "100"
+    # Validate every record on workflow_dispatch when validate_all=true,
+    # otherwise spot-check the first N records of each file.
+    SPOT_CHECK_LIMIT: "20"
+
 jobs:
+    # -------------------------------------------------------------------------
+    # Job 1: Immutability gate - existing dataset files cannot be changed
+    # -------------------------------------------------------------------------
     immutability-check:
         name: Dataset Immutability Gate
         runs-on: ubuntu-latest
         timeout-minutes: 5
+        outputs:
+            violations: ${{ steps.check.outputs.violations }}
+            status: ${{ steps.check.outputs.status }}
 
         steps:
             - name: Checkout code
               uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4.3.1
               with:
                   fetch-depth: 0
+                  persist-credentials: false
 
             - name: Resolve diff range
               id: range
+              env:
+                  EVENT_NAME: ${{ github.event_name }}
+                  PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+                  PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+                  PUSH_BEFORE: ${{ github.event.before }}
+                  PUSH_HEAD: ${{ github.sha }}
               run: |
-                  if [ "${{ github.event_name }}" = "pull_request" ]; then
-                    echo "base=${{ github.event.pull_request.base.sha }}" >> $GITHUB_OUTPUT
-                    echo "head=${{ github.event.pull_request.head.sha }}" >> $GITHUB_OUTPUT
-                  elif [ "${{ github.event.before }}" = "0000000000000000000000000000000000000000" ] || \
-                       [ -z "${{ github.event.before }}" ]; then
-                    # Initial push to branch — compare against empty tree
-                    echo "base=$(git hash-object -t tree /dev/null)" >> $GITHUB_OUTPUT
-                    echo "head=${{ github.sha }}" >> $GITHUB_OUTPUT
+                  set -euo pipefail
+
+                  empty_tree=$(git hash-object -t tree /dev/null)
+
+                  if [ "$EVENT_NAME" = "pull_request" ]; then
+                      # Use merge-base so we only see commits introduced by the PR,
+                      # which is robust against force-pushes and rebased base branches.
+                      git fetch --no-tags --depth=1 origin "$PR_BASE_SHA" 2>/dev/null || true
+                      base=$(git merge-base "$PR_BASE_SHA" "$PR_HEAD_SHA" 2>/dev/null || echo "$PR_BASE_SHA")
+                      head="$PR_HEAD_SHA"
+                  elif [ -z "$PUSH_BEFORE" ] || [ "$PUSH_BEFORE" = "0000000000000000000000000000000000000000" ]; then
+                      # Initial push to a branch — diff against empty tree
+                      base="$empty_tree"
+                      head="$PUSH_HEAD"
                   else
-                    echo "base=${{ github.event.before }}" >> $GITHUB_OUTPUT
-                    echo "head=${{ github.sha }}" >> $GITHUB_OUTPUT
+                      base="$PUSH_BEFORE"
+                      head="$PUSH_HEAD"
                   fi
+
+                  echo "Resolved diff range: $base..$head"
+                  echo "base=$base" >> "$GITHUB_OUTPUT"
+                  echo "head=$head" >> "$GITHUB_OUTPUT"
 
             - name: Detect modified or deleted dataset files
               id: check
+              env:
+                  BASE: ${{ steps.range.outputs.base }}
+                  HEAD: ${{ steps.range.outputs.head }}
               run: |
-                  BASE="${{ steps.range.outputs.base }}"
-                  HEAD="${{ steps.range.outputs.head }}"
+                  set -euo pipefail
 
-                  # Only Added (A) files are permitted — Modified (M), Deleted (D),
-                  # Renamed (R), Copied (C) are all immutability violations.
-                  VIOLATIONS=$(git diff --name-status "$BASE".."$HEAD" -- datasets/ \
-                    | grep -E '^[MDRCT]' | awk '{print $NF}' || true)
+                  # Only Added (A) files are permitted. Modified (M), Deleted (D),
+                  # Renamed (R), Copied (C), and Type-Changed (T) are violations.
+                  # Use --diff-filter for reliable filtering and -z for NUL-delimited
+                  # output that handles spaces/unicode in filenames safely.
+                  violations=$(git diff -z --name-only --diff-filter=MDRCT \
+                      "$BASE..$HEAD" -- datasets/ | tr '\0' '\n' | sed '/^$/d' || true)
 
-                  if [ -n "$VIOLATIONS" ]; then
-                    echo "❌ Immutability violation — existing dataset files were changed:"
-                    echo "$VIOLATIONS"
-                    echo ""
-                    echo "The datasets/ directory is READ-ONLY. Existing files must not"
-                    echo "be modified, deleted, renamed, or moved. Only adding new files"
-                    echo "is allowed. See .github/copilot-instructions.md for details."
-                    echo ""
-                    echo "violations<<EOF" >> $GITHUB_OUTPUT
-                    echo "$VIOLATIONS" >> $GITHUB_OUTPUT
-                    echo "EOF" >> $GITHUB_OUTPUT
-                    exit 1
+                  {
+                      echo "status<<EOF"
+                      if [ -n "$violations" ]; then echo "failed"; else echo "passed"; fi
+                      echo "EOF"
+                      echo "violations<<EOF"
+                      echo "$violations"
+                      echo "EOF"
+                  } >> "$GITHUB_OUTPUT"
+
+                  if [ -n "$violations" ]; then
+                      echo "::error title=Dataset immutability violation::Existing dataset files were modified or removed."
+                      echo ""
+                      echo "❌ Immutability violation — existing dataset files were changed:"
+                      printf '  - %s\n' $violations
+                      echo ""
+                      echo "The datasets/ directory is READ-ONLY. Existing files must not"
+                      echo "be modified, deleted, renamed, or moved. Only adding new files"
+                      echo "is allowed. See .github/copilot-instructions.md for details."
+                      exit 1
                   fi
 
                   echo "✅ No existing dataset files were modified"
-                  echo "violations=" >> $GITHUB_OUTPUT
 
             - name: Write immutability summary
               if: always()
+              env:
+                  STATUS: ${{ steps.check.outputs.status }}
+                  VIOLATIONS: ${{ steps.check.outputs.violations }}
               run: |
-                  echo "## Dataset Immutability Gate" >> $GITHUB_STEP_SUMMARY
-                  echo "" >> $GITHUB_STEP_SUMMARY
-                  if [ -n "${{ steps.check.outputs.violations }}" ]; then
-                    echo "❌ **FAILED** — existing files modified:" >> $GITHUB_STEP_SUMMARY
-                    echo '```' >> $GITHUB_STEP_SUMMARY
-                    echo "${{ steps.check.outputs.violations }}" >> $GITHUB_STEP_SUMMARY
-                    echo '```' >> $GITHUB_STEP_SUMMARY
-                  else
-                    echo "✅ **PASSED** — no existing dataset files were changed" >> $GITHUB_STEP_SUMMARY
-                  fi
+                  set -euo pipefail
+                  {
+                      echo "## Dataset Immutability Gate"
+                      echo ""
+                      if [ "$STATUS" = "passed" ]; then
+                          echo "✅ **PASSED** — no existing dataset files were changed"
+                      else
+                          echo "❌ **FAILED** — existing files modified:"
+                          echo ""
+                          echo '```'
+                          echo "$VIOLATIONS"
+                          echo '```'
+                      fi
+                  } >> "$GITHUB_STEP_SUMMARY"
 
+    # -------------------------------------------------------------------------
+    # Job 2: Schema validation - new dataset files must conform to chat schema
+    # -------------------------------------------------------------------------
     schema-validate:
         name: Validate New Dataset Files
         runs-on: ubuntu-latest
-        timeout-minutes: 5
+        timeout-minutes: 10
         needs: immutability-check
+        outputs:
+            status: ${{ steps.validate.outputs.status }}
+            files_checked: ${{ steps.validate.outputs.files_checked }}
 
         steps:
             - name: Checkout code
               uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4.3.1
               with:
                   fetch-depth: 0
+                  persist-credentials: false
 
             - name: Setup Python
               uses: ./.github/actions/setup-python-env
@@ -116,127 +187,302 @@ jobs:
 
             - name: Resolve diff range
               id: range
+              env:
+                  EVENT_NAME: ${{ github.event_name }}
+                  PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+                  PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+                  PUSH_BEFORE: ${{ github.event.before }}
+                  PUSH_HEAD: ${{ github.sha }}
               run: |
-                  if [ "${{ github.event_name }}" = "pull_request" ]; then
-                    echo "base=${{ github.event.pull_request.base.sha }}" >> $GITHUB_OUTPUT
-                    echo "head=${{ github.event.pull_request.head.sha }}" >> $GITHUB_OUTPUT
-                  elif [ "${{ github.event.before }}" = "0000000000000000000000000000000000000000" ] || \
-                       [ -z "${{ github.event.before }}" ]; then
-                    echo "base=$(git hash-object -t tree /dev/null)" >> $GITHUB_OUTPUT
-                    echo "head=${{ github.sha }}" >> $GITHUB_OUTPUT
+                  set -euo pipefail
+
+                  empty_tree=$(git hash-object -t tree /dev/null)
+
+                  if [ "$EVENT_NAME" = "pull_request" ]; then
+                      git fetch --no-tags --depth=1 origin "$PR_BASE_SHA" 2>/dev/null || true
+                      base=$(git merge-base "$PR_BASE_SHA" "$PR_HEAD_SHA" 2>/dev/null || echo "$PR_BASE_SHA")
+                      head="$PR_HEAD_SHA"
+                  elif [ -z "$PUSH_BEFORE" ] || [ "$PUSH_BEFORE" = "0000000000000000000000000000000000000000" ]; then
+                      base="$empty_tree"
+                      head="$PUSH_HEAD"
                   else
-                    echo "base=${{ github.event.before }}" >> $GITHUB_OUTPUT
-                    echo "head=${{ github.sha }}" >> $GITHUB_OUTPUT
+                      base="$PUSH_BEFORE"
+                      head="$PUSH_HEAD"
                   fi
+
+                  echo "base=$base" >> "$GITHUB_OUTPUT"
+                  echo "head=$head" >> "$GITHUB_OUTPUT"
+
+            - name: Collect newly added dataset files
+              id: collect
+              env:
+                  BASE: ${{ steps.range.outputs.base }}
+                  HEAD: ${{ steps.range.outputs.head }}
+              run: |
+                  set -euo pipefail
+
+                  # NUL-delimited list of added files under datasets/
+                  added_file=$(mktemp)
+                  git diff -z --name-only --diff-filter=A "$BASE..$HEAD" -- datasets/ \
+                      > "$added_file" || true
+
+                  count=$(tr -cd '\0' < "$added_file" | wc -c | tr -d ' ')
+                  echo "Found $count newly added file(s) under datasets/"
+                  echo "added_file=$added_file" >> "$GITHUB_OUTPUT"
+                  echo "count=$count" >> "$GITHUB_OUTPUT"
 
             - name: Validate newly added dataset files
+              id: validate
+              env:
+                  ADDED_FILE: ${{ steps.collect.outputs.added_file }}
+                  ADDED_COUNT: ${{ steps.collect.outputs.count }}
+                  MAX_DATASET_FILE_MIB: ${{ env.MAX_DATASET_FILE_MIB }}
+                  SPOT_CHECK_LIMIT: ${{ env.SPOT_CHECK_LIMIT }}
+                  VALIDATE_ALL: ${{ github.event.inputs.validate_all || 'false' }}
               run: |
-                  BASE="${{ steps.range.outputs.base }}"
-                  HEAD="${{ steps.range.outputs.head }}"
+                  set -euo pipefail
 
-                  ADDED=$(git diff --name-status "$BASE".."$HEAD" -- datasets/ \
-                    | grep '^A' | awk '{print $2}' || true)
-
-                  if [ -z "$ADDED" ]; then
-                    echo "No newly added dataset files — nothing to validate"
-                    exit 0
+                  if [ "${ADDED_COUNT:-0}" = "0" ]; then
+                      echo "No newly added dataset files — nothing to validate"
+                      {
+                          echo "status=skipped"
+                          echo "files_checked=0"
+                      } >> "$GITHUB_OUTPUT"
+                      exit 0
                   fi
 
-                  echo "Validating new dataset files:"
-                  echo "$ADDED"
-                  echo ""
+                  python3 - <<'PYEOF'
+                  """Validate newly added dataset files against the chat-message schema.
 
-                  ADDED_FILES="$ADDED" python3 - <<'PYEOF'
-                  import sys, json, os
+                  Schema (per record):
+                      {"messages": [{"role": "user|assistant|system|tool",
+                                     "content": "..."}]}
 
-                  VALID_ROLES = {'user', 'assistant', 'system', 'tool'}
-                  added_files = [f for f in os.environ.get('ADDED_FILES', '').strip().splitlines() if f]
-                  dataset_files = [f for f in added_files if f.endswith(('.json', '.jsonl'))]
+                  Behavior:
+                      - JSONL files: one record per non-empty line.
+                      - JSON files: a single record OR a list of records.
+                      - Spot-checks the first N records unless VALIDATE_ALL=true.
+                      - Enforces a per-file size limit (MAX_DATASET_FILE_MIB).
+                      - Reports line numbers (JSONL) and record indices (JSON arrays).
+                      - Writes structured outputs for the GitHub Actions step summary.
+                  """
+                  from __future__ import annotations
+
+                  import json
+                  import os
+                  import sys
+                  from pathlib import Path
+
+                  VALID_ROLES = frozenset({"user", "assistant", "system", "tool"})
+                  ADDED_FILE = os.environ["ADDED_FILE"]
+                  MAX_BYTES = int(os.environ.get("MAX_DATASET_FILE_MIB", "100")) * 1024 * 1024
+                  SPOT_LIMIT = int(os.environ.get("SPOT_CHECK_LIMIT", "20"))
+                  VALIDATE_ALL = os.environ.get("VALIDATE_ALL", "false").lower() == "true"
+                  GITHUB_OUTPUT = os.environ.get("GITHUB_OUTPUT")
+
+                  # Read NUL-delimited list of added files
+                  with open(ADDED_FILE, "rb") as fh:
+                      raw = fh.read()
+                  added = [p.decode("utf-8", errors="replace")
+                           for p in raw.split(b"\x00") if p]
+                  dataset_files = [f for f in added if f.endswith((".json", ".jsonl"))]
 
                   if not dataset_files:
                       print("No JSON/JSONL dataset files to validate — skipping")
+                      if GITHUB_OUTPUT:
+                          with open(GITHUB_OUTPUT, "a") as gh:
+                              gh.write("status=skipped\nfiles_checked=0\n")
                       sys.exit(0)
 
-                  errors = []
+                  print(f"Validating {len(dataset_files)} dataset file(s) "
+                        f"(mode={'full' if VALIDATE_ALL else f'spot-check[{SPOT_LIMIT}]'})")
+                  print()
+
+                  errors: list[str] = []
                   passed = 0
 
-                  for filepath in dataset_files:
-                      if not os.path.exists(filepath):
-                          print(f"⚠ {filepath}: file not found (may be outside working tree)")
-                          continue
-                      try:
-                          with open(filepath) as fh:
-                              content = fh.read().strip()
+                  def validate_message(msg: object, ctx: str) -> list[str]:
+                      """Validate a single chat message dict; return list of error strings."""
+                      problems: list[str] = []
+                      if not isinstance(msg, dict):
+                          return [f"{ctx}: expected object, got {type(msg).__name__}"]
+                      if "role" not in msg or "content" not in msg:
+                          problems.append(f"{ctx}: must have 'role' and 'content'")
+                          return problems
+                      role = msg.get("role")
+                      if role not in VALID_ROLES:
+                          problems.append(f"{ctx}: unknown role {role!r} "
+                                          f"(expected one of {sorted(VALID_ROLES)})")
+                      content = msg.get("content")
+                      # Content may be a string or list-of-parts (multi-modal). Reject
+                      # anything else and reject empty strings.
+                      if isinstance(content, str):
+                          if not content.strip():
+                              problems.append(f"{ctx}: 'content' is empty")
+                      elif isinstance(content, list):
                           if not content:
-                              errors.append(f"{filepath}: file is empty")
-                              continue
+                              problems.append(f"{ctx}: 'content' list is empty")
+                      else:
+                          problems.append(f"{ctx}: 'content' must be string or list, "
+                                          f"got {type(content).__name__}")
+                      return problems
 
-                          # Parse as JSONL (newline-delimited) or JSON array
-                          if filepath.endswith('.jsonl'):
-                              records = [json.loads(line) for line in content.splitlines() if line.strip()]
+                  def validate_record(rec: object, ctx: str) -> list[str]:
+                      problems: list[str] = []
+                      if not isinstance(rec, dict):
+                          return [f"{ctx}: expected object, got {type(rec).__name__}"]
+                      if "messages" not in rec:
+                          return [f"{ctx}: missing 'messages' key"]
+                      msgs = rec["messages"]
+                      if not isinstance(msgs, list) or not msgs:
+                          return [f"{ctx}: 'messages' must be a non-empty list"]
+                      for j, msg in enumerate(msgs):
+                          problems.extend(
+                              validate_message(msg, f"{ctx}.messages[{j}]")
+                          )
+                      return problems
+
+                  for filepath in dataset_files:
+                      path = Path(filepath)
+                      if not path.exists():
+                          print(f"⚠ {filepath}: file not found (skipped)")
+                          continue
+
+                      # Enforce per-file size limit
+                      try:
+                          size = path.stat().st_size
+                      except OSError as e:
+                          errors.append(f"{filepath}: cannot stat — {e}")
+                          continue
+                      if size > MAX_BYTES:
+                          errors.append(
+                              f"{filepath}: file is {size / 1024 / 1024:.1f} MiB, "
+                              f"exceeds limit of {MAX_BYTES // 1024 // 1024} MiB"
+                          )
+                          continue
+
+                      try:
+                          # UTF-8 is required; reject anything else.
+                          content = path.read_text(encoding="utf-8")
+                      except UnicodeDecodeError as e:
+                          errors.append(f"{filepath}: not valid UTF-8 — {e}")
+                          continue
+                      except OSError as e:
+                          errors.append(f"{filepath}: read error — {e}")
+                          continue
+
+                      if not content.strip():
+                          errors.append(f"{filepath}: file is empty")
+                          continue
+
+                      file_errors: list[str] = []
+                      record_count = 0
+
+                      try:
+                          if filepath.endswith(".jsonl"):
+                              # Parse line by line so we can report line numbers.
+                              records: list[tuple[int, object]] = []
+                              for lineno, line in enumerate(content.splitlines(), start=1):
+                                  if not line.strip():
+                                      continue
+                                  try:
+                                      records.append((lineno, json.loads(line)))
+                                  except json.JSONDecodeError as e:
+                                      file_errors.append(
+                                          f"  line {lineno}: JSON parse error — {e.msg}"
+                                      )
+                              record_count = len(records)
+                              limit = record_count if VALIDATE_ALL else min(SPOT_LIMIT, record_count)
+                              for lineno, rec in records[:limit]:
+                                  file_errors.extend(
+                                      validate_record(rec, f"  line {lineno}")
+                                  )
                           else:
                               data = json.loads(content)
-                              records = data if isinstance(data, list) else [data]
-
-                          if not records:
-                              errors.append(f"{filepath}: no records found")
-                              continue
-
-                          # Validate chat message schema: each record must have
-                          # {"messages": [{"role": "...", "content": "..."}]}
-                          file_errors = []
-                          for i, rec in enumerate(records[:20]):  # spot-check up to 20
-                              if not isinstance(rec, dict):
-                                  file_errors.append(f"  record[{i}]: expected dict, got {type(rec).__name__}")
-                                  continue
-                              if 'messages' not in rec:
-                                  file_errors.append(f"  record[{i}]: missing 'messages' key")
-                                  continue
-                              msgs = rec['messages']
-                              if not isinstance(msgs, list) or not msgs:
-                                  file_errors.append(f"  record[{i}]: 'messages' must be a non-empty list")
-                                  continue
-                              for j, msg in enumerate(msgs):
-                                  if not isinstance(msg, dict):
-                                      file_errors.append(f"  record[{i}].messages[{j}]: expected dict")
-                                  elif 'role' not in msg or 'content' not in msg:
-                                      file_errors.append(
-                                          f"  record[{i}].messages[{j}]: must have 'role' and 'content'"
-                                      )
-                                  elif msg['role'] not in VALID_ROLES:
-                                      file_errors.append(
-                                          f"  record[{i}].messages[{j}]: unknown role '{msg['role']}'"
-                                      )
-
-                          if file_errors:
-                              errors.append(f"{filepath}:")
-                              errors.extend(file_errors)
-                          else:
-                              print(f"✅ {filepath} ({len(records)} records)")
-                              passed += 1
-
+                              records_seq = data if isinstance(data, list) else [data]
+                              record_count = len(records_seq)
+                              limit = record_count if VALIDATE_ALL else min(SPOT_LIMIT, record_count)
+                              for i, rec in enumerate(records_seq[:limit]):
+                                  file_errors.extend(
+                                      validate_record(rec, f"  record[{i}]")
+                                  )
                       except json.JSONDecodeError as e:
-                          errors.append(f"{filepath}: JSON parse error — {e}")
-                      except Exception as e:
-                          errors.append(f"{filepath}: unexpected error — {e}")
+                          file_errors.append(f"  JSON parse error — {e}")
 
-                  print(f"\n{passed}/{len(dataset_files)} file(s) passed validation")
+                      if record_count == 0 and not file_errors:
+                          file_errors.append("  no records found")
+
+                      if file_errors:
+                          errors.append(f"{filepath}:")
+                          errors.extend(file_errors)
+                      else:
+                          checked = record_count if VALIDATE_ALL else min(SPOT_LIMIT, record_count)
+                          print(f"✅ {filepath} ({record_count} records, {checked} checked)")
+                          passed += 1
+
+                  print()
+                  print(f"{passed}/{len(dataset_files)} file(s) passed validation")
+
+                  if GITHUB_OUTPUT:
+                      with open(GITHUB_OUTPUT, "a") as gh:
+                          gh.write(f"files_checked={len(dataset_files)}\n")
+                          gh.write(f"status={'failed' if errors else 'passed'}\n")
 
                   if errors:
-                      print("\n❌ Schema validation errors:")
+                      print()
+                      print("❌ Schema validation errors:")
                       for err in errors:
                           print(err)
+                          # Surface the first error per file as a workflow annotation
+                          if not err.startswith("  "):
+                              print(f"::error file={err.rstrip(':')}::Schema validation failed")
                       sys.exit(1)
                   PYEOF
 
             - name: Write schema summary
               if: always()
+              env:
+                  STATUS: ${{ steps.validate.outputs.status }}
+                  FILES_CHECKED: ${{ steps.validate.outputs.files_checked }}
               run: |
-                  echo "## Dataset Schema Validation" >> $GITHUB_STEP_SUMMARY
-                  echo "" >> $GITHUB_STEP_SUMMARY
-                  echo "New files are validated against the chat message schema:" >> $GITHUB_STEP_SUMMARY
-                  echo '```json' >> $GITHUB_STEP_SUMMARY
-                  echo '[{"messages": [{"role": "user|assistant|system", "content": "..."}]}]' >> $GITHUB_STEP_SUMMARY
-                  echo '```' >> $GITHUB_STEP_SUMMARY
-                  echo "" >> $GITHUB_STEP_SUMMARY
-                  echo "See job logs for per-file validation results." >> $GITHUB_STEP_SUMMARY
+                  set -euo pipefail
+                  {
+                      echo "## Dataset Schema Validation"
+                      echo ""
+                      echo "**Status:** \`${STATUS:-unknown}\`  "
+                      echo "**Files checked:** \`${FILES_CHECKED:-0}\`"
+                      echo ""
+                      echo "New files are validated against the chat message schema:"
+                      echo ""
+                      echo '```json'
+                      echo '[{"messages": [{"role": "user|assistant|system|tool", "content": "..."}]}]'
+                      echo '```'
+                      echo ""
+                      echo "See job logs for per-file validation results."
+                  } >> "$GITHUB_STEP_SUMMARY"
+
+    # -------------------------------------------------------------------------
+    # Job 3: Aggregate status - single required check for branch protection
+    # -------------------------------------------------------------------------
+    integrity-summary:
+        name: Dataset Integrity Summary
+        runs-on: ubuntu-latest
+        needs: [immutability-check, schema-validate]
+        if: always()
+        timeout-minutes: 1
+        steps:
+            - name: Aggregate status
+              env:
+                  IMMUTABILITY: ${{ needs.immutability-check.result }}
+                  SCHEMA: ${{ needs.schema-validate.result }}
+              run: |
+                  set -euo pipefail
+                  echo "Immutability: $IMMUTABILITY"
+                  echo "Schema:       $SCHEMA"
+
+                  # Treat 'skipped' as success (e.g. when only docs changed via path filters
+                  # in a future revision). Anything other than success/skipped fails.
+                  case "$IMMUTABILITY" in success|skipped) ;; *) exit 1 ;; esac
+                  case "$SCHEMA"       in success|skipped) ;; *) exit 1 ;; esac
+
+                  echo "✅ All dataset integrity checks passed"
