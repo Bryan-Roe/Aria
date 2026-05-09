@@ -28,6 +28,7 @@ permissions:
   contents: read
 
 env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true  # Opt into Node.js 24 for JS actions ahead of June 2026 forced migration
   PYTHON_VERSION: '3.11'
   TEST_PATH: tests
 
@@ -38,10 +39,10 @@ jobs:
     timeout-minutes: 30
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4.3.1
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065  # v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
           cache: pip
@@ -51,12 +52,12 @@ jobs:
             pyproject.toml
             setup.cfg
 
-      - name: Install dev dependencies
+      - name: Install dependencies
         shell: bash
         run: |
           set -euo pipefail
           python -m pip install --upgrade pip
-
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
           if [[ -f requirements-dev.txt ]]; then
             python -m pip install -r requirements-dev.txt
           elif [[ -f pyproject.toml ]]; then
@@ -91,10 +92,9 @@ jobs:
           test-path: ${{ env.TEST_PATH }}
           extra-args: --maxfail=1 -q
         env:
-          CI: 'true'
+          CI: true
 
   watcher:
-    name: Test watcher
     needs: test
     if: >-
       (
@@ -108,25 +108,17 @@ jobs:
       image: mcr.microsoft.com/devcontainers/python:1-3.11
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4.3.1
 
       - name: Install dev dependencies (in container)
-        shell: bash
         run: |
-          set -euo pipefail
           python -m pip install --upgrade pip
-
-          if [[ -f requirements-dev.txt ]]; then
-            python -m pip install -r requirements-dev.txt
-          else
-            python -m pip install pytest watchdog
-          fi
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          if [ -f requirements-dev.txt ]; then pip install -r requirements-dev.txt; else pip install pytest watchdog; fi
 
       - name: Run test watcher (runs tests once then exits via timeout)
-        shell: bash
         run: |
-          set -euo pipefail
           timeout "${{ github.event.inputs.watcher_timeout_minutes || '10' }}m" \
-            python3 scripts/test_watcher.py --cmd "pytest ${{ env.TEST_PATH }} -q --maxfail=1"
+            python3 scripts/test_watcher.py --cmd "pytest tests -q --maxfail=1"
         env:
-          CI: 'true'
+          CI: true

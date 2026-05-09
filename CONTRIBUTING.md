@@ -117,7 +117,7 @@ A lightweight file watcher at [`scripts/test_watcher.py`](scripts/test_watcher.p
 python3 scripts/test_watcher.py
 ```
 
-See [`NEXT_STEPS.md`](NEXT_STEPS.md) for troubleshooting notes.
+See [`NEXT_STEPS.md`](docs/NEXT_STEPS.md) for troubleshooting notes, or check the [open issues](https://github.com/Bryan-Roe/Aria/issues).
 
 ---
 
