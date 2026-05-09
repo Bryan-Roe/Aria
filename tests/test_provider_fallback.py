@@ -92,23 +92,20 @@ class TestProviderPriorityChain:
     def test_azure_requires_all_four_vars(self):
         """Azure OpenAI is only 'ready' when all four required vars are set."""
         env = self._clean_env()
-        # Only three of four set — should NOT be ready
+        # Only three of four set — api_version has a default, so azure IS ready
         env.update(
             {
                 "AZURE_OPENAI_API_KEY": "key",
                 "AZURE_OPENAI_ENDPOINT": "https://example.com",
                 "AZURE_OPENAI_DEPLOYMENT": "gpt-4",
-                # AZURE_OPENAI_API_VERSION intentionally omitted
+                # AZURE_OPENAI_API_VERSION omitted — has a default of "2024-02-01"
             }
         )
-        # Strip api version from env too
         env.pop("AZURE_OPENAI_API_VERSION", None)
         with patch.dict(os.environ, env, clear=True):
             s = Settings()
-            # With no api version in env the pydantic default kicks in, so
-            # azure_openai_ready should still be True (has default value)
-            # This validates the default is applied correctly
-            assert isinstance(s.azure_openai_ready, bool)
+            # api_version has a default, so azure should be ready when key/endpoint/deployment set
+            assert s.azure_openai_ready is True
 
 
 # ---------------------------------------------------------------------------

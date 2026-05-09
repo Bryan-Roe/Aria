@@ -37,14 +37,14 @@ all: lint test
 ## Install all project dependencies (runtime + dev)
 install:
 	$(PIP) install --upgrade pip
-	$(PIP) install -r requirements.txt
-	$(PIP) install -r requirements-dev.txt
+	@if [ -f requirements.txt ]; then $(PIP) install -r requirements.txt; fi
+	@if [ -f requirements-dev.txt ]; then $(PIP) install -r requirements-dev.txt; fi
 	@echo "✅ Dependencies installed."
 
 ## Install only runtime dependencies
 install-prod:
 	$(PIP) install --upgrade pip
-	$(PIP) install -r requirements.txt
+	@if [ -f requirements.txt ]; then $(PIP) install -r requirements.txt; fi
 
 # ---------------------------------------------------------------------------
 # Development servers

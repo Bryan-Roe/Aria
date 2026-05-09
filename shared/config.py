@@ -27,12 +27,17 @@ _LOG = logging.getLogger(__name__)
 try:
     from pydantic import Field, field_validator
     from pydantic_settings import BaseSettings
+    try:
+        from pydantic import ConfigDict as _ConfigDict
+    except ImportError:
+        _ConfigDict = None  # type: ignore[assignment,misc]
 
     _PYDANTIC_AVAILABLE = True
 except ImportError:  # pragma: no cover
     try:
         # pydantic v1 compatibility
         from pydantic import BaseSettings, Field, validator as field_validator  # type: ignore[assignment,no-redef]
+        _ConfigDict = None  # type: ignore[assignment]
 
         _PYDANTIC_AVAILABLE = True
     except ImportError:
@@ -40,6 +45,7 @@ except ImportError:  # pragma: no cover
         BaseSettings = object  # type: ignore[assignment,misc]
         Field = None  # type: ignore[assignment]
         field_validator = None  # type: ignore[assignment]
+        _ConfigDict = None  # type: ignore[assignment]
 
 
 # ---------------------------------------------------------------------------
@@ -141,14 +147,22 @@ if _PYDANTIC_AVAILABLE:
             default=4, alias="QAI_MAX_CONCURRENT_TRAINING_JOBS"
         )
 
-        model_config = {  # pydantic v2 style
-            "extra": "ignore",
-            "env_file": ".env",
-            "env_file_encoding": "utf-8",
-            "populate_by_name": True,
-        }
+        if _ConfigDict is not None:
+            model_config = _ConfigDict(
+                extra="ignore",
+                env_file=".env",
+                env_file_encoding="utf-8",
+                populate_by_name=True,
+            )
+        else:
+            model_config = {  # type: ignore[assignment]
+                "extra": "ignore",
+                "env_file": ".env",
+                "env_file_encoding": "utf-8",
+                "populate_by_name": True,
+            }
 
-        @field_validator("log_level", mode="before")  # type: ignore[arg-type]
+        @field_validator("log_level", mode="before")
         @classmethod
         def _validate_log_level(cls, v: str) -> str:
             upper = str(v).upper()

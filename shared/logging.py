@@ -94,7 +94,14 @@ class JsonFormatter(logging.Formatter):
         try:
             return json.dumps(doc, default=str)
         except Exception as exc:  # noqa: BLE001
-            return json.dumps({"level": "ERROR", "message": f"Failed to serialize log record: {exc}"})
+            return json.dumps(
+                {
+                    "level": "ERROR",
+                    "logger": record.name,
+                    "message": f"Failed to serialize log record: {exc}",
+                    "original_message": str(record.message),
+                }
+            )
 
 
 # ---------------------------------------------------------------------------
