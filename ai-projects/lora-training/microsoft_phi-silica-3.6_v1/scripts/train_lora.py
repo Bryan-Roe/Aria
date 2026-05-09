@@ -5,6 +5,7 @@ import os
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, Iterable, List
+from urllib.parse import urlparse
 
 try:
     import yaml  # type: ignore
@@ -166,11 +167,41 @@ def make_hf_dataset_from_files(
     return ds
 
 
+def _allowed_manifest_hosts() -> List[str]:
+    raw = os.environ.get("LORA_MANIFEST_ALLOWED_HOSTS", "")
+    return [h.strip().lower() for h in raw.split(",") if h.strip()]
+
+
+def _is_allowed_manifest_url(path_or_url: str) -> bool:
+    parsed = urlparse(path_or_url)
+    if parsed.scheme not in ("http", "https"):
+        return False
+    if not parsed.hostname:
+        return False
+    host = parsed.hostname.lower()
+    allowed_hosts = _allowed_manifest_hosts()
+    if not allowed_hosts:
+        return False
+    for allowed in allowed_hosts:
+        if host == allowed or host.endswith("." + allowed):
+            return True
+    return False
+
+
+def _open_remote_manifest(path_or_url: str):
+    if not _is_allowed_manifest_url(path_or_url):
+        raise ValueError(
+            "Remote manifest URL is not allowed. Set LORA_MANIFEST_ALLOWED_HOSTS "
+            "to a comma-separated allowlist of hostnames."
+        )
+    import urllib.request
+
+    return urllib.request.urlopen(path_or_url)
+
+
 def _read_text_source(path_or_url: str) -> Iterable[str]:
     if path_or_url.startswith("http://") or path_or_url.startswith("https://"):
-        import urllib.request
-
-        with urllib.request.urlopen(path_or_url) as resp:  # nosec B310
+        with _open_remote_manifest(path_or_url) as resp:  # validated allowlisted URL
             for line in resp.read().decode("utf-8").splitlines():
                 yield line
     else:
@@ -187,9 +218,7 @@ def parse_manifest(path_or_url: str) -> List[str]:
         import json as _json
 
         if path_or_url.startswith("http://") or path_or_url.startswith("https://"):
-            import urllib.request
-
-            with urllib.request.urlopen(path_or_url) as resp:  # nosec B310
+            with _open_remote_manifest(path_or_url) as resp:  # validated allowlisted URL
                 obj = _json.loads(resp.read().decode("utf-8"))
         else:
             with Path(path_or_url).open("r", encoding="utf-8") as f:
