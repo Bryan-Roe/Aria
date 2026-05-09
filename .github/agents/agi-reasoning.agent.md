@@ -176,3 +176,7 @@ create_agi_provider(
 - Cost-impacting operations (QPU jobs, Azure deployments)
 - Ambiguous requirements that could be interpreted multiple ways
 - Changes that would break existing public APIs
+
+## Difference from `visible-reasoning`
+
+This agent keeps chain-of-thought **internal** — only the final answer is delivered. For tasks where the user wants to follow each reasoning step explicitly (explanation, tutoring, decision walkthroughs), use the `visible-reasoning` agent (via `reason.prompt.md`) instead.
