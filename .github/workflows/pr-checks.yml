@@ -2,20 +2,34 @@ name: PR Checks
 
 on:
   pull_request:
-    types: [opened, synchronize, reopened]
+    types: [opened, synchronize, reopened, edited, ready_for_review]
 
+# Cancel superseded runs for the same PR. Fall back to ref if the PR
+# number is unavailable on the event payload for any reason.
 concurrency:
-  group: pr-${{ github.event.pull_request.number }}
+  group: pr-checks-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
+
+# Default to least-privilege at the workflow level; jobs opt-in to more.
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash
 
 jobs:
   validate:
     name: Quick Validation
+    # Skip drafts to save CI minutes; they re-run on `ready_for_review`.
+    if: github.event.pull_request.draft == false
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       - name: Setup Python
         uses: ./.github/actions/setup-python-env
@@ -47,27 +61,32 @@ jobs:
 
       - name: Fast validation
         run: |
-          if [ -f scripts/fast_validate.py ]; then
+          set -euo pipefail
+          if [[ -f scripts/fast_validate.py ]]; then
             python scripts/fast_validate.py
           else
-            echo "Fast validate script not found, skipping"
+            echo "::notice::scripts/fast_validate.py not found, skipping fast validation"
           fi
 
   description-check:
     name: PR Description Check
+    if: github.event.pull_request.draft == false
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     permissions:
       contents: read
       pull-requests: read
     env:
-      MIN_DESCRIPTION_LENGTH: 100
+      MIN_DESCRIPTION_LENGTH: '100'
     steps:
       - name: Check PR description is filled in
         env:
           PR_BODY: ${{ github.event.pull_request.body }}
           PR_TITLE: ${{ github.event.pull_request.title }}
-          MIN_DESCRIPTION_LENGTH: ${{ env.MIN_DESCRIPTION_LENGTH }}
         run: |
+          set -euo pipefail
+
+          # Patterns that indicate the PR template was not filled out.
           UNFILLED_PATTERNS=(
             "What does this change do"
             "List of user-visible changes"
@@ -78,81 +97,123 @@ jobs:
           )
 
           FAILED=0
-          for pattern in "${UNFILLED_PATTERNS[@]}"; do
-            if echo "$PR_BODY" | grep -qF "$pattern"; then
-              echo "❌ PR description still contains unfilled placeholder: '$pattern'"
+          ERRORS=()
+          BODY_LENGTH=0
+
+          # Treat null/whitespace-only body as failure up front.
+          if [[ -z "${PR_BODY// /}" ]]; then
+            ERRORS+=("PR description is empty. Please fill in the PR template.")
+            FAILED=1
+          else
+            for pattern in "${UNFILLED_PATTERNS[@]}"; do
+              if grep -qF -- "$pattern" <<<"$PR_BODY"; then
+                ERRORS+=("PR description still contains unfilled placeholder: '$pattern'")
+                FAILED=1
+              fi
+            done
+
+            # Use printf to avoid `echo`'s trailing newline inflating the count by 1.
+            BODY_LENGTH=$(printf '%s' "$PR_BODY" | wc -c | tr -d ' ')
+            if (( BODY_LENGTH < MIN_DESCRIPTION_LENGTH )); then
+              ERRORS+=("PR description is too short (${BODY_LENGTH} chars, minimum ${MIN_DESCRIPTION_LENGTH}). Please fill in the Summary, Changes, and Testing sections.")
               FAILED=1
             fi
-          done
+          fi
 
-          # Require a minimum body length (more than just the template boilerplate)
-          BODY_LENGTH=$(echo "$PR_BODY" | wc -c)
-          if [ "$BODY_LENGTH" -lt "$MIN_DESCRIPTION_LENGTH" ]; then
-            echo "❌ PR description is too short ($BODY_LENGTH chars, minimum $MIN_DESCRIPTION_LENGTH). Please fill in the Summary, Changes, and Testing sections."
+          # Reject obviously default/generated PR titles.
+          if [[ "$PR_TITLE" =~ ^([Pp]ending\ [Cc]hanges|[Ee]xported\ from\ ([Yy]our\ )?[Cc]odespace|[Cc]odespace[-\ ]|[Uu]ntitled|[Dd]raft|[Ww][Ii][Pp])(:|\ |$) ]]; then
+            ERRORS+=("PR title looks like a default/generated name: '${PR_TITLE}'. Please use a descriptive title.")
             FAILED=1
           fi
 
-          # Fail if the PR title looks like a default codespace/branch name
-          if echo "$PR_TITLE" | grep -qiE "^(pending changes|exported from (your )?codespace|codespace[- ]|untitled|draft|wip)"; then
-            echo "❌ PR title looks like a default/generated name: '$PR_TITLE'. Please use a descriptive title that explains what the PR does."
-            FAILED=1
-          fi
-
-          if [ "$FAILED" -eq 1 ]; then
-            echo ""
-            echo "Please update the PR description with:"
-            echo "  - Summary: What changed and why (1-3 sentences)"
-            echo "  - Changes: Bullet list of user-visible changes"
-            echo "  - Testing: Commands run and their outcomes"
-            echo ""
-            echo "See the PR template for a filled-in example."
+          if (( FAILED == 1 )); then
+            for err in "${ERRORS[@]}"; do
+              echo "::error::${err}"
+            done
+            {
+              echo "## ❌ PR description / title check failed"
+              echo
+              for err in "${ERRORS[@]}"; do
+                echo "- ${err}"
+              done
+              echo
+              echo "Please update the PR with:"
+              echo "- **Summary**: What changed and why (1–3 sentences)"
+              echo "- **Changes**: Bullet list of user-visible changes"
+              echo "- **Testing**: Commands run and their outcomes"
+              echo
+              echo "See the PR template for a filled-in example."
+            } >> "$GITHUB_STEP_SUMMARY"
             exit 1
           fi
 
-          echo "✓ PR description looks filled in ($BODY_LENGTH chars)"
+          echo "✓ PR description and title look good (${BODY_LENGTH} chars)"
+          echo "## ✓ PR description check passed (${BODY_LENGTH} chars)" >> "$GITHUB_STEP_SUMMARY"
 
   size-check:
     name: PR Size Check
+    if: github.event.pull_request.draft == false
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          persist-credentials: false
 
       - name: Check PR size
         id: size
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          LARGE_FILES_THRESHOLD: '50'
+          LARGE_LINES_THRESHOLD: '1000'
         run: |
-          ADDITIONS=$(git diff "$BASE_SHA"..."$HEAD_SHA" --numstat | awk '{sum+=$1} END {print sum}')
-          DELETIONS=$(git diff "$BASE_SHA"..."$HEAD_SHA" --numstat | awk '{sum+=$2} END {print sum}')
-          FILES_CHANGED=$(git diff "$BASE_SHA"..."$HEAD_SHA" --name-only | wc -l)
+          set -euo pipefail
+
+          # Ensure both endpoints are available locally (defensive on shallow clones).
+          git fetch --no-tags --depth=1 origin "$BASE_SHA" "$HEAD_SHA" 2>/dev/null || true
+
+          # Compute diff stats once and reuse — guarding against binary
+          # files where numstat reports '-' instead of a numeric count.
+          NUMSTAT=$(git diff --numstat "$BASE_SHA"..."$HEAD_SHA")
+          ADDITIONS=$(awk 'BEGIN{s=0} $1 ~ /^[0-9]+$/ {s+=$1} END{print s+0}' <<<"$NUMSTAT")
+          DELETIONS=$(awk 'BEGIN{s=0} $2 ~ /^[0-9]+$/ {s+=$2} END{print s+0}' <<<"$NUMSTAT")
+          FILES_CHANGED=$(git diff --name-only "$BASE_SHA"..."$HEAD_SHA" | wc -l | tr -d ' ')
 
           echo "Files changed: $FILES_CHANGED"
-          echo "Lines added: $ADDITIONS"
+          echo "Lines added:   $ADDITIONS"
           echo "Lines deleted: $DELETIONS"
 
-          # Warn if PR is very large
-          if [ "$FILES_CHANGED" -gt 50 ] || [ "$ADDITIONS" -gt 1000 ]; then
-            echo "⚠️ Warning: This is a large PR. Consider breaking it into smaller PRs for easier review."
-            echo "pr_size=large" >> $GITHUB_OUTPUT
+          {
+            echo "## PR Size"
+            echo
+            echo "| Metric | Value |"
+            echo "| --- | ---: |"
+            echo "| Files changed | $FILES_CHANGED |"
+            echo "| Lines added | $ADDITIONS |"
+            echo "| Lines deleted | $DELETIONS |"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          if (( FILES_CHANGED > LARGE_FILES_THRESHOLD )) || (( ADDITIONS > LARGE_LINES_THRESHOLD )); then
+            echo "::warning::Large PR detected (${FILES_CHANGED} files, ${ADDITIONS} additions). Consider splitting it for easier review."
+            echo "pr_size=large" >> "$GITHUB_OUTPUT"
           else
             echo "✓ PR size looks good"
-            echo "pr_size=normal" >> $GITHUB_OUTPUT
+            echo "pr_size=normal" >> "$GITHUB_OUTPUT"
           fi
 
   label-pr:
     name: Auto-label PR
+    # Labeler needs write perms; skip for forks where GITHUB_TOKEN is read-only.
+    if: github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     permissions:
       contents: read
       pull-requests: write
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
       - name: Label PR based on files changed
         uses: actions/labeler@634933edcd8ababfe52f92936142cc22ac488b1b  # v6
         with:

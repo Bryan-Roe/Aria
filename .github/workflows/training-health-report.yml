@@ -34,13 +34,24 @@ jobs:
     timeout-minutes: 10
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
 
       - name: Setup Python
         uses: ./.github/actions/setup-python-env
         with:
           python-version: '3.11'
           extra-packages: 'tabulate'
+
+      - name: Seed training data (if no prior status exists)
+        run: |
+          if [ ! -f data_out/autonomous_training_status.json ]; then
+            echo "No training status found — running 1 seed cycle to bootstrap data..."
+            python scripts/autonomous_training_orchestrator.py \
+              --cycles 1 --interval 0 --skip-quantum 2>&1 || echo "Seed training failed — workflow will proceed with no data (fresh checkout or missing dependencies)."
+          else
+            echo "Existing training status found, skipping seed."
+          fi
+        continue-on-error: true
 
       - name: Validate analytics script
         run: |
@@ -91,7 +102,14 @@ jobs:
           at_succeeded = autotrain.get("succeeded", 0)
           at_failed    = autotrain.get("failed", 0)
 
-          degraded = best_acc < 0.6 or trend == "degrading" or (ci_failed > 0 and ci_total > 0 and ci_failed / ci_total > 0.2)
+          # "no data" is not the same as "degraded":
+          # only flag accuracy issues when training has actually been attempted.
+          training_attempted = cycles > 0
+          no_data            = not training_attempted
+          accuracy_degraded = training_attempted and best_acc < 0.6
+          trend_degraded    = training_attempted and trend == "degrading"
+          ci_degraded       = ci_failed > 0 and ci_total > 0 and ci_failed / ci_total > 0.2
+          degraded = accuracy_degraded or trend_degraded or ci_degraded
 
           with open(os.environ["GITHUB_OUTPUT"], "a") as f:
               f.write(f"cycles={cycles}\n")
@@ -103,9 +121,10 @@ jobs:
               f.write(f"ci_total={ci_total}\n")
               f.write(f"at_succeeded={at_succeeded}\n")
               f.write(f"at_failed={at_failed}\n")
+              f.write(f"no_data={'true' if no_data else 'false'}\n")
               f.write(f"degraded={'true' if degraded else 'false'}\n")
 
-          print(f"Cycles={cycles}  BestAcc={best_acc:.4f}  Trend={trend}  Degraded={degraded}")
+          print(f"Cycles={cycles}  BestAcc={best_acc:.4f}  Trend={trend}  Degraded={degraded}  NoData={no_data}")
           PYEOF
 
       - name: Run training analytics (if available)
@@ -122,6 +141,8 @@ jobs:
           # Overall health badge
           if [ "${{ steps.status.outputs.degraded }}" == "true" ]; then
             echo "### ⚠️ Health Status: DEGRADED" >> $GITHUB_STEP_SUMMARY
+          elif [ "${{ steps.status.outputs.no_data }}" == "true" ]; then
+            echo "### ℹ️ Health Status: No Training Data" >> $GITHUB_STEP_SUMMARY
           else
             echo "### ✅ Health Status: Healthy" >> $GITHUB_STEP_SUMMARY
           fi
@@ -146,21 +167,24 @@ jobs:
 
       - name: Open degradation issue
         if: steps.status.outputs.degraded == 'true' || github.event.inputs.open-issue == 'true'
-        uses: actions/github-script@v7
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b  # v7
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const week = new Date().toISOString().slice(0, 10);
             const degraded = '${{ steps.status.outputs.degraded }}' === 'true';
+            const noData   = '${{ steps.status.outputs.no_data }}' === 'true';
             const title = degraded
               ? `⚠️ Training Health Degraded — week of ${week}`
               : `📊 Training Health Report — week of ${week}`;
+
+            const statusLabel = degraded ? '⚠️ DEGRADED' : noData ? 'ℹ️ No Training Data' : '✅ Healthy';
 
             const body = [
               `## Weekly Training Health Report`,
               ``,
               `**Report date:** ${new Date().toUTCString()}`,
-              `**Status:** ${degraded ? '⚠️ DEGRADED' : '✅ Healthy'}`,
+              `**Status:** ${statusLabel}`,
               ``,
               `### Autonomous Training`,
               ``,

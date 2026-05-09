@@ -114,7 +114,7 @@ class GPUOptimizer:
                 text=True,
             )
             return result.stdout.strip().split("\n")[0]
-        except:
+        except Exception:
             return "N/A"
 
     def _cpu_fallback(self) -> GPUInfo:
@@ -270,7 +270,7 @@ class GPUOptimizer:
         try:
             major_version = int(gpu.compute_capability.split(".")[0])
             return major_version >= 8  # Ampere (A100, RTX 30xx) and newer
-        except:
+        except Exception:
             return False
 
     def _print_profile(self, profile: OptimizationProfile):

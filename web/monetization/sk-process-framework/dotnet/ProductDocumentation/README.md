@@ -30,15 +30,6 @@ To select an AI model:
 
 ### Preview a Process
 
-To select an AI model:
-
-- Open the Semantic Kernel extension in the side panel of Visual Studio Code.
-- In the "AI Endpoints" section, choose your preferred AI provider and model.
-
-![Select AI Model](images/select-model.jpeg)
-
-### Preview a Process
-
 To preview a process:
 
 - Open the [product-documentation.process.yaml](./product-documentation.process.yaml) file.
@@ -49,6 +40,7 @@ To preview a process:
 ### Debug a Process
 
 To debug a process:
+
 - Open the [product-documentation.process.yaml](./product-documentation.process.yaml) file.
 - Click the **Debug Process** button in the top bar of the process file.
 
