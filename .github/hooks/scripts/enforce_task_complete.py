@@ -33,7 +33,21 @@ def _load_transcript() -> list:
     if not transcript_path:
         return []
 
-    path = Path(transcript_path)
+    base_dir = Path.cwd().resolve()
+    candidate = Path(transcript_path).expanduser()
+    if not candidate.is_absolute():
+        candidate = base_dir / candidate
+
+    try:
+        path = candidate.resolve()
+    except OSError:
+        return []
+
+    try:
+        path.relative_to(base_dir)
+    except ValueError:
+        return []
+
     if not path.exists():
         return []
 
