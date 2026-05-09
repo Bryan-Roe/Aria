@@ -305,7 +305,7 @@ def main():
     ap.add_argument(
         "--allow-remote-manifest",
         action="store_true",
-        help="Allow loading train/eval manifests from http(s) URLs (disabled by default).",
+        help="Allow loading train/eval manifests from http(s) URLs. By default, --train-manifest and --eval-manifest only accept local paths unless this flag is provided.",
     )
     args = ap.parse_args()
 
