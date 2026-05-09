@@ -131,6 +131,14 @@ def fix_file(
     model: str,
     write: bool,
 ) -> str:
+    safe_root = pathlib.Path.cwd().resolve()
+    resolved_path = file_path.expanduser().resolve()
+    try:
+        resolved_path.relative_to(safe_root)
+    except ValueError as exc:
+        raise ValueError(f"Path escapes allowed root '{safe_root}': {file_path}") from exc
+
+    file_path = resolved_path
     if not file_path.exists() or not file_path.is_file():
         raise FileNotFoundError(f"File not found: {file_path}")
 
