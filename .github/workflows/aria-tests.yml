@@ -355,6 +355,8 @@ jobs:
 
       - name: Display test summary
         run: |
-          echo "## Test Results Summary" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "All test jobs completed. Check individual job outputs for details." >> $GITHUB_STEP_SUMMARY
+          {
+            echo "## Test Results Summary"
+            echo ""
+            echo "All test jobs completed. Check individual job outputs for details."
+          } >> "$GITHUB_STEP_SUMMARY"

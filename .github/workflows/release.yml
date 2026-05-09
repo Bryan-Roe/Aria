@@ -94,11 +94,13 @@ jobs:
 
       - name: Create release summary
         run: |
-          echo "# Release ${{ steps.version.outputs.version }}" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "## Changes" >> $GITHUB_STEP_SUMMARY
-          cat CHANGELOG.md >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "## Artifacts" >> $GITHUB_STEP_SUMMARY
-          echo "- Source tarball: aria-${{ steps.version.outputs.version_number }}.tar.gz" >> $GITHUB_STEP_SUMMARY
-          echo "- Source zip: aria-${{ steps.version.outputs.version_number }}.zip" >> $GITHUB_STEP_SUMMARY
+          {
+            echo "# Release ${{ steps.version.outputs.version }}"
+            echo ""
+            echo "## Changes"
+            cat CHANGELOG.md
+            echo ""
+            echo "## Artifacts"
+            echo "- Source tarball: aria-${{ steps.version.outputs.version_number }}.tar.gz"
+            echo "- Source zip: aria-${{ steps.version.outputs.version_number }}.zip"
+          } >> "$GITHUB_STEP_SUMMARY"

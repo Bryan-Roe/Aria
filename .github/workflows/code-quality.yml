@@ -74,15 +74,17 @@ jobs:
       - name: Generate security summary
         if: always()
         run: |
-          echo "## Security Check Results" >> $GITHUB_STEP_SUMMARY
-          if [ -f safety-report.json ]; then
-            echo '```json' >> $GITHUB_STEP_SUMMARY
-            head -100 safety-report.json >> $GITHUB_STEP_SUMMARY
-            echo '' >> $GITHUB_STEP_SUMMARY
-            echo '```' >> $GITHUB_STEP_SUMMARY
-          else
-            echo "No vulnerabilities found." >> $GITHUB_STEP_SUMMARY
-          fi
+          {
+            echo "## Security Check Results"
+            if [ -f safety-report.json ]; then
+              echo '```json'
+              head -100 safety-report.json
+              echo ''
+              echo '```'
+            else
+              echo "No vulnerabilities found."
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload safety report
         if: always()
