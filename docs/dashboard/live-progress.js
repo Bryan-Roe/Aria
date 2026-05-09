@@ -205,7 +205,7 @@ class LiveProgressTracker {
                     {
                         label: 'Training Loss',
                         data: [],
-                        borderColor: '#667eea',
+                        borderColor: '#0f9d89',
                         backgroundColor: 'rgba(102, 126, 234, 0.1)',
                         tension: 0.4,
                         pointRadius: 3
@@ -213,7 +213,7 @@ class LiveProgressTracker {
                     {
                         label: 'Validation Loss',
                         data: [],
-                        borderColor: '#f093fb',
+                        borderColor: '#d95b43',
                         backgroundColor: 'rgba(240, 147, 251, 0.1)',
                         tension: 0.4,
                         pointRadius: 3

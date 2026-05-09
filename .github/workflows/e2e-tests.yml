@@ -31,7 +31,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4.3.1
       - name: Setup Python
         uses: ./.github/actions/setup-python-env
         with:
@@ -41,7 +41,7 @@ jobs:
         run: |
           python3 aria_web/server.py > /tmp/aria_server.log 2>&1 &
           READY=0
-          for i in $(seq 1 50); do
+          for _ in $(seq 1 50); do
             if curl -sSf http://127.0.0.1:8080/api/aria/state >/dev/null; then
               READY=1
               break
@@ -60,7 +60,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4.3.1
       - name: Setup Python
         uses: ./.github/actions/setup-python-env
         with:
@@ -72,7 +72,7 @@ jobs:
         run: |
           python3 aria_web/server.py > /tmp/aria_server.log 2>&1 &
           READY=0
-          for i in $(seq 1 60); do
+          for _ in $(seq 1 60); do
             if curl -sSf http://127.0.0.1:8080/api/aria/state >/dev/null; then
               READY=1
               break
@@ -93,7 +93,7 @@ jobs:
       image: python:3.11-bullseye
     timeout-minutes: 25
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4.3.1
       - name: Apt-get update & install dependencies
         run: |
           apt-get update
@@ -129,7 +129,7 @@ jobs:
         run: |
           python3 aria_web/server.py > /tmp/aria_server.log 2>&1 &
           READY=0
-          for i in $(seq 1 60); do
+          for _ in $(seq 1 60); do
             if curl -sSf http://127.0.0.1:8080/api/aria/state >/dev/null; then
               READY=1
               break

@@ -178,7 +178,7 @@ class KeyboardNavigationManager {
             setTimeout(() => {
                 const newFocus = document.activeElement;
                 if (newFocus && newFocus !== activeElement) {
-                    newFocus.style.outline = '2px solid #667eea';
+                    newFocus.style.outline = '2px solid #0f9d89';
                     setTimeout(() => {
                         newFocus.style.outline = '';
                     }, 500);
@@ -198,7 +198,7 @@ class KeyboardNavigationManager {
             top: 20px;
             right: 20px;
             background: rgba(26, 26, 46, 0.98);
-            border: 2px solid #667eea;
+            border: 2px solid #0f9d89;
             border-radius: 12px;
             padding: 20px;
             max-width: 400px;
@@ -212,7 +212,7 @@ class KeyboardNavigationManager {
 
         panel.innerHTML = `
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                <h3 style="margin: 0; color: #667eea; font-size: 1.2em;">⌨️ Keyboard Shortcuts</h3>
+                <h3 style="margin: 0; color: #0f9d89; font-size: 1.2em;">⌨️ Keyboard Shortcuts</h3>
                 <button id="close-hints-btn" style="background: none; border: none; color: #aaa; font-size: 1.5em; cursor: pointer; padding: 0; width: 30px; height: 30px;">&times;</button>
             </div>
             <div id="shortcuts-content"></div>
@@ -255,7 +255,7 @@ class KeyboardNavigationManager {
 
             categories[category].forEach(shortcut => {
                 const keys = shortcut.key.split('+').map(k =>
-                    `<kbd style="background: #667eea; color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.85em; font-family: monospace;">${k}</kbd>`
+                    `<kbd style="background: #0f9d89; color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.85em; font-family: monospace;">${k}</kbd>`
                 ).join(' + ');
 
                 html += `<div style="display: flex; justify-content: space-between; align-items: center; padding: 8px; background: rgba(102, 126, 234, 0.1); border-radius: 6px;">

@@ -15,6 +15,8 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
+import shlex
 import subprocess
 import sys
 from dataclasses import dataclass, field
@@ -71,68 +73,190 @@ class TrainJob:
 # ---------------------------------------------------------------------------
 
 
+def _parse_bool(value: Any, default: bool = True) -> bool:
+    if value is None:
+        return default
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, (int, float)):
+        return bool(value)
+    if isinstance(value, str):
+        v = value.strip().lower()
+        if v in {"true", "yes", "y", "1", "on"}:
+            return True
+        if v in {"false", "no", "n", "0", "off"}:
+            return False
+    return default
+
+
+def _parse_int(value: Any) -> Optional[int]:
+    if value is None:
+        return None
+    if isinstance(value, bool):
+        return None
+    if isinstance(value, int):
+        return value
+    if isinstance(value, float):
+        return int(value)
+    if isinstance(value, str):
+        v = value.strip()
+        if not v:
+            return None
+        try:
+            return int(v)
+        except ValueError:
+            return None
+    return None
+
+
+def _parse_float(value: Any) -> Optional[float]:
+    if value is None:
+        return None
+    if isinstance(value, bool):
+        return None
+    if isinstance(value, (int, float)):
+        return float(value)
+    if isinstance(value, str):
+        v = value.strip()
+        if not v:
+            return None
+        try:
+            return float(v)
+        except ValueError:
+            return None
+    return None
+
+
+def _parse_str(value: Any) -> Optional[str]:
+    if value is None:
+        return None
+    if isinstance(value, str):
+        s = value.strip()
+        return s or None
+    return str(value)
+
+
+def _parse_str_list(value: Any) -> List[str]:
+    if value is None:
+        return []
+    if isinstance(value, list):
+        out: List[str] = []
+        for item in value:
+            s = _parse_str(item)
+            if s:
+                out.append(s)
+        return out
+    if isinstance(value, str):
+        s = value.strip()
+        if not s:
+            return []
+        return shlex.split(s)
+    return [str(value)]
+
+
+def _norm_relpath(value: Optional[str]) -> Optional[str]:
+    if not value:
+        return None
+
+    p = Path(value)
+    if p.is_absolute():
+        return None
+
+    norm = os.path.normpath(value)
+    if norm.startswith("..") or norm == "..":
+        return None
+    return norm
+
+
 def load_config(path: Path) -> Dict[str, Any]:
     if not path.exists():
         return {"jobs": []}
-    text = path.read_text()
+
+    text = path.read_text(encoding="utf-8")
+
     if yaml is not None:
-        return yaml.safe_load(text) or {"jobs": []}
-    # Minimal fallback: only supports basic YAML structure (name/runner keys)
+        data = yaml.safe_load(text) or {}
+        if not isinstance(data, dict):
+            return {"jobs": []}
+        jobs = data.get("jobs", [])
+        if not isinstance(jobs, list):
+            return {"jobs": []}
+        data.setdefault("jobs", jobs)
+        return data
+
     jobs: List[Dict[str, Any]] = []
     current: Dict[str, Any] = {}
+
     for line in text.splitlines():
         line = line.rstrip()
-        if line.strip().startswith("- name:"):
+        stripped = line.strip()
+
+        if not stripped or stripped.startswith("#"):
+            continue
+
+        if stripped.startswith("- name:"):
             if current:
                 jobs.append(current)
-            current = {"name": line.strip().split(":", 1)[1].strip()}
-        elif ":" in line and current:
-            key, _, val = line.strip().partition(":")
+            current = {"name": stripped.split(":", 1)[1].strip()}
+            continue
+
+        if ":" in stripped and current:
+            key, _, val = stripped.partition(":")
             current[key.strip()] = val.strip()
+
     if current:
         jobs.append(current)
+
     return {"jobs": jobs}
 
 
 def load_jobs(path: Path) -> List[TrainJob]:
     data = load_config(path)
+    raw_jobs = data.get("jobs", [])
+
+    if not isinstance(raw_jobs, list):
+        return []
+
     jobs: List[TrainJob] = []
-    for raw in data.get("jobs", []):
+    for raw in raw_jobs:
+        if not isinstance(raw, dict):
+            continue
 
-        def _get(k, default=None):
-            return raw.get(k, default)
+        enabled = _parse_bool(raw.get("enabled"), default=True)
+        epochs = _parse_int(raw.get("epochs")) or 1
+        if epochs < 1:
+            epochs = 1
 
-        def _int(v):
-            try:
-                return int(v) if v is not None else None
-            except Exception:
-                return None
+        learning_rate = _parse_float(raw.get("learning_rate")) or 2e-4
+        if learning_rate <= 0:
+            learning_rate = 2e-4
 
-        def _float(v):
-            try:
-                return float(v) if v is not None else None
-            except Exception:
-                return None
+        lora_dropout = _parse_float(raw.get("lora_dropout")) or 0.1
+        if lora_dropout < 0:
+            lora_dropout = 0.0
+        if lora_dropout > 1:
+            lora_dropout = 1.0
 
         jobs.append(
             TrainJob(
-                name=str(_get("name", "unnamed")),
-                runner=str(_get("runner", "hf")),
-                category=str(_get("category", "baseline")),
-                enabled=bool(_get("enabled", True)),
-                config=_get("config"),
-                dataset=_get("dataset"),
-                save_dir=_get("save_dir"),
-                epochs=_int(_get("epochs")) or 1,
-                max_train_samples=_int(_get("max_train_samples")),
-                max_eval_samples=_int(_get("max_eval_samples")),
-                learning_rate=_float(_get("learning_rate")) or 2e-4,
-                lora_dropout=_float(_get("lora_dropout")) or 0.1,
-                hf_model_id=_get("hf_model_id"),
-                device=str(_get("device", "auto")),
-                extra_args=_get("extra_args") or [],
+                name=str(raw.get("name", "unnamed")),
+                runner=str(raw.get("runner", "hf")),
+                category=str(raw.get("category", "baseline")),
+                enabled=enabled,
+                config=_norm_relpath(_parse_str(raw.get("config"))),
+                dataset=_norm_relpath(_parse_str(raw.get("dataset"))),
+                save_dir=_norm_relpath(_parse_str(raw.get("save_dir"))),
+                epochs=epochs,
+                max_train_samples=_parse_int(raw.get("max_train_samples")),
+                max_eval_samples=_parse_int(raw.get("max_eval_samples")),
+                learning_rate=learning_rate,
+                lora_dropout=lora_dropout,
+                hf_model_id=_parse_str(raw.get("hf_model_id")),
+                device=str(raw.get("device", "auto")),
+                extra_args=_parse_str_list(raw.get("extra_args")),
             )
         )
+
     return jobs
 
 
@@ -146,16 +270,26 @@ def validate_job(job: TrainJob) -> Dict[str, Any]:
 
     if not job.dataset:
         missing.append("dataset")
-    elif not (REPO_ROOT / job.dataset).exists():
-        missing.append(f"dataset path not found: {job.dataset}")
+    else:
+        dataset_path = REPO_ROOT / job.dataset
+        if not dataset_path.exists():
+            missing.append(f"dataset path not found: {job.dataset}")
 
-    if job.runner == "hf" and not HF_TRAIN_SCRIPT.exists():
-        missing.append(
-            f"train script not found: {HF_TRAIN_SCRIPT.relative_to(REPO_ROOT)}"
-        )
+    if job.runner == "hf":
+        if not HF_TRAIN_SCRIPT.exists():
+            missing.append(
+                f"train script not found: {HF_TRAIN_SCRIPT.relative_to(REPO_ROOT)}"
+            )
 
-    if job.config and not (REPO_ROOT / job.config).exists():
-        missing.append(f"lora config not found: {job.config}")
+    if job.config:
+        config_path = REPO_ROOT / job.config
+        if not config_path.exists():
+            missing.append(f"lora config not found: {job.config}")
+
+    if job.save_dir:
+        out_dir = REPO_ROOT / job.save_dir
+        if out_dir.exists() and not out_dir.is_dir():
+            missing.append(f"save_dir is not a directory: {job.save_dir}")
 
     return {"status": "ok" if not missing else "missing", "missing": missing}
 
@@ -169,11 +303,9 @@ def build_command(job: TrainJob) -> List[str]:
     py = sys.executable or "python"
 
     if job.runner == "local":
-        # Placeholder for a local runner script
         local_script = REPO_ROOT / "scripts" / "run_local_lora_training.py"
         return [py, str(local_script), "--job", job.name]
 
-    # Default: HF trainer
     cmd = [py, str(HF_TRAIN_SCRIPT)]
     if job.hf_model_id:
         cmd.extend(["--model-id", job.hf_model_id])
@@ -203,17 +335,22 @@ def build_command(job: TrainJob) -> List[str]:
 
 def _write_status(payload: Dict[str, Any]) -> None:
     DATA_OUT.mkdir(parents=True, exist_ok=True)
-    STATUS_FILE.write_text(json.dumps(payload, indent=2))
+    STATUS_FILE.write_text(
+        json.dumps(payload, indent=2, ensure_ascii=False) + "\n",
+        encoding="utf-8",
+    )
 
 
 def _build_status(jobs_info: List[Dict[str, Any]]) -> Dict[str, Any]:
     succeeded = sum(1 for j in jobs_info if j.get("status") == "ok")
     failed = sum(1 for j in jobs_info if j.get("status") == "failed")
+    skipped = sum(1 for j in jobs_info if j.get("status") == "skipped")
     return {
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "total_jobs": len(jobs_info),
         "succeeded": succeeded,
         "failed": failed,
+        "skipped": skipped,
         "running": 0,
         "avg_duration": None,
         "last_updated": datetime.now(timezone.utc).isoformat(),
@@ -227,9 +364,7 @@ def _build_status(jobs_info: List[Dict[str, Any]]) -> Dict[str, Any]:
 
 
 def main(argv: Optional[List[str]] = None) -> int:
-    parser = argparse.ArgumentParser(
-        description="AutoTrain — LoRA fine-tuning orchestrator"
-    )
+    parser = argparse.ArgumentParser(description="AutoTrain — LoRA fine-tuning orchestrator")
     parser.add_argument(
         "--config",
         type=Path,
@@ -239,9 +374,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     parser.add_argument(
         "--dry-run", action="store_true", help="Validate config only; do not execute"
     )
-    parser.add_argument(
-        "--list", action="store_true", help="Print jobs as JSON and exit"
-    )
+    parser.add_argument("--list", action="store_true", help="Print jobs as JSON and exit")
     parser.add_argument("--run", action="store_true", help="Execute training jobs")
     parser.add_argument("--job", metavar="NAME", help="Filter to a single job by name")
 
@@ -249,7 +382,7 @@ def main(argv: Optional[List[str]] = None) -> int:
 
     config_path = Path(args.config)
     if not config_path.exists():
-        print(f"⚠️  Config not found: {config_path} — using empty job list")
+        print(f"Config not found: {config_path} — using empty job list", file=sys.stderr)
         jobs: List[TrainJob] = []
     else:
         jobs = load_jobs(config_path)
@@ -257,14 +390,17 @@ def main(argv: Optional[List[str]] = None) -> int:
     if args.job:
         jobs = [j for j in jobs if j.name == args.job]
         if not jobs:
-            print(f"❌ No job named '{args.job}' found in config")
+            print(f"No job named '{args.job}' found in config", file=sys.stderr)
             return 1
 
     if args.list:
-        print(json.dumps([vars(j) for j in jobs], indent=2))
+        print(json.dumps([vars(j) for j in jobs], indent=2, ensure_ascii=False))
         return 0
 
-    print(f"📋 AutoTrain — {len(jobs)} job(s) from {config_path}")
+    if not (args.dry_run or args.run):
+        args.dry_run = True
+
+    print(f"AutoTrain — {len(jobs)} job(s) from {config_path}")
 
     jobs_info: List[Dict[str, Any]] = []
     for job in jobs:
@@ -279,36 +415,41 @@ def main(argv: Optional[List[str]] = None) -> int:
         else:
             print(f"  [ok]   {job.name} (runner={job.runner}, epochs={job.epochs})")
 
-        if args.dry_run:
+        if args.dry_run and not args.run:
             jobs_info.append(
                 {
                     "name": job.name,
-                    "status": "ok",
+                    "status": "ok" if validation["status"] == "ok" else "missing",
                     "validation": validation,
                     "dry_run": True,
                 }
             )
             continue
 
-        if args.run:
-            cmd = build_command(job)
-            print(f"  → {' '.join(cmd[:4])} ...")
-            result = subprocess.run(cmd, cwd=str(REPO_ROOT))
-            status = "ok" if result.returncode == 0 else "failed"
-            jobs_info.append(
-                {"name": job.name, "status": status, "returncode": result.returncode}
+        cmd = build_command(job)
+        print(f"  → {shlex.join(cmd)}")
+
+        try:
+            result = subprocess.run(
+                cmd,
+                cwd=str(REPO_ROOT),
+                check=False,
             )
+        except OSError as e:
+            jobs_info.append(
+                {"name": job.name, "status": "failed", "error": str(e), "returncode": None}
+            )
+            continue
+
+        status = "ok" if result.returncode == 0 else "failed"
+        jobs_info.append({"name": job.name, "status": status, "returncode": result.returncode})
 
     status_payload = _build_status(jobs_info)
     _write_status(status_payload)
-    print(f"\n📄 Status written to {STATUS_FILE}")
-
-    if not args.dry_run and not args.run and not args.list:
-        # Default mode: just dry-run
-        print("ℹ️  Use --dry-run to validate, --run to execute, --list to list jobs")
+    print(f"\nStatus written to {STATUS_FILE}")
 
     return 0
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    raise SystemExit(main())
