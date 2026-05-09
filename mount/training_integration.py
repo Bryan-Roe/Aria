@@ -3,11 +3,16 @@ Training Integration Module
 Interfaces with LoRA training and orchestration systems
 """
 
+import asyncio
 import json
+import logging
+import os
 import subprocess
 import sys
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Set
+
+logger = logging.getLogger(__name__)
 
 
 class TrainingIntegration:
@@ -51,7 +56,7 @@ class TrainingIntegration:
                     status["jobs"] = status_data.get("jobs", {})
                     status["last_run"] = status_data.get("timestamp")
             except Exception:
-                pass
+                logger.exception("Failed to read autotrain status file")
 
         return status
 
@@ -74,7 +79,7 @@ class TrainingIntegration:
                     status["jobs"] = status_data.get("jobs", {})
                     status["last_run"] = status_data.get("timestamp")
             except Exception:
-                pass
+                logger.exception("Failed to read quantum_autorun status file")
 
         return status
 
@@ -96,7 +101,7 @@ class TrainingIntegration:
                     adapter_info["target_modules"] = config.get("target_modules")
                     adapter_info["model"] = config.get("base_model_name_or_path")
             except Exception:
-                pass
+                logger.exception("Failed to read adapter config")
 
         return adapter_info
 
@@ -109,18 +114,21 @@ class TrainingIntegration:
             return trainings
 
         # Look for training logs and checkpoints
-        for run_dir in sorted(
-            lora_output.iterdir(), key=lambda p: p.stat().st_mtime, reverse=True
-        )[:limit]:
-            if run_dir.is_dir():
-                trainings.append(
-                    {
-                        "name": run_dir.name,
-                        "path": str(run_dir),
-                        "timestamp": run_dir.stat().st_mtime,
-                        "has_adapter": (run_dir / "adapter_config.json").exists(),
-                    }
-                )
+        try:
+            for run_dir in sorted(
+                lora_output.iterdir(), key=lambda p: p.stat().st_mtime, reverse=True
+            )[:limit]:
+                if run_dir.is_dir():
+                    trainings.append(
+                        {
+                            "name": run_dir.name,
+                            "path": str(run_dir),
+                            "timestamp": run_dir.stat().st_mtime,
+                            "has_adapter": (run_dir / "adapter_config.json").exists(),
+                        }
+                    )
+        except Exception:
+            logger.exception("Failed to list recent trainings")
 
         return trainings
 
@@ -138,7 +146,11 @@ class TrainingIntegration:
                 cmd.extend(["--job", job_name])
 
             result = subprocess.run(
-                cmd, capture_output=True, text=True, cwd=str(self.workspace_root)
+                cmd,
+                capture_output=True,
+                text=True,
+                cwd=str(self.workspace_root),
+                env={"PATH": os.environ.get("PATH", "")},
             )
 
             return {
@@ -149,6 +161,7 @@ class TrainingIntegration:
                 "stderr": result.stderr,
             }
         except Exception as e:
+            logger.exception("run_autotrain failed")
             return {"success": False, "error": str(e)}
 
     async def list_autotrain_jobs(self) -> List[str]:
@@ -161,6 +174,7 @@ class TrainingIntegration:
                 capture_output=True,
                 text=True,
                 cwd=str(self.workspace_root),
+                env={"PATH": os.environ.get("PATH", "")},
             )
 
             if result.returncode == 0:
@@ -174,6 +188,7 @@ class TrainingIntegration:
                 return jobs
             return []
         except Exception:
+            logger.exception("list_autotrain_jobs failed")
             return []
 
     async def train_lora(
@@ -183,92 +198,128 @@ class TrainingIntegration:
         max_eval_samples: int = 16,
         epochs: int = 1,
     ) -> Dict[str, Any]:
-        """Run LoRA training directly"""
+        """Run LoRA training directly
+
+        Hardening and validation added to prevent uncontrolled command-line and
+        path-injection issues. This method validates the dataset against the
+        discovered datasets and runs the training script using a safe argument
+        list, a restricted environment, and a bounded timeout.
+        """
         try:
+            # Basic type/format checks
+            if not isinstance(dataset, str) or not dataset.strip():
+                return {"success": False, "error": "Invalid dataset: must be a non-empty string"}
+
+            # Normalize input for comparison (strip only to preserve case semantics)
+            dataset_norm = dataset.strip()
+
+            # Fetch available datasets (list_datasets uses a thread for FS ops)
             available_datasets = await self.list_datasets()
-            datasets_root = (self.workspace_root / "datasets").resolve()
 
-            # Build allowed absolute paths from list_datasets() results.
-            # Resolve every entry so symlinks are normalised consistently with
-            # the resolved_dataset comparison below.
-            allowed_paths: Set[Path] = set()
-            for name in available_datasets.get("quantum", []):
-                allowed_paths.add((datasets_root / "quantum" / f"{name}.csv").resolve())
-            for name in available_datasets.get("chat", []):
-                allowed_paths.add((datasets_root / "chat" / name).resolve())
-            for name in available_datasets.get("vision", []):
-                allowed_paths.add((datasets_root / "vision" / name).resolve())
+            # Build allowed set (normalized)
+            allowed_datasets = set()
+            for names in available_datasets.values():
+                for name in names:
+                    if isinstance(name, str):
+                        allowed_datasets.add(name.strip())
 
-            # Resolve the provided dataset path relative to phi_path (subprocess cwd)
-            resolved_dataset = (self.phi_path / dataset).resolve()
+            # Reject obvious path traversal / separators
+            if any(tok in dataset_norm for tok in ("/", "\\", "..")):
+                logger.warning("train_lora: rejected dataset with path-like content: %s", dataset)
+                return {"success": False, "error": "Invalid dataset: path characters are not allowed"}
 
-            # Path-traversal guard: resolved path must be within datasets_root
-            try:
-                resolved_dataset.relative_to(datasets_root)
-            except ValueError:
-                return {"success": False, "error": "Invalid dataset"}
-
-            # Must match an explicitly allowed path derived from list_datasets()
-            if resolved_dataset not in allowed_paths:
+            if dataset_norm not in allowed_datasets:
+                logger.warning("train_lora: dataset not in allowlist: %s", dataset_norm)
                 return {"success": False, "error": "Invalid dataset"}
 
             train_script = self.phi_path / "scripts" / "train_lora.py"
             config_file = self.phi_path / "lora" / "lora.yaml"
 
-            # Use the validated resolved path as the --dataset argument so the
-            # raw (potentially untrusted) input string never reaches subprocess.
+            if not train_script.exists():
+                logger.error("train_lora: train script missing: %s", train_script)
+                return {"success": False, "error": "Training script not found"}
+
             cmd = [
                 sys.executable,
                 str(train_script),
                 "--dataset",
-                str(resolved_dataset),
+                dataset_norm,
                 "--config",
                 str(config_file),
                 "--max-train-samples",
-                str(max_train_samples),
+                str(int(max_train_samples)),
                 "--max-eval-samples",
-                str(max_eval_samples),
+                str(int(max_eval_samples)),
                 "--epochs",
-                str(epochs),
+                str(int(epochs)),
             ]
 
-            result = subprocess.run(
-                cmd, capture_output=True, text=True, cwd=str(self.phi_path)
-            )
+            # Restrict environment to a minimal PATH to avoid leaking secrets into child
+            env = {"PATH": os.environ.get("PATH", "")}
+
+            try:
+                # Use a reasonable timeout (2 hours) to prevent runaway processes
+                result = subprocess.run(
+                    cmd,
+                    capture_output=True,
+                    text=True,
+                    cwd=str(self.phi_path),
+                    env=env,
+                    timeout=2 * 60 * 60,
+                )
+            except subprocess.TimeoutExpired as exc:
+                logger.exception("train_lora: training timed out for dataset %s", dataset_norm)
+                return {"success": False, "error": "Training timed out", "stdout": getattr(exc, "stdout", ""), "stderr": getattr(exc, "stderr", "")}
 
             return {
                 "success": result.returncode == 0,
-                "dataset": dataset,
-                "samples": max_train_samples,
-                "epochs": epochs,
+                "dataset": dataset_norm,
+                "samples": int(max_train_samples),
+                "epochs": int(epochs),
+                "returncode": result.returncode,
                 "stdout": result.stdout,
                 "stderr": result.stderr,
             }
         except Exception as e:
+            logger.exception("train_lora failed")
             return {"success": False, "error": str(e)}
 
     async def list_datasets(self) -> Dict[str, List[str]]:
-        """List available training datasets"""
+        """List available training datasets.
+
+        Filesystem operations are performed in a thread to avoid blocking the event
+        loop since Path.glob / iterdir are blocking calls.
+        """
         datasets_root = self.workspace_root / "datasets"
 
-        result = {"quantum": [], "chat": [], "vision": []}
+        def _scan() -> Dict[str, List[str]]:
+            result = {"quantum": [], "chat": [], "vision": []}
 
-        # Quantum datasets (CSV)
-        quantum_dir = datasets_root / "quantum"
-        if quantum_dir.exists():
-            result["quantum"] = [f.stem for f in quantum_dir.glob("*.csv")]
+            try:
+                # Quantum datasets (CSV)
+                quantum_dir = datasets_root / "quantum"
+                if quantum_dir.exists():
+                    result["quantum"] = [f.stem for f in quantum_dir.glob("*.csv") if f.is_file()]
 
-        # Chat datasets (JSONL directories)
-        chat_dir = datasets_root / "chat"
-        if chat_dir.exists():
-            result["chat"] = [d.name for d in chat_dir.iterdir() if d.is_dir()]
+                # Chat datasets (JSONL directories)
+                chat_dir = datasets_root / "chat"
+                if chat_dir.exists():
+                    result["chat"] = [d.name for d in chat_dir.iterdir() if d.is_dir()]
 
-        # Vision datasets
-        vision_dir = datasets_root / "vision"
-        if vision_dir.exists():
-            result["vision"] = [d.name for d in vision_dir.iterdir() if d.is_dir()]
+                # Vision datasets
+                vision_dir = datasets_root / "vision"
+                if vision_dir.exists():
+                    result["vision"] = [d.name for d in vision_dir.iterdir() if d.is_dir()]
+            except Exception:
+                logger.exception("list_datasets: failed during filesystem scan")
 
-        return result
+            return result
+
+        try:
+            return await asyncio.to_thread(_scan)
+        except Exception:
+            logger.exception("list_datasets failed")
+            return {"quantum": [], "chat": [], "vision": []}
 
     async def get_training_metrics(self, run_name: str) -> Dict[str, Any]:
         """Get metrics for a specific training run"""
@@ -285,8 +336,11 @@ class TrainingIntegration:
         }
 
         # Look for checkpoint directories
-        for checkpoint in run_dir.glob("checkpoint-*"):
-            if checkpoint.is_dir():
-                metrics["checkpoints"].append(checkpoint.name)
+        try:
+            for checkpoint in run_dir.glob("checkpoint-*"):
+                if checkpoint.is_dir():
+                    metrics["checkpoints"].append(checkpoint.name)
+        except Exception:
+            logger.exception("get_training_metrics failed for run: %s", run_name)
 
         return metrics

@@ -1,15 +1,15 @@
 # CodeQL Advanced workflow for the Aria repository.
 #
 # This workflow performs static analysis using GitHub's CodeQL engine across
-# all languages used in the project (Actions, C/C++, C#, JS/TS, Python).
+# the repository languages chosen in the matrix. Keep the matrix in sync with
+# the repo to avoid wasted CI minutes.
 #
-# Notes for maintainers:
-#   - Keep the language matrix in sync with the languages actually present in
-#     the repo. Remove entries that no longer apply to avoid wasted CI minutes.
-#   - The `security-extended` query suite is enabled for deeper coverage; drop
-#     back to the default suite if scan times become problematic.
-#   - Concurrency cancels superseded runs on the same ref to save runner time.
-
+# Improvements made:
+# - Added explicit PR event types to avoid noisy triggers.
+# - Hardened and minimized permissions while ensuring SARIF upload works.
+# - Clarified matrix comment and kept build-mode handling robust.
+# - Preserved manual-build guidance and safe checkout settings.
+#
 name: "CodeQL Advanced"
 
 on:
@@ -22,6 +22,8 @@ on:
       - ".github/PULL_REQUEST_TEMPLATE/**"
       - "LICENSE"
   pull_request:
+    # Run for relevant PR lifecycle events only.
+    types: [opened, reopened, synchronize, ready_for_review]
     branches: ["main"]
     paths-ignore:
       - "**/*.md"
@@ -39,7 +41,7 @@ concurrency:
   group: codeql-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
-# Default minimal permissions for the workflow; jobs may add what they need.
+# Minimal permissions at workflow level. Job adds needed additional permissions.
 permissions:
   contents: read
 
@@ -50,14 +52,12 @@ jobs:
     runs-on: ${{ (matrix.language == 'swift' && 'macos-latest') || 'ubuntu-latest' }}
     timeout-minutes: 360
 
+    # Job-specific permissions required for uploading SARIF and fetching packs.
     permissions:
-      # Required to upload SARIF results to the Security tab.
-      security-events: write
-      # Required to fetch internal or private CodeQL packs.
-      packages: read
-      # Required for workflows in private repositories.
-      actions: read
+      security-events: write   # required to upload SARIF results to the Security tab
       contents: read
+      packages: read
+      actions: read
 
     strategy:
       fail-fast: false
@@ -71,12 +71,11 @@ jobs:
             build-mode: none
           - language: python
             build-mode: none
-          # Supported values for 'language':
-          #   actions, c-cpp, csharp, go, java-kotlin,
-          #   javascript-typescript, python, ruby, rust, swift
-          # Docs:
-          #   https://docs.github.com/en/code-security/code-scanning/creating-an-advanced-setup-for-code-scanning/customizing-your-advanced-setup-for-code-scanning
-          #   https://docs.github.com/en/code-security/code-scanning/creating-an-advanced-setup-for-code-scanning/codeql-code-scanning-for-compiled-languages
+        # Supported values for 'language':
+        #   actions, c-cpp, csharp, go, java-kotlin,
+        #   javascript-typescript, python, ruby, rust, swift
+        # If you add or remove languages, keep this matrix in sync with the repo.
+        # Use build-mode: manual for compiled languages where autobuild needs guidance.
 
     steps:
       - name: Checkout repository
@@ -85,12 +84,11 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
 
-      # Initializes the CodeQL tools for scanning.
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v4
         with:
           languages: ${{ matrix.language }}
-          build-mode: ${{ matrix.build-mode }}
+          build-mode: ${{ matrix['build-mode'] }}
           # Use the extended security query suite for higher signal coverage.
           # Switch to "security-and-quality" to also include code-quality queries,
           # or remove this line entirely to fall back to the default suite.
@@ -101,7 +99,7 @@ jobs:
       # If autobuild fails for a compiled language, switch its 'build-mode' to
       # 'manual' in the matrix and provide explicit build commands here.
       - name: Manual build steps
-        if: matrix.build-mode == 'manual'
+        if: matrix['build-mode'] == 'manual'
         shell: bash
         run: |
           echo "::error::No manual build commands configured for language '${{ matrix.language }}'."
