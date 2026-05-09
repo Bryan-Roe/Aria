@@ -1,10 +1,13 @@
 import argparse
+import ipaddress
 import json
 import math
 import os
+import socket
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, Iterable, List
+from urllib.parse import urlparse
 
 try:
     import yaml  # type: ignore
@@ -133,11 +136,44 @@ def make_hf_dataset_from_files(
     return ds
 
 
+def _is_public_ip(ip_text: str) -> bool:
+    try:
+        ip = ipaddress.ip_address(ip_text)
+    except ValueError:
+        return False
+    return not (
+        ip.is_private
+        or ip.is_loopback
+        or ip.is_link_local
+        or ip.is_multicast
+        or ip.is_reserved
+        or ip.is_unspecified
+    )
+
+
+def _validate_remote_url(url: str) -> str:
+    parsed = urlparse(url)
+    if parsed.scheme not in ("http", "https"):
+        raise ValueError("Only http/https URLs are allowed for manifests")
+    if not parsed.hostname:
+        raise ValueError("Manifest URL must include a valid hostname")
+    try:
+        addrinfo = socket.getaddrinfo(parsed.hostname, parsed.port or None, type=socket.SOCK_STREAM)
+    except socket.gaierror as e:
+        raise ValueError(f"Unable to resolve manifest host: {parsed.hostname}") from e
+
+    resolved_ips = {ai[4][0] for ai in addrinfo}
+    if not resolved_ips or not all(_is_public_ip(ip) for ip in resolved_ips):
+        raise ValueError("Manifest URL resolves to non-public network address")
+    return url
+
+
 def _read_text_source(path_or_url: str) -> Iterable[str]:
     if path_or_url.startswith("http://") or path_or_url.startswith("https://"):
         import urllib.request
 
-        with urllib.request.urlopen(path_or_url) as resp:  # nosec B310
+        safe_url = _validate_remote_url(path_or_url)
+        with urllib.request.urlopen(safe_url) as resp:  # nosec B310
             for line in resp.read().decode("utf-8").splitlines():
                 yield line
     else:
@@ -156,7 +192,8 @@ def parse_manifest(path_or_url: str) -> List[str]:
         if path_or_url.startswith("http://") or path_or_url.startswith("https://"):
             import urllib.request
 
-            with urllib.request.urlopen(path_or_url) as resp:  # nosec B310
+            safe_url = _validate_remote_url(path_or_url)
+            with urllib.request.urlopen(safe_url) as resp:  # nosec B310
                 obj = _json.loads(resp.read().decode("utf-8"))
         else:
             with Path(path_or_url).open("r", encoding="utf-8") as f:
