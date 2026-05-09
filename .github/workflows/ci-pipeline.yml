@@ -35,7 +35,7 @@ jobs:
         python-version: ['3.11']
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4.3.1
 
     - name: Setup Python
       uses: ./.github/actions/setup-python-env
@@ -66,20 +66,18 @@ jobs:
     - name: Generate summary
       if: always()
       run: |
-        {
-          echo "## CI Validation Results"
-          echo ""
-          if [ -f data_out/ci_orchestrator/status.json ]; then
-            echo '```json'
-            cat data_out/ci_orchestrator/status.json
-            echo ''
-            echo '```'
-          fi
-        } >> "$GITHUB_STEP_SUMMARY"
+        echo "## CI Validation Results" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        if [ -f data_out/ci_orchestrator/status.json ]; then
+          echo '```json' >> $GITHUB_STEP_SUMMARY
+          cat data_out/ci_orchestrator/status.json >> $GITHUB_STEP_SUMMARY
+          echo '' >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+        fi
 
     - name: Upload validation results
       if: always()
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4.6.2
       with:
         name: validation-results
         path: |
@@ -95,7 +93,7 @@ jobs:
     if: github.event_name == 'schedule'
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4.3.1
 
     - name: Setup Python
       uses: ./.github/actions/setup-python-env
@@ -106,19 +104,17 @@ jobs:
     - name: Generate training summary
       if: always()
       run: |
-        {
-          echo "## Training Results"
-          if [ -f data_out/master_orchestrator/status.json ]; then
-            echo '```json'
-            cat data_out/master_orchestrator/status.json
-            echo ''
-            echo '```'
-          fi
-        } >> "$GITHUB_STEP_SUMMARY"
+        echo "## Training Results" >> $GITHUB_STEP_SUMMARY
+        if [ -f data_out/master_orchestrator/status.json ]; then
+          echo '```json' >> $GITHUB_STEP_SUMMARY
+          cat data_out/master_orchestrator/status.json >> $GITHUB_STEP_SUMMARY
+          echo '' >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+        fi
 
     - name: Upload training results
       if: always()
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4.6.2
       with:
         name: training-results
         path: data_out/
@@ -131,7 +127,7 @@ jobs:
     if: github.event_name == 'schedule'
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4.3.1
 
     - name: Setup Python
       uses: ./.github/actions/setup-python-env
@@ -140,7 +136,7 @@ jobs:
       run: python scripts/model_deployer.py --deploy best --strategy canary
 
     - name: Upload deployment manifest
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4.6.2
       with:
         name: deployment-manifest
         path: deployed_models/model_registry.json
