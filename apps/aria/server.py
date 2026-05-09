@@ -26,6 +26,13 @@ _RE_JSON_BLOCK = re.compile(r"\[.*\]", re.DOTALL)
 
 
 def _sanitize_for_log(value: str) -> str:
+    """Return a log-safe single-line representation of user-controlled text."""
+    if not isinstance(value, str):
+        value = str(value)
+    return value.replace("\r", "").replace("\n", "")
+
+
+def _sanitize_for_log(value: str) -> str:
     """Sanitize potentially untrusted text for safe plain-text logging."""
     sanitized = value.replace("\r", "").replace("\n", " ")
     sanitized = re.sub(r"[\x00-\x1f\x7f]", "", sanitized)
@@ -677,13 +684,15 @@ Rules:
                     or self._normalize_provider_alias(provider_choice)
                     or "auto"
                 )
-                logger.info(f"✓ LLM parsed via {used_provider_name}: {command} -> {len(actions)} actions")
+                safe_command = _sanitize_for_log(command)
+                logger.info(f"✓ LLM parsed via {used_provider_name}: {safe_command} -> {len(actions)} actions")
                 return actions
             except Exception as e:
                 logger.warning(f"LLM parsing failed, using fallback: {e}")
 
         actions = self.parse_with_fallback(command)
-        logger.info(f"✓ Fallback parsed: {command} -> {len(actions)} actions")
+        safe_command = _sanitize_for_log(command)
+        logger.info(f"✓ Fallback parsed: {safe_command} -> {len(actions)} actions")
         return actions
 
 
