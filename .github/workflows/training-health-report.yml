@@ -132,6 +132,15 @@ jobs:
         continue-on-error: true
 
       - name: Generate step summary
+        env:
+          DEGRADED: ${{ steps.status.outputs.degraded }}
+          NO_DATA: ${{ steps.status.outputs.no_data }}
+          CYCLES: ${{ steps.status.outputs.cycles }}
+          BEST_ACC: ${{ steps.status.outputs.best_acc }}
+          TREND: ${{ steps.status.outputs.trend }}
+          CI_TOTAL: ${{ steps.status.outputs.ci_total }}
+          CI_SUCCEEDED: ${{ steps.status.outputs.ci_succeeded }}
+          CI_FAILED: ${{ steps.status.outputs.ci_failed }}
         run: |
           {
             echo "## 📊 Weekly Training Health Report"
@@ -140,9 +149,9 @@ jobs:
             echo ""
 
             # Overall health badge
-            if [ "${{ steps.status.outputs.degraded }}" = "true" ]; then
+            if [ "${DEGRADED}" = "true" ]; then
               echo "### ⚠️ Health Status: DEGRADED"
-            elif [ "${{ steps.status.outputs.no_data }}" = "true" ]; then
+            elif [ "${NO_DATA}" = "true" ]; then
               echo "### ℹ️ Health Status: No Training Data"
             else
               echo "### ✅ Health Status: Healthy"
@@ -153,18 +162,18 @@ jobs:
             echo ""
             echo "| Metric | Value |"
             echo "|--------|-------|"
-            echo "| Cycles completed | ${{ steps.status.outputs.cycles }} |"
-            echo "| Best accuracy | ${{ steps.status.outputs.best_acc }} |"
-            echo "| Recent trend | ${{ steps.status.outputs.trend }} |"
+            echo "| Cycles completed | ${CYCLES} |"
+            echo "| Best accuracy | ${BEST_ACC} |"
+            echo "| Recent trend | ${TREND} |"
             echo ""
 
             echo "### CI Orchestrator"
             echo ""
             echo "| Metric | Value |"
             echo "|--------|-------|"
-            echo "| Total jobs | ${{ steps.status.outputs.ci_total }} |"
-            echo "| Succeeded | ${{ steps.status.outputs.ci_succeeded }} |"
-            echo "| Failed | ${{ steps.status.outputs.ci_failed }} |"
+            echo "| Total jobs | ${CI_TOTAL} |"
+            echo "| Succeeded | ${CI_SUCCEEDED} |"
+            echo "| Failed | ${CI_FAILED} |"
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Open degradation issue
