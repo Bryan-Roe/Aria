@@ -27,8 +27,6 @@ import math
 import os
 import queue
 import struct
-import logging
-import queue
 import threading
 from contextlib import contextmanager
 from typing import Any, Callable, Dict, Iterator, List, Optional, Sequence, Tuple
@@ -82,9 +80,6 @@ _thread_local = threading.local()
 _thread_connections: Dict[int, Any] = {}
 _conn_lock = threading.RLock()
 
-_conn_lock = threading.RLock()
-_thread_local = threading.local()
-_thread_connections: Dict[int, Any] = {}
 
 class ConnectionPool:
     """Simple LIFO connection pool with thread-local fast-path.
@@ -152,8 +147,15 @@ class ConnectionPool:
                 _thread_connections.pop(thread_id, None)
 
         # 2) Try pool
+        conn = None
         try:
-            conn = self._pool.get(block=(timeout > 0.0), timeout=timeout if timeout > 0 else 0)
+            # If timeout <= 0, use non-blocking get
+            if timeout and timeout > 0.0:
+                conn = self._pool.get(block=True, timeout=timeout)
+            else:
+                conn = self._pool.get(block=False)
+        except queue.Empty:
+            conn = None
         except Exception:
             conn = None
 
@@ -163,14 +165,12 @@ class ConnectionPool:
                 _thread_local.conn = conn
                 _thread_connections[thread_id] = conn
                 return conn
-            # Dead connection: close and continue to create
+            # Dead connection: close and continue to create a new one
             try:
-                cursor.close()
+                conn.close()
             except Exception:
                 pass
-            return True
-        except Exception:
-            return False
+            conn = None
 
         # 3) Create new connection (if allowed)
         conn = self._create_connection()
@@ -206,7 +206,7 @@ class ConnectionPool:
         while True:
             try:
                 conn = self._pool.get_nowait()
-            except Exception:
+            except queue.Empty:
                 break
             try:
                 conn.close()
@@ -241,7 +241,7 @@ class ConnectionPool:
                 item = self._pool.get_nowait()
                 items.append(item)
                 tmp.append(item)
-            except Exception:
+            except queue.Empty:
                 break
         # put them back
         for item in tmp:
@@ -281,6 +281,7 @@ def close_all_connections() -> None:
 
 
 # ------------------------- Embedding Generation -------------------------
+
 
 _LOCAL_DIM = 256  # dimension for lightweight local fallback
 
@@ -385,15 +386,6 @@ def store_embeddings_batch(embeddings: List[Tuple[str, Sequence[float], str]]) -
         if not values:
             return 0
         cursor = conn.cursor()
-        values = []
-        for message_id, embedding, model in embeddings:
-            if not message_id or not embedding:
-                continue
-            blob = _serialize_f32(embedding)
-            values.append((message_id, model or "unknown-model", len(embedding), blob))
-
-        if not values:
-            return 0
 
         try:
             cursor.executemany(
