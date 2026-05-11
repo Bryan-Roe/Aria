@@ -33,8 +33,11 @@ def _is_safe_dataset_name(name: str) -> bool:
     return bool(_DATASET_NAME_PATTERN.fullmatch(name_norm))
 
 
-def _error_response(code: str, message: str) -> Dict[str, Any]:
-    return {"success": False, "error": code, "message": message}
+def _error_response(code: str, message: str, **extra: Any) -> Dict[str, Any]:
+    response: Dict[str, Any] = {"success": False, "error": code, "message": message}
+    if extra:
+        response.update(extra)
+    return response
 
 
 class TrainingIntegration:
