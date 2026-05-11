@@ -36,5 +36,5 @@ def configure_json_logging(level: int | None = None) -> None:
 
     handler = logging.StreamHandler()
     handler.setFormatter(JsonFormatter())
-    root.handlers = [handler]
+    root.addHandler(handler)
     root.setLevel(resolved_level)
