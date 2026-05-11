@@ -151,7 +151,7 @@ jobs:
           print(f"errors={errors}")
           print(f"total={total}")
           PY
-          echo "Parsed: passed=${{ steps.parse.outputs.passed }} failed=${{ steps.parse.outputs.failed }} skipped=${{ steps.parse.outputs.skipped }} errors=${{ steps.parse.outputs.errors }}"
+          echo "JUnit parsing completed."
 
       - name: Enforce coverage threshold
         if: ${{ github.event.inputs.coverage-threshold != '' && github.event.inputs.coverage-threshold != '0' }}
