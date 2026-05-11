@@ -130,7 +130,7 @@ curl http://localhost:7071/api/ai/status | python -m json.tool
 make build
 make dev
 # Aria: http://localhost:8080
-# Functions: http://localhost:7071/api/health
+# Functions: http://localhost:7071/api/ai/status
 ```
 
 To run the autonomous training orchestrator safely as a single instance:
