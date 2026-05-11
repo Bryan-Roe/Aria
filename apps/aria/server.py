@@ -1909,7 +1909,11 @@ class AriaRequestHandler(SimpleHTTPRequestHandler):
                 self.send_header("Content-Type", "application/json")
                 self.end_headers()
                 self.wfile.write(json.dumps(response, indent=2).encode("utf-8"))
-                logger.info(f"✓ World generated (theme={safe_theme_for_log}, llm={response['used_llm']}, count={response['count']})")
+                safe_used_llm_for_log = str(bool(response.get("used_llm", False)))
+                safe_count_for_log = str(int(response.get("count", 0)))
+                logger.info(
+                    f"✓ World generated (theme={safe_theme_for_log}, llm={safe_used_llm_for_log}, count={safe_count_for_log})"
+                )
                 return
             except Exception as e:
                 logger.error(f"World generation error: {e}")
