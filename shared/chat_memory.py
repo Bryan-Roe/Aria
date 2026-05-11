@@ -165,12 +165,9 @@ class ConnectionPool:
                 return conn
             # Dead connection: close and continue to create
             try:
-                cursor.close()
+                conn.close()
             except Exception:
                 pass
-            return True
-        except Exception:
-            return False
 
         # 3) Create new connection (if allowed)
         conn = self._create_connection()
