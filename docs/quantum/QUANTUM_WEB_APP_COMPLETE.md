@@ -172,8 +172,8 @@ cd quantum-ai
 - Metric: Documentation — Target: Complete guide — Achieved: ✅ Yes
 - Metric: Ease of use — Target: One-command start — Achieved: ✅ Yes
 - Metric: Code quality — Target: Clean, commented — Achieved: ✅ Yes
-| Performance | Non-blocking training | ✅ Yes |
-| UI/UX | Modern, responsive | ✅ Yes |
+- Metric: Performance — Target: Non-blocking training — Achieved: ✅ Yes
+- Metric: UI/UX — Target: Modern, responsive — Achieved: ✅ Yes
 
 ## 📈 Performance Characteristics
 
