@@ -1522,8 +1522,8 @@ def start_backend(req: func.HttpRequest) -> func.HttpResponse:
 def health(req: func.HttpRequest) -> func.HttpResponse:
     """Minimal health endpoint safe for probes and load balancers."""
     try:
-        info = detect_provider(None)
-        active_provider = getattr(info, "name", "unknown")
+        _, provider_choice = detect_provider(None)
+        active_provider = getattr(provider_choice, "name", "unknown")
     except (TypeError, ValueError, AttributeError, RuntimeError) as exc:
         logging.debug("health provider detection failed: %s", exc)
         active_provider = "unknown"
