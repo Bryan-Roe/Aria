@@ -124,6 +124,23 @@ curl http://localhost:7071/api/ai/status | python -m json.tool
 ./.venv/bin/python app.py
 ```
 
+### 5 — Local autonomous/dev stack with Docker Compose
+
+```bash
+make build
+make dev
+# Aria: http://localhost:8080
+# Functions: http://localhost:7071/api/ai/status
+```
+
+To run the autonomous training orchestrator safely as a single instance:
+
+```bash
+python scripts/autonomous_training_orchestrator.py --cycles 1
+# If a stale lock exists and you intentionally want takeover:
+python scripts/autonomous_training_orchestrator.py --force-run --cycles 1
+```
+
 ---
 
 ## 🏗️ Project Structure

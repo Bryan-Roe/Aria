@@ -15,9 +15,14 @@ from pathlib import Path
 import azure.functions as func
 
 # Import AI projects via centralized registry (replaced scattered sys.path manipulation)
+from shared.config import get_settings
 from shared.core.module_registry import AIProjectsRegistry
 from shared.import_helpers import create_stub_function, safe_import
 from shared.json_utils import load_status_json
+from shared.logging import configure_json_logging
+
+configure_json_logging()
+_settings = get_settings()
 
 # Initialize registry and get chat providers API
 _ai_registry = AIProjectsRegistry()
@@ -97,23 +102,6 @@ chat_memory_funcs = safe_import(
 generate_embedding = chat_memory_funcs["generate_embedding"]
 fetch_similar_messages = chat_memory_funcs["fetch_similar_messages"]
 store_embedding = chat_memory_funcs["store_embedding"]
-try:
-    from shared.db_logging import log_chat_message_safe
-except Exception:  # pragma: no cover - if shared not on path
-    log_chat_message_safe = None  # type: ignore
-try:
-    from shared.chat_memory import (fetch_similar_messages, generate_embedding,
-                                    store_embedding)
-except Exception:
-    # Provide graceful degradations so endpoint still works
-    def generate_embedding(text: str):  # type: ignore
-        return []
-
-    def fetch_similar_messages(query_emb, top_k=5, session_id=None):  # type: ignore
-        return []
-
-    def store_embedding(message_id, embedding, model):  # type: ignore
-        pass
 
 
 # File caching for repeated JSON reads
@@ -128,11 +116,6 @@ except Exception:  # pragma: no cover
             return json.load(f)
         return False
 
-
-# Add scripts to path for vision inference (kept for legacy support)
-scripts_path = Path(__file__).resolve().parent / "scripts"
-if str(scripts_path) not in sys.path:
-    sys.path.insert(0, str(scripts_path))
 
 # -----------------------------------------------------------------------------
 # Subscription Manager (optional)
@@ -1535,6 +1518,30 @@ def start_backend(req: func.HttpRequest) -> func.HttpResponse:
     )
 
 
+@app.route(route="health", methods=["GET"], auth_level=func.AuthLevel.ANONYMOUS)
+def health(req: func.HttpRequest) -> func.HttpResponse:
+    """Minimal health endpoint safe for probes and load balancers."""
+    try:
+        _, provider_choice = detect_provider(None)
+        active_provider = getattr(provider_choice, "name", "unknown")
+    except (TypeError, ValueError, AttributeError, RuntimeError) as exc:
+        logging.debug("health provider detection failed: %s", exc)
+        active_provider = "unknown"
+
+    payload = {
+        "status": "ok",
+        "provider": active_provider,
+        "settings": _settings.summary(),
+        "timestamp": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
+    }
+    return func.HttpResponse(
+        json.dumps(payload),
+        status_code=200,
+        mimetype="application/json",
+        headers=create_cors_response_headers(),
+    )
+
+
 # =============================================================================
 # Status API - Health and environment diagnostics
 # =============================================================================
@@ -2073,6 +2080,7 @@ def ai_status(req: func.HttpRequest) -> func.HttpResponse:
             "quantum": quantum_info,
             "self_learning": learning_info,
             "orchestrator_health": orchestrator_health,
+            "settings": _settings.summary(),
             "temperature": float(os.getenv("CHAT_TEMPERATURE", "0.7")),
             "server": {
                 "executable": sys.executable,
@@ -2088,6 +2096,7 @@ def ai_status(req: func.HttpRequest) -> func.HttpResponse:
                 "/api/chat-web/chat.js",
                 "/api/chat",
                 "/api/chat/stream",
+                "/api/health",
                 "/api/ai/status",
                 "/api/vision/infer",
                 "/api/vision/batch-infer",

@@ -73,7 +73,7 @@ jobs:
 
       - name: Trigger experiment fork signal (repository_dispatch)
         if: ${{ steps.evaluate.outputs.evolution_triggered == 'true' }}
-        uses: actions/github-script@v6
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b  # v7 (pinned SHA)
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |

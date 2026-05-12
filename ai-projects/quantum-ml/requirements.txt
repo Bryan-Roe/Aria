@@ -1,29 +1,29 @@
 # Azure Quantum SDK
-azure-quantum[qiskit]>=1.0.0,<2.0.0
+azure-quantum[qiskit]>=3.9.0,<4.0.0
 # Qiskit 1.x baseline (security-patched and compatible with current torch baseline)
-qiskit==1.4.2
-qiskit-aer==0.16.4
+qiskit==2.4.1
+qiskit-aer==0.17.2
 
 # Quantum Machine Learning
-pennylane>=0.39.0,<1.0.0
+pennylane>=0.44.1,<1.0.0
 ## Pennylane-Qiskit adapter is optional.
 ## It currently conflicts with secure torch baselines because recent torch
 ## versions require sympy>=1.13.1 while pennylane-qiskit 0.39.x requires
 ## sympy<1.13. Install this adapter only in a dedicated environment when needed.
 # pennylane-qiskit>=0.39.0,<0.40.0
-torch>=2.8.0,<3.0.0
-numpy>=1.26.4,<2.0.0
-scipy>=1.14.0,<2.0.0
-qiskit-machine-learning==0.8.2  # Compatible with Qiskit 1.3.x and Azure Quantum's NumPy<2 constraint
+torch>=2.11.0,<3.0.0
+numpy>=2.4.4,<3.0.0
+scipy>=1.17.1,<2.0.0
+qiskit-machine-learning==0.9.0  # Compatible with Qiskit 1.3.x and Azure Quantum's NumPy<2 constraint
 
 # Azure Integration
-azure-identity>=1.15.0,<2.0.0
-azure-core>=1.29.0,<2.0.0
+azure-identity>=1.25.3,<2.0.0
+azure-core>=1.41.0,<2.0.0
 
 # Data Processing & Visualization
-pandas>=2.2.0,<3.0.0
-matplotlib>=3.9.0,<4.0.0
-scikit-learn>=1.6.0,<2.0.0
+pandas>=3.0.2,<4.0.0
+matplotlib>=3.10.9,<4.0.0
+scikit-learn>=1.8.0,<2.0.0
 seaborn==0.13.2
 
 # Configuration & Utilities
@@ -31,14 +31,14 @@ pyyaml==6.0.3
 
 # Development Tools
 jupyter==1.1.1
-ipykernel==6.31.0
+ipykernel==7.2.0
 pytest==9.0.3
 black>=26.3.1,<27.0.0
 
 # Model Context Protocol (MCP) Server
-mcp>=1.0.0
-pydantic>=2.0.0
-anyio>=3.0.0
+mcp>=1.27.1
+pydantic>=2.13.4
+anyio>=4.13.0
 
 # (Removed) pip-check-duplicates was referenced but no distribution exists.
 # If dependency insight is needed, install pipdeptree instead:

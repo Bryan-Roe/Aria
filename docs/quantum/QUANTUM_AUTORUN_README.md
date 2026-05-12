@@ -1,6 +1,10 @@
 # Quantum AutoRun
 
-A lightweight orchestrator to automate quantum training runs using `ai-projects/quantum-ml/train_custom_dataset.py` (local simulators) and `ai-projects/quantum-ml/deploy_to_azure_quantum.py` (Azure Quantum hardware). It mirrors the AutoTrain pattern used for LoRA fine-tuning and supports both free local execution and cloud hardware submission.
+A lightweight orchestrator to automate quantum training runs using
+`ai-projects/quantum-ml/train_custom_dataset.py` (local simulators) and
+`ai-projects/quantum-ml/deploy_to_azure_quantum.py` (Azure Quantum hardware).
+It mirrors the AutoTrain pattern used for LoRA fine-tuning and supports both
+free local execution and cloud hardware submission.
 
 ## What it does
 
@@ -87,7 +91,9 @@ Notes:
 
 ## Status endpoint integration
 
-The `/api/ai/status` Azure Function now includes a `quantum_autorun` field when `data_out/quantum_autorun/status.json` exists. This makes it easy to check the last validation/execution results from the web UI or via curl.
+The `/api/ai/status` Azure Function now includes a `quantum_autorun` field when
+`data_out/quantum_autorun/status.json` exists. This makes it easy to check the
+last validation/execution results from the web UI or via curl.
 
 ## Azure Quantum setup
 

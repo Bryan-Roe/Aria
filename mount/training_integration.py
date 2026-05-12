@@ -2,9 +2,9 @@
 Training Integration Module
 Interfaces with LoRA training and orchestration systems
 
-Dataset validation policy for `train_lora`:
-- Reject path separators/traversal tokens (`/`, `\\`, `..`)
-- Allow only names matching `^[A-Za-z0-9_.-]+$`
+Dataset names are validated with a strict allowlist policy before subprocess
+invocation. Names must match regex ``^[A-Za-z0-9_.-]+$`` and must not contain
+path separators or traversal tokens.
 """
 
 import asyncio
@@ -18,6 +18,25 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
+DATASET_NAME_PATTERN = re.compile(r"^[A-Za-z0-9_.-]+$")
+
+
+def _normalize_dataset_name(name: str) -> str:
+    """Normalize dataset names for case-insensitive allowlist matching."""
+    return name.strip().lower()
+
+
+def _is_safe_dataset_name(name: str) -> bool:
+    """Return True when dataset name is non-path-like and matches safe regex."""
+    name_norm = name.strip()
+    if any(token in name_norm for token in ("/", "\\", "..")):
+        return False
+    return bool(DATASET_NAME_PATTERN.fullmatch(name_norm))
+
+
+def _error_response(code: str, message: str) -> Dict[str, Any]:
+    """Return a consistent error payload."""
+    return {"success": False, "error": code, "message": message}
 
 _DATASET_NAME_PATTERN = re.compile(r"^[A-Za-z0-9_.-]+$")
 
@@ -228,68 +247,62 @@ class TrainingIntegration:
         Hardening and validation added to prevent uncontrolled command-line and
         path-injection issues. This method validates the dataset against the
         discovered datasets and runs the training script using a safe argument
-        list, a restricted environment, and a bounded timeout.
+        list, a restricted environment, and a bounded timeout. Dataset matching
+        is case-insensitive via lower-case normalization.
         """
         try:
             # Basic type/format checks
             if not isinstance(dataset, str) or not dataset.strip():
                 return _error_response(
-                    "invalid_dataset",
-                    "Dataset name must be a non-empty string.",
+                    "invalid_dataset", "Dataset must be a non-empty string."
                 )
 
-            dataset_norm = _normalize_dataset_name(dataset)
+            # Fetch available datasets (list_datasets uses a thread for FS ops)
+            available_datasets = await self.list_datasets()
+
+            # Build allowed map (normalized -> canonical discovered dataset name)
+            allowed_dataset_map: Dict[str, str] = {}
+            for names in available_datasets.values():
+                for name in names:
+                    if isinstance(name, str) and _is_safe_dataset_name(name):
+                        allowed_dataset_map[_normalize_dataset_name(name)] = name.strip()
+
+            logger.debug(
+                "train_lora: allowed dataset names=%s", sorted(allowed_dataset_map.keys())
+            )
 
             if not _is_safe_dataset_name(dataset):
-                dataset_for_log = dataset.replace("\r", "").replace("\n", "")
                 logger.warning(
-                    "train_lora: rejected unsafe dataset name: %s", dataset_for_log
+                    "train_lora: rejected dataset with disallowed characters: %s",
+                    dataset,
                 )
                 return _error_response(
                     "invalid_dataset",
                     "Dataset name contains disallowed characters or path traversal tokens.",
                 )
 
-            # Fetch available datasets (list_datasets uses a thread for FS ops)
-            available_datasets = await self.list_datasets()
+            dataset_norm = _normalize_dataset_name(dataset)
+            dataset_for_cmd = allowed_dataset_map.get(dataset_norm)
 
-            # Build normalized allowlist and preserve canonical discovered name
-            allowed_datasets = set()
-            normalized_to_canonical: Dict[str, str] = {}
-            for names in available_datasets.values():
-                for name in names:
-                    if isinstance(name, str):
-                        stripped_name = name.strip()
-                        normalized = _normalize_dataset_name(stripped_name)
-                        if _is_safe_dataset_name(stripped_name):
-                            allowed_datasets.add(normalized)
-                            normalized_to_canonical[normalized] = stripped_name
-
-            if logger.isEnabledFor(logging.DEBUG):
-                logger.debug(
-                    "train_lora: allowed datasets for validation: %s",
-                    sorted(allowed_datasets),
-                )
-            if dataset_norm not in allowed_datasets:
+            if dataset_for_cmd is None:
                 logger.warning("train_lora: dataset not in allowlist: %s", dataset_norm)
                 return _error_response(
                     "unknown_dataset",
                     "Dataset not found. Call list_datasets() to see valid names.",
                 )
-            canonical_dataset = normalized_to_canonical[dataset_norm]
 
             train_script = self.phi_path / "scripts" / "train_lora.py"
             config_file = self.phi_path / "lora" / "lora.yaml"
 
             if not train_script.exists():
                 logger.error("train_lora: train script missing: %s", train_script)
-                return {"success": False, "error": "Training script not found"}
+                return _error_response("training_script_missing", "Training script not found")
 
             cmd = [
                 sys.executable,
                 str(train_script),
                 "--dataset",
-                canonical_dataset,
+                dataset_for_cmd,
                 "--config",
                 str(config_file),
                 "--max-train-samples",
@@ -300,11 +313,8 @@ class TrainingIntegration:
                 str(int(epochs)),
             ]
 
-            # Restrict environment to a minimal set to avoid leaking secrets into child
-            env = {
-                "PATH": os.environ.get("PATH", ""),
-                "LANG": "en_US.UTF-8",
-            }
+            # Restrict environment to a minimal PATH to avoid leaking secrets into child
+            env = {"PATH": os.environ.get("PATH", ""), "LANG": "en_US.UTF-8"}
 
             try:
                 # Use a reasonable timeout (2 hours) to prevent runaway processes
@@ -318,7 +328,11 @@ class TrainingIntegration:
                 )
             except subprocess.TimeoutExpired as exc:
                 logger.exception("train_lora: training timed out for dataset %s", dataset_norm)
-                return {"success": False, "error": "Training timed out", "stdout": getattr(exc, "stdout", ""), "stderr": getattr(exc, "stderr", "")}
+                return {
+                    **_error_response("training_timeout", "Training timed out."),
+                    "stdout": getattr(exc, "stdout", ""),
+                    "stderr": getattr(exc, "stderr", ""),
+                }
 
             return {
                 "success": result.returncode == 0,
@@ -331,7 +345,7 @@ class TrainingIntegration:
             }
         except Exception as e:
             logger.exception("train_lora failed")
-            return _error_response("train_lora_failed", str(e))
+            return _error_response("training_failed", str(e))
 
     async def list_datasets(self) -> Dict[str, List[str]]:
         """List available training datasets.
