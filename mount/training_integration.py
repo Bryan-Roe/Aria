@@ -265,10 +265,11 @@ class TrainingIntegration:
                             allowed_datasets.add(normalized)
                             normalized_to_canonical[normalized] = stripped_name
 
-            logger.debug(
-                "train_lora: allowed datasets for validation: %s",
-                sorted(allowed_datasets),
-            )
+            if logger.isEnabledFor(logging.DEBUG):
+                logger.debug(
+                    "train_lora: allowed datasets for validation: %s",
+                    sorted(allowed_datasets),
+                )
             if dataset_norm not in allowed_datasets:
                 logger.warning("train_lora: dataset not in allowlist: %s", dataset_norm)
                 return _error_response(
