@@ -37,6 +37,25 @@ def test_generate_tags_fallback_add_object():
     ), "Expected an interact:add tag for spawn/add commands"
 
 
+def test_validate_action_sequence_rejects_invalid_coordinates():
+    valid, reason = aria_server.validate_action_sequence(
+        [{"action": "move", "target": {"x": 1000, "y": 50}}]
+    )
+    assert valid is False
+    assert "between 0 and 100" in reason
+
+
+def test_validate_action_sequence_accepts_basic_plan():
+    valid, reason = aria_server.validate_action_sequence(
+        [
+            {"action": "move", "target": {"x": 50, "y": 50}},
+            {"action": "gesture", "gesture_type": "wave"},
+        ]
+    )
+    assert valid is True
+    assert reason == ""
+
+
 def test_determine_position_come_here_command():
     tag = aria_server.determine_position_from_context("come here please")
     assert tag == "[aria:position:50:85]"

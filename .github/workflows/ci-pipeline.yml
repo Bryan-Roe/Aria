@@ -74,13 +74,17 @@ jobs:
     - name: Generate summary
       if: always()
       run: |
-        echo "## CI Validation Results" >> $GITHUB_STEP_SUMMARY
-        echo "" >> $GITHUB_STEP_SUMMARY
+        {
+          echo "## CI Validation Results"
+          echo ""
+        } >> "$GITHUB_STEP_SUMMARY"
         if [ -f data_out/ci_orchestrator/status.json ]; then
-          echo '```json' >> $GITHUB_STEP_SUMMARY
-          cat data_out/ci_orchestrator/status.json >> $GITHUB_STEP_SUMMARY
-          echo '' >> $GITHUB_STEP_SUMMARY
-          echo '```' >> $GITHUB_STEP_SUMMARY
+          {
+            echo '```json'
+            cat data_out/ci_orchestrator/status.json
+            echo ''
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
         fi
 
     - name: Upload validation results
@@ -118,12 +122,16 @@ jobs:
     - name: Generate training summary
       if: always()
       run: |
-        echo "## Training Results" >> $GITHUB_STEP_SUMMARY
+        {
+          echo "## Training Results"
+        } >> "$GITHUB_STEP_SUMMARY"
         if [ -f data_out/master_orchestrator/status.json ]; then
-          echo '```json' >> $GITHUB_STEP_SUMMARY
-          cat data_out/master_orchestrator/status.json >> $GITHUB_STEP_SUMMARY
-          echo '' >> $GITHUB_STEP_SUMMARY
-          echo '```' >> $GITHUB_STEP_SUMMARY
+          {
+            echo '```json'
+            cat data_out/master_orchestrator/status.json
+            echo ''
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
         fi
 
     - name: Upload training results
