@@ -101,7 +101,48 @@ def _get_conn() -> pyodbc.Connection:
             age = now - ts
             if age < _MAX_CONN_AGE_SECONDS and _is_connection_usable(conn):
                 return conn
-            # stale or unhealthy connection: try to close and remove
+            # Dead connection: close and continue to create
+            try:
+                conn.close()
+            except Exception:
+                pass
+
+        # 3) Create new connection (if allowed)
+        conn = self._create_connection()
+        if conn is not None:
+            _thread_local.conn = conn
+            _thread_connections[thread_id] = conn
+        return conn
+
+    def release(self, conn: Any) -> None:
+        """Return a connection to pool or close it if pool is full."""
+        if not conn:
+            return
+        thread_id = threading.get_ident()
+        # If this is the same as thread-local, keep it cached (fast-path)
+        if getattr(_thread_local, "conn", None) is conn:
+            # keep cached for thread reuse; do not put back into shared pool
+            _thread_connections[thread_id] = conn
+            return
+
+        # Otherwise, try to put back into pool
+        try:
+            self._pool.put_nowait(conn)
+        except queue.Full:
+            # Pool full: close the connection
+            try:
+                conn.close()
+            except Exception:
+                pass
+
+    def close_all(self) -> None:
+        """Close and clear all pooled connections and thread-local caches."""
+        # Clear pool
+        while True:
+            try:
+                conn = self._pool.get_nowait()
+            except Exception:
+                break
             try:
                 conn.close()
             except Exception:
