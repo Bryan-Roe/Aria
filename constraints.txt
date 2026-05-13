@@ -1,0 +1,8 @@
+# Constraints to avoid pip dependency resolution conflicts for CI.
+# Pin OpenTelemetry and Azure Monitor packages to a mutually-compatible set.
+# Adjust versions as needed when upgrading dependencies.
+
+opentelemetry-api>=1.41.1,<2.0.0
+opentelemetry-sdk>=1.41.1,<2.0.0
+azure-monitor-opentelemetry-exporter==1.0.0b52
+azure-monitor-opentelemetry~=1.0.0b52
