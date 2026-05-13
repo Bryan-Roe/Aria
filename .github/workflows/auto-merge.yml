@@ -26,9 +26,7 @@ name: Auto Merge
 
 on:
   pull_request:
-    types: [labeled, unlabeled]
-  pull_request_review:
-    types: [submitted]
+    types: [opened, synchronize, reopened, ready_for_review, labeled, unlabeled]
 
 permissions:
   contents: write
@@ -45,8 +43,8 @@ defaults:
 
 jobs:
   # ---------------------------------------------------------------------------
-  # Enable auto-merge when the `auto-merge` label is applied OR when an
-  # approving review arrives on a PR that already carries the label.
+  # Enable auto-merge when the `auto-merge` label is applied OR when a PR
+  # update event occurs and the label is already present.
   # ---------------------------------------------------------------------------
   enable:
     name: Enable Auto-Merge
@@ -56,13 +54,11 @@ jobs:
       github.event.pull_request.head.repo.full_name == github.repository &&
       (
         (
-          github.event_name == 'pull_request' &&
           github.event.action == 'labeled' &&
           github.event.label.name == 'auto-merge'
         ) ||
         (
-          github.event_name == 'pull_request_review' &&
-          github.event.review.state == 'approved' &&
+          github.event.action != 'unlabeled' &&
           contains(github.event.pull_request.labels.*.name, 'auto-merge')
         )
       )
