@@ -92,9 +92,9 @@ jobs:
         env:
           NODE_OPTIONS: "--no-warnings"
           TELEMETRY_CONCLUSION: ${{ github.event.workflow_run.conclusion }}
-          FORCE_EVOLUTION: ${{ github.event.inputs.force_evolution || 'false' }}
-          FITNESS_THRESHOLD: ${{ github.event.inputs.fitness_threshold || '60' }}
-          STABILITY_THRESHOLD: ${{ github.event.inputs.stability_threshold || '70' }}
+          FORCE_EVOLUTION: ${{ inputs.force_evolution || 'false' }}
+          FITNESS_THRESHOLD: ${{ inputs.fitness_threshold || '60' }}
+          STABILITY_THRESHOLD: ${{ inputs.stability_threshold || '70' }}
 
       - name: Log result when no evolution required
         if: ${{ steps.evaluate.outputs.evolution_triggered != 'true' }}

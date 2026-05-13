@@ -55,8 +55,8 @@ jobs:
       - name: Execute experiment evaluation
         id: evaluate
         env:
-          THRESHOLD: ${{ github.event.inputs.threshold || '50' }}
-          FAIL_ON_LOW: ${{ github.event.inputs.fail_on_low || 'false' }}
+          THRESHOLD: ${{ inputs.threshold || '50' }}
+          FAIL_ON_LOW: ${{ inputs.fail_on_low || 'false' }}
           METRICS_FILE: experiment-metrics.json
         run: |
           set -euo pipefail
