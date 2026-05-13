@@ -131,8 +131,12 @@ jobs:
               });
               core.info('repository_dispatch aria-evolution-triggered sent successfully.');
             } catch (error) {
-              const details = (error && (error.stack || error.message)) || String(error);
-              core.setFailed(`Failed to dispatch aria-evolution-triggered event to ${owner}/${repo}: ${details}`);
+              const details = {
+                message: error?.message || String(error),
+                status: error?.status || null,
+                response: error?.response?.data || null
+              };
+              core.setFailed(`Failed to dispatch aria-evolution-triggered event to ${owner}/${repo}: ${JSON.stringify(details)}`);
             }
         env:
           FITNESS: ${{ steps.evaluate.outputs.fitness }}
