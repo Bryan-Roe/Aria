@@ -34,7 +34,7 @@ jobs:
       )
     # prevent overlapping runs for the same workflow
     concurrency:
-      group: aria-experiment-runner-${{ github.event.workflow_run.id || github.ref }}
+      group: aria-experiment-runner-${{ github.event.workflow_run.id || github.run_id }}
       cancel-in-progress: true
     runs-on: ubuntu-latest
     permissions:

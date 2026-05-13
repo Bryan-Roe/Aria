@@ -111,22 +111,27 @@ jobs:
           script: |
             const owner = context.repo.owner;
             const repo = context.repo.repo;
-            // Create a repository dispatch event so other workflows or automation can react.
-            // Event type: 'aria-evolution-triggered'
-            await github.repos.createDispatchEvent({
-              owner,
-              repo,
-              event_type: 'aria-evolution-triggered',
-              client_payload: {
-                source_workflow: context.workflow,
-                trigger: 'autonomous-evolver',
-                evaluated: {
-                  fitness: process.env.FITNESS || null,
-                  stability: process.env.STABILITY || null,
-                  reason: process.env.REASON || null
+            try {
+              // Create a repository dispatch event so other workflows or automation can react.
+              // Event type: 'aria-evolution-triggered'
+              await github.repos.createDispatchEvent({
+                owner,
+                repo,
+                event_type: 'aria-evolution-triggered',
+                client_payload: {
+                  source_workflow: context.workflow,
+                  trigger: 'autonomous-evolver',
+                  evaluated: {
+                    fitness: process.env.FITNESS || null,
+                    stability: process.env.STABILITY || null,
+                    reason: process.env.REASON || null
+                  }
                 }
-              }
-            });
+              });
+              core.info('repository_dispatch aria-evolution-triggered sent successfully.');
+            } catch (error) {
+              core.setFailed(`Failed to dispatch aria-evolution-triggered event: ${error.message}`);
+            }
         env:
           FITNESS: ${{ steps.evaluate.outputs.fitness }}
           STABILITY: ${{ steps.evaluate.outputs.stability }}
