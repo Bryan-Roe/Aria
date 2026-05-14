@@ -14,11 +14,13 @@ This module is simulator-first and never mutates files in datasets/.
 from __future__ import annotations
 
 import argparse
+import atexit
 import json
 import logging
 import math
 import os
 import random
+import signal
 import sys
 import time
 from datetime import datetime, timedelta
@@ -26,6 +28,27 @@ from pathlib import Path
 from typing import Any, Dict
 
 import yaml
+
+try:
+    from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_exponential
+except ImportError:  # pragma: no cover - optional dependency
+    logging.getLogger(__name__).warning("tenacity not available; transient training retries are disabled")
+
+    def retry(*args, **kwargs):  # type: ignore
+        def _decorator(func):
+            return func
+
+        return _decorator
+
+    def retry_if_exception_type(*args, **kwargs):  # type: ignore
+        return Exception
+
+    def stop_after_attempt(*args, **kwargs):  # type: ignore
+        return None
+
+    def wait_exponential(*args, **kwargs):  # type: ignore
+        return None
+
 
 # ----------------------------------------------------------------------------
 # Logging
@@ -55,11 +78,13 @@ sys.path.insert(0, str(REPO_ROOT / "shared"))
 DATA_OUT_ROOT = REPO_ROOT / "data_out"
 STATUS_FILE = DATA_OUT_ROOT / "autonomous_training_status.json"
 HEARTBEAT_FILE = DATA_OUT_ROOT / "autonomous_training_heartbeat.json"
+PID_FILE = DATA_OUT_ROOT / "autonomous_training.pid"
 CONFIG_FILE = REPO_ROOT / "config" / "autonomous_training.yaml"
 
 PLATEAU_PROMOTION_CYCLES = 5
 PLATEAU_VARIANCE = 0.005
 MAX_HISTORY_CYCLES = 500
+_STOP_REQUESTED = False
 
 
 # ----------------------------------------------------------------------------
@@ -69,6 +94,53 @@ MAX_HISTORY_CYCLES = 500
 
 def _now_iso() -> str:
     return datetime.now().isoformat()
+
+
+def _request_stop(signum: int, _frame) -> None:
+    global _STOP_REQUESTED
+    logger.info("Received signal %s; graceful shutdown requested", signum)
+    _STOP_REQUESTED = True
+
+
+def _acquire_pidfile(*, force: bool = False) -> None:
+    PID_FILE.parent.mkdir(parents=True, exist_ok=True)
+    if PID_FILE.exists() and not force:
+        existing_pid = PID_FILE.read_text(encoding="utf-8").strip()
+        if existing_pid and existing_pid.isdigit():
+            try:
+                os.kill(int(existing_pid), 0)
+                raise RuntimeError(
+                    f"Another orchestrator instance is running (pid={existing_pid}). " "Use --force-run to take over."
+                )
+            except ProcessLookupError:
+                logger.warning("Stale pidfile detected (pid=%s); replacing", existing_pid)
+            except PermissionError:
+                raise RuntimeError(
+                    f"Unable to verify running process for pid {existing_pid}; "
+                    "refusing to continue without --force-run."
+                )
+    PID_FILE.write_text(str(os.getpid()), encoding="utf-8")
+
+
+def _release_pidfile() -> None:
+    try:
+        if PID_FILE.exists() and PID_FILE.read_text(encoding="utf-8").strip() == str(os.getpid()):
+            PID_FILE.unlink()
+    except OSError:
+        logger.debug("Failed to remove pidfile", exc_info=True)
+
+
+@retry(
+    retry=retry_if_exception_type(RuntimeError),
+    wait=wait_exponential(multiplier=1, min=1, max=30),
+    stop=stop_after_attempt(3),
+    reraise=True,
+)
+def _run_training_cycle_with_retry(cycle_num: int, plateau_cycles: int) -> Dict[str, Any]:
+    try:
+        return simulate_training_cycle(cycle_num, plateau_cycles=plateau_cycles)
+    except Exception as exc:  # noqa: BLE001
+        raise RuntimeError(f"transient training cycle error: {exc}") from exc
 
 
 def load_config(config_path: Path = CONFIG_FILE) -> Dict[str, Any]:
@@ -172,9 +244,7 @@ def discover_datasets() -> Dict[str, Dict[str, Any]]:
         for category_dir in root.iterdir():
             if not category_dir.is_dir():
                 continue
-            files = list(category_dir.glob("**/train.json")) + list(
-                category_dir.glob("**/train.jsonl")
-            )
+            files = list(category_dir.glob("**/train.json")) + list(category_dir.glob("**/train.jsonl"))
             if files:
                 key = f"{prefix}{category_dir.name}" if prefix else category_dir.name
                 inventory[key] = {
@@ -211,9 +281,7 @@ def simulate_training_cycle(
         logger.info("  Training progress: %.0f%%", progress * 100)
 
     cap = _accuracy_cap(n_cats)
-    cycle_accuracy = (
-        accuracy_baseline + (cycle_num * 0.02) + (0.05 * (1 - (cycle_num * 0.1)))
-    )
+    cycle_accuracy = accuracy_baseline + (cycle_num * 0.02) + (0.05 * (1 - (cycle_num * 0.1)))
     cycle_accuracy = min(cycle_accuracy, cap)
 
     if plateau_cycles > 0:
@@ -248,9 +316,7 @@ def promote_model(status: Dict[str, Any]) -> None:
     with open(out, "w", encoding="utf-8") as f:
         json.dump(payload, f, indent=2)
 
-    logger.info(
-        "🚀 Model v%s promoted → %s (accuracy=%.4f)", version, out, payload["accuracy"]
-    )
+    logger.info("🚀 Model v%s promoted → %s (accuracy=%.4f)", version, out, payload["accuracy"])
 
 
 # ----------------------------------------------------------------------------
@@ -281,19 +347,11 @@ def _select_quantum_dataset() -> Path:
 
 
 def _should_run_quantum_cycle(status: Dict[str, Any], config: Dict[str, Any]) -> bool:
-    qcfg = (
-        config.get("quantum_llm", {})
-        if isinstance(config.get("quantum_llm"), dict)
-        else {}
-    )
+    qcfg = config.get("quantum_llm", {}) if isinstance(config.get("quantum_llm"), dict) else {}
     if not qcfg.get("enabled", False):
         return False
 
-    auto_cfg = (
-        config.get("autonomous_mode", {})
-        if isinstance(config.get("autonomous_mode"), dict)
-        else {}
-    )
+    auto_cfg = config.get("autonomous_mode", {}) if isinstance(config.get("autonomous_mode"), dict) else {}
     cycle_minutes = int(auto_cfg.get("cycle_interval_minutes", 30))
     quantum_minutes = int(qcfg.get("training_interval_minutes", 60))
     cycles_between = max(1, int(round(quantum_minutes / max(cycle_minutes, 1))))
@@ -302,17 +360,11 @@ def _should_run_quantum_cycle(status: Dict[str, Any], config: Dict[str, Any]) ->
     if completed <= 0:
         return False
 
-    qstatus = (
-        status.get("quantum_llm", {})
-        if isinstance(status.get("quantum_llm"), dict)
-        else {}
-    )
+    qstatus = status.get("quantum_llm", {}) if isinstance(status.get("quantum_llm"), dict) else {}
     last_run = qstatus.get("last_run")
     if last_run:
         try:
-            elapsed = (
-                datetime.now() - datetime.fromisoformat(last_run)
-            ).total_seconds()
+            elapsed = (datetime.now() - datetime.fromisoformat(last_run)).total_seconds()
             if elapsed >= quantum_minutes * 60:
                 return True
         except Exception:
@@ -322,16 +374,8 @@ def _should_run_quantum_cycle(status: Dict[str, Any], config: Dict[str, Any]) ->
 
 
 def run_quantum_llm_training(status: Dict[str, Any], config: Dict[str, Any]) -> None:
-    qcfg = (
-        config.get("quantum_llm", {})
-        if isinstance(config.get("quantum_llm"), dict)
-        else {}
-    )
-    quantum_status = (
-        status.get("quantum_llm", {})
-        if isinstance(status.get("quantum_llm"), dict)
-        else {}
-    )
+    qcfg = config.get("quantum_llm", {}) if isinstance(config.get("quantum_llm"), dict) else {}
+    quantum_status = status.get("quantum_llm", {}) if isinstance(status.get("quantum_llm"), dict) else {}
 
     quantum_status.setdefault("runs", 0)
     quantum_status["enabled"] = bool(qcfg.get("enabled", False))
@@ -349,8 +393,7 @@ def run_quantum_llm_training(status: Dict[str, Any], config: Dict[str, Any]) -> 
 
     try:
         sys.path.insert(0, str(REPO_ROOT / "scripts"))
-        from quantum_llm_trainer import (QuantumEnhancedLLMTrainer,
-                                         get_quantum_llm_status)
+        from quantum_llm_trainer import QuantumEnhancedLLMTrainer, get_quantum_llm_status
 
         trainer_config: Dict[str, Any] = {
             "quantum_backend": qcfg.get("backend", "local"),
@@ -363,9 +406,7 @@ def run_quantum_llm_training(status: Dict[str, Any], config: Dict[str, Any]) -> 
             "status_file": "data_out/quantum_llm_training/status.json",
         }
 
-        config_file = _resolve_repo_path(
-            qcfg.get("config_file"), REPO_ROOT / "config" / "quantum_llm_config.yaml"
-        )
+        config_file = _resolve_repo_path(qcfg.get("config_file"), REPO_ROOT / "config" / "quantum_llm_config.yaml")
         if config_file.exists():
             with open(config_file, "r", encoding="utf-8") as f:
                 file_cfg = yaml.safe_load(f) or {}
@@ -389,9 +430,7 @@ def run_quantum_llm_training(status: Dict[str, Any], config: Dict[str, Any]) -> 
                 "runs": int(quantum_status.get("runs", 0)) + 1,
                 "last_error": None,
                 "dataset_path": (
-                    str(dataset_path.relative_to(REPO_ROOT))
-                    if dataset_path.exists()
-                    else str(dataset_path)
+                    str(dataset_path.relative_to(REPO_ROOT)) if dataset_path.exists() else str(dataset_path)
                 ),
                 "epochs_completed": results.get("epochs_completed"),
                 "final_loss": results.get("final_loss"),
@@ -427,13 +466,11 @@ def run_autonomously(
     cycle_interval_sec: int | None = None,
     skip_quantum: bool = False,
 ) -> int:
+    global _STOP_REQUESTED
+    _STOP_REQUESTED = False
     status = load_status()
 
-    auto_cfg = (
-        config.get("autonomous_mode", {})
-        if isinstance(config.get("autonomous_mode"), dict)
-        else {}
-    )
+    auto_cfg = config.get("autonomous_mode", {}) if isinstance(config.get("autonomous_mode"), dict) else {}
     configured_max_cycles = int(auto_cfg.get("max_cycles", 0))
     configured_interval_sec = int(auto_cfg.get("cycle_interval_minutes", 30)) * 60
 
@@ -470,6 +507,9 @@ def run_autonomously(
     try:
         cycle_num = start_cycle
         while True:
+            if _STOP_REQUESTED:
+                logger.info("Stop requested; ending autonomous loop")
+                break
             if not infinite_mode and end_cycle is not None and cycle_num >= end_cycle:
                 break
 
@@ -482,10 +522,7 @@ def run_autonomously(
             save_status(status)
             save_heartbeat("training", current_cycle=cycle_num + 1)
 
-            result = simulate_training_cycle(
-                cycle_num + 1,
-                plateau_cycles=int(status.get("plateau_cycles", 0)),
-            )
+            result = _run_training_cycle_with_retry(cycle_num + 1, int(status.get("plateau_cycles", 0)))
 
             status["cycles_completed"] = cycle_num + 1
             history = status.get("performance_history", [])
@@ -531,14 +568,8 @@ def run_autonomously(
                 logger.info("🔬 Running scheduled Quantum LLM training step...")
                 run_quantum_llm_training(status, config)
             else:
-                qstate = (
-                    status.get("quantum_llm", {})
-                    if isinstance(status.get("quantum_llm"), dict)
-                    else {}
-                )
-                qstate["enabled"] = bool(
-                    config.get("quantum_llm", {}).get("enabled", False)
-                )
+                qstate = status.get("quantum_llm", {}) if isinstance(status.get("quantum_llm"), dict) else {}
+                qstate["enabled"] = bool(config.get("quantum_llm", {}).get("enabled", False))
                 qstate["status"] = "idle"
                 qstate["last_error"] = None
                 status["quantum_llm"] = qstate
@@ -548,9 +579,7 @@ def run_autonomously(
             if not infinite_mode and end_cycle is not None and cycle_num >= end_cycle:
                 status["next_cycle_eta"] = None
             else:
-                status["next_cycle_eta"] = (
-                    datetime.now() + timedelta(seconds=cycle_interval_sec)
-                ).isoformat()
+                status["next_cycle_eta"] = (datetime.now() + timedelta(seconds=cycle_interval_sec)).isoformat()
 
             save_status(status)
             save_heartbeat(
@@ -563,17 +592,24 @@ def run_autonomously(
                 break
 
             logger.info("Cycle complete. Next cycle in %ss...", cycle_interval_sec)
-            time.sleep(cycle_interval_sec)
+            if cycle_interval_sec > 0:
+                for _ in range(cycle_interval_sec):
+                    if _STOP_REQUESTED:
+                        break
+                    time.sleep(1)
 
-        if not infinite_mode:
+        if _STOP_REQUESTED:
+            status["status"] = "stopped"
+            status["next_cycle_eta"] = None
+            save_status(status)
+            save_heartbeat("stopped", current_cycle=status.get("cycles_completed", 0))
+        elif not infinite_mode:
             logger.info("\n%s", "=" * 70)
             logger.info("🎉 TRAINING COMPLETE")
             logger.info("%s", "=" * 70)
             logger.info("Cycles completed: %s", status.get("cycles_completed", 0))
             logger.info("Best accuracy: %.4f", float(status.get("best_accuracy", 0.0)))
-            logger.info(
-                "Datasets discovered: %s", len(status.get("dataset_inventory", {}))
-            )
+            logger.info("Datasets discovered: %s", len(status.get("dataset_inventory", {})))
 
             status["status"] = "completed"
             status["current_cycle"] = status.get("cycles_completed", 0)
@@ -596,9 +632,7 @@ def run_autonomously(
         status["error"] = str(exc)
         status["next_cycle_eta"] = None
         save_status(status)
-        save_heartbeat(
-            "error", current_cycle=status.get("cycles_completed", 0), error=str(exc)
-        )
+        save_heartbeat("error", current_cycle=status.get("cycles_completed", 0), error=str(exc))
         return 1
 
 
@@ -615,12 +649,8 @@ def main() -> int:
         default=None,
         help="Number of training cycles (0 = infinite)",
     )
-    parser.add_argument(
-        "--interval", type=int, default=None, help="Seconds between cycles"
-    )
-    parser.add_argument(
-        "--status", action="store_true", help="Show current status and exit"
-    )
+    parser.add_argument("--interval", type=int, default=None, help="Seconds between cycles")
+    parser.add_argument("--status", action="store_true", help="Show current status and exit")
     parser.add_argument(
         "--config",
         type=str,
@@ -631,6 +661,11 @@ def main() -> int:
         "--skip-quantum",
         action="store_true",
         help="Skip Quantum LLM step even if enabled",
+    )
+    parser.add_argument(
+        "--force-run",
+        action="store_true",
+        help="Allow starting even when pidfile is present",
     )
 
     args = parser.parse_args()
@@ -657,13 +692,19 @@ def main() -> int:
         return 1
 
     config = load_config(config_path)
-
-    return run_autonomously(
-        config=config,
-        max_cycles=args.cycles,
-        cycle_interval_sec=args.interval,
-        skip_quantum=args.skip_quantum,
-    )
+    signal.signal(signal.SIGINT, _request_stop)
+    signal.signal(signal.SIGTERM, _request_stop)
+    _acquire_pidfile(force=args.force_run)
+    atexit.register(_release_pidfile)
+    try:
+        return run_autonomously(
+            config=config,
+            max_cycles=args.cycles,
+            cycle_interval_sec=args.interval,
+            skip_quantum=args.skip_quantum,
+        )
+    finally:
+        _release_pidfile()
 
 
 if __name__ == "__main__":

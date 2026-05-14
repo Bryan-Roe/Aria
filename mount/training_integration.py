@@ -38,6 +38,26 @@ def _error_response(code: str, message: str) -> Dict[str, Any]:
     """Return a consistent error payload."""
     return {"success": False, "error": code, "message": message}
 
+_DATASET_NAME_PATTERN = re.compile(r"^[A-Za-z0-9_.-]+$")
+
+
+def _normalize_dataset_name(name: str) -> str:
+    return name.strip().lower()
+
+
+def _is_safe_dataset_name(name: str) -> bool:
+    name_norm = name.strip()
+    if any(token in name_norm for token in ("/", "\\", "..")):
+        return False
+    return bool(_DATASET_NAME_PATTERN.fullmatch(name_norm))
+
+
+def _error_response(code: str, message: str, **extra: Any) -> Dict[str, Any]:
+    response: Dict[str, Any] = {"success": False, "error": code, "message": message}
+    if extra:
+        response.update(extra)
+    return response
+
 
 class TrainingIntegration:
     """Integration layer for training operations"""
@@ -240,15 +260,15 @@ class TrainingIntegration:
             # Fetch available datasets (list_datasets uses a thread for FS ops)
             available_datasets = await self.list_datasets()
 
-            # Build allowed set (normalized)
-            allowed_datasets = set()
+            # Build allowed map (normalized -> canonical discovered dataset name)
+            allowed_dataset_map: Dict[str, str] = {}
             for names in available_datasets.values():
                 for name in names:
                     if isinstance(name, str) and _is_safe_dataset_name(name):
-                        allowed_datasets.add(_normalize_dataset_name(name))
+                        allowed_dataset_map[_normalize_dataset_name(name)] = name.strip()
 
             logger.debug(
-                "train_lora: allowed dataset names=%s", sorted(allowed_datasets)
+                "train_lora: allowed dataset names=%s", sorted(allowed_dataset_map.keys())
             )
 
             if not _is_safe_dataset_name(dataset):
@@ -262,8 +282,9 @@ class TrainingIntegration:
                 )
 
             dataset_norm = _normalize_dataset_name(dataset)
+            dataset_for_cmd = allowed_dataset_map.get(dataset_norm)
 
-            if dataset_norm not in allowed_datasets:
+            if dataset_for_cmd is None:
                 logger.warning("train_lora: dataset not in allowlist: %s", dataset_norm)
                 return _error_response(
                     "unknown_dataset",
@@ -281,7 +302,7 @@ class TrainingIntegration:
                 sys.executable,
                 str(train_script),
                 "--dataset",
-                dataset_norm,
+                dataset_for_cmd,
                 "--config",
                 str(config_file),
                 "--max-train-samples",

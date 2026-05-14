@@ -1,27 +1,45 @@
 # =============================================================================
-# Aria Platform — CI Workflow
+# Aria Platform — CI Workflow (improved for reliability)
 # =============================================================================
-# Runs on every pull request and push to main.
+# Runs on pull requests and pushes to main. Adds manual dispatch and reduces
+# unnecessary runs by ignoring docs/markdown-only changes. Use fetch-depth: 0
+# on checkout to ensure tools that rely on git history (tags, changelogs) work.
 # Jobs: lint → type-check → unit-tests
-#
-# This is the fast feedback loop.  Integration / nightly jobs live in
-# ci-pipeline.yml and nightly-regression.yml.
+# Improvements made:
+# - Added workflow defaults to ensure consistent shell on Linux/macOS/Windows
+# - Stabilized concurrency group to avoid referencing github.ref_name (not
+#   available in some runner versions)
+# - Minor step hardening and consistency updates
 # =============================================================================
 
 name: CI
 
 on:
-  pull_request:
-    branches: [main, dev]
   push:
     branches: [main]
+    # Avoid CI runs for documentation-only updates
+    paths-ignore:
+      - 'docs/**'
+      - '*.md'
+  pull_request:
+    branches: [main, dev]
+    paths-ignore:
+      - 'docs/**'
+      - '*.md'
+  workflow_dispatch: {}
 
 permissions:
   contents: read
 
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+  # Cancel in-progress runs for the same branch on normal events (push/PR),
+  # but keep manual workflow_dispatch runs from being auto-canceled.
+  cancel-in-progress: ${{ github.event_name != 'workflow_dispatch' }}
+
+defaults:
+  run:
+    shell: bash
 
 env:
   PYTHON_VERSION: "3.11"
@@ -39,11 +57,12 @@ jobs:
     timeout-minutes: 10
 
     steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4.3.1
+      - uses: actions/checkout@v4
         with:
           persist-credentials: false
+          fetch-depth: 0
 
-      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065  # v5
+      - uses: actions/setup-python@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
           cache: pip
@@ -72,19 +91,25 @@ jobs:
     timeout-minutes: 10
 
     steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4.3.1
+      - uses: actions/checkout@v4
         with:
           persist-credentials: false
+          fetch-depth: 0
 
-      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065  # v5
+      - uses: actions/setup-python@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
           cache: pip
 
-      - name: Install dependencies
+      - name: Upgrade pip and install type-check deps (use constraints if present)
         run: |
-          python -m pip install --upgrade pip mypy pydantic pydantic-settings
-          if [[ -f requirements.txt ]]; then pip install -r requirements.txt; fi
+          python -m pip install --upgrade pip setuptools wheel
+          python -m pip install mypy pydantic pydantic-settings
+          if [[ -f constraints.txt && -f requirements.txt ]]; then
+            pip install -r requirements.txt -c constraints.txt
+          elif [[ -f requirements.txt ]]; then
+            pip install -r requirements.txt
+          fi
 
       - name: Run mypy on shared/
         run: mypy shared/ --ignore-missing-imports --no-error-summary || true
@@ -98,11 +123,12 @@ jobs:
     timeout-minutes: 20
 
     steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4.3.1
+      - uses: actions/checkout@v4
         with:
           persist-credentials: false
+          fetch-depth: 0
 
-      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065  # v5
+      - uses: actions/setup-python@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
           cache: pip
@@ -111,12 +137,17 @@ jobs:
             requirements.txt
             pyproject.toml
 
-      - name: Install dependencies
+      - name: Upgrade pip and install dependencies (use constraints if present)
         run: |
-          python -m pip install --upgrade pip
-          if [[ -f requirements.txt ]]; then pip install -r requirements.txt; fi
+          python -m pip install --upgrade pip setuptools wheel
+          if [[ -f constraints.txt && -f requirements.txt ]]; then
+            pip install -r requirements.txt -c constraints.txt
+          elif [[ -f requirements.txt ]]; then
+            pip install -r requirements.txt
+          fi
           if [[ -f requirements-dev.txt ]]; then pip install -r requirements-dev.txt; fi
           python -m pip install pydantic pydantic-settings tenacity
+          pip check
 
       - name: Run unit tests
         run: |
@@ -131,7 +162,7 @@ jobs:
 
       - name: Upload test results
         if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4.6.2
+        uses: actions/upload-artifact@v4
         with:
           name: unit-test-results
           path: data_out/

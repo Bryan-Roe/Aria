@@ -7,7 +7,7 @@ connection string so unit tests can patch os.getenv("...") easily.
 
 Design goals:
 - Use import pyodbc (not from pyodbc import connect) so tests can patch shared.chat_memory.pyodbc.
-- Cache connections per thread id under _conn_cache protected by _conn_lock.
+- Cache connections per thread id under _conn_lock.
 - Keep cached connections open (do not close them in store_embedding).
 - Perform lightweight health-check before reusing a cached connection and
   reconnect if needed.
@@ -20,7 +20,7 @@ import os
 import threading
 import time
 import logging
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Sequence
 
 import pyodbc
 
@@ -53,6 +53,7 @@ def _create_connection() -> pyodbc.Connection:
         raise RuntimeError("Database connection string not set in environment variables")
 
     # Use a conservative timeout; autocommit disabled to allow explicit commits
+    # Some pyodbc drivers don't accept a 'timeout' keyword depending on version; keep type-ignore
     conn = pyodbc.connect(conn_str, autocommit=False, timeout=4)  # type: ignore[arg-type]
     return conn
 
@@ -101,22 +102,20 @@ def _get_conn() -> pyodbc.Connection:
             age = now - ts
             if age < _MAX_CONN_AGE_SECONDS and _is_connection_usable(conn):
                 return conn
-            # stale or unhealthy connection: try to close and remove
+            # Dead or stale connection: close and continue to create a new one
             try:
                 conn.close()
             except Exception:
-                logger.debug("Error closing stale connection", exc_info=True)
-            _conn_cache.pop(tid, None)
-            _conn_timestamps.pop(tid, None)
+                logger.debug("Failed closing stale connection", exc_info=True)
 
         # Create new connection and cache it
-        new_conn = _create_connection()
-        _conn_cache[tid] = new_conn
-        _conn_timestamps[tid] = time.time()
-        return new_conn
+        conn = _create_connection()
+        _conn_cache[tid] = conn
+        _conn_timestamps[tid] = now
+        return conn
 
 
-def store_embedding(message_id: str, embedding: list[float], model: str) -> bool:
+def store_embedding(message_id: str, embedding: Sequence[float], model: str) -> bool:
     """
     Store an embedding for a message_id into the database.
 
@@ -143,9 +142,10 @@ def store_embedding(message_id: str, embedding: list[float], model: str) -> bool
         # Serialize embedding to a bytes representation if required by DB. If DB expects
         # a JSON/text column, adapt accordingly. Here we'll try a compact binary
         # representation and fall back to comma-separated text.
-        embedding_value: Any
         try:
-            embedding_value = bytes(bytearray(int(x * 255) & 0xFF for x in embedding))
+            # Clamp to 0-255 per element and convert to bytes. This is lossy; callers should
+            # adapt to the DB schema they use (e.g., store JSON/text or use proper binary encoding).
+            embedding_value = bytes(bytearray(int(max(0, min(1, float(x))) * 255) & 0xFF for x in embedding))
         except Exception:
             embedding_value = ",".join(str(x) for x in embedding)
 
@@ -177,7 +177,7 @@ def clear_cached_connections() -> None:
     Close and clear all cached connections. Use in shutdown or tests teardown if needed.
     """
     with _conn_lock:
-        for conn in list(_conn_cache.values()):
+        for tid, conn in list(_conn_cache.items()):
             try:
                 conn.close()
             except Exception:

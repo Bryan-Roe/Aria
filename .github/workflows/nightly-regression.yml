@@ -151,6 +151,10 @@ jobs:
           print(f"errors={errors}")
           print(f"total={total}")
           PY
+
+      - name: Log parsed result totals
+        if: always()
+        run: |
           echo "Parsed: passed=${{ steps.parse.outputs.passed }} failed=${{ steps.parse.outputs.failed }} skipped=${{ steps.parse.outputs.skipped }} errors=${{ steps.parse.outputs.errors }}"
 
       - name: Enforce coverage threshold
