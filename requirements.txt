@@ -1,6 +1,11 @@
+# Application Insights telemetry
 azure-monitor-opentelemetry>=1.8.7,<2.0.0  # Application Insights telemetry
-opentelemetry-api>=1.41.1,<2.0.0
-opentelemetry-sdk>=1.41.1,<2.0.0
+# NOTE: Remove explicit opentelemetry-api/opentelemetry-sdk pins to avoid pip
+# dependency resolution conflicts with azure-monitor-opentelemetry. Let the
+# Azure package pull compatible OpenTelemetry versions.
+# opentelemetry-api>=1.41.1,<2.0.0
+# opentelemetry-sdk>=1.41.1,<2.0.0
+
 azure-cosmos>=4.15.0,<5.0.0  # Cosmos DB client
 
 azure-functions
