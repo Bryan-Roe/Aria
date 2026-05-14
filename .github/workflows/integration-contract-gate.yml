@@ -64,8 +64,8 @@ env:
   # Integration endpoint used by the contract gate (override in workflows or runs)
   INTEGRATION_AI_STATUS_ENDPOINT: 'http://localhost:7071/api/ai/status'
   # Optional: command used to start a local Functions host (if desired in CI).
-  # Example: 'func start --cors "*"' or 'func start --cors "*" --script-root ./functions'
-  START_FUNC_CMD: 'func start --cors "*"'
+  # Default includes --script-root pointing to ./functions to avoid 404s.
+  START_FUNC_CMD: 'func start --cors "*" --script-root ./functions'
   # Retry tuning for the gate script/steps
   RETRY_COUNT: '30'
   RETRY_INTERVAL: '1'
@@ -82,7 +82,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4.3.1
+        uses: actions/checkout@v4
         with:
           # Shallow clone is sufficient for contract validation; speeds up checkout.
           fetch-depth: 1
@@ -135,42 +135,112 @@ jobs:
         with:
           node-version: '18'
 
+      - name: Cache npm
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
       - name: Start local Functions host (for endpoint checks)
         id: start-func
         if: runner.os == 'Linux'
+        env:
+          INTEGRATION_AI_STATUS_ENDPOINT: ${{ env.INTEGRATION_AI_STATUS_ENDPOINT }}
+          START_FUNC_CMD: ${{ env.START_FUNC_CMD }}
+          RETRY_COUNT: ${{ env.RETRY_COUNT }}
+          RETRY_INTERVAL: ${{ env.RETRY_INTERVAL }}
         run: |
           set -euo pipefail
-          echo "INTEGRATION_AI_STATUS_ENDPOINT=${{ env.INTEGRATION_AI_STATUS_ENDPOINT }}"
+          echo "INTEGRATION_AI_STATUS_ENDPOINT=${INTEGRATION_AI_STATUS_ENDPOINT}"
 
-          # Install Azure Functions Core Tools if not present
-          if ! command -v func >/dev/null 2>&1; then
-            echo "Installing Azure Functions Core Tools v4..."
-            npm install -g azure-functions-core-tools@4 --unsafe-perm true
+          # Prefer Docker if a Dockerfile is provided under ./functions for reliability.
+          if command -v docker >/dev/null 2>&1 && [[ -f "./functions/Dockerfile" ]]; then
+            echo "Docker detected and ./functions/Dockerfile found — building image..."
+            docker build -t integration-func-image ./functions
+            echo "Running container mapping port 7071..."
+            docker run -d --name integration-func -p 7071:7071 integration-func-image || true
+
           else
-            echo "azure-functions-core-tools already installed"
+            echo "Docker not used or Dockerfile missing — falling back to Azure Functions Core Tools install/start"
+
+            # Try to install azure functions core tools with retries; rely on cached npm when available.
+            install_attempts=3
+            installed=false
+            for attempt in $(seq 1 ${install_attempts}); do
+              if command -v func >/dev/null 2>&1; then
+                echo "func already available"
+                installed=true
+                break
+              fi
+
+              echo "Attempt ${attempt}/${install_attempts} — installing azure-functions-core-tools@4 via npm..."
+              if npm install -g azure-functions-core-tools@4 --unsafe-perm true; then
+                echo "Installed azure-functions-core-tools successfully"
+                if command -v func >/dev/null 2>&1; then
+                  installed=true
+                  break
+                fi
+              else
+                echo "npm install failed on attempt ${attempt} — retrying in 2s..."
+                sleep 2
+              fi
+            done
+
+            if [[ "${installed}" != true ]]; then
+              echo "Warning: func not available after install attempts — attempting to proceed, but endpoint checks may fail" >&2
+            fi
+
+            # Start the Functions host in the background using START_FUNC_CMD. Ensure script-root is set by default.
+            echo "Starting Functions host using: ${START_FUNC_CMD}"
+            if [[ -d "./functions" ]]; then
+              pushd functions >/dev/null
+              nohup ${START_FUNC_CMD} &>/tmp/func.log &
+              popd >/dev/null
+            else
+              nohup ${START_FUNC_CMD} &>/tmp/func.log &
+            fi
           fi
 
-          # Start the Functions host in the background. Use project 'functions' if present
-          echo "Starting Functions host using START_FUNC_CMD: ${START_FUNC_CMD}"
-          if [[ -d "./functions" ]]; then
-            pushd functions >/dev/null
-            nohup ${START_FUNC_CMD} &>/tmp/func.log &
-            popd >/dev/null
-          else
-            nohup ${START_FUNC_CMD} &>/tmp/func.log &
-          fi
-
-          echo "Started Functions host (logs: /tmp/func.log). Waiting for endpoint..."
-          for i in $(seq 1 ${RETRY_COUNT}); do
-            if curl --silent --fail --max-time 5 "${{ env.INTEGRATION_AI_STATUS_ENDPOINT }}" >/dev/null 2>&1; then
-              echo "Endpoint ready"
+          echo "Waiting for endpoint to become available: ${INTEGRATION_AI_STATUS_ENDPOINT}"
+          i=0
+          while (( i < RETRY_COUNT )); do
+            if curl --silent --fail --max-time 5 "${INTEGRATION_AI_STATUS_ENDPOINT}" -o /dev/null; then
+              echo "AI status endpoint reachable: ${INTEGRATION_AI_STATUS_ENDPOINT}"
               exit 0
             fi
-            sleep ${RETRY_INTERVAL}
+            ((i++))
+            echo "Attempt ${i}/${RETRY_COUNT} — endpoint not ready yet; sleeping ${RETRY_INTERVAL}s"
+            sleep "${RETRY_INTERVAL}"
           done
 
-          echo "Functions host did not become ready after ${RETRY_COUNT} attempts" >&2
-          tail -n 200 /tmp/func.log || true
+          echo "AI status endpoint not reachable after ${RETRY_COUNT} attempts: ${INTEGRATION_AI_STATUS_ENDPOINT}" >&2
+          echo "If a function host was started, check /tmp/func.log (or the Docker container logs)."
+
+          if [[ -f /tmp/func.log ]]; then
+            echo "--- Last lines from /tmp/func.log ---"
+            tail -n 200 /tmp/func.log || true
+          fi
+
+          if command -v docker >/dev/null 2>&1 && docker ps --filter "name=integration-func" --format '{{.ID}}' | grep -q .; then
+            echo "--- Last Docker container logs (integration-func) ---"
+            docker logs --tail 200 integration-func || true
+          fi
+
+          echo "--- Diagnostics: listening ports ---"
+          if command -v ss >/dev/null 2>&1; then
+            ss -ltnp || true
+          elif command -v netstat >/dev/null 2>&1; then
+            netstat -ltnp || true
+          else
+            echo "(ss/netstat not available)"
+          fi
+
+          echo "--- Curl verbose attempt ---"
+          curl --verbose --max-time 10 "${INTEGRATION_AI_STATUS_ENDPOINT}" || true
+
           exit 1
 
       - name: Run contract gate (standard)
@@ -185,7 +255,7 @@ jobs:
 
       - name: Upload contract results
         if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4
+        uses: actions/upload-artifact@v4
         with:
           name: contract-gate-results-${{ github.run_number }}-${{ github.run_attempt }}
           retention-days: 14
