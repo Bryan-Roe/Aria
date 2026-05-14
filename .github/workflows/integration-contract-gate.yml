@@ -61,6 +61,14 @@ env:
   PYTHONDONTWRITEBYTECODE: '1'
   # Force colored output where supported.
   FORCE_COLOR: '1'
+  # Integration endpoint used by the contract gate (override in workflows or runs)
+  INTEGRATION_AI_STATUS_ENDPOINT: 'http://localhost:7071/api/ai/status'
+  # Optional: command used to start a local Functions host (if desired in CI).
+  # Example: 'func start --cors "*"' or 'func start --cors "*" --script-root ./functions'
+  START_FUNC_CMD: 'func start --cors "*"'
+  # Retry tuning for the gate script/steps
+  RETRY_COUNT: '30'
+  RETRY_INTERVAL: '1'
 
 defaults:
   run:
@@ -122,6 +130,44 @@ jobs:
         with:
           script-path: scripts/validate_composite_actions.py
 
+      - name: Start local Functions host (for endpoint checks)
+        id: start-func
+        if: runner.os == 'Linux'
+        run: |
+          set -euo pipefail
+          echo "INTEGRATION_AI_STATUS_ENDPOINT=${{ env.INTEGRATION_AI_STATUS_ENDPOINT }}"
+
+          # Install Azure Functions Core Tools if not present
+          if ! command -v func >/dev/null 2>&1; then
+            echo "Installing Azure Functions Core Tools v4..."
+            npm install -g azure-functions-core-tools@4 --unsafe-perm true
+          else
+            echo "azure-functions-core-tools already installed"
+          fi
+
+          # Start the Functions host in the background. Use project 'functions' if present
+          echo "Starting Functions host using START_FUNC_CMD: ${START_FUNC_CMD}"
+          if [[ -d "./functions" ]]; then
+            pushd functions >/dev/null
+            nohup ${START_FUNC_CMD} &>/tmp/func.log &
+            popd >/dev/null
+          else
+            nohup ${START_FUNC_CMD} &>/tmp/func.log &
+          fi
+
+          echo "Started Functions host (logs: /tmp/func.log). Waiting for endpoint..."
+          for i in $(seq 1 ${RETRY_COUNT}); do
+            if curl --silent --fail --max-time 5 "${{ env.INTEGRATION_AI_STATUS_ENDPOINT }}" >/dev/null 2>&1; then
+              echo "Endpoint ready"
+              exit 0
+            fi
+            sleep ${RETRY_INTERVAL}
+          done
+
+          echo "Functions host did not become ready after ${RETRY_COUNT} attempts" >&2
+          tail -n 200 /tmp/func.log || true
+          exit 1
+
       - name: Run contract gate (standard)
         if: steps.mode.outputs.strict == 'false'
         uses: ./.github/actions/run-integration-contract-gate
@@ -180,6 +226,6 @@ jobs:
               echo '```'
             } >> "${GITHUB_STEP_SUMMARY}"
           else
-            echo "_No orchestrator status file produced (\`${status_file}\` missing or empty)._" \
+            echo "_No orchestrator status file produced (`${status_file}` missing or empty)._" \
               >> "${GITHUB_STEP_SUMMARY}"
           fi
