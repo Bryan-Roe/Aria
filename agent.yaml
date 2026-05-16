@@ -1,56 +1,35 @@
 # yaml-language-server: $schema=https://json.schemastore.org/github-action.json
 # ------------------------------------------------------------------------------
-# Aria Agent configuration
-# ------------------------------------------------------------------------------
-# Defines the container build context and runtime resource allocation
-# for the Aria agent. Schema follows the standard agent manifest format.
-#
-# Conventions:
-#   - All durations are written as Go-style strings (e.g. "30s", "2m").
-#   - All resource values are quoted to preserve units and avoid YAML
-#     numeric coercion (e.g. 3.5 -> float).
-#   - Memory uses Kubernetes-style binary suffixes (Mi/Gi).
-#   - CPU uses plain cores (e.g. "2") or millicores (e.g. "500m").
-#   - Secrets MUST NOT be inlined; reference them via a secret manager.
-# ------------------------------------------------------------------------------
 
-# Unique, human-readable identifier for the agent.
+schemaVersion: "1.0" # Explicit schema versioning
+
 name: Aria
-
-# Short description shown in tooling/UIs that consume this manifest.
 description: Aria agent runtime configuration.
-
-# Semantic version of this agent definition. Bump on breaking changes.
 version: "1.0.0"
 
-# Optional metadata for discovery, ownership, and tooling integrations.
 metadata:
   maintainers:
-    - "Bryan-Roe"
+    - name: "Bryan-Roe"
+      email: "bryan@example.com"
+      github: "Bryan-Roe"
   labels:
     app: "aria"
     component: "agent"
     tier: "backend"
+    environment: "production"
+    team: "ai-platform"
 
-# ------------------------------------------------------------------------------
-# Build configuration
-# ------------------------------------------------------------------------------
-# `dockerfile_path` is resolved relative to the repository root.
-# `context` controls what files are sent to the Docker build daemon;
-# keeping it at the repo root ("./") matches the previous behavior.
-# `target` selects a specific build stage when using multi-stage builds.
-# ------------------------------------------------------------------------------
 build:
   context: "./"
   dockerfile_path: Dockerfile
   # target: production
-  args: {}
+  args:
+    # EXAMPLE_ARG: "default" # Add useful build arguments here with descriptions
 
-# ------------------------------------------------------------------------------
-# Runtime resource allocation
-# ------------------------------------------------------------------------------
-# Requests are guaranteed; limits are upper bounds. Limits should be >= requests.
-# ------------------------------------------------------------------------------
+platforms:
+  - linux/amd64
+  - linux/arm64 # Optional: for multi-arch builds
+
 resources:
   requests:
     cpu: "2"
@@ -59,50 +38,35 @@ resources:
     cpu: "3500m"
     memory: "7Gi"
 
-# ------------------------------------------------------------------------------
-# Lifecycle
-# ------------------------------------------------------------------------------
-# Restart policy for the agent container.
-# Allowed values: Always | OnFailure | Never
 restartPolicy: OnFailure
 
-# Network ports exposed by the container.
 ports:
   - name: http
     containerPort: 8080
     protocol: TCP
+  # - name: metrics
+  #   containerPort: 9090
 
-# ------------------------------------------------------------------------------
-# Healthcheck used by the orchestrator to determine readiness/liveness.
-# Adjust the command to match an actual endpoint or CLI in your image.
-# ------------------------------------------------------------------------------
 healthcheck:
+  # Split out readiness/liveness if supported
   command: ["CMD-SHELL", "curl -fsS http://localhost:8080/health || exit 1"]
   interval: "30s"
   timeout: "5s"
   retries: 3
   startPeriod: "10s"
 
-# ------------------------------------------------------------------------------
-# Environment variables passed to the container at runtime.
-# Prefer referencing secrets via a secret manager rather than inlining values.
-# ------------------------------------------------------------------------------
 env:
   - name: LOG_LEVEL
-    value: "info"
+    value: "${LOG_LEVEL:-info}"
   - name: AGENT_NAME
     value: "Aria"
   - name: AGENT_VERSION
     value: "1.0.0"
   - name: HTTP_PORT
     value: "8080"
+  # - name: DB_PASSWORD
+  #   valueFrom: secret/db-password  # Example secret reference
 
-# ------------------------------------------------------------------------------
-# Security context
-# ------------------------------------------------------------------------------
-# Run as a non-root user with a read-only root filesystem and no privilege
-# escalation. Override per-deployment if your image requires otherwise.
-# ------------------------------------------------------------------------------
 security:
   runAsNonRoot: true
   runAsUser: 1000
@@ -112,10 +76,10 @@ security:
   capabilities:
     drop:
       - ALL
+  seccompProfile: "RuntimeDefault"
+  procMount: "default"
+  noNewPrivileges: true
 
-# ------------------------------------------------------------------------------
-# Logging configuration consumed by the runtime.
-# ------------------------------------------------------------------------------
 logging:
   driver: "json-file"
   level: "info"
