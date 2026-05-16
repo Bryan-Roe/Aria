@@ -203,18 +203,17 @@ def main() -> None:
     if not findings:
         sys.exit(0)
 
-    label = ", ".join(findings)
     path_hint = f" in `{file_path}`" if file_path else ""
     if _BLOCK:
         print(
-            f"🛑  SECRETS BLOCKED: Detected possible hardcoded secret ({label}){path_hint}. "
+            f"🛑  SECRETS BLOCKED: Detected possible hardcoded secret{path_hint}. "
             "Move credentials to environment variables or local.settings.json.",
             file=sys.stderr,
         )
         sys.exit(1)
     else:
         print(
-            f"⚠️  SECRETS WARNING: Possible hardcoded secret detected ({label}){path_hint}. "
+            f"⚠️  SECRETS WARNING: Possible hardcoded secret detected{path_hint}. "
             "Verify this is not a real credential. Use env vars or local.settings.json for secrets."
         )
     sys.exit(0)
