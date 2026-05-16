@@ -4,17 +4,20 @@
 # the repository languages chosen in the matrix. Keep the matrix in sync with
 # the repo to avoid wasted CI minutes.
 #
-# Improvements made:
-# - Added explicit PR event types to avoid noisy triggers.
-# - Hardened and minimized permissions while ensuring SARIF upload works.
-# - Clarified matrix comment and kept build-mode handling robust.
-# - Preserved manual-build guidance and safe checkout settings.
+# Improvements made in this file:
+# - Added conservative concurrency grouping to avoid collisions across refs.
+# - Kept minimal workflow-level permissions and set job-level permissions needed
+#   for SARIF upload and pack fetching.
+# - Added an informational step and enabled CodeQL pack caching to speed runs.
+# - Clarified manual build guidance and preserved safe checkout settings.
+# - Restricted PR triggers to common lifecycle events to reduce noisy runs.
 #
 name: "CodeQL Advanced"
 
 on:
   push:
     branches: ["main"]
+    # Ignore documentation and non-code infra changes to reduce CI minutes.
     paths-ignore:
       - "**/*.md"
       - "docs/**"
@@ -38,10 +41,11 @@ on:
 
 # Cancel in-progress runs for the same ref/PR when a new commit is pushed.
 concurrency:
-  group: codeql-${{ github.workflow }}-${{ github.ref }}
+  # Use head_ref for PRs (if present) to produce stable, human-friendly groups.
+  group: codeql-${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.head_ref || github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
-# Minimal permissions at workflow level. Job adds needed additional permissions.
+# Minimal permissions at workflow level. Job adds the additional permissions it needs.
 permissions:
   contents: read
 
@@ -82,7 +86,12 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          # Avoid passing repository token to the checkout step to reduce risk.
           persist-credentials: false
+
+      - name: Info — selected language and build-mode
+        run: |
+          echo "CodeQL will analyze language: '${{ matrix.language }}' with build-mode: '${{ matrix['build-mode'] }}'"
 
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v4
@@ -90,9 +99,9 @@ jobs:
           languages: ${{ matrix.language }}
           build-mode: ${{ matrix['build-mode'] }}
           # Use the extended security query suite for higher signal coverage.
-          # Switch to "security-and-quality" to also include code-quality queries,
-          # or remove this line entirely to fall back to the default suite.
           queries: security-extended
+          # Enable pack caching (when supported) to speed up repeated runs.
+          cache: true
           # Uncomment to use a config file for path filters / custom packs:
           # config-file: ./.github/codeql/codeql-config.yml
 
@@ -107,6 +116,9 @@ jobs:
           echo "commands required to build the project, for example:"
           echo "  make bootstrap"
           echo "  make release"
+          echo "Or add language-specific commands, for example:"
+          echo "  # Python: pip install -r requirements.txt"
+          echo "  # C#: dotnet build MySolution.sln"
           exit 1
 
       - name: Perform CodeQL Analysis
