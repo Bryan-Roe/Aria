@@ -1042,6 +1042,25 @@ def create_agi_provider(
         **kwargs,
     )
 
+    # Optionally attach a persistence backend if configured via environment.
+    persist_enabled = os.getenv("QAI_AGI_PERSIST", "").lower() in ("1", "true", "yes")
+    persist_path = os.getenv("QAI_AGI_PERSIST_PATH")
+    if persist_enabled or persist_path:
+        try:
+            from shared.agi_persistence import FileAGIPersistence
+
+            path = persist_path or os.path.join(os.getcwd(), "data_out", "agi_reasoning.jsonl")
+            os.makedirs(os.path.dirname(path), exist_ok=True)
+            provider.persistence = FileAGIPersistence(path)
+        except Exception as exc:  # pragma: no cover - best-effort persistence
+            _logger.exception(
+                "Failed to initialise AGI persistence backend: %s",
+                _sanitize_for_logging(str(exc)),
+            )
+            provider.persistence = None
+    else:
+        provider.persistence = None
+
     if base_choice:
         model_name = f"agi-{base_choice.name}-{base_choice.model}"
     elif model:
