@@ -296,6 +296,28 @@ class AGIProvider(BaseChatProvider):
                     user_query, response, reasoning_chain
                 )
             self.context.add_reasoning_chain(reasoning_chain)
+            if getattr(self, "persistence", None) is not None:
+                try:
+                    serialized_chain = []
+                    for step in reasoning_chain:
+                        serialized_chain.append({
+                            "step_type": step.step_type,
+                            "content": step.content,
+                            "confidence": step.confidence,
+                            "metadata": step.metadata,
+                        })
+                    meta = {"query": user_query, "agent": self._last_agent_used, "ts": time.time()}
+                    if hasattr(self.persistence, "write_reasoning_chain"):
+                        self.persistence.write_reasoning_chain(serialized_chain, meta)
+                    elif hasattr(self.persistence, "add_reasoning_chain"):
+                        self.persistence.add_reasoning_chain(serialized_chain)
+                    elif hasattr(self.persistence, "write"):
+                        try:
+                            self.persistence.write("reasoning_chain", {"chain": serialized_chain, "meta": meta})
+                        except Exception:
+                            pass
+                except Exception as pers_exc:
+                    _logger.exception("Failed to persist AGI reasoning chain: %s", _sanitize_for_logging(str(pers_exc)))
         except Exception as exc:
             _logger.error("AGI processing error: %s", _sanitize_for_logging(str(exc)))
             response = self._generate_fallback_response(
