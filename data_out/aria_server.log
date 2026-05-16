@@ -58,3 +58,7 @@ nohup: ignoring input
 ℹ️ Reusing existing server; exiting this process cleanly.
 2026-05-16 13:34:25,603 - INFO - ✓ LLM providers available for automatic action generation
 2026-05-16 13:34:25,603 - INFO - ✓ Initialized LLM provider: type
+2026-05-16 16:28:40,071 - INFO - ✓ Fallback parsed: Say hello world -> 1 actions
+2026-05-16 16:28:40,071 - INFO - Dry-run plan mode for command 'Say hello world': [{"action":"say","text":"hello world","emotion":"happy"}]
+2026-05-16 16:28:40,074 - INFO - ✓ Fallback parsed: Wave at the audience -> 1 actions
+2026-05-16 16:28:40,074 - INFO - Executing validated action sequence: [{"action":"gesture","gesture_type":"wave"}]
