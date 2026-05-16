@@ -25,9 +25,16 @@ This is a production-ready REST API for banknote fraud detection using a hybrid 
 
 ### Installation
 
+**Production:**
 ```bash
 cd production
 pip install -r requirements.txt
+```
+
+**Development (includes testing tools):**
+```bash
+cd production
+pip install -r requirements.txt -r dev-requirements.txt
 ```
 
 ### Start the API
@@ -312,7 +319,11 @@ pip install -r requirements.txt
 ### Run Tests
 
 ```bash
-pytest tests/
+# Install dev dependencies first
+pip install -r dev-requirements.txt
+
+# Run the test suite
+python test_api.py
 ```
 
 ### Enable Debug Mode
