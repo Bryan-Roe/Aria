@@ -2,11 +2,29 @@ name: Copilot setup validation
 
 # Runnable checklist validating repository Copilot instruction files and related docs.
 # Runs YAML and Markdown linters and produces a small report artifact contributors can inspect.
-# Safe by default (read-only), runs manually (workflow_dispatch) or when .github content changes.
+# Safe by default (read-only). Runs manually (workflow_dispatch), on push to .github, and on PRs touching .github.
+# Improvements:
+# - runs on pull_request as well as push
+# - caches pip/npm to speed repeated runs
+# - consistent shell safety (set -euo pipefail)
+# - workflow_dispatch input to optionally expand checks
+# - more robust file list handling and explicit reporting
 
 on:
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      include_all:
+        description: "Set to true to force linting of all repo markdown/yaml targets"
+        required: false
+        default: 'false'
   push:
+    paths:
+      - '.github/**'
+      - '.github/workflows/**'
+      - '.github/copilot*'
+      - '.github/*.md'
+      - 'README.md'
+  pull_request:
     paths:
       - '.github/**'
       - '.github/workflows/**'
@@ -36,6 +54,18 @@ jobs:
         with:
           fetch-depth: 1
 
+      - name: Cache pip cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-cache-v1
+
+      - name: Cache npm cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-npm-cache-v1
+
       - name: Setup Node (for markdownlint)
         uses: actions/setup-node@v4
         with:
@@ -48,8 +78,11 @@ jobs:
 
       - name: Install linters
         run: |
+          # Fail fast for install errors, keep linters pinned for reproducible runs
+          set -euo pipefail
           python -m pip install --upgrade pip
           pip install --no-cache-dir yamllint
+          # Install markdownlint CLI (pinned). Using global install on runner is acceptable here.
           npm install -g markdownlint-cli@0.33.0 markdownlint-rule-helpers
 
       - name: Lint YAML workflow files
@@ -58,6 +91,7 @@ jobs:
         run: |
           set -euo pipefail
           echo "Running yamllint on .github YAML files..."
+
           # Build list of YAML files safely (handles spaces/newlines)
           YAML_LIST_FILE="${RUNNER_TEMP}/yaml_files0"
           find .github -type f \( -iname '*.yml' -o -iname '*.yaml' \) -print0 > "$YAML_LIST_FILE" || true
@@ -85,10 +119,11 @@ jobs:
         id: mdlint
         continue-on-error: true
         run: |
+          set -euo pipefail
           echo "Running markdownlint on common Copilot docs..."
           md_targets=()
 
-          # Common Copilot doc locations
+          # Common Copilot doc locations (explicit)
           [ -f ".github/copilot-instructions.full.md" ] && md_targets+=(".github/copilot-instructions.full.md")
           [ -f ".github/copilot-instructions.md" ] && md_targets+=(".github/copilot-instructions.md")
           [ -f ".github/COPILOT.md" ] && md_targets+=(".github/COPILOT.md")
@@ -98,12 +133,25 @@ jobs:
             [ -f "$f" ] && md_targets+=("$f")
           done
 
+          # If the workflow_dispatch input include_all=true, optionally search repository-wide markdown too
+          if [ "${{ github.event.inputs.include_all || 'false' }}" = "true" ]; then
+            echo "include_all set: adding docs/**/*.md and *.md at repo root"
+            while IFS= read -r -d '' file; do
+              md_targets+=("$file")
+            done < <(find . -type f -iname '*.md' -not -path './node_modules/*' -print0 || true)
+          fi
+
           if [ ${#md_targets[@]} -eq 0 ]; then
             echo "No target markdown files found for markdownlint."
           else
-            printf "%s\n" "${md_targets[@]}" | xargs -n1 echo "linting:" || true
-            # markdownlint returns non-zero on issues; keep continue-on-error so we don't block artifact creation
-            markdownlint "${md_targets[@]}" || true
+            # Deduplicate targets
+            IFS=$'\n' read -r -d '' -a md_targets_unique < <(printf "%s\n" "${md_targets[@]}" | awk '!seen[$0]++' && printf '\0')
+            for m in "${md_targets_unique[@]}"; do
+              echo "linting: $m"
+            done
+
+            # Run markdownlint; continue-on-error preserves artifact creation even if lint failures exist
+            markdownlint "${md_targets_unique[@]}" || true
           fi
 
       - name: Basic content checks for Copilot docs

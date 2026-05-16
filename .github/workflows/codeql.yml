@@ -24,7 +24,7 @@
 #          the PR branch, or opens a follow-up PR on scheduled / manual runs.
 #       3. A `dependency-review` job blocks PRs that introduce vulnerable
 #          dependencies.
-#
+
 name: "CodeQL Advanced"
 
 on:
@@ -68,12 +68,17 @@ on:
         default: true
 
 concurrency:
-  group: codeql-${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.head_ref || github.ref }}
+  group: codeql-${{ github.workflow }}-${{ (github.event_name == 'pull_request' && github.head_ref) || github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 # Default to read-only at the workflow level; jobs elevate as needed.
 permissions:
   contents: read
+
+# Use bash as the default shell for run steps to keep consistency.
+defaults:
+  run:
+    shell: bash
 
 env:
   # Centralised pin for the codeql-action major version. Update in one place.
@@ -117,7 +122,7 @@ jobs:
   # ---------------------------------------------------------------------------
   analyze:
     name: Analyze (${{ matrix.language }})
-    runs-on: ${{ matrix.runs-on }}
+    runs-on: ${{ matrix.os }}
     timeout-minutes: 360
 
     permissions:
@@ -134,25 +139,25 @@ jobs:
           # missing permissions, unpinned actions, etc.).
           - language: actions
             build-mode: none
-            runs-on: ubuntu-latest
+            os: ubuntu-latest
 
           # JavaScript + TypeScript (also covers HTML <script> blocks and
           # inline event handlers, plus JSON/YAML config heuristics).
           - language: javascript-typescript
             build-mode: none
-            runs-on: ubuntu-latest
+            os: ubuntu-latest
 
           # Python — the dominant language in this repo (~55%).
           - language: python
             build-mode: none
-            runs-on: ubuntu-latest
+            os: ubuntu-latest
 
           # C/C++ (~4% of repo). `none` skips compilation but still runs a
           # subset of source-only queries. Switch to `manual` and add build
           # commands below for full taint-tracking coverage.
           - language: c-cpp
             build-mode: none
-            runs-on: ubuntu-latest
+            os: ubuntu-latest
 
         # Supported values:
         #   actions, c-cpp, csharp, go, java-kotlin,
@@ -179,7 +184,6 @@ jobs:
 
       - name: Generate CodeQL config (in-workflow)
         id: codeql_config
-        shell: bash
         run: |
           set -euo pipefail
           mkdir -p .github/codeql
@@ -187,45 +191,45 @@ jobs:
           # local override at .github/codeql/codeql-config.yml wins.
           if [ ! -f .github/codeql/codeql-config.yml ]; then
             cat > .github/codeql/codeql-config.yml <<'YAML'
-          name: "Aria CodeQL — maximum security coverage"
+name: "Aria CodeQL — maximum security coverage"
 
-          # Extra query suites layered on top of `queries:` in init.
-          # `+` appends rather than replaces the default suite.
-          queries:
-            - uses: security-extended
-            - uses: security-and-quality
-            # GitHub's experimental security queries — higher recall, may
-            # produce more findings to triage.
-            - uses: security-experimental
+# Extra query suites layered on top of `queries:` in init.
+# `+` appends rather than replaces the default suite.
+queries:
+  - uses: security-extended
+  - uses: security-and-quality
+  # GitHub's experimental security queries — higher recall, may
+  # produce more findings to triage.
+  - uses: security-experimental
 
-          # Community-maintained query packs. They are fetched from the
-          # GitHub Container Registry and require `packages: read` (granted
-          # at the job level). Comment out any pack that is not available
-          # for your CodeQL CLI version.
-          packs:
-            - codeql/javascript-queries
-            - codeql/python-queries
-            - codeql/cpp-queries
-            - codeql/actions-queries
+# Community-maintained query packs. They are fetched from the
+# GitHub Container Registry and require `packages: read` (granted
+# at the job level). Comment out any pack that is not available
+# for your CodeQL CLI version.
+packs:
+  - codeql/javascript-queries
+  - codeql/python-queries
+  - codeql/cpp-queries
+  - codeql/actions-queries
 
-          # Path filters: scan EVERYTHING we ship, including generated code
-          # that may be deployed. Only exclude vendored third-party deps that
-          # we do not control. Adjust as needed for your layout.
-          paths-ignore:
-            - "**/node_modules/**"
-            - "**/.venv/**"
-            - "**/venv/**"
-            - "**/__pycache__/**"
-            - "**/dist/**"
-            - "**/build/**"
-            - "**/*.min.js"
-            - "**/vendor/**"
-            - "**/third_party/**"
-            - "**/third-party/**"
+# Path filters: scan EVERYTHING we ship, including generated code
+# that may be deployed. Only exclude vendored third-party deps that
+# we do not control. Adjust as needed for your layout.
+paths-ignore:
+  - "**/node_modules/**"
+  - "**/.venv/**"
+  - "**/venv/**"
+  - "**/__pycache__/**"
+  - "**/dist/**"
+  - "**/build/**"
+  - "**/*.min.js"
+  - "**/vendor/**"
+  - "**/third_party/**"
+  - "**/third-party/**"
 
-          # Do NOT add `paths:` — leaving it unset means "scan everything not
-          # explicitly ignored", which maximizes coverage.
-          YAML
+# Do NOT add `paths:` — leaving it unset means "scan everything not
+# explicitly ignored", which maximizes coverage.
+YAML
             echo "Wrote default .github/codeql/codeql-config.yml"
           else
             echo "Using committed .github/codeql/codeql-config.yml"
@@ -233,7 +237,7 @@ jobs:
 
       - name: Info — selected language and build-mode
         run: |
-          echo "::notice title=CodeQL::Analyzing '${{ matrix.language }}' (build-mode=${{ matrix.build-mode }}) on ${{ runner.os }}"
+          echo "::notice title=CodeQL::Analyzing '${{ matrix.language }}' (build-mode=${{ matrix.build-mode }}) on ${{ matrix.os }}"
 
       # Cache the CodeQL bundle + databases between runs to cut wall-clock by
       # 40-60%. Safe to share across PRs since the cache key includes language
@@ -270,17 +274,16 @@ jobs:
 
       - name: Manual build steps
         if: matrix.build-mode == 'manual'
-        shell: bash
         run: |
           set -euo pipefail
           echo "::error title=CodeQL manual build not configured::No manual build commands are defined for language '${{ matrix.language }}'."
           cat <<'EOF'
-          Edit .github/workflows/codeql.yml and replace this step with the
-          commands required to build the project, e.g.:
-            # C/C++:    cmake -S . -B build && cmake --build build --parallel
-            # C#:       dotnet build MySolution.sln -c Release
-            # Java:     ./gradlew assemble --no-daemon
-          EOF
+Edit .github/workflows/codeql.yml and replace this step with the
+commands required to build the project, e.g.:
+  # C/C++:    cmake -S . -B build && cmake --build build --parallel
+  # C#:       dotnet build MySolution.sln -c Release
+  # Java:     ./gradlew assemble --no-daemon
+EOF
           exit 1
 
       - name: Perform CodeQL Analysis
@@ -406,7 +409,6 @@ jobs:
 
       - name: Determine checkout ref
         id: ref
-        shell: bash
         run: |
           set -euo pipefail
           if [ "${{ github.event_name }}" = "pull_request" ]; then
@@ -443,7 +445,6 @@ jobs:
           node-version: "20"
 
       - name: Install autofix tooling
-        shell: bash
         run: |
           set -euo pipefail
           python -m pip install --upgrade pip
@@ -457,15 +458,14 @@ jobs:
 
       - name: Run ruff --fix (Python)
         continue-on-error: true
-        shell: bash
         run: |
           set -euo pipefail
+          # --exit-zero so lint fixing never fails the workflow; changes are handled downstream.
           ruff check --fix --unsafe-fixes --exit-zero .
           ruff format .
 
       - name: Run prettier --write (JS/TS/JSON/YAML/MD/CSS/HTML)
         continue-on-error: true
-        shell: bash
         run: |
           set -euo pipefail
           # Use --ignore-unknown so unsupported files don't error.
@@ -478,11 +478,11 @@ jobs:
             "!**/build/**" \
             "!**/vendor/**" \
             "!**/third_party/**" \
+            "!**/third-party/**" \
             "!**/*.min.*" || true
 
       - name: Run clang-format (C/C++)
         continue-on-error: true
-        shell: bash
         run: |
           set -euo pipefail
           # Use a project .clang-format if present, otherwise LLVM defaults.
@@ -495,7 +495,6 @@ jobs:
 
       - name: Detect changes
         id: diff
-        shell: bash
         run: |
           set -euo pipefail
           if git diff --quiet --exit-code; then
@@ -509,7 +508,6 @@ jobs:
       # --- Path A: same-repo PR → commit straight to the PR head branch.
       - name: Commit fixes to PR branch
         if: steps.diff.outputs.changed == 'true' && github.event_name == 'pull_request' && steps.ref.outputs.can_push == 'true'
-        shell: bash
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -519,13 +517,12 @@ jobs:
           git add -A
           git commit -m "style: apply automated autofixes (ruff / prettier / clang-format)
 
-          Generated by the CodeQL Advanced workflow."
+Generated by the CodeQL Advanced workflow." || echo "No commit created"
           git push origin "HEAD:${{ steps.ref.outputs.ref }}"
 
       # --- Path B: fork PR → upload patch artifact + comment for maintainer.
       - name: Produce patch artifact (fork PRs)
         if: steps.diff.outputs.changed == 'true' && github.event_name == 'pull_request' && steps.ref.outputs.can_push == 'false'
-        shell: bash
         run: |
           set -euo pipefail
           git diff > autofix.patch
