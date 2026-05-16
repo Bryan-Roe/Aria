@@ -1,0 +1,46 @@
+name: AGI persistence prune (daily)
+
+on:
+  schedule:
+    - cron: '0 3 * * *' # daily at 03:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  prune:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Run prune (dry-run by default)
+        env:
+          QAI_AGI_PERSIST_DB: ${{ secrets.QAI_AGI_PERSIST_DB }}
+          QAI_AGI_PERSIST_PATH: ${{ secrets.QAI_AGI_PERSIST_PATH }}
+          PRUNE_KEEP_ROWS: ${{ secrets.PRUNE_KEEP_ROWS }}
+          PRUNE_DRY_RUN: ${{ secrets.PRUNE_DRY_RUN }}
+        run: |
+          set -euo pipefail
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt || true
+          KEEP=${PRUNE_KEEP_ROWS:-1000}
+          DRY=${PRUNE_DRY_RUN:-true}
+          ARGS=""
+          if [ -n "${QAI_AGI_PERSIST_DB:-}" ]; then
+            ARGS="$ARGS --sqlite ${QAI_AGI_PERSIST_DB}"
+          fi
+          if [ -n "${QAI_AGI_PERSIST_PATH:-}" ]; then
+            ARGS="$ARGS --jsonl ${QAI_AGI_PERSIST_PATH}"
+          fi
+          ARGS="$ARGS --keep-rows ${KEEP}"
+          if [ "${DRY}" = "true" ] || [ "${DRY}" = "1" ]; then
+            ARGS="$ARGS --dry-run"
+            echo "Dry-run enabled; prune will not modify data"
+          fi
+          python scripts/agi_persistence_prune.py $ARGS

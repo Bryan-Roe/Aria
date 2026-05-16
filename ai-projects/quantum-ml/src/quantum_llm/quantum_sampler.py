@@ -42,20 +42,28 @@ except ImportError:
 
 
 def _active_backend(requested: str) -> str:
-    """Resolve the effective backend string."""
-    if requested == "auto":
+    """Resolve the effective backend string.
+
+    Unknown backend names are treated as 'auto' to ensure a sensible fallback
+    behavior (prefer PennyLane, then Qiskit, then classical).
+    """
+    req = (requested or "").lower()
+    if req not in {"auto", "pennylane", "qiskit", "classical"}:
+        req = "auto"
+
+    if req == "auto":
         if _PENNYLANE_AVAILABLE:
             return "pennylane"
         if _QISKIT_AVAILABLE:
             return "qiskit"
         return "classical"
-    if requested == "pennylane" and not _PENNYLANE_AVAILABLE:
+    if req == "pennylane" and not _PENNYLANE_AVAILABLE:
         warnings.warn("PennyLane not available, falling back to classical", stacklevel=3)
         return "classical"
-    if requested == "qiskit" and not _QISKIT_AVAILABLE:
+    if req == "qiskit" and not _QISKIT_AVAILABLE:
         warnings.warn("Qiskit not available, falling back to classical", stacklevel=3)
         return "classical"
-    return requested
+    return req
 
 
 # ---------------------------------------------------------------------------

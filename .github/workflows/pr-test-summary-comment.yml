@@ -1,0 +1,46 @@
+name: PR test summary comment
+
+on:
+  workflow_run:
+    workflows: ["AGI smoke"]
+    types: [completed]
+
+permissions:
+  issues: write
+
+jobs:
+  comment:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Post PR test summary comment
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const run = context.payload.workflow_run;
+            if (!run) return;
+            const conclusion = run.conclusion;
+            const url = run.html_url;
+            const prs = run.pull_requests || [];
+            // Try to enumerate artifacts (best-effort)
+            let artifacts = [];
+            try {
+              const res = await github.rest.actions.listWorkflowRunArtifacts({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                run_id: run.id
+              });
+              artifacts = (res.data.artifacts || []).map(a => `- ${a.name} (id: ${a.id})`);
+            } catch (e) {
+              // ignore
+            }
+
+            for (const pr of prs) {
+              const body = `Automated test summary: **${conclusion}**\n\nWorkflow run: ${url}\n\nArtifacts:\n${artifacts.length ? artifacts.join('\n') : '- (none)'}\n\nIf you want to auto-merge this PR on success, add label \`auto-merge\`.`;
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: pr.number,
+                body
+              });
+            }

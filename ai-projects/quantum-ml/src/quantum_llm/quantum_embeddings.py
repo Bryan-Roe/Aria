@@ -44,16 +44,22 @@ def _classical_amplitude_transform(
         return embedding.copy()
     state = embedding / norm
 
-    # Construct a rotation matrix: apply RY-like rotations using cos/sin
-    angles = np.resize(params, dim) * np.pi
+    # Construct pairwise real rotations (Givens-like 2x2 rotations) that preserve norm.
+    # Resize params to supply one angle per rotation pair.
+    angles = np.resize(params, (dim + 1) // 2) * np.pi
 
-    # Diagonal RY-style rotation: cos(θ) on amplitude, sin(θ) as phase shift
-    # (approximate classical analogue of single-qubit RY rotations)
-    rot = np.diag(np.cos(angles))  # real rotation via cosine
+    transformed = state.copy().astype(float)
+    # Apply 2x2 rotations across adjacent element pairs
+    for i in range(0, dim - 1, 2):
+        theta = angles[i // 2]
+        c = np.cos(theta)
+        s = np.sin(theta)
+        a = transformed[i]
+        b = transformed[i + 1]
+        transformed[i] = c * a - s * b
+        transformed[i + 1] = s * a + c * b
 
-    # Apply and project back
-    transformed = rot @ state
-    # Re-scale to original magnitude
+    # If dim is odd, the last element is left unchanged; rotations preserve norm
     return transformed * norm
 
 
@@ -69,7 +75,12 @@ def _pennylane_amplitude_transform(
     num_layers: int,
 ) -> np.ndarray:
     """Amplitude-encode + variational transform via PennyLane."""
-    import pennylane as qml  # noqa: PLC0415
+    try:
+        import pennylane as qml  # type: ignore  # noqa: PLC0415
+    except ImportError:
+        logger.warning(
+            "PennyLane not available, using classical fallback")
+        return _classical_amplitude_transform(embedding, params, num_qubits)
 
     dim = len(embedding)
     pad_to = 2**num_qubits
@@ -83,7 +94,8 @@ def _pennylane_amplitude_transform(
 
     @qml.qnode(dev)
     def circuit(state_vec, params):
-        qml.AmplitudeEmbedding(state_vec, wires=range(num_qubits), normalize=True)
+        qml.AmplitudeEmbedding(
+            state_vec, wires=range(num_qubits), normalize=True)
         for layer in range(num_layers):
             for q in range(num_qubits):
                 idx = (layer * num_qubits + q) % len(params)
@@ -113,11 +125,12 @@ def _qiskit_amplitude_transform(
 ) -> np.ndarray:
     """Amplitude-encode + variational transform via Qiskit statevector sim."""
     try:
-        from qiskit import QuantumCircuit, transpile  # noqa: PLC0415
-        from qiskit.circuit import ParameterVector  # noqa: PLC0415
+        from qiskit import QuantumCircuit, transpile  # type: ignore  # noqa: PLC0415
+        from qiskit.circuit import ParameterVector  # type: ignore  # noqa: PLC0415
         from qiskit_aer import AerSimulator  # type: ignore  # noqa: PLC0415
     except ImportError:
-        logger.warning("Qiskit/AerSimulator not available, using classical fallback")
+        logger.warning(
+            "Qiskit/AerSimulator not available, using classical fallback")
         return _classical_amplitude_transform(embedding, params, num_qubits)
 
     dim = len(embedding)
@@ -145,7 +158,8 @@ def _qiskit_amplitude_transform(
         for q in range(n - 1):
             qc.cx(q, q + 1)
 
-    param_dict = {pv[i]: float(params[i % len(params)]) for i in range(total_params)}
+    param_dict = {pv[i]: float(params[i % len(params)])
+                  for i in range(total_params)}
     bound = qc.assign_parameters(param_dict)
 
     sim = AerSimulator(method="statevector")

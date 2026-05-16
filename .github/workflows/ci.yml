@@ -241,6 +241,7 @@ jobs:
   ci-success:
     name: CI success
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     needs: [lint, type-check, unit-tests]
     if: always()
     steps:

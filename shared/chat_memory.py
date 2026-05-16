@@ -20,6 +20,24 @@ from typing import Any, Dict, List, Optional, Sequence, Tuple
 
 logger = logging.getLogger(__name__)
 
+# Expose pyodbc module object at module level so tests can monkeypatch it even when
+# the optional dependency is not installed.
+try:
+    import pyodbc  # type: ignore
+except Exception:
+    # Create an empty module-like object so unit tests can patch attributes such
+    # as `connect` without the import actually being present on the system.
+    import types
+
+    pyodbc = types.ModuleType("pyodbc")
+
+    # Provide a stubbed connect attribute so tests can patch it; if accidentally
+    # called at runtime it will raise a clear error indicating pyodbc is missing.
+    def _pyodbc_dummy_connect(*args, **kwargs):
+        raise RuntimeError("pyodbc not installed")
+
+    pyodbc.connect = _pyodbc_dummy_connect
+
 # ---------------------------------------------------------------------------
 # Constants
 # ---------------------------------------------------------------------------
@@ -38,6 +56,11 @@ _CONN_HEALTH_CHECK_SQL = "SELECT 1"
 _CONN_HEALTH_CHECK_TIMEOUT = 2.0
 _MAX_CONN_AGE_SECONDS = int(os.getenv("QAI_DB_CONN_MAX_AGE", "300"))
 
+# Optional connection pool shared across threads for performance. Tests expect
+# a small pool (default 5) and the ability to return connections back to the pool.
+_connection_pool: list = []
+_POOL_MAX_SIZE: int = int(os.getenv("QAI_DB_CONN_POOL_SIZE", "5"))
+
 
 def _conn_str() -> Optional[str]:
     return (
@@ -48,12 +71,12 @@ def _conn_str() -> Optional[str]:
 
 
 def _create_connection() -> Any:
-    try:
-        import pyodbc  # local import
-    except Exception as e:
+    # Use module-level pyodbc (may be None if not installed). Keep behavior
+    # consistent: raise a clear RuntimeError when the dependency is missing.
+    if pyodbc is None:
         raise RuntimeError(
             "pyodbc import failed. Install unixODBC system libs and the `pyodbc` package."
-        ) from e
+        )
 
     conn_str = _conn_str()
     if not conn_str:
@@ -82,6 +105,7 @@ def _get_conn() -> Any:
     tid = threading.get_ident()
     now = time.time()
     with _conn_lock:
+        # Check thread-local cache first
         conn = _conn_cache.get(tid)
         if conn is not None:
             age = now - _conn_timestamps.get(tid, 0)
@@ -91,6 +115,21 @@ def _get_conn() -> Any:
                 conn.close()
             except Exception:
                 logger.debug("Failed closing stale connection", exc_info=True)
+            _conn_cache.pop(tid, None)
+
+        # Try to reuse a pooled connection if available
+        while _connection_pool:
+            pooled = _connection_pool.pop()
+            if _is_connection_usable(pooled):
+                _conn_cache[tid] = pooled
+                _conn_timestamps[tid] = now
+                return pooled
+            try:
+                pooled.close()
+            except Exception:
+                logger.debug("Failed closing dead pooled connection", exc_info=True)
+
+        # No pooled connection; create a new one
         conn = _create_connection()
         _conn_cache[tid] = conn
         _conn_timestamps[tid] = now
@@ -295,6 +334,39 @@ def fetch_similar_messages(
             logger.debug("Failed to close cursor", exc_info=True)
 
 
+def _return_conn(conn: Any) -> None:
+    """Return a connection to the shared pool (or close if unusable).
+
+    Intended for short-lived usage patterns where a connection can be reused by
+    another thread. Keeps pool size bounded by _POOL_MAX_SIZE.
+    """
+    if conn is None:
+        return
+    with _conn_lock:
+        try:
+            if not _is_connection_usable(conn):
+                try:
+                    conn.close()
+                except Exception:
+                    logger.debug("Failed closing unusable returned connection", exc_info=True)
+                return
+        except Exception:
+            try:
+                conn.close()
+            except Exception:
+                pass
+            return
+
+        _connection_pool.append(conn)
+        # Trim pool to maximum size by closing oldest entries
+        while len(_connection_pool) > _POOL_MAX_SIZE:
+            old = _connection_pool.pop(0)
+            try:
+                old.close()
+            except Exception:
+                logger.debug("Failed closing pooled connection", exc_info=True)
+
+
 def clear_cached_connections() -> None:
     with _conn_lock:
         for _, conn in list(_conn_cache.items()):
@@ -304,3 +376,11 @@ def clear_cached_connections() -> None:
                 logger.debug("Error closing connection", exc_info=True)
         _conn_cache.clear()
         _conn_timestamps.clear()
+
+        # Close and clear any pooled connections
+        for conn in list(_connection_pool):
+            try:
+                conn.close()
+            except Exception:
+                logger.debug("Error closing pooled connection", exc_info=True)
+        _connection_pool.clear()

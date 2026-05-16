@@ -1,0 +1,57 @@
+name: Auto-assign reviewers
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  assign:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Auto-assign reviewers (CODEOWNERS fallback)
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const pr = context.payload.pull_request;
+            if (!pr) return;
+
+            // Collect changed files
+            const changedFiles = await github.paginate(github.rest.pulls.listFiles, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: pr.number
+            });
+
+            // Attempt to read CODEOWNERS and pick owners (best-effort)
+            let owners = [];
+            try {
+              const { data: content } = await github.rest.repos.getContent({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                path: '.github/CODEOWNERS'
+              });
+              const text = Buffer.from(content.content, content.encoding).toString();
+              // Simple extraction of GitHub usernames mentioned with @
+              const matches = text.match(/@[^\s/]+/g) || [];
+              owners = [...new Set(matches.map(m => m.replace('@', '')))]
+            } catch (e) {
+              core.info('No CODEOWNERS found or parse failed; will request review from repo owner');
+            }
+
+            const reviewers = owners.length ? owners.slice(0,5) : [context.repo.owner];
+            try {
+              await github.rest.pulls.requestReviewers({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: pr.number,
+                reviewers
+              });
+              core.info(`Requested reviewers: ${reviewers.join(', ')}`);
+            } catch (err) {
+              core.info(`Failed to request reviewers: ${err}`);
+            }

@@ -64,6 +64,12 @@ class FileAGIPersistence:
             with open(self.path, "a", encoding="utf-8") as fh:
                 fh.write(json.dumps(entry, separators=(",", ":"), ensure_ascii=False))
                 fh.write("\n")
+                fh.flush()
+                try:
+                    # Ensure data is durable before returning to caller (best-effort)
+                    os.fsync(fh.fileno())
+                except Exception:
+                    pass
 
     def read_last(self, n: int = 10) -> List[Dict[str, Any]]:
         """Return up to the last *n* entries from the file (newest last)."""

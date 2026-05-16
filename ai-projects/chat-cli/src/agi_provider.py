@@ -605,6 +605,31 @@ class AGIProvider(BaseChatProvider):
                     user_query, response, reasoning_chain
                 )
             self.context.add_reasoning_chain(reasoning_chain)
+            # Persist reasoning chain to optional persistence backend (best-effort)
+            if getattr(self, "persistence", None) is not None:
+                try:
+                    serialized_chain = []
+                    for step in reasoning_chain:
+                        serialized_chain.append(
+                            {
+                                "step_type": step.step_type,
+                                "content": step.content,
+                                "confidence": step.confidence,
+                                "metadata": step.metadata,
+                            }
+                        )
+                    meta = {"query": user_query, "agent": self._last_agent_used, "ts": time.time()}
+                    if hasattr(self.persistence, "write_reasoning_chain"):
+                        self.persistence.write_reasoning_chain(serialized_chain, meta)
+                    elif hasattr(self.persistence, "add_reasoning_chain"):
+                        self.persistence.add_reasoning_chain(serialized_chain)
+                    elif hasattr(self.persistence, "write"):
+                        try:
+                            self.persistence.write("reasoning_chain", {"chain": serialized_chain, "meta": meta})
+                        except Exception:
+                            pass
+                except Exception as pers_exc:
+                    _logger.exception("Failed to persist AGI reasoning chain: %s", _sanitize_for_logging(str(pers_exc)))
         except Exception as exc:
             _logger.error("AGI processing error: %s", _sanitize_for_logging(str(exc)))
             response = self._generate_fallback_response(
@@ -1656,12 +1681,26 @@ def create_agi_provider(
 
     # Optionally attach a persistence backend if configured via environment.
     persist_enabled = os.getenv("QAI_AGI_PERSIST", "").lower() in ("1", "true", "yes")
-    persist_path = os.getenv("QAI_AGI_PERSIST_PATH")
-    if persist_enabled or persist_path:
+    jsonl_path = os.getenv("QAI_AGI_PERSIST_PATH")
+    sqlite_path = os.getenv("QAI_AGI_PERSIST_DB") or os.getenv("QAI_AGI_PERSIST_SQLITE")
+    if sqlite_path:
+        try:
+            from shared.agi_persistence_sqlite import SQLiteAGIPersistence
+
+            path = sqlite_path
+            os.makedirs(os.path.dirname(path), exist_ok=True)
+            provider.persistence = SQLiteAGIPersistence(path)
+        except Exception as exc:  # pragma: no cover - best-effort persistence
+            _logger.exception(
+                "Failed to initialise SQLite AGI persistence backend: %s",
+                _sanitize_for_logging(str(exc)),
+            )
+            provider.persistence = None
+    elif persist_enabled or jsonl_path:
         try:
             from shared.agi_persistence import FileAGIPersistence
 
-            path = persist_path or os.path.join(os.getcwd(), "data_out", "agi_reasoning.jsonl")
+            path = jsonl_path or os.path.join(os.getcwd(), "data_out", "agi_reasoning.jsonl")
             os.makedirs(os.path.dirname(path), exist_ok=True)
             provider.persistence = FileAGIPersistence(path)
         except Exception as exc:  # pragma: no cover - best-effort persistence

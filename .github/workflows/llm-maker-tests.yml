@@ -12,9 +12,14 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: llm-maker-tests-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   test-llm-maker:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - name: Checkout
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4.3.1
@@ -26,6 +31,7 @@ jobs:
 
       - name: Install dev dependencies
         run: |
+          set -euo pipefail
           python -m pip install --upgrade pip
           if [ -f requirements-dev.txt ]; then pip install -r requirements-dev.txt; \
           elif [ -f pyproject.toml ]; then python -m pip install -e .[dev]; \

@@ -1,0 +1,74 @@
+name: Auto-create PRs for feature branches
+
+on:
+  push:
+    branches:
+      - 'agi/**'
+      - 'auto-pr/**'
+      - 'feature/**'
+      - 'pr/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: auto-create-pr-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  create_pr:
+    name: Create pull request
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Create PR if none exists
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const ref = context.ref;
+            if (!ref || !ref.startsWith('refs/heads/')) {
+              core.info('Not a branch ref; skipping.');
+              return;
+            }
+            const head = ref.replace('refs/heads/', '');
+            const base = 'main';
+            if (head === base) {
+              core.info('Branch equals base; skipping.');
+              return;
+            }
+            core.info(`Checking existing PRs for branch: ${head}`);
+            const { data: existing } = await github.rest.pulls.list({ owner, repo, head: `${owner}:${head}`, state: 'open' });
+            if (existing && existing.length > 0) {
+              core.info('PR already exists for this branch; skipping creation.');
+              return;
+            }
+            const title = `[Auto PR] ${head}`;
+            const body = `Automated pull request for branch **${head}** → **${base}**.\n\nSummary: AGI persistence audit + CI updates.\n\nThis PR was created by the repository automation workflow (.github/workflows/auto-create-pr.yml).`;
+
+            // Create the PR as a draft
+            const pr = await github.rest.pulls.create({ owner, repo, head, base, title, body, draft: true });
+            core.info(`Created PR: ${pr.data.html_url}`);
+
+            // Add labels and assignee if possible (best-effort)
+            try {
+              await github.rest.issues.addLabels({ owner, repo, issue_number: pr.data.number, labels: ['ci','automation'] });
+              core.info('Added labels: ci, automation');
+            } catch (labErr) {
+              core.info(`Adding labels failed: ${labErr}`);
+            }
+
+            try {
+              // Assign to repository owner if permitted
+              await github.rest.issues.addAssignees({ owner, repo, issue_number: pr.data.number, assignees: [owner] });
+              core.info(`Assigned PR to: ${owner}`);
+            } catch (assignErr) {
+              core.info(`Assigning PR failed: ${assignErr}`);
+            }

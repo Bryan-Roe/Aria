@@ -54,7 +54,14 @@ class CircuitCache:
 
     def _hash_params(self, params: np.ndarray, num_qubits: int) -> str:
         """Generate a cache key for parameters."""
-        param_bytes = params.tobytes()
+        try:
+            # Accept array-like inputs (lists, tuples) and coerce to numeric numpy array.
+            # Non-numeric or malformed inputs will raise and be treated as invalid.
+            arr = np.asarray(params, dtype=np.float64)
+        except Exception as e:
+            raise TypeError("params must be array-like of numeric values") from e
+
+        param_bytes = arr.tobytes()
         qubits_str = str(num_qubits).encode()
         key_bytes = param_bytes + qubits_str
         return hashlib.sha256(key_bytes).hexdigest()[:16]

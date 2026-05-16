@@ -729,6 +729,124 @@ def agi_stream(req: func.HttpRequest) -> func.HttpResponse:
         )
 
 
+@app.route(route="agi/persistence", methods=["GET"], auth_level=func.AuthLevel.ANONYMOUS)
+def agi_persistence(req: func.HttpRequest) -> func.HttpResponse:
+    """Read-only audit endpoint for AGI persisted reasoning chains.
+
+    GET /api/agi/persistence?limit=50
+    Returns JSON: {status: ok, backend: 'sqlite'|'jsonl', entries: [...]}
+    """
+    logging.info("AGI persistence endpoint invoked")
+    # Optional token guard: when QAI_AGI_PERSIST_READ_TOKEN is set, require the token via
+    # X-AGI-AUDIT-TOKEN header or Authorization: Bearer <token>.
+    token_required = os.getenv("QAI_AGI_PERSIST_READ_TOKEN")
+    if token_required:
+        provided_token = None
+        try:
+            headers = getattr(req, "headers", {}) or {}
+            if isinstance(headers, dict):
+                provided_token = headers.get("X-AGI-AUDIT-TOKEN") or headers.get("x-agi-audit-token") or headers.get("Authorization") or headers.get("authorization")
+            else:
+                # headers may be a case-insensitive mapping-like object
+                provided_token = headers.get("X-AGI-AUDIT-TOKEN") if hasattr(headers, "get") else None
+            if provided_token and isinstance(provided_token, str) and provided_token.startswith("Bearer "):
+                provided_token = provided_token.split(" ", 1)[1]
+        except Exception:
+            provided_token = None
+        if provided_token != token_required:
+            return func.HttpResponse(
+                json.dumps({"status": "error", "error": "unauthorized"}),
+                status_code=401,
+                mimetype="application/json",
+                headers=create_cors_response_headers(),
+            )
+    try:
+        # Parse limit param (clamp to reasonable bounds)
+        limit = 50
+        try:
+            if hasattr(req, "params") and req.params.get("limit"):
+                limit = int(req.params.get("limit"))
+            else:
+                # Fallback to JSON body if provided
+                try:
+                    body = req.get_json()
+                    limit = int(body.get("limit", limit))
+                except Exception:
+                    pass
+        except Exception:
+            limit = 50
+        limit = max(1, min(limit, 500))
+
+        sqlite_path = os.getenv("QAI_AGI_PERSIST_DB") or os.getenv("QAI_AGI_PERSIST_SQLITE")
+        jsonl_path = os.getenv("QAI_AGI_PERSIST_PATH")
+        jsonl_enabled = os.getenv("QAI_AGI_PERSIST", "").lower() in ("1", "true", "yes")
+
+        if sqlite_path:
+            try:
+                from shared.agi_persistence_sqlite import SQLiteAGIPersistence
+
+                backend = SQLiteAGIPersistence(sqlite_path)
+                entries = backend.read_last(limit)
+                backend.close()
+                return func.HttpResponse(
+                    json.dumps({"status": "ok", "backend": "sqlite", "entries": entries}, default=str),
+                    status_code=200,
+                    mimetype="application/json",
+                    headers=create_cors_response_headers(),
+                )
+            except Exception as e:  # noqa: BLE001
+                logging.exception("AGI persistence sqlite read error: %s", e)
+                return func.HttpResponse(
+                    json.dumps({"status": "error", "error": str(e)}),
+                    status_code=500,
+                    mimetype="application/json",
+                    headers=create_cors_response_headers(),
+                )
+
+        if jsonl_path or jsonl_enabled:
+            path = jsonl_path or os.path.join(os.getcwd(), "data_out", "agi_reasoning.jsonl")
+            try:
+                entries = []
+                if os.path.exists(path):
+                    # Safe for expected small files; if large, consider streaming/tail
+                    with open(path, "r", encoding="utf-8") as fh:
+                        lines = fh.read().splitlines()
+                    for ln in lines[-limit:]:
+                        try:
+                            entries.append(json.loads(ln))
+                        except Exception:
+                            entries.append({"raw": ln})
+                return func.HttpResponse(
+                    json.dumps({"status": "ok", "backend": "jsonl", "entries": entries}, default=str),
+                    status_code=200,
+                    mimetype="application/json",
+                    headers=create_cors_response_headers(),
+                )
+            except Exception as e:  # noqa: BLE001
+                logging.exception("AGI persistence jsonl read error: %s", e)
+                return func.HttpResponse(
+                    json.dumps({"status": "error", "error": str(e)}),
+                    status_code=500,
+                    mimetype="application/json",
+                    headers=create_cors_response_headers(),
+                )
+
+        return func.HttpResponse(
+            json.dumps({"status": "error", "error": "AGI persistence not configured"}),
+            status_code=404,
+            mimetype="application/json",
+            headers=create_cors_response_headers(),
+        )
+    except Exception as e:  # noqa: BLE001
+        logging.exception("agi/persistence unexpected error: %s", e)
+        return func.HttpResponse(
+            json.dumps({"status": "error", "error": str(e)}),
+            status_code=500,
+            mimetype="application/json",
+            headers=create_cors_response_headers(),
+        )
+
+
 @app.route(route="chat", methods=["POST"], auth_level=func.AuthLevel.ANONYMOUS)
 def chat(req: func.HttpRequest) -> func.HttpResponse:
     """

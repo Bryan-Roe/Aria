@@ -35,7 +35,10 @@
 			"command": "bash",
 			"args": [
 				"-lc",
-				"./scripts/integration_contract_gate.sh"
+				"bash ./scripts/integration_contract_gate.sh"
+			],
+			"dependsOn": [
+				"func: host start"
 			],
 			"problemMatcher": []
 		},
@@ -45,7 +48,10 @@
 			"command": "bash",
 			"args": [
 				"-lc",
-				"./scripts/integration_contract_gate.sh --strict-endpoints"
+				"bash ./scripts/integration_contract_gate.sh --strict-endpoints"
+			],
+			"dependsOn": [
+				"func: host start"
 			],
 			"problemMatcher": []
 		},

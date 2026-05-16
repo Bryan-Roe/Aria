@@ -64,8 +64,8 @@ env:
   # Integration endpoint used by the contract gate (override in workflows or runs)
   INTEGRATION_AI_STATUS_ENDPOINT: 'http://localhost:7071/api/ai/status'
   # Optional: command used to start a local Functions host (if desired in CI).
-  # Default includes --script-root pointing to ./functions to avoid 404s.
-  START_FUNC_CMD: 'func start --cors "*" --script-root ./functions'
+  # Keep this cwd-agnostic; the startup step adds --script-root when needed.
+  START_FUNC_CMD: 'func start --cors "*"'
   # Retry tuning for the gate script/steps
   RETRY_COUNT: '30'
   RETRY_INTERVAL: '1'
@@ -156,6 +156,9 @@ jobs:
           set -euo pipefail
           echo "INTEGRATION_AI_STATUS_ENDPOINT=${INTEGRATION_AI_STATUS_ENDPOINT}"
 
+          func_log="${RUNNER_TEMP:-/tmp}/func.log"
+          echo "Functions host log: ${func_log}"
+
           # Prefer Docker if a Dockerfile is provided under ./functions for reliability.
           if command -v docker >/dev/null 2>&1 && [[ -f "./functions/Dockerfile" ]]; then
             echo "Docker detected and ./functions/Dockerfile found — building image..."
@@ -193,15 +196,17 @@ jobs:
               echo "Warning: func not available after install attempts — attempting to proceed, but endpoint checks may fail" >&2
             fi
 
-            # Start the Functions host in the background using START_FUNC_CMD. Ensure script-root is set by default.
-            echo "Starting Functions host using: ${START_FUNC_CMD}"
+            # Start Functions host in background. Prefer explicit --script-root from
+            # repo root when ./functions exists, otherwise use START_FUNC_CMD as-is.
             if [[ -d "./functions" ]]; then
-              pushd functions >/dev/null
-              nohup ${START_FUNC_CMD} &>/tmp/func.log &
-              popd >/dev/null
+              start_cmd="${START_FUNC_CMD} --script-root ./functions"
             else
-              nohup ${START_FUNC_CMD} &>/tmp/func.log &
+              start_cmd="${START_FUNC_CMD}"
             fi
+
+            echo "Starting Functions host using: ${start_cmd}"
+            # shellcheck disable=SC2086
+            nohup ${start_cmd} &>"${func_log}" &
           fi
 
           echo "Waiting for endpoint to become available: ${INTEGRATION_AI_STATUS_ENDPOINT}"
@@ -217,11 +222,11 @@ jobs:
           done
 
           echo "AI status endpoint not reachable after ${RETRY_COUNT} attempts: ${INTEGRATION_AI_STATUS_ENDPOINT}" >&2
-          echo "If a function host was started, check /tmp/func.log (or the Docker container logs)."
+          echo "If a function host was started, check ${func_log} (or the Docker container logs)."
 
-          if [[ -f /tmp/func.log ]]; then
-            echo "--- Last lines from /tmp/func.log ---"
-            tail -n 200 /tmp/func.log || true
+          if [[ -f "${func_log}" ]]; then
+            echo "--- Last lines from ${func_log} ---"
+            tail -n 200 "${func_log}" || true
           fi
 
           if command -v docker >/dev/null 2>&1 && docker ps --filter "name=integration-func" --format '{{.ID}}' | grep -q .; then

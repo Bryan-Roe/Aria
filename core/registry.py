@@ -14,8 +14,9 @@ class AgentRegistry:
         self._agents: List[BaseAgent] = []
 
     def register(self, agent: BaseAgent) -> BaseAgent:
-        """Register an agent, replacing any previous instance with the same name."""
-        self._agents = [existing for existing in self._agents if existing.name != agent.name]
+        """Register an agent and reject duplicate names to keep routing deterministic."""
+        if self.get(agent.name) is not None:
+            raise ValueError(f"Agent already registered: {agent.name}")
         self._agents.append(agent)
         return agent
 

@@ -282,9 +282,35 @@ MIN_TEST_PASSING_RATE = 0.8          # 80% tests must pass
 | Performance | "Optimize database queries" | Medium |
 | Cleanup | "Remove unused imports" | Low |
 
+## AGI Smoke Prompt Toolkit
+
+Use these reusable prompts for AGI smoke CI work in this repository:
+
+- `.github/prompts/agi-smoke-triage.prompt.md` — fast root-cause triage for failing AGI smoke runs
+- `.github/prompts/agi-smoke-ci-hardening.prompt.md` — minimum-risk fix + hardening workflow
+- `.github/prompts/agi-smoke-pr-summary.prompt.md` — reviewer-ready PR summary with evidence/risks
+- `.github/prompts/agi-smoke-flake-audit.prompt.md` — quantify and reduce flaky AGI smoke behavior
+
+Typical invocation style:
+
+```text
+/agi-smoke-triage <failing test/job + log excerpt>
+/agi-smoke-ci-hardening <failure context> --mode hardening
+/agi-smoke-pr-summary <changed files + validation commands>
+/agi-smoke-flake-audit <target tests> --iterations 20
+```
+
+Recommended sequence:
+
+1. Triage quickly (`/agi-smoke-triage`)
+2. Fix and harden (`/agi-smoke-ci-hardening`)
+3. If intermittent, run flake audit (`/agi-smoke-flake-audit`)
+4. Publish reviewer summary (`/agi-smoke-pr-summary`)
+
 ## Troubleshooting
 
 ### "Cannot connect to Ollama"
+
 ```bash
 # Check if running
 ps aux | grep ollama
@@ -297,6 +323,7 @@ curl http://127.0.0.1:11434/api/tags
 ```
 
 ### "Cannot connect to LM Studio"
+
 ```bash
 # Verify server is running in app
 curl http://127.0.0.1:1234/v1/models
@@ -305,6 +332,7 @@ curl http://127.0.0.1:1234/v1/models
 ```
 
 ### Agent Getting Stuck
+
 ```bash
 # Kill the process
 pkill -f autonomous_code_agent
@@ -314,6 +342,7 @@ tail -100 data_out/autonomous_agent/agent.log
 ```
 
 ### Out of Memory
+
 - Use smaller model (mistral is recommended)
 - Reduce context window in settings
 - Kill other apps to free RAM
@@ -336,6 +365,7 @@ data_out/autonomous_agent/
 ## Advanced Usage
 
 ### Batch Multiple Tasks
+
 ```bash
 #!/bin/bash
 for task in \
@@ -348,6 +378,7 @@ done
 ```
 
 ### Monitor Progress
+
 ```bash
 # Terminal 1: Run agent
 python scripts/autonomous_code_agent.py --task "..."
@@ -360,6 +391,7 @@ watch -n 2 'cat data_out/autonomous_agent/status.json | python -m json.tool'
 ```
 
 ### CI/CD Integration
+
 ```yaml
 # .github/workflows/agent.yml
 - name: Run autonomous agent fix
@@ -398,6 +430,7 @@ watch -n 2 'cat data_out/autonomous_agent/status.json | python -m json.tool'
 ## Contributing
 
 Ideas for improvements:
+
 1. Better prompts for specific task types
 2. Multi-model fallback (try mistral, then llama, then fail)
 3. Parallel testing of different agents
@@ -424,9 +457,9 @@ from shared.json_utils import load_status_json
 
 ## Resources
 
-- **Ollama**: https://ollama.ai
-- **LM Studio**: https://lmstudio.ai
-- **Models**: https://huggingface.co/models
+- **Ollama**: [https://ollama.ai](https://ollama.ai)
+- **LM Studio**: [https://lmstudio.ai](https://lmstudio.ai)
+- **Models**: [https://huggingface.co/models](https://huggingface.co/models)
 - **This Repo**: [Aria](https://github.com/Bryan-Roe/Aria)
 
 ## FAQ

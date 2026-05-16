@@ -1,0 +1,67 @@
+name: Auto-merge on CI success
+
+on:
+  workflow_run:
+    workflows: ["AGI smoke"]
+    types: [completed]
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+jobs:
+  auto-merge:
+    name: Auto-merge PRs labeled 'auto-merge'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Auto-merge PRs labeled 'auto-merge'
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const run = context.payload.workflow_run;
+            if (!run) return;
+            if (run.conclusion !== 'success') {
+              core.info(`Workflow run conclusion: ${run.conclusion}; skipping`);
+              return;
+            }
+            const prs = run.pull_requests || [];
+            if (!prs.length) {
+              core.info('No pull requests associated; skipping.');
+              return;
+            }
+            for (const pr of prs) {
+              const prNumber = pr.number;
+              const { data: labels } = await github.rest.issues.listLabelsOnIssue({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: prNumber
+              });
+              const labelNames = labels.map(l => l.name);
+              if (!labelNames.includes('auto-merge')) {
+                core.info(`PR #${prNumber} not labeled auto-merge; skipping`);
+                continue;
+              }
+              const { data: prData } = await github.rest.pulls.get({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: prNumber
+              });
+              // If mergeable is 'unknown', the API may still be calculating; guard defensively
+              if (prData.mergeable === false) {
+                core.info(`PR #${prNumber} not mergeable; skipping`);
+                continue;
+              }
+              try {
+                await github.rest.pulls.merge({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  pull_number: prNumber,
+                  merge_method: 'squash'
+                });
+                core.info(`Merged PR #${prNumber}`);
+              } catch (err) {
+                core.info(`Failed to merge PR #${prNumber}: ${err}`);
+              }
+            }
