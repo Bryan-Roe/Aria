@@ -13,11 +13,11 @@ name: QAI CI Pipeline
 
 on:
   push:
-    branches: [ main, dev ]
+    branches: [main, dev]
   pull_request:
-    branches: [ main, dev ]
+    branches: [main, dev]
   schedule:
-    - cron: '0 2 * * *'  # Daily at 2 AM UTC
+    - cron: '0 2 * * *' # Daily at 2 AM UTC
 
 permissions:
   contents: read
@@ -57,68 +57,55 @@ jobs:
           key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements*.txt', 'pyproject.toml') }}
 
       - name: Setup Python
-        uses: actions/setup-python@v5
+        uses: ./.github/actions/setup-python-env
         with:
           python-version: ${{ matrix.python-version }}
-          cache: 'pip'
-          cache-dependency-path: |
-            requirements.txt
-            requirements-dev.txt
-            pyproject.toml
+          extra-packages: 'pytest pytest-timeout pytest-cov'
 
-      - name: Install test & lint dependencies
+      - name: Run CI validation
         run: |
-          python -m pip install --upgrade pip
-          python -m pip install -r requirements.txt || true
-          # Install dev/test tools separately to avoid strict dependency conflicts
-          python -m pip install pytest pytest-timeout pytest-cov ruff black mypy
-
-      - name: Lint (ruff)
-        run: |
-          ruff check shared/ scripts/ apps/aria/server.py tests/ --output-format=github
-
-      - name: Format check (black)
-        run: |
-          black --check --quiet shared/ scripts/ apps/aria/server.py tests/
-
-      - name: Type check (mypy)
-        run: |
-          mypy shared/ --ignore-missing-imports --no-error-summary
-
-      - name: Run CI validation (orchestrator)
-        run: |
+          set -euo pipefail
           python scripts/ci_orchestrator.py --validate-all
 
-      - name: Integration smoke checks
+      - name: Run integration smoke checks
         run: |
+          set -euo pipefail
           python scripts/integration_smoke.py
 
-      - name: Integration contract tests
+      - name: Run integration contract unit tests
         run: |
+          set -euo pipefail
           python scripts/ci_orchestrator.py --integration-contract-tests
 
-      - name: Unit tests (pytest)
+      - name: Run unit tests
         run: |
-          python -m pytest tests/ --maxfail=1 -q --disable-warnings --cov=.
+          set -euo pipefail
+          python scripts/test_runner.py --unit --coverage
 
-      - name: Integration tests
+      - name: Run integration tests
         run: |
+          set -euo pipefail
           python scripts/test_runner.py --integration
 
       - name: Generate summary
         if: always()
         run: |
-          {
-            echo "## CI Validation Results"
-            echo ""
-          } >> "$GITHUB_STEP_SUMMARY"
+          set -euo pipefail
+          echo "## CI Validation Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
           if [ -f data_out/ci_orchestrator/status.json ]; then
-            {
-              echo '```json'
-              cat data_out/ci_orchestrator/status.json
-              echo ''
-              echo '```'
-            } >> "$GITHUB_STEP_SUMMARY"
+            echo '```json' >> $GITHUB_STEP_SUMMARY
+            cat data_out/ci_orchestrator/status.json >> $GITHUB_STEP_SUMMARY
+            echo '' >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+          else
+            echo "⚠️ No ci_orchestrator status file found" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          if [ "${{ job.status }}" != "success" ]; then
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "### ❌ Validation failed — see logs above for details." >> $GITHUB_STEP_SUMMARY
           fi
 
       - name: Upload validation results
@@ -170,21 +157,27 @@ jobs:
           if [[ -f requirements.txt ]]; then python -m pip install -r requirements.txt; fi
 
       - name: Run training workflow
-        run: python scripts/master_orchestrator.py --workflow daily_full_pipeline
+        run: |
+          set -euo pipefail
+          python scripts/master_orchestrator.py --workflow daily_full_pipeline
 
       - name: Generate training summary
         if: always()
         run: |
-          {
-            echo "## Training Results"
-          } >> "$GITHUB_STEP_SUMMARY"
+          set -euo pipefail
+          echo "## Training Results" >> $GITHUB_STEP_SUMMARY
           if [ -f data_out/master_orchestrator/status.json ]; then
-            {
-              echo '```json'
-              cat data_out/master_orchestrator/status.json
-              echo ''
-              echo '```'
-            } >> "$GITHUB_STEP_SUMMARY"
+            echo '```json' >> $GITHUB_STEP_SUMMARY
+            cat data_out/master_orchestrator/status.json >> $GITHUB_STEP_SUMMARY
+            echo '' >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+          else
+            echo "⚠️ No master_orchestrator status file found" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          if [ "${{ job.status }}" != "success" ]; then
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "### ❌ Training job failed — see logs above." >> $GITHUB_STEP_SUMMARY
           fi
 
       - name: Upload training results
@@ -232,7 +225,9 @@ jobs:
           if [[ -f requirements.txt ]]; then python -m pip install -r requirements.txt; fi
 
       - name: Deploy best model
-        run: python scripts/model_deployer.py --deploy best --strategy canary
+        run: |
+          set -euo pipefail
+          python scripts/model_deployer.py --deploy best --strategy canary
 
       - name: Upload deployment manifest
         uses: actions/upload-artifact@v4

@@ -56,18 +56,21 @@ jobs:
         with:
           extra-packages: "pytest requests"
 
-      - name: Run integration smoke checks
-        id: integration_smoke
-        run: python scripts/integration_smoke.py --json
+            - name: Run integration smoke checks
+              id: integration_smoke
+              run: |
+                  python scripts/integration_smoke.py --json
 
-      - name: Run strict endpoint smoke (scheduled only)
-        id: strict_smoke
-        if: github.event_name == 'schedule'
-        run: python scripts/integration_smoke.py --strict-endpoints --json
+            - name: Run strict endpoint smoke (scheduled only)
+              id: strict_smoke
+              if: github.event_name == 'schedule'
+              run: |
+                  python scripts/integration_smoke.py --strict-endpoints --json
 
-      - name: Validate AI status route contract tests
-        id: contract_tests
-        run: python scripts/ci_orchestrator.py --integration-contract-tests
+            - name: Validate AI status route contract tests
+              id: contract_tests
+              run: |
+                  python scripts/ci_orchestrator.py --integration-contract-tests
 
       - name: Upload smoke artifacts
         if: always()
@@ -80,41 +83,49 @@ jobs:
             data_out/integration_smoke/
             data_out/ci_orchestrator/status.json
 
-      - name: Summary
-        if: always()
-        env:
-          INTEGRATION_OUTCOME: ${{ steps.integration_smoke.outcome }}
-          STRICT_OUTCOME: ${{ steps.strict_smoke.outcome }}
-          CONTRACT_OUTCOME: ${{ steps.contract_tests.outcome }}
-          EVENT_NAME: ${{ github.event_name }}
-        run: |
-          set -euo pipefail
-
-          # Map a step outcome (success|failure|cancelled|skipped|"") to a
-          # human-readable summary cell with an appropriate emoji.
-          render_result() {
-            case "${1:-}" in
-              success)   echo "✅ passed" ;;
-              failure)   echo "❌ failed" ;;
-              cancelled) echo "⚠️ cancelled" ;;
-              skipped)   echo "⏭️ skipped" ;;
-              "")        echo "⏭️ not run" ;;
-              *)         echo "ℹ️ ${1}" ;;
-            esac
-          }
-
-          {
-            echo "## API Health Smoke"
-            echo ""
-            echo "**Event:** \`${EVENT_NAME}\`"
-            echo ""
-            echo "| Check | Result |"
-            echo "|-------|--------|"
-            echo "| integration_smoke.py --json | $(render_result "${INTEGRATION_OUTCOME}") |"
-            if [[ "${EVENT_NAME}" == "schedule" ]]; then
-              echo "| integration_smoke.py --strict-endpoints --json | $(render_result "${STRICT_OUTCOME}") |"
-            else
-              echo "| integration_smoke.py --strict-endpoints --json | ⏭️ skipped (non-scheduled event) |"
-            fi
-            echo "| ci_orchestrator --integration-contract-tests | $(render_result "${CONTRACT_OUTCOME}") |"
-          } >> "${GITHUB_STEP_SUMMARY}"
+            - name: Summary
+              if: always()
+              run: |
+                  set -euo pipefail
+                  echo "## API Health Smoke" >> $GITHUB_STEP_SUMMARY
+                  echo "" >> $GITHUB_STEP_SUMMARY
+                  echo "| Check | Result |" >> $GITHUB_STEP_SUMMARY
+                  echo "|-------|--------|" >> $GITHUB_STEP_SUMMARY
+                  
+                  # Report integration_smoke result
+                  if [ "${{ steps.integration_smoke.outcome }}" = "success" ]; then
+                    echo "| integration_smoke.py --json | ✅ passed |" >> $GITHUB_STEP_SUMMARY
+                  else
+                    echo "| integration_smoke.py --json | ❌ failed |" >> $GITHUB_STEP_SUMMARY
+                  fi
+                  
+                  # Report strict endpoint smoke result (only if scheduled)
+                  if [ "${{ github.event_name }}" = "schedule" ]; then
+                    if [ "${{ steps.strict_smoke.outcome }}" = "success" ]; then
+                      echo "| integration_smoke.py --strict-endpoints | ✅ passed |" >> $GITHUB_STEP_SUMMARY
+                    else
+                      echo "| integration_smoke.py --strict-endpoints | ❌ failed |" >> $GITHUB_STEP_SUMMARY
+                    fi
+                  else
+                    echo "| integration_smoke.py --strict-endpoints | ⊘ skipped (non-scheduled) |" >> $GITHUB_STEP_SUMMARY
+                  fi
+                  
+                  # Report contract tests result
+                  if [ "${{ steps.contract_tests.outcome }}" = "success" ]; then
+                    echo "| ci_orchestrator --integration-contract-tests | ✅ passed |" >> $GITHUB_STEP_SUMMARY
+                  else
+                    echo "| ci_orchestrator --integration-contract-tests | ❌ failed |" >> $GITHUB_STEP_SUMMARY
+                  fi
+                  
+                  # Check overall status and exit if any tests failed
+                  if [ "${{ steps.integration_smoke.outcome }}" != "success" ] || \
+                     ([ "${{ github.event_name }}" = "schedule" ] && [ "${{ steps.strict_smoke.outcome }}" != "success" ]) || \
+                     [ "${{ steps.contract_tests.outcome }}" != "success" ]; then
+                    echo "" >> $GITHUB_STEP_SUMMARY
+                    echo "### ❌ One or more API health checks failed." >> $GITHUB_STEP_SUMMARY
+                    echo "::error::API health checks failed. See artifacts and logs above."
+                    exit 1
+                  fi
+                  
+                  echo "" >> $GITHUB_STEP_SUMMARY
+                  echo "### ✅ All API health checks passed." >> $GITHUB_STEP_SUMMARY

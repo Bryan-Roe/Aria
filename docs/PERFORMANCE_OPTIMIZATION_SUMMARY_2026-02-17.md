@@ -225,7 +225,7 @@ Pattern compilation cost (typical):
 - Single compile at module load: ~0.1ms × 7 patterns = ~0.7ms
 - Runtime cost without pre-compilation: ~0.1ms per search × N calls
 - Break-even point: ~7 calls (achieved in first second of server uptime)
-```
+```text
 
 ---
 

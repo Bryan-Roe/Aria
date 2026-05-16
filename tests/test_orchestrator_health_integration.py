@@ -7,7 +7,7 @@ through the status endpoint for real-time monitoring.
 import importlib.util
 import json
 import sys
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from types import ModuleType
 
@@ -268,6 +268,54 @@ def test_orchestrator_heartbeat_training_running(app_module: ModuleType):
 
         assert isinstance(orch["heartbeat_running"], bool)
         assert orch["heartbeat_running"] is True
+    finally:
+        _restore_bytes_or_unlink(status_file, original_status)
+        _restore_bytes_or_unlink(heartbeat_file, original_heartbeat)
+
+
+def test_orchestrator_heartbeat_stale_not_running(app_module: ModuleType):
+    """Stale heartbeat timestamps should not be treated as active."""
+    repo_root = Path(__file__).resolve().parents[1]
+    data_out = repo_root / "data_out"
+    status_file = data_out / "autonomous_training_status.json"
+    heartbeat_file = data_out / "autonomous_training_heartbeat.json"
+
+    original_status = _read_bytes_or_none(status_file)
+    original_heartbeat = _read_bytes_or_none(heartbeat_file)
+
+    try:
+        _write_json(
+            status_file,
+            {
+                "cycles_completed": 5,
+                "best_accuracy": 0.91,
+                "last_updated": datetime.now(timezone.utc).isoformat(),
+                "performance_history": [{"accuracy": 0.84}, {"accuracy": 0.91}],
+            },
+        )
+        _write_json(
+            heartbeat_file,
+            {
+                "timestamp": (
+                    datetime.now(timezone.utc) - timedelta(minutes=10)
+                ).isoformat(),
+                "state": "training",
+                "pid": 34567,
+                "current_cycle": 5,
+            },
+        )
+
+        req = MockRequest("GET")
+        resp = app_module.ai_status(req)
+        assert resp.status_code == 200
+
+        body = resp.get_body()
+        if isinstance(body, bytes):
+            body = body.decode()
+        data = json.loads(body)
+        orch = data["orchestrator_health"]["orchestrators"]["autonomous_training"]
+
+        assert orch["heartbeat_running"] is False
     finally:
         _restore_bytes_or_unlink(status_file, original_status)
         _restore_bytes_or_unlink(heartbeat_file, original_heartbeat)

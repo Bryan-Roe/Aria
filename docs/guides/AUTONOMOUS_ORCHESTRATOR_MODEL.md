@@ -6,7 +6,7 @@ This model provides a complete blueprint for building production-grade autonomou
 
 ## Architecture Pattern
 
-```
+```text
 ┌─────────────────────────────────────────────────────────────┐
 │                 Orchestrator Core (Async)                    │
 │  - Configuration Management (YAML)                           │

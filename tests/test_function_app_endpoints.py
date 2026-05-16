@@ -223,6 +223,7 @@ class TestGetEndpoints:
         orch = data["orchestrator_health"]["orchestrators"]
 
         assert orch["autonomous_training"]["cycles_completed"] == 4
+        assert orch["autonomous_training"]["heartbeat_running"] is False
         assert orch["autotrain"]["status"] == "ok"
         assert not any(
             key.startswith("_status_file_") for key in orch["autonomous_training"]
