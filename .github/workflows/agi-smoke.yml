@@ -31,4 +31,4 @@ jobs:
 
       - name: Run AGI smoke tests
         run: |
-          pytest tests/test_agi_smoke.py -q --maxfail=1
+          pytest tests/test_agi_smoke.py tests/test_local_agi_sse_integration.py -q --maxfail=1
