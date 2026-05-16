@@ -177,6 +177,7 @@ asyncio.run(main())
 | History overflow / DoS     | `MAX_HISTORY_SIZE` hard-limit + warning log    |
 | Goal overflow              | `MAX_GOALS` hard-limit, oldest evicted first   |
 | Reasoning chain overflow   | `MAX_REASONING_CHAINS` rolling window          |
+| Error detail leakage       | All exceptions caught; sanitized message logged|
 | Error detail leakage       | All exceptions caught; sanitised message logged|
 
 ---
