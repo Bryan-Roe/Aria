@@ -33,7 +33,8 @@ on:
       - 'README.md'
 
 concurrency:
-  group: copilot-setup-check
+  # Scope cancellation to the same ref/PR to avoid cross-branch run interference.
+  group: copilot-setup-check-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 permissions:
