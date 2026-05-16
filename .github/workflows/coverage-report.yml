@@ -30,6 +30,7 @@ env:
   HARDEN_RUNNER_SHA: 0634a2670c59f64b4a01f0f96f84700a4088b9f0  # v2.12.2
   CHECKOUT_SHA: 11bd71901bbe5b1630ceea73d27597364c9af683      # v4.2.2
   UPLOAD_ARTIFACT_SHA: 65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 # v4.6.0
+  DOWNLOAD_ARTIFACT_SHA: bf251b5aa9c2f7eeb574a96ee720e24f801b7c11 # dawidd6 v6
   GITHUB_SCRIPT_SHA: 60a0d83039c74a4aee5435082ffcb1c3799cdea    # v7.0.1
 
 jobs:
@@ -114,7 +115,7 @@ jobs:
       - name: Download main baseline
         if: github.event_name == 'pull_request'
         id: dl-base
-        uses: dawidd6/action-download-artifact@v6
+        uses: dawidd6/action-download-artifact@${{ env.DOWNLOAD_ARTIFACT_SHA }}
         with:
           name: coverage-main-baseline
           workflow: coverage-report.yml
@@ -224,14 +225,3 @@ jobs:
             fi
           } >> "$GITHUB_STEP_SUMMARY"
 
-# =============================================================================
-# Suggested Improvements applied:
-# - Use latest major versions for all official actions (e.g. @v4, @v7) for automatic minor/patch update (security+features)
-# - Add 'defaults' for global shell config, 'set -euxo pipefail' for robust scripts
-# - Use double quotes for variable expansion robustness in bash
-# - Optionally add dependency caching (if install is heavy/slow, not included here; see GitHub docs)
-# - Ensure permissions are as strict as possible (already tight here)
-# - Consistent indentation and whitespace for clarity
-# - Remove redundant or legacy comments
-# - Add basic error safety for parsing steps, step output
-# =============================================================================

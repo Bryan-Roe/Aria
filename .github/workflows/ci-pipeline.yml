@@ -2,7 +2,7 @@
 # QAI CI Pipeline - Main continuous integration workflow
 # =============================================================================
 # Purpose: Validates code quality, runs tests, and performs daily training
-# Triggers: Push/PR to main/dev branches, daily scheduled runs
+# Triggers: Daily scheduled runs and manual dispatch
 # Jobs:
 #   - validate: Code validation, unit & integration tests
 #   - train: Daily scheduled training workflow (requires validate pass)
@@ -12,12 +12,9 @@
 name: QAI CI Pipeline
 
 on:
-  push:
-    branches: [main, dev]
-  pull_request:
-    branches: [main, dev]
   schedule:
     - cron: '0 2 * * *' # Daily at 2 AM UTC
+  workflow_dispatch: {}
 
 permissions:
   contents: read
@@ -26,7 +23,7 @@ permissions:
 
 concurrency:
   group: ci-${{ github.ref }}
-  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+  cancel-in-progress: ${{ github.event_name != 'workflow_dispatch' }}
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"

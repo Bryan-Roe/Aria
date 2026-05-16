@@ -6,7 +6,7 @@ This repository uses GitHub Actions for continuous integration, testing, deploym
 
 | Workflow | Status | Description |
 | ------------------------- | -------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------- |
-| CI Pipeline | ![CI Pipeline](https://github.com/Bryan-Roe/Aria/actions/workflows/ci-pipeline.yml/badge.svg) | Main CI with validation, training, and deployment |
+| CI Pipeline | ![CI Pipeline](https://github.com/Bryan-Roe/Aria/actions/workflows/ci-pipeline.yml/badge.svg) | Scheduled/manual pipeline for validation, training, and deployment |
 | Code Quality | ![Code Quality](https://github.com/Bryan-Roe/Aria/actions/workflows/code-quality.yml/badge.svg) | Linting, formatting, and security checks |
 | CodeQL Security | ![CodeQL](https://github.com/Bryan-Roe/Aria/actions/workflows/codeql.yml/badge.svg) | Security vulnerability scanning |
 | PR Checks | ![PR Checks](https://github.com/Bryan-Roe/Aria/actions/workflows/pr-checks.yml/badge.svg) | Fast validation for pull requests |
@@ -37,7 +37,7 @@ This repository uses GitHub Actions for continuous integration, testing, deploym
 
 #### 1. **CI Pipeline** (`ci-pipeline.yml`)
 
-**Triggers:** Push to main/dev, PRs to main, daily at 2 AM UTC
+**Triggers:** Daily at 2 AM UTC, manual dispatch
 
 **Jobs:**
 
@@ -270,7 +270,7 @@ This repository uses GitHub Actions for continuous integration, testing, deploym
 
 **Jobs:**
 
-- **gitleaks**: Authoritative secret detection via `gitleaks/gitleaks-action@v2`
+- **gitleaks**: Authoritative secret detection via `gitleaks/gitleaks-action` pinned to an immutable commit SHA
   - Scans full git history (`fetch-depth: 0`) for API keys, tokens, passwords, private keys
   - **Blocking** — fails the workflow if any secret is detected
   - Integrates with GitHub's security advisory system
@@ -286,7 +286,7 @@ This repository uses GitHub Actions for continuous integration, testing, deploym
 **Jobs:**
 
 - **dependency-review**: Reviews dependency changes introduced by PRs
-  - Uses `actions/dependency-review-action@v4`
+  - Uses `actions/dependency-review-action` pinned to an immutable commit SHA
   - Fails on vulnerabilities with severity **high** or above
   - Denies high-risk copyleft licenses (`GPL-2.0`, `GPL-3.0`, `AGPL-3.0`)
   - Posts dependency review summary directly on PRs
@@ -298,7 +298,7 @@ This repository uses GitHub Actions for continuous integration, testing, deploym
 **Jobs:**
 
 - **actionlint**: Lints GitHub Actions workflows and embedded shell snippets
-  - Uses `reviewdog/action-actionlint@v1` with blocking mode (`fail_on_error: true`)
+  - Uses `reviewdog/action-actionlint` pinned to an immutable commit SHA with blocking mode (`fail_on_error: true`)
   - Installs `shellcheck` so shell fragments in workflows are validated too
   - Catches invalid expressions, runner matrix mistakes, and shell anti-patterns before merge
 
@@ -309,7 +309,7 @@ This repository uses GitHub Actions for continuous integration, testing, deploym
 **Jobs:**
 
 - **markdownlint**: Enforces Markdown style and structural consistency
-  - Uses `DavidAnson/markdownlint-cli2-action@v20`
+  - Uses `DavidAnson/markdownlint-cli2-action` pinned to an immutable commit SHA
   - Scans `**/*.md` while excluding generated/ephemeral paths (`data_out/**`, `mount/**`)
   - Adds run summary in `GITHUB_STEP_SUMMARY`
 
@@ -320,7 +320,7 @@ This repository uses GitHub Actions for continuous integration, testing, deploym
 **Jobs:**
 
 - **link-check**: Verifies outbound and repo links in Markdown/docs
-  - Uses `lycheeverse/lychee-action@v2`
+  - Uses `lycheeverse/lychee-action` pinned to an immutable commit SHA
   - Accepts common redirect/auth/rate-limit status codes (`301`, `302`, `401`, `403`, `429`)
   - Fails the workflow on unresolved/broken links to prevent stale docs
   - Adds run summary in `GITHUB_STEP_SUMMARY`

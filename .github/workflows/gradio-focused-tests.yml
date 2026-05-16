@@ -1,0 +1,31 @@
+name: Gradio Focused Tests
+
+on:
+  push:
+    paths:
+      - 'tests/**'
+      - 'scripts/**'
+      - '.github/workflows/gradio-focused-tests.yml'
+  pull_request:
+    paths:
+      - 'tests/**'
+      - 'scripts/**'
+
+jobs:
+  gradio-focused:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install minimal dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest gradio
+
+      - name: Run focused Gradio tests
+        run: pytest -q tests/test_gradio_*.py -q

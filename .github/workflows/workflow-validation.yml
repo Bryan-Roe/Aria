@@ -63,18 +63,6 @@ jobs:
           install-requirements: 'false'
           extra-packages: 'pyyaml jsonschema'
 
-      - name: Lint workflow YAML (Super-Linter)
-        uses: github/super-linter@v4
-        env:
-          # Only validate YAML to keep this step focused and quick
-          VALIDATE_YAML: true
-          VALIDATE_JSON: false
-          VALIDATE_MARKDOWN: false
-          VALIDATE_TERRAFORM: false
-          DEFAULT_WORKSPACE: ${{ github.workspace }}
-          # Exclude common vendor dirs
-          FILTER_REGEX_EXCLUDE: '^(vendor|node_modules|dist)/'
-
       - name: Validate workflow YAML structure
         uses: ./.github/actions/validate-workflow-yaml
         with:

@@ -1,12 +1,12 @@
 {
-  "generated_at": "2026-05-16T14:09:55.333150+00:00",
+  "generated_at": "2026-05-16T15:07:32.837939+00:00",
   "total_jobs": 12,
   "succeeded": 0,
   "failed": 0,
   "skipped": 0,
   "running": 0,
   "avg_duration": null,
-  "last_updated": "2026-05-16T14:09:55.333164+00:00",
+  "last_updated": "2026-05-16T15:07:32.837953+00:00",
   "jobs": [
     {
       "name": "phi35_comprehensive_full",

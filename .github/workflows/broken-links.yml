@@ -31,6 +31,7 @@ env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
   HARDEN_RUNNER_SHA: 0634a2670c59f64b4a01f0f96f84700a4088b9f0  # v2.12.2
   CHECKOUT_SHA: 11bd71901bbe5b1630ceea73d27597364c9af683      # v4.2.2
+  LYCHEE_ACTION_REF: 8646ba30535128ac92d33dfc9133794bfdd9b411 # lycheeverse/lychee-action v2.8.0
 
 jobs:
   link-check:
@@ -53,7 +54,7 @@ jobs:
 
       - name: "Run Lychee link checker"
         id: lychee
-        uses: lycheeverse/lychee-action@v2.8.0
+        uses: lycheeverse/lychee-action@${{ env.LYCHEE_ACTION_REF }}
         with:
           fail: true
           args: >-
@@ -70,6 +71,7 @@ jobs:
       - name: "Summary"
         if: always()
         run: |
+          set -euo pipefail
           # Safely write the step summary in a single redirection to avoid multiple appends (ShellCheck SC2129)
           if [ -n "${GITHUB_STEP_SUMMARY:-}" ]; then
             {
@@ -83,5 +85,6 @@ jobs:
       - name: "Show Failures"
         if: failure()
         run: |
+          set -euo pipefail
           echo "❌ One or more broken links detected!"
           exit 1

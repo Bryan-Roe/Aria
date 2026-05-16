@@ -59,6 +59,12 @@ jobs:
       pull-requests: read
 
     steps:
+      - name: Harden runner
+        uses: step-security/harden-runner@${{ env.HARDEN_RUNNER_SHA }}
+        with:
+          egress-policy: audit
+          disable-sudo: true
+
       - name: Checkout
         uses: actions/checkout@${{ env.CHECKOUT_SHA }}
         with:

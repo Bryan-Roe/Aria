@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-05-16T14:09:54Z",
-  "run_id": "20260516T140954Z",
+  "generated_at": "2026-05-16T15:07:31Z",
+  "run_id": "20260516T150731Z",
   "config_path": null,
   "config_paths": {
     "master_orchestrator": "config/master_orchestrator.yaml",
@@ -41,14 +41,14 @@
       "name": "master_orchestrator_status",
       "status": "succeeded",
       "critical": true,
-      "duration_sec": 1.13,
-      "detail": "rc=0 | stdout=   \"schedule\": null,\n      \"orchestrators\": [\n        \"aria_automation\"\n      ]\n    },\n    {\n      \"name\": \"aria_server_only\",\n      \"enabled\": false,\n      \"trigger\": \"manual\",\n      \"schedule\": null,\n      \"orchestrators\": [\n        \"aria_automation\"\n      ]\n    }\n  ],\n  \"resource_usage\": {\n    \"available\": true,\n    \"cpu_percent\": 11.9,\n    \"memory_percent\": 25.7,\n    \"disk_percent\": 16.4\n  }\n}"
+      "duration_sec": 1.12,
+      "detail": "rc=0 | stdout=   \"schedule\": null,\n      \"orchestrators\": [\n        \"aria_automation\"\n      ]\n    },\n    {\n      \"name\": \"aria_server_only\",\n      \"enabled\": false,\n      \"trigger\": \"manual\",\n      \"schedule\": null,\n      \"orchestrators\": [\n        \"aria_automation\"\n      ]\n    }\n  ],\n  \"resource_usage\": {\n    \"available\": true,\n    \"cpu_percent\": 10.1,\n    \"memory_percent\": 26.6,\n    \"disk_percent\": 16.5\n  }\n}"
     },
     {
       "name": "quantum_autorun_dry_run",
       "status": "succeeded",
       "critical": true,
-      "duration_sec": 0.1,
+      "duration_sec": 0.09,
       "detail": "rc=0 | stdout=Validated 4 job(s): heart_quick, ionosphere_quick, azure_quantinuum_simulator, azure_ionq_qpu_test"
     },
     {
@@ -62,7 +62,7 @@
       "name": "chat_cli_local_once",
       "status": "succeeded",
       "critical": true,
-      "duration_sec": 1.13,
+      "duration_sec": 1.09,
       "detail": "rc=0 | stdout=Provider: local | Model: local-echo\nassistant> No live model detected. Run with `--provider lmstudio` (LM Studio running locally), `--provider ollama`, `--provider openai`, or `--provider azure`."
     },
     {

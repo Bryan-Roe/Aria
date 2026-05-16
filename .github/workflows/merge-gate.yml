@@ -64,7 +64,7 @@ jobs:
       contents: read
     steps:
       - name: Checkout
-        uses: actions/checkout@${{ env.CHECKOUT_SHA }}  # v4.3.1
+        uses: actions/checkout@${{ env.CHECKOUT_SHA }}
         with:
           persist-credentials: false
 
@@ -96,7 +96,7 @@ jobs:
       contents: read
     steps:
       - name: Checkout
-        uses: actions/checkout@${{ env.CHECKOUT_SHA }}  # v4.3.1
+        uses: actions/checkout@${{ env.CHECKOUT_SHA }}
         with:
           persist-credentials: false
 
@@ -143,7 +143,7 @@ jobs:
       pull-requests: write  # required by dependency-review-action to comment
     steps:
       - name: Checkout
-        uses: actions/checkout@${{ env.CHECKOUT_SHA }}  # v4.3.1
+        uses: actions/checkout@${{ env.CHECKOUT_SHA }}
         with:
           persist-credentials: false
 
@@ -168,7 +168,7 @@ jobs:
       contents: read
     steps:
       - name: Checkout
-        uses: actions/checkout@${{ env.CHECKOUT_SHA }}  # v4.3.1
+        uses: actions/checkout@${{ env.CHECKOUT_SHA }}
         with:
           persist-credentials: false
 
