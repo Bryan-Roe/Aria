@@ -19,6 +19,17 @@ from functools import lru_cache
 from typing import Annotated, List, Optional
 
 _LOG = logging.getLogger(__name__)
+_DEFAULT_PROVIDER_PRIORITY = ["azure", "openai", "lmstudio", "local"]
+
+
+def _normalize_provider_priority(value: object) -> List[str]:
+    if isinstance(value, str):
+        providers = [item.strip() for item in value.split(",") if item.strip()]
+        return providers or list(_DEFAULT_PROVIDER_PRIORITY)
+    if isinstance(value, (list, tuple)):
+        providers = [str(item).strip() for item in value if str(item).strip()]
+        return providers or list(_DEFAULT_PROVIDER_PRIORITY)
+    return list(_DEFAULT_PROVIDER_PRIORITY)
 
 
 def _normalize_provider_priority(value: object) -> List[str]:
@@ -233,10 +244,15 @@ if _PYDANTIC_AVAILABLE:
                     return name
             return "local"
 
+        def provider_chain(self) -> List[str]:
+            """Return configured provider priority order."""
+            return list(self.provider_priority)
+
         def summary(self) -> dict:
             """Return a non-secret summary suitable for health endpoints."""
             return {
                 "active_provider": self.active_provider(),
+                "provider_chain": self.provider_chain(),
                 "azure_openai_ready": self.azure_openai_ready,
                 "openai_ready": self.openai_ready,
                 "lmstudio_ready": self.lmstudio_ready,
@@ -325,9 +341,13 @@ else:
                     return name
             return "local"
 
+        def provider_chain(self) -> List[str]:
+            return list(self.provider_priority)
+
         def summary(self) -> dict:
             return {
                 "active_provider": self.active_provider(),
+                "provider_chain": self.provider_chain(),
                 "azure_openai_ready": self.azure_openai_ready,
                 "openai_ready": self.openai_ready,
                 "lmstudio_ready": self.lmstudio_ready,
