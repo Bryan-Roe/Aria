@@ -161,3 +161,7 @@ extensions/lmstudio-provider/*.vsix
 Thumbs.db
 .Trash-*/
 $RECYCLE.BIN/
+
+# Additional ignores
+coverage.json
+
