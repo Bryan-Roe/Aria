@@ -16,7 +16,7 @@ from __future__ import annotations
 import logging
 import os
 from functools import lru_cache
-from typing import List, Optional
+from typing import Annotated, List, Optional
 
 _LOG = logging.getLogger(__name__)
 _DEFAULT_PROVIDER_PRIORITY = ["azure", "openai", "lmstudio", "local"]
@@ -27,7 +27,7 @@ _DEFAULT_PROVIDER_PRIORITY = ["azure", "openai", "lmstudio", "local"]
 # ---------------------------------------------------------------------------
 try:
     from pydantic import Field, field_validator
-    from pydantic_settings import BaseSettings
+    from pydantic_settings import BaseSettings, NoDecode
     try:
         from pydantic import ConfigDict as _ConfigDict
     except ImportError:
@@ -89,7 +89,7 @@ if _PYDANTIC_AVAILABLE:
         # ------------------------------------------------------------------
         # Provider selection
         # ------------------------------------------------------------------
-        provider_priority: List[str] = Field(
+        provider_priority: Annotated[List[str], NoDecode] = Field(
             default=_DEFAULT_PROVIDER_PRIORITY,
             alias="QAI_PROVIDER_PRIORITY",
         )
@@ -154,7 +154,6 @@ if _PYDANTIC_AVAILABLE:
                 env_file=".env",
                 env_file_encoding="utf-8",
                 populate_by_name=True,
-                enable_decoding=False,
             )
         else:
             model_config = {  # type: ignore[assignment]
@@ -162,7 +161,6 @@ if _PYDANTIC_AVAILABLE:
                 "env_file": ".env",
                 "env_file_encoding": "utf-8",
                 "populate_by_name": True,
-                "enable_decoding": False,
             }
 
         @field_validator("log_level", mode="before")
