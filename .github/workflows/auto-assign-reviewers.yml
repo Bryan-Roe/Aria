@@ -1,3 +1,11 @@
+# Auto-assign reviewers workflow
+# Improvements:
+# - Skip draft PRs
+# - Concurrency to avoid duplicate runs
+# - Try multiple CODEOWNERS locations and parse owners robustly
+# - Filter out PR author and bot accounts
+# - Limit number of reviewers requested
+# - Safer logging and retry for transient API errors
 name: Auto-assign reviewers
 
 on:
@@ -8,50 +16,202 @@ permissions:
   contents: read
   pull-requests: write
 
+concurrency:
+  group: auto-assign-reviewers-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
 jobs:
   assign:
+    # Skip drafts early to avoid noisy assignments
+    if: ${{ github.event.pull_request.draft == false }}
     runs-on: ubuntu-latest
+
     steps:
       - name: Auto-assign reviewers (CODEOWNERS fallback)
         uses: actions/github-script@v6
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
+            // Required helpers
+            const core = require('@actions/core');
+
             const pr = context.payload.pull_request;
-            if (!pr) return;
-
-            // Collect changed files
-            const changedFiles = await github.paginate(github.rest.pulls.listFiles, {
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              pull_number: pr.number
-            });
-
-            // Attempt to read CODEOWNERS and pick owners (best-effort)
-            let owners = [];
-            try {
-              const { data: content } = await github.rest.repos.getContent({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                path: '.github/CODEOWNERS'
-              });
-              const text = Buffer.from(content.content, content.encoding).toString();
-              // Simple extraction of GitHub usernames mentioned with @
-              const matches = text.match(/@[^\s/]+/g) || [];
-              owners = [...new Set(matches.map(m => m.replace('@', '')))]
-            } catch (e) {
-              core.info('No CODEOWNERS found or parse failed; will request review from repo owner');
+            if (!pr) {
+              core.info('No pull request context found; exiting.');
+              return;
             }
 
-            const reviewers = owners.length ? owners.slice(0,5) : [context.repo.owner];
+            if (pr.draft) {
+              core.info('PR is a draft; skipping reviewer assignment.');
+              return;
+            }
+
+            // Simple retry helper for transient API issues
+            async function withRetries(fn, retries = 3, baseDelayMs = 1000) {
+              for (let attempt = 0; attempt <= retries; attempt++) {
+                try {
+                  return await fn();
+                } catch (err) {
+                  const isLast = attempt === retries;
+                  // Retry on 5xx or rate limit-ish responses; otherwise rethrow
+                  const status = err && err.status ? err.status : null;
+                  if (isLast || (status && status < 500 && status !== 429)) throw err;
+                  const delay = baseDelayMs * (attempt + 1);
+                  core.info(`Transient error (status=${status}); retrying in ${delay}ms (attempt ${attempt + 1}/${retries})`);
+                  await new Promise(r => setTimeout(r, delay));
+                }
+              }
+            }
+
+            // Collect changed files (not currently used for per-file CODEOWNERS matching,
+            // kept for future enhancements)
+            let changedFiles = [];
             try {
-              await github.rest.pulls.requestReviewers({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                pull_number: pr.number,
-                reviewers
-              });
-              core.info(`Requested reviewers: ${reviewers.join(', ')}`);
+              changedFiles = await withRetries(() => github.paginate(
+                github.rest.pulls.listFiles,
+                {
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  pull_number: pr.number,
+                }
+              ));
+              core.info(`Found ${changedFiles.length} changed file(s).`);
             } catch (err) {
-              core.info(`Failed to request reviewers: ${err}`);
+              core.info(`Could not list changed files: ${err.message || err}`);
+            }
+
+            // Try common CODEOWNERS file locations
+            const candidatePaths = ['.github/CODEOWNERS', 'CODEOWNERS', 'docs/CODEOWNERS'];
+            let codeownersText = null;
+            for (const p of candidatePaths) {
+              try {
+                const content = await withRetries(() =>
+                  github.rest.repos.getContent({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    path: p,
+                  })
+                );
+                if (content && content.data && content.data.content) {
+                  codeownersText = Buffer.from(content.data.content, content.data.encoding).toString();
+                  core.info(`Loaded CODEOWNERS from ${p}`);
+                  break;
+                }
+              } catch (e) {
+                // Ignore not found or permission errors and continue trying other paths
+                core.info(`CODEOWNERS not found at ${p} (or unreadable): ${e.status || e.message || e}`);
+              }
+            }
+
+            // Parse CODEOWNERS: extract @mentions (both users and org/team)
+            const users = new Set();
+            const teams = new Set();
+            if (codeownersText) {
+              // Remove comments and empty lines, then extract owner tokens from each rule
+              const lines = codeownersText.split(/\r?\n/).map(l => l.trim());
+              for (const line of lines) {
+                if (!line || line.startsWith('#')) continue;
+                // Each non-comment line: pattern [pattern] [owner ...]
+                const parts = line.split(/\s+/).slice(1); // owners start at index 1
+                for (const ownerToken of parts) {
+                  if (!ownerToken || !ownerToken.startsWith('@')) continue;
+                  const token = ownerToken.slice(1); // remove '@'
+                  if (token.includes('/')) {
+                    // org/team - team slug is after the slash
+                    const [org, team] = token.split('/', 2);
+                    if (team) teams.add(team);
+                  } else {
+                    users.add(token);
+                  }
+                }
+              }
+            } else {
+              core.info('No CODEOWNERS detected; will use repository owner as fallback.');
+              users.add(context.repo.owner);
+            }
+
+            // Normalize and filter out PR author and bots
+            const prAuthor = pr.user && pr.user.login ? pr.user.login.toLowerCase() : null;
+            function isBotCandidate(login) {
+              if (!login) return false;
+              const ll = login.toLowerCase();
+              return ll.endsWith('[bot]') || ll.endsWith('-bot') || ll.includes('dependabot') || ll.includes('bors');
+            }
+
+            const filteredUsers = [...users].filter(u => {
+              if (!u) return false;
+              const low = u.toLowerCase();
+              if (prAuthor && low === prAuthor) return false;
+              if (low === context.repo.owner.toLowerCase()) return false; // avoid requesting owner if possible
+              if (isBotCandidate(low)) return false;
+              return true;
+            });
+
+            const filteredTeams = [...teams].filter(t => !!t);
+
+            // Limits to avoid spamming many reviewers
+            const maxUserReviewers = 3;
+            const maxTeamReviewers = 2;
+            const selectedUsers = filteredUsers.slice(0, maxUserReviewers);
+            const selectedTeams = filteredTeams.slice(0, maxTeamReviewers);
+
+            // Ensure we don't request the PR author; if no one remains, fallback to repo owner unless they are the author
+            if (selectedUsers.length === 0 && selectedTeams.length === 0) {
+              if (prAuthor && prAuthor === context.repo.owner.toLowerCase()) {
+                core.info('No valid CODEOWNERS and repo owner is the PR author; skipping reviewer assignment.');
+                return;
+              }
+              selectedUsers.push(context.repo.owner);
+            }
+
+            // Avoid requesting reviewers that were already requested
+            try {
+              const current = await withRetries(() =>
+                github.rest.pulls.listRequestedReviewers({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  pull_number: pr.number,
+                })
+              );
+
+              const alreadyRequestedUsers = (current.data && current.data.users) ? current.data.users.map(u => u.login.toLowerCase()) : [];
+              const alreadyRequestedTeams = (current.data && current.data.teams) ? current.data.teams.map(t => t.slug.toLowerCase()) : [];
+
+              const finalUsers = selectedUsers.filter(u => !alreadyRequestedUsers.includes(u.toLowerCase()));
+              const finalTeams = selectedTeams.filter(t => !alreadyRequestedTeams.includes(t.toLowerCase()));
+
+              if (finalUsers.length === 0 && finalTeams.length === 0) {
+                core.info('All selected reviewers are already requested; nothing to do.');
+                return;
+              }
+
+              // Request reviewers (teams go via team_reviewers)
+              try {
+                await withRetries(() =>
+                  github.rest.pulls.requestReviewers({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    pull_number: pr.number,
+                    reviewers: finalUsers,
+                    team_reviewers: finalTeams,
+                  })
+                );
+                core.info(`Requested reviewers: users=[${finalUsers.join(', ')}] teams=[${finalTeams.join(', ')}]`);
+              } catch (err) {
+                core.error(`Failed to request reviewers: ${err.status || ''} ${err.message || err}.`);
+              }
+            } catch (err) {
+              core.error(`Failed to check existing requested reviewers: ${err.status || ''} ${err.message || err}. Attempting to request previously-selected reviewers anyway.`);
+              try {
+                await github.rest.pulls.requestReviewers({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  pull_number: pr.number,
+                  reviewers: selectedUsers,
+                  team_reviewers: selectedTeams,
+                });
+                core.info(`Requested reviewers (fallback): users=[${selectedUsers.join(', ')}] teams=[${selectedTeams.join(', ')}]`);
+              } catch (err2) {
+                core.error(`Fallback request also failed: ${err2.status || ''} ${err2.message || err2}`);
+              }
             }
