@@ -5,7 +5,7 @@
 
 # === Testing ===
 pytest==8.3.2
-requests==2.31.0          # HTTP client for test_api.py
+requests==2.33.0          # HTTP client for test_api.py
 
 # === Type checking & linting ===
 mypy==1.11.0
