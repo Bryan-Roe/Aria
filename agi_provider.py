@@ -34,6 +34,8 @@ _EXPECTED_EXPORTS: Final[tuple[str, ...]] = (
     "AGIContext",
     "ReasoningStep",
     "create_agi_provider",
+    "MemoryInterface",
+    "EnvironmentInterface",
     "MAX_INPUT_LENGTH",
     "MAX_HISTORY_SIZE",
     "MAX_GOALS",
@@ -106,6 +108,8 @@ AGIProvider = _export(_mod, "AGIProvider")
 AGIContext = _export(_mod, "AGIContext")
 ReasoningStep = _export(_mod, "ReasoningStep")
 create_agi_provider = _export(_mod, "create_agi_provider")
+MemoryInterface = _export(_mod, "MemoryInterface")
+EnvironmentInterface = _export(_mod, "EnvironmentInterface")
 
 MAX_INPUT_LENGTH = cast(int, _export(_mod, "MAX_INPUT_LENGTH"))
 MAX_HISTORY_SIZE = cast(int, _export(_mod, "MAX_HISTORY_SIZE"))

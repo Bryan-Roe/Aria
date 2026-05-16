@@ -698,3 +698,149 @@ class TestAGISecurity:
         assert "SENSITIVE" not in result
         assert "secret123" not in result
         assert "database" not in result.lower() or "password" not in result.lower()
+
+
+# ---------------------------------------------------------------------------
+# Protocol compliance tests
+# ---------------------------------------------------------------------------
+
+
+class TestMemoryInterface:
+    """Tests for the MemoryInterface protocol and AGIContext compliance."""
+
+    def test_agi_context_satisfies_memory_interface(self):
+        """AGIContext must be a runtime-checkable MemoryInterface implementation."""
+        from agi_provider import MemoryInterface
+
+        ctx = AGIContext()
+        assert isinstance(ctx, MemoryInterface)
+
+    def test_custom_memory_backend_satisfies_interface(self):
+        """A custom class implementing the three methods passes the protocol check."""
+        from agi_provider import MemoryInterface
+
+        class MinimalMemory:
+            def add_message(self, message):
+                pass
+
+            def add_reasoning_chain(self, chain):
+                pass
+
+            def get_relevant_context(self, query):
+                return ""
+
+        mem = MinimalMemory()
+        assert isinstance(mem, MemoryInterface)
+
+    def test_incomplete_class_fails_interface(self):
+        """A class missing required methods does not satisfy MemoryInterface."""
+        from agi_provider import MemoryInterface
+
+        class IncompleteMemory:
+            def add_message(self, message):
+                pass
+
+            # missing add_reasoning_chain and get_relevant_context
+
+        obj = IncompleteMemory()
+        assert not isinstance(obj, MemoryInterface)
+
+
+class TestEnvironmentInterface:
+    """Tests for the EnvironmentInterface protocol."""
+
+    def test_mock_provider_satisfies_environment_interface(self):
+        """MockBaseProvider (used in other tests) satisfies EnvironmentInterface."""
+        from agi_provider import EnvironmentInterface
+
+        mock = MockBaseProvider()
+        assert isinstance(mock, EnvironmentInterface)
+
+    def test_custom_environment_satisfies_interface(self):
+        """A custom class implementing complete() satisfies EnvironmentInterface."""
+        from agi_provider import EnvironmentInterface
+
+        class EchoEnvironment:
+            def complete(self, messages, stream=True):
+                return "echo"
+
+        env = EchoEnvironment()
+        assert isinstance(env, EnvironmentInterface)
+
+    def test_object_without_complete_fails_interface(self):
+        """An object without complete() does not satisfy EnvironmentInterface."""
+        from agi_provider import EnvironmentInterface
+
+        class NotAnEnvironment:
+            def send(self, messages):
+                return "nope"
+
+        obj = NotAnEnvironment()
+        assert not isinstance(obj, EnvironmentInterface)
+
+
+# ---------------------------------------------------------------------------
+# Async tests
+# ---------------------------------------------------------------------------
+
+
+class TestAGIProviderAsync:
+    """Tests for the async_complete method."""
+
+    def test_async_complete_returns_string(self):
+        """async_complete should resolve to a non-empty string."""
+        import asyncio
+
+        mock_provider = MockBaseProvider(response="Async response")
+        agi = AGIProvider(base_provider=mock_provider)
+
+        result = asyncio.run(
+            agi.async_complete([{"role": "user", "content": "Hello async"}])
+        )
+
+        assert isinstance(result, str)
+        assert len(result) > 0
+
+    def test_async_complete_empty_query(self):
+        """async_complete should handle empty queries gracefully."""
+        import asyncio
+
+        mock_provider = MockBaseProvider()
+        agi = AGIProvider(base_provider=mock_provider)
+
+        result = asyncio.run(
+            agi.async_complete([{"role": "user", "content": "   "}])
+        )
+
+        assert "ready to help" in result.lower()
+
+    def test_async_complete_updates_context(self):
+        """async_complete should update the provider's context."""
+        import asyncio
+
+        mock_provider = MockBaseProvider(response="Context update test")
+        agi = AGIProvider(base_provider=mock_provider)
+
+        asyncio.run(
+            agi.async_complete([{"role": "user", "content": "Update context"}])
+        )
+
+        assert len(agi.context.conversation_history) >= 1
+
+    def test_async_complete_concurrent(self):
+        """Multiple concurrent async_complete calls should not corrupt state."""
+        import asyncio
+
+        async def run_concurrent():
+            mock_provider = MockBaseProvider(response="Concurrent")
+            agi = AGIProvider(base_provider=mock_provider)
+
+            results = await asyncio.gather(
+                agi.async_complete([{"role": "user", "content": "First"}]),
+                agi.async_complete([{"role": "user", "content": "Second"}]),
+            )
+            return results
+
+        results = asyncio.run(run_concurrent())
+        assert len(results) == 2
+        assert all(isinstance(r, str) and len(r) > 0 for r in results)
