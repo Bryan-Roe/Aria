@@ -98,6 +98,18 @@ _PROVIDER_ALIASES: Dict[str, str] = {
     "quantum-llm": "quantum",
 }
 
+_KNOWN_PROVIDER_CHOICES: set[str] = {
+    "auto",
+    "lmstudio",
+    "ollama",
+    "azure",
+    "openai",
+    "local",
+    "lora",
+    "agi",
+    "quantum",
+}
+
 
 def _get_lmstudio_api_key() -> Optional[str]:
     """Resolve LM Studio API token from supported env var names."""
@@ -316,7 +328,8 @@ class LoraLocalProvider(BaseChatProvider):
 
         adapter_config_path = self.adapter_dir / "adapter_config.json"
         if not adapter_config_path.exists():
-            raise RuntimeError(f"adapter_config.json not found in {self.adapter_dir}")
+            raise RuntimeError(
+                f"adapter_config.json not found in {self.adapter_dir}")
         with open(adapter_config_path, "r", encoding="utf-8") as f:
             adapter_cfg = _json.load(f)
         base_model_id = adapter_cfg.get(
@@ -371,7 +384,7 @@ class LoraLocalProvider(BaseChatProvider):
                 eos_token_id=self.tokenizer.eos_token_id,
             )
         response = self.tokenizer.decode(
-            output[0][inputs["input_ids"].shape[-1] :], skip_special_tokens=True
+            output[0][inputs["input_ids"].shape[-1]:], skip_special_tokens=True
         )
         if not stream:
             return response
@@ -385,8 +398,10 @@ class LoraLocalProvider(BaseChatProvider):
 
     def _complete_via_subprocess(self, messages: List[RoleMessage]) -> str:
         if not self.bridge_python:
-            raise RuntimeError("Subprocess bridge not configured for LoRA provider.")
-        bridge_script = Path(__file__).resolve().parent / "lora_infer_bridge.py"
+            raise RuntimeError(
+                "Subprocess bridge not configured for LoRA provider.")
+        bridge_script = Path(__file__).resolve().parent / \
+            "lora_infer_bridge.py"
         if not bridge_script.exists():
             raise RuntimeError(f"Bridge script not found at {bridge_script}")
         payload = {
@@ -408,7 +423,8 @@ class LoraLocalProvider(BaseChatProvider):
         if proc.returncode != 0:
             stderr = proc.stderr.decode("utf-8", errors="ignore")
             stdout = proc.stdout.decode("utf-8", errors="ignore")
-            msg = stderr.strip() or stdout.strip() or f"exit code {proc.returncode}"
+            msg = stderr.strip() or stdout.strip(
+            ) or f"exit code {proc.returncode}"
             # Truncate very long errors but keep start and end
             if len(msg) > 1000:
                 msg = msg[:500] + "\n...\n" + msg[-500:]
@@ -532,7 +548,8 @@ class LocalEchoProvider(BaseChatProvider):
 
         # Check for greetings
         if (
-            any(word in lower_text for word in ["hello", "hi", "hey", "greetings"])
+            any(word in lower_text for word in [
+                "hello", "hi", "hey", "greetings"])
             and len(text) < 50
         ):
             return "greeting"
@@ -589,7 +606,8 @@ class LocalEchoProvider(BaseChatProvider):
             if m.get("role") == "user" and m.get("content", "").strip()
         ]
         topic = (
-            user_topics[0][:120].rstrip(".,?!") if user_topics else "the current task"
+            user_topics[0][:120].rstrip(
+                ".,?!") if user_topics else "the current task"
         )
 
         if "message count exceeded limit" in last_assistant.lower():
@@ -636,7 +654,8 @@ class LocalEchoProvider(BaseChatProvider):
         actionable rather than meaninglessly rephrasing the user's input.
         """
         last_user = next(
-            (m["content"] for m in reversed(messages) if m.get("role") == "user"), ""
+            (m["content"]
+             for m in reversed(messages) if m.get("role") == "user"), ""
         ).strip()
 
         if not last_user:
@@ -1343,8 +1362,16 @@ def detect_provider(
     provider_choice = (explicit or "auto").lower()
     provider_choice = _PROVIDER_ALIASES.get(provider_choice, provider_choice)
 
+    explicit_requested = bool(explicit and str(explicit).strip())
+    if explicit_requested and provider_choice not in _KNOWN_PROVIDER_CHOICES:
+        valid = ", ".join(sorted(_KNOWN_PROVIDER_CHOICES))
+        raise ValueError(
+            f"Unknown provider '{explicit}'. Valid providers: {valid}"
+        )
+
     # LM Studio config
-    lm_studio_base_url = os.getenv("LMSTUDIO_BASE_URL", "http://127.0.0.1:1234/v1")
+    lm_studio_base_url = os.getenv(
+        "LMSTUDIO_BASE_URL", "http://127.0.0.1:1234/v1")
     lm_studio_model_name = os.getenv("LMSTUDIO_MODEL", "local-model")
 
     # Ollama config
@@ -1384,9 +1411,11 @@ def detect_provider(
             )
             # Recompute settings (import may have failed before they were set).
             temperature_value = float(
-                temperature if temperature is not None else os.getenv("CHAT_TEMPERATURE", "0.7")
+                temperature if temperature is not None else os.getenv(
+                    "CHAT_TEMPERATURE", "0.7")
             )
-            max_tokens_limit = int(max_output_tokens) if max_output_tokens is not None else 2048
+            max_tokens_limit = int(
+                max_output_tokens) if max_output_tokens is not None else 2048
             try:
                 from local_agi_provider import LocalAGIProvider
 
@@ -1439,7 +1468,8 @@ def detect_provider(
 
     if provider_choice == "lora":
         if not model_override:
-            raise RuntimeError("LoRA provider selected but model path not provided.")
+            raise RuntimeError(
+                "LoRA provider selected but model path not provided.")
         temperature_value = float(
             temperature
             if temperature is not None
@@ -1468,7 +1498,8 @@ def detect_provider(
     openai_model_name = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
 
     temperature_setting = float(
-        temperature if temperature is not None else os.getenv("CHAT_TEMPERATURE", "0.7")
+        temperature if temperature is not None else os.getenv(
+            "CHAT_TEMPERATURE", "0.7")
     )
 
     # Resolve based on explicit choice first
@@ -1514,7 +1545,8 @@ def detect_provider(
 
     if provider_choice == "openai":
         if not openai_api_key:
-            raise RuntimeError("OpenAI selected but OPENAI_API_KEY is not set.")
+            raise RuntimeError(
+                "OpenAI selected but OPENAI_API_KEY is not set.")
         selected_model = model_override or openai_model_name
         provider = OpenAIProvider(
             model=selected_model,

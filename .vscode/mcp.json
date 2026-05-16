@@ -7,7 +7,8 @@
         "${workspaceFolder}/ai-projects/quantum-ml/quantum_mcp_server.py"
       ],
       "env": {
-        "PYTHONPATH": "${workspaceFolder}/ai-projects/quantum-ml"
+        "PYTHONPATH": "${workspaceFolder}/ai-projects/quantum-ml:${workspaceFolder}",
+        "PYTHONUNBUFFERED": "1"
       }
     },
     "llm-maker": {

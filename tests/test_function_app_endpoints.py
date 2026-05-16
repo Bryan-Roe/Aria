@@ -221,12 +221,19 @@ class TestGetEndpoints:
         assert orch["autonomous_training"]["cycles_completed"] == 4
         assert orch["autonomous_training"]["heartbeat_running"] is False
         assert orch["autotrain"]["status"] == "ok"
-        assert not any(key.startswith("_status_file_") for key in orch["autonomous_training"])
+        assert not any(key.startswith("_status_file_")
+                       for key in orch["autonomous_training"])
 
     def test_chat_options(self, app_module):
         """OPTIONS /api/chat returns CORS headers."""
         req = _mock_request("OPTIONS")
         resp = app_module.chat_options(req)
+        assert resp.status_code == 200
+
+    def test_chat_stream_options(self, app_module):
+        """OPTIONS /api/chat/stream returns CORS headers."""
+        req = _mock_request("OPTIONS")
+        resp = app_module.chat_stream_options(req)
         assert resp.status_code == 200
 
     def test_subscription_pricing(self, app_module):
@@ -262,6 +269,21 @@ class TestPostValidation:
         req = _mock_request("POST")
         resp = app_module.chat(req)
         assert resp.status_code in (400, 500)
+
+    def test_chat_invalid_json_body_returns_400(self, app_module):
+        """POST /api/chat with malformed JSON should return 400."""
+        req = MagicMock()
+        req.method = "POST"
+        req.params = {}
+        req.route_params = {}
+        req.get_json.side_effect = ValueError("bad json")
+        req.get_body.return_value = b"{bad-json"
+
+        resp = app_module.chat(req)
+
+        assert resp.status_code == 400
+        data = json.loads(resp.get_body())
+        assert "invalid json body" in data["error"].lower()
 
     def test_chat_whitespace_only_message(self, app_module):
         """POST /api/chat with whitespace-only content should return 400."""
@@ -362,7 +384,8 @@ class TestPostValidation:
         resp = app_module.chat(req)
 
         assert resp.status_code == 200
-        assert captured["messages"] == [{"role": "user", "content": "Continue with the fix"}]
+        assert captured["messages"] == [
+            {"role": "user", "content": "Continue with the fix"}]
 
     def test_chat_only_compaction_placeholder_messages_return_validation_error(self, app_module):
         """Placeholder-only histories should be rejected like other empty input."""
@@ -388,6 +411,21 @@ class TestPostValidation:
         req = _mock_request("POST", body={"messages": []})
         resp = app_module.chat_stream(req)
         assert resp.status_code == 400
+
+    def test_chat_stream_invalid_json_body_returns_400(self, app_module):
+        """POST /api/chat/stream with malformed JSON should return 400."""
+        req = MagicMock()
+        req.method = "POST"
+        req.params = {}
+        req.route_params = {}
+        req.get_json.side_effect = ValueError("bad json")
+        req.get_body.return_value = b"{bad-json"
+
+        resp = app_module.chat_stream(req)
+
+        assert resp.status_code == 400
+        data = json.loads(resp.get_body())
+        assert "invalid json body" in data["error"].lower()
 
     def test_chat_stream_whitespace_only_message(self, app_module):
         """POST /api/chat/stream with whitespace-only content should return 400."""
@@ -454,7 +492,8 @@ class TestPostValidation:
 
         import azure.functions as _af
 
-        captured: dict = {"embedding": None, "session_id": None, "sse_body": b""}
+        captured: dict = {"embedding": None,
+                          "session_id": None, "sse_body": b""}
 
         def _fake_embedding(text: str):
             captured["embedding"] = text
@@ -474,9 +513,11 @@ class TestPostValidation:
                 return _real_HttpResponse(consumed, **kwargs)
             return _real_HttpResponse(body, **kwargs)
 
-        monkeypatch.setattr(app_module.func, "HttpResponse", _capturing_HttpResponse)
+        monkeypatch.setattr(app_module.func, "HttpResponse",
+                            _capturing_HttpResponse)
         monkeypatch.setattr(app_module, "generate_embedding", _fake_embedding)
-        monkeypatch.setattr(app_module, "fetch_similar_messages", _fake_similar)
+        monkeypatch.setattr(
+            app_module, "fetch_similar_messages", _fake_similar)
 
         req = _mock_request(
             "POST",
@@ -505,6 +546,58 @@ class TestPostValidation:
         assert meta_data["memory_messages"] == 1
         assert captured["embedding"] == "How do I use widgets?"
         assert captured["session_id"] == "test-session-789"
+
+    def test_chat_stream_emits_done_sentinel(self, app_module, monkeypatch):
+        """POST /api/chat/stream should terminate SSE with data: [DONE]."""
+        import inspect
+
+        import azure.functions as _af
+
+        captured: dict = {"sse_body": b""}
+
+        class _FakeProvider:
+            def complete(self, messages, stream=False):
+                assert stream is True
+                yield "Hello"
+                yield " world"
+
+        monkeypatch.setattr(
+            app_module,
+            "_detect_provider_with_runtime_fallback",
+            lambda **kwargs: (
+                _FakeProvider(),
+                types.SimpleNamespace(name="local", model="local-echo"),
+            ),
+        )
+        monkeypatch.setattr(app_module, "generate_embedding", lambda text: [])
+        monkeypatch.setattr(
+            app_module,
+            "fetch_similar_messages",
+            lambda query_emb, top_k=5, session_id=None: [],
+        )
+
+        _real_HttpResponse = _af.HttpResponse
+
+        def _capturing_HttpResponse(body=None, **kwargs):
+            if body is not None and inspect.isgenerator(body):
+                consumed = b"".join(body)
+                captured["sse_body"] = consumed
+                return _real_HttpResponse(consumed, **kwargs)
+            return _real_HttpResponse(body, **kwargs)
+
+        monkeypatch.setattr(app_module.func, "HttpResponse",
+                            _capturing_HttpResponse)
+
+        req = _mock_request(
+            "POST",
+            body={"messages": [{"role": "user", "content": "say hi"}]},
+        )
+        resp = app_module.chat_stream(req)
+
+        assert resp.status_code == 200
+        body_text = captured["sse_body"].decode("utf-8")
+        assert '"delta": "Hello"' in body_text or '"delta": " world"' in body_text
+        assert "data: [DONE]" in body_text
 
     def test_tts_no_text(self, app_module):
         """POST /api/tts with no text field → 400."""
@@ -688,7 +781,8 @@ class TestAgiEndpoints:
                 return _real_HttpResponse(consumed, **kwargs)
             return _real_HttpResponse(body, **kwargs)
 
-        monkeypatch.setattr(app_module.func, "HttpResponse", _capturing_HttpResponse)
+        monkeypatch.setattr(app_module.func, "HttpResponse",
+                            _capturing_HttpResponse)
 
         req = _mock_request(
             "POST",
@@ -820,7 +914,8 @@ class TestQuantumLlmEndpoint:
         train_args = capture["train_args"]
         assert train_args["epochs"] == 5
         assert train_args["dataset_path"].is_absolute()
-        assert str(train_args["output_dir"]).endswith("data_out/quantum_llm_api")
+        assert str(train_args["output_dir"]).endswith(
+            "data_out/quantum_llm_api")
 
     def test_quantum_llm_post_unknown_action(self, app_module, monkeypatch):
         _install_fake_quantum_trainer_module(monkeypatch)
@@ -941,7 +1036,8 @@ class TestRequestValidator:
         from shared.request_validator import validate_fields
 
         err = validate_fields(
-            {"messages": [{"role": "user", "content": "hi"}], "temperature": 0.7},
+            {"messages": [{"role": "user", "content": "hi"}],
+                "temperature": 0.7},
             {
                 "messages": {"type": list, "required": True, "min_length": 1},
                 "temperature": {"type": (int, float), "min": 0, "max": 2},

@@ -12,6 +12,13 @@ Covers:
 """
 
 from __future__ import annotations
+from chat_providers import (
+    OllamaProvider,
+    _check_ollama_available,
+    _ollama_availability_cache,
+    _ollama_cache_lock,
+    detect_provider,
+)
 
 import sys
 from pathlib import Path
@@ -24,13 +31,6 @@ _CHAT_SRC = Path(__file__).parent.parent / "ai-projects" / "chat-cli" / "src"
 if str(_CHAT_SRC) not in sys.path:
     sys.path.insert(0, str(_CHAT_SRC))
 
-from chat_providers import (
-    OllamaProvider,
-    _check_ollama_available,
-    _ollama_availability_cache,
-    _ollama_cache_lock,
-    detect_provider,
-)
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -152,7 +152,8 @@ def test_ollama_provider_complete_stream():
 def test_ollama_provider_connection_error_stream():
     """Friendly message yielded when Ollama server is unreachable (stream)."""
     mock_client = MagicMock()
-    mock_client.chat.completions.create.side_effect = ConnectionRefusedError("Connection refused")
+    mock_client.chat.completions.create.side_effect = ConnectionRefusedError(
+        "Connection refused")
 
     with patch("chat_providers.OpenAI", return_value=mock_client):
         p = OllamaProvider()
@@ -168,7 +169,8 @@ def test_ollama_provider_connection_error_stream():
 def test_ollama_provider_connection_error_non_stream():
     """Friendly message returned when Ollama server is unreachable (non-stream)."""
     mock_client = MagicMock()
-    mock_client.chat.completions.create.side_effect = ConnectionRefusedError("Connection refused")
+    mock_client.chat.completions.create.side_effect = ConnectionRefusedError(
+        "Connection refused")
 
     with patch("chat_providers.OpenAI", return_value=mock_client):
         p = OllamaProvider()
@@ -183,7 +185,8 @@ def test_ollama_provider_connection_error_non_stream():
 def test_ollama_provider_model_not_found_stream():
     """Friendly message yielded when requested model is not pulled (stream)."""
     mock_client = MagicMock()
-    mock_client.chat.completions.create.side_effect = Exception("model 'nomodel' not found")
+    mock_client.chat.completions.create.side_effect = Exception(
+        "model 'nomodel' not found")
 
     with patch("chat_providers.OpenAI", return_value=mock_client):
         p = OllamaProvider(model="nomodel")
@@ -199,7 +202,8 @@ def test_ollama_provider_model_not_found_stream():
 def test_ollama_provider_model_not_found_non_stream():
     """Friendly message returned when requested model is not pulled (non-stream)."""
     mock_client = MagicMock()
-    mock_client.chat.completions.create.side_effect = Exception("model 'nomodel' not found")
+    mock_client.chat.completions.create.side_effect = Exception(
+        "model 'nomodel' not found")
 
     with patch("chat_providers.OpenAI", return_value=mock_client):
         p = OllamaProvider(model="nomodel")
@@ -214,7 +218,8 @@ def test_ollama_provider_model_not_found_non_stream():
 def test_ollama_provider_unexpected_error_raises():
     """Unexpected exceptions (not connection/model errors) are re-raised."""
     mock_client = MagicMock()
-    mock_client.chat.completions.create.side_effect = ValueError("unexpected error")
+    mock_client.chat.completions.create.side_effect = ValueError(
+        "unexpected error")
 
     with patch("chat_providers.OpenAI", return_value=mock_client):
         p = OllamaProvider()
@@ -321,7 +326,8 @@ def test_detect_provider_explicit_ollama_model_override(monkeypatch):
 
     with patch("chat_providers.OpenAI") as mock_openai_cls:
         mock_openai_cls.return_value = MagicMock()
-        provider, choice = detect_provider(explicit="ollama", model_override="phi3")
+        provider, choice = detect_provider(
+            explicit="ollama", model_override="phi3")
 
     assert choice.name == "ollama"
     assert choice.model == "phi3"
@@ -340,6 +346,13 @@ def test_detect_provider_explicit_ollama_default_model(monkeypatch):
     assert choice.name == "ollama"
     # Default model from the provider definition
     assert choice.model == "llama3.2"
+
+
+@pytest.mark.unit
+def test_detect_provider_explicit_invalid_provider_raises_value_error():
+    """Explicit unknown providers should fail fast with a clear error."""
+    with pytest.raises(ValueError, match="Unknown provider"):
+        detect_provider(explicit="definitely-not-a-provider")
 
 
 # ---------------------------------------------------------------------------
@@ -362,8 +375,10 @@ def test_detect_provider_auto_picks_ollama_when_reachable(monkeypatch):
         return True
 
     with (
-        patch("chat_providers._check_lm_studio_available", side_effect=fake_check_lm),
-        patch("chat_providers._check_ollama_available", side_effect=fake_check_ollama),
+        patch("chat_providers._check_lm_studio_available",
+              side_effect=fake_check_lm),
+        patch("chat_providers._check_ollama_available",
+              side_effect=fake_check_ollama),
         patch("chat_providers.OpenAI") as mock_openai_cls,
     ):
         mock_openai_cls.return_value = MagicMock()
@@ -387,8 +402,10 @@ def test_detect_provider_auto_prefers_lmstudio_over_ollama(monkeypatch):
         return True
 
     with (
-        patch("chat_providers._check_lm_studio_available", side_effect=fake_check_lm),
-        patch("chat_providers._check_ollama_available", side_effect=fake_check_ollama),
+        patch("chat_providers._check_lm_studio_available",
+              side_effect=fake_check_lm),
+        patch("chat_providers._check_ollama_available",
+              side_effect=fake_check_ollama),
         patch("chat_providers.OpenAI") as mock_openai_cls,
     ):
         mock_openai_cls.return_value = MagicMock()

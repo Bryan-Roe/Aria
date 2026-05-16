@@ -371,6 +371,23 @@ def _sanitize_chat_messages(messages) -> list[dict]:
     return sanitized
 
 
+def _parse_json_object_body(req: func.HttpRequest) -> dict:
+    """Parse a JSON request body and require an object payload.
+
+    Raises ValueError with a client-safe message on malformed or missing JSON.
+    """
+    try:
+        payload = req.get_json()
+    except ValueError as exc:
+        raise ValueError("Invalid JSON body") from exc
+
+    if payload is None:
+        raise ValueError("JSON request body is required")
+    if not isinstance(payload, dict):
+        raise ValueError("JSON body must be an object")
+    return payload
+
+
 def _detect_provider_with_runtime_fallback(
     *,
     explicit: str | None = None,
@@ -429,7 +446,8 @@ def _extract_agi_query_from_request(req_body: dict) -> str:
         if user_query.strip():
             return user_query.strip()
 
-    raise ValueError("Provide a non-empty `query` or user message in `messages`")
+    raise ValueError(
+        "Provide a non-empty `query` or user message in `messages`")
 
 
 def _create_agi_provider_for_api(
@@ -495,14 +513,16 @@ def agi_analyze(req: func.HttpRequest) -> func.HttpResponse:
         )
     except ValueError as ve:
         return func.HttpResponse(
-            json.dumps({"status": "error", "error": f"Validation error: {ve}"}),
+            json.dumps(
+                {"status": "error", "error": f"Validation error: {ve}"}),
             status_code=400,
             mimetype="application/json",
             headers=create_cors_response_headers(),
         )
     except RuntimeError as re:
         return func.HttpResponse(
-            json.dumps({"status": "error", "error": f"Configuration error: {re}"}),
+            json.dumps(
+                {"status": "error", "error": f"Configuration error: {re}"}),
             status_code=500,
             mimetype="application/json",
             headers=create_cors_response_headers(),
@@ -625,14 +645,16 @@ def agi_reason(req: func.HttpRequest) -> func.HttpResponse:
         )
     except ValueError as ve:
         return func.HttpResponse(
-            json.dumps({"status": "error", "error": f"Validation error: {ve}"}),
+            json.dumps(
+                {"status": "error", "error": f"Validation error: {ve}"}),
             status_code=400,
             mimetype="application/json",
             headers=create_cors_response_headers(),
         )
     except RuntimeError as re:
         return func.HttpResponse(
-            json.dumps({"status": "error", "error": f"Configuration error: {re}"}),
+            json.dumps(
+                {"status": "error", "error": f"Configuration error: {re}"}),
             status_code=500,
             mimetype="application/json",
             headers=create_cors_response_headers(),
@@ -703,18 +725,21 @@ def agi_stream(req: func.HttpRequest) -> func.HttpResponse:
             body=_sse_iterable(),
             status_code=200,
             mimetype="text/event-stream",
-            headers={**create_cors_response_headers(), "Cache-Control": "no-cache"},
+            headers={**create_cors_response_headers(),
+                     "Cache-Control": "no-cache"},
         )
     except ValueError as ve:
         return func.HttpResponse(
-            json.dumps({"status": "error", "error": f"Validation error: {ve}"}),
+            json.dumps(
+                {"status": "error", "error": f"Validation error: {ve}"}),
             status_code=400,
             mimetype="application/json",
             headers=create_cors_response_headers(),
         )
     except RuntimeError as re:
         return func.HttpResponse(
-            json.dumps({"status": "error", "error": f"Configuration error: {re}"}),
+            json.dumps(
+                {"status": "error", "error": f"Configuration error: {re}"}),
             status_code=500,
             mimetype="application/json",
             headers=create_cors_response_headers(),
@@ -745,10 +770,12 @@ def agi_persistence(req: func.HttpRequest) -> func.HttpResponse:
         try:
             headers = getattr(req, "headers", {}) or {}
             if isinstance(headers, dict):
-                provided_token = headers.get("X-AGI-AUDIT-TOKEN") or headers.get("x-agi-audit-token") or headers.get("Authorization") or headers.get("authorization")
+                provided_token = headers.get("X-AGI-AUDIT-TOKEN") or headers.get(
+                    "x-agi-audit-token") or headers.get("Authorization") or headers.get("authorization")
             else:
                 # headers may be a case-insensitive mapping-like object
-                provided_token = headers.get("X-AGI-AUDIT-TOKEN") if hasattr(headers, "get") else None
+                provided_token = headers.get(
+                    "X-AGI-AUDIT-TOKEN") if hasattr(headers, "get") else None
             if provided_token and isinstance(provided_token, str) and provided_token.startswith("Bearer "):
                 provided_token = provided_token.split(" ", 1)[1]
         except Exception:
@@ -777,9 +804,11 @@ def agi_persistence(req: func.HttpRequest) -> func.HttpResponse:
             limit = 50
         limit = max(1, min(limit, 500))
 
-        sqlite_path = os.getenv("QAI_AGI_PERSIST_DB") or os.getenv("QAI_AGI_PERSIST_SQLITE")
+        sqlite_path = os.getenv("QAI_AGI_PERSIST_DB") or os.getenv(
+            "QAI_AGI_PERSIST_SQLITE")
         jsonl_path = os.getenv("QAI_AGI_PERSIST_PATH")
-        jsonl_enabled = os.getenv("QAI_AGI_PERSIST", "").lower() in ("1", "true", "yes")
+        jsonl_enabled = os.getenv(
+            "QAI_AGI_PERSIST", "").lower() in ("1", "true", "yes")
 
         if sqlite_path:
             try:
@@ -789,7 +818,8 @@ def agi_persistence(req: func.HttpRequest) -> func.HttpResponse:
                 entries = backend.read_last(limit)
                 backend.close()
                 return func.HttpResponse(
-                    json.dumps({"status": "ok", "backend": "sqlite", "entries": entries}, default=str),
+                    json.dumps({"status": "ok", "backend": "sqlite",
+                               "entries": entries}, default=str),
                     status_code=200,
                     mimetype="application/json",
                     headers=create_cors_response_headers(),
@@ -804,7 +834,8 @@ def agi_persistence(req: func.HttpRequest) -> func.HttpResponse:
                 )
 
         if jsonl_path or jsonl_enabled:
-            path = jsonl_path or os.path.join(os.getcwd(), "data_out", "agi_reasoning.jsonl")
+            path = jsonl_path or os.path.join(
+                os.getcwd(), "data_out", "agi_reasoning.jsonl")
             try:
                 entries = []
                 if os.path.exists(path):
@@ -817,7 +848,8 @@ def agi_persistence(req: func.HttpRequest) -> func.HttpResponse:
                         except Exception:
                             entries.append({"raw": ln})
                 return func.HttpResponse(
-                    json.dumps({"status": "ok", "backend": "jsonl", "entries": entries}, default=str),
+                    json.dumps({"status": "ok", "backend": "jsonl",
+                               "entries": entries}, default=str),
                     status_code=200,
                     mimetype="application/json",
                     headers=create_cors_response_headers(),
@@ -832,7 +864,8 @@ def agi_persistence(req: func.HttpRequest) -> func.HttpResponse:
                 )
 
         return func.HttpResponse(
-            json.dumps({"status": "error", "error": "AGI persistence not configured"}),
+            json.dumps(
+                {"status": "error", "error": "AGI persistence not configured"}),
             status_code=404,
             mimetype="application/json",
             headers=create_cors_response_headers(),
@@ -877,7 +910,7 @@ def chat(req: func.HttpRequest) -> func.HttpResponse:
         if span_ctx:
             span_ctx.__enter__()
         # Parse request
-        req_body = req.get_json()
+        req_body = _parse_json_object_body(req)
         messages = _sanitize_chat_messages(req_body.get("messages", []))
         # Optional client-provided session identifier
         session_id = req_body.get("session_id")
@@ -1409,7 +1442,7 @@ def chat_stream(req: func.HttpRequest) -> func.HttpResponse:
     """
     logging.info("Chat stream function invoked")
     try:
-        body = req.get_json()
+        body = _parse_json_object_body(req)
         messages = _sanitize_chat_messages(body.get("messages", []))
         provider_choice = body.get("provider", "auto")
         model_override = body.get("model")
@@ -1578,10 +1611,14 @@ def chat_stream(req: func.HttpRequest) -> func.HttpResponse:
                                 token_index += 1
                             prev_word_count = len(words)
 
+                # Back-compat done event (legacy clients).
                 yield b"event: done\ndata: {}\n\n"
             except Exception as e:
                 err = json.dumps({"error": str(e)})
                 yield (f"event: error\n" f"data: {err}\n\n").encode("utf-8")
+            finally:
+                # Canonical SSE completion sentinel used by chat-web clients.
+                yield b"data: [DONE]\n\n"
 
         return func.HttpResponse(
             body=sse_iterable(),
@@ -1607,6 +1644,14 @@ def chat_stream(req: func.HttpRequest) -> func.HttpResponse:
             mimetype="application/json",
             headers=create_cors_response_headers(),
         )
+
+
+@app.route(route="chat/stream", methods=["OPTIONS"], auth_level=func.AuthLevel.ANONYMOUS)
+def chat_stream_options(req: func.HttpRequest) -> func.HttpResponse:
+    """Handle CORS preflight requests for /api/chat/stream."""
+    return func.HttpResponse(
+        "", status_code=200, headers=create_cors_response_headers()
+    )
 
 
 @app.route(route="tts", methods=["POST"], auth_level=func.AuthLevel.ANONYMOUS)
