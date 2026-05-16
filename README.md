@@ -12,9 +12,10 @@ pinned: false
 # Aria — Interactive AI Character Platform
 
 [![CI Pipeline](https://github.com/Bryan-Roe/Aria/actions/workflows/ci-pipeline.yml/badge.svg)](https://github.com/Bryan-Roe/Aria/actions/workflows/ci-pipeline.yml)
+[![Code Quality](https://github.com/Bryan-Roe/Aria/actions/workflows/code-quality.yml/badge.svg)](https://github.com/Bryan-Roe/Aria/actions/workflows/code-quality.yml)
 [![CodeQL](https://github.com/Bryan-Roe/Aria/actions/workflows/codeql.yml/badge.svg)](https://github.com/Bryan-Roe/Aria/actions/workflows/codeql.yml)
 [![E2E Tests](https://github.com/Bryan-Roe/Aria/actions/workflows/e2e-tests.yml/badge.svg)](https://github.com/Bryan-Roe/Aria/actions/workflows/e2e-tests.yml)
-
+[![Codespaces Prebuilds](https://github.com/Bryan-Roe/Aria/actions/workflows/codespaces/create_codespaces_prebuilds/badge.svg?branch=main)](https://github.com/Bryan-Roe/Aria/actions/workflows/codespaces/create_codespaces_prebuilds)
 **An intelligent, animated AI character with movement, gestures, and natural language interaction.**
 
 [Live Demo](https://bryan-roe.github.io/Aria) · [Aria Web UI](apps/aria/) · [Quick Start](#-quick-start)
@@ -95,7 +96,7 @@ python server.py
 
 Type commands in the chat box: `move left`, `wave`, `jump`, `pick up the ball`, `dance`.
 
-### 2 — Chat via CLI
+### 2 — Chat via CLI (no UI required)
 
 ```bash
 # Local mode — no API keys required
