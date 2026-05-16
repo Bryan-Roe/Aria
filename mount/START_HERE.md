@@ -129,7 +129,7 @@ All with a modern purple gradient theme!
 ## 📊 Capabilities
 
 | Feature | Status | Notes |
-|---------|--------|-------|
+| ------- | ------ | ----- |
 | Quantum Training | ✅ Ready | All datasets available |
 | Chat (Local) | ✅ Ready | Always available, free |
 | Chat (Cloud) | ✅ Ready | Requires API keys |

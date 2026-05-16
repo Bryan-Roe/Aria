@@ -40,7 +40,7 @@ Do not retain control after the scoped training work is finished; hand back to `
 ### Orchestrators (YAML-driven)
 
 | Orchestrator | Script | Config | Purpose |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | Autotrain | `scripts/autotrain.py` | `autotrain.yaml` | LoRA fine-tuning jobs |
 | Quantum Autorun | `scripts/quantum_autorun.py` | `quantum_autorun.yaml` | Quantum ML pipelines |
 | Evaluation | `scripts/evaluation_autorun.py` | `evaluation_autorun.yaml` | Model evaluation |
@@ -132,7 +132,7 @@ python scripts/resource_monitor.py --snapshot
 ## Key Files
 
 | Change | File |
-|--------|------|
+| -------- | ------ |
 | Training orchestration | `scripts/autotrain.py` + `autotrain.yaml` |
 | Autonomous training | `scripts/autonomous_training_orchestrator.py` + `config/autonomous_training.yaml` |
 | Training pipeline | `scripts/automated_training_pipeline.py` |

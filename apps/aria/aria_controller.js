@@ -2224,16 +2224,27 @@ function pickUpObject(objectId) {
     return true;
 }
 
-function dropObject() {
-    if (!characterState.heldObject) {
+function dropObject(name) {
+    const targetName = name || characterState.heldObject;
+    if (!targetName) {
         showFeedback('⚠️ Not holding anything!');
         return false;
     }
 
-    console.log('📦 Dropping:', characterState.heldObject);
-    showFeedback('📦 DROPPED ' + characterState.heldObject.toUpperCase() + '!');
+    // Only allow dropping the currently held object
+    if (targetName !== characterState.heldObject) {
+        showFeedback('⚠️ Not holding ' + targetName + '!');
+        return false;
+    }
 
-    const obj = characterState.heldObjectElement;
+    const obj = characterState.heldObjectElement || document.getElementById(targetName);
+    if (!obj) {
+        showFeedback('⚠️ Object not found: ' + targetName);
+        return false;
+    }
+
+    console.log('📦 Dropping:', targetName);
+    showFeedback('📦 DROPPED ' + targetName.toUpperCase() + '!');
 
     // Remove held state
     obj.classList.remove('held');

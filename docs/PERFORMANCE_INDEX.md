@@ -28,7 +28,7 @@
 ## Key Findings Summary
 
 | Issue | Location | Impact | Status |
-|-------|----------|--------|--------|
+| ------- | ---------- | -------- | -------- |
 | O(n³) gradient computation | ai-projects/quantum-ml/web_app.py:217-246 | 10-100x | Not fixed |
 | Repeated JSON file I/O | dashboard/serve.py:273-515 | 5-10x | Not fixed |
 | Linear keyword searches | ai-projects/chat-cli/src/agi_provider.py:343-372 | 3-30x | Not fixed |

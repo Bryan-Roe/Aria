@@ -103,14 +103,14 @@ stage_state = {
 
 ## API Endpoints
 
-| Method | Path                | Purpose                            |
+| Method | Path | Purpose |
 | ------ | ------------------- | ---------------------------------- |
-| GET    | `/api/aria/state`   | Full character + environment state |
-| GET    | `/api/aria/objects` | Current objects                    |
-| POST   | `/api/aria/command` | NL command → tags/actions          |
-| POST   | `/api/aria/execute` | Auto-execute action sequences      |
-| POST   | `/api/aria/object`  | Add/update/remove objects          |
-| POST   | `/api/aria/world`   | LLM-powered world generation       |
+| GET | `/api/aria/state` | Full character + environment state |
+| GET | `/api/aria/objects` | Current objects |
+| POST | `/api/aria/command` | NL command → tags/actions |
+| POST | `/api/aria/execute` | Auto-execute action sequences |
+| POST | `/api/aria/object` | Add/update/remove objects |
+| POST | `/api/aria/world` | LLM-powered world generation |
 
 ## Key Patterns
 
@@ -126,15 +126,15 @@ forest, space, ocean, lab, medieval, desert, garden, cyberpunk, arcade
 
 ## Files to Reference
 
-| Change                         | File                                                                |
+| Change | File |
 | ------------------------------ | ------------------------------------------------------------------- |
-| Server APIs & action execution | `apps/aria/server.py`                                               |
-| Client animations & rendering  | `apps/aria/aria_controller.js`                                      |
-| Character UI                   | `apps/aria/index.html`                                              |
-| Auto-execute UI                | `apps/aria/auto-execute.html`                                       |
-| Aria web module                | `aria_web/server.py`                                                |
-| E2E tests                      | `tests/test_ui_playwright.py`, `tests/test_ui_pyppeteer.py`         |
-| Unit tests                     | `tests/test_aria_server.py`, `tests/test_object_api_integration.py` |
+| Server APIs & action execution | `apps/aria/server.py` |
+| Client animations & rendering | `apps/aria/aria_controller.js` |
+| Character UI | `apps/aria/index.html` |
+| Auto-execute UI | `apps/aria/auto-execute.html` |
+| Aria web module | `aria_web/server.py` |
+| E2E tests | `tests/test_ui_playwright.py`, `tests/test_ui_pyppeteer.py` |
+| Unit tests | `tests/test_aria_server.py`, `tests/test_object_api_integration.py` |
 
 ## Safety Rules
 

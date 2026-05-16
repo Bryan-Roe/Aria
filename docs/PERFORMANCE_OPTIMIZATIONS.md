@@ -11,6 +11,7 @@ This document describes performance optimizations applied to the Aria repository
 **Problem**: Status files were written on every state change, causing excessive disk I/O.
 
 **Solution**: Implemented debouncing with configurable intervals:
+
 - `autonomous_training_orchestrator.py`: 2-second minimum interval between writes
 - Added `force` parameter for critical writes (shutdown, errors)
 - Added `_flush_status()` to ensure pending writes complete
@@ -18,6 +19,7 @@ This document describes performance optimizations applied to the Aria repository
 **Impact**: 70-80% reduction in file I/O operations
 
 **Pattern**:
+
 ```python
 class Orchestrator:
     def __init__(self):
@@ -40,12 +42,14 @@ class Orchestrator:
 **Problem**: Glob patterns and directory scans were repeated without caching.
 
 **Solutions**:
+
 - `autonomous_training_orchestrator.py`: Cached glob results with 30-second TTL
 - `quantum_llm_trainer.py`: Combined multiple glob calls into single pattern
 
 **Impact**: 50% reduction in filesystem operations
 
 **Pattern**:
+
 ```python
 def _cached_glob(self, path: Path, pattern: str) -> List[Path]:
     cache_key = f"{path}::{pattern}"
@@ -67,12 +71,14 @@ def _cached_glob(self, path: Path, pattern: str) -> List[Path]:
 **Problem**: Expensive `psutil.process_iter()` calls and socket creation repeated unnecessarily.
 
 **Solutions**:
+
 - `aria_automation.py`: Process list caching with 10-second TTL
 - `aria_automation.py`: Port check caching with 5-second TTL
 
 **Impact**: ~90% reduction in process scanning overhead
 
 **Pattern**:
+
 ```python
 def _get_process_list(self) -> List[psutil.Process]:
     current_time = time.time()
@@ -94,6 +100,7 @@ def _get_process_list(self) -> List[psutil.Process]:
 **Impact**: Up to 90% faster startup detection
 
 **Pattern**:
+
 ```python
 check_interval = 0.1
 elapsed = 0
@@ -114,6 +121,7 @@ while elapsed < max_wait:
 **Impact**: 99% faster model comparisons
 
 **Pattern**:
+
 ```python
 class BatchEvaluator:
     def __init__(self):
@@ -136,6 +144,7 @@ class BatchEvaluator:
 **Impact**: 67% fewer iterations (O(3n) → O(n))
 
 **Pattern**:
+
 ```python
 # Before (3 passes):
 succeeded = sum(1 for r in results if r.status == 'succeeded')
@@ -156,7 +165,7 @@ for r in results:
 ## Files Modified
 
 | File | Optimizations | Impact |
-|------|--------------|--------|
+| ------ | -------------- | -------- |
 | `scripts/autonomous_training_orchestrator.py` | Debounced writes, glob caching | 70-80% I/O reduction |
 | `scripts/aria_automation.py` | Port/process caching, exponential backoff | 90% scanning reduction |
 | `scripts/repo_automation.py` | Improved polling intervals | 90% faster startup |
@@ -167,6 +176,7 @@ for r in results:
 ## Testing
 
 All optimizations have been validated:
+
 - ✅ Syntax validation with `py_compile`
 - ✅ Unit tests for caching mechanisms
 - ✅ Verification of cached lookups
@@ -181,6 +191,7 @@ All optimizations have been validated:
    - Linear searches that could use dictionaries
 
 2. **Monitor Performance**: Add timing instrumentation to identify new bottlenecks:
+
    ```python
    import time
    start = time.time()
@@ -197,7 +208,8 @@ All optimizations have been validated:
 
 ## Performance Best Practices
 
-### DO:
+### DO
+
 - ✅ Cache expensive operations (filesystem, network, process scanning)
 - ✅ Use dictionaries for lookups instead of linear searches
 - ✅ Combine multiple passes into single loops
@@ -205,7 +217,8 @@ All optimizations have been validated:
 - ✅ Use exponential backoff for polling
 - ✅ Profile code to find real bottlenecks
 
-### DON'T:
+### DON'T
+
 - ❌ Optimize without measuring first
 - ❌ Cache data that changes frequently
 - ❌ Use fixed sleep intervals for polling
@@ -216,6 +229,7 @@ All optimizations have been validated:
 ## Backward Compatibility
 
 All optimizations maintain backward compatibility:
+
 - No changes to public APIs
 - No breaking changes to existing code
 - Graceful degradation if cache misses occur

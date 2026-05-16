@@ -1,0 +1,1124 @@
+=== 2026-03-27T04:38:04+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> No live model detected. Run with `--provider lmstudio` (LM Studio running locally), `--provider ollama`, `--provider openai`, or `--provider azure`.
+=== 2026-03-27T04:38:11+00:00 agi cycle end ===
+=== 2026-03-27T04:39:45+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> I'm running in local fallback mode. Set AZURE_OPENAI_API_KEY, OPENAI_API_KEY, or start LM Studio / Ollama to enable full AI responses.
+=== 2026-03-27T04:39:49+00:00 agi cycle end ===
+=== 2026-03-27T04:41:24+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> No live model detected. Run with `--provider lmstudio` (LM Studio running locally), `--provider ollama`, `--provider openai`, or `--provider azure`.
+=== 2026-03-27T04:41:31+00:00 agi cycle end ===
+=== 2026-03-27T04:43:05+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> Offline mode active. I can process Aria commands but can't generate AI responses without a configured provider.
+=== 2026-03-27T04:43:16+00:00 agi cycle end ===
+=== 2026-03-27T04:44:50+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> Offline mode active. I can process Aria commands but can't generate AI responses without a configured provider.
+=== 2026-03-27T04:44:56+00:00 agi cycle end ===
+=== 2026-03-27T04:46:33+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> No live model detected. Run with `--provider lmstudio` (LM Studio running locally), `--provider ollama`, `--provider openai`, or `--provider azure`.
+=== 2026-03-27T04:46:40+00:00 agi cycle end ===
+=== 2026-03-27T04:48:14+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> Offline mode active. I can process Aria commands but can't generate AI responses without a configured provider.
+=== 2026-03-27T04:48:20+00:00 agi cycle end ===
+=== 2026-03-27T04:49:55+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> Offline mode active. I can process Aria commands but can't generate AI responses without a configured provider.
+=== 2026-03-27T04:50:05+00:00 agi cycle end ===
+=== 2026-03-27T04:51:40+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> Offline mode active. I can process Aria commands but can't generate AI responses without a configured provider.
+=== 2026-03-27T04:51:49+00:00 agi cycle end ===
+=== 2026-03-27T04:53:24+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> No live model detected. Run with `--provider lmstudio` (LM Studio running locally), `--provider ollama`, `--provider openai`, or `--provider azure`.
+=== 2026-03-27T04:53:31+00:00 agi cycle end ===
+=== 2026-03-27T04:55:06+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> I'm running in local fallback mode. Set AZURE_OPENAI_API_KEY, OPENAI_API_KEY, or start LM Studio / Ollama to enable full AI responses.
+=== 2026-03-27T04:55:12+00:00 agi cycle end ===
+=== 2026-03-27T04:56:46+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> No live model detected. Run with `--provider lmstudio` (LM Studio running locally), `--provider ollama`, `--provider openai`, or `--provider azure`.
+=== 2026-03-27T04:56:51+00:00 agi cycle end ===
+=== 2026-03-27T04:58:26+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> No live model detected. Run with `--provider lmstudio` (LM Studio running locally), `--provider ollama`, `--provider openai`, or `--provider azure`.
+=== 2026-03-27T04:58:30+00:00 agi cycle end ===
+=== 2026-03-27T05:00:04+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> I'm running in local fallback mode. Set AZURE_OPENAI_API_KEY, OPENAI_API_KEY, or start LM Studio / Ollama to enable full AI responses.
+=== 2026-03-27T05:00:07+00:00 agi cycle end ===
+=== 2026-03-27T05:01:41+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> No live model detected. Run with `--provider lmstudio` (LM Studio running locally), `--provider ollama`, `--provider openai`, or `--provider azure`.
+=== 2026-03-27T05:01:45+00:00 agi cycle end ===
+=== 2026-03-27T05:03:20+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> Offline mode active. I can process Aria commands but can't generate AI responses without a configured provider.
+=== 2026-03-27T05:03:23+00:00 agi cycle end ===
+=== 2026-03-27T05:04:57+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> Offline mode active. I can process Aria commands but can't generate AI responses without a configured provider.
+=== 2026-03-27T05:05:01+00:00 agi cycle end ===
+=== 2026-03-27T05:06:36+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> Offline mode active. I can process Aria commands but can't generate AI responses without a configured provider.
+=== 2026-03-27T05:06:40+00:00 agi cycle end ===
+=== 2026-03-27T05:08:14+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> Offline mode active. I can process Aria commands but can't generate AI responses without a configured provider.
+=== 2026-03-27T05:08:19+00:00 agi cycle end ===
+=== 2026-03-27T05:09:51+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> No live model detected. Run with `--provider lmstudio` (LM Studio running locally), `--provider ollama`, `--provider openai`, or `--provider azure`.
+=== 2026-03-27T05:09:57+00:00 agi cycle end ===
+=== 2026-03-27T05:11:30+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> Offline mode active. I can process Aria commands but can't generate AI responses without a configured provider.
+=== 2026-03-27T05:11:34+00:00 agi cycle end ===
+=== 2026-03-27T05:13:07+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> Offline mode active. I can process Aria commands but can't generate AI responses without a configured provider.
+=== 2026-03-27T05:13:11+00:00 agi cycle end ===
+=== 2026-03-27T05:14:44+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> Offline mode active. I can process Aria commands but can't generate AI responses without a configured provider.
+=== 2026-03-27T05:14:58+00:00 agi cycle end ===
+=== 2026-03-27T05:16:31+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> No live model detected. Run with `--provider lmstudio` (LM Studio running locally), `--provider ollama`, `--provider openai`, or `--provider azure`.
+=== 2026-03-27T05:16:53+00:00 agi cycle end ===
+=== 2026-03-27T05:18:26+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> No live model detected. Run with `--provider lmstudio` (LM Studio running locally), `--provider ollama`, `--provider openai`, or `--provider azure`.
+=== 2026-03-27T05:18:31+00:00 agi cycle end ===
+=== 2026-03-27T05:20:05+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> Offline mode active. I can process Aria commands but can't generate AI responses without a configured provider.
+=== 2026-03-27T05:20:11+00:00 agi cycle end ===
+=== 2026-03-27T05:21:45+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> Offline mode active. I can process Aria commands but can't generate AI responses without a configured provider.
+=== 2026-03-27T05:21:53+00:00 agi cycle end ===
+=== 2026-03-27T05:23:26+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> Offline mode active. I can process Aria commands but can't generate AI responses without a configured provider.
+=== 2026-03-27T05:23:39+00:00 agi cycle end ===
+=== 2026-03-27T05:25:13+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> I'm running in local fallback mode. Set AZURE_OPENAI_API_KEY, OPENAI_API_KEY, or start LM Studio / Ollama to enable full AI responses.
+=== 2026-03-27T05:25:17+00:00 agi cycle end ===
+=== 2026-03-27T05:26:51+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> Offline mode active. I can process Aria commands but can't generate AI responses without a configured provider.
+=== 2026-03-27T05:26:56+00:00 agi cycle end ===
+=== 2026-03-27T05:28:30+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> No live model detected. Run with `--provider lmstudio` (LM Studio running locally), `--provider ollama`, `--provider openai`, or `--provider azure`.
+=== 2026-03-27T05:28:35+00:00 agi cycle end ===
+=== 2026-03-27T05:30:09+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> No live model detected. Run with `--provider lmstudio` (LM Studio running locally), `--provider ollama`, `--provider openai`, or `--provider azure`.
+=== 2026-03-27T05:30:15+00:00 agi cycle end ===
+=== 2026-03-27T05:31:49+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> Offline mode active. I can process Aria commands but can't generate AI responses without a configured provider.
+=== 2026-03-27T05:31:53+00:00 agi cycle end ===
+=== 2026-03-27T05:33:27+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> No live model detected. Run with `--provider lmstudio` (LM Studio running locally), `--provider ollama`, `--provider openai`, or `--provider azure`.
+=== 2026-03-27T05:33:31+00:00 agi cycle end ===
+=== 2026-03-27T05:35:04+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> Offline mode active. I can process Aria commands but can't generate AI responses without a configured provider.
+=== 2026-03-27T05:35:09+00:00 agi cycle end ===
+=== 2026-03-27T05:36:42+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> No live model detected. Run with `--provider lmstudio` (LM Studio running locally), `--provider ollama`, `--provider openai`, or `--provider azure`.
+=== 2026-03-27T05:36:51+00:00 agi cycle end ===
+=== 2026-03-27T05:38:24+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> I'm running in local fallback mode. Set AZURE_OPENAI_API_KEY, OPENAI_API_KEY, or start LM Studio / Ollama to enable full AI responses.
+=== 2026-03-27T05:38:29+00:00 agi cycle end ===
+=== 2026-03-27T05:40:02+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> No live model detected. Run with `--provider lmstudio` (LM Studio running locally), `--provider ollama`, `--provider openai`, or `--provider azure`.
+=== 2026-03-27T05:40:13+00:00 agi cycle end ===
+=== 2026-03-27T05:41:47+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> No live model detected. Run with `--provider lmstudio` (LM Studio running locally), `--provider ollama`, `--provider openai`, or `--provider azure`.
+=== 2026-03-27T05:41:59+00:00 agi cycle end ===
+=== 2026-03-27T05:43:33+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> No live model detected. Run with `--provider lmstudio` (LM Studio running locally), `--provider ollama`, `--provider openai`, or `--provider azure`.
+=== 2026-03-27T05:43:40+00:00 agi cycle end ===
+=== 2026-03-27T05:45:14+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> I'm running in local fallback mode. Set AZURE_OPENAI_API_KEY, OPENAI_API_KEY, or start LM Studio / Ollama to enable full AI responses.
+=== 2026-03-27T05:45:16+00:00 agi cycle end ===
+=== 2026-03-27T05:46:51+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> I'm running in local fallback mode. Set AZURE_OPENAI_API_KEY, OPENAI_API_KEY, or start LM Studio / Ollama to enable full AI responses.
+=== 2026-03-27T05:46:52+00:00 agi cycle end ===
+=== 2026-03-27T05:48:25+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> No live model detected. Run with `--provider lmstudio` (LM Studio running locally), `--provider ollama`, `--provider openai`, or `--provider azure`.
+=== 2026-03-27T05:48:31+00:00 agi cycle end ===
+=== 2026-03-27T05:50:03+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> No live model detected. Run with `--provider lmstudio` (LM Studio running locally), `--provider ollama`, `--provider openai`, or `--provider azure`.
+=== 2026-03-27T05:50:07+00:00 agi cycle end ===
+=== 2026-03-27T05:51:41+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> I'm running in local fallback mode. Set AZURE_OPENAI_API_KEY, OPENAI_API_KEY, or start LM Studio / Ollama to enable full AI responses.
+=== 2026-03-27T05:51:45+00:00 agi cycle end ===
+=== 2026-03-27T05:53:19+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> Offline mode active. I can process Aria commands but can't generate AI responses without a configured provider.
+=== 2026-03-27T05:53:26+00:00 agi cycle end ===
+=== 2026-03-27T05:55:00+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> Offline mode active. I can process Aria commands but can't generate AI responses without a configured provider.
+=== 2026-03-27T05:55:04+00:00 agi cycle end ===
+=== 2026-03-27T05:56:38+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> I'm running in local fallback mode. Set AZURE_OPENAI_API_KEY, OPENAI_API_KEY, or start LM Studio / Ollama to enable full AI responses.
+=== 2026-03-27T05:56:40+00:00 agi cycle end ===
+=== 2026-03-27T05:58:14+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> I'm running in local fallback mode. Set AZURE_OPENAI_API_KEY, OPENAI_API_KEY, or start LM Studio / Ollama to enable full AI responses.
+=== 2026-03-27T05:58:16+00:00 agi cycle end ===
+=== 2026-03-27T05:59:51+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> No live model detected. Run with `--provider lmstudio` (LM Studio running locally), `--provider ollama`, `--provider openai`, or `--provider azure`.
+=== 2026-03-27T05:59:55+00:00 agi cycle end ===
+=== 2026-03-27T06:01:30+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> I'm running in local fallback mode. Set AZURE_OPENAI_API_KEY, OPENAI_API_KEY, or start LM Studio / Ollama to enable full AI responses.
+=== 2026-03-27T06:01:32+00:00 agi cycle end ===
+=== 2026-03-27T06:03:05+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> I'm running in local fallback mode. Set AZURE_OPENAI_API_KEY, OPENAI_API_KEY, or start LM Studio / Ollama to enable full AI responses.
+=== 2026-03-27T06:03:09+00:00 agi cycle end ===
+=== 2026-03-27T06:04:43+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> No live model detected. Run with `--provider lmstudio` (LM Studio running locally), `--provider ollama`, `--provider openai`, or `--provider azure`.
+=== 2026-03-27T06:04:46+00:00 agi cycle end ===
+=== 2026-03-27T06:06:20+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> I'm running in local fallback mode. Set AZURE_OPENAI_API_KEY, OPENAI_API_KEY, or start LM Studio / Ollama to enable full AI responses.
+=== 2026-03-27T06:06:22+00:00 agi cycle end ===
+=== 2026-03-27T06:07:57+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> I'm running in local fallback mode. Set AZURE_OPENAI_API_KEY, OPENAI_API_KEY, or start LM Studio / Ollama to enable full AI responses.
+=== 2026-03-27T06:08:00+00:00 agi cycle end ===
+=== 2026-03-27T06:09:34+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> I'm running in local fallback mode. Set AZURE_OPENAI_API_KEY, OPENAI_API_KEY, or start LM Studio / Ollama to enable full AI responses.
+=== 2026-03-27T06:09:38+00:00 agi cycle end ===
+=== 2026-03-27T06:11:13+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> Offline mode active. I can process Aria commands but can't generate AI responses without a configured provider.
+=== 2026-03-27T06:11:17+00:00 agi cycle end ===
+=== 2026-03-27T06:12:52+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> Offline mode active. I can process Aria commands but can't generate AI responses without a configured provider.
+=== 2026-03-27T06:12:54+00:00 agi cycle end ===
+=== 2026-03-27T06:14:29+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> Offline mode active. I can process Aria commands but can't generate AI responses without a configured provider.
+=== 2026-03-27T06:14:33+00:00 agi cycle end ===
+=== 2026-03-27T06:16:07+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> I'm running in local fallback mode. Set AZURE_OPENAI_API_KEY, OPENAI_API_KEY, or start LM Studio / Ollama to enable full AI responses.
+=== 2026-03-27T06:16:10+00:00 agi cycle end ===
+=== 2026-03-27T06:17:42+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> Offline mode active. I can process Aria commands but can't generate AI responses without a configured provider.
+=== 2026-03-27T06:17:45+00:00 agi cycle end ===
+=== 2026-03-27T06:19:20+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> Offline mode active. I can process Aria commands but can't generate AI responses without a configured provider.
+=== 2026-03-27T06:19:22+00:00 agi cycle end ===
+=== 2026-03-27T06:20:57+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> No live model detected. Run with `--provider lmstudio` (LM Studio running locally), `--provider ollama`, `--provider openai`, or `--provider azure`.
+=== 2026-03-27T06:21:00+00:00 agi cycle end ===
+=== 2026-03-27T06:22:35+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> I'm running in local fallback mode. Set AZURE_OPENAI_API_KEY, OPENAI_API_KEY, or start LM Studio / Ollama to enable full AI responses.
+=== 2026-03-27T06:22:37+00:00 agi cycle end ===
+=== 2026-03-27T06:24:11+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> I'm running in local fallback mode. Set AZURE_OPENAI_API_KEY, OPENAI_API_KEY, or start LM Studio / Ollama to enable full AI responses.
+=== 2026-03-27T06:24:13+00:00 agi cycle end ===
+=== 2026-03-27T06:25:48+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> No live model detected. Run with `--provider lmstudio` (LM Studio running locally), `--provider ollama`, `--provider openai`, or `--provider azure`.
+=== 2026-03-27T06:25:51+00:00 agi cycle end ===
+=== 2026-03-27T06:27:25+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> No live model detected. Run with `--provider lmstudio` (LM Studio running locally), `--provider ollama`, `--provider openai`, or `--provider azure`.
+=== 2026-03-27T06:27:29+00:00 agi cycle end ===
+=== 2026-03-27T06:29:03+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> I'm running in local fallback mode. Set AZURE_OPENAI_API_KEY, OPENAI_API_KEY, or start LM Studio / Ollama to enable full AI responses.
+=== 2026-03-27T06:29:05+00:00 agi cycle end ===
+=== 2026-03-27T06:30:38+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> No live model detected. Run with `--provider lmstudio` (LM Studio running locally), `--provider ollama`, `--provider openai`, or `--provider azure`.
+=== 2026-03-27T06:30:42+00:00 agi cycle end ===
+=== 2026-03-27T06:32:16+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> I'm running in local fallback mode. Set AZURE_OPENAI_API_KEY, OPENAI_API_KEY, or start LM Studio / Ollama to enable full AI responses.
+=== 2026-03-27T06:32:18+00:00 agi cycle end ===
+=== 2026-03-27T06:33:52+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> No live model detected. Run with `--provider lmstudio` (LM Studio running locally), `--provider ollama`, `--provider openai`, or `--provider azure`.
+=== 2026-03-27T06:33:56+00:00 agi cycle end ===
+=== 2026-03-27T06:35:30+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> No live model detected. Run with `--provider lmstudio` (LM Studio running locally), `--provider ollama`, `--provider openai`, or `--provider azure`.
+=== 2026-03-27T06:35:34+00:00 agi cycle end ===
+=== 2026-03-27T06:37:08+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> Offline mode active. I can process Aria commands but can't generate AI responses without a configured provider.
+=== 2026-03-27T06:37:11+00:00 agi cycle end ===
+=== 2026-03-27T06:38:45+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> I'm running in local fallback mode. Set AZURE_OPENAI_API_KEY, OPENAI_API_KEY, or start LM Studio / Ollama to enable full AI responses.
+=== 2026-03-27T06:38:47+00:00 agi cycle end ===
+=== 2026-03-27T06:40:22+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> I'm running in local fallback mode. Set AZURE_OPENAI_API_KEY, OPENAI_API_KEY, or start LM Studio / Ollama to enable full AI responses.
+=== 2026-03-27T06:40:23+00:00 agi cycle end ===
+=== 2026-03-27T06:41:56+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> No live model detected. Run with `--provider lmstudio` (LM Studio running locally), `--provider ollama`, `--provider openai`, or `--provider azure`.
+=== 2026-03-27T06:42:01+00:00 agi cycle end ===
+=== 2026-03-27T06:43:34+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> I'm running in local fallback mode. Set AZURE_OPENAI_API_KEY, OPENAI_API_KEY, or start LM Studio / Ollama to enable full AI responses.
+=== 2026-03-27T06:43:36+00:00 agi cycle end ===
+=== 2026-03-27T06:45:11+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> No live model detected. Run with `--provider lmstudio` (LM Studio running locally), `--provider ollama`, `--provider openai`, or `--provider azure`.
+=== 2026-03-27T06:45:15+00:00 agi cycle end ===
+=== 2026-03-27T06:46:50+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> No live model detected. Run with `--provider lmstudio` (LM Studio running locally), `--provider ollama`, `--provider openai`, or `--provider azure`.
+=== 2026-03-27T06:46:54+00:00 agi cycle end ===
+=== 2026-03-27T06:48:29+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> I'm running in local fallback mode. Set AZURE_OPENAI_API_KEY, OPENAI_API_KEY, or start LM Studio / Ollama to enable full AI responses.
+=== 2026-03-27T06:48:31+00:00 agi cycle end ===
+=== 2026-03-27T06:50:06+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> I'm running in local fallback mode. Set AZURE_OPENAI_API_KEY, OPENAI_API_KEY, or start LM Studio / Ollama to enable full AI responses.
+=== 2026-03-27T06:50:08+00:00 agi cycle end ===
+=== 2026-03-27T06:51:42+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> No live model detected. Run with `--provider lmstudio` (LM Studio running locally), `--provider ollama`, `--provider openai`, or `--provider azure`.
+=== 2026-03-27T06:51:46+00:00 agi cycle end ===
+=== 2026-03-27T06:53:20+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> No live model detected. Run with `--provider lmstudio` (LM Studio running locally), `--provider ollama`, `--provider openai`, or `--provider azure`.
+=== 2026-03-27T06:53:24+00:00 agi cycle end ===
+=== 2026-03-27T06:54:57+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> I'm running in local fallback mode. Set AZURE_OPENAI_API_KEY, OPENAI_API_KEY, or start LM Studio / Ollama to enable full AI responses.
+=== 2026-03-27T06:55:00+00:00 agi cycle end ===
+=== 2026-03-27T06:56:33+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> No live model detected. Run with `--provider lmstudio` (LM Studio running locally), `--provider ollama`, `--provider openai`, or `--provider azure`.
+=== 2026-03-27T06:56:36+00:00 agi cycle end ===
+=== 2026-03-27T06:58:11+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> No live model detected. Run with `--provider lmstudio` (LM Studio running locally), `--provider ollama`, `--provider openai`, or `--provider azure`.
+=== 2026-03-27T06:58:15+00:00 agi cycle end ===
+=== 2026-03-27T06:59:50+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> I'm running in local fallback mode. Set AZURE_OPENAI_API_KEY, OPENAI_API_KEY, or start LM Studio / Ollama to enable full AI responses.
+=== 2026-03-27T06:59:52+00:00 agi cycle end ===
+=== 2026-03-27T07:01:26+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> I'm running in local fallback mode. Set AZURE_OPENAI_API_KEY, OPENAI_API_KEY, or start LM Studio / Ollama to enable full AI responses.
+=== 2026-03-27T07:01:28+00:00 agi cycle end ===
+=== 2026-03-27T07:03:03+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> No live model detected. Run with `--provider lmstudio` (LM Studio running locally), `--provider ollama`, `--provider openai`, or `--provider azure`.
+=== 2026-03-27T07:03:06+00:00 agi cycle end ===
+=== 2026-03-27T07:04:41+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> I'm running in local fallback mode. Set AZURE_OPENAI_API_KEY, OPENAI_API_KEY, or start LM Studio / Ollama to enable full AI responses.
+=== 2026-03-27T07:04:42+00:00 agi cycle end ===
+=== 2026-03-27T07:06:17+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> No live model detected. Run with `--provider lmstudio` (LM Studio running locally), `--provider ollama`, `--provider openai`, or `--provider azure`.
+=== 2026-03-27T07:06:20+00:00 agi cycle end ===
+=== 2026-03-27T07:07:53+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> No live model detected. Run with `--provider lmstudio` (LM Studio running locally), `--provider ollama`, `--provider openai`, or `--provider azure`.
+=== 2026-03-27T07:07:58+00:00 agi cycle end ===
+=== 2026-03-27T07:09:31+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> Offline mode active. I can process Aria commands but can't generate AI responses without a configured provider.
+=== 2026-03-27T07:09:34+00:00 agi cycle end ===
+=== 2026-03-27T07:11:08+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> Offline mode active. I can process Aria commands but can't generate AI responses without a configured provider.
+=== 2026-03-27T07:11:15+00:00 agi cycle end ===
+=== 2026-03-27T07:12:49+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> I'm running in local fallback mode. Set AZURE_OPENAI_API_KEY, OPENAI_API_KEY, or start LM Studio / Ollama to enable full AI responses.
+=== 2026-03-27T07:12:55+00:00 agi cycle end ===
+=== 2026-03-27T07:14:30+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> I'm running in local fallback mode. Set AZURE_OPENAI_API_KEY, OPENAI_API_KEY, or start LM Studio / Ollama to enable full AI responses.
+=== 2026-03-27T07:14:43+00:00 agi cycle end ===
+=== 2026-03-27T07:16:17+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> Offline mode active. I can process Aria commands but can't generate AI responses without a configured provider.
+=== 2026-03-27T07:16:33+00:00 agi cycle end ===
+=== 2026-03-27T07:18:08+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> I'm running in local fallback mode. Set AZURE_OPENAI_API_KEY, OPENAI_API_KEY, or start LM Studio / Ollama to enable full AI responses.
+=== 2026-03-27T07:18:20+00:00 agi cycle end ===
+=== 2026-03-27T07:19:54+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> Offline mode active. I can process Aria commands but can't generate AI responses without a configured provider.
+=== 2026-03-27T07:20:09+00:00 agi cycle end ===
+=== 2026-03-27T07:21:43+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> I'm running in local fallback mode. Set AZURE_OPENAI_API_KEY, OPENAI_API_KEY, or start LM Studio / Ollama to enable full AI responses.
+=== 2026-03-27T07:21:53+00:00 agi cycle end ===
+=== 2026-03-27T07:23:27+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> Offline mode active. I can process Aria commands but can't generate AI responses without a configured provider.
+=== 2026-03-27T07:23:37+00:00 agi cycle end ===
+=== 2026-03-27T07:25:12+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> Offline mode active. I can process Aria commands but can't generate AI responses without a configured provider.
+=== 2026-03-27T07:25:21+00:00 agi cycle end ===
+=== 2026-03-27T07:26:55+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> I'm running in local fallback mode. Set AZURE_OPENAI_API_KEY, OPENAI_API_KEY, or start LM Studio / Ollama to enable full AI responses.
+=== 2026-03-27T07:27:02+00:00 agi cycle end ===
+=== 2026-03-27T07:28:37+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> No live model detected. Run with `--provider lmstudio` (LM Studio running locally), `--provider ollama`, `--provider openai`, or `--provider azure`.
+=== 2026-03-27T07:28:45+00:00 agi cycle end ===
+=== 2026-03-27T07:30:20+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> I'm running in local fallback mode. Set AZURE_OPENAI_API_KEY, OPENAI_API_KEY, or start LM Studio / Ollama to enable full AI responses.
+=== 2026-03-27T07:30:27+00:00 agi cycle end ===
+=== 2026-03-27T07:32:02+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> I'm running in local fallback mode. Set AZURE_OPENAI_API_KEY, OPENAI_API_KEY, or start LM Studio / Ollama to enable full AI responses.
+=== 2026-03-27T07:32:09+00:00 agi cycle end ===
+=== 2026-03-27T07:33:44+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> I'm running in local fallback mode. Set AZURE_OPENAI_API_KEY, OPENAI_API_KEY, or start LM Studio / Ollama to enable full AI responses.
+=== 2026-03-27T07:33:51+00:00 agi cycle end ===
+=== 2026-03-27T07:35:26+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> Offline mode active. I can process Aria commands but can't generate AI responses without a configured provider.
+=== 2026-03-27T07:35:37+00:00 agi cycle end ===
+=== 2026-03-27T07:37:10+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> I'm running in local fallback mode. Set AZURE_OPENAI_API_KEY, OPENAI_API_KEY, or start LM Studio / Ollama to enable full AI responses.
+=== 2026-03-27T07:37:18+00:00 agi cycle end ===
+=== 2026-03-27T07:38:52+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> I'm running in local fallback mode. Set AZURE_OPENAI_API_KEY, OPENAI_API_KEY, or start LM Studio / Ollama to enable full AI responses.
+=== 2026-03-27T07:39:01+00:00 agi cycle end ===
+=== 2026-03-27T07:40:35+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> No live model detected. Run with `--provider lmstudio` (LM Studio running locally), `--provider ollama`, `--provider openai`, or `--provider azure`.
+=== 2026-03-27T07:40:45+00:00 agi cycle end ===
+=== 2026-03-27T07:42:18+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> No live model detected. Run with `--provider lmstudio` (LM Studio running locally), `--provider ollama`, `--provider openai`, or `--provider azure`.
+=== 2026-03-27T07:42:28+00:00 agi cycle end ===
+=== 2026-03-27T07:44:02+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> I'm running in local fallback mode. Set AZURE_OPENAI_API_KEY, OPENAI_API_KEY, or start LM Studio / Ollama to enable full AI responses.
+=== 2026-03-27T07:44:10+00:00 agi cycle end ===
+=== 2026-03-27T07:45:43+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> I'm running in local fallback mode. Set AZURE_OPENAI_API_KEY, OPENAI_API_KEY, or start LM Studio / Ollama to enable full AI responses.
+=== 2026-03-27T07:45:52+00:00 agi cycle end ===
+=== 2026-03-27T07:47:25+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> Offline mode active. I can process Aria commands but can't generate AI responses without a configured provider.
+=== 2026-03-27T07:47:35+00:00 agi cycle end ===
+=== 2026-03-27T07:49:10+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> I'm running in local fallback mode. Set AZURE_OPENAI_API_KEY, OPENAI_API_KEY, or start LM Studio / Ollama to enable full AI responses.
+=== 2026-03-27T07:49:16+00:00 agi cycle end ===
+=== 2026-03-27T07:50:51+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> No live model detected. Run with `--provider lmstudio` (LM Studio running locally), `--provider ollama`, `--provider openai`, or `--provider azure`.
+=== 2026-03-27T07:51:00+00:00 agi cycle end ===
+=== 2026-03-27T07:52:34+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> I'm running in local fallback mode. Set AZURE_OPENAI_API_KEY, OPENAI_API_KEY, or start LM Studio / Ollama to enable full AI responses.
+=== 2026-03-27T07:52:40+00:00 agi cycle end ===
+=== 2026-03-27T07:54:15+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> No live model detected. Run with `--provider lmstudio` (LM Studio running locally), `--provider ollama`, `--provider openai`, or `--provider azure`.
+=== 2026-03-27T07:54:24+00:00 agi cycle end ===
+=== 2026-03-27T07:55:59+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> No live model detected. Run with `--provider lmstudio` (LM Studio running locally), `--provider ollama`, `--provider openai`, or `--provider azure`.
+=== 2026-03-27T07:56:09+00:00 agi cycle end ===
+=== 2026-03-27T07:57:43+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> I'm running in local fallback mode. Set AZURE_OPENAI_API_KEY, OPENAI_API_KEY, or start LM Studio / Ollama to enable full AI responses.
+=== 2026-03-27T07:57:50+00:00 agi cycle end ===
+=== 2026-03-27T07:59:25+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> Offline mode active. I can process Aria commands but can't generate AI responses without a configured provider.
+=== 2026-03-27T07:59:33+00:00 agi cycle end ===
+=== 2026-03-27T08:01:08+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> No live model detected. Run with `--provider lmstudio` (LM Studio running locally), `--provider ollama`, `--provider openai`, or `--provider azure`.
+=== 2026-03-27T08:01:15+00:00 agi cycle end ===
+=== 2026-03-27T08:02:50+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> No live model detected. Run with `--provider lmstudio` (LM Studio running locally), `--provider ollama`, `--provider openai`, or `--provider azure`.
+=== 2026-03-27T08:02:58+00:00 agi cycle end ===
+=== 2026-03-27T08:04:33+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> Offline mode active. I can process Aria commands but can't generate AI responses without a configured provider.
+=== 2026-03-27T08:04:41+00:00 agi cycle end ===
+=== 2026-03-27T08:06:15+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> No live model detected. Run with `--provider lmstudio` (LM Studio running locally), `--provider ollama`, `--provider openai`, or `--provider azure`.
+=== 2026-03-27T08:06:25+00:00 agi cycle end ===
+=== 2026-03-27T08:07:59+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> No live model detected. Run with `--provider lmstudio` (LM Studio running locally), `--provider ollama`, `--provider openai`, or `--provider azure`.
+=== 2026-03-27T08:08:09+00:00 agi cycle end ===
+=== 2026-03-27T08:09:44+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> Offline mode active. I can process Aria commands but can't generate AI responses without a configured provider.
+=== 2026-03-27T08:09:51+00:00 agi cycle end ===
+=== 2026-03-27T08:11:25+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> Offline mode active. I can process Aria commands but can't generate AI responses without a configured provider.
+=== 2026-03-27T08:11:31+00:00 agi cycle end ===
+=== 2026-03-27T08:13:05+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> No live model detected. Run with `--provider lmstudio` (LM Studio running locally), `--provider ollama`, `--provider openai`, or `--provider azure`.
+=== 2026-03-27T08:13:15+00:00 agi cycle end ===
+=== 2026-03-27T08:14:49+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> Offline mode active. I can process Aria commands but can't generate AI responses without a configured provider.
+=== 2026-03-27T08:14:58+00:00 agi cycle end ===
+=== 2026-03-27T08:16:33+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> I'm running in local fallback mode. Set AZURE_OPENAI_API_KEY, OPENAI_API_KEY, or start LM Studio / Ollama to enable full AI responses.
+=== 2026-03-27T08:16:39+00:00 agi cycle end ===
+=== 2026-03-27T08:18:14+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> No live model detected. Run with `--provider lmstudio` (LM Studio running locally), `--provider ollama`, `--provider openai`, or `--provider azure`.
+=== 2026-03-27T08:18:24+00:00 agi cycle end ===
+=== 2026-03-27T08:19:59+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> I'm running in local fallback mode. Set AZURE_OPENAI_API_KEY, OPENAI_API_KEY, or start LM Studio / Ollama to enable full AI responses.
+=== 2026-03-27T08:20:05+00:00 agi cycle end ===
+=== 2026-03-27T08:21:40+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> Offline mode active. I can process Aria commands but can't generate AI responses without a configured provider.
+=== 2026-03-27T08:21:48+00:00 agi cycle end ===
+=== 2026-03-27T08:23:22+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> I'm running in local fallback mode. Set AZURE_OPENAI_API_KEY, OPENAI_API_KEY, or start LM Studio / Ollama to enable full AI responses.
+=== 2026-03-27T08:23:31+00:00 agi cycle end ===
+=== 2026-03-27T08:25:05+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> No live model detected. Run with `--provider lmstudio` (LM Studio running locally), `--provider ollama`, `--provider openai`, or `--provider azure`.
+=== 2026-03-27T08:25:16+00:00 agi cycle end ===
+=== 2026-03-27T08:26:49+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> Offline mode active. I can process Aria commands but can't generate AI responses without a configured provider.
+=== 2026-03-27T08:27:00+00:00 agi cycle end ===
+=== 2026-03-27T08:28:33+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> Offline mode active. I can process Aria commands but can't generate AI responses without a configured provider.
+=== 2026-03-27T08:28:42+00:00 agi cycle end ===
+=== 2026-03-27T08:30:15+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> No live model detected. Run with `--provider lmstudio` (LM Studio running locally), `--provider ollama`, `--provider openai`, or `--provider azure`.
+=== 2026-03-27T08:30:26+00:00 agi cycle end ===
+=== 2026-03-27T08:32:00+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> Offline mode active. I can process Aria commands but can't generate AI responses without a configured provider.
+=== 2026-03-27T08:32:08+00:00 agi cycle end ===
+=== 2026-03-27T08:33:43+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> No live model detected. Run with `--provider lmstudio` (LM Studio running locally), `--provider ollama`, `--provider openai`, or `--provider azure`.
+=== 2026-03-27T08:33:52+00:00 agi cycle end ===
+=== 2026-03-27T08:35:27+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> I'm running in local fallback mode. Set AZURE_OPENAI_API_KEY, OPENAI_API_KEY, or start LM Studio / Ollama to enable full AI responses.
+=== 2026-03-27T08:35:34+00:00 agi cycle end ===
+=== 2026-03-27T08:37:09+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> Offline mode active. I can process Aria commands but can't generate AI responses without a configured provider.
+=== 2026-03-27T08:37:17+00:00 agi cycle end ===
+=== 2026-03-27T08:38:52+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> Offline mode active. I can process Aria commands but can't generate AI responses without a configured provider.
+=== 2026-03-27T08:38:58+00:00 agi cycle end ===
+=== 2026-03-27T08:40:33+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> Offline mode active. I can process Aria commands but can't generate AI responses without a configured provider.
+=== 2026-03-27T08:40:41+00:00 agi cycle end ===
+=== 2026-03-27T08:42:16+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> Offline mode active. I can process Aria commands but can't generate AI responses without a configured provider.
+=== 2026-03-27T08:42:24+00:00 agi cycle end ===
+=== 2026-03-27T08:43:59+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> I'm running in local fallback mode. Set AZURE_OPENAI_API_KEY, OPENAI_API_KEY, or start LM Studio / Ollama to enable full AI responses.
+=== 2026-03-27T08:44:06+00:00 agi cycle end ===
+=== 2026-03-27T08:45:40+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> Offline mode active. I can process Aria commands but can't generate AI responses without a configured provider.
+=== 2026-03-27T08:45:51+00:00 agi cycle end ===
+=== 2026-03-27T08:47:24+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> No live model detected. Run with `--provider lmstudio` (LM Studio running locally), `--provider ollama`, `--provider openai`, or `--provider azure`.
+=== 2026-03-27T08:47:34+00:00 agi cycle end ===
+=== 2026-03-27T08:49:07+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> I'm running in local fallback mode. Set AZURE_OPENAI_API_KEY, OPENAI_API_KEY, or start LM Studio / Ollama to enable full AI responses.
+=== 2026-03-27T08:49:16+00:00 agi cycle end ===
+=== 2026-03-27T08:50:49+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> Offline mode active. I can process Aria commands but can't generate AI responses without a configured provider.
+=== 2026-03-27T08:50:59+00:00 agi cycle end ===
+=== 2026-03-27T08:52:32+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> I'm running in local fallback mode. Set AZURE_OPENAI_API_KEY, OPENAI_API_KEY, or start LM Studio / Ollama to enable full AI responses.
+=== 2026-03-27T08:52:41+00:00 agi cycle end ===
+=== 2026-03-27T08:54:14+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> I'm running in local fallback mode. Set AZURE_OPENAI_API_KEY, OPENAI_API_KEY, or start LM Studio / Ollama to enable full AI responses.
+=== 2026-03-27T08:54:24+00:00 agi cycle end ===
+=== 2026-03-27T08:55:57+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> I'm running in local fallback mode. Set AZURE_OPENAI_API_KEY, OPENAI_API_KEY, or start LM Studio / Ollama to enable full AI responses.
+=== 2026-03-27T08:56:05+00:00 agi cycle end ===
+=== 2026-03-27T08:57:38+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> No live model detected. Run with `--provider lmstudio` (LM Studio running locally), `--provider ollama`, `--provider openai`, or `--provider azure`.
+=== 2026-03-27T08:57:48+00:00 agi cycle end ===
+=== 2026-03-27T08:59:22+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> Offline mode active. I can process Aria commands but can't generate AI responses without a configured provider.
+=== 2026-03-27T08:59:31+00:00 agi cycle end ===
+=== 2026-03-27T09:01:05+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> No live model detected. Run with `--provider lmstudio` (LM Studio running locally), `--provider ollama`, `--provider openai`, or `--provider azure`.
+=== 2026-03-27T09:01:15+00:00 agi cycle end ===
+=== 2026-03-27T09:02:49+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> I'm running in local fallback mode. Set AZURE_OPENAI_API_KEY, OPENAI_API_KEY, or start LM Studio / Ollama to enable full AI responses.
+=== 2026-03-27T09:02:55+00:00 agi cycle end ===
+=== 2026-03-27T09:04:29+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> No live model detected. Run with `--provider lmstudio` (LM Studio running locally), `--provider ollama`, `--provider openai`, or `--provider azure`.
+=== 2026-03-27T09:04:40+00:00 agi cycle end ===
+=== 2026-03-27T09:06:14+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> No live model detected. Run with `--provider lmstudio` (LM Studio running locally), `--provider ollama`, `--provider openai`, or `--provider azure`.
+=== 2026-03-27T09:06:22+00:00 agi cycle end ===
+=== 2026-03-27T09:07:57+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> No live model detected. Run with `--provider lmstudio` (LM Studio running locally), `--provider ollama`, `--provider openai`, or `--provider azure`.
+=== 2026-03-27T09:08:11+00:00 agi cycle end ===
+=== 2026-03-27T09:09:45+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> I'm running in local fallback mode. Set AZURE_OPENAI_API_KEY, OPENAI_API_KEY, or start LM Studio / Ollama to enable full AI responses.
+=== 2026-03-27T09:09:52+00:00 agi cycle end ===
+=== 2026-03-27T09:11:26+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> I'm running in local fallback mode. Set AZURE_OPENAI_API_KEY, OPENAI_API_KEY, or start LM Studio / Ollama to enable full AI responses.
+=== 2026-03-27T09:11:32+00:00 agi cycle end ===
+=== 2026-03-27T09:13:07+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> Offline mode active. I can process Aria commands but can't generate AI responses without a configured provider.
+=== 2026-03-27T09:13:17+00:00 agi cycle end ===
+=== 2026-03-27T09:14:51+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> No live model detected. Run with `--provider lmstudio` (LM Studio running locally), `--provider ollama`, `--provider openai`, or `--provider azure`.
+=== 2026-03-27T09:15:01+00:00 agi cycle end ===
+=== 2026-03-27T09:16:36+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> No live model detected. Run with `--provider lmstudio` (LM Studio running locally), `--provider ollama`, `--provider openai`, or `--provider azure`.
+=== 2026-03-27T09:16:44+00:00 agi cycle end ===
+=== 2026-03-27T09:18:19+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> Offline mode active. I can process Aria commands but can't generate AI responses without a configured provider.
+=== 2026-03-27T09:18:27+00:00 agi cycle end ===
+=== 2026-03-27T09:20:02+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> I'm running in local fallback mode. Set AZURE_OPENAI_API_KEY, OPENAI_API_KEY, or start LM Studio / Ollama to enable full AI responses.
+=== 2026-03-27T09:20:09+00:00 agi cycle end ===
+=== 2026-03-27T09:21:44+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> Offline mode active. I can process Aria commands but can't generate AI responses without a configured provider.
+=== 2026-03-27T09:21:53+00:00 agi cycle end ===
+=== 2026-03-27T09:23:28+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> No live model detected. Run with `--provider lmstudio` (LM Studio running locally), `--provider ollama`, `--provider openai`, or `--provider azure`.
+=== 2026-03-27T09:23:37+00:00 agi cycle end ===
+=== 2026-03-27T09:25:12+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> Offline mode active. I can process Aria commands but can't generate AI responses without a configured provider.
+=== 2026-03-27T09:25:22+00:00 agi cycle end ===
+=== 2026-03-27T09:26:57+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> I'm running in local fallback mode. Set AZURE_OPENAI_API_KEY, OPENAI_API_KEY, or start LM Studio / Ollama to enable full AI responses.
+=== 2026-03-27T09:27:03+00:00 agi cycle end ===
+=== 2026-03-27T09:28:38+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> I'm running in local fallback mode. Set AZURE_OPENAI_API_KEY, OPENAI_API_KEY, or start LM Studio / Ollama to enable full AI responses.
+=== 2026-03-27T09:28:45+00:00 agi cycle end ===
+=== 2026-03-27T09:30:20+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> I'm running in local fallback mode. Set AZURE_OPENAI_API_KEY, OPENAI_API_KEY, or start LM Studio / Ollama to enable full AI responses.
+=== 2026-03-27T09:30:28+00:00 agi cycle end ===
+=== 2026-03-27T09:32:03+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> I'm running in local fallback mode. Set AZURE_OPENAI_API_KEY, OPENAI_API_KEY, or start LM Studio / Ollama to enable full AI responses.
+=== 2026-03-27T09:32:10+00:00 agi cycle end ===
+=== 2026-03-27T09:33:45+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> I'm running in local fallback mode. Set AZURE_OPENAI_API_KEY, OPENAI_API_KEY, or start LM Studio / Ollama to enable full AI responses.
+=== 2026-03-27T09:33:54+00:00 agi cycle end ===
+=== 2026-03-27T09:35:27+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> No live model detected. Run with `--provider lmstudio` (LM Studio running locally), `--provider ollama`, `--provider openai`, or `--provider azure`.
+=== 2026-03-27T09:35:36+00:00 agi cycle end ===
+=== 2026-03-27T09:37:09+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> No live model detected. Run with `--provider lmstudio` (LM Studio running locally), `--provider ollama`, `--provider openai`, or `--provider azure`.
+=== 2026-03-27T09:37:21+00:00 agi cycle end ===
+=== 2026-03-27T09:38:54+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> I'm running in local fallback mode. Set AZURE_OPENAI_API_KEY, OPENAI_API_KEY, or start LM Studio / Ollama to enable full AI responses.
+=== 2026-03-27T09:39:02+00:00 agi cycle end ===
+=== 2026-03-27T09:40:35+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> Offline mode active. I can process Aria commands but can't generate AI responses without a configured provider.
+=== 2026-03-27T09:40:45+00:00 agi cycle end ===
+=== 2026-03-27T09:42:17+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> No live model detected. Run with `--provider lmstudio` (LM Studio running locally), `--provider ollama`, `--provider openai`, or `--provider azure`.
+=== 2026-03-27T09:42:28+00:00 agi cycle end ===
+=== 2026-03-27T09:44:03+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> Offline mode active. I can process Aria commands but can't generate AI responses without a configured provider.
+=== 2026-03-27T09:44:11+00:00 agi cycle end ===
+=== 2026-03-27T09:45:46+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> I'm running in local fallback mode. Set AZURE_OPENAI_API_KEY, OPENAI_API_KEY, or start LM Studio / Ollama to enable full AI responses.
+=== 2026-03-27T09:45:53+00:00 agi cycle end ===
+=== 2026-03-27T09:47:28+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> No live model detected. Run with `--provider lmstudio` (LM Studio running locally), `--provider ollama`, `--provider openai`, or `--provider azure`.
+=== 2026-03-27T09:47:38+00:00 agi cycle end ===
+=== 2026-03-27T09:49:13+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> I'm running in local fallback mode. Set AZURE_OPENAI_API_KEY, OPENAI_API_KEY, or start LM Studio / Ollama to enable full AI responses.
+=== 2026-03-27T09:49:19+00:00 agi cycle end ===
+=== 2026-03-27T09:50:54+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> I'm running in local fallback mode. Set AZURE_OPENAI_API_KEY, OPENAI_API_KEY, or start LM Studio / Ollama to enable full AI responses.
+=== 2026-03-27T09:51:01+00:00 agi cycle end ===
+=== 2026-03-27T09:52:36+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> No live model detected. Run with `--provider lmstudio` (LM Studio running locally), `--provider ollama`, `--provider openai`, or `--provider azure`.
+=== 2026-03-27T09:52:46+00:00 agi cycle end ===
+=== 2026-03-27T09:54:21+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> I'm running in local fallback mode. Set AZURE_OPENAI_API_KEY, OPENAI_API_KEY, or start LM Studio / Ollama to enable full AI responses.
+=== 2026-03-27T09:54:26+00:00 agi cycle end ===
+=== 2026-03-27T09:56:00+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> I'm running in local fallback mode. Set AZURE_OPENAI_API_KEY, OPENAI_API_KEY, or start LM Studio / Ollama to enable full AI responses.
+=== 2026-03-27T09:56:09+00:00 agi cycle end ===
+=== 2026-03-27T09:57:44+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> Offline mode active. I can process Aria commands but can't generate AI responses without a configured provider.
+=== 2026-03-27T09:57:52+00:00 agi cycle end ===
+=== 2026-03-27T09:59:27+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> No live model detected. Run with `--provider lmstudio` (LM Studio running locally), `--provider ollama`, `--provider openai`, or `--provider azure`.
+=== 2026-03-27T09:59:36+00:00 agi cycle end ===
+=== 2026-03-27T10:01:11+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> No live model detected. Run with `--provider lmstudio` (LM Studio running locally), `--provider ollama`, `--provider openai`, or `--provider azure`.
+=== 2026-03-27T10:01:20+00:00 agi cycle end ===
+=== 2026-03-27T10:02:55+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> No live model detected. Run with `--provider lmstudio` (LM Studio running locally), `--provider ollama`, `--provider openai`, or `--provider azure`.
+=== 2026-03-27T10:03:04+00:00 agi cycle end ===
+=== 2026-03-27T10:04:38+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> Offline mode active. I can process Aria commands but can't generate AI responses without a configured provider.
+=== 2026-03-27T10:04:46+00:00 agi cycle end ===
+=== 2026-03-27T10:06:20+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> No live model detected. Run with `--provider lmstudio` (LM Studio running locally), `--provider ollama`, `--provider openai`, or `--provider azure`.
+=== 2026-03-27T10:06:30+00:00 agi cycle end ===
+=== 2026-03-27T10:08:05+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> I'm running in local fallback mode. Set AZURE_OPENAI_API_KEY, OPENAI_API_KEY, or start LM Studio / Ollama to enable full AI responses.
+=== 2026-03-27T10:08:11+00:00 agi cycle end ===
+=== 2026-03-27T10:09:46+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> No live model detected. Run with `--provider lmstudio` (LM Studio running locally), `--provider ollama`, `--provider openai`, or `--provider azure`.
+=== 2026-03-27T10:09:57+00:00 agi cycle end ===
+=== 2026-03-27T10:11:32+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> No live model detected. Run with `--provider lmstudio` (LM Studio running locally), `--provider ollama`, `--provider openai`, or `--provider azure`.
+=== 2026-03-27T10:11:41+00:00 agi cycle end ===
+=== 2026-03-27T10:13:16+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> Offline mode active. I can process Aria commands but can't generate AI responses without a configured provider.
+=== 2026-03-27T10:13:23+00:00 agi cycle end ===
+=== 2026-03-27T10:14:58+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> No live model detected. Run with `--provider lmstudio` (LM Studio running locally), `--provider ollama`, `--provider openai`, or `--provider azure`.
+=== 2026-03-27T10:15:06+00:00 agi cycle end ===
+=== 2026-03-27T10:16:41+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> No live model detected. Run with `--provider lmstudio` (LM Studio running locally), `--provider ollama`, `--provider openai`, or `--provider azure`.
+=== 2026-03-27T10:16:51+00:00 agi cycle end ===
+=== 2026-03-27T10:18:26+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> No live model detected. Run with `--provider lmstudio` (LM Studio running locally), `--provider ollama`, `--provider openai`, or `--provider azure`.
+=== 2026-03-27T10:18:34+00:00 agi cycle end ===
+=== 2026-03-27T10:20:08+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> No live model detected. Run with `--provider lmstudio` (LM Studio running locally), `--provider ollama`, `--provider openai`, or `--provider azure`.
+=== 2026-03-27T10:20:18+00:00 agi cycle end ===
+=== 2026-03-27T10:21:53+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> No live model detected. Run with `--provider lmstudio` (LM Studio running locally), `--provider ollama`, `--provider openai`, or `--provider azure`.
+=== 2026-03-27T10:22:03+00:00 agi cycle end ===
+=== 2026-03-27T10:23:37+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> No live model detected. Run with `--provider lmstudio` (LM Studio running locally), `--provider ollama`, `--provider openai`, or `--provider azure`.
+=== 2026-03-27T10:23:45+00:00 agi cycle end ===
+=== 2026-03-27T10:25:20+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> I'm running in local fallback mode. Set AZURE_OPENAI_API_KEY, OPENAI_API_KEY, or start LM Studio / Ollama to enable full AI responses.
+=== 2026-03-27T10:25:26+00:00 agi cycle end ===
+=== 2026-03-27T10:27:01+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> Offline mode active. I can process Aria commands but can't generate AI responses without a configured provider.
+=== 2026-03-27T10:27:10+00:00 agi cycle end ===
+=== 2026-03-27T10:28:45+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> Offline mode active. I can process Aria commands but can't generate AI responses without a configured provider.
+=== 2026-03-27T10:28:52+00:00 agi cycle end ===
+=== 2026-03-27T10:30:27+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> I'm running in local fallback mode. Set AZURE_OPENAI_API_KEY, OPENAI_API_KEY, or start LM Studio / Ollama to enable full AI responses.
+=== 2026-03-27T10:30:33+00:00 agi cycle end ===
+=== 2026-03-27T10:32:08+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> I'm running in local fallback mode. Set AZURE_OPENAI_API_KEY, OPENAI_API_KEY, or start LM Studio / Ollama to enable full AI responses.
+=== 2026-03-27T10:32:14+00:00 agi cycle end ===
+=== 2026-03-27T10:33:49+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> I'm running in local fallback mode. Set AZURE_OPENAI_API_KEY, OPENAI_API_KEY, or start LM Studio / Ollama to enable full AI responses.
+=== 2026-03-27T10:33:57+00:00 agi cycle end ===
+=== 2026-03-27T10:35:32+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> No live model detected. Run with `--provider lmstudio` (LM Studio running locally), `--provider ollama`, `--provider openai`, or `--provider azure`.
+=== 2026-03-27T10:35:43+00:00 agi cycle end ===
+=== 2026-03-27T10:37:18+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> I'm running in local fallback mode. Set AZURE_OPENAI_API_KEY, OPENAI_API_KEY, or start LM Studio / Ollama to enable full AI responses.
+=== 2026-03-27T10:37:25+00:00 agi cycle end ===
+=== 2026-03-27T10:39:00+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> I'm running in local fallback mode. Set AZURE_OPENAI_API_KEY, OPENAI_API_KEY, or start LM Studio / Ollama to enable full AI responses.
+=== 2026-03-27T10:39:08+00:00 agi cycle end ===
+=== 2026-03-27T10:40:43+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> Offline mode active. I can process Aria commands but can't generate AI responses without a configured provider.
+=== 2026-03-27T10:40:53+00:00 agi cycle end ===
+=== 2026-03-27T10:42:27+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> I'm running in local fallback mode. Set AZURE_OPENAI_API_KEY, OPENAI_API_KEY, or start LM Studio / Ollama to enable full AI responses.
+=== 2026-03-27T10:42:36+00:00 agi cycle end ===
+=== 2026-03-27T10:44:10+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> I'm running in local fallback mode. Set AZURE_OPENAI_API_KEY, OPENAI_API_KEY, or start LM Studio / Ollama to enable full AI responses.
+=== 2026-03-27T10:44:15+00:00 agi cycle end ===
+=== 2026-03-27T10:45:50+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> No live model detected. Run with `--provider lmstudio` (LM Studio running locally), `--provider ollama`, `--provider openai`, or `--provider azure`.
+=== 2026-03-27T10:46:00+00:00 agi cycle end ===
+=== 2026-03-27T10:47:33+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> Offline mode active. I can process Aria commands but can't generate AI responses without a configured provider.
+=== 2026-03-27T10:47:49+00:00 agi cycle end ===
+=== 2026-03-27T10:49:25+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> I'm running in local fallback mode. Set AZURE_OPENAI_API_KEY, OPENAI_API_KEY, or start LM Studio / Ollama to enable full AI responses.
+=== 2026-03-27T10:49:37+00:00 agi cycle end ===
+=== 2026-03-27T10:51:12+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> Offline mode active. I can process Aria commands but can't generate AI responses without a configured provider.
+=== 2026-03-27T10:51:16+00:00 agi cycle end ===
+=== 2026-03-27T10:52:52+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> No live model detected. Run with `--provider lmstudio` (LM Studio running locally), `--provider ollama`, `--provider openai`, or `--provider azure`.
+=== 2026-03-27T10:53:06+00:00 agi cycle end ===
+=== 2026-03-27T10:54:41+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> No live model detected. Run with `--provider lmstudio` (LM Studio running locally), `--provider ollama`, `--provider openai`, or `--provider azure`.
+=== 2026-03-27T10:54:45+00:00 agi cycle end ===
+=== 2026-03-27T10:56:20+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> No live model detected. Run with `--provider lmstudio` (LM Studio running locally), `--provider ollama`, `--provider openai`, or `--provider azure`.
+=== 2026-03-27T10:56:26+00:00 agi cycle end ===
+=== 2026-03-27T10:58:01+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> Offline mode active. I can process Aria commands but can't generate AI responses without a configured provider.
+=== 2026-03-27T10:58:06+00:00 agi cycle end ===
+=== 2026-03-27T10:59:41+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> Offline mode active. I can process Aria commands but can't generate AI responses without a configured provider.
+=== 2026-03-27T10:59:46+00:00 agi cycle end ===
+=== 2026-03-27T11:01:21+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> Offline mode active. I can process Aria commands but can't generate AI responses without a configured provider.
+=== 2026-03-27T11:01:28+00:00 agi cycle end ===
+=== 2026-03-27T11:03:03+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> No live model detected. Run with `--provider lmstudio` (LM Studio running locally), `--provider ollama`, `--provider openai`, or `--provider azure`.
+=== 2026-03-27T11:03:10+00:00 agi cycle end ===
+=== 2026-03-27T11:04:45+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> No live model detected. Run with `--provider lmstudio` (LM Studio running locally), `--provider ollama`, `--provider openai`, or `--provider azure`.
+=== 2026-03-27T11:04:51+00:00 agi cycle end ===
+=== 2026-03-27T11:06:26+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> I'm running in local fallback mode. Set AZURE_OPENAI_API_KEY, OPENAI_API_KEY, or start LM Studio / Ollama to enable full AI responses.
+=== 2026-03-27T11:06:29+00:00 agi cycle end ===
+=== 2026-03-27T11:08:03+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> No live model detected. Run with `--provider lmstudio` (LM Studio running locally), `--provider ollama`, `--provider openai`, or `--provider azure`.
+=== 2026-03-27T11:08:11+00:00 agi cycle end ===
+=== 2026-03-27T11:09:44+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> Offline mode active. I can process Aria commands but can't generate AI responses without a configured provider.
+=== 2026-03-27T11:09:50+00:00 agi cycle end ===
+=== 2026-03-27T11:11:24+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> I'm running in local fallback mode. Set AZURE_OPENAI_API_KEY, OPENAI_API_KEY, or start LM Studio / Ollama to enable full AI responses.
+=== 2026-03-27T11:11:30+00:00 agi cycle end ===
+=== 2026-03-27T11:13:03+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> I'm running in local fallback mode. Set AZURE_OPENAI_API_KEY, OPENAI_API_KEY, or start LM Studio / Ollama to enable full AI responses.
+=== 2026-03-27T11:13:08+00:00 agi cycle end ===
+=== 2026-03-27T11:14:43+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> Offline mode active. I can process Aria commands but can't generate AI responses without a configured provider.
+=== 2026-03-27T11:14:46+00:00 agi cycle end ===
+=== 2026-03-27T11:16:21+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> I'm running in local fallback mode. Set AZURE_OPENAI_API_KEY, OPENAI_API_KEY, or start LM Studio / Ollama to enable full AI responses.
+=== 2026-03-27T11:16:27+00:00 agi cycle end ===
+=== 2026-03-27T11:18:02+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> I'm running in local fallback mode. Set AZURE_OPENAI_API_KEY, OPENAI_API_KEY, or start LM Studio / Ollama to enable full AI responses.
+=== 2026-03-27T11:18:04+00:00 agi cycle end ===
+=== 2026-03-27T11:19:39+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> Offline mode active. I can process Aria commands but can't generate AI responses without a configured provider.
+=== 2026-03-27T11:19:42+00:00 agi cycle end ===
+=== 2026-03-27T11:21:17+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> No live model detected. Run with `--provider lmstudio` (LM Studio running locally), `--provider ollama`, `--provider openai`, or `--provider azure`.
+=== 2026-03-27T11:21:20+00:00 agi cycle end ===
+=== 2026-03-27T11:22:55+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> Offline mode active. I can process Aria commands but can't generate AI responses without a configured provider.
+=== 2026-03-27T11:22:57+00:00 agi cycle end ===
+=== 2026-03-27T11:24:32+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> Offline mode active. I can process Aria commands but can't generate AI responses without a configured provider.
+=== 2026-03-27T11:24:35+00:00 agi cycle end ===
+=== 2026-03-27T11:26:08+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> Offline mode active. I can process Aria commands but can't generate AI responses without a configured provider.
+=== 2026-03-27T11:26:11+00:00 agi cycle end ===
+=== 2026-03-27T11:27:46+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> No live model detected. Run with `--provider lmstudio` (LM Studio running locally), `--provider ollama`, `--provider openai`, or `--provider azure`.
+=== 2026-03-27T11:27:49+00:00 agi cycle end ===
+=== 2026-03-27T11:29:24+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> Offline mode active. I can process Aria commands but can't generate AI responses without a configured provider.
+=== 2026-03-27T11:29:27+00:00 agi cycle end ===
+=== 2026-03-27T11:31:00+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> Offline mode active. I can process Aria commands but can't generate AI responses without a configured provider.
+=== 2026-03-27T11:31:06+00:00 agi cycle end ===
+=== 2026-03-27T11:32:38+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> Offline mode active. I can process Aria commands but can't generate AI responses without a configured provider.
+=== 2026-03-27T11:32:43+00:00 agi cycle end ===
+=== 2026-03-27T11:34:17+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> Offline mode active. I can process Aria commands but can't generate AI responses without a configured provider.
+=== 2026-03-27T11:34:20+00:00 agi cycle end ===
+=== 2026-03-27T11:35:55+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> I'm running in local fallback mode. Set AZURE_OPENAI_API_KEY, OPENAI_API_KEY, or start LM Studio / Ollama to enable full AI responses.
+=== 2026-03-27T11:35:56+00:00 agi cycle end ===
+=== 2026-03-27T11:37:32+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> No live model detected. Run with `--provider lmstudio` (LM Studio running locally), `--provider ollama`, `--provider openai`, or `--provider azure`.
+=== 2026-03-27T11:37:35+00:00 agi cycle end ===
+=== 2026-03-27T11:39:10+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> I'm running in local fallback mode. Set AZURE_OPENAI_API_KEY, OPENAI_API_KEY, or start LM Studio / Ollama to enable full AI responses.
+=== 2026-03-27T11:39:12+00:00 agi cycle end ===
+=== 2026-03-27T11:40:47+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> No live model detected. Run with `--provider lmstudio` (LM Studio running locally), `--provider ollama`, `--provider openai`, or `--provider azure`.
+=== 2026-03-27T11:40:50+00:00 agi cycle end ===
+=== 2026-03-27T11:42:25+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> No live model detected. Run with `--provider lmstudio` (LM Studio running locally), `--provider ollama`, `--provider openai`, or `--provider azure`.
+=== 2026-03-27T11:42:28+00:00 agi cycle end ===
+=== 2026-03-27T11:44:03+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> No live model detected. Run with `--provider lmstudio` (LM Studio running locally), `--provider ollama`, `--provider openai`, or `--provider azure`.
+=== 2026-03-27T11:44:06+00:00 agi cycle end ===
+=== 2026-03-27T11:45:40+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> Offline mode active. I can process Aria commands but can't generate AI responses without a configured provider.
+=== 2026-03-27T11:45:42+00:00 agi cycle end ===
+=== 2026-03-27T11:47:17+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> No live model detected. Run with `--provider lmstudio` (LM Studio running locally), `--provider ollama`, `--provider openai`, or `--provider azure`.
+=== 2026-03-27T11:47:21+00:00 agi cycle end ===
+=== 2026-03-27T11:48:56+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> Offline mode active. I can process Aria commands but can't generate AI responses without a configured provider.
+=== 2026-03-27T11:48:58+00:00 agi cycle end ===
+=== 2026-03-27T11:50:33+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> Offline mode active. I can process Aria commands but can't generate AI responses without a configured provider.
+=== 2026-03-27T11:50:36+00:00 agi cycle end ===
+=== 2026-03-27T11:52:11+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> No live model detected. Run with `--provider lmstudio` (LM Studio running locally), `--provider ollama`, `--provider openai`, or `--provider azure`.
+=== 2026-03-27T11:52:14+00:00 agi cycle end ===
+=== 2026-03-27T11:53:49+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> No live model detected. Run with `--provider lmstudio` (LM Studio running locally), `--provider ollama`, `--provider openai`, or `--provider azure`.
+=== 2026-03-27T11:53:53+00:00 agi cycle end ===
+=== 2026-03-27T11:55:28+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> Offline mode active. I can process Aria commands but can't generate AI responses without a configured provider.
+=== 2026-03-27T11:55:31+00:00 agi cycle end ===
+=== 2026-03-27T11:57:04+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> No live model detected. Run with `--provider lmstudio` (LM Studio running locally), `--provider ollama`, `--provider openai`, or `--provider azure`.
+=== 2026-03-27T11:57:09+00:00 agi cycle end ===
+=== 2026-03-27T11:58:43+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> Offline mode active. I can process Aria commands but can't generate AI responses without a configured provider.
+=== 2026-03-27T11:58:46+00:00 agi cycle end ===
+=== 2026-03-27T12:00:21+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> Offline mode active. I can process Aria commands but can't generate AI responses without a configured provider.
+=== 2026-03-27T12:00:23+00:00 agi cycle end ===
+=== 2026-03-27T12:01:58+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> No live model detected. Run with `--provider lmstudio` (LM Studio running locally), `--provider ollama`, `--provider openai`, or `--provider azure`.
+=== 2026-03-27T12:02:02+00:00 agi cycle end ===
+=== 2026-03-27T12:03:37+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> Offline mode active. I can process Aria commands but can't generate AI responses without a configured provider.
+=== 2026-03-27T12:03:41+00:00 agi cycle end ===
+=== 2026-03-27T12:05:16+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> I'm running in local fallback mode. Set AZURE_OPENAI_API_KEY, OPENAI_API_KEY, or start LM Studio / Ollama to enable full AI responses.
+=== 2026-03-27T12:05:18+00:00 agi cycle end ===
+=== 2026-03-27T12:06:54+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> I'm running in local fallback mode. Set AZURE_OPENAI_API_KEY, OPENAI_API_KEY, or start LM Studio / Ollama to enable full AI responses.
+=== 2026-03-27T12:06:55+00:00 agi cycle end ===
+=== 2026-03-27T12:08:31+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> Offline mode active. I can process Aria commands but can't generate AI responses without a configured provider.
+=== 2026-03-27T12:08:33+00:00 agi cycle end ===
+=== 2026-03-27T12:10:07+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> I'm running in local fallback mode. Set AZURE_OPENAI_API_KEY, OPENAI_API_KEY, or start LM Studio / Ollama to enable full AI responses.
+=== 2026-03-27T12:10:11+00:00 agi cycle end ===
+=== 2026-03-27T12:11:44+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> No live model detected. Run with `--provider lmstudio` (LM Studio running locally), `--provider ollama`, `--provider openai`, or `--provider azure`.
+=== 2026-03-27T12:11:48+00:00 agi cycle end ===
+=== 2026-03-27T12:13:23+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> I'm running in local fallback mode. Set AZURE_OPENAI_API_KEY, OPENAI_API_KEY, or start LM Studio / Ollama to enable full AI responses.
+=== 2026-03-27T12:13:24+00:00 agi cycle end ===
+=== 2026-03-27T12:14:59+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> I'm running in local fallback mode. Set AZURE_OPENAI_API_KEY, OPENAI_API_KEY, or start LM Studio / Ollama to enable full AI responses.
+=== 2026-03-27T12:15:01+00:00 agi cycle end ===
+=== 2026-03-27T12:16:36+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> Offline mode active. I can process Aria commands but can't generate AI responses without a configured provider.
+=== 2026-03-27T12:16:39+00:00 agi cycle end ===
+=== 2026-03-27T12:18:14+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> Offline mode active. I can process Aria commands but can't generate AI responses without a configured provider.
+=== 2026-03-27T12:18:17+00:00 agi cycle end ===
+=== 2026-03-27T12:19:52+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> Offline mode active. I can process Aria commands but can't generate AI responses without a configured provider.
+=== 2026-03-27T12:19:55+00:00 agi cycle end ===
+=== 2026-03-27T12:21:28+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> I'm running in local fallback mode. Set AZURE_OPENAI_API_KEY, OPENAI_API_KEY, or start LM Studio / Ollama to enable full AI responses.
+=== 2026-03-27T12:21:30+00:00 agi cycle end ===
+=== 2026-03-27T12:23:05+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> No live model detected. Run with `--provider lmstudio` (LM Studio running locally), `--provider ollama`, `--provider openai`, or `--provider azure`.
+=== 2026-03-27T12:23:08+00:00 agi cycle end ===
+=== 2026-03-27T12:24:43+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> I'm running in local fallback mode. Set AZURE_OPENAI_API_KEY, OPENAI_API_KEY, or start LM Studio / Ollama to enable full AI responses.
+=== 2026-03-27T12:24:45+00:00 agi cycle end ===
+=== 2026-03-27T12:26:20+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> No live model detected. Run with `--provider lmstudio` (LM Studio running locally), `--provider ollama`, `--provider openai`, or `--provider azure`.
+=== 2026-03-27T12:26:23+00:00 agi cycle end ===
+=== 2026-03-27T12:27:58+00:00 agi cycle start ===
+Provider: agi | Model: agi-local-local-echo
+assistant> Offline mode active. I can process Aria commands but can't generate AI responses without a configured provider.
+=== 2026-03-27T12:28:01+00:00 agi cycle end ===

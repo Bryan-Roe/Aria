@@ -152,13 +152,21 @@ def test_client_add_pickup_and_drag_updates_server():
                 time.sleep(0.15)
             assert held_ok, f"Object {unique_name} was not marked 'held' on server"
 
-            # Drop object and see where it lands
-            page.evaluate("() => dropObject()")
-            dropped = wait_for_object(unique_name, timeout=4.0)
-            assert dropped is not None and dropped.get("state") in [
+            # Drop object and poll until server reflects the new resting state
+            page.evaluate("(name) => dropObject(name)", unique_name)
+
+            deadline = time.time() + 5.0
+            dropped = None
+            while time.time() < deadline:
+                dropped = wait_for_object(unique_name, timeout=1.0)
+                if dropped and dropped.get("state") in ("on_stage", "on_table"):
+                    break
+                time.sleep(0.15)
+
+            assert dropped is not None and dropped.get("state") in (
                 "on_stage",
                 "on_table",
-            ], "Dropped state not persisted on server"
+            ), f"Dropped state not persisted on server, got: {dropped}"
 
             # Clean up: remove object via server API
             r = requests.post(

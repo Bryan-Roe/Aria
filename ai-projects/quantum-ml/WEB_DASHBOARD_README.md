@@ -141,12 +141,12 @@ Features:
 
 Located in `../datasets/quantum/*.csv`:
 
-| Dataset       | Samples | Features | Task   | Best Accuracy |
+| Dataset | Samples | Features | Task | Best Accuracy |
 | ------------- | ------- | -------- | ------ | ------------- |
-| heart_disease | 302     | 13       | Binary | ~85%          |
-| ionosphere    | 351     | 34       | Binary | ~90%          |
-| sonar         | 208     | 60       | Binary | ~80%          |
-| banknote      | 1,372   | 4        | Binary | ~95%          |
+| heart_disease | 302 | 13 | Binary | ~85% |
+| ionosphere | 351 | 34 | Binary | ~90% |
+| sonar | 208 | 60 | Binary | ~80% |
+| banknote | 1,372 | 4 | Binary | ~95% |
 
 All datasets automatically:
 

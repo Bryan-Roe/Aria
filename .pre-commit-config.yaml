@@ -1,3 +1,5 @@
+exclude: ^(extensions/lmstudio-provider/node_modules)/
+
 repos:
   - repo: https://github.com/psf/black
     rev: 24.8.0

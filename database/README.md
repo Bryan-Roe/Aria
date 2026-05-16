@@ -36,7 +36,7 @@ Memory retrieval flow:
 Embedding configuration:
 
 | Priority | Method | Env Vars Required |
-|----------|--------|-------------------|
+| ---------- | -------- | ------------------- |
 | 1 | Azure OpenAI Embeddings | `AZURE_OPENAI_API_KEY`, `AZURE_OPENAI_ENDPOINT`, `AZURE_OPENAI_EMBEDDING_DEPLOYMENT` |
 | 2 | OpenAI Embeddings | `OPENAI_API_KEY` |
 | 3 | Local Hash Fallback (dim=256) | None |

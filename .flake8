@@ -1,0 +1,21 @@
+[flake8]
+exclude =
+    .git,
+    __pycache__,
+    .venv,
+    venv,
+    venv.bak,
+    venv_*,
+    .venv_*,
+    node_modules,
+    data_out,
+    mount,
+    __blobstorage__,
+    __queuestorage__,
+    .push-worktrees,
+    dist,
+    build,
+    *.egg-info,
+    .eggs,
+    .tox,
+    .nox

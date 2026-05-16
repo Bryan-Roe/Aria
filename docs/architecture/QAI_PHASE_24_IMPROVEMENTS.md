@@ -227,7 +227,7 @@ cleanup              Remove old backups
 **Notification Types:**
 
 | Icon | Event | Title | Example Message |
-|------|-------|-------|-----------------|
+| ------ | ------- | ------- | ----------------- |
 | 🚀 | Job Started | Training Started | Job 'phi35_mixed_chat' has begun training |
 | ✅ | Job Complete | Training Complete | Job 'phi35_mixed_chat' finished in 45min with loss 0.2341 |
 | ❌ | Job Failed | Training Failed | Job 'phi35_mixed_chat' failed: CUDA out of memory |
@@ -303,7 +303,7 @@ python scripts/notification_system.py \
 **Platform Support:**
 
 | Platform | Method | Dependencies |
-|----------|--------|--------------|
+| ---------- | -------- | -------------- |
 | Browser | Web Notifications API | None (built-in) |
 | Windows | win10toast | `pip install win10toast` |
 | macOS | osascript | None (built-in) |
@@ -323,7 +323,7 @@ python scripts/notification_system.py \
 ### Code Metrics
 
 | Feature | Lines of Code | Files Modified | New Files |
-|---------|---------------|----------------|-----------|
+| --------- | --------------- | ---------------- | ----------- |
 | Export Functionality | 164 | 1 (`analytics.html`) | 0 |
 | Backup Manager | 415 | 0 | 1 (`backup_manager.py`) |
 | Notification System | 491 | 3 (all dashboards) | 2 (`.py` + guide) |
@@ -332,7 +332,7 @@ python scripts/notification_system.py \
 ### Feature Coverage
 
 | Dashboard | Export | Backup | Notifications |
-|-----------|--------|--------|---------------|
+| ----------- | -------- | -------- | --------------- |
 | unified.html | ❌ | ❌ | ✅ |
 | analytics.html | ✅ | ❌ | ✅ |
 | hub.html | ❌ | ❌ | ✅ (toggle) |
@@ -340,7 +340,7 @@ python scripts/notification_system.py \
 ### Testing Status
 
 | Component | Unit Tests | Integration Tests | Manual Testing |
-|-----------|------------|-------------------|----------------|
+| ----------- | ------------ | ------------------- | ---------------- |
 | Export (PNG/CSV/TXT) | N/A (UI) | N/A | ✅ Verified |
 | Backup Manager CLI | ⏳ Pending | ⏳ Pending | ✅ Verified |
 | Browser Notifications | N/A (browser API) | N/A | ✅ Verified |

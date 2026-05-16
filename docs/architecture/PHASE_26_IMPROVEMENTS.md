@@ -320,14 +320,14 @@ Safe batch size: 8 (with 20% headroom)
 
 ## Progress Summary
 
-| Feature                    | Status         | Completion |
+| Feature | Status | Completion |
 | -------------------------- | -------------- | ---------- |
-| Dataset Profiling          | ✅ Complete    | 100%       |
-| GPU-Aware Batch Calculator | 🔄 In Progress | 50%        |
-| Anomaly Detection          | 🔄 In Progress | 40%        |
-| Shared CSS                 | 🔄 In Progress | 70%        |
-| Keyboard Navigation        | 🔄 In Progress | 40%        |
-| Training Session History   | 🔄 In Progress | 60%        |
+| Dataset Profiling | ✅ Complete | 100% |
+| GPU-Aware Batch Calculator | 🔄 In Progress | 50% |
+| Anomaly Detection | 🔄 In Progress | 40% |
+| Shared CSS | 🔄 In Progress | 70% |
+| Keyboard Navigation | 🔄 In Progress | 40% |
+| Training Session History | 🔄 In Progress | 60% |
 
 **Overall**: 45% complete (6/6 features touched)
 

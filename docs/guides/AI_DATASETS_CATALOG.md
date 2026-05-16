@@ -39,7 +39,7 @@ AI/
 **Already Available** - No download needed
 
 | Dataset | Samples | Features | Classes | Use Case |
-|---------|---------|----------|---------|----------|
+| --------- | --------- | ---------- | --------- | ---------- |
 | Iris | 150 | 4 | 3 | Binary/multi-class classification |
 | Wine | 178 | 13 | 3 | Quality classification |
 | Breast Cancer | 569 | 30 | 2 | Medical diagnosis |

@@ -1,0 +1,261 @@
+# =============================================================================
+# Aria Platform — CI Workflow
+# =============================================================================
+# Runs on pull requests and pushes to main/dev. Adds manual dispatch and reduces
+# unnecessary runs by ignoring docs/markdown-only changes.
+#
+# Pipeline: lint  →  type-check  →  unit-tests  →  ci-success (gate)
+#
+# Notes:
+# - Pinned action major versions (v4/v5) for stability while still receiving
+#   security patches.
+# - `set -euo pipefail` is applied to all shell steps via `defaults.run.shell`.
+# - A final aggregate job (`ci-success`) is provided so branch protection rules
+#   only need to require a single check.
+# =============================================================================
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - "docs/**"
+      - "**/*.md"
+      - ".gitignore"
+      - "LICENSE"
+  pull_request:
+    branches: [main, dev]
+    paths-ignore:
+      - "docs/**"
+      - "**/*.md"
+      - ".gitignore"
+      - "LICENSE"
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+concurrency:
+  # Group by workflow + ref so feature branches don't cancel main, and
+  # multiple pushes on the same PR/branch cancel previous in-progress runs.
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  # Keep manual workflow_dispatch runs from being auto-cancelled.
+  cancel-in-progress: ${{ github.event_name != 'workflow_dispatch' }}
+
+defaults:
+  run:
+    shell: bash
+    # Strict mode catches errors early and makes pipes fail loudly.
+    # (Configured via `bash --noprofile --norc -eo pipefail {0}` implicitly by
+    #  GitHub Actions; we additionally enable `nounset` in scripts below.)
+
+env:
+  PYTHON_VERSION: "3.11"
+  PIP_DISABLE_PIP_VERSION_CHECK: "1"
+  PIP_NO_PYTHON_VERSION_WARNING: "1"
+  PYTHONDONTWRITEBYTECODE: "1"
+  PYTHONUNBUFFERED: "1"
+  FORCE_COLOR: "1"
+  # Shared lint targets — keep in sync across jobs.
+  LINT_PATHS: "shared/ scripts/ apps/aria/server.py tests/"
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # Lint (ruff + black --check)
+  # ---------------------------------------------------------------------------
+  lint:
+    name: Lint (ruff + black)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+          cache-dependency-path: |
+            requirements-dev.txt
+            requirements.txt
+            pyproject.toml
+            constraints.txt
+
+      - name: Install lint dependencies
+        run: |
+          set -euxo pipefail
+          python -m pip install --upgrade pip
+          # Prefer pinned versions from requirements-dev.txt when available,
+          # otherwise fall back to latest known-good majors.
+          if [[ -f requirements-dev.txt ]]; then
+            python -m pip install -r requirements-dev.txt
+          fi
+          python -m pip install "ruff>=0.5,<1.0" "black>=24.0,<26.0"
+
+      - name: Ruff (lint)
+        run: ruff check ${LINT_PATHS} --output-format=github
+
+      - name: Black (format check)
+        run: black --check --quiet ${LINT_PATHS}
+
+  # ---------------------------------------------------------------------------
+  # Type checks (mypy)
+  # ---------------------------------------------------------------------------
+  type-check:
+    name: Type check (mypy)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: lint
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+          cache-dependency-path: |
+            requirements-dev.txt
+            requirements.txt
+            pyproject.toml
+            constraints.txt
+
+      - name: Cache mypy
+        uses: actions/cache@v4
+        with:
+          path: .mypy_cache
+          key: mypy-${{ runner.os }}-py${{ env.PYTHON_VERSION }}-${{ hashFiles('shared/**/*.py', 'pyproject.toml', 'requirements*.txt', 'constraints.txt') }}
+          restore-keys: |
+            mypy-${{ runner.os }}-py${{ env.PYTHON_VERSION }}-
+
+      - name: Install dependencies
+        run: |
+          set -euxo pipefail
+          python -m pip install --upgrade pip setuptools wheel
+          if [[ -f constraints.txt && -f requirements.txt ]]; then
+            pip install -r requirements.txt -c constraints.txt
+          elif [[ -f requirements.txt ]]; then
+            pip install -r requirements.txt
+          fi
+          python -m pip install "mypy>=1.10,<2.0" pydantic pydantic-settings
+
+      - name: Run mypy on shared/
+        # Non-blocking until baseline is clean. Remove `continue-on-error`
+        # once the type errors are resolved so regressions fail CI.
+        continue-on-error: true
+        run: mypy shared/ --ignore-missing-imports --show-error-codes
+
+  # ---------------------------------------------------------------------------
+  # Unit tests (pytest, no cloud)
+  # ---------------------------------------------------------------------------
+  unit-tests:
+    name: Unit tests (pytest)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: lint
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+          cache-dependency-path: |
+            requirements-dev.txt
+            requirements.txt
+            pyproject.toml
+            constraints.txt
+
+      - name: Install dependencies
+        run: |
+          set -euxo pipefail
+          python -m pip install --upgrade pip setuptools wheel
+          if [[ -f constraints.txt && -f requirements.txt ]]; then
+            pip install -r requirements.txt -c constraints.txt
+          elif [[ -f requirements.txt ]]; then
+            pip install -r requirements.txt
+          fi
+          if [[ -f requirements-dev.txt ]]; then
+            pip install -r requirements-dev.txt
+          fi
+          python -m pip install pydantic pydantic-settings tenacity pytest pytest-cov
+          # Detect dependency conflicts early.
+          pip check
+
+      - name: Run unit tests
+        env:
+          CI: "true"
+          # Ensure tests never accidentally hit live cloud services.
+          AZURE_CLIENT_ID: ""
+          AZURE_TENANT_ID: ""
+          AZURE_CLIENT_SECRET: ""
+          OPENAI_API_KEY: ""
+        run: |
+          set -euxo pipefail
+          mkdir -p data_out
+          python -m pytest tests/ \
+            -q --tb=short \
+            -m "not slow and not azure and not integration" \
+            --ignore=tests/test_ui_playwright.py \
+            --ignore=tests/test_ui_pyppeteer.py \
+            --ignore=tests/test_ui_selenium.py \
+            --maxfail=1 \
+            --durations=10 \
+            --junitxml=data_out/junit.xml \
+            --cov=shared --cov=scripts \
+            --cov-report=term-missing \
+            --cov-report=xml:data_out/coverage.xml
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: unit-test-results
+          path: |
+            data_out/junit.xml
+            data_out/coverage.xml
+            data_out/
+          retention-days: 7
+          if-no-files-found: warn
+
+  # ---------------------------------------------------------------------------
+  # Aggregate gate — required check for branch protection.
+  # ---------------------------------------------------------------------------
+  ci-success:
+    name: CI success
+    runs-on: ubuntu-latest
+    needs: [lint, type-check, unit-tests]
+    if: always()
+    steps:
+      - name: Verify all required jobs succeeded
+        env:
+          LINT_RESULT: ${{ needs.lint.result }}
+          TYPE_RESULT: ${{ needs.type-check.result }}
+          TEST_RESULT: ${{ needs.unit-tests.result }}
+        run: |
+          set -euo pipefail
+          echo "lint=$LINT_RESULT type-check=$TYPE_RESULT unit-tests=$TEST_RESULT"
+          # type-check is currently advisory (continue-on-error inside the job),
+          # so we only hard-fail on lint and unit-tests.
+          if [[ "$LINT_RESULT" != "success" || "$TEST_RESULT" != "success" ]]; then
+            echo "::error::One or more required CI jobs failed."
+            exit 1
+          fi
+          echo "All required CI jobs passed."

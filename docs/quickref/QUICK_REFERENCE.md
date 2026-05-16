@@ -30,13 +30,13 @@ python -m http.server 8000
 
 ## File Locations
 
-| File                         | Purpose               | Access                            |
+| File | Purpose | Access |
 | ---------------------------- | --------------------- | --------------------------------- |
-| `docs/index.html`            | Main site             | Browser / GitHub Pages            |
-| `function_app.py`            | Backend API           | `func host start`                 |
-| `docs/GITHUB_PAGES_SETUP.md` | Full setup guide      | Read in editor                    |
-| `docs/README_PAGES.md`       | Configuration options | Read in editor                    |
-| `scripts/fast_validate.py`   | Verify setup          | `python scripts/fast_validate.py` |
+| `docs/index.html` | Main site | Browser / GitHub Pages |
+| `function_app.py` | Backend API | `func host start` |
+| `docs/GITHUB_PAGES_SETUP.md` | Full setup guide | Read in editor |
+| `docs/README_PAGES.md` | Configuration options | Read in editor |
+| `scripts/fast_validate.py` | Verify setup | `python scripts/fast_validate.py` |
 
 ## Common Commands
 
@@ -69,31 +69,31 @@ cat data_out/chat.log
 
 ## Server URLs by Scenario
 
-| Scenario               | Server URL                           |
+| Scenario | Server URL |
 | ---------------------- | ------------------------------------ |
-| Local development      | `http://localhost:7071`              |
-| Azure Functions        | `https://your-app.azurewebsites.net` |
-| GitHub Pages parameter | `?server=https://...`                |
-| Docker container       | `http://localhost:8080`              |
+| Local development | `http://localhost:7071` |
+| Azure Functions | `https://your-app.azurewebsites.net` |
+| GitHub Pages parameter | `?server=https://...` |
+| Docker container | `http://localhost:8080` |
 
 ## Providers
 
-| Provider     | Setup                     | Speed      | Cost         |
+| Provider | Setup | Speed | Cost |
 | ------------ | ------------------------- | ---------- | ------------ |
-| LMStudio     | LMSTUDIO_BASE_URL env var | ⚡ Fastest | Free (local) |
-| Azure OpenAI | AZURE\_\* env vars        | ⚡ Fast    | Paid         |
-| OpenAI       | OPENAI_API_KEY env var    | ⚡ Fast    | Paid         |
-| Local Echo   | None                      | ⚡ Instant | Free         |
+| LMStudio | LMSTUDIO_BASE_URL env var | ⚡ Fastest | Free (local) |
+| Azure OpenAI | AZURE\_\* env vars | ⚡ Fast | Paid |
+| OpenAI | OPENAI_API_KEY env var | ⚡ Fast | Paid |
+| Local Echo | None | ⚡ Instant | Free |
 
 ## Troubleshooting 30-Second Fixes
 
-| Problem              | Fix                                |
+| Problem | Fix |
 | -------------------- | ---------------------------------- |
-| "Can't connect"      | `func host start` running?         |
-| "Wrong URL"          | Default is `http://localhost:7071` |
-| "No response"        | Click "Test Connection"            |
-| "Streaming stops"    | Check function_app logs            |
-| "History disappears" | Disable incognito mode             |
+| "Can't connect" | `func host start` running? |
+| "Wrong URL" | Default is `http://localhost:7071` |
+| "No response" | Click "Test Connection" |
+| "Streaming stops" | Check function_app logs |
+| "History disappears" | Disable incognito mode |
 
 ## Performance Tips
 
@@ -124,12 +124,12 @@ Azure Backend: https://your-app.azurewebsites.net
 
 ## Documentation
 
-| Guide                              | Purpose                    |
+| Guide | Purpose |
 | ---------------------------------- | -------------------------- |
-| GITHUB_PAGES_SETUP.md              | Complete setup walkthrough |
-| SERVER_CONFIGURATION.md            | All deployment scenarios   |
-| verify_aria_chat.py                | Automated verification     |
-| ARIA_CHAT_GITHUB_PAGES_COMPLETE.md | Full project summary       |
+| GITHUB_PAGES_SETUP.md | Complete setup walkthrough |
+| SERVER_CONFIGURATION.md | All deployment scenarios |
+| verify_aria_chat.py | Automated verification |
+| ARIA_CHAT_GITHUB_PAGES_COMPLETE.md | Full project summary |
 
 ## One-Liners
 
@@ -149,13 +149,13 @@ curl -s http://localhost:7071/api/ai/status | python -m json.tool
 
 ## Status Codes
 
-| Code               | Meaning      | Action                  |
+| Code | Meaning | Action |
 | ------------------ | ------------ | ----------------------- |
-| 200                | Success      | Proceed normally        |
-| 400                | Bad request  | Check message format    |
-| 404                | Not found    | Wrong endpoint/URL      |
-| 500                | Server error | Check function_app logs |
-| Connection refused | Backend down | Run `func host start`   |
+| 200 | Success | Proceed normally |
+| 400 | Bad request | Check message format |
+| 404 | Not found | Wrong endpoint/URL |
+| 500 | Server error | Check function_app logs |
+| Connection refused | Backend down | Run `func host start` |
 
 ---
 

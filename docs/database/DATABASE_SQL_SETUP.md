@@ -13,7 +13,7 @@ Existing logging uses stored procedures via `pyodbc` and `QAI_DB_CONN`. New laye
 - Optional multi-vendor support with a single environment variable: `QAI_SQL_URL`
 
 | Feature | Legacy (Stored Proc) | New (Engine/Repository) |
-|---------|----------------------|--------------------------|
+| --------- | ---------------------- | -------------------------- |
 | Training / Chat Logging | ✅ (sp_Log*) | ✅ (unchanged) |
 | Embeddings | ✅ | ✅ |
 | Ad-hoc Queries | ❌ | ✅ (`quick_query`) |
@@ -241,7 +241,7 @@ func host start
 ## 16. Troubleshooting
 
 | Symptom | Cause | Action |
-|---------|-------|--------|
+| --------- | ------- | -------- |
 | `sql.enabled=false` | Missing env vars | Set `QAI_SQL_URL` or `QAI_DB_CONN` |
 | Slow query warnings too frequent | Threshold too low | Raise `QAI_SQL_SLOW_MS` |
 | Pool stats show `None` | Pool type lacks metrics (e.g., SQLite memory pool) | Accept defaults; switch to file-based SQLite or external DB |
@@ -299,7 +299,7 @@ Engine tracks slow queries in a **rolling 60-second window** (in-memory):
 Slow query threshold automatically adjusts based on deployment environment:
 
 | Environment | Threshold | Rationale |
-|-------------|-----------|-----------|
+| ------------- | ----------- | ----------- |
 | `development` (local) | 100ms | Fast feedback during development |
 | `staging` / `test` | 300ms | Balanced for integration testing |
 | `production` (default) | 500ms | Conservative for variable load |
@@ -360,7 +360,7 @@ $env:QAI_SQL_URL = "sqlite:///path/to/db.sqlite?timeout=30"
 ### Pool Size Guidelines
 
 | Scenario | Pool Size | Max Overflow | Rationale |
-|----------|-----------|--------------|-----------|
+| ---------- | ----------- | -------------- | ----------- |
 | Low traffic (< 10 req/s) | 10 | 5 | Minimize idle connections |
 | Medium traffic (10-50 req/s) | 20-30 | 10 | Balanced for burst capacity |
 | High traffic (> 50 req/s) | 30-50 | 20 | Prevent saturation under load |
@@ -381,7 +381,7 @@ pool_size = (function_instances × avg_concurrent_requests_per_instance) × 1.2
 ### Additional URL Parameters
 
 | Parameter | Default | Description |
-|-----------|---------|-------------|
+| ----------- | --------- | ------------- |
 | `pool_size` | 5 | Core pool size (always open) |
 | `max_overflow` | 10 | Additional connections on demand |
 | `pool_timeout` | 30 | Seconds to wait for available connection |

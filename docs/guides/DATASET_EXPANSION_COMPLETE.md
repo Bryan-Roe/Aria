@@ -66,7 +66,7 @@ Successfully expanded quantum ML dataset collection from **15 to 27 datasets** (
 
 ### Exceptional Performers (>95% Accuracy)
 | Dataset | Accuracy | Loss | Samples | Features |
-|---------|----------|------|---------|----------|
+| --------- | ---------- | ------ | --------- | ---------- |
 | wine_white | 99.59% | 0.0778 | 4,898 | 11→4 |
 | wine_red | 99.38% | 0.3660 | 1,599 | 11→5 |
 | optical_recognition | 98.94% | 0.1321 | 3,823 | 64→6 |
@@ -76,7 +76,7 @@ Successfully expanded quantum ML dataset collection from **15 to 27 datasets** (
 
 ### Very Good Performers (75-95%)
 | Dataset | Accuracy | Samples |
-|---------|----------|---------|
+| --------- | ---------- | --------- |
 | banknote | 93.38% | 1,372 |
 | balance_scale | 91.07% | 625 |
 | breast_cancer | 75.89% | 569 |
@@ -86,7 +86,7 @@ Successfully expanded quantum ML dataset collection from **15 to 27 datasets** (
 
 ### Challenging Datasets (<50%)
 | Dataset | Accuracy | Issue |
-|---------|----------|-------|
+| --------- | ---------- | ------- |
 | statlog_heart | 0.00% | Training instability |
 | iris | 6.25% | Multi-class complexity |
 | wheat_seeds | 40.62% | Limited samples |
@@ -159,7 +159,7 @@ Implemented 14 dataset-specific loading handlers:
 ## 📊 Domain Distribution
 
 | Domain | Datasets | Samples | Percentage |
-|--------|----------|---------|------------|
+| -------- | ---------- | --------- | ------------ |
 | **Medical** | 10 | 3,959 | 37% |
 | **Chemistry** | 3 | 12,994 | 11% |
 | **Image Features** | 2 | 11,317 | 7% |

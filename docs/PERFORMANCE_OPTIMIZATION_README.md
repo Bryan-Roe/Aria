@@ -65,7 +65,7 @@ Performance Benchmark:
 ## Performance Impact Summary
 
 | Optimization | Before | After | Improvement |
-|-------------|--------|-------|-------------|
+| ------------- | -------- | ------- | ------------- |
 | **Keyword matching** | O(n×m) repeated | O(n) set intersection | 2-5x faster |
 | **DB connections** | New per operation | Pooled (max 5) | 50-100ms → 0ms |
 | **Model lookups** | O(n²) linear search | O(1) dict lookup | 10x for 100 models |

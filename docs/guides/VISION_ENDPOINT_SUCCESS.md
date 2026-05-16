@@ -115,7 +115,7 @@ numpy>=1.24.0      # Array operations
 ## Validation Status
 
 | Component | Status | Details |
-|-----------|--------|---------|
+| ----------- | -------- | --------- |
 | Inference Module | ✅ | 376 lines, fully tested |
 | API Endpoints | ✅ | 2 endpoints with CORS, caching |
 | Frontend UI | ✅ | Button, preview, CSS styling |

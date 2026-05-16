@@ -5,7 +5,7 @@ This document outlines identified performance bottlenecks and inefficient code p
 ## Summary of Findings
 
 | Location | Issue | Severity | Status |
-|----------|-------|----------|--------|
+| ---------- | ------- | ---------- | -------- |
 | `token_utils.py` | Repeated tokenizer instantiation | High | Fixed |
 | `chat_memory.py` | Inefficient cosine similarity loop | Medium | Fixed |
 | `chat_memory.py` | Repeated OpenAI client creation | Medium | Fixed |

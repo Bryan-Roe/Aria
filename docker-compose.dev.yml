@@ -1,0 +1,87 @@
+# =============================================================================
+# Aria Platform — Docker Compose (local dev)
+# =============================================================================
+# Brings up two services:
+#   - aria-server: the Aria web UI / API (apps/aria/server.py on port 8080)
+#   - functions:   a lightweight local API proxy (local_dev_adapter.py on 7071)
+#
+# Usage:
+#   docker compose -f docker-compose.dev.yml up --build
+#   docker compose -f docker-compose.dev.yml down
+# =============================================================================
+
+version: "3.9"
+
+# Shared environment variables for all services (safe local-dev defaults).
+# Override any value by creating a .env file in the repo root.
+x-common-env: &common-env
+  PYTHONDONTWRITEBYTECODE: "1"
+  PYTHONUNBUFFERED: "1"
+  QAI_LOG_LEVEL: "${QAI_LOG_LEVEL:-INFO}"
+  QAI_STRUCTURED_LOGGING: "${QAI_STRUCTURED_LOGGING:-false}"
+  QAI_ENABLE_LOCAL_TTS: "${QAI_ENABLE_LOCAL_TTS:-false}"
+  # Azure / Cloud vars — leave empty for pure local dev
+  AZURE_OPENAI_API_KEY: "${AZURE_OPENAI_API_KEY:-}"
+  AZURE_OPENAI_ENDPOINT: "${AZURE_OPENAI_ENDPOINT:-}"
+  AZURE_OPENAI_DEPLOYMENT: "${AZURE_OPENAI_DEPLOYMENT:-}"
+  AZURE_OPENAI_API_VERSION: "${AZURE_OPENAI_API_VERSION:-2024-02-01}"
+  OPENAI_API_KEY: "${OPENAI_API_KEY:-}"
+  LMSTUDIO_BASE_URL: "${LMSTUDIO_BASE_URL:-}"
+  QAI_DB_CONN: "${QAI_DB_CONN:-}"
+
+services:
+  # ---------------------------------------------------------------------------
+  # Aria web UI server
+  # ---------------------------------------------------------------------------
+  aria-server:
+    build:
+      context: .
+      dockerfile: apps/aria/Dockerfile
+    image: aria-server:dev
+    container_name: aria-server
+    ports:
+      - "${ARIA_PORT:-8080}:8080"
+    environment:
+      <<: *common-env
+      ARIA_PORT: "8080"
+    volumes:
+      # Mount source for live-reload during development
+      - ./apps/aria:/app/apps/aria:ro
+      - ./shared:/app/shared:ro
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8080/api/aria/state')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    restart: on-failure
+
+  # ---------------------------------------------------------------------------
+  # Local Azure Functions proxy
+  # ---------------------------------------------------------------------------
+  functions:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: aria-functions:dev
+    container_name: aria-functions
+    ports:
+      - "${FUNC_PORT:-7071}:7071"
+    environment:
+      <<: *common-env
+      FUNCTIONS_PORT: "7071"
+    volumes:
+      - ./shared:/app/shared:ro
+      - ./ai-projects:/app/ai-projects:ro
+      - ./scripts:/app/scripts:ro
+    command: >
+      python local_dev_adapter.py
+    depends_on:
+      aria-server:
+        condition: service_started
+    restart: on-failure
+
+volumes:
+  # Persist data_out across restarts for status files
+  data_out:
+    driver: local

@@ -12,6 +12,7 @@ Enhanced the Aria character system's sparkle visual effects with performance opt
 ### 1. Performance Optimizations
 
 #### Keyword Matching with Frozensets
+
 - **Before**: Inline string checks (`'sparkle' in cmd`)
 - **After**: Pre-compiled frozensets with O(1) lookup
 - **Files**: `aria_web/server.py:75-77`
@@ -24,6 +25,7 @@ HEARTS_KEYWORDS = frozenset(['hearts', 'heart', 'love'])
 ```
 
 #### requestAnimationFrame for DOM Manipulation
+
 - **Before**: Sequential `setTimeout` loops for creating effects
 - **After**: `requestAnimationFrame`-based scheduling
 - **Files**: `aria_web/aria_controller.js:1490-1557`
@@ -34,12 +36,13 @@ HEARTS_KEYWORDS = frozenset(['hearts', 'heart', 'love'])
 Added three intensity levels for all effects (sparkle, glow, hearts):
 
 | Intensity | Count | Spread | Duration | Delay | Keywords |
-|-----------|-------|--------|----------|-------|----------|
+| ----------- | ------- | -------- | ---------- | ------- | ---------- |
 | **Light** | 3 | 60% | 1200ms | 150ms | light, subtle, gentle |
 | **Normal** | 5 | 80% | 1500ms | 100ms | *(default)* |
 | **Heavy** | 10 | 90% | 1800ms | 60ms | heavy, intense, lots, many |
 
 **Usage Examples**:
+
 - `"light sparkle"` → 3 sparkles with gentle spread
 - `"sparkle"` → 5 sparkles (normal)
 - `"heavy sparkle"` or `"lots of sparkles"` → 10 sparkles with wide spread
@@ -49,11 +52,13 @@ Added three intensity levels for all effects (sparkle, glow, hearts):
 ### 3. Enhanced Visual Features
 
 #### Color Variations
+
 - Added hue rotation filters to sparkle effects for color diversity
 - Random rotation transforms for variety
 - Color palette: Gold, Orange, Yellow, Wheat, Light Yellow
 
 #### Better Positioning
+
 - Effects centered around Aria (50%, 50%)
 - Spread radius configurable per intensity
 - More natural distribution pattern
@@ -96,18 +101,21 @@ Added 12 new tests to `tests/test_aria_server.py`:
 ## Performance Impact
 
 ### Before
+
 - Sequential DOM manipulation with `setTimeout` loops
 - 5 fixed sparkles regardless of context
 - No color variation
 - Inline keyword checking on every command
 
 ### After
+
 - RAF-synchronized DOM operations (better frame timing)
 - Configurable count (3-10) based on intensity
 - Color variations via hue rotation
 - O(1) keyword lookups with frozensets
 
 **Estimated Improvements**:
+
 - 10-15% faster keyword matching (O(n) → O(1) per keyword)
 - Smoother animations (60fps sync with RAF)
 - 3x effect range (3 to 10 sparkles)
@@ -116,14 +124,16 @@ Added 12 new tests to `tests/test_aria_server.py`:
 ## Usage Examples
 
 ### Basic Commands
-```
+
+```text
 "sparkle"                    → [aria:effect:sparkle:normal]
 "make it sparkle"            → [aria:effect:sparkle:normal]
 "add some glitter"           → [aria:effect:sparkle:normal]
 ```
 
 ### Intensity Control
-```
+
+```text
 "light sparkle"              → [aria:effect:sparkle:light]
 "gentle shimmer"             → [aria:effect:sparkle:light]
 "heavy sparkle"              → [aria:effect:sparkle:heavy]
@@ -131,7 +141,8 @@ Added 12 new tests to `tests/test_aria_server.py`:
 ```
 
 ### Combined Commands
-```
+
+```text
 "dance with sparkles"        → [aria:animate:dance] [aria:effect:sparkle:normal]
 "jump and sparkle"           → [aria:animate:jump] [aria:effect:sparkle:normal]
 "heavy sparkle and wave"     → [aria:effect:sparkle:heavy] [aria:gesture:wave]
@@ -166,6 +177,7 @@ Potential improvements identified but not implemented:
 ## Testing
 
 Run the sparkle tests:
+
 ```bash
 python -m pytest tests/test_aria_server.py -v
 ```

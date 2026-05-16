@@ -1,0 +1,48 @@
+{
+  "run_id": "20260329_024034",
+  "started_at": "2026-03-29T02:40:34.229420",
+  "completed_at": "2026-03-29T02:41:16.330717",
+  "total_tasks": 1,
+  "succeeded": 1,
+  "failed": 0,
+  "rolled_back": 0,
+  "tests_skipped_tasks": 1,
+  "total_files_modified": 0,
+  "total_tokens_estimated": 193,
+  "total_duration_seconds": 39.5,
+  "consensus": {
+    "reached": true,
+    "winner": "success",
+    "winner_ratio": 1.0,
+    "reason": "ok",
+    "support_count": 1,
+    "vote_count": 1,
+    "scores": {
+      "success": 1.0
+    }
+  },
+  "tasks": [
+    {
+      "task_id": "20260329_024115",
+      "task_description": "Smoke test forced file routing",
+      "status": "complete",
+      "llm_type": "echo",
+      "files_modified": [],
+      "tests_run": 0,
+      "tests_passed": 0,
+      "tests_failed": 0,
+      "reasoning": "[Echo Plan]\n1. Understand the task requirements\n2. Identify the files that need modification\n3. Implement changes with proper error handling\n4. Validate with tests\n5. Commit changes with descriptive message\nRisks: low \u2014 echo mode returns no actual modifications",
+      "commits": [],
+      "errors": [],
+      "started_at": "2026-03-29T02:41:15.515410",
+      "updated_at": "2026-03-29T02:41:15.515414",
+      "task_category": "test",
+      "duration_seconds": 0.74,
+      "tokens_estimated": 193,
+      "rollback_performed": false,
+      "dry_run": true,
+      "tests_skipped": true,
+      "plan": "[Echo Plan]\n1. Understand the task requirements\n2. Identify the files that need modification\n3. Implement changes with proper error handling\n4. Validate with tests\n5. Commit changes with descriptive message\nRisks: low \u2014 echo mode returns no actual modifications"
+    }
+  ]
+}

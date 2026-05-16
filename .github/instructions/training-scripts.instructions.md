@@ -12,7 +12,7 @@ applyTo: "scripts/*train*"
 ## Key Scripts
 
 | Script | Config | Purpose |
-|--------|--------|---------|
+| -------- | -------- | --------- |
 | `autotrain.py` | `autotrain.yaml` | LoRA fine-tuning job orchestration |
 | `automated_training_pipeline.py` | — | End-to-end training pipeline |
 | `train_and_promote.py` | — | Train + auto-deploy best model |

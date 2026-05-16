@@ -10,7 +10,7 @@ Three progressive dashboard interfaces for monitoring and managing AI training:
 
 ## 🚀 Quick Access
 
-```
+```text
 Basic:    http://localhost:8000/index.html
 Enhanced: http://localhost:8000/enhanced.html
 Advanced: http://localhost:8000/advanced.html  ⭐ RECOMMENDED
@@ -148,7 +148,7 @@ Invoke-WebRequest -Uri http://localhost:8000/api/history -OutFile history.json
 ## 🎨 Dashboard Comparison
 
 | Feature | Basic | Enhanced | Advanced |
-|---------|-------|----------|----------|
+| --------- | ------- | ---------- | ---------- |
 | Real-time status | ✅ | ✅ | ✅ |
 | Job metrics | ✅ | ✅ | ✅ |
 | GPU monitoring | ❌ | ❌ | ✅ |

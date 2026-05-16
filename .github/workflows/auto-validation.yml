@@ -48,16 +48,18 @@ jobs:
       - name: Generate validation summary
         if: always()
         run: |
-          echo "## Auto-Validation Results" >> $GITHUB_STEP_SUMMARY
-          for f in data_out/autotrain/status.json data_out/quantum_autorun/status.json data_out/auto_bootstrap/status_summary.json; do
-            if [ -f "$f" ]; then
-              echo "### $(basename $f)" >> $GITHUB_STEP_SUMMARY
-              echo '```json' >> $GITHUB_STEP_SUMMARY
-              cat "$f" >> $GITHUB_STEP_SUMMARY
-              echo '' >> $GITHUB_STEP_SUMMARY
-              echo '```' >> $GITHUB_STEP_SUMMARY
-            fi
-          done
+          {
+            echo "## Auto-Validation Results"
+            for f in data_out/autotrain/status.json data_out/quantum_autorun/status.json data_out/auto_bootstrap/status_summary.json; do
+              if [ -f "$f" ]; then
+                echo "### $(basename "$f")"
+                echo '```json'
+                cat "$f"
+                echo ''
+                echo '```'
+              fi
+            done
+          } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload status artifacts
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4.6.2

@@ -19,6 +19,7 @@ python .\scripts\batch_evaluator.py --scan-models --evaluate-all
 ```
 
 This will:
+
 - Scan `data_out/lora_training/` for LoRA adapters
 - Evaluate each model with default metrics
 - Save results to `data_out/batch_evaluator/results_<timestamp>.json`
@@ -30,6 +31,7 @@ python .\scripts\batch_evaluator.py --scan-models --evaluate-all --promote-best
 ```
 
 This will:
+
 - Evaluate all models
 - Promote the best model to `deployed_models/<model_id>_<timestamp>/`
 - Create `deployed_models/LATEST.txt` pointing to the promoted model
@@ -50,22 +52,26 @@ Preview what would be promoted without making changes.
 The evaluation system computes the following metrics:
 
 ### Perplexity
+
 - **Description**: Language model quality (lower is better)
 - **Range**: Typically 1-100 for fine-tuned models
 - **Interpretation**: Measures how "surprised" the model is by the test data
 - **Note**: Uses fallback heuristic for compatibility with some model versions
 
 ### Diversity
+
 - **Description**: Unique token ratio in responses
 - **Range**: 0.0-1.0 (higher is better)
 - **Interpretation**: Measures vocabulary richness and variation
 
 ### Response Length
+
 - **Description**: Average response length in tokens
 - **Range**: Variable (depends on dataset)
 - **Interpretation**: Helps ensure responses are appropriately sized
 
 ### Coherence
+
 - **Description**: Ratio of complete sentences
 - **Range**: 0.0-1.0 (higher is better)
 - **Interpretation**: Simple heuristic for response completeness
@@ -126,7 +132,7 @@ python .\scripts\batch_evaluator.py --compare checkpoint-64 lora_adapter
 
 After promotion, the `deployed_models/` directory contains:
 
-```
+```text
 deployed_models/
 ├── checkpoint-64_20251124_234342/      # Promoted model directory
 │   ├── adapter_config.json
@@ -162,9 +168,11 @@ deployed_models/
 
 1. **Train models** with `autotrain.py` or `train_lora.py`
 2. **Evaluate all adapters**:
+
    ```powershell
    python .\scripts\batch_evaluator.py --scan-models --evaluate-all --promote-best
    ```
+
 3. **Use promoted model** from `deployed_models/latest/` (or read `LATEST.txt`)
 
 ### Example CI/CD Pipeline
@@ -217,6 +225,7 @@ evaluation_tasks:
 ## Ranking Logic
 
 Models are ranked by:
+
 1. **Perplexity** (lower is better) - if available
 2. **Accuracy** (higher is better) - if available
 3. **First evaluated** - fallback if no metrics
@@ -232,6 +241,7 @@ The top-ranked model is promoted when `--promote-best` is used.
 **Cause**: No LoRA adapters in `data_out/lora_training/`
 
 **Solution**: Train models first:
+
 ```powershell
 python .\scripts\autotrain.py
 ```
@@ -241,6 +251,7 @@ python .\scripts\autotrain.py
 **Cause**: Missing dependencies
 
 **Solution**: Install evaluation dependencies:
+
 ```powershell
 pip install transformers peft torch
 ```

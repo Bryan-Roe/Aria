@@ -77,7 +77,7 @@ This document summarizes all enhancements delivered in Phase 25, focusing on opt
 ## Usage Quick Reference
 
 | Feature | How to Use | Notes |
-|---------|------------|-------|
+| --------- | ------------ | ------- |
 | Incremental Backup | `python scripts/backup_manager.py --incremental --source data_out --dest backups` | Falls back to full if no prior manifest. |
 | Tuning Wizard | Click "🧪 Tuning Wizard" or press `Ctrl+Y` | Apply profile to populate form. |
 | Dark Mode | Toggle button or `D` / `Ctrl+D` | Persists via localStorage. |

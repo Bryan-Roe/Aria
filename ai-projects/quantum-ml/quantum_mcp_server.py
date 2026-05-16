@@ -107,10 +107,12 @@ class CircuitCache:
 
     def put(self, key: str, circuit: QuantumCircuit):
         if key in self.cache:
+            self.cache[key] = circuit
             self.cache.move_to_end(key)
         else:
             self.cache[key] = circuit
-            self.timestamps[key] = time.time()
+        # Refresh TTL on every put, including updates.
+        self.timestamps[key] = time.time()
 
         # Evict oldest if over size limit
         if len(self.cache) > self.max_size:
@@ -754,7 +756,7 @@ async def simulate_circuit_handler(args: Dict) -> List[TextContent]:
         ]
 
     # Clean expired cache entries periodically
-    quantum_state["circuit_cache"].clear_expired()
+    _cleanup_cache_if_needed()
 
     circuit = quantum_state["circuit_cache"].get(circuit_id)
     if circuit is None:
@@ -765,11 +767,32 @@ async def simulate_circuit_handler(args: Dict) -> List[TextContent]:
             )
         ]
 
-    # Offload simulation to thread pool (CPU-intensive)
+    # Offload simulation (process pool first; thread fallback if process execution fails)
     loop = asyncio.get_event_loop()
-    counts = await loop.run_in_executor(
-        cpu_executor, _simulate_circuit_sync, circuit, shots
-    )
+    try:
+        counts = await asyncio.wait_for(
+            loop.run_in_executor(cpu_executor, _simulate_circuit_sync, circuit, shots),
+            timeout=45.0,
+        )
+    except asyncio.TimeoutError:
+        return [TextContent(type="text", text="Circuit simulation timed out after 45s")]
+    except Exception as exc:
+        logger.warning(
+            "Process-pool simulation failed (%s). Retrying in thread pool.", exc
+        )
+        try:
+            counts = await asyncio.wait_for(
+                loop.run_in_executor(io_executor, _simulate_circuit_sync, circuit, shots),
+                timeout=45.0,
+            )
+        except asyncio.TimeoutError:
+            return [TextContent(type="text", text="Circuit simulation timed out after 45s")]
+        except Exception as fallback_exc:
+            return [
+                TextContent(
+                    type="text", text=f"Error running circuit simulation: {fallback_exc}"
+                )
+            ]
 
     # Format results
     sorted_counts = dict(sorted(counts.items(), key=lambda x: x[1], reverse=True))

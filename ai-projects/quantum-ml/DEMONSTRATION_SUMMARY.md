@@ -318,7 +318,7 @@ ai-projects/quantum-ml/
 ## 🏆 Success Metrics
 
 | Metric | Target | Achieved | Status |
-|--------|--------|----------|--------|
+| -------- | -------- | ---------- | -------- |
 | Circuit Creation | 5+ types | 6 types | ✅ |
 | Local Simulation | Working | Perfect | ✅ |
 | ML Training | >70% acc | 85% (Moons) | ✅ |

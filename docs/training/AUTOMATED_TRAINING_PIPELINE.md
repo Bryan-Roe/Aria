@@ -17,7 +17,7 @@ This document explains the usage of `scripts/automated_training_pipeline.py`, a 
 ## Core Outputs
 
 | Artifact | Location | Purpose |
-|----------|----------|---------|
+| ---------- | ---------- | --------- |
 | Summary JSON | `data_out/automated_training/summary_<run_label>.json` | Aggregated results for this wrapper invocation (per model). |
 | Azure ML Job Spec (optional) | `.azureml/job_<run_label>.yaml` | Ready for `az ml job create --file` remote submission. |
 | Conda Environment Definition | `.azureml/environment.yml` | Base environment for Azure ML job. Generated if missing or forced. |
@@ -29,7 +29,7 @@ This document explains the usage of `scripts/automated_training_pipeline.py`, a 
 ## Key Flags
 
 | Flag | Description | Default |
-|------|-------------|---------|
+| ------ | ------------- | --------- |
 | `--models phi,qwen,tinyllama` | Comma list of models to process. | `phi,qwen` |
 | `--quick` | Generate ~100 samples (fast dev mode). Ignored if `--samples` specified. | Off |
 | `--samples <N>` | Override synthetic sample count. | None |
@@ -124,7 +124,7 @@ Runs synthetic generation & ultrafast TinyLlama LoRA config path defined in `aut
 ## Supported Models
 
 | Key | Base HF Model ID | Config (ultrafast) | Notes |
-|-----|------------------|--------------------|-------|
+| ----- | ------------------ | -------------------- | ------- |
 | phi | `microsoft/Phi-3.5-mini-instruct` | `AI/microsoft_phi-silica-3.6_v1/lora/lora.yaml` | General baseline, medium size |
 | qwen | `Qwen/Qwen2.5-3B-Instruct` | `AI/microsoft_phi-silica-3.6_v1/lora/lora_qwen_ultrafast.yaml` (example, if present) | Higher capacity, slower |
 | tinyllama | `TinyLlama/TinyLlama-1.1B-Chat-v1.0` | `AI/microsoft_phi-silica-3.6_v1/lora/lora_tinyllama_ultrafast.yaml` | Small, very fast experimentation |
@@ -138,7 +138,7 @@ Runs synthetic generation & ultrafast TinyLlama LoRA config path defined in `aut
 The wrapper propagates the ranking metric to the underlying parallel trainer:
 
 | Metric | Definition | Direction | When Useful |
-|--------|------------|-----------|-------------|
+| -------- | ------------ | ----------- | ------------- |
 | `perplexity_improvement` | Relative drop: (pre - post) / pre | Higher better | General quality gains |
 | `post_perplexity` | Final perplexity (stored negative internally for sorting) | Lower better | Absolute model quality target |
 | `diversity_avg` | (Distinct-1 + Distinct-2) / 2 from sample generations | Higher better | Variety / reduced repetition |
@@ -239,7 +239,7 @@ For training runs `run_id` links to the underlying last entry in `data_out/paral
 ## Troubleshooting
 
 | Symptom | Cause | Resolution |
-|---------|-------|-----------|
+| --------- | ------- | ----------- |
 | No job YAML produced | Forgot `--azure-ml-spec` flag | Re-run with flag. |
 | Job spec command trains unexpectedly | Omitted `--generate-only` in original invocation | Add `--generate-only` and regenerate spec. |
 | AML job fails environment solve | Missing dependency versions | Add pinned versions to `environment.yml` & re-run with `--force-azure-ml`. |

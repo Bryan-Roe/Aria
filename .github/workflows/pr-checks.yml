@@ -24,6 +24,8 @@ jobs:
     # Skip drafts to save CI minutes; they re-run on `ready_for_review`.
     if: github.event.pull_request.draft == false
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     timeout-minutes: 10
     steps:
       - name: Checkout code
@@ -156,53 +158,50 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - name: Checkout code
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4.3.1
-        with:
-          fetch-depth: 0
-          persist-credentials: false
-
       - name: Check PR size
         id: size
+        uses: actions/github-script@v7
         env:
-          BASE_SHA: ${{ github.event.pull_request.base.sha }}
-          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
           LARGE_FILES_THRESHOLD: '50'
           LARGE_LINES_THRESHOLD: '1000'
-        run: |
-          set -euo pipefail
+        with:
+          script: |
+            const prNumber = context.payload.pull_request.number;
+            const files = await github.paginate(github.rest.pulls.listFiles, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: prNumber,
+              per_page: 100
+            });
 
-          # Ensure both endpoints are available locally (defensive on shallow clones).
-          git fetch --no-tags --depth=1 origin "$BASE_SHA" "$HEAD_SHA" 2>/dev/null || true
+            const filesChanged = files.length;
+            const additions = files.reduce((sum, f) => sum + (f.additions || 0), 0);
+            const deletions = files.reduce((sum, f) => sum + (f.deletions || 0), 0);
 
-          # Compute diff stats once and reuse — guarding against binary
-          # files where numstat reports '-' instead of a numeric count.
-          NUMSTAT=$(git diff --numstat "$BASE_SHA"..."$HEAD_SHA")
-          ADDITIONS=$(awk 'BEGIN{s=0} $1 ~ /^[0-9]+$/ {s+=$1} END{print s+0}' <<<"$NUMSTAT")
-          DELETIONS=$(awk 'BEGIN{s=0} $2 ~ /^[0-9]+$/ {s+=$2} END{print s+0}' <<<"$NUMSTAT")
-          FILES_CHANGED=$(git diff --name-only "$BASE_SHA"..."$HEAD_SHA" | wc -l | tr -d ' ')
+            core.info(`Files changed: ${filesChanged}`);
+            core.info(`Lines added:   ${additions}`);
+            core.info(`Lines deleted: ${deletions}`);
 
-          echo "Files changed: $FILES_CHANGED"
-          echo "Lines added:   $ADDITIONS"
-          echo "Lines deleted: $DELETIONS"
+            await core.summary
+              .addHeading('PR Size', 2)
+              .addTable([
+                [{data: 'Metric', header: true}, {data: 'Value', header: true}],
+                ['Files changed', String(filesChanged)],
+                ['Lines added', String(additions)],
+                ['Lines deleted', String(deletions)]
+              ])
+              .write();
 
-          {
-            echo "## PR Size"
-            echo
-            echo "| Metric | Value |"
-            echo "| --- | ---: |"
-            echo "| Files changed | $FILES_CHANGED |"
-            echo "| Lines added | $ADDITIONS |"
-            echo "| Lines deleted | $DELETIONS |"
-          } >> "$GITHUB_STEP_SUMMARY"
+            const largeFilesThreshold = Number(process.env.LARGE_FILES_THRESHOLD || '50');
+            const largeLinesThreshold = Number(process.env.LARGE_LINES_THRESHOLD || '1000');
 
-          if (( FILES_CHANGED > LARGE_FILES_THRESHOLD )) || (( ADDITIONS > LARGE_LINES_THRESHOLD )); then
-            echo "::warning::Large PR detected (${FILES_CHANGED} files, ${ADDITIONS} additions). Consider splitting it for easier review."
-            echo "pr_size=large" >> "$GITHUB_OUTPUT"
-          else
-            echo "✓ PR size looks good"
-            echo "pr_size=normal" >> "$GITHUB_OUTPUT"
-          fi
+            if (filesChanged > largeFilesThreshold || additions > largeLinesThreshold) {
+              core.warning(`Large PR detected (${filesChanged} files, ${additions} additions). Consider splitting it for easier review.`);
+              core.setOutput('pr_size', 'large');
+            } else {
+              core.info('✓ PR size looks good');
+              core.setOutput('pr_size', 'normal');
+            }
 
   label-pr:
     name: Auto-label PR

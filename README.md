@@ -24,7 +24,16 @@ pinned: false
 
 ## What is Aria?
 
-Aria is a full-stack interactive AI character platform. She lives on a virtual 3D stage, responds to natural language commands ("wave", "pick up the ball", "dance"), speaks via text-to-speech, and is powered by a multi-provider AI backend that supports LM Studio, Ollama, Azure OpenAI, OpenAI, local models, and LoRA fine-tuned adapters.
+Aria is a full-stack interactive AI character platform. She lives on a virtual 3D stage, responds to natural language commands such as `wave`, `pick up the ball`, and `dance`, speaks via text-to-speech, and connects to multiple AI backends.
+
+## Features
+
+- Animated 3D character stage with object interaction
+- Natural-language command parsing and action execution
+- Multi-provider chat backends with local and cloud options
+- Azure Functions API layer for chat, TTS, and AI services
+- Experimental quantum ML, LoRA fine-tuning, and autonomous training workflows
+- Lightweight Hugging Face Spaces deployment via Gradio
 
 The project is organized around four core areas:
 
@@ -47,9 +56,9 @@ This repository is also configured to run as a **Gradio Hugging Face Space**.
 - Reusable demo helper: `scripts/gradio_hello.py`
 - SDK: `gradio`
 
-The Spaces deployment now exposes a **lightweight AI chat app** backed by the repository's existing provider abstraction. It can use the same provider layer as the rest of Aria (`auto`, local fallback, OpenAI, Azure OpenAI, LM Studio, Ollama, and AGI where configured), while remaining simpler than the full local Aria stack (`apps/aria/`, Azure Functions, training scripts, and quantum components).
+The Spaces deployment exposes a lightweight AI chat app backed by the repository's existing provider abstraction. It can use the same provider layer as the rest of Aria (`auto`, local fallback, OpenAI-compatible providers, and more).
 
-If you want to run the Space locally:
+To run the Space locally:
 
 ```bash
 ./.venv/bin/python app.py
@@ -61,16 +70,26 @@ If you want the full Aria platform instead, use the Quick Start steps below.
 
 ## 🚀 Quick Start
 
-### Prerequisites
+### Requirements
 
 - Python 3.9+
 - Git
+- Azure Functions Core Tools for `func host start`
+- Optional provider credentials for cloud-backed chat and speech features
 
-### 1 — Run the Aria character web UI
+### Optional local setup
+
+```bash
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+```
+
+### 1 — Run the Aria web UI
 
 ```bash
 cd apps/aria
-pip install -r ../../requirements.txt   # only needed once
+pip install -r ../../requirements.txt
 python server.py
 # Open http://localhost:8080
 ```
@@ -97,34 +116,57 @@ Interactive session commands: `/new`, `/save`, `/exit`.
 ```bash
 func host start
 # Endpoints: /api/chat, /api/chat-web, /api/tts, /api/quantum/*, /api/ai/status
-curl http://localhost:7071/api/ai/status | python -m json.tool   # health check
+curl http://localhost:7071/api/ai/status | python -m json.tool
+```
+
+### 4 — Run the Hugging Face Space locally
+
+```bash
+./.venv/bin/python app.py
+```
+
+### 5 — Local autonomous/dev stack with Docker Compose
+
+```bash
+make build
+make dev
+# Aria: http://localhost:8080
+# Functions: http://localhost:7071/api/ai/status
+```
+
+To run the autonomous training orchestrator safely as a single instance:
+
+```bash
+python scripts/autonomous_training_orchestrator.py --cycles 1
+# If a stale lock exists and you intentionally want takeover:
+python scripts/autonomous_training_orchestrator.py --force-run --cycles 1
 ```
 
 ---
 
 ## 🏗️ Project Structure
 
-```
-apps/aria/          Animated character stage (HTML/CSS/JS + Python API server)
-apps/chat/          Browser-based streaming chat UI
-ai-projects/chat-cli/ Multi-provider chat CLI
+```text
+apps/aria/             Animated character stage (HTML/CSS/JS + Python API server)
+apps/chat/             Browser-based streaming chat UI
+ai-projects/chat-cli/  Multi-provider chat CLI
 ai-projects/quantum-ml/ Quantum ML platform (circuits, MCP server, Azure Quantum)
 ai-projects/llm-maker/ Autonomous tool-creation system
 ai-projects/cooking-ai/ Cooking-focused AI assistant
-AI/                 LoRA fine-tuning workspace (Phi / TinyLlama)
-shared/             Shared Python modules (providers, DB, telemetry, Cosmos)
-scripts/            Orchestration, training, evaluation, and utility scripts
-config/             YAML configs for orchestrators
-datasets/           Read-only training datasets
-data_out/           All generated outputs (git-ignored)
-function_app.py     Azure Functions entry point (all /api/* endpoints)
+AI/                    LoRA fine-tuning workspace (Phi / TinyLlama)
+shared/                Shared Python modules (providers, DB, telemetry, Cosmos)
+scripts/               Orchestration, training, evaluation, and utility scripts
+config/                YAML configs for orchestrators
+datasets/              Read-only training datasets
+data_out/              All generated outputs (git-ignored)
+function_app.py        Azure Functions entry point (all /api/* endpoints)
 ```
 
 ---
 
 ## 🎭 Aria Character
 
-The Aria character runs at `http://localhost:8080` (or the [GitHub Pages demo](https://bryan-roe.github.io/Aria)).
+The Aria character stage runs at `http://localhost:8080` or the [GitHub Pages demo](https://bryan-roe.github.io/Aria).
 
 **Natural language commands (examples):**
 
@@ -136,7 +178,7 @@ The Aria character runs at `http://localhost:8080` (or the [GitHub Pages demo](h
 | `throw the ball` | Throw held object with physics |
 | `say hello` | Aria speaks the text aloud via TTS |
 
-The auto-execute system parses complex multi-step requests ("walk to the table and pick up the apple") into a structured sequence of 8 core actions: `move`, `say`, `pickup`, `drop`, `throw`, `gesture`, `look`, `wait`.
+The auto-execute system parses complex multi-step requests such as `walk to the table and pick up the apple` into a structured sequence of 8 core actions: `move`, `say`, `pickup`, `drop`, `throw`, `gesture`, `world`, and `expression`.
 
 **Aria web server API (port 8080):**
 
@@ -154,24 +196,32 @@ The auto-execute system parses complex multi-step requests ("walk to the table a
 
 Provider auto-detection order:
 
-```
+```text
 LM Studio → Ollama → Azure OpenAI → OpenAI → Local (zero-dependency echo)
 ```
 
 Pass `--provider` to override: `local`, `openai`, `azure`, `lmstudio`, `ollama`, `lora`, `quantum`, `agi`.
 
-**Azure OpenAI** — all four variables required:
+### Environment variables
 
-```
+#### Azure OpenAI
+
+```text
 AZURE_OPENAI_API_KEY
 AZURE_OPENAI_ENDPOINT
 AZURE_OPENAI_DEPLOYMENT
 AZURE_OPENAI_API_VERSION
 ```
 
+#### OpenAI
+
+```text
+OPENAI_API_KEY
+```
+
 **LoRA adapter** — adapter directory must contain:
 
-```
+```text
 adapter_config.json
 adapter_model.safetensors
 ```
@@ -186,22 +236,23 @@ All providers implement `BaseChatProvider.complete(messages, stream)`. Add a new
 
 ## ⚛️ Quantum ML (Experimental)
 
-Local Qiskit Aer simulation is free and unlimited. Azure simulator backends are also free. Real QPU hardware is billed per gate-shot — always simulate first.
+Local Qiskit Aer simulation is free and unlimited. Azure simulator backends are also free. Real QPU hardware is billed per gate-shot, so always simulate first.
 
-**Workflow:** Test locally → Validate on Azure simulator → Run on QPU (set `azure_confirm_cost: true` in YAML first)
+**Workflow:** Test locally → Validate on Azure simulator → Run on QPU (`azure_confirm_cost: true` in YAML required before hardware runs)
 
 ```bash
 # Validate config without running anything
 python scripts/quantum_autorun.py --dry-run
 
 # Interactive training dashboard
-cd ai-projects/quantum-ml && ./start_dashboard.sh   # http://localhost:5000
+cd ai-projects/quantum-ml && ./start_dashboard.sh
+# Open http://localhost:5000
 
 # Start the MCP server (8 quantum tools)
 python ai-projects/quantum-ml/quantum_mcp_server.py
 ```
 
-**MCP tools:** `create_quantum_circuit`, `simulate_quantum_circuit`, `get_quantum_circuit_properties`, `connect_azure_quantum`, `list_quantum_backends`, `submit_quantum_job`, `estimate_quantum_cost`, `train_quantum_classifier`.
+**MCP tools:** `create_quantum_circuit`, `simulate_quantum_circuit`, `get_quantum_circuit_properties`, `connect_azure_quantum`, `list_quantum_backends`, `submit_quantum_job`, `estimate_quantum_cost`, `get_job_status`
 
 ---
 
@@ -245,12 +296,12 @@ tail -f data_out/autonomous_training.log
 An autonomous system where an LLM generates, validates, and sandboxes Python tools at runtime.
 
 ```bash
-cd llm-maker
-python examples/quick_start.py        # create a tool from a description
-python llm_maker_mcp_server.py        # expose tools via MCP
+cd ai-projects/llm-maker
+python examples/quick_start.py
+python llm_maker_mcp_server.py
 ```
 
-Security: no dangerous imports, no filesystem or network access, no `eval`/`exec`, sandboxed execution with resource limits.
+Security: no dangerous imports, no filesystem or network access, no `eval` / `exec`, sandboxed execution with resource limits.
 
 ---
 
@@ -276,7 +327,7 @@ bash ./scripts/integration_contract_gate.sh --strict-endpoints
 pytest -m "not slow and not azure" tests/
 ```
 
-VS Code users: open the Test Explorer (🧪 beaker icon) for interactive test running and debugging.
+VS Code users: open the Test Explorer for interactive test running and debugging.
 
 ---
 
@@ -284,7 +335,7 @@ VS Code users: open the Test Explorer (🧪 beaker icon) for interactive test ru
 
 **[https://bryan-roe.github.io/Aria](https://bryan-roe.github.io/Aria)**
 
-The demo runs in mock mode with simulated API responses — no API keys needed. For full AI capabilities, run the project locally.
+The demo runs in mock mode with simulated API responses, so no API keys are needed. For full AI capabilities, run the project locally.
 
 ---
 
@@ -298,9 +349,9 @@ cp local.settings.json.example local.settings.json
 # Fill in API keys as needed
 ```
 
-Never commit secrets. All keys belong in environment variables or `local.settings.json` (development only).
+Never commit secrets. Store keys in environment variables or `local.settings.json` for local development only.
 
-**Optional services** (feature-flagged — safe to leave unset):
+**Optional services** (feature-flagged and safe to leave unset):
 
 | Service | How to enable |
 | --- | --- |
@@ -312,6 +363,15 @@ Never commit secrets. All keys belong in environment variables or `local.setting
 
 ---
 
+## Troubleshooting
+
+- If `func host start` fails, install Azure Functions Core Tools and confirm it is on your `PATH`.
+- If `http://localhost:8080` or `http://localhost:7071` is unavailable, check for local port conflicts.
+- If cloud providers fail, verify the required environment variables are set correctly.
+- If no provider credentials are configured, use `--provider local` for a zero-dependency fallback.
+
+---
+
 ## 📚 Documentation
 
 | Document | Purpose |
@@ -320,7 +380,7 @@ Never commit secrets. All keys belong in environment variables or `local.setting
 | [ai-projects/quantum-ml/README.md](ai-projects/quantum-ml/README.md) | Quantum ML platform guide |
 | [ai-projects/chat-cli/README.md](ai-projects/chat-cli/README.md) | Chat CLI reference |
 | [ai-projects/llm-maker/README.md](ai-projects/llm-maker/README.md) | Tool maker guide |
-| [docs/aria/](docs/aria/) | Aria movement & training documentation |
+| [docs/aria/](docs/aria/) | Aria movement and training documentation |
 | [MONETIZATION_GUIDE.md](MONETIZATION_GUIDE.md) | Subscription and revenue system |
 | [docs/guides/REPO_AUTOMATION_GUIDE.md](docs/guides/REPO_AUTOMATION_GUIDE.md) | Full repository automation reference |
 | [QUANTUM_LLM_TRAINING.md](QUANTUM_LLM_TRAINING.md) | Quantum-LLM concurrent training |
@@ -329,9 +389,11 @@ Never commit secrets. All keys belong in environment variables or `local.setting
 
 ## 🤝 Contributing
 
-- Update `README.md` when adding configuration options, changing CLI flags, introducing new providers, or modifying cost behaviour.
-- All output files go under `data_out/` (git-ignored). Never modify files under `datasets/`.
-- Always run `--dry-run` on orchestrators before executing GPU or QPU workloads.
+- Update `README.md` when adding configuration options, changing CLI flags, introducing new providers, or modifying cost behavior.
+- Put generated outputs under `data_out/` (git-ignored).
+- Never modify files under `datasets/`.
+- Run `--dry-run` on orchestrators before executing GPU or QPU workloads.
+- Run tests before opening a pull request.
 
 ---
 

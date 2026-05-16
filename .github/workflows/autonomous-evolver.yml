@@ -1,3 +1,6 @@
+# Aria Autonomous Evolver
+# Improved workflow: clearer steps, outputs, conditional dispatch, pinned action versions, concurrency and minimal permissions.
+
 name: Aria Autonomous Evolver
 
 on:
@@ -6,37 +9,145 @@ on:
     types:
       - completed
   workflow_dispatch:
+    inputs:
+      force_evolution:
+        description: "Force evolution dispatch regardless of computed metrics"
+        required: false
+        default: "false"
+      fitness_threshold:
+        description: "Trigger threshold: fitness must be greater than this value (0-100)"
+        required: false
+        default: "60"
+      stability_threshold:
+        description: "Trigger threshold: stability must be lower than this value (0-100)"
+        required: false
+        default: "70"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  actions: write
 
 jobs:
   evolve:
+    name: Evaluate & optionally trigger evolution
     runs-on: ubuntu-latest
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (
+        github.event_name == 'workflow_run' &&
+        github.event.workflow_run.conclusion == 'success' &&
+        github.event.workflow_run.head_branch == 'main'
+      )
+    defaults:
+      run:
+        shell: bash
 
     steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4.3.1
-
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020  # v4
+      - name: Checkout repository
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4.3.1
         with:
-          node-version: 20
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020  # v4
+        with:
+          node-version: "20.x"
 
       - name: Evaluate evolution conditions
+        id: evaluate
         run: |
-          node -e "
-          console.log('Evaluating evolution readiness...');
+          set -euo pipefail
+          node <<'NODE'
+          const fs = require('fs');
 
           const fitness = Math.random() * 100;
           const stability = Math.random() * 100;
+          const parsedFitnessThreshold = Number(process.env.FITNESS_THRESHOLD);
+          const parsedStabilityThreshold = Number(process.env.STABILITY_THRESHOLD);
+          const fitnessThreshold = Number.isFinite(parsedFitnessThreshold) ? parsedFitnessThreshold : 60;
+          const stabilityThreshold = Number.isFinite(parsedStabilityThreshold) ? parsedStabilityThreshold : 70;
+          const forceEvolution = (process.env.FORCE_EVOLUTION || 'false').toLowerCase() === 'true';
+          const telemetryConclusion = process.env.TELEMETRY_CONCLUSION || 'n/a';
 
-          console.log('fitness:', fitness);
-          console.log('stability:', stability);
+          const triggered = forceEvolution || (fitness > fitnessThreshold && stability < stabilityThreshold);
+          const reason = forceEvolution
+            ? 'forced'
+            : `fitness>${fitnessThreshold} && stability<${stabilityThreshold}`;
 
-          if (fitness > 60 && stability < 70) {
-            console.log('EVOLUTION TRIGGERED');
-            process.exit(0);
-          } else {
-            console.log('No evolution required');
-            process.exit(0);
-          }
-          "
+          console.log('Evaluating evolution readiness...');
+          console.log('telemetry conclusion:', telemetryConclusion);
+          console.log('fitness:', fitness.toFixed(2));
+          console.log('stability:', stability.toFixed(2));
+          console.log('evolution triggered:', triggered);
+          console.log('reason:', reason);
 
-      - name: Trigger experiment fork signal
-        run: echo "evolution cycle complete"
+          const out = [];
+          out.push(`evolution_triggered=${triggered}`);
+          out.push(`fitness=${fitness.toFixed(4)}`);
+          out.push(`stability=${stability.toFixed(4)}`);
+          out.push(`reason=${reason}`);
+          fs.appendFileSync(process.env.GITHUB_OUTPUT, out.join('\n') + '\n');
+          NODE
+        env:
+          NODE_OPTIONS: "--no-warnings"
+          TELEMETRY_CONCLUSION: ${{ github.event.workflow_run.conclusion }}
+          FORCE_EVOLUTION: ${{ inputs.force_evolution || 'false' }}
+          FITNESS_THRESHOLD: ${{ inputs.fitness_threshold || '60' }}
+          STABILITY_THRESHOLD: ${{ inputs.stability_threshold || '70' }}
+
+      - name: Log result when no evolution required
+        if: ${{ steps.evaluate.outputs.evolution_triggered != 'true' }}
+        run: |
+          echo "No evolution required this cycle."
+          echo "fitness=${{ steps.evaluate.outputs.fitness }}"
+          echo "stability=${{ steps.evaluate.outputs.stability }}"
+
+      - name: Trigger experiment fork signal (repository_dispatch)
+        if: ${{ steps.evaluate.outputs.evolution_triggered == 'true' }}
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b  # v7 (pinned SHA)
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            try {
+              // Create a repository dispatch event so other workflows or automation can react.
+              // Event type: 'aria-evolution-triggered'
+              await github.repos.createDispatchEvent({
+                owner,
+                repo,
+                event_type: 'aria-evolution-triggered',
+                client_payload: {
+                  source_workflow: context.workflow,
+                  trigger: 'autonomous-evolver',
+                  evaluated: {
+                    fitness: process.env.FITNESS || null,
+                    stability: process.env.STABILITY || null,
+                    reason: process.env.REASON || null
+                  }
+                }
+              });
+              core.info('repository_dispatch aria-evolution-triggered sent successfully.');
+            } catch (error) {
+              const details = {
+                message: error?.message || String(error),
+                status: error?.status || null
+              };
+              core.setFailed(`Failed to dispatch aria-evolution-triggered event to ${owner}/${repo}: ${JSON.stringify(details)}`);
+            }
+        env:
+          FITNESS: ${{ steps.evaluate.outputs.fitness }}
+          STABILITY: ${{ steps.evaluate.outputs.stability }}
+          REASON: ${{ steps.evaluate.outputs.reason }}
+
+      - name: Finalize
+        run: |
+          echo "Evolution evaluation finished."
+          echo "evolution_triggered=${{ steps.evaluate.outputs.evolution_triggered }}"
+          echo "fitness=${{ steps.evaluate.outputs.fitness }}"
+          echo "stability=${{ steps.evaluate.outputs.stability }}"
+          echo "reason=${{ steps.evaluate.outputs.reason }}"

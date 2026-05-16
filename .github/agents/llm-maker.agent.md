@@ -94,7 +94,7 @@ eval, exec, compile, __import__, open, input, breakpoint, exit
 ## Key Files
 
 | File | Purpose |
-|------|---------|
+| ------ | --------- |
 | `ai-projects/llm-maker/src/tool_maker.py` | `ToolMaker` — iterative safe code generation |
 | `ai-projects/llm-maker/src/website_maker.py` | `WebsiteMaker` — full site generation with metadata |
 | `ai-projects/llm-maker/src/tool_validator.py` | `ToolValidator` — AST + regex safety validation |

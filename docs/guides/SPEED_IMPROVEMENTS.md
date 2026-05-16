@@ -55,7 +55,7 @@ python .\scripts\test_runner.py --unit --watch
 ## Benchmarks
 
 | Operation | Before | After | Speedup |
-|-----------|--------|-------|---------|
+| ----------- | -------- | ------- | --------- |
 | Fast validation | 10s | 0.1s | **100x** |
 | Test watch polling | 2s | 0.5s | **4x** |
 | Orchestrator iteration | 10s | 3s | **3.3x** |

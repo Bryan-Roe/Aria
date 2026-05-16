@@ -65,7 +65,7 @@ Highlights:
 ## 🎯 Integration Status
 
 | Component | Status | Details |
-|-----------|--------|---------|
+| ----------- | -------- | --------- |
 | Database Schema | ✅ Complete | 8 tables (added ChatMessageEmbeddings), 3 views, 4 stored procedures |
 | Quantum Training Logging | ✅ Complete | Auto-logs via `log_quantum_run_safe()` |
 | LoRA Training Logging | ✅ Complete | Auto-logs via `log_lora_run_safe()` |

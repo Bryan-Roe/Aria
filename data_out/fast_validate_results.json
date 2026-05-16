@@ -1,0 +1,83 @@
+{
+  "checks": [
+    {
+      "check": "Datasets",
+      "status": "ok",
+      "categories_found": 1,
+      "speed": "instant"
+    },
+    {
+      "check": "Scripts",
+      "status": "ok",
+      "missing": [],
+      "speed": "instant"
+    },
+    {
+      "check": "Virtual Envs",
+      "status": "ok",
+      "venvs_found": 3,
+      "speed": "instant"
+    },
+    {
+      "check": "Output Dirs",
+      "status": "ok",
+      "issues": [],
+      "speed": "instant"
+    },
+    {
+      "check": "Configs",
+      "status": "ok",
+      "issues": [],
+      "speed": "instant"
+    },
+    {
+      "check": "Providers",
+      "status": "no_providers",
+      "available": [],
+      "speed": "instant"
+    },
+    {
+      "check": "AI Tokens",
+      "status": "ok",
+      "healthy": 1,
+      "total": 1,
+      "stale": false,
+      "last_updated": "2026-03-29T08:40:42Z",
+      "providers": {
+        "ollama": {
+          "status": "ok",
+          "token_present": true,
+          "token_generated": false,
+          "token_rotated": false,
+          "endpoint": "http://127.0.0.1:11434",
+          "model": "tinyllama:latest",
+          "latency_ms": 22.5,
+          "error": "",
+          "notes": []
+        }
+      },
+      "speed": "instant"
+    },
+    {
+      "check": "Dependencies",
+      "status": "ok",
+      "present": [
+        "pytest",
+        "yaml",
+        "flask",
+        "azure.functions"
+      ],
+      "missing": [],
+      "speed": "instant",
+      "project_python": ".venv/bin/python"
+    }
+  ],
+  "summary": {
+    "total_checks": 8,
+    "ok_count": 7,
+    "warning_count": 1,
+    "critical_failure_count": 0,
+    "critical_failure_checks": []
+  },
+  "all_ok": true
+}

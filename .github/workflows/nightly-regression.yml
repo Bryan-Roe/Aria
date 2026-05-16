@@ -3,7 +3,7 @@
 # =============================================================================
 # Purpose: Runs the full test suite nightly, archives results as artifacts,
 #          and opens a GitHub Issue if the pass-rate drops compared to the
-#          previous run (regression detection).
+#          previous successful run (regression detection).
 # Triggers: Nightly at 03:00 UTC, manual dispatch
 # =============================================================================
 
@@ -22,10 +22,16 @@ on:
         options:
           - 'false'
           - 'true'
+      coverage-threshold:
+        description: 'Minimum coverage percentage (0 disables)'
+        required: false
+        default: '0'
+        type: string
 
 permissions:
   contents: read
   issues: write
+  actions: read  # Required to read previous workflow run artifacts
 
 concurrency:
   group: nightly-regression
@@ -33,8 +39,15 @@ concurrency:
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true  # Opt into Node.js 24 for JS actions ahead of June 2026 forced migration
+  PYTHONUNBUFFERED: '1'
+  PIP_DISABLE_PIP_VERSION_CHECK: '1'
+
+defaults:
+  run:
+    shell: bash
 
 jobs:
+  # ── Full test run ────────────────────────────────────────────────────────────
   full-test-suite:
     name: Full Test Suite
     runs-on: ubuntu-latest
@@ -43,11 +56,16 @@ jobs:
       passed: ${{ steps.parse.outputs.passed }}
       failed: ${{ steps.parse.outputs.failed }}
       skipped: ${{ steps.parse.outputs.skipped }}
+      errors: ${{ steps.parse.outputs.errors }}
+      total: ${{ steps.parse.outputs.total }}
       exit-code: ${{ steps.run-tests.outputs.exit-code }}
 
     steps:
       - name: Checkout code
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4.3.1
+        with:
+          fetch-depth: 1
+          persist-credentials: false
 
       - name: Setup Python
         uses: ./.github/actions/setup-python-env
@@ -57,45 +75,106 @@ jobs:
 
       - name: Verify critical dependencies
         run: |
+          set -euo pipefail
           echo "Verifying critical test dependencies are installed..."
-          python -c "import azure.functions; print('✓ azure-functions installed')"
-          python -c "import openai; print('✓ openai installed')"
-          python -c "import pytest; print('✓ pytest installed')"
-          echo "All critical dependencies verified."
+          python - <<'PY'
+          import importlib, sys
+          required = ["azure.functions", "openai", "pytest"]
+          missing = []
+          for mod in required:
+              try:
+                  importlib.import_module(mod)
+                  print(f"✓ {mod} installed")
+              except ImportError as e:
+                  print(f"✗ {mod} MISSING: {e}", file=sys.stderr)
+                  missing.append(mod)
+          if missing:
+              sys.exit(f"Missing required modules: {missing}")
+          PY
 
       - name: Resolve pytest flags
         id: flags
+        env:
+          FAIL_FAST: ${{ github.event.inputs.fail-fast }}
         run: |
-          if [[ "${{ github.event.inputs.fail-fast }}" == "true" ]]; then
-            echo "extra=--maxfail=1" >> $GITHUB_OUTPUT
-          else
-            echo "extra=" >> $GITHUB_OUTPUT
+          set -euo pipefail
+          extra=""
+          if [[ "${FAIL_FAST:-false}" == "true" ]]; then
+            extra="--maxfail=1"
           fi
+          echo "extra=${extra}" >> "$GITHUB_OUTPUT"
 
       - name: Run full test suite
         id: run-tests
+        env:
+          PYTEST_EXTRA: ${{ steps.flags.outputs.extra }}
         run: |
-          set +e
+          set -uo pipefail
+          # shellcheck disable=SC2086
           python -m pytest tests/ -q --tb=short \
             --junitxml=test-results.xml \
             --cov=. \
             --cov-report=xml:coverage.xml \
-            ${{ steps.flags.outputs.extra }} \
+            --cov-report=term-missing:skip-covered \
+            ${PYTEST_EXTRA} \
             2>&1 | tee pytest-output.txt
-          echo "exit-code=$?" >> $GITHUB_OUTPUT
+          # Capture pytest's exit code (not tee's), thanks to pipefail
+          exit_code="${PIPESTATUS[0]}"
+          echo "exit-code=${exit_code}" >> "$GITHUB_OUTPUT"
+          echo "Pytest exit code: ${exit_code}"
+          # Don't fail the step here; downstream steps need to run to upload artifacts.
 
-      - name: Parse results
+      - name: Parse results (JUnit XML)
         id: parse
+        if: always()
         run: |
-          # Extract "X passed, Y failed, Z skipped" from pytest output
-          SUMMARY=$(grep -E "[0-9]+ passed" pytest-output.txt | tail -1 || echo "0 passed")
-          PASSED=$(echo "$SUMMARY" | grep -oE "[0-9]+ passed" | grep -oE "[0-9]+" || echo "0")
-          FAILED=$(echo "$SUMMARY" | grep -oE "[0-9]+ failed" | grep -oE "[0-9]+" || echo "0")
-          SKIPPED=$(echo "$SUMMARY" | grep -oE "[0-9]+ skipped" | grep -oE "[0-9]+" || echo "0")
-          echo "passed=$PASSED" >> $GITHUB_OUTPUT
-          echo "failed=$FAILED" >> $GITHUB_OUTPUT
-          echo "skipped=$SKIPPED" >> $GITHUB_OUTPUT
-          echo "Passed=$PASSED  Failed=$FAILED  Skipped=$SKIPPED"
+          set -euo pipefail
+          python - <<'PY' >> "$GITHUB_OUTPUT"
+          import os, sys, xml.etree.ElementTree as ET
+          path = "test-results.xml"
+          passed = failed = skipped = errors = total = 0
+          if os.path.exists(path):
+              try:
+                  root = ET.parse(path).getroot()
+                  suites = root.findall(".//testsuite") or [root]
+                  for s in suites:
+                      total   += int(s.attrib.get("tests", 0))
+                      failed  += int(s.attrib.get("failures", 0))
+                      errors  += int(s.attrib.get("errors", 0))
+                      skipped += int(s.attrib.get("skipped", 0))
+                  passed = max(total - failed - errors - skipped, 0)
+              except ET.ParseError as e:
+                  print(f"# JUnit parse error: {e}", file=sys.stderr)
+          print(f"passed={passed}")
+          print(f"failed={failed}")
+          print(f"skipped={skipped}")
+          print(f"errors={errors}")
+          print(f"total={total}")
+          PY
+
+      - name: Log parsed result totals
+        if: always()
+        run: |
+          echo "Parsed: passed=${{ steps.parse.outputs.passed }} failed=${{ steps.parse.outputs.failed }} skipped=${{ steps.parse.outputs.skipped }} errors=${{ steps.parse.outputs.errors }}"
+
+      - name: Enforce coverage threshold
+        if: ${{ github.event.inputs.coverage-threshold != '' && github.event.inputs.coverage-threshold != '0' }}
+        env:
+          COV_MIN: ${{ github.event.inputs.coverage-threshold }}
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import os, sys, xml.etree.ElementTree as ET
+          threshold = float(os.environ.get("COV_MIN", "0") or "0")
+          if threshold <= 0:
+              sys.exit(0)
+              if not os.path.exists("coverage.xml"):
+              sys.exit("coverage.xml not found")
+          rate = float(ET.parse("coverage.xml").getroot().attrib.get("line-rate", "0")) * 100
+          print(f"Line coverage: {rate:.2f}%  (threshold: {threshold:.2f}%)")
+          if rate + 1e-9 < threshold:
+              sys.exit(f"Coverage {rate:.2f}% is below threshold {threshold:.2f}%")
+          PY
 
       - name: Upload test results
         if: always()
@@ -112,15 +191,27 @@ jobs:
       - name: Generate summary
         if: always()
         run: |
-          echo "## Nightly Regression Baseline" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "| Result | Count |" >> $GITHUB_STEP_SUMMARY
-          echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
-          echo "| ✅ Passed | ${{ steps.parse.outputs.passed }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| ❌ Failed | ${{ steps.parse.outputs.failed }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| ⏭️ Skipped | ${{ steps.parse.outputs.skipped }} |" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Run date:** $(date -u +'%Y-%m-%d %H:%M UTC')" >> $GITHUB_STEP_SUMMARY
+          set -euo pipefail
+          {
+            echo "## Nightly Regression Baseline"
+            echo ""
+            echo "| Result | Count |"
+            echo "|--------|-------|"
+            echo "| ✅ Passed | ${{ steps.parse.outputs.passed }} |"
+            echo "| ❌ Failed | ${{ steps.parse.outputs.failed }} |"
+            echo "| 💥 Errors | ${{ steps.parse.outputs.errors }} |"
+            echo "| ⏭️ Skipped | ${{ steps.parse.outputs.skipped }} |"
+            echo "| 🧮 Total | ${{ steps.parse.outputs.total }} |"
+            echo ""
+            echo "**Pytest exit code:** \`${{ steps.run-tests.outputs.exit-code }}\`"
+            echo "**Run date:** $(date -u +'%Y-%m-%d %H:%M UTC')"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Fail job on test failures
+        if: always() && steps.run-tests.outputs.exit-code != '0' && steps.run-tests.outputs.exit-code != '5'
+        run: |
+          echo "::error::Pytest exited with code ${{ steps.run-tests.outputs.exit-code }} (failures=${{ steps.parse.outputs.failed }}, errors=${{ steps.parse.outputs.errors }})"
+          exit 1
 
   # ── Regression detection ─────────────────────────────────────────────────────
   detect-regression:
@@ -132,87 +223,156 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4.3.1
+        with:
+          fetch-depth: 1
+          persist-credentials: false
 
-      - name: Download previous baseline artifact
+      - name: Download previous successful baseline
         id: download-prev
         uses: dawidd6/action-download-artifact@bf251b5aa9c2f7eeb574a96ee720e24f801b7c11  # v6
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           workflow: nightly-regression.yml
-          # Get the most recent *successful* prior run
-          workflow_conclusion: completed
-          run_id: ${{ github.run_id }}
-          skip_unpack: false
-          name: nightly-test-results-*
-          # Use the run before the current one
+          workflow_conclusion: success
+          name: nightly-test-results-
+          name_is_regexp: true
+          path: ./prev-baseline
           if_no_artifact_found: warn
+          # Find the most recent successful run that is NOT the current one.
+          # (Omitting run_id makes the action pick the latest successful run.)
         continue-on-error: true
 
       - name: Compare against baseline
         id: compare
         env:
-          CURRENT_PASSED: ${{ needs.full-test-suite.outputs.passed }}
-          CURRENT_FAILED: ${{ needs.full-test-suite.outputs.failed }}
+          CURRENT_PASSED:  ${{ needs.full-test-suite.outputs.passed }}
+          CURRENT_FAILED:  ${{ needs.full-test-suite.outputs.failed }}
+          CURRENT_ERRORS:  ${{ needs.full-test-suite.outputs.errors }}
+          CURRENT_SKIPPED: ${{ needs.full-test-suite.outputs.skipped }}
         run: |
+          set -euo pipefail
           PREV_PASSED=0
-          PREV_OUTPUT_FILE=$(find . -type f -name 'pytest-output.txt' | head -1)
-          if [ -n "$PREV_OUTPUT_FILE" ] && [ -f "$PREV_OUTPUT_FILE" ]; then
-            PREV_PASSED=$(grep -oE "[0-9]+ passed" "$PREV_OUTPUT_FILE" | tail -1 | grep -oE "[0-9]+" || echo "0")
+          PREV_FOUND=false
+
+          # Look for any prior JUnit XML artifact first (more reliable than text parsing)
+          PREV_XML="$(find ./prev-baseline -type f -name 'test-results.xml' 2>/dev/null | head -n1 || true)"
+          if [[ -n "${PREV_XML}" && -f "${PREV_XML}" ]]; then
+            PREV_FOUND=true
+            PREV_PASSED="$(python - <<PY
+          import xml.etree.ElementTree as ET
+          r = ET.parse("${PREV_XML}").getroot()
+          suites = r.findall('.//testsuite') or [r]
+          total = sum(int(s.attrib.get('tests',0)) for s in suites)
+          fail  = sum(int(s.attrib.get('failures',0)) for s in suites)
+          err   = sum(int(s.attrib.get('errors',0)) for s in suites)
+          skip  = sum(int(s.attrib.get('skipped',0)) for s in suites)
+          print(max(total - fail - err - skip, 0))
+          PY
+          )"
+          else
+            # Fallback: parse pytest text output
+            PREV_TXT="$(find ./prev-baseline -type f -name 'pytest-output.txt' 2>/dev/null | head -n1 || true)"
+            if [[ -n "${PREV_TXT}" && -f "${PREV_TXT}" ]]; then
+              PREV_FOUND=true
+              PREV_PASSED="$(grep -oE '[0-9]+ passed' "${PREV_TXT}" | tail -1 | grep -oE '[0-9]+' || echo 0)"
+            fi
           fi
 
-          echo "Previous passed: $PREV_PASSED"
-          echo "Current passed:  $CURRENT_PASSED"
-          echo "Current failed:  $CURRENT_FAILED"
+          echo "Previous found:  ${PREV_FOUND}"
+          echo "Previous passed: ${PREV_PASSED}"
+          echo "Current passed:  ${CURRENT_PASSED}"
+          echo "Current failed:  ${CURRENT_FAILED}"
+          echo "Current errors:  ${CURRENT_ERRORS}"
 
-          REGRESSION=false
-          if [ "$CURRENT_FAILED" -gt "0" ]; then
-            REGRESSION=true
-            echo "Failures detected: $CURRENT_FAILED"
+          regression=false
+          reason=""
+
+          # Hard regression: any failures or errors in this run.
+          if [[ "${CURRENT_FAILED}" -gt 0 || "${CURRENT_ERRORS}" -gt 0 ]]; then
+            regression=true
+            reason="Test failures detected (failed=${CURRENT_FAILED}, errors=${CURRENT_ERRORS})."
           fi
-          echo "regression=$REGRESSION" >> $GITHUB_OUTPUT
-          echo "prev-passed=$PREV_PASSED" >> $GITHUB_OUTPUT
+
+          # Soft regression: pass count dropped vs. last successful run.
+          if [[ "${PREV_FOUND}" == "true" && "${CURRENT_PASSED}" -lt "${PREV_PASSED}" ]]; then
+            regression=true
+            reason="${reason:+${reason} }Pass count dropped: ${PREV_PASSED} → ${CURRENT_PASSED}."
+          fi
+
+          {
+            echo "regression=${regression}"
+            echo "prev-passed=${PREV_PASSED}"
+            echo "prev-found=${PREV_FOUND}"
+          } >> "$GITHUB_OUTPUT"
+
+          # Multi-line reason via heredoc-style delimiter
+          {
+            echo "reason<<__EOF__"
+            echo "${reason:-No regression detected.}"
+            echo "__EOF__"
+          } >> "$GITHUB_OUTPUT"
 
       - name: Open regression issue
         if: steps.compare.outputs.regression == 'true'
         uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b  # v7
+        env:
+          PASSED:      ${{ needs.full-test-suite.outputs.passed }}
+          FAILED:      ${{ needs.full-test-suite.outputs.failed }}
+          ERRORS:      ${{ needs.full-test-suite.outputs.errors }}
+          SKIPPED:     ${{ needs.full-test-suite.outputs.skipped }}
+          PREV_PASSED: ${{ steps.compare.outputs.prev-passed }}
+          REASON:      ${{ steps.compare.outputs.reason }}
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const title = `🚨 Nightly Regression — ${new Date().toISOString().slice(0,10)}`;
+            const today = new Date().toISOString().slice(0, 10);
+            const title = `🚨 Nightly Regression — ${today}`;
+            const runUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+
             const body = [
               `## Nightly Regression Detected`,
               ``,
-              `The nightly test suite detected failures on **${new Date().toUTCString()}**.`,
+              `The nightly test suite reported a regression on **${new Date().toUTCString()}**.`,
               ``,
-              `| Metric | Value |`,
-              `|--------|-------|`,
-              `| ✅ Passed | ${{ needs.full-test-suite.outputs.passed }} |`,
-              `| ❌ Failed | ${{ needs.full-test-suite.outputs.failed }} |`,
-              `| ⏭️ Skipped | ${{ needs.full-test-suite.outputs.skipped }} |`,
+              `**Reason:** ${process.env.REASON}`,
               ``,
-              `**Workflow run:** ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}`,
+              `| Metric | Current | Previous (last success) |`,
+              `|--------|---------|--------------------------|`,
+              `| ✅ Passed   | ${process.env.PASSED}  | ${process.env.PREV_PASSED} |`,
+              `| ❌ Failed   | ${process.env.FAILED}  | — |`,
+              `| 💥 Errors   | ${process.env.ERRORS}  | — |`,
+              `| ⏭️ Skipped | ${process.env.SKIPPED} | — |`,
+              ``,
+              `**Workflow run:** ${runUrl}`,
               ``,
               `Please investigate and resolve failures before the next release.`,
             ].join('\n');
 
-            // Avoid duplicate issues: search for an open regression issue from today
-            const today = new Date().toISOString().slice(0, 10);
-            const issues = await github.rest.issues.listForRepo({
+            // Avoid duplicate issues: search for an open regression issue from today (paginated).
+            const issues = await github.paginate(github.rest.issues.listForRepo, {
               owner: context.repo.owner,
               repo: context.repo.repo,
               state: 'open',
               labels: 'regression,automated',
+              per_page: 100,
             });
-            const existing = issues.data.find(i => i.title.includes(today));
+            const existing = issues.find(i => i.title.includes(today));
             if (existing) {
-              console.log(`Regression issue already open: #${existing.number}`);
+              core.notice(`Regression issue already open: #${existing.number}`);
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: existing.number,
+                body: `Another regression run reported failures.\n\n${body}`,
+              });
               return;
             }
 
-            await github.rest.issues.create({
+            const created = await github.rest.issues.create({
               owner: context.repo.owner,
               repo: context.repo.repo,
               title,
               body,
               labels: ['regression', 'automated', 'bug'],
             });
+            core.notice(`Opened regression issue #${created.data.number}`);

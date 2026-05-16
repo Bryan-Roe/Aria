@@ -1,0 +1,113 @@
+nohup: ignoring input
+[Cycle 1] Parallel train run...
+^^^^^^^
+  File "/workspaces/Aria/scripts/parallel_train.py", line 562, in run_all_parallel
+    self.results = await asyncio.gather(*tasks)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspaces/Aria/scripts/parallel_train.py", line 552, in run_with_semaphore
+    return await self.run_job(job, device_id)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspaces/Aria/scripts/parallel_train.py", line 171, in ru[Cycle 2] Parallel training run...
+=================================================
+
+Total Jobs:[Cycle 2] Parallel train run...
+====================================================
+Parallel Training Summary
+======================================================================
+
+Total Jobs: 1
+Succeeded: 0
+Skipped: 0
+Failed: 1
+Total Time: 0.1s
+
+Status file: /workspaces/Aria/data_out/parallel_training/status.json
+
+Failed Jobs:
+  - github_actions_chat: [Errno 2] [Cycle 3] Parallel training run...
+=================================================
+
+Total Jobs: 1
+Succeeded: 0
+Skipped: 0
+Failed: 1
+Total Time: 0.2s
+
+Status file: /workspaces/Aria/data_out/par[Cycle 3] Parallel train run...
+====================================================
+Parallel Training Summary
+======================================================================
+
+Total Jobs: 1
+Succeeded: 0
+Skipped: 0
+Failed: 1
+Total Time: 0.2s
+
+Status file: /workspa[Cycle 4] Parallel training run...
+=================================================
+
+Total Jobs: 1
+Succeeded: 0
+Skipped: 0
+Failed: 1
+Total Time: 0.1s
+
+Status file: /workspaces/Aria/data_out/parallel_training/status.json
+
+Failed Jobs:
+  - github_actions_chat: [Errno 2] No such file or direc[Cycle 4] Parallel train run...
+====================================================
+Parallel Training Summary
+==============================================================[Cycle 5] Parallel training run...
+=================================================
+
+Total Jobs: 1
+Succeeded: 0
+Skipped: 0
+Failed: 1
+Total Time: 0.1s
+
+Status file: /workspaces/Aria/data_out/parallel_training/status.json
+
+Failed Jobs:
+  - github_actions_chat: [Errno 2] No such file or directory: '/workspaces/Aria/AI/microsoft_phi-silica-3.6_v1/venv/Scripts/python.exe'
+
+[parallel_train][Cycle 5] Parallel train run...
+============================================[Cycle 6] Parallel training run...
+ File "/workspaces/Aria/scripts/parallel_train.py", line 729, in main
+    trainer = ParallelTrainer(
+              ^^^^^^^^^^^^^^^^
+  File "/workspaces/Aria/scripts/parallel_train.py", line 65, in __init__
+    with open(self.config_path, "r", encoding="utf-8") as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: 'autotrain_fast.yaml'
+
+[Cycle 6] Sleeping 3600s...
+[Cycle 7] Parallel training run...
+ File "/workspaces/Aria/scripts/parallel_train.py", line 729, in main
+    trainer = ParallelTrainer(
+              ^^^^^^^^^^^^^^^^
+  File "/workspaces/Aria/scripts/parallel_train.py", line 65, in __init__
+    with open(self.config_path, "r", encoding="utf-8") as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: 'autotrain_fast.yaml'
+
+[Cycle 7] Sleeping 3600s...
+^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: 'autotrain_fast.yaml'
+
+[Cycle 6] Sleeping 3600s...
+[Cycle 7] Parallel train run...
+ call last):
+  File "/workspaces/Aria/scripts/parallel_train.py", line 766, in <module>
+    main()
+  File "/workspaces/Aria/scripts/parallel_train.py", line 729, in main
+    trainer = ParallelTrainer(
+              ^^^^^^^^^^^^^^^^
+  File "/workspaces/Aria/scripts/parallel_train.py", line 65, in __init__
+    with open(self.config_path, "r", encoding="utf-8") as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: 'autotrain_fast.yaml'
+
+[Cycle 7] Sleeping 3600s...

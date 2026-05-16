@@ -29,7 +29,7 @@ open http://localhost:8000/monetization-index.html
 ### User-Facing Pages
 
 | Page | URL | Description |
-|------|-----|-------------|
+| ------ | ----- | ------------- |
 | **Landing** | `monetization-index.html` | Main hub with all links and stats |
 | **Pricing** | `pricing.html` | 3-tier comparison with revenue model |
 | **Checkout** | `checkout.html?plan=pro` | Stripe-ready payment page |
@@ -40,7 +40,7 @@ open http://localhost:8000/monetization-index.html
 ### Admin Pages
 
 | Page | URL | Description |
-|------|-----|-------------|
+| ------ | ----- | ------------- |
 | **Admin Dashboard** | `admin_dashboard.html` | Revenue analytics and subscriber management |
 
 ## 💰 Subscription Tiers
@@ -320,7 +320,7 @@ This creates:
 ## 📚 Documentation
 
 | Document | Description |
-|----------|-------------|
+| ---------- | ------------- |
 | `MONETIZATION_GUIDE.md` | Complete technical guide (10,936 chars) |
 | `INCOME_STREAM_SUMMARY.md` | Executive summary with screenshots |
 | `QUICK_START_MONETIZATION.md` | Quick start guide (5,894 chars) |

@@ -1,0 +1,16 @@
+# Development and testing dependencies for ai-projects/quantum-ml/production
+# Last updated: 2026-05-16
+#
+# Install with: pip install -r requirements.txt -r dev-requirements.txt
+
+# === Testing ===
+pytest==9.0.3
+requests==2.34.2          # HTTP client for test_api.py
+
+# === Type checking & linting ===
+mypy==2.1.0
+
+# === Build tools (optional for local development) ===
+# pip-tools==6.14.0       # pip-compile for generating constraints.txt
+# wheel==0.41.2
+# setuptools==68.0.0

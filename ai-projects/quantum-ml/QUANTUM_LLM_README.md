@@ -29,7 +29,7 @@ python quantum_llm_quickstart.py --mode generate --model data_out/quantum_llm_qu
 ### Core Files
 
 | File | Purpose | Features |
-|------|---------|----------|
+| ------ | --------- | ---------- |
 | **quantum_llm_advanced.py** | Advanced quantum layers | Circuit caching, adaptive entanglement, multi-scale attention, prompt tuning, error mitigation |
 | **quantum_circuit_optimizer.py** | Circuit optimization | Circuit compilation, batch execution, adaptive scheduling, quantum/classical partitioning |
 | **quantum_llm_hybrid_trainer.py** | Hybrid training orchestration | Curriculum learning, adaptive routing, multi-stage training |

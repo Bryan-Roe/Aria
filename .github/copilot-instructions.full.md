@@ -42,7 +42,7 @@
 ## 3️⃣ Core Workflows & Commands
 
 | Goal | Command (repo root) | Notes |
-|------|--------------------|-------|
+| ------ | -------------------- | ------- |
 | Dry‑run any orchestrator | `python scripts/autotrain.py --dry-run` (or quantum_autorun, evaluation_autorun) | Validate config only |
 | Quick LoRA train & auto‑deploy | `python scripts/train_and_promote.py --quick --auto-promote` | Uses TinyLlama by default |
 | Full multi‑model pipeline | `python scripts/automated_training_pipeline.py --quick` | Data → train → eval → ranking |

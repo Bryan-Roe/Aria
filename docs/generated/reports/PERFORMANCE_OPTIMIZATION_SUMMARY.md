@@ -82,21 +82,21 @@ All tests passing with no regressions detected.
 
 ### SQL Query Optimization
 | Table Size | Before | After | Improvement |
-|------------|--------|-------|-------------|
-| 100 rows   | ~1ms   | ~0.5ms | 2x |
-| 10K rows   | ~100ms | ~1ms | 100x |
-| 1M rows    | ~10s   | ~1ms | 10,000x |
+| ------------ | -------- | ------- | ------------- |
+| 100 rows | ~1ms | ~0.5ms | 2x |
+| 10K rows | ~100ms | ~1ms | 100x |
+| 1M rows | ~10s | ~1ms | 10,000x |
 
 ### String Concatenation
 | Chart Size | Before | After | Improvement |
-|------------|--------|-------|-------------|
-| 10 chars   | ~0.05ms | ~0.02ms | 2.5x |
-| 100 chars  | ~5ms   | ~0.5ms | 10x |
+| ------------ | -------- | ------- | ------------- |
+| 10 chars | ~0.05ms | ~0.02ms | 2.5x |
+| 100 chars | ~5ms | ~0.5ms | 10x |
 | 1000 chars | ~500ms | ~5ms | 100x |
 
 ### Memory History Trimming
 | Metrics | Before | After | Improvement |
-|---------|--------|-------|-------------|
+| --------- | -------- | ------- | ------------- |
 | Performance | ~2ms | ~1ms | 2x |
 | Code Quality | Good | Excellent | Pythonic |
 

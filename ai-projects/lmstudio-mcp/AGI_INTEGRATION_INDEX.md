@@ -140,7 +140,7 @@ subtasks = await decompose_task_with_lmstudio(complex_task)
 ## 💡 Use Cases
 
 | Query | Routing | Why |
-|-------|---------|-----|
+| ------- | --------- | ----- |
 | "Explain backpropagation" | LM Studio | Technical domain |
 | "Write Python code" | LM Studio | Coding intent |
 | "How does AI work?" | LM Studio | AI domain |
@@ -230,7 +230,7 @@ Reasoning & Reflection → Final Response
 ## 📈 Performance Characteristics
 
 | Aspect | LM Studio | Cloud API | Notes |
-|--------|-----------|-----------|-------|
+| -------- | ----------- | ----------- | ------- |
 | Latency | 100-500ms | 500-2000ms | Depends on model size |
 | Privacy | ✅ Local | ❌ Remote | LM Studio is private |
 | Cost | ✅ Free | ❌ Per API call | LM Studio has no API costs |

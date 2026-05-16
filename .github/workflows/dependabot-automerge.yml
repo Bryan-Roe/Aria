@@ -1,29 +1,53 @@
 # =============================================================================
 # Dependabot Auto-merge
 # =============================================================================
-# Purpose: Automatically approve and merge Dependabot PRs for minor/patch
-#          updates once all CI checks pass.
-# Security: Major version bumps require manual review.
-# Triggers: Dependabot pull_request events (opened / synchronize / reopened)
+# Purpose : Automatically approve and enable auto-merge for Dependabot PRs that
+#           contain only minor / patch updates, once all required CI checks pass.
+# Security: - Major version bumps are never auto-approved; a comment is posted
+#             requesting manual review.
+#           - Production dependency minor bumps are flagged for manual review.
+#           - Workflow runs only for PRs authored by dependabot[bot].
+#           - Token permissions are scoped to the minimum required.
+# Triggers: pull_request events (opened / synchronize / reopened / ready_for_review)
+# Refs    : https://docs.github.com/en/code-security/dependabot/working-with-dependabot/automating-dependabot-with-github-actions
 # =============================================================================
 
 name: Dependabot Auto-merge
 
 on:
   pull_request:
-    types: [opened, synchronize, reopened]
+    types: [opened, synchronize, reopened, ready_for_review]
 
+# Cancel superseded runs on the same PR to save CI minutes.
+concurrency:
+  group: dependabot-automerge-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+# Default to read-only; the job elevates to writes only where needed.
 permissions:
-  contents: write
-  pull-requests: write
+  contents: read
 
 jobs:
   automerge:
-    name: Auto-merge Minor / Patch Updates
+    name: Auto-merge minor / patch updates
     runs-on: ubuntu-latest
-    # Only run for Dependabot PRs
-    if: github.actor == 'dependabot[bot]'
     timeout-minutes: 5
+
+    # Hard guard: only Dependabot PRs, and skip drafts.
+    # `pull_request.user.login` is more reliable than `github.actor`
+    # (which can change on re-runs by humans).
+    if: >-
+      github.event.pull_request.user.login == 'dependabot[bot]' &&
+      github.event.pull_request.draft == false
+
+    permissions:
+      contents: write
+      pull-requests: write
+
+    env:
+      PR_URL: ${{ github.event.pull_request.html_url }}
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
     steps:
       - name: Fetch Dependabot metadata
         id: metadata
@@ -31,44 +55,80 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Approve minor / patch updates
-        # Approve if update is minor or patch (not major)
-        if: |
-          steps.metadata.outputs.update-type == 'version-update:semver-minor' ||
-          steps.metadata.outputs.update-type == 'version-update:semver-patch'
-        run: gh pr review --approve "$PR_URL"
+      - name: Determine if PR is auto-mergeable
+        id: gate
         env:
-          PR_URL: ${{ github.event.pull_request.html_url }}
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          UPDATE_TYPE: ${{ steps.metadata.outputs.update-type }}
+          DEP_TYPE: ${{ steps.metadata.outputs.dependency-type }}
+        run: |
+          set -euo pipefail
+          automerge="false"
+          case "${UPDATE_TYPE}" in
+            version-update:semver-patch)
+              automerge="true"
+              ;;
+            version-update:semver-minor)
+              # Conservative: auto-merge minor bumps only for dev / indirect deps.
+              if [[ "${DEP_TYPE}" == "direct:development" || "${DEP_TYPE}" == "indirect" ]]; then
+                automerge="true"
+              fi
+              ;;
+          esac
+          echo "automerge=${automerge}" >> "$GITHUB_OUTPUT"
+          echo "Decision: automerge=${automerge} (update-type=${UPDATE_TYPE}, dependency-type=${DEP_TYPE})"
 
-      - name: Enable auto-merge for minor / patch updates
-        if: |
-          steps.metadata.outputs.update-type == 'version-update:semver-minor' ||
-          steps.metadata.outputs.update-type == 'version-update:semver-patch'
-        run: gh pr merge --auto --squash "$PR_URL"
-        env:
-          PR_URL: ${{ github.event.pull_request.html_url }}
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Approve PR
+        if: steps.gate.outputs.automerge == 'true'
+        run: gh pr review --approve "$PR_URL"
+
+      - name: Enable auto-merge (squash)
+        if: steps.gate.outputs.automerge == 'true'
+        run: gh pr merge --auto --squash --delete-branch "$PR_URL"
 
       - name: Comment on major updates
         if: steps.metadata.outputs.update-type == 'version-update:semver-major'
         run: |
-          gh pr comment "$PR_URL" --body \
-            "⚠️ **Major version update** — manual review required before merging.
+          gh pr comment "$PR_URL" --body "$(cat <<'EOF'
+          ⚠️ **Major version update detected — manual review required.**
 
-            Please check the changelog for breaking changes before approving this PR."
-        env:
-          PR_URL: ${{ github.event.pull_request.html_url }}
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          This PR will not be auto-merged. Please:
+          - Review the package changelog / release notes for breaking changes.
+          - Run the full test suite locally if needed.
+          - Approve and merge manually once verified.
+          EOF
+          )"
 
-      - name: Summary
-        if: always()
+      - name: Comment on skipped non-major updates
+        if: >-
+          steps.gate.outputs.automerge == 'false' &&
+          steps.metadata.outputs.update-type != 'version-update:semver-major' &&
+          steps.metadata.outputs.update-type != ''
         run: |
-          echo "## Dependabot Auto-merge" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "| Field | Value |" >> $GITHUB_STEP_SUMMARY
-          echo "|-------|-------|" >> $GITHUB_STEP_SUMMARY
-          echo "| Package | ${{ steps.metadata.outputs.dependency-names }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Update type | ${{ steps.metadata.outputs.update-type }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Previous version | ${{ steps.metadata.outputs.previous-version }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| New version | ${{ steps.metadata.outputs.new-version }} |" >> $GITHUB_STEP_SUMMARY
+          gh pr comment "$PR_URL" --body "$(cat <<'EOF'
+          ℹ️ This Dependabot update was **not auto-merged** (production dependency or non-trivial change). Manual review requested.
+          EOF
+          )"
+
+      - name: Job summary
+        if: always()
+        env:
+          PKG: ${{ steps.metadata.outputs.dependency-names }}
+          UPDATE_TYPE: ${{ steps.metadata.outputs.update-type }}
+          DEP_TYPE: ${{ steps.metadata.outputs.dependency-type }}
+          PREV: ${{ steps.metadata.outputs.previous-version }}
+          NEW: ${{ steps.metadata.outputs.new-version }}
+          AUTOMERGE: ${{ steps.gate.outputs.automerge }}
+        run: |
+          {
+            echo "## Dependabot Auto-merge"
+            echo ""
+            echo "| Field              | Value |"
+            echo "|--------------------|-------|"
+            echo "| Package(s)         | ${PKG:-_n/a_} |"
+            echo "| Update type        | ${UPDATE_TYPE:-_n/a_} |"
+            echo "| Dependency type    | ${DEP_TYPE:-_n/a_} |"
+            echo "| Previous version   | ${PREV:-_n/a_} |"
+            echo "| New version        | ${NEW:-_n/a_} |"
+            echo "| Auto-merge enabled | ${AUTOMERGE:-false} |"
+            echo "| PR                 | ${PR_URL} |"
+          } >> "$GITHUB_STEP_SUMMARY"

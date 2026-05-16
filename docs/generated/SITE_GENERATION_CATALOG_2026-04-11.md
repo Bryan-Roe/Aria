@@ -5,7 +5,7 @@ This catalog summarizes generated websites and reusable generation assets.
 ## Generated bundles
 
 | Bundle | Type | Pages |
-|---|---|---|
+| --- | --- | --- |
 | `portfolio-live` | Portfolio | 1+ |
 | `nebula-launch` | Landing | 1 |
 | `dev-journal` | Blog | 1 |

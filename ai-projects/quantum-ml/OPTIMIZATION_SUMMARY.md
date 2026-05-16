@@ -13,7 +13,7 @@
 We ran comprehensive experiments testing different layer depths:
 
 | Configuration | Accuracy | Verdict |
-|---------------|----------|---------|
+| --------------- | ---------- | --------- |
 | 1 layer | 67.5% | ❌ Too simple |
 | **2 layers** | **87.5%** | ✅ **OPTIMAL** |
 | 3 layers | 75.0% | ⚠️ Overfitting starts |
@@ -48,7 +48,7 @@ Training Parameters:
 ### Current Training Results
 
 | Dataset | Accuracy | Status |
-|---------|----------|--------|
+| --------- | ---------- | -------- |
 | **Iris** | 67.5% | Good baseline |
 | **Imbalanced** | 90.0% | Excellent! |
 | **Wine** | 88.9% | Excellent! |

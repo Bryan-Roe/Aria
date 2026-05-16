@@ -1,237 +1,153 @@
-# To get started with Dependabot version updates, you'll need to specify which
-# package ecosystems to update and where the package manifests are located.
-# Please see the documentation for more information:
-# https://docs.github.com/github/administering-a-repository/configuration-options-for-dependency-updates
-# https://containers.dev/guide/dependabot
+# Dependabot configuration for Aria
+# Docs: https://docs.github.com/github/administering-a-repository/configuration-options-for-dependency-updates
 
 version: 2
+
+# Shared defaults to reduce repetition and improve maintainability
+# Note: YAML anchors are used to DRY common settings.
+_defaults: &defaults
+  schedule:
+    interval: "daily"
+    time: "04:00"
+    timezone: "UTC"
+  labels:
+    - "dependencies"
+    - "autofix"
+  assignees:
+    - "Bryan-Roe"
+  allow:
+    - dependency-type: "direct"
+    - dependency-type: "indirect"
+  rebase-strategy: "auto"
+  open-pull-requests-limit: 5
+
 updates:
   - package-ecosystem: "github-actions"
     directory: "/"
-    schedule:
-      interval: "weekly"
-      day: "monday"
-      time: "04:00"
-      timezone: "UTC"
+    <<: *defaults
     commit-message:
       prefix: "deps(actions)"
+    open-pull-requests-limit: 10
     groups:
       github-actions:
         patterns:
           - "*"
-    labels:
-      - "dependencies"
-    assignees:
-      - "Bryan-Roe"
 
   - package-ecosystem: "devcontainers"
     directory: "/"
-    schedule:
-      interval: "weekly"
-      day: "monday"
-      time: "04:00"
-      timezone: "UTC"
+    <<: *defaults
     commit-message:
       prefix: "deps(devcontainer)"
-    labels:
-      - "dependencies"
-    assignees:
-      - "Bryan-Roe"
 
   - package-ecosystem: "pip"
     directory: "/"
-    schedule:
-      interval: "weekly"
-      day: "monday"
-      time: "04:00"
-      timezone: "UTC"
+    <<: *defaults
     commit-message:
       prefix: "deps(pip)"
     groups:
       python-dependencies:
         patterns:
           - "*"
-    labels:
-      - "dependencies"
-    assignees:
-      - "Bryan-Roe"
+    open-pull-requests-limit: 10
 
+  # Project-specific Python environments
   - package-ecosystem: "pip"
     directory: "/ai-projects/quantum-ml"
-    schedule:
-      interval: "weekly"
-      day: "monday"
-      time: "04:00"
-      timezone: "UTC"
+    <<: *defaults
     commit-message:
       prefix: "deps(quantum-ml)"
     groups:
       quantum-ml-deps:
         patterns:
           - "*"
-    labels:
-      - "dependencies"
-    assignees:
-      - "Bryan-Roe"
+    open-pull-requests-limit: 5
 
   - package-ecosystem: "pip"
     directory: "/ai-projects/quantum-ml/production"
-    schedule:
-      interval: "weekly"
-      day: "monday"
-      time: "04:00"
-      timezone: "UTC"
+    <<: *defaults
     commit-message:
       prefix: "deps(quantum-prod)"
     groups:
       quantum-prod-deps:
         patterns:
           - "*"
-    labels:
-      - "dependencies"
-    assignees:
-      - "Bryan-Roe"
 
   - package-ecosystem: "pip"
     directory: "/ai-projects/chat-cli"
-    schedule:
-      interval: "weekly"
-      day: "monday"
-      time: "04:00"
-      timezone: "UTC"
+    <<: *defaults
     commit-message:
       prefix: "deps(chat-cli)"
     groups:
       chat-cli-deps:
         patterns:
           - "*"
-    labels:
-      - "dependencies"
-    assignees:
-      - "Bryan-Roe"
 
   - package-ecosystem: "pip"
     directory: "/ai-projects/cooking-ai"
-    schedule:
-      interval: "weekly"
-      day: "monday"
-      time: "04:00"
-      timezone: "UTC"
+    <<: *defaults
     commit-message:
       prefix: "deps(cooking-ai)"
     groups:
       cooking-ai-deps:
         patterns:
           - "*"
-    labels:
-      - "dependencies"
-    assignees:
-      - "Bryan-Roe"
 
   - package-ecosystem: "pip"
     directory: "/ai-projects/llm-maker"
-    schedule:
-      interval: "weekly"
-      day: "monday"
-      time: "04:00"
-      timezone: "UTC"
+    <<: *defaults
     commit-message:
       prefix: "deps(llm-maker)"
     groups:
       llm-maker-deps:
         patterns:
           - "*"
-    labels:
-      - "dependencies"
-    assignees:
-      - "Bryan-Roe"
 
   - package-ecosystem: "pip"
     directory: "/ai-projects/lora-training/microsoft_phi-silica-3.6_v1"
-    schedule:
-      interval: "weekly"
-      day: "monday"
-      time: "04:00"
-      timezone: "UTC"
+    <<: *defaults
     commit-message:
       prefix: "deps(lora)"
     groups:
       lora-deps:
         patterns:
           - "*"
-    labels:
-      - "dependencies"
-    assignees:
-      - "Bryan-Roe"
 
   - package-ecosystem: "pip"
     directory: "/ai-projects/lora-training/microsoft_phi-silica-3.6_v1/local_train"
-    schedule:
-      interval: "weekly"
-      day: "monday"
-      time: "04:00"
-      timezone: "UTC"
+    <<: *defaults
     commit-message:
       prefix: "deps(lora-local-train)"
     groups:
       lora-local-train-deps:
         patterns:
           - "*"
-    labels:
-      - "dependencies"
-    assignees:
-      - "Bryan-Roe"
 
   - package-ecosystem: "pip"
     directory: "/ai-projects/lora-training/quantum-ai"
-    schedule:
-      interval: "weekly"
-      day: "monday"
-      time: "04:00"
-      timezone: "UTC"
+    <<: *defaults
     commit-message:
       prefix: "deps(lora-quantum-ai)"
     groups:
       lora-quantum-ai-deps:
         patterns:
           - "*"
-    labels:
-      - "dependencies"
-    assignees:
-      - "Bryan-Roe"
 
   - package-ecosystem: "pip"
     directory: "/apps/dashboard"
-    schedule:
-      interval: "weekly"
-      day: "monday"
-      time: "04:00"
-      timezone: "UTC"
+    <<: *defaults
     commit-message:
       prefix: "deps(dashboard)"
     groups:
       dashboard-deps:
         patterns:
           - "*"
-    labels:
-      - "dependencies"
-    assignees:
-      - "Bryan-Roe"
 
   - package-ecosystem: "pip"
     directory: "/mount"
-    schedule:
-      interval: "weekly"
-      day: "monday"
-      time: "04:00"
-      timezone: "UTC"
+    <<: *defaults
     commit-message:
       prefix: "deps(mount)"
     groups:
       mount-deps:
         patterns:
           - "*"
-    labels:
-      - "dependencies"
-    assignees:
-      - "Bryan-Roe"

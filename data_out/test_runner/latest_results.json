@@ -1,0 +1,16 @@
+{
+  "timestamp": "20260516T035037Z",
+  "suites": [
+    {
+      "passed": 0,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "suite": "unit",
+      "returncode": 2,
+      "duration_s": 3.29,
+      "success": false
+    }
+  ],
+  "overall_success": false
+}

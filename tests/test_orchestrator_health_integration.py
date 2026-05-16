@@ -7,7 +7,7 @@ through the status endpoint for real-time monitoring.
 import importlib.util
 import json
 import sys
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from types import ModuleType
 
@@ -48,6 +48,25 @@ class MockRequest:
         return {}
 
 
+def _write_json(path: Path, payload: dict) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(payload), encoding="utf-8")
+
+
+def _read_bytes_or_none(path: Path) -> bytes | None:
+    if not path.exists():
+        return None
+    return path.read_bytes()
+
+
+def _restore_bytes_or_unlink(path: Path, original: bytes | None) -> None:
+    if original is None:
+        if path.exists():
+            path.unlink()
+        return
+    path.write_bytes(original)
+
+
 def test_orchestrator_health_aggregates_autonomous_training(app_module: ModuleType):
     """
     Conditional test: Verifies autonomous_training orchestrator is included if status file exists.
@@ -57,7 +76,8 @@ def test_orchestrator_health_aggregates_autonomous_training(app_module: ModuleTy
     status_file = repo_root / "data_out" / "autonomous_training_status.json"
 
     if not status_file.exists():
-        pytest.skip("autonomous_training_status.json does not exist; skipping test.")
+        pytest.skip(
+            "autonomous_training_status.json does not exist; skipping test.")
 
     req = MockRequest("GET")
     resp = app_module.ai_status(req)
@@ -157,3 +177,145 @@ def test_orchestrator_health_last_checked_utc_z(app_module: ModuleType):
 
     # Parseability guard: convert trailing Z to +00:00 for fromisoformat.
     datetime.fromisoformat(last_checked.replace("Z", "+00:00"))
+
+
+def test_orchestrator_heartbeat_completed_not_running(app_module: ModuleType):
+    """Completed heartbeat should not be reported as running."""
+    repo_root = Path(__file__).resolve().parents[1]
+    data_out = repo_root / "data_out"
+    status_file = data_out / "autonomous_training_status.json"
+    heartbeat_file = data_out / "autonomous_training_heartbeat.json"
+
+    original_status = _read_bytes_or_none(status_file)
+    original_heartbeat = _read_bytes_or_none(heartbeat_file)
+
+    try:
+        _write_json(
+            status_file,
+            {
+                "cycles_completed": 3,
+                "best_accuracy": 0.88,
+                "last_updated": datetime.now(timezone.utc).isoformat(),
+                "performance_history": [{"accuracy": 0.8}, {"accuracy": 0.88}],
+            },
+        )
+        _write_json(
+            heartbeat_file,
+            {
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "state": "completed",
+                "pid": 12345,
+                "current_cycle": 3,
+            },
+        )
+
+        req = MockRequest("GET")
+        resp = app_module.ai_status(req)
+        assert resp.status_code == 200
+
+        body = resp.get_body()
+        if isinstance(body, bytes):
+            body = body.decode()
+        data = json.loads(body)
+        orch = data["orchestrator_health"]["orchestrators"]["autonomous_training"]
+
+        assert isinstance(orch["heartbeat_running"], bool)
+        assert orch["heartbeat_running"] is False
+    finally:
+        _restore_bytes_or_unlink(status_file, original_status)
+        _restore_bytes_or_unlink(heartbeat_file, original_heartbeat)
+
+
+def test_orchestrator_heartbeat_training_running(app_module: ModuleType):
+    """Fresh training heartbeat should be reported as running."""
+    repo_root = Path(__file__).resolve().parents[1]
+    data_out = repo_root / "data_out"
+    status_file = data_out / "autonomous_training_status.json"
+    heartbeat_file = data_out / "autonomous_training_heartbeat.json"
+
+    original_status = _read_bytes_or_none(status_file)
+    original_heartbeat = _read_bytes_or_none(heartbeat_file)
+
+    try:
+        _write_json(
+            status_file,
+            {
+                "cycles_completed": 4,
+                "best_accuracy": 0.9,
+                "last_updated": datetime.now(timezone.utc).isoformat(),
+                "performance_history": [{"accuracy": 0.82}, {"accuracy": 0.9}],
+            },
+        )
+        _write_json(
+            heartbeat_file,
+            {
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "state": "training",
+                "pid": 23456,
+                "current_cycle": 4,
+            },
+        )
+
+        req = MockRequest("GET")
+        resp = app_module.ai_status(req)
+        assert resp.status_code == 200
+
+        body = resp.get_body()
+        if isinstance(body, bytes):
+            body = body.decode()
+        data = json.loads(body)
+        orch = data["orchestrator_health"]["orchestrators"]["autonomous_training"]
+
+        assert isinstance(orch["heartbeat_running"], bool)
+        assert orch["heartbeat_running"] is True
+    finally:
+        _restore_bytes_or_unlink(status_file, original_status)
+        _restore_bytes_or_unlink(heartbeat_file, original_heartbeat)
+
+
+def test_orchestrator_heartbeat_stale_not_running(app_module: ModuleType):
+    """Stale heartbeat timestamps should not be treated as active."""
+    repo_root = Path(__file__).resolve().parents[1]
+    data_out = repo_root / "data_out"
+    status_file = data_out / "autonomous_training_status.json"
+    heartbeat_file = data_out / "autonomous_training_heartbeat.json"
+
+    original_status = _read_bytes_or_none(status_file)
+    original_heartbeat = _read_bytes_or_none(heartbeat_file)
+
+    try:
+        _write_json(
+            status_file,
+            {
+                "cycles_completed": 5,
+                "best_accuracy": 0.91,
+                "last_updated": datetime.now(timezone.utc).isoformat(),
+                "performance_history": [{"accuracy": 0.84}, {"accuracy": 0.91}],
+            },
+        )
+        _write_json(
+            heartbeat_file,
+            {
+                "timestamp": (
+                    datetime.now(timezone.utc) - timedelta(minutes=10)
+                ).isoformat(),
+                "state": "training",
+                "pid": 34567,
+                "current_cycle": 5,
+            },
+        )
+
+        req = MockRequest("GET")
+        resp = app_module.ai_status(req)
+        assert resp.status_code == 200
+
+        body = resp.get_body()
+        if isinstance(body, bytes):
+            body = body.decode()
+        data = json.loads(body)
+        orch = data["orchestrator_health"]["orchestrators"]["autonomous_training"]
+
+        assert orch["heartbeat_running"] is False
+    finally:
+        _restore_bytes_or_unlink(status_file, original_status)
+        _restore_bytes_or_unlink(heartbeat_file, original_heartbeat)

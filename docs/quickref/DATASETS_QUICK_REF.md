@@ -13,11 +13,13 @@ Downloads quantum datasets + Dolly 15k (~500 MB, 5 minutes)
 ## 📥 Download Commands
 
 ### Quantum ML Datasets
+
 ```powershell
 python .\scripts\download_datasets.py --category quantum
 ```
 
 ### Chat Datasets
+
 ```powershell
 # Small, high-quality (recommended first)
 python .\scripts\download_datasets.py --category chat --dataset dolly
@@ -49,18 +51,21 @@ Get-ChildItem .\datasets -Recurse | Measure-Object -Property Length -Sum
 ## 🎯 Training Commands
 
 ### Quantum AI
+
 ```powershell
 cd quantum-ai
 python .\train_custom_dataset.py
 ```
 
 ### Phi-3.6 Fine-tuning (Small Test)
+
 ```powershell
 cd AI\microsoft_phi-silica-3.6_v1
 python .\scripts\train_lora.py --dataset ..\..\datasets\chat\dolly --config .\lora\lora.yaml --max-train-samples 64 --no-stream
 ```
 
 ### Phi-3.6 Fine-tuning (Full)
+
 ```powershell
 cd AI\microsoft_phi-silica-3.6_v1
 python .\scripts\train_lora.py --dataset ..\..\datasets\chat\dolly --config .\lora\lora.yaml
@@ -71,7 +76,7 @@ python .\scripts\train_lora.py --dataset ..\..\datasets\chat\dolly --config .\lo
 ## 📊 Dataset Sizes & Quality
 
 | Dataset | Size | Samples | Quality | License |
-|---------|------|---------|---------|---------|
+| --------- | ------ | --------- | --------- | --------- |
 | **Quantum** | | | | |
 | Heart Disease | <1 MB | 303 | ⭐⭐⭐⭐ | Free |
 | Ionosphere | <1 MB | 351 | ⭐⭐⭐⭐ | Free |
@@ -85,7 +90,7 @@ python .\scripts\train_lora.py --dataset ..\..\datasets\chat\dolly --config .\lo
 
 ## 📁 Storage Locations
 
-```
+```text
 datasets/
 ├── quantum/          # UCI ML datasets (CSV)
 ├── chat/             # LLM datasets (JSONL)

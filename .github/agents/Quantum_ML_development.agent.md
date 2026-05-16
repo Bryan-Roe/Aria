@@ -48,7 +48,7 @@ curl http://localhost:7071/api/quantum/info | jq
 ### Circuit Design
 Available circuit types via MCP:
 | Type | Description | Qubits |
-|------|-------------|--------|
+| ------ | ------------- | -------- |
 | `bell` | Bell state (entanglement pair) | 2 |
 | `ghz` | GHZ state (multi-qubit entanglement) | 3+ |
 | `entanglement` | General entanglement circuit | 2+ |
@@ -106,7 +106,7 @@ python scripts/quantum_autorun.py --config quantum_autorun.yaml
 ## API Endpoints
 
 | Endpoint | Method | Purpose |
-|----------|--------|---------|
+| ---------- | -------- | --------- |
 | `/api/quantum/classify` | POST | Submit quantum classification job |
 | `/api/quantum/circuit` | POST | Create and simulate circuits |
 | `/api/quantum/info` | GET | Backend info and capabilities |
@@ -114,7 +114,7 @@ python scripts/quantum_autorun.py --config quantum_autorun.yaml
 ## Key Files
 
 | File | Purpose |
-|------|---------|
+| ------ | --------- |
 | `ai-projects/quantum-ml/quantum_mcp_server.py` | MCP server with quantum tools |
 | `ai-projects/quantum-ml/src/` | Quantum ML pipeline implementations |
 | `config/quantum_llm_config.yaml` | Quantum backend configuration |

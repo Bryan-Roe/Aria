@@ -122,20 +122,20 @@ Do not narrate every sub-step. Provide a progress update at:
 
 ### Common Entry Points
 
-| Task Class            | Command / Entry Point                                                                                |
+| Task Class | Command / Entry Point |
 | --------------------- | ---------------------------------------------------------------------------------------------------- |
-| All unit tests        | `python scripts/test_runner.py --unit`                                                               |
-| Full test suite       | `python scripts/test_runner.py --all`                                                                |
-| Fast validation       | `python scripts/fast_validate.py`                                                                    |
-| System health         | `python scripts/system_health_check.py`                                                              |
-| LoRA training (quick) | `python scripts/automated_training_pipeline.py --quick`                                              |
-| Train + promote       | `python scripts/train_and_promote.py --quick --auto-promote`                                         |
-| Autonomous training   | `nohup python scripts/autonomous_training_orchestrator.py > data_out/autonomous_training.log 2>&1 &` |
-| Code fix sweep        | Run `problems` tool → fix each issue → verify with `runTests`                                        |
-| Evaluate models       | `python scripts/batch_evaluator.py`                                                                  |
-| Orchestrator status   | `python scripts/status_dashboard.py`                                                                 |
-| Resource snapshot     | `python scripts/resource_monitor.py --snapshot`                                                      |
-| Artifact cleanup      | `python scripts/cleanup_artifacts.py` (dry-run first, then `--apply`)                                |
+| All unit tests | `python scripts/test_runner.py --unit` |
+| Full test suite | `python scripts/test_runner.py --all` |
+| Fast validation | `python scripts/fast_validate.py` |
+| System health | `python scripts/system_health_check.py` |
+| LoRA training (quick) | `python scripts/automated_training_pipeline.py --quick` |
+| Train + promote | `python scripts/train_and_promote.py --quick --auto-promote` |
+| Autonomous training | `nohup python scripts/autonomous_training_orchestrator.py > data_out/autonomous_training.log 2>&1 &` |
+| Code fix sweep | Run `problems` tool → fix each issue → verify with `runTests` |
+| Evaluate models | `python scripts/batch_evaluator.py` |
+| Orchestrator status | `python scripts/status_dashboard.py` |
+| Resource snapshot | `python scripts/resource_monitor.py --snapshot` |
+| Artifact cleanup | `python scripts/cleanup_artifacts.py` (dry-run first, then `--apply`) |
 
 ### Provider Detection Chain
 
@@ -191,15 +191,15 @@ Read these files to assess job success without parsing logs manually.
 
 ## Decision-Making Heuristics
 
-| Situation                                    | Decision                                                    |
+| Situation | Decision |
 | -------------------------------------------- | ----------------------------------------------------------- |
-| Test fails after a code edit                 | Revert the edit, rediagnose, try another approach           |
-| Missing env var required for a feature       | Skip that feature path; document as dependency gap          |
-| Ambiguous file to edit (multiple candidates) | Edit the one closest to the failing test or error           |
-| Dry-run passes, execution takes >5 min       | Proceed; report completion when done                        |
-| New package import needed                    | Add to `requirements.txt` + install in relevant venv        |
-| Conflicting status files                     | Trust the most recent `last_updated` timestamp              |
-| GPU/QPU cost gate triggered                  | STOP — surface to user with cost estimate before proceeding |
+| Test fails after a code edit | Revert the edit, rediagnose, try another approach |
+| Missing env var required for a feature | Skip that feature path; document as dependency gap |
+| Ambiguous file to edit (multiple candidates) | Edit the one closest to the failing test or error |
+| Dry-run passes, execution takes >5 min | Proceed; report completion when done |
+| New package import needed | Add to `requirements.txt` + install in relevant venv |
+| Conflicting status files | Trust the most recent `last_updated` timestamp |
+| GPU/QPU cost gate triggered | STOP — surface to user with cost estimate before proceeding |
 
 ---
 

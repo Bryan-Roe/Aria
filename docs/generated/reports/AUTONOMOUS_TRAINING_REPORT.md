@@ -13,7 +13,7 @@ The Aria autonomous training orchestrator has been **activated and validated**. 
 ### Key Metrics
 
 | Metric | Value |
-|--------|-------|
+| -------- | ------- |
 | **Cycles Completed** | 3 |
 | **Best Accuracy Achieved** | 74.5% |
 | **Accuracy Improvement** | +3.0 percentage points (Cycle 1→3) |
@@ -233,7 +233,7 @@ All training state persists to `data_out/autonomous_training_status.json`:
 ## 🚀 Production Readiness
 
 | Component | Status | Notes |
-|-----------|--------|-------|
+| ----------- | -------- | ------- |
 | **Config** | ✅ Ready | `config/autonomous_training.yaml` fully configured |
 | **Infrastructure** | ✅ Ready | Cycle manager operational, status persistence working |
 | **Monitoring** | ✅ Ready | Real-time status updates, performance history |

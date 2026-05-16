@@ -5,7 +5,7 @@ This directory contains all training and optimization scripts for the Phi-3.6 fi
 ## 📁 Script Overview
 
 | Script | Purpose | Usage |
-|--------|---------|-------|
+| -------- | --------- | ------- |
 | `train_lora.py` | LoRA fine-tuning | `python train_lora.py --dataset data --config ../lora/lora.yaml` |
 | `auto_eval.py` | Automatic evaluation | `python auto_eval.py --model path/to/model --dataset test.jsonl` |
 | `rag_pipeline.py` | RAG setup | `python rag_pipeline.py --model model --docs docs --interactive` |

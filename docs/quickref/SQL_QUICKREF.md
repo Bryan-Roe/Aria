@@ -32,28 +32,28 @@ az functionapp config appsettings set --name your-func --resource-group your-rg 
 
 ## 📊 Key Endpoints
 
-| Endpoint         | Purpose              | Example                                                              |
+| Endpoint | Purpose | Example |
 | ---------------- | -------------------- | -------------------------------------------------------------------- |
-| `/api/ai/status` | Health + SQL metrics | `curl http://localhost:7071/api/ai/status`                           |
-| `engine_stats()` | Pool metrics (code)  | `from shared.sql_engine import engine_stats; stats = engine_stats()` |
-| `sql_health()`   | Connectivity probe   | `from shared.sql_engine import sql_health; ok, msg = sql_health()`   |
+| `/api/ai/status` | Health + SQL metrics | `curl http://localhost:7071/api/ai/status` |
+| `engine_stats()` | Pool metrics (code) | `from shared.sql_engine import engine_stats; stats = engine_stats()` |
+| `sql_health()` | Connectivity probe | `from shared.sql_engine import sql_health; ok, msg = sql_health()` |
 
 ## 🔧 Environment Variables
 
-| Variable                      | Required | Example                                           |
+| Variable | Required | Example |
 | ----------------------------- | -------- | ------------------------------------------------- |
-| `QAI_SQL_URL`                 | No       | `sqlite:///./data.sqlite` or `mssql+pyodbc://...` |
-| `QAI_SQL_SLOW_MS`             | No       | `300` (milliseconds)                              |
-| `QAI_ENABLE_QUERY_TRACKING`   | No       | `true` (enable persistent metrics)                |
-| `AZURE_FUNCTIONS_ENVIRONMENT` | No       | `development` / `staging` / `production`          |
+| `QAI_SQL_URL` | No | `sqlite:///./data.sqlite` or `mssql+pyodbc://...` |
+| `QAI_SQL_SLOW_MS` | No | `300` (milliseconds) |
+| `QAI_ENABLE_QUERY_TRACKING` | No | `true` (enable persistent metrics) |
+| `AZURE_FUNCTIONS_ENVIRONMENT` | No | `development` / `staging` / `production` |
 
 ## 📈 Monitoring Thresholds
 
-| Metric              | Warning | Critical | Action                             |
+| Metric | Warning | Critical | Action |
 | ------------------- | ------- | -------- | ---------------------------------- |
-| `saturation_pct`    | > 60%   | > 80%    | Scale pool size                    |
-| `slow_queries_1min` | > 5     | > 10     | Tune threshold or optimize queries |
-| `execution_time_ms` | > P95   | > P99    | Add indexes, review query plan     |
+| `saturation_pct` | > 60% | > 80% | Scale pool size |
+| `slow_queries_1min` | > 5 | > 10 | Tune threshold or optimize queries |
+| `execution_time_ms` | > P95 | > P99 | Add indexes, review query plan |
 
 ## 🛠️ Common Commands
 
@@ -99,28 +99,28 @@ $env:QAI_SQL_URL = "postgresql://user:pass@host/db?pool_size=30&max_overflow=10"
 
 ## 📝 Key Files
 
-| File                               | Purpose                                    |
+| File | Purpose |
 | ---------------------------------- | ------------------------------------------ |
-| `DATABASE_SQL_SETUP.md`            | Complete setup & usage guide (20 sections) |
-| `AZURE_MONITOR_SQL_SETUP.md`       | Azure deployment & KQL queries             |
-| `SQL_INTEGRATION_COMPLETE.md`      | Implementation summary & architecture      |
-| `shared/sql_engine.py`             | Core engine with pool metrics              |
-| `shared/sql_repository.py`         | Key-value CRUD abstraction                 |
-| `scripts/sql_migrate.py`           | Migration runner                           |
-| `scripts/setup_azure_alerts.ps1`   | Alert deployment automation                |
-| `config/azure_monitor_alerts.json` | ARM template for alerts                    |
-| `tests/test_sql_integration.py`    | Test suite (7 tests)                       |
+| `DATABASE_SQL_SETUP.md` | Complete setup & usage guide (20 sections) |
+| `AZURE_MONITOR_SQL_SETUP.md` | Azure deployment & KQL queries |
+| `SQL_INTEGRATION_COMPLETE.md` | Implementation summary & architecture |
+| `shared/sql_engine.py` | Core engine with pool metrics |
+| `shared/sql_repository.py` | Key-value CRUD abstraction |
+| `scripts/sql_migrate.py` | Migration runner |
+| `scripts/setup_azure_alerts.ps1` | Alert deployment automation |
+| `config/azure_monitor_alerts.json` | ARM template for alerts |
+| `tests/test_sql_integration.py` | Test suite (7 tests) |
 
 ## 🔍 Troubleshooting Quick Hits
 
-| Issue                         | Solution                                                                     |
+| Issue | Solution |
 | ----------------------------- | ---------------------------------------------------------------------------- |
-| "No SQL configured" in status | Set `QAI_SQL_URL` or `QAI_DB_CONN` env var                                   |
-| Pool saturation > 80%         | Increase `pool_size` URL parameter (see DATABASE_SQL_SETUP.md section 18)    |
-| Too many slow query alerts    | Increase `QAI_SQL_SLOW_MS` or optimize queries                               |
-| Migrations not applying       | Check `QAI_Migrations` table exists, verify SQL file syntax                  |
-| Tests failing                 | Ensure SQLAlchemy installed in venv: `.\venv\Scripts\pip install sqlalchemy` |
-| Alerts not firing             | Verify Application Insights enabled, check KQL query in portal               |
+| "No SQL configured" in status | Set `QAI_SQL_URL` or `QAI_DB_CONN` env var |
+| Pool saturation > 80% | Increase `pool_size` URL parameter (see DATABASE_SQL_SETUP.md section 18) |
+| Too many slow query alerts | Increase `QAI_SQL_SLOW_MS` or optimize queries |
+| Migrations not applying | Check `QAI_Migrations` table exists, verify SQL file syntax |
+| Tests failing | Ensure SQLAlchemy installed in venv: `.\venv\Scripts\pip install sqlalchemy` |
+| Alerts not firing | Verify Application Insights enabled, check KQL query in portal |
 
 ## 📚 KQL Quick Queries
 
@@ -159,9 +159,9 @@ traces | where message has "slow query" | extend sql = extract(@"sql=(.{1,120})"
 
 | Environment | Slow Query Threshold | Pool Size | Target P95 |
 | ----------- | -------------------- | --------- | ---------- |
-| Development | 100ms                | 5         | < 150ms    |
-| Staging     | 300ms                | 10-20     | < 400ms    |
-| Production  | 500ms                | 20-50     | < 600ms    |
+| Development | 100ms | 5 | < 150ms |
+| Staging | 300ms | 10-20 | < 400ms |
+| Production | 500ms | 20-50 | < 600ms |
 
 ## 🚨 Alert Response Playbook
 

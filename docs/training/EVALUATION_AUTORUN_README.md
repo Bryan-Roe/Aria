@@ -23,6 +23,7 @@ python .\scripts\evaluation_autorun.py
 ### YAML-Driven Configuration (`evaluation_autorun.yaml`)
 
 Define evaluation jobs with:
+
 - **Model types**: `lora`, `azure`, `openai`, `local`, `quantum`
 - **Datasets**: Path to test dataset
 - **Metrics**: Configurable evaluation metrics per model type
@@ -31,7 +32,7 @@ Define evaluation jobs with:
 ### Supported Model Types & Metrics
 
 | Model Type | Metrics | Requirements |
-|------------|---------|--------------|
+| ------------ | --------- | -------------- |
 | `lora` | accuracy, bleu, rouge, response_time, token_efficiency | LoRA adapter path |
 | `azure` | accuracy, bleu, rouge, response_time, cost_per_token | Azure OpenAI credentials |
 | `openai` | accuracy, bleu, rouge, response_time, cost_per_token | OpenAI API key |
@@ -40,7 +41,7 @@ Define evaluation jobs with:
 
 ### Output Structure
 
-```
+```text
 data_out/evaluation_autorun/
 ├── status.json                              # Global summary
 ├── <job_name>/
@@ -285,6 +286,7 @@ $env:OPENAI_MODEL = "gpt-4o-mini"  # Optional
 ### Custom Output Formats
 
 Evaluation scripts should support:
+
 - `--output-format json` (default)
 - `--output-format csv` (for spreadsheet analysis)
 - `--output-format markdown` (for reports)

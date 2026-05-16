@@ -146,7 +146,7 @@ Entanglement Quality: 100%
 ### FREE Options (Start Here!)
 
 | Service | Usage | Cost |
-|---------|-------|------|
+| --------- | ------- | ------ |
 | **IonQ Simulator** | Unlimited | **$0.00** |
 | **Microsoft QC Simulator** | Unlimited | **$0.00** |
 | **Azure Storage** | First 5 GB | **$0.00** |
@@ -157,7 +157,7 @@ Entanglement Quality: 100%
 ### Paid Quantum Hardware
 
 | Provider | Pricing Model | Estimated Cost |
-|----------|---------------|----------------|
+| ---------- | --------------- | ---------------- |
 | **IonQ QPU** | $0.00003 per gate-shot | ~$0.50 per circuit |
 | **Quantinuum H1-1** | $0.00015 per circuit | ~$1.50 per circuit |
 | **Rigetti** | Per-shot pricing | ~$0.30 per circuit |

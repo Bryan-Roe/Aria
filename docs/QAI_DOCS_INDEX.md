@@ -1,11 +1,13 @@
 # QAI Documentation
 
+<!-- markdownlint-disable MD033 -->
+
 This directory contains all documentation for the QAI hybrid quantum-AI/ML workspace.
 
 ## 📁 Documentation Structure
 
 | Directory | Description |
-|-----------|-------------|
+| ----------- | ------------- |
 | [guides/](guides/) | General guides, feature documentation, and improvement summaries |
 | [quickref/](quickref/) | Quick reference cards for rapid lookup |
 | [training/](training/) | LoRA fine-tuning, automated training, and evaluation guides |
@@ -18,23 +20,28 @@ This directory contains all documentation for the QAI hybrid quantum-AI/ML works
 ## 🚀 Quick Links
 
 ### Getting Started
+
 - [Quick Reference](quickref/QUICK_REFERENCE.md) - Essential commands at a glance
 - [Quick Start Chat](quickref/QUICK_START_CHAT.md) - Get chatting in minutes
 
 ### Training
+
 - [AutoTrain README](training/AUTOTRAIN_README.md) - LoRA training orchestration
 - [Training Commands](quickref/TRAINING_COMMANDS_QUICKREF.md) - Training command cheat sheet
 - [Automated Pipeline](training/AUTOMATED_TRAINING_PIPELINE.md) - End-to-end automation
 
 ### Quantum Computing
+
 - [Quantum AutoRun](quantum/QUANTUM_AUTORUN_README.md) - Quantum job orchestration
 - [Azure Quantum Examples](quantum/QUANTUM_AZURE_EXAMPLES.md) - Working examples
 
 ### Database & Monitoring
+
 - [SQL Quickref](quickref/SQL_QUICKREF.md) - SQL integration quick reference
 - [Database Setup](database/DATABASE_SQL_SETUP.md) - Database configuration
 
 ### Deployment
+
 - [Azure Deployment](deployment/AZURE_ML_TRAINING_GUIDE.md) - Deploy to Azure ML
 - [Production Plan](deployment/PRODUCTION_DEPLOYMENT_PLAN.md) - Production readiness
 

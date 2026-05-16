@@ -4,32 +4,32 @@ This repository uses GitHub Actions for continuous integration, testing, deploym
 
 ## 📊 Workflow Status
 
-| Workflow                  | Status                                                                                                               | Description                                        |
+| Workflow | Status | Description |
 | ------------------------- | -------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------- |
-| CI Pipeline               | ![CI Pipeline](https://github.com/Bryan-Roe/Aria/actions/workflows/ci-pipeline.yml/badge.svg)                        | Main CI with validation, training, and deployment  |
-| Code Quality              | ![Code Quality](https://github.com/Bryan-Roe/Aria/actions/workflows/code-quality.yml/badge.svg)                      | Linting, formatting, and security checks           |
-| CodeQL Security           | ![CodeQL](https://github.com/Bryan-Roe/Aria/actions/workflows/codeql.yml/badge.svg)                                  | Security vulnerability scanning                    |
-| PR Checks                 | ![PR Checks](https://github.com/Bryan-Roe/Aria/actions/workflows/pr-checks.yml/badge.svg)                            | Fast validation for pull requests                  |
-| Auto Validation           | ![Auto Validation](https://github.com/Bryan-Roe/Aria/actions/workflows/auto-validation.yml/badge.svg)                | Orchestrator dry-run validation                    |
-| E2E Tests                 | ![E2E Tests](https://github.com/Bryan-Roe/Aria/actions/workflows/e2e-tests.yml/badge.svg)                            | End-to-end browser tests                           |
-| Aria Tests                | ![Aria Tests](https://github.com/Bryan-Roe/Aria/actions/workflows/aria-tests.yml/badge.svg)                          | Aria character tests                               |
-| Quantum                   | ![Quantum](https://github.com/Bryan-Roe/Aria/actions/workflows/quantum-orchestration.yml/badge.svg)                  | Quantum computing workflows                        |
-| Azure ML                  | ![Azure ML](https://github.com/Bryan-Roe/Aria/actions/workflows/azureml-train.yml/badge.svg)                         | Azure ML training jobs                             |
-| Release                   | ![Release](https://github.com/Bryan-Roe/Aria/actions/workflows/release.yml/badge.svg)                                | Automated releases                                 |
-| Dependabot Auto-merge     | ![Dependabot Auto-merge](https://github.com/Bryan-Roe/Aria/actions/workflows/dependabot-automerge.yml/badge.svg)     | Auto-merge safe Dependabot PRs                     |
-| Integration Contract Gate | ![Integration Contract](https://github.com/Bryan-Roe/Aria/actions/workflows/integration-contract-gate.yml/badge.svg) | API contract validation on push/PR                 |
-| Nightly Regression        | ![Nightly Regression](https://github.com/Bryan-Roe/Aria/actions/workflows/nightly-regression.yml/badge.svg)          | Nightly full suite with regression detection       |
-| Training Health Report    | ![Training Health](https://github.com/Bryan-Roe/Aria/actions/workflows/training-health-report.yml/badge.svg)         | Weekly training pipeline digest                    |
-| Coverage Report           | ![Coverage Report](https://github.com/Bryan-Roe/Aria/actions/workflows/coverage-report.yml/badge.svg)                | Test coverage tracking and PR diff comments        |
-| Dataset Integrity         | ![Dataset Integrity](https://github.com/Bryan-Roe/Aria/actions/workflows/dataset-integrity.yml/badge.svg)            | Enforces datasets/ immutability and schema rules   |
-| Secrets Scan              | ![Secrets Scan](https://github.com/Bryan-Roe/Aria/actions/workflows/secrets-scan.yml/badge.svg)                      | Gitleaks secret detection and sensitive file guard |
-| Dependency Review         | ![Dependency Review](https://github.com/Bryan-Roe/Aria/actions/workflows/dependency-review.yml/badge.svg)            | Blocks risky dependency changes in PRs             |
-| Workflow Lint             | ![Workflow Lint](https://github.com/Bryan-Roe/Aria/actions/workflows/actionlint.yml/badge.svg)                       | Lints GitHub Actions with actionlint               |
-| Markdown Quality          | ![Markdown Quality](https://github.com/Bryan-Roe/Aria/actions/workflows/markdown-quality.yml/badge.svg)              | Lints Markdown style and structure                 |
-| Broken Links Check        | ![Broken Links](https://github.com/Bryan-Roe/Aria/actions/workflows/broken-links.yml/badge.svg)                      | Validates links in docs and markdown               |
-| API Health Smoke          | ![API Health Smoke](https://github.com/Bryan-Roe/Aria/actions/workflows/api-health-smoke.yml/badge.svg)              | Fast smoke gate for API route health               |
-| Artifact Lifecycle        | ![Artifact Lifecycle](https://github.com/Bryan-Roe/Aria/actions/workflows/artifact-lifecycle.yml/badge.svg)          | Weekly artifact retention audit/cleanup            |
-| Platform Health Daily     | ![Platform Health Daily](https://github.com/Bryan-Roe/Aria/actions/workflows/platform-health-daily.yml/badge.svg)    | Daily health pulse and resource snapshot           |
+| CI Pipeline | ![CI Pipeline](https://github.com/Bryan-Roe/Aria/actions/workflows/ci-pipeline.yml/badge.svg) | Main CI with validation, training, and deployment |
+| Code Quality | ![Code Quality](https://github.com/Bryan-Roe/Aria/actions/workflows/code-quality.yml/badge.svg) | Linting, formatting, and security checks |
+| CodeQL Security | ![CodeQL](https://github.com/Bryan-Roe/Aria/actions/workflows/codeql.yml/badge.svg) | Security vulnerability scanning |
+| PR Checks | ![PR Checks](https://github.com/Bryan-Roe/Aria/actions/workflows/pr-checks.yml/badge.svg) | Fast validation for pull requests |
+| Auto Validation | ![Auto Validation](https://github.com/Bryan-Roe/Aria/actions/workflows/auto-validation.yml/badge.svg) | Orchestrator dry-run validation |
+| E2E Tests | ![E2E Tests](https://github.com/Bryan-Roe/Aria/actions/workflows/e2e-tests.yml/badge.svg) | End-to-end browser tests |
+| Aria Tests | ![Aria Tests](https://github.com/Bryan-Roe/Aria/actions/workflows/aria-tests.yml/badge.svg) | Aria character tests |
+| Quantum | ![Quantum](https://github.com/Bryan-Roe/Aria/actions/workflows/quantum-orchestration.yml/badge.svg) | Quantum computing workflows |
+| Azure ML | ![Azure ML](https://github.com/Bryan-Roe/Aria/actions/workflows/azureml-train.yml/badge.svg) | Azure ML training jobs |
+| Release | ![Release](https://github.com/Bryan-Roe/Aria/actions/workflows/release.yml/badge.svg) | Automated releases |
+| Dependabot Auto-merge | ![Dependabot Auto-merge](https://github.com/Bryan-Roe/Aria/actions/workflows/dependabot-automerge.yml/badge.svg) | Auto-merge safe Dependabot PRs |
+| Integration Contract Gate | ![Integration Contract](https://github.com/Bryan-Roe/Aria/actions/workflows/integration-contract-gate.yml/badge.svg) | API contract validation on push/PR |
+| Nightly Regression | ![Nightly Regression](https://github.com/Bryan-Roe/Aria/actions/workflows/nightly-regression.yml/badge.svg) | Nightly full suite with regression detection |
+| Training Health Report | ![Training Health](https://github.com/Bryan-Roe/Aria/actions/workflows/training-health-report.yml/badge.svg) | Weekly training pipeline digest |
+| Coverage Report | ![Coverage Report](https://github.com/Bryan-Roe/Aria/actions/workflows/coverage-report.yml/badge.svg) | Test coverage tracking and PR diff comments |
+| Dataset Integrity | ![Dataset Integrity](https://github.com/Bryan-Roe/Aria/actions/workflows/dataset-integrity.yml/badge.svg) | Enforces datasets/ immutability and schema rules |
+| Secrets Scan | ![Secrets Scan](https://github.com/Bryan-Roe/Aria/actions/workflows/secrets-scan.yml/badge.svg) | Gitleaks secret detection and sensitive file guard |
+| Dependency Review | ![Dependency Review](https://github.com/Bryan-Roe/Aria/actions/workflows/dependency-review.yml/badge.svg) | Blocks risky dependency changes in PRs |
+| Workflow Lint | ![Workflow Lint](https://github.com/Bryan-Roe/Aria/actions/workflows/actionlint.yml/badge.svg) | Lints GitHub Actions with actionlint |
+| Markdown Quality | ![Markdown Quality](https://github.com/Bryan-Roe/Aria/actions/workflows/markdown-quality.yml/badge.svg) | Lints Markdown style and structure |
+| Broken Links Check | ![Broken Links](https://github.com/Bryan-Roe/Aria/actions/workflows/broken-links.yml/badge.svg) | Validates links in docs and markdown |
+| API Health Smoke | ![API Health Smoke](https://github.com/Bryan-Roe/Aria/actions/workflows/api-health-smoke.yml/badge.svg) | Fast smoke gate for API route health |
+| Artifact Lifecycle | ![Artifact Lifecycle](https://github.com/Bryan-Roe/Aria/actions/workflows/artifact-lifecycle.yml/badge.svg) | Weekly artifact retention audit/cleanup |
+| Platform Health Daily | ![Platform Health Daily](https://github.com/Bryan-Roe/Aria/actions/workflows/platform-health-daily.yml/badge.svg) | Daily health pulse and resource snapshot |
 
 ## 🔄 Workflows Overview
 

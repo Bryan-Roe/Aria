@@ -3,67 +3,201 @@
 # =============================================================================
 # Purpose: Run a daily platform health pulse using existing health scripts and
 #          archive machine-readable outputs for trend/debug follow-up.
+#
+# Outputs (uploaded as artifacts, retained 30 days):
+#   - data_out/platform_health/system_health.json
+#   - data_out/platform_health/resource_snapshot.json
+#
+# Triggers:
+#   - Scheduled: daily at 05:45 UTC
+#   - Manual:    workflow_dispatch (with optional debug toggle)
 # =============================================================================
 
 name: Platform Health Daily
 
 on:
-    schedule:
-        - cron: "45 5 * * *" # Daily at 05:45 UTC
-    workflow_dispatch:
+  schedule:
+    - cron: "45 5 * * *" # Daily at 05:45 UTC
+  workflow_dispatch:
+    inputs:
+      debug:
+        description: "Enable verbose/debug output"
+        required: false
+        default: "false"
+        type: boolean
 
+# Principle of least privilege — this workflow only reads repo contents.
 permissions:
-    contents: read
+  contents: read
 
+# Prevent overlapping runs; do not cancel an in-progress run so a scheduled
+# pulse always completes even if a manual dispatch arrives.
 concurrency:
-    group: platform-health-daily
-    cancel-in-progress: false
+  group: platform-health-daily
+  cancel-in-progress: false
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  HEALTH_DIR: data_out/platform_health
+  PYTHONUNBUFFERED: "1"
+  PYTHONDONTWRITEBYTECODE: "1"
+  # Fail fast on unset vars / pipe errors in inline scripts.
+  SHELLOPTS: errexit:pipefail:nounset
 
 jobs:
-    health-pulse:
-        name: Platform Health Pulse
-        runs-on: ubuntu-latest
-        timeout-minutes: 15
+  health-pulse:
+    name: Platform Health Pulse
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
 
-        steps:
-            - name: Checkout
-              uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4.3.1
+    steps:
+      - name: Checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          persist-credentials: false
+          fetch-depth: 1
 
-            - name: Setup Python
-              uses: ./.github/actions/setup-python-env
-              with:
-                  install-requirements: "false"
-                  extra-packages: "psutil"
+      - name: Setup Python
+        uses: ./.github/actions/setup-python-env
+        with:
+          install-requirements: "false"
+          extra-packages: "psutil"
 
-            - name: Run system health report (JSON)
-              run: |
-                  mkdir -p data_out/platform_health
-                  python scripts/system_health_check.py --json > data_out/platform_health/system_health.json
+      - name: Prepare output directory
+        run: |
+          set -euo pipefail
+          mkdir -p "${HEALTH_DIR}"
+          echo "Output directory: ${HEALTH_DIR}"
 
-            - name: Run resource snapshot export
-              run: |
-                  python scripts/resource_monitor.py --snapshot --export data_out/platform_health/resource_snapshot.json
+      - name: Run system health report (JSON)
+        id: system_health
+        continue-on-error: true
+        run: |
+          set -euo pipefail
+          OUT="${HEALTH_DIR}/system_health.json"
+          if [[ "${{ inputs.debug }}" == "true" ]]; then
+            set -x
+          fi
+          python scripts/system_health_check.py --json > "${OUT}"
+          # Validate JSON early so downstream consumers can trust the artifact.
+          python -c "import json,sys; json.load(open('${OUT}'))"
+          echo "path=${OUT}" >> "${GITHUB_OUTPUT}"
 
-            - name: Upload health artifacts
-              if: always()
-              uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4
-              with:
-                  name: platform-health-${{ github.run_number }}
-                  retention-days: 30
-                  path: |
-                      data_out/platform_health/system_health.json
-                      data_out/platform_health/resource_snapshot.json
+      - name: Run resource snapshot export
+        id: resource_snapshot
+        continue-on-error: true
+        run: |
+          set -euo pipefail
+          OUT="${HEALTH_DIR}/resource_snapshot.json"
+          if [[ "${{ inputs.debug }}" == "true" ]]; then
+            set -x
+          fi
+          python scripts/resource_monitor.py --snapshot --export "${OUT}"
+          python -c "import json,sys; json.load(open('${OUT}'))"
+          echo "path=${OUT}" >> "${GITHUB_OUTPUT}"
 
-            - name: Summary
-              if: always()
-              run: |
-                  echo "## Platform Health Daily" >> $GITHUB_STEP_SUMMARY
-                  echo "" >> $GITHUB_STEP_SUMMARY
-                  echo "| Output | Path |" >> $GITHUB_STEP_SUMMARY
-                  echo "|--------|------|" >> $GITHUB_STEP_SUMMARY
-                  echo "| System health | data_out/platform_health/system_health.json |" >> $GITHUB_STEP_SUMMARY
-                  echo "| Resource snapshot | data_out/platform_health/resource_snapshot.json |" >> $GITHUB_STEP_SUMMARY
-                  echo "" >> $GITHUB_STEP_SUMMARY
-                  if [ -f data_out/platform_health/system_health.json ]; then
-                    python3 -c "import json,pathlib; p=pathlib.Path('data_out/platform_health/system_health.json'); d=json.loads(p.read_text()); checks=d.get('checks',[]) if isinstance(d,dict) else []; ok=sum(1 for c in checks if c.get('status')=='ok'); warn=sum(1 for c in checks if c.get('status')=='warn'); fail=sum(1 for c in checks if c.get('status')=='fail'); print(f'- Check counts: ✅ {ok}  ⚠️ {warn}  ❌ {fail}')" >> $GITHUB_STEP_SUMMARY || echo "- Could not parse system health JSON summary" >> $GITHUB_STEP_SUMMARY
-                  fi
+      - name: Upload health artifacts
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: platform-health-${{ github.run_number }}
+          retention-days: 30
+          if-no-files-found: warn
+          compression-level: 9
+          path: |
+            data_out/platform_health/system_health.json
+            data_out/platform_health/resource_snapshot.json
+
+      - name: Summary
+        if: always()
+        env:
+          SYSTEM_HEALTH_STATUS: ${{ steps.system_health.outcome }}
+          RESOURCE_SNAPSHOT_STATUS: ${{ steps.resource_snapshot.outcome }}
+        run: |
+          set -euo pipefail
+          {
+            echo "## Platform Health Daily"
+            echo ""
+            echo "Run: \`${{ github.run_id }}\` • Trigger: \`${{ github.event_name }}\` • SHA: \`${{ github.sha }}\`"
+            echo ""
+            echo "### Step Outcomes"
+            echo ""
+            echo "| Step | Outcome |"
+            echo "|------|---------|"
+            echo "| System health         | ${SYSTEM_HEALTH_STATUS} |"
+            echo "| Resource snapshot     | ${RESOURCE_SNAPSHOT_STATUS} |"
+            echo ""
+            echo "### Artifacts"
+            echo ""
+            echo "| Output | Path | Size |"
+            echo "|--------|------|------|"
+          } >> "${GITHUB_STEP_SUMMARY}"
+
+          # Emit row for each artifact, with size if present.
+          for entry in \
+            "System health|${HEALTH_DIR}/system_health.json" \
+            "Resource snapshot|${HEALTH_DIR}/resource_snapshot.json"; do
+            label="${entry%%|*}"
+            path="${entry##*|}"
+            if [[ -f "${path}" ]]; then
+              size="$(du -h "${path}" | awk '{print $1}')"
+              echo "| ${label} | \`${path}\` | ${size} |" >> "${GITHUB_STEP_SUMMARY}"
+            else
+              echo "| ${label} | \`${path}\` | _missing_ |" >> "${GITHUB_STEP_SUMMARY}"
+            fi
+          done
+
+          echo "" >> "${GITHUB_STEP_SUMMARY}"
+
+          # Render a compact view of system_health checks if the file is valid.
+          SH="${HEALTH_DIR}/system_health.json"
+          if [[ -f "${SH}" ]]; then
+            echo "### System Health Checks" >> "${GITHUB_STEP_SUMMARY}"
+            echo "" >> "${GITHUB_STEP_SUMMARY}"
+            python3 - "${SH}" >> "${GITHUB_STEP_SUMMARY}" <<'PY' || echo "_Could not parse system_health.json_" >> "${GITHUB_STEP_SUMMARY}"
+          import json, pathlib, sys
+
+          path = pathlib.Path(sys.argv[1])
+          try:
+              data = json.loads(path.read_text())
+          except Exception as exc:  # noqa: BLE001
+              print(f"_Failed to parse {path}: {exc}_")
+              sys.exit(0)
+
+          checks = data.get("checks", []) if isinstance(data, dict) else []
+          if not checks:
+              print("_No checks reported._")
+              sys.exit(0)
+
+          print("| Check | Status | Detail |")
+          print("|-------|--------|--------|")
+          for c in checks:
+              if not isinstance(c, dict):
+                  continue
+              name = str(c.get("name", "unknown"))
+              status = str(c.get("status", c.get("ok", "?")))
+              detail = str(c.get("detail", c.get("message", "")))[:120].replace("|", "\\|")
+              print(f"| {name} | {status} | {detail} |")
+          PY
+          fi
+
+      - name: Fail if any health step failed
+        if: always()
+        env:
+          SYSTEM_HEALTH_STATUS: ${{ steps.system_health.outcome }}
+          RESOURCE_SNAPSHOT_STATUS: ${{ steps.resource_snapshot.outcome }}
+        run: |
+          set -euo pipefail
+          failed=0
+          if [[ "${SYSTEM_HEALTH_STATUS}" != "success" ]]; then
+            echo "::error::system_health step outcome=${SYSTEM_HEALTH_STATUS}"
+            failed=1
+          fi
+          if [[ "${RESOURCE_SNAPSHOT_STATUS}" != "success" ]]; then
+            echo "::error::resource_snapshot step outcome=${RESOURCE_SNAPSHOT_STATUS}"
+            failed=1
+          fi
+          exit "${failed}"

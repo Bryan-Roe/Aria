@@ -25,9 +25,16 @@ This is a production-ready REST API for banknote fraud detection using a hybrid 
 
 ### Installation
 
+**Production:**
 ```bash
 cd production
 pip install -r requirements.txt
+```
+
+**Development (includes testing tools):**
+```bash
+cd production
+pip install -r requirements.txt -r dev-requirements.txt
 ```
 
 ### Start the API
@@ -254,7 +261,7 @@ docker-compose up
 ### Benchmark
 
 | Metric | Value |
-|--------|-------|
+| -------- | ------- |
 | Accuracy | 100% |
 | Precision | 100% |
 | Recall | 100% |
@@ -312,7 +319,14 @@ pip install -r requirements.txt
 ### Run Tests
 
 ```bash
-pytest tests/
+# Install dev dependencies first
+pip install -r dev-requirements.txt
+
+# Run the test suite (standalone script with pytest integration)
+python test_api.py
+
+# Or use pytest directly
+pytest test_api.py -v
 ```
 
 ### Enable Debug Mode

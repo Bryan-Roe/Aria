@@ -5,6 +5,7 @@ The `shared/` directory is organized by import dependency tier to make it clear 
 ## Tier Levels (bottom-up)
 
 ### 🔵 Core Tier (`shared/core/`)
+
 **Always required.** Minimal dependencies, no AI project imports.
 
 - **module_registry.py** — Central import hub for all ai-projects; replaces all sys.path manipulation
@@ -28,6 +29,7 @@ detect_provider = chat_api.detect_provider
 ---
 
 ### 🟢 Infrastructure Tier (`shared/infrastructure/`)
+
 **Heavy dependencies**: SQL engines, Cosmos DB, telemetry, observability.
 
 - `sql_engine.py` — SQL connection pool management
@@ -51,6 +53,7 @@ except ImportError:
 ---
 
 ### 🟡 Domain Tier (`shared/domain/`)
+
 **AI-specific utilities**: Chat providers, memory systems, token management.
 
 - `chat_providers.py` — Chat provider detection, streaming, fallback
@@ -66,6 +69,7 @@ except ImportError:
 ---
 
 ### 🟠 Utilities Tier (`shared/utilities/`)
+
 **Lightweight helpers** with no heavy dependencies.
 
 - `file_cache.py` — In-memory and disk caching
@@ -79,6 +83,7 @@ except ImportError:
 ---
 
 ### 🔴 Premium Tier (`shared/premium/`)
+
 **Feature-gated monetization and advanced features.**
 
 - `subscription_manager.py` — Tier-based access control (FREE/PRO/ENTERPRISE)
@@ -103,7 +108,7 @@ except ImportError:
 
 ## Dependency Graph (what can import what)
 
-```
+```text
 Core
   ↑
   │ depends on
@@ -115,6 +120,7 @@ Applications (function_app.py, scripts/, apps/)
 ```
 
 **Rule**: Never import upward in the dependency graph.
+
 - ✗ Core cannot import from Domain or Infrastructure
 - ✓ Domain can import from Core
 - ✓ function_app.py can import from all tiers
@@ -174,7 +180,7 @@ __all__ = ['detect_provider', 'BaseChatProvider']
 
 ## Migration Guide
 
-### If you see old-style imports:
+### If you see old-style imports
 
 ```python
 # ❌ Old: root-level shims (deprecated)
@@ -189,7 +195,7 @@ detect_provider = chat_api.detect_provider
 prune_messages = chat_api.token_utils.prune_messages
 ```
 
-### If you see sys.path manipulation:
+### If you see sys.path manipulation
 
 ```python
 # ❌ Old: scattered sys.path

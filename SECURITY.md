@@ -1,111 +1,146 @@
 # Security Policy
 
-Thank you for helping keep **Aria** and its users safe. This document describes
-which versions of the project receive security updates, how to privately report
-a vulnerability, and what to expect from the maintainers during the disclosure
-process.
+Thank you for helping keep **Aria** and its users safe. This policy explains how to report vulnerabilities, what versions are supported, what’s in scope, and our coordinated disclosure process.
+
+---
+
+## Table of Contents
+
+- [Supported Versions](#supported-versions)
+- [How to Report a Vulnerability](#how-to-report-a-vulnerability)
+- [What to Include in a Report](#what-to-include-in-a-report)
+- [Coordinated Disclosure Process](#coordinated-disclosure-process)
+- [Scope](#scope)
+  - [In Scope](#in-scope)
+  - [Out of Scope](#out-of-scope)
+- [Testing Expectations](#testing-expectations)
+- [Safe Harbor & Good-Faith Research](#safe-harbor--good-faith-research)
+- [Remediation and Release Practices](#remediation-and-release-practices)
+- [Policy Updates](#policy-updates)
+
+---
 
 ## Supported Versions
 
-The table below lists the versions of Aria that are currently receiving
-security updates. Older releases that are no longer supported will not receive
-patches; please upgrade to a supported version before reporting an issue.
+Security fixes are provided only for versions listed below. If you’re running an unsupported release, please [upgrade](https://github.com/Bryan-Roe/Aria/releases) before reporting a vulnerability.
 
-| Version         | Supported          | Notes                                   |
-| --------------- | ------------------ | --------------------------------------- |
-| latest (`main`) | :white_check_mark: | Active development branch               |
-| 5.1.x           | :white_check_mark: | Current stable release                  |
-| 5.0.x           | :x:                | End of life                             |
-| 4.0.x           | :white_check_mark: | Long-term support (critical fixes only) |
-| < 4.0           | :x:                | Unsupported – please upgrade            |
+| Version         | Supported           | Notes                                        |
+| --------------- | ------------------ | --------------------------------------------- |
+| latest (`main`) | :white_check_mark: | Active development branch                     |
+| 5.1.x           | :white_check_mark: | Current stable release                        |
+| 5.0.x           | :x:                | End of life                                  |
+| 4.0.x           | :white_check_mark: | Long-term support (critical fixes only)       |
+| < 4.0           | :x:                | Unsupported — please upgrade                  |
 
-If you are unsure which version you are running, check the project release
-notes or your installed package metadata.
+Unsure which version you’re using? Review the [release notes](https://github.com/Bryan-Roe/Aria/releases).
 
-## Reporting a Vulnerability
+---
 
-**Please do not report security vulnerabilities through public GitHub issues,
-discussions, or pull requests.** Public disclosure before a fix is available
-puts users at risk.
+## How to Report a Vulnerability
 
-Instead, please report vulnerabilities privately using one of the following
-channels:
+> **Please do NOT report security vulnerabilities through public GitHub issues, pull requests, or discussions. Disclosing security issues publicly before a fix is available can put users at risk.**
 
-1. **GitHub Private Vulnerability Reporting** (preferred):
-   Open a private report at
-   [https://github.com/Bryan-Roe/Aria/security/advisories/new](https://github.com/Bryan-Roe/Aria/security/advisories/new).
-2. **Email:** Contact the maintainer via the address listed on the
-   [maintainer's GitHub profile](https://github.com/Bryan-Roe). If possible,
-   encrypt sensitive details before sending.
+To report a potential security issue **privately and securely**:
 
-### What to include
+1. **[Open a private report (recommended)](https://github.com/Bryan-Roe/Aria/security/advisories/new)**
+2. **Contact via email:**  
+   Message the maintainer using their public address from the [project maintainer’s GitHub profile](https://github.com/Bryan-Roe). Whenever possible, encrypt sensitive details.
 
-To help us triage and resolve the issue quickly, please include as much of the
-following as you can:
+Reports should be written in English when possible.
+
+---
+
+## What to Include in a Report
+
+To help us confirm, triage, and fix the issue faster, please include:
 
 - A clear description of the vulnerability and its potential impact.
-- The affected version(s), platform, and configuration.
-- Step-by-step instructions to reproduce the issue (proof-of-concept code,
-  scripts, or screenshots are very helpful).
-- Any known mitigations or workarounds.
-- Whether the issue has been disclosed elsewhere, and any CVE identifier if
-  one has already been assigned.
-- How you would like to be credited (or whether you prefer to remain anonymous).
+- The version(s), environment, platform, or configuration involved.
+- Steps to reproduce, proof-of-concept code, scripts, logs, or screenshots if possible.
+- Any known workarounds or mitigations.
+- Whether and where the issue has been disclosed elsewhere.
+- CVE identifier (if one is already assigned).
+- How you would like to be credited, if at all.
 
-### What to expect
+---
 
-We aim to follow a coordinated disclosure process:
+## Coordinated Disclosure Process
 
-| Stage                          | Target Response Time                                                  |
-| ------------------------------ | --------------------------------------------------------------------- |
-| Initial acknowledgement        | Within **3 business days** of your report                             |
-| Triage and severity assessment | Within **7 business days**                                            |
-| Status updates                 | At least every **7 days** until resolution                            |
-| Fix and disclosure             | Typically within **90 days**, depending on severity and complexity    |
+We strive to handle reports using a coordinated process and keep reporters informed.
 
-After triage, we will let you know whether the report is accepted as a security
-issue, declined (e.g., out of scope or not a vulnerability), or needs more
-information. For accepted reports, we will work with you on a fix, prepare a
-release, and coordinate public disclosure. With your permission, we will credit
-you in the release notes and any associated security advisory.
+| Stage                    | Target Response Time                                  |
+| ------------------------ | ----------------------------------------------------- |
+| Initial acknowledgment   | Within **3 business days**                            |
+| Triage & assessment      | Within **7 business days**                            |
+| Progress updates         | At least every **7 days** until resolution            |
+| Fix/disclosure           | Typically within **90 days**, depending on severity   |
+
+After triage, you’ll be notified if the report is accepted, declined, or needs more info. Accepted reports proceed to remediation and coordinated disclosure.
+
+---
 
 ## Scope
 
-In-scope issues include, but are not limited to:
+### In Scope
 
-- Remote code execution, command injection, or unsafe deserialization.
-- Authentication or authorization bypasses.
-- Sensitive data exposure (secrets, credentials, personal data).
-- Cross-site scripting (XSS), CSRF, SSRF, or path-traversal vulnerabilities in
-  any first-party Aria component.
-- Supply-chain or dependency issues unique to this repository's configuration.
+Issues are generally in scope if they involve:
 
-The following are generally **out of scope**:
+- Remote code execution, command injection, or unsafe deserialization
+- Authentication/authorization bypass
+- Sensitive data exposure (secrets, credentials, tokens, personal data)
+- XSS, CSRF, SSRF, path traversal—in **first-party Aria code**
+- Supply-chain or dependency risks from this repository’s configuration or integrations
+- Insecure defaults, or exposed admin/debug features in authentic deployments
 
-- Vulnerabilities in third-party dependencies that are already publicly tracked
-  upstream (please report those to the upstream project; we will update once a
-  fix is available).
-- Issues that require physical access to a user's device or non-default,
-  insecure configurations.
-- Best-practice or hardening suggestions without a demonstrable security impact.
-- Denial-of-service issues that require unrealistic resources or that only
-  affect the reporter's own environment.
+### Out of Scope
 
-## Safe Harbor
+Out of scope, unless a **clear, material risk** exists:
 
-We support good-faith security research. If you make a good-faith effort to
-comply with this policy during your research, we will:
+- Vulnerabilities in third-party dependencies already tracked upstream ([check advisories](https://github.com/advisories))
+- Issues requiring physical device access or a non-default insecure config
+- Best-practice, compliance, or hardening items **without a demonstrated exploit path**
+- Denial-of-service findings that only affect your own test environment or are impractical
+- Missing HTTP security headers, banners, or version disclosures lacking an exploit chain
+- Social engineering, phishing, or attacks requiring maintainer credential compromise outside this project
 
-- Consider your research to be authorized.
-- Work with you to understand and resolve the issue quickly.
-- Not pursue or support legal action related to your research.
+---
 
-Please make every effort to avoid privacy violations, data destruction, and
-service interruption while conducting research.
+## Testing Expectations
+
+- Test only on systems/data you own or are authorized to test.
+- Avoid privacy violations, destructive actions, or disruptions.
+- Do not access, modify, or retain others’ data.
+- Do not use automated/high-volume scanning that could degrade service.
+- Stop testing and report once you have enough info to demonstrate an issue.
+
+---
+
+## Safe Harbor & Good-Faith Research
+
+We support good-faith security research. If you follow this policy:
+
+- **Your findings are authorized** and welcomed by project maintainers.
+- We’ll work with you to diagnose, remediate, and disclose issues cooperatively.
+- We will not initiate or support legal action for research reported according to this policy.
+
+**Note:** Safe harbor does not apply if research intentionally harms users, damages data, violates privacy, or disrupts service.
+
+---
+
+## Remediation and Release Practices
+
+When a report is accepted, we may:
+
+- Develop and validate a fix
+- Prepare patched releases for all supported versions if feasible
+- Publish a GitHub Security Advisory
+- Request or reference a CVE
+- Document mitigations for users unable to upgrade
+
+---
 
 ## Policy Updates
 
-This policy may be updated from time to time. Material changes will be noted in
-the project's release notes or commit history. The latest version of this
-document is always available at
-[`SECURITY.md`](https://github.com/Bryan-Roe/Aria/blob/main/SECURITY.md).
+This policy may evolve. Significant updates will be reflected in release notes, commit logs, or [this file](https://github.com/Bryan-Roe/Aria/blob/main/SECURITY.md). Always refer to the latest version here.
+
+

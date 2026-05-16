@@ -211,6 +211,35 @@ def test_update_object_state(aria_server):
     assert resp["object"]["state"] == "held"
 
 
+@pytest.mark.integration
+def test_drop_object_state_persisted(aria_server):
+    """Dropping an object (held → on_stage/on_table) must be reflected by GET /api/aria/state."""
+    obj_id = "drop_test_obj"
+    _post(
+        f"{aria_server}/api/aria/object",
+        {"action": "add", "object": {"id": obj_id, "position": {"x": 50, "y": 50}, "state": "on_stage"}},
+    )
+    # Pick up
+    _post(
+        f"{aria_server}/api/aria/object",
+        {"action": "update", "object": {"id": obj_id, "state": "held"}},
+    )
+    # Drop — update state to on_stage with a new position
+    resp = _post(
+        f"{aria_server}/api/aria/object",
+        {"action": "update", "object": {"id": obj_id, "position": {"x": 30, "y": 20}, "state": "on_stage"}},
+    )
+    assert resp.get("status") == "updated"
+    assert resp["object"]["state"] == "on_stage"
+    assert resp["object"]["position"] == {"x": 30, "y": 20}
+
+    # Verify GET /api/aria/state reflects the drop
+    obj_state = _get(f"{aria_server}/api/aria/state").get("objects", {}).get(obj_id)
+    assert obj_state is not None, f"Object {obj_id!r} missing from /api/aria/state"
+    assert obj_state["state"] == "on_stage", f"Expected on_stage, got: {obj_state['state']}"
+    assert obj_state["position"] == {"x": 30, "y": 20}
+
+
 # ---------------------------------------------------------------------------
 # Tests — POST /api/aria/object — remove action
 # ---------------------------------------------------------------------------

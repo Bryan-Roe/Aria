@@ -96,29 +96,29 @@ data_out/                        # All outputs go here
 
 ## Evaluation Metrics
 
-| Metric            | Description                                |
+| Metric | Description |
 | ----------------- | ------------------------------------------ |
-| accuracy          | Exact match ratio                          |
-| perplexity        | Cross-entropy exponential (lower = better) |
-| f1                | Harmonic mean of precision/recall          |
-| mean_accuracy     | Average across evaluation samples          |
-| improvement_rate  | Accuracy delta between training cycles     |
-| plateau_detection | Identifies stalled performance trends      |
+| accuracy | Exact match ratio |
+| perplexity | Cross-entropy exponential (lower = better) |
+| f1 | Harmonic mean of precision/recall |
+| mean_accuracy | Average across evaluation samples |
+| improvement_rate | Accuracy delta between training cycles |
+| plateau_detection | Identifies stalled performance trends |
 
 ## Performance Analysis Tools
 
-| Script                           | Purpose                                      |
+| Script | Purpose |
 | -------------------------------- | -------------------------------------------- |
-| `scripts/batch_evaluator.py`     | Parallel multi-model evaluation              |
-| `scripts/training_analytics.py`  | Trends, improvement rates, plateau detection |
-| `scripts/evaluate_lora_model.py` | Single model evaluation                      |
+| `scripts/batch_evaluator.py` | Parallel multi-model evaluation |
+| `scripts/training_analytics.py` | Trends, improvement rates, plateau detection |
+| `scripts/evaluate_lora_model.py` | Single model evaluation |
 
 ## Key Files
 
-| File                            | Purpose                                             |
+| File | Purpose |
 | ------------------------------- | --------------------------------------------------- |
-| `scripts/batch_evaluator.py`    | `BatchEvaluator` — parallel evaluation orchestrator |
-| `scripts/training_analytics.py` | Performance trend analysis                          |
-| `config/evaluation/`            | Evaluation YAML configs                             |
-| `datasets/`                     | Source datasets (READ-ONLY)                         |
-| `data_out/batch_evaluator/`     | Evaluation results output                           |
+| `scripts/batch_evaluator.py` | `BatchEvaluator` — parallel evaluation orchestrator |
+| `scripts/training_analytics.py` | Performance trend analysis |
+| `config/evaluation/` | Evaluation YAML configs |
+| `datasets/` | Source datasets (READ-ONLY) |
+| `data_out/batch_evaluator/` | Evaluation results output |

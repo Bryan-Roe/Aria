@@ -1,25 +1,25 @@
 # QAI Integration Service Requirements
 
 # Web Framework
-fastapi>=0.115.0
-uvicorn[standard]>=0.32.0
-pydantic>=2.10.0
-pydantic-settings>=2.7.0
+fastapi>=0.136.1
+uvicorn[standard]>=0.47.0
+pydantic>=2.13.4
+pydantic-settings>=2.14.1
 
 # Async Support
-aiofiles>=23.2.1
-httpx>=0.28.0
+aiofiles>=25.1.0
+httpx>=0.28.1
 
 # Configuration
-pyyaml>=6.0.1
-python-dotenv>=1.0.0
+pyyaml>=6.0.3
+python-dotenv>=1.2.2
 
 # Monitoring & Logging
-python-json-logger>=2.0.7
+python-json-logger>=4.1.0
 
 # Data Processing
-pandas>=2.2.0
-numpy>=1.26.4
+pandas>=3.0.3
+numpy>=2.4.5
 
 # Optional: Add if you want direct imports from other modules
 # -e ../quantum-ai

@@ -14,7 +14,7 @@ You requested to **activate the autonomous training orchestrator** (Option 1 fro
 ### 2. **Performance Metrics Achieved** 📊
 
    | Metric | Value |
-   |--------|-------|
+   | -------- | ------- |
    | Initial Accuracy (Cycle 1) | 71.50% |
    | Final Accuracy (Cycle 3) | 74.50% |
    | Total Improvement | +3.0 percentage points |
@@ -144,7 +144,7 @@ Process ran as `[1] 41572` with CPU & memory managed independently.
 ## 🚀 Production Readiness Checklist
 
 | Component | Status | Action |
-|-----------|--------|--------|
+| ----------- | -------- | -------- |
 | Config Structure | ✅ Ready | `config/autonomous_training.yaml` fully defined |
 | Orchestrator Logic | ✅ Ready | Cycle management working (demo script validates pattern) |
 | Dataset Discovery | ✅ Working | Auto-scans `/datasets` and builds inventory |

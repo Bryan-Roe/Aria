@@ -80,7 +80,7 @@ Get-Process python*, func* | Select-Object ProcessName, Id, CPU, WorkingSet64
 ### 4. Common Issue Patterns
 
 | Symptom | Likely Cause | Fix |
-|---------|-------------|-----|
+| --------- | ------------- | ----- |
 | Chat returns empty | Provider not detected | Check env vars, `/api/ai/status` |
 | 500 on `/api/chat` | Import error in function_app | Check `func host start` logs |
 | Aria not responding | Server not on 8080 | `cd apps/aria && python server.py` |
@@ -114,7 +114,7 @@ pytest tests/ -k "test_chat" -v
 ## Key Diagnostic Files
 
 | File | What It Tells You |
-|------|------------------|
+| ------ | ------------------ |
 | `function_app.py` | All API routes and handlers |
 | `shared/chat_providers.py` | Provider detection chain |
 | `shared/chat_memory.py` | Embedding system status |

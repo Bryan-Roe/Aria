@@ -1,16 +1,17 @@
 # Extended Marathon Training Session
-# ====================================
-# Multi-hour comprehensive AI training with automatic data generation
-#
-# Created: 2025-11-25
-# Estimated Runtime: 4-6 hours
-# Expected Output: 13 trained LoRA adapters
+
+Multi-hour comprehensive AI training with automatic data generation.
+
+- Created: 2025-11-25
+- Estimated Runtime: 4-6 hours
+- Expected Output: 13 trained LoRA adapters
 
 ## Overview
 
 This configuration enables extended AI training across multiple datasets and models:
 
 ### 1. Data Generation (Completed)
+
 - **2,000 synthetic chat samples** generated via `auto_data_train.py`
 - Sources: Template-based + Repository Q&A + Augmentation
 - Location: `datasets/chat/mega_synthetic/`
@@ -18,26 +19,32 @@ This configuration enables extended AI training across multiple datasets and mod
 ### 2. Training Jobs (13 total)
 
 #### Synthetic Data Training (2 jobs, ~30-45 min each)
+
 - `phi35_mega_synthetic_full` - Phi-3.5 on new synthetic data (3 epochs, all samples)
 - `qwen25_mega_synthetic_full` - Qwen2.5 on new synthetic data (3 epochs, all samples)
 
 #### Comprehensive Dataset Marathon (2 jobs, ~45-60 min each)
+
 - `phi35_comprehensive_marathon` - 5 epochs, 3000 samples
 - `qwen25_comprehensive_marathon` - 5 epochs, 3000 samples
 
 #### Dolly Full Dataset (2 jobs, ~60-90 min each)
+
 - `phi35_dolly_marathon` - 5 epochs, 5000 samples
 - `qwen25_dolly_marathon` - 5 epochs, 5000 samples
 
 #### Mixed Chat Extended (2 jobs, ~30-40 min each)
+
 - `phi35_mixed_extended` - 5 epochs, 2000 samples
 - `qwen25_mixed_extended` - 5 epochs, 2000 samples
 
 #### Repository-Augmented Extended (2 jobs, ~25-35 min each)
+
 - `phi35_repo_marathon` - 4 epochs, 1500 samples
 - `qwen25_repo_marathon` - 4 epochs, 1500 samples
 
 #### Hyperparameter Exploration (3 jobs, ~30-40 min each)
+
 - `phi35_comprehensive_lr_low_extended` - Low LR (0.0001), 5 epochs
 - `phi35_comprehensive_lr_high_extended` - High LR (0.0004), 4 epochs
 - `qwen25_comprehensive_dropout_test` - Higher dropout (0.15), 4 epochs
@@ -45,6 +52,7 @@ This configuration enables extended AI training across multiple datasets and mod
 ### 3. Expected Outputs
 
 Each job produces:
+
 - `data_out/lora_training/marathon/<job_name>/` - Trained adapter
 - `data_out/autotrain/<job_name>/<timestamp>/stdout.log` - Training logs
 - `data_out/autotrain/<job_name>/last_run.json` - Job metadata
@@ -115,7 +123,7 @@ python .\scripts\training_analytics.py --compare-all
 ### 9. Expected Timeline
 
 | Phase | Duration | Jobs |
-|-------|----------|------|
+| ------- | ---------- | ------ |
 | Synthetic Data Training | 1-1.5 hrs | 2 |
 | Comprehensive Marathon | 1.5-2 hrs | 2 |
 | Dolly Full Dataset | 2-3 hrs | 2 |
@@ -124,11 +132,12 @@ python .\scripts\training_analytics.py --compare-all
 | HPO Variations | 1.5-2 hrs | 3 |
 | **Total** | **4-6 hrs** | **13** |
 
-*Times assume GPU acceleration. CPU-only systems: multiply by 2-3x*
+Times assume GPU acceleration. CPU-only systems: multiply by 2-3x
 
 ### 10. Troubleshooting
 
 **Out of Memory**:
+
 ```yaml
 # Reduce max_train_samples in YAML (e.g., 3000 → 1500)
 # Or add to job config:
@@ -136,6 +145,7 @@ no_stream: true  # Disable streaming for stability
 ```
 
 **Training stuck**:
+
 ```powershell
 # Find running job PID
 Get-Content data_out\autotrain\*.pid
@@ -148,6 +158,7 @@ python .\scripts\autotrain.py --config autotrain_extended_marathon.yaml --resume
 ```
 
 **Low GPU utilization**:
+
 - Check `device: auto` is set (not `cpu`)
 - Verify CUDA: `python -c "import torch; print(torch.cuda.is_available())"`
 - Install GPU torch: `pip install torch --index-url https://download.pytorch.org/whl/cu121`
@@ -160,4 +171,4 @@ python .\scripts\autotrain.py --config autotrain_extended_marathon.yaml --resume
 4. ⏳ Post-training evaluation & promotion
 
 ---
-*For questions or issues, check `AUTOTRAIN_README.md` and `.github/copilot-instructions.md`*
+For questions or issues, check `AUTOTRAIN_README.md` and `.github/copilot-instructions.md`

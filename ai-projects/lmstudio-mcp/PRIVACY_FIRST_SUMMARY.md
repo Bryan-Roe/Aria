@@ -235,7 +235,7 @@ if compliance:
 ## 📈 Performance
 
 | Operation | Time | Notes |
-|-----------|------|-------|
+| ----------- | ------ | ------- |
 | Small analysis (256 tokens) | 100-500ms | Local inference |
 | Medium analysis (1K tokens) | 500-2000ms | Depends on model |
 | Large analysis (4K tokens) | 2-10s | Longer generation |
@@ -289,7 +289,7 @@ if compliance:
 ## 📚 Documentation Files
 
 | File | Purpose | Size |
-|------|---------|------|
+| ------ | --------- | ------ |
 | `privacy_first_ai.py` | Core framework, examples | 18 KB |
 | `PRIVACY_FIRST_GUIDE.md` | Comprehensive guide | 13 KB |
 | `privacy_deployment_config.py` | Configuration templates | 5 KB |

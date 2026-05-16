@@ -1,0 +1,41 @@
+# constraints.txt — generated suggestion to freeze transitive dependencies for CI reproducibility
+# Date: 2026-05-14
+# NOTE: Validate these pinned versions in an isolated env (`pip install -r requirements.txt -c constraints.txt`)
+
+azure-monitor-opentelemetry==1.8.8
+opentelemetry-api==1.41.1
+opentelemetry-sdk==1.41.1
+opentelemetry-instrumentation==0.62b1
+
+azure-cosmos==4.15.0
+openai==2.37.0
+colorama==0.4.6
+pytest==8.4.2
+pytest-asyncio==1.2.0
+tiktoken==0.13.0
+pyyaml==6.0.3
+pyodbc==5.3.0
+sqlalchemy==2.0.49
+
+pydantic==2.13.4
+pydantic-settings==2.0.0
+tenacity==9.1.2
+
+Flask==3.1.3
+flask-socketio==5.6.1
+python-socketio==5.16.1
+eventlet==0.40.4
+gradio==5.24.0
+
+pyttsx3==2.99
+gTTS==2.5.4
+
+scikit-learn==1.6.1
+matplotlib==3.9.4
+seaborn==0.13.2
+
+Pillow==11.3.0
+torch==2.8.0
+numpy==1.26.4
+
+jsonschema==4.25.1

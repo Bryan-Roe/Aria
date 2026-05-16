@@ -14,6 +14,7 @@ This refactoring effort focused on identifying and eliminating code duplication 
 **Problem**: OpenAIProvider, LMStudioProvider, and AzureOpenAIProvider had ~95% identical streaming and non-streaming response handling code (~60-80 lines of duplication).
 
 **Solution**:
+
 - Created helper methods in `BaseChatProvider`:
   - `_handle_openai_streaming_response()` - Extracts content from streaming responses
   - `_handle_openai_non_streaming_response()` - Extracts content from non-streaming responses
@@ -21,9 +22,11 @@ This refactoring effort focused on identifying and eliminating code duplication 
 - Kept AzureOpenAIProvider's custom quota handling logic intact
 
 **Files Modified**:
+
 - `ai-projects/chat-cli/src/chat_providers.py`
 
 **Impact**:
+
 - Eliminated ~60 lines of duplicated code
 - Improved maintainability - changes to response handling now only need to be made once
 - Better testability - helper methods can be tested independently
@@ -33,18 +36,22 @@ This refactoring effort focused on identifying and eliminating code duplication 
 **Problem**: function_app.py had 5+ repeated try/except blocks (lines 21-76) for importing optional dependencies, each with manual fallback function definitions.
 
 **Solution**:
+
 - Created `shared/import_helpers.py` with:
   - `safe_import()` - Safely imports modules/functions with fallback support
   - `create_stub_function()` - Generates stub functions that return error dicts
 - Refactored function_app.py to use these utilities
 
 **Files Modified**:
+
 - `function_app.py` (lines 19-82)
 
 **Files Created**:
+
 - `shared/import_helpers.py` (122 lines)
 
 **Impact**:
+
 - Centralized defensive import pattern
 - Reduced boilerplate from ~56 lines of try/except to cleaner utility calls
 - More maintainable and testable
@@ -53,11 +60,13 @@ This refactoring effort focused on identifying and eliminating code duplication 
 ### 3. HTTP Validation & File Serving (Medium Impact)
 
 **Problem**:
+
 - Message validation logic duplicated in http_chat/function_app.py and function_app.py
 - CORS headers manually created in multiple places
 - File serving pattern duplicated in http_chat_web/function_app.py (lines 11-74)
 
 **Solution**:
+
 - Created `shared/http_utils.py` with utilities:
   - `validate_messages()` - Common message format validation
   - `create_cors_headers()` - Consistent CORS header generation
@@ -68,13 +77,16 @@ This refactoring effort focused on identifying and eliminating code duplication 
 - Refactored http_chat_web/function_app.py to use file serving utility
 
 **Files Modified**:
+
 - `http_chat/function_app.py`
 - `http_chat_web/function_app.py`
 
 **Files Created**:
+
 - `shared/http_utils.py` (195 lines)
 
 **Impact**:
+
 - Eliminated ~40 lines in HTTP validation
 - Eliminated ~50 lines in file serving
 - Improved consistency across all HTTP endpoints
@@ -107,12 +119,14 @@ Created comprehensive test suites to validate refactored code:
 ## Quantitative Impact
 
 ### Lines of Code
+
 - **Eliminated**: ~150 lines of duplicated code
 - **Added**: 317 lines of reusable utilities (import_helpers + http_utils)
 - **Test Coverage**: 400+ lines of comprehensive tests
 - **Net**: Better code quality despite slightly more total lines (utilities are reusable)
 
 ### Duplication Metrics
+
 - **Before**: 3 provider classes with identical 30-line response handling blocks
 - **After**: 1 base class with 2 helper methods used by all providers
 - **Before**: 5+ try/except blocks in function_app.py with manual fallbacks
@@ -121,6 +135,7 @@ Created comprehensive test suites to validate refactored code:
 - **After**: Shared utilities used by all endpoints
 
 ### Maintainability Improvements
+
 - **Provider changes**: Now only need to update 1 place instead of 3
 - **Import pattern**: Now only need to update 1 utility instead of N files
 - **HTTP validation**: Now only need to update 1 place instead of multiple endpoints

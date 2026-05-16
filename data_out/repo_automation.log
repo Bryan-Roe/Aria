@@ -1,0 +1,669 @@
+nohup: ignoring input
+
+🔍 Pre-flight validation...
+
+🔍 Validating orchestrator configurations...
+
+✅ VALID | 0 errors, 0 warnings
+Config: /workspaces/Aria/config/master_orchestrator.yaml
+
+✅ VALID | 0 errors, 0 warnings
+Config: /workspaces/Aria/config/autonomous_training.yaml
+
+✅ All configurations valid. Safe to start daemon.
+
+================================================================================
+🤖 Repository-Wide Automation Starting
+================================================================================
+
+🚀 Starting Aria Character Automation...
+✅ Aria Character Automation started (PID 104185)
+
+🔗 Found existing process for Autonomous Training System (PID 97136), attaching instead of starting new instance
+
+🚀 Starting Quantum Computing Workflows...
+✅ Quantum Computing Workflows started (PID 104188)
+🔧 Installing missing dependencies for evaluation: scikit-learn
+❌ Cannot start Model Evaluation System due to dependency installation failure
+⚠️  Component 'Dataset Auto-Discovery (Integrated in training)' is disabled
+⚠️  Component 'Status Dashboard' is disabled
+⚠️  Component 'Backup Manager' is disabled
+
+👁️  Starting monitoring loop (interval: 60s)
+
+🔍 Health check #1: 2/7 components running
+
+🔍 Health check #2: 2/7 components running
+
+🔍 Health check #3: 2/7 components running
+
+🔍 Health check #4: 2/7 components running
+
+🔍 Health check #5: 2/7 components running
+
+🔍 Health check #6: 2/7 components running
+
+🔍 Health check #7: 2/7 components running
+
+🔍 Health check #8: 2/7 components running
+
+🔍 Health check #9: 2/7 components running
+
+🔍 Health check #10: 2/7 components running
+
+🔍 Health check #11: 2/7 components running
+
+🔍 Health check #12: 2/7 components running
+
+🔍 Health check #13: 2/7 components running
+
+🔍 Health check #14: 2/7 components running
+
+🔍 Health check #15: 2/7 components running
+
+🔍 Health check #16: 2/7 components running
+
+🔍 Health check #17: 2/7 components running
+
+🔍 Health check #18: 2/7 components running
+
+🔍 Health check #19: 2/7 components running
+
+🔍 Health check #20: 2/7 components running
+
+🔍 Health check #21: 2/7 components running
+
+🔍 Health check #22: 2/7 components running
+
+🔍 Health check #23: 2/7 components running
+
+🔍 Health check #24: 2/7 components running
+
+🔍 Health check #25: 2/7 components running
+
+🔍 Health check #26: 2/7 components running
+
+🔍 Health check #27: 2/7 components running
+
+🔍 Health check #28: 2/7 components running
+
+🔍 Health check #29: 2/7 components running
+
+🔍 Health check #30: 2/7 components running
+
+🔍 Health check #31: 2/7 components running
+
+🔍 Health check #32: 2/7 components running
+
+🔍 Health check #33: 2/7 components running
+
+🔍 Health check #34: 2/7 components running
+
+🔍 Health check #35: 2/7 components running
+
+🔍 Health check #36: 2/7 components running
+
+🔍 Health check #37: 2/7 components running
+
+🔍 Health check #38: 2/7 components running
+
+🔍 Health check #39: 2/7 components running
+
+🔍 Health check #40: 2/7 components running
+
+🔍 Health check #41: 2/7 components running
+
+🔍 Health check #42: 2/7 components running
+
+🔍 Health check #43: 2/7 components running
+
+🔍 Health check #44: 2/7 components running
+
+🔍 Health check #45: 2/7 components running
+
+🔍 Health check #46: 2/7 components running
+
+🔍 Health check #47: 2/7 components running
+
+🔍 Health check #48: 2/7 components running
+
+🔍 Health check #49: 2/7 components running
+
+🔍 Health check #50: 2/7 components running
+
+🔍 Health check #51: 2/7 components running
+
+🔍 Health check #52: 2/7 components running
+
+🔍 Health check #53: 2/7 components running
+
+🔍 Health check #54: 2/7 components running
+
+🔍 Health check #55: 2/7 components running
+
+🔍 Health check #56: 2/7 components running
+
+🔍 Health check #57: 2/7 components running
+
+🔍 Health check #58: 2/7 components running
+
+🔍 Health check #59: 2/7 components running
+
+🔍 Health check #60: 2/7 components running
+
+🔍 Health check #61: 2/7 components running
+
+🔍 Health check #62: 2/7 components running
+
+🔍 Health check #63: 2/7 components running
+
+🔍 Health check #64: 2/7 components running
+
+🔍 Health check #65: 2/7 components running
+
+🔍 Health check #66: 2/7 components running
+
+🔍 Health check #67: 2/7 components running
+
+🔍 Health check #68: 2/7 components running
+
+🔍 Health check #69: 2/7 components running
+
+🔍 Health check #70: 2/7 components running
+
+🔍 Health check #71: 2/7 components running
+
+🔍 Health check #72: 2/7 components running
+
+🔍 Health check #73: 2/7 components running
+
+🔍 Health check #74: 2/7 components running
+
+🔍 Health check #75: 2/7 components running
+
+🔍 Health check #76: 2/7 components running
+
+🔍 Health check #77: 2/7 components running
+
+🔍 Health check #78: 2/7 components running
+
+🔍 Health check #79: 2/7 components running
+
+🔍 Health check #80: 2/7 components running
+
+🔍 Health check #81: 2/7 components running
+
+🔍 Health check #82: 2/7 components running
+
+🔍 Health check #83: 2/7 components running
+
+🔍 Health check #84: 2/7 components running
+
+🔍 Health check #85: 2/7 components running
+
+🔍 Health check #86: 2/7 components running
+
+🔍 Health check #87: 2/7 components running
+
+🔍 Health check #88: 2/7 components running
+
+🔍 Health check #89: 2/7 components running
+
+🔍 Health check #90: 2/7 components running
+
+🔍 Health check #91: 2/7 components running
+
+🔍 Health check #92: 2/7 components running
+
+🔍 Health check #93: 2/7 components running
+
+🔍 Health check #94: 2/7 components running
+
+🔍 Health check #95: 2/7 components running
+
+🔍 Health check #96: 2/7 components running
+
+🔍 Health check #97: 2/7 components running
+
+🔍 Health check #98: 2/7 components running
+
+🔍 Health check #99: 2/7 components running
+
+🔍 Health check #100: 2/7 components running
+
+🔍 Health check #101: 2/7 components running
+
+🔍 Health check #102: 2/7 components running
+
+🔍 Health check #103: 2/7 components running
+
+🔍 Health check #104: 2/7 components running
+
+🔍 Health check #105: 2/7 components running
+
+🔍 Health check #106: 2/7 components running
+
+🔍 Health check #107: 2/7 components running
+
+🔍 Health check #108: 2/7 components running
+
+🔍 Health check #109: 2/7 components running
+
+🔍 Health check #110: 2/7 components running
+
+🔍 Health check #111: 2/7 components running
+
+🔍 Health check #112: 2/7 components running
+
+🔍 Health check #113: 2/7 components running
+
+🔍 Health check #114: 2/7 components running
+
+🔍 Health check #115: 2/7 components running
+
+🔍 Health check #116: 2/7 components running
+
+🔍 Health check #117: 2/7 components running
+
+🔍 Health check #118: 2/7 components running
+
+🔍 Health check #119: 2/7 components running
+
+🔍 Health check #120: 2/7 components running
+
+🔍 Health check #121: 2/7 components running
+
+🔍 Health check #122: 2/7 components running
+
+🔍 Health check #123: 2/7 components running
+
+🔍 Health check #124: 2/7 components running
+
+🔍 Health check #125: 2/7 components running
+
+🔍 Health check #126: 2/7 components running
+
+🔍 Health check #127: 2/7 components running
+
+🔍 Health check #128: 2/7 components running
+
+🔍 Health check #129: 2/7 components running
+
+🔍 Health check #130: 2/7 components running
+
+🔍 Health check #131: 2/7 components running
+
+🔍 Health check #132: 2/7 components running
+
+🔍 Health check #133: 2/7 components running
+
+🔍 Health check #134: 2/7 components running
+
+🔍 Health check #135: 2/7 components running
+
+🔍 Health check #136: 2/7 components running
+
+🔍 Health check #137: 2/7 components running
+
+🔍 Health check #138: 2/7 components running
+
+🔍 Health check #139: 2/7 components running
+
+🔍 Health check #140: 2/7 components running
+
+🔍 Health check #141: 2/7 components running
+
+🔍 Health check #142: 2/7 components running
+
+🔍 Health check #143: 2/7 components running
+
+🔍 Health check #144: 2/7 components running
+
+🔍 Health check #145: 2/7 components running
+
+🔍 Health check #146: 2/7 components running
+
+🔍 Health check #147: 2/7 components running
+
+🔍 Health check #148: 2/7 components running
+
+🔍 Health check #149: 2/7 components running
+
+🔍 Health check #150: 2/7 components running
+
+🔍 Health check #151: 2/7 components running
+
+🔍 Health check #152: 2/7 components running
+
+🔍 Health check #153: 2/7 components running
+
+🔍 Health check #154: 2/7 components running
+
+🔍 Health check #155: 2/7 components running
+
+🔍 Health check #156: 2/7 components running
+
+🔍 Health check #157: 2/7 components running
+
+🔍 Health check #158: 2/7 components running
+
+🔍 Health check #159: 2/7 components running
+
+🔍 Health check #160: 2/7 components running
+
+🔍 Health check #161: 2/7 components running
+
+🔍 Health check #162: 2/7 components running
+
+🔍 Health check #163: 2/7 components running
+
+🔍 Health check #164: 2/7 components running
+
+🔍 Health check #165: 2/7 components running
+
+🔍 Health check #166: 2/7 components running
+
+🔍 Health check #167: 2/7 components running
+
+🔍 Health check #168: 2/7 components running
+
+🔍 Health check #169: 2/7 components running
+
+🔍 Health check #170: 2/7 components running
+
+🔍 Health check #171: 2/7 components running
+
+🔍 Health check #172: 2/7 components running
+
+🔍 Health check #173: 2/7 components running
+
+🔍 Health check #174: 2/7 components running
+
+🔍 Health check #175: 2/7 components running
+
+🔍 Health check #176: 2/7 components running
+
+🔍 Health check #177: 2/7 components running
+
+🔍 Health check #178: 2/7 components running
+
+🔍 Health check #179: 2/7 components running
+
+🔍 Health check #180: 2/7 components running
+
+🔍 Health check #181: 2/7 components running
+
+🔍 Health check #182: 2/7 components running
+
+🔍 Health check #183: 2/7 components running
+
+🔍 Health check #184: 2/7 components running
+
+🔍 Health check #185: 2/7 components running
+
+🔍 Health check #186: 2/7 components running
+
+🔍 Health check #187: 2/7 components running
+
+🔍 Health check #188: 2/7 components running
+
+🔍 Health check #189: 2/7 components running
+
+🔍 Health check #190: 2/7 components running
+
+🔍 Health check #191: 2/7 components running
+
+🔍 Health check #192: 2/7 components running
+
+🔍 Health check #193: 2/7 components running
+
+🔍 Health check #194: 2/7 components running
+
+🔍 Health check #195: 2/7 components running
+
+🔍 Health check #196: 2/7 components running
+
+🔍 Health check #197: 2/7 components running
+
+🔍 Health check #198: 2/7 components running
+
+🔍 Health check #199: 2/7 components running
+
+🔍 Health check #200: 2/7 components running
+
+🔍 Health check #201: 2/7 components running
+
+🔍 Health check #202: 2/7 components running
+
+🔍 Health check #203: 2/7 components running
+
+🔍 Health check #204: 2/7 components running
+
+🔍 Health check #205: 2/7 components running
+
+🔍 Health check #206: 2/7 components running
+
+🔍 Health check #207: 2/7 components running
+
+🔍 Health check #208: 2/7 components running
+
+🔍 Health check #209: 2/7 components running
+
+🔍 Health check #210: 2/7 components running
+
+🔍 Health check #211: 2/7 components running
+
+🔍 Health check #212: 2/7 components running
+
+🔍 Health check #213: 2/7 components running
+
+🔍 Health check #214: 2/7 components running
+
+🔍 Health check #215: 2/7 components running
+
+🔍 Health check #216: 2/7 components running
+
+🔍 Health check #217: 2/7 components running
+
+🔍 Health check #218: 2/7 components running
+
+🔍 Health check #219: 2/7 components running
+
+🔍 Health check #220: 2/7 components running
+
+🔍 Health check #221: 2/7 components running
+
+🔍 Health check #222: 2/7 components running
+
+🔍 Health check #223: 2/7 components running
+
+🔍 Health check #224: 2/7 components running
+
+🔍 Health check #225: 2/7 components running
+
+🔍 Health check #226: 2/7 components running
+
+🔍 Health check #227: 2/7 components running
+
+🔍 Health check #228: 2/7 components running
+
+🔍 Health check #229: 2/7 components running
+
+🔍 Health check #230: 2/7 components running
+
+🔍 Health check #231: 2/7 components running
+
+🔍 Health check #232: 2/7 components running
+
+🔍 Health check #233: 2/7 components running
+
+🔍 Health check #234: 2/7 components running
+
+🔍 Health check #235: 2/7 components running
+
+🔍 Health check #236: 2/7 components running
+
+🔍 Health check #237: 2/7 components running
+
+🔍 Health check #238: 2/7 components running
+
+🔍 Health check #239: 2/7 components running
+
+🔍 Health check #240: 2/7 components running
+
+🔍 Health check #241: 2/7 components running
+
+🔍 Health check #242: 2/7 components running
+
+🔍 Health check #243: 2/7 components running
+
+🔍 Health check #244: 2/7 components running
+
+🔍 Health check #245: 2/7 components running
+
+🔍 Health check #246: 2/7 components running
+
+🔍 Health check #247: 2/7 components running
+
+🔍 Health check #248: 2/7 components running
+
+🔍 Health check #249: 2/7 components running
+
+🔍 Health check #250: 2/7 components running
+
+🔍 Health check #251: 2/7 components running
+
+🔍 Health check #252: 2/7 components running
+
+🔍 Health check #253: 2/7 components running
+
+🔍 Health check #254: 2/7 components running
+
+🔍 Health check #255: 2/7 components running
+
+🔍 Health check #256: 2/7 components running
+
+🔍 Health check #257: 2/7 components running
+
+🔍 Health check #258: 2/7 components running
+
+🔍 Health check #259: 2/7 components running
+
+🔍 Health check #260: 2/7 components running
+
+🔍 Health check #261: 2/7 components running
+
+🔍 Health check #262: 2/7 components running
+
+🔍 Health check #263: 2/7 components running
+
+🔍 Health check #264: 2/7 components running
+
+🔍 Health check #265: 2/7 components running
+
+🔍 Health check #266: 2/7 components running
+
+🔍 Health check #267: 2/7 components running
+
+🔍 Health check #268: 2/7 components running
+
+🔍 Health check #269: 2/7 components running
+
+🔍 Health check #270: 2/7 components running
+
+🔍 Health check #271: 2/7 components running
+
+🔍 Health check #272: 2/7 components running
+
+🔍 Health check #273: 2/7 components running
+
+🔍 Health check #274: 2/7 components running
+
+🔍 Health check #275: 2/7 components running
+
+🔍 Health check #276: 2/7 components running
+
+🔍 Health check #277: 2/7 components running
+
+🔍 Health check #278: 2/7 components running
+
+🔍 Health check #279: 2/7 components running
+
+🔍 Health check #280: 2/7 components running
+
+🔍 Health check #281: 2/7 components running
+
+🔍 Health check #282: 2/7 components running
+
+🔍 Health check #283: 2/7 components running
+
+🔍 Health check #284: 2/7 components running
+
+🔍 Health check #285: 2/7 components running
+
+🔍 Health check #286: 2/7 components running
+
+🔍 Health check #287: 2/7 components running
+
+🔍 Health check #288: 2/7 components running
+
+🔍 Health check #289: 2/7 components running
+
+🔍 Health check #290: 2/7 components running
+
+🔍 Health check #291: 2/7 components running
+
+🔍 Health check #292: 2/7 components running
+
+🔍 Health check #293: 2/7 components running
+
+🔍 Health check #294: 2/7 components running
+
+🔍 Health check #295: 2/7 components running
+
+🔍 Health check #296: 2/7 components running
+
+🔍 Health check #297: 2/7 components running
+
+🔍 Health check #298: 2/7 components running
+
+🔍 Health check #299: 2/7 components running
+
+🔄 Auto-restarting Aria Character Automation...
+
+🚀 Starting Aria Character Automation...
+✅ Aria Character Automation started (PID 497730)
+
+🔍 Health check #300: 1/7 components running
+
+🔍 Health check #301: 2/7 components running
+
+🔍 Health check #302: 2/7 components running
+
+🔍 Health check #303: 2/7 components running
+
+🔍 Health check #304: 2/7 components running
+
+🔍 Health check #305: 2/7 components running
+
+🔍 Health check #306: 2/7 components running
+
+🔍 Health check #307: 2/7 components running
+
+🔍 Health check #308: 2/7 components running
+
+🔍 Health check #309: 2/7 components running
+
+🔍 Health check #310: 2/7 components running
+
+🔍 Health check #311: 2/7 components running
+
+🔍 Health check #312: 2/7 components running
+
+🔍 Health check #313: 2/7 components running
+
+🔍 Health check #314: 2/7 components running
+
+🔍 Health check #315: 2/7 components running
+
+🔍 Health check #316: 2/7 components running

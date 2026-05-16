@@ -147,7 +147,7 @@ Result: Successfully parsed 2 actions (say, gesture) and executed both with prop
 All tested with fallback parser:
 
 | Command | Actions Generated | Execution |
-|---------|------------------|-----------|
+| --------- | ------------------ | ----------- |
 | "Say hello" | `say(text="hello", emotion="happy")` | ✅ |
 | "Wave and say hello" | `say(...), gesture(wave)` | ✅ |
 | "Walk to the table" | `move(target={x:60, y:35})` | ✅ |

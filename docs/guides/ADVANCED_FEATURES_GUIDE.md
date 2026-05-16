@@ -413,7 +413,7 @@ python .\dashboard\websocket_server.py
 ### 2. Access Features
 
 | Feature | URL | Keyboard Shortcut |
-|---------|-----|-------------------|
+| --------- | ----- | ------------------- |
 | **Hub** | http://localhost:8000/ | - |
 | **Training Dashboard** | http://localhost:8000/unified.html | - |
 | **Analytics** | http://localhost:8000/analytics.html | - |
@@ -451,7 +451,7 @@ Start-Process "http://localhost:8000/analytics.html"
 ## 📈 Performance Improvements
 
 | Metric | Before | After | Improvement |
-|--------|--------|-------|-------------|
+| -------- | -------- | ------- | ------------- |
 | **Real-time Updates** | 5-10s polling | Instant (WebSocket) | 10x faster |
 | **Server Load** | High (constant polling) | Low (push notifications) | 80% reduction |
 | **Data Visualization** | None | 4 interactive charts | New feature |

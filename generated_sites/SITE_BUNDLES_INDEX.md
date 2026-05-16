@@ -1,6 +1,6 @@
 # Generated Site Bundles Index
 
-_Last updated: 2026-04-11_
+Last updated: 2026-04-11
 
 This index tracks generated static site bundles under `generated_sites/`.
 

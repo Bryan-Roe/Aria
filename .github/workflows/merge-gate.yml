@@ -9,6 +9,8 @@
 # Trigger:  pull_request → main (opened / synchronize / reopened /
 #           ready_for_review).  Draft PRs skip all gate jobs so they don't
 #           block development; the fan-in still succeeds (skipped is OK).
+#           merge_group is included so the same gates run in GitHub's merge
+#           queue.  workflow_dispatch is provided for manual re-runs.
 #
 # Branch protection:  Add "Merge Gate / All Gates Passed" as the single
 #                     required status check on the main branch.
@@ -20,10 +22,19 @@ on:
   pull_request:
     branches: [main]
     types: [opened, synchronize, reopened, ready_for_review]
+  merge_group:
+  workflow_dispatch:
 
-# Cancel superseded runs for the same PR.
+# Cancel superseded runs for the same PR / merge-queue entry / manual run.
+# The fallback to github.ref keeps the group unique when pull_request.number
+# is unavailable (merge_group, workflow_dispatch).
 concurrency:
-  group: merge-gate-${{ github.event.pull_request.number }}
+  group: >-
+    merge-gate-${{
+      github.event.pull_request.number
+      || github.event.merge_group.head_ref
+      || github.ref
+    }}
   cancel-in-progress: true
 
 # Least-privilege default; jobs opt-in to more below.
@@ -34,15 +45,21 @@ defaults:
   run:
     shell: bash
 
+env:
+  # Centralised pin for actions/checkout so all jobs stay in sync.
+  CHECKOUT_SHA: 34e114876b0b11c390a56381ad16ebd13914f8d5  # v4.3.1
+
 jobs:
   # ---------------------------------------------------------------------------
   # Gate 1 — Unit tests
   # ---------------------------------------------------------------------------
   unit-tests:
     name: Unit Tests
-    if: github.event.pull_request.draft == false
+    if: github.event.pull_request.draft != true
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    permissions:
+      contents: read
     steps:
       - name: Checkout
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4.3.1
@@ -62,15 +79,19 @@ jobs:
           extra-args: '--maxfail=5 -q'
         env:
           CI: 'true'
+          PYTHONDONTWRITEBYTECODE: '1'
+          PYTHONUNBUFFERED: '1'
 
   # ---------------------------------------------------------------------------
   # Gate 2 — PR structure validation
   # ---------------------------------------------------------------------------
   pr-validation:
     name: PR Validation
-    if: github.event.pull_request.draft == false
+    if: github.event.pull_request.draft != true
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    permissions:
+      contents: read
     steps:
       - name: Checkout
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4.3.1
@@ -97,10 +118,11 @@ jobs:
       - name: Fast validation
         run: |
           set -euo pipefail
-          if [[ -f scripts/fast_validate.py ]]; then
-            python scripts/fast_validate.py
+          script="scripts/fast_validate.py"
+          if [[ -f "${script}" ]]; then
+            python "${script}"
           else
-            echo "::notice::scripts/fast_validate.py not found, skipping"
+            echo "::notice title=Fast validation skipped::${script} not found"
           fi
 
   # ---------------------------------------------------------------------------
@@ -108,12 +130,15 @@ jobs:
   # ---------------------------------------------------------------------------
   security:
     name: Security Review
-    if: github.event.pull_request.draft == false
+    # dependency-review-action only supports pull_request / merge_group events.
+    if: >-
+      github.event.pull_request.draft != true
+      && (github.event_name == 'pull_request' || github.event_name == 'merge_group')
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
       contents: read
-      pull-requests: write  # dependency-review-action needs PR write to comment
+      pull-requests: write  # required by dependency-review-action to comment
     steps:
       - name: Checkout
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4.3.1
@@ -125,16 +150,20 @@ jobs:
         with:
           fail-on-severity: high
           deny-licenses: GPL-2.0, GPL-3.0, AGPL-3.0
-          comment-summary-in-pr: always
+          comment-summary-in-pr: on-failure
+          vulnerability-check: true
+          license-check: true
 
   # ---------------------------------------------------------------------------
   # Gate 4 — Integration contract gate
   # ---------------------------------------------------------------------------
   contract-gate:
     name: Integration Contract Gate
-    if: github.event.pull_request.draft == false
+    if: github.event.pull_request.draft != true
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    permissions:
+      contents: read
     steps:
       - name: Checkout
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4.3.1
@@ -169,6 +198,8 @@ jobs:
     if: always()
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    permissions:
+      contents: read
     steps:
       - name: Evaluate gate results
         env:
@@ -179,49 +210,72 @@ jobs:
         run: |
           set -euo pipefail
 
-          FAILED=0
+          declare -a FAILED_GATES=()
+          declare -a SKIPPED_GATES=()
+          declare -a PASSED_GATES=()
 
-          check_gate() {
-            local name="$1"
-            local result="$2"
-            case "$result" in
-              success)  echo "✓ ${name}: passed" ;;
-              skipped)  echo "⊘ ${name}: skipped (draft PR)" ;;
-              failure|cancelled)
-                echo "✗ ${name}: ${result}"
-                FAILED=1
-                ;;
-              *)
-                echo "? ${name}: ${result} (unexpected result)"
-                FAILED=1
-                ;;
+          # Map gate display names to their result values.
+          # Using parallel arrays keeps the order deterministic.
+          GATE_NAMES=("Unit Tests" "PR Validation" "Security Review" "Contract Gate")
+          GATE_RESULTS=("${UNIT_TESTS}" "${PR_VALIDATION}" "${SECURITY}" "${CONTRACT_GATE}")
+
+          status_emoji() {
+            case "$1" in
+              success)             printf '✅' ;;
+              skipped)             printf '⊘'  ;;
+              failure)             printf '❌' ;;
+              cancelled)           printf '🛑' ;;
+              *)                   printf '❓' ;;
             esac
           }
 
-          check_gate "unit-tests"    "$UNIT_TESTS"
-          check_gate "pr-validation" "$PR_VALIDATION"
-          check_gate "security"      "$SECURITY"
-          check_gate "contract-gate" "$CONTRACT_GATE"
-
+          # Build the run log and step summary in a single pass.
           {
             echo "## Merge Gate Summary"
             echo ""
             echo "| Gate | Result |"
             echo "|------|--------|"
-            echo "| Unit Tests | ${UNIT_TESTS} |"
-            echo "| PR Validation | ${PR_VALIDATION} |"
-            echo "| Security Review | ${SECURITY} |"
-            echo "| Contract Gate | ${CONTRACT_GATE} |"
-            echo ""
           } >> "$GITHUB_STEP_SUMMARY"
 
-          if (( FAILED == 1 )); then
-            echo "### ❌ One or more merge gates failed — PR cannot be merged." \
+          for i in "${!GATE_NAMES[@]}"; do
+            name="${GATE_NAMES[$i]}"
+            result="${GATE_RESULTS[$i]:-unknown}"
+            emoji="$(status_emoji "$result")"
+
+            printf '%s %s: %s\n' "$emoji" "$name" "$result"
+            printf '| %s | %s %s |\n' "$name" "$emoji" "$result" \
               >> "$GITHUB_STEP_SUMMARY"
-            echo "::error::One or more merge gates failed. Review the job results above."
+
+            case "$result" in
+              success)
+                PASSED_GATES+=("$name")
+                ;;
+              skipped)
+                SKIPPED_GATES+=("$name")
+                ;;
+              failure|cancelled)
+                FAILED_GATES+=("$name ($result)")
+                ;;
+              *)
+                FAILED_GATES+=("$name (unexpected: $result)")
+                ;;
+            esac
+          done
+
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+
+          if (( ${#FAILED_GATES[@]} > 0 )); then
+            {
+              echo "### ❌ Merge blocked"
+              echo ""
+              echo "The following gate(s) did not pass:"
+              for g in "${FAILED_GATES[@]}"; do echo "- $g"; done
+            } >> "$GITHUB_STEP_SUMMARY"
+
+            echo "::error title=Merge Gate failed::Failing gates: ${FAILED_GATES[*]}"
             exit 1
           fi
 
           echo "### ✅ All merge gates passed — PR is ready to merge." \
             >> "$GITHUB_STEP_SUMMARY"
-          echo "All merge gates passed."
+          echo "All merge gates passed (${#PASSED_GATES[@]} passed, ${#SKIPPED_GATES[@]} skipped)."

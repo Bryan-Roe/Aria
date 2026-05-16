@@ -1,0 +1,324 @@
+2026-03-28 22:09:26,880 MainThread INFO Multi-agent run 20260328_220926: 3 tasks, max_workers=3
+2026-03-28 22:09:26,880 agent_0 INFO Worker starting task: Add docstrings in shared/chat_memory.py for core public func
+2026-03-28 22:09:26,880 agent_0 INFO Initialized ollama client: http://127.0.0.1:11434 model=mistral:latest
+2026-03-28 22:09:26,880 agent_1 INFO Worker starting task: Improve error handling in shared/chat_providers.py around pr
+2026-03-28 22:09:26,881 agent_1 INFO Initialized ollama client: http://127.0.0.1:11434 model=mistral:latest
+2026-03-28 22:09:26,881 agent_2 INFO Worker starting task: Add type hints in scripts/autonomous_training_orchestrator.p
+2026-03-28 22:09:26,881 agent_2 INFO Initialized ollama client: http://127.0.0.1:11434 model=mistral:latest
+2026-03-28 22:09:30,353 agent_0 INFO Starting task 20260328_220930 (dry_run=False): Add docstrings in shared/chat_memory.py for core public functions
+2026-03-28 22:09:30,353 agent_2 INFO Starting task 20260328_220930 (dry_run=False): Add type hints in scripts/autonomous_training_orchestrator.py for key methods
+2026-03-28 22:09:30,359 agent_2 INFO Planning task [feature]: Add type hints in scripts/autonomous_training_orchestrator.py for key methods
+2026-03-28 22:09:30,361 agent_0 INFO Planning task [documentation]: Add docstrings in shared/chat_memory.py for core public functions
+2026-03-28 22:09:31,962 agent_1 INFO Starting task 20260328_220931 (dry_run=False): Improve error handling in shared/chat_providers.py around provider fallback branches
+2026-03-28 22:09:31,969 agent_1 INFO Planning task [bug_fix]: Improve error handling in shared/chat_providers.py around provider fallback branches
+2026-03-28 22:10:36,239 agent_2 ERROR Error querying LLM: timed out
+Traceback (most recent call last):
+  File "/workspaces/Aria/scripts/autonomous_code_agent.py", line 264, in query
+    return self._query_ollama(prompt, max_tokens)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspaces/Aria/scripts/autonomous_code_agent.py", line 291, in _query_ollama
+    with urllib.request.urlopen(req, timeout=60) as response:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/urllib/request.py", line 216, in urlopen
+    return opener.open(url, data, timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/urllib/request.py", line 519, in open
+    response = self._open(req, data)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/urllib/request.py", line 536, in _open
+    result = self._call_chain(self.handle_open, protocol, protocol +
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/urllib/request.py", line 496, in _call_chain
+    result = func(*args)
+             ^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/urllib/request.py", line 1377, in http_open
+    return self.do_open(http.client.HTTPConnection, req)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/urllib/request.py", line 1352, in do_open
+    r = h.getresponse()
+        ^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/http/client.py", line 1395, in getresponse
+    response.begin()
+  File "/usr/local/lib/python3.11/http/client.py", line 325, in begin
+    version, status, reason = self._read_status()
+                              ^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/http/client.py", line 286, in _read_status
+    line = str(self.fp.readline(_MAXLINE + 1), "iso-8859-1")
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/socket.py", line 718, in readinto
+    return self._sock.recv_into(b)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+TimeoutError: timed out
+
+2026-03-28 22:10:36,241 agent_2 INFO Planning complete: Error: timed out
+2026-03-28 22:10:36,253 agent_0 ERROR Error querying LLM: timed out
+Traceback (most recent call last):
+  File "/workspaces/Aria/scripts/autonomous_code_agent.py", line 264, in query
+    return self._query_ollama(prompt, max_tokens)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspaces/Aria/scripts/autonomous_code_agent.py", line 291, in _query_ollama
+    with urllib.request.urlopen(req, timeout=60) as response:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/urllib/request.py", line 216, in urlopen
+    return opener.open(url, data, timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/urllib/request.py", line 519, in open
+    response = self._open(req, data)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/urllib/request.py", line 536, in _open
+    result = self._call_chain(self.handle_open, protocol, protocol +
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/urllib/request.py", line 496, in _call_chain
+    result = func(*args)
+             ^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/urllib/request.py", line 1377, in http_open
+    return self.do_open(http.client.HTTPConnection, req)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/urllib/request.py", line 1352, in do_open
+    r = h.getresponse()
+        ^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/http/client.py", line 1395, in getresponse
+    response.begin()
+  File "/usr/local/lib/python3.11/http/client.py", line 325, in begin
+    version, status, reason = self._read_status()
+                              ^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/http/client.py", line 286, in _read_status
+    line = str(self.fp.readline(_MAXLINE + 1), "iso-8859-1")
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/socket.py", line 718, in readinto
+    return self._sock.recv_into(b)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+TimeoutError: timed out
+
+2026-03-28 22:10:36,254 agent_0 INFO Planning complete: Error: timed out
+2026-03-28 22:10:37,802 agent_1 ERROR Error querying LLM: timed out
+Traceback (most recent call last):
+  File "/workspaces/Aria/scripts/autonomous_code_agent.py", line 264, in query
+    return self._query_ollama(prompt, max_tokens)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspaces/Aria/scripts/autonomous_code_agent.py", line 291, in _query_ollama
+    with urllib.request.urlopen(req, timeout=60) as response:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/urllib/request.py", line 216, in urlopen
+    return opener.open(url, data, timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/urllib/request.py", line 519, in open
+    response = self._open(req, data)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/urllib/request.py", line 536, in _open
+    result = self._call_chain(self.handle_open, protocol, protocol +
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/urllib/request.py", line 496, in _call_chain
+    result = func(*args)
+             ^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/urllib/request.py", line 1377, in http_open
+    return self.do_open(http.client.HTTPConnection, req)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/urllib/request.py", line 1352, in do_open
+    r = h.getresponse()
+        ^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/http/client.py", line 1395, in getresponse
+    response.begin()
+  File "/usr/local/lib/python3.11/http/client.py", line 325, in begin
+    version, status, reason = self._read_status()
+                              ^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/http/client.py", line 286, in _read_status
+    line = str(self.fp.readline(_MAXLINE + 1), "iso-8859-1")
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/socket.py", line 718, in readinto
+    return self._sock.recv_into(b)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+TimeoutError: timed out
+
+2026-03-28 22:10:37,804 agent_1 INFO Planning complete: Error: timed out
+2026-03-28 22:11:42,173 agent_2 ERROR Error querying LLM: timed out
+Traceback (most recent call last):
+  File "/workspaces/Aria/scripts/autonomous_code_agent.py", line 264, in query
+    return self._query_ollama(prompt, max_tokens)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspaces/Aria/scripts/autonomous_code_agent.py", line 291, in _query_ollama
+    with urllib.request.urlopen(req, timeout=60) as response:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/urllib/request.py", line 216, in urlopen
+    return opener.open(url, data, timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/urllib/request.py", line 519, in open
+    response = self._open(req, data)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/urllib/request.py", line 536, in _open
+    result = self._call_chain(self.handle_open, protocol, protocol +
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/urllib/request.py", line 496, in _call_chain
+    result = func(*args)
+             ^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/urllib/request.py", line 1377, in http_open
+    return self.do_open(http.client.HTTPConnection, req)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/urllib/request.py", line 1352, in do_open
+    r = h.getresponse()
+        ^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/http/client.py", line 1395, in getresponse
+    response.begin()
+  File "/usr/local/lib/python3.11/http/client.py", line 325, in begin
+    version, status, reason = self._read_status()
+                              ^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/http/client.py", line 286, in _read_status
+    line = str(self.fp.readline(_MAXLINE + 1), "iso-8859-1")
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/socket.py", line 718, in readinto
+    return self._sock.recv_into(b)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+TimeoutError: timed out
+
+2026-03-28 22:11:42,174 agent_2 INFO Identified 0 relevant file(s): []
+2026-03-28 22:11:42,175 agent_2 INFO Identified files: []
+2026-03-28 22:11:42,182 agent_2 INFO Running tests...
+2026-03-28 22:11:42,188 agent_0 ERROR Error querying LLM: timed out
+Traceback (most recent call last):
+  File "/workspaces/Aria/scripts/autonomous_code_agent.py", line 264, in query
+    return self._query_ollama(prompt, max_tokens)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspaces/Aria/scripts/autonomous_code_agent.py", line 291, in _query_ollama
+    with urllib.request.urlopen(req, timeout=60) as response:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/urllib/request.py", line 216, in urlopen
+    return opener.open(url, data, timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/urllib/request.py", line 519, in open
+    response = self._open(req, data)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/urllib/request.py", line 536, in _open
+    result = self._call_chain(self.handle_open, protocol, protocol +
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/urllib/request.py", line 496, in _call_chain
+    result = func(*args)
+             ^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/urllib/request.py", line 1377, in http_open
+    return self.do_open(http.client.HTTPConnection, req)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/urllib/request.py", line 1352, in do_open
+    r = h.getresponse()
+        ^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/http/client.py", line 1395, in getresponse
+    response.begin()
+  File "/usr/local/lib/python3.11/http/client.py", line 325, in begin
+    version, status, reason = self._read_status()
+                              ^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/http/client.py", line 286, in _read_status
+    line = str(self.fp.readline(_MAXLINE + 1), "iso-8859-1")
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/socket.py", line 718, in readinto
+    return self._sock.recv_into(b)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+TimeoutError: timed out
+
+2026-03-28 22:11:42,190 agent_0 INFO Identified 0 relevant file(s): []
+2026-03-28 22:11:42,191 agent_0 INFO Identified files: []
+2026-03-28 22:11:42,198 agent_0 INFO Running tests...
+2026-03-28 22:11:43,736 agent_1 ERROR Error querying LLM: timed out
+Traceback (most recent call last):
+  File "/workspaces/Aria/scripts/autonomous_code_agent.py", line 264, in query
+    return self._query_ollama(prompt, max_tokens)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspaces/Aria/scripts/autonomous_code_agent.py", line 291, in _query_ollama
+    with urllib.request.urlopen(req, timeout=60) as response:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/urllib/request.py", line 216, in urlopen
+    return opener.open(url, data, timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/urllib/request.py", line 519, in open
+    response = self._open(req, data)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/urllib/request.py", line 536, in _open
+    result = self._call_chain(self.handle_open, protocol, protocol +
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/urllib/request.py", line 496, in _call_chain
+    result = func(*args)
+             ^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/urllib/request.py", line 1377, in http_open
+    return self.do_open(http.client.HTTPConnection, req)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/urllib/request.py", line 1352, in do_open
+    r = h.getresponse()
+        ^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/http/client.py", line 1395, in getresponse
+    response.begin()
+  File "/usr/local/lib/python3.11/http/client.py", line 325, in begin
+    version, status, reason = self._read_status()
+                              ^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/http/client.py", line 286, in _read_status
+    line = str(self.fp.readline(_MAXLINE + 1), "iso-8859-1")
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/socket.py", line 718, in readinto
+    return self._sock.recv_into(b)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+TimeoutError: timed out
+
+2026-03-28 22:11:43,738 agent_1 INFO Identified 0 relevant file(s): []
+2026-03-28 22:11:43,740 agent_1 INFO Identified files: []
+2026-03-28 22:11:43,749 agent_1 INFO Running tests...
+2026-03-28 22:12:59,730 agent_0 DEBUG Test output: 
+============================================================
+  Running suite: unit  (Fast unit tests (~0.5s))
+============================================================
+
+============================= test session starts ==============================
+collected 1370 items / 17 deselected / 3 skipped / 1353 selected
+
+tests/test_agent_mode_delegation_contracts.py ............               [  0%]
+tests/test_agi_provider.py ............................................. [  4%]
+......              
+2026-03-28 22:12:59,733 agent_0 INFO Tests: passed=False results={'total': 1353, 'passed': 1286, 'failed': 18, 'success': False, 'output': '\n============================================================\n  Running suite: unit  (Fast unit tests (~0.5s))\n============================================================\n\n============================= test session starts ==============================\ncollected 1370 items / 17 deselected / 3 skipped / 1353 selected\n\ntests/test_agent_mode_delegation_contracts.py ............               [  0%]\ntests/test_agi_provider.py ............................................. [  4%]\n......              '}
+2026-03-28 22:12:59,737 agent_0 INFO Task 20260328_220930 complete in 191.24s (~341 tokens)
+2026-03-28 22:13:00,000 agent_2 DEBUG Test output: 
+============================================================
+  Running suite: unit  (Fast unit tests (~0.5s))
+============================================================
+
+============================= test session starts ==============================
+collected 1370 items / 17 deselected / 3 skipped / 1353 selected
+
+tests/test_agent_mode_delegation_contracts.py ............               [  0%]
+tests/test_agi_provider.py ............................................. [  4%]
+......              
+2026-03-28 22:13:00,002 agent_2 INFO Tests: passed=False results={'total': 1353, 'passed': 1286, 'failed': 18, 'success': False, 'output': '\n============================================================\n  Running suite: unit  (Fast unit tests (~0.5s))\n============================================================\n\n============================= test session starts ==============================\ncollected 1370 items / 17 deselected / 3 skipped / 1353 selected\n\ntests/test_agent_mode_delegation_contracts.py ............               [  0%]\ntests/test_agi_provider.py ............................................. [  4%]\n......              '}
+2026-03-28 22:13:00,007 agent_2 INFO Task 20260328_220930 complete in 191.51s (~352 tokens)
+2026-03-28 22:13:04,271 agent_1 DEBUG Test output: 
+============================================================
+  Running suite: unit  (Fast unit tests (~0.5s))
+============================================================
+
+============================= test session starts ==============================
+collected 1370 items / 17 deselected / 3 skipped / 1353 selected
+
+tests/test_agent_mode_delegation_contracts.py ............               [  0%]
+tests/test_agi_provider.py ............................................. [  4%]
+......              
+2026-03-28 22:13:04,273 agent_1 INFO Tests: passed=False results={'total': 1353, 'passed': 1286, 'failed': 18, 'success': False, 'output': '\n============================================================\n  Running suite: unit  (Fast unit tests (~0.5s))\n============================================================\n\n============================= test session starts ==============================\ncollected 1370 items / 17 deselected / 3 skipped / 1353 selected\n\ntests/test_agent_mode_delegation_contracts.py ............               [  0%]\ntests/test_agi_provider.py ............................................. [  4%]\n......              '}
+2026-03-28 22:13:04,278 agent_1 INFO Task 20260328_220931 complete in 194.17s (~361 tokens)
+
+Running 3 task(s) with up to 3 parallel worker(s)...
+
+  ✗ [failed      ] Add docstrings in shared/chat_memory.py for core public (191.24s)
+         error: Validation tests failed
+  ✗ [failed      ] Add type hints in scripts/autonomous_training_orchestra (191.51s)
+         error: Validation tests failed
+  ✗ [failed      ] Improve error handling in shared/chat_providers.py arou (194.17s)
+         error: Validation tests failed
+
+====================================================================
+===================== MULTI-AGENT RUN SUMMARY ======================
+====================================================================
+  Run ID          : 20260328_220926
+  Total tasks     : 3
+  Succeeded       : 0
+  Failed          : 3
+  Rolled back     : 0
+  Tests skipped   : 0
+  Files modified  : 0
+  ~Tokens used    : 1054
+  Wall-clock time : 199.26s
+  Consensus       : reached=True winner=failure ratio=1.0 reason=ok
+====================================================================
+
+Report saved: data_out/multi_agent_code_changes_live_1774735765/report_20260328_220926.json

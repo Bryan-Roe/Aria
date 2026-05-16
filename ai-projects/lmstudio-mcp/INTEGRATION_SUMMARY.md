@@ -289,7 +289,7 @@ python -m chat_cli --provider lmstudio "test message"
 ## Documentation Files
 
 | File | Purpose | Lines |
-|------|---------|-------|
+| ------ | --------- | ------- |
 | `lmstudio_mcp_server.py` | Core MCP server | ~350 |
 | `lmstudio_agent_integration.py` | Agent integration | ~400 |
 | `verify_agent_integration.py` | Verification script | ~400 |

@@ -210,7 +210,7 @@ async def run_single_cycle(cycle_number):
 ## Where to Edit
 
 | Change | File(s) |
-|--------|---------|
+| -------- | --------- |
 | Add/modify API endpoint | `function_app.py` |
 | Quantum LLM pipeline | `ai-projects/quantum-ml/src/quantum_llm/pipeline.py` |
 | Quantum token sampler | `ai-projects/quantum-ml/src/quantum_llm/quantum_sampler.py` |
@@ -313,7 +313,7 @@ These are automatically applied by VS Code based on file paths. Check attachment
 Available agents in `.github/agents/`:
 
 | Agent | Purpose |
-|-------|---------|
+| ------- | --------- |
 | `ai.agent.md` | Primary autonomous agent — task decomposition, multi-step execution |
 | `my-agent.agent.md` | QAI specialist — quantum-AI/ML development |
 | `agi-reasoning.agent.md` | Chain-of-thought reasoning, self-reflection (CoT is internal, final answer only) |

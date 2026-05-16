@@ -401,23 +401,23 @@ if (-not $status.success) {
 
 ## Troubleshooting
 
-| Issue                             | Solution                                                   |
+| Issue | Solution |
 | --------------------------------- | ---------------------------------------------------------- |
-| Deployment fails at prerequisites | Run `pip install -r requirements.txt`                      |
-| Health monitor shows "critical"   | Check `QAI_SQL_URL` environment variable                   |
-| Threshold tuning finds no data    | Verify Application Insights is logging traces              |
-| Cleanup script fails              | Ensure 002 migration applied and tracking enabled          |
-| Module import fails               | Run from repo root: `Import-Module .\scripts\QAI-SQL.psm1` |
+| Deployment fails at prerequisites | Run `pip install -r requirements.txt` |
+| Health monitor shows "critical" | Check `QAI_SQL_URL` environment variable |
+| Threshold tuning finds no data | Verify Application Insights is logging traces |
+| Cleanup script fails | Ensure 002 migration applied and tracking enabled |
+| Module import fails | Run from repo root: `Import-Module .\scripts\QAI-SQL.psm1` |
 
 ## Files Created
 
-| File                                 | Purpose                        | Lines |
+| File | Purpose | Lines |
 | ------------------------------------ | ------------------------------ | ----- |
-| `scripts/deploy_sql_integration.ps1` | Master deployment orchestrator | 450+  |
-| `scripts/tune_sql_thresholds.ps1`    | Automated threshold tuning     | 300+  |
-| `scripts/cleanup_query_metrics.py`   | Retention cleanup automation   | 200+  |
-| `scripts/sql_health_monitor.py`      | Health monitoring daemon       | 300+  |
-| `scripts/QAI-SQL.psm1`               | PowerShell cmdlet module       | 400+  |
+| `scripts/deploy_sql_integration.ps1` | Master deployment orchestrator | 450+ |
+| `scripts/tune_sql_thresholds.ps1` | Automated threshold tuning | 300+ |
+| `scripts/cleanup_query_metrics.py` | Retention cleanup automation | 200+ |
+| `scripts/sql_health_monitor.py` | Health monitoring daemon | 300+ |
+| `scripts/QAI-SQL.psm1` | PowerShell cmdlet module | 400+ |
 
 **Total**: ~1,650 lines of automation code
 

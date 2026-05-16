@@ -1,0 +1,5 @@
+usage: multi_agent.py [-h] [--tasks-file PATH | --task TASK]
+                      [--llm-type {ollama,lmstudio,echo}] [--model MODEL]
+                      [--workers WORKERS] [--dry-run] [--skip-tests]
+                      [--output-dir OUTPUT_DIR] [--verbose]
+multi_agent.py: error: unrecognized arguments: --apply-changes --commit

@@ -124,14 +124,14 @@ This document provides a complete index of all experimental results, documentati
 
 #### Azure Hardware Jobs
 | Backend | Jobs | Status | Notes |
-|---------|------|--------|-------|
+| --------- | ------ | -------- | ------- |
 | rigetti.sim.qvm | 3 | ✅ All passed | 4q/6q GHZ + 4q variational |
 | quantinuum.sim.h2-1sc | 6 | ❌ All collapsed | All patterns failed (bug) |
 | **Total** | **9** | **33% success** | Quantinuum excluded |
 
 #### Local Simulations
 | Method | Qubits | Circuits | Status |
-|--------|--------|----------|--------|
+| -------- | -------- | ---------- | -------- |
 | MPS | 32, 64 | 22 (L=1-4, 3 entanglements, 4 noise) | ✅ Complete |
 | Stabilizer | 128, 256 | 6 (L=2/4/8, shots=2000) | ✅ Complete |
 | Statevector | 4, 16 | 8 (early tests) | ✅ Complete |

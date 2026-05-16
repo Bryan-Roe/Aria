@@ -4,6 +4,7 @@ Interfaces with quantum-ai training, circuits, and Azure Quantum
 """
 
 import json
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -104,6 +105,24 @@ class QuantumIntegration:
         try:
             train_script = self.quantum_path / "train_custom_dataset.py"
 
+            datasets_path = self.workspace_root / "datasets" / "quantum"
+            allowed_datasets = {
+                csv_file.stem for csv_file in datasets_path.glob("*.csv")
+            } if datasets_path.exists() else set()
+
+            if dataset not in allowed_datasets:
+                return {
+                    "success": False,
+                    "error": f"Invalid dataset '{dataset}'.",
+                }
+
+            allowed_backends = set(self._get_available_backends())
+            if backend not in allowed_backends:
+                return {
+                    "success": False,
+                    "error": f"Invalid backend '{backend}'.",
+                }
+
             cmd = [
                 sys.executable,
                 str(train_script),
@@ -169,6 +188,12 @@ class QuantumIntegration:
         """Run a quantum autorun job"""
         try:
             autorun_script = self.workspace_root / "scripts" / "quantum_autorun.py"
+
+            if not re.fullmatch(r"[A-Za-z0-9_-]{1,64}", job_name):
+                return {
+                    "success": False,
+                    "error": "Invalid job_name format. Allowed: letters, numbers, underscore, hyphen (max 64 chars).",
+                }
 
             cmd = [sys.executable, str(autorun_script), "--job", job_name]
             if dry_run:

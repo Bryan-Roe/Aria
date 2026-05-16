@@ -151,7 +151,7 @@ if not sub.track_usage('quantum_jobs', amount=1):
 ## Key Files
 
 | Component | File |
-|-----------|------|
+| ----------- | ------ |
 | Provider detection | `shared/chat_providers.py` → `ai-projects/chat-cli/src/chat_providers.py` |
 | AGI reasoning | `ai-projects/chat-cli/src/agi_provider.py` |
 | Memory/embeddings | `shared/chat_memory.py` |

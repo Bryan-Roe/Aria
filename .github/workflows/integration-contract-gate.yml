@@ -15,9 +15,21 @@ name: Integration Contract Gate
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - '.vscode/**'
+      - '.devcontainer/**'
+      - 'LICENSE'
   pull_request:
-    branches: [ main, dev ]
+    branches: [main, dev]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - '.vscode/**'
+      - '.devcontainer/**'
+      - 'LICENSE'
   workflow_dispatch:
     inputs:
       strict:
@@ -29,41 +41,84 @@ on:
           - 'false'
           - 'true'
 
+# Cancel superseded PR runs; never cancel pushes to main (we want a full
+# audit trail of contract validation on the default branch).
 concurrency:
-  group: contract-${{ github.ref }}
+  group: contract-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
+# Principle of least privilege: this workflow only reads code and uploads
+# artifacts. No write access to issues, PRs, packages, or contents required.
+permissions:
+  contents: read
+
 env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true  # Opt into Node.js 24 for JS actions ahead of June 2026 forced migration
+  # Opt into Node.js 24 for JS actions ahead of the June 2026 forced migration.
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
+  PYTHON_VERSION: '3.11'
+  # Make Python output unbuffered so logs stream live in the Actions UI.
+  PYTHONUNBUFFERED: '1'
+  PYTHONDONTWRITEBYTECODE: '1'
+  # Force colored output where supported.
+  FORCE_COLOR: '1'
+  # Integration endpoint used by the contract gate (override in workflows or runs)
+  INTEGRATION_AI_STATUS_ENDPOINT: 'http://localhost:7071/api/ai/status'
+  # Optional: command used to start a local Functions host (if desired in CI).
+  # Default includes --script-root pointing to ./functions to avoid 404s.
+  START_FUNC_CMD: 'func start --cors "*" --script-root ./functions'
+  # Retry tuning for the gate script/steps
+  RETRY_COUNT: '30'
+  RETRY_INTERVAL: '1'
+
+defaults:
+  run:
+    shell: bash
 
 jobs:
   contract-gate:
     name: API Contract Validation
     runs-on: ubuntu-latest
     timeout-minutes: 15
+
     steps:
       - name: Checkout code
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4.3.1
+        uses: actions/checkout@v4
+        with:
+          # Shallow clone is sufficient for contract validation; speeds up checkout.
+          fetch-depth: 1
+          persist-credentials: false
 
       - name: Setup Python
         uses: ./.github/actions/setup-python-env
         with:
-          python-version: '3.11'
+          python-version: ${{ env.PYTHON_VERSION }}
           extra-packages: 'pytest pytest-timeout'
 
       - name: Determine gate mode
         id: mode
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          REF: ${{ github.ref }}
+          DISPATCH_STRICT: ${{ github.event.inputs.strict }}
         run: |
-          if [[ "${{ github.event_name }}" == "push" && "${{ github.ref }}" == "refs/heads/main" ]]; then
-            echo "strict=true" >> $GITHUB_OUTPUT
-            echo "mode_label=strict (push to main)" >> $GITHUB_OUTPUT
-          elif [[ "${{ github.event_name }}" == "workflow_dispatch" && "${{ github.event.inputs.strict }}" == "true" ]]; then
-            echo "strict=true" >> $GITHUB_OUTPUT
-            echo "mode_label=strict (manual dispatch)" >> $GITHUB_OUTPUT
-          else
-            echo "strict=false" >> $GITHUB_OUTPUT
-            echo "mode_label=standard (PR)" >> $GITHUB_OUTPUT
+          set -euo pipefail
+          strict='false'
+          mode_label='standard (PR)'
+
+          if [[ "${EVENT_NAME}" == "push" && "${REF}" == "refs/heads/main" ]]; then
+            strict='true'
+            mode_label='strict (push to main)'
+          elif [[ "${EVENT_NAME}" == "workflow_dispatch" && "${DISPATCH_STRICT}" == "true" ]]; then
+            strict='true'
+            mode_label='strict (manual dispatch)'
           fi
+
+          {
+            echo "strict=${strict}"
+            echo "mode_label=${mode_label}"
+          } >> "${GITHUB_OUTPUT}"
+
+          echo "::notice title=Contract Gate Mode::${mode_label}"
 
       - name: Validate generated site bundles (strict)
         uses: ./.github/actions/validate-site-bundles
@@ -74,6 +129,119 @@ jobs:
         uses: ./.github/actions/validate-composite-actions
         with:
           script-path: scripts/validate_composite_actions.py
+
+      - name: Setup Node.js (needed for azure functions core tools install)
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Cache npm
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - name: Start local Functions host (for endpoint checks)
+        id: start-func
+        if: runner.os == 'Linux'
+        env:
+          INTEGRATION_AI_STATUS_ENDPOINT: ${{ env.INTEGRATION_AI_STATUS_ENDPOINT }}
+          START_FUNC_CMD: ${{ env.START_FUNC_CMD }}
+          RETRY_COUNT: ${{ env.RETRY_COUNT }}
+          RETRY_INTERVAL: ${{ env.RETRY_INTERVAL }}
+        run: |
+          set -euo pipefail
+          echo "INTEGRATION_AI_STATUS_ENDPOINT=${INTEGRATION_AI_STATUS_ENDPOINT}"
+
+          # Prefer Docker if a Dockerfile is provided under ./functions for reliability.
+          if command -v docker >/dev/null 2>&1 && [[ -f "./functions/Dockerfile" ]]; then
+            echo "Docker detected and ./functions/Dockerfile found — building image..."
+            docker build -t integration-func-image ./functions
+            echo "Running container mapping port 7071..."
+            docker run -d --name integration-func -p 7071:7071 integration-func-image || true
+
+          else
+            echo "Docker not used or Dockerfile missing — falling back to Azure Functions Core Tools install/start"
+
+            # Try to install azure functions core tools with retries; rely on cached npm when available.
+            install_attempts=3
+            installed=false
+            for attempt in $(seq 1 ${install_attempts}); do
+              if command -v func >/dev/null 2>&1; then
+                echo "func already available"
+                installed=true
+                break
+              fi
+
+              echo "Attempt ${attempt}/${install_attempts} — installing azure-functions-core-tools@4 via npm..."
+              if npm install -g azure-functions-core-tools@4 --unsafe-perm true; then
+                echo "Installed azure-functions-core-tools successfully"
+                if command -v func >/dev/null 2>&1; then
+                  installed=true
+                  break
+                fi
+              else
+                echo "npm install failed on attempt ${attempt} — retrying in 2s..."
+                sleep 2
+              fi
+            done
+
+            if [[ "${installed}" != true ]]; then
+              echo "Warning: func not available after install attempts — attempting to proceed, but endpoint checks may fail" >&2
+            fi
+
+            # Start the Functions host in the background using START_FUNC_CMD. Ensure script-root is set by default.
+            echo "Starting Functions host using: ${START_FUNC_CMD}"
+            if [[ -d "./functions" ]]; then
+              pushd functions >/dev/null
+              nohup ${START_FUNC_CMD} &>/tmp/func.log &
+              popd >/dev/null
+            else
+              nohup ${START_FUNC_CMD} &>/tmp/func.log &
+            fi
+          fi
+
+          echo "Waiting for endpoint to become available: ${INTEGRATION_AI_STATUS_ENDPOINT}"
+          i=0
+          while (( i < RETRY_COUNT )); do
+            if curl --silent --fail --max-time 5 "${INTEGRATION_AI_STATUS_ENDPOINT}" -o /dev/null; then
+              echo "AI status endpoint reachable: ${INTEGRATION_AI_STATUS_ENDPOINT}"
+              exit 0
+            fi
+            ((i++))
+            echo "Attempt ${i}/${RETRY_COUNT} — endpoint not ready yet; sleeping ${RETRY_INTERVAL}s"
+            sleep "${RETRY_INTERVAL}"
+          done
+
+          echo "AI status endpoint not reachable after ${RETRY_COUNT} attempts: ${INTEGRATION_AI_STATUS_ENDPOINT}" >&2
+          echo "If a function host was started, check /tmp/func.log (or the Docker container logs)."
+
+          if [[ -f /tmp/func.log ]]; then
+            echo "--- Last lines from /tmp/func.log ---"
+            tail -n 200 /tmp/func.log || true
+          fi
+
+          if command -v docker >/dev/null 2>&1 && docker ps --filter "name=integration-func" --format '{{.ID}}' | grep -q .; then
+            echo "--- Last Docker container logs (integration-func) ---"
+            docker logs --tail 200 integration-func || true
+          fi
+
+          echo "--- Diagnostics: listening ports ---"
+          if command -v ss >/dev/null 2>&1; then
+            ss -ltnp || true
+          elif command -v netstat >/dev/null 2>&1; then
+            netstat -ltnp || true
+          else
+            echo "(ss/netstat not available)"
+          fi
+
+          echo "--- Curl verbose attempt ---"
+          curl --verbose --max-time 10 "${INTEGRATION_AI_STATUS_ENDPOINT}" || true
+
+          exit 1
 
       - name: Run contract gate (standard)
         if: steps.mode.outputs.strict == 'false'
@@ -87,25 +255,52 @@ jobs:
 
       - name: Upload contract results
         if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4
+        uses: actions/upload-artifact@v4
         with:
-          name: contract-gate-results-${{ github.run_number }}
+          name: contract-gate-results-${{ github.run_number }}-${{ github.run_attempt }}
           retention-days: 14
+          if-no-files-found: warn
+          compression-level: 9
           path: |
             data_out/integration_smoke/
             data_out/ci_orchestrator/status.json
 
       - name: Generate summary
         if: always()
+        env:
+          MODE_LABEL: ${{ steps.mode.outputs.mode_label }}
+          JOB_STATUS: ${{ job.status }}
         run: |
-          echo "## Integration Contract Gate" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Mode:** ${{ steps.mode.outputs.mode_label }}" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          if [ -f data_out/ci_orchestrator/status.json ]; then
-            echo "### Orchestrator Status" >> $GITHUB_STEP_SUMMARY
-            echo '```json' >> $GITHUB_STEP_SUMMARY
-            cat data_out/ci_orchestrator/status.json >> $GITHUB_STEP_SUMMARY
-            echo '' >> $GITHUB_STEP_SUMMARY
-            echo '```' >> $GITHUB_STEP_SUMMARY
+          set -euo pipefail
+          status_file='data_out/ci_orchestrator/status.json'
+
+          {
+            echo "## Integration Contract Gate"
+            echo ""
+            echo "| Field | Value |"
+            echo "| --- | --- |"
+            echo "| **Mode** | ${MODE_LABEL} |"
+            echo "| **Job status** | ${JOB_STATUS} |"
+            echo "| **Run** | [#${GITHUB_RUN_NUMBER} (attempt ${GITHUB_RUN_ATTEMPT})](${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}) |"
+            echo "| **Commit** | \`${GITHUB_SHA::7}\` |"
+            echo ""
+          } >> "${GITHUB_STEP_SUMMARY}"
+
+          if [[ -s "${status_file}" ]]; then
+            {
+              echo "### Orchestrator Status"
+              echo ""
+              echo '```json'
+              # Pretty-print if jq is available, otherwise emit raw JSON.
+              if command -v jq >/dev/null 2>&1; then
+                jq '.' "${status_file}" || cat "${status_file}"
+              else
+                cat "${status_file}"
+              fi
+              echo ''
+              echo '```'
+            } >> "${GITHUB_STEP_SUMMARY}"
+          else
+            echo "_No orchestrator status file produced (`${status_file}` missing or empty)._" \
+              >> "${GITHUB_STEP_SUMMARY}"
           fi

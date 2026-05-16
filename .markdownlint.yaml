@@ -1,7 +1,35 @@
 # MD013: Line length
-# Increased limit to accommodate long URLs and content descriptions.
-# Code blocks are excluded since they contain copilot commands and generated code.
+# Increased to accommodate long URLs and content descriptions in generated docs.
 MD013:
-  line_length: 200
+  line_length: 400
   code_blocks: false
   tables: false
+
+# MD024: No duplicate headings – allow repeating names under different parent sections.
+MD024:
+  siblings_only: true
+
+# MD025: Single H1 – ignore front matter title field to allow # heading in body.
+MD025:
+  front_matter_title: ""
+
+# MD029: Ordered list item prefix – disabled to allow step-by-step lists that span
+# multiple code blocks (each code-block break is parsed as a new list by markdownlint).
+MD029: false
+
+# MD036: No emphasis as heading – disabled. Many guides intentionally use bold text
+# as inline sub-section labels (e.g. **Wheat Seeds**) rather than additional headings.
+MD036: false
+
+# MD040: Fenced code language – disabled. Guides frequently include bare ``` blocks
+# for raw command output and ASCII diagrams where no language tag applies.
+MD040: false
+
+# MD051: Link fragments – disabled. The linter's GitHub-style anchor slugification
+# does not always match GitHub's actual rendered anchors (e.g. headings containing
+# "&" produce a double-dash anchor on GitHub). Re-enable once TOCs are regenerated.
+MD051: false
+
+# MD060: Table column style – require compact style (single space around pipe content).
+MD060:
+  style: compact

@@ -124,7 +124,7 @@ python ai-projects/chat-cli/src/chat_cli.py --provider lora --once "Hello, how a
 ## Key Files
 
 | File | Purpose |
-|------|---------|
+| ------ | --------- |
 | `scripts/autotrain.py` | Training orchestrator |
 | `scripts/autonomous_training_orchestrator.py` | Continuous 30-min cycle training |
 | `scripts/train_and_promote.py` | Train + auto-deploy |

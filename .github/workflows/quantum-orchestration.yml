@@ -88,12 +88,14 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      - name: Fail fast when Azure credentials are not configured
+      - name: Skip when Azure credentials are not configured
         if: env.HAS_AZURE_CREDENTIALS != 'true'
         run: |
-          throw "AZURE_CREDENTIALS secret is not configured. Add it as a repository secret to enable Azure Quantum orchestration."
+          Write-Warning "AZURE_CREDENTIALS secret is not configured. Skipping Azure Quantum orchestration."
+          Write-Output "To enable, add AZURE_CREDENTIALS as a repository secret."
 
       - name: Run orchestration
+        if: env.HAS_AZURE_CREDENTIALS == 'true'
         env:
           LOGIC_APP_URL: ${{ inputs.LOGIC_APP_URL }}
           RESOURCE_GROUP: ${{ inputs.RESOURCE_GROUP }}

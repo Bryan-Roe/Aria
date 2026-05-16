@@ -35,7 +35,7 @@ Do not retain control after the scoped ops work is finished; hand back to `agent
 
 ### Tiers
 | Tier | Price | Chat Messages | Quantum Jobs | Training Hours |
-|------|-------|--------------|--------------|----------------|
+| ------ | ------- | -------------- | -------------- | ---------------- |
 | FREE | $0/mo | 100/mo | 0 | 0 |
 | PRO | $49/mo | 10,000/mo | 50/mo | 20 hrs/mo |
 | ENTERPRISE | $199/mo | Unlimited | Unlimited | Unlimited |
@@ -87,7 +87,7 @@ sub.increment_usage('quantum_jobs')
 
 ### Monitoring Scripts
 | Script | Purpose |
-|--------|---------|
+| -------- | --------- |
 | `scripts/status_dashboard.py` | Unified orchestrator status (--watch, --export) |
 | `scripts/resource_monitor.py` | CPU/memory/disk/GPU with threshold alerts |
 | `scripts/system_health_check.py` | Comprehensive health report |
@@ -119,7 +119,7 @@ func azure functionapp publish <app-name>    # Deploy
 
 ### Key Files
 | File | Purpose |
-|------|---------|
+| ------ | --------- |
 | `shared/subscription_manager.py` | Tiers, features, usage tracking |
 | `shared/db_logging.py` | Fault-tolerant SP wrappers |
 | `shared/telemetry.py` | OpenTelemetry setup |

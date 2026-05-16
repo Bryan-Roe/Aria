@@ -1,0 +1,28 @@
+{
+  "ollama_style": {
+    "endpoint": "http://127.0.0.1:11434/api/tags",
+    "status": 200,
+    "working": true,
+    "note": "Returns models list with mistral:latest"
+  },
+  "ollama_generate": {
+    "endpoint": "http://127.0.0.1:11434/api/generate",
+    "status": 405,
+    "working": true,
+    "note": "405 on GET is expected \u2014 POST endpoint is live"
+  },
+  "openai_compatible": {
+    "endpoint": "http://127.0.0.1:11434/v1/models",
+    "status": 200,
+    "working": true,
+    "note": "Returns OpenAI-format models list with mistral:latest"
+  },
+  "lmstudio": {
+    "env_var": "LMSTUDIO_BASE_URL",
+    "set": false,
+    "working": false,
+    "note": "Not configured"
+  },
+  "verdict": "BOTH Ollama-style and OpenAI-compatible protocols work on port 11434",
+  "active_model": "mistral:latest"
+}

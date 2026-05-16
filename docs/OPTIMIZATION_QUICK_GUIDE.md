@@ -289,7 +289,7 @@ def benchmark_optimization(old_func, new_func, *args, iterations=100):
 ## Expected Performance Gains
 
 | Optimization | File | Speedup | Risk |
-|--------------|------|---------|------|
+| -------------- | ------ | --------- | ------ |
 | Quantum gradient | web_app.py | 10-100x | Low (has fallback) |
 | File caching | serve.py | 5-10x | Low (5s TTL) |
 | Keyword frozensets | agi_provider.py | 3-30x | Very low |

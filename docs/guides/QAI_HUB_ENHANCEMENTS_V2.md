@@ -178,7 +178,7 @@
 ### 🚀 Performance Metrics
 
 | Metric | Before | After | Improvement |
-|--------|--------|-------|-------------|
+| -------- | -------- | ------- | ------------- |
 | **Page Load** | 2.5s | 1.8s | 28% faster |
 | **API Response** | 150ms | 120ms | 20% faster |
 | **Stats Refresh** | 60s | 30s | 50% more frequent |
@@ -312,7 +312,7 @@ dashboard/
 ### 📊 Usage Statistics (Hypothetical)
 
 | Feature | Usage | User Satisfaction |
-|---------|-------|-------------------|
+| --------- | ------- | ------------------- |
 | **Quick Actions** | 85% | ⭐⭐⭐⭐⭐ |
 | **Training Presets** | 78% | ⭐⭐⭐⭐⭐ |
 | **Model Comparison** | 62% | ⭐⭐⭐⭐ |
@@ -358,7 +358,7 @@ dashboard/
 ### 🎉 Success Metrics
 
 | Metric | Target | Achieved | Status |
-|--------|--------|----------|--------|
+| -------- | -------- | ---------- | -------- |
 | **Page Load** | <2s | 1.8s | ✅ Beat target |
 | **API Response** | <200ms | 120ms | ✅ Beat target |
 | **Error Rate** | <1% | 0.2% | ✅ Beat target |

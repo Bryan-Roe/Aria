@@ -1,42 +1,123 @@
 name: Markdown Quality
 
 on:
-    pull_request:
-        branches: [main, dev]
-        paths:
-            - "**/*.md"
-            - ".github/workflows/markdown-quality.yml"
-    push:
-        branches: [main]
-        paths:
-            - "**/*.md"
-            - ".github/workflows/markdown-quality.yml"
-    workflow_dispatch:
+  pull_request:
+    branches: [main, dev]
+    paths:
+      - "**/*.md"
+      - ".markdownlint.json"
+      - ".markdownlint.jsonc"
+      - ".markdownlint.yaml"
+      - ".markdownlint-cli2.jsonc"
+      - ".markdownlint-cli2.yaml"
+      - ".github/workflows/markdown-quality.yml"
+  push:
+    branches: [main]
+    paths:
+      - "**/*.md"
+      - ".markdownlint.json"
+      - ".markdownlint.jsonc"
+      - ".markdownlint.yaml"
+      - ".markdownlint-cli2.jsonc"
+      - ".markdownlint-cli2.yaml"
+      - ".github/workflows/markdown-quality.yml"
+  workflow_dispatch:
+    inputs:
+      fix:
+        description: "Attempt to auto-fix markdown issues and upload patch as artifact"
+        type: boolean
+        default: false
 
+# Cancel superseded runs on the same ref to save CI minutes.
 concurrency:
-    group: markdown-quality-${{ github.ref }}
-    cancel-in-progress: true
+  group: markdown-quality-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+# Principle of least privilege: read-only by default.
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash
 
 jobs:
-    markdownlint:
-        name: markdownlint
-        runs-on: ubuntu-latest
-        timeout-minutes: 10
-        steps:
-            - name: Checkout
-              uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4.3.1
+  markdownlint:
+    name: markdownlint
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      pull-requests: read
 
-            - name: Lint Markdown files
-              uses: DavidAnson/markdownlint-cli2-action@6b51ade7a9e4a75a7ad929842dd298a3804ebe8b  # v23
-              with:
-                  globs: |
-                      **/*.md
-                      !data_out/**
-                      !mount/**
+    steps:
+      - name: Checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4.3.1
+        with:
+          # Avoid leaving credentials on disk for subsequent steps.
+          persist-credentials: false
+          # Shallow clone is sufficient for linting changed/all markdown files.
+          fetch-depth: 1
 
-            - name: Summary
-              if: always()
-              run: |
-                  echo "## Markdown Quality" >> $GITHUB_STEP_SUMMARY
-                  echo "" >> $GITHUB_STEP_SUMMARY
-                  echo "Validated Markdown style and structure with markdownlint-cli2." >> $GITHUB_STEP_SUMMARY
+      - name: Lint Markdown files
+        id: lint
+        uses: DavidAnson/markdownlint-cli2-action@6b51ade7a9e4a75a7ad929842dd298a3804ebe8b  # v23
+        with:
+          # Lint all repo markdown except generated/output and mounted volumes.
+          # Keep this list in sync with .markdownlintignore if present.
+          globs: |
+            **/*.md
+            !**/node_modules/**
+            !**/.venv/**
+            !**/venv/**
+            !**/.git/**
+            !**/dist/**
+            !**/build/**
+            !**/.next/**
+            !**/.cache/**
+            !data_out/**
+            !mount/**
+            !**/CHANGELOG.md
+          fix: ${{ github.event_name == 'workflow_dispatch' && inputs.fix == true }}
+
+      - name: Generate auto-fix patch
+        if: ${{ always() && github.event_name == 'workflow_dispatch' && inputs.fix == true }}
+        run: |
+          set -euo pipefail
+          if ! git diff --quiet; then
+            git diff > markdownlint-autofix.patch
+            echo "Auto-fix patch generated."
+          else
+            echo "No auto-fix changes were produced." > markdownlint-autofix.patch
+          fi
+
+      - name: Upload auto-fix patch
+        if: ${{ always() && github.event_name == 'workflow_dispatch' && inputs.fix == true }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4.6.2
+        with:
+          name: markdownlint-autofix-patch
+          path: markdownlint-autofix.patch
+          if-no-files-found: ignore
+          retention-days: 7
+
+      - name: Summary
+        if: always()
+        env:
+          OUTCOME: ${{ steps.lint.outcome }}
+        run: |
+          {
+            echo "## Markdown Quality"
+            echo ""
+            echo "Validated Markdown style and structure with **markdownlint-cli2**."
+            echo ""
+            echo "- Result: \`${OUTCOME}\`"
+            echo "- Event: \`${GITHUB_EVENT_NAME}\`"
+            echo "- Ref: \`${GITHUB_REF}\`"
+            echo "- Commit: \`${GITHUB_SHA}\`"
+            echo ""
+            if [ "${OUTCOME}" != "success" ]; then
+              echo "> ❌ Markdown lint failed. Run \`npx markdownlint-cli2 \"**/*.md\"\` locally, or re-run this workflow via \"Run workflow\" with **fix** enabled to download an auto-fix patch."
+            else
+              echo "> ✅ All Markdown files passed linting."
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"

@@ -1,2 +1,153 @@
-messages: []
-model: openai/gpt-5-chat
+# Prompt.prompt.yml
+# Default prompt configuration for the Aria interactive character platform.
+# Purpose: seed runtime defaults for chat, planning, and auto-execute flows.
+# Keep this file machine- and human-readable. Update last_updated when editing.
+
+version: 1
+description: "Default chat/prompt configuration for the Aria interactive character platform."
+last_updated: "2026-05-16"
+maintainer: "Bryan-Roe"
+
+# Primary model and ordered fallback list (runtime may map provider aliases)
+model: "openai/gpt-5-chat"
+fallback_models:
+  - "openai/gpt-4o-mini"
+  - "azure_openai/gpt-4o"
+  - "local/phi-3.5-lora"
+
+# Runtime defaults applied when a request does not override them
+defaults:
+  temperature: 0.2           # prefer deterministic plans; raise for creative dialogues
+  top_p: 0.95
+  max_tokens: 1024
+  frequency_penalty: 0.0
+  presence_penalty: 0.0
+  stop: null
+  streaming: true
+  stream_format: "sse"       # supported: sse | websocket | none
+  response_mode: "chat"      # supported: chat | json_actions
+  force_json_actions_on_keywords:           # keywords that force JSON action plans
+    - "plan:"
+    - "execute:"
+    - "auto-execute"
+  action_timeout_ms: 60000   # default max time to wait for executing an action plan
+
+# Safety & retry configuration
+safety:
+  content_filter: true
+  max_retries_on_safe_failure: 1
+  blocklist:                # short example; runtime should expand with external list
+    - "malware"
+    - "illegal"
+    - "self-harm"
+
+retry_policy:
+  retries: 2
+  initial_backoff_seconds: 1.0
+  backoff_multiplier: 2.0
+
+# Message schema and required instructions the system prompt should enforce.
+message_schema:
+  system_instructions: |
+    You are Aria, an animated interactive AI character for the Aria platform.
+    - Keep responses concise and anchored to user intent.
+    - Use friendly, expressive, and safe language for conversational replies.
+    - When the user requests planning or execution (keywords: \"plan:\", \"execute:\", \"auto-execute\"), respond with a JSON action plan that matches actions_schema and set the message content to pure JSON.
+    - Allowed action types: move, say, pickup, drop, throw, gesture, look, wait.
+    - Each action object must include: type (string), params (object). Optionally: duration_ms (integer), confidence (float between 0.0 and 1.0).
+    - Do NOT include system-level or developer notes in assistant responses. Do NOT include surrounding markdown or explanatory text when returning JSON action plans.
+    - For ambiguous user requests, ask a single clarifying question (one short sentence). Do not assume dangerous actions or actions that manipulate persistent external state without explicit permission.
+  actions_schema: |
+    {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "type": "object",
+      "required": ["actions"],
+      "properties": {
+        "actions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["type", "params"],
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": ["move","say","pickup","drop","throw","gesture","look","wait"]
+              },
+              "params": {
+                "type": "object"
+              },
+              "duration_ms": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "confidence": {
+                "type": "number",
+                "minimum": 0.0,
+                "maximum": 1.0
+              }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    }
+
+# Example messages to seed common patterns and test the JSON plan output
+messages:
+  - role: system
+    content: |
+      You are Aria — an interactive character that executes user commands in a virtual environment.
+      Follow the system_instructions and return structured JSON action plans for execution requests.
+  - role: user
+    content: "Plan: Walk to the table and pick up the red apple, then wave."
+  - role: assistant
+    content: >
+      {"actions":[
+        {"type":"move","params":{"direction":"absolute_coords","distance_m":3.2,"speed":"normal"},"duration_ms":3200,"confidence":0.98},
+        {"type":"pickup","params":{"object":"red apple"},"confidence":0.95},
+        {"type":"gesture","params":{"name":"wave"},"duration_ms":1200,"confidence":0.9}
+      ]}
+
+# Provider preferences; runtime should map these aliases to configured credentials
+providers:
+  preferred_chain:
+    - "openai"
+    - "azure_openai"
+    - "local_fallback"
+
+# Small set of canonical action param examples (human-readable guidance)
+action_examples:
+  move:
+    description: "Move the character."
+    params:
+      direction: "left|right|forward|backward|absolute_coords"
+      distance_m: "float (meters)"
+      speed: "slow|normal|fast"
+  say:
+    description: "Speak a short utterance."
+    params:
+      text: "string (max ~200 chars)"
+      voice: "optional voice identifier"
+  pickup:
+    description: "Pick up a nearby object."
+    params:
+      object: "string (object name or id)"
+  gesture:
+    description: "Play a named gesture/animation."
+    params:
+      name: "string (e.g., wave, dance, nod)"
+      intensity: "optional 0.0-1.0"
+
+# Runtime note for operators
+usage:
+  note: "Load this file at runtime to seed conversation defaults. Per-request settings may override defaults. Keep examples minimal and avoid embedding secrets."
+
+# Validation test cases (small set for CI or local checks)
+validation_tests:
+  - name: "simple_plan_json"
+    input: "Plan: Walk to the table and pick up the apple."
+    expect_json_actions: true
+  - name: "casual_chat"
+    input: "Hi Aria, how are you?"
+    expect_json_actions: false

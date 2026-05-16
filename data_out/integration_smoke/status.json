@@ -1,0 +1,76 @@
+{
+  "generated_at": "2026-03-29T12:46:14Z",
+  "run_id": "20260329T124614Z",
+  "config_path": null,
+  "config_paths": {
+    "master_orchestrator": "config/master_orchestrator.yaml",
+    "quantum_autorun": "config/quantum/quantum_autorun.yaml",
+    "evaluation_autorun": "config/evaluation/evaluation_autorun.yaml"
+  },
+  "strict_endpoints": true,
+  "total_steps": 8,
+  "succeeded": 8,
+  "warnings": 0,
+  "failed": 0,
+  "skipped": 0,
+  "errors": 0,
+  "passed": true,
+  "results": [
+    {
+      "name": "master_orchestrator_config",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.0,
+      "detail": "resolved=config/master_orchestrator.yaml"
+    },
+    {
+      "name": "quantum_autorun_config",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.0,
+      "detail": "resolved=config/quantum/quantum_autorun.yaml"
+    },
+    {
+      "name": "evaluation_autorun_config",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.0,
+      "detail": "resolved=config/evaluation/evaluation_autorun.yaml"
+    },
+    {
+      "name": "master_orchestrator_status",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 1.66,
+      "detail": "rc=0 | stdout=   \"schedule\": null,\n      \"orchestrators\": [\n        \"aria_automation\"\n      ]\n    },\n    {\n      \"name\": \"aria_server_only\",\n      \"enabled\": false,\n      \"trigger\": \"manual\",\n      \"schedule\": null,\n      \"orchestrators\": [\n        \"aria_automation\"\n      ]\n    }\n  ],\n  \"resource_usage\": {\n    \"available\": true,\n    \"cpu_percent\": 99.9,\n    \"memory_percent\": 50.0,\n    \"disk_percent\": 45.8\n  }\n}"
+    },
+    {
+      "name": "quantum_autorun_dry_run",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.18,
+      "detail": "rc=0 | stdout=Validated 4 job(s): heart_quick, ionosphere_quick, azure_quantinuum_simulator, azure_ionq_qpu_test"
+    },
+    {
+      "name": "repo_automation_status",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.27,
+      "detail": "rc=0 | stdout=36) (\ud83e\udde9 deps)\n  \u274c Quantum Computing Workflows (PID 104188) (\ud83e\udde9 deps)\n  \u274c Model Evaluation System (\u26a0\ufe0f deps)\n  \u2705 Dataset Auto-Discovery (Integrated in training) (\ud83e\udde9 deps)\n  \u274c Status Dashboard (\ud83e\udde9 deps)\n  \u2705 Backup Manager (\ud83e\udde9 deps)\n\n\u26a0\ufe0f  Recent Errors (1):\n  - Dependencies still missing after install (evaluation): scikit-learn\n================================================================================"
+    },
+    {
+      "name": "chat_cli_local_once",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 2.07,
+      "detail": "rc=0 | stdout=Provider: local | Model: local-echo\nassistant> No live model detected. Run with `--provider lmstudio` (LM Studio running locally), `--provider ollama`, `--provider openai`, or `--provider azure`."
+    },
+    {
+      "name": "functions_ai_status_endpoint",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 14.47,
+      "detail": "provider=ollama | via=local_dev_adapter"
+    }
+  ]
+}

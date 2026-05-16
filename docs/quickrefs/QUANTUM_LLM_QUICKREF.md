@@ -45,14 +45,14 @@ python ai-projects/quantum-ml/src/quantum_llm_monitor.py
 
 ## 📦 Components at a Glance
 
-| Component      | What It Does                                   | Import                                     |
+| Component | What It Does | Import |
 | -------------- | ---------------------------------------------- | ------------------------------------------ |
-| **advanced**   | Cache, multi-scale attention, error mitigation | `from quantum_llm_advanced import *`       |
-| **optimizer**  | Circuit compilation, batch execution           | `from quantum_circuit_optimizer import *`  |
-| **trainer**    | Curriculum learning, orchestration             | `from quantum_llm_hybrid_trainer import *` |
-| **monitor**    | Dashboard, alerts, profiling                   | `from quantum_llm_monitor import *`        |
-| **integrated** | Complete system                                | `from quantum_llm_integrated import *`     |
-| **datasets**   | Tokenizer, data loading                        | `from quantum_llm_datasets import *`       |
+| **advanced** | Cache, multi-scale attention, error mitigation | `from quantum_llm_advanced import *` |
+| **optimizer** | Circuit compilation, batch execution | `from quantum_circuit_optimizer import *` |
+| **trainer** | Curriculum learning, orchestration | `from quantum_llm_hybrid_trainer import *` |
+| **monitor** | Dashboard, alerts, profiling | `from quantum_llm_monitor import *` |
+| **integrated** | Complete system | `from quantum_llm_integrated import *` |
+| **datasets** | Tokenizer, data loading | `from quantum_llm_datasets import *` |
 
 ---
 

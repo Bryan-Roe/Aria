@@ -67,19 +67,19 @@ Aria is an interactive AI character platform with:
 
 Delegate to specialist agents when the task requires deep domain expertise:
 
-| Agent                 | Use For                                                        |
+| Agent | Use For |
 | --------------------- | -------------------------------------------------------------- |
-| `agi-reasoning`       | Chain-of-thought analysis, task decomposition, self-reflection |
-| `aria-character`      | Character commands, actions, world generation, animations      |
-| `autonomous-trainer`  | LoRA training, dataset curation, model promotion               |
-| `full-stack-debugger` | Cross-stack issue diagnosis                                    |
-| `ai-architect`        | AI pipeline design, provider integration, memory architecture  |
-| `llm-maker`           | Safe code/website generation via ToolMaker/WebsiteMaker        |
-| `chat-provider`       | Provider detection, streaming, memory injection, tokens        |
-| `platform-ops`        | Subscriptions, monitoring, deployment, dashboards              |
-| `vision-ai`           | Expression classification, CNN models, image inference         |
-| `data-pipeline`       | Batch evaluation, dataset management, benchmarking             |
-| `qai-specialist`      | Quantum-AI hybrid workflows                                    |
+| `agi-reasoning` | Chain-of-thought analysis, task decomposition, self-reflection |
+| `aria-character` | Character commands, actions, world generation, animations |
+| `autonomous-trainer` | LoRA training, dataset curation, model promotion |
+| `full-stack-debugger` | Cross-stack issue diagnosis |
+| `ai-architect` | AI pipeline design, provider integration, memory architecture |
+| `llm-maker` | Safe code/website generation via ToolMaker/WebsiteMaker |
+| `chat-provider` | Provider detection, streaming, memory injection, tokens |
+| `platform-ops` | Subscriptions, monitoring, deployment, dashboards |
+| `vision-ai` | Expression classification, CNN models, image inference |
+| `data-pipeline` | Batch evaluation, dataset management, benchmarking |
+| `qai-specialist` | Quantum-AI hybrid workflows |
 
 ## Automatic Mode Switching
 

@@ -12,7 +12,7 @@
 ### Enhanced 8-Qubit Classifier Results
 
 | Metric | Value | Improvement |
-|--------|-------|-------------|
+| -------- | ------- | ------------- |
 | **Accuracy** | **97.5%** | +20% vs 4-qubit |
 | **Qubits** | 8 | 2x capacity |
 | **Layers** | 4 | Optimized depth |
@@ -22,7 +22,7 @@
 ### Comparison: 4-Qubit vs 8-Qubit
 
 | Configuration | Accuracy | Use Case |
-|--------------|----------|----------|
+| -------------- | ---------- | ---------- |
 | 4 qubits, 2 layers | 77.5% | Simple patterns |
 | 4 qubits, 4 layers | 87.5% | Moderate complexity |
 | **8 qubits, 4 layers** | **97.5%** ⭐ | **Complex patterns** |
@@ -281,7 +281,7 @@ quantum:
 ### Training Performance
 
 | Dataset | 4-Qubit | 8-Qubit | Improvement |
-|---------|---------|---------|-------------|
+| --------- | --------- | --------- | ------------- |
 | Moons | 77.5% | **97.5%** | +20.0% |
 | XOR | 57.5% | **85.0%** | +27.5% |
 | Spiral | 55.0% | **82.0%** | +27.0% |
@@ -290,7 +290,7 @@ quantum:
 ### Computational Cost
 
 | Configuration | Parameters | Training Time | Inference Time |
-|--------------|------------|---------------|----------------|
+| -------------- | ------------ | --------------- | ---------------- |
 | 4 qubits, 2 layers | 96 | 2 min | 10 ms |
 | 4 qubits, 4 layers | 192 | 4 min | 15 ms |
 | **8 qubits, 4 layers** | **473** | **6 min** | **20 ms** |

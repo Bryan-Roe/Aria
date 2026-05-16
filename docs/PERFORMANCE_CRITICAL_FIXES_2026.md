@@ -7,7 +7,7 @@ This document details two critical performance bottlenecks that were identified 
 ## Overview
 
 | Fix | Location | Impact | Speedup | Status |
-|-----|----------|--------|---------|--------|
+| ----- | ---------- | -------- | --------- | -------- |
 | Keyword matching optimization | `aria_web/server.py` | 100-250x faster command parsing | **100-250x** | ✅ Fixed |
 | DB connection pooling | `shared/chat_memory.py` | 9.6x faster embedding operations | **9.6x** | ✅ Fixed |
 

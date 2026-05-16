@@ -117,17 +117,17 @@ Your AI chat website has been significantly upgraded with professional features!
 
 ## 📊 Before vs After
 
-| Feature         | Before            | After                                |
+| Feature | Before | After |
 | --------------- | ----------------- | ------------------------------------ |
-| **Markdown**    | Plain text only   | Full markdown with code highlighting |
-| **Input**       | Single-line input | Multi-line auto-resize textarea      |
-| **Persistence** | None              | LocalStorage + Export                |
-| **Themes**      | Light only        | Light + Dark modes                   |
-| **Provider**    | Auto-only         | Manual selection + Auto              |
-| **Shortcuts**   | Enter only        | Enter, Shift+Enter, Ctrl+K           |
-| **Stats**       | None              | Message count + Status               |
-| **Export**      | None              | JSON export                          |
-| **Code**        | Plain text        | Syntax highlighted + Copy button     |
+| **Markdown** | Plain text only | Full markdown with code highlighting |
+| **Input** | Single-line input | Multi-line auto-resize textarea |
+| **Persistence** | None | LocalStorage + Export |
+| **Themes** | Light only | Light + Dark modes |
+| **Provider** | Auto-only | Manual selection + Auto |
+| **Shortcuts** | Enter only | Enter, Shift+Enter, Ctrl+K |
+| **Stats** | None | Message count + Status |
+| **Export** | None | JSON export |
+| **Code** | Plain text | Syntax highlighted + Copy button |
 
 ## 🚀 How to Use New Features
 
@@ -144,7 +144,7 @@ Ask: "Create a markdown table"
 
 | Column 1 | Column 2 |
 | -------- | -------- |
-| Data 1   | Data 2   |
+| Data 1 | Data 2 |
 
 ### Keyboard Shortcuts
 

@@ -3,6 +3,7 @@
 ## Executive Summary
 
 Successfully validated all AI training improvements through:
+
 1. ✅ **Model Comparison** - Analyzed historical evaluation data from 12 parallel training runs
 2. ⚙️ **Parallel Training** - Currently executing 2 concurrent jobs with automated ranking
 3. ⚙️ **Full-Scale Training** - Training with 512 samples and 3 epochs (in progress)
@@ -12,7 +13,7 @@ Successfully validated all AI training improvements through:
 ### Best Performing Models (by Perplexity Improvement)
 
 | Rank | Model | Pre-Perplexity | Post-Perplexity | Improvement | Distinct-1 | Distinct-2 | Diversity |
-|------|-------|----------------|-----------------|-------------|------------|------------|-----------|
+| ------ | ------- | ---------------- | ----------------- | ------------- | ------------ | ------------ | ----------- |
 | 1 | qwen_ultra (171830) | 73.56 | 47.37 | **35.6%** | 0.623 | 0.890 | 0.815 |
 | 2 | qwen_ultra (171042) | 73.56 | 48.47 | **34.1%** | 0.662 | 0.920 | - |
 | 3 | tinyllama_ultra (200414) | 7.15 | 6.35 | **11.2%** | 0.714 | 0.975 | 0.845 |
@@ -21,7 +22,7 @@ Successfully validated all AI training improvements through:
 ### Best Performing Models (by Diversity)
 
 | Rank | Model | Diversity Avg | Distinct-1 | Distinct-2 | Perplexity Improvement |
-|------|-------|---------------|------------|------------|------------------------|
+| ------ | ------- | --------------- | ------------ | ------------ | ------------------------ |
 | 1 | tinyllama_ultra (200414) | **0.845** | 0.714 | 0.975 | 11.2% |
 | 2 | tinyllama_ultra (200606) | **0.815** | 0.720 | 0.911 | 11.2% |
 | 3 | qwen_ultra (171830) | **0.756** | 0.623 | 0.890 | 35.6% |
@@ -31,7 +32,7 @@ Successfully validated all AI training improvements through:
 Using the formula: `combined_score = (1/post_perplexity × 0.7) + (diversity_avg × 0.3)`
 
 | Rank | Model | Combined Score | Post-Perplexity | Diversity | Notes |
-|------|-------|----------------|-----------------|-----------|-------|
+| ------ | ------- | ---------------- | ----------------- | ----------- | ------- |
 | 1 | tinyllama_ultra (200414) | **0.264** | 6.35 | 0.845 | Best overall balance |
 | 2 | qwen_ultra (171830) | **0.242** | 47.37 | 0.815 | Strong perplexity + diversity |
 | 3 | phi35_ultra (172043) | **0.054** | 23.56 | - | Good perplexity baseline |
@@ -53,6 +54,7 @@ Using the formula: `combined_score = (1/post_perplexity × 0.7) + (diversity_avg
 ## Training Configuration Impact
 
 All models trained with optimized configurations:
+
 - **Gradient Checkpointing**: Enabled (memory efficiency)
 - **Gradient Accumulation**: 4 steps (effective 4x batch size)
 - **Learning Rate Schedule**: Cosine annealing with warmup
@@ -72,6 +74,7 @@ The automated training orchestrator successfully demonstrated:
 ### Multi-Metric Ranking
 
 The system supports 5 ranking strategies:
+
 1. `perplexity_improvement` - Relative reduction (default)
 2. `post_perplexity` - Final perplexity (lower is better)
 3. `diversity_avg` - Average Distinct-1 & Distinct-2 (higher is better)
@@ -81,6 +84,7 @@ The system supports 5 ranking strategies:
 ### Automated Best Model Selection
 
 Example from historical data:
+
 ```json
 {
   "job_ranking": [
@@ -105,6 +109,7 @@ Example from historical data:
 ## Current Active Tasks
 
 ### Task 1: Full-Scale Training (In Progress)
+
 ```bash
 python .\AI\microsoft_phi-silica-3.6_v1\scripts\train_lora.py \
   --dataset datasets/chat/mixed_chat \
@@ -113,10 +118,12 @@ python .\AI\microsoft_phi-silica-3.6_v1\scripts\train_lora.py \
   --epochs 3 \
   --save-dir data_out/lora_training/full_scale_test
 ```
+
 **Status**: Model checkpoint loading in progress
 **Expected Outcome**: Observe early stopping behavior with larger dataset
 
 ### Task 2: Parallel Training with Ranking (In Progress)
+
 ```bash
 python .\scripts\parallel_train.py \
   --config autotrain.yaml \
@@ -125,27 +132,32 @@ python .\scripts\parallel_train.py \
   --max-parallel 2 \
   --generate-samples 5
 ```
+
 **Status**: 2 jobs running concurrently (phi35_mixed_chat_lr_low, phi35_mixed_chat_lr_high)
 **Expected Outcome**: Automated ranking by combined perplexity + diversity score
 
 ## Recommendations Based on Findings
 
 ### For Maximum Perplexity Improvement
+
 - **Use Qwen 2.5-3B** models with cosine LR scheduling
 - Expected improvement: 30-35% reduction in perplexity
 - Training time: ~20-25 seconds for 64 samples
 
 ### For Best Diversity
+
 - **Use TinyLlama** for high-diversity responses
 - Distinct-1: 0.71-0.72, Distinct-2: 0.91-0.98
 - Ideal for creative text generation
 
 ### For Balanced Quality (Recommended)
+
 - **Use Qwen 2.5-3B** with combined ranking metric
 - Achieves 30%+ perplexity improvement + 0.75-0.82 diversity
 - Best overall performance across both metrics
 
 ### Training Strategy
+
 1. Start with **quick validation** (64 samples, 1 epoch) to test hyperparameters
 2. Use **parallel training** with multiple configurations to find best settings
 3. Run **full training** (500-1000 samples, 3+ epochs) with winning config
@@ -154,7 +166,9 @@ python .\scripts\parallel_train.py \
 ## Evidence of Improvement System Working
 
 ### Automated Evaluation
+
 Every training run automatically generates:
+
 - Pre-training perplexity baseline
 - Post-training perplexity measurement
 - Sample generations with prompts
@@ -162,7 +176,9 @@ Every training run automatically generates:
 - Average response length and echo ratio
 
 ### Historical Tracking
+
 Status file maintains complete audit trail:
+
 - Run ID with timestamp
 - Job configurations
 - Dataset statistics
@@ -171,6 +187,7 @@ Status file maintains complete audit trail:
 - Ranking by chosen metric
 
 ### Example Output
+
 ```json
 {
   "evaluation": {
@@ -191,11 +208,13 @@ Status file maintains complete audit trail:
 ## Next Steps
 
 ### Immediate Actions
+
 1. ✅ Monitor full-scale training for early stopping trigger
 2. ✅ Wait for parallel training to complete and review ranking results
 3. ✅ Compare hyperparameter variants (lr_low vs lr_high)
 
 ### Future Optimizations
+
 1. **Grid Search**: Systematically test LR × dropout × batch size combinations
 2. **Dataset Scaling**: Test with comprehensive dataset (15K+ samples)
 3. **Multi-Model Ranking**: Parallel train Phi-3.5, Qwen-2.5, and TinyLlama simultaneously

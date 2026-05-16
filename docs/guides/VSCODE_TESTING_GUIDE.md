@@ -64,7 +64,7 @@ python -m pytest -m "not slow and not azure"
 Test profiles are pre-configured test run configurations accessible via the Test Explorer:
 
 | Profile | Description | Command |
-|---------|-------------|---------|
+| --------- | ------------- | --------- |
 | **Unit Tests (Fast)** | Quick unit tests only | `-m "not slow and not azure" tests/test_*_unit.py` |
 | **Integration Tests** | External service integration | `-m "integration" tests/` |
 | **All Fast Tests** | All tests except slow/azure | `-m "not slow and not azure" tests/` |

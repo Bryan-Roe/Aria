@@ -173,12 +173,12 @@ Run **Query 5** in Application Insights and note P95 value.
 
 **Tuning Decision Matrix:**
 
-| P95 Latency | Recommended Threshold | Rationale             |
+| P95 Latency | Recommended Threshold | Rationale |
 | ----------- | --------------------- | --------------------- |
-| < 100ms     | 150ms                 | Catch outliers early  |
-| 100-300ms   | 400ms                 | Balanced sensitivity  |
-| 300-500ms   | 600ms                 | Reduce alert noise    |
-| > 500ms     | 750ms                 | Focus on severe cases |
+| < 100ms | 150ms | Catch outliers early |
+| 100-300ms | 400ms | Balanced sensitivity |
+| 300-500ms | 600ms | Reduce alert noise |
+| > 500ms | 750ms | Focus on severe cases |
 
 ### Step 3: Adjust Threshold
 
@@ -205,12 +205,12 @@ $env:QAI_SQL_URL = "mssql+pyodbc://user:pass@host/db?driver=ODBC+Driver+18+for+S
 
 **Common Pool Size Guidelines:**
 
-| Scenario                     | Pool Size | Max Overflow | Rationale                     |
+| Scenario | Pool Size | Max Overflow | Rationale |
 | ---------------------------- | --------- | ------------ | ----------------------------- |
-| Low traffic (< 10 req/s)     | 10        | 5            | Minimize idle connections     |
-| Medium traffic (10-50 req/s) | 20        | 10           | Balanced for burst capacity   |
-| High traffic (> 50 req/s)    | 30-50     | 20           | Prevent saturation under load |
-| Background workers           | 5         | 2            | Dedicated pool for async jobs |
+| Low traffic (< 10 req/s) | 10 | 5 | Minimize idle connections |
+| Medium traffic (10-50 req/s) | 20 | 10 | Balanced for burst capacity |
+| High traffic (> 50 req/s) | 30-50 | 20 | Prevent saturation under load |
+| Background workers | 5 | 2 | Dedicated pool for async jobs |
 
 ### Option 2: Engine Creation Override (Code)
 

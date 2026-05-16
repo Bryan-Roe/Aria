@@ -1,50 +1,50 @@
 # Python dependencies for Quantum AI project
 
 # Core quantum computing libraries
-qiskit>=1.0.0
-qiskit-aer>=0.13.0
-qiskit-ibm-runtime>=0.17.0
-qiskit-algorithms>=0.3.0
-qiskit-machine-learning>=0.7.0
+qiskit>=2.4.1
+qiskit-aer>=0.17.2
+qiskit-ibm-runtime>=0.47.0
+qiskit-algorithms>=0.4.0
+qiskit-machine-learning>=0.9.0
 
 # Azure Quantum
-azure-quantum>=1.0.0
-azure-identity>=1.15.0
+azure-quantum>=3.9.0
+azure-identity>=1.25.3
 
 # Deep learning frameworks
-torch>=2.8.0
-torchvision>=0.20.0
+torch>=2.12.0
+torchvision>=0.27.0
 
 # Classical ML
-scikit-learn>=1.6.0
-numpy>=1.26.4
-pandas>=2.2.0
+scikit-learn>=1.8.0
+numpy>=2.4.5
+pandas>=3.0.3
 
 # Visualization
-matplotlib>=3.9.0
-seaborn>=0.13.0
-plotly>=5.24.0
+matplotlib>=3.10.9
+seaborn>=0.13.2
+plotly>=6.7.0
 
 # Jupyter notebooks
-jupyter>=1.1.0
-jupyterlab>=4.3.0
-ipykernel>=6.25.0
-ipywidgets>=8.1.0
+jupyter>=1.1.1
+jupyterlab>=4.5.7
+ipykernel>=7.2.0
+ipywidgets>=8.1.8
 
 # Configuration and utilities
-pyyaml>=6.0
-python-dotenv>=1.0.0
-tqdm>=4.67.0
+pyyaml>=6.0.3
+python-dotenv>=1.2.2
+tqdm>=4.67.3
 
 # Testing
-pytest>=8.0.0
-pytest-cov>=6.0.0
-pytest-mock>=3.14.0
+pytest>=9.0.3
+pytest-cov>=7.1.0
+pytest-mock>=3.15.1
 
 # Code quality
-black>=24.0.0
-flake8>=7.0.0
-mypy>=1.13.0
+black>=26.3.1
+flake8>=7.3.0
+mypy>=2.1.0
 
 # Additional quantum ML libraries (optional)
 # pennylane>=0.32.0

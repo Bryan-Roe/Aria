@@ -1,0 +1,326 @@
+nohup: ignoring input
+[Cycle 1] Running quantum job: heart_quick
+usage: quantum_autorun.py [-h] [--config CONFIG] [--list] [--dry-run]
+                          [--job JOB]
+
+Quantum AutoRun Orchestrator
+
+options:
+  -h, --help       show this help message and exit
+  --config CONFIG  Path to YAML config
+  --list           List jobs as JSON
+  --dry-run        Validate config and write status.json
+  --job JOB        Filter to a specific job by name
+
+[Cycle 1] Running quantum job: ionosphere_quick
+usage: quantum_autorun.py [-h] [--config CONFIG] [--list] [--dry-run]
+                          [--job JOB]
+
+Quantum AutoRun Orchestrator
+
+options:
+  -h, --help       show this help message and exit
+  --config CONFIG  Path to YAML config
+  --list           List jobs as JSON
+  --dry-run        Validate config and write status.json
+  --job JOB        Filter to a specific job by name
+
+[Cycle 1] Done. Sleeping 1800s...
+[Cycle 2] Running quantum job: heart_quick
+usage: quantum_autorun.py [-h] [--config CONFIG] [--list] [--dry-run]
+                          [--job JOB]
+
+Quantum AutoRun Orchestrator
+
+options:
+  -h, --help       show this help message and exit
+  --config CONFIG  Path to YAML config
+  --list           List jobs as JSON
+  --dry-run        Validate config and write status.json
+  --job JOB        Filter to a specific job by name
+
+[Cycle 2] Running quantum job: ionosphere_quick
+usage: quantum_autorun.py [-h] [--config CONFIG] [--list] [--dry-run]
+                          [--job JOB]
+
+Quantum AutoRun Orchestrator
+
+options:
+  -h, --help       show this help message and exit
+  --config CONFIG  Path to YAML config
+  --list           List jobs as JSON
+  --dry-run        Validate config and write status.json
+  --job JOB        Filter to a specific job by name
+
+[Cycle 2] Done. Sleeping 1800s...
+[Cycle 3] Running quantum job: heart_quick
+
+========================================================
+Job: heart_quick  [heart_quick]
+  SKIP: no runner for 'heart_quick'
+
+========================================================
+Summary: {"heart_quick": "skipped"}
+
+[Cycle 3] Running quantum job: ionosphere_quick
+
+========================================================
+Job: ionosphere_quick  [ionosphere_quick]
+  SKIP: no runner for 'ionosphere_quick'
+
+========================================================
+Summary: {"ionosphere_quick": "skipped"}
+
+[Cycle 3] Done. Sleeping 1800s...
+[Cycle 4] Running quantum job: heart_quick
+(no output)
+STDERR: Job 'heart_quick' not found in config. Available: ['local_sim']
+
+[Cycle 4] Running quantum job: ionosphere_quick
+(no output)
+STDERR: Job 'ionosphere_quick' not found in config. Available: ['local_sim']
+
+[Cycle 4] Done. Sleeping 1800s...
+[Cycle 5] Running quantum job: heart_quick
+usage: quantum_autorun.py [-h] [--config CONFIG] [--list] [--dry-run]
+                          [--job JOB]
+
+Quantum AutoRun Orchestrator
+
+options:
+  -h, --help       show this help message and exit
+  --config CONFIG  Path to YAML config
+  --list           List jobs as JSON
+  --dry-run        Validate config and write status.json
+  --job JOB        Filter to a specific job by name
+
+[Cycle 5] Running quantum job: ionosphere_quick
+usage: quantum_autorun.py [-h] [--config CONFIG] [--list] [--dry-run]
+                          [--job JOB]
+
+Quantum AutoRun Orchestrator
+
+options:
+  -h, --help       show this help message and exit
+  --config CONFIG  Path to YAML config
+  --list           List jobs as JSON
+  --dry-run        Validate config and write status.json
+  --job JOB        Filter to a specific job by name
+
+[Cycle 5] Done. Sleeping 1800s...
+[Cycle 6] Running quantum job: heart_quick
+usage: quantum_autorun.py [-h] [--config CONFIG] [--list] [--dry-run]
+                          [--job JOB]
+
+Quantum AutoRun Orchestrator
+
+options:
+  -h, --help       show this help message and exit
+  --config CONFIG  Path to YAML config
+  --list           List jobs as JSON
+  --dry-run        Validate config and write status.json
+  --job JOB        Filter to a specific job by name
+
+[Cycle 6] Running quantum job: ionosphere_quick
+usage: quantum_autorun.py [-h] [--config CONFIG] [--list] [--dry-run]
+                          [--job JOB]
+
+Quantum AutoRun Orchestrator
+
+options:
+  -h, --help       show this help message and exit
+  --config CONFIG  Path to YAML config
+  --list           List jobs as JSON
+  --dry-run        Validate config and write status.json
+  --job JOB        Filter to a specific job by name
+
+[Cycle 6] Done. Sleeping 1800s...
+[Cycle 7] Running quantum job: heart_quick
+usage: quantum_autorun.py [-h] [--config CONFIG] [--list] [--dry-run]
+                          [--job JOB]
+
+Quantum AutoRun Orchestrator
+
+options:
+  -h, --help       show this help message and exit
+  --config CONFIG  Path to YAML config
+  --list           List jobs as JSON
+  --dry-run        Validate config and write status.json
+  --job JOB        Filter to a specific job by name
+
+[Cycle 7] Running quantum job: ionosphere_quick
+usage: quantum_autorun.py [-h] [--config CONFIG] [--list] [--dry-run]
+                          [--job JOB]
+
+Quantum AutoRun Orchestrator
+
+options:
+  -h, --help       show this help message and exit
+  --config CONFIG  Path to YAML config
+  --list           List jobs as JSON
+  --dry-run        Validate config and write status.json
+  --job JOB        Filter to a specific job by name
+
+[Cycle 7] Done. Sleeping 1800s...
+[Cycle 8] Running quantum job: heart_quick
+usage: quantum_autorun.py [-h] [--config CONFIG] [--list] [--dry-run]
+                          [--job JOB]
+
+Quantum AutoRun Orchestrator
+
+options:
+  -h, --help       show this help message and exit
+  --config CONFIG  Path to YAML config
+  --list           List jobs as JSON
+  --dry-run        Validate config and write status.json
+  --job JOB        Filter to a specific job by name
+
+[Cycle 8] Running quantum job: ionosphere_quick
+usage: quantum_autorun.py [-h] [--config CONFIG] [--list] [--dry-run]
+                          [--job JOB]
+
+Quantum AutoRun Orchestrator
+
+options:
+  -h, --help       show this help message and exit
+  --config CONFIG  Path to YAML config
+  --list           List jobs as JSON
+  --dry-run        Validate config and write status.json
+  --job JOB        Filter to a specific job by name
+
+[Cycle 8] Done. Sleeping 1800s...
+[Cycle 9] Running quantum job: heart_quick
+usage: quantum_autorun.py [-h] [--config CONFIG] [--list] [--dry-run]
+                          [--job JOB]
+
+Quantum AutoRun Orchestrator
+
+options:
+  -h, --help       show this help message and exit
+  --config CONFIG  Path to YAML config
+  --list           List jobs as JSON
+  --dry-run        Validate config and write status.json
+  --job JOB        Filter to a specific job by name
+
+[Cycle 9] Running quantum job: ionosphere_quick
+usage: quantum_autorun.py [-h] [--config CONFIG] [--list] [--dry-run]
+                          [--job JOB]
+
+Quantum AutoRun Orchestrator
+
+options:
+  -h, --help       show this help message and exit
+  --config CONFIG  Path to YAML config
+  --list           List jobs as JSON
+  --dry-run        Validate config and write status.json
+  --job JOB        Filter to a specific job by name
+
+[Cycle 9] Done. Sleeping 1800s...
+[Cycle 10] Running quantum job: heart_quick
+usage: quantum_autorun.py [-h] [--config CONFIG] [--list] [--dry-run]
+                          [--job JOB]
+
+Quantum AutoRun Orchestrator
+
+options:
+  -h, --help       show this help message and exit
+  --config CONFIG  Path to YAML config
+  --list           List jobs as JSON
+  --dry-run        Validate config and write status.json
+  --job JOB        Filter to a specific job by name
+
+[Cycle 10] Running quantum job: ionosphere_quick
+usage: quantum_autorun.py [-h] [--config CONFIG] [--list] [--dry-run]
+                          [--job JOB]
+
+Quantum AutoRun Orchestrator
+
+options:
+  -h, --help       show this help message and exit
+  --config CONFIG  Path to YAML config
+  --list           List jobs as JSON
+  --dry-run        Validate config and write status.json
+  --job JOB        Filter to a specific job by name
+
+[Cycle 10] Done. Sleeping 1800s...
+[Cycle 11] Running quantum job: heart_quick
+usage: quantum_autorun.py [-h] [--config CONFIG] [--list] [--dry-run]
+                          [--job JOB]
+
+Quantum AutoRun Orchestrator
+
+options:
+  -h, --help       show this help message and exit
+  --config CONFIG  Path to YAML config
+  --list           List jobs as JSON
+  --dry-run        Validate config and write status.json
+  --job JOB        Filter to a specific job by name
+
+[Cycle 11] Running quantum job: ionosphere_quick
+usage: quantum_autorun.py [-h] [--config CONFIG] [--list] [--dry-run]
+                          [--job JOB]
+
+Quantum AutoRun Orchestrator
+
+options:
+  -h, --help       show this help message and exit
+  --config CONFIG  Path to YAML config
+  --list           List jobs as JSON
+  --dry-run        Validate config and write status.json
+  --job JOB        Filter to a specific job by name
+
+[Cycle 11] Done. Sleeping 1800s...
+[Cycle 12] Running quantum job: heart_quick
+usage: quantum_autorun.py [-h] [--config CONFIG] [--list] [--dry-run]
+                          [--job JOB]
+
+Quantum AutoRun Orchestrator
+
+options:
+  -h, --help       show this help message and exit
+  --config CONFIG  Path to YAML config
+  --list           List jobs as JSON
+  --dry-run        Validate config and write status.json
+  --job JOB        Filter to a specific job by name
+
+[Cycle 12] Running quantum job: ionosphere_quick
+usage: quantum_autorun.py [-h] [--config CONFIG] [--list] [--dry-run]
+                          [--job JOB]
+
+Quantum AutoRun Orchestrator
+
+options:
+  -h, --help       show this help message and exit
+  --config CONFIG  Path to YAML config
+  --list           List jobs as JSON
+  --dry-run        Validate config and write status.json
+  --job JOB        Filter to a specific job by name
+
+[Cycle 12] Done. Sleeping 1800s...
+[Cycle 13] Running quantum job: heart_quick
+usage: quantum_autorun.py [-h] [--config CONFIG] [--list] [--dry-run]
+                          [--job JOB]
+
+Quantum AutoRun Orchestrator
+
+options:
+  -h, --help       show this help message and exit
+  --config CONFIG  Path to YAML config
+  --list           List jobs as JSON
+  --dry-run        Validate config and write status.json
+  --job JOB        Filter to a specific job by name
+
+[Cycle 13] Running quantum job: ionosphere_quick
+usage: quantum_autorun.py [-h] [--config CONFIG] [--list] [--dry-run]
+                          [--job JOB]
+
+Quantum AutoRun Orchestrator
+
+options:
+  -h, --help       show this help message and exit
+  --config CONFIG  Path to YAML config
+  --list           List jobs as JSON
+  --dry-run        Validate config and write status.json
+  --job JOB        Filter to a specific job by name
+
+[Cycle 13] Done. Sleeping 1800s...

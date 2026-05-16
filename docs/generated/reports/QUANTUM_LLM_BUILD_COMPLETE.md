@@ -206,7 +206,7 @@ docs/
 ## ✨ FEATURES MATRIX
 
 | Feature | Status | File |
-|---------|--------|------|
+| --------- | -------- | ------ |
 | Multi-Scale Attention | ✅ | quantum_llm_advanced.py |
 | Circuit Caching | ✅ | quantum_llm_advanced.py |
 | Adaptive Entanglement | ✅ | quantum_llm_advanced.py |

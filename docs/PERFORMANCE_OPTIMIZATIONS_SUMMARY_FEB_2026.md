@@ -5,7 +5,7 @@ Quick reference for the 5 major performance optimizations completed in February 
 ## At a Glance
 
 | # | File | Problem | Solution | Impact |
-|---|------|---------|----------|--------|
+| --- | ------ | --------- | ---------- | -------- |
 | 1 | `scripts/extract_chat_logs_dataset.py:72` | Double `any()` traversal | Single-pass set comprehension | **2x faster** |
 | 2 | `scripts/job_queue.py:295` | Nested `any()` in list comprehension | Set intersection | **5-50x faster** |
 | 3 | `function_app.py:560` | 12 separate `if` statements | Command pattern table | **5-20x faster** |
@@ -17,6 +17,7 @@ Quick reference for the 5 major performance optimizations completed in February 
 ## Quick Examples
 
 ### 1. Single-Pass Role Checking
+
 ```python
 # Before (O(2n))
 if any(x.get("role") == "user" for x in window) and any(x.get("role") == "assistant" for x in window):
@@ -27,6 +28,7 @@ if "user" in roles and "assistant" in roles:
 ```
 
 ### 2. Set Intersection for Tag Filtering
+
 ```python
 # Before (O(n³))
 jobs = [j for j in jobs if any(tag in j.tags for tag in tags)]
@@ -37,6 +39,7 @@ jobs = [j for j in jobs if set(j.tags) & tags_set]
 ```
 
 ### 3. Command Pattern Table
+
 ```python
 # Before (12 separate if statements)
 if '[aria:walk:left]' in lower_text or 'walk left' in lower_text:
@@ -57,6 +60,7 @@ for patterns, command in _COMMAND_PATTERNS:
 ```
 
 ### 4. Single-Pass File Reading
+
 ```python
 # Before (reads files 2-3 times)
 training_hashes = collect_training_hashes(src)  # Read 1
@@ -77,6 +81,7 @@ if not candidates:
 ```
 
 ### 5. PennyLane Autograd for Gradients
+
 ```python
 # Before (manual parameter-shift with triple-nested loops)
 for i in range(weights.shape[0]):
@@ -114,7 +119,7 @@ python -m pytest tests/test_performance_optimizations.py -v
 ## When to Apply These Patterns
 
 | Pattern | Use When | Avoid When |
-|---------|----------|------------|
+| --------- | ---------- | ------------ |
 | Single-pass checks | Multiple conditions on same collection | Single condition check |
 | Set intersection | Filtering by tags/keywords | Small lists (<10 items) |
 | Pattern tables | 5+ similar if statements | Dynamic patterns |
@@ -137,4 +142,4 @@ Not yet implemented but identified:
 
 ---
 
-*Last updated: February 2026*
+Last updated: February 2026

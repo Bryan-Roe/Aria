@@ -39,7 +39,7 @@ Aria/
 ### Demo Mode vs Local Development
 
 | Feature | GitHub Pages (Demo) | Local Development |
-|---------|-------------------|-------------------|
+| --------- | ------------------- | ------------------- |
 | UI Functionality | ✅ Full | ✅ Full |
 | Character Animations | ✅ Full | ✅ Full |
 | API Responses | 🔸 Mock | ✅ Real |

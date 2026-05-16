@@ -4,98 +4,179 @@
 # Purpose: Keep data_out/ artifacts under retention control using the repo's
 #          cleanup script. Scheduled runs are dry-run only; manual dispatch can
 #          optionally apply deletions.
+#
+# Triggers:
+#   - schedule: Weekly on Sunday at 03:15 UTC (always dry-run)
+#   - workflow_dispatch: Manual run with configurable apply/max-age/max-count
+#
+# Outputs:
+#   - data_out/cleanup_summary.json artifact (retained 30 days)
+#   - GitHub Step Summary with run mode and JSON cleanup summary
 # =============================================================================
 
 name: Artifact Lifecycle
 
 on:
-    schedule:
-        - cron: "15 3 * * 0" # Weekly on Sunday 03:15 UTC
-    workflow_dispatch:
-        inputs:
-            apply:
-                description: "Set true to actually delete old artifacts"
-                required: false
-                default: "false"
-                type: choice
-                options:
-                    - "false"
-                    - "true"
-            max_age:
-                description: "Max artifact age in days"
-                required: false
-                default: "30"
-                type: string
-            max_count:
-                description: "Max retained files per cleanable directory"
-                required: false
-                default: "50"
-                type: string
+  schedule:
+    - cron: "15 3 * * 0" # Weekly on Sunday 03:15 UTC
+  workflow_dispatch:
+    inputs:
+      apply:
+        description: "Set true to actually delete old artifacts (otherwise dry-run)"
+        required: false
+        default: "false"
+        type: choice
+        options:
+          - "false"
+          - "true"
+      max_age:
+        description: "Max artifact age in days (positive integer)"
+        required: false
+        default: "30"
+        type: string
+      max_count:
+        description: "Max retained files per cleanable directory (positive integer)"
+        required: false
+        default: "50"
+        type: string
 
+# Principle of least privilege: workflow only reads repo contents.
 permissions:
-    contents: read
+  contents: read
 
+# Prevent overlapping cleanup runs; do not cancel an in-flight cleanup.
 concurrency:
-    group: artifact-lifecycle
-    cancel-in-progress: false
+  group: artifact-lifecycle
+  cancel-in-progress: false
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  # Centralized defaults so scheduled and manual runs stay in sync.
+  DEFAULT_MAX_AGE: "30"
+  DEFAULT_MAX_COUNT: "50"
+  CLEANUP_SUMMARY_PATH: data_out/cleanup_summary.json
 
 jobs:
-    cleanup:
-        name: Cleanup data_out artifacts
-        runs-on: ubuntu-latest
-        timeout-minutes: 10
+  cleanup:
+    name: Cleanup data_out artifacts
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
 
-        steps:
-            - name: Checkout
-              uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4.3.1
+    steps:
+      - name: Checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4.3.1
+        with:
+          persist-credentials: false
+          fetch-depth: 1
 
-            - name: Setup Python
-              uses: ./.github/actions/setup-python-env
-              with:
-                  install-requirements: "false"
+      - name: Setup Python
+        uses: ./.github/actions/setup-python-env
+        with:
+          install-requirements: "false"
 
-            - name: Run cleanup dry-run (scheduled)
-              if: github.event_name == 'schedule'
-              run: |
-                  python scripts/cleanup_artifacts.py --max-age 30 --max-count 50
+      - name: Validate manual inputs
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          MAX_AGE: ${{ github.event.inputs.max_age }}
+          MAX_COUNT: ${{ github.event.inputs.max_count }}
+        run: |
+          set -euo pipefail
+          if ! [[ "${MAX_AGE}" =~ ^[0-9]+$ ]] || [ "${MAX_AGE}" -lt 1 ]; then
+            echo "::error::max_age must be a positive integer (got: '${MAX_AGE}')"
+            exit 1
+          fi
+          if ! [[ "${MAX_COUNT}" =~ ^[0-9]+$ ]] || [ "${MAX_COUNT}" -lt 1 ]; then
+            echo "::error::max_count must be a positive integer (got: '${MAX_COUNT}')"
+            exit 1
+          fi
+          echo "Inputs validated: max_age=${MAX_AGE}, max_count=${MAX_COUNT}"
 
-            - name: Run cleanup (manual dry-run)
-              if: github.event_name == 'workflow_dispatch' && github.event.inputs.apply == 'false'
-              run: |
-                  python scripts/cleanup_artifacts.py \
-                    --max-age "${{ github.event.inputs.max_age }}" \
-                    --max-count "${{ github.event.inputs.max_count }}"
+      - name: Resolve effective parameters
+        id: params
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          INPUT_APPLY: ${{ github.event.inputs.apply }}
+          INPUT_MAX_AGE: ${{ github.event.inputs.max_age }}
+          INPUT_MAX_COUNT: ${{ github.event.inputs.max_count }}
+        run: |
+          set -euo pipefail
+          if [ "${EVENT_NAME}" = "workflow_dispatch" ]; then
+            apply="${INPUT_APPLY:-false}"
+            max_age="${INPUT_MAX_AGE:-${DEFAULT_MAX_AGE}}"
+            max_count="${INPUT_MAX_COUNT:-${DEFAULT_MAX_COUNT}}"
+          else
+            apply="false"
+            max_age="${DEFAULT_MAX_AGE}"
+            max_count="${DEFAULT_MAX_COUNT}"
+          fi
+          {
+            echo "apply=${apply}"
+            echo "max_age=${max_age}"
+            echo "max_count=${max_count}"
+          } >> "${GITHUB_OUTPUT}"
+          echo "Effective: apply=${apply}, max_age=${max_age}, max_count=${max_count}"
 
-            - name: Run cleanup (manual apply)
-              if: github.event_name == 'workflow_dispatch' && github.event.inputs.apply == 'true'
-              run: |
-                  python scripts/cleanup_artifacts.py --apply \
-                    --max-age "${{ github.event.inputs.max_age }}" \
-                    --max-count "${{ github.event.inputs.max_count }}"
+      - name: Run cleanup
+        env:
+          APPLY: ${{ steps.params.outputs.apply }}
+          MAX_AGE: ${{ steps.params.outputs.max_age }}
+          MAX_COUNT: ${{ steps.params.outputs.max_count }}
+        run: |
+          set -euo pipefail
+          mkdir -p data_out
+          args=(--max-age "${MAX_AGE}" --max-count "${MAX_COUNT}")
+          if [ "${APPLY}" = "true" ]; then
+            echo "Running cleanup in APPLY mode (deletions will occur)."
+            args+=(--apply)
+          else
+            echo "Running cleanup in DRY-RUN mode (no deletions)."
+          fi
+          python scripts/cleanup_artifacts.py "${args[@]}"
 
-            - name: Upload cleanup summary
-              if: always()
-              uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4
-              with:
-                  name: artifact-lifecycle-${{ github.run_number }}
-                  retention-days: 30
-                  path: |
-                      data_out/cleanup_summary.json
+      - name: Upload cleanup summary
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4
+        with:
+          name: artifact-lifecycle-${{ github.run_number }}
+          retention-days: 30
+          if-no-files-found: warn
+          path: ${{ env.CLEANUP_SUMMARY_PATH }}
 
-            - name: Step summary
-              if: always()
-              run: |
-                  echo "## Artifact Lifecycle" >> $GITHUB_STEP_SUMMARY
-                  echo "" >> $GITHUB_STEP_SUMMARY
-                  if [ "${{ github.event_name }}" = "schedule" ]; then
-                    echo "- Mode: scheduled dry-run" >> $GITHUB_STEP_SUMMARY
-                  else
-                    echo "- Mode: manual (apply=${{ github.event.inputs.apply }})" >> $GITHUB_STEP_SUMMARY
-                  fi
-                  if [ -f data_out/cleanup_summary.json ]; then
-                    echo "" >> $GITHUB_STEP_SUMMARY
-                    echo '```json' >> $GITHUB_STEP_SUMMARY
-                    cat data_out/cleanup_summary.json >> $GITHUB_STEP_SUMMARY
-                    echo '' >> $GITHUB_STEP_SUMMARY
-                    echo '```' >> $GITHUB_STEP_SUMMARY
-                  fi
+      - name: Step summary
+        if: always()
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          APPLY: ${{ steps.params.outputs.apply }}
+          MAX_AGE: ${{ steps.params.outputs.max_age }}
+          MAX_COUNT: ${{ steps.params.outputs.max_count }}
+        run: |
+          set -euo pipefail
+          {
+            echo "## Artifact Lifecycle"
+            echo ""
+            if [ "${EVENT_NAME}" = "schedule" ]; then
+              echo "- **Mode:** scheduled dry-run"
+            else
+              if [ "${APPLY}" = "true" ]; then
+                echo "- **Mode:** manual (apply)"
+              else
+                echo "- **Mode:** manual (dry-run)"
+              fi
+            fi
+            echo "- **max_age:** ${MAX_AGE} days"
+            echo "- **max_count:** ${MAX_COUNT} files/dir"
+            echo ""
+            if [ -f "${CLEANUP_SUMMARY_PATH}" ]; then
+              echo "### Cleanup summary"
+              echo ""
+              echo '```json'
+              cat "${CLEANUP_SUMMARY_PATH}"
+              echo ""
+              echo '```'
+            else
+              echo "_No cleanup summary file produced at \`${CLEANUP_SUMMARY_PATH}\`._"
+            fi
+          } >> "${GITHUB_STEP_SUMMARY}"

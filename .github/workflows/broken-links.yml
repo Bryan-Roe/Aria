@@ -1,50 +1,70 @@
 name: Broken Links Check
 
+# Trigger on PRs and pushes to markdown/docs files
 on:
-    pull_request:
-        branches: [main, dev]
-        paths:
-            - "**/*.md"
-            - "docs/**"
-            - ".github/workflows/broken-links.yml"
-    push:
-        branches: [main]
-        paths:
-            - "**/*.md"
-            - "docs/**"
-            - ".github/workflows/broken-links.yml"
-    workflow_dispatch:
+  pull_request:
+    branches: [main, dev]
+    paths:
+      - "**/*.md"
+      - "docs/**"
+      - ".github/workflows/broken-links.yml"
+  push:
+    branches: [main]
+    paths:
+      - "**/*.md"
+      - "docs/**"
+      - ".github/workflows/broken-links.yml"
+  # Allow manual trigger
+  workflow_dispatch:
+  # (Optional) Enable periodic checking as reminder/audit
+  # schedule:
+  #   - cron: "0 7 * * 1"  # Every Monday at 07:00 UTC
 
 concurrency:
-    group: broken-links-${{ github.ref }}
-    cancel-in-progress: true
+  group: "broken-links-${{ github.ref }}"
+  cancel-in-progress: true
 
 jobs:
-    link-check:
-        name: Link Validation
-        runs-on: ubuntu-latest
-        timeout-minutes: 15
-        steps:
-            - name: Checkout
-              uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4.3.1
+  link-check:
+    name: "Link Validation"
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
 
-            - name: Check links in docs and markdown
-              uses: lycheeverse/lychee-action@8646ba30535128ac92d33dfc9133794bfdd9b411  # v2.8.0
-              with:
-                  fail: true
-                  args: >-
-                      --verbose
-                      --no-progress
-                      --max-concurrency 8
-                      --accept 200,204,206,301,302,307,308,401,403,429
-                      '**/*.md'
-                      'docs/**/*.md'
-              env:
-                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - name: "Checkout repository"
+        uses: actions/checkout@v4
 
-            - name: Summary
-              if: always()
-              run: |
-                  echo "## Broken Links Check" >> $GITHUB_STEP_SUMMARY
-                  echo "" >> $GITHUB_STEP_SUMMARY
-                  echo "Scanned markdown and docs links using Lychee." >> $GITHUB_STEP_SUMMARY
+      - name: "Run Lychee link checker"
+        id: lychee
+        uses: lycheeverse/lychee-action@v2.8.0
+        with:
+          fail: true
+          args: >-
+            --verbose
+            --no-progress
+            --max-concurrency 8
+            --accept 200,204,206,301,302,307,308,401,403,429
+            "**/*.md"
+            "docs/**/*.md"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        # continue-on-error: true  # Uncomment to make workflow pass but report errors
+
+      - name: "Summary"
+        if: always()
+        run: |
+          # Safely write the step summary in a single redirection to avoid multiple appends (ShellCheck SC2129)
+          if [ -n "${GITHUB_STEP_SUMMARY:-}" ]; then
+            {
+              echo "## 🔗 Broken Links Check"
+              echo ""
+              echo "Scanned markdown and docs links with [Lychee](https://github.com/lycheeverse/lychee-action)."
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi
+          # Note: lychee-action auto uploads artifacts if it finds broken links
+
+      - name: "Show Failures"
+        if: failure()
+        run: |
+          echo "❌ One or more broken links detected!"
+          exit 1

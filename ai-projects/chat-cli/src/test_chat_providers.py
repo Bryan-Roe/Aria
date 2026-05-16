@@ -398,6 +398,79 @@ class AGIMultiAgentTests(unittest.TestCase):
         # Either None (unavailable) or a string (available) — must not raise.
         self.assertTrue(result is None or isinstance(result, str))
 
+    def test_dispatch_quantum_uses_analysis_model_path(self) -> None:
+        """Quantum dispatch should pass analysis quantum_model_path as model_override."""
+        class _Specialist:
+            def complete(self, messages, stream=True):
+                return "quantum-ok"
+
+        with unittest.mock.patch("agi_provider.detect_provider") as mocked_detect:
+            mocked_detect.return_value = (
+                _Specialist(),
+                chat_providers.ProviderChoice(name="quantum", model="mock"),
+            )
+            response = self.agi._dispatch_to_agent(
+                "Explain VQE",
+                "quantum-specialist",
+                {
+                    "intent": "explanation",
+                    "domain": "quantum",
+                    "quantum_model_path": "/tmp/quantum-model",
+                },
+            )
+
+            self.assertEqual(response, "quantum-ok")
+            mocked_detect.assert_called_once()
+            _, kwargs = mocked_detect.call_args
+            self.assertEqual(kwargs["explicit"], "quantum")
+            self.assertEqual(kwargs["model_override"], "/tmp/quantum-model")
+            self.assertEqual(kwargs["temperature"], self.agi.temperature)
+            self.assertEqual(kwargs["max_output_tokens"], self.agi.max_output_tokens)
+
+    def test_dispatch_quantum_uses_env_model_path(self) -> None:
+        """Quantum dispatch should use QAI_QUANTUM_MODEL_PATH when analysis has none."""
+        class _Specialist:
+            def complete(self, messages, stream=True):
+                return "env-quantum-ok"
+
+        with unittest.mock.patch.dict(
+            os.environ, {"QAI_QUANTUM_MODEL_PATH": "/tmp/env-quantum-model"}, clear=False
+        ):
+            with unittest.mock.patch("agi_provider.detect_provider") as mocked_detect:
+                mocked_detect.return_value = (
+                    _Specialist(),
+                    chat_providers.ProviderChoice(name="quantum", model="mock"),
+                )
+                response = self.agi._dispatch_to_agent(
+                    "Explain QAOA",
+                    "quantum-specialist",
+                    {"intent": "explanation", "domain": "quantum"},
+                )
+
+                self.assertEqual(response, "env-quantum-ok")
+                _, kwargs = mocked_detect.call_args
+                self.assertEqual(kwargs["model_override"], "/tmp/env-quantum-model")
+
+    def test_dispatch_quantum_without_model_path_skips_detect(self) -> None:
+        """Quantum dispatch should skip detect_provider when no model path exists."""
+        with unittest.mock.patch.dict(
+            os.environ,
+            {
+                "QAI_QUANTUM_MODEL_PATH": "",
+                "QAI_QUANTUM_MODEL": "",
+                "ARIA_QUANTUM_MODEL_PATH": "",
+            },
+            clear=False,
+        ):
+            with unittest.mock.patch("agi_provider.detect_provider") as mocked_detect:
+                result = self.agi._dispatch_to_agent(
+                    "Explain superposition",
+                    "quantum-specialist",
+                    {"intent": "explanation", "domain": "quantum"},
+                )
+                self.assertIsNone(result)
+                mocked_detect.assert_not_called()
+
     def test_reason_sets_last_agent_used(self) -> None:
         """After _reason(), _last_agent_used should be set to a registry key."""
         messages: list = [{"role": "user", "content": "move Aria to the left"}]

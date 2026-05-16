@@ -66,7 +66,7 @@ Log to self-learning JSONL → future training data
 
 ### Context Window Defaults
 | Model | Context |
-|-------|---------|
+| ------- | --------- |
 | gpt-4o | 128,000 |
 | gpt-3.5-turbo | 16,384 |
 | Azure default | 16,384 |
@@ -113,7 +113,7 @@ Better responses → more training data → cycle continues
 ## Key Files
 
 | File | Purpose |
-|------|---------|
+| ------ | --------- |
 | `shared/chat_providers.py` | Provider re-exports + `detect_provider()` |
 | `ai-projects/chat-cli/src/chat_providers.py` | Full provider implementations |
 | `shared/chat_memory.py` | Embedding generation, storage, similarity search |

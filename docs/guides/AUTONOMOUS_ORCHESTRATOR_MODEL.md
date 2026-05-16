@@ -6,7 +6,7 @@ This model provides a complete blueprint for building production-grade autonomou
 
 ## Architecture Pattern
 
-```
+```text
 ┌─────────────────────────────────────────────────────────────┐
 │                 Orchestrator Core (Async)                    │
 │  - Configuration Management (YAML)                           │
@@ -518,11 +518,11 @@ scaling:
 Based on our production deployment (552 datasets, 100 epochs):
 
 | Workers | Datasets/Hour | Accuracy | Memory/Worker |
-|---------|---------------|----------|---------------|
-| 4       | ~25           | 98-100%  | ~500 MB       |
-| 8       | ~45           | 98-100%  | ~500 MB       |
-| 20      | ~100          | 98-100%  | ~500 MB       |
-| 32      | ~150          | 98-100%  | ~500 MB       |
+| --------- | --------------- | ---------- | --------------- |
+| 4 | ~25 | 98-100% | ~500 MB |
+| 8 | ~45 | 98-100% | ~500 MB |
+| 20 | ~100 | 98-100% | ~500 MB |
+| 32 | ~150 | 98-100% | ~500 MB |
 
 **Key Findings:**
 - Linear scaling up to CPU count

@@ -1,0 +1,4051 @@
+=== 2026-03-27T04:07:25+00:00 cycle start ===
+{
+  "generated_at": "2026-03-27T04:07:34Z",
+  "run_id": "20260327T040734Z",
+  "config_path": null,
+  "config_paths": {
+    "master_orchestrator": "config/master_orchestrator.yaml",
+    "quantum_autorun": "config/quantum/quantum_autorun.yaml",
+    "evaluation_autorun": "config/evaluation/evaluation_autorun.yaml"
+  },
+  "strict_endpoints": false,
+  "total_steps": 8,
+  "succeeded": 7,
+  "warnings": 0,
+  "failed": 0,
+  "skipped": 1,
+  "errors": 0,
+  "passed": true,
+  "results": [
+    {
+      "name": "master_orchestrator_config",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.0,
+      "detail": "resolved=config/master_orchestrator.yaml"
+    },
+    {
+      "name": "quantum_autorun_config",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.1,
+      "detail": "resolved=config/quantum/quantum_autorun.yaml"
+    },
+    {
+      "name": "evaluation_autorun_config",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.05,
+      "detail": "resolved=config/evaluation/evaluation_autorun.yaml"
+    },
+    {
+      "name": "master_orchestrator_status",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 1.75,
+      "detail": "rc=0 | stdout=   \"schedule\": null,\n      \"orchestrators\": [\n        \"aria_automation\"\n      ]\n    },\n    {\n      \"name\": \"aria_server_only\",\n      \"enabled\": false,\n      \"trigger\": \"manual\",\n      \"schedule\": null,\n      \"orchestrators\": [\n        \"aria_automation\"\n      ]\n    }\n  ],\n  \"resource_usage\": {\n    \"available\": true,\n    \"cpu_percent\": 16.0,\n    \"memory_percent\": 16.5,\n    \"disk_percent\": 30.9\n  }\n}"
+    },
+    {
+      "name": "quantum_autorun_dry_run",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.51,
+      "detail": "rc=0 | stdout=Validated 4 job(s): heart_quick, ionosphere_quick, azure_quantinuum_simulator, azure_ionq_qpu_test"
+    },
+    {
+      "name": "repo_automation_status",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.45,
+      "detail": "rc=0 | stdout=110) (\ud83e\udde9 deps)\n  \u274c Quantum Computing Workflows (PID 75111) (\ud83e\udde9 deps)\n  \u274c Model Evaluation System (\u26a0\ufe0f deps)\n  \u274c Dataset Auto-Discovery (Integrated in training) (\ud83e\udde9 deps)\n  \u274c Status Dashboard (\ud83e\udde9 deps)\n  \u274c Backup Manager (\ud83e\udde9 deps)\n\n\u26a0\ufe0f  Recent Errors (1):\n  - Dependencies still missing after install (evaluation): scikit-learn\n================================================================================"
+    },
+    {
+      "name": "chat_cli_local_once",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 3.68,
+      "detail": "rc=0 | stdout=Provider: local | Model: local-echo\nassistant> I'm running in local fallback mode. Set AZURE_OPENAI_API_KEY, OPENAI_API_KEY, or start LM Studio / Ollama to enable full AI responses."
+    },
+    {
+      "name": "functions_ai_status_endpoint",
+      "status": "skipped",
+      "critical": false,
+      "duration_sec": 0.01,
+      "detail": "functions host not running (non-strict mode)"
+    }
+  ]
+}
+=== 2026-03-27T04:07:38+00:00 cycle start ===
+{
+  "generated_at": "2026-03-27T04:07:47Z",
+  "run_id": "20260327T040747Z",
+  "config_path": null,
+  "config_paths": {
+    "master_orchestrator": "config/master_orchestrator.yaml",
+    "quantum_autorun": "config/quantum/quantum_autorun.yaml",
+    "evaluation_autorun": "config/evaluation/evaluation_autorun.yaml"
+  },
+  "strict_endpoints": false,
+  "total_steps": 8,
+  "succeeded": 7,
+  "warnings": 0,
+  "failed": 0,
+  "skipped": 1,
+  "errors": 0,
+  "passed": true,
+  "results": [
+    {
+      "name": "master_orchestrator_config",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.02,
+      "detail": "resolved=config/master_orchestrator.yaml"
+    },
+    {
+      "name": "quantum_autorun_config",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.02,
+      "detail": "resolved=config/quantum/quantum_autorun.yaml"
+    },
+    {
+      "name": "evaluation_autorun_config",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.01,
+      "detail": "resolved=config/evaluation/evaluation_autorun.yaml"
+    },
+    {
+      "name": "master_orchestrator_status",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 1.97,
+      "detail": "rc=0 | stdout=    \"schedule\": null,\n      \"orchestrators\": [\n        \"aria_automation\"\n      ]\n    },\n    {\n      \"name\": \"aria_server_only\",\n      \"enabled\": false,\n      \"trigger\": \"manual\",\n      \"schedule\": null,\n      \"orchestrators\": [\n        \"aria_automation\"\n      ]\n    }\n  ],\n  \"resource_usage\": {\n    \"available\": true,\n    \"cpu_percent\": 7.1,\n    \"memory_percent\": 16.6,\n    \"disk_percent\": 30.9\n  }\n}"
+    },
+    {
+      "name": "quantum_autorun_dry_run",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.44,
+      "detail": "rc=0 | stdout=Validated 4 job(s): heart_quick, ionosphere_quick, azure_quantinuum_simulator, azure_ionq_qpu_test"
+    },
+    {
+      "name": "repo_automation_status",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.48,
+      "detail": "rc=0 | stdout=110) (\ud83e\udde9 deps)\n  \u274c Quantum Computing Workflows (PID 75111) (\ud83e\udde9 deps)\n  \u274c Model Evaluation System (\u26a0\ufe0f deps)\n  \u274c Dataset Auto-Discovery (Integrated in training) (\ud83e\udde9 deps)\n  \u274c Status Dashboard (\ud83e\udde9 deps)\n  \u274c Backup Manager (\ud83e\udde9 deps)\n\n\u26a0\ufe0f  Recent Errors (1):\n  - Dependencies still missing after install (evaluation): scikit-learn\n================================================================================"
+    },
+    {
+      "name": "chat_cli_local_once",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 4.23,
+      "detail": "rc=0 | stdout=Provider: local | Model: local-echo\nassistant> Offline mode active. I can process Aria commands but can't generate AI responses without a configured provider."
+    },
+    {
+      "name": "functions_ai_status_endpoint",
+      "status": "skipped",
+      "critical": false,
+      "duration_sec": 0.02,
+      "detail": "functions host not running (non-strict mode)"
+    }
+  ]
+}
+
+[ci] Running Integration Contract Unit Tests
+
+[ci] Results saved: /workspaces/Aria/data_out/ci_orchestrator/ci_results.json
+[ci] Summary: 1/1 passed
+
+[ci] ========================================
+[ci] Validating All Orchestrators
+[ci] ========================================
+
+[ci] Validating: autotrain
+[ci] Validating: quantum_autorun
+[ci] Validating: evaluation_autorun
+
+[ci] Results saved: /workspaces/Aria/data_out/ci_orchestrator/ci_results.json
+[ci] Summary: 3/3 passed
+[integration_contract_gate] passed
+
+[ci] Running Integration Contract Unit Tests
+
+[ci] Results saved: /workspaces/Aria/data_out/ci_orchestrator/ci_results.json
+[ci] Summary: 1/1 passed
+
+[ci] ========================================
+[ci] Validating All Orchestrators
+[ci] ========================================
+
+[ci] Validating: autotrain
+[ci] Validating: quantum_autorun
+[ci] Validating: evaluation_autorun
+
+[ci] Results saved: /workspaces/Aria/data_out/ci_orchestrator/ci_results.json
+[ci] Summary: 3/3 passed
+[integration_contract_gate] passed
+................................................................         [100%]
+64 passed in 9.26s
+=== 2026-03-27T04:08:05+00:00 cycle end ===
+................................................................         [100%]
+64 passed in 11.80s
+=== 2026-03-27T04:08:19+00:00 cycle end ===
+=== 2026-03-27T04:09:09+00:00 cycle start ===
+{
+  "generated_at": "2026-03-27T04:09:19Z",
+  "run_id": "20260327T040919Z",
+  "config_path": null,
+  "config_paths": {
+    "master_orchestrator": "config/master_orchestrator.yaml",
+    "quantum_autorun": "config/quantum/quantum_autorun.yaml",
+    "evaluation_autorun": "config/evaluation/evaluation_autorun.yaml"
+  },
+  "strict_endpoints": false,
+  "total_steps": 8,
+  "succeeded": 7,
+  "warnings": 0,
+  "failed": 0,
+  "skipped": 1,
+  "errors": 0,
+  "passed": true,
+  "results": [
+    {
+      "name": "master_orchestrator_config",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.02,
+      "detail": "resolved=config/master_orchestrator.yaml"
+    },
+    {
+      "name": "quantum_autorun_config",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.04,
+      "detail": "resolved=config/quantum/quantum_autorun.yaml"
+    },
+    {
+      "name": "evaluation_autorun_config",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.03,
+      "detail": "resolved=config/evaluation/evaluation_autorun.yaml"
+    },
+    {
+      "name": "master_orchestrator_status",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 2.54,
+      "detail": "rc=0 | stdout=    \"schedule\": null,\n      \"orchestrators\": [\n        \"aria_automation\"\n      ]\n    },\n    {\n      \"name\": \"aria_server_only\",\n      \"enabled\": false,\n      \"trigger\": \"manual\",\n      \"schedule\": null,\n      \"orchestrators\": [\n        \"aria_automation\"\n      ]\n    }\n  ],\n  \"resource_usage\": {\n    \"available\": true,\n    \"cpu_percent\": 5.1,\n    \"memory_percent\": 16.2,\n    \"disk_percent\": 31.0\n  }\n}"
+    },
+    {
+      "name": "quantum_autorun_dry_run",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.69,
+      "detail": "rc=0 | stdout=Validated 4 job(s): heart_quick, ionosphere_quick, azure_quantinuum_simulator, azure_ionq_qpu_test"
+    },
+    {
+      "name": "repo_automation_status",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 1.02,
+      "detail": "rc=0 | stdout=110) (\ud83e\udde9 deps)\n  \u274c Quantum Computing Workflows (PID 75111) (\ud83e\udde9 deps)\n  \u274c Model Evaluation System (\u26a0\ufe0f deps)\n  \u274c Dataset Auto-Discovery (Integrated in training) (\ud83e\udde9 deps)\n  \u274c Status Dashboard (\ud83e\udde9 deps)\n  \u274c Backup Manager (\ud83e\udde9 deps)\n\n\u26a0\ufe0f  Recent Errors (1):\n  - Dependencies still missing after install (evaluation): scikit-learn\n================================================================================"
+    },
+    {
+      "name": "chat_cli_local_once",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 4.59,
+      "detail": "rc=0 | stdout=Provider: local | Model: local-echo\nassistant> No live model detected. Run with `--provider lmstudio` (LM Studio running locally), `--provider ollama`, `--provider openai`, or `--provider azure`."
+    },
+    {
+      "name": "functions_ai_status_endpoint",
+      "status": "skipped",
+      "critical": false,
+      "duration_sec": 0.03,
+      "detail": "functions host not running (non-strict mode)"
+    }
+  ]
+}
+=== 2026-03-27T04:09:20+00:00 cycle start ===
+{
+  "generated_at": "2026-03-27T04:09:29Z",
+  "run_id": "20260327T040929Z",
+  "config_path": null,
+  "config_paths": {
+    "master_orchestrator": "config/master_orchestrator.yaml",
+    "quantum_autorun": "config/quantum/quantum_autorun.yaml",
+    "evaluation_autorun": "config/evaluation/evaluation_autorun.yaml"
+  },
+  "strict_endpoints": false,
+  "total_steps": 8,
+  "succeeded": 7,
+  "warnings": 0,
+  "failed": 0,
+  "skipped": 1,
+  "errors": 0,
+  "passed": true,
+  "results": [
+    {
+      "name": "master_orchestrator_config",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.01,
+      "detail": "resolved=config/master_orchestrator.yaml"
+    },
+    {
+      "name": "quantum_autorun_config",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.01,
+      "detail": "resolved=config/quantum/quantum_autorun.yaml"
+    },
+    {
+      "name": "evaluation_autorun_config",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.01,
+      "detail": "resolved=config/evaluation/evaluation_autorun.yaml"
+    },
+    {
+      "name": "master_orchestrator_status",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 2.02,
+      "detail": "rc=0 | stdout=    \"schedule\": null,\n      \"orchestrators\": [\n        \"aria_automation\"\n      ]\n    },\n    {\n      \"name\": \"aria_server_only\",\n      \"enabled\": false,\n      \"trigger\": \"manual\",\n      \"schedule\": null,\n      \"orchestrators\": [\n        \"aria_automation\"\n      ]\n    }\n  ],\n  \"resource_usage\": {\n    \"available\": true,\n    \"cpu_percent\": 7.2,\n    \"memory_percent\": 16.6,\n    \"disk_percent\": 31.0\n  }\n}"
+    },
+    {
+      "name": "quantum_autorun_dry_run",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.66,
+      "detail": "rc=0 | stdout=Validated 4 job(s): heart_quick, ionosphere_quick, azure_quantinuum_simulator, azure_ionq_qpu_test"
+    },
+    {
+      "name": "repo_automation_status",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.8,
+      "detail": "rc=0 | stdout=110) (\ud83e\udde9 deps)\n  \u274c Quantum Computing Workflows (PID 75111) (\ud83e\udde9 deps)\n  \u274c Model Evaluation System (\u26a0\ufe0f deps)\n  \u274c Dataset Auto-Discovery (Integrated in training) (\ud83e\udde9 deps)\n  \u274c Status Dashboard (\ud83e\udde9 deps)\n  \u274c Backup Manager (\ud83e\udde9 deps)\n\n\u26a0\ufe0f  Recent Errors (1):\n  - Dependencies still missing after install (evaluation): scikit-learn\n================================================================================"
+    },
+    {
+      "name": "chat_cli_local_once",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 3.43,
+      "detail": "rc=0 | stdout=Provider: local | Model: local-echo\nassistant> Offline mode active. I can process Aria commands but can't generate AI responses without a configured provider."
+    },
+    {
+      "name": "functions_ai_status_endpoint",
+      "status": "skipped",
+      "critical": false,
+      "duration_sec": 0.02,
+      "detail": "functions host not running (non-strict mode)"
+    }
+  ]
+}
+
+[ci] Running Integration Contract Unit Tests
+
+[ci] Results saved: /workspaces/Aria/data_out/ci_orchestrator/ci_results.json
+[ci] Summary: 1/1 passed
+
+[ci] ========================================
+[ci] Validating All Orchestrators
+[ci] ========================================
+
+[ci] Validating: autotrain
+[ci] Validating: quantum_autorun
+[ci] Validating: evaluation_autorun
+
+[ci] Results saved: /workspaces/Aria/data_out/ci_orchestrator/ci_results.json
+[ci] Summary: 3/3 passed
+[integration_contract_gate] passed
+
+[ci] Running Integration Contract Unit Tests
+
+[ci] Results saved: /workspaces/Aria/data_out/ci_orchestrator/ci_results.json
+[ci] Summary: 1/1 passed
+
+[ci] ========================================
+[ci] Validating All Orchestrators
+[ci] ========================================
+
+[ci] Validating: autotrain
+[ci] Validating: quantum_autorun
+[ci] Validating: evaluation_autorun
+
+[ci] Results saved: /workspaces/Aria/data_out/ci_orchestrator/ci_results.json
+[ci] Summary: 3/3 passed
+[integration_contract_gate] passed
+................................................................         [100%]
+64 passed in 6.00s
+=== 2026-03-27T04:09:48+00:00 cycle end ===
+................................................................         [100%]
+64 passed in 6.84s
+=== 2026-03-27T04:09:53+00:00 cycle end ===
+=== 2026-03-27T04:10:51+00:00 cycle start ===
+=== 2026-03-27T04:10:56+00:00 cycle start ===
+{
+  "generated_at": "2026-03-27T04:11:10Z",
+  "run_id": "20260327T041110Z",
+  "config_path": null,
+  "config_paths": {
+    "master_orchestrator": "config/master_orchestrator.yaml",
+    "quantum_autorun": "config/quantum/quantum_autorun.yaml",
+    "evaluation_autorun": "config/evaluation/evaluation_autorun.yaml"
+  },
+  "strict_endpoints": false,
+  "total_steps": 8,
+  "succeeded": 7,
+  "warnings": 0,
+  "failed": 0,
+  "skipped": 1,
+  "errors": 0,
+  "passed": true,
+  "results": [
+    {
+      "name": "master_orchestrator_config",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.03,
+      "detail": "resolved=config/master_orchestrator.yaml"
+    },
+    {
+      "name": "quantum_autorun_config",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.0,
+      "detail": "resolved=config/quantum/quantum_autorun.yaml"
+    },
+    {
+      "name": "evaluation_autorun_config",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.07,
+      "detail": "resolved=config/evaluation/evaluation_autorun.yaml"
+    },
+    {
+      "name": "master_orchestrator_status",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 3.44,
+      "detail": "rc=0 | stdout=    \"schedule\": null,\n      \"orchestrators\": [\n        \"aria_automation\"\n      ]\n    },\n    {\n      \"name\": \"aria_server_only\",\n      \"enabled\": false,\n      \"trigger\": \"manual\",\n      \"schedule\": null,\n      \"orchestrators\": [\n        \"aria_automation\"\n      ]\n    }\n  ],\n  \"resource_usage\": {\n    \"available\": true,\n    \"cpu_percent\": 3.8,\n    \"memory_percent\": 16.2,\n    \"disk_percent\": 31.1\n  }\n}"
+    },
+    {
+      "name": "quantum_autorun_dry_run",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 1.11,
+      "detail": "rc=0 | stdout=Validated 4 job(s): heart_quick, ionosphere_quick, azure_quantinuum_simulator, azure_ionq_qpu_test"
+    },
+    {
+      "name": "repo_automation_status",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 2.26,
+      "detail": "rc=0 | stdout=110) (\ud83e\udde9 deps)\n  \u274c Quantum Computing Workflows (PID 75111) (\ud83e\udde9 deps)\n  \u274c Model Evaluation System (\u26a0\ufe0f deps)\n  \u274c Dataset Auto-Discovery (Integrated in training) (\ud83e\udde9 deps)\n  \u274c Status Dashboard (\ud83e\udde9 deps)\n  \u274c Backup Manager (\ud83e\udde9 deps)\n\n\u26a0\ufe0f  Recent Errors (1):\n  - Dependencies still missing after install (evaluation): scikit-learn\n================================================================================"
+    },
+    {
+      "name": "chat_cli_local_once",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 8.91,
+      "detail": "rc=0 | stdout=Provider: local | Model: local-echo\nassistant> No live model detected. Run with `--provider lmstudio` (LM Studio running locally), `--provider ollama`, `--provider openai`, or `--provider azure`."
+    },
+    {
+      "name": "functions_ai_status_endpoint",
+      "status": "skipped",
+      "critical": false,
+      "duration_sec": 0.02,
+      "detail": "functions host not running (non-strict mode)"
+    }
+  ]
+}
+{
+  "generated_at": "2026-03-27T04:11:17Z",
+  "run_id": "20260327T041117Z",
+  "config_path": null,
+  "config_paths": {
+    "master_orchestrator": "config/master_orchestrator.yaml",
+    "quantum_autorun": "config/quantum/quantum_autorun.yaml",
+    "evaluation_autorun": "config/evaluation/evaluation_autorun.yaml"
+  },
+  "strict_endpoints": false,
+  "total_steps": 8,
+  "succeeded": 7,
+  "warnings": 0,
+  "failed": 0,
+  "skipped": 1,
+  "errors": 0,
+  "passed": true,
+  "results": [
+    {
+      "name": "master_orchestrator_config",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.03,
+      "detail": "resolved=config/master_orchestrator.yaml"
+    },
+    {
+      "name": "quantum_autorun_config",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.01,
+      "detail": "resolved=config/quantum/quantum_autorun.yaml"
+    },
+    {
+      "name": "evaluation_autorun_config",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.01,
+      "detail": "resolved=config/evaluation/evaluation_autorun.yaml"
+    },
+    {
+      "name": "master_orchestrator_status",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 3.04,
+      "detail": "rc=0 | stdout=   \"schedule\": null,\n      \"orchestrators\": [\n        \"aria_automation\"\n      ]\n    },\n    {\n      \"name\": \"aria_server_only\",\n      \"enabled\": false,\n      \"trigger\": \"manual\",\n      \"schedule\": null,\n      \"orchestrators\": [\n        \"aria_automation\"\n      ]\n    }\n  ],\n  \"resource_usage\": {\n    \"available\": true,\n    \"cpu_percent\": 14.2,\n    \"memory_percent\": 16.3,\n    \"disk_percent\": 31.1\n  }\n}"
+    },
+    {
+      "name": "quantum_autorun_dry_run",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 2.6,
+      "detail": "rc=0 | stdout=Validated 4 job(s): heart_quick, ionosphere_quick, azure_quantinuum_simulator, azure_ionq_qpu_test"
+    },
+    {
+      "name": "repo_automation_status",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 3.14,
+      "detail": "rc=0 | stdout=110) (\ud83e\udde9 deps)\n  \u274c Quantum Computing Workflows (PID 75111) (\ud83e\udde9 deps)\n  \u274c Model Evaluation System (\u26a0\ufe0f deps)\n  \u274c Dataset Auto-Discovery (Integrated in training) (\ud83e\udde9 deps)\n  \u274c Status Dashboard (\ud83e\udde9 deps)\n  \u274c Backup Manager (\ud83e\udde9 deps)\n\n\u26a0\ufe0f  Recent Errors (1):\n  - Dependencies still missing after install (evaluation): scikit-learn\n================================================================================"
+    },
+    {
+      "name": "chat_cli_local_once",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 9.34,
+      "detail": "rc=0 | stdout=Provider: local | Model: local-echo\nassistant> No live model detected. Run with `--provider lmstudio` (LM Studio running locally), `--provider ollama`, `--provider openai`, or `--provider azure`."
+    },
+    {
+      "name": "functions_ai_status_endpoint",
+      "status": "skipped",
+      "critical": false,
+      "duration_sec": 0.02,
+      "detail": "functions host not running (non-strict mode)"
+    }
+  ]
+}
+
+[ci] Running Integration Contract Unit Tests
+
+[ci] Results saved: /workspaces/Aria/data_out/ci_orchestrator/ci_results.json
+[ci] Summary: 1/1 passed
+
+[ci] ========================================
+[ci] Validating All Orchestrators
+[ci] ========================================
+
+[ci] Validating: autotrain
+[ci] Validating: quantum_autorun
+[ci] Validating: evaluation_autorun
+
+[ci] Results saved: /workspaces/Aria/data_out/ci_orchestrator/ci_results.json
+[ci] Summary: 3/3 passed
+[integration_contract_gate] passed
+
+[ci] Running Integration Contract Unit Tests
+
+[ci] Results saved: /workspaces/Aria/data_out/ci_orchestrator/ci_results.json
+[ci] Summary: 1/1 passed
+
+[ci] ========================================
+[ci] Validating All Orchestrators
+[ci] ========================================
+
+[ci] Validating: autotrain
+[ci] Validating: quantum_autorun
+[ci] Validating: evaluation_autorun
+
+[ci] Results saved: /workspaces/Aria/data_out/ci_orchestrator/ci_results.json
+[ci] Summary: 3/3 passed
+[integration_contract_gate] passed
+................................................................         [100%]
+64 passed in 11.40s
+=== 2026-03-27T04:11:54+00:00 cycle end ===
+................................................................         [100%]
+64 passed in 10.61s
+=== 2026-03-27T04:11:56+00:00 cycle end ===
+=== 2026-03-27T04:12:57+00:00 cycle start ===
+=== 2026-03-27T04:12:59+00:00 cycle start ===
+{
+  "generated_at": "2026-03-27T04:13:06Z",
+  "run_id": "20260327T041306Z",
+  "config_path": null,
+  "config_paths": {
+    "master_orchestrator": "config/master_orchestrator.yaml",
+    "quantum_autorun": "config/quantum/quantum_autorun.yaml",
+    "evaluation_autorun": "config/evaluation/evaluation_autorun.yaml"
+  },
+  "strict_endpoints": false,
+  "total_steps": 8,
+  "succeeded": 7,
+  "warnings": 0,
+  "failed": 0,
+  "skipped": 1,
+  "errors": 0,
+  "passed": true,
+  "results": [
+    {
+      "name": "master_orchestrator_config",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.01,
+      "detail": "resolved=config/master_orchestrator.yaml"
+    },
+    {
+      "name": "quantum_autorun_config",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.02,
+      "detail": "resolved=config/quantum/quantum_autorun.yaml"
+    },
+    {
+      "name": "evaluation_autorun_config",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.01,
+      "detail": "resolved=config/evaluation/evaluation_autorun.yaml"
+    },
+    {
+      "name": "master_orchestrator_status",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 1.9,
+      "detail": "rc=0 | stdout=    \"schedule\": null,\n      \"orchestrators\": [\n        \"aria_automation\"\n      ]\n    },\n    {\n      \"name\": \"aria_server_only\",\n      \"enabled\": false,\n      \"trigger\": \"manual\",\n      \"schedule\": null,\n      \"orchestrators\": [\n        \"aria_automation\"\n      ]\n    }\n  ],\n  \"resource_usage\": {\n    \"available\": true,\n    \"cpu_percent\": 8.3,\n    \"memory_percent\": 16.8,\n    \"disk_percent\": 31.2\n  }\n}"
+    },
+    {
+      "name": "quantum_autorun_dry_run",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.88,
+      "detail": "rc=0 | stdout=Validated 4 job(s): heart_quick, ionosphere_quick, azure_quantinuum_simulator, azure_ionq_qpu_test"
+    },
+    {
+      "name": "repo_automation_status",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 1.26,
+      "detail": "rc=0 | stdout=110) (\ud83e\udde9 deps)\n  \u274c Quantum Computing Workflows (PID 75111) (\ud83e\udde9 deps)\n  \u274c Model Evaluation System (\u26a0\ufe0f deps)\n  \u274c Dataset Auto-Discovery (Integrated in training) (\ud83e\udde9 deps)\n  \u274c Status Dashboard (\ud83e\udde9 deps)\n  \u274c Backup Manager (\ud83e\udde9 deps)\n\n\u26a0\ufe0f  Recent Errors (1):\n  - Dependencies still missing after install (evaluation): scikit-learn\n================================================================================"
+    },
+    {
+      "name": "chat_cli_local_once",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 3.93,
+      "detail": "rc=0 | stdout=Provider: local | Model: local-echo\nassistant> I'm running in local fallback mode. Set AZURE_OPENAI_API_KEY, OPENAI_API_KEY, or start LM Studio / Ollama to enable full AI responses."
+    },
+    {
+      "name": "functions_ai_status_endpoint",
+      "status": "skipped",
+      "critical": false,
+      "duration_sec": 0.02,
+      "detail": "functions host not running (non-strict mode)"
+    }
+  ]
+}
+{
+  "generated_at": "2026-03-27T04:13:10Z",
+  "run_id": "20260327T041310Z",
+  "config_path": null,
+  "config_paths": {
+    "master_orchestrator": "config/master_orchestrator.yaml",
+    "quantum_autorun": "config/quantum/quantum_autorun.yaml",
+    "evaluation_autorun": "config/evaluation/evaluation_autorun.yaml"
+  },
+  "strict_endpoints": false,
+  "total_steps": 8,
+  "succeeded": 7,
+  "warnings": 0,
+  "failed": 0,
+  "skipped": 1,
+  "errors": 0,
+  "passed": true,
+  "results": [
+    {
+      "name": "master_orchestrator_config",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.03,
+      "detail": "resolved=config/master_orchestrator.yaml"
+    },
+    {
+      "name": "quantum_autorun_config",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.01,
+      "detail": "resolved=config/quantum/quantum_autorun.yaml"
+    },
+    {
+      "name": "evaluation_autorun_config",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.01,
+      "detail": "resolved=config/evaluation/evaluation_autorun.yaml"
+    },
+    {
+      "name": "master_orchestrator_status",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 1.68,
+      "detail": "rc=0 | stdout=    \"schedule\": null,\n      \"orchestrators\": [\n        \"aria_automation\"\n      ]\n    },\n    {\n      \"name\": \"aria_server_only\",\n      \"enabled\": false,\n      \"trigger\": \"manual\",\n      \"schedule\": null,\n      \"orchestrators\": [\n        \"aria_automation\"\n      ]\n    }\n  ],\n  \"resource_usage\": {\n    \"available\": true,\n    \"cpu_percent\": 5.4,\n    \"memory_percent\": 16.8,\n    \"disk_percent\": 31.2\n  }\n}"
+    },
+    {
+      "name": "quantum_autorun_dry_run",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.75,
+      "detail": "rc=0 | stdout=Validated 4 job(s): heart_quick, ionosphere_quick, azure_quantinuum_simulator, azure_ionq_qpu_test"
+    },
+    {
+      "name": "repo_automation_status",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 1.76,
+      "detail": "rc=0 | stdout=110) (\ud83e\udde9 deps)\n  \u274c Quantum Computing Workflows (PID 75111) (\ud83e\udde9 deps)\n  \u274c Model Evaluation System (\u26a0\ufe0f deps)\n  \u274c Dataset Auto-Discovery (Integrated in training) (\ud83e\udde9 deps)\n  \u274c Status Dashboard (\ud83e\udde9 deps)\n  \u274c Backup Manager (\ud83e\udde9 deps)\n\n\u26a0\ufe0f  Recent Errors (1):\n  - Dependencies still missing after install (evaluation): scikit-learn\n================================================================================"
+    },
+    {
+      "name": "chat_cli_local_once",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 6.42,
+      "detail": "rc=0 | stdout=Provider: local | Model: local-echo\nassistant> Offline mode active. I can process Aria commands but can't generate AI responses without a configured provider."
+    },
+    {
+      "name": "functions_ai_status_endpoint",
+      "status": "skipped",
+      "critical": false,
+      "duration_sec": 0.02,
+      "detail": "functions host not running (non-strict mode)"
+    }
+  ]
+}
+
+[ci] Running Integration Contract Unit Tests
+
+[ci] Results saved: /workspaces/Aria/data_out/ci_orchestrator/ci_results.json
+[ci] Summary: 1/1 passed
+
+[ci] Running Integration Contract Unit Tests
+
+[ci] Results saved: /workspaces/Aria/data_out/ci_orchestrator/ci_results.json
+[ci] Summary: 1/1 passed
+
+[ci] ========================================
+[ci] Validating All Orchestrators
+[ci] ========================================
+
+[ci] Validating: autotrain
+[ci] Validating: quantum_autorun
+[ci] Validating: evaluation_autorun
+
+[ci] Results saved: /workspaces/Aria/data_out/ci_orchestrator/ci_results.json
+[ci] Summary: 3/3 passed
+[integration_contract_gate] passed
+
+[ci] ========================================
+[ci] Validating All Orchestrators
+[ci] ========================================
+
+[ci] Validating: autotrain
+[ci] Validating: quantum_autorun
+[ci] Validating: evaluation_autorun
+
+[ci] Results saved: /workspaces/Aria/data_out/ci_orchestrator/ci_results.json
+[ci] Summary: 3/3 passed
+[integration_contract_gate] passed
+......................................................................         [100%]...................
+64 passed in 43.51s
+..................=== 2026-03-27T04:15:20+00:00 cycle end ===
+.....................         [100%]
+64 passed in 39.06s
+=== 2026-03-27T04:15:21+00:00 cycle end ===
+=== 2026-03-27T04:16:23+00:00 cycle start ===
+=== 2026-03-27T04:16:24+00:00 cycle start ===
+{
+  "generated_at": "2026-03-27T04:16:31Z",
+  "run_id": "20260327T041631Z",
+  "config_path": null,
+  "config_paths": {
+    "master_orchestrator": "config/master_orchestrator.yaml",
+    "quantum_autorun": "config/quantum/quantum_autorun.yaml",
+    "evaluation_autorun": "config/evaluation/evaluation_autorun.yaml"
+  },
+  "strict_endpoints": false,
+  "total_steps": 8,
+  "succeeded": 7,
+  "warnings": 0,
+  "failed": 0,
+  "skipped": 1,
+  "errors": 0,
+  "passed": true,
+  "results": [
+    {
+      "name": "master_orchestrator_config",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.03,
+      "detail": "resolved=config/master_orchestrator.yaml"
+    },
+    {
+      "name": "quantum_autorun_config",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.03,
+      "detail": "resolved=config/quantum/quantum_autorun.yaml"
+    },
+    {
+      "name": "evaluation_autorun_config",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.02,
+      "detail": "resolved=config/evaluation/evaluation_autorun.yaml"
+    },
+    {
+      "name": "master_orchestrator_status",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 1.93,
+      "detail": "rc=0 | stdout=    \"schedule\": null,\n      \"orchestrators\": [\n        \"aria_automation\"\n      ]\n    },\n    {\n      \"name\": \"aria_server_only\",\n      \"enabled\": false,\n      \"trigger\": \"manual\",\n      \"schedule\": null,\n      \"orchestrators\": [\n        \"aria_automation\"\n      ]\n    }\n  ],\n  \"resource_usage\": {\n    \"available\": true,\n    \"cpu_percent\": 9.2,\n    \"memory_percent\": 17.1,\n    \"disk_percent\": 31.3\n  }\n}"
+    },
+    {
+      "name": "quantum_autorun_dry_run",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.33,
+      "detail": "rc=0 | stdout=Validated 4 job(s): heart_quick, ionosphere_quick, azure_quantinuum_simulator, azure_ionq_qpu_test"
+    },
+    {
+      "name": "repo_automation_status",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.85,
+      "detail": "rc=0 | stdout=110) (\ud83e\udde9 deps)\n  \u274c Quantum Computing Workflows (PID 75111) (\ud83e\udde9 deps)\n  \u274c Model Evaluation System (\u26a0\ufe0f deps)\n  \u274c Dataset Auto-Discovery (Integrated in training) (\ud83e\udde9 deps)\n  \u274c Status Dashboard (\ud83e\udde9 deps)\n  \u274c Backup Manager (\ud83e\udde9 deps)\n\n\u26a0\ufe0f  Recent Errors (1):\n  - Dependencies still missing after install (evaluation): scikit-learn\n================================================================================"
+    },
+    {
+      "name": "chat_cli_local_once",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 3.86,
+      "detail": "rc=0 | stdout=Provider: local | Model: local-echo\nassistant> I'm running in local fallback mode. Set AZURE_OPENAI_API_KEY, OPENAI_API_KEY, or start LM Studio / Ollama to enable full AI responses."
+    },
+    {
+      "name": "functions_ai_status_endpoint",
+      "status": "skipped",
+      "critical": false,
+      "duration_sec": 0.01,
+      "detail": "functions host not running (non-strict mode)"
+    }
+  ]
+}
+{
+  "generated_at": "2026-03-27T04:16:32Z",
+  "run_id": "20260327T041632Z",
+  "config_path": null,
+  "config_paths": {
+    "master_orchestrator": "config/master_orchestrator.yaml",
+    "quantum_autorun": "config/quantum/quantum_autorun.yaml",
+    "evaluation_autorun": "config/evaluation/evaluation_autorun.yaml"
+  },
+  "strict_endpoints": false,
+  "total_steps": 8,
+  "succeeded": 7,
+  "warnings": 0,
+  "failed": 0,
+  "skipped": 1,
+  "errors": 0,
+  "passed": true,
+  "results": [
+    {
+      "name": "master_orchestrator_config",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.01,
+      "detail": "resolved=config/master_orchestrator.yaml"
+    },
+    {
+      "name": "quantum_autorun_config",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.02,
+      "detail": "resolved=config/quantum/quantum_autorun.yaml"
+    },
+    {
+      "name": "evaluation_autorun_config",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.03,
+      "detail": "resolved=config/evaluation/evaluation_autorun.yaml"
+    },
+    {
+      "name": "master_orchestrator_status",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 1.79,
+      "detail": "rc=0 | stdout=    \"schedule\": null,\n      \"orchestrators\": [\n        \"aria_automation\"\n      ]\n    },\n    {\n      \"name\": \"aria_server_only\",\n      \"enabled\": false,\n      \"trigger\": \"manual\",\n      \"schedule\": null,\n      \"orchestrators\": [\n        \"aria_automation\"\n      ]\n    }\n  ],\n  \"resource_usage\": {\n    \"available\": true,\n    \"cpu_percent\": 8.9,\n    \"memory_percent\": 17.0,\n    \"disk_percent\": 31.3\n  }\n}"
+    },
+    {
+      "name": "quantum_autorun_dry_run",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.36,
+      "detail": "rc=0 | stdout=Validated 4 job(s): heart_quick, ionosphere_quick, azure_quantinuum_simulator, azure_ionq_qpu_test"
+    },
+    {
+      "name": "repo_automation_status",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 1.59,
+      "detail": "rc=0 | stdout=110) (\ud83e\udde9 deps)\n  \u274c Quantum Computing Workflows (PID 75111) (\ud83e\udde9 deps)\n  \u274c Model Evaluation System (\u26a0\ufe0f deps)\n  \u274c Dataset Auto-Discovery (Integrated in training) (\ud83e\udde9 deps)\n  \u274c Status Dashboard (\ud83e\udde9 deps)\n  \u274c Backup Manager (\ud83e\udde9 deps)\n\n\u26a0\ufe0f  Recent Errors (1):\n  - Dependencies still missing after install (evaluation): scikit-learn\n================================================================================"
+    },
+    {
+      "name": "chat_cli_local_once",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 3.05,
+      "detail": "rc=0 | stdout=Provider: local | Model: local-echo\nassistant> I'm running in local fallback mode. Set AZURE_OPENAI_API_KEY, OPENAI_API_KEY, or start LM Studio / Ollama to enable full AI responses."
+    },
+    {
+      "name": "functions_ai_status_endpoint",
+      "status": "skipped",
+      "critical": false,
+      "duration_sec": 0.01,
+      "detail": "functions host not running (non-strict mode)"
+    }
+  ]
+}
+
+[ci] Running Integration Contract Unit Tests
+
+[ci] Results saved: /workspaces/Aria/data_out/ci_orchestrator/ci_results.json
+[ci] Summary: 1/1 passed
+
+[ci] Running Integration Contract Unit Tests
+
+[ci] Results saved: /workspaces/Aria/data_out/ci_orchestrator/ci_results.json
+[ci] Summary: 1/1 passed
+
+[ci] ========================================
+[ci] Validating All Orchestrators
+[ci] ========================================
+
+[ci] Validating: autotrain
+[ci] Validating: quantum_autorun
+[ci] Validating: evaluation_autorun
+
+[ci] Results saved: /workspaces/Aria/data_out/ci_orchestrator/ci_results.json
+[ci] Summary: 3/3 passed
+[integration_contract_gate] passed
+
+[ci] ========================================
+[ci] Validating All Orchestrators
+[ci] ========================================
+
+[ci] Validating: autotrain
+[ci] Validating: quantum_autorun
+[ci] Validating: evaluation_autorun
+
+[ci] Results saved: /workspaces/Aria/data_out/ci_orchestrator/ci_results.json
+[ci] Summary: 3/3 passed
+[integration_contract_gate] passed
+................................................................         [100%]...................................
+64 passed in 9.91s
+.............................         [100%]=== 2026-03-27T04:17:02+00:00 cycle end ===
+
+64 passed in 9.00s
+=== 2026-03-27T04:17:02+00:00 cycle end ===
+=== 2026-03-27T04:18:04+00:00 cycle start ===
+=== 2026-03-27T04:18:05+00:00 cycle start ===
+{
+  "generated_at": "2026-03-27T04:18:11Z",
+  "run_id": "20260327T041811Z",
+  "config_path": null,
+  "config_paths": {
+    "master_orchestrator": "config/master_orchestrator.yaml",
+    "quantum_autorun": "config/quantum/quantum_autorun.yaml",
+    "evaluation_autorun": "config/evaluation/evaluation_autorun.yaml"
+  },
+  "strict_endpoints": false,
+  "total_steps": 8,
+  "succeeded": 7,
+  "warnings": 0,
+  "failed": 0,
+  "skipped": 1,
+  "errors": 0,
+  "passed": true,
+  "results": [
+    {
+      "name": "master_orchestrator_config",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.0,
+      "detail": "resolved=config/master_orchestrator.yaml"
+    },
+    {
+      "name": "quantum_autorun_config",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.01,
+      "detail": "resolved=config/quantum/quantum_autorun.yaml"
+    },
+    {
+      "name": "evaluation_autorun_config",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.01,
+      "detail": "resolved=config/evaluation/evaluation_autorun.yaml"
+    },
+    {
+      "name": "master_orchestrator_status",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 1.48,
+      "detail": "rc=0 | stdout=    \"schedule\": null,\n      \"orchestrators\": [\n        \"aria_automation\"\n      ]\n    },\n    {\n      \"name\": \"aria_server_only\",\n      \"enabled\": false,\n      \"trigger\": \"manual\",\n      \"schedule\": null,\n      \"orchestrators\": [\n        \"aria_automation\"\n      ]\n    }\n  ],\n  \"resource_usage\": {\n    \"available\": true,\n    \"cpu_percent\": 9.2,\n    \"memory_percent\": 17.4,\n    \"disk_percent\": 31.4\n  }\n}"
+    },
+    {
+      "name": "quantum_autorun_dry_run",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.55,
+      "detail": "rc=0 | stdout=Validated 4 job(s): heart_quick, ionosphere_quick, azure_quantinuum_simulator, azure_ionq_qpu_test"
+    },
+    {
+      "name": "repo_automation_status",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.86,
+      "detail": "rc=0 | stdout=110) (\ud83e\udde9 deps)\n  \u274c Quantum Computing Workflows (PID 75111) (\ud83e\udde9 deps)\n  \u274c Model Evaluation System (\u26a0\ufe0f deps)\n  \u274c Dataset Auto-Discovery (Integrated in training) (\ud83e\udde9 deps)\n  \u274c Status Dashboard (\ud83e\udde9 deps)\n  \u274c Backup Manager (\ud83e\udde9 deps)\n\n\u26a0\ufe0f  Recent Errors (1):\n  - Dependencies still missing after install (evaluation): scikit-learn\n================================================================================"
+    },
+    {
+      "name": "chat_cli_local_once",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 3.52,
+      "detail": "rc=0 | stdout=Provider: local | Model: local-echo\nassistant> I'm running in local fallback mode. Set AZURE_OPENAI_API_KEY, OPENAI_API_KEY, or start LM Studio / Ollama to enable full AI responses."
+    },
+    {
+      "name": "functions_ai_status_endpoint",
+      "status": "skipped",
+      "critical": false,
+      "duration_sec": 0.01,
+      "detail": "functions host not running (non-strict mode)"
+    }
+  ]
+}
+{
+  "generated_at": "2026-03-27T04:18:14Z",
+  "run_id": "20260327T041814Z",
+  "config_path": null,
+  "config_paths": {
+    "master_orchestrator": "config/master_orchestrator.yaml",
+    "quantum_autorun": "config/quantum/quantum_autorun.yaml",
+    "evaluation_autorun": "config/evaluation/evaluation_autorun.yaml"
+  },
+  "strict_endpoints": false,
+  "total_steps": 8,
+  "succeeded": 7,
+  "warnings": 0,
+  "failed": 0,
+  "skipped": 1,
+  "errors": 0,
+  "passed": true,
+  "results": [
+    {
+      "name": "master_orchestrator_config",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.01,
+      "detail": "resolved=config/master_orchestrator.yaml"
+    },
+    {
+      "name": "quantum_autorun_config",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.01,
+      "detail": "resolved=config/quantum/quantum_autorun.yaml"
+    },
+    {
+      "name": "evaluation_autorun_config",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.01,
+      "detail": "resolved=config/evaluation/evaluation_autorun.yaml"
+    },
+    {
+      "name": "master_orchestrator_status",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 1.4,
+      "detail": "rc=0 | stdout=    \"schedule\": null,\n      \"orchestrators\": [\n        \"aria_automation\"\n      ]\n    },\n    {\n      \"name\": \"aria_server_only\",\n      \"enabled\": false,\n      \"trigger\": \"manual\",\n      \"schedule\": null,\n      \"orchestrators\": [\n        \"aria_automation\"\n      ]\n    }\n  ],\n  \"resource_usage\": {\n    \"available\": true,\n    \"cpu_percent\": 8.4,\n    \"memory_percent\": 17.3,\n    \"disk_percent\": 31.3\n  }\n}"
+    },
+    {
+      "name": "quantum_autorun_dry_run",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.61,
+      "detail": "rc=0 | stdout=Validated 4 job(s): heart_quick, ionosphere_quick, azure_quantinuum_simulator, azure_ionq_qpu_test"
+    },
+    {
+      "name": "repo_automation_status",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.78,
+      "detail": "rc=0 | stdout=110) (\ud83e\udde9 deps)\n  \u274c Quantum Computing Workflows (PID 75111) (\ud83e\udde9 deps)\n  \u274c Model Evaluation System (\u26a0\ufe0f deps)\n  \u274c Dataset Auto-Discovery (Integrated in training) (\ud83e\udde9 deps)\n  \u274c Status Dashboard (\ud83e\udde9 deps)\n  \u274c Backup Manager (\ud83e\udde9 deps)\n\n\u26a0\ufe0f  Recent Errors (1):\n  - Dependencies still missing after install (evaluation): scikit-learn\n================================================================================"
+    },
+    {
+      "name": "chat_cli_local_once",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 5.39,
+      "detail": "rc=0 | stdout=Provider: local | Model: local-echo\nassistant> I'm running in local fallback mode. Set AZURE_OPENAI_API_KEY, OPENAI_API_KEY, or start LM Studio / Ollama to enable full AI responses."
+    },
+    {
+      "name": "functions_ai_status_endpoint",
+      "status": "skipped",
+      "critical": false,
+      "duration_sec": 0.03,
+      "detail": "functions host not running (non-strict mode)"
+    }
+  ]
+}
+
+[ci] Running Integration Contract Unit Tests
+
+[ci] Results saved: /workspaces/Aria/data_out/ci_orchestrator/ci_results.json
+[ci] Summary: 1/1 passed
+
+[ci] ========================================
+[ci] Validating All Orchestrators
+[ci] ========================================
+
+[ci] Validating: autotrain
+[ci] Validating: quantum_autorun
+[ci] Validating: evaluation_autorun
+
+[ci] Results saved: /workspaces/Aria/data_out/ci_orchestrator/ci_results.json
+[ci] Summary: 3/3 passed
+[integration_contract_gate] passed
+
+[ci] Running Integration Contract Unit Tests
+
+[ci] Results saved: /workspaces/Aria/data_out/ci_orchestrator/ci_results.json
+[ci] Summary: 1/1 passed
+
+[ci] ========================================
+[ci] Validating All Orchestrators
+[ci] ========================================
+
+[ci] Validating: autotrain
+[ci] Validating: quantum_autorun
+[ci] Validating: evaluation_autorun
+
+[ci] Results saved: /workspaces/Aria/data_out/ci_orchestrator/ci_results.json
+[ci] Summary: 3/3 passed
+[integration_contract_gate] passed
+................................................................         [100%]
+64 passed in 15.22s
+=== 2026-03-27T04:18:51+00:00 cycle end ===
+................................................................         [100%]
+64 passed in 15.71s
+=== 2026-03-27T04:18:54+00:00 cycle end ===
+=== 2026-03-27T04:19:53+00:00 cycle start ===
+=== 2026-03-27T04:19:57+00:00 cycle start ===
+{
+  "generated_at": "2026-03-27T04:20:02Z",
+  "run_id": "20260327T042002Z",
+  "config_path": null,
+  "config_paths": {
+    "master_orchestrator": "config/master_orchestrator.yaml",
+    "quantum_autorun": "config/quantum/quantum_autorun.yaml",
+    "evaluation_autorun": "config/evaluation/evaluation_autorun.yaml"
+  },
+  "strict_endpoints": false,
+  "total_steps": 8,
+  "succeeded": 7,
+  "warnings": 0,
+  "failed": 0,
+  "skipped": 1,
+  "errors": 0,
+  "passed": true,
+  "results": [
+    {
+      "name": "master_orchestrator_config",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.01,
+      "detail": "resolved=config/master_orchestrator.yaml"
+    },
+    {
+      "name": "quantum_autorun_config",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.01,
+      "detail": "resolved=config/quantum/quantum_autorun.yaml"
+    },
+    {
+      "name": "evaluation_autorun_config",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.02,
+      "detail": "resolved=config/evaluation/evaluation_autorun.yaml"
+    },
+    {
+      "name": "master_orchestrator_status",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 1.97,
+      "detail": "rc=0 | stdout=    \"schedule\": null,\n      \"orchestrators\": [\n        \"aria_automation\"\n      ]\n    },\n    {\n      \"name\": \"aria_server_only\",\n      \"enabled\": false,\n      \"trigger\": \"manual\",\n      \"schedule\": null,\n      \"orchestrators\": [\n        \"aria_automation\"\n      ]\n    }\n  ],\n  \"resource_usage\": {\n    \"available\": true,\n    \"cpu_percent\": 9.6,\n    \"memory_percent\": 17.0,\n    \"disk_percent\": 31.5\n  }\n}"
+    },
+    {
+      "name": "quantum_autorun_dry_run",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.52,
+      "detail": "rc=0 | stdout=Validated 4 job(s): heart_quick, ionosphere_quick, azure_quantinuum_simulator, azure_ionq_qpu_test"
+    },
+    {
+      "name": "repo_automation_status",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 1.05,
+      "detail": "rc=0 | stdout=110) (\ud83e\udde9 deps)\n  \u274c Quantum Computing Workflows (PID 75111) (\ud83e\udde9 deps)\n  \u274c Model Evaluation System (\u26a0\ufe0f deps)\n  \u274c Dataset Auto-Discovery (Integrated in training) (\ud83e\udde9 deps)\n  \u274c Status Dashboard (\ud83e\udde9 deps)\n  \u274c Backup Manager (\ud83e\udde9 deps)\n\n\u26a0\ufe0f  Recent Errors (1):\n  - Dependencies still missing after install (evaluation): scikit-learn\n================================================================================"
+    },
+    {
+      "name": "chat_cli_local_once",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 4.9,
+      "detail": "rc=0 | stdout=Provider: local | Model: local-echo\nassistant> I'm running in local fallback mode. Set AZURE_OPENAI_API_KEY, OPENAI_API_KEY, or start LM Studio / Ollama to enable full AI responses."
+    },
+    {
+      "name": "functions_ai_status_endpoint",
+      "status": "skipped",
+      "critical": false,
+      "duration_sec": 0.02,
+      "detail": "functions host not running (non-strict mode)"
+    }
+  ]
+}
+{
+  "generated_at": "2026-03-27T04:20:07Z",
+  "run_id": "20260327T042007Z",
+  "config_path": null,
+  "config_paths": {
+    "master_orchestrator": "config/master_orchestrator.yaml",
+    "quantum_autorun": "config/quantum/quantum_autorun.yaml",
+    "evaluation_autorun": "config/evaluation/evaluation_autorun.yaml"
+  },
+  "strict_endpoints": false,
+  "total_steps": 8,
+  "succeeded": 7,
+  "warnings": 0,
+  "failed": 0,
+  "skipped": 1,
+  "errors": 0,
+  "passed": true,
+  "results": [
+    {
+      "name": "master_orchestrator_config",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.03,
+      "detail": "resolved=config/master_orchestrator.yaml"
+    },
+    {
+      "name": "quantum_autorun_config",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.03,
+      "detail": "resolved=config/quantum/quantum_autorun.yaml"
+    },
+    {
+      "name": "evaluation_autorun_config",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.03,
+      "detail": "resolved=config/evaluation/evaluation_autorun.yaml"
+    },
+    {
+      "name": "master_orchestrator_status",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 2.68,
+      "detail": "rc=0 | stdout=    \"schedule\": null,\n      \"orchestrators\": [\n        \"aria_automation\"\n      ]\n    },\n    {\n      \"name\": \"aria_server_only\",\n      \"enabled\": false,\n      \"trigger\": \"manual\",\n      \"schedule\": null,\n      \"orchestrators\": [\n        \"aria_automation\"\n      ]\n    }\n  ],\n  \"resource_usage\": {\n    \"available\": true,\n    \"cpu_percent\": 6.9,\n    \"memory_percent\": 17.1,\n    \"disk_percent\": 31.5\n  }\n}"
+    },
+    {
+      "name": "quantum_autorun_dry_run",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.7,
+      "detail": "rc=0 | stdout=Validated 4 job(s): heart_quick, ionosphere_quick, azure_quantinuum_simulator, azure_ionq_qpu_test"
+    },
+    {
+      "name": "repo_automation_status",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 1.18,
+      "detail": "rc=0 | stdout=110) (\ud83e\udde9 deps)\n  \u274c Quantum Computing Workflows (PID 75111) (\ud83e\udde9 deps)\n  \u274c Model Evaluation System (\u26a0\ufe0f deps)\n  \u274c Dataset Auto-Discovery (Integrated in training) (\ud83e\udde9 deps)\n  \u274c Status Dashboard (\ud83e\udde9 deps)\n  \u274c Backup Manager (\ud83e\udde9 deps)\n\n\u26a0\ufe0f  Recent Errors (1):\n  - Dependencies still missing after install (evaluation): scikit-learn\n================================================================================"
+    },
+    {
+      "name": "chat_cli_local_once",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 4.79,
+      "detail": "rc=0 | stdout=Provider: local | Model: local-echo\nassistant> Offline mode active. I can process Aria commands but can't generate AI responses without a configured provider."
+    },
+    {
+      "name": "functions_ai_status_endpoint",
+      "status": "skipped",
+      "critical": false,
+      "duration_sec": 0.01,
+      "detail": "functions host not running (non-strict mode)"
+    }
+  ]
+}
+
+[ci] Running Integration Contract Unit Tests
+
+[ci] Results saved: /workspaces/Aria/data_out/ci_orchestrator/ci_results.json
+[ci] Summary: 1/1 passed
+
+[ci] ========================================
+[ci] Validating All Orchestrators
+[ci] ========================================
+
+[ci] Validating: autotrain
+[ci] Validating: quantum_autorun
+[ci] Validating: evaluation_autorun
+
+[ci] Results saved: /workspaces/Aria/data_out/ci_orchestrator/ci_results.json
+[ci] Summary: 3/3 passed
+[integration_contract_gate] passed
+
+[ci] Running Integration Contract Unit Tests
+
+[ci] Results saved: /workspaces/Aria/data_out/ci_orchestrator/ci_results.json
+[ci] Summary: 1/1 passed
+
+[ci] ========================================
+[ci] Validating All Orchestrators
+[ci] ========================================
+
+[ci] Validating: autotrain
+[ci] Validating: quantum_autorun
+[ci] Validating: evaluation_autorun
+
+[ci] Results saved: /workspaces/Aria/data_out/ci_orchestrator/ci_results.json
+[ci] Summary: 3/3 passed
+[integration_contract_gate] passed
+................................................................         [100%]
+64 passed in 18.43s
+=== 2026-03-27T04:20:51+00:00 cycle end ===
+................................................................         [100%]
+64 passed in 17.16s
+=== 2026-03-27T04:20:54+00:00 cycle end ===
+=== 2026-03-27T04:21:53+00:00 cycle start ===
+=== 2026-03-27T04:21:56+00:00 cycle start ===
+{
+  "generated_at": "2026-03-27T04:22:00Z",
+  "run_id": "20260327T042200Z",
+  "config_path": null,
+  "config_paths": {
+    "master_orchestrator": "config/master_orchestrator.yaml",
+    "quantum_autorun": "config/quantum/quantum_autorun.yaml",
+    "evaluation_autorun": "config/evaluation/evaluation_autorun.yaml"
+  },
+  "strict_endpoints": false,
+  "total_steps": 8,
+  "succeeded": 7,
+  "warnings": 0,
+  "failed": 0,
+  "skipped": 1,
+  "errors": 0,
+  "passed": true,
+  "results": [
+    {
+      "name": "master_orchestrator_config",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.02,
+      "detail": "resolved=config/master_orchestrator.yaml"
+    },
+    {
+      "name": "quantum_autorun_config",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.01,
+      "detail": "resolved=config/quantum/quantum_autorun.yaml"
+    },
+    {
+      "name": "evaluation_autorun_config",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.02,
+      "detail": "resolved=config/evaluation/evaluation_autorun.yaml"
+    },
+    {
+      "name": "master_orchestrator_status",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 1.97,
+      "detail": "rc=0 | stdout=    \"schedule\": null,\n      \"orchestrators\": [\n        \"aria_automation\"\n      ]\n    },\n    {\n      \"name\": \"aria_server_only\",\n      \"enabled\": false,\n      \"trigger\": \"manual\",\n      \"schedule\": null,\n      \"orchestrators\": [\n        \"aria_automation\"\n      ]\n    }\n  ],\n  \"resource_usage\": {\n    \"available\": true,\n    \"cpu_percent\": 6.6,\n    \"memory_percent\": 16.8,\n    \"disk_percent\": 31.5\n  }\n}"
+    },
+    {
+      "name": "quantum_autorun_dry_run",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.32,
+      "detail": "rc=0 | stdout=Validated 4 job(s): heart_quick, ionosphere_quick, azure_quantinuum_simulator, azure_ionq_qpu_test"
+    },
+    {
+      "name": "repo_automation_status",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.65,
+      "detail": "rc=0 | stdout=110) (\ud83e\udde9 deps)\n  \u274c Quantum Computing Workflows (PID 75111) (\ud83e\udde9 deps)\n  \u274c Model Evaluation System (\u26a0\ufe0f deps)\n  \u274c Dataset Auto-Discovery (Integrated in training) (\ud83e\udde9 deps)\n  \u274c Status Dashboard (\ud83e\udde9 deps)\n  \u274c Backup Manager (\ud83e\udde9 deps)\n\n\u26a0\ufe0f  Recent Errors (1):\n  - Dependencies still missing after install (evaluation): scikit-learn\n================================================================================"
+    },
+    {
+      "name": "chat_cli_local_once",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 3.64,
+      "detail": "rc=0 | stdout=Provider: local | Model: local-echo\nassistant> I'm running in local fallback mode. Set AZURE_OPENAI_API_KEY, OPENAI_API_KEY, or start LM Studio / Ollama to enable full AI responses."
+    },
+    {
+      "name": "functions_ai_status_endpoint",
+      "status": "skipped",
+      "critical": false,
+      "duration_sec": 0.01,
+      "detail": "functions host not running (non-strict mode)"
+    }
+  ]
+}
+{
+  "generated_at": "2026-03-27T04:22:03Z",
+  "run_id": "20260327T042203Z",
+  "config_path": null,
+  "config_paths": {
+    "master_orchestrator": "config/master_orchestrator.yaml",
+    "quantum_autorun": "config/quantum/quantum_autorun.yaml",
+    "evaluation_autorun": "config/evaluation/evaluation_autorun.yaml"
+  },
+  "strict_endpoints": false,
+  "total_steps": 8,
+  "succeeded": 7,
+  "warnings": 0,
+  "failed": 0,
+  "skipped": 1,
+  "errors": 0,
+  "passed": true,
+  "results": [
+    {
+      "name": "master_orchestrator_config",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.01,
+      "detail": "resolved=config/master_orchestrator.yaml"
+    },
+    {
+      "name": "quantum_autorun_config",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.01,
+      "detail": "resolved=config/quantum/quantum_autorun.yaml"
+    },
+    {
+      "name": "evaluation_autorun_config",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.01,
+      "detail": "resolved=config/evaluation/evaluation_autorun.yaml"
+    },
+    {
+      "name": "master_orchestrator_status",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 1.71,
+      "detail": "rc=0 | stdout=    \"schedule\": null,\n      \"orchestrators\": [\n        \"aria_automation\"\n      ]\n    },\n    {\n      \"name\": \"aria_server_only\",\n      \"enabled\": false,\n      \"trigger\": \"manual\",\n      \"schedule\": null,\n      \"orchestrators\": [\n        \"aria_automation\"\n      ]\n    }\n  ],\n  \"resource_usage\": {\n    \"available\": true,\n    \"cpu_percent\": 5.7,\n    \"memory_percent\": 16.9,\n    \"disk_percent\": 31.6\n  }\n}"
+    },
+    {
+      "name": "quantum_autorun_dry_run",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.4,
+      "detail": "rc=0 | stdout=Validated 4 job(s): heart_quick, ionosphere_quick, azure_quantinuum_simulator, azure_ionq_qpu_test"
+    },
+    {
+      "name": "repo_automation_status",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.86,
+      "detail": "rc=0 | stdout=110) (\ud83e\udde9 deps)\n  \u274c Quantum Computing Workflows (PID 75111) (\ud83e\udde9 deps)\n  \u274c Model Evaluation System (\u26a0\ufe0f deps)\n  \u274c Dataset Auto-Discovery (Integrated in training) (\ud83e\udde9 deps)\n  \u274c Status Dashboard (\ud83e\udde9 deps)\n  \u274c Backup Manager (\ud83e\udde9 deps)\n\n\u26a0\ufe0f  Recent Errors (1):\n  - Dependencies still missing after install (evaluation): scikit-learn\n================================================================================"
+    },
+    {
+      "name": "chat_cli_local_once",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 3.5,
+      "detail": "rc=0 | stdout=Provider: local | Model: local-echo\nassistant> I'm running in local fallback mode. Set AZURE_OPENAI_API_KEY, OPENAI_API_KEY, or start LM Studio / Ollama to enable full AI responses."
+    },
+    {
+      "name": "functions_ai_status_endpoint",
+      "status": "skipped",
+      "critical": false,
+      "duration_sec": 0.02,
+      "detail": "functions host not running (non-strict mode)"
+    }
+  ]
+}
+
+[ci] Running Integration Contract Unit Tests
+
+[ci] Results saved: /workspaces/Aria/data_out/ci_orchestrator/ci_results.json
+[ci] Summary: 1/1 passed
+
+[ci] ========================================
+[ci] Validating All Orchestrators
+[ci] ========================================
+
+[ci] Validating: autotrain
+[ci] Validating: quantum_autorun
+[ci] Validating: evaluation_autorun
+
+[ci] Results saved: /workspaces/Aria/data_out/ci_orchestrator/ci_results.json
+[ci] Summary: 3/3 passed
+[integration_contract_gate] passed
+
+[ci] Running Integration Contract Unit Tests
+
+[ci] Results saved: /workspaces/Aria/data_out/ci_orchestrator/ci_results.json
+[ci] Summary: 1/1 passed
+
+[ci] ========================================
+[ci] Validating All Orchestrators
+[ci] ========================================
+
+[ci] Validating: autotrain
+[ci] Validating: quantum_autorun
+[ci] Validating: evaluation_autorun
+
+[ci] Results saved: /workspaces/Aria/data_out/ci_orchestrator/ci_results.json
+[ci] Summary: 3/3 passed
+[integration_contract_gate] passed
+................................................................         [100%]
+64 passed in 11.74s
+=== 2026-03-27T04:22:31+00:00 cycle end ===
+................................................................         [100%]
+64 passed in 14.57s
+=== 2026-03-27T04:22:37+00:00 cycle end ===
+=== 2026-03-27T04:23:33+00:00 cycle start ===
+=== 2026-03-27T04:23:38+00:00 cycle start ===
+{
+  "generated_at": "2026-03-27T04:23:44Z",
+  "run_id": "20260327T042344Z",
+  "config_path": null,
+  "config_paths": {
+    "master_orchestrator": "config/master_orchestrator.yaml",
+    "quantum_autorun": "config/quantum/quantum_autorun.yaml",
+    "evaluation_autorun": "config/evaluation/evaluation_autorun.yaml"
+  },
+  "strict_endpoints": false,
+  "total_steps": 8,
+  "succeeded": 7,
+  "warnings": 0,
+  "failed": 0,
+  "skipped": 1,
+  "errors": 0,
+  "passed": true,
+  "results": [
+    {
+      "name": "master_orchestrator_config",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.02,
+      "detail": "resolved=config/master_orchestrator.yaml"
+    },
+    {
+      "name": "quantum_autorun_config",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.03,
+      "detail": "resolved=config/quantum/quantum_autorun.yaml"
+    },
+    {
+      "name": "evaluation_autorun_config",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.02,
+      "detail": "resolved=config/evaluation/evaluation_autorun.yaml"
+    },
+    {
+      "name": "master_orchestrator_status",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 2.03,
+      "detail": "rc=0 | stdout=    \"schedule\": null,\n      \"orchestrators\": [\n        \"aria_automation\"\n      ]\n    },\n    {\n      \"name\": \"aria_server_only\",\n      \"enabled\": false,\n      \"trigger\": \"manual\",\n      \"schedule\": null,\n      \"orchestrators\": [\n        \"aria_automation\"\n      ]\n    }\n  ],\n  \"resource_usage\": {\n    \"available\": true,\n    \"cpu_percent\": 6.6,\n    \"memory_percent\": 16.8,\n    \"disk_percent\": 31.6\n  }\n}"
+    },
+    {
+      "name": "quantum_autorun_dry_run",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.77,
+      "detail": "rc=0 | stdout=Validated 4 job(s): heart_quick, ionosphere_quick, azure_quantinuum_simulator, azure_ionq_qpu_test"
+    },
+    {
+      "name": "repo_automation_status",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.79,
+      "detail": "rc=0 | stdout=110) (\ud83e\udde9 deps)\n  \u274c Quantum Computing Workflows (PID 75111) (\ud83e\udde9 deps)\n  \u274c Model Evaluation System (\u26a0\ufe0f deps)\n  \u274c Dataset Auto-Discovery (Integrated in training) (\ud83e\udde9 deps)\n  \u274c Status Dashboard (\ud83e\udde9 deps)\n  \u274c Backup Manager (\ud83e\udde9 deps)\n\n\u26a0\ufe0f  Recent Errors (1):\n  - Dependencies still missing after install (evaluation): scikit-learn\n================================================================================"
+    },
+    {
+      "name": "chat_cli_local_once",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 6.38,
+      "detail": "rc=0 | stdout=Provider: local | Model: local-echo\nassistant> I'm running in local fallback mode. Set AZURE_OPENAI_API_KEY, OPENAI_API_KEY, or start LM Studio / Ollama to enable full AI responses."
+    },
+    {
+      "name": "functions_ai_status_endpoint",
+      "status": "skipped",
+      "critical": false,
+      "duration_sec": 0.02,
+      "detail": "functions host not running (non-strict mode)"
+    }
+  ]
+}
+{
+  "generated_at": "2026-03-27T04:23:49Z",
+  "run_id": "20260327T042349Z",
+  "config_path": null,
+  "config_paths": {
+    "master_orchestrator": "config/master_orchestrator.yaml",
+    "quantum_autorun": "config/quantum/quantum_autorun.yaml",
+    "evaluation_autorun": "config/evaluation/evaluation_autorun.yaml"
+  },
+  "strict_endpoints": false,
+  "total_steps": 8,
+  "succeeded": 7,
+  "warnings": 0,
+  "failed": 0,
+  "skipped": 1,
+  "errors": 0,
+  "passed": true,
+  "results": [
+    {
+      "name": "master_orchestrator_config",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.04,
+      "detail": "resolved=config/master_orchestrator.yaml"
+    },
+    {
+      "name": "quantum_autorun_config",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.04,
+      "detail": "resolved=config/quantum/quantum_autorun.yaml"
+    },
+    {
+      "name": "evaluation_autorun_config",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.04,
+      "detail": "resolved=config/evaluation/evaluation_autorun.yaml"
+    },
+    {
+      "name": "master_orchestrator_status",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 2.47,
+      "detail": "rc=0 | stdout=    \"schedule\": null,\n      \"orchestrators\": [\n        \"aria_automation\"\n      ]\n    },\n    {\n      \"name\": \"aria_server_only\",\n      \"enabled\": false,\n      \"trigger\": \"manual\",\n      \"schedule\": null,\n      \"orchestrators\": [\n        \"aria_automation\"\n      ]\n    }\n  ],\n  \"resource_usage\": {\n    \"available\": true,\n    \"cpu_percent\": 9.6,\n    \"memory_percent\": 16.9,\n    \"disk_percent\": 31.6\n  }\n}"
+    },
+    {
+      "name": "quantum_autorun_dry_run",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.64,
+      "detail": "rc=0 | stdout=Validated 4 job(s): heart_quick, ionosphere_quick, azure_quantinuum_simulator, azure_ionq_qpu_test"
+    },
+    {
+      "name": "repo_automation_status",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 1.03,
+      "detail": "rc=0 | stdout=110) (\ud83e\udde9 deps)\n  \u274c Quantum Computing Workflows (PID 75111) (\ud83e\udde9 deps)\n  \u274c Model Evaluation System (\u26a0\ufe0f deps)\n  \u274c Dataset Auto-Discovery (Integrated in training) (\ud83e\udde9 deps)\n  \u274c Status Dashboard (\ud83e\udde9 deps)\n  \u274c Backup Manager (\ud83e\udde9 deps)\n\n\u26a0\ufe0f  Recent Errors (1):\n  - Dependencies still missing after install (evaluation): scikit-learn\n================================================================================"
+    },
+    {
+      "name": "chat_cli_local_once",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 4.32,
+      "detail": "rc=0 | stdout=Provider: local | Model: local-echo\nassistant> I'm running in local fallback mode. Set AZURE_OPENAI_API_KEY, OPENAI_API_KEY, or start LM Studio / Ollama to enable full AI responses."
+    },
+    {
+      "name": "functions_ai_status_endpoint",
+      "status": "skipped",
+      "critical": false,
+      "duration_sec": 0.02,
+      "detail": "functions host not running (non-strict mode)"
+    }
+  ]
+}
+
+[ci] Running Integration Contract Unit Tests
+
+[ci] Results saved: /workspaces/Aria/data_out/ci_orchestrator/ci_results.json
+[ci] Summary: 1/1 passed
+
+[ci] ========================================
+[ci] Validating All Orchestrators
+[ci] ========================================
+
+[ci] Validating: autotrain
+[ci] Validating: quantum_autorun
+[ci] Validating: evaluation_autorun
+
+[ci] Results saved: /workspaces/Aria/data_out/ci_orchestrator/ci_results.json
+[ci] Summary: 3/3 passed
+[integration_contract_gate] passed
+
+[ci] Running Integration Contract Unit Tests
+
+[ci] Results saved: /workspaces/Aria/data_out/ci_orchestrator/ci_results.json
+[ci] Summary: 1/1 passed
+
+[ci] ========================================
+[ci] Validating All Orchestrators
+[ci] ========================================
+
+[ci] Validating: autotrain
+[ci] Validating: quantum_autorun
+[ci] Validating: evaluation_autorun
+
+[ci] Results saved: /workspaces/Aria/data_out/ci_orchestrator/ci_results.json
+[ci] Summary: 3/3 passed
+[integration_contract_gate] passed
+................................................................         [100%]
+64 passed in 14.68s
+=== 2026-03-27T04:24:32+00:00 cycle end ===
+................................................................         [100%]
+64 passed in 15.26s
+=== 2026-03-27T04:24:37+00:00 cycle end ===
+=== 2026-03-27T04:25:34+00:00 cycle start ===
+=== 2026-03-27T04:25:39+00:00 cycle start ===
+{
+  "generated_at": "2026-03-27T04:25:46Z",
+  "run_id": "20260327T042546Z",
+  "config_path": null,
+  "config_paths": {
+    "master_orchestrator": "config/master_orchestrator.yaml",
+    "quantum_autorun": "config/quantum/quantum_autorun.yaml",
+    "evaluation_autorun": "config/evaluation/evaluation_autorun.yaml"
+  },
+  "strict_endpoints": false,
+  "total_steps": 8,
+  "succeeded": 7,
+  "warnings": 0,
+  "failed": 0,
+  "skipped": 1,
+  "errors": 0,
+  "passed": true,
+  "results": [
+    {
+      "name": "master_orchestrator_config",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.01,
+      "detail": "resolved=config/master_orchestrator.yaml"
+    },
+    {
+      "name": "quantum_autorun_config",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.01,
+      "detail": "resolved=config/quantum/quantum_autorun.yaml"
+    },
+    {
+      "name": "evaluation_autorun_config",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.02,
+      "detail": "resolved=config/evaluation/evaluation_autorun.yaml"
+    },
+    {
+      "name": "master_orchestrator_status",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 2.14,
+      "detail": "rc=0 | stdout=    \"schedule\": null,\n      \"orchestrators\": [\n        \"aria_automation\"\n      ]\n    },\n    {\n      \"name\": \"aria_server_only\",\n      \"enabled\": false,\n      \"trigger\": \"manual\",\n      \"schedule\": null,\n      \"orchestrators\": [\n        \"aria_automation\"\n      ]\n    }\n  ],\n  \"resource_usage\": {\n    \"available\": true,\n    \"cpu_percent\": 7.1,\n    \"memory_percent\": 16.9,\n    \"disk_percent\": 31.6\n  }\n}"
+    },
+    {
+      "name": "quantum_autorun_dry_run",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.84,
+      "detail": "rc=0 | stdout=Validated 4 job(s): heart_quick, ionosphere_quick, azure_quantinuum_simulator, azure_ionq_qpu_test"
+    },
+    {
+      "name": "repo_automation_status",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 2.16,
+      "detail": "rc=0 | stdout=110) (\ud83e\udde9 deps)\n  \u274c Quantum Computing Workflows (PID 75111) (\ud83e\udde9 deps)\n  \u274c Model Evaluation System (\u26a0\ufe0f deps)\n  \u274c Dataset Auto-Discovery (Integrated in training) (\ud83e\udde9 deps)\n  \u274c Status Dashboard (\ud83e\udde9 deps)\n  \u274c Backup Manager (\ud83e\udde9 deps)\n\n\u26a0\ufe0f  Recent Errors (1):\n  - Dependencies still missing after install (evaluation): scikit-learn\n================================================================================"
+    },
+    {
+      "name": "chat_cli_local_once",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 5.68,
+      "detail": "rc=0 | stdout=Provider: local | Model: local-echo\nassistant> Offline mode active. I can process Aria commands but can't generate AI responses without a configured provider."
+    },
+    {
+      "name": "functions_ai_status_endpoint",
+      "status": "skipped",
+      "critical": false,
+      "duration_sec": 0.02,
+      "detail": "functions host not running (non-strict mode)"
+    }
+  ]
+}
+{
+  "generated_at": "2026-03-27T04:25:50Z",
+  "run_id": "20260327T042550Z",
+  "config_path": null,
+  "config_paths": {
+    "master_orchestrator": "config/master_orchestrator.yaml",
+    "quantum_autorun": "config/quantum/quantum_autorun.yaml",
+    "evaluation_autorun": "config/evaluation/evaluation_autorun.yaml"
+  },
+  "strict_endpoints": false,
+  "total_steps": 8,
+  "succeeded": 7,
+  "warnings": 0,
+  "failed": 0,
+  "skipped": 1,
+  "errors": 0,
+  "passed": true,
+  "results": [
+    {
+      "name": "master_orchestrator_config",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.03,
+      "detail": "resolved=config/master_orchestrator.yaml"
+    },
+    {
+      "name": "quantum_autorun_config",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.02,
+      "detail": "resolved=config/quantum/quantum_autorun.yaml"
+    },
+    {
+      "name": "evaluation_autorun_config",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.01,
+      "detail": "resolved=config/evaluation/evaluation_autorun.yaml"
+    },
+    {
+      "name": "master_orchestrator_status",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 2.55,
+      "detail": "rc=0 | stdout=    \"schedule\": null,\n      \"orchestrators\": [\n        \"aria_automation\"\n      ]\n    },\n    {\n      \"name\": \"aria_server_only\",\n      \"enabled\": false,\n      \"trigger\": \"manual\",\n      \"schedule\": null,\n      \"orchestrators\": [\n        \"aria_automation\"\n      ]\n    }\n  ],\n  \"resource_usage\": {\n    \"available\": true,\n    \"cpu_percent\": 7.1,\n    \"memory_percent\": 16.9,\n    \"disk_percent\": 31.6\n  }\n}"
+    },
+    {
+      "name": "quantum_autorun_dry_run",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.73,
+      "detail": "rc=0 | stdout=Validated 4 job(s): heart_quick, ionosphere_quick, azure_quantinuum_simulator, azure_ionq_qpu_test"
+    },
+    {
+      "name": "repo_automation_status",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 1.13,
+      "detail": "rc=0 | stdout=110) (\ud83e\udde9 deps)\n  \u274c Quantum Computing Workflows (PID 75111) (\ud83e\udde9 deps)\n  \u274c Model Evaluation System (\u26a0\ufe0f deps)\n  \u274c Dataset Auto-Discovery (Integrated in training) (\ud83e\udde9 deps)\n  \u274c Status Dashboard (\ud83e\udde9 deps)\n  \u274c Backup Manager (\ud83e\udde9 deps)\n\n\u26a0\ufe0f  Recent Errors (1):\n  - Dependencies still missing after install (evaluation): scikit-learn\n================================================================================"
+    },
+    {
+      "name": "chat_cli_local_once",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 5.39,
+      "detail": "rc=0 | stdout=Provider: local | Model: local-echo\nassistant> I'm running in local fallback mode. Set AZURE_OPENAI_API_KEY, OPENAI_API_KEY, or start LM Studio / Ollama to enable full AI responses."
+    },
+    {
+      "name": "functions_ai_status_endpoint",
+      "status": "skipped",
+      "critical": false,
+      "duration_sec": 0.02,
+      "detail": "functions host not running (non-strict mode)"
+    }
+  ]
+}
+
+[ci] Running Integration Contract Unit Tests
+
+[ci] Results saved: /workspaces/Aria/data_out/ci_orchestrator/ci_results.json
+[ci] Summary: 1/1 passed
+
+[ci] ========================================
+[ci] Validating All Orchestrators
+[ci] ========================================
+
+[ci] Validating: autotrain
+[ci] Validating: quantum_autorun
+[ci] Validating: evaluation_autorun
+
+[ci] Results saved: /workspaces/Aria/data_out/ci_orchestrator/ci_results.json
+[ci] Summary: 3/3 passed
+[integration_contract_gate] passed
+
+[ci] Running Integration Contract Unit Tests
+
+[ci] Results saved: /workspaces/Aria/data_out/ci_orchestrator/ci_results.json
+[ci] Summary: 1/1 passed
+
+[ci] ========================================
+[ci] Validating All Orchestrators
+[ci] ========================================
+
+[ci] Validating: autotrain
+[ci] Validating: quantum_autorun
+[ci] Validating: evaluation_autorun
+
+[ci] Results saved: /workspaces/Aria/data_out/ci_orchestrator/ci_results.json
+[ci] Summary: 3/3 passed
+[integration_contract_gate] passed
+................................................................         [100%]
+64 passed in 18.66s
+=== 2026-03-27T04:26:36+00:00 cycle end ===
+................................................................         [100%]
+64 passed in 19.12s
+=== 2026-03-27T04:26:39+00:00 cycle end ===
+=== 2026-03-27T04:27:37+00:00 cycle start ===
+=== 2026-03-27T04:27:40+00:00 cycle start ===
+{
+  "generated_at": "2026-03-27T04:27:49Z",
+  "run_id": "20260327T042749Z",
+  "config_path": null,
+  "config_paths": {
+    "master_orchestrator": "config/master_orchestrator.yaml",
+    "quantum_autorun": "config/quantum/quantum_autorun.yaml",
+    "evaluation_autorun": "config/evaluation/evaluation_autorun.yaml"
+  },
+  "strict_endpoints": false,
+  "total_steps": 8,
+  "succeeded": 7,
+  "warnings": 0,
+  "failed": 0,
+  "skipped": 1,
+  "errors": 0,
+  "passed": true,
+  "results": [
+    {
+      "name": "master_orchestrator_config",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.05,
+      "detail": "resolved=config/master_orchestrator.yaml"
+    },
+    {
+      "name": "quantum_autorun_config",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.03,
+      "detail": "resolved=config/quantum/quantum_autorun.yaml"
+    },
+    {
+      "name": "evaluation_autorun_config",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.04,
+      "detail": "resolved=config/evaluation/evaluation_autorun.yaml"
+    },
+    {
+      "name": "master_orchestrator_status",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 3.22,
+      "detail": "rc=0 | stdout=    \"schedule\": null,\n      \"orchestrators\": [\n        \"aria_automation\"\n      ]\n    },\n    {\n      \"name\": \"aria_server_only\",\n      \"enabled\": false,\n      \"trigger\": \"manual\",\n      \"schedule\": null,\n      \"orchestrators\": [\n        \"aria_automation\"\n      ]\n    }\n  ],\n  \"resource_usage\": {\n    \"available\": true,\n    \"cpu_percent\": 6.7,\n    \"memory_percent\": 17.1,\n    \"disk_percent\": 31.7\n  }\n}"
+    },
+    {
+      "name": "quantum_autorun_dry_run",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.63,
+      "detail": "rc=0 | stdout=Validated 4 job(s): heart_quick, ionosphere_quick, azure_quantinuum_simulator, azure_ionq_qpu_test"
+    },
+    {
+      "name": "repo_automation_status",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 1.31,
+      "detail": "rc=0 | stdout=110) (\ud83e\udde9 deps)\n  \u274c Quantum Computing Workflows (PID 75111) (\ud83e\udde9 deps)\n  \u274c Model Evaluation System (\u26a0\ufe0f deps)\n  \u274c Dataset Auto-Discovery (Integrated in training) (\ud83e\udde9 deps)\n  \u274c Status Dashboard (\ud83e\udde9 deps)\n  \u274c Backup Manager (\ud83e\udde9 deps)\n\n\u26a0\ufe0f  Recent Errors (1):\n  - Dependencies still missing after install (evaluation): scikit-learn\n================================================================================"
+    },
+    {
+      "name": "chat_cli_local_once",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 4.37,
+      "detail": "rc=0 | stdout=Provider: local | Model: local-echo\nassistant> Offline mode active. I can process Aria commands but can't generate AI responses without a configured provider."
+    },
+    {
+      "name": "functions_ai_status_endpoint",
+      "status": "skipped",
+      "critical": false,
+      "duration_sec": 0.04,
+      "detail": "functions host not running (non-strict mode)"
+    }
+  ]
+}
+{
+  "generated_at": "2026-03-27T04:27:52Z",
+  "run_id": "20260327T042752Z",
+  "config_path": null,
+  "config_paths": {
+    "master_orchestrator": "config/master_orchestrator.yaml",
+    "quantum_autorun": "config/quantum/quantum_autorun.yaml",
+    "evaluation_autorun": "config/evaluation/evaluation_autorun.yaml"
+  },
+  "strict_endpoints": false,
+  "total_steps": 8,
+  "succeeded": 7,
+  "warnings": 0,
+  "failed": 0,
+  "skipped": 1,
+  "errors": 0,
+  "passed": true,
+  "results": [
+    {
+      "name": "master_orchestrator_config",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.01,
+      "detail": "resolved=config/master_orchestrator.yaml"
+    },
+    {
+      "name": "quantum_autorun_config",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.02,
+      "detail": "resolved=config/quantum/quantum_autorun.yaml"
+    },
+    {
+      "name": "evaluation_autorun_config",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.01,
+      "detail": "resolved=config/evaluation/evaluation_autorun.yaml"
+    },
+    {
+      "name": "master_orchestrator_status",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 2.07,
+      "detail": "rc=0 | stdout=    \"schedule\": null,\n      \"orchestrators\": [\n        \"aria_automation\"\n      ]\n    },\n    {\n      \"name\": \"aria_server_only\",\n      \"enabled\": false,\n      \"trigger\": \"manual\",\n      \"schedule\": null,\n      \"orchestrators\": [\n        \"aria_automation\"\n      ]\n    }\n  ],\n  \"resource_usage\": {\n    \"available\": true,\n    \"cpu_percent\": 5.0,\n    \"memory_percent\": 17.1,\n    \"disk_percent\": 31.7\n  }\n}"
+    },
+    {
+      "name": "quantum_autorun_dry_run",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.82,
+      "detail": "rc=0 | stdout=Validated 4 job(s): heart_quick, ionosphere_quick, azure_quantinuum_simulator, azure_ionq_qpu_test"
+    },
+    {
+      "name": "repo_automation_status",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.87,
+      "detail": "rc=0 | stdout=110) (\ud83e\udde9 deps)\n  \u274c Quantum Computing Workflows (PID 75111) (\ud83e\udde9 deps)\n  \u274c Model Evaluation System (\u26a0\ufe0f deps)\n  \u274c Dataset Auto-Discovery (Integrated in training) (\ud83e\udde9 deps)\n  \u274c Status Dashboard (\ud83e\udde9 deps)\n  \u274c Backup Manager (\ud83e\udde9 deps)\n\n\u26a0\ufe0f  Recent Errors (1):\n  - Dependencies still missing after install (evaluation): scikit-learn\n================================================================================"
+    },
+    {
+      "name": "chat_cli_local_once",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 5.08,
+      "detail": "rc=0 | stdout=Provider: local | Model: local-echo\nassistant> Offline mode active. I can process Aria commands but can't generate AI responses without a configured provider."
+    },
+    {
+      "name": "functions_ai_status_endpoint",
+      "status": "skipped",
+      "critical": false,
+      "duration_sec": 0.02,
+      "detail": "functions host not running (non-strict mode)"
+    }
+  ]
+}
+
+[ci] Running Integration Contract Unit Tests
+
+[ci] Results saved: /workspaces/Aria/data_out/ci_orchestrator/ci_results.json
+[ci] Summary: 1/1 passed
+
+[ci] Running Integration Contract Unit Tests
+
+[ci] Results saved: /workspaces/Aria/data_out/ci_orchestrator/ci_results.json
+[ci] Summary: 1/1 passed
+
+[ci] ========================================
+[ci] Validating All Orchestrators
+[ci] ========================================
+
+[ci] Validating: autotrain
+[ci] Validating: quantum_autorun
+[ci] Validating: evaluation_autorun
+
+[ci] Results saved: /workspaces/Aria/data_out/ci_orchestrator/ci_results.json
+[ci] Summary: 3/3 passed
+[integration_contract_gate] passed
+
+[ci] ========================================
+[ci] Validating All Orchestrators
+[ci] ========================================
+
+[ci] Validating: autotrain
+[ci] Validating: quantum_autorun
+[ci] Validating: evaluation_autorun
+
+[ci] Results saved: /workspaces/Aria/data_out/ci_orchestrator/ci_results.json
+[ci] Summary: 3/3 passed
+[integration_contract_gate] passed
+.......................................................................         [100%].................................
+64 passed in 15.78s
+........................         [100%]=== 2026-03-27T04:28:38+00:00 cycle end ===
+
+64 passed in 15.20s
+=== 2026-03-27T04:28:39+00:00 cycle end ===
+=== 2026-03-27T04:29:40+00:00 cycle start ===
+=== 2026-03-27T04:29:41+00:00 cycle start ===
+{
+  "generated_at": "2026-03-27T04:29:50Z",
+  "run_id": "20260327T042950Z",
+  "config_path": null,
+  "config_paths": {
+    "master_orchestrator": "config/master_orchestrator.yaml",
+    "quantum_autorun": "config/quantum/quantum_autorun.yaml",
+    "evaluation_autorun": "config/evaluation/evaluation_autorun.yaml"
+  },
+  "strict_endpoints": false,
+  "total_steps": 8,
+  "succeeded": 7,
+  "warnings": 0,
+  "failed": 0,
+  "skipped": 1,
+  "errors": 0,
+  "passed": true,
+  "results": [
+    {
+      "name": "master_orchestrator_config",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.02,
+      "detail": "resolved=config/master_orchestrator.yaml"
+    },
+    {
+      "name": "quantum_autorun_config",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.03,
+      "detail": "resolved=config/quantum/quantum_autorun.yaml"
+    },
+    {
+      "name": "evaluation_autorun_config",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.02,
+      "detail": "resolved=config/evaluation/evaluation_autorun.yaml"
+    },
+    {
+      "name": "master_orchestrator_status",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 2.38,
+      "detail": "rc=0 | stdout=    \"schedule\": null,\n      \"orchestrators\": [\n        \"aria_automation\"\n      ]\n    },\n    {\n      \"name\": \"aria_server_only\",\n      \"enabled\": false,\n      \"trigger\": \"manual\",\n      \"schedule\": null,\n      \"orchestrators\": [\n        \"aria_automation\"\n      ]\n    }\n  ],\n  \"resource_usage\": {\n    \"available\": true,\n    \"cpu_percent\": 6.6,\n    \"memory_percent\": 16.9,\n    \"disk_percent\": 31.7\n  }\n}"
+    },
+    {
+      "name": "quantum_autorun_dry_run",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.66,
+      "detail": "rc=0 | stdout=Validated 4 job(s): heart_quick, ionosphere_quick, azure_quantinuum_simulator, azure_ionq_qpu_test"
+    },
+    {
+      "name": "repo_automation_status",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 1.27,
+      "detail": "rc=0 | stdout=110) (\ud83e\udde9 deps)\n  \u274c Quantum Computing Workflows (PID 75111) (\ud83e\udde9 deps)\n  \u274c Model Evaluation System (\u26a0\ufe0f deps)\n  \u274c Dataset Auto-Discovery (Integrated in training) (\ud83e\udde9 deps)\n  \u274c Status Dashboard (\ud83e\udde9 deps)\n  \u274c Backup Manager (\ud83e\udde9 deps)\n\n\u26a0\ufe0f  Recent Errors (1):\n  - Dependencies still missing after install (evaluation): scikit-learn\n================================================================================"
+    },
+    {
+      "name": "chat_cli_local_once",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 4.27,
+      "detail": "rc=0 | stdout=Provider: local | Model: local-echo\nassistant> No live model detected. Run with `--provider lmstudio` (LM Studio running locally), `--provider ollama`, `--provider openai`, or `--provider azure`."
+    },
+    {
+      "name": "functions_ai_status_endpoint",
+      "status": "skipped",
+      "critical": false,
+      "duration_sec": 0.02,
+      "detail": "functions host not running (non-strict mode)"
+    }
+  ]
+}
+{
+  "generated_at": "2026-03-27T04:29:51Z",
+  "run_id": "20260327T042951Z",
+  "config_path": null,
+  "config_paths": {
+    "master_orchestrator": "config/master_orchestrator.yaml",
+    "quantum_autorun": "config/quantum/quantum_autorun.yaml",
+    "evaluation_autorun": "config/evaluation/evaluation_autorun.yaml"
+  },
+  "strict_endpoints": false,
+  "total_steps": 8,
+  "succeeded": 7,
+  "warnings": 0,
+  "failed": 0,
+  "skipped": 1,
+  "errors": 0,
+  "passed": true,
+  "results": [
+    {
+      "name": "master_orchestrator_config",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.01,
+      "detail": "resolved=config/master_orchestrator.yaml"
+    },
+    {
+      "name": "quantum_autorun_config",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.02,
+      "detail": "resolved=config/quantum/quantum_autorun.yaml"
+    },
+    {
+      "name": "evaluation_autorun_config",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.02,
+      "detail": "resolved=config/evaluation/evaluation_autorun.yaml"
+    },
+    {
+      "name": "master_orchestrator_status",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 2.27,
+      "detail": "rc=0 | stdout=    \"schedule\": null,\n      \"orchestrators\": [\n        \"aria_automation\"\n      ]\n    },\n    {\n      \"name\": \"aria_server_only\",\n      \"enabled\": false,\n      \"trigger\": \"manual\",\n      \"schedule\": null,\n      \"orchestrators\": [\n        \"aria_automation\"\n      ]\n    }\n  ],\n  \"resource_usage\": {\n    \"available\": true,\n    \"cpu_percent\": 8.1,\n    \"memory_percent\": 16.9,\n    \"disk_percent\": 31.7\n  }\n}"
+    },
+    {
+      "name": "quantum_autorun_dry_run",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.67,
+      "detail": "rc=0 | stdout=Validated 4 job(s): heart_quick, ionosphere_quick, azure_quantinuum_simulator, azure_ionq_qpu_test"
+    },
+    {
+      "name": "repo_automation_status",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 1.46,
+      "detail": "rc=0 | stdout=110) (\ud83e\udde9 deps)\n  \u274c Quantum Computing Workflows (PID 75111) (\ud83e\udde9 deps)\n  \u274c Model Evaluation System (\u26a0\ufe0f deps)\n  \u274c Dataset Auto-Discovery (Integrated in training) (\ud83e\udde9 deps)\n  \u274c Status Dashboard (\ud83e\udde9 deps)\n  \u274c Backup Manager (\ud83e\udde9 deps)\n\n\u26a0\ufe0f  Recent Errors (1):\n  - Dependencies still missing after install (evaluation): scikit-learn\n================================================================================"
+    },
+    {
+      "name": "chat_cli_local_once",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 4.64,
+      "detail": "rc=0 | stdout=Provider: local | Model: local-echo\nassistant> No live model detected. Run with `--provider lmstudio` (LM Studio running locally), `--provider ollama`, `--provider openai`, or `--provider azure`."
+    },
+    {
+      "name": "functions_ai_status_endpoint",
+      "status": "skipped",
+      "critical": false,
+      "duration_sec": 0.02,
+      "detail": "functions host not running (non-strict mode)"
+    }
+  ]
+}
+
+[ci] Running Integration Contract Unit Tests
+
+[ci] Results saved: /workspaces/Aria/data_out/ci_orchestrator/ci_results.json
+[ci] Summary: 1/1 passed
+
+[ci] Running Integration Contract Unit Tests
+
+[ci] Results saved: /workspaces/Aria/data_out/ci_orchestrator/ci_results.json
+[ci] Summary: 1/1 passed
+
+[ci] ========================================
+[ci] Validating All Orchestrators
+[ci] ========================================
+
+[ci] Validating: autotrain
+[ci] Validating: quantum_autorun
+[ci] Validating: evaluation_autorun
+
+[ci] Results saved: /workspaces/Aria/data_out/ci_orchestrator/ci_results.json
+[ci] Summary: 3/3 passed
+[integration_contract_gate] passed
+
+[ci] ========================================
+[ci] Validating All Orchestrators
+[ci] ========================================
+
+[ci] Validating: autotrain
+[ci] Validating: quantum_autorun
+[ci] Validating: evaluation_autorun
+
+[ci] Results saved: /workspaces/Aria/data_out/ci_orchestrator/ci_results.json
+[ci] Summary: 3/3 passed
+[integration_contract_gate] passed
+ERROR: file or directory not found: tests/test_aria_index_provider_wiring.py
+
+
+no tests ran in 0.11s
+ERROR: file or directory not found: tests/test_aria_index_provider_wiring.py
+
+
+no tests ran in 0.11s
+=== 2026-03-27T04:30:21+00:00 cycle end ===
+=== 2026-03-27T04:30:21+00:00 cycle end ===
+=== 2026-03-27T04:31:23+00:00 cycle start ===
+=== 2026-03-27T04:31:23+00:00 cycle start ===
+{
+  "generated_at": "2026-03-27T04:31:30Z",
+  "run_id": "20260327T043130Z",
+  "config_path": null,
+  "config_paths": {
+    "master_orchestrator": "config/master_orchestrator.yaml",
+    "quantum_autorun": "config/quantum/quantum_autorun.yaml",
+    "evaluation_autorun": "config/evaluation/evaluation_autorun.yaml"
+  },
+  "strict_endpoints": false,
+  "total_steps": 8,
+  "succeeded": 7,
+  "warnings": 0,
+  "failed": 0,
+  "skipped": 1,
+  "errors": 0,
+  "passed": true,
+  "results": [
+    {
+      "name": "master_orchestrator_config",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.01,
+      "detail": "resolved=config/master_orchestrator.yaml"
+    },
+    {
+      "name": "quantum_autorun_config",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.01,
+      "detail": "resolved=config/quantum/quantum_autorun.yaml"
+    },
+    {
+      "name": "evaluation_autorun_config",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.01,
+      "detail": "resolved=config/evaluation/evaluation_autorun.yaml"
+    },
+    {
+      "name": "master_orchestrator_status",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 1.84,
+      "detail": "rc=0 | stdout=    \"schedule\": null,\n      \"orchestrators\": [\n        \"aria_automation\"\n      ]\n    },\n    {\n      \"name\": \"aria_server_only\",\n      \"enabled\": false,\n      \"trigger\": \"manual\",\n      \"schedule\": null,\n      \"orchestrators\": [\n        \"aria_automation\"\n      ]\n    }\n  ],\n  \"resource_usage\": {\n    \"available\": true,\n    \"cpu_percent\": 5.6,\n    \"memory_percent\": 16.9,\n    \"disk_percent\": 31.8\n  }\n}"
+    },
+    {
+      "name": "quantum_autorun_dry_run",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.77,
+      "detail": "rc=0 | stdout=Validated 4 job(s): heart_quick, ionosphere_quick, azure_quantinuum_simulator, azure_ionq_qpu_test"
+    },
+    {
+      "name": "repo_automation_status",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.56,
+      "detail": "rc=0 | stdout=110) (\ud83e\udde9 deps)\n  \u274c Quantum Computing Workflows (PID 75111) (\ud83e\udde9 deps)\n  \u274c Model Evaluation System (\u26a0\ufe0f deps)\n  \u274c Dataset Auto-Discovery (Integrated in training) (\ud83e\udde9 deps)\n  \u274c Status Dashboard (\ud83e\udde9 deps)\n  \u274c Backup Manager (\ud83e\udde9 deps)\n\n\u26a0\ufe0f  Recent Errors (1):\n  - Dependencies still missing after install (evaluation): scikit-learn\n================================================================================"
+    },
+    {
+      "name": "chat_cli_local_once",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 3.0,
+      "detail": "rc=0 | stdout=Provider: local | Model: local-echo\nassistant> No live model detected. Run with `--provider lmstudio` (LM Studio running locally), `--provider ollama`, `--provider openai`, or `--provider azure`."
+    },
+    {
+      "name": "functions_ai_status_endpoint",
+      "status": "skipped",
+      "critical": false,
+      "duration_sec": 0.04,
+      "detail": "functions host not running (non-strict mode)"
+    }
+  ]
+}
+{
+  "generated_at": "2026-03-27T04:31:30Z",
+  "run_id": "20260327T043130Z",
+  "config_path": null,
+  "config_paths": {
+    "master_orchestrator": "config/master_orchestrator.yaml",
+    "quantum_autorun": "config/quantum/quantum_autorun.yaml",
+    "evaluation_autorun": "config/evaluation/evaluation_autorun.yaml"
+  },
+  "strict_endpoints": false,
+  "total_steps": 8,
+  "succeeded": 7,
+  "warnings": 0,
+  "failed": 0,
+  "skipped": 1,
+  "errors": 0,
+  "passed": true,
+  "results": [
+    {
+      "name": "master_orchestrator_config",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.0,
+      "detail": "resolved=config/master_orchestrator.yaml"
+    },
+    {
+      "name": "quantum_autorun_config",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.0,
+      "detail": "resolved=config/quantum/quantum_autorun.yaml"
+    },
+    {
+      "name": "evaluation_autorun_config",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.01,
+      "detail": "resolved=config/evaluation/evaluation_autorun.yaml"
+    },
+    {
+      "name": "master_orchestrator_status",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 1.83,
+      "detail": "rc=0 | stdout=    \"schedule\": null,\n      \"orchestrators\": [\n        \"aria_automation\"\n      ]\n    },\n    {\n      \"name\": \"aria_server_only\",\n      \"enabled\": false,\n      \"trigger\": \"manual\",\n      \"schedule\": null,\n      \"orchestrators\": [\n        \"aria_automation\"\n      ]\n    }\n  ],\n  \"resource_usage\": {\n    \"available\": true,\n    \"cpu_percent\": 5.6,\n    \"memory_percent\": 16.9,\n    \"disk_percent\": 31.8\n  }\n}"
+    },
+    {
+      "name": "quantum_autorun_dry_run",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.77,
+      "detail": "rc=0 | stdout=Validated 4 job(s): heart_quick, ionosphere_quick, azure_quantinuum_simulator, azure_ionq_qpu_test"
+    },
+    {
+      "name": "repo_automation_status",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.57,
+      "detail": "rc=0 | stdout=110) (\ud83e\udde9 deps)\n  \u274c Quantum Computing Workflows (PID 75111) (\ud83e\udde9 deps)\n  \u274c Model Evaluation System (\u26a0\ufe0f deps)\n  \u274c Dataset Auto-Discovery (Integrated in training) (\ud83e\udde9 deps)\n  \u274c Status Dashboard (\ud83e\udde9 deps)\n  \u274c Backup Manager (\ud83e\udde9 deps)\n\n\u26a0\ufe0f  Recent Errors (1):\n  - Dependencies still missing after install (evaluation): scikit-learn\n================================================================================"
+    },
+    {
+      "name": "chat_cli_local_once",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 2.98,
+      "detail": "rc=0 | stdout=Provider: local | Model: local-echo\nassistant> I'm running in local fallback mode. Set AZURE_OPENAI_API_KEY, OPENAI_API_KEY, or start LM Studio / Ollama to enable full AI responses."
+    },
+    {
+      "name": "functions_ai_status_endpoint",
+      "status": "skipped",
+      "critical": false,
+      "duration_sec": 0.05,
+      "detail": "functions host not running (non-strict mode)"
+    }
+  ]
+}
+
+[ci] Running Integration Contract Unit Tests
+
+[ci] Results saved: /workspaces/Aria/data_out/ci_orchestrator/ci_results.json
+[ci] Summary: 1/1 passed
+
+[ci] Running Integration Contract Unit Tests
+
+[ci] Results saved: /workspaces/Aria/data_out/ci_orchestrator/ci_results.json
+[ci] Summary: 1/1 passed
+
+[ci] ========================================
+[ci] Validating All Orchestrators
+[ci] ========================================
+
+[ci] Validating: autotrain
+[ci] Validating: quantum_autorun
+[ci] Validating: evaluation_autorun
+
+[ci] Results saved: /workspaces/Aria/data_out/ci_orchestrator/ci_results.json
+[ci] Summary: 3/3 passed
+[integration_contract_gate] passed
+
+[ci] ========================================
+[ci] Validating All Orchestrators
+[ci] ========================================
+
+[ci] Validating: autotrain
+[ci] Validating: quantum_autorun
+[ci] Validating: evaluation_autorun
+
+[ci] Results saved: /workspaces/Aria/data_out/ci_orchestrator/ci_results.json
+[ci] Summary: 3/3 passed
+[integration_contract_gate] passed
+...............................................................................................................................         [100%].         [100%]
+64 passed in 15.74s
+
+64 passed in 15.74s
+=== 2026-03-27T04:32:18+00:00 cycle end ===
+=== 2026-03-27T04:32:18+00:00 cycle end ===
+=== 2026-03-27T04:33:20+00:00 cycle start ===
+=== 2026-03-27T04:33:20+00:00 cycle start ===
+{
+  "generated_at": "2026-03-27T04:33:27Z",
+  "run_id": "20260327T043327Z",
+  "config_path": null,
+  "config_paths": {
+    "master_orchestrator": "config/master_orchestrator.yaml",
+    "quantum_autorun": "config/quantum/quantum_autorun.yaml",
+    "evaluation_autorun": "config/evaluation/evaluation_autorun.yaml"
+  },
+  "strict_endpoints": false,
+  "total_steps": 8,
+  "succeeded": 7,
+  "warnings": 0,
+  "failed": 0,
+  "skipped": 1,
+  "errors": 0,
+  "passed": true,
+  "results": [
+    {
+      "name": "master_orchestrator_config",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.01,
+      "detail": "resolved=config/master_orchestrator.yaml"
+    },
+    {
+      "name": "quantum_autorun_config",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.01,
+      "detail": "resolved=config/quantum/quantum_autorun.yaml"
+    },
+    {
+      "name": "evaluation_autorun_config",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.02,
+      "detail": "resolved=config/evaluation/evaluation_autorun.yaml"
+    },
+    {
+      "name": "master_orchestrator_status",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 2.25,
+      "detail": "rc=0 | stdout=    \"schedule\": null,\n      \"orchestrators\": [\n        \"aria_automation\"\n      ]\n    },\n    {\n      \"name\": \"aria_server_only\",\n      \"enabled\": false,\n      \"trigger\": \"manual\",\n      \"schedule\": null,\n      \"orchestrators\": [\n        \"aria_automation\"\n      ]\n    }\n  ],\n  \"resource_usage\": {\n    \"available\": true,\n    \"cpu_percent\": 3.4,\n    \"memory_percent\": 14.9,\n    \"disk_percent\": 31.8\n  }\n}"
+    },
+    {
+      "name": "quantum_autorun_dry_run",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.45,
+      "detail": "rc=0 | stdout=Validated 4 job(s): heart_quick, ionosphere_quick, azure_quantinuum_simulator, azure_ionq_qpu_test"
+    },
+    {
+      "name": "repo_automation_status",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.67,
+      "detail": "rc=0 | stdout=110) (\ud83e\udde9 deps)\n  \u274c Quantum Computing Workflows (PID 75111) (\ud83e\udde9 deps)\n  \u274c Model Evaluation System (\u26a0\ufe0f deps)\n  \u274c Dataset Auto-Discovery (Integrated in training) (\ud83e\udde9 deps)\n  \u274c Status Dashboard (\ud83e\udde9 deps)\n  \u274c Backup Manager (\ud83e\udde9 deps)\n\n\u26a0\ufe0f  Recent Errors (1):\n  - Dependencies still missing after install (evaluation): scikit-learn\n================================================================================"
+    },
+    {
+      "name": "chat_cli_local_once",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 3.16,
+      "detail": "rc=0 | stdout=Provider: local | Model: local-echo\nassistant> Offline mode active. I can process Aria commands but can't generate AI responses without a configured provider."
+    },
+    {
+      "name": "functions_ai_status_endpoint",
+      "status": "skipped",
+      "critical": false,
+      "duration_sec": 0.01,
+      "detail": "functions host not running (non-strict mode)"
+    }
+  ]
+}
+{
+  "generated_at": "2026-03-27T04:33:28Z",
+  "run_id": "20260327T043328Z",
+  "config_path": null,
+  "config_paths": {
+    "master_orchestrator": "config/master_orchestrator.yaml",
+    "quantum_autorun": "config/quantum/quantum_autorun.yaml",
+    "evaluation_autorun": "config/evaluation/evaluation_autorun.yaml"
+  },
+  "strict_endpoints": false,
+  "total_steps": 8,
+  "succeeded": 7,
+  "warnings": 0,
+  "failed": 0,
+  "skipped": 1,
+  "errors": 0,
+  "passed": true,
+  "results": [
+    {
+      "name": "master_orchestrator_config",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.01,
+      "detail": "resolved=config/master_orchestrator.yaml"
+    },
+    {
+      "name": "quantum_autorun_config",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.01,
+      "detail": "resolved=config/quantum/quantum_autorun.yaml"
+    },
+    {
+      "name": "evaluation_autorun_config",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.01,
+      "detail": "resolved=config/evaluation/evaluation_autorun.yaml"
+    },
+    {
+      "name": "master_orchestrator_status",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 2.25,
+      "detail": "rc=0 | stdout=    \"schedule\": null,\n      \"orchestrators\": [\n        \"aria_automation\"\n      ]\n    },\n    {\n      \"name\": \"aria_server_only\",\n      \"enabled\": false,\n      \"trigger\": \"manual\",\n      \"schedule\": null,\n      \"orchestrators\": [\n        \"aria_automation\"\n      ]\n    }\n  ],\n  \"resource_usage\": {\n    \"available\": true,\n    \"cpu_percent\": 3.4,\n    \"memory_percent\": 14.9,\n    \"disk_percent\": 31.8\n  }\n}"
+    },
+    {
+      "name": "quantum_autorun_dry_run",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.46,
+      "detail": "rc=0 | stdout=Validated 4 job(s): heart_quick, ionosphere_quick, azure_quantinuum_simulator, azure_ionq_qpu_test"
+    },
+    {
+      "name": "repo_automation_status",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.66,
+      "detail": "rc=0 | stdout=110) (\ud83e\udde9 deps)\n  \u274c Quantum Computing Workflows (PID 75111) (\ud83e\udde9 deps)\n  \u274c Model Evaluation System (\u26a0\ufe0f deps)\n  \u274c Dataset Auto-Discovery (Integrated in training) (\ud83e\udde9 deps)\n  \u274c Status Dashboard (\ud83e\udde9 deps)\n  \u274c Backup Manager (\ud83e\udde9 deps)\n\n\u26a0\ufe0f  Recent Errors (1):\n  - Dependencies still missing after install (evaluation): scikit-learn\n================================================================================"
+    },
+    {
+      "name": "chat_cli_local_once",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 3.28,
+      "detail": "rc=0 | stdout=Provider: local | Model: local-echo\nassistant> Offline mode active. I can process Aria commands but can't generate AI responses without a configured provider."
+    },
+    {
+      "name": "functions_ai_status_endpoint",
+      "status": "skipped",
+      "critical": false,
+      "duration_sec": 0.02,
+      "detail": "functions host not running (non-strict mode)"
+    }
+  ]
+}
+
+[ci] Running Integration Contract Unit Tests
+
+[ci] Results saved: /workspaces/Aria/data_out/ci_orchestrator/ci_results.json
+[ci] Summary: 1/1 passed
+
+[ci] Running Integration Contract Unit Tests
+
+[ci] Results saved: /workspaces/Aria/data_out/ci_orchestrator/ci_results.json
+[ci] Summary: 1/1 passed
+
+[ci] ========================================
+[ci] Validating All Orchestrators
+[ci] ========================================
+
+[ci] Validating: autotrain
+[ci] Validating: quantum_autorun
+[ci] Validating: evaluation_autorun
+
+[ci] Results saved: /workspaces/Aria/data_out/ci_orchestrator/ci_results.json
+[ci] Summary: 3/3 passed
+
+[ci] ========================================
+[ci] Validating All Orchestrators
+[ci] ========================================
+
+[ci] Validating: autotrain
+[ci] Validating: quantum_autorun
+[ci] Validating: evaluation_autorun
+
+[ci] Results saved: /workspaces/Aria/data_out/ci_orchestrator/ci_results.json
+[ci] Summary: 3/3 passed
+[integration_contract_gate] passed
+[integration_contract_gate] passed
+........................................................................................................................         [100%]........         [100%]
+64 passed in 11.74s
+
+64 passed in 11.73s
+=== 2026-03-27T04:34:04+00:00 cycle end ===
+=== 2026-03-27T04:34:04+00:00 cycle end ===
+=== 2026-03-27T04:35:06+00:00 cycle start ===
+=== 2026-03-27T04:35:06+00:00 cycle start ===
+{
+  "generated_at": "2026-03-27T04:35:16Z",
+  "run_id": "20260327T043516Z",
+  "config_path": null,
+  "config_paths": {
+    "master_orchestrator": "config/master_orchestrator.yaml",
+    "quantum_autorun": "config/quantum/quantum_autorun.yaml",
+    "evaluation_autorun": "config/evaluation/evaluation_autorun.yaml"
+  },
+  "strict_endpoints": false,
+  "total_steps": 8,
+  "succeeded": 7,
+  "warnings": 0,
+  "failed": 0,
+  "skipped": 1,
+  "errors": 0,
+  "passed": true,
+  "results": [
+    {
+      "name": "master_orchestrator_config",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.01,
+      "detail": "resolved=config/master_orchestrator.yaml"
+    },
+    {
+      "name": "quantum_autorun_config",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.02,
+      "detail": "resolved=config/quantum/quantum_autorun.yaml"
+    },
+    {
+      "name": "evaluation_autorun_config",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.02,
+      "detail": "resolved=config/evaluation/evaluation_autorun.yaml"
+    },
+    {
+      "name": "master_orchestrator_status",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 2.45,
+      "detail": "rc=0 | stdout=    \"schedule\": null,\n      \"orchestrators\": [\n        \"aria_automation\"\n      ]\n    },\n    {\n      \"name\": \"aria_server_only\",\n      \"enabled\": false,\n      \"trigger\": \"manual\",\n      \"schedule\": null,\n      \"orchestrators\": [\n        \"aria_automation\"\n      ]\n    }\n  ],\n  \"resource_usage\": {\n    \"available\": true,\n    \"cpu_percent\": 2.7,\n    \"memory_percent\": 16.4,\n    \"disk_percent\": 31.8\n  }\n}"
+    },
+    {
+      "name": "quantum_autorun_dry_run",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.74,
+      "detail": "rc=0 | stdout=Validated 4 job(s): heart_quick, ionosphere_quick, azure_quantinuum_simulator, azure_ionq_qpu_test"
+    },
+    {
+      "name": "repo_automation_status",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 1.37,
+      "detail": "rc=0 | stdout=110) (\ud83e\udde9 deps)\n  \u274c Quantum Computing Workflows (PID 75111) (\ud83e\udde9 deps)\n  \u274c Model Evaluation System (\u26a0\ufe0f deps)\n  \u274c Dataset Auto-Discovery (Integrated in training) (\ud83e\udde9 deps)\n  \u274c Status Dashboard (\ud83e\udde9 deps)\n  \u274c Backup Manager (\ud83e\udde9 deps)\n\n\u26a0\ufe0f  Recent Errors (1):\n  - Dependencies still missing after install (evaluation): scikit-learn\n================================================================================"
+    },
+    {
+      "name": "chat_cli_local_once",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 4.08,
+      "detail": "rc=0 | stdout=Provider: local | Model: local-echo\nassistant> No live model detected. Run with `--provider lmstudio` (LM Studio running locally), `--provider ollama`, `--provider openai`, or `--provider azure`."
+    },
+    {
+      "name": "functions_ai_status_endpoint",
+      "status": "skipped",
+      "critical": false,
+      "duration_sec": 0.03,
+      "detail": "functions host not running (non-strict mode)"
+    }
+  ]
+}
+{
+  "generated_at": "2026-03-27T04:35:16Z",
+  "run_id": "20260327T043516Z",
+  "config_path": null,
+  "config_paths": {
+    "master_orchestrator": "config/master_orchestrator.yaml",
+    "quantum_autorun": "config/quantum/quantum_autorun.yaml",
+    "evaluation_autorun": "config/evaluation/evaluation_autorun.yaml"
+  },
+  "strict_endpoints": false,
+  "total_steps": 8,
+  "succeeded": 7,
+  "warnings": 0,
+  "failed": 0,
+  "skipped": 1,
+  "errors": 0,
+  "passed": true,
+  "results": [
+    {
+      "name": "master_orchestrator_config",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.01,
+      "detail": "resolved=config/master_orchestrator.yaml"
+    },
+    {
+      "name": "quantum_autorun_config",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.04,
+      "detail": "resolved=config/quantum/quantum_autorun.yaml"
+    },
+    {
+      "name": "evaluation_autorun_config",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.02,
+      "detail": "resolved=config/evaluation/evaluation_autorun.yaml"
+    },
+    {
+      "name": "master_orchestrator_status",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 2.5,
+      "detail": "rc=0 | stdout=    \"schedule\": null,\n      \"orchestrators\": [\n        \"aria_automation\"\n      ]\n    },\n    {\n      \"name\": \"aria_server_only\",\n      \"enabled\": false,\n      \"trigger\": \"manual\",\n      \"schedule\": null,\n      \"orchestrators\": [\n        \"aria_automation\"\n      ]\n    }\n  ],\n  \"resource_usage\": {\n    \"available\": true,\n    \"cpu_percent\": 2.8,\n    \"memory_percent\": 16.4,\n    \"disk_percent\": 31.8\n  }\n}"
+    },
+    {
+      "name": "quantum_autorun_dry_run",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.71,
+      "detail": "rc=0 | stdout=Validated 4 job(s): heart_quick, ionosphere_quick, azure_quantinuum_simulator, azure_ionq_qpu_test"
+    },
+    {
+      "name": "repo_automation_status",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 1.39,
+      "detail": "rc=0 | stdout=110) (\ud83e\udde9 deps)\n  \u274c Quantum Computing Workflows (PID 75111) (\ud83e\udde9 deps)\n  \u274c Model Evaluation System (\u26a0\ufe0f deps)\n  \u274c Dataset Auto-Discovery (Integrated in training) (\ud83e\udde9 deps)\n  \u274c Status Dashboard (\ud83e\udde9 deps)\n  \u274c Backup Manager (\ud83e\udde9 deps)\n\n\u26a0\ufe0f  Recent Errors (1):\n  - Dependencies still missing after install (evaluation): scikit-learn\n================================================================================"
+    },
+    {
+      "name": "chat_cli_local_once",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 4.04,
+      "detail": "rc=0 | stdout=Provider: local | Model: local-echo\nassistant> I'm running in local fallback mode. Set AZURE_OPENAI_API_KEY, OPENAI_API_KEY, or start LM Studio / Ollama to enable full AI responses."
+    },
+    {
+      "name": "functions_ai_status_endpoint",
+      "status": "skipped",
+      "critical": false,
+      "duration_sec": 0.03,
+      "detail": "functions host not running (non-strict mode)"
+    }
+  ]
+}
+
+[ci] Running Integration Contract Unit Tests
+
+[ci] Results saved: /workspaces/Aria/data_out/ci_orchestrator/ci_results.json
+[ci] Summary: 1/1 passed
+
+[ci] Running Integration Contract Unit Tests
+
+[ci] Results saved: /workspaces/Aria/data_out/ci_orchestrator/ci_results.json
+[ci] Summary: 1/1 passed
+
+[ci] ========================================
+[ci] Validating All Orchestrators
+[ci] ========================================
+
+[ci] Validating: autotrain
+[ci] Validating: quantum_autorun
+[ci] Validating: evaluation_autorun
+
+[ci] Results saved: /workspaces/Aria/data_out/ci_orchestrator/ci_results.json
+[ci] Summary: 3/3 passed
+
+[ci] ========================================
+[ci] Validating All Orchestrators
+[ci] ========================================
+
+[ci] Validating: autotrain
+[ci] Validating: quantum_autorun
+[ci] Validating: evaluation_autorun
+
+[ci] Results saved: /workspaces/Aria/data_out/ci_orchestrator/ci_results.json
+[ci] Summary: 3/3 passed
+[integration_contract_gate] passed
+[integration_contract_gate] passed
+...............................................................................................................................         [100%].         [100%]
+64 passed in 5.92s
+
+64 passed in 5.90s
+=== 2026-03-27T04:35:44+00:00 cycle end ===
+=== 2026-03-27T04:35:44+00:00 cycle end ===
+=== 2026-03-27T04:36:47+00:00 cycle start ===
+=== 2026-03-27T04:36:47+00:00 cycle start ===
+{
+  "generated_at": "2026-03-27T04:36:57Z",
+  "run_id": "20260327T043657Z",
+  "config_path": null,
+  "config_paths": {
+    "master_orchestrator": "config/master_orchestrator.yaml",
+    "quantum_autorun": "config/quantum/quantum_autorun.yaml",
+    "evaluation_autorun": "config/evaluation/evaluation_autorun.yaml"
+  },
+  "strict_endpoints": false,
+  "total_steps": 8,
+  "succeeded": 7,
+  "warnings": 0,
+  "failed": 0,
+  "skipped": 1,
+  "errors": 0,
+  "passed": true,
+  "results": [
+    {
+      "name": "master_orchestrator_config",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.01,
+      "detail": "resolved=config/master_orchestrator.yaml"
+    },
+    {
+      "name": "quantum_autorun_config",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.01,
+      "detail": "resolved=config/quantum/quantum_autorun.yaml"
+    },
+    {
+      "name": "evaluation_autorun_config",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.01,
+      "detail": "resolved=config/evaluation/evaluation_autorun.yaml"
+    },
+    {
+      "name": "master_orchestrator_status",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 2.08,
+      "detail": "rc=0 | stdout=    \"schedule\": null,\n      \"orchestrators\": [\n        \"aria_automation\"\n      ]\n    },\n    {\n      \"name\": \"aria_server_only\",\n      \"enabled\": false,\n      \"trigger\": \"manual\",\n      \"schedule\": null,\n      \"orchestrators\": [\n        \"aria_automation\"\n      ]\n    }\n  ],\n  \"resource_usage\": {\n    \"available\": true,\n    \"cpu_percent\": 5.8,\n    \"memory_percent\": 16.7,\n    \"disk_percent\": 31.8\n  }\n}"
+    },
+    {
+      "name": "quantum_autorun_dry_run",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.58,
+      "detail": "rc=0 | stdout=Validated 4 job(s): heart_quick, ionosphere_quick, azure_quantinuum_simulator, azure_ionq_qpu_test"
+    },
+    {
+      "name": "repo_automation_status",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 1.08,
+      "detail": "rc=0 | stdout=110) (\ud83e\udde9 deps)\n  \u274c Quantum Computing Workflows (PID 75111) (\ud83e\udde9 deps)\n  \u274c Model Evaluation System (\u26a0\ufe0f deps)\n  \u274c Dataset Auto-Discovery (Integrated in training) (\ud83e\udde9 deps)\n  \u274c Status Dashboard (\ud83e\udde9 deps)\n  \u274c Backup Manager (\ud83e\udde9 deps)\n\n\u26a0\ufe0f  Recent Errors (1):\n  - Dependencies still missing after install (evaluation): scikit-learn\n================================================================================"
+    },
+    {
+      "name": "chat_cli_local_once",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 5.02,
+      "detail": "rc=0 | stdout=Provider: local | Model: local-echo\nassistant> No live model detected. Run with `--provider lmstudio` (LM Studio running locally), `--provider ollama`, `--provider openai`, or `--provider azure`."
+    },
+    {
+      "name": "functions_ai_status_endpoint",
+      "status": "skipped",
+      "critical": false,
+      "duration_sec": 0.02,
+      "detail": "functions host not running (non-strict mode)"
+    }
+  ]
+}
+{
+  "generated_at": "2026-03-27T04:36:57Z",
+  "run_id": "20260327T043657Z",
+  "config_path": null,
+  "config_paths": {
+    "master_orchestrator": "config/master_orchestrator.yaml",
+    "quantum_autorun": "config/quantum/quantum_autorun.yaml",
+    "evaluation_autorun": "config/evaluation/evaluation_autorun.yaml"
+  },
+  "strict_endpoints": false,
+  "total_steps": 8,
+  "succeeded": 7,
+  "warnings": 0,
+  "failed": 0,
+  "skipped": 1,
+  "errors": 0,
+  "passed": true,
+  "results": [
+    {
+      "name": "master_orchestrator_config",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.01,
+      "detail": "resolved=config/master_orchestrator.yaml"
+    },
+    {
+      "name": "quantum_autorun_config",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.01,
+      "detail": "resolved=config/quantum/quantum_autorun.yaml"
+    },
+    {
+      "name": "evaluation_autorun_config",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.01,
+      "detail": "resolved=config/evaluation/evaluation_autorun.yaml"
+    },
+    {
+      "name": "master_orchestrator_status",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 2.06,
+      "detail": "rc=0 | stdout=    \"schedule\": null,\n      \"orchestrators\": [\n        \"aria_automation\"\n      ]\n    },\n    {\n      \"name\": \"aria_server_only\",\n      \"enabled\": false,\n      \"trigger\": \"manual\",\n      \"schedule\": null,\n      \"orchestrators\": [\n        \"aria_automation\"\n      ]\n    }\n  ],\n  \"resource_usage\": {\n    \"available\": true,\n    \"cpu_percent\": 5.8,\n    \"memory_percent\": 16.7,\n    \"disk_percent\": 31.8\n  }\n}"
+    },
+    {
+      "name": "quantum_autorun_dry_run",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.69,
+      "detail": "rc=0 | stdout=Validated 4 job(s): heart_quick, ionosphere_quick, azure_quantinuum_simulator, azure_ionq_qpu_test"
+    },
+    {
+      "name": "repo_automation_status",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 1.21,
+      "detail": "rc=0 | stdout=110) (\ud83e\udde9 deps)\n  \u274c Quantum Computing Workflows (PID 75111) (\ud83e\udde9 deps)\n  \u274c Model Evaluation System (\u26a0\ufe0f deps)\n  \u274c Dataset Auto-Discovery (Integrated in training) (\ud83e\udde9 deps)\n  \u274c Status Dashboard (\ud83e\udde9 deps)\n  \u274c Backup Manager (\ud83e\udde9 deps)\n\n\u26a0\ufe0f  Recent Errors (1):\n  - Dependencies still missing after install (evaluation): scikit-learn\n================================================================================"
+    },
+    {
+      "name": "chat_cli_local_once",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 4.93,
+      "detail": "rc=0 | stdout=Provider: local | Model: local-echo\nassistant> No live model detected. Run with `--provider lmstudio` (LM Studio running locally), `--provider ollama`, `--provider openai`, or `--provider azure`."
+    },
+    {
+      "name": "functions_ai_status_endpoint",
+      "status": "skipped",
+      "critical": false,
+      "duration_sec": 0.03,
+      "detail": "functions host not running (non-strict mode)"
+    }
+  ]
+}
+
+[ci] Running Integration Contract Unit Tests
+
+[ci] Results saved: /workspaces/Aria/data_out/ci_orchestrator/ci_results.json
+[ci] Summary: 1/1 passed
+
+[ci] Running Integration Contract Unit Tests
+
+[ci] Results saved: /workspaces/Aria/data_out/ci_orchestrator/ci_results.json
+[ci] Summary: 1/1 passed
+
+[ci] ========================================
+[ci] Validating All Orchestrators
+[ci] ========================================
+
+[ci] Validating: autotrain
+[ci] Validating: quantum_autorun
+[ci] Validating: evaluation_autorun
+
+[ci] Results saved: /workspaces/Aria/data_out/ci_orchestrator/ci_results.json
+[ci] Summary: 3/3 passed
+[integration_contract_gate] passed
+
+[ci] ========================================
+[ci] Validating All Orchestrators
+[ci] ========================================
+
+[ci] Validating: autotrain
+[ci] Validating: quantum_autorun
+[ci] Validating: evaluation_autorun
+
+[ci] Results saved: /workspaces/Aria/data_out/ci_orchestrator/ci_results.json
+[ci] Summary: 3/3 passed
+[integration_contract_gate] passed
+.......................................................................................         [100%].........................................         [100%]
+64 passed in 15.87s
+=== 2026-03-27T04:37:48+00:00 cycle end ===
+
+64 passed in 15.51s
+=== 2026-03-27T04:37:48+00:00 cycle end ===
+=== 2026-03-27T04:38:49+00:00 cycle start ===
+=== 2026-03-27T04:38:50+00:00 cycle start ===
+{
+  "generated_at": "2026-03-27T04:38:59Z",
+  "run_id": "20260327T043859Z",
+  "config_path": null,
+  "config_paths": {
+    "master_orchestrator": "config/master_orchestrator.yaml",
+    "quantum_autorun": "config/quantum/quantum_autorun.yaml",
+    "evaluation_autorun": "config/evaluation/evaluation_autorun.yaml"
+  },
+  "strict_endpoints": false,
+  "total_steps": 8,
+  "succeeded": 7,
+  "warnings": 0,
+  "failed": 0,
+  "skipped": 1,
+  "errors": 0,
+  "passed": true,
+  "results": [
+    {
+      "name": "master_orchestrator_config",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.04,
+      "detail": "resolved=config/master_orchestrator.yaml"
+    },
+    {
+      "name": "quantum_autorun_config",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.05,
+      "detail": "resolved=config/quantum/quantum_autorun.yaml"
+    },
+    {
+      "name": "evaluation_autorun_config",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.03,
+      "detail": "resolved=config/evaluation/evaluation_autorun.yaml"
+    },
+    {
+      "name": "master_orchestrator_status",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 1.69,
+      "detail": "rc=0 | stdout=    \"schedule\": null,\n      \"orchestrators\": [\n        \"aria_automation\"\n      ]\n    },\n    {\n      \"name\": \"aria_server_only\",\n      \"enabled\": false,\n      \"trigger\": \"manual\",\n      \"schedule\": null,\n      \"orchestrators\": [\n        \"aria_automation\"\n      ]\n    }\n  ],\n  \"resource_usage\": {\n    \"available\": true,\n    \"cpu_percent\": 7.0,\n    \"memory_percent\": 16.7,\n    \"disk_percent\": 31.8\n  }\n}"
+    },
+    {
+      "name": "quantum_autorun_dry_run",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.51,
+      "detail": "rc=0 | stdout=Validated 4 job(s): heart_quick, ionosphere_quick, azure_quantinuum_simulator, azure_ionq_qpu_test"
+    },
+    {
+      "name": "repo_automation_status",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 1.23,
+      "detail": "rc=0 | stdout=110) (\ud83e\udde9 deps)\n  \u274c Quantum Computing Workflows (PID 75111) (\ud83e\udde9 deps)\n  \u274c Model Evaluation System (\u26a0\ufe0f deps)\n  \u274c Dataset Auto-Discovery (Integrated in training) (\ud83e\udde9 deps)\n  \u274c Status Dashboard (\ud83e\udde9 deps)\n  \u274c Backup Manager (\ud83e\udde9 deps)\n\n\u26a0\ufe0f  Recent Errors (1):\n  - Dependencies still missing after install (evaluation): scikit-learn\n================================================================================"
+    },
+    {
+      "name": "chat_cli_local_once",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 3.54,
+      "detail": "rc=0 | stdout=Provider: local | Model: local-echo\nassistant> Offline mode active. I can process Aria commands but can't generate AI responses without a configured provider."
+    },
+    {
+      "name": "functions_ai_status_endpoint",
+      "status": "skipped",
+      "critical": false,
+      "duration_sec": 0.01,
+      "detail": "functions host not running (non-strict mode)"
+    }
+  ]
+}
+{
+  "generated_at": "2026-03-27T04:38:59Z",
+  "run_id": "20260327T043859Z",
+  "config_path": null,
+  "config_paths": {
+    "master_orchestrator": "config/master_orchestrator.yaml",
+    "quantum_autorun": "config/quantum/quantum_autorun.yaml",
+    "evaluation_autorun": "config/evaluation/evaluation_autorun.yaml"
+  },
+  "strict_endpoints": false,
+  "total_steps": 8,
+  "succeeded": 7,
+  "warnings": 0,
+  "failed": 0,
+  "skipped": 1,
+  "errors": 0,
+  "passed": true,
+  "results": [
+    {
+      "name": "master_orchestrator_config",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.01,
+      "detail": "resolved=config/master_orchestrator.yaml"
+    },
+    {
+      "name": "quantum_autorun_config",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.01,
+      "detail": "resolved=config/quantum/quantum_autorun.yaml"
+    },
+    {
+      "name": "evaluation_autorun_config",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.01,
+      "detail": "resolved=config/evaluation/evaluation_autorun.yaml"
+    },
+    {
+      "name": "master_orchestrator_status",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 1.72,
+      "detail": "rc=0 | stdout=    \"schedule\": null,\n      \"orchestrators\": [\n        \"aria_automation\"\n      ]\n    },\n    {\n      \"name\": \"aria_server_only\",\n      \"enabled\": false,\n      \"trigger\": \"manual\",\n      \"schedule\": null,\n      \"orchestrators\": [\n        \"aria_automation\"\n      ]\n    }\n  ],\n  \"resource_usage\": {\n    \"available\": true,\n    \"cpu_percent\": 6.9,\n    \"memory_percent\": 16.7,\n    \"disk_percent\": 31.8\n  }\n}"
+    },
+    {
+      "name": "quantum_autorun_dry_run",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.5,
+      "detail": "rc=0 | stdout=Validated 4 job(s): heart_quick, ionosphere_quick, azure_quantinuum_simulator, azure_ionq_qpu_test"
+    },
+    {
+      "name": "repo_automation_status",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 1.22,
+      "detail": "rc=0 | stdout=110) (\ud83e\udde9 deps)\n  \u274c Quantum Computing Workflows (PID 75111) (\ud83e\udde9 deps)\n  \u274c Model Evaluation System (\u26a0\ufe0f deps)\n  \u274c Dataset Auto-Discovery (Integrated in training) (\ud83e\udde9 deps)\n  \u274c Status Dashboard (\ud83e\udde9 deps)\n  \u274c Backup Manager (\ud83e\udde9 deps)\n\n\u26a0\ufe0f  Recent Errors (1):\n  - Dependencies still missing after install (evaluation): scikit-learn\n================================================================================"
+    },
+    {
+      "name": "chat_cli_local_once",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 3.41,
+      "detail": "rc=0 | stdout=Provider: local | Model: local-echo\nassistant> I'm running in local fallback mode. Set AZURE_OPENAI_API_KEY, OPENAI_API_KEY, or start LM Studio / Ollama to enable full AI responses."
+    },
+    {
+      "name": "functions_ai_status_endpoint",
+      "status": "skipped",
+      "critical": false,
+      "duration_sec": 0.02,
+      "detail": "functions host not running (non-strict mode)"
+    }
+  ]
+}
+
+[ci] Running Integration Contract Unit Tests
+
+[ci] Results saved: /workspaces/Aria/data_out/ci_orchestrator/ci_results.json
+[ci] Summary: 1/1 passed
+
+[ci] Running Integration Contract Unit Tests
+
+[ci] Results saved: /workspaces/Aria/data_out/ci_orchestrator/ci_results.json
+[ci] Summary: 1/1 passed
+
+[ci] ========================================
+[ci] Validating All Orchestrators
+[ci] ========================================
+
+[ci] Validating: autotrain
+[ci] Validating: quantum_autorun
+[ci] Validating: evaluation_autorun
+
+[ci] Results saved: /workspaces/Aria/data_out/ci_orchestrator/ci_results.json
+[ci] Summary: 3/3 passed
+
+[ci] ========================================
+[ci] Validating All Orchestrators
+[ci] ========================================
+
+[ci] Validating: autotrain
+[ci] Validating: quantum_autorun
+[ci] Validating: evaluation_autorun
+
+[ci] Results saved: /workspaces/Aria/data_out/ci_orchestrator/ci_results.json
+[ci] Summary: 3/3 passed
+[integration_contract_gate] passed
+[integration_contract_gate] passed
+................................................................................................................................         [100%]         [100%]
+64 passed in 10.09s
+
+64 passed in 10.09s
+=== 2026-03-27T04:39:34+00:00 cycle end ===
+=== 2026-03-27T04:39:34+00:00 cycle end ===
+=== 2026-03-27T04:40:37+00:00 cycle start ===
+=== 2026-03-27T04:40:37+00:00 cycle start ===
+{
+  "generated_at": "2026-03-27T04:40:46Z",
+  "run_id": "20260327T044046Z",
+  "config_path": null,
+  "config_paths": {
+    "master_orchestrator": "config/master_orchestrator.yaml",
+    "quantum_autorun": "config/quantum/quantum_autorun.yaml",
+    "evaluation_autorun": "config/evaluation/evaluation_autorun.yaml"
+  },
+  "strict_endpoints": false,
+  "total_steps": 8,
+  "succeeded": 7,
+  "warnings": 0,
+  "failed": 0,
+  "skipped": 1,
+  "errors": 0,
+  "passed": true,
+  "results": [
+    {
+      "name": "master_orchestrator_config",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.01,
+      "detail": "resolved=config/master_orchestrator.yaml"
+    },
+    {
+      "name": "quantum_autorun_config",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.01,
+      "detail": "resolved=config/quantum/quantum_autorun.yaml"
+    },
+    {
+      "name": "evaluation_autorun_config",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.01,
+      "detail": "resolved=config/evaluation/evaluation_autorun.yaml"
+    },
+    {
+      "name": "master_orchestrator_status",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 2.3,
+      "detail": "rc=0 | stdout=    \"schedule\": null,\n      \"orchestrators\": [\n        \"aria_automation\"\n      ]\n    },\n    {\n      \"name\": \"aria_server_only\",\n      \"enabled\": false,\n      \"trigger\": \"manual\",\n      \"schedule\": null,\n      \"orchestrators\": [\n        \"aria_automation\"\n      ]\n    }\n  ],\n  \"resource_usage\": {\n    \"available\": true,\n    \"cpu_percent\": 4.9,\n    \"memory_percent\": 16.7,\n    \"disk_percent\": 31.8\n  }\n}"
+    },
+    {
+      "name": "quantum_autorun_dry_run",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 1.27,
+      "detail": "rc=0 | stdout=Validated 4 job(s): heart_quick, ionosphere_quick, azure_quantinuum_simulator, azure_ionq_qpu_test"
+    },
+    {
+      "name": "repo_automation_status",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 1.72,
+      "detail": "rc=0 | stdout=110) (\ud83e\udde9 deps)\n  \u274c Quantum Computing Workflows (PID 75111) (\ud83e\udde9 deps)\n  \u274c Model Evaluation System (\u26a0\ufe0f deps)\n  \u274c Dataset Auto-Discovery (Integrated in training) (\ud83e\udde9 deps)\n  \u274c Status Dashboard (\ud83e\udde9 deps)\n  \u274c Backup Manager (\ud83e\udde9 deps)\n\n\u26a0\ufe0f  Recent Errors (1):\n  - Dependencies still missing after install (evaluation): scikit-learn\n================================================================================"
+    },
+    {
+      "name": "chat_cli_local_once",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 3.51,
+      "detail": "rc=0 | stdout=Provider: local | Model: local-echo\nassistant> Offline mode active. I can process Aria commands but can't generate AI responses without a configured provider."
+    },
+    {
+      "name": "functions_ai_status_endpoint",
+      "status": "skipped",
+      "critical": false,
+      "duration_sec": 0.03,
+      "detail": "functions host not running (non-strict mode)"
+    }
+  ]
+}
+{
+  "generated_at": "2026-03-27T04:40:46Z",
+  "run_id": "20260327T044046Z",
+  "config_path": null,
+  "config_paths": {
+    "master_orchestrator": "config/master_orchestrator.yaml",
+    "quantum_autorun": "config/quantum/quantum_autorun.yaml",
+    "evaluation_autorun": "config/evaluation/evaluation_autorun.yaml"
+  },
+  "strict_endpoints": false,
+  "total_steps": 8,
+  "succeeded": 7,
+  "warnings": 0,
+  "failed": 0,
+  "skipped": 1,
+  "errors": 0,
+  "passed": true,
+  "results": [
+    {
+      "name": "master_orchestrator_config",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.0,
+      "detail": "resolved=config/master_orchestrator.yaml"
+    },
+    {
+      "name": "quantum_autorun_config",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.01,
+      "detail": "resolved=config/quantum/quantum_autorun.yaml"
+    },
+    {
+      "name": "evaluation_autorun_config",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.01,
+      "detail": "resolved=config/evaluation/evaluation_autorun.yaml"
+    },
+    {
+      "name": "master_orchestrator_status",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 2.41,
+      "detail": "rc=0 | stdout=    \"schedule\": null,\n      \"orchestrators\": [\n        \"aria_automation\"\n      ]\n    },\n    {\n      \"name\": \"aria_server_only\",\n      \"enabled\": false,\n      \"trigger\": \"manual\",\n      \"schedule\": null,\n      \"orchestrators\": [\n        \"aria_automation\"\n      ]\n    }\n  ],\n  \"resource_usage\": {\n    \"available\": true,\n    \"cpu_percent\": 5.5,\n    \"memory_percent\": 16.7,\n    \"disk_percent\": 31.8\n  }\n}"
+    },
+    {
+      "name": "quantum_autorun_dry_run",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 1.13,
+      "detail": "rc=0 | stdout=Validated 4 job(s): heart_quick, ionosphere_quick, azure_quantinuum_simulator, azure_ionq_qpu_test"
+    },
+    {
+      "name": "repo_automation_status",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 1.75,
+      "detail": "rc=0 | stdout=110) (\ud83e\udde9 deps)\n  \u274c Quantum Computing Workflows (PID 75111) (\ud83e\udde9 deps)\n  \u274c Model Evaluation System (\u26a0\ufe0f deps)\n  \u274c Dataset Auto-Discovery (Integrated in training) (\ud83e\udde9 deps)\n  \u274c Status Dashboard (\ud83e\udde9 deps)\n  \u274c Backup Manager (\ud83e\udde9 deps)\n\n\u26a0\ufe0f  Recent Errors (1):\n  - Dependencies still missing after install (evaluation): scikit-learn\n================================================================================"
+    },
+    {
+      "name": "chat_cli_local_once",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 3.49,
+      "detail": "rc=0 | stdout=Provider: local | Model: local-echo\nassistant> I'm running in local fallback mode. Set AZURE_OPENAI_API_KEY, OPENAI_API_KEY, or start LM Studio / Ollama to enable full AI responses."
+    },
+    {
+      "name": "functions_ai_status_endpoint",
+      "status": "skipped",
+      "critical": false,
+      "duration_sec": 0.03,
+      "detail": "functions host not running (non-strict mode)"
+    }
+  ]
+}
+
+[ci] Running Integration Contract Unit Tests
+
+[ci] Results saved: /workspaces/Aria/data_out/ci_orchestrator/ci_results.json
+[ci] Summary: 1/1 passed
+
+[ci] Running Integration Contract Unit Tests
+
+[ci] Results saved: /workspaces/Aria/data_out/ci_orchestrator/ci_results.json
+[ci] Summary: 1/1 passed
+
+[ci] ========================================
+[ci] Validating All Orchestrators
+[ci] ========================================
+
+[ci] Validating: autotrain
+[ci] Validating: quantum_autorun
+[ci] Validating: evaluation_autorun
+
+[ci] Results saved: /workspaces/Aria/data_out/ci_orchestrator/ci_results.json
+[ci] Summary: 3/3 passed
+
+[ci] ========================================
+[ci] Validating All Orchestrators
+[ci] ========================================
+
+[ci] Validating: autotrain
+[ci] Validating: quantum_autorun
+[ci] Validating: evaluation_autorun
+
+[ci] Results saved: /workspaces/Aria/data_out/ci_orchestrator/ci_results.json
+[ci] Summary: 3/3 passed
+[integration_contract_gate] passed
+[integration_contract_gate] passed
+...............................................................................................................................         [100%].         [100%]
+64 passed in 11.56s
+
+64 passed in 11.57s
+=== 2026-03-27T04:41:19+00:00 cycle end ===
+=== 2026-03-27T04:41:19+00:00 cycle end ===
+=== 2026-03-27T04:42:22+00:00 cycle start ===
+=== 2026-03-27T04:42:22+00:00 cycle start ===
+{
+  "generated_at": "2026-03-27T04:42:36Z",
+  "run_id": "20260327T044236Z",
+  "config_path": null,
+  "config_paths": {
+    "master_orchestrator": "config/master_orchestrator.yaml",
+    "quantum_autorun": "config/quantum/quantum_autorun.yaml",
+    "evaluation_autorun": "config/evaluation/evaluation_autorun.yaml"
+  },
+  "strict_endpoints": false,
+  "total_steps": 8,
+  "succeeded": 7,
+  "warnings": 0,
+  "failed": 0,
+  "skipped": 1,
+  "errors": 0,
+  "passed": true,
+  "results": [
+    {
+      "name": "master_orchestrator_config",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.03,
+      "detail": "resolved=config/master_orchestrator.yaml"
+    },
+    {
+      "name": "quantum_autorun_config",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.02,
+      "detail": "resolved=config/quantum/quantum_autorun.yaml"
+    },
+    {
+      "name": "evaluation_autorun_config",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.03,
+      "detail": "resolved=config/evaluation/evaluation_autorun.yaml"
+    },
+    {
+      "name": "master_orchestrator_status",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 2.83,
+      "detail": "rc=0 | stdout=   \"schedule\": null,\n      \"orchestrators\": [\n        \"aria_automation\"\n      ]\n    },\n    {\n      \"name\": \"aria_server_only\",\n      \"enabled\": false,\n      \"trigger\": \"manual\",\n      \"schedule\": null,\n      \"orchestrators\": [\n        \"aria_automation\"\n      ]\n    }\n  ],\n  \"resource_usage\": {\n    \"available\": true,\n    \"cpu_percent\": 10.0,\n    \"memory_percent\": 16.8,\n    \"disk_percent\": 31.9\n  }\n}"
+    },
+    {
+      "name": "quantum_autorun_dry_run",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 1.13,
+      "detail": "rc=0 | stdout=Validated 4 job(s): heart_quick, ionosphere_quick, azure_quantinuum_simulator, azure_ionq_qpu_test"
+    },
+    {
+      "name": "repo_automation_status",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 2.01,
+      "detail": "rc=0 | stdout=110) (\ud83e\udde9 deps)\n  \u274c Quantum Computing Workflows (PID 75111) (\ud83e\udde9 deps)\n  \u274c Model Evaluation System (\u26a0\ufe0f deps)\n  \u274c Dataset Auto-Discovery (Integrated in training) (\ud83e\udde9 deps)\n  \u274c Status Dashboard (\ud83e\udde9 deps)\n  \u274c Backup Manager (\ud83e\udde9 deps)\n\n\u26a0\ufe0f  Recent Errors (1):\n  - Dependencies still missing after install (evaluation): scikit-learn\n================================================================================"
+    },
+    {
+      "name": "chat_cli_local_once",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 5.0,
+      "detail": "rc=0 | stdout=Provider: local | Model: local-echo\nassistant> No live model detected. Run with `--provider lmstudio` (LM Studio running locally), `--provider ollama`, `--provider openai`, or `--provider azure`."
+    },
+    {
+      "name": "functions_ai_status_endpoint",
+      "status": "skipped",
+      "critical": false,
+      "duration_sec": 0.02,
+      "detail": "functions host not running (non-strict mode)"
+    }
+  ]
+}
+{
+  "generated_at": "2026-03-27T04:42:36Z",
+  "run_id": "20260327T044236Z",
+  "config_path": null,
+  "config_paths": {
+    "master_orchestrator": "config/master_orchestrator.yaml",
+    "quantum_autorun": "config/quantum/quantum_autorun.yaml",
+    "evaluation_autorun": "config/evaluation/evaluation_autorun.yaml"
+  },
+  "strict_endpoints": false,
+  "total_steps": 8,
+  "succeeded": 7,
+  "warnings": 0,
+  "failed": 0,
+  "skipped": 1,
+  "errors": 0,
+  "passed": true,
+  "results": [
+    {
+      "name": "master_orchestrator_config",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.03,
+      "detail": "resolved=config/master_orchestrator.yaml"
+    },
+    {
+      "name": "quantum_autorun_config",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.01,
+      "detail": "resolved=config/quantum/quantum_autorun.yaml"
+    },
+    {
+      "name": "evaluation_autorun_config",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.02,
+      "detail": "resolved=config/evaluation/evaluation_autorun.yaml"
+    },
+    {
+      "name": "master_orchestrator_status",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 2.86,
+      "detail": "rc=0 | stdout=    \"schedule\": null,\n      \"orchestrators\": [\n        \"aria_automation\"\n      ]\n    },\n    {\n      \"name\": \"aria_server_only\",\n      \"enabled\": false,\n      \"trigger\": \"manual\",\n      \"schedule\": null,\n      \"orchestrators\": [\n        \"aria_automation\"\n      ]\n    }\n  ],\n  \"resource_usage\": {\n    \"available\": true,\n    \"cpu_percent\": 9.9,\n    \"memory_percent\": 16.8,\n    \"disk_percent\": 31.9\n  }\n}"
+    },
+    {
+      "name": "quantum_autorun_dry_run",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 1.1,
+      "detail": "rc=0 | stdout=Validated 4 job(s): heart_quick, ionosphere_quick, azure_quantinuum_simulator, azure_ionq_qpu_test"
+    },
+    {
+      "name": "repo_automation_status",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 2.01,
+      "detail": "rc=0 | stdout=110) (\ud83e\udde9 deps)\n  \u274c Quantum Computing Workflows (PID 75111) (\ud83e\udde9 deps)\n  \u274c Model Evaluation System (\u26a0\ufe0f deps)\n  \u274c Dataset Auto-Discovery (Integrated in training) (\ud83e\udde9 deps)\n  \u274c Status Dashboard (\ud83e\udde9 deps)\n  \u274c Backup Manager (\ud83e\udde9 deps)\n\n\u26a0\ufe0f  Recent Errors (1):\n  - Dependencies still missing after install (evaluation): scikit-learn\n================================================================================"
+    },
+    {
+      "name": "chat_cli_local_once",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 5.0,
+      "detail": "rc=0 | stdout=Provider: local | Model: local-echo\nassistant> No live model detected. Run with `--provider lmstudio` (LM Studio running locally), `--provider ollama`, `--provider openai`, or `--provider azure`."
+    },
+    {
+      "name": "functions_ai_status_endpoint",
+      "status": "skipped",
+      "critical": false,
+      "duration_sec": 0.03,
+      "detail": "functions host not running (non-strict mode)"
+    }
+  ]
+}
+
+[ci] Running Integration Contract Unit Tests
+
+[ci] Results saved: /workspaces/Aria/data_out/ci_orchestrator/ci_results.json
+[ci] Summary: 1/1 passed
+
+[ci] Running Integration Contract Unit Tests
+
+[ci] Results saved: /workspaces/Aria/data_out/ci_orchestrator/ci_results.json
+[ci] Summary: 1/1 passed
+
+[ci] ========================================
+[ci] Validating All Orchestrators
+[ci] ========================================
+
+[ci] Validating: autotrain
+[ci] Validating: quantum_autorun
+[ci] Validating: evaluation_autorun
+
+[ci] Results saved: /workspaces/Aria/data_out/ci_orchestrator/ci_results.json
+[ci] Summary: 3/3 passed
+
+[ci] ========================================
+[ci] Validating All Orchestrators
+[ci] ========================================
+
+[ci] Validating: autotrain
+[ci] Validating: quantum_autorun
+[ci] Validating: evaluation_autorun
+
+[ci] Results saved: /workspaces/Aria/data_out/ci_orchestrator/ci_results.json
+[ci] Summary: 3/3 passed
+[integration_contract_gate] passed
+[integration_contract_gate] passed
+.............................................................................................................................         [100%]...         [100%]
+64 passed in 11.11s
+
+64 passed in 11.11s
+=== 2026-03-27T04:43:26+00:00 cycle end ===
+=== 2026-03-27T04:43:26+00:00 cycle end ===
+=== 2026-03-27T04:44:27+00:00 cycle start ===
+=== 2026-03-27T04:44:27+00:00 cycle start ===
+{
+  "generated_at": "2026-03-27T04:44:37Z",
+  "run_id": "20260327T044437Z",
+  "config_path": null,
+  "config_paths": {
+    "master_orchestrator": "config/master_orchestrator.yaml",
+    "quantum_autorun": "config/quantum/quantum_autorun.yaml",
+    "evaluation_autorun": "config/evaluation/evaluation_autorun.yaml"
+  },
+  "strict_endpoints": false,
+  "total_steps": 8,
+  "succeeded": 7,
+  "warnings": 0,
+  "failed": 0,
+  "skipped": 1,
+  "errors": 0,
+  "passed": true,
+  "results": [
+    {
+      "name": "master_orchestrator_config",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.02,
+      "detail": "resolved=config/master_orchestrator.yaml"
+    },
+    {
+      "name": "quantum_autorun_config",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.04,
+      "detail": "resolved=config/quantum/quantum_autorun.yaml"
+    },
+    {
+      "name": "evaluation_autorun_config",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.02,
+      "detail": "resolved=config/evaluation/evaluation_autorun.yaml"
+    },
+    {
+      "name": "master_orchestrator_status",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 2.35,
+      "detail": "rc=0 | stdout=    \"schedule\": null,\n      \"orchestrators\": [\n        \"aria_automation\"\n      ]\n    },\n    {\n      \"name\": \"aria_server_only\",\n      \"enabled\": false,\n      \"trigger\": \"manual\",\n      \"schedule\": null,\n      \"orchestrators\": [\n        \"aria_automation\"\n      ]\n    }\n  ],\n  \"resource_usage\": {\n    \"available\": true,\n    \"cpu_percent\": 6.9,\n    \"memory_percent\": 16.7,\n    \"disk_percent\": 31.9\n  }\n}"
+    },
+    {
+      "name": "quantum_autorun_dry_run",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.49,
+      "detail": "rc=0 | stdout=Validated 4 job(s): heart_quick, ionosphere_quick, azure_quantinuum_simulator, azure_ionq_qpu_test"
+    },
+    {
+      "name": "repo_automation_status",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 1.31,
+      "detail": "rc=0 | stdout=110) (\ud83e\udde9 deps)\n  \u274c Quantum Computing Workflows (PID 75111) (\ud83e\udde9 deps)\n  \u274c Model Evaluation System (\u26a0\ufe0f deps)\n  \u274c Dataset Auto-Discovery (Integrated in training) (\ud83e\udde9 deps)\n  \u274c Status Dashboard (\ud83e\udde9 deps)\n  \u274c Backup Manager (\ud83e\udde9 deps)\n\n\u26a0\ufe0f  Recent Errors (1):\n  - Dependencies still missing after install (evaluation): scikit-learn\n================================================================================"
+    },
+    {
+      "name": "chat_cli_local_once",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 3.41,
+      "detail": "rc=0 | stdout=Provider: local | Model: local-echo\nassistant> Offline mode active. I can process Aria commands but can't generate AI responses without a configured provider."
+    },
+    {
+      "name": "functions_ai_status_endpoint",
+      "status": "skipped",
+      "critical": false,
+      "duration_sec": 0.02,
+      "detail": "functions host not running (non-strict mode)"
+    }
+  ]
+}
+{
+  "generated_at": "2026-03-27T04:44:38Z",
+  "run_id": "20260327T044438Z",
+  "config_path": null,
+  "config_paths": {
+    "master_orchestrator": "config/master_orchestrator.yaml",
+    "quantum_autorun": "config/quantum/quantum_autorun.yaml",
+    "evaluation_autorun": "config/evaluation/evaluation_autorun.yaml"
+  },
+  "strict_endpoints": false,
+  "total_steps": 8,
+  "succeeded": 7,
+  "warnings": 0,
+  "failed": 0,
+  "skipped": 1,
+  "errors": 0,
+  "passed": true,
+  "results": [
+    {
+      "name": "master_orchestrator_config",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.02,
+      "detail": "resolved=config/master_orchestrator.yaml"
+    },
+    {
+      "name": "quantum_autorun_config",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.02,
+      "detail": "resolved=config/quantum/quantum_autorun.yaml"
+    },
+    {
+      "name": "evaluation_autorun_config",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.02,
+      "detail": "resolved=config/evaluation/evaluation_autorun.yaml"
+    },
+    {
+      "name": "master_orchestrator_status",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 2.36,
+      "detail": "rc=0 | stdout=    \"schedule\": null,\n      \"orchestrators\": [\n        \"aria_automation\"\n      ]\n    },\n    {\n      \"name\": \"aria_server_only\",\n      \"enabled\": false,\n      \"trigger\": \"manual\",\n      \"schedule\": null,\n      \"orchestrators\": [\n        \"aria_automation\"\n      ]\n    }\n  ],\n  \"resource_usage\": {\n    \"available\": true,\n    \"cpu_percent\": 6.9,\n    \"memory_percent\": 16.7,\n    \"disk_percent\": 31.9\n  }\n}"
+    },
+    {
+      "name": "quantum_autorun_dry_run",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.48,
+      "detail": "rc=0 | stdout=Validated 4 job(s): heart_quick, ionosphere_quick, azure_quantinuum_simulator, azure_ionq_qpu_test"
+    },
+    {
+      "name": "repo_automation_status",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 1.34,
+      "detail": "rc=0 | stdout=110) (\ud83e\udde9 deps)\n  \u274c Quantum Computing Workflows (PID 75111) (\ud83e\udde9 deps)\n  \u274c Model Evaluation System (\u26a0\ufe0f deps)\n  \u274c Dataset Auto-Discovery (Integrated in training) (\ud83e\udde9 deps)\n  \u274c Status Dashboard (\ud83e\udde9 deps)\n  \u274c Backup Manager (\ud83e\udde9 deps)\n\n\u26a0\ufe0f  Recent Errors (1):\n  - Dependencies still missing after install (evaluation): scikit-learn\n================================================================================"
+    },
+    {
+      "name": "chat_cli_local_once",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 3.47,
+      "detail": "rc=0 | stdout=Provider: local | Model: local-echo\nassistant> No live model detected. Run with `--provider lmstudio` (LM Studio running locally), `--provider ollama`, `--provider openai`, or `--provider azure`."
+    },
+    {
+      "name": "functions_ai_status_endpoint",
+      "status": "skipped",
+      "critical": false,
+      "duration_sec": 0.04,
+      "detail": "functions host not running (non-strict mode)"
+    }
+  ]
+}
+=== 2026-03-27T04:44:46+00:00 cycle start ===
+
+[ci] Running Integration Contract Unit Tests
+
+[ci] Results saved: /workspaces/Aria/data_out/ci_orchestrator/ci_results.json
+[ci] Summary: 1/1 passed
+
+[ci] Running Integration Contract Unit Tests
+
+[ci] Results saved: /workspaces/Aria/data_out/ci_orchestrator/ci_results.json
+[ci] Summary: 1/1 passed
+
+[ci] ========================================
+[ci] Validating All Orchestrators
+[ci] ========================================
+
+[ci] Validating: autotrain
+[ci] Validating: quantum_autorun
+[ci] Validating: evaluation_autorun
+
+[ci] Results saved: /workspaces/Aria/data_out/ci_orchestrator/ci_results.json
+[ci] Summary: 3/3 passed
+
+[ci] ========================================
+[ci] Validating All Orchestrators
+[ci] ========================================
+
+[ci] Validating: autotrain
+[ci] Validating: quantum_autorun
+[ci] Validating: evaluation_autorun
+
+[ci] Results saved: /workspaces/Aria/data_out/ci_orchestrator/ci_results.json
+[ci] Summary: 3/3 passed
+[integration_contract_gate] passed
+[integration_contract_gate] passed
+{
+  "generated_at": "2026-03-27T04:44:55Z",
+  "run_id": "20260327T044455Z",
+  "config_path": null,
+  "config_paths": {
+    "master_orchestrator": "config/master_orchestrator.yaml",
+    "quantum_autorun": "config/quantum/quantum_autorun.yaml",
+    "evaluation_autorun": "config/evaluation/evaluation_autorun.yaml"
+  },
+  "strict_endpoints": false,
+  "total_steps": 8,
+  "succeeded": 7,
+  "warnings": 0,
+  "failed": 0,
+  "skipped": 1,
+  "errors": 0,
+  "passed": true,
+  "results": [
+    {
+      "name": "master_orchestrator_config",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.01,
+      "detail": "resolved=config/master_orchestrator.yaml"
+    },
+    {
+      "name": "quantum_autorun_config",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.01,
+      "detail": "resolved=config/quantum/quantum_autorun.yaml"
+    },
+    {
+      "name": "evaluation_autorun_config",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.01,
+      "detail": "resolved=config/evaluation/evaluation_autorun.yaml"
+    },
+    {
+      "name": "master_orchestrator_status",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 2.04,
+      "detail": "rc=0 | stdout=    \"schedule\": null,\n      \"orchestrators\": [\n        \"aria_automation\"\n      ]\n    },\n    {\n      \"name\": \"aria_server_only\",\n      \"enabled\": false,\n      \"trigger\": \"manual\",\n      \"schedule\": null,\n      \"orchestrators\": [\n        \"aria_automation\"\n      ]\n    }\n  ],\n  \"resource_usage\": {\n    \"available\": true,\n    \"cpu_percent\": 7.2,\n    \"memory_percent\": 16.9,\n    \"disk_percent\": 31.9\n  }\n}"
+    },
+    {
+      "name": "quantum_autorun_dry_run",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.78,
+      "detail": "rc=0 | stdout=Validated 4 job(s): heart_quick, ionosphere_quick, azure_quantinuum_simulator, azure_ionq_qpu_test"
+    },
+    {
+      "name": "repo_automation_status",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 1.26,
+      "detail": "rc=0 | stdout=110) (\ud83e\udde9 deps)\n  \u274c Quantum Computing Workflows (PID 75111) (\ud83e\udde9 deps)\n  \u274c Model Evaluation System (\u26a0\ufe0f deps)\n  \u274c Dataset Auto-Discovery (Integrated in training) (\ud83e\udde9 deps)\n  \u274c Status Dashboard (\ud83e\udde9 deps)\n  \u274c Backup Manager (\ud83e\udde9 deps)\n\n\u26a0\ufe0f  Recent Errors (1):\n  - Dependencies still missing after install (evaluation): scikit-learn\n================================================================================"
+    },
+    {
+      "name": "chat_cli_local_once",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 3.93,
+      "detail": "rc=0 | stdout=Provider: local | Model: local-echo\nassistant> I'm running in local fallback mode. Set AZURE_OPENAI_API_KEY, OPENAI_API_KEY, or start LM Studio / Ollama to enable full AI responses."
+    },
+    {
+      "name": "functions_ai_status_endpoint",
+      "status": "skipped",
+      "critical": false,
+      "duration_sec": 0.02,
+      "detail": "functions host not running (non-strict mode)"
+    }
+  ]
+}
+
+[ci] Running Integration Contract Unit Tests
+
+[ci] Results saved: /workspaces/Aria/data_out/ci_orchestrator/ci_results.json
+[ci] Summary: 1/1 passed
+
+[ci] ========================================
+[ci] Validating All Orchestrators
+[ci] ========================================
+
+[ci] Validating: autotrain
+[ci] Validating: quantum_autorun
+[ci] Validating: evaluation_autorun
+
+[ci] Results saved: /workspaces/Aria/data_out/ci_orchestrator/ci_results.json
+[ci] Summary: 3/3 passed
+[integration_contract_gate] passed
+=== 2026-03-27T04:46:05+00:00 cycle start ===
+................................................................         [100%]
+64 passed in 41.97s
+{
+  "generated_at": "2026-03-27T04:46:22Z",
+  "run_id": "20260327T044622Z",
+  "config_path": null,
+  "config_paths": {
+    "master_orchestrator": "config/master_orchestrator.yaml",
+    "quantum_autorun": "config/quantum/quantum_autorun.yaml",
+    "evaluation_autorun": "config/evaluation/evaluation_autorun.yaml"
+  },
+  "strict_endpoints": false,
+  "total_steps": 8,
+  "succeeded": 7,
+  "warnings": 0,
+  "failed": 0,
+  "skipped": 1,
+  "errors": 0,
+  "passed": true,
+  "results": [
+    {
+      "name": "master_orchestrator_config",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.02,
+      "detail": "resolved=config/master_orchestrator.yaml"
+    },
+    {
+      "name": "quantum_autorun_config",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.02,
+      "detail": "resolved=config/quantum/quantum_autorun.yaml"
+    },
+    {
+      "name": "evaluation_autorun_config",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 0.05,
+      "detail": "resolved=config/evaluation/evaluation_autorun.yaml"
+    },
+    {
+      "name": "master_orchestrator_status",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 2.95,
+      "detail": "rc=0 | stdout=    \"schedule\": null,\n      \"orchestrators\": [\n        \"aria_automation\"\n      ]\n    },\n    {\n      \"name\": \"aria_server_only\",\n      \"enabled\": false,\n      \"trigger\": \"manual\",\n      \"schedule\": null,\n      \"orchestrators\": [\n        \"aria_automation\"\n      ]\n    }\n  ],\n  \"resource_usage\": {\n    \"available\": true,\n    \"cpu_percent\": 2.9,\n    \"memory_percent\": 16.7,\n    \"disk_percent\": 31.9\n  }\n}"
+    },
+    {
+      "name": "quantum_autorun_dry_run",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 1.15,
+      "detail": "rc=0 | stdout=Validated 4 job(s): heart_quick, ionosphere_quick, azure_quantinuum_simulator, azure_ionq_qpu_test"
+    },
+    {
+      "name": "repo_automation_status",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 2.36,
+      "detail": "rc=0 | stdout=110) (\ud83e\udde9 deps)\n  \u274c Quantum Computing Workflows (PID 75111) (\ud83e\udde9 deps)\n  \u274c Model Evaluation System (\u26a0\ufe0f deps)\n  \u274c Dataset Auto-Discovery (Integrated in training) (\ud83e\udde9 deps)\n  \u274c Status Dashboard (\ud83e\udde9 deps)\n  \u274c Backup Manager (\ud83e\udde9 deps)\n\n\u26a0\ufe0f  Recent Errors (1):\n  - Dependencies still missing after install (evaluation): scikit-learn\n================================================================================"
+    },
+    {
+      "name": "chat_cli_local_once",
+      "status": "succeeded",
+      "critical": true,
+      "duration_sec": 7.26,
+      "detail": "rc=0 | stdout=Provider: local | Model: local-echo\nassistant> No live model detected. Run with `--provider lmstudio` (LM Studio running locally), `--provider ollama`, `--provider openai`, or `--provider azure`."
+    },
+    {
+      "name": "functions_ai_status_endpoint",
+      "status": "skipped",
+      "critical": false,
+      "duration_sec": 0.03,
+      "detail": "functions host not running (non-strict mode)"
+    }
+  ]
+}

@@ -15,9 +15,14 @@ from pathlib import Path
 import azure.functions as func
 
 # Import AI projects via centralized registry (replaced scattered sys.path manipulation)
+from shared.config import get_settings
 from shared.core.module_registry import AIProjectsRegistry
 from shared.import_helpers import create_stub_function, safe_import
 from shared.json_utils import load_status_json
+from shared.logging import configure_json_logging
+
+configure_json_logging()
+_settings = get_settings()
 
 # Initialize registry and get chat providers API
 _ai_registry = AIProjectsRegistry()
@@ -86,7 +91,8 @@ log_chat_message_safe = db_logging["log_chat_message_safe"]
 # Chat memory functions with graceful degradation
 chat_memory_funcs = safe_import(
     "shared.chat_memory",
-    import_names=("generate_embedding", "fetch_similar_messages", "store_embedding"),
+    import_names=("generate_embedding",
+                  "fetch_similar_messages", "store_embedding"),
     fallback_factory=lambda name: {
         "generate_embedding": lambda text: [],
         "fetch_similar_messages": lambda query_emb, top_k=5, session_id=None: [],
@@ -96,23 +102,6 @@ chat_memory_funcs = safe_import(
 generate_embedding = chat_memory_funcs["generate_embedding"]
 fetch_similar_messages = chat_memory_funcs["fetch_similar_messages"]
 store_embedding = chat_memory_funcs["store_embedding"]
-try:
-    from shared.db_logging import log_chat_message_safe
-except Exception:  # pragma: no cover - if shared not on path
-    log_chat_message_safe = None  # type: ignore
-try:
-    from shared.chat_memory import (fetch_similar_messages, generate_embedding,
-                                    store_embedding)
-except Exception:
-    # Provide graceful degradations so endpoint still works
-    def generate_embedding(text: str):  # type: ignore
-        return []
-
-    def fetch_similar_messages(query_emb, top_k=5, session_id=None):  # type: ignore
-        return []
-
-    def store_embedding(message_id, embedding, model):  # type: ignore
-        pass
 
 
 # File caching for repeated JSON reads
@@ -127,11 +116,6 @@ except Exception:  # pragma: no cover
             return json.load(f)
         return False
 
-
-# Add scripts to path for vision inference (kept for legacy support)
-scripts_path = Path(__file__).resolve().parent / "scripts"
-if str(scripts_path) not in sys.path:
-    sys.path.insert(0, str(scripts_path))
 
 # -----------------------------------------------------------------------------
 # Subscription Manager (optional)
@@ -167,7 +151,8 @@ app = func.FunctionApp()
 def serve_chat_web(req: func.HttpRequest) -> func.HttpResponse:
     """Serve the chat web interface HTML"""
     try:
-        html_path = Path(__file__).resolve().parent / "apps" / "chat" / "index.html"
+        html_path = Path(__file__).resolve().parent / \
+            "apps" / "chat" / "index.html"
 
         if html_path.exists():
             with open(html_path, "r", encoding="utf-8") as f:
@@ -406,7 +391,8 @@ def chat(req: func.HttpRequest) -> func.HttpResponse:
 
     # Telemetry span setup (optional)
     span_ctx = (
-        _tracer.start_as_current_span("chat_request") if _tracer is not None else None
+        _tracer.start_as_current_span(
+            "chat_request") if _tracer is not None else None
     )
     try:
         if span_ctx:
@@ -416,7 +402,8 @@ def chat(req: func.HttpRequest) -> func.HttpResponse:
         messages = _sanitize_chat_messages(req_body.get("messages", []))
         # Optional client-provided session identifier
         session_id = req_body.get("session_id")
-        provider_choice = req_body.get("provider", os.getenv("QAI_PROVIDER", "auto"))
+        provider_choice = req_body.get(
+            "provider", os.getenv("QAI_PROVIDER", "auto"))
         model_override = req_body.get("model", os.getenv("QAI_LORA_MODEL"))
         temperature = req_body.get("temperature")
         max_output_tokens = req_body.get("max_output_tokens")
@@ -475,7 +462,8 @@ def chat(req: func.HttpRequest) -> func.HttpResponse:
             provider=info.name,
             model=info.model,
             max_context_tokens=max_context_tokens,
-            reserve_output_tokens=int(max_output_tokens) if max_output_tokens else 1024,
+            reserve_output_tokens=int(
+                max_output_tokens) if max_output_tokens else 1024,
             system_prompt=system_prompt,
         )
         # Completion (non-streaming for HTTP simplicity)
@@ -491,13 +479,15 @@ def chat(req: func.HttpRequest) -> func.HttpResponse:
         # =============================
         try:
             logs_dir = (
-                Path(__file__).resolve().parent / "ai-projects" / "chat-cli" / "logs"
+                Path(__file__).resolve().parent /
+                "ai-projects" / "chat-cli" / "logs"
             )
             logs_dir.mkdir(parents=True, exist_ok=True)
 
             # Create timestamped log file
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            log_file = logs_dir / f"chat_{timestamp}_{session_id or 'anonymous'}.jsonl"
+            log_file = logs_dir / \
+                f"chat_{timestamp}_{session_id or 'anonymous'}.jsonl"
 
             # Append conversation to log
             with open(log_file, "a", encoding="utf-8") as f:
@@ -529,7 +519,8 @@ def chat(req: func.HttpRequest) -> func.HttpResponse:
                     + "\n"
                 )
         except Exception as log_err:
-            logging.warning(f"Self-learning conversation logging failed: {log_err}")
+            logging.warning(
+                f"Self-learning conversation logging failed: {log_err}")
 
         # =============================
         # Logging + Embedding Storage
@@ -577,7 +568,8 @@ def chat(req: func.HttpRequest) -> func.HttpResponse:
                 if os.getenv("QAI_COSMOS_PERSIST_STRATEGY", "messages") == "messages":
                     # Persist user and assistant messages separately
                     last_user_msg = next(
-                        (m for m in reversed(messages) if m.get("role") == "user"), None
+                        (m for m in reversed(messages)
+                         if m.get("role") == "user"), None
                     )
                     if last_user_msg:
                         cosmos_client.record_chat_message(
@@ -747,7 +739,8 @@ def model_deployer_status(req: func.HttpRequest) -> func.HttpResponse:
     """Return model deployer registry status."""
     try:
         reg_path = (
-            Path(__file__).resolve().parent / "deployed_models" / "model_registry.json"
+            Path(__file__).resolve().parent /
+            "deployed_models" / "model_registry.json"
         )
         if reg_path.exists():
             with open(reg_path, "r") as f:
@@ -779,7 +772,8 @@ def results_export(req: func.HttpRequest) -> func.HttpResponse:
     """Return latest results export (all orchestrators)."""
     try:
         res_path = (
-            Path(__file__).resolve().parent / "exports" / "all_orchestrators.json"
+            Path(__file__).resolve().parent /
+            "exports" / "all_orchestrators.json"
         )
         if res_path.exists():
             with open(res_path, "r") as f:
@@ -813,7 +807,8 @@ def evaluation_results(req: func.HttpRequest) -> func.HttpResponse:
     """Return latest batch evaluation results."""
     try:
         eval_path = (
-            Path(__file__).resolve().parent / "data_out" / "evaluation_results.json"
+            Path(__file__).resolve().parent /
+            "data_out" / "evaluation_results.json"
         )
         if eval_path.exists():
             with open(eval_path, "r") as f:
@@ -989,7 +984,8 @@ def chat_stream(req: func.HttpRequest) -> func.HttpResponse:
             provider=info.name,
             model=info.model,
             max_context_tokens=max_context_tokens,
-            reserve_output_tokens=int(max_output_tokens) if max_output_tokens else 1024,
+            reserve_output_tokens=int(
+                max_output_tokens) if max_output_tokens else 1024,
             system_prompt=system_prompt,
         )
 
@@ -1048,7 +1044,8 @@ def chat_stream(req: func.HttpRequest) -> func.HttpResponse:
 
                     # Check for movement commands periodically
                     if not movement_commands_sent and len(cumulative_text) > 20:
-                        movement_data = parse_movement_commands(cumulative_text)
+                        movement_data = parse_movement_commands(
+                            cumulative_text)
                         if movement_data.get("commands"):
                             movement_event = json.dumps(movement_data)
                             yield (
@@ -1111,7 +1108,8 @@ def chat_stream(req: func.HttpRequest) -> func.HttpResponse:
             body=sse_iterable(),
             status_code=200,
             mimetype="text/event-stream",
-            headers={**create_cors_response_headers(), "Cache-Control": "no-cache"},
+            headers={**create_cors_response_headers(),
+                     "Cache-Control": "no-cache"},
         )
 
     except ValueError as ve:
@@ -1165,7 +1163,8 @@ def tts(req: func.HttpRequest) -> func.HttpResponse:
             or os.getenv("AZURE_SPEECH_API_KEY")
             or os.getenv("AZURE_SPEECH_SUBSCRIPTION")
         )
-        az_region = os.getenv("AZURE_SPEECH_REGION") or os.getenv("AZURE_REGION")
+        az_region = os.getenv(
+            "AZURE_SPEECH_REGION") or os.getenv("AZURE_REGION")
 
         if az_key and az_region:
             try:
@@ -1192,7 +1191,8 @@ def tts(req: func.HttpRequest) -> func.HttpResponse:
                     )
 
                 # Configure speech
-                scfg = speechsdk.SpeechConfig(subscription=az_key, region=az_region)
+                scfg = speechsdk.SpeechConfig(
+                    subscription=az_key, region=az_region)
                 # force WAV output for simpler handling
                 scfg.set_speech_synthesis_output_format(
                     speechsdk.SpeechSynthesisOutputFormat.Riff16Khz16BitMonoPcm
@@ -1217,7 +1217,8 @@ def tts(req: func.HttpRequest) -> func.HttpResponse:
                     )
                     return func.HttpResponse(
                         json.dumps(
-                            {"error": "Synthesis failed", "detail": str(detail)}
+                            {"error": "Synthesis failed",
+                                "detail": str(detail)}
                         ),
                         status_code=500,
                         mimetype="application/json",
@@ -1306,14 +1307,16 @@ def tts(req: func.HttpRequest) -> func.HttpResponse:
                 if pyttsx3 is not None:
                     tmp = None
                     try:
-                        tmp = tempfile.NamedTemporaryFile(delete=False, suffix=".wav")
+                        tmp = tempfile.NamedTemporaryFile(
+                            delete=False, suffix=".wav")
                         tmp_path = tmp.name
                         tmp.close()
 
                         engine = pyttsx3.init()
                         # Try to set rate (pyttsx3 rate is an int; we scale from given rate)
                         try:
-                            engine.setProperty("rate", int(200 * (rate or 1.0)))
+                            engine.setProperty(
+                                "rate", int(200 * (rate or 1.0)))
                         except Exception:
                             pass
                         # Try to select voice by name if provided
@@ -1364,7 +1367,8 @@ def tts(req: func.HttpRequest) -> func.HttpResponse:
                             )
                             cursor += dur
 
-                        audio_b64 = base64.b64encode(audio_bytes).decode("ascii")
+                        audio_b64 = base64.b64encode(
+                            audio_bytes).decode("ascii")
                         return func.HttpResponse(
                             json.dumps(
                                 {
@@ -1401,7 +1405,8 @@ def tts(req: func.HttpRequest) -> func.HttpResponse:
                 if gTTS is not None:
                     tmp = None
                     try:
-                        tmp = tempfile.NamedTemporaryFile(delete=False, suffix=".mp3")
+                        tmp = tempfile.NamedTemporaryFile(
+                            delete=False, suffix=".mp3")
                         tmp_path = tmp.name
                         tmp.close()
 
@@ -1427,7 +1432,8 @@ def tts(req: func.HttpRequest) -> func.HttpResponse:
                             )
                             cursor += dur
 
-                        audio_b64 = base64.b64encode(audio_bytes).decode("ascii")
+                        audio_b64 = base64.b64encode(
+                            audio_bytes).decode("ascii")
                         return func.HttpResponse(
                             json.dumps(
                                 {
@@ -1512,6 +1518,30 @@ def start_backend(req: func.HttpRequest) -> func.HttpResponse:
     )
 
 
+@app.route(route="health", methods=["GET"], auth_level=func.AuthLevel.ANONYMOUS)
+def health(req: func.HttpRequest) -> func.HttpResponse:
+    """Minimal health endpoint safe for probes and load balancers."""
+    try:
+        _, provider_choice = detect_provider(None)
+        active_provider = getattr(provider_choice, "name", "unknown")
+    except (TypeError, ValueError, AttributeError, RuntimeError) as exc:
+        logging.debug("health provider detection failed: %s", exc)
+        active_provider = "unknown"
+
+    payload = {
+        "status": "ok",
+        "provider": active_provider,
+        "settings": _settings.summary(),
+        "timestamp": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
+    }
+    return func.HttpResponse(
+        json.dumps(payload),
+        status_code=200,
+        mimetype="application/json",
+        headers=create_cors_response_headers(),
+    )
+
+
 # =============================================================================
 # Status API - Health and environment diagnostics
 # =============================================================================
@@ -1546,6 +1576,34 @@ def ai_status(req: func.HttpRequest) -> func.HttpResponse:
                 k: v for k, v in loaded.items() if not k.startswith("_status_file_")
             }
 
+        def _heartbeat_is_active(heartbeat: dict) -> bool:
+            """Return True only for fresh heartbeat states that indicate active work."""
+            if not isinstance(heartbeat, dict):
+                return False
+
+            state = str(heartbeat.get("state", "")).strip().lower()
+            if state in {"completed", "paused", "error", "stopped", "idle"}:
+                return False
+
+            pid = heartbeat.get("pid")
+            if not pid:
+                return False
+
+            ts = heartbeat.get("timestamp")
+            if not isinstance(ts, str) or not ts.strip():
+                return True
+
+            try:
+                parsed = datetime.fromisoformat(ts.replace("Z", "+00:00"))
+                now_utc = datetime.now(timezone.utc)
+                if parsed.tzinfo is None:
+                    parsed = parsed.replace(tzinfo=timezone.utc)
+                age_seconds = (
+                    now_utc - parsed.astimezone(timezone.utc)).total_seconds()
+                return age_seconds <= 120
+            except Exception:
+                return True
+
         # Environment flags
         azure_env = {
             "AZURE_OPENAI_API_KEY": bool(os.getenv("AZURE_OPENAI_API_KEY")),
@@ -1559,8 +1617,10 @@ def ai_status(req: func.HttpRequest) -> func.HttpResponse:
         }
 
         # Local AI provider config (Ollama + LM Studio)
-        ollama_base_url = os.getenv("OLLAMA_BASE_URL", "http://127.0.0.1:11434/v1")
-        lmstudio_base_url = os.getenv("LMSTUDIO_BASE_URL", "http://127.0.0.1:1234/v1")
+        ollama_base_url = os.getenv(
+            "OLLAMA_BASE_URL", "http://127.0.0.1:11434/v1")
+        lmstudio_base_url = os.getenv(
+            "LMSTUDIO_BASE_URL", "http://127.0.0.1:1234/v1")
         try:
             from chat_providers import (  # type: ignore
                 _check_lm_studio_available, _check_ollama_available)
@@ -1646,7 +1706,8 @@ def ai_status(req: func.HttpRequest) -> func.HttpResponse:
             "subprocess_ready": (
                 venv_info.get("exists")
                 and bool(
-                    venv_info.get("packages", {}).get("available", {}).get("torch")
+                    venv_info.get("packages", {}).get(
+                        "available", {}).get("torch")
                 )
                 and bool(
                     venv_info.get("packages", {})
@@ -1665,7 +1726,8 @@ def ai_status(req: func.HttpRequest) -> func.HttpResponse:
                 pass
 
         # Detect active provider
-        provider, info = _detect_provider_with_runtime_fallback(explicit="auto")
+        provider, info = _detect_provider_with_runtime_fallback(
+            explicit="auto")
 
         # Assets
         chat_web_html = (repo_root / "apps" / "chat" / "index.html").exists()
@@ -1845,7 +1907,8 @@ def ai_status(req: func.HttpRequest) -> func.HttpResponse:
                     for k, v in loaded_learning_status.items()
                     if not k.startswith("_status_file_")
                 }
-                learning_info["enabled"] = learning_status.get("learning_enabled", True)
+                learning_info["enabled"] = learning_status.get(
+                    "learning_enabled", True)
                 learning_info["training_cycles"] = learning_status.get(
                     "training_cycles", 0
                 )
@@ -1855,7 +1918,8 @@ def ai_status(req: func.HttpRequest) -> func.HttpResponse:
                 learning_info["new_conversations"] = learning_status.get(
                     "conversations_since_last_train", 0
                 )
-                learning_info["last_training"] = learning_status.get("last_training")
+                learning_info["last_training"] = learning_status.get(
+                    "last_training")
                 learning_info["best_model_path"] = learning_status.get(
                     "best_model_path"
                 )
@@ -1896,17 +1960,13 @@ def ai_status(req: func.HttpRequest) -> func.HttpResponse:
                     heartbeat_running = False
                     heartbeat = _load_status_payload(heartbeat_file)
                     if heartbeat:
-                        try:
-                            heartbeat_running = heartbeat.get(
-                                "state"
-                            ) == "completed" or heartbeat.get("pid")
-                        except Exception:
-                            pass
+                        heartbeat_running = _heartbeat_is_active(heartbeat)
 
                     orchestrator_health["orchestrators"]["autonomous_training"] = {
                         "name": "autonomous_training",
                         "status": (
-                            "ok" if at_status.get("cycles_completed", 0) > 0 else "idle"
+                            "ok" if at_status.get(
+                                "cycles_completed", 0) > 0 else "idle"
                         ),
                         "cycles_completed": at_status.get("cycles_completed", 0),
                         "best_accuracy": at_status.get("best_accuracy"),
@@ -1940,7 +2000,8 @@ def ai_status(req: func.HttpRequest) -> func.HttpResponse:
             for name in standard_names:
                 try:
                     status_file = data_out_dir / name / "status.json"
-                    orch_status = _load_status_payload(status_file, require_clean=True)
+                    orch_status = _load_status_payload(
+                        status_file, require_clean=True)
                     if orch_status:
 
                         # Normalize to common schema
@@ -2019,6 +2080,7 @@ def ai_status(req: func.HttpRequest) -> func.HttpResponse:
             "quantum": quantum_info,
             "self_learning": learning_info,
             "orchestrator_health": orchestrator_health,
+            "settings": _settings.summary(),
             "temperature": float(os.getenv("CHAT_TEMPERATURE", "0.7")),
             "server": {
                 "executable": sys.executable,
@@ -2034,6 +2096,7 @@ def ai_status(req: func.HttpRequest) -> func.HttpResponse:
                 "/api/chat-web/chat.js",
                 "/api/chat",
                 "/api/chat/stream",
+                "/api/health",
                 "/api/ai/status",
                 "/api/vision/infer",
                 "/api/vision/batch-infer",
@@ -2170,7 +2233,8 @@ def vision_infer(req: func.HttpRequest) -> func.HttpResponse:
                 result = vi.predict(img)
             except Exception as e:
                 return func.HttpResponse(
-                    json.dumps({"error": f"Failed to fetch image from URL: {e}"}),
+                    json.dumps(
+                        {"error": f"Failed to fetch image from URL: {e}"}),
                     status_code=400,
                     mimetype="application/json",
                     headers=create_cors_response_headers(),
@@ -2181,7 +2245,8 @@ def vision_infer(req: func.HttpRequest) -> func.HttpResponse:
                 result = vi.predict_base64(image_data)
             except Exception as e:
                 return func.HttpResponse(
-                    json.dumps({"error": f"Failed to decode base64 image: {e}"}),
+                    json.dumps(
+                        {"error": f"Failed to decode base64 image: {e}"}),
                     status_code=400,
                     mimetype="application/json",
                     headers=create_cors_response_headers(),
@@ -2301,7 +2366,8 @@ def vision_batch_infer(req: func.HttpRequest) -> func.HttpResponse:
                 vision_batch_infer._vision_model = VisionInference()
             except FileNotFoundError as e:
                 return func.HttpResponse(
-                    json.dumps({"error": "No trained model found", "detail": str(e)}),
+                    json.dumps(
+                        {"error": "No trained model found", "detail": str(e)}),
                     status_code=404,
                     mimetype="application/json",
                     headers=create_cors_response_headers(),
@@ -2436,7 +2502,8 @@ def image_generate(req: func.HttpRequest) -> func.HttpResponse:
             response = client.images.generate(
                 model="dall-e-2",
                 prompt=prompt,
-                size=size if size in ["256x256", "512x512", "1024x1024"] else "512x512",
+                size=size if size in ["256x256",
+                                      "512x512", "1024x1024"] else "512x512",
                 n=1,
                 response_format="url",
             )
@@ -2576,7 +2643,8 @@ def quantum_classify(req: func.HttpRequest) -> func.HttpResponse:
             from quantum_classifier import QuantumClassifier
         except ImportError as e:
             return func.HttpResponse(
-                json.dumps({"error": f"Quantum dependencies not available: {e}"}),
+                json.dumps(
+                    {"error": f"Quantum dependencies not available: {e}"}),
                 status_code=500,
                 mimetype="application/json",
                 headers=create_cors_response_headers(),
@@ -2602,7 +2670,8 @@ def quantum_classify(req: func.HttpRequest) -> func.HttpResponse:
         # Prepare features
         feature_array = np.array(features[:n_qubits])
         if len(feature_array) < n_qubits:
-            feature_array = np.pad(feature_array, (0, n_qubits - len(feature_array)))
+            feature_array = np.pad(
+                feature_array, (0, n_qubits - len(feature_array)))
 
         # Convert to torch tensor and scale to [0, 2π]
         inputs = torch.tensor(feature_array, dtype=torch.float32) * 2 * np.pi
@@ -2831,7 +2900,8 @@ def quantum_llm(req: func.HttpRequest) -> func.HttpResponse:
         # Lazy import to avoid hard dependency at startup
         repo_root = Path(__file__).resolve().parent
         quantum_ml_src = (
-            Path(__file__).resolve().parent / "ai-projects" / "quantum-ml" / "src"
+            Path(__file__).resolve().parent /
+            "ai-projects" / "quantum-ml" / "src"
         )
         scripts_dir = Path(__file__).resolve().parent / "scripts"
         for p in [str(quantum_ml_src), str(scripts_dir)]:
@@ -3231,7 +3301,8 @@ def subscription_status(req: func.HttpRequest) -> func.HttpResponse:
     except Exception as e:
         logging.error(f"Subscription status error: {str(e)}")
         return func.HttpResponse(
-            json.dumps({"error": f"Failed to get subscription status: {str(e)}"}),
+            json.dumps(
+                {"error": f"Failed to get subscription status: {str(e)}"}),
             status_code=500,
             mimetype="application/json",
             headers=create_cors_response_headers(),
@@ -3289,7 +3360,8 @@ def subscription_upgrade(req: func.HttpRequest) -> func.HttpResponse:
         )
 
         return func.HttpResponse(
-            json.dumps({"success": True, "subscription": subscription.to_dict()}),
+            json.dumps(
+                {"success": True, "subscription": subscription.to_dict()}),
             status_code=200,
             mimetype="application/json",
             headers=create_cors_response_headers(),
@@ -3449,7 +3521,8 @@ def stripe_webhook(req: func.HttpRequest) -> func.HttpResponse:
         handler = get_webhook_handler()
         result = handler.handle_webhook(payload, signature, webhook_secret)
 
-        status_code = 200 if result["status"] in ["success", "ignored"] else 500
+        status_code = 200 if result["status"] in [
+            "success", "ignored"] else 500
 
         return func.HttpResponse(
             json.dumps(result),
@@ -3543,7 +3616,8 @@ def test_notifications(req: func.HttpRequest) -> func.HttpResponse:
     except Exception as e:
         logging.error(f"Test notification error: {str(e)}")
         return func.HttpResponse(
-            json.dumps({"error": f"Failed to send test notification: {str(e)}"}),
+            json.dumps(
+                {"error": f"Failed to send test notification: {str(e)}"}),
             status_code=500,
             mimetype="application/json",
             headers=create_cors_response_headers(),
@@ -3577,7 +3651,8 @@ def notifications_log(req: func.HttpRequest) -> func.HttpResponse:
         notifications = email_system.get_sent_emails(user_email)
 
         return func.HttpResponse(
-            json.dumps({"notifications": notifications, "count": len(notifications)}),
+            json.dumps({"notifications": notifications,
+                       "count": len(notifications)}),
             status_code=200,
             mimetype="application/json",
             headers=create_cors_response_headers(),
@@ -3586,7 +3661,8 @@ def notifications_log(req: func.HttpRequest) -> func.HttpResponse:
     except Exception as e:
         logging.error(f"Notifications log error: {str(e)}")
         return func.HttpResponse(
-            json.dumps({"error": f"Failed to get notifications log: {str(e)}"}),
+            json.dumps(
+                {"error": f"Failed to get notifications log: {str(e)}"}),
             status_code=500,
             mimetype="application/json",
             headers=create_cors_response_headers(),
@@ -3784,10 +3860,13 @@ def _get_quantum_llm_pipeline():
                     sys.path.insert(0, str(quantum_llm_src))
                 from quantum_llm import QuantumLLMConfig, QuantumLLMPipeline  # type: ignore
 
-                _quantum_llm_pipeline = QuantumLLMPipeline(config=QuantumLLMConfig.from_env())
-                logging.info("[quantum-llm] Pipeline initialized: backend=%s", _quantum_llm_pipeline.effective_backend)
+                _quantum_llm_pipeline = QuantumLLMPipeline(
+                    config=QuantumLLMConfig.from_env())
+                logging.info("[quantum-llm] Pipeline initialized: backend=%s",
+                             _quantum_llm_pipeline.effective_backend)
             except Exception as _qllm_err:  # noqa: BLE001
-                logging.warning("[quantum-llm] Pipeline init failed: %s", _qllm_err)
+                logging.warning(
+                    "[quantum-llm] Pipeline init failed: %s", _qllm_err)
     return _quantum_llm_pipeline
 
 
@@ -3812,7 +3891,8 @@ def quantum_llm_status(req: func.HttpRequest) -> func.HttpResponse:
         pipeline = _get_quantum_llm_pipeline()
         if pipeline is None:
             return func.HttpResponse(
-                json.dumps({"status": "unavailable", "error": "Pipeline not initialized"}),
+                json.dumps({"status": "unavailable",
+                           "error": "Pipeline not initialized"}),
                 status_code=503,
                 mimetype="application/json",
                 headers=create_cors_response_headers(),
@@ -3866,7 +3946,8 @@ def quantum_llm_chat(req: func.HttpRequest) -> func.HttpResponse:
         prompt = body.get("prompt", "")
         if not prompt or not isinstance(prompt, str):
             return func.HttpResponse(
-                json.dumps({"error": "prompt is required and must be a non-empty string"}),
+                json.dumps(
+                    {"error": "prompt is required and must be a non-empty string"}),
                 status_code=400,
                 mimetype="application/json",
                 headers=create_cors_response_headers(),
@@ -3889,11 +3970,13 @@ def quantum_llm_chat(req: func.HttpRequest) -> func.HttpResponse:
         # instead of mutating the shared pipeline config to avoid race conditions.
         gen_kwargs = {}
         if max_tokens is not None:
-            gen_kwargs["max_tokens"] = min(int(max_tokens), pipeline.config.max_tokens_cap)
+            gen_kwargs["max_tokens"] = min(
+                int(max_tokens), pipeline.config.max_tokens_cap)
 
         import asyncio  # noqa: PLC0415 (already imported at module level but guard)
 
-        result = asyncio.run(pipeline.generate(prompt, provider=provider_override, seed=seed))
+        result = asyncio.run(pipeline.generate(
+            prompt, provider=provider_override, seed=seed))
         return func.HttpResponse(
             json.dumps(result),
             status_code=200,
@@ -3955,7 +4038,8 @@ def quantum_llm_stream(req: func.HttpRequest) -> func.HttpResponse:
                 body=_unavail(),
                 status_code=503,
                 mimetype="text/event-stream",
-                headers={**create_cors_response_headers(), "Cache-Control": "no-cache"},
+                headers={**create_cors_response_headers(),
+                         "Cache-Control": "no-cache"},
             )
 
         import asyncio  # noqa: PLC0415
@@ -3984,7 +4068,8 @@ def quantum_llm_stream(req: func.HttpRequest) -> func.HttpResponse:
             body=_sse_generator(),
             status_code=200,
             mimetype="text/event-stream",
-            headers={**create_cors_response_headers(), "Cache-Control": "no-cache"},
+            headers={**create_cors_response_headers(),
+                     "Cache-Control": "no-cache"},
         )
     except Exception as exc:  # noqa: BLE001
         logging.error("quantum-llm/stream error: %s", exc)
@@ -3998,7 +4083,8 @@ def quantum_llm_stream(req: func.HttpRequest) -> func.HttpResponse:
             body=_err(),
             status_code=200,
             mimetype="text/event-stream",
-            headers={**create_cors_response_headers(), "Cache-Control": "no-cache"},
+            headers={**create_cors_response_headers(),
+                     "Cache-Control": "no-cache"},
         )
 
 

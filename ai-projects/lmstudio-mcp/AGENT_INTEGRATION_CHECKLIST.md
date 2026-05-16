@@ -62,7 +62,7 @@ python -m chat_cli --provider lmstudio "What is AI?"
 ## 📚 Documentation Guide
 
 | Document | For |
-|----------|-----|
+| ---------- | ----- |
 | `AGENT_INTEGRATION.md` | Using LM Studio with agents |
 | `README.md` | MCP server details |
 | `CONFIG_EXAMPLES.md` | Environment setup |

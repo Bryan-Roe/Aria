@@ -1,0 +1,348 @@
+nohup: ignoring input
+2026-03-29 07:23:14,883 - INFO - ======================================================================
+2026-03-29 07:23:14,885 - INFO - 🤖 AUTONOMOUS AI TRAINING ORCHESTRATOR
+2026-03-29 07:23:14,887 - INFO - ======================================================================
+2026-03-29 07:23:14,887 - INFO - Starting continuous training mode (infinite cycles)...
+2026-03-29 07:23:14,888 - INFO - Cycle interval: 1800s
+2026-03-29 07:23:14,889 - INFO - 
+======================================================================
+2026-03-29 07:23:14,889 - INFO - CYCLE 379
+2026-03-29 07:23:14,890 - INFO - ======================================================================
+2026-03-29 07:23:14,907 - INFO - Starting training cycle #379...
+2026-03-29 07:23:15,046 - INFO - Found 4 dataset categories: ['chat', 'synthetic:aria_commands', 'synthetic:python_help', 'synthetic:quantum']
+2026-03-29 07:23:17,047 - INFO -   Training progress: 33%
+2026-03-29 07:23:19,051 - INFO -   Training progress: 67%
+2026-03-29 07:23:21,054 - INFO -   Training progress: 100%
+2026-03-29 07:23:21,056 - INFO - Current accuracy: 0.9569 (best: 0.9569, plateau: 24 cycles)
+2026-03-29 07:23:21,153 - INFO - 🔬 Running scheduled Quantum LLM training step...
+2026-03-29 07:23:26,679 - WARNING - QuantumLayer not available - using classical fallbacks: No module named 'pennylane'
+2026-03-29 07:23:26,740 - INFO - Using ClassicalSelfAttention (fallback)
+2026-03-29 07:23:26,743 - INFO - Using ClassicalFeedForward (fallback)
+2026-03-29 07:23:26,744 - INFO - Using ClassicalSelfAttention (fallback)
+2026-03-29 07:23:26,745 - INFO - Using ClassicalFeedForward (fallback)
+2026-03-29 07:23:26,748 - INFO - QuantumLLM initialised: 118,528 parameters
+2026-03-29 07:23:26,748 - INFO -   vocab=256, d_model=64, heads=4, blocks=2, qubits=4, seq_len=32
+2026-03-29 07:23:28,726 - INFO - Initialized QuantumEnhancedLLMTrainer
+2026-03-29 07:23:28,727 - INFO -   Device: cpu
+2026-03-29 07:23:28,727 - INFO -   Parameters: 118,528
+2026-03-29 07:23:28,728 - INFO -   Quantum available: False
+2026-03-29 07:23:28,729 - INFO -   Model config: {'vocab_size': 256, 'd_model': 64, 'n_heads': 4, 'n_transformer_layers': 2, 'n_qubits': 4, 'n_quantum_layers': 2, 'max_seq_len': 32, 'entanglement': 'circular', 'dropout': 0.1, 'use_quantum_attention': True, 'use_quantum_ffn': True, 'tie_embeddings': True}
+2026-03-29 07:23:28,776 - INFO - Starting quantum-enhanced LLM training
+2026-03-29 07:23:28,777 - INFO -   Dataset: /workspaces/Aria/datasets/chat/github_actions/train.json
+2026-03-29 07:23:28,777 - INFO -   Output: /workspaces/Aria/data_out/quantum_llm_training
+2026-03-29 07:23:28,778 - INFO -   Epochs: 1
+2026-03-29 07:23:28,778 - INFO -   Mode: simulated
+2026-03-29 07:23:28,826 - INFO - 
+--- Epoch 1/1 (simulated) ---
+2026-03-29 07:23:28,884 - INFO -   Epoch 1 complete | Avg Loss: 1.0027
+2026-03-29 07:23:28,942 - INFO - 
+Training complete! Results saved to: /workspaces/Aria/data_out/quantum_llm_training/quantum_training_results.json
+2026-03-29 07:23:29,062 - INFO - Cycle complete. Next cycle in 1800s...
+2026-03-29 07:56:02,963 - INFO - 
+======================================================================
+2026-03-29 07:56:02,994 - INFO - CYCLE 380
+2026-03-29 07:56:02,996 - INFO - ======================================================================
+2026-03-29 07:56:03,039 - INFO - Starting training cycle #380...
+2026-03-29 07:56:03,281 - INFO - Found 4 dataset categories: ['chat', 'synthetic:aria_commands', 'synthetic:python_help', 'synthetic:quantum']
+2026-03-29 07:56:05,285 - INFO -   Training progress: 33%
+2026-03-29 07:56:07,287 - INFO -   Training progress: 67%
+2026-03-29 07:56:09,289 - INFO -   Training progress: 100%
+2026-03-29 07:56:09,298 - INFO - Current accuracy: 0.9569 (best: 0.9569, plateau: 25 cycles)
+2026-03-29 07:56:09,304 - INFO - 📦 Plateau reached 25 stable cycles — promoting model...
+2026-03-29 07:56:09,346 - INFO - 🚀 Model v7 promoted → /workspaces/Aria/deployed_models/chat_model_v7.json (accuracy=0.9569)
+2026-03-29 07:56:09,649 - INFO - 🔬 Running scheduled Quantum LLM training step...
+2026-03-29 07:56:09,706 - INFO - Using ClassicalSelfAttention (fallback)
+2026-03-29 07:56:09,711 - INFO - Using ClassicalFeedForward (fallback)
+2026-03-29 07:56:09,716 - INFO - Using ClassicalSelfAttention (fallback)
+2026-03-29 07:56:09,720 - INFO - Using ClassicalFeedForward (fallback)
+2026-03-29 07:56:09,727 - INFO - QuantumLLM initialised: 118,528 parameters
+2026-03-29 07:56:09,731 - INFO -   vocab=256, d_model=64, heads=4, blocks=2, qubits=4, seq_len=32
+2026-03-29 07:56:09,741 - INFO - Initialized QuantumEnhancedLLMTrainer
+2026-03-29 07:56:09,744 - INFO -   Device: cpu
+2026-03-29 07:56:09,745 - INFO -   Parameters: 118,528
+2026-03-29 07:56:09,747 - INFO -   Quantum available: False
+2026-03-29 07:56:09,748 - INFO -   Model config: {'vocab_size': 256, 'd_model': 64, 'n_heads': 4, 'n_transformer_layers': 2, 'n_qubits': 4, 'n_quantum_layers': 2, 'max_seq_len': 32, 'entanglement': 'circular', 'dropout': 0.1, 'use_quantum_attention': True, 'use_quantum_ffn': True, 'tie_embeddings': True}
+2026-03-29 07:56:09,925 - INFO - Starting quantum-enhanced LLM training
+2026-03-29 07:56:09,929 - INFO -   Dataset: /workspaces/Aria/datasets/chat/github_actions/train.json
+2026-03-29 07:56:09,930 - INFO -   Output: /workspaces/Aria/data_out/quantum_llm_training
+2026-03-29 07:56:09,934 - INFO -   Epochs: 1
+2026-03-29 07:56:09,940 - INFO -   Mode: simulated
+2026-03-29 07:56:10,079 - INFO - 
+--- Epoch 1/1 (simulated) ---
+2026-03-29 07:56:10,174 - INFO -   Epoch 1 complete | Avg Loss: 0.9780
+2026-03-29 07:56:10,296 - INFO - 
+Training complete! Results saved to: /workspaces/Aria/data_out/quantum_llm_training/quantum_training_results.json
+2026-03-29 07:56:10,637 - INFO - Cycle complete. Next cycle in 1800s...
+2026-03-29 08:28:42,444 - INFO - 
+======================================================================
+2026-03-29 08:28:42,571 - INFO - CYCLE 381
+2026-03-29 08:28:42,585 - INFO - ======================================================================
+2026-03-29 08:28:43,336 - INFO - Starting training cycle #381...
+2026-03-29 08:28:43,732 - INFO - Found 4 dataset categories: ['chat', 'synthetic:aria_commands', 'synthetic:python_help', 'synthetic:quantum']
+2026-03-29 08:28:45,735 - INFO -   Training progress: 33%
+2026-03-29 08:28:47,740 - INFO -   Training progress: 67%
+2026-03-29 08:28:49,748 - INFO -   Training progress: 100%
+2026-03-29 08:28:49,784 - INFO - Current accuracy: 0.9569 (best: 0.9569, plateau: 26 cycles)
+2026-03-29 08:28:50,050 - INFO - Cycle complete. Next cycle in 1800s...
+2026-03-29 09:01:39,414 - INFO - 
+======================================================================
+2026-03-29 09:01:39,589 - INFO - CYCLE 382
+2026-03-29 09:01:39,592 - INFO - ======================================================================
+2026-03-29 09:01:39,868 - INFO - Starting training cycle #382...
+2026-03-29 09:01:40,156 - INFO - Found 4 dataset categories: ['chat', 'synthetic:aria_commands', 'synthetic:python_help', 'synthetic:quantum']
+2026-03-29 09:01:42,173 - INFO -   Training progress: 33%
+2026-03-29 09:01:44,181 - INFO -   Training progress: 67%
+2026-03-29 09:01:46,185 - INFO -   Training progress: 100%
+2026-03-29 09:01:46,207 - INFO - Current accuracy: 0.9569 (best: 0.9569, plateau: 27 cycles)
+2026-03-29 09:01:46,435 - INFO - 🔬 Running scheduled Quantum LLM training step...
+2026-03-29 09:01:47,938 - INFO - Using ClassicalSelfAttention (fallback)
+2026-03-29 09:01:48,111 - INFO - Using ClassicalFeedForward (fallback)
+2026-03-29 09:01:48,138 - INFO - Using ClassicalSelfAttention (fallback)
+2026-03-29 09:01:48,153 - INFO - Using ClassicalFeedForward (fallback)
+2026-03-29 09:01:48,233 - INFO - QuantumLLM initialised: 118,528 parameters
+2026-03-29 09:01:48,234 - INFO -   vocab=256, d_model=64, heads=4, blocks=2, qubits=4, seq_len=32
+2026-03-29 09:01:48,499 - INFO - Initialized QuantumEnhancedLLMTrainer
+2026-03-29 09:01:48,506 - INFO -   Device: cpu
+2026-03-29 09:01:48,507 - INFO -   Parameters: 118,528
+2026-03-29 09:01:48,508 - INFO -   Quantum available: False
+2026-03-29 09:01:48,512 - INFO -   Model config: {'vocab_size': 256, 'd_model': 64, 'n_heads': 4, 'n_transformer_layers': 2, 'n_qubits': 4, 'n_quantum_layers': 2, 'max_seq_len': 32, 'entanglement': 'circular', 'dropout': 0.1, 'use_quantum_attention': True, 'use_quantum_ffn': True, 'tie_embeddings': True}
+2026-03-29 09:01:48,642 - INFO - Starting quantum-enhanced LLM training
+2026-03-29 09:01:48,650 - INFO -   Dataset: /workspaces/Aria/datasets/chat/github_actions/train.json
+2026-03-29 09:01:48,662 - INFO -   Output: /workspaces/Aria/data_out/quantum_llm_training
+2026-03-29 09:01:48,663 - INFO -   Epochs: 1
+2026-03-29 09:01:48,664 - INFO -   Mode: simulated
+2026-03-29 09:01:48,900 - INFO - 
+--- Epoch 1/1 (simulated) ---
+2026-03-29 09:01:49,307 - INFO -   Epoch 1 complete | Avg Loss: 1.0192
+2026-03-29 09:01:49,516 - INFO - 
+Training complete! Results saved to: /workspaces/Aria/data_out/quantum_llm_training/quantum_training_results.json
+2026-03-29 09:01:49,902 - INFO - Cycle complete. Next cycle in 1800s...
+2026-03-29 09:34:56,097 - INFO - 
+======================================================================
+2026-03-29 09:34:56,120 - INFO - CYCLE 383
+2026-03-29 09:34:56,136 - INFO - ======================================================================
+2026-03-29 09:34:56,393 - INFO - Starting training cycle #383...
+2026-03-29 09:34:58,435 - INFO - Found 4 dataset categories: ['chat', 'synthetic:aria_commands', 'synthetic:python_help', 'synthetic:quantum']
+2026-03-29 09:35:00,447 - INFO -   Training progress: 33%
+2026-03-29 09:35:02,466 - INFO -   Training progress: 67%
+2026-03-29 09:35:04,484 - INFO -   Training progress: 100%
+2026-03-29 09:35:04,505 - INFO - Current accuracy: 0.9480 (best: 0.9569, plateau: 28 cycles)
+2026-03-29 09:35:06,793 - INFO - Cycle complete. Next cycle in 1800s...
+2026-03-29 10:07:46,022 - INFO - 
+======================================================================
+2026-03-29 10:07:46,038 - INFO - CYCLE 384
+2026-03-29 10:07:46,039 - INFO - ======================================================================
+2026-03-29 10:07:46,115 - INFO - Starting training cycle #384...
+2026-03-29 10:07:46,498 - INFO - Found 4 dataset categories: ['chat', 'synthetic:aria_commands', 'synthetic:python_help', 'synthetic:quantum']
+2026-03-29 10:07:48,504 - INFO -   Training progress: 33%
+2026-03-29 10:07:52,840 - INFO -   Training progress: 67%
+2026-03-29 10:07:54,841 - INFO -   Training progress: 100%
+2026-03-29 10:07:54,842 - INFO - Current accuracy: 0.9490 (best: 0.9569, plateau: 29 cycles)
+2026-03-29 10:07:55,067 - INFO - 🔬 Running scheduled Quantum LLM training step...
+2026-03-29 10:07:55,342 - INFO - Using ClassicalSelfAttention (fallback)
+2026-03-29 10:07:55,346 - INFO - Using ClassicalFeedForward (fallback)
+2026-03-29 10:07:55,357 - INFO - Using ClassicalSelfAttention (fallback)
+2026-03-29 10:07:55,374 - INFO - Using ClassicalFeedForward (fallback)
+2026-03-29 10:07:55,385 - INFO - QuantumLLM initialised: 118,528 parameters
+2026-03-29 10:07:55,387 - INFO -   vocab=256, d_model=64, heads=4, blocks=2, qubits=4, seq_len=32
+2026-03-29 10:07:55,400 - INFO - Initialized QuantumEnhancedLLMTrainer
+2026-03-29 10:07:55,403 - INFO -   Device: cpu
+2026-03-29 10:07:55,407 - INFO -   Parameters: 118,528
+2026-03-29 10:07:55,420 - INFO -   Quantum available: False
+2026-03-29 10:07:55,422 - INFO -   Model config: {'vocab_size': 256, 'd_model': 64, 'n_heads': 4, 'n_transformer_layers': 2, 'n_qubits': 4, 'n_quantum_layers': 2, 'max_seq_len': 32, 'entanglement': 'circular', 'dropout': 0.1, 'use_quantum_attention': True, 'use_quantum_ffn': True, 'tie_embeddings': True}
+2026-03-29 10:07:55,591 - INFO - Starting quantum-enhanced LLM training
+2026-03-29 10:07:55,599 - INFO -   Dataset: /workspaces/Aria/datasets/chat/github_actions/train.json
+2026-03-29 10:07:55,600 - INFO -   Output: /workspaces/Aria/data_out/quantum_llm_training
+2026-03-29 10:07:55,601 - INFO -   Epochs: 1
+2026-03-29 10:07:55,602 - INFO -   Mode: simulated
+2026-03-29 10:07:55,880 - INFO - 
+--- Epoch 1/1 (simulated) ---
+2026-03-29 10:07:56,041 - INFO -   Epoch 1 complete | Avg Loss: 0.9512
+2026-03-29 10:07:56,206 - INFO - 
+Training complete! Results saved to: /workspaces/Aria/data_out/quantum_llm_training/quantum_training_results.json
+2026-03-29 10:07:56,527 - INFO - Cycle complete. Next cycle in 1800s...
+2026-03-29 10:40:45,902 - INFO - 
+======================================================================
+2026-03-29 10:40:46,098 - INFO - CYCLE 385
+2026-03-29 10:40:46,138 - INFO - ======================================================================
+2026-03-29 10:40:51,124 - INFO - Starting training cycle #385...
+2026-03-29 10:40:51,371 - INFO - Found 4 dataset categories: ['chat', 'synthetic:aria_commands', 'synthetic:python_help', 'synthetic:quantum']
+2026-03-29 10:40:53,377 - INFO -   Training progress: 33%
+2026-03-29 10:40:55,424 - INFO -   Training progress: 67%
+2026-03-29 10:40:57,424 - INFO -   Training progress: 100%
+2026-03-29 10:40:57,521 - INFO - Current accuracy: 0.9542 (best: 0.9569, plateau: 30 cycles)
+2026-03-29 10:40:57,521 - INFO - 📦 Plateau reached 30 stable cycles — promoting model...
+2026-03-29 10:40:57,615 - INFO - 🚀 Model v8 promoted → /workspaces/Aria/deployed_models/chat_model_v8.json (accuracy=0.9569)
+2026-03-29 10:40:57,858 - INFO - Cycle complete. Next cycle in 1800s...
+2026-03-29 11:13:29,207 - INFO - 
+======================================================================
+2026-03-29 11:13:29,683 - INFO - CYCLE 386
+2026-03-29 11:13:29,797 - INFO - ======================================================================
+2026-03-29 11:13:30,650 - INFO - Starting training cycle #386...
+2026-03-29 11:13:30,895 - INFO - Found 4 dataset categories: ['chat', 'synthetic:aria_commands', 'synthetic:python_help', 'synthetic:quantum']
+2026-03-29 11:13:32,899 - INFO -   Training progress: 33%
+2026-03-29 11:13:34,911 - INFO -   Training progress: 67%
+2026-03-29 11:13:36,916 - INFO -   Training progress: 100%
+2026-03-29 11:13:36,978 - INFO - Current accuracy: 0.9566 (best: 0.9569, plateau: 31 cycles)
+2026-03-29 11:13:37,169 - INFO - 🔬 Running scheduled Quantum LLM training step...
+2026-03-29 11:13:38,179 - INFO - Using ClassicalSelfAttention (fallback)
+2026-03-29 11:13:38,347 - INFO - Using ClassicalFeedForward (fallback)
+2026-03-29 11:13:38,383 - INFO - Using ClassicalSelfAttention (fallback)
+2026-03-29 11:13:38,413 - INFO - Using ClassicalFeedForward (fallback)
+2026-03-29 11:13:38,591 - INFO - QuantumLLM initialised: 118,528 parameters
+2026-03-29 11:13:38,597 - INFO -   vocab=256, d_model=64, heads=4, blocks=2, qubits=4, seq_len=32
+2026-03-29 11:13:38,757 - INFO - Initialized QuantumEnhancedLLMTrainer
+2026-03-29 11:13:38,797 - INFO -   Device: cpu
+2026-03-29 11:13:38,798 - INFO -   Parameters: 118,528
+2026-03-29 11:13:38,799 - INFO -   Quantum available: False
+2026-03-29 11:13:38,800 - INFO -   Model config: {'vocab_size': 256, 'd_model': 64, 'n_heads': 4, 'n_transformer_layers': 2, 'n_qubits': 4, 'n_quantum_layers': 2, 'max_seq_len': 32, 'entanglement': 'circular', 'dropout': 0.1, 'use_quantum_attention': True, 'use_quantum_ffn': True, 'tie_embeddings': True}
+2026-03-29 11:13:38,910 - INFO - Starting quantum-enhanced LLM training
+2026-03-29 11:13:38,911 - INFO -   Dataset: /workspaces/Aria/datasets/chat/github_actions/train.json
+2026-03-29 11:13:38,912 - INFO -   Output: /workspaces/Aria/data_out/quantum_llm_training
+2026-03-29 11:13:38,912 - INFO -   Epochs: 1
+2026-03-29 11:13:38,913 - INFO -   Mode: simulated
+2026-03-29 11:13:39,091 - INFO - 
+--- Epoch 1/1 (simulated) ---
+2026-03-29 11:13:39,480 - INFO -   Epoch 1 complete | Avg Loss: 1.0145
+2026-03-29 11:13:39,772 - INFO - 
+Training complete! Results saved to: /workspaces/Aria/data_out/quantum_llm_training/quantum_training_results.json
+2026-03-29 11:13:39,962 - INFO - Cycle complete. Next cycle in 1800s...
+2026-03-29 11:46:06,236 - INFO - 
+======================================================================
+2026-03-29 11:46:06,243 - INFO - CYCLE 387
+2026-03-29 11:46:06,244 - INFO - ======================================================================
+2026-03-29 11:46:06,272 - INFO - Starting training cycle #387...
+2026-03-29 11:46:06,396 - INFO - Found 4 dataset categories: ['chat', 'synthetic:aria_commands', 'synthetic:python_help', 'synthetic:quantum']
+2026-03-29 11:46:08,397 - INFO -   Training progress: 33%
+2026-03-29 11:46:10,401 - INFO -   Training progress: 67%
+2026-03-29 11:46:14,711 - INFO -   Training progress: 100%
+2026-03-29 11:46:14,729 - INFO - Current accuracy: 0.9545 (best: 0.9569, plateau: 32 cycles)
+2026-03-29 11:46:14,941 - INFO - Cycle complete. Next cycle in 1800s...
+2026-03-29 12:18:46,004 - INFO - 
+======================================================================
+2026-03-29 12:18:46,017 - INFO - CYCLE 388
+2026-03-29 12:18:46,019 - INFO - ======================================================================
+2026-03-29 12:18:46,132 - INFO - Starting training cycle #388...
+2026-03-29 12:18:46,491 - INFO - Found 4 dataset categories: ['chat', 'synthetic:aria_commands', 'synthetic:python_help', 'synthetic:quantum']
+2026-03-29 12:18:48,495 - INFO -   Training progress: 33%
+2026-03-29 12:18:50,497 - INFO -   Training progress: 67%
+2026-03-29 12:18:55,076 - INFO -   Training progress: 100%
+2026-03-29 12:18:55,077 - INFO - Current accuracy: 0.9563 (best: 0.9569, plateau: 33 cycles)
+2026-03-29 12:18:55,251 - INFO - 🔬 Running scheduled Quantum LLM training step...
+2026-03-29 12:18:55,324 - INFO - Using ClassicalSelfAttention (fallback)
+2026-03-29 12:18:55,344 - INFO - Using ClassicalFeedForward (fallback)
+2026-03-29 12:18:55,362 - INFO - Using ClassicalSelfAttention (fallback)
+2026-03-29 12:18:55,366 - INFO - Using ClassicalFeedForward (fallback)
+2026-03-29 12:18:55,371 - INFO - QuantumLLM initialised: 118,528 parameters
+2026-03-29 12:18:55,375 - INFO -   vocab=256, d_model=64, heads=4, blocks=2, qubits=4, seq_len=32
+2026-03-29 12:18:55,411 - INFO - Initialized QuantumEnhancedLLMTrainer
+2026-03-29 12:18:55,414 - INFO -   Device: cpu
+2026-03-29 12:18:55,414 - INFO -   Parameters: 118,528
+2026-03-29 12:18:55,416 - INFO -   Quantum available: False
+2026-03-29 12:18:55,416 - INFO -   Model config: {'vocab_size': 256, 'd_model': 64, 'n_heads': 4, 'n_transformer_layers': 2, 'n_qubits': 4, 'n_quantum_layers': 2, 'max_seq_len': 32, 'entanglement': 'circular', 'dropout': 0.1, 'use_quantum_attention': True, 'use_quantum_ffn': True, 'tie_embeddings': True}
+2026-03-29 12:18:55,534 - INFO - Starting quantum-enhanced LLM training
+2026-03-29 12:18:55,535 - INFO -   Dataset: /workspaces/Aria/datasets/chat/github_actions/train.json
+2026-03-29 12:18:55,536 - INFO -   Output: /workspaces/Aria/data_out/quantum_llm_training
+2026-03-29 12:18:55,537 - INFO -   Epochs: 1
+2026-03-29 12:18:55,538 - INFO -   Mode: simulated
+2026-03-29 12:18:55,614 - INFO - 
+--- Epoch 1/1 (simulated) ---
+2026-03-29 12:18:55,687 - INFO -   Epoch 1 complete | Avg Loss: 0.8939
+2026-03-29 12:18:55,779 - INFO - 
+Training complete! Results saved to: /workspaces/Aria/data_out/quantum_llm_training/quantum_training_results.json
+2026-03-29 12:18:56,088 - INFO - Cycle complete. Next cycle in 1800s...
+2026-03-29 12:51:13,476 - INFO - 
+======================================================================
+2026-03-29 12:51:13,479 - INFO - CYCLE 389
+2026-03-29 12:51:13,480 - INFO - ======================================================================
+2026-03-29 12:51:13,510 - INFO - Starting training cycle #389...
+2026-03-29 12:51:13,591 - INFO - Found 4 dataset categories: ['chat', 'synthetic:aria_commands', 'synthetic:python_help', 'synthetic:quantum']
+2026-03-29 12:51:15,601 - INFO -   Training progress: 33%
+2026-03-29 12:51:20,087 - INFO -   Training progress: 67%
+2026-03-29 12:51:22,099 - INFO -   Training progress: 100%
+2026-03-29 12:51:22,099 - INFO - Current accuracy: 0.9547 (best: 0.9569, plateau: 34 cycles)
+2026-03-29 12:51:22,267 - INFO - Cycle complete. Next cycle in 1800s...
+2026-03-29 13:23:38,732 - INFO - 
+======================================================================
+2026-03-29 13:23:38,732 - INFO - CYCLE 390
+2026-03-29 13:23:38,733 - INFO - ======================================================================
+2026-03-29 13:23:38,753 - INFO - Starting training cycle #390...
+2026-03-29 13:23:38,817 - INFO - Found 4 dataset categories: ['chat', 'synthetic:aria_commands', 'synthetic:python_help', 'synthetic:quantum']
+2026-03-29 13:23:43,605 - INFO -   Training progress: 33%
+2026-03-29 13:23:45,606 - INFO -   Training progress: 67%
+2026-03-29 13:23:47,607 - INFO -   Training progress: 100%
+2026-03-29 13:23:47,608 - INFO - Current accuracy: 0.9529 (best: 0.9569, plateau: 35 cycles)
+2026-03-29 13:23:47,608 - INFO - 📦 Plateau reached 35 stable cycles — promoting model...
+2026-03-29 13:23:47,656 - INFO - 🚀 Model v9 promoted → /workspaces/Aria/deployed_models/chat_model_v9.json (accuracy=0.9569)
+2026-03-29 13:23:47,751 - INFO - 🔬 Running scheduled Quantum LLM training step...
+2026-03-29 13:23:48,193 - INFO - Using ClassicalSelfAttention (fallback)
+2026-03-29 13:23:48,198 - INFO - Using ClassicalFeedForward (fallback)
+2026-03-29 13:23:48,201 - INFO - Using ClassicalSelfAttention (fallback)
+2026-03-29 13:23:48,208 - INFO - Using ClassicalFeedForward (fallback)
+2026-03-29 13:23:48,209 - INFO - QuantumLLM initialised: 118,528 parameters
+2026-03-29 13:23:48,213 - INFO -   vocab=256, d_model=64, heads=4, blocks=2, qubits=4, seq_len=32
+2026-03-29 13:23:48,215 - INFO - Initialized QuantumEnhancedLLMTrainer
+2026-03-29 13:23:48,215 - INFO -   Device: cpu
+2026-03-29 13:23:48,215 - INFO -   Parameters: 118,528
+2026-03-29 13:23:48,216 - INFO -   Quantum available: False
+2026-03-29 13:23:48,216 - INFO -   Model config: {'vocab_size': 256, 'd_model': 64, 'n_heads': 4, 'n_transformer_layers': 2, 'n_qubits': 4, 'n_quantum_layers': 2, 'max_seq_len': 32, 'entanglement': 'circular', 'dropout': 0.1, 'use_quantum_attention': True, 'use_quantum_ffn': True, 'tie_embeddings': True}
+2026-03-29 13:23:48,241 - INFO - Starting quantum-enhanced LLM training
+2026-03-29 13:23:48,241 - INFO -   Dataset: /workspaces/Aria/datasets/chat/github_actions/train.json
+2026-03-29 13:23:48,241 - INFO -   Output: /workspaces/Aria/data_out/quantum_llm_training
+2026-03-29 13:23:48,241 - INFO -   Epochs: 1
+2026-03-29 13:23:48,242 - INFO -   Mode: simulated
+2026-03-29 13:23:48,269 - INFO - 
+--- Epoch 1/1 (simulated) ---
+2026-03-29 13:23:48,303 - INFO -   Epoch 1 complete | Avg Loss: 1.0255
+2026-03-29 13:23:48,359 - INFO - 
+Training complete! Results saved to: /workspaces/Aria/data_out/quantum_llm_training/quantum_training_results.json
+2026-03-29 13:23:48,442 - INFO - Cycle complete. Next cycle in 1800s...
+2026-03-29 13:56:20,250 - INFO - 
+======================================================================
+2026-03-29 13:56:20,252 - INFO - CYCLE 391
+2026-03-29 13:56:20,252 - INFO - ======================================================================
+2026-03-29 13:56:20,265 - INFO - Starting training cycle #391...
+2026-03-29 13:56:20,335 - INFO - Found 4 dataset categories: ['chat', 'synthetic:aria_commands', 'synthetic:python_help', 'synthetic:quantum']
+2026-03-29 13:56:22,336 - INFO -   Training progress: 33%
+2026-03-29 13:56:24,337 - INFO -   Training progress: 67%
+2026-03-29 13:56:26,340 - INFO -   Training progress: 100%
+2026-03-29 13:56:26,340 - INFO - Current accuracy: 0.9569 (best: 0.9569, plateau: 36 cycles)
+2026-03-29 13:56:26,653 - INFO - Cycle complete. Next cycle in 1800s...
+2026-03-29 14:28:45,433 - INFO - 
+======================================================================
+2026-03-29 14:28:45,801 - INFO - CYCLE 392
+2026-03-29 14:28:45,816 - INFO - ======================================================================
+2026-03-29 14:28:45,856 - INFO - Starting training cycle #392...
+2026-03-29 14:28:45,939 - INFO - Found 4 dataset categories: ['chat', 'synthetic:aria_commands', 'synthetic:python_help', 'synthetic:quantum']
+2026-03-29 14:28:47,940 - INFO -   Training progress: 33%
+2026-03-29 14:28:49,940 - INFO -   Training progress: 67%
+2026-03-29 14:28:51,941 - INFO -   Training progress: 100%
+2026-03-29 14:28:51,942 - INFO - Current accuracy: 0.9569 (best: 0.9569, plateau: 37 cycles)
+2026-03-29 14:28:52,022 - INFO - 🔬 Running scheduled Quantum LLM training step...
+2026-03-29 14:28:52,040 - INFO - Using ClassicalSelfAttention (fallback)
+2026-03-29 14:28:52,041 - INFO - Using ClassicalFeedForward (fallback)
+2026-03-29 14:28:52,043 - INFO - Using ClassicalSelfAttention (fallback)
+2026-03-29 14:28:52,044 - INFO - Using ClassicalFeedForward (fallback)
+2026-03-29 14:28:52,047 - INFO - QuantumLLM initialised: 118,528 parameters
+2026-03-29 14:28:52,047 - INFO -   vocab=256, d_model=64, heads=4, blocks=2, qubits=4, seq_len=32
+2026-03-29 14:28:52,050 - INFO - Initialized QuantumEnhancedLLMTrainer
+2026-03-29 14:28:52,050 - INFO -   Device: cpu
+2026-03-29 14:28:52,051 - INFO -   Parameters: 118,528
+2026-03-29 14:28:52,051 - INFO -   Quantum available: False
+2026-03-29 14:28:52,052 - INFO -   Model config: {'vocab_size': 256, 'd_model': 64, 'n_heads': 4, 'n_transformer_layers': 2, 'n_qubits': 4, 'n_quantum_layers': 2, 'max_seq_len': 32, 'entanglement': 'circular', 'dropout': 0.1, 'use_quantum_attention': True, 'use_quantum_ffn': True, 'tie_embeddings': True}
+2026-03-29 14:28:52,080 - INFO - Starting quantum-enhanced LLM training
+2026-03-29 14:28:52,081 - INFO -   Dataset: /workspaces/Aria/datasets/chat/github_actions/train.json
+2026-03-29 14:28:52,082 - INFO -   Output: /workspaces/Aria/data_out/quantum_llm_training
+2026-03-29 14:28:52,082 - INFO -   Epochs: 1
+2026-03-29 14:28:52,083 - INFO -   Mode: simulated
+2026-03-29 14:28:52,133 - INFO - 
+--- Epoch 1/1 (simulated) ---
+2026-03-29 14:28:52,159 - INFO -   Epoch 1 complete | Avg Loss: 0.9780
+2026-03-29 14:28:52,214 - INFO - 
+Training complete! Results saved to: /workspaces/Aria/data_out/quantum_llm_training/quantum_training_results.json
+2026-03-29 14:28:52,302 - INFO - Cycle complete. Next cycle in 1800s...
+simulated) ---
+2026-03-29 14:28:52,159 - INFO -   Epoch 1 complete | Avg Loss: 0.9780
+2026-03-29 14:28:52,214 - INFO - 
+Training complete! Results saved to: /workspaces/Aria/data_out/quantum_llm_training/quantum_training_results.json
+2026-03-29 14:28:52,302 - INFO - Cycle complete. Next cycle in 1800s...

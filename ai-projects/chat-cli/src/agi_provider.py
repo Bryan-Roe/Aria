@@ -6,26 +6,181 @@ This module wraps a base chat provider and adds:
 - optional task decomposition
 - optional reasoning traces
 - optional self-reflection improvements
+
+Architecture overview
+---------------------
+The module is organised around three logical subsystems:
+
+Reasoning core
+    ``AGIProvider._reason`` orchestrates the multi-step reasoning pipeline:
+    query analysis → agent routing → optional task decomposition →
+    chain-of-thought synthesis → self-reflection.
+
+Memory subsystem
+    ``AGIContext`` is the short-term, in-process memory store.  It tracks
+    conversation history, past reasoning chains, active goals, and learned
+    routing patterns.  ``MemoryInterface`` is a structural ``Protocol`` that
+    any alternative memory backend must satisfy to be used as a drop-in
+    replacement.
+
+Environment interface
+    The provider interacts with the outside world only through a
+    ``BaseChatProvider`` for LLM inference and the ``_AGENT_REGISTRY`` for
+    specialist dispatch.  ``EnvironmentInterface`` is a structural ``Protocol``
+    describing the minimal contract for any environment adapter.
+
+Extensibility
+    Both ``MemoryInterface`` and ``EnvironmentInterface`` are
+    ``runtime_checkable`` protocols so that third-party implementations can be
+    validated at import time without inheriting from an abstract base class.
+
+Public API (``__all__``)
+    ``AGIProvider``, ``AGIContext``, ``ReasoningStep``,
+    ``create_agi_provider``, ``MemoryInterface``, ``EnvironmentInterface``.
 """
 
 from __future__ import annotations
 
+import asyncio
 import html
 import logging
+import os
 import re
 import time
 from dataclasses import dataclass, field
-from typing import Any, Dict, Generator, Iterable, List, Optional
+from typing import Any, Dict, Generator, Iterable, List, Optional, Protocol, runtime_checkable
 
 from chat_providers import (BaseChatProvider, ProviderChoice, RoleMessage,
                             detect_provider)
 
 _logger = logging.getLogger(__name__)
 
+__all__ = [
+    "AGIProvider",
+    "AGIContext",
+    "ReasoningStep",
+    "create_agi_provider",
+    "MemoryInterface",
+    "EnvironmentInterface",
+    "MAX_INPUT_LENGTH",
+    "MAX_HISTORY_SIZE",
+    "MAX_GOALS",
+    "MAX_REASONING_CHAINS",
+    "_sanitize_input",
+    "_sanitize_for_logging",
+    "_infer_aria_movement_tag",
+    "_AGENT_REGISTRY",
+]
+
 MAX_INPUT_LENGTH = 10000
 MAX_HISTORY_SIZE = 50
 MAX_GOALS = 5
 MAX_REASONING_CHAINS = 10
+
+
+# ---------------------------------------------------------------------------
+# Extensibility protocols
+# ---------------------------------------------------------------------------
+
+@runtime_checkable
+class MemoryInterface(Protocol):
+    """Structural protocol for AGI memory backends.
+
+    Any object that implements these three methods can be passed where
+    ``AGIContext`` is expected, allowing alternative memory backends
+    (e.g. a Redis-backed store or an in-process SQLite cache) without
+    requiring inheritance.
+
+    All methods **must** be safe to call from multiple threads when the
+    provider is used concurrently.
+    """
+
+    def add_message(self, message: RoleMessage) -> None:
+        """Append *message* to the conversation history.
+
+        Implementations should enforce bounded storage — old messages should
+        be evicted when the history exceeds the configured limit.
+
+        Parameters
+        ----------
+        message:
+            A dict with ``"role"`` and ``"content"`` keys.
+        """
+        ...
+
+    def add_reasoning_chain(self, chain: List[ReasoningStep]) -> None:  # type: ignore[name-defined]
+        """Persist a completed reasoning *chain*.
+
+        Implementations should cap the number of stored chains to avoid
+        unbounded memory growth.
+
+        Parameters
+        ----------
+        chain:
+            Ordered list of ``ReasoningStep`` objects produced during one
+            ``AGIProvider.complete`` call.
+        """
+        ...
+
+    def get_relevant_context(self, query: str) -> str:
+        """Return a concise textual summary of memory relevant to *query*.
+
+        The returned string is injected into the AGI system prompt so it
+        should be brief (a few hundred characters at most).
+
+        Parameters
+        ----------
+        query:
+            The user's latest query used to select relevant memory fragments.
+
+        Returns
+        -------
+        str
+            A plain-text context snippet, or an empty string when no relevant
+            context is available.
+        """
+        raise NotImplementedError
+
+
+@runtime_checkable
+class EnvironmentInterface(Protocol):
+    """Structural protocol for AGI environment adapters.
+
+    An environment adapter provides the AGI provider with read/write access to
+    its external execution context: submitting messages to an LLM backend and
+    receiving responses.
+
+    The minimal contract mirrors ``BaseChatProvider.complete`` so that any
+    existing chat provider can serve as a conforming environment adapter.
+
+    Implementing this protocol is **not** required for normal use — it is
+    provided as an extension point for testing (mock environments) and for
+    future multi-environment or simulation scenarios.
+    """
+
+    def complete(
+        self, messages: List[RoleMessage], stream: bool = True  # type: ignore[name-defined]
+    ) -> Iterable[str] | str:
+        """Submit *messages* to the environment and return the response.
+
+        Parameters
+        ----------
+        messages:
+            Ordered conversation turn list; each element is a dict with
+            ``"role"`` and ``"content"`` keys.
+        stream:
+            When ``True`` the environment should return an iterable of token
+            strings for real-time display.  When ``False`` it should return
+            the complete response as a single ``str``.
+
+        Returns
+        -------
+        Iterable[str] | str
+            Either a generator of token strings (streaming) or a complete
+            response string (non-streaming).
+        """
+        ...
+
 
 # ---------------------------------------------------------------------------
 # Agent registry — maps agent names to capabilities for multi-agent routing.
@@ -171,7 +326,23 @@ def _infer_aria_movement_tag(query: str) -> Optional[str]:
 
 @dataclass
 class ReasoningStep:
-    """Represents one reasoning step."""
+    """One step in an AGI reasoning chain.
+
+    Parameters
+    ----------
+    step_type:
+        Categorical label for this step.  Standard types are ``"analyze"``,
+        ``"route"``, ``"decompose"``, ``"synthesize"``, ``"reflect"``, and
+        ``"refine"``.  Custom step types are allowed for specialised use cases.
+    content:
+        Human-readable description of what this step concluded.
+    confidence:
+        A float in ``[0.0, 1.0]`` representing the provider's self-assessed
+        confidence in this step.  Defaults to ``1.0``.
+    metadata:
+        Arbitrary key-value pairs for structured data produced by this step
+        (e.g. the full query analysis dict for an ``"analyze"`` step).
+    """
 
     step_type: str
     content: str
@@ -181,7 +352,29 @@ class ReasoningStep:
 
 @dataclass
 class AGIContext:
-    """Maintains bounded AGI context and short-term memory."""
+    """Bounded short-term memory for an ``AGIProvider`` instance.
+
+    ``AGIContext`` implements the :class:`MemoryInterface` protocol, so it can
+    be replaced by any object that satisfies that structural interface.
+
+    Parameters
+    ----------
+    conversation_history:
+        Ordered list of sanitized role messages seen in the current session.
+        Bounded to ``max_history`` entries; system messages are preserved
+        when older non-system messages are evicted.
+    reasoning_chains:
+        Ordered list of per-turn reasoning chains, bounded to
+        ``MAX_REASONING_CHAINS``.
+    goals:
+        Active user-specified goals injected into the system prompt.  Bounded
+        to ``MAX_GOALS`` entries.
+    learned_patterns:
+        Dictionary of routing observations used to improve agent selection
+        over the course of a session.
+    max_history:
+        Maximum number of messages to retain.  Defaults to ``MAX_HISTORY_SIZE``.
+    """
 
     conversation_history: List[RoleMessage] = field(default_factory=list)
     reasoning_chains: List[List[ReasoningStep]] = field(default_factory=list)
@@ -190,6 +383,17 @@ class AGIContext:
     max_history: int = MAX_HISTORY_SIZE
 
     def add_message(self, message: RoleMessage) -> None:
+        """Append *message* to the conversation history after sanitisation.
+
+        System messages are always preserved during eviction; the oldest
+        non-system messages are dropped first when the history is full.
+
+        Parameters
+        ----------
+        message:
+            Dict with ``"role"`` and ``"content"`` keys.  Both values are
+            sanitised before storage.
+        """
         sanitized = {
             "role": _sanitize_input(str(message.get("role", "user")), max_length=20),
             "content": _sanitize_input(str(message.get("content", ""))),
@@ -206,11 +410,34 @@ class AGIContext:
             self.conversation_history = system_msgs + other_msgs[-keep_count:]
 
     def add_reasoning_chain(self, chain: List[ReasoningStep]) -> None:
+        """Persist *chain* and evict old chains when the cap is reached.
+
+        Parameters
+        ----------
+        chain:
+            Completed reasoning chain from one ``AGIProvider.complete`` call.
+        """
         self.reasoning_chains.append(chain)
         if len(self.reasoning_chains) > MAX_REASONING_CHAINS:
             self.reasoning_chains = self.reasoning_chains[-MAX_REASONING_CHAINS:]
 
     def get_relevant_context(self, query: str) -> str:
+        """Return a brief text summary of recent memory relevant to *query*.
+
+        Includes the last six conversation turns and the first three active
+        goals.  The query argument is sanitised but not used for retrieval in
+        the default implementation (it is reserved for future semantic search).
+
+        Parameters
+        ----------
+        query:
+            The current user query (reserved for future retrieval use).
+
+        Returns
+        -------
+        str
+            Plain-text context snippet, or empty string when no context exists.
+        """
         _ = _sanitize_input(query)
         parts: List[str] = []
         recent = self.conversation_history[-6:]
@@ -227,7 +454,55 @@ class AGIContext:
 
 
 class AGIProvider(BaseChatProvider):
-    """AGI-enhanced provider wrapping a normal provider."""
+    """AGI-enhanced chat provider with reasoning, memory, and multi-agent routing.
+
+    ``AGIProvider`` wraps any :class:`~chat_providers.BaseChatProvider` and
+    adds a structured reasoning pipeline:
+
+    1. **Query analysis** — classify intent, domain, and complexity.
+    2. **Agent routing** — select the best specialist from ``_AGENT_REGISTRY``.
+    3. **Task decomposition** — break complex queries into ordered subtasks.
+    4. **Chain-of-thought synthesis** — generate domain-aware reasoning hints.
+    5. **Self-reflection** — validate and patch the response (e.g. missing
+       Aria movement tags).
+
+    Parameters
+    ----------
+    base_provider:
+        Underlying LLM provider.  When ``None`` the provider is auto-detected
+        via :func:`~chat_providers.detect_provider` on first use.
+    temperature:
+        Sampling temperature forwarded to the base provider.  Agent-aware
+        overrides are applied per specialist during response generation.
+    max_output_tokens:
+        Maximum token budget for generated responses.
+    enable_chain_of_thought:
+        Include chain-of-thought synthesis steps in the reasoning trace.
+    enable_self_reflection:
+        Validate and improve the generated response after synthesis.
+    enable_task_decomposition:
+        Break complex queries into subtasks before synthesis.
+    reasoning_depth:
+        Number of reasoning steps to generate, clamped to ``[1, 5]``.
+    verbose:
+        Prepend the formatted reasoning trace to each response.
+
+    Examples
+    --------
+    Wrap any provider::
+
+        from agi_provider import AGIProvider
+        from chat_providers import detect_provider
+
+        base, _ = detect_provider(explicit="local")
+        agi = AGIProvider(base_provider=base, verbose=True)
+        print(agi.complete([{"role": "user", "content": "Explain LoRA"}], stream=False))
+
+    Auto-detect the best available provider::
+
+        provider, info = create_agi_provider(temperature=0.4)
+        response = provider.complete([{"role": "user", "content": "Hello"}], stream=False)
+    """
 
     def __init__(
         self,
@@ -253,6 +528,16 @@ class AGIProvider(BaseChatProvider):
         self._last_agent_used: Optional[str] = None
 
     def _get_base_provider(self) -> BaseChatProvider:
+        """Return the base provider, auto-detecting it on first call.
+
+        The detected provider and its :class:`~chat_providers.ProviderChoice`
+        are cached on the instance so subsequent calls are cheap.
+
+        Returns
+        -------
+        BaseChatProvider
+            The underlying LLM provider used for final response generation.
+        """
         if self.base_provider is None:
             provider, choice = detect_provider(explicit="auto")
             self.base_provider = provider
@@ -262,6 +547,31 @@ class AGIProvider(BaseChatProvider):
     def complete(
         self, messages: List[RoleMessage], stream: bool = True
     ) -> Iterable[str] | str:
+        """Process *messages* through the AGI reasoning pipeline and return a response.
+
+        The pipeline:
+
+        1. Truncate ``messages`` to ``MAX_HISTORY_SIZE`` if needed.
+        2. Deduplicate and add new messages to ``self.context``.
+        3. Extract the latest user query.
+        4. Run ``_reason`` to build the reasoning chain.
+        5. Generate a response via the base provider (or a specialist).
+        6. Optionally apply self-reflection.
+        7. Store the chain and return the response, streaming if requested.
+
+        Parameters
+        ----------
+        messages:
+            Ordered conversation turn list.
+        stream:
+            When ``True`` yield tokens one by one; when ``False`` return the
+            full response as a single ``str``.
+
+        Returns
+        -------
+        Iterable[str] | str
+            Streaming token generator or complete response string.
+        """
         if len(messages) > MAX_HISTORY_SIZE:
             messages = messages[-MAX_HISTORY_SIZE:]
             _logger.warning(
@@ -304,6 +614,35 @@ class AGIProvider(BaseChatProvider):
         return self._stream_text(response) if stream else response
 
     def _analyze_query(self, query: str) -> Dict[str, Any]:
+        """Classify *query* by complexity, intent, and domain.
+
+        Complexity classification (from repository instructions):
+
+        * ``"complex"`` — more than 30 words, or contains keywords
+          ``implement``, ``architect``, ``debug``, ``refactor``, or phrases
+          ``step by step``, ``detailed``, ``comprehensive``.
+        * ``"simple"`` — fewer than 10 words with no complex keywords.
+        * ``"moderate"`` — everything else.
+
+        Intent categories:
+            ``movement``, ``coding``, ``reasoning``, ``explanation``,
+            ``creation``, ``question``, ``general``.
+
+        Domain categories:
+            ``quantum``, ``aria``, ``ai``, ``technical``, ``general``.
+
+        Parameters
+        ----------
+        query:
+            Raw user query string (should already be sanitised by the caller).
+
+        Returns
+        -------
+        Dict[str, Any]
+            A dict with keys: ``query``, ``complexity``, ``intent``,
+            ``domain``, ``word_count``, ``has_question``, ``confidence``,
+            ``summary``.
+        """
         query_lower = query.lower()
         words = query.split()
         word_count = len(words)
@@ -499,26 +838,42 @@ class AGIProvider(BaseChatProvider):
         Returns the agent's reply as a plain string, or ``None`` when the
         specialist is unavailable (falls back to AGI processing).
         """
+        if not query or not str(query).strip():
+            _logger.warning("Agent dispatch to %s: empty query provided", agent_name)
+            return None
+
         config = _AGENT_REGISTRY.get(agent_name, {})
         provider_name = config.get("provider", "agi")
 
         if provider_name in ("agi", ""):
             return None  # let AGI handle it directly
 
+        model_override: Optional[str] = None
+        if provider_name == "quantum":
+            model_override = self._resolve_quantum_model_path(analysis)
+            if not model_override:
+                analysis["quantum_backend_ready"] = False
+                _logger.info(
+                    "Agent dispatch skipped for %s: quantum model path not configured",
+                    agent_name,
+                )
+                return None
+            analysis["quantum_backend_ready"] = True
+            analysis["quantum_model_path"] = model_override
+
         try:
-            specialist, choice = detect_provider(explicit=provider_name)
+            specialist, choice = detect_provider(
+                explicit=provider_name,
+                model_override=model_override,
+                temperature=self.temperature,
+                max_output_tokens=self.max_output_tokens,
+            )
             if choice.name != provider_name:
                 _logger.debug(
                     "Agent dispatch skipped for %s: requested provider=%s resolved to %s",
                     agent_name,
                     provider_name,
                     choice.name,
-                )
-                return None
-            # Validate query is non-empty before constructing message
-            if not query or not str(query).strip():
-                _logger.warning(
-                    "Agent dispatch to %s: empty query provided", agent_name
                 )
                 return None
             messages = [{"role": "user", "content": query}]
@@ -534,7 +889,53 @@ class AGIProvider(BaseChatProvider):
             )
             return None  # fall back to AGI
 
+    def _resolve_quantum_model_path(self, analysis: Dict[str, Any]) -> Optional[str]:
+        """Resolve the quantum model path for quantum-specialist dispatch.
+
+        Resolution order:
+        1. ``analysis["quantum_model_path"]``
+        2. ``analysis["model_path"]``
+        3. ``QAI_QUANTUM_MODEL_PATH`` environment variable
+        4. ``QAI_QUANTUM_MODEL`` environment variable
+        5. ``ARIA_QUANTUM_MODEL_PATH`` environment variable
+        """
+        candidates = (
+            analysis.get("quantum_model_path"),
+            analysis.get("model_path"),
+            os.getenv("QAI_QUANTUM_MODEL_PATH"),
+            os.getenv("QAI_QUANTUM_MODEL"),
+            os.getenv("ARIA_QUANTUM_MODEL_PATH"),
+        )
+        for candidate in candidates:
+            if isinstance(candidate, str):
+                stripped = candidate.strip()
+                if stripped:
+                    return stripped
+        return None
+
     def _decompose_task(self, query: str, analysis: Dict[str, Any]) -> List[str]:
+        """Break *query* into an ordered list of subtasks for the reasoning trace.
+
+        Subtasks are taken from the selected agent's ``subtask_templates`` in
+        ``_AGENT_REGISTRY`` when available; otherwise a generic template is
+        chosen based on the detected intent.
+
+        The returned list is capped to ``self.reasoning_depth`` entries.
+
+        Parameters
+        ----------
+        query:
+            The user query (not used in the default implementation — the
+            ``analysis`` dict contains all required information).
+        analysis:
+            Output of ``_analyze_query``.  Must include ``"intent"`` and
+            optionally ``"selected_agent"``.
+
+        Returns
+        -------
+        List[str]
+            Ordered subtask descriptions, bounded by ``self.reasoning_depth``.
+        """
         _ = query
         # First try to pull subtask templates from the selected agent's registry entry.
         selected_agent = analysis.get("selected_agent")
@@ -585,6 +986,28 @@ class AGIProvider(BaseChatProvider):
     def _chain_of_thought(
         self, query: str, analysis: Dict[str, Any], messages: List[RoleMessage]
     ) -> List[str]:
+        """Generate domain-aware chain-of-thought reasoning hints.
+
+        Produces a list of natural-language reasoning statements that are
+        injected into the AGI system prompt to steer the base provider toward
+        a well-structured response.
+
+        The list is bounded by ``self.reasoning_depth``.
+
+        Parameters
+        ----------
+        query:
+            The user query; used to retrieve relevant memory context.
+        analysis:
+            Output of ``_analyze_query``.
+        messages:
+            Full conversation turn list (reserved for future contextual use).
+
+        Returns
+        -------
+        List[str]
+            Ordered reasoning hints, bounded by ``self.reasoning_depth``.
+        """
         _ = messages
         summary = analysis.get(
             "summary",
@@ -628,6 +1051,30 @@ class AGIProvider(BaseChatProvider):
         return thoughts[: self.reasoning_depth]
 
     def _reason(self, query: str, messages: List[RoleMessage]) -> List[ReasoningStep]:
+        """Build the full reasoning chain for *query*.
+
+        Executes the reasoning pipeline in order:
+
+        1. ``_analyze_query`` — classify intent, domain, and complexity.
+        2. ``_select_agent`` — pick the best specialist from the registry.
+        3. (optional) ``_decompose_task`` — generate subtasks for complex queries.
+        4. (optional) ``_chain_of_thought`` — generate domain-aware hints.
+
+        The chain is stored in ``self.context`` by the caller (``complete``).
+
+        Parameters
+        ----------
+        query:
+            Sanitised user query extracted from *messages*.
+        messages:
+            Full conversation history for context retrieval.
+
+        Returns
+        -------
+        List[ReasoningStep]
+            Ordered reasoning steps ready for system-prompt injection and
+            verbose display.
+        """
         chain: List[ReasoningStep] = []
         analysis = self._analyze_query(query)
 
@@ -871,6 +1318,25 @@ class AGIProvider(BaseChatProvider):
             existing["last_seen"] = now
 
     def _generate_fallback_response(self, query: str, analysis: Dict[str, Any]) -> str:
+        """Generate a canned fallback response when the base provider is unavailable.
+
+        For Aria movement queries the appropriate ``[aria:…]`` tag is included.
+        For questions a brief apology noting fallback mode is returned.  All
+        other queries receive a generic request for more information.
+
+        Parameters
+        ----------
+        query:
+            The user query, used to infer an Aria movement tag.
+        analysis:
+            Output of ``_analyze_query`` (must include ``"intent"`` and
+            ``"domain"``).
+
+        Returns
+        -------
+        str
+            A self-contained fallback response string.
+        """
         intent = analysis.get("intent", "general")
         domain = analysis.get("domain", "general")
 
@@ -905,6 +1371,34 @@ class AGIProvider(BaseChatProvider):
     def _reflect_and_improve(
         self, query: str, response: str, reasoning_chain: List[ReasoningStep]
     ) -> str:
+        """Validate *response* and apply targeted improvements.
+
+        Reflection checks performed:
+
+        * **Length check** — flags complex responses that are too short
+          (< 50 words) or simple responses that are too long (> 300 words).
+        * **Aria tag injection** — when the query intent is ``"movement"`` and
+          the domain is ``"aria"``, appends the appropriate ``[aria:…]`` tag
+          if one is absent from the response.
+
+        All identified issues are recorded in ``context.learned_patterns`` for
+        diagnostic inspection via ``get_reasoning_summary()``.
+
+        Parameters
+        ----------
+        query:
+            The original user query, used to infer the Aria movement tag.
+        response:
+            The generated response string to validate and potentially modify.
+        reasoning_chain:
+            The reasoning chain for this turn; the ``"analyze"`` step's
+            metadata is used to retrieve intent, domain, and complexity.
+
+        Returns
+        -------
+        str
+            The (possibly modified) response string.
+        """
         issues: List[str] = []
         analysis: Dict[str, Any] = {}
         for step in reasoning_chain:
@@ -969,6 +1463,18 @@ class AGIProvider(BaseChatProvider):
             time.sleep(delay)
 
     def set_goal(self, goal: str) -> None:
+        """Add *goal* to the active goals list, enforcing the per-session cap.
+
+        Duplicate goals are silently ignored.  When the list exceeds
+        ``MAX_GOALS`` the oldest goal is evicted.  Empty or whitespace-only
+        strings are rejected.
+
+        Parameters
+        ----------
+        goal:
+            A free-text goal description.  Sanitised and truncated to 200
+            characters before storage.
+        """
         safe_goal = _sanitize_input(str(goal), max_length=200).strip()
         if not safe_goal:
             return
@@ -978,10 +1484,32 @@ class AGIProvider(BaseChatProvider):
                 self.context.goals = self.context.goals[-MAX_GOALS:]
 
     def clear_goals(self) -> None:
+        """Remove all active goals from the context."""
         self.context.goals.clear()
 
     def get_reasoning_summary(self) -> Dict[str, Any]:
-        # Extract agent_score from last reasoning chain if available.
+        """Return a structured summary of the provider's current state.
+
+        Useful for monitoring, debugging, and observability dashboards.
+
+        Returns
+        -------
+        Dict[str, Any]
+            Keys:
+
+            * ``total_reasoning_chains`` — number of completed reasoning chains
+              stored in context (max ``MAX_REASONING_CHAINS``).
+            * ``active_goals`` — copy of the current goals list.
+            * ``learned_patterns_count`` — total entries in
+              ``context.learned_patterns``.
+            * ``top_learned_patterns`` — up to five routing patterns sorted by
+              observation count (descending).
+            * ``conversation_length`` — number of messages in the history.
+            * ``last_agent_used`` — name of the agent used in the last call.
+            * ``last_agent_score`` — routing confidence score from the last
+              call's ``"analyze"`` step, or ``None``.
+            * ``available_agents`` — list of all registered agent names.
+        """
         last_agent_score: Optional[float] = None
         if self.context.reasoning_chains:
             last_chain = self.context.reasoning_chains[-1]
@@ -1011,6 +1539,54 @@ class AGIProvider(BaseChatProvider):
             "available_agents": list(_AGENT_REGISTRY.keys()),
         }
 
+    async def async_complete(
+        self, messages: List[RoleMessage], stream: bool = False
+    ) -> str:
+        """Asynchronous variant of :meth:`complete` for use in async contexts.
+
+        Delegates to the synchronous ``complete`` implementation via
+        :func:`asyncio.to_thread` so that blocking I/O in the base provider
+        does not stall the event loop.  Streaming is disabled by default
+        because async callers typically await a complete response; pass
+        ``stream=True`` only when the caller can iterate the generator in a
+        thread context.
+
+        Parameters
+        ----------
+        messages:
+            Ordered conversation turn list.
+        stream:
+            Passed through to ``complete``.  Defaults to ``False`` — callers
+            expecting a generator should set this to ``True`` and consume the
+            result appropriately.
+
+        Returns
+        -------
+        str
+            The complete response string.  When ``stream=True`` the generator
+            is consumed internally and returned as a joined string.
+
+        Examples
+        --------
+        ::
+
+            import asyncio
+            from agi_provider import AGIProvider
+
+            async def main():
+                agi = AGIProvider()
+                response = await agi.async_complete(
+                    [{"role": "user", "content": "Hello"}]
+                )
+                print(response)
+
+            asyncio.run(main())
+        """
+        result = await asyncio.to_thread(self.complete, messages, stream)
+        if isinstance(result, str):
+            return result
+        return "".join(result)
+
 
 def create_agi_provider(
     model: Optional[str] = None,
@@ -1019,7 +1595,43 @@ def create_agi_provider(
     verbose: bool = False,
     **kwargs: Any,
 ) -> tuple[AGIProvider, ProviderChoice]:
-    """Factory for AGI provider."""
+    """Create an :class:`AGIProvider` wrapping the best available base provider.
+
+    Auto-detects the base provider using :func:`~chat_providers.detect_provider`
+    with ``explicit="auto"``.  If detection fails the provider is created
+    without a pre-loaded base provider (it will be auto-detected on the first
+    ``complete`` call).
+
+    Parameters
+    ----------
+    model:
+        Optional model name override forwarded to the base provider.
+    temperature:
+        Sampling temperature (defaults to ``0.7`` when ``None``).
+    max_output_tokens:
+        Maximum token budget (defaults to ``2048`` when ``None``).
+    verbose:
+        When ``True`` the reasoning trace is prepended to each response.
+    **kwargs:
+        Additional keyword arguments forwarded to :class:`AGIProvider`.
+
+    Returns
+    -------
+    tuple[AGIProvider, ProviderChoice]
+        A ``(provider, info)`` pair.  ``info.name`` is always ``"agi"``;
+        ``info.model`` encodes the underlying base provider and model name,
+        e.g. ``"agi-openai-gpt-4"``.
+
+    Examples
+    --------
+    ::
+
+        provider, info = create_agi_provider(temperature=0.4, verbose=True)
+        response = provider.complete(
+            [{"role": "user", "content": "Explain LoRA fine-tuning"}],
+            stream=False,
+        )
+    """
     base_provider = None
     base_choice = None
 

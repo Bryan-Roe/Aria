@@ -1,0 +1,197 @@
+name: Copilot setup validation
+
+# Runnable checklist validating repository Copilot instruction files and related docs.
+# Runs YAML and Markdown linters and produces a small report artifact contributors can inspect.
+# Safe by default (read-only), runs manually (workflow_dispatch) or when .github content changes.
+
+on:
+  workflow_dispatch: {}
+  push:
+    paths:
+      - '.github/**'
+      - '.github/workflows/**'
+      - '.github/copilot*'
+      - '.github/*.md'
+      - 'README.md'
+
+concurrency:
+  group: copilot-setup-check
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  validate-setup:
+    name: Validate Copilot setup files & linters
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Setup Node (for markdownlint)
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Setup Python (for yamllint)
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install linters
+        run: |
+          python -m pip install --upgrade pip
+          pip install --no-cache-dir yamllint
+          npm install -g markdownlint-cli@0.33.0 markdownlint-rule-helpers
+
+      - name: Lint YAML workflow files
+        id: yamllint
+        continue-on-error: true
+        run: |
+          echo "Running yamllint on .github YAML files..."
+          # Build list of YAML files safely (handles spaces/newlines)
+          find .github -type f \( -iname '*.yml' -o -iname '*.yaml' \) -print0 > /tmp/yaml_files0 || true
+
+          if [ -s /tmp/yaml_files0 ]; then
+            # convert null-delimited list to shell args safely
+            mapfile -d '' -t yaml_files < /tmp/yaml_files0
+            printf "Found %d YAML files to lint\n" "${#yaml_files[@]}"
+            printf "%s\n" "${yaml_files[@]}"
+
+            # Inline basic yamllint config: prefer warnings for long lines
+            yamllint -c <(cat <<'YAML'
+extends: default
+rules:
+  line-length:
+    max: 140
+    level: warning
+YAML
+            ) "${yaml_files[@]}" || true
+          else
+            echo "No YAML files found under .github to lint."
+          fi
+
+      - name: Lint Copilot and Markdown files
+        id: mdlint
+        continue-on-error: true
+        run: |
+          echo "Running markdownlint on common Copilot docs..."
+          md_targets=()
+
+          # Common Copilot doc locations
+          [ -f ".github/copilot-instructions.full.md" ] && md_targets+=(".github/copilot-instructions.full.md")
+          [ -f ".github/copilot-instructions.md" ] && md_targets+=(".github/copilot-instructions.md")
+          [ -f ".github/COPILOT.md" ] && md_targets+=(".github/COPILOT.md")
+
+          # Add any .github/*.md and root README.md
+          for f in .github/*.md README.md; do
+            [ -f "$f" ] && md_targets+=("$f")
+          done
+
+          if [ ${#md_targets[@]} -eq 0 ]; then
+            echo "No target markdown files found for markdownlint."
+          else
+            printf "%s\n" "${md_targets[@]}" | xargs -n1 echo "linting:" || true
+            # markdownlint returns non-zero on issues; keep continue-on-error so we don't block artifact creation
+            markdownlint "${md_targets[@]}" || true
+          fi
+
+      - name: Basic content checks for Copilot docs
+        id: checks
+        continue-on-error: false
+        run: |
+          REPORT="/tmp/copilot_setup_report.txt"
+          echo "Copilot Setup Report - $(date -u)" > "$REPORT"
+          echo "" >> "$REPORT"
+
+          # Files we expect or recommend
+          files_to_check=(
+            .github/copilot-instructions.full.md
+            .github/copilot-instructions.md
+            .github/COPILOT.md
+            .github/copilot.yml
+          )
+
+          for f in "${files_to_check[@]}"; do
+            if [ -f "$f" ]; then
+              echo "FOUND: $f" >> "$REPORT"
+            else
+              echo "MISSING: $f" >> "$REPORT"
+            fi
+          done
+
+          echo "" >> "$REPORT"
+
+          # Sanity-check the main Copilot instructions file if present
+          MAIN=".github/copilot-instructions.full.md"
+          if [ -f "$MAIN" ]; then
+            echo "Checking header and length of $MAIN..." >> "$REPORT"
+            head -n 10 "$MAIN" >> "$REPORT"
+            echo "----" >> "$REPORT"
+            wc -l "$MAIN" >> "$REPORT"
+            echo "" >> "$REPORT"
+
+            if grep -qi "last updated" "$MAIN"; then
+              echo "OK: contains 'Last updated' entry" >> "$REPORT"
+            else
+              echo "WARN: consider adding a 'Last updated:' date near the top of $MAIN" >> "$REPORT"
+            fi
+
+            if grep -qi "copilot" "$MAIN"; then
+              echo "OK: file references Copilot" >> "$REPORT"
+            else
+              echo "WARN: $MAIN does not mention 'Copilot' — ensure the guide is Copilot-specific" >> "$REPORT"
+            fi
+          else
+            echo "SKIP: $MAIN not present for deep checks" >> "$REPORT"
+          fi
+
+          # Recommend a minimal copilot.yml if none exists
+          if [ ! -f ".github/copilot.yml" ]; then
+            echo "" >> "$REPORT"
+            echo "RECOMMENDATION: add a .github/copilot.yml to control Copilot settings for this repo." >> "$REPORT"
+            cat >> "$REPORT" <<'YAML'
+
+Example minimal .github/copilot.yml:
+# Opt-in per-repo Copilot configuration. Adjust to your repo needs.
+
+copilot:
+  code-suggestions: enabled
+  chat: enabled
+  file-exclusions:
+    - path: "data/"
+    - path: "models/"
+YAML
+          fi
+
+          # Export report location as a step output via GITHUB_OUTPUT (preferred)
+          echo "report_path=/tmp/copilot_setup_report.txt" >> "$GITHUB_OUTPUT"
+
+          # Print short report to logs for visibility
+          echo "---- Copilot setup report ----"
+          cat "$REPORT"
+        shell: bash
+
+      - name: Upload report artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: copilot-setup-report
+          path: /tmp/copilot_setup_report.txt
+
+      - name: Summary annotation (best-effort)
+        if: always()
+        run: |
+          echo "=== Copilot Setup Summary ==="
+          sed -n '1,200p' /tmp/copilot_setup_report.txt || true
+
+    outputs:
+      # Expose the report path from the checks step
+      report: ${{ steps.checks.outputs.report_path }}

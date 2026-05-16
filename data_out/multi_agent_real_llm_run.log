@@ -1,0 +1,90 @@
+2026-03-28 21:33:38,933 MainThread INFO Multi-agent run 20260328_213338: 3 tasks, max_workers=3
+2026-03-28 21:33:38,934 agent_0 INFO Worker starting task: Add docstrings to shared/chat_memory.py
+2026-03-28 21:33:38,934 agent_0 INFO Initialized ollama client: http://127.0.0.1:11434 model=mistral
+2026-03-28 21:33:38,934 agent_1 INFO Worker starting task: Improve error handling in shared/chat_providers.py
+2026-03-28 21:33:38,934 agent_1 INFO Initialized ollama client: http://127.0.0.1:11434 model=mistral
+2026-03-28 21:33:38,935 agent_2 INFO Worker starting task: Add type hints to scripts/autonomous_training_orchestrator.p
+2026-03-28 21:33:38,935 agent_2 INFO Initialized ollama client: http://127.0.0.1:11434 model=mistral
+2026-03-28 21:33:41,098 agent_1 INFO Starting task 20260328_213341 (dry_run=False): Improve error handling in shared/chat_providers.py
+2026-03-28 21:33:41,098 agent_2 INFO Starting task 20260328_213341 (dry_run=False): Add type hints to scripts/autonomous_training_orchestrator.py
+2026-03-28 21:33:41,106 agent_1 INFO Planning task [unknown]: Improve error handling in shared/chat_providers.py
+2026-03-28 21:33:41,107 agent_2 INFO Planning task [unknown]: Add type hints to scripts/autonomous_training_orchestrator.py
+2026-03-28 21:33:41,111 agent_2 INFO Planning complete: Response to: You are an expert code agent working on a Python r...
+2026-03-28 21:33:41,112 agent_1 INFO Planning complete: Response to: You are an expert code agent working on a Python r...
+2026-03-28 21:33:41,114 agent_2 INFO Identified 0 relevant file(s): []
+2026-03-28 21:33:41,114 agent_1 INFO Identified 0 relevant file(s): []
+2026-03-28 21:33:41,115 agent_2 INFO Identified files: []
+2026-03-28 21:33:41,115 agent_1 INFO Identified files: []
+2026-03-28 21:33:41,124 agent_2 INFO Running tests...
+2026-03-28 21:33:41,124 agent_1 INFO Running tests...
+2026-03-28 21:33:43,380 agent_0 INFO Starting task 20260328_213343 (dry_run=False): Add docstrings to shared/chat_memory.py
+2026-03-28 21:33:43,401 agent_0 INFO Planning task [unknown]: Add docstrings to shared/chat_memory.py
+2026-03-28 21:33:43,405 agent_0 INFO Planning complete: Response to: You are an expert code agent working on a Python r...
+2026-03-28 21:33:43,412 agent_0 INFO Identified 0 relevant file(s): []
+2026-03-28 21:33:43,417 agent_0 INFO Identified files: []
+2026-03-28 21:33:43,437 agent_0 INFO Running tests...
+2026-03-28 21:35:26,949 agent_1 DEBUG Test output: 
+============================================================
+  Running suite: unit  (Fast unit tests (~0.5s))
+============================================================
+
+============================= test session starts ==============================
+collected 1370 items / 17 deselected / 3 skipped / 1353 selected
+
+tests/test_agent_mode_delegation_contracts.py ............               [  0%]
+tests/test_agi_provider.py ............................................. [  4%]
+......              
+2026-03-28 21:35:26,953 agent_1 INFO Tests: passed=False results={'total': 1353, 'passed': 1295, 'failed': 9, 'success': False, 'output': '\n============================================================\n  Running suite: unit  (Fast unit tests (~0.5s))\n============================================================\n\n============================= test session starts ==============================\ncollected 1370 items / 17 deselected / 3 skipped / 1353 selected\n\ntests/test_agent_mode_delegation_contracts.py ............               [  0%]\ntests/test_agi_provider.py ............................................. [  4%]\n......              '}
+2026-03-28 21:35:26,962 agent_1 INFO Task 20260328_213341 complete in 97.88s (~232 tokens)
+2026-03-28 21:35:27,214 agent_2 DEBUG Test output: 
+============================================================
+  Running suite: unit  (Fast unit tests (~0.5s))
+============================================================
+
+============================= test session starts ==============================
+collected 1370 items / 17 deselected / 3 skipped / 1353 selected
+
+tests/test_agent_mode_delegation_contracts.py ............               [  0%]
+tests/test_agi_provider.py ............................................. [  4%]
+......              
+2026-03-28 21:35:27,217 agent_2 INFO Tests: passed=False results={'total': 1353, 'passed': 1295, 'failed': 9, 'success': False, 'output': '\n============================================================\n  Running suite: unit  (Fast unit tests (~0.5s))\n============================================================\n\n============================= test session starts ==============================\ncollected 1370 items / 17 deselected / 3 skipped / 1353 selected\n\ntests/test_agent_mode_delegation_contracts.py ............               [  0%]\ntests/test_agi_provider.py ............................................. [  4%]\n......              '}
+2026-03-28 21:35:27,224 agent_2 INFO Task 20260328_213341 complete in 98.14s (~237 tokens)
+2026-03-28 21:35:34,116 agent_0 DEBUG Test output: 
+============================================================
+  Running suite: unit  (Fast unit tests (~0.5s))
+============================================================
+
+============================= test session starts ==============================
+collected 1370 items / 17 deselected / 3 skipped / 1353 selected
+
+tests/test_agent_mode_delegation_contracts.py ............               [  0%]
+tests/test_agi_provider.py ............................................. [  4%]
+......              
+2026-03-28 21:35:34,117 agent_0 INFO Tests: passed=False results={'total': 1353, 'passed': 1295, 'failed': 9, 'success': False, 'output': '\n============================================================\n  Running suite: unit  (Fast unit tests (~0.5s))\n============================================================\n\n============================= test session starts ==============================\ncollected 1370 items / 17 deselected / 3 skipped / 1353 selected\n\ntests/test_agent_mode_delegation_contracts.py ............               [  0%]\ntests/test_agi_provider.py ............................................. [  4%]\n......              '}
+2026-03-28 21:35:34,122 agent_0 INFO Task 20260328_213343 complete in 102.76s (~226 tokens)
+
+Running 3 task(s) with up to 3 parallel worker(s)...
+
+  ✗ [failed      ] Improve error handling in shared/chat_providers.py (97.88s)
+         error: Validation tests failed
+  ✗ [failed      ] Add type hints to scripts/autonomous_training_orchestra (98.14s)
+         error: Validation tests failed
+  ✗ [failed      ] Add docstrings to shared/chat_memory.py (102.76s)
+         error: Validation tests failed
+
+====================================================================
+===================== MULTI-AGENT RUN SUMMARY ======================
+====================================================================
+  Run ID          : 20260328_213338
+  Total tasks     : 3
+  Succeeded       : 0
+  Failed          : 3
+  Rolled back     : 0
+  Tests skipped   : 0
+  Files modified  : 0
+  ~Tokens used    : 695
+  Wall-clock time : 107.21s
+  Consensus       : reached=True winner=failure ratio=1.0 reason=ok
+====================================================================
+
+Report saved: /workspaces/Aria/data_out/multi_agent/report_20260328_213338.json

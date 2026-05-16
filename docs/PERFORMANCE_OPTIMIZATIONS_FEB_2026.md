@@ -7,7 +7,7 @@ This document details performance optimizations implemented in February 2026, in
 Five high-impact optimizations targeting hot paths in data processing, command parsing, and quantum ML training:
 
 | File | Optimization | Estimated Speedup | Lines Changed |
-|------|--------------|-------------------|---------------|
+| ------ | -------------- | ------------------- | --------------- |
 | `scripts/extract_chat_logs_dataset.py` | Single-pass role checking | 2x | 3 |
 | `scripts/job_queue.py` | Set intersection for tag filtering | 5-50x | 3 |
 | `function_app.py` | Command pattern table | 5-20x | 30 |
@@ -72,6 +72,7 @@ if tags:
 ```
 
 This performs O(n_jobs × n_filter_tags × n_job_tags) operations, which becomes very slow when:
+
 - Many jobs exist (100s-1000s)
 - Each job has multiple tags (5-10)
 - Filtering by multiple tags (2-5)
@@ -119,6 +120,7 @@ if '[aria:walk:right]' in lower_text or 'walk right' in lower_text:
 ```
 
 Issues:
+
 - Text lowercased once but checked 12+ times
 - Each check repeats the pattern matching logic
 - No opportunity for compiler optimization
@@ -150,6 +152,7 @@ def parse_movement_commands(text: str) -> dict:
 ```
 
 Benefits:
+
 - Data-driven design (easy to add/modify commands)
 - Single iteration through patterns
 - Better cache locality
@@ -174,13 +177,16 @@ Benefits:
 The original code read the same dataset files multiple times:
 
 1. **First pass (line 74-75):** Collect training hashes
+
    ```python
    for src in args.sources:
        training_hashes |= collect_training_hashes(Path(src))
    ```
+
    This reads `train.json` and `test.json` for each source.
 
 2. **Second pass (line 84-92):** Read files again to build candidates
+
    ```python
    for cf in candidate_files:
        for rec in read_jsonl(cf):  # Re-reads same files
@@ -188,6 +194,7 @@ The original code read the same dataset files multiple times:
    ```
 
 3. **Third pass (line 95-99):** If no candidates, read files yet again
+
    ```python
    if not candidates:
        for cf in candidate_files:
@@ -195,6 +202,7 @@ The original code read the same dataset files multiple times:
    ```
 
 For large datasets (1000s of records), this meant:
+
 - 3x I/O operations
 - 2-3x hash computations
 - 2-3x JSON parsing
@@ -269,6 +277,7 @@ def compute_gradient(circuit, X, y, weights, use_parameter_shift=True):
 ```
 
 For a typical circuit:
+
 - 4 qubits, 3 layers, 3 rotation parameters = 36 total parameters
 - Each gradient computation requires **72 circuit evaluations** (2 per parameter)
 - Each circuit evaluation iterates through all training samples
@@ -302,6 +311,7 @@ def compute_gradient(circuit, X, y, weights, use_parameter_shift=True):
 ```
 
 Benefits:
+
 - **Automatic differentiation:** PennyLane computes gradients efficiently using its graph-based approach
 - **Optimized circuit caching:** Reuses intermediate circuit results where possible
 - **Hardware acceleration:** Can leverage GPU/TPU when available
@@ -318,6 +328,7 @@ The quantum circuit already uses `@qml.qnode(dev, interface='autograd')`, which 
 ### Safety
 
 The implementation includes a fallback to the original manual parameter-shift implementation, ensuring:
+
 - Zero behavioral change if autograd fails
 - No breaking changes to existing code
 - Graceful degradation in edge cases
@@ -355,6 +366,7 @@ All optimizations include:
 3. **Edge case tests:** Empty inputs, single items, large datasets
 
 Test coverage: 6 new test methods in `tests/test_performance_optimizations.py`:
+
 - `TestCollectionOptimizations` (3 tests)
 - `TestCommandParsingOptimizations` (2 tests)
 - `TestFileReadingOptimizations` (1 test)
@@ -387,6 +399,7 @@ Additional optimizations identified but not yet implemented:
 ## Rollout Notes
 
 These optimizations are:
+
 - **Non-breaking:** All maintain identical external behavior
 - **Well-tested:** 6 new test cases with 100% pass rate
 - **Documented:** This file + inline comments
@@ -401,4 +414,4 @@ Safe to deploy immediately with no migration needed.
 - Repository memories: Performance optimization patterns
 - Existing optimizations: `docs/PERFORMANCE_OPTIMIZATION_SUMMARY_2026-02-17.md`
 - Test suite: `tests/test_performance_optimizations.py`
-- PennyLane docs: https://pennylane.ai/qml/glossary/quantum_differentiable_programming.html
+- PennyLane docs: <https://pennylane.ai/qml/glossary/quantum_differentiable_programming.html>

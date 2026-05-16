@@ -20,7 +20,7 @@ tokens = count_messages_tokens(messages, provider, model, system_prompt)
 ## Context Window Defaults
 
 | Model | Context Window |
-|-------|---------------|
+| ------- | --------------- |
 | gpt-4o | 128,000 |
 | gpt-3.5-turbo | 16,384 |
 | Azure default | 16,384 |

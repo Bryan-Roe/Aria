@@ -14,7 +14,7 @@ applyTo: "tests/**"
 ## Test Organization
 
 | Test File | Tests | Requires |
-|-----------|-------|----------|
+| ----------- | ------- | ---------- |
 | `test_aria_server.py` | Aria server API endpoints | — |
 | `test_object_api_integration.py` | Object CRUD operations | — |
 | `test_ui_playwright.py` | Browser E2E (Playwright) | Aria server running |
