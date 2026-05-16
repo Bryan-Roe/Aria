@@ -911,6 +911,10 @@ with gr.Blocks() as demo:
         load_latest_btn.click(load_latest_click, outputs=[chatbot, hist_state])
 
         def generate_tts_for_text(text: str, backend: Optional[str] = None) -> Optional[str]:
+            """Generate TTS audio file for text. Falls back to a short silent WAV if no TTS backends are available.
+
+            Returns path to audio file or None on unrecoverable errors.
+            """
             if not text or not str(text).strip():
                 return None
             try:
@@ -919,6 +923,7 @@ with gr.Blocks() as demo:
                 os.makedirs(tts_dir, exist_ok=True)
                 ts = int(time.time())
                 wav_path = os.path.join(tts_dir, f"tts_{ts}.wav")
+
                 def try_pyttsx3():
                     try:
                         import pyttsx3
@@ -928,6 +933,7 @@ with gr.Blocks() as demo:
                         return wav_path
                     except Exception:
                         return None
+
                 def try_gtts():
                     try:
                         from gtts import gTTS
@@ -937,16 +943,45 @@ with gr.Blocks() as demo:
                         return mp3_path
                     except Exception:
                         return None
+
+                def write_silent_wav(path: str, duration: float = 0.1) -> str:
+                    try:
+                        import wave
+                        n_channels = 1
+                        sampwidth = 2
+                        framerate = 22050
+                        n_frames = int(framerate * duration)
+                        silence = (b"\x00\x00") * n_frames
+                        with wave.open(path, 'wb') as wf:
+                            wf.setnchannels(n_channels)
+                            wf.setsampwidth(sampwidth)
+                            wf.setframerate(framerate)
+                            wf.writeframes(silence)
+                        return path
+                    except Exception:
+                        return None
+
                 # backend selection
                 if backend == "pyttsx3":
-                    return try_pyttsx3()
+                    res = try_pyttsx3()
+                    if res:
+                        return res
+                    return write_silent_wav(wav_path)
                 if backend == "gtts":
-                    return try_gtts()
-                # auto: prefer pyttsx3 then gTTS
+                    res = try_gtts()
+                    if res:
+                        return res
+                    return write_silent_wav(wav_path)
+
+                # auto: prefer pyttsx3 then gTTS, then silent fallback
                 res = try_pyttsx3()
                 if res:
                     return res
-                return try_gtts()
+                res = try_gtts()
+                if res:
+                    return res
+                # final fallback: produce a short silent WAV so the UI can play a harmless audio file
+                return write_silent_wav(wav_path)
             except Exception:
                 return None
 
