@@ -22,7 +22,10 @@ _LOG = logging.getLogger(__name__)
 
 
 def _normalize_provider_priority(value: object) -> List[str]:
-    """Normalize provider priority values from env/config sources."""
+    """Return a normalized provider priority list from strings or iterables.
+
+    Non-string, non-iterable values fall back to the default provider order.
+    """
     if isinstance(value, str):
         return [item.strip() for item in value.split(",") if item.strip()]
     if isinstance(value, (list, tuple)):
@@ -58,7 +61,7 @@ except ImportError:  # pragma: no cover
         NoDecode = None  # type: ignore[assignment]
         _ConfigDict = None  # type: ignore[assignment]
 
-ProviderPriorityType = (
+ProviderPriority = (
     Annotated[List[str], NoDecode] if _PYDANTIC_AVAILABLE and NoDecode is not None else List[str]
 )
 
@@ -103,7 +106,7 @@ if _PYDANTIC_AVAILABLE:
         # ------------------------------------------------------------------
         # Provider selection
         # ------------------------------------------------------------------
-        provider_priority: ProviderPriorityType = Field(
+        provider_priority: ProviderPriority = Field(
             default=["azure", "openai", "lmstudio", "local"],
             alias="QAI_PROVIDER_PRIORITY",
         )
@@ -416,7 +419,7 @@ class AppSettings(Settings):
     """Backward-compatible alias for older settings API callers."""
 
     def provider_chain(self) -> List[str]:
-        return list(getattr(self, "provider_priority", []))
+        return list(self.provider_priority)
 
     def summary(self) -> dict:
         data = super().summary()
