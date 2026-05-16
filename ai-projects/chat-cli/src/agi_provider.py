@@ -706,6 +706,9 @@ class AGIProvider(BaseChatProvider):
                 "break down",
                 "explain your reasoning",
                 "chain of thought",
+                "agi reasoning",
+                "use agi reasoning",
+                "autonomous planning",
             ]
         ):
             intent = "reasoning"
@@ -729,10 +732,11 @@ class AGIProvider(BaseChatProvider):
             domain = "quantum"
         elif any(w in query_lower for w in ["aria", "avatar", "gesture", "animation"]):
             domain = "aria"
-        elif any(
-            w in query_lower
+        elif (
+            re.search(r"\b(?:ai|agi)\b", query_lower) is not None
+            or any(
+                w in query_lower
             for w in [
-                "ai",
                 "llm",
                 "transformer",
                 "lora",
@@ -746,6 +750,7 @@ class AGIProvider(BaseChatProvider):
                 "inference",
                 "model weights",
             ]
+            )
         ):
             domain = "ai"
         elif any(
