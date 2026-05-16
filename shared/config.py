@@ -19,6 +19,7 @@ from functools import lru_cache
 from typing import List, Optional
 
 _LOG = logging.getLogger(__name__)
+_DEFAULT_PROVIDER_PRIORITY = ["azure", "openai", "lmstudio", "local"]
 
 # ---------------------------------------------------------------------------
 # Try to import pydantic v2 BaseSettings; fall back to a plain dataclass-style
@@ -89,7 +90,7 @@ if _PYDANTIC_AVAILABLE:
         # Provider selection
         # ------------------------------------------------------------------
         provider_priority: List[str] = Field(
-            default=["azure", "openai", "lmstudio", "local"],
+            default=_DEFAULT_PROVIDER_PRIORITY,
             alias="QAI_PROVIDER_PRIORITY",
         )
 
@@ -153,6 +154,7 @@ if _PYDANTIC_AVAILABLE:
                 env_file=".env",
                 env_file_encoding="utf-8",
                 populate_by_name=True,
+                enable_decoding=False,
             )
         else:
             model_config = {  # type: ignore[assignment]
@@ -160,6 +162,7 @@ if _PYDANTIC_AVAILABLE:
                 "env_file": ".env",
                 "env_file_encoding": "utf-8",
                 "populate_by_name": True,
+                "enable_decoding": False,
             }
 
         @field_validator("log_level", mode="before")
@@ -171,6 +174,17 @@ if _PYDANTIC_AVAILABLE:
                 _LOG.warning("Invalid log level '%s'; defaulting to INFO", v)
                 return "INFO"
             return upper
+
+        @field_validator("provider_priority", mode="before")
+        @classmethod
+        def _validate_provider_priority(cls, value: object) -> List[str]:
+            if isinstance(value, str):
+                providers = [item.strip() for item in value.split(",") if item.strip()]
+                return providers or list(_DEFAULT_PROVIDER_PRIORITY)
+            if isinstance(value, (list, tuple)):
+                providers = [str(item).strip() for item in value if str(item).strip()]
+                return providers or list(_DEFAULT_PROVIDER_PRIORITY)
+            return list(_DEFAULT_PROVIDER_PRIORITY)
 
         # ------------------------------------------------------------------
         # Derived helpers
@@ -210,10 +224,15 @@ if _PYDANTIC_AVAILABLE:
                     return name
             return "local"
 
+        def provider_chain(self) -> List[str]:
+            """Return configured provider priority order."""
+            return list(self.provider_priority)
+
         def summary(self) -> dict:
             """Return a non-secret summary suitable for health endpoints."""
             return {
                 "active_provider": self.active_provider(),
+                "provider_chain": self.provider_chain(),
                 "azure_openai_ready": self.azure_openai_ready,
                 "openai_ready": self.openai_ready,
                 "lmstudio_ready": self.lmstudio_ready,
@@ -239,6 +258,13 @@ else:
             )
             self.openai_api_key = os.environ.get("OPENAI_API_KEY")
             self.lmstudio_base_url = os.environ.get("LMSTUDIO_BASE_URL")
+            self.provider_priority = [
+                name.strip()
+                for name in os.environ.get(
+                    "QAI_PROVIDER_PRIORITY", ",".join(_DEFAULT_PROVIDER_PRIORITY)
+                ).split(",")
+                if name.strip()
+            ] or list(_DEFAULT_PROVIDER_PRIORITY)
             self.db_connection_string = os.environ.get("QAI_DB_CONN")
             self.sql_pool_size = int(os.environ.get("QAI_SQL_POOL_SIZE", "10"))
             self.enable_cosmos = os.environ.get("QAI_ENABLE_COSMOS", "").lower() in (
@@ -289,23 +315,23 @@ else:
             return bool(self.lmstudio_base_url)
 
         def active_provider(self) -> str:
-            priority = os.environ.get(
-                "QAI_PROVIDER_PRIORITY", "azure,openai,lmstudio,local"
-            ).split(",")
             checks = {
                 "azure": self.azure_openai_ready,
                 "openai": self.openai_ready,
                 "lmstudio": self.lmstudio_ready,
             }
-            for name in priority:
-                name = name.strip()
+            for name in self.provider_priority:
                 if checks.get(name, False):
                     return name
             return "local"
 
+        def provider_chain(self) -> List[str]:
+            return list(self.provider_priority)
+
         def summary(self) -> dict:
             return {
                 "active_provider": self.active_provider(),
+                "provider_chain": self.provider_chain(),
                 "azure_openai_ready": self.azure_openai_ready,
                 "openai_ready": self.openai_ready,
                 "lmstudio_ready": self.lmstudio_ready,
@@ -393,4 +419,6 @@ def reset_settings() -> None:
     get_settings.cache_clear()
 
 
-__all__ = ["Settings", "get_settings", "reset_settings"]
+AppSettings = Settings
+
+__all__ = ["Settings", "AppSettings", "get_settings", "reset_settings"]
