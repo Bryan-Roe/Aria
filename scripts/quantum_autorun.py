@@ -1,6 +1,7 @@
 """Quantum AutoRun Orchestrator CLI
 
 Minimal CLI for validating and listing quantum jobs from a YAML config.
+
 Implements:
 - --help: prints usage and description
 - --config: path to YAML config (defaults to config/quantum/quantum_autorun.yaml)
@@ -20,11 +21,13 @@ from __future__ import annotations
 
 import argparse
 import json
+import logging
 import sys
+import tempfile
 from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 try:
     from .config_paths import resolve_config_path
@@ -35,6 +38,12 @@ try:
     import yaml  # type: ignore
 except Exception:  # pragma: no cover
     yaml = None  # Tests will provide simple configs; fail gracefully if missing
+
+
+logger = logging.getLogger("quantum_autorun")
+if not logger.handlers:
+    # Basic configuration suitable for CLI and tests; tests may capture stdout/stderr
+    logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -66,28 +75,64 @@ class QJob:
     enabled: bool = True
 
     # Dataset / training args
-    preset: str | None = None
-    csv: str | None = None
-    label_col: str | None = None
-    drop_cols: str | None = None
-    epochs: int | None = None
-    batch_size: int | None = None
-    learning_rate: float | None = None
-    test_size: float | None = None
-    n_qubits: int | None = None
+    preset: Optional[str] = None
+    csv: Optional[str] = None
+    label_col: Optional[str] = None
+    drop_cols: Optional[str] = None
+    epochs: Optional[int] = None
+    batch_size: Optional[int] = None
+    learning_rate: Optional[float] = None
+    test_size: Optional[float] = None
+    n_qubits: Optional[int] = None
 
     # Extra arguments for CLI
-    extra_args: list[str] = field(default_factory=list)
+    extra_args: List[str] = field(default_factory=list)
 
     # Azure-specific
-    azure_backend: str | None = None
-    azure_shots: int | None = None
+    azure_backend: Optional[str] = None
+    azure_shots: Optional[int] = None
     azure_confirm_cost: bool = False
 
 
 # Backwards compatible alias expected by tests
 def read_yaml(path: Path) -> Dict[str, Any]:
     return load_config(path)
+
+
+def _to_int(v: Any) -> Optional[int]:
+    if v is None:
+        return None
+    try:
+        return int(v)
+    except (TypeError, ValueError):
+        return None
+
+
+def _to_float(v: Any) -> Optional[float]:
+    if v is None:
+        return None
+    try:
+        return float(v)
+    except (TypeError, ValueError):
+        return None
+
+
+def _to_bool(v: Any) -> bool:
+    if isinstance(v, bool):
+        return v
+    if v is None:
+        return False
+    s = str(v).strip().lower()
+    return s in ("1", "true", "yes", "y", "on")
+
+
+def _normalize_list(v: Any) -> List[str]:
+    if v is None:
+        return []
+    if isinstance(v, list):
+        return [str(x) for x in v]
+    # Accept comma-separated strings
+    return [p.strip() for p in str(v).split(",") if p.strip()]
 
 
 def load_jobs(path: Path) -> List[QJob]:
@@ -100,46 +145,33 @@ def load_jobs(path: Path) -> List[QJob]:
     data = read_yaml(path)
     jobs: List[QJob] = []
     for raw in data.get("jobs", []):
-        # Raw loader may return dicts with string values when PyYAML is not
-        # available; attempt sensible conversions.
-        def _get(key, default=None):
-            v = raw.get(key, default)
-            return v
+        # Ensure raw is a mapping-like object
+        if not isinstance(raw, dict):
+            continue
 
-        # Convert basic numeric types conservatively
-        def _int(v):
-            if v is None:
-                return None
-            try:
-                return int(v)
-            except Exception:
-                return None
+        def _get(key: str, default: Any = None) -> Any:
+            return raw.get(key, default)
 
-        def _float(v):
-            if v is None:
-                return None
-            try:
-                return float(v)
-            except Exception:
-                return None
+        name_val = _get("name")
+        name = str(name_val) if name_val is not None else "<unnamed>"
 
         j = QJob(
-            name=str(_get("name")),
+            name=name,
             mode=str(_get("mode", "train_custom_dataset")),
-            enabled=bool(_get("enabled", True)),
+            enabled=_to_bool(_get("enabled", True)),
             preset=_get("preset"),
             csv=_get("csv"),
             label_col=_get("label_col"),
             drop_cols=_get("drop_cols"),
-            epochs=_int(_get("epochs")),
-            batch_size=_int(_get("batch_size")),
-            learning_rate=_float(_get("learning_rate")),
-            test_size=_float(_get("test_size")),
-            n_qubits=_int(_get("n_qubits")),
-            extra_args=_get("extra_args") or [],
+            epochs=_to_int(_get("epochs")),
+            batch_size=_to_int(_get("batch_size")),
+            learning_rate=_to_float(_get("learning_rate")),
+            test_size=_to_float(_get("test_size")),
+            n_qubits=_to_int(_get("n_qubits")),
+            extra_args=_normalize_list(_get("extra_args")),
             azure_backend=_get("azure_backend"),
-            azure_shots=_int(_get("azure_shots")),
-            azure_confirm_cost=bool(_get("azure_confirm_cost", False)),
+            azure_shots=_to_int(_get("azure_shots")),
+            azure_confirm_cost=_to_bool(_get("azure_confirm_cost", False)),
         )
         jobs.append(j)
     return jobs
@@ -201,7 +233,7 @@ def validate_job(job: QJob) -> Dict[str, Any]:
 
     The returned dict contains keys: status (ok/missing), missing (list).
     """
-    missing = []
+    missing: List[str] = []
     # Mode-specific checks
     if job.mode == "train_custom_dataset":
         if not TRAIN_SCRIPT.exists():
@@ -251,25 +283,39 @@ def collect_status(jobs: List[Dict[str, Any]]) -> Dict[str, Any]:
 
 
 def load_config(path: Path) -> Dict[str, Any]:
+    """Load YAML config from `path` and return a dict with a `jobs` list.
+
+    If PyYAML is available it is used. Otherwise a minimal, conservative
+    fallback parser is used that supports simple key:value pairs and
+    top-level lists under `jobs:` for test scenarios.
+    """
     if not path.exists():
         return {"jobs": []}
     if yaml is None:
         # Minimal YAML loader fallback: handle a very small subset for tests
         # Prefer PyYAML when available.
         text = path.read_text(encoding="utf-8")
-        # Extremely simple parse: find lines under jobs: and collect name/preset/etc
         jobs: List[Dict[str, Any]] = []
         current: Dict[str, Any] = {}
         in_jobs = False
         for line in text.splitlines():
             s = line.strip()
+            if not s or s.startswith("#"):
+                continue
             if s.startswith("jobs:"):
                 in_jobs = True
                 continue
+            # Start of a new job entry
             if in_jobs and s.startswith("-"):
                 if current:
                     jobs.append(current)
                 current = {}
+                # If the line contains more than just '-', parse inline key if present
+                # e.g. - name: foo
+                rest = s.lstrip("- ")
+                if rest and ":" in rest:
+                    k, v = rest.split(":", 1)
+                    current[k.strip()] = v.strip()
                 continue
             if in_jobs and ":" in s:
                 k, v = s.split(":", 1)
@@ -278,35 +324,47 @@ def load_config(path: Path) -> Dict[str, Any]:
             jobs.append(current)
         return {"jobs": jobs}
     # Normal path: use safe_load
-    data = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    try:
+        data = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    except Exception as e:
+        logger.warning("Failed to parse YAML with PyYAML: %s", e)
+        return {"jobs": []}
     if not isinstance(data, dict):
         return {"jobs": []}
     data.setdefault("jobs", [])
     return data
 
 
-def filter_jobs(jobs: List[Dict[str, Any]], name: str | None) -> List[Dict[str, Any]]:
+def filter_jobs(jobs: List[Dict[str, Any]], name: Optional[str]) -> List[Dict[str, Any]]:
     if not name:
         return jobs
     filtered = [j for j in jobs if j.get("name") == name]
     return filtered
 
 
+def _write_json_atomic(path: Path, payload: Dict[str, Any]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    # Use tempfile to ensure atomic write across filesystems
+    with tempfile.NamedTemporaryFile("w", delete=False, dir=str(path.parent), encoding="utf-8") as t:
+        json.dump(payload, t, indent=2)
+        tmp = Path(t.name)
+    tmp.replace(path)
+
+
 def write_status(jobs: List[Dict[str, Any]]) -> None:
-    STATUS_DIR.mkdir(parents=True, exist_ok=True)
     payload = {
         "total_jobs": len(jobs),
         "jobs": jobs,
-        "last_updated": None,
+        "last_updated": datetime.now().isoformat() + "Z",
         "succeeded": 0,
         "failed": 0,
         "running": 0,
         "avg_duration": None,
     }
-    STATUS_FILE.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+    _write_json_atomic(STATUS_FILE, payload)
 
 
-def main(argv: List[str] | None = None) -> int:
+def main(argv: Optional[List[str]] = None) -> int:
     parser = argparse.ArgumentParser(description="Quantum AutoRun Orchestrator")
     parser.add_argument(
         "--config", type=str, default=str(DEFAULT_CONFIG), help="Path to YAML config"
