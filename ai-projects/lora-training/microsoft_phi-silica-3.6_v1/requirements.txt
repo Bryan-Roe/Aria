@@ -1,12 +1,12 @@
 # Fine-tuning requirements for microsoft_phi-silica-3.6_v1
 pyyaml>=6.0.3
 datasets>=4.8.5
-transformers>=5.8.0
+transformers>=5.8.1
 peft>=0.19.1
 accelerate>=1.13.0
 tqdm>=4.67.3
 einops>=0.8.2
-numpy>=2.4.4
+numpy>=2.4.5
 # Install torch appropriate to your CUDA; example:
 # pip install torch --index-url https://download.pytorch.org/whl/cu121
 

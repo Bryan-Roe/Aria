@@ -1,11 +1,11 @@
 # Azure Machine Learning SDK
-azure-ai-ml>=1.32.0
+azure-ai-ml>=1.33.0
 azure-identity>=1.25.3
 azure-core>=1.41.0
 
 # Core dependencies (if not already installed)
-azure-storage-blob>=12.28.0
-azure-monitor-opentelemetry>=1.8.7
+azure-storage-blob>=12.29.0
+azure-monitor-opentelemetry>=1.8.8
 
 # Optional: For advanced features
 mlflow>=3.12.0

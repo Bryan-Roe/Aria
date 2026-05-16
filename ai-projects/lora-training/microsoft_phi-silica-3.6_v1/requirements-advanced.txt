@@ -2,7 +2,7 @@
 # Install with: pip install -r requirements-advanced.txt
 
 # Semantic search and document embedding
-sentence-transformers>=5.4.1
+sentence-transformers>=5.5.0
 
 # Evaluation metrics
 rouge-score>=0.1.2
@@ -21,7 +21,7 @@ scipy>=1.17.1
 
 # Model serving & deployment
 fastapi>=0.136.1
-uvicorn[standard]>=0.46.0
+uvicorn[standard]>=0.47.0
 pydantic>=2.13.4
 
 # Model export
