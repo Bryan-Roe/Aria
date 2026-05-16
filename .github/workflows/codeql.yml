@@ -81,10 +81,19 @@ defaults:
     shell: bash
 
 env:
-  # Centralised pin for the codeql-action major version. Update in one place.
+  # Centralised pins for action SHAs (update in one place).
   CODEQL_ACTION_SHA: 4e828ff8d448a8a6e532957b1811f387a63867e8  # v4.30.4
-  HARDEN_RUNNER_SHA: 0634a2670c59f64b4a01f0f96f84700a4088b9f0  # v2.12.2
-  CHECKOUT_SHA: 11bd71901bbe5b1630ceea73d27597364c9af683        # v4.2.2
+  HARDEN_RUNNER_SHA: 0634a2670c59f64b4a01f0f96f84700a4088b9f0      # v2.12.2
+  CHECKOUT_SHA: 11bd71901bbe5b1630ceea73d27597364c9af683         # v4.2.2
+  ACTIONS_CACHE_SHA: 1bd1e32a3bdc45362d1e726936510720a7c30a57     # v4.2.0
+  DEPENDENCY_REVIEW_SHA: da24556b548a50705dd671f47852072ea4c105d9 # v4.7.1
+  GITHUB_SCRIPT_SHA: 60a0d83039c74a4aee543508d2ffcb1c3799cdea      # v7.0.1
+  UPLOAD_ARTIFACT_SHA: 65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08   # v4.6.0
+  SETUP_PYTHON_SHA: a26af69be951a213d495a4c3e4e4022e16d87065       # v5.6.0
+  SETUP_NODE_SHA: 49933ea5288caeca8642d1e84afbd3f7d6820020         # v4.4.0
+  CREATE_PR_SHA: 67ccf781d68cd99b580ae25a5c18a1cc84ffff1f         # v7.0.6
+  # Keep CLI limits sensible for CI.
+  RUFF_VERSION: ">=0.6,<1.0"
 
 jobs:
   # ---------------------------------------------------------------------------
@@ -100,17 +109,17 @@ jobs:
       pull-requests: write
     steps:
       - name: Harden runner
-        uses: step-security/harden-runner@0634a2670c59f64b4a01f0f96f84700a4088b9f0 # v2.12.2
+        uses: step-security/harden-runner@${{ env.HARDEN_RUNNER_SHA }}
         with:
           egress-policy: audit
 
       - name: Checkout repository
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        uses: actions/checkout@${{ env.CHECKOUT_SHA }}
         with:
           persist-credentials: false
 
       - name: Dependency Review
-        uses: actions/dependency-review-action@da24556b548a50705dd671f47852072ea4c105d9 # v4.7.1
+        uses: actions/dependency-review-action@${{ env.DEPENDENCY_REVIEW_SHA }}
         with:
           fail-on-severity: high
           comment-summary-in-pr: on-failure
@@ -165,14 +174,14 @@ jobs:
 
     steps:
       - name: Harden runner
-        uses: step-security/harden-runner@0634a2670c59f64b4a01f0f96f84700a4088b9f0 # v2.12.2
+        uses: step-security/harden-runner@${{ env.HARDEN_RUNNER_SHA }}
         with:
           egress-policy: audit
           # Allow CodeQL bundle + community packs from GHCR.
           disable-sudo: false
 
       - name: Checkout repository
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        uses: actions/checkout@${{ env.CHECKOUT_SHA }}
         with:
           # Full history helps some queries (e.g., secret-in-history heuristics
           # via community packs) and the GitHub Actions analyzer to resolve
@@ -243,7 +252,7 @@ paths-ignore:
       # 40-60%. Safe to share across PRs since the cache key includes language
       # and the action SHA.
       - name: Cache CodeQL bundle
-        uses: actions/cache@1bd1e32a3bdc45362d1e726936510720a7c30a57 # v4.2.0
+        uses: actions/cache@${{ env.ACTIONS_CACHE_SHA }}
         with:
           path: |
             ~/.codeql
@@ -254,7 +263,7 @@ paths-ignore:
             codeql-${{ runner.os }}-${{ matrix.language }}-
 
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@4e828ff8d448a8a6e532957b1811f387a63867e8 # v4.30.4
+        uses: github/codeql-action/init@${{ env.CODEQL_ACTION_SHA }}
         with:
           languages: ${{ matrix.language }}
           build-mode: ${{ matrix.build-mode }}
@@ -270,7 +279,7 @@ paths-ignore:
 
       - name: Autobuild
         if: matrix.build-mode == 'autobuild'
-        uses: github/codeql-action/autobuild@4e828ff8d448a8a6e532957b1811f387a63867e8 # v4.30.4
+        uses: github/codeql-action/autobuild@${{ env.CODEQL_ACTION_SHA }}
 
       - name: Manual build steps
         if: matrix.build-mode == 'manual'
@@ -288,7 +297,7 @@ EOF
 
       - name: Perform CodeQL Analysis
         id: analyze
-        uses: github/codeql-action/analyze@4e828ff8d448a8a6e532957b1811f387a63867e8 # v4.30.4
+        uses: github/codeql-action/analyze@${{ env.CODEQL_ACTION_SHA }}
         with:
           category: "/language:${{ matrix.language }}"
           upload: always
@@ -301,7 +310,7 @@ EOF
 
       - name: Upload SARIF as artifact (debug / archival)
         if: always()
-        uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 # v4.6.0
+        uses: actions/upload-artifact@${{ env.UPLOAD_ARTIFACT_SHA }}
         with:
           name: codeql-sarif-${{ matrix.language }}
           path: ${{ runner.temp }}/sarif-${{ matrix.language }}
@@ -329,12 +338,12 @@ EOF
       security-events: read
     steps:
       - name: Harden runner
-        uses: step-security/harden-runner@0634a2670c59f64b4a01f0f96f84700a4088b9f0 # v2.12.2
+        uses: step-security/harden-runner@${{ env.HARDEN_RUNNER_SHA }}
         with:
           egress-policy: audit
 
       - name: Summarise code scanning alerts + autofixes for this PR
-        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
+        uses: actions/github-script@${{ env.GITHUB_SCRIPT_SHA }}
         with:
           script: |
             const pr = context.payload.pull_request;
@@ -403,9 +412,10 @@ EOF
 
     steps:
       - name: Harden runner
-        uses: step-security/harden-runner@0634a2670c59f64b4a01f0f96f84700a4088b9f0 # v2.12.2
+        uses: step-security/harden-runner@${{ env.HARDEN_RUNNER_SHA }}
         with:
           egress-policy: audit
+          disable-sudo: false
 
       - name: Determine checkout ref
         id: ref
@@ -426,7 +436,7 @@ EOF
           fi
 
       - name: Checkout repository
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        uses: actions/checkout@${{ env.CHECKOUT_SHA }}
         with:
           ref: ${{ steps.ref.outputs.ref }}
           repository: ${{ steps.ref.outputs.repo }}
@@ -434,13 +444,13 @@ EOF
           persist-credentials: true
 
       - name: Set up Python
-        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+        uses: actions/setup-python@${{ env.SETUP_PYTHON_SHA }}
         with:
           python-version: "3.12"
           cache: "pip"
 
       - name: Set up Node.js
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        uses: actions/setup-node@${{ env.SETUP_NODE_SHA }}
         with:
           node-version: "20"
 
@@ -449,7 +459,7 @@ EOF
           set -euo pipefail
           python -m pip install --upgrade pip
           # Ruff: fast Python linter + formatter with --fix support.
-          pip install "ruff>=0.6,<1.0"
+          pip install "ruff${{ env.RUFF_VERSION }}"
           # JS/TS + JSON/YAML/Markdown formatter.
           npm install --global --no-fund --no-audit prettier@3
           # clang-format for C/C++ (preinstalled on ubuntu-latest, but ensure).
@@ -530,7 +540,7 @@ Generated by the CodeQL Advanced workflow." || echo "No commit created"
 
       - name: Upload patch artifact
         if: steps.diff.outputs.changed == 'true' && github.event_name == 'pull_request' && steps.ref.outputs.can_push == 'false'
-        uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 # v4.6.0
+        uses: actions/upload-artifact@${{ env.UPLOAD_ARTIFACT_SHA }}
         with:
           name: autofix-patch
           path: autofix.patch
@@ -538,7 +548,7 @@ Generated by the CodeQL Advanced workflow." || echo "No commit created"
 
       - name: Comment patch link on fork PR
         if: steps.diff.outputs.changed == 'true' && github.event_name == 'pull_request' && steps.ref.outputs.can_push == 'false'
-        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
+        uses: actions/github-script@${{ env.GITHUB_SCRIPT_SHA }}
         with:
           script: |
             const runUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
@@ -565,7 +575,7 @@ Generated by the CodeQL Advanced workflow." || echo "No commit created"
           (github.event_name == 'push' ||
            github.event_name == 'schedule' ||
            (github.event_name == 'workflow_dispatch' && inputs.open_autofix_pr))
-        uses: peter-evans/create-pull-request@67ccf781d68cd99b580ae25a5c18a1cc84ffff1f # v7.0.6
+        uses: peter-evans/create-pull-request@${{ env.CREATE_PR_SHA }}
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           branch: chore/codeql-autofix-${{ github.run_id }}
