@@ -25,6 +25,7 @@ jobs:
   validate-setup:
     name: Validate Copilot setup files & linters
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     defaults:
       run:
         shell: bash
@@ -41,7 +42,7 @@ jobs:
           node-version: '20'
 
       - name: Setup Python (for yamllint)
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
@@ -55,13 +56,15 @@ jobs:
         id: yamllint
         continue-on-error: true
         run: |
+          set -euo pipefail
           echo "Running yamllint on .github YAML files..."
           # Build list of YAML files safely (handles spaces/newlines)
-          find .github -type f \( -iname '*.yml' -o -iname '*.yaml' \) -print0 > /tmp/yaml_files0 || true
+          YAML_LIST_FILE="${RUNNER_TEMP}/yaml_files0"
+          find .github -type f \( -iname '*.yml' -o -iname '*.yaml' \) -print0 > "$YAML_LIST_FILE" || true
 
-          if [ -s /tmp/yaml_files0 ]; then
+          if [ -s "$YAML_LIST_FILE" ]; then
             # convert null-delimited list to shell args safely
-            mapfile -d '' -t yaml_files < /tmp/yaml_files0
+            mapfile -d '' -t yaml_files < "$YAML_LIST_FILE"
             printf "Found %d YAML files to lint\n" "${#yaml_files[@]}"
             printf "%s\n" "${yaml_files[@]}"
 
@@ -107,7 +110,8 @@ YAML
         id: checks
         continue-on-error: false
         run: |
-          REPORT="/tmp/copilot_setup_report.txt"
+          set -euo pipefail
+          REPORT="${RUNNER_TEMP}/copilot_setup_report.txt"
           echo "Copilot Setup Report - $(date -u)" > "$REPORT"
           echo "" >> "$REPORT"
 
@@ -172,7 +176,7 @@ YAML
           fi
 
           # Export report location as a step output via GITHUB_OUTPUT (preferred)
-          echo "report_path=/tmp/copilot_setup_report.txt" >> "$GITHUB_OUTPUT"
+          echo "report_path=$REPORT" >> "$GITHUB_OUTPUT"
 
           # Print short report to logs for visibility
           echo "---- Copilot setup report ----"
@@ -184,13 +188,16 @@ YAML
         uses: actions/upload-artifact@v4
         with:
           name: copilot-setup-report
-          path: /tmp/copilot_setup_report.txt
+          path: ${{ steps.checks.outputs.report_path }}
 
       - name: Summary annotation (best-effort)
         if: always()
+        env:
+          REPORT_PATH: ${{ steps.checks.outputs.report_path }}
         run: |
+          set -euo pipefail
           echo "=== Copilot Setup Summary ==="
-          sed -n '1,200p' /tmp/copilot_setup_report.txt || true
+          sed -n '1,200p' "$REPORT_PATH" || true
 
     outputs:
       # Expose the report path from the checks step

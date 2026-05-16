@@ -33,10 +33,10 @@ if os.path.dirname(os.path.abspath(__file__)) not in sys.path:
 
 try:
     from openai import (
-        APIConnectionError,
-        APIError,
-        AuthenticationError,
-        RateLimitError,
+        APIConnectionError as OpenAIAPIConnectionError,
+        APIError as OpenAIAPIError,
+        AuthenticationError as OpenAIAuthenticationError,
+        RateLimitError as OpenAIRateLimitError,
     )
 except ImportError:  # pragma: no cover - optional dependency when using local fallback
     # When the `openai` package isn't installed, allow the CLI to still run
@@ -45,13 +45,10 @@ except ImportError:  # pragma: no cover - optional dependency when using local f
     class _OpenAIPackageMissing(Exception):
         pass
 
-    # type: ignore[assignment, misc]
-    APIConnectionError = _OpenAIPackageMissing
-    APIError = _OpenAIPackageMissing  # type: ignore[assignment, misc]
-    # type: ignore[assignment, misc]
-    # type: ignore[assignment, misc]
-    AuthenticationError = _OpenAIPackageMissing
-    RateLimitError = _OpenAIPackageMissing  # type: ignore[assignment, misc]
+    OpenAIAPIConnectionError = _OpenAIPackageMissing
+    OpenAIAPIError = _OpenAIPackageMissing
+    OpenAIAuthenticationError = _OpenAIPackageMissing
+    OpenAIRateLimitError = _OpenAIPackageMissing
 
 if TYPE_CHECKING:
     from openai import OpenAI
@@ -356,7 +353,7 @@ def main(argv: list[str] | None = None) -> int:
             temperature=temperature,
             system_prompt=args.system,
         )
-    except AuthenticationError as exc:
+    except OpenAIAuthenticationError as exc:
         if args.local_fallback:
             print(
                 f"Authentication failed ({exc}); using local fallback.", file=sys.stderr)
@@ -364,7 +361,7 @@ def main(argv: list[str] | None = None) -> int:
             return EXIT_OK
         print(f"Authentication failed: {exc}", file=sys.stderr)
         return EXIT_AUTH
-    except RateLimitError as exc:
+    except OpenAIRateLimitError as exc:
         if args.local_fallback:
             print(
                 f"Rate limited ({exc}); using local fallback.", file=sys.stderr)
@@ -372,7 +369,7 @@ def main(argv: list[str] | None = None) -> int:
             return EXIT_OK
         print(f"Rate limit exceeded: {exc}", file=sys.stderr)
         return EXIT_RATE_LIMIT
-    except APIConnectionError as exc:
+    except OpenAIAPIConnectionError as exc:
         if args.local_fallback:
             print(
                 f"Network error ({exc}); using local fallback.", file=sys.stderr)
@@ -380,7 +377,7 @@ def main(argv: list[str] | None = None) -> int:
             return EXIT_OK
         print(f"Network error reaching OpenAI: {exc}", file=sys.stderr)
         return EXIT_NETWORK
-    except APIError as exc:
+    except OpenAIAPIError as exc:
         if args.local_fallback:
             print(
                 f"OpenAI API error ({exc}); using local fallback.", file=sys.stderr)

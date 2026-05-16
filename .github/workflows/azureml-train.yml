@@ -35,6 +35,10 @@ permissions:
   id-token: write
   contents: read
 
+concurrency:
+  group: azureml-train-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   submit-job:
     runs-on: ubuntu-latest

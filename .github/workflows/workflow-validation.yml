@@ -15,6 +15,10 @@ on:
       - '.github/actions/**'
   workflow_dispatch:
 
+concurrency:
+  group: workflow-validation-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   validate-workflows:
     name: Validate Workflow Syntax

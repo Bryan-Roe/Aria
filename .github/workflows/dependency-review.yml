@@ -3,12 +3,24 @@ name: Dependency Review
 on:
     pull_request:
         branches: [main, dev]
+        paths:
+            - '**/requirements*.txt'
+            - '**/pyproject.toml'
+            - '**/poetry.lock'
+            - '**/package.json'
+            - '**/package-lock.json'
+            - '**/pnpm-lock.yaml'
+            - '**/yarn.lock'
+            - '**/Pipfile'
+            - '**/Pipfile.lock'
+            - '**/*.csproj'
+            - '**/packages.lock.json'
 
 permissions:
     contents: read
 
 concurrency:
-    group: dep-review-${{ github.event.pull_request.number }}
+    group: dep-review-${{ github.event.pull_request.number || github.ref }}
     cancel-in-progress: true
 
 jobs:
