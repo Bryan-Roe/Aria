@@ -1,5 +1,5 @@
 {
-  "timestamp": "20260516T090042Z",
+  "timestamp": "20260516T115134Z",
   "suites": [
     {
       "passed": 0,
@@ -8,7 +8,7 @@
       "skipped": 0,
       "suite": "unit",
       "returncode": 1,
-      "duration_s": 0.02,
+      "duration_s": 0.01,
       "success": false
     }
   ],
