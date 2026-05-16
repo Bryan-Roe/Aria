@@ -8,6 +8,7 @@ import asyncio
 import json
 import math
 import os
+import re
 import shutil
 import sys
 from datetime import datetime
@@ -67,6 +68,30 @@ class ParallelTrainer:
 
         self.jobs = self.config.get("jobs", [])
         self.results: List[Dict[str, Any]] = []
+
+    def _validate_cmd_arg(self, value: Any, arg_name: str) -> str:
+        """Validate and sanitize command argument for subprocess_exec.
+
+        Args:
+            value: The argument value to validate
+            arg_name: Name of the argument (for error messages)
+
+        Returns:
+            Validated string value
+
+        Raises:
+            ValueError: If the value contains dangerous characters
+        """
+        str_value = str(value)
+        # Check for null bytes which could truncate paths
+        if '\x00' in str_value:
+            raise ValueError(f"Invalid null byte in {arg_name}")
+        # Check for shell metacharacters that might indicate injection attempt
+        # These aren't interpreted by subprocess_exec, but their presence is suspicious
+        dangerous_patterns = re.compile(r'[;&|`$]|\$\(|`.*`')
+        if dangerous_patterns.search(str_value):
+            raise ValueError(f"Suspicious characters in {arg_name}: {str_value!r}")
+        return str_value
 
     async def run_job(self, job: Dict[str, Any], device_id: int) -> Dict[str, Any]:
         """
@@ -159,24 +184,27 @@ class ParallelTrainer:
             )
             return result
 
-        # Build command for actual training
+        # Build command for actual training with validated arguments
         cmd = [
             str(self.venv_python),
             str(self.train_script),
             "--config",
-            job.get("config", "AI/microsoft_phi-silica-3.6_v1/lora/lora.yaml"),
+            self._validate_cmd_arg(
+                job.get("config", "AI/microsoft_phi-silica-3.6_v1/lora/lora.yaml"),
+                "config",
+            ),
             "--dataset",
-            job["dataset"],
+            self._validate_cmd_arg(job["dataset"], "dataset"),
             "--save-dir",
-            job["save_dir"],
+            self._validate_cmd_arg(job["save_dir"], "save_dir"),
             "--epochs",
-            str(job.get("epochs", 1)),
+            self._validate_cmd_arg(job.get("epochs", 1), "epochs"),
             "--learning-rate",
-            str(job.get("learning_rate", 0.0002)),
+            self._validate_cmd_arg(job.get("learning_rate", 0.0002), "learning_rate"),
             "--lora-dropout",
-            str(job.get("lora_dropout", 0.1)),
+            self._validate_cmd_arg(job.get("lora_dropout", 0.1), "lora_dropout"),
             "--hf-model-id",
-            job["hf_model_id"],
+            self._validate_cmd_arg(job["hf_model_id"], "hf_model_id"),
             "--device",
             "auto",  # Use auto device selection
         ]
@@ -187,9 +215,15 @@ class ParallelTrainer:
             env["CUDA_VISIBLE_DEVICES"] = str(device_id)
 
         if job.get("max_train_samples"):
-            cmd.extend(["--max-train-samples", str(job["max_train_samples"])])
+            cmd.extend([
+                "--max-train-samples",
+                self._validate_cmd_arg(job["max_train_samples"], "max_train_samples"),
+            ])
         if job.get("max_eval_samples"):
-            cmd.extend(["--max-eval-samples", str(job["max_eval_samples"])])
+            cmd.extend([
+                "--max-eval-samples",
+                self._validate_cmd_arg(job["max_eval_samples"], "max_eval_samples"),
+            ])
         # Note: lora_rank should be set in config YAML, not via CLI
         if job.get("no_stream"):
             cmd.append("--no-stream")
