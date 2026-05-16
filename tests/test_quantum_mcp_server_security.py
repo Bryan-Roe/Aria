@@ -43,6 +43,29 @@ def _run(coro):
 
 
 @pytest.mark.unit
+class TestCircuitCacheBehavior:
+    """Circuit cache updates should replace values and refresh TTL timestamps."""
+
+    def test_put_replaces_existing_circuit_and_refreshes_timestamp(self):
+        try:
+            from quantum_mcp_server import CircuitCache
+        except (ImportError, SystemExit):
+            pytest.skip("quantum_mcp_server dependencies not installed")
+
+        cache = CircuitCache(max_size=4, ttl_seconds=60)
+        first = object()
+        second = object()
+
+        cache.put("same-id", first)
+        first_timestamp = cache.timestamps["same-id"]
+        time.sleep(0.01)
+        cache.put("same-id", second)
+
+        assert cache.get("same-id") is second
+        assert cache.timestamps["same-id"] > first_timestamp
+
+
+@pytest.mark.unit
 class TestSimulateCircuitHandlerShotsBounds:
     """simulate_circuit_handler must reject shots outside [1, 8192]."""
 
