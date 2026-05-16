@@ -31,6 +31,18 @@ def _normalize_provider_priority(value: object) -> List[str]:
         return providers or list(_DEFAULT_PROVIDER_PRIORITY)
     return list(_DEFAULT_PROVIDER_PRIORITY)
 
+
+def _normalize_provider_priority(value: object) -> List[str]:
+    """Return a normalized provider priority list from strings or iterables.
+
+    Non-string, non-iterable values fall back to the default provider order.
+    """
+    if isinstance(value, str):
+        return [item.strip() for item in value.split(",") if item.strip()]
+    if isinstance(value, (list, tuple)):
+        return [str(item).strip() for item in value if str(item).strip()]
+    return ["azure", "openai", "lmstudio", "local"]
+
 # ---------------------------------------------------------------------------
 # Try to import pydantic v2 BaseSettings; fall back to a plain dataclass-style
 # class so the module never hard-fails in environments without pydantic.
@@ -48,6 +60,7 @@ except ImportError:  # pragma: no cover
     try:
         # pydantic v1 compatibility
         from pydantic import BaseSettings, Field, validator as field_validator  # type: ignore[assignment,no-redef]
+        NoDecode = None  # type: ignore[assignment]
         _ConfigDict = None  # type: ignore[assignment]
 
         _PYDANTIC_AVAILABLE = True
@@ -56,7 +69,12 @@ except ImportError:  # pragma: no cover
         BaseSettings = object  # type: ignore[assignment,misc]
         Field = None  # type: ignore[assignment]
         field_validator = None  # type: ignore[assignment]
+        NoDecode = None  # type: ignore[assignment]
         _ConfigDict = None  # type: ignore[assignment]
+
+ProviderPriority = (
+    Annotated[List[str], NoDecode] if _PYDANTIC_AVAILABLE and NoDecode is not None else List[str]
+)
 
 
 # ---------------------------------------------------------------------------
@@ -99,8 +117,8 @@ if _PYDANTIC_AVAILABLE:
         # ------------------------------------------------------------------
         # Provider selection
         # ------------------------------------------------------------------
-        provider_priority: Annotated[List[str], NoDecode] = Field(
-            default_factory=lambda: list(_DEFAULT_PROVIDER_PRIORITY),
+        provider_priority: ProviderPriority = Field(
+            default=["azure", "openai", "lmstudio", "local"],
             alias="QAI_PROVIDER_PRIORITY",
         )
 
@@ -185,8 +203,8 @@ if _PYDANTIC_AVAILABLE:
 
         @field_validator("provider_priority", mode="before")
         @classmethod
-        def _validate_provider_priority(cls, value: object) -> List[str]:
-            return _normalize_provider_priority(value)
+        def _validate_provider_priority(cls, v: object) -> List[str]:
+            return _normalize_provider_priority(v)
 
         # ------------------------------------------------------------------
         # Derived helpers
@@ -261,7 +279,7 @@ else:
             self.openai_api_key = os.environ.get("OPENAI_API_KEY")
             self.lmstudio_base_url = os.environ.get("LMSTUDIO_BASE_URL")
             self.provider_priority = _normalize_provider_priority(
-                os.environ.get("QAI_PROVIDER_PRIORITY", ",".join(_DEFAULT_PROVIDER_PRIORITY))
+                os.environ.get("QAI_PROVIDER_PRIORITY", "azure,openai,lmstudio,local")
             )
             self.db_connection_string = os.environ.get("QAI_DB_CONN")
             self.sql_pool_size = int(os.environ.get("QAI_SQL_POOL_SIZE", "10"))
@@ -417,7 +435,16 @@ def reset_settings() -> None:
     get_settings.cache_clear()
 
 
-# Backward compatibility alias used by existing tests/importers.
-AppSettings = Settings
+class AppSettings(Settings):
+    """Backward-compatible alias for older settings API callers."""
+
+    def provider_chain(self) -> List[str]:
+        return list(self.provider_priority)
+
+    def summary(self) -> dict:
+        data = super().summary()
+        data["provider_chain"] = self.provider_chain()
+        return data
+
 
 __all__ = ["Settings", "AppSettings", "get_settings", "reset_settings"]
