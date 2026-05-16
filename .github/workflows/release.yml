@@ -19,78 +19,135 @@ concurrency:
   group: release
   cancel-in-progress: false
 
+env:
+  RELEASE_DIR: release-artifacts
+
 jobs:
   create-release:
     name: Create Release
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 30
     steps:
       - name: Checkout code
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4.3.1
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Setup Python
+      - name: Setup Python (optional local action)
         uses: ./.github/actions/setup-python-env
         with:
           install-requirements: 'false'
           extra-packages: 'build twine'
 
-      - name: Get version from tag
+      - name: Determine version
         id: version
         run: |
+          set -euo pipefail
+
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             VERSION="${{ github.event.inputs.version }}"
           else
             VERSION=${GITHUB_REF#refs/tags/}
           fi
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
-          echo "version_number=${VERSION#v}" >> $GITHUB_OUTPUT
+
+          # Basic validation: must start with 'v' and contain at least major.minor.patch
+          if ! echo "$VERSION" | grep -Eq '^v[0-9]+\.[0-9]+\.[0-9]+'; then
+            echo "Invalid version format: $VERSION" >&2
+            exit 1
+          fi
+
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "version_number=${VERSION#v}" >> "$GITHUB_OUTPUT"
+
+      - name: Create tag if requested (workflow_dispatch)
+        if: ${{ github.event_name == 'workflow_dispatch' }}
+        run: |
+          set -euo pipefail
+          git fetch --tags
+
+          if git rev-parse "refs/tags/${{ steps.version.outputs.version }}" >/dev/null 2>&1; then
+            echo "Tag ${{ steps.version.outputs.version }} already exists; skipping tag creation"
+          else
+            echo "Creating and pushing tag ${{ steps.version.outputs.version }}"
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git tag -a "${{ steps.version.outputs.version }}" -m "Release ${{ steps.version.outputs.version }}"
+            git push origin "${{ steps.version.outputs.version }}"
+          fi
 
       - name: Generate changelog
         id: changelog
         run: |
-          # Get previous tag
-          PREV_TAG=$(git describe --abbrev=0 --tags "$(git rev-list --tags --skip=1 --max-count=1)" 2>/dev/null || echo "")
+          set -euo pipefail
+          git fetch --tags
+
+          # Find the previous tag (ignore the current one)
+          PREV_TAG=$(git for-each-ref --sort=-creatordate --format '%(refname:short)' refs/tags \
+            | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+' \
+            | grep -v "^${{ steps.version.outputs.version }}$" \
+            | sed -n '1p' || true)
+
+          echo "Previous tag: $PREV_TAG"
 
           if [ -z "$PREV_TAG" ]; then
             echo "First release - no previous tag found"
-            git log --pretty=format:"- %s (%h)" > CHANGELOG.md
+            git log --no-merges --pretty=format:"- %s (%h)" > CHANGELOG.md || true
           else
             echo "Changes since $PREV_TAG:" > CHANGELOG.md
-            git log $PREV_TAG..HEAD --pretty=format:"- %s (%h)" >> CHANGELOG.md
+            git log --no-merges --pretty=format:"- %s (%h)" "$PREV_TAG"..HEAD >> CHANGELOG.md || true
           fi
 
+          if [ ! -s CHANGELOG.md ]; then
+            echo "No commits found for changelog; adding placeholder"
+            echo "- No notable changes listed." > CHANGELOG.md
+          fi
+
+          # Add a separator for release body readability
+          printf '---\n' | cat - CHANGELOG.md > CHANGELOG.tmp && mv CHANGELOG.tmp CHANGELOG.md
           cat CHANGELOG.md
 
+      - name: Build release artifacts (archives + optional Python build)
+        run: |
+          set -euo pipefail
+          mkdir -p "${RELEASE_DIR}"
+
+          # Create source archives
+          git archive --format=tar.gz --prefix=aria-${{ steps.version.outputs.version_number }}/ HEAD > "${RELEASE_DIR}/aria-${{ steps.version.outputs.version_number }}.tar.gz"
+          git archive --format=zip --prefix=aria-${{ steps.version.outputs.version_number }}/ HEAD > "${RELEASE_DIR}/aria-${{ steps.version.outputs.version_number }}.zip"
+
+          # If Python package files exist, build sdist and wheel into release dir
+          if [ -f pyproject.toml ] || [ -f setup.py ]; then
+            echo "Detected Python project - building distributions"
+            python -m build --sdist --wheel -o "${RELEASE_DIR}" || true
+          else
+            echo "No Python packaging files detected; skipping python build"
+          fi
+
+      - name: Upload artifacts to workflow run
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-artifacts
+          path: ${{ env.RELEASE_DIR }}
+
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65  # v2.6.2
+        uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.version.outputs.version }}
           name: Release ${{ steps.version.outputs.version }}
           body_path: CHANGELOG.md
           draft: false
           prerelease: ${{ contains(steps.version.outputs.version, 'alpha') || contains(steps.version.outputs.version, 'beta') || contains(steps.version.outputs.version, 'rc') }}
-          token: ${{ secrets.GITHUB_TOKEN }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build package artifacts
-        run: |
-          # Create release artifacts directory
-          mkdir -p release-artifacts
-
-          # Create a source tarball
-          git archive --format=tar.gz --prefix=aria-${{ steps.version.outputs.version_number }}/ HEAD > release-artifacts/aria-${{ steps.version.outputs.version_number }}.tar.gz
-
-          # Create a zip archive
-          git archive --format=zip --prefix=aria-${{ steps.version.outputs.version_number }}/ HEAD > release-artifacts/aria-${{ steps.version.outputs.version_number }}.zip
-
-      - name: Upload release artifacts
-        uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65  # v2.6.2
+      - name: Upload release artifacts to GitHub Release
+        uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.version.outputs.version }}
           files: |
-            release-artifacts/*
-          token: ${{ secrets.GITHUB_TOKEN }}
+            ${{ env.RELEASE_DIR }}/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create release summary
         run: |
@@ -98,9 +155,11 @@ jobs:
             echo "# Release ${{ steps.version.outputs.version }}"
             echo ""
             echo "## Changes"
-            cat CHANGELOG.md
+            cat CHANGELOG.md || true
             echo ""
             echo "## Artifacts"
-            echo "- Source tarball: aria-${{ steps.version.outputs.version_number }}.tar.gz"
-            echo "- Source zip: aria-${{ steps.version.outputs.version_number }}.zip"
+            for f in "${RELEASE_DIR}"/*; do
+              [ -e "$f" ] || continue
+              echo "- $(basename "$f")"
+            done
           } >> "$GITHUB_STEP_SUMMARY"
