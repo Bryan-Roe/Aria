@@ -105,8 +105,10 @@ class TestAGIContext:
     def test_get_relevant_context(self):
         """Test extracting relevant context for a query."""
         ctx = AGIContext()
-        ctx.add_message({"role": "user", "content": "What is quantum computing?"})
-        ctx.add_message({"role": "assistant", "content": "Quantum computing uses qubits..."})
+        ctx.add_message(
+            {"role": "user", "content": "What is quantum computing?"})
+        ctx.add_message(
+            {"role": "assistant", "content": "Quantum computing uses qubits..."})
         ctx.goals = ["Learn about quantum"]
 
         context = ctx.get_relevant_context("Tell me more")
@@ -122,7 +124,8 @@ class TestReasoningStep:
 
     def test_basic_step(self):
         """Test creating a basic reasoning step."""
-        step = ReasoningStep(step_type="analyze", content="Analyzing the query")
+        step = ReasoningStep(step_type="analyze",
+                             content="Analyzing the query")
         assert step.step_type == "analyze"
         assert step.content == "Analyzing the query"
         assert step.confidence == 1.0
@@ -284,6 +287,34 @@ class TestAGIProvider:
         assert analysis["intent"] == "coding"
         assert analysis["domain"] == "technical"
 
+    def test_query_analysis_detects_agi_keyword_as_ai_domain(self):
+        """AGI keyword should route to AI domain even when 'ai' token is absent."""
+        mock_provider = MockBaseProvider()
+        agi = AGIProvider(base_provider=mock_provider)
+
+        analysis = agi._analyze_query("Work on AGI architecture and safety")
+
+        assert analysis["domain"] == "ai"
+
+    def test_query_analysis_agi_reasoning_phrase_sets_reasoning_intent(self):
+        """Explicit AGI reasoning requests should map to reasoning intent."""
+        mock_provider = MockBaseProvider()
+        agi = AGIProvider(base_provider=mock_provider)
+
+        analysis = agi._analyze_query("Use AGI reasoning to break this down")
+
+        assert analysis["intent"] == "reasoning"
+        assert analysis["domain"] == "ai"
+
+    def test_query_analysis_does_not_false_positive_ai_from_paint(self):
+        """Words containing 'ai' as a substring should not force AI domain."""
+        mock_provider = MockBaseProvider()
+        agi = AGIProvider(base_provider=mock_provider)
+
+        analysis = agi._analyze_query("How do I paint a wall evenly?")
+
+        assert analysis["domain"] != "ai"
+
     def test_task_decomposition_explanation(self):
         """Test task decomposition for explanation queries."""
         mock_provider = MockBaseProvider()
@@ -294,7 +325,8 @@ class TestAGIProvider:
 
         assert len(subtasks) > 0
         assert len(subtasks) <= 3  # Limited by reasoning_depth
-        assert "concepts" in subtasks[0].lower() or "define" in subtasks[0].lower()
+        assert "concepts" in subtasks[0].lower(
+        ) or "define" in subtasks[0].lower()
 
     def test_task_decomposition_coding(self):
         """Test task decomposition for coding queries."""
@@ -305,17 +337,20 @@ class TestAGIProvider:
         subtasks = agi._decompose_task("Write a sorting algorithm", analysis)
 
         assert len(subtasks) > 0
-        assert any("requirement" in s.lower() or "understand" in s.lower() for s in subtasks)
+        assert any("requirement" in s.lower() or "understand" in s.lower()
+                   for s in subtasks)
 
     def test_chain_of_thought(self):
         """Test chain-of-thought reasoning generation."""
         mock_provider = MockBaseProvider()
         agi = AGIProvider(base_provider=mock_provider)
 
-        analysis = {"intent": "question", "domain": "quantum", "complexity": "moderate"}
+        analysis = {"intent": "question",
+                    "domain": "quantum", "complexity": "moderate"}
         messages = [{"role": "user", "content": "What is a qubit?"}]
 
-        thoughts = agi._chain_of_thought("What is a qubit?", analysis, messages)
+        thoughts = agi._chain_of_thought(
+            "What is a qubit?", analysis, messages)
 
         assert len(thoughts) > 0
         assert any("quantum" in t.lower() for t in thoughts)
@@ -333,7 +368,8 @@ class TestAGIProvider:
             )
         ]
 
-        response = agi._reflect_and_improve("Move Aria left", "I'll move to the left!", reasoning_chain)
+        response = agi._reflect_and_improve(
+            "Move Aria left", "I'll move to the left!", reasoning_chain)
 
         assert "[aria:walk:left]" in response
 
@@ -350,7 +386,8 @@ class TestAGIProvider:
             )
         ]
 
-        response = agi._reflect_and_improve("Spin Aria around", "Spinning now!", reasoning_chain)
+        response = agi._reflect_and_improve(
+            "Spin Aria around", "Spinning now!", reasoning_chain)
 
         assert "[aria:spin]" in response
 
@@ -388,7 +425,8 @@ class TestAGIProvider:
 
         # Add some state
         agi.set_goal("Test goal")
-        agi.context.add_reasoning_chain([ReasoningStep(step_type="analyze", content="Test")])
+        agi.context.add_reasoning_chain(
+            [ReasoningStep(step_type="analyze", content="Test")])
 
         summary = agi.get_reasoning_summary()
 
@@ -412,7 +450,8 @@ class TestAGIProvider:
         mock_provider = MockBaseProvider()
         agi = AGIProvider(base_provider=mock_provider)
 
-        analysis = {"intent": "movement", "domain": "aria", "has_question": False}
+        analysis = {"intent": "movement",
+                    "domain": "aria", "has_question": False}
 
         # Test movement fallback
         response = agi._generate_fallback_response("Move left", analysis)
@@ -457,7 +496,8 @@ class TestCreateAGIProvider:
             assert explicit == "auto"
             return base, ProviderChoice(name="openai", model=model_override or "gpt-test")
 
-        monkeypatch.setitem(create_agi_provider.__globals__, "detect_provider", fake_detect_provider)
+        monkeypatch.setitem(create_agi_provider.__globals__,
+                            "detect_provider", fake_detect_provider)
 
         provider, info = create_agi_provider(model="gpt-4")
 
@@ -467,7 +507,8 @@ class TestCreateAGIProvider:
 
     def test_create_with_options(self):
         """Test creating AGI provider with custom options."""
-        provider, info = create_agi_provider(temperature=0.5, max_output_tokens=1024, verbose=True)
+        provider, info = create_agi_provider(
+            temperature=0.5, max_output_tokens=1024, verbose=True)
 
         assert provider.temperature == 0.5
         assert provider.max_output_tokens == 1024
@@ -515,7 +556,8 @@ def test_agi_smoke():
     mock_provider = MockBaseProvider(response="Smoke test passed")
     agi = AGIProvider(base_provider=mock_provider)
 
-    result = agi.complete([{"role": "user", "content": "What is 2 plus 2?"}], stream=False)
+    result = agi.complete(
+        [{"role": "user", "content": "What is 2 plus 2?"}], stream=False)
 
     assert len(result) > 0
     assert mock_provider.call_count == 1
@@ -649,7 +691,8 @@ class TestAGISecurity:
         agi = AGIProvider(base_provider=mock_provider)
 
         # Create more messages than the limit
-        messages = [{"role": "user", "content": f"Message {i}"} for i in range(MAX_HISTORY_SIZE + 10)]
+        messages = [{"role": "user", "content": f"Message {i}"}
+                    for i in range(MAX_HISTORY_SIZE + 10)]
 
         # Should complete without error
         result = agi.complete(messages, stream=False)
@@ -664,7 +707,8 @@ class TestAGISecurity:
 
         agi = AGIProvider(base_provider=FailingProvider())
 
-        result = agi.complete([{"role": "user", "content": "Test"}], stream=False)
+        result = agi.complete(
+            [{"role": "user", "content": "Test"}], stream=False)
 
         # Should return fallback response, not expose error details
         assert "SENSITIVE" not in result

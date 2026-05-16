@@ -108,7 +108,8 @@ class MemoryInterface(Protocol):
         """
         ...
 
-    def add_reasoning_chain(self, chain: List[ReasoningStep]) -> None:  # type: ignore[name-defined]
+    # type: ignore[name-defined]
+    def add_reasoning_chain(self, chain: List[ReasoningStep]) -> None:
         """Persist a completed reasoning *chain*.
 
         Implementations should cap the number of stored chains to avoid
@@ -159,7 +160,8 @@ class EnvironmentInterface(Protocol):
     """
 
     def complete(
-        self, messages: List[RoleMessage], stream: bool = True  # type: ignore[name-defined]
+        # type: ignore[name-defined]
+        self, messages: List[RoleMessage], stream: bool = True
     ) -> Iterable[str] | str:
         """Submit *messages* to the environment and return the response.
 
@@ -444,8 +446,10 @@ class AGIContext:
         if recent:
             parts.append("Recent conversation:")
             for msg in recent:
-                role = _sanitize_for_logging(str(msg.get("role", "unknown")), 20)
-                content = _sanitize_for_logging(str(msg.get("content", "")), 200)
+                role = _sanitize_for_logging(
+                    str(msg.get("role", "unknown")), 20)
+                content = _sanitize_for_logging(
+                    str(msg.get("content", "")), 200)
                 parts.append(f"  {role}: {content}")
         if self.goals:
             safe_goals = [_sanitize_for_logging(g, 50) for g in self.goals[:3]]
@@ -578,7 +582,8 @@ class AGIProvider(BaseChatProvider):
                 "Message count exceeded limit; truncating to %d", MAX_HISTORY_SIZE
             )
 
-        existing = {m.get("content", "") for m in self.context.conversation_history}
+        existing = {m.get("content", "")
+                    for m in self.context.conversation_history}
         for msg in messages:
             content = _sanitize_input(str(msg.get("content", "")))
             if content not in existing:
@@ -599,7 +604,8 @@ class AGIProvider(BaseChatProvider):
 
         try:
             reasoning_chain = self._reason(user_query, messages)
-            response = self._generate_response(user_query, reasoning_chain, messages)
+            response = self._generate_response(
+                user_query, reasoning_chain, messages)
             if self.enable_self_reflection:
                 response = self._reflect_and_improve(
                     user_query, response, reasoning_chain
@@ -618,20 +624,25 @@ class AGIProvider(BaseChatProvider):
                                 "metadata": step.metadata,
                             }
                         )
-                    meta = {"query": user_query, "agent": self._last_agent_used, "ts": time.time()}
+                    meta = {"query": user_query,
+                            "agent": self._last_agent_used, "ts": time.time()}
                     if hasattr(self.persistence, "write_reasoning_chain"):
-                        self.persistence.write_reasoning_chain(serialized_chain, meta)
+                        self.persistence.write_reasoning_chain(
+                            serialized_chain, meta)
                     elif hasattr(self.persistence, "add_reasoning_chain"):
                         self.persistence.add_reasoning_chain(serialized_chain)
                     elif hasattr(self.persistence, "write"):
                         try:
-                            self.persistence.write("reasoning_chain", {"chain": serialized_chain, "meta": meta})
+                            self.persistence.write("reasoning_chain", {
+                                                   "chain": serialized_chain, "meta": meta})
                         except Exception:
                             pass
                 except Exception as pers_exc:
-                    _logger.exception("Failed to persist AGI reasoning chain: %s", _sanitize_for_logging(str(pers_exc)))
+                    _logger.exception(
+                        "Failed to persist AGI reasoning chain: %s", _sanitize_for_logging(str(pers_exc)))
         except Exception as exc:
-            _logger.error("AGI processing error: %s", _sanitize_for_logging(str(exc)))
+            _logger.error("AGI processing error: %s",
+                          _sanitize_for_logging(str(exc)))
             response = self._generate_fallback_response(
                 user_query, {"intent": "general", "domain": "general"}
             )
@@ -736,7 +747,7 @@ class AGIProvider(BaseChatProvider):
             re.search(r"\b(?:ai|agi)\b", query_lower) is not None
             or any(
                 w in query_lower
-            for w in [
+                for w in [
                 "llm",
                 "transformer",
                 "lora",
@@ -749,7 +760,7 @@ class AGIProvider(BaseChatProvider):
                 "tokenizer",
                 "inference",
                 "model weights",
-            ]
+                ]
             )
         ):
             domain = "ai"
@@ -869,7 +880,8 @@ class AGIProvider(BaseChatProvider):
         specialist is unavailable (falls back to AGI processing).
         """
         if not query or not str(query).strip():
-            _logger.warning("Agent dispatch to %s: empty query provided", agent_name)
+            _logger.warning(
+                "Agent dispatch to %s: empty query provided", agent_name)
             return None
 
         config = _AGENT_REGISTRY.get(agent_name, {})
@@ -909,7 +921,8 @@ class AGIProvider(BaseChatProvider):
             messages = [{"role": "user", "content": query}]
             result = specialist.complete(messages, stream=False)
             response = result if isinstance(result, str) else "".join(result)
-            _logger.debug("Agent dispatch: %s → %s chars", agent_name, len(response))
+            _logger.debug("Agent dispatch: %s → %s chars",
+                          agent_name, len(response))
             return response
         except Exception as exc:
             _logger.debug(
@@ -970,7 +983,8 @@ class AGIProvider(BaseChatProvider):
         # First try to pull subtask templates from the selected agent's registry entry.
         selected_agent = analysis.get("selected_agent")
         if selected_agent and selected_agent in _AGENT_REGISTRY:
-            templates = _AGENT_REGISTRY[selected_agent].get("subtask_templates", [])
+            templates = _AGENT_REGISTRY[selected_agent].get(
+                "subtask_templates", [])
             if templates:
                 return templates[: self.reasoning_depth]
 
@@ -1147,7 +1161,8 @@ class AGIProvider(BaseChatProvider):
 
         if self.enable_chain_of_thought:
             for thought in self._chain_of_thought(query, analysis, messages):
-                chain.append(ReasoningStep(step_type="synthesize", content=thought))
+                chain.append(ReasoningStep(
+                    step_type="synthesize", content=thought))
 
         return chain
 
@@ -1261,7 +1276,8 @@ class AGIProvider(BaseChatProvider):
                 return specialist_response
 
         # Specialist unavailable or returned None — fall back to AGI base provider.
-        system_prompt = self._build_agi_system_prompt(analysis, reasoning_chain)
+        system_prompt = self._build_agi_system_prompt(
+            analysis, reasoning_chain)
         enhanced_messages: List[RoleMessage] = [
             {"role": "system", "content": system_prompt}
         ]
@@ -1299,7 +1315,8 @@ class AGIProvider(BaseChatProvider):
                     pass
             response = result if isinstance(result, str) else "".join(result)
         except Exception as exc:
-            _logger.error("Base provider error: %s", _sanitize_for_logging(str(exc)))
+            _logger.error("Base provider error: %s",
+                          _sanitize_for_logging(str(exc)))
             response = self._generate_fallback_response(query, analysis)
 
         # Record a routing pattern so future queries benefit from history.
@@ -1685,9 +1702,11 @@ def create_agi_provider(
     )
 
     # Optionally attach a persistence backend if configured via environment.
-    persist_enabled = os.getenv("QAI_AGI_PERSIST", "").lower() in ("1", "true", "yes")
+    persist_enabled = os.getenv(
+        "QAI_AGI_PERSIST", "").lower() in ("1", "true", "yes")
     jsonl_path = os.getenv("QAI_AGI_PERSIST_PATH")
-    sqlite_path = os.getenv("QAI_AGI_PERSIST_DB") or os.getenv("QAI_AGI_PERSIST_SQLITE")
+    sqlite_path = os.getenv("QAI_AGI_PERSIST_DB") or os.getenv(
+        "QAI_AGI_PERSIST_SQLITE")
     if sqlite_path:
         try:
             from shared.agi_persistence_sqlite import SQLiteAGIPersistence
@@ -1705,7 +1724,8 @@ def create_agi_provider(
         try:
             from shared.agi_persistence import FileAGIPersistence
 
-            path = jsonl_path or os.path.join(os.getcwd(), "data_out", "agi_reasoning.jsonl")
+            path = jsonl_path or os.path.join(
+                os.getcwd(), "data_out", "agi_reasoning.jsonl")
             os.makedirs(os.path.dirname(path), exist_ok=True)
             provider.persistence = FileAGIPersistence(path)
         except Exception as exc:  # pragma: no cover - best-effort persistence
