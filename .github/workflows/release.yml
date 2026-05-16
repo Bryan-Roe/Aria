@@ -14,6 +14,8 @@ on:
 permissions:
   contents: write
   packages: write
+  attestations: write
+  id-token: write
 
 concurrency:
   group: release
@@ -83,6 +85,11 @@ jobs:
 
           # Create a zip archive
           git archive --format=zip --prefix=aria-${{ steps.version.outputs.version_number }}/ HEAD > release-artifacts/aria-${{ steps.version.outputs.version_number }}.zip
+
+      - name: Attest build provenance
+        uses: actions/attest-build-provenance@977bb373ede98d70efdf65b84cb5f73e068dcc2a  # v3
+        with:
+          subject-path: 'release-artifacts/*'
 
       - name: Upload release artifacts
         uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65  # v2.6.2
