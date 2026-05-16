@@ -2,22 +2,22 @@
 # Date: 2026-05-14
 # NOTE: Validate these pinned versions in an isolated env (`pip install -r requirements.txt -c constraints.txt`)
 
-azure-monitor-opentelemetry==1.8.7
-opentelemetry-api==1.40.0
-opentelemetry-sdk==1.40.0
-opentelemetry-instrumentation==0.41b0
+azure-monitor-opentelemetry==1.8.8
+opentelemetry-api==1.41.1
+opentelemetry-sdk==1.41.1
+opentelemetry-instrumentation==0.62b1
 
 azure-cosmos==4.15.0
-openai==2.36.0
+openai==2.37.0
 colorama==0.4.6
 pytest==8.4.2
 pytest-asyncio==1.2.0
-tiktoken==0.12.0
-pyyaml==6.0.1
+tiktoken==0.13.0
+pyyaml==6.0.3
 pyodbc==5.3.0
 sqlalchemy==2.0.49
 
-pydantic==2.0.0
+pydantic==2.13.4
 pydantic-settings==2.0.0
 tenacity==9.1.2
 
