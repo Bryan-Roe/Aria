@@ -8,6 +8,7 @@ import asyncio
 import json
 import math
 import os
+import shlex
 import shutil
 import sys
 from datetime import datetime
@@ -67,6 +68,60 @@ class ParallelTrainer:
 
         self.jobs = self.config.get("jobs", [])
         self.results: List[Dict[str, Any]] = []
+
+    def _validate_and_build_cmd(self, job: Dict[str, Any]) -> List[str]:
+        """Build command with validated and sanitized arguments.
+
+        Validates executable paths exist and sanitizes user-provided arguments
+        to prevent command injection.
+        """
+        # Validate executable paths exist
+        if not self.venv_python.exists():
+            raise FileNotFoundError(f"Python executable not found: {self.venv_python}")
+        if not self.train_script.exists():
+            raise FileNotFoundError(f"Train script not found: {self.train_script}")
+
+        # Use resolved absolute paths for executables
+        python_path = str(self.venv_python.resolve())
+        script_path = str(self.train_script.resolve())
+
+        # Sanitize user-provided string arguments from config
+        config_path = shlex.quote(
+            job.get("config", "AI/microsoft_phi-silica-3.6_v1/lora/lora.yaml")
+        )
+        dataset_path = shlex.quote(str(job["dataset"]))
+        save_dir = shlex.quote(str(job["save_dir"]))
+        hf_model_id = shlex.quote(str(job["hf_model_id"]))
+
+        cmd = [
+            python_path,
+            script_path,
+            "--config",
+            config_path,
+            "--dataset",
+            dataset_path,
+            "--save-dir",
+            save_dir,
+            "--epochs",
+            str(int(job.get("epochs", 1))),
+            "--learning-rate",
+            str(float(job.get("learning_rate", 0.0002))),
+            "--lora-dropout",
+            str(float(job.get("lora_dropout", 0.1))),
+            "--hf-model-id",
+            hf_model_id,
+            "--device",
+            "auto",
+        ]
+
+        if job.get("max_train_samples"):
+            cmd.extend(["--max-train-samples", str(int(job["max_train_samples"]))])
+        if job.get("max_eval_samples"):
+            cmd.extend(["--max-eval-samples", str(int(job["max_eval_samples"]))])
+        if job.get("no_stream"):
+            cmd.append("--no-stream")
+
+        return cmd
 
     async def run_job(self, job: Dict[str, Any], device_id: int) -> Dict[str, Any]:
         """
@@ -159,40 +214,13 @@ class ParallelTrainer:
             )
             return result
 
-        # Build command for actual training
-        cmd = [
-            str(self.venv_python),
-            str(self.train_script),
-            "--config",
-            job.get("config", "AI/microsoft_phi-silica-3.6_v1/lora/lora.yaml"),
-            "--dataset",
-            job["dataset"],
-            "--save-dir",
-            job["save_dir"],
-            "--epochs",
-            str(job.get("epochs", 1)),
-            "--learning-rate",
-            str(job.get("learning_rate", 0.0002)),
-            "--lora-dropout",
-            str(job.get("lora_dropout", 0.1)),
-            "--hf-model-id",
-            job["hf_model_id"],
-            "--device",
-            "auto",  # Use auto device selection
-        ]
+        # Build command with validated and sanitized arguments
+        cmd = self._validate_and_build_cmd(job)
 
         # Set CUDA_VISIBLE_DEVICES for device isolation
         env = dict(os.environ)
         if device_id >= 0:
             env["CUDA_VISIBLE_DEVICES"] = str(device_id)
-
-        if job.get("max_train_samples"):
-            cmd.extend(["--max-train-samples", str(job["max_train_samples"])])
-        if job.get("max_eval_samples"):
-            cmd.extend(["--max-eval-samples", str(job["max_eval_samples"])])
-        # Note: lora_rank should be set in config YAML, not via CLI
-        if job.get("no_stream"):
-            cmd.append("--no-stream")
 
         # Create output directory
         output_dir = (
