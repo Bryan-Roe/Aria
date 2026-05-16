@@ -115,6 +115,22 @@ restored_model, restored_tok, metadata = load_checkpoint(checkpoint)
 print(metadata["path"], metadata["backend"])
 ```
 
+## Checkpoint formats & testing
+
+The compatibility wrapper expects NumPy checkpoint files placed in `quantum-ai/checkpoints/`.
+Supported checkpoint containers:
+- `.npz` archives with keys `weights`, `epoch`, optional `config`.
+- NumPy object arrays that contain dict-like checkpoint objects (legacy).
+
+To run the unit test locally:
+1. Create a virtual environment:
+   python -m venv .venv
+   source .venv/bin/activate  # Windows: .venv\Scripts\activate
+2. Install dev deps:
+   pip install -r requirements-dev.txt
+3. Run pytest:
+   pytest tests/test_quantum_web_app.py -q
+   
 ## Files
 
 | File | Description |
