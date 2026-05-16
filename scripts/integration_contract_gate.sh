@@ -34,7 +34,13 @@ run_step() {
   local name="$1"
   shift
   log "Running ${name}: $*"
+  set +e
   "$@"
+  local rc=$?
+  set -e
+  if [[ ${rc} -ne 0 ]]; then
+    exit "${rc}"
+  fi
 }
 
 run_step integration_smoke python scripts/integration_smoke.py

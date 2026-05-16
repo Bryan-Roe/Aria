@@ -60,7 +60,7 @@ _MAX_CONN_AGE_SECONDS = int(os.getenv("QAI_DB_CONN_MAX_AGE", "300"))
 # a small pool (default 5) and the ability to return connections back to the pool.
 _connection_pool: list = []
 _POOL_MAX_SIZE: int = int(os.getenv("QAI_DB_CONN_POOL_SIZE", "5"))
-_last_connect_impl_id: int | None = None
+_last_connect_impl_id: Optional[int] = None
 
 
 def _conn_str() -> Optional[str]:
@@ -112,11 +112,15 @@ def _get_conn() -> Any:
         if _last_connect_impl_id is None:
             _last_connect_impl_id = current_connect_impl_id
         elif _last_connect_impl_id != current_connect_impl_id:
-            for _, stale_conn in list(_conn_cache.items()):
+            for thread_id, stale_conn in list(_conn_cache.items()):
                 try:
                     stale_conn.close()
                 except Exception:
-                    logger.debug("Error closing cached connection", exc_info=True)
+                    logger.debug(
+                        "Error closing cached connection for thread_id=%s",
+                        thread_id,
+                        exc_info=True,
+                    )
             _conn_cache.clear()
             _conn_timestamps.clear()
 
@@ -360,7 +364,16 @@ def fetch_similar_messages(
 def store_embeddings_batch(
     rows: Sequence[Tuple[str, Sequence[float], str]],
 ) -> int:
-    """Store multiple embeddings and return the number successfully inserted."""
+    """Store multiple embeddings.
+
+    Args:
+        rows: Sequence of tuples in the form
+            ``(message_id, embedding_vector, model)``.
+
+    Returns:
+        Number of rows inserted. Returns ``0`` when no rows are provided, no DB
+        connection string is configured, or the batch fails and rolls back.
+    """
     if not rows:
         return 0
     if not _conn_str():
@@ -392,7 +405,7 @@ def store_embeddings_batch(
                 conn.rollback()
         except Exception:
             logger.debug("Rollback failed", exc_info=True)
-        return inserted
+        return 0
     finally:
         try:
             if cur is not None:
