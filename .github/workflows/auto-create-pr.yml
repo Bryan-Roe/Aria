@@ -1,0 +1,51 @@
+name: Auto-create PRs for feature branches
+
+on:
+  push:
+    branches:
+      - 'agi/**'
+      - 'auto-pr/**'
+      - 'feature/**'
+      - 'pr/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  create_pr:
+    name: Create pull request
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Create PR if none exists
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const ref = context.ref;
+            if (!ref || !ref.startsWith('refs/heads/')) {
+              core.info('Not a branch ref; skipping.');
+              return;
+            }
+            const head = ref.replace('refs/heads/', '');
+            const base = 'main';
+            if (head === base) {
+              core.info('Branch equals base; skipping.');
+              return;
+            }
+            core.info(`Checking existing PRs for branch: ${head}`);
+            const { data: existing } = await github.rest.pulls.list({ owner, repo, head: `${owner}:${head}`, state: 'open' });
+            if (existing && existing.length > 0) {
+              core.info('PR already exists for this branch; skipping creation.');
+              return;
+            }
+            const title = `[Auto PR] ${head}`;
+            const body = `Automated pull request for branch **${head}** → **${base}**.\n\nThis PR was created by the repository automation workflow (.github/workflows/auto-create-pr.yml).`;
+            const pr = await github.rest.pulls.create({ owner, repo, head, base, title, body, draft: false });
+            core.info(`Created PR: ${pr.data.html_url}`);
