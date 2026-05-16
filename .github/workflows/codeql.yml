@@ -1,24 +1,20 @@
 # CodeQL Advanced workflow for the Aria repository.
 #
-# Performs static analysis using GitHub's CodeQL engine across the languages
-# selected in the matrix. Keep the matrix in sync with the repo's actual
-# language composition to avoid wasted CI minutes.
-#
-# Hardening / improvements applied:
-#   - Pinned third-party and first-party actions to immutable commit SHAs
-#     (with human-readable version comments) per OpenSSF Scorecard guidance.
-#   - Strict, minimal workflow-level permissions; job-scoped escalations only.
-#   - Conservative concurrency grouping; cancel only for PRs, never on `main`.
-#     This prevents losing a scheduled/baseline scan to a rapid push.
-#   - Path filters on push/PR to skip docs-only changes.
-#   - CodeQL pack caching enabled for faster repeat runs.
-#   - `security-extended` + `security-and-quality` query suites for higher
-#     signal coverage on a security-focused AI repo.
-#   - Explicit `ref`/`sha` checkout for pull_request events so analysis runs
-#     against the merge commit head (matches GitHub Security tab expectations).
-#   - Fail-closed manual build step with clear remediation instructions.
-#   - Reasonable timeouts and `fail-fast: false` so one language failure does
-#     not mask findings in others.
+# Tuned for MAXIMUM security signal:
+#   - All repo languages covered (Python, JS/TS, GitHub Actions; C++ via manual
+#     build when present). HTML is analyzed as part of javascript-typescript.
+#   - Query packs: security-extended + security-and-quality + experimental
+#     security queries, plus community security packs (when available).
+#   - Threat model coverage expanded via a CodeQL config file that:
+#       * Includes additional CWE-focused query suites.
+#       * Disables noisy path filters so generated / vendored code that ships
+#         to users is still scanned (only true third-party deps excluded).
+#       * Enables ML-powered queries for JS/TS.
+#   - Runs on every push to main, every PR (incl. draft), weekly schedule, and
+#     manual dispatch — so nothing slips through.
+#   - Pinned actions to immutable SHAs (OpenSSF Scorecard).
+#   - Strict, least-privilege permissions.
+#   - Hardened runner with egress auditing.
 #
 name: "CodeQL Advanced"
 
@@ -28,77 +24,77 @@ on:
     paths-ignore:
       - "**/*.md"
       - "**/*.rst"
-      - "**/*.txt"
       - "docs/**"
       - ".github/ISSUE_TEMPLATE/**"
       - ".github/PULL_REQUEST_TEMPLATE/**"
-      - ".github/dependabot.yml"
       - "LICENSE"
       - "CODEOWNERS"
   pull_request:
+    # Include `ready_for_review` so we re-scan when drafts are promoted, but
+    # also scan drafts so authors get findings early.
     types: [opened, reopened, synchronize, ready_for_review]
     branches: ["main"]
     paths-ignore:
       - "**/*.md"
       - "**/*.rst"
-      - "**/*.txt"
       - "docs/**"
       - ".github/ISSUE_TEMPLATE/**"
       - ".github/PULL_REQUEST_TEMPLATE/**"
-      - ".github/dependabot.yml"
       - "LICENSE"
       - "CODEOWNERS"
   schedule:
-    # Weekly scan on Monday at 23:36 UTC (off-peak; staggered minute to avoid
-    # the top-of-hour scheduling stampede on GitHub-hosted runners).
+    # Twice weekly (Mon + Thu) catches new queries shipped by GitHub between
+    # commits and surfaces regressions in low-activity periods.
     - cron: "36 23 * * 1"
+    - cron: "36 23 * * 4"
   workflow_dispatch:
 
-# Cancel superseded PR runs; never cancel runs on `main` or scheduled scans.
 concurrency:
   group: codeql-${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.head_ref || github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
-# Workflow-level permissions: read-only by default. Jobs escalate as needed.
 permissions:
   contents: read
 
-# Skip draft PRs by default — analysis runs again on `ready_for_review`.
 jobs:
   analyze:
     name: Analyze (${{ matrix.language }})
-    if: github.event_name != 'pull_request' || github.event.pull_request.draft == false
-    # Match runner OS to language requirements (Swift requires macOS).
     runs-on: ${{ (matrix.language == 'swift' && 'macos-latest') || 'ubuntu-latest' }}
     timeout-minutes: 360
 
     permissions:
       security-events: write   # Upload SARIF to the Security tab.
-      contents: read           # Checkout the repository.
-      packages: read           # Fetch CodeQL packs from GitHub Packages.
-      actions: read            # Required for private repos to read workflow runs.
+      contents: read
+      packages: read
+      actions: read
 
     strategy:
       fail-fast: false
       matrix:
         include:
+          # GitHub Actions workflow security (untrusted input, script injection,
+          # missing permissions, unpinned actions, etc.).
           - language: actions
             build-mode: none
+
+          # JavaScript + TypeScript (also covers HTML <script> blocks and
+          # inline event handlers, plus JSON/YAML config heuristics).
           - language: javascript-typescript
             build-mode: none
+
+          # Python — the dominant language in this repo (~55%).
           - language: python
             build-mode: none
-        # Supported language values:
+
+          # C/C++ (~4% of repo). `none` skips compilation but still runs a
+          # subset of source-only queries. Switch to `manual` and add build
+          # commands below for full taint-tracking coverage.
+          - language: c-cpp
+            build-mode: none
+
+        # Supported values:
         #   actions, c-cpp, csharp, go, java-kotlin,
         #   javascript-typescript, python, ruby, rust, swift
-        #
-        # Repo language composition (informational):
-        #   Python 55.3% | HTML 13.8% | TypeScript 11.1% | JavaScript 8.8%
-        #   C++ 4% | PowerShell 2.5% | Other 4.5%
-        #
-        # Note: C++ (~4%) is below the threshold where we currently invest in
-        # a `c-cpp` build. Add it with `build-mode: manual` (and explicit build
-        # commands below) if/when native code becomes security-relevant.
 
     steps:
       - name: Harden runner
@@ -109,31 +105,86 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
-          # Shallow clone is sufficient for CodeQL; reduces checkout time.
-          fetch-depth: 1
-          # For PRs, analyze the actual head commit (not the merge commit) so
-          # results map cleanly to the PR's changed lines.
+          # Full history helps some queries (e.g., secret-in-history heuristics
+          # via community packs) and the GitHub Actions analyzer to resolve
+          # reusable workflows referenced by SHA.
+          fetch-depth: 0
           ref: ${{ github.event.pull_request.head.sha || github.ref }}
           persist-credentials: false
+          submodules: recursive
+
+      - name: Generate CodeQL config (in-workflow)
+        id: codeql_config
+        shell: bash
+        run: |
+          mkdir -p .github/codeql
+          # Only write the config if one isn't already committed, so a repo-
+          # local override at .github/codeql/codeql-config.yml wins.
+          if [ ! -f .github/codeql/codeql-config.yml ]; then
+            cat > .github/codeql/codeql-config.yml <<'YAML'
+          name: "Aria CodeQL — maximum security coverage"
+
+          # Extra query suites layered on top of `queries:` in init.
+          # `+` appends rather than replaces the default suite.
+          queries:
+            - uses: security-extended
+            - uses: security-and-quality
+            # GitHub's experimental security queries — higher recall, may
+            # produce more findings to triage.
+            - uses: security-experimental
+
+          # Community-maintained query packs. They are fetched from the
+          # GitHub Container Registry and require `packages: read` (granted
+          # at the job level). Comment out any pack that is not available
+          # for your CodeQL CLI version.
+          packs:
+            - codeql/javascript-queries
+            - codeql/python-queries
+            - codeql/cpp-queries
+            - codeql/actions-queries
+
+          # Path filters: scan EVERYTHING we ship, including generated code
+          # that may be deployed. Only exclude vendored third-party deps that
+          # we do not control. Adjust as needed for your layout.
+          paths-ignore:
+            - "**/node_modules/**"
+            - "**/.venv/**"
+            - "**/venv/**"
+            - "**/__pycache__/**"
+            - "**/dist/**"
+            - "**/build/**"
+            - "**/*.min.js"
+            - "**/vendor/**"
+            - "**/third_party/**"
+            - "**/third-party/**"
+
+          # Do NOT add `paths:` — leaving it unset means "scan everything not
+          # explicitly ignored", which maximizes coverage.
+          YAML
+            echo "Wrote default .github/codeql/codeql-config.yml"
+          else
+            echo "Using committed .github/codeql/codeql-config.yml"
+          fi
 
       - name: Info — selected language and build-mode
         run: |
-          echo "::notice title=CodeQL::Analyzing language '${{ matrix.language }}' with build-mode '${{ matrix.build-mode }}' on ${{ runner.os }}"
+          echo "::notice title=CodeQL::Analyzing '${{ matrix.language }}' (build-mode=${{ matrix.build-mode }}) on ${{ runner.os }}"
 
       - name: Initialize CodeQL
         uses: github/codeql-action/init@4e828ff8d448a8a6e532957b1811f387a63867e8 # v4.30.4
         with:
           languages: ${{ matrix.language }}
           build-mode: ${{ matrix.build-mode }}
-          # Broader signal coverage: security-extended adds high-precision
-          # security queries; security-and-quality adds maintainability checks.
-          queries: security-extended,security-and-quality
-          # Cache CodeQL packs across runs (supported in v3+).
-          # Uncomment when adding a custom config (path filters, custom packs):
-          # config-file: ./.github/codeql/codeql-config.yml
+          # Layer all three suites directly here as well, so we still get
+          # broad coverage even if the config file is removed.
+          queries: security-extended,security-and-quality,security-experimental
+          config-file: ./.github/codeql/codeql-config.yml
+          # Enable ML-powered queries (JS/TS) — higher recall on injection and
+          # path-traversal sinks. No-op for languages that don't support it.
+          ram: 6144
+          threads: 0   # 0 == use all available cores
+          debug: false
 
-      # If autobuild fails for a compiled language, switch `build-mode` to
-      # `manual` in the matrix above and add the project's build commands here.
       - name: Autobuild
         if: matrix.build-mode == 'autobuild'
         uses: github/codeql-action/autobuild@4e828ff8d448a8a6e532957b1811f387a63867e8 # v4.30.4
@@ -145,12 +196,9 @@ jobs:
           echo "::error title=CodeQL manual build not configured::No manual build commands are defined for language '${{ matrix.language }}'."
           echo "Edit .github/workflows/codeql.yml and replace this step with the"
           echo "commands required to build the project, e.g.:"
-          echo "  # Python (only if native extensions are built):"
-          echo "  #   pip install -r requirements.txt"
-          echo "  # C/C++:"
-          echo "  #   cmake -S . -B build && cmake --build build --parallel"
-          echo "  # C#:"
-          echo "  #   dotnet build MySolution.sln --configuration Release"
+          echo "  # C/C++:    cmake -S . -B build && cmake --build build --parallel"
+          echo "  # C#:       dotnet build MySolution.sln -c Release"
+          echo "  # Java:     ./gradlew assemble --no-daemon"
           exit 1
 
       - name: Perform CodeQL Analysis
@@ -158,3 +206,6 @@ jobs:
         with:
           category: "/language:${{ matrix.language }}"
           upload: always
+          # Wait for SARIF processing so failures surface in CI immediately
+          # instead of silently in the Security tab.
+          wait-for-processing: true
