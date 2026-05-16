@@ -55,32 +55,32 @@ class LocalAGIProvider:
                 return _char_gen()
             return str(raw)
 
-        # If streaming, yield analysis, steps, then output incrementally.
+        # If streaming, yield structured dict chunks: analysis, steps, output tokens.
         if stream:
             def _gen():
                 try:
                     if isinstance(payload, dict):
                         analysis = payload.get("analysis")
                         if analysis:
-                            yield f"[analysis] {analysis}"
+                            yield {"type": "analysis", "data": analysis}
 
                         steps = payload.get("steps")
                         if isinstance(steps, list):
                             for s in steps:
-                                # yield step as compact JSON so consumer can parse
-                                yield json.dumps({"step": s})
+                                # yield step objects directly so consumers can parse easily
+                                yield {"type": "step", "data": s}
 
                         output = payload.get("output")
                         if output:
-                            # Stream output by word for slightly coarser chunks
+                            # Stream output by word to create coarser tokens
                             for token in str(output).split():
-                                yield token + " "
+                                yield {"type": "output", "data": token + " "}
                             return
 
-                    # Generic fallback: stream the full JSON string
-                    yield json.dumps(payload)
+                    # Generic fallback: yield the payload as a single structured chunk
+                    yield {"type": "payload", "data": payload}
                 except Exception as exc:
-                    yield f"[LocalAGI error] {str(exc)}"
+                    yield {"type": "error", "data": str(exc)}
 
             return _gen()
 
