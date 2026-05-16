@@ -16,21 +16,32 @@ from __future__ import annotations
 import logging
 import os
 from functools import lru_cache
-from typing import List, Optional
+from typing import Annotated, List, Optional
 
 _LOG = logging.getLogger(__name__)
-DEFAULT_PROVIDER_PRIORITY = ["azure", "openai", "lmstudio", "local"]
-DEFAULT_PROVIDER_PRIORITY_ENV = ",".join(DEFAULT_PROVIDER_PRIORITY)
+_DEFAULT_PROVIDER_PRIORITY = ["azure", "openai", "lmstudio", "local"]
 
 
-def _parse_provider_priority(value: object) -> List[str]:
-    if isinstance(value, list):
-        parsed = [str(item).strip() for item in value if str(item).strip()]
-        return parsed or DEFAULT_PROVIDER_PRIORITY.copy()
+def _normalize_provider_priority(value: object) -> List[str]:
     if isinstance(value, str):
-        parsed = [item.strip() for item in value.split(",") if item.strip()]
-        return parsed or DEFAULT_PROVIDER_PRIORITY.copy()
-    return DEFAULT_PROVIDER_PRIORITY.copy()
+        providers = [item.strip() for item in value.split(",") if item.strip()]
+        return providers or list(_DEFAULT_PROVIDER_PRIORITY)
+    if isinstance(value, (list, tuple)):
+        providers = [str(item).strip() for item in value if str(item).strip()]
+        return providers or list(_DEFAULT_PROVIDER_PRIORITY)
+    return list(_DEFAULT_PROVIDER_PRIORITY)
+
+
+def _normalize_provider_priority(value: object) -> List[str]:
+    """Return a normalized provider priority list from strings or iterables.
+
+    Non-string, non-iterable values fall back to the default provider order.
+    """
+    if isinstance(value, str):
+        return [item.strip() for item in value.split(",") if item.strip()]
+    if isinstance(value, (list, tuple)):
+        return [str(item).strip() for item in value if str(item).strip()]
+    return ["azure", "openai", "lmstudio", "local"]
 
 # ---------------------------------------------------------------------------
 # Try to import pydantic v2 BaseSettings; fall back to a plain dataclass-style
@@ -38,7 +49,11 @@ def _parse_provider_priority(value: object) -> List[str]:
 # ---------------------------------------------------------------------------
 try:
     from pydantic import Field, field_validator
-    from pydantic_settings import BaseSettings
+    from pydantic_settings import BaseSettings, NoDecode
+    try:
+        from pydantic_settings import NoDecode as _NoDecode
+    except ImportError:
+        _NoDecode = None  # type: ignore[assignment,misc]
     try:
         from pydantic import ConfigDict as _ConfigDict
     except ImportError:
@@ -49,7 +64,9 @@ except ImportError:  # pragma: no cover
     try:
         # pydantic v1 compatibility
         from pydantic import BaseSettings, Field, validator as field_validator  # type: ignore[assignment,no-redef]
+        NoDecode = None  # type: ignore[assignment]
         _ConfigDict = None  # type: ignore[assignment]
+        _NoDecode = None  # type: ignore[assignment]
 
         _PYDANTIC_AVAILABLE = True
     except ImportError:
@@ -57,7 +74,28 @@ except ImportError:  # pragma: no cover
         BaseSettings = object  # type: ignore[assignment,misc]
         Field = None  # type: ignore[assignment]
         field_validator = None  # type: ignore[assignment]
+        NoDecode = None  # type: ignore[assignment]
         _ConfigDict = None  # type: ignore[assignment]
+        _NoDecode = None  # type: ignore[assignment]
+
+
+def _normalize_provider_priority(value: object) -> List[str]:
+    if isinstance(value, str):
+        return [name.strip() for name in value.split(",") if name.strip()]
+    if isinstance(value, (list, tuple)):
+        return [str(name).strip() for name in value if str(name).strip()]
+    return ["azure", "openai", "lmstudio", "local"]
+
+
+def _provider_priority_field():
+    return Field(
+        default_factory=lambda: ["azure", "openai", "lmstudio", "local"],
+        alias="QAI_PROVIDER_PRIORITY",
+    )
+
+ProviderPriority = (
+    Annotated[List[str], NoDecode] if _PYDANTIC_AVAILABLE and NoDecode is not None else List[str]
+)
 
 
 # ---------------------------------------------------------------------------
@@ -100,7 +138,7 @@ if _PYDANTIC_AVAILABLE:
         # ------------------------------------------------------------------
         # Provider selection
         # ------------------------------------------------------------------
-        provider_priority: List[str] = Field(
+        provider_priority: ProviderPriority = Field(
             default=["azure", "openai", "lmstudio", "local"],
             alias="QAI_PROVIDER_PRIORITY",
         )
@@ -187,7 +225,7 @@ if _PYDANTIC_AVAILABLE:
         @field_validator("provider_priority", mode="before")
         @classmethod
         def _validate_provider_priority(cls, v: object) -> List[str]:
-            return _parse_provider_priority(v)
+            return _normalize_provider_priority(v)
 
         # ------------------------------------------------------------------
         # Derived helpers
@@ -222,15 +260,20 @@ if _PYDANTIC_AVAILABLE:
                 "openai": self.openai_ready,
                 "lmstudio": self.lmstudio_ready,
             }
-            for name in self.provider_priority:
+            for name in self.provider_chain():
                 if checks.get(name, False):
                     return name
             return "local"
+
+        def provider_chain(self) -> List[str]:
+            """Return configured provider priority order."""
+            return list(self.provider_priority)
 
         def summary(self) -> dict:
             """Return a non-secret summary suitable for health endpoints."""
             return {
                 "active_provider": self.active_provider(),
+                "provider_chain": self.provider_chain(),
                 "azure_openai_ready": self.azure_openai_ready,
                 "openai_ready": self.openai_ready,
                 "lmstudio_ready": self.lmstudio_ready,
@@ -256,8 +299,8 @@ else:
             )
             self.openai_api_key = os.environ.get("OPENAI_API_KEY")
             self.lmstudio_base_url = os.environ.get("LMSTUDIO_BASE_URL")
-            self.provider_priority = _parse_provider_priority(
-                os.environ.get("QAI_PROVIDER_PRIORITY", DEFAULT_PROVIDER_PRIORITY_ENV)
+            self.provider_priority = _normalize_provider_priority(
+                os.environ.get("QAI_PROVIDER_PRIORITY", "azure,openai,lmstudio,local")
             )
             self.db_connection_string = os.environ.get("QAI_DB_CONN")
             self.sql_pool_size = int(os.environ.get("QAI_SQL_POOL_SIZE", "10"))
@@ -309,21 +352,23 @@ else:
             return bool(self.lmstudio_base_url)
 
         def active_provider(self) -> str:
-            priority = self.provider_priority
             checks = {
                 "azure": self.azure_openai_ready,
                 "openai": self.openai_ready,
                 "lmstudio": self.lmstudio_ready,
             }
-            for name in priority:
-                name = name.strip()
+            for name in self.provider_priority:
                 if checks.get(name, False):
                     return name
             return "local"
 
+        def provider_chain(self) -> List[str]:
+            return list(self.provider_priority)
+
         def summary(self) -> dict:
             return {
                 "active_provider": self.active_provider(),
+                "provider_chain": self.provider_chain(),
                 "azure_openai_ready": self.azure_openai_ready,
                 "openai_ready": self.openai_ready,
                 "lmstudio_ready": self.lmstudio_ready,
@@ -412,10 +457,10 @@ def reset_settings() -> None:
 
 
 class AppSettings(Settings):
-    """Backward-compatible settings API used by legacy tests and callers."""
+    """Backward-compatible alias for older settings API callers."""
 
     def provider_chain(self) -> List[str]:
-        return self.provider_priority.copy()
+        return list(self.provider_priority)
 
     def summary(self) -> dict:
         data = super().summary()
