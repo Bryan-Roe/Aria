@@ -51,6 +51,10 @@ try:
     from pydantic import Field, field_validator
     from pydantic_settings import BaseSettings, NoDecode
     try:
+        from pydantic_settings import NoDecode as _NoDecode
+    except ImportError:
+        _NoDecode = None  # type: ignore[assignment,misc]
+    try:
         from pydantic import ConfigDict as _ConfigDict
     except ImportError:
         _ConfigDict = None  # type: ignore[assignment,misc]
@@ -62,6 +66,7 @@ except ImportError:  # pragma: no cover
         from pydantic import BaseSettings, Field, validator as field_validator  # type: ignore[assignment,no-redef]
         NoDecode = None  # type: ignore[assignment]
         _ConfigDict = None  # type: ignore[assignment]
+        _NoDecode = None  # type: ignore[assignment]
 
         _PYDANTIC_AVAILABLE = True
     except ImportError:
@@ -71,6 +76,22 @@ except ImportError:  # pragma: no cover
         field_validator = None  # type: ignore[assignment]
         NoDecode = None  # type: ignore[assignment]
         _ConfigDict = None  # type: ignore[assignment]
+        _NoDecode = None  # type: ignore[assignment]
+
+
+def _normalize_provider_priority(value: object) -> List[str]:
+    if isinstance(value, str):
+        return [name.strip() for name in value.split(",") if name.strip()]
+    if isinstance(value, (list, tuple)):
+        return [str(name).strip() for name in value if str(name).strip()]
+    return ["azure", "openai", "lmstudio", "local"]
+
+
+def _provider_priority_field():
+    return Field(
+        default_factory=lambda: ["azure", "openai", "lmstudio", "local"],
+        alias="QAI_PROVIDER_PRIORITY",
+    )
 
 ProviderPriority = (
     Annotated[List[str], NoDecode] if _PYDANTIC_AVAILABLE and NoDecode is not None else List[str]
@@ -239,7 +260,7 @@ if _PYDANTIC_AVAILABLE:
                 "openai": self.openai_ready,
                 "lmstudio": self.lmstudio_ready,
             }
-            for name in self.provider_priority:
+            for name in self.provider_chain():
                 if checks.get(name, False):
                     return name
             return "local"
