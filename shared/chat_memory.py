@@ -1,17 +1,16 @@
 """
 Database connection caching and embedding storage utilities.
 
-This module maintains a per-thread cached pyodbc connection to avoid repeatedly
-creating expensive DB connections. Functions use os.getenv to obtain the
-connection string so unit tests can patch os.getenv("...") easily.
+This module maintains a per-thread cached ODBC connection to avoid repeatedly
+creating expensive DB connections.
 
-Design goals:
-- Use import pyodbc (not from pyodbc import connect) so tests can patch shared.chat_memory.pyodbc.
-- Cache connections per thread id under _conn_lock.
-- Keep cached connections open (do not close them in store_embedding).
-- Perform lightweight health-check before reusing a cached connection and
-  reconnect if needed.
-- Use parameterized queries to avoid SQL injection.
+Key changes:
+- Lazy-import pyodbc inside _create_connection so importing this module doesn't
+  immediately fail in environments missing the unixODBC shared libraries.
+- Use typing.Any for connection types to avoid import-time references.
+- Provide a clear, actionable RuntimeError when pyodbc (or system ODBC libs)
+  are missing.
+- Preserve previous caching, health-check, and commit/rollback semantics.
 """
 
 from __future__ import annotations
@@ -22,14 +21,12 @@ import time
 import logging
 from typing import Any, Dict, Optional, Sequence
 
-import pyodbc
-
 logger = logging.getLogger(__name__)
 
 # Connection cache keyed by thread identity
-# Keep legacy shape: mapping tid -> pyodbc.Connection so external tests that
+# Keep legacy shape: mapping tid -> connection object so external tests that
 # inspect _conn_cache still see connection objects.
-_conn_cache: Dict[int, pyodbc.Connection] = {}
+_conn_cache: Dict[int, Any] = {}
 _conn_timestamps: Dict[int, float] = {}
 _conn_lock = threading.Lock()
 
@@ -39,13 +36,23 @@ _CONN_HEALTH_CHECK_TIMEOUT = 2.0  # seconds
 _MAX_CONN_AGE_SECONDS = int(os.getenv("QAI_DB_CONN_MAX_AGE", str(300)))
 
 
-def _create_connection() -> pyodbc.Connection:
+def _create_connection() -> Any:
     """
     Create a new pyodbc connection using the connection string from env.
 
-    Uses os.getenv to allow tests to patch shared.chat_memory.os.getenv.
-    Supports multiple env var names for backwards compatibility.
+    Lazy-imports pyodbc so importing this module won't fail on systems missing
+    the unixODBC shared libraries. Raises a RuntimeError with an actionable
+    message if pyodbc cannot be imported.
     """
+    try:
+        import pyodbc  # local import so module import doesn't fail when libodbc is missing
+    except Exception as e:  # ImportError or OSError from underlying lib load
+        raise RuntimeError(
+            "pyodbc import failed. Ensure the unixODBC system libraries are installed "
+            "(e.g. on Debian/Ubuntu: `apt-get update && apt-get install -y unixodbc unixodbc-dev libodbc1`). "
+            "Also ensure the Python package `pyodbc` is installed in your environment."
+        ) from e
+
     # Prefer application-specific env var but fall back to commonly-used names
     conn_str = os.getenv("QAI_DB_CONN") or os.getenv("DB_CONN_STRING") or os.getenv("CONN_STRING")
 
@@ -58,7 +65,7 @@ def _create_connection() -> pyodbc.Connection:
     return conn
 
 
-def _is_connection_usable(conn: pyodbc.Connection) -> bool:
+def _is_connection_usable(conn: Any) -> bool:
     """
     Perform a lightweight health check on the connection.
 
@@ -85,7 +92,7 @@ def _is_connection_usable(conn: pyodbc.Connection) -> bool:
         return False
 
 
-def _get_conn() -> pyodbc.Connection:
+def _get_conn() -> Any:
     """
     Get a cached connection for the current thread or create a new one.
 
@@ -127,7 +134,7 @@ def store_embedding(message_id: str, embedding: Sequence[float], model: str) -> 
 
     Returns True on success, False on failure.
     """
-    conn: Optional[pyodbc.Connection] = None
+    conn: Optional[Any] = None
     cur = None
     try:
         conn = _get_conn()
