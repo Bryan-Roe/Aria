@@ -23,6 +23,10 @@ _DEFAULT_PROVIDER_PRIORITY = ["azure", "openai", "lmstudio", "local"]
 
 
 def _normalize_provider_priority(value: object) -> List[str]:
+    """Return a normalized provider priority list from strings or iterables.
+
+    Non-string, non-iterable values fall back to the default provider order.
+    """
     if isinstance(value, str):
         providers = [item.strip() for item in value.split(",") if item.strip()]
         return providers or list(_DEFAULT_PROVIDER_PRIORITY)
@@ -31,17 +35,6 @@ def _normalize_provider_priority(value: object) -> List[str]:
         return providers or list(_DEFAULT_PROVIDER_PRIORITY)
     return list(_DEFAULT_PROVIDER_PRIORITY)
 
-
-def _normalize_provider_priority(value: object) -> List[str]:
-    """Return a normalized provider priority list from strings or iterables.
-
-    Non-string, non-iterable values fall back to the default provider order.
-    """
-    if isinstance(value, str):
-        return [item.strip() for item in value.split(",") if item.strip()]
-    if isinstance(value, (list, tuple)):
-        return [str(item).strip() for item in value if str(item).strip()]
-    return ["azure", "openai", "lmstudio", "local"]
 
 # ---------------------------------------------------------------------------
 # Try to import pydantic v2 BaseSettings; fall back to a plain dataclass-style
@@ -63,7 +56,8 @@ try:
 except ImportError:  # pragma: no cover
     try:
         # pydantic v1 compatibility
-        from pydantic import BaseSettings, Field, validator as field_validator  # type: ignore[assignment,no-redef]
+        # type: ignore[assignment,no-redef]
+        from pydantic import BaseSettings, Field, validator as field_validator
         NoDecode = None  # type: ignore[assignment]
         _ConfigDict = None  # type: ignore[assignment]
         _NoDecode = None  # type: ignore[assignment]
@@ -79,22 +73,16 @@ except ImportError:  # pragma: no cover
         _NoDecode = None  # type: ignore[assignment]
 
 
-def _normalize_provider_priority(value: object) -> List[str]:
-    if isinstance(value, str):
-        return [name.strip() for name in value.split(",") if name.strip()]
-    if isinstance(value, (list, tuple)):
-        return [str(name).strip() for name in value if str(name).strip()]
-    return ["azure", "openai", "lmstudio", "local"]
-
-
 def _provider_priority_field():
     return Field(
-        default_factory=lambda: ["azure", "openai", "lmstudio", "local"],
+        default_factory=lambda: list(_DEFAULT_PROVIDER_PRIORITY),
         alias="QAI_PROVIDER_PRIORITY",
     )
 
+
 ProviderPriority = (
-    Annotated[List[str], NoDecode] if _PYDANTIC_AVAILABLE and NoDecode is not None else List[str]
+    Annotated[List[str],
+              NoDecode] if _PYDANTIC_AVAILABLE and NoDecode is not None else List[str]
 )
 
 
@@ -116,8 +104,10 @@ if _PYDANTIC_AVAILABLE:
         # ------------------------------------------------------------------
         # Azure OpenAI
         # ------------------------------------------------------------------
-        azure_openai_api_key: Optional[str] = Field(default=None, alias="AZURE_OPENAI_API_KEY")
-        azure_openai_endpoint: Optional[str] = Field(default=None, alias="AZURE_OPENAI_ENDPOINT")
+        azure_openai_api_key: Optional[str] = Field(
+            default=None, alias="AZURE_OPENAI_API_KEY")
+        azure_openai_endpoint: Optional[str] = Field(
+            default=None, alias="AZURE_OPENAI_ENDPOINT")
         azure_openai_deployment: Optional[str] = Field(
             default=None, alias="AZURE_OPENAI_DEPLOYMENT"
         )
@@ -128,12 +118,14 @@ if _PYDANTIC_AVAILABLE:
         # ------------------------------------------------------------------
         # OpenAI
         # ------------------------------------------------------------------
-        openai_api_key: Optional[str] = Field(default=None, alias="OPENAI_API_KEY")
+        openai_api_key: Optional[str] = Field(
+            default=None, alias="OPENAI_API_KEY")
 
         # ------------------------------------------------------------------
         # LM Studio / local inference
         # ------------------------------------------------------------------
-        lmstudio_base_url: Optional[str] = Field(default=None, alias="LMSTUDIO_BASE_URL")
+        lmstudio_base_url: Optional[str] = Field(
+            default=None, alias="LMSTUDIO_BASE_URL")
 
         # ------------------------------------------------------------------
         # Provider selection
@@ -146,22 +138,27 @@ if _PYDANTIC_AVAILABLE:
         # ------------------------------------------------------------------
         # Database
         # ------------------------------------------------------------------
-        db_connection_string: Optional[str] = Field(default=None, alias="QAI_DB_CONN")
+        db_connection_string: Optional[str] = Field(
+            default=None, alias="QAI_DB_CONN")
         sql_pool_size: int = Field(default=10, alias="QAI_SQL_POOL_SIZE")
 
         # ------------------------------------------------------------------
         # Cosmos DB (optional, feature-flagged)
         # ------------------------------------------------------------------
         enable_cosmos: bool = Field(default=False, alias="QAI_ENABLE_COSMOS")
-        cosmos_endpoint: Optional[str] = Field(default=None, alias="COSMOS_ENDPOINT")
+        cosmos_endpoint: Optional[str] = Field(
+            default=None, alias="COSMOS_ENDPOINT")
         cosmos_key: Optional[str] = Field(default=None, alias="COSMOS_KEY")
-        cosmos_database: Optional[str] = Field(default=None, alias="COSMOS_DATABASE")
-        cosmos_container: Optional[str] = Field(default=None, alias="COSMOS_CONTAINER")
+        cosmos_database: Optional[str] = Field(
+            default=None, alias="COSMOS_DATABASE")
+        cosmos_container: Optional[str] = Field(
+            default=None, alias="COSMOS_CONTAINER")
 
         # ------------------------------------------------------------------
         # Azure Key Vault (optional)
         # ------------------------------------------------------------------
-        keyvault_url: Optional[str] = Field(default=None, alias="QAI_KEYVAULT_URL")
+        keyvault_url: Optional[str] = Field(
+            default=None, alias="QAI_KEYVAULT_URL")
 
         # ------------------------------------------------------------------
         # Observability
@@ -180,7 +177,8 @@ if _PYDANTIC_AVAILABLE:
         orchestrator_cycle_interval_minutes: int = Field(
             default=30, alias="QAI_ORCHESTRATOR_CYCLE_MINUTES"
         )
-        orchestrator_max_retries: int = Field(default=3, alias="QAI_ORCHESTRATOR_MAX_RETRIES")
+        orchestrator_max_retries: int = Field(
+            default=3, alias="QAI_ORCHESTRATOR_MAX_RETRIES")
         orchestrator_backoff_base: float = Field(
             default=2.0, alias="QAI_ORCHESTRATOR_BACKOFF_BASE"
         )
@@ -188,7 +186,8 @@ if _PYDANTIC_AVAILABLE:
         # ------------------------------------------------------------------
         # Local TTS fallback
         # ------------------------------------------------------------------
-        enable_local_tts: bool = Field(default=False, alias="QAI_ENABLE_LOCAL_TTS")
+        enable_local_tts: bool = Field(
+            default=False, alias="QAI_ENABLE_LOCAL_TTS")
 
         # ------------------------------------------------------------------
         # Concurrency limits
@@ -292,15 +291,18 @@ else:
 
         def __init__(self) -> None:
             self.azure_openai_api_key = os.environ.get("AZURE_OPENAI_API_KEY")
-            self.azure_openai_endpoint = os.environ.get("AZURE_OPENAI_ENDPOINT")
-            self.azure_openai_deployment = os.environ.get("AZURE_OPENAI_DEPLOYMENT")
+            self.azure_openai_endpoint = os.environ.get(
+                "AZURE_OPENAI_ENDPOINT")
+            self.azure_openai_deployment = os.environ.get(
+                "AZURE_OPENAI_DEPLOYMENT")
             self.azure_openai_api_version = os.environ.get(
                 "AZURE_OPENAI_API_VERSION", "2024-02-01"
             )
             self.openai_api_key = os.environ.get("OPENAI_API_KEY")
             self.lmstudio_base_url = os.environ.get("LMSTUDIO_BASE_URL")
             self.provider_priority = _normalize_provider_priority(
-                os.environ.get("QAI_PROVIDER_PRIORITY", "azure,openai,lmstudio,local")
+                os.environ.get("QAI_PROVIDER_PRIORITY",
+                               "azure,openai,lmstudio,local")
             )
             self.db_connection_string = os.environ.get("QAI_DB_CONN")
             self.sql_pool_size = int(os.environ.get("QAI_SQL_POOL_SIZE", "10"))
@@ -400,7 +402,8 @@ def _load_keyvault_secrets(settings: Settings) -> None:
         return
 
     try:
-        from azure.identity import DefaultAzureCredential  # type: ignore[import]
+        # type: ignore[import]
+        from azure.identity import DefaultAzureCredential
         from azure.keyvault.secrets import SecretClient  # type: ignore[import]
 
         credential = DefaultAzureCredential()

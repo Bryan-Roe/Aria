@@ -9,6 +9,7 @@ These tests verify that:
 """
 
 from __future__ import annotations
+from shared.config import Settings, get_settings, reset_settings
 
 import os
 import sys
@@ -20,8 +21,6 @@ import pytest
 # Ensure shared/ is importable when running from the repo root
 _REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(_REPO_ROOT))
-
-from shared.config import Settings, get_settings, reset_settings
 
 
 @pytest.fixture(autouse=True)
@@ -124,6 +123,18 @@ class TestEnvVarPropagation:
         with patch.dict(os.environ, {"QAI_LOG_LEVEL": "INVALID"}):
             s = Settings()
             assert s.log_level == "INFO"
+
+    def test_blank_provider_priority_falls_back_to_default_chain(self):
+        with patch.dict(os.environ, {"QAI_PROVIDER_PRIORITY": ""}):
+            s = Settings()
+            assert s.provider_chain() == [
+                "azure", "openai", "lmstudio", "local"]
+
+    def test_whitespace_provider_priority_falls_back_to_default_chain(self):
+        with patch.dict(os.environ, {"QAI_PROVIDER_PRIORITY": " ,  ,   "}):
+            s = Settings()
+            assert s.provider_chain() == [
+                "azure", "openai", "lmstudio", "local"]
 
 
 class TestActiveProvider:

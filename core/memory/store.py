@@ -42,7 +42,8 @@ class MemoryStore:
     def __init__(self, max_events: Optional[int] = None) -> None:
         self._lock = threading.RLock()
         # deque provides efficient appends and optional bounded length
-        self._events: deque[Event] = deque(maxlen=max_events) if max_events else deque()
+        self._events: deque[Event] = deque(
+            maxlen=max_events) if max_events else deque()
 
     def write(self, event_type: str, data: Mapping[str, Any], timestamp: Optional[datetime] = None) -> str:
         """
@@ -83,13 +84,16 @@ class MemoryStore:
         Returned events are shallow copies of the stored events (data dict remains a deepcopy from write).
         """
         # Normalize timestamps to epoch floats for comparisons
-        since_epoch = since.astimezone(timezone.utc).timestamp() if since else None
-        until_epoch = until.astimezone(timezone.utc).timestamp() if until else None
+        since_epoch = since.astimezone(
+            timezone.utc).timestamp() if since else None
+        until_epoch = until.astimezone(
+            timezone.utc).timestamp() if until else None
 
         with self._lock:
             events_snapshot = list(self._events)
 
-        iterable: Iterable[Event] = reversed(events_snapshot) if reverse else events_snapshot
+        iterable: Iterable[Event] = reversed(
+            events_snapshot) if reverse else events_snapshot
 
         results: List[Event] = []
         for e in iterable:
@@ -143,7 +147,8 @@ class MemoryStore:
                 return original_len
             # Rebuild deque without matching events while preserving maxlen
             maxlen = self._events.maxlen
-            new_events = [e for e in self._events if e.get("type") != event_type]
+            new_events = [e for e in self._events if e.get(
+                "type") != event_type]
             self._events = deque(new_events, maxlen=maxlen)
             return original_len - len(self._events)
 
@@ -153,6 +158,19 @@ class MemoryStore:
         """
         with self._lock:
             return [e.copy() for e in self._events]
+
+    def count_by_type(self) -> Dict[str, int]:
+        """Return a histogram of event counts grouped by ``type``.
+
+        This helper is used by the core runner to build lightweight context
+        summaries for tool calls and diagnostics.
+        """
+        counts: Dict[str, int] = {}
+        with self._lock:
+            for event in self._events:
+                event_type = str(event.get("type", "unknown"))
+                counts[event_type] = counts.get(event_type, 0) + 1
+        return counts
 
     def __len__(self) -> int:
         with self._lock:

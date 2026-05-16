@@ -10,14 +10,13 @@ Improvements:
 - Clearer typing and docstrings; goal length limiting and sanitization.
 """
 
-from typing import Dict, Any
+from typing import Dict, Any, Optional, Sequence
 import json
 
 from core.agent import BaseAgent
 from core.task import Task
 from core.memory.store import MemoryStore
 from core.llm.client import LLMClient
-import json
 import logging
 import re
 
@@ -87,7 +86,8 @@ class GoalEvolutionAgent(BaseAgent):
             t = e.get("type", "event")
             data = e.get("data")
             if isinstance(data, dict):
-                short = data.get("goal") or data.get("message") or data.get("output")
+                short = data.get("goal") or data.get(
+                    "message") or data.get("output")
             else:
                 short = str(data)[:80] if data is not None else ""
             part = f"{t}: {short}" if short else t
@@ -111,7 +111,8 @@ Generate the next most useful goal for system improvement, learning, or optimiza
         fallback = "improve system performance"
 
         if not raw or not raw.strip():
-            logger.debug("Empty LLM response for goal evolution; returning fallback")
+            logger.debug(
+                "Empty LLM response for goal evolution; returning fallback")
             return fallback
 
         # Try strict JSON parse
@@ -121,7 +122,8 @@ Generate the next most useful goal for system improvement, learning, or optimiza
                 goal = str(data.get("goal", fallback)).strip()
                 return self._normalize_goal(goal, fallback)
         except Exception:
-            logger.debug("Strict JSON parsing failed for LLM output; attempting substring search")
+            logger.debug(
+                "Strict JSON parsing failed for LLM output; attempting substring search")
 
         # Attempt to find first JSON object in the string
         try:
