@@ -13,7 +13,7 @@ import time
 from collections import OrderedDict
 from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
 from pathlib import Path
-import typing
+from typing import Any, Dict, List, Optional
 
 import numpy as np
 from qiskit import QuantumCircuit
@@ -93,7 +93,7 @@ class CircuitCache:
         self.ttl_seconds = ttl_seconds
         self.timestamps = {}
 
-    def get(self, key: str) -> typing.Optional[QuantumCircuit]:
+    def get(self, key: str) -> Optional[QuantumCircuit]:
         if key not in self.cache:
             return None
 
@@ -201,12 +201,12 @@ def _cleanup_cache_if_needed():
         quantum_state["last_cache_cleanup"] = current_time
 
 
-def _normalize_backend_name(backend_name: typing.Optional[str]) -> str:
+def _normalize_backend_name(backend_name: Optional[str]) -> str:
     """Normalize backend names for matching and pricing."""
     return (backend_name or "").strip().lower()
 
 
-def _normalize_required_string(value: typing.Any) -> typing.Optional[str]:
+def _normalize_required_string(value: Any) -> Optional[str]:
     """Return a trimmed non-empty string, or None when invalid."""
     if not isinstance(value, str):
         return None
@@ -214,7 +214,7 @@ def _normalize_required_string(value: typing.Any) -> typing.Optional[str]:
     return normalized or None
 
 
-def _is_free_backend(backend_name: typing.Optional[str]) -> bool:
+def _is_free_backend(backend_name: Optional[str]) -> bool:
     """Return True when the backend is simulator-like and should not incur cost."""
     normalized = _normalize_backend_name(backend_name)
     if not normalized:
@@ -228,7 +228,7 @@ def _is_free_backend(backend_name: typing.Optional[str]) -> bool:
     return any(keyword in normalized for keyword in FREE_BACKEND_KEYWORDS)
 
 
-def _requires_cost_confirmation(backend_name: typing.Optional[str]) -> bool:
+def _requires_cost_confirmation(backend_name: Optional[str]) -> bool:
     """Paid or unknown non-simulator backends require explicit confirmation."""
     normalized = _normalize_backend_name(backend_name)
     if not normalized:
@@ -266,7 +266,7 @@ def _estimate_job_cost_sync(circuit, backend_name: str, shots: int) -> float:
     return max(0.0, estimated_cost)  # Never negative
 
 
-def _normalize_backend_allowlist(backends: typing.List[str]) -> set[str]:
+def _normalize_backend_allowlist(backends: List[str]) -> set[str]:
     """Normalize allowlist for membership checks."""
     return {
         _normalize_backend_name(name)
@@ -290,7 +290,7 @@ def _backend_in_allowlist(
     return False
 
 
-async def _validate_backend_against_allowlist(backend_name: str) -> typing.Optional[str]:
+async def _validate_backend_against_allowlist(backend_name: str) -> Optional[str]:
     """Ensure a backend exists in the cached workspace allowlist, refreshing as needed."""
     loop = asyncio.get_event_loop()
 
@@ -358,7 +358,7 @@ def initialize_quantum_resources():
 
 
 @app.list_tools()
-async def list_tools() -> typing.List[Tool]:
+async def list_tools() -> List[Tool]:
     """List available quantum computing tools"""
     return [
         Tool(
@@ -553,7 +553,7 @@ async def list_tools() -> typing.List[Tool]:
 
 
 @app.call_tool()
-async def call_tool(name: str, arguments: typing.Any) -> typing.List[TextContent]:
+async def call_tool(name: str, arguments: Any) -> List[TextContent]:
     """Handle tool calls"""
 
     try:
@@ -589,7 +589,7 @@ async def call_tool(name: str, arguments: typing.Any) -> typing.List[TextContent
         return [TextContent(type="text", text=f"Error: {str(e)}")]
 
 
-async def create_circuit_handler(args: typing.Dict) -> typing.List[TextContent]:
+async def create_circuit_handler(args: Dict) -> List[TextContent]:
     """Create a quantum circuit based on parameters (optimized with async execution)"""
     # Periodic cache cleanup to prevent memory leaks
     _cleanup_cache_if_needed()
@@ -674,8 +674,8 @@ async def create_circuit_handler(args: typing.Dict) -> typing.List[TextContent]:
 
 
 def _create_circuit_sync(
-    n_qubits: int, circuit_type: str, gates: typing.Optional[typing.List] = None
-) -> typing.Optional[QuantumCircuit]:
+    n_qubits: int, circuit_type: str, gates: Optional[List] = None
+) -> Optional[QuantumCircuit]:
     """Synchronous circuit creation (runs in thread pool)"""
     if circuit_type == "entanglement":
         return create_sample_circuit(n_qubits)
@@ -753,7 +753,7 @@ def _create_circuit_sync(
     return None
 
 
-async def simulate_circuit_handler(args: typing.Dict) -> typing.List[TextContent]:
+async def simulate_circuit_handler(args: Dict) -> List[TextContent]:
     """Simulate a quantum circuit locally (optimized with async execution)"""
     circuit_id = _normalize_required_string(args.get("circuit_id"))
     shots = args.get("shots", MAX_SHOTS_PER_CALL)
@@ -841,7 +841,7 @@ async def simulate_circuit_handler(args: typing.Dict) -> typing.List[TextContent
     return [TextContent(type="text", text=result_text)]
 
 
-def _simulate_circuit_sync(circuit: QuantumCircuit, shots: int) -> typing.Dict:
+def _simulate_circuit_sync(circuit: QuantumCircuit, shots: int) -> Dict:
     """Synchronous circuit simulation (runs in process pool)"""
     from qiskit_aer import AerSimulator
 
@@ -851,7 +851,7 @@ def _simulate_circuit_sync(circuit: QuantumCircuit, shots: int) -> typing.Dict:
     return result.get_counts()
 
 
-async def connect_azure_handler(args: typing.Dict) -> typing.List[TextContent]:
+async def connect_azure_handler(args: Dict) -> List[TextContent]:
     """Connect to Azure Quantum workspace (optimized with config caching)"""
     subscription_id = _normalize_required_string(args.get("subscription_id"))
     resource_group = _normalize_required_string(args.get("resource_group"))
@@ -912,7 +912,7 @@ async def connect_azure_handler(args: typing.Dict) -> typing.List[TextContent]:
         ]
 
 
-def _connect_azure_sync(config: typing.Dict) -> AzureQuantumIntegration:
+def _connect_azure_sync(config: Dict) -> AzureQuantumIntegration:
     """Synchronous Azure connection (runs in thread pool)"""
     import os
     import tempfile
@@ -935,7 +935,7 @@ def _connect_azure_sync(config: typing.Dict) -> AzureQuantumIntegration:
             pass
 
 
-async def list_backends_handler(args: typing.Dict) -> typing.List[TextContent]:
+async def list_backends_handler(args: Dict) -> List[TextContent]:
     """List available quantum backends (optimized with async I/O)"""
     if quantum_state["azure_integration"] is None:
         return [
@@ -963,7 +963,7 @@ async def list_backends_handler(args: typing.Dict) -> typing.List[TextContent]:
         return [TextContent(type="text", text=f"Error listing backends: {str(e)}")]
 
 
-async def submit_job_handler(args: typing.Dict) -> typing.List[TextContent]:
+async def submit_job_handler(args: Dict) -> List[TextContent]:
     """Submit a quantum job to Azure Quantum with cost-gating (optimized)"""
     circuit_id = _normalize_required_string(args.get("circuit_id"))
     backend_name = _normalize_required_string(args.get("backend_name"))
@@ -1068,7 +1068,7 @@ async def submit_job_handler(args: typing.Dict) -> typing.List[TextContent]:
         return [TextContent(type="text", text=f"Error submitting job: {str(e)}")]
 
 
-async def train_classifier_handler(args: typing.Dict) -> typing.List[TextContent]:
+async def train_classifier_handler(args: Dict) -> List[TextContent]:
     """Train a quantum classifier (optimized with process pool for CPU-intensive training)"""
     dataset_name = args.get("dataset")
     n_qubits = args.get("n_qubits", 4)
@@ -1237,7 +1237,7 @@ Training History:
         return f"Training failed: {str(e)}"
 
 
-async def estimate_cost_handler(args: typing.Dict) -> typing.List[TextContent]:
+async def estimate_cost_handler(args: Dict) -> List[TextContent]:
     """Estimate quantum job cost (optimized)"""
     circuit_id = _normalize_required_string(args.get("circuit_id"))
     backend_name = _normalize_required_string(args.get("backend_name"))
@@ -1306,7 +1306,7 @@ Note: Actual costs vary by provider:
         return [TextContent(type="text", text=f"Error estimating cost: {str(e)}")]
 
 
-async def circuit_properties_handler(args: typing.Dict) -> typing.List[TextContent]:
+async def circuit_properties_handler(args: Dict) -> List[TextContent]:
     """Get circuit properties (optimized with caching)"""
     circuit_id = _normalize_required_string(args.get("circuit_id"))
 

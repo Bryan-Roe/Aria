@@ -98,7 +98,7 @@ class TestSimulateCircuitHandlerShotsBounds:
         result = _run(handler({"circuit_id": circuit_id, "shots": 0}))
         assert str(mcp_server.MAX_SHOTS_PER_CALL) in result[0].text
 
-    def test_rejects_shots_above_8192(self):
+    def test_rejects_shots_above_max_limit(self):
         try:
             import quantum_mcp_server as mcp_server
         except (ImportError, SystemExit):
