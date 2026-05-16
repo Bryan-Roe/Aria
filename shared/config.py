@@ -22,6 +22,16 @@ _LOG = logging.getLogger(__name__)
 DEFAULT_PROVIDER_PRIORITY = ["azure", "openai", "lmstudio", "local"]
 DEFAULT_PROVIDER_PRIORITY_ENV = ",".join(DEFAULT_PROVIDER_PRIORITY)
 
+
+def _parse_provider_priority(value: object) -> List[str]:
+    if isinstance(value, list):
+        parsed = [str(item).strip() for item in value if str(item).strip()]
+        return parsed or DEFAULT_PROVIDER_PRIORITY.copy()
+    if isinstance(value, str):
+        parsed = [item.strip() for item in value.split(",") if item.strip()]
+        return parsed or DEFAULT_PROVIDER_PRIORITY.copy()
+    return DEFAULT_PROVIDER_PRIORITY.copy()
+
 # ---------------------------------------------------------------------------
 # Try to import pydantic v2 BaseSettings; fall back to a plain dataclass-style
 # class so the module never hard-fails in environments without pydantic.
@@ -177,11 +187,7 @@ if _PYDANTIC_AVAILABLE:
         @field_validator("provider_priority", mode="before")
         @classmethod
         def _validate_provider_priority(cls, v: object) -> List[str]:
-            if isinstance(v, list):
-                return [str(item).strip() for item in v if str(item).strip()]
-            if isinstance(v, str):
-                return [item.strip() for item in v.split(",") if item.strip()]
-            return DEFAULT_PROVIDER_PRIORITY.copy()
+            return _parse_provider_priority(v)
 
         # ------------------------------------------------------------------
         # Derived helpers
@@ -250,13 +256,9 @@ else:
             )
             self.openai_api_key = os.environ.get("OPENAI_API_KEY")
             self.lmstudio_base_url = os.environ.get("LMSTUDIO_BASE_URL")
-            self.provider_priority = [
-                item.strip()
-                for item in os.environ.get(
-                    "QAI_PROVIDER_PRIORITY", DEFAULT_PROVIDER_PRIORITY_ENV
-                ).split(",")
-                if item.strip()
-            ]
+            self.provider_priority = _parse_provider_priority(
+                os.environ.get("QAI_PROVIDER_PRIORITY", DEFAULT_PROVIDER_PRIORITY_ENV)
+            )
             self.db_connection_string = os.environ.get("QAI_DB_CONN")
             self.sql_pool_size = int(os.environ.get("QAI_SQL_POOL_SIZE", "10"))
             self.enable_cosmos = os.environ.get("QAI_ENABLE_COSMOS", "").lower() in (
@@ -413,7 +415,7 @@ class AppSettings(Settings):
     """Backward-compatible settings API used by legacy tests and callers."""
 
     def provider_chain(self) -> List[str]:
-        return [str(item).strip() for item in self.provider_priority if str(item).strip()]
+        return self.provider_priority.copy()
 
     def summary(self) -> dict:
         data = super().summary()
