@@ -322,8 +322,11 @@ pip install -r requirements.txt
 # Install dev dependencies first
 pip install -r dev-requirements.txt
 
-# Run the test suite
+# Run the test suite (standalone script with pytest integration)
 python test_api.py
+
+# Or use pytest directly
+pytest test_api.py -v
 ```
 
 ### Enable Debug Mode
