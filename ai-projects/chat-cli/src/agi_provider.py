@@ -572,6 +572,7 @@ class AGIProvider(BaseChatProvider):
             Streaming token generator or complete response string.
         """
         if len(messages) > MAX_HISTORY_SIZE:
+            messages = messages[-MAX_HISTORY_SIZE:]
             _logger.warning(
                 "Message count exceeded limit; truncating to %d", MAX_HISTORY_SIZE
             )

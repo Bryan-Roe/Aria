@@ -17,7 +17,7 @@ User query
 ┌─────────────────────────────────────┐
 │  AGIProvider.complete()             │
 │                                     │
-│  1. Sanitise & validate input       │
+│  1. Sanitize & validate input       │
 │  2. _reason()                       │
 │     ├─ _analyze_query()             │
 │     ├─ _select_agent()              │
