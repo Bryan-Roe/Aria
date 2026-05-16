@@ -1,16 +1,12 @@
-# To get started with Dependabot version updates, you'll need to specify which
-# package ecosystems to update and where the package manifests are located.
-# Please see the documentation for more information:
-# https://docs.github.com/github/administering-a-repository/configuration-options-for-dependency-updates
-# https://containers.dev/guide/dependabot
+# Dependabot configuration for Aria
+# Docs: https://docs.github.com/github/administering-a-repository/configuration-options-for-dependency-updates
 
 version: 2
 updates:
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      interval: "weekly"
-      day: "monday"
+      interval: "daily"
       time: "04:00"
       timezone: "UTC"
     commit-message:
@@ -21,28 +17,38 @@ updates:
           - "*"
     labels:
       - "dependencies"
+      - "autofix"
     assignees:
       - "Bryan-Roe"
+    open-pull-requests-limit: 10
+    allow:
+      - dependency-type: "direct"
+      - dependency-type: "indirect"
+    rebase-strategy: "auto"
 
   - package-ecosystem: "devcontainers"
     directory: "/"
     schedule:
-      interval: "weekly"
-      day: "monday"
+      interval: "daily"
       time: "04:00"
       timezone: "UTC"
     commit-message:
       prefix: "deps(devcontainer)"
     labels:
       - "dependencies"
+      - "autofix"
     assignees:
       - "Bryan-Roe"
+    open-pull-requests-limit: 10
+    allow:
+      - dependency-type: "direct"
+      - dependency-type: "indirect"
+    rebase-strategy: "auto"
 
   - package-ecosystem: "pip"
     directory: "/"
     schedule:
-      interval: "weekly"
-      day: "monday"
+      interval: "daily"
       time: "04:00"
       timezone: "UTC"
     commit-message:
@@ -53,14 +59,19 @@ updates:
           - "*"
     labels:
       - "dependencies"
+      - "autofix"
     assignees:
       - "Bryan-Roe"
+    open-pull-requests-limit: 10
+    allow:
+      - dependency-type: "direct"
+      - dependency-type: "indirect"
+    rebase-strategy: "auto"
 
   - package-ecosystem: "pip"
     directory: "/ai-projects/quantum-ml"
     schedule:
-      interval: "weekly"
-      day: "monday"
+      interval: "daily"
       time: "04:00"
       timezone: "UTC"
     commit-message:
@@ -71,14 +82,19 @@ updates:
           - "*"
     labels:
       - "dependencies"
+      - "autofix"
     assignees:
       - "Bryan-Roe"
+    open-pull-requests-limit: 5
+    allow:
+      - dependency-type: "direct"
+      - dependency-type: "indirect"
+    rebase-strategy: "auto"
 
   - package-ecosystem: "pip"
     directory: "/ai-projects/quantum-ml/production"
     schedule:
-      interval: "weekly"
-      day: "monday"
+      interval: "daily"
       time: "04:00"
       timezone: "UTC"
     commit-message:
@@ -89,14 +105,19 @@ updates:
           - "*"
     labels:
       - "dependencies"
+      - "autofix"
     assignees:
       - "Bryan-Roe"
+    open-pull-requests-limit: 5
+    allow:
+      - dependency-type: "direct"
+      - dependency-type: "indirect"
+    rebase-strategy: "auto"
 
   - package-ecosystem: "pip"
     directory: "/ai-projects/chat-cli"
     schedule:
-      interval: "weekly"
-      day: "monday"
+      interval: "daily"
       time: "04:00"
       timezone: "UTC"
     commit-message:
@@ -107,14 +128,19 @@ updates:
           - "*"
     labels:
       - "dependencies"
+      - "autofix"
     assignees:
       - "Bryan-Roe"
+    open-pull-requests-limit: 5
+    allow:
+      - dependency-type: "direct"
+      - dependency-type: "indirect"
+    rebase-strategy: "auto"
 
   - package-ecosystem: "pip"
     directory: "/ai-projects/cooking-ai"
     schedule:
-      interval: "weekly"
-      day: "monday"
+      interval: "daily"
       time: "04:00"
       timezone: "UTC"
     commit-message:
@@ -125,14 +151,19 @@ updates:
           - "*"
     labels:
       - "dependencies"
+      - "autofix"
     assignees:
       - "Bryan-Roe"
+    open-pull-requests-limit: 5
+    allow:
+      - dependency-type: "direct"
+      - dependency-type: "indirect"
+    rebase-strategy: "auto"
 
   - package-ecosystem: "pip"
     directory: "/ai-projects/llm-maker"
     schedule:
-      interval: "weekly"
-      day: "monday"
+      interval: "daily"
       time: "04:00"
       timezone: "UTC"
     commit-message:
@@ -143,14 +174,19 @@ updates:
           - "*"
     labels:
       - "dependencies"
+      - "autofix"
     assignees:
       - "Bryan-Roe"
+    open-pull-requests-limit: 5
+    allow:
+      - dependency-type: "direct"
+      - dependency-type: "indirect"
+    rebase-strategy: "auto"
 
   - package-ecosystem: "pip"
     directory: "/ai-projects/lora-training/microsoft_phi-silica-3.6_v1"
     schedule:
-      interval: "weekly"
-      day: "monday"
+      interval: "daily"
       time: "04:00"
       timezone: "UTC"
     commit-message:
@@ -161,14 +197,19 @@ updates:
           - "*"
     labels:
       - "dependencies"
+      - "autofix"
     assignees:
       - "Bryan-Roe"
+    open-pull-requests-limit: 5
+    allow:
+      - dependency-type: "direct"
+      - dependency-type: "indirect"
+    rebase-strategy: "auto"
 
   - package-ecosystem: "pip"
     directory: "/ai-projects/lora-training/microsoft_phi-silica-3.6_v1/local_train"
     schedule:
-      interval: "weekly"
-      day: "monday"
+      interval: "daily"
       time: "04:00"
       timezone: "UTC"
     commit-message:
@@ -179,14 +220,19 @@ updates:
           - "*"
     labels:
       - "dependencies"
+      - "autofix"
     assignees:
       - "Bryan-Roe"
+    open-pull-requests-limit: 5
+    allow:
+      - dependency-type: "direct"
+      - dependency-type: "indirect"
+    rebase-strategy: "auto"
 
   - package-ecosystem: "pip"
     directory: "/ai-projects/lora-training/quantum-ai"
     schedule:
-      interval: "weekly"
-      day: "monday"
+      interval: "daily"
       time: "04:00"
       timezone: "UTC"
     commit-message:
@@ -197,14 +243,19 @@ updates:
           - "*"
     labels:
       - "dependencies"
+      - "autofix"
     assignees:
       - "Bryan-Roe"
+    open-pull-requests-limit: 5
+    allow:
+      - dependency-type: "direct"
+      - dependency-type: "indirect"
+    rebase-strategy: "auto"
 
   - package-ecosystem: "pip"
     directory: "/apps/dashboard"
     schedule:
-      interval: "weekly"
-      day: "monday"
+      interval: "daily"
       time: "04:00"
       timezone: "UTC"
     commit-message:
@@ -215,14 +266,19 @@ updates:
           - "*"
     labels:
       - "dependencies"
+      - "autofix"
     assignees:
       - "Bryan-Roe"
+    open-pull-requests-limit: 5
+    allow:
+      - dependency-type: "direct"
+      - dependency-type: "indirect"
+    rebase-strategy: "auto"
 
   - package-ecosystem: "pip"
     directory: "/mount"
     schedule:
-      interval: "weekly"
-      day: "monday"
+      interval: "daily"
       time: "04:00"
       timezone: "UTC"
     commit-message:
@@ -233,5 +289,11 @@ updates:
           - "*"
     labels:
       - "dependencies"
+      - "autofix"
     assignees:
       - "Bryan-Roe"
+    open-pull-requests-limit: 5
+    allow:
+      - dependency-type: "direct"
+      - dependency-type: "indirect"
+    rebase-strategy: "auto"
