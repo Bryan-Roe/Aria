@@ -4,6 +4,7 @@ Interfaces with quantum-ai training, circuits, and Azure Quantum
 """
 
 import json
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -187,6 +188,12 @@ class QuantumIntegration:
         """Run a quantum autorun job"""
         try:
             autorun_script = self.workspace_root / "scripts" / "quantum_autorun.py"
+
+            if not re.fullmatch(r"[A-Za-z0-9_-]{1,64}", job_name):
+                return {
+                    "success": False,
+                    "error": "Invalid job_name format. Allowed: letters, numbers, underscore, hyphen (max 64 chars).",
+                }
 
             cmd = [sys.executable, str(autorun_script), "--job", job_name]
             if dry_run:
