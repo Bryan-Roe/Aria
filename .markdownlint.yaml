@@ -17,6 +17,19 @@ MD025:
 # multiple code blocks (each code-block break is parsed as a new list by markdownlint).
 MD029: false
 
+# MD036: No emphasis as heading – disabled. Many guides intentionally use bold text
+# as inline sub-section labels (e.g. **Wheat Seeds**) rather than additional headings.
+MD036: false
+
+# MD040: Fenced code language – disabled. Guides frequently include bare ``` blocks
+# for raw command output and ASCII diagrams where no language tag applies.
+MD040: false
+
+# MD051: Link fragments – disabled. The linter's GitHub-style anchor slugification
+# does not always match GitHub's actual rendered anchors (e.g. headings containing
+# "&" produce a double-dash anchor on GitHub). Re-enable once TOCs are regenerated.
+MD051: false
+
 # MD060: Table column style – require compact style (single space around pipe content).
 MD060:
   style: compact
