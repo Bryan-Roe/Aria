@@ -172,6 +172,15 @@ if _PYDANTIC_AVAILABLE:
                 return "INFO"
             return upper
 
+        @field_validator("provider_priority", mode="before")
+        @classmethod
+        def _validate_provider_priority(cls, v: object) -> List[str]:
+            if isinstance(v, list):
+                return [str(item).strip() for item in v if str(item).strip()]
+            if isinstance(v, str):
+                return [item.strip() for item in v.split(",") if item.strip()]
+            return ["azure", "openai", "lmstudio", "local"]
+
         # ------------------------------------------------------------------
         # Derived helpers
         # ------------------------------------------------------------------
@@ -393,4 +402,21 @@ def reset_settings() -> None:
     get_settings.cache_clear()
 
 
-__all__ = ["Settings", "get_settings", "reset_settings"]
+class AppSettings(Settings):
+    """Backward-compatible settings API used by legacy tests and callers."""
+
+    def provider_chain(self) -> List[str]:
+        priority = getattr(self, "provider_priority", None)
+        if isinstance(priority, list) and priority:
+            return [str(item).strip() for item in priority if str(item).strip()]
+
+        raw_priority = os.environ.get("QAI_PROVIDER_PRIORITY", "azure,openai,lmstudio,local")
+        return [item.strip() for item in raw_priority.split(",") if item.strip()]
+
+    def summary(self) -> dict:
+        data = super().summary()
+        data["provider_chain"] = self.provider_chain()
+        return data
+
+
+__all__ = ["Settings", "AppSettings", "get_settings", "reset_settings"]
