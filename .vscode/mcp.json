@@ -29,6 +29,7 @@
         "${workspaceFolder}/scripts/task_complete_mcp_server.py"
       ],
       "env": {
+        "PYTHONPATH": "${workspaceFolder}/scripts:${workspaceFolder}",
         "PYTHONUNBUFFERED": "1"
       }
     }

@@ -15,7 +15,7 @@
             "name": "Python Debugger: Aria Gradio Chat App",
             "type": "debugpy",
             "request": "launch",
-            "program": "${workspaceFolder}/app.py",
+            "program": "${workspaceFolder}/scripts/gradio_hello.py",
             "cwd": "${workspaceFolder}",
             "console": "integratedTerminal",
             "justMyCode": true
@@ -57,7 +57,7 @@
             "name": "Run Gradio AI Chat app (task)",
             "type": "debugpy",
             "request": "launch",
-            "program": "${workspaceFolder}/app.py",
+            "program": "${workspaceFolder}/scripts/gradio_hello.py",
             "cwd": "${workspaceFolder}",
             "console": "integratedTerminal",
             "preLaunchTask": "Run Gradio AI Chat app",

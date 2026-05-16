@@ -150,7 +150,7 @@
 			"type": "shell",
 			"command": "${command:python.interpreterPath}",
 			"args": [
-				"apps/chat/gradio_app.py"
+				"scripts/gradio_hello.py"
 			],
 			"options": {
 				"cwd": "${workspaceFolder}"

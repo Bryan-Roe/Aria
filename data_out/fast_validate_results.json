@@ -15,7 +15,7 @@
     {
       "check": "Virtual Envs",
       "status": "ok",
-      "venvs_found": 3,
+      "venvs_found": 1,
       "speed": "instant"
     },
     {
@@ -38,10 +38,10 @@
     },
     {
       "check": "AI Tokens",
-      "status": "ok",
+      "status": "token_status_stale",
       "healthy": 1,
       "total": 1,
-      "stale": false,
+      "stale": true,
       "last_updated": "2026-03-29T08:40:42Z",
       "providers": {
         "ollama": {
@@ -74,8 +74,8 @@
   ],
   "summary": {
     "total_checks": 8,
-    "ok_count": 7,
-    "warning_count": 1,
+    "ok_count": 6,
+    "warning_count": 2,
     "critical_failure_count": 0,
     "critical_failure_checks": []
   },
