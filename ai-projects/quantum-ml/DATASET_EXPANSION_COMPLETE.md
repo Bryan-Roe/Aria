@@ -43,7 +43,7 @@ Successfully expanded the quantum ML dataset collection from **4 to 15 datasets*
 ### ✅ **Working Datasets (10)**
 
 | Dataset | Samples | Features | Classes | Category | Recommended Qubits |
-|---------|---------|----------|---------|----------|-------------------|
+| --------- | --------- | ---------- | --------- | ---------- | ------------------- |
 | **banknote** | 1,371 | 4 | 2 | Forensics | 4 |
 | **blood_transfusion** | 748 | 4 | 2 | Medical | 4 |
 | **diabetes** | 767 | 8 | 2 | Medical | 4 |
@@ -58,7 +58,7 @@ Successfully expanded the quantum ML dataset collection from **4 to 15 datasets*
 ### ⚠️ **Datasets Needing Format Fixes (5)**
 
 | Dataset | Samples | Category | Issue |
-|---------|---------|----------|-------|
+| --------- | --------- | ---------- | ------- |
 | **breast_cancer** | 569 | Medical | No header, needs special handling for M/B labels |
 | **vertebral_column** | 310 | Medical | Encoding issue (latin-1 required) |
 | **wine_red** | 1,599 | Chemistry | Semicolon delimiter (;) instead of comma |
@@ -202,7 +202,7 @@ python quantum-ai\quick_test_datasets.py
 Based on 1-epoch quick tests, expected full-training performance:
 
 | Difficulty | Expected Accuracy | Epochs Needed | Example Datasets |
-|------------|------------------|---------------|------------------|
+| ------------ | ------------------ | --------------- | ------------------ |
 | **Easy** | 90-100% | 25-40 | Banknote, Iris |
 | **Medium** | 75-90% | 40-50 | Diabetes, Magic Gamma, Heart Disease |
 | **Hard** | 60-80% | 50+ | Haberman, Blood Transfusion, Sonar |

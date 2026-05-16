@@ -163,7 +163,7 @@ python3 src/chat_cli.py --once "What is machine learning?"
 ## Benefits of This Integration
 
 | Feature | Benefit |
-|---------|---------|
+| --------- | --------- |
 | **Local Inference** | Privacy - no cloud data transmission |
 | **Fast Responses** | No network latency to APIs |
 | **Cost-Free** | No per-query API charges |

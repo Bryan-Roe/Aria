@@ -107,7 +107,7 @@ This session added comprehensive monitoring, health checking, and metrics analys
 ## New Tools & Scripts
 
 | Tool | Purpose | Location | Lines |
-|------|---------|----------|-------|
+| ------ | --------- | ---------- | ------- |
 | Status Check | Real-time training progress monitoring | `scripts/quantum_llm_status_check.py` | 240+ |
 | Metrics Analyzer | Training metrics analysis & trends | `scripts/quantum_llm_metrics_analyzer.py` | 230+ |
 | Health Check | System validation & diagnostics | `scripts/quantum_llm_health_check.py` | 233 |

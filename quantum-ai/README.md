@@ -4,7 +4,7 @@ Self-contained quantum-classical transformer language model for code generation.
 
 ## Architecture
 
-```
+```text
 Tokens → Embedding + Positional Encoding
        → N × QuantumTransformerBlock
            ├── QuantumKernelAttention
@@ -73,14 +73,14 @@ python3 -m pip install -r quantum-ai/requirements-smoke.txt
 ## Config Reference
 
 | Parameter | Default | Description |
-|-----------|---------|-------------|
+| ----------- | --------- | ------------- |
 | `n_qubits` | 4 | qubits per quantum layer |
 | `d_model` | 64 | model hidden dimension |
 | `n_heads` | 4 | attention heads |
 | `n_layers` | 2 | transformer blocks |
 | `n_var_layers` | 2 | variational layers inside each circuit |
 | `max_seq_len` | 128 | maximum context length |
-| `backend` | `"auto"` | `"auto"` \| `"qiskit.aer"` \| `"default.qubit"` \| `"classical"` |
+| `backend` | `"auto"` | `"auto"`, `"qiskit.aer"`, `"default.qubit"`, or `"classical"` |
 
 ## Train with Custom Code
 
@@ -118,6 +118,6 @@ print(metadata["path"], metadata["backend"])
 ## Files
 
 | File | Description |
-|------|-------------|
+| ------ | ------------- |
 | `src/quantum_code_llm.py` | Self-contained module (~700 lines) |
 | `examples/quantum_code_llm_demo.py` | Training + generation demo |

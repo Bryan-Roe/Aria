@@ -122,7 +122,7 @@ python quickstart.py
 ## 📚 Documentation Files
 
 | File | Purpose |
-|------|---------|
+| ------ | --------- |
 | `README.md` | Complete documentation with architecture, tools, troubleshooting |
 | `CONFIG_EXAMPLES.md` | Setup examples for different environments (Docker, K8s, systemd, etc.) |
 | `mcp-requirements.txt` | Python package dependencies |

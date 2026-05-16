@@ -214,7 +214,7 @@ gradient_accumulation_steps: 2
 ## Differences from Azure Setup
 
 | Feature | Local Setup | Azure Setup (../scripts/) |
-|---------|-------------|---------------------------|
+| --------- | ------------- | --------------------------- |
 | Dependencies | Minimal (no Azure SDKs) | Full (Azure Blob, Log Analytics, App Insights) |
 | Data Loading | Local files only | Blob Storage manifests, streaming |
 | Multi-GPU | Manual Accelerate launch | Built-in DeepSpeed support |

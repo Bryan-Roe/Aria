@@ -135,7 +135,7 @@ state.save()  # → data_out/autonomous_agent/status.json
 ## Task Categories (Auto-Detected)
 
 | Type | Keywords | Complexity | Example |
-|------|----------|------------|---------|
+| ------ | ---------- | ------------ | --------- |
 | Bug Fix | bug, fix, broken, failing | Moderate | "Fix test_chat.py test" |
 | Feature | feature, implement, add | Complex | "Add OAuth2 support" |
 | Refactor | refactor, improve, cleanup | Moderate | "Extract to util function" |
@@ -347,7 +347,7 @@ tail -50 data_out/autonomous_agent/agent.log
 ## Performance Metrics
 
 | Metric | Value |
-|--------|-------|
+| -------- | ------- |
 | Syntax Validation | <100ms |
 | LLM Planning | 5-10s (Mistral) |
 | File Identification | 2-5s |

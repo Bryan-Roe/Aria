@@ -126,7 +126,7 @@ Total: 4/4 tests passed
 
 **Multi-Agent System Components:**
 | Agent | Provider | Domains | Intents | Status |
-|-------|----------|---------|---------|--------|
+| ------- | ---------- | --------- | --------- | -------- |
 | quantum-specialist | quantum | quantum | theoretical, coding | ✓ |
 | code-specialist | lora | technical | coding, debugging | ✓ |
 | aria-character | local | aria | movement, interaction | ✓ |

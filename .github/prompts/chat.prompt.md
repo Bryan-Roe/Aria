@@ -19,7 +19,7 @@ Start a chat conversation using the Aria platform's multi-provider system with s
 ## Provider Configuration
 
 | Provider | Required Env Vars |
-|----------|------------------|
+| ---------- | ------------------ |
 | Azure OpenAI | `AZURE_OPENAI_API_KEY`, `AZURE_OPENAI_ENDPOINT`, `AZURE_OPENAI_DEPLOYMENT`, `AZURE_OPENAI_API_VERSION` |
 | OpenAI | `OPENAI_API_KEY` |
 | LMStudio | `LMSTUDIO_BASE_URL` |

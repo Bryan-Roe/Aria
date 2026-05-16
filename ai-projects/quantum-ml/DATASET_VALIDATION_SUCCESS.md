@@ -77,7 +77,7 @@ Successfully validated **14 out of 15 datasets** with 1-epoch smoke tests, achie
 
 ### **By Accuracy (1 epoch):**
 | Tier | Accuracy Range | Count | Datasets |
-|------|---------------|-------|----------|
+| ------ | --------------- | ------- | ---------- |
 | **Excellent** | 95-100% | 3 | wine_white, wine_red, banknote |
 | **Very Good** | 85-95% | 1 | breast_cancer |
 | **Good** | 70-85% | 3 | magic_gamma, wheat_seeds, heart_disease |
@@ -86,7 +86,7 @@ Successfully validated **14 out of 15 datasets** with 1-epoch smoke tests, achie
 
 ### **By Dataset Size:**
 | Size Category | Samples Range | Count | Examples |
-|--------------|--------------|-------|----------|
+| -------------- | -------------- | ------- | ---------- |
 | **Tiny** | 150-300 | 5 | iris (150), sonar (207), glass (214), wheat (210), haberman (306) |
 | **Small** | 300-1000 | 5 | heart (303), ionosphere (351), breast (569), diabetes (768), blood (747) |
 | **Medium** | 1000-5000 | 3 | banknote (1,372), wine_red (1,599), wine_white (4,898) |
@@ -94,7 +94,7 @@ Successfully validated **14 out of 15 datasets** with 1-epoch smoke tests, achie
 
 ### **By Feature Count:**
 | Feature Range | Count | Datasets |
-|--------------|-------|----------|
+| -------------- | ------- | ---------- |
 | **Low (3-4)** | 4 | haberman, banknote, blood_transfusion, iris |
 | **Medium (5-15)** | 6 | wheat, diabetes, magic_gamma, glass, wine_red, wine_white, heart |
 | **High (20+)** | 4 | breast_cancer (29), ionosphere (34), sonar (60) |
@@ -206,7 +206,7 @@ Successfully validated **14 out of 15 datasets** with 1-epoch smoke tests, achie
 Based on 1-epoch results and historical data:
 
 | Dataset | 1-Epoch | Expected 25-Epoch | Improvement |
-|---------|---------|-------------------|-------------|
+| --------- | --------- | ------------------- | ------------- |
 | wine_white | 99.59% | 99.8%+ | Minimal (already optimal) |
 | wine_red | 99.38% | 99.5%+ | Minimal (already optimal) |
 | banknote | 94.85% | 99%+ | +4-5% (proven: 100% possible) |

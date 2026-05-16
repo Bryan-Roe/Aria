@@ -179,7 +179,7 @@ Aria includes **20+ specialized agents** for different development workflows. Ea
 ### Core Agents
 
 | Agent | Purpose | Trigger Phrases |
-|-------|---------|----------------|
+| ------- | --------- | ---------------- |
 | `ai.agent.md` | Primary autonomous agent for task decomposition | "break this down", "reason through this" |
 | `aria-character.agent.md` | Aria interactive character control | "make Aria", "create a world", "action sequence" |
 | `autonomous-trainer.agent.md` | LoRA training & model lifecycle | "train a model", "fine-tune", "evaluate models" |
@@ -357,7 +357,7 @@ Use the platform-health-triage-workflow to diagnose why services are degraded
 Detailed instructions for each major component:
 
 | Component | Instruction File |
-|-----------|------------------|
+| ----------- | ------------------ |
 | Azure Functions API endpoints | `instructions/functions.instructions.md` |
 | Aria interactive character | `instructions/aria-character.instructions.md` |
 | Chat providers & multi-provider | `instructions/chat-providers.instructions.md` |
@@ -381,7 +381,7 @@ Aria includes **20+ specialized prompts** in `.github/prompts/` that guide Copil
 ### Common Prompts
 
 | Prompt | Purpose |
-|--------|---------|
+| -------- | --------- |
 | `agi.prompt.md` | Autonomous long-running work with internal reasoning (chain-of-thought is hidden) |
 | `debug.prompt.md` | Systematic debugging protocol |
 | `reason.prompt.md` | Structured analysis & planning |

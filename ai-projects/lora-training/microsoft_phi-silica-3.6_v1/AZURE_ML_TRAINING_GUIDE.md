@@ -135,7 +135,7 @@ python azure_ml_training.py `
 ### Compute Costs
 
 | VM Size | GPU | Cost/hour | Best For |
-|---------|-----|-----------|----------|
+| --------- | ----- | ----------- | ---------- |
 | Standard_NC6s_v3 | 1x V100 (16GB) | ~$3.06 | Default (good balance) |
 | Standard_NC12s_v3 | 2x V100 (32GB) | ~$6.12 | Faster training |
 | Standard_NC24s_v3 | 4x V100 (64GB) | ~$12.24 | Large batches |
@@ -149,7 +149,7 @@ python azure_ml_training.py `
 ### Example Costs
 
 | Scenario | Duration | Cost |
-|----------|----------|------|
+| ---------- | ---------- | ------ |
 | Quick test (64 samples) | ~5 min | ~$0.25 |
 | Medium run (1000 samples) | ~30 min | ~$1.50 |
 | Full training (8000 samples) | ~3 hours | ~$9.00 |

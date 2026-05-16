@@ -1,11 +1,13 @@
 # Training Tab Enhancements - Complete Summary
 
 ## 🎯 Overview
+
 The training tab has been significantly enhanced with advanced features, better validation, real-time estimates, and a professional UI that serves both beginners and power users.
 
 ## ✨ New Features
 
 ### 1. **Enhanced Input Fields**
+
 - ✅ **Job Name** - Required field with validation (lowercase, underscores, no spaces)
 - ✅ **Model Selection** - Dynamic info cards showing parameters and use cases
 - ✅ **Dataset Dropdown** - Auto-populated from API with sample counts
@@ -14,64 +16,78 @@ The training tab has been significantly enhanced with advanced features, better 
 - ✅ **Learning Rate** with pattern validation
 
 ### 2. **Collapsible Advanced Options Section** 🔧
+
 Click to reveal/hide advanced parameters:
 
-#### Training Parameters:
+#### Training Parameters
+
 - **Batch Size** - Dropdown (1/2/4/8) with memory hints
 - **Gradient Accumulation** - Simulate larger batches (1-32)
 - **Warmup Steps** - Learning rate warmup period
 
-#### LoRA Configuration:
+#### LoRA Configuration
+
 - **LoRA Rank** (4-128) - Controls adapter size
 - **LoRA Alpha** (8-256) - Scaling parameter
 - **LoRA Dropout** (0-0.5) - Regularization
 
-#### Optimization:
+#### Optimization
+
 - **Weight Decay** (0-0.5) - L2 regularization
 - **Max Grad Norm** (0-10) - Gradient clipping
 - **Random Seed** - For reproducibility
 
 ### 3. **Evaluation Options** ✓
+
 - ✅ Enable/disable evaluation toggle
 - ✅ Max eval samples input
 - ✅ Eval steps frequency control
 - ✅ Conditional display (only shows when enabled)
 
 ### 4. **Real-Time Estimates** ⏱️
+
 Beautiful gradient card showing:
+
 - **Estimated Training Time** - Calculated from epochs, samples, and batch size
 - **VRAM Usage** - Based on LoRA rank and model size
 - Updates dynamically as parameters change
 
 ### 5. **Quick Presets** ⚡
+
 One-click configuration templates:
 
 #### ⚡ Quick Test
+
 - 1 epoch, 100 samples
 - LoRA rank 4, batch size 2
 - ~1-2 minutes
 - Perfect for testing pipeline
 
 #### 📊 Standard
+
 - 3 epochs, 1k samples
 - LoRA rank 8, batch size 2
 - ~5-10 minutes
 - Good for iterative development
 
 #### 🏆 Full Training
+
 - 5 epochs, all samples
 - LoRA rank 16, batch size 4
 - ~30-60 minutes
 - Thorough training run
 
 #### 🚀 Production
+
 - 10 epochs, all samples
 - LoRA rank 32, batch size 4
 - ~2-4 hours
 - Production-quality training
 
 ### 6. **Smart Validation** 🛡️
+
 Comprehensive pre-submission checks:
+
 - ✅ Job name required and format validation
 - ✅ Dataset selection required
 - ✅ Epoch range validation (1-20)
@@ -82,12 +98,14 @@ Comprehensive pre-submission checks:
 ### 7. **Configuration Management** 💾
 
 #### Save Config
+
 - Export current settings as JSON
 - Auto-named based on job name
 - Includes all parameters (basic + advanced)
 - Easy backup and sharing
 
 #### Load Config
+
 - Import previously saved configs
 - File picker with .json filter
 - Validates JSON structure
@@ -95,6 +113,7 @@ Comprehensive pre-submission checks:
 - Success/error notifications
 
 #### Reset Form
+
 - Return to smart defaults
 - Confirmation toast
 - Updates all estimates
@@ -103,24 +122,30 @@ Comprehensive pre-submission checks:
 ### 8. **Enhanced User Experience** 🎨
 
 #### Tooltips
+
 Every field has helpful tooltips explaining:
+
 - What the parameter does
 - Typical/recommended values
 - Performance implications
 
 #### Helper Text
+
 Small gray text under inputs providing:
+
 - Value ranges
 - Default recommendations
 - Performance hints
 
 #### Visual Feedback
+
 - Required fields marked with red asterisks
 - Model info updates on selection
 - Dataset info updates on selection
 - Progress indication during submission
 
 #### Confirmation Dialogs
+
 - Warns for training jobs >1 hour
 - Prevents accidental long runs
 - Shows estimated duration
@@ -128,6 +153,7 @@ Small gray text under inputs providing:
 ## 🔧 JavaScript Functions Added
 
 ### Core Functions
+
 ```javascript
 startTraining()          // Enhanced with validation and confirmation
 updateModelInfo()        // Dynamic model descriptions
@@ -137,6 +163,7 @@ calculateEstimatedTime() // Helper for time estimation
 ```
 
 ### Advanced Features
+
 ```javascript
 toggleAdvancedOptions()  // Show/hide advanced section
 toggleEvalOptions()      // Show/hide eval settings
@@ -144,6 +171,7 @@ validateTrainingParams() // Pre-submission validation
 ```
 
 ### Presets & Config
+
 ```javascript
 applyPreset()           // Apply quick preset (quick/standard/full/production)
 saveAsConfig()          // Export config as JSON
@@ -156,22 +184,25 @@ resetForm()             // Reset to defaults
 ### Estimation Algorithms
 
 #### Time Estimate
-```
+
+```text
 steps_per_epoch = ceil(samples / batch_size)
 total_steps = steps_per_epoch × epochs
 estimated_minutes = ceil((total_steps × 0.5) / 60)
 ```
 
 #### VRAM Estimate
-```
+
+```text
 base_vram = 3.5 GB (base model)
 lora_vram = (rank / 8) × 0.5 GB
 total_vram = base_vram + lora_vram
 ```
 
 ### Parameter Ranges
+
 | Parameter | Min | Max | Default | Step |
-|-----------|-----|-----|---------|------|
+| ----------- | ----- | ----- | --------- | ------ |
 | Epochs | 1 | 20 | 3 | 1 |
 | Max Samples | 10 | ∞ | 1000 | 10 |
 | Batch Size | 1 | 8 | 2 | - |
@@ -186,6 +217,7 @@ total_vram = base_vram + lora_vram
 ## 🚀 Usage Guide
 
 ### For Beginners
+
 1. Enter a **job name** (e.g., `my_first_job`)
 2. Select **dataset** from dropdown
 3. Click a **Quick Preset** button (⚡ Quick Test recommended)
@@ -193,6 +225,7 @@ total_vram = base_vram + lora_vram
 5. Switch to Jobs tab to monitor progress
 
 ### For Power Users
+
 1. Configure **basic parameters** (name, dataset, epochs)
 2. Click **🔧 Advanced Options** to expand
 3. Fine-tune **LoRA settings** (rank, alpha, dropout)
@@ -203,7 +236,8 @@ total_vram = base_vram + lora_vram
 8. Click **🚀 Start Training**
 
 ### Configuration Workflow
-```
+
+```text
 Create config → Save as JSON → Share/backup
                 ↓
 Load config → Modify → Train → Evaluate
@@ -214,6 +248,7 @@ Compare results → Iterate → Production
 ## 📝 API Integration
 
 ### Training Submission Payload
+
 ```json
 {
   "name": "my_training_job",
@@ -238,12 +273,14 @@ Compare results → Iterate → Production
 ```
 
 ### Server Endpoints Used
+
 - `GET /api/datasets` - Populate dataset dropdown
 - `POST /api/start-training` - Submit training job
 
 ## 🎯 Benefits
 
 ### For Users
+
 - ✅ **Faster setup** with presets
 - ✅ **Better visibility** with estimates
 - ✅ **Fewer errors** with validation
@@ -251,6 +288,7 @@ Compare results → Iterate → Production
 - ✅ **Professional UX** with tooltips and feedback
 
 ### For Developers
+
 - ✅ **Maintainable code** with clear functions
 - ✅ **Extensible** - easy to add new parameters
 - ✅ **Well-documented** with inline comments
@@ -260,6 +298,7 @@ Compare results → Iterate → Production
 ## 🔮 Future Enhancements (Ready to Add)
 
 ### Potential Additions
+
 1. **Template Library** - Pre-built configs for common tasks
 2. **Historical Configs** - Recently used settings dropdown
 3. **A/B Testing** - Queue multiple variations
@@ -274,6 +313,7 @@ Compare results → Iterate → Production
 ## 📊 Testing Checklist
 
 ### Manual Tests Performed ✅
+
 - [x] Server starts successfully
 - [x] Datasets API endpoint returns data
 - [x] Dataset dropdown populates correctly
@@ -291,6 +331,7 @@ Compare results → Iterate → Production
 - [x] Error messages are clear
 
 ### Browser Compatibility
+
 - ✅ Modern browsers (Chrome, Edge, Firefox, Safari)
 - ✅ Responsive layout (works on tablets)
 - ✅ Keyboard navigation support
@@ -299,11 +340,13 @@ Compare results → Iterate → Production
 ## 📚 Documentation
 
 ### File Locations
+
 - **Dashboard HTML**: `dashboard/unified.html`
 - **Server**: `dashboard/serve.py`
 - **This Guide**: `TRAINING_TAB_ENHANCEMENTS.md`
 
 ### Related Documentation
+
 - `DASHBOARD_ENHANCEMENTS.md` - Previous dashboard improvements
 - `AUTOTRAIN_README.md` - Training orchestration details
 - `DATABASE_INTEGRATION_GUIDE.md` - SQL logging integration
@@ -311,6 +354,7 @@ Compare results → Iterate → Production
 ## 🎉 Summary
 
 The training tab is now a **production-ready, feature-rich interface** that:
+
 - Serves beginners with presets and validation
 - Empowers experts with advanced controls
 - Provides transparency with real-time estimates

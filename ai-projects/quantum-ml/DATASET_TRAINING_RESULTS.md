@@ -9,7 +9,7 @@
 Successfully trained hybrid quantum models on all 4 downloaded UCI datasets from the centralized dataset storage.
 
 | Dataset | Samples (Train/Val) | Features | Val Accuracy | Status |
-|---------|---------------------|----------|--------------|--------|
+| --------- | --------------------- | ---------- | -------------- | -------- |
 | **Banknote** | 1097/275 | 8 (4→8 pad) | 55.6% | ✅ Trained |
 | **Ionosphere** | 280/71 | 8 (34→8 PCA) | **63.4%** | ✅ Trained |
 | **Sonar** | 166/42 | 8 (60→8 PCA) | 52.4% | ✅ Trained |

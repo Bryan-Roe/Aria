@@ -100,7 +100,7 @@ pip list | Select-String "websockets|watchdog|win10toast"
 ## Feature Dependency Matrix
 
 | Feature | Dependencies | Status |
-|---------|--------------|--------|
+| --------- | -------------- | -------- |
 | WebSocket Server | websockets, watchdog | Required for Phase 23 |
 | Export (PNG/CSV/TXT) | None | Phase 24 ✅ |
 | Backup Manager | None | Phase 24 ✅ |

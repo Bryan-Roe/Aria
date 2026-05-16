@@ -331,7 +331,7 @@ python -c "import json; data=json.load(open('data_out/autonomous_training_status
 Typical performance on 552 datasets:
 
 | Metric | Value |
-|--------|-------|
+| -------- | ------- |
 | Cycle Duration | 5-10 minutes |
 | Datasets/Second | 1-2 datasets |
 | Memory Usage | 2-4 GB |

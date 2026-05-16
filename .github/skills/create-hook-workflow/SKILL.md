@@ -39,7 +39,7 @@ Common trigger phrases:
 Before writing anything, choose the right event(s) and exit behavior:
 
 | Goal | Events | Exit on match |
-|------|--------|---------------|
+| ------ | -------- | --------------- |
 | Block file write to protected path | `PreToolUse` | 1 (hard block) |
 | Run audit before save, warn if fails | `PreToolUse`, `PostToolUse` | 0 (warn) or 1 (opt-in via env var) |
 | Inject reminder into conversation | `UserPromptSubmit` | 0 (always) |

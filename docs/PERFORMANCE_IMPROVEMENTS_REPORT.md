@@ -238,7 +238,7 @@ for compiled_pattern, desc in _FILE_OPERATION_PATTERNS:
 ### By Category
 
 | Category | Fixes | Best Improvement |
-|----------|-------|------------------|
+| ---------- | ------- | ------------------ |
 | Algorithm Complexity | 5 | O(n²) → O(n) |
 | String Operations | 1 | O(n²) → O(n) |
 | Regex Compilation | 2 | 400x faster |
@@ -247,7 +247,7 @@ for compiled_pattern, desc in _FILE_OPERATION_PATTERNS:
 ### By File
 
 | File | Issue Type | Performance Gain |
-|------|-----------|------------------|
+| ------ | ----------- | ------------------ |
 | dashboard/app.py | Regex in loop | 100-400x |
 | function_app.py | String concat | 10-100x |
 | llm-maker/tool_validator.py | Regex compilation | 16x |

@@ -93,10 +93,10 @@ The vision system feeds expression detection into Aria's character state:
 
 ## Key Files
 
-| File                          | Purpose                          |
+| File | Purpose |
 | ----------------------------- | -------------------------------- |
 | `scripts/vision_inference.py` | `VisionInference`, `TinyConvNet` |
-| `data_out/vision_training/`   | Trained model checkpoints        |
+| `data_out/vision_training/` | Trained model checkpoints |
 
 ## Training Guidelines
 

@@ -186,7 +186,7 @@ for name in status_map:
 ### Summary Table
 
 | Optimization | Location | Complexity Change | Typical Speedup |
-|-------------|----------|-------------------|-----------------|
+| ------------- | ---------- | ------------------- | ----------------- |
 | Keyword matching | `aria_web/server.py` | O(n×m) → O(n) | 2-5x per command |
 | Connection pooling | `shared/chat_memory.py` | N/A | 50-100ms → 0ms per op |
 | Dict lookup | `scripts/batch_evaluator.py` | O(n×m) → O(n) | 10x for 100 models |

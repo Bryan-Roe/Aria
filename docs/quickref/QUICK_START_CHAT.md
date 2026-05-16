@@ -3,6 +3,7 @@
 ## Improvements Made ✅
 
 ### Core Enhancements
+
 1. **Markdown Rendering** - Beautiful formatted text, code blocks, lists, tables
 2. **Syntax Highlighting** - 180+ languages with copy buttons
 3. **Dark Theme** - Eye-friendly mode toggle
@@ -16,9 +17,10 @@
 
 ## Access
 
-**URL:** http://localhost:7071/api/chat-web
+**URL:** <http://localhost:7071/api/chat-web>
 
 **Start Server:**
+
 ```powershell
 .\start-chat-web.ps1
 # or
@@ -28,7 +30,7 @@ func start
 ## Keyboard Shortcuts
 
 | Key | Action |
-|-----|--------|
+| ----- | -------- |
 | `Enter` | Send message |
 | `Shift + Enter` | New line |
 | `Ctrl + K` | New chat |
@@ -36,7 +38,7 @@ func start
 ## Controls
 
 | Button | Function |
-|--------|----------|
+| -------- | ---------- |
 | 🔄 New Chat | Start fresh |
 | 🗑️ Clear | Remove messages |
 | 💾 Export | Save as JSON |
@@ -45,11 +47,13 @@ func start
 ## Try These Commands
 
 **Markdown:**
+
 - "Explain Python decorators with code examples"
 - "Create a comparison table of Python vs JavaScript"
 - "Show me a REST API example with comments"
 
 **Code:**
+
 - "Write a quicksort in Python with explanation"
 - "Create a React component with TypeScript"
 - "Show me async/await examples"

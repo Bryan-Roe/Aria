@@ -96,7 +96,7 @@ python .\scripts\ci_orchestrator.py --ci-pipeline
 All orchestrators available as VS Code tasks (Ctrl+Shift+P → "Run Task"):
 
 | Task | Command |
-|------|---------|
+| ------ | --------- |
 | **Run: Evaluation AutoRun (dry-run)** | Validate evaluation jobs |
 | **Run: Evaluation AutoRun (all)** | Run all evaluation jobs |
 | **Run: CI Validate All** | Validate all orchestrators in parallel |

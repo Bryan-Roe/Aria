@@ -29,7 +29,7 @@ User Message
 ## Provider Detection Chain
 
 | Priority | Provider | Required Config |
-|----------|----------|----------------|
+| ---------- | ---------- | ---------------- |
 | 1 | Explicit choice | `--provider` flag |
 | 2 | LMStudio | `LMSTUDIO_BASE_URL` |
 | 3 | Azure OpenAI | `AZURE_OPENAI_API_KEY` + `_ENDPOINT` + `_DEPLOYMENT` + `_API_VERSION` |
@@ -52,7 +52,7 @@ python ai-projects/chat-cli/src/chat_cli.py --provider azure --once "Hello"
 ## Chat Endpoints
 
 | Endpoint | Method | Purpose |
-|----------|--------|---------|
+| ---------- | -------- | --------- |
 | `/api/chat` | POST | Standard chat with memory injection |
 | `/api/chat/stream` | POST | SSE streaming with movement tags |
 | `/api/chat-web` | GET | Web chat UI |
@@ -92,7 +92,7 @@ similar = fetch_similar_messages(embedding, top_k=5)
 
 ### Context Windows
 | Model | Tokens |
-|-------|--------|
+| ------- | -------- |
 | gpt-4o | 128,000 |
 | gpt-3.5-turbo | 16,384 |
 | Azure default | 16,384 |
@@ -144,7 +144,7 @@ if not sub.has_feature(Feature.BASIC_CHAT):
 ## Key Files
 
 | File | Purpose |
-|------|---------|
+| ------ | --------- |
 | `shared/chat_providers.py` | Provider re-exports + `detect_provider()` |
 | `ai-projects/chat-cli/src/chat_providers.py` | Full provider implementations |
 | `shared/chat_memory.py` | Embedding generation, storage, similarity |

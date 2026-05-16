@@ -87,7 +87,7 @@
 ## API Endpoints
 
 | Endpoint | Method | Purpose | Returns |
-|----------|--------|---------|---------|
+| ---------- | -------- | --------- | --------- |
 | `/api/training_progress` | GET | Current progress snapshot | Full job status with ETA, validated_type, category |
 | `/api/retry_job/<name>` | POST | Retry failed/succeeded job | `{accepted: true, retry_count: N}` |
 | `/api/cancel_job/<name>` | POST | Cancel running job | `{cancelled: true, pid: N}` |

@@ -148,7 +148,7 @@ Invoke-WebRequest -Uri http://localhost:8000/api/history -OutFile history.json
 ## 🎨 Dashboard Comparison
 
 | Feature | Basic | Enhanced | Advanced |
-|---------|-------|----------|----------|
+| --------- | ------- | ---------- | ---------- |
 | Real-time status | ✅ | ✅ | ✅ |
 | Job metrics | ✅ | ✅ | ✅ |
 | GPU monitoring | ❌ | ❌ | ✅ |

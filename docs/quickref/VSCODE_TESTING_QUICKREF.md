@@ -3,11 +3,13 @@
 ## 🚀 Getting Started
 
 ### Open Test Explorer
+
 1. Click the **beaker icon (🧪)** in the Activity Bar (left sidebar)
 2. Or press `Ctrl+Shift+T`
 3. Tests auto-discover from `tests/` directory
 
 ### Run Your First Test
+
 - Click the **▶️ play button** next to any test
 - Or right-click test → "Run Test"
 - Results appear instantly with ✅ or ❌
@@ -15,7 +17,7 @@
 ## ⌨️ Keyboard Shortcuts
 
 | Shortcut | Action |
-|----------|--------|
+| ---------- | -------- |
 | `Ctrl+; Ctrl+A` | Run all tests |
 | `Ctrl+; Ctrl+F` | Run failed tests |
 | `Ctrl+; Ctrl+L` | Run last test |
@@ -63,15 +65,18 @@ Quick test configurations accessible from Test Explorer dropdown:
 ## 🔧 Troubleshooting
 
 ### "No tests found"
+
 1. Click refresh button (🔄) in Test Explorer
 2. Check Python interpreter: `Ctrl+Shift+P` → "Python: Select Interpreter"
 3. Reload window: `Ctrl+Shift+P` → "Developer: Reload Window"
 
 ### Test fails in Test Explorer but passes in terminal
+
 - Verify working directory is set to workspace root
 - Check environment variables are exported
 
 ### Import errors
+
 - Ensure virtual environment is activated
 - Run: `pip install -r requirements.txt`
 

@@ -341,7 +341,7 @@ Shows how to optimize for speed vs quality
 ## Documentation Files
 
 | File | Purpose | Lines |
-|------|---------|-------|
+| ------ | --------- | ------- |
 | `lmstudio_agi_integration.py` | Core integration layer | ~500 |
 | `AGI_PROVIDER_INTEGRATION.md` | Comprehensive guide | ~600 |
 | `agi_provider_examples.py` | 7 practical examples | ~400 |

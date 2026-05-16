@@ -5,10 +5,10 @@ catch issues early and keep the `main` branch healthy.
 
 ## Contents
 
-| File              | Platform                       | Description                                 |
+| File | Platform | Description |
 | ----------------- | ------------------------------ | ------------------------------------------- |
-| `pre-commit`      | Linux / macOS / Git Bash (Win) | Bash hook that runs fast unit tests.        |
-| `pre-commit.ps1`  | Windows (PowerShell)           | PowerShell equivalent for native Windows.   |
+| `pre-commit` | Linux / macOS / Git Bash (Win) | Bash hook that runs fast unit tests. |
+| `pre-commit.ps1` | Windows (PowerShell) | PowerShell equivalent for native Windows. |
 
 ## Installation
 

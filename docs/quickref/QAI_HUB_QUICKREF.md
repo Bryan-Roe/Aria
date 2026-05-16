@@ -3,17 +3,19 @@
 ## 🚀 One-Liners
 
 ### Start Hub Server
+
 ```powershell
 python .\dashboard\serve.py
 ```
-**Hub**: http://localhost:8000/
-**Training Dashboard**: http://localhost:8000/unified.html
+
+**Hub**: <http://localhost:8000/>
+**Training Dashboard**: <http://localhost:8000/unified.html>
 
 ---
 
 ## 📍 Navigation Map
 
-```
+```text
 http://localhost:8000/
 │
 ├─ / (root) → AUTO REDIRECTS TO → /hub.html ✨
@@ -47,31 +49,37 @@ http://localhost:8000/
 ## ⚡ 30-Second Workflows
 
 ### 1. Start Training Job
-1. Open http://localhost:8000/ → Click "Training Dashboard"
+
+1. Open <http://localhost:8000/> → Click "Training Dashboard"
 2. Click "Train" tab
 3. Fill job name + select dataset
 4. Click "Start Training"
 
 **Or use preset**:
+
 1. Click "Quick Test" preset (1 epoch, 100 samples, ~2 min)
 2. Click "Start Training"
 
 ### 2. Check System Health
+
 ```powershell
 curl http://localhost:8000/api/health | ConvertFrom-Json
 ```
 
 ### 3. View All Training Jobs
+
 ```powershell
 curl http://localhost:8000/status | ConvertFrom-Json
 ```
 
 ### 4. Monitor GPU Usage
+
 ```powershell
 curl http://localhost:8000/api/gpu | ConvertFrom-Json
 ```
 
 ### 5. List Datasets
+
 ```powershell
 curl http://localhost:8000/api/datasets | ConvertFrom-Json
 ```
@@ -81,7 +89,7 @@ curl http://localhost:8000/api/datasets | ConvertFrom-Json
 ## 🎯 Quick Actions (From Hub)
 
 | Icon | Action | Target |
-|------|--------|--------|
+| ------ | -------- | -------- |
 | 🚀 | Start Training | `/unified.html#train` |
 | 📊 | View Datasets | `/unified.html#datasets` |
 | 🤖 | Browse Models | `/unified.html#models` |
@@ -94,6 +102,7 @@ curl http://localhost:8000/api/datasets | ConvertFrom-Json
 ## 📡 API Endpoints Reference
 
 ### Training & Jobs
+
 ```http
 GET  /status                  # Training job status
 POST /api/start-training      # Create new job
@@ -101,6 +110,7 @@ GET  /api/history             # Historical data
 ```
 
 ### Datasets & Models
+
 ```http
 GET /api/datasets             # All datasets + sample counts
 GET /api/models               # Trained models
@@ -108,6 +118,7 @@ GET /api/configs              # YAML configs
 ```
 
 ### System Monitoring
+
 ```http
 GET /api/gpu                  # GPU utilization
 GET /api/gpu-processes        # GPU process list
@@ -116,12 +127,14 @@ GET /api/processes            # Active Python processes
 ```
 
 ### Health & Stats
+
 ```http
 GET /api/health               # System health check
 GET /api/stats                # Quick summary
 ```
 
 ### Job Details
+
 ```http
 GET /api/job/:name            # Specific job details
 GET /api/logs/:name           # Training logs
@@ -132,7 +145,7 @@ GET /api/logs/:name           # Training logs
 ## 🎨 Training Presets
 
 | Preset | Epochs | Samples | Rank | Time | Use Case |
-|--------|--------|---------|------|------|----------|
+| -------- | -------- | --------- | ------ | ------ | ---------- |
 | **Quick Test** | 1 | 100 | 4 | ~2 min | Fast validation |
 | **Standard** | 3 | 1,000 | 8 | ~10 min | Good baseline |
 | **Full** | 5 | All | 16 | ~60 min | Production quality |
@@ -143,6 +156,7 @@ GET /api/logs/:name           # Training logs
 ## 🔧 Advanced Training Parameters
 
 ### Basic (Always Visible)
+
 - **Job Name**: Unique identifier (lowercase, underscores)
 - **Model**: phi35 or qwen25
 - **Dataset**: From datasets/chat/*
@@ -151,6 +165,7 @@ GET /api/logs/:name           # Training logs
 - **Learning Rate**: 1e-5 to 5e-4 (default: 2e-4)
 
 ### Advanced (Collapsible)
+
 - **Batch Size**: 1/2/4/8 (default: 2)
 - **Gradient Accumulation**: 1-32 (default: 1)
 - **Warmup Steps**: 0-N (default: 0)
@@ -162,6 +177,7 @@ GET /api/logs/:name           # Training logs
 - **Random Seed**: Any integer (default: 42)
 
 ### Evaluation
+
 - **Enable Eval**: Checkbox (default: checked)
 - **Max Eval Samples**: 10-N (default: 100)
 - **Eval Steps**: 10-N (default: 50)
@@ -173,7 +189,7 @@ GET /api/logs/:name           # Training logs
 ## 🌟 System Cards Overview
 
 | System | Icon | Description | Link |
-|--------|------|-------------|------|
+| -------- | ------ | ------------- | ------ |
 | **Training Dashboard** | 🎯 | LoRA fine-tuning interface | `/unified.html` |
 | **Quantum ML** | ⚛️ | Hybrid quantum-classical | CLI |
 | **Chat Interface** | 💬 | Multi-provider chat | CLI |
@@ -188,6 +204,7 @@ GET /api/logs/:name           # Training logs
 ## 🐛 Quick Troubleshooting
 
 ### Hub Not Loading
+
 ```powershell
 # Check server
 Get-Process python | Where-Object {$_.CommandLine -like "*serve.py*"}
@@ -197,18 +214,21 @@ python .\dashboard\serve.py
 ```
 
 ### Stats Showing "--"
+
 ```powershell
 # Generate status.json
 python .\scripts\autotrain.py --dry-run
 ```
 
 ### API 404 Errors
+
 ```powershell
 # Verify server is running
 curl http://localhost:8000/api/health
 ```
 
 ### GPU Not Detected
+
 ```powershell
 # Check CUDA
 python -c "import torch; print(torch.cuda.is_available())"
@@ -219,7 +239,7 @@ python -c "import torch; print(torch.cuda.is_available())"
 ## 📊 Keyboard Shortcuts (In Hub)
 
 | Key | Action |
-|-----|--------|
+| ----- | -------- |
 | **Click Card** | Navigate to system |
 | **Click Action** | Execute quick action |
 | **F5** | Refresh page (auto-updates stats) |
@@ -230,24 +250,28 @@ python -c "import torch; print(torch.cuda.is_available())"
 ## 🎓 Learning Path
 
 ### Beginner (Day 1)
+
 1. Start hub server
 2. Explore Quick Actions
 3. Run "Quick Test" preset
 4. View job in "All Jobs" tab
 
 ### Intermediate (Week 1)
+
 1. Adjust basic parameters (epochs, samples)
 2. Try different presets
 3. Save/load configurations
 4. Monitor GPU usage
 
 ### Advanced (Month 1)
+
 1. Tune advanced parameters
 2. Run batch evaluations
 3. Use API endpoints
 4. Integrate with CI/CD
 
 ### Expert (Ongoing)
+
 1. Quantum ML pipeline
 2. Custom provider backends
 3. Distributed training
@@ -258,7 +282,7 @@ python -c "import torch; print(torch.cuda.is_available())"
 ## 📚 Related Documentation
 
 | File | Description |
-|------|-------------|
+| ------ | ------------- |
 | `QAI_HUB_GUIDE.md` | Full hub documentation (this file's parent) |
 | `TRAINING_TAB_ENHANCEMENTS.md` | Training features (450 lines) |
 | `TRAINING_TAB_QUICKREF.md` | Training quick reference (350 lines) |
@@ -270,7 +294,7 @@ python -c "import torch; print(torch.cuda.is_available())"
 
 ## 💡 Pro Tips
 
-1. **Bookmark the Hub**: http://localhost:8000/ (not unified.html)
+1. **Bookmark the Hub**: <http://localhost:8000/> (not unified.html)
 2. **Use Presets First**: Validate before custom tuning
 3. **Save Configs**: Export JSON for reproducibility
 4. **Monitor GPU**: Avoid over-allocation (max 6.1GB VRAM)
@@ -283,29 +307,32 @@ python -c "import torch; print(torch.cuda.is_available())"
 
 ## 🔗 External Resources
 
-- **PennyLane Docs**: https://pennylane.ai/
-- **Azure Quantum**: https://quantum.microsoft.com/
-- **Hugging Face**: https://huggingface.co/
-- **PyTorch**: https://pytorch.org/
-- **Azure Functions**: https://docs.microsoft.com/azure/azure-functions/
+- **PennyLane Docs**: <https://pennylane.ai/>
+- **Azure Quantum**: <https://quantum.microsoft.com/>
+- **Hugging Face**: <https://huggingface.co/>
+- **PyTorch**: <https://pytorch.org/>
+- **Azure Functions**: <https://docs.microsoft.com/azure/azure-functions/>
 
 ---
 
 ## 📞 Quick Support
 
 ### Server Issues
+
 ```powershell
 # Check logs
 Get-Content .\dashboard\serve.py.log -Tail 50
 ```
 
 ### Training Stuck
+
 ```powershell
 # Check running jobs
 python .\scripts\master_orchestrator.py --status
 ```
 
 ### Database Issues
+
 ```powershell
 # Check SQL connection
 curl http://localhost:7071/api/ai/status | ConvertFrom-Json

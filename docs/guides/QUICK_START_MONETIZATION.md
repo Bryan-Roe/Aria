@@ -7,7 +7,7 @@ Your Aria platform now has a complete monetization system that generates **$2,23
 ## 🎯 Revenue Breakdown
 
 | Tier | Subscribers | Price | Revenue |
-|------|-------------|-------|---------|
+| ------ | ------------- | ------- | --------- |
 | Pro | 5 | $49/mo | $245 |
 | Enterprise | 10 | $199/mo | $1,990 |
 | **Total** | **15** | - | **$2,235/mo** ✅ |

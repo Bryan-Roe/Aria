@@ -210,7 +210,7 @@ Output includes:
 **7 new tasks added:**
 
 | Task | Command |
-|------|---------|
+| ------ | --------- |
 | Run: Model Deployer - Scan | `python .\scripts\model_deployer.py --scan` |
 | Run: Model Deployer - Deploy Best | `python .\scripts\model_deployer.py --deploy best --strategy canary` |
 | Run: Resource Monitor - Snapshot | `python .\scripts\resource_monitor.py --snapshot` |
@@ -305,7 +305,7 @@ pip install croniter GPUtil openpyxl
 ## Output Locations
 
 | Tool | Output Directory |
-|------|-----------------|
+| ------ | ----------------- |
 | Model Deployer | `deployed_models/` |
 | Resource Monitor | `data_out/resource_monitor/` |
 | Batch Evaluator | `data_out/batch_evaluator/` |

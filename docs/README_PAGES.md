@@ -131,7 +131,7 @@ To test the GitHub Pages site locally:
 
 3. **Open browser**
 
-   ```
+   ```text
    http://localhost:4000
    ```
 

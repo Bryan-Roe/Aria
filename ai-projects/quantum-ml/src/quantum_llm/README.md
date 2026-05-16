@@ -18,7 +18,7 @@ graph TD
 ## Components
 
 | Component | File | Description |
-|-----------|------|-------------|
+| ----------- | ------ | ------------- |
 | `QuantumSampler` | `quantum_sampler.py` | Re-weights LLM top-k logits via variational circuit |
 | `QuantumEmbeddingTransformer` | `quantum_embeddings.py` | Amplitude-encoding + variational transform |
 | `QuantumRouter` | `quantum_router.py` | QAOA-style provider routing |
@@ -40,8 +40,8 @@ No hard dependencies are added to the base install.  Quantum packages remain opt
 All settings can be overridden via environment variables:
 
 | Env var | Default | Description |
-|---------|---------|-------------|
-| `QUANTUM_LLM_BACKEND` | `auto` | `auto\|pennylane\|qiskit\|classical` |
+| --------- | --------- | ------------- |
+| `QUANTUM_LLM_BACKEND` | `auto` | `auto\ | pennylane\ | qiskit\ | classical` |
 | `QUANTUM_LLM_QUBITS` | `4` | Number of qubits |
 | `QUANTUM_LLM_SHOTS` | `512` | Measurement shots |
 | `QUANTUM_LLM_LAYERS` | `2` | Variational circuit depth |
@@ -112,7 +112,7 @@ curl -X POST http://localhost:7071/api/quantum-llm/chat \
 Optional body fields:
 
 | Field | Type | Description |
-|-------|------|-------------|
+| ------- | ------ | ------------- |
 | `prompt` | string | **Required** — user prompt |
 | `provider` | string | Override provider (`azure`, `openai`, `lmstudio`, `local`) |
 | `backend` | string | Override quantum backend |

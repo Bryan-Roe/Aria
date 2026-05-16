@@ -103,7 +103,7 @@ python .\scripts\distributed_benchmark.py --datasets-dir datasets/massive_quantu
 ## 📊 Current Status Summary
 
 | Phase | Status | Progress | Duration |
-|-------|--------|----------|----------|
+| ------- | -------- | ---------- | ---------- |
 | Discovery | ✅ Complete | 1,412/5,000 candidates | 10 min |
 | Download | 🔄 In Progress | 3/100 datasets | Ongoing |
 | Benchmark System | ✅ Complete | System ready | - |

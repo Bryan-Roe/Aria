@@ -95,7 +95,7 @@ Comprehensive analysis identified **8 distinct performance issues** across the c
 ## Summary Statistics
 
 | Priority | Count | Total Potential Speedup | Total Effort |
-|----------|-------|------------------------|--------------|
+| ---------- | ------- | ------------------------ | -------------- |
 | Critical | 2 | 10-100x | 3-6 hours |
 | High | 2 | 3-30x | 1.5-2.5 hours |
 | Medium | 3 | 2-5x | 2 hours |
@@ -139,7 +139,7 @@ Test infrastructure exists at:
 ## Risk Assessment
 
 | Risk Level | Count | Notes |
-|------------|-------|-------|
+| ------------ | ------- | ------- |
 | Very Low | 5 | Pure optimizations, no behavior change |
 | Low | 3 | Include fallback mechanisms |
 | Medium | 0 | None identified |

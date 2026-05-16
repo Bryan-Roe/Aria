@@ -558,7 +558,7 @@ export COPILOT_MAX_CONCURRENT_REQUESTS=3
 ## Workspace-Level vs User-Level
 
 | Setting | Workspace Level | User Level |
-|---------|---|---|
+| --------- | --- | --- |
 | Location | `.vscode/settings.json` | `~/.vscode/settings.json` |
 | Scope | This project only | All projects |
 | Override | User settings | Workspace settings |

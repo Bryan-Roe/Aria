@@ -233,7 +233,7 @@ spec:
 ## Environment Variable Reference
 
 | Variable | Default | Description |
-|----------|---------|-------------|
+| ---------- | --------- | ------------- |
 | `LMSTUDIO_BASE_URL` | `http://127.0.0.1:1234/v1` | LM Studio server endpoint |
 | `LMSTUDIO_MODEL` | `local-model` | Default model to use |
 | `LMSTUDIO_TEMPERATURE` | `0.7` | Sampling temperature (0.0-2.0) |

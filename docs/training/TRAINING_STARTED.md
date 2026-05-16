@@ -7,6 +7,7 @@
 ## Training Jobs Running
 
 ### LoRA Fine-Tuning (3 models)
+
 - **Phi-3.5 Mini** (microsoft/Phi-3.5-mini-instruct)
   - Dataset: mixed_chat (full)
   - Epochs: 3
@@ -23,6 +24,7 @@
   - Output: `data_out/lora_training/phi35_max_performance/`
 
 ### Quantum Training (2 models)
+
 - **Heart Disease Classifier**
   - Dataset: heart_disease.csv
   - Qubits: 4
@@ -38,21 +40,25 @@
 ## Monitoring
 
 **Quick Status:**
+
 ```powershell
 .\scripts\monitor_training.ps1
 ```
 
 **Continuous Monitoring:**
+
 ```powershell
 .\scripts\monitor_training.ps1 -Continuous
 ```
 
 **Check Processes:**
+
 ```powershell
 Get-Process -Name python
 ```
 
 **View Logs:**
+
 ```powershell
 # LoRA logs
 Get-Content data_out\autotrain\status.json | ConvertFrom-Json
@@ -72,14 +78,18 @@ Get-Content data_out\quantum_autorun\status.json | ConvertFrom-Json
 ## Expected Outputs
 
 ### LoRA Adapters
+
 Each model will generate:
+
 - `adapter_config.json` - LoRA configuration
 - `adapter_model.safetensors` - Trained adapter weights
 - `training_args.bin` - Training configuration
 - Checkpoints in timestamped directories
 
 ### Quantum Models
+
 Each quantum job will generate:
+
 - `results/<dataset>_quantum_model.pth` - Trained model
 - `results/<dataset>_scaler.pkl` - Data scaler
 - `results/<dataset>_pca.pkl` - PCA transformer (if needed)
@@ -89,18 +99,22 @@ Each quantum job will generate:
 ## Using Trained Models
 
 ### LoRA Chat
+
 ```powershell
 cd talk-to-ai
 python .\src\chat_cli.py --provider lora --model ..\data_out\lora_training\phi35
 ```
 
 ### Azure Functions Integration
+
 The latest trained adapter will be auto-detected at:
-```
+
+```text
 /api/ai/status
 ```
 
 ### Quantum Inference
+
 ```powershell
 cd quantum-ai
 python .\src\quantum_classifier.py --load results/heart_disease_quantum_model.pth
@@ -109,6 +123,7 @@ python .\src\quantum_classifier.py --load results/heart_disease_quantum_model.pt
 ## Next Steps After Training
 
 1. **Validate Models**
+
    ```powershell
    # Test LoRA adapter
    python .\AI\microsoft_phi-silica-3.6_v1\scripts\train_lora.py --dry-run
@@ -118,6 +133,7 @@ python .\src\quantum_classifier.py --load results/heart_disease_quantum_model.pt
    ```
 
 2. **Deploy to Azure Functions**
+
    ```powershell
    func host start  # Test locally first
    .\deploy-chat-to-azure.ps1  # Deploy to Azure
@@ -131,6 +147,7 @@ python .\src\quantum_classifier.py --load results/heart_disease_quantum_model.pt
 ## Troubleshooting
 
 **If training stops:**
+
 ```powershell
 # Check if processes are still running
 Get-Process -Name python
@@ -143,11 +160,13 @@ python .\scripts\quantum_autorun.py
 ```
 
 **Out of memory:**
+
 - Reduce `max_train_samples` in autotrain.yaml
 - Reduce `batch_size` in quantum_autorun.yaml
 - Close other applications
 
 **Training too slow:**
+
 - Consider using Google Colab free GPU
 - Reduce `epochs` in configuration files
 - Use smaller datasets for testing

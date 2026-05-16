@@ -145,7 +145,7 @@ python scripts/autonomous_training_orchestrator.py --force-run --cycles 1
 
 ## 🏗️ Project Structure
 
-```
+```text
 apps/aria/             Animated character stage (HTML/CSS/JS + Python API server)
 apps/chat/             Browser-based streaming chat UI
 ai-projects/chat-cli/  Multi-provider chat CLI
@@ -195,7 +195,7 @@ The auto-execute system parses complex multi-step requests such as `walk to the 
 
 Provider auto-detection order:
 
-```
+```text
 LM Studio → Ollama → Azure OpenAI → OpenAI → Local (zero-dependency echo)
 ```
 
@@ -203,7 +203,7 @@ Pass `--provider` to override: `local`, `openai`, `azure`, `lmstudio`, `ollama`,
 
 ### Environment variables
 
-**Azure OpenAI**
+#### Azure OpenAI
 
 ```text
 AZURE_OPENAI_API_KEY
@@ -212,7 +212,7 @@ AZURE_OPENAI_DEPLOYMENT
 AZURE_OPENAI_API_VERSION
 ```
 
-**OpenAI**
+#### OpenAI
 
 ```text
 OPENAI_API_KEY

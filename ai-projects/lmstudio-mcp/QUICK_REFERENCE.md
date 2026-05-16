@@ -15,7 +15,7 @@ python -m chat_cli --provider lmstudio "Hello!"
 ## 📚 Documentation Files
 
 | File | Purpose |
-|------|---------|
+| ------ | --------- |
 | `AGENT_INTEGRATION.md` | **START HERE** — Full integration guide |
 | `INTEGRATION_SUMMARY.md` | Architecture & integration points |
 | `README.md` | MCP server reference |

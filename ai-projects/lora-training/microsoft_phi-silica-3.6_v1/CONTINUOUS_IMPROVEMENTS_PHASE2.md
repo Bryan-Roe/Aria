@@ -293,7 +293,7 @@ python scripts\model_server.py --model {trained_model}
 ## 📊 Performance Improvements
 
 | Feature | Benefit | Impact |
-|---------|---------|--------|
+| --------- | --------- | -------- |
 | Dataset Analyzer | Identify issues early | Save hours of debugging |
 | LR Finder | Optimal learning rate | 50-80% faster convergence |
 | Data Augmenter | 2-5x more training data | +10-20% accuracy |

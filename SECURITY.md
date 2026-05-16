@@ -6,13 +6,13 @@ Thank you for helping keep **Aria** and its users safe. This document explains w
 
 Security fixes are provided only for the versions listed below. If you are running an unsupported release, please upgrade to a supported version before reporting a vulnerability.
 
-| Version         | Supported          | Notes                                   |
+| Version | Supported | Notes |
 | --------------- | ------------------ | --------------------------------------- |
-| latest (`main`) | :white_check_mark: | Active development branch               |
-| 5.1.x           | :white_check_mark: | Current stable release                  |
-| 5.0.x           | :x:                | End of life                             |
-| 4.0.x           | :white_check_mark: | Long-term support (critical fixes only) |
-| < 4.0           | :x:                | Unsupported — please upgrade            |
+| latest (`main`) | :white_check_mark: | Active development branch |
+| 5.1.x | :white_check_mark: | Current stable release |
+| 5.0.x | :x: | End of life |
+| 4.0.x | :white_check_mark: | Long-term support (critical fixes only) |
+| < 4.0 | :x: | Unsupported — please upgrade |
 
 If you are unsure which version you are using, review the release notes or check your installed package metadata.
 
@@ -43,12 +43,12 @@ To help with triage and remediation, include as much of the following informatio
 
 We aim to handle reports using a coordinated disclosure process.
 
-| Stage                          | Target Response Time                                               |
+| Stage | Target Response Time |
 | ------------------------------ | ------------------------------------------------------------------ |
-| Initial acknowledgement        | Within **3 business days**                                         |
-| Triage and severity assessment | Within **7 business days**                                         |
-| Status updates                 | At least every **7 days** until resolution                         |
-| Fix and disclosure             | Typically within **90 days**, depending on severity and complexity |
+| Initial acknowledgement | Within **3 business days** |
+| Triage and severity assessment | Within **7 business days** |
+| Status updates | At least every **7 days** until resolution |
+| Fix and disclosure | Typically within **90 days**, depending on severity and complexity |
 
 After triage, we will let you know whether the report is accepted as a security issue, declined, or requires more information. For accepted reports, we will work on remediation, prepare a release when appropriate, and coordinate public disclosure. With your permission, we may credit you in release notes or in a related security advisory.
 

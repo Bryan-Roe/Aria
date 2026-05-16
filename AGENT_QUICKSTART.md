@@ -272,7 +272,7 @@ MIN_TEST_PASSING_RATE = 0.8          # 80% tests must pass
 ## Supported Task Types
 
 | Category | Example | Risk |
-|----------|---------|------|
+| ---------- | --------- | ------ |
 | Bug Fix | "Fix failing test_chat.py" | Medium |
 | Feature | "Add OAuth2 support" | High |
 | Refactor | "Extract common code to utility" | Medium |
@@ -372,7 +372,7 @@ watch -n 2 'cat data_out/autonomous_agent/status.json | python -m json.tool'
 ## Performance
 
 | Model | Speed | Quality | Memory | Recommendation |
-|-------|-------|---------|--------|-----------------|
+| ------- | ------- | --------- | -------- | ----------------- |
 | Mistral | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ | 4GB | **Best for agent** |
 | Neural-Chat | ⭐⭐⭐⭐ | ⭐⭐⭐⭐ | 8GB | Good |
 | Llama-7B | ⭐⭐ | ⭐⭐⭐ | 8GB | Slower |

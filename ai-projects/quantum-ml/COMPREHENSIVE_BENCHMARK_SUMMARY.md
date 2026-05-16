@@ -16,7 +16,7 @@ Successfully expanded quantum ML infrastructure from **4 to 15 datasets** (275% 
 ### **Working Datasets (14)**
 
 | # | Dataset | Category | Samples | Features | Classes | Status |
-|---|---------|----------|---------|----------|---------|--------|
+| --- | --------- | ---------- | --------- | ---------- | --------- | -------- |
 | 1 | ionosphere | Physics | 351 | 34 | 2 | ✅ 85-90% |
 | 2 | banknote | Forensics | 1,372 | 4 | 2 | ✅ 99-100% |
 | 3 | heart_disease | Medical | 303 | 13 | 2 | ✅ 82% |
@@ -35,7 +35,7 @@ Successfully expanded quantum ML infrastructure from **4 to 15 datasets** (275% 
 ### **Excluded Dataset (1)**
 
 | Dataset | Category | Reason | Workaround |
-|---------|----------|--------|------------|
+| --------- | ---------- | -------- | ------------ |
 | vertebral_column | Medical | File corruption (binary format) | Download from alternative source |
 
 ---
@@ -146,7 +146,7 @@ Created `quick_test_datasets.py` for 1-epoch smoke tests:
 
 ### **By Dataset Size**
 | Size Category | Count | Avg Accuracy | Best Example |
-|---------------|-------|--------------|--------------|
+| --------------- | ------- | -------------- | -------------- |
 | Tiny (150-300) | 5 | 76.4% | iris 97%, glass 88% |
 | Small (300-1K) | 5 | 81.2% | breast_cancer 88%, blood_transfusion 83% |
 | Medium (1K-5K) | 3 | 95.3% | banknote 100%, wine_white 99% |
@@ -156,7 +156,7 @@ Created `quick_test_datasets.py` for 1-epoch smoke tests:
 
 ### **By Feature Count**
 | Feature Range | Count | Avg Accuracy | PCA Required |
-|---------------|-------|--------------|--------------|
+| --------------- | ------- | -------------- | -------------- |
 | Low (3-4) | 4 | 88.8% | No (padding only) |
 | Medium (5-15) | 6 | 80.5% | Yes (5-15→4) |
 | High (20+) | 4 | 84.8% | Yes (29-60→4) |
@@ -165,7 +165,7 @@ Created `quick_test_datasets.py` for 1-epoch smoke tests:
 
 ### **By Domain**
 | Category | Datasets | Avg Accuracy | Best Example |
-|----------|----------|--------------|--------------|
+| ---------- | ---------- | -------------- | -------------- |
 | Medical | 6 | 75.5% | breast_cancer 88% |
 | Chemistry | 2 | 99.0% | wine_white 99% |
 | Physics | 2 | 84.0% | ionosphere 90% |
@@ -237,7 +237,7 @@ Model performance varies by configuration:
 ## 📊 Comparison: 1-Epoch vs 25-Epoch
 
 | Dataset | 1-Epoch | 25-Epoch | Improvement |
-|---------|---------|----------|-------------|
+| --------- | --------- | ---------- | ------------- |
 | ionosphere | 65.62% | 90.14% | +24.52% |
 | banknote | 94.85% | 100.00% | +5.15% |
 | heart_disease | 68.75% | 81.97% | +13.22% |

@@ -1,19 +1,36 @@
-# Production API Dependencies
+# Production dependencies for ai-projects/quantum-ml
+# Last updated: 2026-05-16
+#
+# Recommendations:
+# - Keep exact pins here for reproducible production builds.
+# - For GPU deployments, install a matching torch wheel for your CUDA version (see GPU hint below).
+# - Test/dev dependencies are in dev-requirements.txt.
+
+# === Core runtime ===
 flask==3.1.3
 flask-cors==6.0.2
 numpy==2.4.4
-torch==2.11.0
 scikit-learn==1.8.0
 joblib==1.5.3
 
-# Quantum ML (from parent)
+# === Deep learning / ML runtime ===
+# NOTE: For CUDA-enabled servers, install the appropriate torch wheel for your CUDA version
+torch==2.11.0
+
+# === Quantum ML ===
+# Keep pennylane and pennylane-lightning versions compatible
 pennylane==0.44.1
 pennylane-lightning==0.44.0
 
-# Optional: Production servers
-gunicorn==26.0.0  # For production WSGI server
-gevent==26.4.0    # For async workers
+# === Production servers / deployment ===
+gunicorn==26.0.0          # WSGI server for Flask
+gevent==26.4.0            # Optional async worker for gunicorn (worker-class 'gevent')
 
-# Monitoring and logging
+# === Monitoring & logging ===
 python-json-logger==4.1.0
 prometheus-client==0.25.0
+
+# === GPU install hint ===
+# If you require CUDA support for torch, DO NOT rely on the generic PyPI wheel.
+# Follow PyTorch's official installation instructions and install the wheel matching your CUDA version, e.g.:
+# pip install --index-url https://download.pytorch.org/whl/cu121 --extra-index-url https://pypi.org/simple torch==2.11.0

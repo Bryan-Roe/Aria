@@ -99,7 +99,7 @@ python .\scripts\quick_setup_datasets.py
 
 ### Quantum Datasets (Downloaded ✅)
 | Dataset | Size | Samples | Features | Use Case |
-|---------|------|---------|----------|----------|
+| --------- | ------ | --------- | ---------- | ---------- |
 | Heart Disease | 20 KB | 303 | 14 | Medical diagnosis |
 | Ionosphere | 70 KB | 351 | 35 | Radar signal classification |
 | Sonar | 80 KB | 208 | 61 | Object detection (mines vs rocks) |
@@ -114,7 +114,7 @@ python .\scripts\quick_setup_datasets.py
 
 ### Chat Datasets (Ready to Download)
 | Dataset | Size | Quality | License | Command |
-|---------|------|---------|---------|---------|
+| --------- | ------ | --------- | --------- | --------- |
 | Dolly 15k | 50 MB | ⭐⭐⭐⭐⭐ | Commercial ✅ | `--dataset dolly` |
 | OpenAssistant | 500 MB | ⭐⭐⭐⭐⭐ | Commercial ✅ | `--dataset openassistant` |
 | Alpaca | 100 MB | ⭐⭐⭐⭐ | Non-commercial ⚠️ | `--dataset alpaca` |

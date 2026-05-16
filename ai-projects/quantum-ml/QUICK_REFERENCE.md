@@ -55,7 +55,7 @@ python .\src\quantum_classifier.py
 ## File Locations
 
 | Item | Path |
-|------|------|
+| ------ | ------ |
 | Examples | `examples/*.py` |
 | Results/Plots | `results/*.png` |
 | Configuration | `config/quantum_config.yaml` |
@@ -67,7 +67,7 @@ python .\src\quantum_classifier.py
 ## Key Results
 
 | Task | Result | Status |
-|------|--------|--------|
+| ------ | -------- | -------- |
 | Bell State Simulation | 51.5% &#124;00⟩ / 48.5% &#124;11⟩ | ✅ Perfect |
 | Moons Classification | 85.0% accuracy | ✅ Excellent |
 | Iris Classification | 66.7% accuracy | ✅ Good |
@@ -122,7 +122,7 @@ python .\examples\azure_integration.py
 ## Troubleshooting
 
 | Issue | Solution |
-|-------|----------|
+| ------- | ---------- |
 | Module not found | `.\venv\Scripts\Activate.ps1` |
 | Poor accuracy | Increase epochs/layers |
 | Memory error | Reduce qubits (<10) |

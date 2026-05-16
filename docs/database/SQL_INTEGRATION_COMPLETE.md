@@ -121,7 +121,7 @@ Complete multi-vendor SQL database integration with production-grade observabili
 ## Environment Variables
 
 | Variable | Required | Default | Description |
-|----------|----------|---------|-------------|
+| ---------- | ---------- | --------- | ------------- |
 | `QAI_SQL_URL` | No | None | SQLAlchemy connection URL |
 | `QAI_DB_CONN` | No | None | Fallback ODBC connection string |
 | `QAI_SQL_SLOW_MS` | No | Auto | Slow query threshold (ms) |
@@ -197,7 +197,7 @@ All 7 tests passing:
 ## Migration Status
 
 | Migration | Status | Purpose |
-|-----------|--------|---------|
+| ----------- | -------- | --------- |
 | `001_keyvalue_index.sql` | ✅ Ready | Index on `QAI_KeyValue(k)` for performance |
 | `002_query_performance_tracking.sql` | ✅ Ready | `QAI_QueryMetrics` table for optional tracking |
 

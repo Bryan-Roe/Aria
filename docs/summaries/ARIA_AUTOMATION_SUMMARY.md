@@ -149,7 +149,7 @@ python3 scripts/aria_automation.py --status
 
 **Output:**
 
-```
+```text
 ================================================================================
 🤖 Aria Automation Status
 ================================================================================
@@ -288,7 +288,7 @@ python3 scripts/master_orchestrator.py --daemon
 
 All automation components tested and verified:
 
-```
+```text
 ================================================================================
 Test Summary
 ================================================================================
@@ -367,13 +367,13 @@ All documentation is comprehensive and complete:
 
 2. Access Aria web interface:
 
-   ```
+   ```text
    http://localhost:8080
    ```
 
 3. Try auto-execute:
 
-   ```
+   ```text
    http://localhost:8080/auto-execute.html
    ```
 
@@ -476,6 +476,6 @@ sudo journalctl -u aria_automation -f
 
 ---
 
-**Happy Automating! 🤖✨**
+Happy Automating! 🤖✨
 
-*For support or issues, check the logs in `data_out/aria_automation/` or review `ARIA_AUTOMATION_GUIDE.md`*
+For support or issues, check the logs in `data_out/aria_automation/` or review `ARIA_AUTOMATION_GUIDE.md`

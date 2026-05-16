@@ -43,7 +43,7 @@ GitHub Copilot Chat
 ### Server Locations
 
 | Server | Path | Status |
-|--------|------|--------|
+| -------- | ------ | -------- |
 | quantum-ai | `ai-projects/quantum-ml/quantum_mcp_server.py` | ✅ Active |
 | llm-maker | `ai-projects/llm-maker/llm_maker_mcp_server.py` | ✅ Active |
 | task-complete | `scripts/task_complete_mcp_server.py` | ✅ Active |

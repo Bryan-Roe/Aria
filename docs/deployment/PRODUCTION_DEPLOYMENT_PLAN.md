@@ -150,7 +150,7 @@ python scripts\distributed_benchmark.py --datasets-dir datasets/massive_quantum/
 **Timeline for 3,500 training-ready datasets:**
 
 | Tier | Datasets | Epochs | Time/Dataset | Workers | Total Hours | Wall Time |
-|------|----------|--------|--------------|---------|-------------|-----------|
+| ------ | ---------- | -------- | -------------- | --------- | ------------- | ----------- |
 | 1 | 3,500 | 1 | 15 min | 16 | 875 | 55 hours |
 | 2 | 2,800 | 25 | 2 hours | 10 | 5,600 | 560 hours |
 | 3 | 100 | 50 | 4 hours | 5 | 400 | 80 hours |
@@ -342,7 +342,7 @@ jobs:
 ### 6.2 Success Metrics
 
 | Metric | Target | Current | Gap |
-|--------|--------|---------|-----|
+| -------- | -------- | --------- | ----- |
 | Total datasets | 5,000 | 30 | 4,970 |
 | Training-ready | 3,500 | 27 | 3,473 |
 | Production models | 50 | 10 (from 27) | 40 |
@@ -375,7 +375,7 @@ jobs:
 ### Total Cost Estimate (16 weeks)
 
 | Category | Low | Medium | High |
-|----------|-----|--------|------|
+| ---------- | ----- | -------- | ------ |
 | Compute (Local) | $0 | $0 | $0 |
 | Azure VM (Optional) | $0 | $400 | $1,000 |
 | Azure Batch (Sprint) | $0 | $1,400 | $3,000 |

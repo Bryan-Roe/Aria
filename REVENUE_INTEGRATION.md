@@ -126,25 +126,25 @@ async function loadSubscriptionStatus() {
 
 ### Subscription Tiers
 
-| Tier           | Price   | Target    | Revenue       |
+| Tier | Price | Target | Revenue |
 | -------------- | ------- | --------- | ------------- |
-| **Free**       | $0/mo   | Unlimited | $0            |
-| **Pro**        | $49/mo  | 5 users   | $245          |
-| **Enterprise** | $199/mo | 10 users  | $1,990        |
-| **Total**      | -       | 15 users  | **$2,235/mo** |
+| **Free** | $0/mo | Unlimited | $0 |
+| **Pro** | $49/mo | 5 users | $245 |
+| **Enterprise** | $199/mo | 10 users | $1,990 |
+| **Total** | - | 15 users | **$2,235/mo** |
 
 **Annual Revenue:** $26,820
 
 ### Feature Gates
 
-| Feature            | Free   | Pro        | Enterprise |
+| Feature | Free | Pro | Enterprise |
 | ------------------ | ------ | ---------- | ---------- |
-| Chat Messages      | 100/mo | 10,000/mo  | Unlimited  |
-| Aria Character     | Basic  | Full       | Full       |
-| Quantum Computing  | ❌     | 50 jobs/mo | Unlimited  |
-| Model Training     | ❌     | 20 hrs/mo  | Unlimited  |
-| API Access         | ❌     | 10K req/mo | Unlimited  |
-| Commercial License | ❌     | ✅         | ✅         |
+| Chat Messages | 100/mo | 10,000/mo | Unlimited |
+| Aria Character | Basic | Full | Full |
+| Quantum Computing | ❌ | 50 jobs/mo | Unlimited |
+| Model Training | ❌ | 20 hrs/mo | Unlimited |
+| API Access | ❌ | 10K req/mo | Unlimited |
+| Commercial License | ❌ | ✅ | ✅ |
 
 ## API Integration
 

@@ -551,11 +551,11 @@ print(circuit)
 
 Benchmark results on standard datasets:
 
-| Dataset       | Classical NN | Quantum Classifier | Hybrid QNN |
+| Dataset | Classical NN | Quantum Classifier | Hybrid QNN |
 | ------------- | ------------ | ------------------ | ---------- |
-| Iris          | 96.7%        | 94.2%              | **97.5%**  |
-| Wine          | 95.3%        | 92.8%              | **96.1%**  |
-| Breast Cancer | 97.2%        | 95.1%              | **97.8%**  |
+| Iris | 96.7% | 94.2% | **97.5%** |
+| Wine | 95.3% | 92.8% | **96.1%** |
+| Breast Cancer | 97.2% | 95.1% | **97.8%** |
 
 > **Note:** Results may vary based on circuit configuration and training parameters
 

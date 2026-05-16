@@ -485,7 +485,7 @@ Minor improvement: avoids creating intermediate list.
 ## Summary Table
 
 | Priority | Issue | File | Lines | Complexity | Expected Speedup |
-|----------|-------|------|-------|------------|------------------|
+| ---------- | ------- | ------ | ------- | ------------ | ------------------ |
 | Critical | Triple-nested gradient loop | web_app.py | 217-246 | O(n³) | 10-100x |
 | High | Repeated JSON file reading | serve.py | 273-515 | File I/O | 5-10x |
 | High | Linear keyword searches | agi_provider.py | 343-372 | O(k×m) | 3-30x |
@@ -582,7 +582,7 @@ def test_gradient_performance():
 ## Memory Usage Considerations
 
 | Optimization | Memory Impact | Notes |
-|--------------|---------------|-------|
+| -------------- | --------------- | ------- |
 | Gradient vectorization | -50% | Eliminates weight copies |
 | File caching | +5MB | Per cached file (acceptable) |
 | Frozenset keywords | +10KB | One-time module load cost |

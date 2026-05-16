@@ -179,7 +179,7 @@ python scripts\run_pipeline.py \
 ## 🔧 Troubleshooting
 
 | Problem | Solution |
-|---------|----------|
+| --------- | ---------- |
 | Out of memory | `python scripts\gpu_optimizer.py --memory-usage 0.6` |
 | Slow training | Check GPU profile, enable BF16/FP16 |
 | Poor eval scores | More aggressive pruning, longer training |
@@ -203,7 +203,7 @@ pip install flash-attn --no-build-isolation
 
 ## 🎯 Performance Targets
 
-|-----|------------|------------|--------|
+| ----- | ------------ | ------------ | -------- |
 | RTX 4090 | 4 | ~2000 | 18GB |
 | RTX 3090 | 2 | ~1000 | 20GB |
 | RTX 3060 | 1 | ~400 | 10GB |

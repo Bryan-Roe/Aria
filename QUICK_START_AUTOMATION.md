@@ -3,16 +3,19 @@
 ## One-Liner Commands
 
 ### Windows Command Prompt
+
 ```cmd
 cd c:\Users\Bryan\Aria && run_automation.bat
 ```
 
 ### Windows PowerShell
+
 ```powershell
 cd c:\Users\Bryan\Aria; .\run_automation.ps1
 ```
 
 ### Linux/macOS
+
 ```bash
 cd ~/Aria && python3 run_automation.py
 ```
@@ -29,7 +32,7 @@ Running the automation will:
 
 ## Expected Output
 
-```
+```text
 ═══════════════════════════════════════════════════════════
 Environment Validation
 ═══════════════════════════════════════════════════════════
@@ -50,14 +53,17 @@ Automation Complete
 ## Troubleshooting
 
 **Python not found?**
+
 - Windows: Use `C:\Users\Bryan\.local\bin\python3.14.exe run_automation.py`
 - Linux/macOS: Use `python3` or `python`
 
 **Permission denied?**
+
 - Linux/macOS: Run `chmod +x run_automation.py` first
 - Windows: Run Command Prompt as Administrator
 
 **Tests failing?**
+
 - This is normal - the runner continues even with test failures
 - Check the test output for details
 - Review test logs for specific errors
@@ -72,18 +78,22 @@ Automation Complete
 ## Schedule Automated Runs
 
 ### Windows Task Scheduler
+
 ```cmd
 schtasks /create /tn "Aria Automation" /tr "C:\Users\Bryan\Aria\run_automation.bat" /sc daily /st 02:00:00
 ```
 
 ### Linux crontab
+
 ```bash
 crontab -e
 # Add: 0 2 * * * cd ~/Aria && python3 run_automation.py
 ```
 
 ### macOS launchd
+
 Create `~/Library/LaunchAgents/com.aria.automation.plist`:
+
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -108,6 +118,7 @@ Create `~/Library/LaunchAgents/com.aria.automation.plist`:
 ```
 
 Then load it:
+
 ```bash
 launchctl load ~/Library/LaunchAgents/com.aria.automation.plist
 ```
@@ -115,6 +126,7 @@ launchctl load ~/Library/LaunchAgents/com.aria.automation.plist
 ## Support
 
 For more information:
+
 - See `AUTOMATION_RUNNER.md` for full documentation
 - Check script headers for technical details
 - Review test output for specific issues

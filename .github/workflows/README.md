@@ -74,14 +74,14 @@ This directory contains all GitHub Actions workflows for the **Aria** repository
 
 ## Workflow Matrix
 
-| Workflow                     | Push | PR  | Schedule | Manual | Path-filtered | Typical duration |
+| Workflow | Push | PR | Schedule | Manual | Path-filtered | Typical duration |
 | ---------------------------- | :--: | :-: | :------: | :----: | :-----------: | :--------------: |
-| `ci-pipeline.yml`            |  ✅  | ✅  |    ✅    |   ✅   |       ❌      |    15–30 min     |
-| `aria-tests.yml`             |  ✅  | ✅  |    ❌    |   ✅   |       ✅      |    20–30 min     |
-| `e2e-tests.yml`              |  ✅  | ✅  |    ❌    |   ✅   |       ❌      |    10–15 min     |
-| `auto-validation.yml`        |  ✅  | ✅  |    ✅    |   ✅   |       ✅      |     5–10 min     |
-| `azureml-train.yml`          |  ❌  | ❌  |    ❌    |   ✅   |      n/a      |     30+ min      |
-| `quantum-orchestration.yml`  |  ✅  | ❌  |    ❌    |   ✅   |       ❌      |     varies       |
+| `ci-pipeline.yml` | ✅ | ✅ | ✅ | ✅ | ❌ | 15–30 min |
+| `aria-tests.yml` | ✅ | ✅ | ❌ | ✅ | ✅ | 20–30 min |
+| `e2e-tests.yml` | ✅ | ✅ | ❌ | ✅ | ❌ | 10–15 min |
+| `auto-validation.yml` | ✅ | ✅ | ✅ | ✅ | ✅ | 5–10 min |
+| `azureml-train.yml` | ❌ | ❌ | ❌ | ✅ | n/a | 30+ min |
+| `quantum-orchestration.yml` | ✅ | ❌ | ❌ | ✅ | ❌ | varies |
 
 ---
 
@@ -89,15 +89,15 @@ This directory contains all GitHub Actions workflows for the **Aria** repository
 
 Configure these under **Settings → Secrets and variables → Actions**.
 
-| Name                       | Type    | Used by                                          | Description                                |
+| Name | Type | Used by | Description |
 | -------------------------- | ------- | ------------------------------------------------ | ------------------------------------------ |
-| `AZURE_CREDENTIALS`        | Secret  | `azureml-train.yml`, `quantum-orchestration.yml` | Service principal JSON for Azure login     |
-| `AZUREML_WORKSPACE`        | Variable| `azureml-train.yml`                              | Azure ML workspace name                    |
-| `AZUREML_RESOURCE_GROUP`   | Variable| `azureml-train.yml`                              | Azure resource group                       |
-| `AZURE_QUANTUM_WORKSPACE`  | Variable| `quantum-orchestration.yml`                      | Azure Quantum workspace name               |
-| `OPENAI_API_KEY`           | Secret  | `ci-pipeline.yml` (optional)                     | For provider-integration tests             |
-| `AZURE_OPENAI_ENDPOINT`    | Secret  | `ci-pipeline.yml` (optional)                     | Azure OpenAI endpoint URL                  |
-| `AZURE_OPENAI_API_KEY`     | Secret  | `ci-pipeline.yml` (optional)                     | Azure OpenAI API key                       |
+| `AZURE_CREDENTIALS` | Secret | `azureml-train.yml`, `quantum-orchestration.yml` | Service principal JSON for Azure login |
+| `AZUREML_WORKSPACE` | Variable | `azureml-train.yml` | Azure ML workspace name |
+| `AZUREML_RESOURCE_GROUP` | Variable | `azureml-train.yml` | Azure resource group |
+| `AZURE_QUANTUM_WORKSPACE` | Variable | `quantum-orchestration.yml` | Azure Quantum workspace name |
+| `OPENAI_API_KEY` | Secret | `ci-pipeline.yml` (optional) | For provider-integration tests |
+| `AZURE_OPENAI_ENDPOINT` | Secret | `ci-pipeline.yml` (optional) | Azure OpenAI endpoint URL |
+| `AZURE_OPENAI_API_KEY` | Secret | `ci-pipeline.yml` (optional) | Azure OpenAI API key |
 
 > 🔐 Never log secret values. Always pass secrets via `env:` blocks scoped to the smallest possible step.
 
@@ -247,13 +247,13 @@ pytest tests/aria/ -v
 
 ### Common errors
 
-| Symptom                                           | Likely cause                                        |
+| Symptom | Likely cause |
 | ------------------------------------------------- | --------------------------------------------------- |
-| `Resource not accessible by integration`          | Missing/insufficient `permissions:` block           |
-| `Error: secret X not found`                       | Secret not configured at repo/org level             |
-| Tests pass locally but fail in CI                 | Different Python/Node version, missing system deps  |
-| Workflow runs but skips all jobs                  | Path filter excludes all changed files              |
-| Scheduled workflow not running                    | Repo inactive >60 days, or file not on `main`       |
+| `Resource not accessible by integration` | Missing/insufficient `permissions:` block |
+| `Error: secret X not found` | Secret not configured at repo/org level |
+| Tests pass locally but fail in CI | Different Python/Node version, missing system deps |
+| Workflow runs but skips all jobs | Path filter excludes all changed files |
+| Scheduled workflow not running | Repo inactive >60 days, or file not on `main` |
 
 ---
 

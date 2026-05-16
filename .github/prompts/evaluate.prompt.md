@@ -31,7 +31,7 @@ python scripts/batch_evaluator.py --scan  # Discovers models in data_out/lora_tr
 ## Metrics
 
 | Metric | Description | Good Range |
-|--------|-------------|------------|
+| -------- | ------------- | ------------ |
 | accuracy | Exact match ratio | > 0.70 |
 | perplexity | Cross-entropy exp (lower = better) | < 50 |
 | f1 | Precision/recall harmonic mean | > 0.75 |

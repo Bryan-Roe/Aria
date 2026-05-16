@@ -48,7 +48,7 @@
 ## 🧪 Test Results (aria_expanded_v2)
 
 | Command | Expected | Generated | Status |
-|---------|----------|-----------|--------|
+| --------- | ---------- | ----------- | -------- |
 | move left | `[aria:move:left]` | `[aria:left]` | ⚠️ Partial |
 | aria smile | `[aria:expression:smile]` | `[aria:expression:smile]` | ✅ Perfect |
 | jump | `[aria:animate:jump]` | `[aria:animate:jump]` | ✅ Perfect |
@@ -111,7 +111,7 @@ python .\scripts\aria_test_debug.py      # Raw model output inspection
 ## 📈 Training Evolution
 
 | Version | Epochs | LR | Perplexity | Notes |
-|---------|--------|----|-----------:|-------|
+| --------- | -------- | ---- | -----------: | ------- |
 | aria_movement | 3 | 0.0003 | ~15 | Original verbose responses |
 | aria_simple | 2 | 0.002 | ~12 | Minimal tokens, still verbose |
 | aria_fast_v2 | 2 | 0.002 | ~10 | 16 samples, too small |

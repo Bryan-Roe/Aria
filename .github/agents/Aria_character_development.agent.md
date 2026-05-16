@@ -45,7 +45,7 @@ Aria understands these command types:
 
 ### 8 Core Actions
 | Action | Parameters | Example |
-|--------|-----------|---------|
+| -------- | ----------- | --------- |
 | `move` | x, y | `{"action": "move", "x": 50, "y": 60}` |
 | `say` | text | `{"action": "say", "text": "Hello!"}` |
 | `pickup` | object | `{"action": "pickup", "object": "ball"}` |
@@ -58,7 +58,7 @@ Aria understands these command types:
 ### API Endpoints
 
 | Endpoint | Method | Purpose |
-|----------|--------|---------|
+| ---------- | -------- | --------- |
 | `/api/aria/state` | GET | Current stage state |
 | `/api/aria/command` | POST | Process NL command → actions |
 | `/api/aria/execute` | POST | Run action sequences (plan/execute mode) |
@@ -112,7 +112,7 @@ curl -X POST http://localhost:8080/api/aria/execute -H "Content-Type: applicatio
 ## Key Files
 
 | File | Purpose |
-|------|---------|
+| ------ | --------- |
 | `apps/aria/server.py` | Python HTTP server, AriaActionParser, world gen |
 | `apps/aria/index.html` | Main character UI |
 | `apps/aria/aria_controller.js` | Animation engine, command handling, eye tracking |

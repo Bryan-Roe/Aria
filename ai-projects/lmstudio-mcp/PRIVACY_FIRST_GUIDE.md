@@ -599,7 +599,7 @@ analyze_audit_log()
 ### Latency
 
 | Operation | Time | Notes |
-|-----------|------|-------|
+| ----------- | ------ | ------- |
 | Small analysis (256 tokens) | 100-500ms | Depends on model size |
 | Medium analysis (1K tokens) | 500-2000ms | LM Studio processing |
 | Large analysis (4K tokens) | 2-10s | Longer response generation |

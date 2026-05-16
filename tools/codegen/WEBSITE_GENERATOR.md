@@ -1,10 +1,11 @@
 # Website Generator - Complete System
 
-**Aria Platform - Generate Complete Static Websites in Seconds**
+## Aria Platform - Generate Complete Static Websites in Seconds
 
 ## ✅ What You Can Generate
 
 ### 📱 Portfolio Websites
+
 - Hero section with CTA
 - Portfolio grid with projects
 - About section with skills
@@ -13,6 +14,7 @@
 - **Total Size**: ~8 KB ready to deploy
 
 ### 📊 Landing Pages (SaaS/Products)
+
 - Hero section
 - Features with cards
 - Pricing table
@@ -22,6 +24,7 @@
 - **Perfect for**: SaaS, products, services, startups
 
 ### 📝 Blogs
+
 - Post listing grid
 - Individual post pages
 - Archives by date/category
@@ -31,6 +34,7 @@
 - **Perfect for**: Writers, journalists, tech blogs
 
 ### 📖 Documentation Sites
+
 - Quick start guide
 - API reference table
 - Code examples
@@ -38,6 +42,7 @@
 - **Perfect for**: APIs, libraries, frameworks
 
 ### 🛒 E-Commerce Stores
+
 - Product catalog grid
 - Product detail pages
 - Shopping cart
@@ -50,21 +55,24 @@
 ## 🚀 How to Generate
 
 ### Method 1: Copilot Chat (FASTEST)
+
 Press `Ctrl+Shift+I` and type:
 
-```
+```text
 @llm-maker Build a professional portfolio website showcasing 12 projects with beautiful grid layout and contact form
 ```
 
 ### Method 2: Copy Ready Commands
 
 **Portfolio:**
-```
+
+```text
 @llm-maker Build a professional portfolio website with home, about, work, and contact pages
 ```
 
 **Blog:**
-```
+
+```text
 @llm-maker Create a tech blog with dark mode, post categories, archives, and social sharing buttons
 ```
 
