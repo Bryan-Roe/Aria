@@ -22,7 +22,12 @@ import sys
 import time
 from typing import Any, Dict, Optional
 
-__all__ = ["configure_logging", "get_logger", "JsonFormatter"]
+__all__ = [
+    "configure_logging",
+    "configure_json_logging",
+    "get_logger",
+    "JsonFormatter",
+]
 
 # ---------------------------------------------------------------------------
 # JSON formatter
@@ -174,6 +179,11 @@ def configure_logging(
         root.setLevel(numeric_level)
         for h in root.handlers:
             h.setLevel(numeric_level)
+
+
+def configure_json_logging(level: Optional[str] = None, stream: Any = None) -> None:
+    """Backward-compatible helper used by legacy imports."""
+    configure_logging(level=level, structured=True, stream=stream)
 
 
 def get_logger(name: str) -> logging.Logger:

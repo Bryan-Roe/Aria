@@ -7,12 +7,19 @@ set -euo pipefail
 # optional helpers for CI environments.
 #
 # Behavior:
-#  - Uses INTEGRATION_AI_STATUS_ENDPOINT (default: http://localhost:7071/api/ai/status)
-#  - Retries the endpoint for up to RETRY_COUNT attempts with RETRY_INTERVAL seconds
-#    between attempts (defaults: 30 attempts, 1s interval).
-#  - If START_FUNC_CMD is set, attempts to start that command in the background and
-#    waits for the endpoint to become available.
+#  - Always runs:
+#      python scripts/integration_smoke.py
+#      python scripts/ci_orchestrator.py --integration-contract-tests
+#      python scripts/ci_orchestrator.py --validate-all
+#  - In --strict-endpoints mode, also verifies /api/ai/status reachability.
 #  - Exits 0 on success, non-zero on failure (exit code 2 for unreachable endpoint).
+
+strict_endpoints=false
+for arg in "$@"; do
+  case "${arg}" in
+    --strict-endpoints) strict_endpoints=true ;;
+  esac
+done
 
 endpoint="${INTEGRATION_AI_STATUS_ENDPOINT:-http://localhost:7071/api/ai/status}"
 retry_count="${RETRY_COUNT:-30}"
@@ -23,6 +30,22 @@ log() {
   echo "[integration_contract_gate] $*"
 }
 
+run_step() {
+  local name="$1"
+  shift
+  log "Running ${name}: $*"
+  "$@"
+}
+
+run_step integration_smoke python scripts/integration_smoke.py
+run_step integration_contract_tests python scripts/ci_orchestrator.py --integration-contract-tests
+run_step validate_all python scripts/ci_orchestrator.py --validate-all
+
+if [[ "${strict_endpoints}" != "true" ]]; then
+  log "Standard mode complete."
+  exit 0
+fi
+
 if [[ -n "${start_cmd}" ]]; then
   log "START_FUNC_CMD is provided; attempting to start process in background."
   # shellcheck disable=SC2086
@@ -31,7 +54,7 @@ if [[ -n "${start_cmd}" ]]; then
   log "Started background process (PID=${start_pid}). Logs: /tmp/integration_contract_gate.start.log"
 fi
 
-log "Checking AI status endpoint: ${endpoint}"
+log "Strict mode: checking AI status endpoint: ${endpoint}"
 
 i=0
 while (( i < retry_count )); do
