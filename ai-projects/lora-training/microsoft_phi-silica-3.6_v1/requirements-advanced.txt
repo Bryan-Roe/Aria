@@ -2,7 +2,7 @@
 # Install with: pip install -r requirements-advanced.txt
 
 # Semantic search and document embedding
-sentence-transformers>=5.5.0
+sentence-transformers>=5.5.1
 
 # Evaluation metrics
 rouge-score>=0.1.2
