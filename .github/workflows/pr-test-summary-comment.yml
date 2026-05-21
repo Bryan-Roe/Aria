@@ -156,11 +156,13 @@ jobs:
                 const aiData = await aiRes.json();
                 const aiText = aiData?.choices?.[0]?.message?.content?.trim();
                 if (aiText) {
-                  body = `${marker}\n${aiText}\n\n_Workflow run: ${url}_`;
+                  const words = aiText.split(/\s+/).filter(Boolean);
+                  const bounded = words.length > 220 ? `${words.slice(0, 220).join(' ')}…` : aiText;
+                  body = `${marker}\n${bounded}\n\n_Workflow run: ${url}_`;
                 }
               } catch (e) {
                 const reason = (e && typeof e.message === 'string')
-                  ? e.message.slice(0, 200)
+                  ? e.message.slice(0, 500)
                   : 'unknown error';
                 core.warning(`AI summary failed (${reason}); using deterministic fallback summary.`);
               }
