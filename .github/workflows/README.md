@@ -114,7 +114,7 @@ Configure these under **Settings → Secrets and variables → Actions**.
 | `AZUREML_WORKSPACE` | Variable | `azureml-train.yml` | Azure ML workspace name |
 | `AZUREML_RESOURCE_GROUP` | Variable | `azureml-train.yml` | Azure resource group |
 | `AZURE_QUANTUM_WORKSPACE` | Variable | `quantum-orchestration.yml` | Azure Quantum workspace name |
-| `OPENAI_API_KEY` | Secret | `ci-pipeline.yml`, `pr-test-summary-comment.yml` (optional) | Provider integration tests and AI-authored workflow-run PR comments |
+| `OPENAI_API_KEY` | Secret | `ci-pipeline.yml`, `pr-test-summary-comment.yml` (optional) | OpenAI API access for provider integration tests and AI-generated PR workflow summaries |
 | `AZURE_OPENAI_ENDPOINT` | Secret | `ci-pipeline.yml` (optional) | Azure OpenAI endpoint URL |
 | `AZURE_OPENAI_API_KEY` | Secret | `ci-pipeline.yml` (optional) | Azure OpenAI API key |
 

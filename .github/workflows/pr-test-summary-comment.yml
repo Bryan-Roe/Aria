@@ -46,7 +46,7 @@ jobs:
             const prs = run.pull_requests || [];
             const openaiApiKey = process.env.OPENAI_API_KEY || '';
             const openaiModel = process.env.OPENAI_MODEL || 'gpt-4o-mini';
-            const maxCommentWords = 219; // Keep generated comments under 220 words.
+            const maxCommentWords = 219; // Keep generated comments at 219 words max.
             const maxErrorMessageLength = 500;
 
             // Try to enumerate artifacts and jobs (best-effort)
@@ -159,14 +159,15 @@ jobs:
                 const aiText = aiData?.choices?.[0]?.message?.content?.trim();
                 if (aiText) {
                   const words = aiText.split(/\s+/).filter(Boolean);
-                  const bounded = words.length >= 220 ? `${words.slice(0, maxCommentWords).join(' ')}…` : aiText;
+                  const bounded = words.length > maxCommentWords ? `${words.slice(0, maxCommentWords).join(' ')}…` : aiText;
                   body = `${marker}\n${bounded}\n\n_Workflow run: ${url}_`;
                 }
               } catch (e) {
+                const errorType = e && e.constructor && e.constructor.name ? e.constructor.name : 'Error';
                 const reason = (e && typeof e.message === 'string')
                   ? e.message.slice(0, maxErrorMessageLength)
                   : 'unknown error';
-                core.warning(`AI summary failed (${reason}); using deterministic fallback summary.`);
+                core.warning(`AI summary failed (${errorType}: ${reason}); using deterministic fallback summary.`);
               }
             }
 
