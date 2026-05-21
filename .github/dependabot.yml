@@ -151,3 +151,23 @@ updates:
       mount-deps:
         patterns:
           - "*"
+
+  - package-ecosystem: "pip"
+    directory: "/ai-projects/writer-reviewer-workflow"
+    <<: *defaults
+    commit-message:
+      prefix: "deps(writer-reviewer)"
+    groups:
+      writer-reviewer-deps:
+        patterns:
+          - "*"
+
+  - package-ecosystem: "pip"
+    directory: "/quantum-ai"
+    <<: *defaults
+    commit-message:
+      prefix: "deps(quantum-ai)"
+    groups:
+      quantum-ai-deps:
+        patterns:
+          - "*"
