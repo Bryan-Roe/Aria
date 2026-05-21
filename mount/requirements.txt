@@ -19,7 +19,7 @@ python-json-logger>=4.1.0
 
 # Data Processing
 pandas>=3.0.3
-numpy>=2.4.5
+numpy>=2.4.6
 
 # Optional: Add if you want direct imports from other modules
 # -e ../quantum-ai
