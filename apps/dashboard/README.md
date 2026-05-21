@@ -24,6 +24,9 @@ A simple Flask web dashboard for monitoring orchestrator status, resource usage,
 - `/resources` : Resource monitor snapshot JSON
 - `/results` : Results export JSON
 
+## AI Capability View
+- `ai-capabilities.html` : Focused AI capability metrics (fallbacks, latency p50/p95, safety blocks, memory usefulness proxy)
+
 ## Customization
 - Add more endpoints or UI sections as needed.
 - Integrate with authentication or advanced visualization if desired.

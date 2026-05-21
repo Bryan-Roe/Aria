@@ -1,0 +1,31 @@
+{
+  "version": "2026-05-21",
+  "objective": "Measure AI quality, fallback, latency, safety, and memory relevance before rollout.",
+  "metrics": {
+    "quality": "task_success_or_evaluator_score",
+    "fallback_rate": "provider_fallback_frequency",
+    "latency": "p50_p95_ms",
+    "safety": "blocked_or_flagged_output_rate",
+    "memory_usefulness": "retrieval_hit_relevance"
+  },
+  "checks": [
+    {
+      "name": "unit_suite",
+      "command": "python scripts/test_runner.py --unit"
+    },
+    {
+      "name": "provider_and_agi_regression",
+      "command": "python -m pytest ai-projects/chat-cli/src/test_chat_providers.py tests/test_agi_provider.py -q --tb=short"
+    },
+    {
+      "name": "memory_and_endpoint_guardrails",
+      "command": "python -m pytest tests/test_chat_memory.py tests/test_function_app_endpoints.py -q --tb=short"
+    }
+  ],
+  "rollback_triggers": [
+    "quality_drop",
+    "fallback_spike",
+    "latency_p95_breach",
+    "safety_regression"
+  ]
+}

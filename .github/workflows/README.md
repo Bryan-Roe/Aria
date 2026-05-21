@@ -51,6 +51,12 @@ This directory contains all GitHub Actions workflows for the **Aria** repository
 - **Duration:** ~10–15 minutes
 - **Notes:** not path-filtered; catches broad regressions
 
+#### `pr-test-summary-comment.yml` — AI PR comment summary for workflow runs
+- **Triggers:** `workflow_run` (currently `AGI smoke`)
+- **Purpose:** posts or updates a PR comment with AI-written action-run summaries
+- **Duration:** ~1–3 minutes
+- **Notes:** uses `OPENAI_API_KEY` when available; falls back to deterministic summary text
+
 ### 🔬 Validation Workflows
 
 #### `auto-validation.yml` — Orchestrator validation
@@ -89,6 +95,7 @@ This directory contains all GitHub Actions workflows for the **Aria** repository
 | `ci-pipeline.yml` | ✅ | ✅ | ✅ | ✅ | ❌ | 15–30 min |
 | `aria-tests.yml` | ✅ | ✅ | ❌ | ✅ | ✅ | 20–30 min |
 | `e2e-tests.yml` | ✅ | ✅ | ❌ | ✅ | ❌ | 10–15 min |
+| `pr-test-summary-comment.yml` | ❌ | ❌ | ❌ | ❌ | n/a | 1–3 min |
 | `auto-validation.yml` | ✅ | ✅ | ✅ | ✅ | ✅ | 5–10 min |
 | `default-github-automation.yml` | ✅ | ✅ | ✅ | ✅ | ✅ | 2–5 min |
 | `ruleset-json-validation.yml` | ✅ | ✅ | ✅ | ✅ | ✅ | 2–5 min |
@@ -107,7 +114,7 @@ Configure these under **Settings → Secrets and variables → Actions**.
 | `AZUREML_WORKSPACE` | Variable | `azureml-train.yml` | Azure ML workspace name |
 | `AZUREML_RESOURCE_GROUP` | Variable | `azureml-train.yml` | Azure resource group |
 | `AZURE_QUANTUM_WORKSPACE` | Variable | `quantum-orchestration.yml` | Azure Quantum workspace name |
-| `OPENAI_API_KEY` | Secret | `ci-pipeline.yml` (optional) | For provider-integration tests |
+| `OPENAI_API_KEY` | Secret | `ci-pipeline.yml`, `pr-test-summary-comment.yml` (optional) | OpenAI API access for provider integration tests and AI-generated PR workflow summaries (falls back to deterministic summary when unset) |
 | `AZURE_OPENAI_ENDPOINT` | Secret | `ci-pipeline.yml` (optional) | Azure OpenAI endpoint URL |
 | `AZURE_OPENAI_API_KEY` | Secret | `ci-pipeline.yml` (optional) | Azure OpenAI API key |
 

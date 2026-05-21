@@ -71,6 +71,15 @@ def _conn_str() -> Optional[str]:
     )
 
 
+def _memory_min_similarity_default() -> float:
+    raw = os.getenv("QAI_MEMORY_MIN_SIMILARITY", "0.2")
+    try:
+        value = float(raw)
+    except (TypeError, ValueError):
+        value = 0.2
+    return max(-1.0, min(1.0, value))
+
+
 def _create_connection() -> Any:
     # Use module-level pyodbc (may be None if not installed). Keep behavior
     # consistent: raise a clear RuntimeError when the dependency is missing.
@@ -320,36 +329,91 @@ def store_embedding(
 
 def fetch_similar_messages(
     query_embedding: Sequence[float],
-    limit: int = 5,
-    min_similarity: float = 0.0,
-) -> List[Tuple[str, float]]:
-    """
-    Return list of (message_id, similarity) sorted by descending similarity.
-    Returns [] if query is empty or no DB connection is configured.
+    top_k: int = 5,
+    session_id: Optional[str] = None,
+    min_similarity: Optional[float] = None,
+    limit: Optional[int] = None,
+) -> List[Dict[str, Any]]:
+    """Return relevant prior messages sorted by descending cosine similarity.
+
+    Supports the newer ``top_k`` + ``session_id`` calling contract used by
+    function_app while retaining ``limit`` compatibility for older callers.
+    Results are dicts with ``message_id``, ``similarity``, and ``content``.
     """
     if not query_embedding:
         return []
     if not _conn_str():
         return []
 
+    effective_top_k = int(limit if limit is not None else top_k)
+    if effective_top_k <= 0:
+        return []
+    effective_min_similarity = (
+        _memory_min_similarity_default()
+        if min_similarity is None
+        else max(-1.0, min(1.0, float(min_similarity)))
+    )
+
     conn: Optional[Any] = None
     cur = None
     try:
         conn = _get_conn()
         cur = conn.cursor()
-        cur.execute("SELECT message_id, embedding_vector, dim FROM embeddings")
-        rows = cur.fetchall()
+        try:
+            cur.execute(
+                """
+                SELECT
+                    e.message_id,
+                    e.embedding_vector,
+                    e.dim,
+                    COALESCE(cm.content, m.content, '') AS content,
+                    COALESCE(cm.session_id, m.session_id, '') AS session_id
+                FROM embeddings e
+                LEFT JOIN chat_messages cm ON cm.message_id = e.message_id
+                LEFT JOIN messages m ON m.message_id = e.message_id
+                """
+            )
+            rows = cur.fetchall()
+            has_joined_metadata = True
+        except Exception:
+            # Backward compatibility with minimal schemas that only have embeddings.
+            cur.execute("SELECT message_id, embedding_vector, dim FROM embeddings")
+            rows = cur.fetchall()
+            has_joined_metadata = False
 
-        scored: List[Tuple[str, float]] = []
+        scored: List[Dict[str, Any]] = []
         for row in rows:
             mid, blob, dim = row[0], row[1], int(row[2])
+            content = ""
+            row_session_id = ""
+            if has_joined_metadata:
+                content = str(row[3] or "").strip()
+                row_session_id = str(row[4] or "").strip()
             vec = _deserialize_f32(bytes(blob), dim)
             sim = _cosine(query_embedding, vec)
-            if sim >= min_similarity:
-                scored.append((mid, sim))
+            if sim < effective_min_similarity:
+                continue
+            # Empty/whitespace session_id values intentionally mean "no scoping".
+            scoped_session_id = str(session_id).strip() if session_id is not None else ""
+            if scoped_session_id:
+                # Fail closed for isolation: when caller scopes by session, ignore
+                # rows that lack session metadata or do not match exactly.
+                if not row_session_id or row_session_id != scoped_session_id:
+                    continue
+            if not content:
+                # Avoid injecting weak/unknown memory into prompts.
+                continue
+            scored.append(
+                {
+                    "message_id": str(mid),
+                    "similarity": float(sim),
+                    "content": content,
+                    "session_id": row_session_id or None,
+                }
+            )
 
-        scored.sort(key=lambda t: t[1], reverse=True)
-        return scored[:limit]
+        scored.sort(key=lambda t: t["similarity"], reverse=True)
+        return scored[:effective_top_k]
     except Exception:
         logger.exception("Failed to fetch similar messages")
         return []

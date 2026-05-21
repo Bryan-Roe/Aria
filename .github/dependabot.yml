@@ -33,6 +33,46 @@ updates:
         patterns:
           - "*"
 
+  - package-ecosystem: "docker"
+    directory: "/"
+    <<: *defaults
+    commit-message:
+      prefix: "deps(docker-root)"
+    groups:
+      docker-root:
+        patterns:
+          - "*"
+
+  - package-ecosystem: "docker"
+    directory: "/.devcontainer"
+    <<: *defaults
+    commit-message:
+      prefix: "deps(docker-devcontainer)"
+    groups:
+      docker-devcontainer:
+        patterns:
+          - "*"
+
+  - package-ecosystem: "docker"
+    directory: "/apps/aria"
+    <<: *defaults
+    commit-message:
+      prefix: "deps(docker-aria)"
+    groups:
+      docker-aria:
+        patterns:
+          - "*"
+
+  - package-ecosystem: "docker"
+    directory: "/ai-projects/quantum-ml/production"
+    <<: *defaults
+    commit-message:
+      prefix: "deps(docker-quantum-prod)"
+    groups:
+      docker-quantum-prod:
+        patterns:
+          - "*"
+
   - package-ecosystem: "devcontainers"
     directory: "/"
     <<: *defaults

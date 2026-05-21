@@ -6,16 +6,19 @@ on:
     types: [completed]
 
 permissions:
+  actions: read
   issues: write
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
   HARDEN_RUNNER_SHA: 0634a2670c59f64b4a01f0f96f84700a4088b9f0  # v2.12.2
-  GITHUB_SCRIPT_SHA: 60a0d83039c74a4aee5435082ffcb1c3799cdea    # v7.0.1
+  GITHUB_SCRIPT_SHA: 60a0d83039c74a4aee543508d2ffcb1c3799cdea    # v7.0.1
+  OPENAI_MODEL: gpt-4o-mini
 
 jobs:
   comment:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - name: Harden runner
         uses: step-security/harden-runner@${{ env.HARDEN_RUNNER_SHA }}
@@ -25,16 +28,30 @@ jobs:
 
       - name: Post PR test summary comment
         uses: actions/github-script@${{ env.GITHUB_SCRIPT_SHA }}
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          OPENAI_MODEL: ${{ env.OPENAI_MODEL }}
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
+            const marker = '<!-- ai-action-run-summary -->';
             const run = context.payload.workflow_run;
             if (!run) return;
+            if ((run.pull_requests || []).length === 0) {
+              core.info('Skipping PR comment because workflow run has no associated pull requests.');
+              return;
+            }
             const conclusion = run.conclusion;
             const url = run.html_url;
             const prs = run.pull_requests || [];
-            // Try to enumerate artifacts (best-effort)
+            const openaiApiKey = process.env.OPENAI_API_KEY || '';
+            const openaiModel = process.env.OPENAI_MODEL || 'gpt-4o-mini';
+            const maxCommentWords = 219; // Keep comments under 220 words; hard truncation is intentional for deterministic bounds.
+            const maxErrorMessageLength = 500;
+
+            // Try to enumerate artifacts and jobs (best-effort)
             let artifacts = [];
+            let jobs = [];
             try {
               const res = await github.rest.actions.listWorkflowRunArtifacts({
                 owner: context.repo.owner,
@@ -46,8 +63,135 @@ jobs:
               // ignore
             }
 
+            try {
+              const res = await github.rest.actions.listJobsForWorkflowRun({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                run_id: run.id,
+                per_page: 100
+              });
+              jobs = (res.data.jobs || []).map(j => ({
+                name: j.name,
+                status: j.status,
+                conclusion: j.conclusion || 'n/a',
+                started_at: j.started_at || null,
+                completed_at: j.completed_at || null
+              }));
+            } catch (e) {
+              // ignore
+            }
+
+            const failedJobs = jobs.filter(j => j.conclusion === 'failure');
+            const cancelledJobs = jobs.filter(j => j.conclusion === 'cancelled');
+            const timedOutJobs = jobs.filter(j => j.conclusion === 'timed_out');
+
+            const fallbackBody = [
+              marker,
+              `### 🤖 AI workflow summary: **${conclusion || 'unknown'}**`,
+              '',
+              `Workflow run: ${url}`,
+              '',
+              `- Total jobs: ${jobs.length}`,
+              `- Failed jobs: ${failedJobs.length}`,
+              `- Timed out jobs: ${timedOutJobs.length}`,
+              `- Cancelled jobs: ${cancelledJobs.length}`,
+              '',
+              '#### Jobs',
+              ...(jobs.length
+                ? jobs.map(j => `- ${j.name}: ${j.conclusion}`)
+                : ['- (unable to load jobs)']),
+              '',
+              '#### Artifacts',
+              ...(artifacts.length ? artifacts : ['- (none)']),
+              '',
+              'If you want to auto-merge this PR on success, add label `auto-merge`.'
+            ].join('\n');
+
+            let body = fallbackBody;
+            if (openaiApiKey) {
+              try {
+                const jobSummary = jobs.length
+                  ? jobs.map(j => `- ${j.name}: ${j.conclusion}`).join('\n')
+                  : '- (unable to load jobs)';
+                const prompt = [
+                  'Write a concise pull request comment summarizing a GitHub Actions workflow run.',
+                  'Use markdown.',
+                  'Include: overall status, likely blockers, and next actions.',
+                  'Do not invent data. Keep under 220 words.',
+                  '',
+                  `Workflow: ${run.name}`,
+                  `Conclusion: ${conclusion || 'unknown'}`,
+                  `URL: ${url}`,
+                  '',
+                  'Jobs:',
+                  jobSummary,
+                  '',
+                  'Artifacts:',
+                  artifacts.length ? artifacts.join('\n') : '- (none)',
+                ].join('\n');
+
+                const aiRes = await fetch('https://api.openai.com/v1/chat/completions', {
+                  method: 'POST',
+                  headers: {
+                    Authorization: `Bearer ${openaiApiKey}`,
+                    'Content-Type': 'application/json'
+                  },
+                  body: JSON.stringify({
+                    model: openaiModel,
+                    temperature: 0.1,
+                    messages: [
+                      {
+                        role: 'system',
+                        content: 'You are a CI assistant that writes brief, actionable PR comments from workflow run metadata.'
+                      },
+                      {
+                        role: 'user',
+                        content: prompt
+                      }
+                    ]
+                  })
+                });
+
+                if (!aiRes.ok) {
+                  throw new Error(`OpenAI API error: ${aiRes.status}`);
+                }
+                const aiData = await aiRes.json();
+                const aiText = aiData?.choices?.[0]?.message?.content?.trim();
+                if (aiText) {
+                  const words = aiText.split(/\s+/).filter(Boolean);
+                  const bounded = words.length > maxCommentWords ? `${words.slice(0, maxCommentWords).join(' ')}…` : aiText;
+                  body = `${marker}\n${bounded}\n\n_Workflow run: ${url}_`;
+                }
+              } catch (e) {
+                const errorType = e && e.constructor && e.constructor.name ? e.constructor.name : 'Error';
+                const reason = (e && typeof e.message === 'string')
+                  ? e.message.slice(0, maxErrorMessageLength)
+                  : 'unknown error';
+                core.warning(`AI summary failed (${errorType}: ${reason}); using deterministic fallback summary.`);
+              }
+            }
+
             for (const pr of prs) {
-              const body = `Automated test summary: **${conclusion}**\n\nWorkflow run: ${url}\n\nArtifacts:\n${artifacts.length ? artifacts.join('\n') : '- (none)'}\n\nIf you want to auto-merge this PR on success, add label \`auto-merge\`.`;
+              const { data: comments } = await github.rest.issues.listComments({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: pr.number,
+                per_page: 100
+              });
+              const existing = comments.find(c =>
+                c.user?.login === 'github-actions[bot]' &&
+                typeof c.body === 'string' &&
+                c.body.includes(marker)
+              );
+              if (existing) {
+                await github.rest.issues.updateComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  comment_id: existing.id,
+                  body
+                });
+                continue;
+              }
               await github.rest.issues.createComment({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
