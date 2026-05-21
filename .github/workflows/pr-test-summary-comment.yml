@@ -12,7 +12,7 @@ permissions:
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
   HARDEN_RUNNER_SHA: 0634a2670c59f64b4a01f0f96f84700a4088b9f0  # v2.12.2
-  GITHUB_SCRIPT_SHA: 60a0d83039c74a4aee5435082ffcb1c3799cdea    # v7.0.1
+  GITHUB_SCRIPT_SHA: 60a0d83039c74a4aee543508d2ffcb1c3799cdea    # v7.0.1
   OPENAI_MODEL: gpt-4o-mini
 
 jobs:
@@ -37,7 +37,10 @@ jobs:
             const marker = '<!-- ai-action-run-summary -->';
             const run = context.payload.workflow_run;
             if (!run) return;
-            if ((run.pull_requests || []).length === 0) return;
+            if ((run.pull_requests || []).length === 0) {
+              core.info('Skipping PR comment because workflow run has no associated pull requests.');
+              return;
+            }
             const conclusion = run.conclusion;
             const url = run.html_url;
             const prs = run.pull_requests || [];
@@ -156,7 +159,10 @@ jobs:
                   body = `${marker}\n${aiText}\n\n_Workflow run: ${url}_`;
                 }
               } catch (e) {
-                core.warning('AI summary failed; using deterministic fallback summary.');
+                const reason = (e && typeof e.message === 'string')
+                  ? e.message.slice(0, 200)
+                  : 'unknown error';
+                core.warning(`AI summary failed (${reason}); using deterministic fallback summary.`);
               }
             }
 
