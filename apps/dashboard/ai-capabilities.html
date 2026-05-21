@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Capability Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #101726;
+            color: #f2f5ff;
+            margin: 0;
+            padding: 24px;
+        }
+
+        h1 {
+            margin-top: 0;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 12px;
+        }
+
+        .card {
+            background: #1a2338;
+            border: 1px solid #2d3a57;
+            border-radius: 10px;
+            padding: 14px;
+        }
+
+        .label {
+            color: #9fb2df;
+            font-size: 0.85rem;
+        }
+
+        .value {
+            font-size: 1.4rem;
+            margin-top: 4px;
+        }
+
+        .meta {
+            margin-top: 16px;
+            color: #b8c7e8;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>🤖 AI Capability Dashboard</h1>
+    <div class="grid">
+        <div class="card">
+            <div class="label">Requests (chat + stream)</div>
+            <div class="value" id="requests">-</div>
+        </div>
+        <div class="card">
+            <div class="label">Fallback count</div>
+            <div class="value" id="fallbacks">-</div>
+        </div>
+        <div class="card">
+            <div class="label">Latency p50 / p95 (ms)</div>
+            <div class="value" id="latency">-</div>
+        </div>
+        <div class="card">
+            <div class="label">Safety blocks (input/output)</div>
+            <div class="value" id="safety">-</div>
+        </div>
+        <div class="card">
+            <div class="label">Memory injected / candidates</div>
+            <div class="value" id="memory">-</div>
+        </div>
+    </div>
+    <div class="meta" id="flags">Loading feature flags…</div>
+
+    <script>
+        async function loadData() {
+            const [statusResp, capResp] = await Promise.all([
+                fetch('/api/ai/status').then(r => r.json()).catch(() => ({})),
+                fetch('/api/ai/capabilities').then(r => r.json()).catch(() => ({})),
+            ]);
+            const snapshot = capResp.ai_capabilities || statusResp.ai_capabilities || {};
+            const metrics = snapshot.metrics || {};
+            const flags = snapshot.feature_flags || {};
+
+            const requests = (metrics.chat_requests || 0) + (metrics.chat_stream_requests || 0);
+            document.getElementById('requests').textContent = requests;
+            document.getElementById('fallbacks').textContent = metrics.fallback_count || 0;
+            document.getElementById('latency').textContent = `${metrics.latency_ms_p50 || 0} / ${metrics.latency_ms_p95 || 0}`;
+            document.getElementById('safety').textContent = `${metrics.safety_blocked_input || 0} / ${metrics.safety_blocked_output || 0}`;
+            document.getElementById('memory').textContent = `${metrics.memory_injected || 0} / ${metrics.memory_candidates || 0}`;
+            document.getElementById('flags').textContent =
+                `Guardrails: ${flags.guardrails_enabled ? 'on' : 'off'} | min_similarity: ${flags.memory_min_similarity ?? '-'} | top_k: ${flags.memory_top_k ?? '-'}`;
+        }
+
+        loadData();
+        setInterval(loadData, 10000);
+    </script>
+</body>
+
+</html>

@@ -593,6 +593,10 @@
                     <div class="action-icon">👤</div>
                     <div class="action-label">Aria Character</div>
                 </div>
+                <div class="action-btn" onclick="quickAction('aiCapabilities')">
+                    <div class="action-icon">🧠</div>
+                    <div class="action-label">AI Capability</div>
+                </div>
             </div>
         </div>
 
@@ -952,6 +956,7 @@
                 models: 'unified.html#models',
                 monitor: 'unified.html#monitor',
                 analytics: 'analytics.html',
+                aiCapabilities: 'ai-capabilities.html',
                 queue: () => showJobQueue(),
                 quantum: () => showToast('Quantum interface: Use quantum_mcp_server.py or quantum_autorun.py'),
                 chat: () => showToast('Chat interface: Run python ai-projects/chat-cli/src/chat_cli.py'),

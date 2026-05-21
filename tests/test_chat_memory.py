@@ -203,3 +203,64 @@ class TestFetchSimilarMessages:
     def test_returns_empty_empty_query(self):
         result = cm.fetch_similar_messages([])
         assert result == []
+
+    def test_accepts_top_k_and_returns_dict_records(self):
+        class _FakeCursor:
+            def execute(self, _sql):
+                return None
+
+            def fetchall(self):
+                dim = 3
+                v1 = cm._serialize_f32([1.0, 0.0, 0.0])
+                v2 = cm._serialize_f32([0.0, 1.0, 0.0])
+                return [
+                    ("m1", v1, dim, "first memory", "s1"),
+                    ("m2", v2, dim, "second memory", "s1"),
+                ]
+
+            def close(self):
+                return None
+
+        class _FakeConn:
+            def cursor(self):
+                return _FakeCursor()
+
+        with patch.dict(os.environ, {"QAI_DB_CONN": "dummy", "QAI_MEMORY_MIN_SIMILARITY": "-1"}):
+            with patch("shared.chat_memory.pyodbc.connect", return_value=_FakeConn()):
+                result = cm.fetch_similar_messages(
+                    [1.0, 0.0, 0.0], top_k=1, session_id="s1"
+                )
+
+        assert len(result) == 1
+        assert isinstance(result[0], dict)
+        assert result[0]["message_id"] == "m1"
+        assert "similarity" in result[0]
+
+    def test_session_isolation_skips_non_matching_or_unknown_session_rows(self):
+        class _FakeCursor:
+            def execute(self, _sql):
+                return None
+
+            def fetchall(self):
+                dim = 3
+                vec = cm._serialize_f32([1.0, 0.0, 0.0])
+                return [
+                    ("keep", vec, dim, "keep me", "session-a"),
+                    ("drop-mismatch", vec, dim, "drop me", "session-b"),
+                    ("drop-missing", vec, dim, "drop me too", ""),
+                ]
+
+            def close(self):
+                return None
+
+        class _FakeConn:
+            def cursor(self):
+                return _FakeCursor()
+
+        with patch.dict(os.environ, {"QAI_DB_CONN": "dummy", "QAI_MEMORY_MIN_SIMILARITY": "-1"}):
+            with patch("shared.chat_memory.pyodbc.connect", return_value=_FakeConn()):
+                result = cm.fetch_similar_messages(
+                    [1.0, 0.0, 0.0], top_k=5, session_id="session-a"
+                )
+
+        assert [row["message_id"] for row in result] == ["keep"]
