@@ -114,10 +114,9 @@ Configure these under **Settings → Secrets and variables → Actions**.
 | `AZUREML_WORKSPACE` | Variable | `azureml-train.yml` | Azure ML workspace name |
 | `AZUREML_RESOURCE_GROUP` | Variable | `azureml-train.yml` | Azure resource group |
 | `AZURE_QUANTUM_WORKSPACE` | Variable | `quantum-orchestration.yml` | Azure Quantum workspace name |
-| `OPENAI_API_KEY` | Secret | `ci-pipeline.yml` (optional) | For provider-integration tests |
+| `OPENAI_API_KEY` | Secret | `ci-pipeline.yml`, `pr-test-summary-comment.yml` (optional) | Provider integration tests and AI-authored workflow-run PR comments |
 | `AZURE_OPENAI_ENDPOINT` | Secret | `ci-pipeline.yml` (optional) | Azure OpenAI endpoint URL |
 | `AZURE_OPENAI_API_KEY` | Secret | `ci-pipeline.yml` (optional) | Azure OpenAI API key |
-| `OPENAI_API_KEY` | Secret | `pr-test-summary-comment.yml` (optional) | Enables AI-authored PR workflow-run comments |
 
 > 🔐 Never log secret values. Always pass secrets via `env:` blocks scoped to the smallest possible step.
 

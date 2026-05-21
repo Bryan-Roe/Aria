@@ -156,7 +156,7 @@ jobs:
                   body = `${marker}\n${aiText}\n\n_Workflow run: ${url}_`;
                 }
               } catch (e) {
-                core.warning(`AI summary failed: ${e.message}`);
+                core.warning('AI summary failed; using deterministic fallback summary.');
               }
             }
 
