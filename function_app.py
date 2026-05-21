@@ -472,6 +472,13 @@ def _safe_float_env(name: str, default: float) -> float:
         return float(default)
 
 
+def _safe_int_env(name: str, default: int) -> int:
+    try:
+        return int(os.getenv(name, str(default)))
+    except (TypeError, ValueError):
+        return int(default)
+
+
 def _default_chat_system_prompt() -> str:
     return os.getenv(
         "QAI_STANDARD_SYSTEM_PROMPT",
@@ -525,7 +532,7 @@ def _ai_capability_snapshot() -> dict:
         "feature_flags": {
             "guardrails_enabled": _env_flag("QAI_AI_GUARDRAILS_ENABLED", True),
             "memory_min_similarity": _safe_float_env("QAI_MEMORY_MIN_SIMILARITY", 0.2),
-            "memory_top_k": int(os.getenv("QAI_MEMORY_TOP_K", "5")),
+            "memory_top_k": _safe_int_env("QAI_MEMORY_TOP_K", 5),
         },
         "metrics": {
             **_AI_CAPABILITY_COUNTERS,
@@ -1103,7 +1110,7 @@ def chat(req: func.HttpRequest) -> func.HttpResponse:
                 user_embedding = generate_embedding(user_message_content)
                 similar = fetch_similar_messages(
                     user_embedding,
-                    top_k=int(os.getenv("QAI_MEMORY_TOP_K", "5")),
+                    top_k=_safe_int_env("QAI_MEMORY_TOP_K", 5),
                     session_id=session_id,
                     min_similarity=_safe_float_env("QAI_MEMORY_MIN_SIMILARITY", 0.2),
                 )
@@ -1708,7 +1715,7 @@ def chat_stream(req: func.HttpRequest) -> func.HttpResponse:
                 stream_embedding = generate_embedding(stream_user_content)
                 similar_msgs = fetch_similar_messages(
                     stream_embedding,
-                    top_k=int(os.getenv("QAI_MEMORY_TOP_K", "5")),
+                    top_k=_safe_int_env("QAI_MEMORY_TOP_K", 5),
                     session_id=body.get("session_id"),
                     min_similarity=_safe_float_env("QAI_MEMORY_MIN_SIMILARITY", 0.2),
                 )
@@ -1810,8 +1817,11 @@ def chat_stream(req: func.HttpRequest) -> func.HttpResponse:
                 for chunk in gen:
                     if not chunk:
                         continue
+                    next_text = cumulative_text + str(chunk)
                     if guardrails_enabled:
-                        output_decision = _ai_safety.validate_output(str(chunk))
+                        # Validate on cumulative output so cross-chunk patterns
+                        # are still detected in streaming mode.
+                        output_decision = _ai_safety.validate_output(next_text)
                         if not output_decision.allowed:
                             _AI_CAPABILITY_COUNTERS["safety_blocked_output"] += 1
                             _record_ai_capability_event(
@@ -1835,7 +1845,7 @@ def chat_stream(req: func.HttpRequest) -> func.HttpResponse:
                     yield (f"data: {payload}\n\n").encode("utf-8")
 
                     # Accumulate for tokenization; note: chunk may be partial
-                    cumulative_text += chunk
+                    cumulative_text = next_text
 
                     # Check for movement commands periodically
                     if not movement_commands_sent and len(cumulative_text) > 20:

@@ -393,10 +393,12 @@ def fetch_similar_messages(
             sim = _cosine(query_embedding, vec)
             if sim < effective_min_similarity:
                 continue
-            if session_id:
+            # Empty/whitespace session_id values intentionally mean "no scoping".
+            scoped_session_id = str(session_id).strip() if session_id is not None else ""
+            if scoped_session_id:
                 # Fail closed for isolation: when caller scopes by session, ignore
                 # rows that lack session metadata or do not match exactly.
-                if not row_session_id or row_session_id != str(session_id):
+                if not row_session_id or row_session_id != scoped_session_id:
                     continue
             if not content:
                 # Avoid injecting weak/unknown memory into prompts.

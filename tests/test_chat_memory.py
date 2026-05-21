@@ -264,3 +264,27 @@ class TestFetchSimilarMessages:
                 )
 
         assert [row["message_id"] for row in result] == ["keep"]
+
+    def test_min_similarity_env_is_clamped(self):
+        class _FakeCursor:
+            def execute(self, _sql):
+                return None
+
+            def fetchall(self):
+                dim = 3
+                vec = cm._serialize_f32([1.0, 0.0, 0.0])
+                return [("m1", vec, dim, "first memory", "s1")]
+
+            def close(self):
+                return None
+
+        class _FakeConn:
+            def cursor(self):
+                return _FakeCursor()
+
+        with patch.dict(os.environ, {"QAI_DB_CONN": "dummy", "QAI_MEMORY_MIN_SIMILARITY": "2.5"}):
+            with patch("shared.chat_memory.pyodbc.connect", return_value=_FakeConn()):
+                # 2.5 clamps to 1.0, so only exact/self matches pass.
+                result = cm.fetch_similar_messages([0.0, 1.0, 0.0], top_k=5)
+
+        assert result == []
