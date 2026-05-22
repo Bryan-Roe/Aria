@@ -5,7 +5,7 @@ pytest-asyncio>=1.2.0
 watchdog>=6.0.0
 black>=25.11.0
 isort>=6.1.0
-ruff>=0.15.13
+ruff>=0.15.14
 mypy>=1.19.1
 pre-commit>=4.3.0
 # Add any additional dev tools below

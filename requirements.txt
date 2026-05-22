@@ -9,7 +9,7 @@ azure-monitor-opentelemetry>=1.8.8,<2.0.0  # Application Insights telemetry
 azure-cosmos>=4.15.0,<5.0.0  # Cosmos DB client
 
 azure-functions
-openai>=2.37.0
+openai>=2.38.0
 colorama>=0.4.6
 pytest>=8.4.2
 pytest-asyncio>=1.2.0
@@ -30,7 +30,7 @@ tenacity>=9.1.2  # Retry/backoff for provider calls and orchestrator cycles
 # Dashboard / WebSocket
 Flask>=3.1.3
 flask-socketio>=5.6.1
-python-socketio>=5.16.1
+python-socketio>=5.16.2
 eventlet>=0.40.4  # Optional async server for SocketIO (can fallback to threading)
 gradio>=5.24.0
 
