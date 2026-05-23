@@ -399,7 +399,7 @@ class TestPostValidation:
         monkeypatch.setattr(
             app_module,
             "fetch_similar_messages",
-            lambda query_emb, top_k=5, session_id=None: [],
+            lambda query_emb, top_k=5, session_id=None, min_similarity=0.0: [],
         )
         monkeypatch.setattr(app_module, "log_chat_message_safe", None)
         monkeypatch.setattr(app_module, "cosmos_client", None)
@@ -417,8 +417,12 @@ class TestPostValidation:
         resp = app_module.chat(req)
 
         assert resp.status_code == 200
-        assert captured["messages"] == [
-            {"role": "user", "content": "Continue with the fix"}]
+        # prune_messages prepends a system prompt; verify the compaction placeholder
+        # was dropped and the user message is present (ignoring the system message).
+        user_messages = [m for m in captured["messages"] if m.get("role") == "user"]
+        assistant_messages = [m for m in captured["messages"] if m.get("content") == "Compacted conversation"]
+        assert user_messages == [{"role": "user", "content": "Continue with the fix"}]
+        assert assistant_messages == [], "Compaction placeholder should have been dropped"
 
     def test_chat_only_compaction_placeholder_messages_return_validation_error(self, app_module):
         """Placeholder-only histories should be rejected like other empty input."""
@@ -567,7 +571,7 @@ class TestPostValidation:
             captured["embedding"] = text
             return [0.1, 0.2, 0.3]
 
-        def _fake_similar(query_emb, top_k=5, session_id=None):
+        def _fake_similar(query_emb, top_k=5, session_id=None, min_similarity=0.0):
             captured["session_id"] = session_id
             return [{"content": "Previous answer about widgets", "similarity": 0.88}]
 

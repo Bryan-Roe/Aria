@@ -1049,15 +1049,15 @@ with gr.Blocks() as demo:
         def delete_suggestion(choice):
             items = load_suggestions()
             if not choice:
-                choices = [f"{it.get('ts','')} - {it.get('suggestion','')[:140].replace('\n',' ')}" for it in items]
+                choices = ["{} - {}".format(it.get('ts', ''), it.get('suggestion', '')[:140].replace('\n', ' ')) for it in items]
                 return gr.Dropdown.update(choices=choices, value=choices[0] if choices else None)
             new_items = []
             for it in items:
-                label = f"{it.get('ts','')} - {it.get('suggestion','')[:140].replace('\n',' ')}"
+                label = "{} - {}".format(it.get('ts', ''), it.get('suggestion', '')[:140].replace('\n', ' '))
                 if label != choice:
                     new_items.append(it)
             save_suggestions(new_items)
-            choices = [f"{it.get('ts','')} - {it.get('suggestion','')[:140].replace('\n',' ')}" for it in new_items]
+            choices = ["{} - {}".format(it.get('ts', ''), it.get('suggestion', '')[:140].replace('\n', ' ')) for it in new_items]
             return gr.Dropdown.update(choices=choices, value=choices[0] if choices else None)
 
         # Wire suggestion controls
