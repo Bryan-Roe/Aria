@@ -24,12 +24,12 @@ jobs:
     timeout-minutes: 45
     steps:
       - name: Checkout
-        uses: actions/checkout@${{ env.CHECKOUT_SHA }}
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
           persist-credentials: false
           fetch-depth: 1
 
       - name: Build and test devcontainer
-        uses: devcontainers/ci@${{ env.DEVCONTAINERS_CI_SHA }}
+        uses: devcontainers/ci@b63b30de439b47a52267f241112c5b453b673db5
         with:
           runCmd: python -m pytest tests -q --maxfail=1

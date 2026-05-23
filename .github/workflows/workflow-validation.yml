@@ -38,19 +38,19 @@ jobs:
     timeout-minutes: 10
     steps:
       - name: Harden runner
-        uses: step-security/harden-runner@${{ env.HARDEN_RUNNER_SHA }}
+        uses: step-security/harden-runner@0634a2670c59f64b4a01f0f96f84700a4088b9f0
         with:
           egress-policy: audit
           disable-sudo: true
 
       - name: Checkout code
-        uses: actions/checkout@${{ env.CHECKOUT_SHA }}
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
           persist-credentials: false
           fetch-depth: 1
 
       - name: Cache pip
-        uses: actions/cache@${{ env.ACTIONS_CACHE_SHA }}
+        uses: actions/cache@1bd1e32a3bdc45362d1e726936510720a7c30a57
         with:
           path: ~/.cache/pip
           key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements*.txt') }}
@@ -105,19 +105,19 @@ jobs:
     needs: validate-workflows
     steps:
       - name: Harden runner
-        uses: step-security/harden-runner@${{ env.HARDEN_RUNNER_SHA }}
+        uses: step-security/harden-runner@0634a2670c59f64b4a01f0f96f84700a4088b9f0
         with:
           egress-policy: audit
           disable-sudo: true
 
       - name: Checkout code
-        uses: actions/checkout@${{ env.CHECKOUT_SHA }}
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
           persist-credentials: false
           fetch-depth: 1
 
       - name: Cache pip
-        uses: actions/cache@${{ env.ACTIONS_CACHE_SHA }}
+        uses: actions/cache@1bd1e32a3bdc45362d1e726936510720a7c30a57
         with:
           path: ~/.cache/pip
           key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements*.txt') }}
@@ -125,7 +125,7 @@ jobs:
             ${{ runner.os }}-pip-
 
       - name: Set up Python
-        uses: actions/setup-python@${{ env.SETUP_PYTHON_SHA }}
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
         with:
           python-version: '3.11'
 

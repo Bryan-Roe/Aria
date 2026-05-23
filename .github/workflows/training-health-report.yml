@@ -39,7 +39,7 @@ jobs:
     timeout-minutes: 10
     steps:
       - name: Checkout code
-        uses: actions/checkout@${{ env.CHECKOUT_SHA }}
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
           persist-credentials: false
           fetch-depth: 1
@@ -186,7 +186,7 @@ jobs:
 
       - name: Open degradation issue
         if: steps.status.outputs.degraded == 'true' || github.event.inputs.open-issue == 'true'
-        uses: actions/github-script@${{ env.GITHUB_SCRIPT_SHA }}
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |

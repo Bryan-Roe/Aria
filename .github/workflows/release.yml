@@ -36,13 +36,13 @@ jobs:
     timeout-minutes: 30
     steps:
       - name: Harden runner
-        uses: step-security/harden-runner@${{ env.HARDEN_RUNNER_SHA }}
+        uses: step-security/harden-runner@0634a2670c59f64b4a01f0f96f84700a4088b9f0
         with:
           egress-policy: audit
           disable-sudo: true
 
       - name: Checkout code
-        uses: actions/checkout@${{ env.CHECKOUT_SHA }}
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
           fetch-depth: 0
           persist-credentials: false
@@ -138,14 +138,14 @@ jobs:
           fi
 
       - name: Upload artifacts to workflow run
-        uses: actions/upload-artifact@${{ env.UPLOAD_ARTIFACT_SHA }}
+        uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08
         with:
           name: release-artifacts
           path: ${{ env.RELEASE_DIR }}
           if-no-files-found: warn
 
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@${{ env.GH_RELEASE_SHA }}
+        uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65
         with:
           tag_name: ${{ steps.version.outputs.version }}
           name: Release ${{ steps.version.outputs.version }}
@@ -161,7 +161,7 @@ jobs:
           subject-path: 'release-artifacts/*'
 
       - name: Upload release artifacts
-        uses: softprops/action-gh-release@${{ env.GH_RELEASE_SHA }}
+        uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65
         with:
           tag_name: ${{ steps.version.outputs.version }}
           files: |

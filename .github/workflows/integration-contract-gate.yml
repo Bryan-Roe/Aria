@@ -87,13 +87,13 @@ jobs:
 
     steps:
       - name: Harden runner
-        uses: step-security/harden-runner@${{ env.HARDEN_RUNNER_SHA }}
+        uses: step-security/harden-runner@0634a2670c59f64b4a01f0f96f84700a4088b9f0
         with:
           egress-policy: audit
           disable-sudo: false
 
       - name: Checkout code
-        uses: actions/checkout@${{ env.CHECKOUT_SHA }}
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
           # Shallow clone is sufficient for contract validation; speeds up checkout.
           fetch-depth: 1
@@ -142,12 +142,12 @@ jobs:
           script-path: scripts/validate_composite_actions.py
 
       - name: Setup Node.js (needed for azure functions core tools install)
-        uses: actions/setup-node@${{ env.SETUP_NODE_SHA }}
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with:
           node-version: '18'
 
       - name: Cache npm
-        uses: actions/cache@${{ env.ACTIONS_CACHE_SHA }}
+        uses: actions/cache@1bd1e32a3bdc45362d1e726936510720a7c30a57
         with:
           path: |
             ~/.npm
@@ -271,7 +271,7 @@ jobs:
 
       - name: Upload contract results
         if: always()
-        uses: actions/upload-artifact@${{ env.UPLOAD_ARTIFACT_SHA }}
+        uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08
         with:
           name: contract-gate-results-${{ github.run_number }}-${{ github.run_attempt }}
           retention-days: 14

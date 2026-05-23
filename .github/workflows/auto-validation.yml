@@ -55,13 +55,13 @@ jobs:
     timeout-minutes: 15
     steps:
       - name: Harden runner
-        uses: step-security/harden-runner@${{ env.HARDEN_RUNNER_SHA }}
+        uses: step-security/harden-runner@0634a2670c59f64b4a01f0f96f84700a4088b9f0
         with:
           egress-policy: audit
           disable-sudo: true
 
       - name: Checkout
-        uses: actions/checkout@${{ env.CHECKOUT_SHA }}
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
           persist-credentials: false
           fetch-depth: 1
@@ -96,7 +96,7 @@ jobs:
 
       - name: Upload status artifacts
         if: always()
-        uses: actions/upload-artifact@${{ env.UPLOAD_ARTIFACT_SHA }}
+        uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08
         with:
           name: auto-validation-status-${{ github.run_number }}-${{ github.run_attempt }}
           path: |

@@ -51,20 +51,20 @@ jobs:
     timeout-minutes: 30
     steps:
       - name: Checkout
-        uses: actions/checkout@${{ env.CHECKOUT_SHA }}
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
           persist-credentials: false
           fetch-depth: 1
 
       - name: Azure login
-        uses: azure/login@${{ env.AZURE_LOGIN_SHA }}
+        uses: azure/login@a457da9ea143d694b1b9c7c869ebb04ebe844ef5
         with:
           # Create an Azure AD app and set its JSON creds in this secret:
           # { "clientId": "...", "clientSecret": "...", "subscriptionId": "...", "tenantId": "..." }
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
       - name: Install Azure ML CLI
-        uses: azure/cli@${{ env.AZURE_CLI_SHA }}
+        uses: azure/cli@9f7ce6f37c31b777ec6c6b6d1dfe7db79f497956
         with:
           inlineScript: |
             az extension add -n ml -y
@@ -76,7 +76,7 @@ jobs:
           WORKSPACE_NAME: ${{ github.event.inputs.workspaceName }}
 
       - name: Submit Azure ML job
-        uses: azure/cli@${{ env.AZURE_CLI_SHA }}
+        uses: azure/cli@9f7ce6f37c31b777ec6c6b6d1dfe7db79f497956
         with:
           inlineScript: |
             echo "Submitting job from $JOB_FILE ..."

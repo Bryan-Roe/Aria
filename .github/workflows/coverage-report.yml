@@ -45,13 +45,13 @@ jobs:
 
     steps:
       - name: Harden runner
-        uses: step-security/harden-runner@${{ env.HARDEN_RUNNER_SHA }}
+        uses: step-security/harden-runner@0634a2670c59f64b4a01f0f96f84700a4088b9f0
         with:
           egress-policy: audit
           disable-sudo: true
 
       - name: Checkout code
-        uses: actions/checkout@${{ env.CHECKOUT_SHA }}
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
           persist-credentials: false
           fetch-depth: 1
@@ -92,7 +92,7 @@ jobs:
       # On main pushes → store as next PR's baseline
       - name: Upload main baseline artifact
         if: github.ref == 'refs/heads/main'
-        uses: actions/upload-artifact@${{ env.UPLOAD_ARTIFACT_SHA }}
+        uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08
         with:
           name: coverage-main-baseline
           path: coverage.xml
@@ -103,7 +103,7 @@ jobs:
       # On PRs → upload per-SHA artifact for auditability
       - name: Upload PR coverage artifact
         if: github.event_name == 'pull_request'
-        uses: actions/upload-artifact@${{ env.UPLOAD_ARTIFACT_SHA }}
+        uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08
         with:
           name: coverage-pr-${{ github.event.pull_request.number }}
           path: coverage.xml
@@ -115,7 +115,7 @@ jobs:
       - name: Download main baseline
         if: github.event_name == 'pull_request'
         id: dl-base
-        uses: dawidd6/action-download-artifact@${{ env.DOWNLOAD_ARTIFACT_SHA }}
+        uses: dawidd6/action-download-artifact@bf251b5aa9c2f7eeb574a96ee720e24f801b7c11
         with:
           name: coverage-main-baseline
           workflow: coverage-report.yml
@@ -146,7 +146,7 @@ jobs:
 
       - name: Post PR coverage comment
         if: github.event_name == 'pull_request'
-        uses: actions/github-script@${{ env.GITHUB_SCRIPT_SHA }}
+        uses: actions/github-script@60a0d83039c74a4aee5435082ffcb1c3799cdea
         env:
           COV_TOTAL: ${{ steps.run.outputs.total }}
           COV_BASE: ${{ steps.baseline.outputs.total }}

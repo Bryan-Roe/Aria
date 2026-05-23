@@ -60,13 +60,13 @@ jobs:
 
     steps:
       - name: Harden runner
-        uses: step-security/harden-runner@${{ env.HARDEN_RUNNER_SHA }}
+        uses: step-security/harden-runner@0634a2670c59f64b4a01f0f96f84700a4088b9f0
         with:
           egress-policy: audit
           disable-sudo: true
 
       - name: Checkout
-        uses: actions/checkout@${{ env.CHECKOUT_SHA }}
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
           # Avoid leaving credentials on disk for subsequent steps.
           persist-credentials: false
@@ -75,7 +75,7 @@ jobs:
 
       - name: Lint Markdown files
         id: lint
-        uses: DavidAnson/markdownlint-cli2-action@${{ env.MARKDOWNLINT_ACTION_SHA }}
+        uses: DavidAnson/markdownlint-cli2-action@6b51ade7a9e4a75a7ad929842dd298a3804ebe8b
         with:
           # Lint all repo markdown except generated/output and mounted volumes.
           # Keep this list in sync with .markdownlintignore if present.
@@ -107,7 +107,7 @@ jobs:
 
       - name: Upload auto-fix patch
         if: ${{ always() && github.event_name == 'workflow_dispatch' && inputs.fix == true }}
-        uses: actions/upload-artifact@${{ env.UPLOAD_ARTIFACT_SHA }}
+        uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08
         with:
           name: markdownlint-autofix-patch
           path: markdownlint-autofix.patch

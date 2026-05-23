@@ -66,7 +66,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@${{ env.CHECKOUT_SHA }}
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
           fetch-depth: 1
           persist-credentials: false
@@ -187,7 +187,7 @@ jobs:
 
       - name: Upload test results
         if: always()
-        uses: actions/upload-artifact@${{ env.UPLOAD_ARTIFACT_SHA }}
+        uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08
         with:
           name: nightly-test-results-${{ github.run_number }}
           retention-days: 30
@@ -231,14 +231,14 @@ jobs:
     timeout-minutes: 5
     steps:
       - name: Checkout code
-        uses: actions/checkout@${{ env.CHECKOUT_SHA }}
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
           fetch-depth: 1
           persist-credentials: false
 
       - name: Download previous successful baseline
         id: download-prev
-        uses: dawidd6/action-download-artifact@${{ env.DOWNLOAD_ARTIFACT_SHA }}
+        uses: dawidd6/action-download-artifact@bf251b5aa9c2f7eeb574a96ee720e24f801b7c11
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           workflow: nightly-regression.yml
@@ -323,7 +323,7 @@ jobs:
 
       - name: Open regression issue
         if: steps.compare.outputs.regression == 'true'
-        uses: actions/github-script@${{ env.GITHUB_SCRIPT_SHA }}
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b
         env:
           PASSED:      ${{ needs.full-test-suite.outputs.passed }}
           FAILED:      ${{ needs.full-test-suite.outputs.failed }}

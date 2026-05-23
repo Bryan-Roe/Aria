@@ -117,13 +117,13 @@ jobs:
       pull-requests: write
     steps:
       - name: Harden runner
-        uses: step-security/harden-runner@${{ env.HARDEN_RUNNER_SHA }}
+        uses: step-security/harden-runner@0634a2670c59f64b4a01f0f96f84700a4088b9f0
         with:
           egress-policy: audit
           disable-sudo: true
 
       - name: Checkout repository
-        uses: actions/checkout@${{ env.CHECKOUT_SHA }}
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
           persist-credentials: false
           fetch-depth: 0
@@ -146,7 +146,7 @@ jobs:
 
       - name: Dependency Review
         if: steps.deps_changed.outputs.changed == 'true'
-        uses: actions/dependency-review-action@${{ env.DEPENDENCY_REVIEW_SHA }}
+        uses: actions/dependency-review-action@da24556b548a50705dd671f47852072ea4c105d9
         with:
           fail-on-severity: high
           comment-summary-in-pr: on-failure
@@ -191,14 +191,14 @@ jobs:
 
     steps:
       - name: Harden runner
-        uses: step-security/harden-runner@${{ env.HARDEN_RUNNER_SHA }}
+        uses: step-security/harden-runner@0634a2670c59f64b4a01f0f96f84700a4088b9f0
         with:
           egress-policy: audit
           # Allow CodeQL bundle + community packs from GHCR.
           disable-sudo: false
 
       - name: Checkout repository
-        uses: actions/checkout@${{ env.CHECKOUT_SHA }}
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
           fetch-depth: 0
           ref: ${{ github.event.pull_request.head.sha || github.ref }}
@@ -206,7 +206,7 @@ jobs:
           submodules: recursive
 
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@${{ env.CODEQL_ACTION_SHA }}
+        uses: github/codeql-action/init@4e828ff8d448a8a6e532957b1811f387a63867e8
         with:
           languages: ${{ matrix.language }}
           build-mode: ${{ matrix.build-mode }}
@@ -214,7 +214,7 @@ jobs:
 
       - name: Perform CodeQL Analysis
         id: analyze
-        uses: github/codeql-action/analyze@${{ env.CODEQL_ACTION_SHA }}
+        uses: github/codeql-action/analyze@4e828ff8d448a8a6e532957b1811f387a63867e8
         with:
           category: "/language:${{ matrix.language }}"
           upload: always
@@ -223,7 +223,7 @@ jobs:
 
       - name: Upload SARIF as artifact (debug / archival)
         if: always()
-        uses: actions/upload-artifact@${{ env.UPLOAD_ARTIFACT_SHA }}
+        uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08
         with:
           name: codeql-sarif-${{ matrix.language }}
           path: ${{ runner.temp }}/sarif-${{ matrix.language }}
@@ -245,12 +245,12 @@ jobs:
       security-events: read
     steps:
       - name: Harden runner
-        uses: step-security/harden-runner@${{ env.HARDEN_RUNNER_SHA }}
+        uses: step-security/harden-runner@0634a2670c59f64b4a01f0f96f84700a4088b9f0
         with:
           egress-policy: audit
 
       - name: Summarise code scanning alerts + autofixes for this PR
-        uses: actions/github-script@${{ env.GITHUB_SCRIPT_SHA }}
+        uses: actions/github-script@60a0d83039c74a4aee5435082ffcb1c3799cdea
         with:
           script: |
             const pr = context.payload.pull_request;
@@ -345,31 +345,37 @@ jobs:
 
     steps:
       - name: Harden runner
-        uses: step-security/harden-runner@${{ env.HARDEN_RUNNER_SHA }}
+        uses: step-security/harden-runner@0634a2670c59f64b4a01f0f96f84700a4088b9f0
         with:
           egress-policy: audit
           disable-sudo: false
 
       - name: Determine checkout ref
         id: ref
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          PR_HEAD_REF: ${{ github.event.pull_request.head.ref }}
+          PR_HEAD_REPO: ${{ github.event.pull_request.head.repo.full_name }}
+          REPOSITORY: ${{ github.repository }}
+          REF_NAME: ${{ github.ref_name }}
         run: |
           set -euo pipefail
-          if [ "${{ github.event_name }}" = "pull_request" ]; then
-            echo "ref=${{ github.event.pull_request.head.ref }}" >> "$GITHUB_OUTPUT"
-            echo "repo=${{ github.event.pull_request.head.repo.full_name }}" >> "$GITHUB_OUTPUT"
-            if [ "${{ github.event.pull_request.head.repo.full_name }}" = "${{ github.repository }}" ]; then
+          if [ "$EVENT_NAME" = "pull_request" ]; then
+            echo "ref=$PR_HEAD_REF" >> "$GITHUB_OUTPUT"
+            echo "repo=$PR_HEAD_REPO" >> "$GITHUB_OUTPUT"
+            if [ "$PR_HEAD_REPO" = "$REPOSITORY" ]; then
               echo "can_push=true" >> "$GITHUB_OUTPUT"
             else
               echo "can_push=false" >> "$GITHUB_OUTPUT"
             fi
           else
-            echo "ref=${{ github.ref_name }}" >> "$GITHUB_OUTPUT"
-            echo "repo=${{ github.repository }}" >> "$GITHUB_OUTPUT"
+            echo "ref=$REF_NAME" >> "$GITHUB_OUTPUT"
+            echo "repo=$REPOSITORY" >> "$GITHUB_OUTPUT"
             echo "can_push=false" >> "$GITHUB_OUTPUT"  # use PR flow instead
           fi
 
       - name: Checkout repository
-        uses: actions/checkout@${{ env.CHECKOUT_SHA }}
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
           ref: ${{ steps.ref.outputs.ref }}
           repository: ${{ steps.ref.outputs.repo }}
@@ -377,19 +383,19 @@ jobs:
           persist-credentials: true
 
       - name: Set up Python
-        uses: actions/setup-python@${{ env.SETUP_PYTHON_SHA }}
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
         with:
           python-version: "3.12"
           cache: "pip"
 
       - name: Set up Node.js
-        uses: actions/setup-node@${{ env.SETUP_NODE_SHA }}
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with:
           node-version: "20"
 
       # Cache pip and npm to reduce repeated install time across runs.
       - name: Cache pip
-        uses: actions/cache@${{ env.ACTIONS_CACHE_SHA }}
+        uses: actions/cache@1bd1e32a3bdc45362d1e726936510720a7c30a57
         with:
           path: ~/.cache/pip
           key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements*.txt') }}
@@ -397,7 +403,7 @@ jobs:
             ${{ runner.os }}-pip-
 
       - name: Cache npm
-        uses: actions/cache@${{ env.ACTIONS_CACHE_SHA }}
+        uses: actions/cache@1bd1e32a3bdc45362d1e726936510720a7c30a57
         with:
           path: |
             ~/.npm
@@ -518,9 +524,7 @@ jobs:
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -A
-          git commit -m "style: apply automated autofixes (ruff / prettier / clang-format)
-
-Generated by the CodeQL Advanced workflow." || echo "No commit created"
+          git commit -m "style: apply automated autofixes (ruff / prettier / clang-format) [CodeQL Advanced]" || echo "No commit created"
           git push origin "HEAD:${{ steps.ref.outputs.ref }}"
 
       # --- Path B: fork PR → upload patch artifact + comment for maintainer.
@@ -533,7 +537,7 @@ Generated by the CodeQL Advanced workflow." || echo "No commit created"
 
       - name: Upload patch artifact
         if: steps.diff.outputs.changed == 'true' && github.event_name == 'pull_request' && steps.ref.outputs.can_push == 'false'
-        uses: actions/upload-artifact@${{ env.UPLOAD_ARTIFACT_SHA }}
+        uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08
         with:
           name: autofix-patch
           path: autofix.patch
@@ -541,7 +545,7 @@ Generated by the CodeQL Advanced workflow." || echo "No commit created"
 
       - name: Comment patch link on fork PR
         if: steps.diff.outputs.changed == 'true' && github.event_name == 'pull_request' && steps.ref.outputs.can_push == 'false'
-        uses: actions/github-script@${{ env.GITHUB_SCRIPT_SHA }}
+        uses: actions/github-script@60a0d83039c74a4aee5435082ffcb1c3799cdea
         with:
           script: |
             const runUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
@@ -594,7 +598,7 @@ Generated by the CodeQL Advanced workflow." || echo "No commit created"
           (github.event_name == 'push' ||
            github.event_name == 'schedule' ||
            (github.event_name == 'workflow_dispatch' && inputs.open_autofix_pr))
-        uses: peter-evans/create-pull-request@${{ env.CREATE_PR_SHA }}
+        uses: peter-evans/create-pull-request@67ccf781d68cd99b580ae25a5c18a1cc84ffff1f
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           branch: chore/codeql-autofix-${{ github.run_id }}

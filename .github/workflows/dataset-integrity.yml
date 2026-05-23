@@ -67,7 +67,7 @@ jobs:
 
         steps:
             - name: Checkout code
-                            uses: actions/checkout@${{ env.CHECKOUT_SHA }}
+              uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
               with:
                   fetch-depth: 0
                   persist-credentials: false
@@ -133,12 +133,10 @@ jobs:
                       echo ""
                       echo "❌ Immutability violation — existing dataset files were changed:"
                       # Print each violating path on its own line (handle spaces/newlines safely)
-                      while IFS= read -r v; do
+                      printf '%s\n' "$violations" | while IFS= read -r v; do
                           [ -n "$v" ] || continue
                           echo "  - $v"
-                      done <<'VIO'
-$violations
-VIO
+                      done
                       echo ""
                       echo "The datasets/ directory is READ-ONLY. Existing files must not"
                       echo "be modified, deleted, renamed, or moved. Only adding new files"
@@ -183,7 +181,7 @@ VIO
 
         steps:
             - name: Checkout code
-                            uses: actions/checkout@${{ env.CHECKOUT_SHA }}
+              uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
               with:
                   fetch-depth: 0
                   persist-credentials: false

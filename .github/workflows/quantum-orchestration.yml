@@ -71,7 +71,7 @@ jobs:
       HAS_AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS != '' }}
 
     steps:
-      - uses: actions/checkout@${{ env.CHECKOUT_SHA }}
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
           persist-credentials: false
           fetch-depth: 1
@@ -116,7 +116,7 @@ jobs:
 
       - name: Azure Login
         if: env.HAS_AZURE_CREDENTIALS == 'true'
-        uses: azure/login@${{ env.AZURE_LOGIN_SHA }}
+        uses: azure/login@a457da9ea143d694b1b9c7c869ebb04ebe844ef5
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 

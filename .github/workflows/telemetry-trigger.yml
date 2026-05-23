@@ -23,12 +23,12 @@ jobs:
     timeout-minutes: 10
 
     steps:
-      - uses: actions/checkout@${{ env.CHECKOUT_SHA }}
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
           persist-credentials: false
           fetch-depth: 1
 
-      - uses: actions/setup-node@${{ env.SETUP_NODE_SHA }}
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with:
           node-version: 20
 
