@@ -664,6 +664,12 @@ class ProviderAliasTests(unittest.TestCase):
         self.assertIsInstance(provider, chat_providers.LocalEchoProvider)
         self.assertEqual(info.name, "local")
 
+    def test_local_echo_underscore_alias_resolves_to_local_provider(self) -> None:
+        """'local_echo' alias should resolve to LocalEchoProvider."""
+        provider, info = chat_providers.detect_provider(explicit="local_echo")
+        self.assertIsInstance(provider, chat_providers.LocalEchoProvider)
+        self.assertEqual(info.name, "local")
+
     def test_aliases_dict_is_exported(self) -> None:
         """_PROVIDER_ALIASES must be accessible as a module attribute."""
         aliases = chat_providers._PROVIDER_ALIASES

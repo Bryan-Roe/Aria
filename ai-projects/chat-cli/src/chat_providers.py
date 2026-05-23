@@ -1367,6 +1367,8 @@ def detect_provider(
                 then falls back to LocalEchoProvider.
             - Auto mode order: LM Studio -> Ollama -> Azure OpenAI -> OpenAI -> local.
     """
+    explicit_normalized = (explicit or "").strip().lower()
+    force_local_echo = explicit_normalized in {"local_echo", "local-echo"}
     provider_choice = (explicit or "auto").lower()
     provider_choice = _PROVIDER_ALIASES.get(provider_choice, provider_choice)
 
@@ -1565,6 +1567,11 @@ def detect_provider(
         return provider, ProviderChoice(name="openai", model=selected_model)
 
     if provider_choice == "local":
+        if force_local_echo:
+            selected_model = model_override or "local-echo"
+            provider = LocalEchoProvider()
+            return provider, ProviderChoice(name="local", model=selected_model)
+
         # "local" should prefer actual local-LLM runtimes first, then degrade
         # to the deterministic local echo provider when no runtime is available.
         if _check_lm_studio_available(lm_studio_base_url):
