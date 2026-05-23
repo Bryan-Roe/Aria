@@ -6,19 +6,22 @@ on:
     - cron: "15 2 * * 2"
 
 concurrency:
-  group: autofix-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 permissions:
-  contents: write
-  pull-requests: write
+  contents: read
 
 jobs:
   autofix:
     name: Run safe autofixes
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+
+    permissions:
+      contents: write
+      pull-requests: write
 
     steps:
       - name: Check out repository
@@ -32,19 +35,23 @@ jobs:
           python-version: "3.11"
           cache: "pip"
 
-      - name: Install autofix and test tooling
+      - name: Install autofix tooling
         shell: bash
         run: |
+          set -euo pipefail
           python -m pip install --upgrade pip
-          pip install ruff black pytest
+          python -m pip install \
+            "ruff==0.11.13" \
+            "black==25.1.0" \
+            "pytest==8.3.5"
 
-      - name: Detect Python paths
-        id: paths
+      - name: Detect Python files
+        id: detect
         shell: bash
         run: |
           set -euo pipefail
 
-          python <<'PY' > python_paths.txt
+          python <<'PY'
           from pathlib import Path
 
           ignore_dirs = {
@@ -59,65 +66,74 @@ jobs:
               "build",
           }
 
-          roots = []
+          has_python = False
           for path in Path(".").rglob("*.py"):
-              parts = set(path.parts)
-              if parts & ignore_dirs:
+              if ignore_dirs.intersection(path.parts):
                   continue
-              roots.append(str(path))
+              has_python = True
+              break
 
-          print("\n".join(sorted(roots)))
+          with open("detect_output.txt", "w", encoding="utf-8") as f:
+              f.write(f"has_python={'true' if has_python else 'false'}\n")
           PY
 
-          if [ -s python_paths.txt ]; then
-            echo "has_python=true" >> "$GITHUB_OUTPUT"
-            {
-              echo "python_files<<EOF"
-              cat python_paths.txt
-              echo "EOF"
-            } >> "$GITHUB_OUTPUT"
-          else
-            echo "has_python=false" >> "$GITHUB_OUTPUT"
-          fi
+          cat detect_output.txt >> "$GITHUB_OUTPUT"
 
       - name: Run Ruff autofixes
-        if: steps.paths.outputs.has_python == 'true'
+        if: steps.detect.outputs.has_python == 'true'
         shell: bash
         run: |
-          printf '%s\n' "${{ steps.paths.outputs.python_files }}" > python_paths.txt
-          xargs -a python_paths.txt ruff check --fix
+          set -euo pipefail
+          ruff check . --fix
 
       - name: Run Black formatting
-        if: steps.paths.outputs.has_python == 'true'
+        if: steps.detect.outputs.has_python == 'true'
         shell: bash
         run: |
-          printf '%s\n' "${{ steps.paths.outputs.python_files }}" > python_paths.txt
-          xargs -a python_paths.txt black
+          set -euo pipefail
+          black .
 
       - name: Verify Ruff
-        if: steps.paths.outputs.has_python == 'true'
+        if: steps.detect.outputs.has_python == 'true'
         shell: bash
         run: |
-          printf '%s\n' "${{ steps.paths.outputs.python_files }}" > python_paths.txt
-          xargs -a python_paths.txt ruff check
+          set -euo pipefail
+          ruff check .
 
       - name: Verify Black
-        if: steps.paths.outputs.has_python == 'true'
+        if: steps.detect.outputs.has_python == 'true'
         shell: bash
         run: |
-          printf '%s\n' "${{ steps.paths.outputs.python_files }}" > python_paths.txt
-          xargs -a python_paths.txt black --check
+          set -euo pipefail
+          black . --check
 
-      - name: Run pytest if tests exist
+      - name: Run pytest if configured
+        if: steps.detect.outputs.has_python == 'true'
         shell: bash
         run: |
+          set -euo pipefail
           if [ -d tests ] || [ -f pytest.ini ] || [ -f pyproject.toml ]; then
-            pytest -q
+            pytest -q || {
+              echo "Pytest failed in repo-wide mode; consider scoping tests per Python project."
+              exit 1
+            }
           else
             echo "No pytest configuration or tests directory found; skipping tests."
           fi
 
+      - name: Detect changes
+        id: changes
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git diff --quiet; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Create pull request
+        if: steps.changes.outputs.changed == 'true'
         uses: peter-evans/create-pull-request@v7
         with:
           commit-message: "ci(chore): apply automated safe autofixes"
@@ -145,3 +161,7 @@ jobs:
           labels: |
             automation
             maintenance
+
+      - name: No changes to commit
+        if: steps.changes.outputs.changed != 'true'
+        run: echo "No autofix changes detected."
