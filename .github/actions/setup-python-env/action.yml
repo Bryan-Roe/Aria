@@ -10,6 +10,10 @@ inputs:
     description: 'Install requirements.txt'
     required: false
     default: 'true'
+  install-dev-requirements:
+    description: 'Install requirements-dev.txt (or fallback editable dev install)'
+    required: false
+    default: 'false'
   extra-packages:
     description: 'Space-separated list of extra pip packages to install'
     required: false
@@ -37,6 +41,17 @@ runs:
         set -euo pipefail
         if [ -f requirements.txt ]; then
           python -m pip install -r requirements.txt
+        fi
+
+    - name: Install dev requirements
+      if: inputs.install-dev-requirements == 'true'
+      shell: bash
+      run: |
+        set -euo pipefail
+        if [ -f requirements-dev.txt ]; then
+          python -m pip install -r requirements-dev.txt
+        elif [ -f pyproject.toml ]; then
+          python -m pip install -e ".[dev]"
         fi
 
     - name: Install extra packages

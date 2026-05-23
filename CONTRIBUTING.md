@@ -170,7 +170,7 @@ isort .
    - Link related issues (`Fixes #123`).
    - Provide context: what, why, and how to test.
    - Include screenshots/recordings for UI changes (e.g., `apps/aria/`).
-6. **CI must pass.** The [`.github/workflows/pr-tests.yml`](.github/workflows/pr-tests.yml) workflow runs `pytest` on every PR targeting `main`.
+6. **CI must pass.** The canonical required PR check is [`Merge Gate / All Gates Passed`](.github/workflows/merge-gate.yml), with additional non-blocking regression lanes in [`.github/workflows/pr-tests.yml`](.github/workflows/pr-tests.yml) and [`.github/workflows/ci.yml`](.github/workflows/ci.yml).
 7. **Address review feedback** by pushing follow-up commits (avoid force-pushing during review unless asked).
 8. A maintainer will merge once approved.
 
