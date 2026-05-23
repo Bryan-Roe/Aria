@@ -31,9 +31,27 @@ This directory contains all GitHub Actions workflows for the **Aria** repository
 
 ### 🔄 Continuous Integration (CI)
 
-#### `ci-pipeline.yml` — Main CI pipeline
-- **Triggers:** push/PR to `main` and `dev`, daily schedule (`0 2 * * *` UTC)
-- **Purpose:** code validation, unit/integration tests, daily training, model deployment
+#### `merge-gate.yml` — Canonical PR validation gate
+- **Triggers:** pull requests to `main`, merge queue, manual dispatch
+- **Purpose:** single branch-protection check (`Merge Gate / All Gates Passed`) with fan-in across unit tests, PR validation, security review, and contract checks
+- **Duration:** ~10–20 minutes
+- **Owner:** Platform team
+
+#### `ci.yml` — Branch CI validation
+- **Triggers:** push to `main`, manual dispatch
+- **Purpose:** linting, type-checking (advisory), and matrix unit tests on branch updates
+- **Duration:** ~10–25 minutes
+- **Owner:** Platform team
+
+#### `pr-tests.yml` — Scheduled/manual regression lane
+- **Triggers:** push to `main`, daily schedule (`0 3 * * *` UTC), manual dispatch
+- **Purpose:** broader regression lane including pre-commit + unit tests and optional watcher execution
+- **Duration:** ~10–20 minutes
+- **Owner:** Platform team
+
+#### `ci-pipeline.yml` — Scheduled automation pipeline
+- **Triggers:** daily schedule (`0 2 * * *` UTC), manual dispatch
+- **Purpose:** orchestrated validation, integration smoke, scheduled training, and deployment chain
 - **Duration:** ~15–30 minutes
 - **Owner:** Platform team
 
@@ -92,7 +110,10 @@ This directory contains all GitHub Actions workflows for the **Aria** repository
 
 | Workflow | Push | PR | Schedule | Manual | Path-filtered | Typical duration |
 | ---------------------------- | :--: | :-: | :------: | :----: | :-----------: | :--------------: |
-| `ci-pipeline.yml` | ✅ | ✅ | ✅ | ✅ | ❌ | 15–30 min |
+| `merge-gate.yml` | ❌ | ✅ | ❌ | ✅ | ❌ | 10–20 min |
+| `ci.yml` | ✅ | ❌ | ❌ | ✅ | ✅ | 10–25 min |
+| `pr-tests.yml` | ✅ | ❌ | ✅ | ✅ | ❌ | 10–20 min |
+| `ci-pipeline.yml` | ❌ | ❌ | ✅ | ✅ | ❌ | 15–30 min |
 | `aria-tests.yml` | ✅ | ✅ | ❌ | ✅ | ✅ | 20–30 min |
 | `e2e-tests.yml` | ✅ | ✅ | ❌ | ✅ | ❌ | 10–15 min |
 | `pr-test-summary-comment.yml` | ❌ | ❌ | ❌ | ❌ | n/a | 1–3 min |
@@ -101,6 +122,15 @@ This directory contains all GitHub Actions workflows for the **Aria** repository
 | `ruleset-json-validation.yml` | ✅ | ✅ | ✅ | ✅ | ✅ | 2–5 min |
 | `azureml-train.yml` | ❌ | ❌ | ❌ | ✅ | n/a | 30+ min |
 | `quantum-orchestration.yml` | ✅ | ❌ | ❌ | ✅ | ❌ | varies |
+
+---
+
+## Canonical PR Merge Policy
+
+- **Single required status check:** `Merge Gate / All Gates Passed`
+- **Canonical PR validation workflow:** `.github/workflows/merge-gate.yml`
+- **Support-only lanes (not required for merge):** `ci.yml`, `pr-tests.yml`, and `ci-pipeline.yml`
+- **Workflow hygiene checks remain active:** `workflow-validation.yml` and `actionlint.yml` for workflow/config changes
 
 ---
 
@@ -179,9 +209,10 @@ concurrency:
 ### When to use each workflow
 
 - **Local development:** run tests locally first (`pytest`, `npm test`)
-- **PR review:** `e2e-tests.yml` provides quick validation
+- **PR review / merge readiness:** `merge-gate.yml` is the canonical merge decision path
+- **Branch CI health:** `ci.yml` validates pushed changes with lint + tests
+- **Scheduled regression lane:** `pr-tests.yml` and `ci-pipeline.yml` catch non-PR regressions
 - **Aria changes:** `aria-tests.yml` runs automatically via path filters
-- **Daily CI:** `ci-pipeline.yml` catches integration issues overnight
 - **Training:** use `azureml-train.yml` for GPU-accelerated cloud training
 - **Quantum:** use `quantum-orchestration.yml` for quantum computing tasks
 

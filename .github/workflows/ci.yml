@@ -10,16 +10,11 @@
 
 name: CI
 
+# Canonical PR validation runs through merge-gate.yml.
+# This workflow is for branch CI and manual validation runs.
 on:
   push:
     branches: [main]
-    paths-ignore:
-      - "docs/**"
-      - "**/*.md"
-      - ".gitignore"
-      - "LICENSE"
-  pull_request:
-    branches: [main, dev]
     paths-ignore:
       - "docs/**"
       - "**/*.md"

@@ -6,6 +6,7 @@ This repository uses GitHub Actions for continuous integration, testing, deploym
 
 | Workflow | Status | Description |
 | ------------------------- | -------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------- |
+| Merge Gate | ![Merge Gate](https://github.com/Bryan-Roe/Aria/actions/workflows/merge-gate.yml/badge.svg) | Canonical PR merge gate (`All Gates Passed`) |
 | CI Pipeline | ![CI Pipeline](https://github.com/Bryan-Roe/Aria/actions/workflows/ci-pipeline.yml/badge.svg) | Scheduled/manual pipeline for validation, training, and deployment |
 | Code Quality | ![Code Quality](https://github.com/Bryan-Roe/Aria/actions/workflows/code-quality.yml/badge.svg) | Linting, formatting, and security checks |
 | CodeQL Security | ![CodeQL](https://github.com/Bryan-Roe/Aria/actions/workflows/codeql.yml/badge.svg) | Security vulnerability scanning |
@@ -35,7 +36,19 @@ This repository uses GitHub Actions for continuous integration, testing, deploym
 
 ### Core CI/CD Workflows
 
-#### 1. **CI Pipeline** (`ci-pipeline.yml`)
+#### 1. **Merge Gate** (`merge-gate.yml`) ⭐ REQUIRED
+
+**Triggers:** PRs to `main`, merge queue, manual dispatch
+
+**Jobs:**
+
+- **unit-tests**: Fast unit test gate for merge readiness
+- **pr-validation**: Workflow + function binding validation
+- **security**: Dependency review security gate
+- **contract-gate**: Integration contract checks
+- **gates-passed**: Fan-in check used by branch protection (`All Gates Passed`)
+
+#### 2. **CI Pipeline** (`ci-pipeline.yml`)
 
 **Triggers:** Daily at 2 AM UTC, manual dispatch
 
@@ -49,7 +62,7 @@ This repository uses GitHub Actions for continuous integration, testing, deploym
   - Runs master orchestrator with full pipeline
 - **deploy**: Deploys best models with canary strategy
 
-#### 2. **Code Quality** (`code-quality.yml`) ⭐ NEW
+#### 3. **Code Quality** (`code-quality.yml`) ⭐ NEW
 
 **Triggers:** Push to main/dev, PRs
 
@@ -63,7 +76,7 @@ This repository uses GitHub Actions for continuous integration, testing, deploym
 - **security-check**: Dependency vulnerability scanning
   - safety check for known vulnerabilities
 
-#### 3. **CodeQL Security** (`codeql.yml`) ⭐ NEW
+#### 4. **CodeQL Security** (`codeql.yml`) ⭐ NEW
 
 **Triggers:** Push to main/dev, PRs to main, weekly on Monday
 
@@ -74,7 +87,7 @@ This repository uses GitHub Actions for continuous integration, testing, deploym
   - Uses extended security queries
   - Reports to GitHub Security tab
 
-#### 4. **PR Checks** (`pr-checks.yml`) ⭐ NEW
+#### 5. **PR Checks** (`pr-checks.yml`) ⭐ NEW
 
 **Triggers:** Pull requests opened/updated
 
