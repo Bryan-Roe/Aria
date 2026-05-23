@@ -1,39 +1,26 @@
 name: Copilot setup validation
-
-# Runnable checklist validating repository Copilot instruction files and related docs.
-# Runs YAML and Markdown linters and produces a small report artifact contributors can inspect.
-# Safe by default (read-only). Runs manually (workflow_dispatch), on push to .github, and on PRs touching .github.
-# Improvements:
-# - runs on pull_request as well as push
-# - caches pip/npm to speed repeated runs
-# - consistent shell safety (set -euo pipefail)
-# - workflow_dispatch input to optionally expand checks
-# - more robust file list handling and explicit reporting
+run-name: >
+  Copilot setup validation
+  (${{ github.event_name }}${{ github.event_name == 'workflow_dispatch' && format(', include_all={0}', inputs.include_all) || '' }})
 
 on:
   workflow_dispatch:
     inputs:
       include_all:
-        description: "Set to true to force linting of all repo markdown/yaml targets"
+        description: Force linting of all repository Markdown/YAML targets
         required: false
-        default: 'false'
+        type: boolean
+        default: false
   push:
     paths:
       - '.github/**'
-      - '.github/workflows/**'
-      - '.github/copilot*'
-      - '.github/*.md'
       - 'README.md'
   pull_request:
     paths:
       - '.github/**'
-      - '.github/workflows/**'
-      - '.github/copilot*'
-      - '.github/*.md'
       - 'README.md'
 
 concurrency:
-  # Scope cancellation to the same ref/PR to avoid cross-branch run interference.
   group: copilot-setup-check-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
@@ -42,12 +29,11 @@ permissions:
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
-  HARDEN_RUNNER_SHA: 0634a2670c59f64b4a01f0f96f84700a4088b9f0  # v2.12.2
-  CHECKOUT_SHA: 11bd71901bbe5b1630ceea73d27597364c9af683      # v4.2.2
-  ACTIONS_CACHE_SHA: 1bd1e32a3bdc45362d1e726936510720a7c30a57   # v4.2.0
-  SETUP_PYTHON_SHA: a26af69be951a213d495a4c3e4e4022e16d87065    # v5.6.0
-  SETUP_NODE_SHA: 49933ea5288caeca8642d1e84afbd3f7d6820020      # v4.4.0
-  UPLOAD_ARTIFACT_SHA: 65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 # v4.6.0
+  HARDEN_RUNNER_SHA: 0634a2670c59f64b4a01f0f96f84700a4088b9f0
+  CHECKOUT_SHA: 11bd71901bbe5b1630ceea73d27597364c9af683
+  SETUP_PYTHON_SHA: a26af69be951a213d495a4c3e4e4022e16d87065
+  SETUP_NODE_SHA: 49933ea5288caeca8642d1e84afbd3f7d6820020
+  UPLOAD_ARTIFACT_SHA: 65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08
 
 jobs:
   validate-setup:
@@ -69,123 +55,107 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
           fetch-depth: 1
-          # Avoid exposing the runner token to subsequent steps
           persist-credentials: false
-          # Ensure a clean working directory for deterministic linting
           clean: true
 
-      - name: Cache pip cache
-        uses: actions/cache@1bd1e32a3bdc45362d1e726936510720a7c30a57
-        with:
-          path: ~/.cache/pip
-          # include requirements hash in the key so cache is invalidated when deps change
-          key: ${{ runner.os }}-pip-cache-v1-${{ hashFiles('**/requirements.txt') }}
-
-      - name: Cache npm cache
-        uses: actions/cache@1bd1e32a3bdc45362d1e726936510720a7c30a57
-        with:
-          path: ~/.npm
-          # include package-lock.json hash to refresh cache when Node deps change
-          key: ${{ runner.os }}-npm-cache-v1-${{ hashFiles('**/package-lock.json') }}
-
-      - name: Setup Node (for markdownlint)
+      - name: Setup Node
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with:
           node-version: '20'
+          cache: npm
 
-      - name: Setup Python (for yamllint)
+      - name: Setup Python
         uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
         with:
           python-version: '3.11'
 
       - name: Install linters
         run: |
-          # Fail fast for install errors, keep linters pinned for reproducible runs
           set -euo pipefail
           python -m pip install --upgrade pip
-          pip install --no-cache-dir yamllint
-          # Install markdownlint CLI (pinned). Using global install on runner is acceptable here.
-          npm install -g markdownlint-cli@0.33.0 markdownlint-rule-helpers
+          pip install --disable-pip-version-check yamllint==1.35.1
+          npm install -g markdownlint-cli@0.33.0 markdownlint-rule-helpers@0.0.0
 
       - name: Lint YAML workflow files
         id: yamllint
         continue-on-error: true
         run: |
           set -euo pipefail
-          echo "Running yamllint on .github YAML files..."
 
-          # Build list of YAML files safely (handles spaces/newlines)
-          YAML_LIST_FILE="${RUNNER_TEMP}/yaml_files0"
+          YAML_LIST_FILE="${RUNNER_TEMP}/yaml_files.txt"
           find .github -type f \( -iname '*.yml' -o -iname '*.yaml' \) -print0 > "$YAML_LIST_FILE" || true
 
-          if [ -s "$YAML_LIST_FILE" ]; then
-            # convert null-delimited list to shell args safely
-            mapfile -d '' -t yaml_files < "$YAML_LIST_FILE"
-            printf "Found %d YAML files to lint\n" "${#yaml_files[@]}"
-            printf "%s\n" "${yaml_files[@]}"
+          if [ ! -s "$YAML_LIST_FILE" ]; then
+            echo "status=skipped" >> "$GITHUB_OUTPUT"
+            echo "No YAML files found under .github to lint."
+            exit 0
+          fi
 
-            # Inline basic yamllint config: prefer warnings for long lines
-            yamllint -c <(cat <<'YAML'
+          mapfile -d '' -t yaml_files < "$YAML_LIST_FILE"
+          printf "Found %d YAML files to lint\n" "${#yaml_files[@]}"
+          printf '%s\n' "${yaml_files[@]}"
+
+          yamllint -c <(cat <<'YAML'
           extends: default
           rules:
             line-length:
               max: 140
               level: warning
           YAML
-            ) "${yaml_files[@]}" || true
-          else
-            echo "No YAML files found under .github to lint."
-          fi
+          ) "${yaml_files[@]}"
+
+          echo "status=success" >> "$GITHUB_OUTPUT"
 
       - name: Lint Copilot and Markdown files
         id: mdlint
         continue-on-error: true
+        env:
+          INCLUDE_ALL: ${{ inputs.include_all }}
         run: |
           set -euo pipefail
-          echo "Running markdownlint on common Copilot docs..."
+
           md_targets=()
 
-          # Common Copilot doc locations (explicit)
           [ -f ".github/copilot-instructions.full.md" ] && md_targets+=(".github/copilot-instructions.full.md")
           [ -f ".github/copilot-instructions.md" ] && md_targets+=(".github/copilot-instructions.md")
           [ -f ".github/COPILOT.md" ] && md_targets+=(".github/COPILOT.md")
 
-          # Add any .github/*.md and root README.md
           for f in .github/*.md README.md; do
             [ -f "$f" ] && md_targets+=("$f")
           done
 
-          # If the workflow_dispatch input include_all=true, optionally search repository-wide markdown too
-          if [ "${{ github.event.inputs.include_all || 'false' }}" = "true" ]; then
-            echo "include_all set: adding docs/**/*.md and *.md at repo root"
+          if [ "${INCLUDE_ALL}" = "true" ]; then
             while IFS= read -r -d '' file; do
               md_targets+=("$file")
-            done < <(find . -type f -iname '*.md' -not -path './node_modules/*' -print0 || true)
+            done < <(find . -type f -iname '*.md' -not -path './node_modules/*' -print0 | sort -z)
           fi
 
-          if [ ${#md_targets[@]} -eq 0 ]; then
+          if [ "${#md_targets[@]}" -eq 0 ]; then
+            echo "status=skipped" >> "$GITHUB_OUTPUT"
             echo "No target markdown files found for markdownlint."
-          else
-            # Deduplicate targets
-            IFS=$'\n' read -r -d '' -a md_targets_unique < <(printf "%s\n" "${md_targets[@]}" | awk '!seen[$0]++' && printf '\0')
-            for m in "${md_targets_unique[@]}"; do
-              echo "linting: $m"
-            done
-
-            # Run markdownlint; continue-on-error preserves artifact creation even if lint failures exist
-            markdownlint "${md_targets_unique[@]}" || true
+            exit 0
           fi
+
+          mapfile -t md_targets_unique < <(printf "%s\n" "${md_targets[@]}" | awk '!seen[$0]++' | sort)
+
+          printf 'Linting markdown targets:\n'
+          printf ' - %s\n' "${md_targets_unique[@]}"
+
+          markdownlint "${md_targets_unique[@]}"
+
+          echo "status=success" >> "$GITHUB_OUTPUT"
 
       - name: Basic content checks for Copilot docs
         id: checks
-        continue-on-error: false
         run: |
           set -euo pipefail
-          REPORT="${RUNNER_TEMP}/copilot_setup_report.txt"
-          echo "Copilot Setup Report - $(date -u)" > "$REPORT"
-          echo "" >> "$REPORT"
 
-          # Files we expect or recommend
+          REPORT="${RUNNER_TEMP}/copilot_setup_report.txt"
+          {
+            echo "Copilot Setup Report - $(date -u)"
+            echo
+          } > "$REPORT"
+
           files_to_check=(
             .github/copilot-instructions.full.md
             .github/copilot-instructions.md
@@ -201,16 +171,15 @@ jobs:
             fi
           done
 
-          echo "" >> "$REPORT"
+          echo >> "$REPORT"
 
-          # Sanity-check the main Copilot instructions file if present
           MAIN=".github/copilot-instructions.full.md"
           if [ -f "$MAIN" ]; then
             echo "Checking header and length of $MAIN..." >> "$REPORT"
             head -n 10 "$MAIN" >> "$REPORT"
             echo "----" >> "$REPORT"
             wc -l "$MAIN" >> "$REPORT"
-            echo "" >> "$REPORT"
+            echo >> "$REPORT"
 
             if grep -qi "last updated" "$MAIN"; then
               echo "OK: contains 'Last updated' entry" >> "$REPORT"
@@ -227,31 +196,15 @@ jobs:
             echo "SKIP: $MAIN not present for deep checks" >> "$REPORT"
           fi
 
-          # Recommend a minimal copilot.yml if none exists
-          if [ ! -f ".github/copilot.yml" ]; then
-            echo "" >> "$REPORT"
-            echo "RECOMMENDATION: add a .github/copilot.yml to control Copilot settings for this repo." >> "$REPORT"
-            cat >> "$REPORT" <<'YAML'
-
-          Example minimal .github/copilot.yml:
-          # Opt-in per-repo Copilot configuration. Adjust to your repo needs.
-
-          copilot:
-            code-suggestions: enabled
-            chat: enabled
-            file-exclusions:
-              - path: "data/"
-              - path: "models/"
-          YAML
-          fi
-
-          # Export report location as a step output via GITHUB_OUTPUT (preferred)
           echo "report_path=$REPORT" >> "$GITHUB_OUTPUT"
 
-          # Print short report to logs for visibility
-          echo "---- Copilot setup report ----"
+          {
+            echo "## Copilot Setup Summary"
+            echo
+            sed -n '1,200p' "$REPORT"
+          } >> "$GITHUB_STEP_SUMMARY"
+
           cat "$REPORT"
-        shell: bash
 
       - name: Upload report artifact
         if: always()
@@ -259,20 +212,21 @@ jobs:
         with:
           name: copilot-setup-report
           path: ${{ steps.checks.outputs.report_path }}
-          # Don't fail the run if the report is missing; warn instead
           if-no-files-found: warn
-          # Keep reports for a short window
           retention-days: 7
 
-      - name: Summary annotation (best-effort)
+      - name: Fail if validation failed
         if: always()
-        env:
-          REPORT_PATH: ${{ steps.checks.outputs.report_path }}
         run: |
           set -euo pipefail
-          echo "=== Copilot Setup Summary ==="
-          sed -n '1,200p' "$REPORT_PATH" || true
 
-    outputs:
-      # Expose the report path from the checks step
-      report: ${{ steps.checks.outputs.report_path }}
+          yaml_outcome="${{ steps.yamllint.outcome }}"
+          md_outcome="${{ steps.mdlint.outcome }}"
+
+          echo "yamllint outcome: $yaml_outcome"
+          echo "markdownlint outcome: $md_outcome"
+
+          if [ "$yaml_outcome" = "failure" ] || [ "$md_outcome" = "failure" ]; then
+            echo "One or more lint checks failed."
+            exit 1
+          fi
