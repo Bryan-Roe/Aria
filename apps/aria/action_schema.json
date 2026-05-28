@@ -1,0 +1,131 @@
+{
+  "actions": {
+    "move": {
+      "params": [
+        "target",
+        "speed"
+      ],
+      "description": "Move Aria to a target position or object",
+      "example": {
+        "action": "move",
+        "target": {
+          "x": 50,
+          "y": 30
+        },
+        "speed": "normal"
+      }
+    },
+    "say": {
+      "params": [
+        "text",
+        "emotion"
+      ],
+      "description": "Make Aria speak with optional emotion",
+      "example": {
+        "action": "say",
+        "text": "Hello!",
+        "emotion": "happy"
+      }
+    },
+    "pickup": {
+      "params": [
+        "object_id"
+      ],
+      "description": "Pick up an object from the stage",
+      "example": {
+        "action": "pickup",
+        "object_id": "apple"
+      }
+    },
+    "drop": {
+      "params": [
+        "position"
+      ],
+      "description": "Drop currently held object at position",
+      "example": {
+        "action": "drop",
+        "position": {
+          "x": 50,
+          "y": 30
+        }
+      }
+    },
+    "throw": {
+      "params": [
+        "target",
+        "force"
+      ],
+      "description": "Throw held object toward target",
+      "example": {
+        "action": "throw",
+        "target": {
+          "x": 70,
+          "y": 40
+        },
+        "force": "medium"
+      }
+    },
+    "gesture": {
+      "params": [
+        "gesture_type"
+      ],
+      "description": "Perform a gesture animation",
+      "example": {
+        "action": "gesture",
+        "gesture_type": "wave"
+      }
+    },
+    "look": {
+      "params": [
+        "target"
+      ],
+      "description": "Look at a target position or object",
+      "example": {
+        "action": "look",
+        "target": "apple"
+      }
+    },
+    "wait": {
+      "params": [
+        "duration"
+      ],
+      "description": "Wait for specified duration in seconds",
+      "example": {
+        "action": "wait",
+        "duration": 2.0
+      }
+    }
+  },
+  "valid_gestures": [
+    "bow",
+    "clap",
+    "nod",
+    "shrug",
+    "thumbs_up",
+    "wave"
+  ],
+  "limits": {
+    "max_actions_per_sequence": 25,
+    "coordinate_range": [
+      0,
+      100
+    ],
+    "max_say_text_chars": 200,
+    "max_wait_seconds": 30
+  },
+  "fallback_tag_forms": [
+    "[aria:position:X:Y]",
+    "[aria:position:NAME]   # center, left, right, front, back, top, bottom",
+    "[aria:gesture:NAME]",
+    "[aria:animation:NAME]",
+    "[aria:say:TEXT]",
+    "[aria:expression:NAME]",
+    "[aria:pickup:OBJ]",
+    "[aria:drop]",
+    "[aria:drop:OBJ]",
+    "[aria:look:TARGET]",
+    "[aria:throw:X:Y]",
+    "[aria:wait:SECONDS]",
+    "[aria:effect:NAME:...]"
+  ]
+}
