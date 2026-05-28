@@ -500,7 +500,8 @@ def _build_guardrail_fallback_text() -> str:
 def _record_ai_capability_event(event_type: str, payload: dict) -> None:
     """Best-effort event append for auditability and trend analysis."""
     try:
-        out_dir = Path(__file__).resolve().parent / "data_out" / "ai_capabilities"
+        out_dir = Path(__file__).resolve().parent / \
+            "data_out" / "ai_capabilities"
         out_dir.mkdir(parents=True, exist_ok=True)
         event = {
             "timestamp": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
@@ -1113,7 +1114,8 @@ def chat(req: func.HttpRequest) -> func.HttpResponse:
                     user_embedding,
                     top_k=_safe_int_env("QAI_MEMORY_TOP_K", 5),
                     session_id=session_id,
-                    min_similarity=_safe_float_env("QAI_MEMORY_MIN_SIMILARITY", 0.2),
+                    min_similarity=_safe_float_env(
+                        "QAI_MEMORY_MIN_SIMILARITY", 0.2),
                 )
                 _AI_CAPABILITY_COUNTERS["memory_candidates"] += len(similar)
                 for idx, sm in enumerate(similar):
@@ -1700,7 +1702,8 @@ def chat_stream(req: func.HttpRequest) -> func.HttpResponse:
                         "safety": {"blocked": True, "stage": "input"},
                     }
                     yield (f"event: meta\n" f"data: {json.dumps(pre)}\n\n").encode("utf-8")
-                    payload = json.dumps({"delta": _build_guardrail_fallback_text()})
+                    payload = json.dumps(
+                        {"delta": _build_guardrail_fallback_text()})
                     yield (f"data: {payload}\n\n").encode("utf-8")
                     yield b"data: [DONE]\n\n"
 
@@ -1708,7 +1711,8 @@ def chat_stream(req: func.HttpRequest) -> func.HttpResponse:
                     body=blocked_sse(),
                     status_code=200,
                     mimetype="text/event-stream",
-                    headers={**create_cors_response_headers(), "Cache-Control": "no-cache"},
+                    headers={**create_cors_response_headers(),
+                             "Cache-Control": "no-cache"},
                 )
         stream_memory_messages: list[dict] = []
         if stream_user_content:
@@ -1718,9 +1722,11 @@ def chat_stream(req: func.HttpRequest) -> func.HttpResponse:
                     stream_embedding,
                     top_k=_safe_int_env("QAI_MEMORY_TOP_K", 5),
                     session_id=body.get("session_id"),
-                    min_similarity=_safe_float_env("QAI_MEMORY_MIN_SIMILARITY", 0.2),
+                    min_similarity=_safe_float_env(
+                        "QAI_MEMORY_MIN_SIMILARITY", 0.2),
                 )
-                _AI_CAPABILITY_COUNTERS["memory_candidates"] += len(similar_msgs)
+                _AI_CAPABILITY_COUNTERS["memory_candidates"] += len(
+                    similar_msgs)
                 for idx, sm in enumerate(similar_msgs):
                     memory_content = sm.get("content")
                     # Validate non-empty
@@ -1735,11 +1741,13 @@ def chat_stream(req: func.HttpRequest) -> func.HttpResponse:
                 logging.warning(f"Stream memory retrieval failed: {_mem_err}")
                 _record_ai_capability_event(
                     "memory_stream_retrieval_failed",
-                    {"error": str(_mem_err), "session_id": body.get("session_id")},
+                    {"error": str(_mem_err),
+                     "session_id": body.get("session_id")},
                 )
         if stream_memory_messages:
             messages = stream_memory_messages + messages
-            _AI_CAPABILITY_COUNTERS["memory_injected"] += len(stream_memory_messages)
+            _AI_CAPABILITY_COUNTERS["memory_injected"] += len(
+                stream_memory_messages)
 
         provider, info = _detect_provider_with_runtime_fallback(
             explicit=provider_choice,
