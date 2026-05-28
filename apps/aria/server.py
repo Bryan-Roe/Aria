@@ -1854,6 +1854,19 @@ class AriaRequestHandler(SimpleHTTPRequestHandler):
             }
             self.wfile.write(json.dumps(payload).encode("utf-8"))
             return
+        if self.path == "/api/aria/presets":
+            # Expose curated example commands so AI agents can discover what
+            # phrases are well-supported by the parser without trial and error.
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.end_headers()
+            presets_path = Path(__file__).resolve().parent / "command_presets.generated.json"
+            try:
+                payload = json.loads(presets_path.read_text(encoding="utf-8"))
+            except Exception as exc:  # pragma: no cover - defensive
+                payload = {"error": f"presets file unavailable: {exc}", "presets": []}
+            self.wfile.write(json.dumps(payload).encode("utf-8"))
+            return
         if self.path == "/":
             self.path = "/index.html"
         return super().do_GET()

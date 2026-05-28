@@ -101,3 +101,31 @@ def test_command_endpoint_returns_actions_for_wave(aria_server):
     assert "actions" in body or "tags" in body
     if body.get("actions"):
         assert any(a.get("action") == "gesture" for a in body["actions"])
+
+
+def test_presets_endpoint_returns_curated_commands(aria_server):
+    body = _get_json(aria_server["port"], "/api/aria/presets")
+    assert "presets" in body
+    assert isinstance(body["presets"], list) and body["presets"]
+    # Every preset entry should have a name and at least one command string
+    for entry in body["presets"]:
+        assert isinstance(entry.get("name"), str) and entry["name"]
+        assert isinstance(entry.get("commands"), list) and entry["commands"]
+        for cmd in entry["commands"]:
+            assert isinstance(cmd, str) and cmd.strip()
+
+
+def test_execute_plan_mode_returns_actions_without_side_effects(aria_server):
+    """Plan mode should return parsed actions without mutating stage_state."""
+    mod = aria_server["module"]
+    pos_before = dict(mod.stage_state["aria"].get("position", {}))
+    body = _post_json(
+        aria_server["port"],
+        "/api/aria/execute",
+        {"command": "wave", "auto_execute": False},
+    )
+    pos_after = dict(mod.stage_state["aria"].get("position", {}))
+    # Plan mode must not move Aria
+    assert pos_before == pos_after
+    # Response should expose either an 'actions' or 'plan' field for AI consumers
+    assert any(k in body for k in ("actions", "plan", "tags"))
