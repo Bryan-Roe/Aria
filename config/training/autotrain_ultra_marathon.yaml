@@ -10,7 +10,7 @@ jobs:
   - name: phi35_mega_synthetic_full
     category: ultra_marathon
     runner: hf
-    config: AI/microsoft_phi-silica-3.6_v1/lora/lora.yaml
+    config: ai-projects/lora-training/microsoft_phi-silica-3.6_v1/lora/lora.yaml
     dataset: datasets/chat/mega_synthetic
     save_dir: data_out/lora_training/ultra/phi35_mega_synthetic
     epochs: 3
@@ -24,7 +24,7 @@ jobs:
   - name: qwen25_mega_synthetic_full
     category: ultra_marathon
     runner: hf
-    config: AI/microsoft_phi-silica-3.6_v1/lora/lora.yaml
+    config: ai-projects/lora-training/microsoft_phi-silica-3.6_v1/lora/lora.yaml
     dataset: datasets/chat/mega_synthetic
     save_dir: data_out/lora_training/ultra/qwen25_mega_synthetic
     epochs: 3
@@ -40,7 +40,7 @@ jobs:
   - name: phi35_comprehensive_ultra_10epoch
     category: ultra_marathon
     runner: hf
-    config: AI/microsoft_phi-silica-3.6_v1/lora/lora.yaml
+    config: ai-projects/lora-training/microsoft_phi-silica-3.6_v1/lora/lora.yaml
     dataset: datasets/chat/comprehensive
     save_dir: data_out/lora_training/ultra/phi35_comprehensive_10epoch
     epochs: 10
@@ -54,7 +54,7 @@ jobs:
   - name: qwen25_comprehensive_ultra_10epoch
     category: ultra_marathon
     runner: hf
-    config: AI/microsoft_phi-silica-3.6_v1/lora/lora.yaml
+    config: ai-projects/lora-training/microsoft_phi-silica-3.6_v1/lora/lora.yaml
     dataset: datasets/chat/comprehensive
     save_dir: data_out/lora_training/ultra/qwen25_comprehensive_10epoch
     epochs: 10
@@ -70,7 +70,7 @@ jobs:
   - name: phi35_dolly_ultra_full
     category: ultra_marathon
     runner: hf
-    config: AI/microsoft_phi-silica-3.6_v1/lora/lora.yaml
+    config: ai-projects/lora-training/microsoft_phi-silica-3.6_v1/lora/lora.yaml
     dataset: datasets/chat/dolly
     save_dir: data_out/lora_training/ultra/phi35_dolly_ultra
     epochs: 8
@@ -84,7 +84,7 @@ jobs:
   - name: qwen25_dolly_ultra_full
     category: ultra_marathon
     runner: hf
-    config: AI/microsoft_phi-silica-3.6_v1/lora/lora.yaml
+    config: ai-projects/lora-training/microsoft_phi-silica-3.6_v1/lora/lora.yaml
     dataset: datasets/chat/dolly
     save_dir: data_out/lora_training/ultra/qwen25_dolly_ultra
     epochs: 8
@@ -100,7 +100,7 @@ jobs:
   - name: phi35_mixed_ultra_8epoch
     category: ultra_marathon
     runner: hf
-    config: AI/microsoft_phi-silica-3.6_v1/lora/lora.yaml
+    config: ai-projects/lora-training/microsoft_phi-silica-3.6_v1/lora/lora.yaml
     dataset: datasets/chat/mixed_chat
     save_dir: data_out/lora_training/ultra/phi35_mixed_8epoch
     epochs: 8
@@ -114,7 +114,7 @@ jobs:
   - name: qwen25_mixed_ultra_8epoch
     category: ultra_marathon
     runner: hf
-    config: AI/microsoft_phi-silica-3.6_v1/lora/lora.yaml
+    config: ai-projects/lora-training/microsoft_phi-silica-3.6_v1/lora/lora.yaml
     dataset: datasets/chat/mixed_chat
     save_dir: data_out/lora_training/ultra/qwen25_mixed_8epoch
     epochs: 8
@@ -130,7 +130,7 @@ jobs:
   - name: phi35_repo_ultra_6epoch
     category: ultra_marathon
     runner: hf
-    config: AI/microsoft_phi-silica-3.6_v1/lora/lora.yaml
+    config: ai-projects/lora-training/microsoft_phi-silica-3.6_v1/lora/lora.yaml
     dataset: datasets/chat/app_repo_augmented
     save_dir: data_out/lora_training/ultra/phi35_repo_6epoch
     epochs: 6
@@ -144,7 +144,7 @@ jobs:
   - name: qwen25_repo_ultra_6epoch
     category: ultra_marathon
     runner: hf
-    config: AI/microsoft_phi-silica-3.6_v1/lora/lora.yaml
+    config: ai-projects/lora-training/microsoft_phi-silica-3.6_v1/lora/lora.yaml
     dataset: datasets/chat/app_repo_augmented
     save_dir: data_out/lora_training/ultra/qwen25_repo_6epoch
     epochs: 6
@@ -161,7 +161,7 @@ jobs:
   - name: phi35_lr_00005_comprehensive
     category: ultra_hpo
     runner: hf
-    config: AI/microsoft_phi-silica-3.6_v1/lora/lora.yaml
+    config: ai-projects/lora-training/microsoft_phi-silica-3.6_v1/lora/lora.yaml
     dataset: datasets/chat/comprehensive
     save_dir: data_out/lora_training/ultra/phi35_lr_00005
     epochs: 6
@@ -175,7 +175,7 @@ jobs:
   - name: phi35_lr_00015_comprehensive
     category: ultra_hpo
     runner: hf
-    config: AI/microsoft_phi-silica-3.6_v1/lora/lora.yaml
+    config: ai-projects/lora-training/microsoft_phi-silica-3.6_v1/lora/lora.yaml
     dataset: datasets/chat/comprehensive
     save_dir: data_out/lora_training/ultra/phi35_lr_00015
     epochs: 6
@@ -189,7 +189,7 @@ jobs:
   - name: phi35_lr_00025_comprehensive
     category: ultra_hpo
     runner: hf
-    config: AI/microsoft_phi-silica-3.6_v1/lora/lora.yaml
+    config: ai-projects/lora-training/microsoft_phi-silica-3.6_v1/lora/lora.yaml
     dataset: datasets/chat/comprehensive
     save_dir: data_out/lora_training/ultra/phi35_lr_00025
     epochs: 6
@@ -203,7 +203,7 @@ jobs:
   - name: phi35_lr_0005_comprehensive
     category: ultra_hpo
     runner: hf
-    config: AI/microsoft_phi-silica-3.6_v1/lora/lora.yaml
+    config: ai-projects/lora-training/microsoft_phi-silica-3.6_v1/lora/lora.yaml
     dataset: datasets/chat/comprehensive
     save_dir: data_out/lora_training/ultra/phi35_lr_0005
     epochs: 5
@@ -218,7 +218,7 @@ jobs:
   - name: qwen25_dropout_005_comprehensive
     category: ultra_hpo
     runner: hf
-    config: AI/microsoft_phi-silica-3.6_v1/lora/lora.yaml
+    config: ai-projects/lora-training/microsoft_phi-silica-3.6_v1/lora/lora.yaml
     dataset: datasets/chat/comprehensive
     save_dir: data_out/lora_training/ultra/qwen25_dropout_005
     epochs: 6
@@ -232,7 +232,7 @@ jobs:
   - name: qwen25_dropout_020_comprehensive
     category: ultra_hpo
     runner: hf
-    config: AI/microsoft_phi-silica-3.6_v1/lora/lora.yaml
+    config: ai-projects/lora-training/microsoft_phi-silica-3.6_v1/lora/lora.yaml
     dataset: datasets/chat/comprehensive
     save_dir: data_out/lora_training/ultra/qwen25_dropout_020
     epochs: 6
@@ -249,7 +249,7 @@ jobs:
   - name: phi35_mega_then_comprehensive
     category: ultra_multi
     runner: hf
-    config: AI/microsoft_phi-silica-3.6_v1/lora/lora.yaml
+    config: ai-projects/lora-training/microsoft_phi-silica-3.6_v1/lora/lora.yaml
     dataset: datasets/chat/mega_synthetic
     save_dir: data_out/lora_training/ultra/phi35_mega_comprehensive
     epochs: 4
@@ -263,7 +263,7 @@ jobs:
   - name: qwen25_dolly_then_mixed
     category: ultra_multi
     runner: hf
-    config: AI/microsoft_phi-silica-3.6_v1/lora/lora.yaml
+    config: ai-projects/lora-training/microsoft_phi-silica-3.6_v1/lora/lora.yaml
     dataset: datasets/chat/dolly
     save_dir: data_out/lora_training/ultra/qwen25_dolly_mixed
     epochs: 4
@@ -280,7 +280,7 @@ jobs:
   - name: phi35_comprehensive_max_depth
     category: ultra_deep
     runner: hf
-    config: AI/microsoft_phi-silica-3.6_v1/lora/lora.yaml
+    config: ai-projects/lora-training/microsoft_phi-silica-3.6_v1/lora/lora.yaml
     dataset: datasets/chat/comprehensive
     save_dir: data_out/lora_training/ultra/phi35_max_depth
     epochs: 15
@@ -294,7 +294,7 @@ jobs:
   - name: qwen25_dolly_max_depth
     category: ultra_deep
     runner: hf
-    config: AI/microsoft_phi-silica-3.6_v1/lora/lora.yaml
+    config: ai-projects/lora-training/microsoft_phi-silica-3.6_v1/lora/lora.yaml
     dataset: datasets/chat/dolly
     save_dir: data_out/lora_training/ultra/qwen25_max_depth
     epochs: 12
@@ -311,7 +311,7 @@ jobs:
   - name: phi35_optimal_combined
     category: ultra_optimal
     runner: hf
-    config: AI/microsoft_phi-silica-3.6_v1/lora/lora.yaml
+    config: ai-projects/lora-training/microsoft_phi-silica-3.6_v1/lora/lora.yaml
     dataset: datasets/chat/comprehensive
     save_dir: data_out/lora_training/ultra/phi35_optimal
     epochs: 7
@@ -325,7 +325,7 @@ jobs:
   - name: qwen25_optimal_combined
     category: ultra_optimal
     runner: hf
-    config: AI/microsoft_phi-silica-3.6_v1/lora/lora.yaml
+    config: ai-projects/lora-training/microsoft_phi-silica-3.6_v1/lora/lora.yaml
     dataset: datasets/chat/comprehensive
     save_dir: data_out/lora_training/ultra/qwen25_optimal
     epochs: 7
@@ -342,7 +342,7 @@ jobs:
   - name: phi35_mega_batch_all_samples
     category: ultra_mega
     runner: hf
-    config: AI/microsoft_phi-silica-3.6_v1/lora/lora.yaml
+    config: ai-projects/lora-training/microsoft_phi-silica-3.6_v1/lora/lora.yaml
     dataset: datasets/chat/dolly
     save_dir: data_out/lora_training/ultra/phi35_mega_batch
     epochs: 6
@@ -356,7 +356,7 @@ jobs:
   - name: qwen25_mega_batch_all_samples
     category: ultra_mega
     runner: hf
-    config: AI/microsoft_phi-silica-3.6_v1/lora/lora.yaml
+    config: ai-projects/lora-training/microsoft_phi-silica-3.6_v1/lora/lora.yaml
     dataset: datasets/chat/dolly
     save_dir: data_out/lora_training/ultra/qwen25_mega_batch
     epochs: 6

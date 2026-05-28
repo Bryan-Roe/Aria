@@ -14,7 +14,7 @@ from __future__ import annotations
 import argparse
 import json
 import sys
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List
 
@@ -53,7 +53,7 @@ def _write_status(jobs: List[Dict[str, Any]], dry_run: bool = False) -> None:
         "succeeded": len(jobs) if dry_run else 0,
         "failed": 0,
         "running": 0,
-        "last_updated": datetime.utcnow().isoformat(),
+        "last_updated": datetime.now(timezone.utc).isoformat(),
         "dry_run": dry_run,
     }
     STATUS_FILE.write_text(json.dumps(status, indent=2), encoding="utf-8")

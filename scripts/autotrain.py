@@ -39,7 +39,7 @@ DEFAULT_CONFIG = resolve_config_path(REPO_ROOT, "autotrain")
 DATA_OUT = REPO_ROOT / "data_out" / "autotrain"
 STATUS_FILE = DATA_OUT / "status.json"
 
-HF_TRAIN_SCRIPT = REPO_ROOT / "AI" / "microsoft_phi-silica-3.6_v1" / "scripts" / "train_lora.py"
+HF_TRAIN_SCRIPT = REPO_ROOT / "ai-projects" / "lora-training" / "microsoft_phi-silica-3.6_v1" / "scripts" / "train_lora.py"
 
 
 # ---------------------------------------------------------------------------

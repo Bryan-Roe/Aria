@@ -9,7 +9,7 @@ jobs:
   - name: phi35_ultra_quick
     category: ultrafast
     runner: hf
-    config: AI/microsoft_phi-silica-3.6_v1/lora/lora_ultrafast.yaml
+    config: ai-projects/lora-training/microsoft_phi-silica-3.6_v1/lora/lora_ultrafast.yaml
     dataset: datasets/chat/mixed_chat
     save_dir: data_out/lora_training/phi35_ultra
     epochs: 1
@@ -25,7 +25,7 @@ jobs:
   - name: phi35_rapid_mixed
     category: ultrafast
     runner: hf
-    config: AI/microsoft_phi-silica-3.6_v1/lora/lora_ultrafast.yaml
+    config: ai-projects/lora-training/microsoft_phi-silica-3.6_v1/lora/lora_ultrafast.yaml
     dataset: datasets/chat/mixed_chat
     save_dir: data_out/lora_training/phi35_rapid_mixed
     epochs: 1
@@ -39,7 +39,7 @@ jobs:
   - name: phi35_rapid_comprehensive
     category: ultrafast
     runner: hf
-    config: AI/microsoft_phi-silica-3.6_v1/lora/lora_ultrafast.yaml
+    config: ai-projects/lora-training/microsoft_phi-silica-3.6_v1/lora/lora_ultrafast.yaml
     dataset: datasets/comprehensive
     save_dir: data_out/lora_training/phi35_rapid_comprehensive
     epochs: 1

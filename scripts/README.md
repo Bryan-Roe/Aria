@@ -458,7 +458,7 @@ python .\scripts\sql_health_monitor.py
 
 ### run_local_lora_training.py
 
-One-command offline LoRA training for TinyLlama on CPU. It auto-creates a venv under `AI/microsoft_phi-silica-3.6_v1/local_train`, installs requirements, and runs the training script with a small dataset and minimal epochs so it completes quickly on Windows.
+One-command offline LoRA training for TinyLlama on CPU. It auto-creates a venv under `ai-projects/lora-training/microsoft_phi-silica-3.6_v1/local_train`, installs requirements, and runs the training script with a small dataset and minimal epochs so it completes quickly on Windows.
 
 Usage (PowerShell):
 
@@ -476,7 +476,7 @@ python .\scripts\run_local_lora_training.py --reinstall
 python .\scripts\run_local_lora_training.py --dry-run
 ```
 
-Outputs are written to `AI/microsoft_phi-silica-3.6_v1/local_train/outputs/final` (LoRA adapter + tokenizer files).
+Outputs are written to `ai-projects/lora-training/microsoft_phi-silica-3.6_v1/local_train/outputs/final` (LoRA adapter + tokenizer files).
 
 Notes:
 
@@ -500,7 +500,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\Start-LocalLoraTra
 
 Logs:
 
-- Default log directory: `AI/microsoft_phi-silica-3.6_v1/local_train/logs`
+- Default log directory: `ai-projects/lora-training/microsoft_phi-silica-3.6_v1/local_train/logs`
 - File name: `train_YYYYMMDD_HHMMSS.log`
 
 Task Scheduler tip:

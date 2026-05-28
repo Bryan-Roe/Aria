@@ -2,7 +2,7 @@ version: 1
 
 # Define one or more training jobs. Jobs run sequentially when invoked.
 # Runners:
-#   - hf:    Uses Hugging Face stack via AI/microsoft_phi-silica-3.6_v1/scripts/train_lora.py
+#   - hf:    Uses Hugging Face stack via ai-projects/lora-training/microsoft_phi-silica-3.6_v1/scripts/train_lora.py
 #   - local: Uses the streamlined local runner scripts/run_local_lora_training.py
 
 jobs:
@@ -12,7 +12,7 @@ jobs:
   - name: phi35_comprehensive_full
     category: comprehensive
     runner: hf
-    config: AI/microsoft_phi-silica-3.6_v1/lora/lora.yaml
+    config: ai-projects/lora-training/microsoft_phi-silica-3.6_v1/lora/lora.yaml
     dataset: datasets/chat/comprehensive
     save_dir: data_out/lora_training/phi35_comprehensive_full
     epochs: 1
@@ -27,7 +27,7 @@ jobs:
   - name: qwen25_comprehensive_full
     category: comprehensive
     runner: hf
-    config: AI/microsoft_phi-silica-3.6_v1/lora/lora.yaml
+    config: ai-projects/lora-training/microsoft_phi-silica-3.6_v1/lora/lora.yaml
     dataset: datasets/chat/comprehensive
     save_dir: data_out/lora_training/qwen25_comprehensive_full
     epochs: 1
@@ -44,7 +44,7 @@ jobs:
   - name: phi35_mixed_chat
     category: baseline
     runner: hf
-    config: AI/microsoft_phi-silica-3.6_v1/lora/lora.yaml
+    config: ai-projects/lora-training/microsoft_phi-silica-3.6_v1/lora/lora.yaml
     dataset: datasets/chat/mixed_chat
     save_dir: data_out/lora_training/phi35
     epochs: 1
@@ -59,7 +59,7 @@ jobs:
   - name: qwen25_3b_mixed_chat
     category: baseline
     runner: hf
-    config: AI/microsoft_phi-silica-3.6_v1/lora/lora.yaml
+    config: ai-projects/lora-training/microsoft_phi-silica-3.6_v1/lora/lora.yaml
     dataset: datasets/chat/mixed_chat
     save_dir: data_out/lora_training/qwen25_3b
     epochs: 1
@@ -74,7 +74,7 @@ jobs:
   - name: phi35_max_performance
     category: baseline
     runner: hf
-    config: AI/microsoft_phi-silica-3.6_v1/lora/lora.yaml
+    config: ai-projects/lora-training/microsoft_phi-silica-3.6_v1/lora/lora.yaml
     dataset: datasets/chat/dolly
     save_dir: data_out/lora_training/phi35_max_performance
     epochs: 1
@@ -91,7 +91,7 @@ jobs:
   - name: phi35_repo_augmented
     category: domain
     runner: hf
-    config: AI/microsoft_phi-silica-3.6_v1/lora/lora.yaml
+    config: ai-projects/lora-training/microsoft_phi-silica-3.6_v1/lora/lora.yaml
     dataset: datasets/chat/app_repo_augmented
     save_dir: data_out/lora_training/phi35_repo_augmented
     epochs: 1
@@ -106,7 +106,7 @@ jobs:
   - name: qwen25_repo_augmented
     category: domain
     runner: hf
-    config: AI/microsoft_phi-silica-3.6_v1/lora/lora.yaml
+    config: ai-projects/lora-training/microsoft_phi-silica-3.6_v1/lora/lora.yaml
     dataset: datasets/chat/app_repo_augmented
     save_dir: data_out/lora_training/qwen25_repo_augmented
     epochs: 1
@@ -122,7 +122,7 @@ jobs:
   - name: phi35_mixed_chat_lr_low
     category: hpo
     runner: hf
-    config: AI/microsoft_phi-silica-3.6_v1/lora/lora.yaml
+    config: ai-projects/lora-training/microsoft_phi-silica-3.6_v1/lora/lora.yaml
     dataset: datasets/chat/mixed_chat
     save_dir: data_out/lora_training/phi35_lr_low
     epochs: 1
@@ -137,7 +137,7 @@ jobs:
   - name: phi35_mixed_chat_lr_high
     category: hpo
     runner: hf
-    config: AI/microsoft_phi-silica-3.6_v1/lora/lora.yaml
+    config: ai-projects/lora-training/microsoft_phi-silica-3.6_v1/lora/lora.yaml
     dataset: datasets/chat/mixed_chat
     save_dir: data_out/lora_training/phi35_lr_high
     epochs: 1
@@ -152,7 +152,7 @@ jobs:
   - name: phi35_mixed_chat_dropout_low
     category: hpo
     runner: hf
-    config: AI/microsoft_phi-silica-3.6_v1/lora/lora.yaml
+    config: ai-projects/lora-training/microsoft_phi-silica-3.6_v1/lora/lora.yaml
     dataset: datasets/chat/mixed_chat
     save_dir: data_out/lora_training/phi35_drop_low
     epochs: 1
@@ -164,7 +164,7 @@ jobs:
   - name: anime_avatar
     category: anime_avatar
     runner: hf
-    config: AI/microsoft_phi-silica-3.6_v1/lora/lora.yaml
+    config: ai-projects/lora-training/microsoft_phi-silica-3.6_v1/lora/lora.yaml
     dataset: datasets/chat/anime_avatar
     save_dir: data_out/lora_training/anime_avatar
     epochs: 10
@@ -180,7 +180,7 @@ jobs:
   - name: phi35_mixed_chat_dropout_high
     category: hpo
     runner: hf
-    config: AI/microsoft_phi-silica-3.6_v1/lora/lora.yaml
+    config: ai-projects/lora-training/microsoft_phi-silica-3.6_v1/lora/lora.yaml
     dataset: datasets/chat/mixed_chat
     save_dir: data_out/lora_training/phi35_drop_high
     epochs: 1
