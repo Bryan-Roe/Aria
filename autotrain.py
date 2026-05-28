@@ -16,4 +16,16 @@ warnings.warn(
 )
 
 from scripts.autotrain import *  # noqa: F401,F403
-from scripts.autotrain import __all__  # noqa: F401,E402
+
+try:
+    from scripts.autotrain import __all__  # noqa: F401,E402
+except ImportError:
+    # scripts.autotrain doesn't define __all__; expose canonical public names.
+    __all__ = [
+        "TrainJob",
+        "load_config",
+        "load_jobs",
+        "validate_job",
+        "build_command",
+        "main",
+    ]
