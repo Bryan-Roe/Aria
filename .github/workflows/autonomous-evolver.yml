@@ -182,7 +182,7 @@ jobs:
             try {
               // Create a repository dispatch event so other workflows or automation can react.
               // Event type: 'aria-evolution-triggered'
-              await github.repos.createDispatchEvent({
+              await github.rest.repos.createDispatchEvent({
                 owner,
                 repo,
                 event_type: 'aria-evolution-triggered',
