@@ -3,7 +3,7 @@ name: API Health Smoke
 on:
   pull_request:
     branches: [main, dev]
-    paths: &api_health_paths
+    paths:
       - "function_app.py"
       - "host.json"
       - "shared/**"
@@ -14,7 +14,15 @@ on:
       - ".github/workflows/api-health-smoke.yml"
   push:
     branches: [main]
-    paths: *api_health_paths
+    paths:
+      - "function_app.py"
+      - "host.json"
+      - "shared/**"
+      - "ai-projects/chat-cli/src/**"
+      - "scripts/integration_smoke.py"
+      - "scripts/ci_orchestrator.py"
+      - ".github/actions/setup-python-env/**"
+      - ".github/workflows/api-health-smoke.yml"
   schedule:
     - cron: "30 4 * * *" # Daily 04:30 UTC
   workflow_dispatch:
