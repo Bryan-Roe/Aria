@@ -34,7 +34,7 @@ AZURE_AI_PROJECT_ENDPOINT=<your-foundry-project-endpoint>
 FOUNDRY_MODEL_DEPLOYMENT_NAME=<your-chat-model-deployment>
 ```
 
-`gpt-4.1-mini` is the recommended default deployment for this workflow. It is a better fit for strict label-only classification while keeping cost and latency low.
+`gpt-oss-120b` is the recommended default deployment for this workflow in the current AI-1424 resource because it is the available GPT-family model there.
 
 ## Run
 

@@ -29,7 +29,7 @@ User request
 
 - Python **3.10+**
 - An **Azure AI Foundry** project with a deployed chat model
-  (recommended: `gpt-4.1`, lower-cost fallback: `gpt-4.1-mini`)
+  (recommended in AI-1424: `gpt-oss-120b`)
 - `az login` (or another credential source for `DefaultAzureCredential`)
 
 > **No deployed model?**
@@ -65,7 +65,7 @@ AZURE_AI_PROJECT_ENDPOINT=https://AI-1424-resource.services.ai.azure.com/api/pro
 FOUNDRY_MODEL_DEPLOYMENT_NAME=<your-deployment-name>
 ```
 
-`gpt-4.1` is the recommended default for this workflow because the reviewer step benefits from stronger writing and revision quality. If you want a cheaper, faster option, use `gpt-4.1-mini`.
+`gpt-oss-120b` is the recommended default for this workflow in the current AI-1424 resource because it is the available GPT-family model there.
 
 ## Running
 
