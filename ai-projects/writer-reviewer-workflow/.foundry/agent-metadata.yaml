@@ -1,0 +1,6 @@
+defaultEnvironment: dev
+environments:
+  dev:
+    projectEndpoint: https://AI-1424-resource.services.ai.azure.com/api/projects/AI-1424
+    agentName: writer-reviewer-workflow
+    evaluationSuites: []

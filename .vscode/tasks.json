@@ -192,10 +192,25 @@
 			"args": [
 				"scripts/gradio_hello.py"
 			],
+			"isBackground": true,
 			"options": {
 				"cwd": "${workspaceFolder}"
 			},
-			"problemMatcher": []
+			"problemMatcher": {
+				"pattern": [
+					{
+						"regexp": "^.*$",
+						"file": 0,
+						"location": 1,
+						"message": 2
+					}
+				],
+				"background": {
+					"activeOnStart": true,
+					"beginsPattern": ".*",
+					"endsPattern": "Running on local URL:|Running on local URL"
+				}
+			}
 		},
 		{
 			"label": "smoke: ai/routes",
@@ -312,6 +327,55 @@
 			]
 		},
 		{
+			"label": "Validate email-spam debug prerequisites",
+			"type": "aitk",
+			"command": "debug-check-prerequisites",
+			"args": {
+				"portOccupancy": [
+					5680,
+					8089
+				]
+			}
+		},
+		{
+			"label": "Run email-spam HTTP server",
+			"type": "shell",
+			"command": "${command:python.interpreterPath} -m debugpy --listen 127.0.0.1:5680 -m agentdev run ai-projects/email-spam-workflow/main.py --verbose --port 8089 -- --server",
+			"isBackground": true,
+			"options": {
+				"cwd": "${workspaceFolder}"
+			},
+			"dependsOn": [
+				"Validate email-spam debug prerequisites"
+			],
+			"problemMatcher": {
+				"pattern": [
+					{
+						"regexp": "^.*$",
+						"file": 0,
+						"location": 1,
+						"message": 2
+					}
+				],
+				"background": {
+					"activeOnStart": true,
+					"beginsPattern": ".*",
+					"endsPattern": "Application startup complete|running on|Started server process"
+				}
+			}
+		},
+		{
+			"label": "Open email-spam Agent Inspector",
+			"type": "shell",
+			"command": "echo '${input:openEmailSpamInspector}'",
+			"presentation": {
+				"reveal": "never"
+			},
+			"dependsOn": [
+				"Run email-spam HTTP server"
+			]
+		},
+		{
 			"label": "Terminate All Tasks",
 			"type": "shell",
 			"command": "echo ${input:terminate}",
@@ -326,6 +390,15 @@
 			"args": {
 				"triggeredFrom": "tasks",
 				"port": 8088
+			}
+		},
+		{
+			"id": "openEmailSpamInspector",
+			"type": "command",
+			"command": "ai-mlstudio.openTestTool",
+			"args": {
+				"triggeredFrom": "tasks",
+				"port": 8089
 			}
 		},
 		{

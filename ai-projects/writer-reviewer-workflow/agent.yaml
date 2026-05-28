@@ -1,0 +1,14 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/microsoft/AgentSchema/refs/heads/main/schemas/v1.0/ContainerAgent.yaml
+kind: hosted
+name: writer-reviewer-workflow
+protocols:
+  - protocol: responses
+    version: 1.0.0
+resources:
+  cpu: "0.5"
+  memory: "1Gi"
+environment_variables:
+  - name: AZURE_AI_PROJECT_ENDPOINT
+    value: ${AZURE_AI_PROJECT_ENDPOINT}
+  - name: FOUNDRY_MODEL_DEPLOYMENT_NAME
+    value: ${FOUNDRY_MODEL_DEPLOYMENT_NAME}

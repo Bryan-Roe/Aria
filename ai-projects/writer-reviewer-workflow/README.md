@@ -29,7 +29,7 @@ User request
 
 - Python **3.10+**
 - An **Azure AI Foundry** project with a deployed chat model
-  (e.g. `gpt-4o`, `gpt-4o-mini`)
+  (recommended: `gpt-4.1`, lower-cost fallback: `gpt-4.1-mini`)
 - `az login` (or another credential source for `DefaultAzureCredential`)
 
 > **No deployed model?**
@@ -64,6 +64,8 @@ Edit `.env`:
 AZURE_AI_PROJECT_ENDPOINT=https://AI-1424-resource.services.ai.azure.com/api/projects/AI-1424
 FOUNDRY_MODEL_DEPLOYMENT_NAME=<your-deployment-name>
 ```
+
+`gpt-4.1` is the recommended default for this workflow because the reviewer step benefits from stronger writing and revision quality. If you want a cheaper, faster option, use `gpt-4.1-mini`.
 
 ## Running
 
@@ -160,3 +162,14 @@ writer-reviewer-workflow/
 - Both agents share the same Foundry model deployment but use **separate
   `AzureAIClient` instances** — the agent name is registered at the client
   level, so a shared client would overwrite the previous agent's identity.
+
+## Deploying to Foundry
+
+This folder now includes the standard hosted-agent deployment artifacts:
+
+- `agent.yaml` for Foundry-hosted agent metadata
+- `Dockerfile` for container builds
+- `docker-compose.yml` for local container smoke checks
+- `.env.example` for deployment-time configuration placeholders
+
+Once Azure authentication is available, you can deploy this workflow as a hosted agent from the Foundry Toolkit or Foundry deployment flow using the files in this directory.

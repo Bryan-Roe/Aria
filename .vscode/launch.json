@@ -33,6 +33,18 @@
             "postDebugTask": "Terminate All Tasks"
         },
         {
+            "name": "Debug Email Spam Workflow HTTP Server",
+            "type": "debugpy",
+            "request": "attach",
+            "connect": {
+                "host": "localhost",
+                "port": 5680
+            },
+            "preLaunchTask": "Open email-spam Agent Inspector",
+            "internalConsoleOptions": "neverOpen",
+            "postDebugTask": "Terminate All Tasks"
+        },
+        {
             "name": "Attach to Python Functions",
             "type": "debugpy",
             "request": "attach",
@@ -62,15 +74,7 @@
             "console": "integratedTerminal",
             "preLaunchTask": "Run Gradio AI Chat app",
             "justMyCode": true
-        },
-    ],
-    "compounds": [
-        {
-            "name": "Launch Edge browsers",
-            "configurations": [
-                "Launch Microsoft Edge",
-                "Launch Microsoft Edge in headless mode"
-            ]
         }
-    ]
+    ],
+    "compounds": []
 }

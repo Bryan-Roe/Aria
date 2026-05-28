@@ -6,7 +6,22 @@ Run after installing dependencies:
 Then open the local URL printed by Gradio.
 """
 
-import gradio as gr
+from typing import List, Tuple, Dict, Any
+from datetime import datetime
+import time
+import json
+import os
+import gradio as gr  # type: ignore[import-not-found]
+
+try:
+    import pyttsx3  # type: ignore[import-not-found]
+except ImportError:
+    pyttsx3 = None  # type: ignore[assignment]
+
+try:
+    from gtts import gTTS  # type: ignore[import-not-found]
+except ImportError:
+    gTTS = None  # type: ignore[assignment]
 
 
 def make_greeting(name: str, style: str, excitement: int, language: str) -> str:
@@ -28,10 +43,12 @@ def make_greeting(name: str, style: str, excitement: int, language: str) -> str:
 
 
 with gr.Blocks() as demo:
-    gr.Markdown("# Aria — Gradio Demo\nEnhanced greeting demo with styles, languages, and examples.")
+    gr.Markdown(
+        "# Aria — Gradio Demo\nEnhanced greeting demo with styles, languages, and examples.")
 
     with gr.Row():
-        name = gr.Textbox(label="Name", placeholder="Your name here", elem_id="nameInput")
+        name = gr.Textbox(
+            label="Name", placeholder="Your name here", elem_id="nameInput")
         language = gr.Dropdown(
             choices=["English", "Spanish", "French", "German"],
             value="English",
@@ -56,7 +73,8 @@ with gr.Blocks() as demo:
         )
 
     greet_btn = gr.Button("Greet", variant="primary")
-    output = gr.Textbox(label="Greeting", interactive=False, lines=2, elem_id="greetingOutput")
+    output = gr.Textbox(label="Greeting", interactive=False,
+                        lines=2, elem_id="greetingOutput")
 
     examples = gr.Examples(
         examples=[
@@ -77,13 +95,6 @@ Run after installing dependencies:
 
 Then open the local URL printed by Gradio.
 """
-
-import gradio as gr
-import os
-import json
-import time
-from datetime import datetime
-from typing import List, Tuple, Dict, Any
 
 
 def timestamp_now() -> str:
@@ -173,17 +184,20 @@ def hist_state_to_display(hist_state: List[dict]) -> List[Tuple[str, str]]:
     if not hist_state:
         return []
     return [
-        (f"{e.get('user','')}\n\n[{e.get('user_ts','')}]", f"{e.get('assistant','')}\n\n[{e.get('assistant_ts','')}]")
+        (f"{e.get('user', '')}\n\n[{e.get('user_ts', '')}]",
+         f"{e.get('assistant', '')}\n\n[{e.get('assistant_ts', '')}]")
         for e in hist_state
     ]
 
 
 with gr.Blocks() as demo:
-    gr.Markdown("# Aria — Gradio Demo\nEnhanced greeting and chat demo with persistence, export, search, and session controls.")
+    gr.Markdown(
+        "# Aria — Gradio Demo\nEnhanced greeting and chat demo with persistence, export, search, and session controls.")
 
     # Greeting controls (kept simple)
     with gr.Row():
-        name = gr.Textbox(label="Name", placeholder="Your name here", elem_id="nameInput")
+        name = gr.Textbox(
+            label="Name", placeholder="Your name here", elem_id="nameInput")
         language = gr.Dropdown(
             choices=["English", "Spanish", "French", "German"],
             value="English",
@@ -208,7 +222,8 @@ with gr.Blocks() as demo:
         )
 
     greet_btn = gr.Button("Greet", variant="primary")
-    output = gr.Textbox(label="Greeting", interactive=False, lines=2, elem_id="greetingOutput")
+    output = gr.Textbox(label="Greeting", interactive=False,
+                        lines=2, elem_id="greetingOutput")
 
     examples = gr.Examples(
         examples=[
@@ -222,7 +237,8 @@ with gr.Blocks() as demo:
     def on_greet(n: str, lang: str, s: str, e: int) -> str:
         return make_greeting(n, s, e, lang)
 
-    greet_btn.click(on_greet, inputs=[name, language, style, excitement], outputs=output)
+    greet_btn.click(on_greet, inputs=[
+                    name, language, style, excitement], outputs=output)
 
     # ------------------------------------------------------------------
     # Chat-style demo with persistence and utilities
@@ -234,27 +250,38 @@ with gr.Blocks() as demo:
 
     with gr.Row():
         with gr.Column(scale=3):
-            chatbot = gr.Chatbot(value=initial_display, label="Conversation", elem_id="ariaChatbot")
+            chatbot = gr.Chatbot(value=initial_display,
+                                 label="Conversation", elem_id="ariaChatbot")
 
-            user_input = gr.Textbox(placeholder="Type a message", label="Your message", elem_id="userInput")
+            user_input = gr.Textbox(
+                placeholder="Type a message", label="Your message", elem_id="userInput")
 
             # Controls
-            use_model = gr.Checkbox(label="Use simulation (override provider)", value=False)
+            use_model = gr.Checkbox(
+                label="Use simulation (override provider)", value=False)
             provider_select = gr.Dropdown(
-                choices=["auto", "local", "ollama", "lmstudio", "openai", "azure", "lora", "agi", "quantum"],
+                choices=["auto", "local", "ollama", "lmstudio",
+                         "openai", "azure", "lora", "agi", "quantum"],
                 value="auto",
                 label="Provider",
                 elem_id="providerSelect",
             )
-            model_override = gr.Textbox(label="Model override (optional)", placeholder="e.g., llama3.2 or gpt-4o-mini", elem_id="modelOverride")
-            temperature = gr.Slider(minimum=0.0, maximum=1.0, value=0.7, step=0.05, label="Temperature", elem_id="temperature")
-            max_output_tokens = gr.Slider(minimum=16, maximum=2048, step=16, value=512, label="Max output tokens", elem_id="maxTokens")
+            model_override = gr.Textbox(label="Model override (optional)",
+                                        placeholder="e.g., llama3.2 or gpt-4o-mini", elem_id="modelOverride")
+            temperature = gr.Slider(minimum=0.0, maximum=1.0, value=0.7,
+                                    step=0.05, label="Temperature", elem_id="temperature")
+            max_output_tokens = gr.Slider(
+                minimum=16, maximum=2048, step=16, value=512, label="Max output tokens", elem_id="maxTokens")
             persona = gr.Textbox(label="Assistant name", value="Aria")
-            persona_presets = gr.Dropdown(choices=["Aria (Friendly)", "Researcher", "Code Assistant"], value="Aria (Friendly)", label="Persona presets")
+            persona_presets = gr.Dropdown(choices=[
+                                          "Aria (Friendly)", "Researcher", "Code Assistant"], value="Aria (Friendly)", label="Persona presets")
             autosave = gr.Checkbox(label="Autosave conversation", value=True)
-            max_history = gr.Slider(minimum=10, maximum=500, step=10, value=200, label="Max history (messages)")
-            session_name = gr.Textbox(label="Session name (optional)", placeholder="session-2026-05-16")
-            provider_info = gr.Textbox(label="Detected provider", interactive=False)
+            max_history = gr.Slider(
+                minimum=10, maximum=500, step=10, value=200, label="Max history (messages)")
+            session_name = gr.Textbox(
+                label="Session name (optional)", placeholder="session-2026-05-16")
+            provider_info = gr.Textbox(
+                label="Detected provider", interactive=False)
 
             with gr.Row():
                 send_btn = gr.Button("Send")
@@ -270,20 +297,23 @@ with gr.Blocks() as demo:
             export_file = gr.File(label="Conversation file", interactive=False)
 
             # Saved sessions manager
-            saved_sessions = gr.Dropdown(choices=[], label="Saved sessions", elem_id="savedSessions")
+            saved_sessions = gr.Dropdown(
+                choices=[], label="Saved sessions", elem_id="savedSessions")
             with gr.Row():
                 refresh_sessions_btn = gr.Button("Refresh sessions")
                 load_session_btn = gr.Button("Load session")
                 delete_session_btn = gr.Button("Delete session")
 
-            search_input = gr.Textbox(label="Search conversation", placeholder="Enter text to search")
+            search_input = gr.Textbox(
+                label="Search conversation", placeholder="Enter text to search")
             with gr.Row():
                 search_btn = gr.Button("Search")
                 revert_btn = gr.Button("Show all")
 
             # Text-to-Speech
             with gr.Row():
-                tts_autoplay = gr.Checkbox(label="Autoplay assistant audio", value=False)
+                tts_autoplay = gr.Checkbox(
+                    label="Autoplay assistant audio", value=False)
                 speak_btn = gr.Button("Speak last reply")
             tts_audio = gr.Audio(label="Assistant audio", interactive=False)
 
@@ -328,14 +358,17 @@ with gr.Blocks() as demo:
                 display_user = f"{user_message}\n\n[{user_ts}]"
                 display_assistant = f"{reply}\n\n[{assistant_ts}]"
 
-                chat_history = list(chat_history) + [(display_user, display_assistant)]
+                chat_history = list(chat_history) + \
+                    [(display_user, display_assistant)]
                 hist_state = list(hist_state) + [
-                    {"user": user_message, "assistant": reply, "user_ts": user_ts, "assistant_ts": assistant_ts}
+                    {"user": user_message, "assistant": reply,
+                        "user_ts": user_ts, "assistant_ts": assistant_ts}
                 ]
 
                 if autosave:
                     try:
-                        save_conversation_json(hist_state, session_name or "session")
+                        save_conversation_json(
+                            hist_state, session_name or "session")
                     except Exception:
                         pass
 
@@ -346,16 +379,20 @@ with gr.Blocks() as demo:
             try:
                 import sys
                 from pathlib import Path
-                chat_cli_src = Path(__file__).resolve().parents[1] / "ai-projects" / "chat-cli" / "src"
+                chat_cli_src = Path(__file__).resolve(
+                ).parents[1] / "ai-projects" / "chat-cli" / "src"
                 if str(chat_cli_src) not in sys.path:
                     sys.path.insert(0, str(chat_cli_src))
                 import chat_providers
 
                 provider, info = chat_providers.detect_provider(
                     explicit=str(provider_choice) if provider_choice else None,
-                    model_override=str(model_override_val) if model_override_val else None,
-                    temperature=float(temperature_val) if temperature_val is not None else None,
-                    max_output_tokens=int(max_output_tokens_val) if max_output_tokens_val else None,
+                    model_override=str(
+                        model_override_val) if model_override_val else None,
+                    temperature=float(
+                        temperature_val) if temperature_val is not None else None,
+                    max_output_tokens=int(
+                        max_output_tokens_val) if max_output_tokens_val else None,
                 )
                 provider_display = f"{info.name} ({info.model})"
             except Exception as e:
@@ -366,13 +403,16 @@ with gr.Blocks() as demo:
                 assistant_ts = timestamp_now()
                 display_user = f"{user_message}\n\n[{user_ts}]"
                 display_assistant = f"{reply}\n\n[{assistant_ts}]"
-                chat_history = list(chat_history) + [(display_user, display_assistant)]
+                chat_history = list(chat_history) + \
+                    [(display_user, display_assistant)]
                 hist_state = list(hist_state) + [
-                    {"user": user_message, "assistant": reply, "user_ts": user_ts, "assistant_ts": assistant_ts}
+                    {"user": user_message, "assistant": reply,
+                        "user_ts": user_ts, "assistant_ts": assistant_ts}
                 ]
                 if autosave:
                     try:
-                        save_conversation_json(hist_state, session_name or "session")
+                        save_conversation_json(
+                            hist_state, session_name or "session")
                     except Exception:
                         pass
 
@@ -382,7 +422,8 @@ with gr.Blocks() as demo:
             # Prepare initial placeholder in UI
             display_user = f"{user_message}\n\n[{user_ts}]"
             display_assistant = f"...\n\n[{timestamp_now()}]"
-            chat_history = list(chat_history) + [(display_user, display_assistant)]
+            chat_history = list(chat_history) + \
+                [(display_user, display_assistant)]
 
             # Yield initial UI state with placeholder
             yield chat_history, "", hist_state, provider_display
@@ -414,11 +455,13 @@ with gr.Blocks() as demo:
 
                 # Append final entry to hist_state and return
                 hist_state = list(hist_state) + [
-                    {"user": user_message, "assistant": err, "user_ts": user_ts, "assistant_ts": timestamp_now()}
+                    {"user": user_message, "assistant": err,
+                        "user_ts": user_ts, "assistant_ts": timestamp_now()}
                 ]
                 if autosave:
                     try:
-                        save_conversation_json(hist_state, session_name or "session")
+                        save_conversation_json(
+                            hist_state, session_name or "session")
                     except Exception:
                         pass
                 yield chat_history, "", hist_state, provider_display
@@ -430,11 +473,13 @@ with gr.Blocks() as demo:
             display_assistant = f"{reply}\n\n[{assistant_ts}]"
             chat_history[-1] = (display_user, display_assistant)
             hist_state = list(hist_state) + [
-                {"user": user_message, "assistant": reply, "user_ts": user_ts, "assistant_ts": assistant_ts}
+                {"user": user_message, "assistant": reply,
+                    "user_ts": user_ts, "assistant_ts": assistant_ts}
             ]
             if autosave:
                 try:
-                    save_conversation_json(hist_state, session_name or "session")
+                    save_conversation_json(
+                        hist_state, session_name or "session")
                 except Exception:
                     pass
 
@@ -443,7 +488,8 @@ with gr.Blocks() as demo:
 
         send_btn.click(
             respond,
-            inputs=[user_input, chatbot, hist_state, use_model, provider_select, model_override, temperature, max_output_tokens, language, persona, autosave, max_history, session_name],
+            inputs=[user_input, chatbot, hist_state, use_model, provider_select, model_override,
+                    temperature, max_output_tokens, language, persona, autosave, max_history, session_name],
             outputs=[chatbot, user_input, hist_state, provider_info],
             queue=True,
         )
@@ -459,7 +505,8 @@ with gr.Blocks() as demo:
                 return "Aria-Dev"
             return persona_field
 
-        persona_presets.change(apply_persona, inputs=[persona_presets, persona], outputs=[persona])
+        persona_presets.change(apply_persona, inputs=[
+                               persona_presets, persona], outputs=[persona])
 
         def clear_history():
             return [], []
@@ -469,10 +516,12 @@ with gr.Blocks() as demo:
         def save_now(hist_state, session_name):
             if not hist_state:
                 return None
-            path = save_conversation_json(hist_state, session_name or "session")
+            path = save_conversation_json(
+                hist_state, session_name or "session")
             return path
 
-        save_btn.click(save_now, inputs=[hist_state, session_name], outputs=[export_file])
+        save_btn.click(save_now, inputs=[
+                       hist_state, session_name], outputs=[export_file])
 
         def export_json(hist_state, session_name):
             if not hist_state:
@@ -484,8 +533,10 @@ with gr.Blocks() as demo:
                 return None
             return save_conversation_markdown(hist_state, session_name or "session")
 
-        export_json_btn.click(export_json, inputs=[hist_state, session_name], outputs=[export_file])
-        export_md_btn.click(export_md, inputs=[hist_state, session_name], outputs=[export_file])
+        export_json_btn.click(export_json, inputs=[
+                              hist_state, session_name], outputs=[export_file])
+        export_md_btn.click(export_md, inputs=[
+                            hist_state, session_name], outputs=[export_file])
 
         def export_txt(hist_state, session_name):
             if not hist_state:
@@ -505,7 +556,8 @@ with gr.Blocks() as demo:
                     f.write(e.get("assistant", "") + "\n\n---\n\n")
             return filename
 
-        export_txt_btn.click(export_txt, inputs=[hist_state, session_name], outputs=[export_file])
+        export_txt_btn.click(export_txt, inputs=[
+                             hist_state, session_name], outputs=[export_file])
 
         def list_sessions():
             ensure_conv_dir()
@@ -529,7 +581,8 @@ with gr.Blocks() as demo:
             except Exception:
                 return [], []
 
-        load_session_btn.click(load_session, inputs=[saved_sessions], outputs=[chatbot, hist_state])
+        load_session_btn.click(load_session, inputs=[
+                               saved_sessions], outputs=[chatbot, hist_state])
 
         def delete_session(filename):
             if not filename:
@@ -546,7 +599,8 @@ with gr.Blocks() as demo:
                     files.append(fname)
             return gr.Dropdown.update(choices=files, value=files[0] if files else None)
 
-        delete_session_btn.click(delete_session, inputs=[saved_sessions], outputs=[saved_sessions])
+        delete_session_btn.click(delete_session, inputs=[
+                                 saved_sessions], outputs=[saved_sessions])
 
         def load_latest_click():
             display, hist = load_latest_conversation()
@@ -565,24 +619,24 @@ with gr.Blocks() as demo:
                 ts = int(time.time())
                 wav_path = os.path.join(tts_dir, f"tts_{ts}.wav")
                 # Try pyttsx3 first
-                try:
-                    import pyttsx3
-
-                    engine = pyttsx3.init()
-                    engine.save_to_file(text, wav_path)
-                    engine.runAndWait()
-                    return wav_path
-                except Exception:
-                    # Fallback to gTTS (may require network)
+                if pyttsx3:
                     try:
-                        from gtts import gTTS
-
+                        engine = pyttsx3.init()
+                        engine.save_to_file(text, wav_path)
+                        engine.runAndWait()
+                        return wav_path
+                    except Exception:
+                        pass
+                # Fallback to gTTS (may require network)
+                if gTTS:
+                    try:
                         mp3_path = wav_path.replace('.wav', '.mp3')
                         tts = gTTS(text)
                         tts.save(mp3_path)
                         return mp3_path
                     except Exception:
                         return None
+                return None
             except Exception:
                 return None
 
@@ -596,7 +650,8 @@ with gr.Blocks() as demo:
             # If autoplay is requested, returning audio file will make Gradio render audio player
             return path
 
-        speak_btn.click(speak_last, inputs=[hist_state, tts_autoplay], outputs=[tts_audio])
+        speak_btn.click(speak_last, inputs=[
+                        hist_state, tts_autoplay], outputs=[tts_audio])
 
         def search_chat(query, hist_state):
             if not query or not hist_state:
@@ -612,7 +667,8 @@ with gr.Blocks() as demo:
                     filtered.append((f"{u}\n\n[{ut}]", f"{a}\n\n[{at}]"))
             return filtered
 
-        search_btn.click(search_chat, inputs=[search_input, hist_state], outputs=[chatbot])
+        search_btn.click(search_chat, inputs=[
+                         search_input, hist_state], outputs=[chatbot])
 
         def revert_search(hist_state):
             return hist_state_to_display(hist_state)
