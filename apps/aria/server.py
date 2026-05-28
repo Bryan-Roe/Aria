@@ -1653,6 +1653,64 @@ def tags_from_actions(actions: List[dict]) -> List[str]:
     return tags
 
 
+def tags_to_actions(tags: List[str]) -> List[dict]:
+    """Infer a minimal list of structured actions from simple tags.
+
+    This helps the web UI receive actionable 'actions' even when the
+    fallback parser returned only tags. It covers common tag types:
+    - [aria:position:x:y] -> move
+    - [aria:gesture:name] -> gesture
+    - [aria:say:...] -> say
+    - [aria:pickup:obj] -> pickup
+    - [aria:drop] or [aria:drop:obj] -> drop
+    - [aria:look:target] -> look
+    """
+    inferred: List[dict] = []
+    for tag in tags:
+        try:
+            m = re.match(r"\[aria:position:(\d{1,3}):(\d{1,3})\]", tag)
+            if m:
+                x = max(0, min(100, int(m.group(1))))
+                y = max(0, min(100, int(m.group(2))))
+                inferred.append({"action": "move", "target": {"x": x, "y": y}, "speed": "normal"})
+                continue
+
+            m = re.match(r"\[aria:gesture:([a-z_]+)\]", tag)
+            if m:
+                inferred.append({"action": "gesture", "gesture_type": m.group(1)})
+                continue
+
+            m = re.match(r"\[aria:say:(.+)\]", tag)
+            if m:
+                text = m.group(1)
+                inferred.append({"action": "say", "text": text, "emotion": "neutral"})
+                continue
+
+            m = re.match(r"\[aria:pickup:([^\]]+)\]", tag)
+            if m:
+                inferred.append({"action": "pickup", "object_id": m.group(1)})
+                continue
+
+            m = re.match(r"\[aria:drop:([^\]]+)\]", tag)
+            if m:
+                inferred.append({"action": "drop", "position": None})
+                continue
+
+            if tag.startswith("[aria:drop]"):
+                inferred.append({"action": "drop", "position": None})
+                continue
+
+            m = re.match(r"\[aria:look:([^\]]+)\]", tag)
+            if m:
+                inferred.append({"action": "look", "target": m.group(1)})
+                continue
+
+        except Exception:
+            # Be tolerant: skip tags we don't understand
+            continue
+    return inferred
+
+
 class AriaRequestHandler(SimpleHTTPRequestHandler):
     def end_headers(self):
         # Add CORS headers
@@ -1761,6 +1819,18 @@ class AriaRequestHandler(SimpleHTTPRequestHandler):
                         )
                         actions = []
                         tags = generate_tags_fallback(command)
+
+                # If tags were produced by the fallback path but we have no structured
+                # actions, attempt to infer a minimal action sequence for convenience
+                # (useful for UIs that prefer actions over raw tags).
+                if tags and not actions:
+                    inferred_actions = tags_to_actions(tags)
+                    if inferred_actions:
+                        valid_actions, validation_reason = validate_action_sequence(inferred_actions)
+                        if valid_actions:
+                            actions = inferred_actions
+                        else:
+                            logger.info(f"Inferred actions failed validation: {validation_reason}")
 
                 print(f"✨ Generated tags: {tags}")
 
