@@ -49,3 +49,25 @@ def test_unknown_tags_ignored():
     tags = ["[aria:unknown:foo]", "[notatag]", "random"]
     actions = aria_server.tags_to_actions(tags)
     assert actions == []
+
+
+def test_throw_tag_mapping():
+    tags = ["[aria:throw:70:40]"]
+    actions = aria_server.tags_to_actions(tags)
+    assert any(a.get("action") == "throw" for a in actions)
+    throw = next(a for a in actions if a.get("action") == "throw")
+    assert throw["target"] == {"x": 70, "y": 40}
+    assert throw["force"] == "medium"
+
+
+def test_wait_tag_mapping():
+    tags = ["[aria:wait:2.5]"]
+    actions = aria_server.tags_to_actions(tags)
+    assert actions and actions[0]["action"] == "wait"
+    assert actions[0]["duration"] == 2.5
+
+
+def test_wait_tag_clamps_to_max():
+    tags = ["[aria:wait:9999]"]
+    actions = aria_server.tags_to_actions(tags)
+    assert actions and actions[0]["duration"] == 30.0

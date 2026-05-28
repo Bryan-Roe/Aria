@@ -102,9 +102,9 @@ chat_memory_funcs = safe_import(
         "store_embedding": lambda message_id, embedding, model: False,
     }.get(name, lambda *args, **kwargs: None),
 )
-generate_embedding = chat_memory_funcs["generate_embedding"]
-fetch_similar_messages = chat_memory_funcs["fetch_similar_messages"]
-store_embedding = chat_memory_funcs["store_embedding"]
+shared.chat_memory.generate_embedding = chat_memory_funcs["generate_embedding"]
+shared.chat_memory.fetch_similar_messages = chat_memory_funcs["fetch_similar_messages"]
+shared.chat_memory.store_embedding = chat_memory_funcs["store_embedding"]
 
 # AI safety middleware (optional, non-blocking)
 ai_safety_funcs = safe_import(
@@ -137,20 +137,35 @@ AGI_STREAM_SCHEMA = request_validator_funcs["AGI_STREAM_SCHEMA"]
 try:
     from shared.db_logging import log_chat_message_safe
 except Exception:  # pragma: no cover - if shared not on path
-    log_chat_message_safe = None  # type: ignore
+    log_chat_message_safe = None
+
 try:
-    from shared.chat_memory import (fetch_similar_messages, generate_embedding,
-                                    store_embedding)
+    import shared.chat_memory
 except Exception:
     # Provide graceful degradations so endpoint still works
-    def generate_embedding(text: str):  # type: ignore
-        return []
+    import sys
+    import types
+    if 'shared.chat_memory' not in sys.modules:
+        shared_chat_memory = types.ModuleType('shared.chat_memory')
 
-    def fetch_similar_messages(query_emb, top_k=5, session_id=None):  # type: ignore
-        return []
+        def _generate_embedding(text: str):
+            return []
 
-    def store_embedding(message_id, embedding, model):  # type: ignore
-        pass
+        def _fetch_similar_messages(query_embedding, top_k=5, session_id=None, min_similarity=None, limit=None):
+            return []
+
+        def _store_embedding(message_id, embedding, model):
+            pass
+
+        setattr(shared_chat_memory, 'generate_embedding', _generate_embedding)
+        setattr(shared_chat_memory, 'fetch_similar_messages',
+                _fetch_similar_messages)
+        setattr(shared_chat_memory, 'store_embedding', _store_embedding)
+        sys.modules['shared.chat_memory'] = shared_chat_memory
+
+        if not hasattr(shared, 'chat_memory'):
+            import shared as shared_module
+            shared_module.chat_memory = shared_chat_memory
 
 
 # AI safety fallback if middleware import failed
@@ -210,7 +225,7 @@ try:  # pragma: no cover
 
     _tracer = trace.get_tracer("qai.functions")
 except Exception:  # pragma: no cover - library optional
-    _tracer = None
+    _tracer = None  # type: ignore
 
 app = func.FunctionApp()
 
@@ -435,6 +450,14 @@ def _detect_provider_with_runtime_fallback(
     In those cases, degrade to ``local`` provider instead of returning HTTP 500
     from status/chat endpoints.
     """
+
+    if detect_provider is None:
+        logging.warning(
+            "detect_provider is None; falling back to local provider. explicit=%s model_override=%s",
+            explicit,
+            model_override,
+        )
+        return detect_provider(explicit="local", model_override="local-echo")
 
     try:
         return detect_provider(
@@ -1109,8 +1132,9 @@ def chat(req: func.HttpRequest) -> func.HttpResponse:
         user_embedding = None
         if user_message_content:
             try:
-                user_embedding = generate_embedding(user_message_content)
-                similar = fetch_similar_messages(
+                user_embedding = shared.chat_memory.generate_embedding(
+                    user_message_content)
+                similar = shared.chat_memory.fetch_similar_messages(
                     user_embedding,
                     top_k=_safe_int_env("QAI_MEMORY_TOP_K", 5),
                     session_id=session_id,
@@ -1165,6 +1189,14 @@ def chat(req: func.HttpRequest) -> func.HttpResponse:
         logging.info(f"Using provider: {info.name}, model: {info.model}")
 
         start_time = time.perf_counter()
+
+        # Defensive check: prune_messages may be None if registry failed to initialize
+        if prune_messages is None:
+            raise RuntimeError(
+                "prune_messages is unavailable. Chat CLI registry initialization failed. "
+                "Check AI projects module availability and imports."
+            )
+
         pruned_messages, stats, system_msg = prune_messages(
             messages=messages,
             provider=info.name,
@@ -1265,7 +1297,7 @@ def chat(req: func.HttpRequest) -> func.HttpResponse:
                     )
                     if user_log.get("success") and user_embedding:
                         try:
-                            store_embedding(
+                            shared.chat_memory.store_embedding(
                                 user_log.get("message_id"),
                                 user_embedding,
                                 model=info.model,
@@ -1717,8 +1749,9 @@ def chat_stream(req: func.HttpRequest) -> func.HttpResponse:
         stream_memory_messages: list[dict] = []
         if stream_user_content:
             try:
-                stream_embedding = generate_embedding(stream_user_content)
-                similar_msgs = fetch_similar_messages(
+                stream_embedding = shared.chat_memory.generate_embedding(
+                    stream_user_content)
+                similar_msgs = shared.chat_memory.fetch_similar_messages(
                     stream_embedding,
                     top_k=_safe_int_env("QAI_MEMORY_TOP_K", 5),
                     session_id=body.get("session_id"),
@@ -1792,7 +1825,7 @@ def chat_stream(req: func.HttpRequest) -> func.HttpResponse:
                     "memory_messages": len(stream_memory_messages),
                     "pruning": {
                         "original_tokens": stats.original_tokens,
-                        "pruned_tokens": stats.pruned_tokens,
+                        "pruned_tokens": stats.pruned_tokens
                         "removed_count": stats.removed_count,
                         "budget": stats.budget,
                         "reserve_output_tokens": stats.reserve_output_tokens,
@@ -2705,14 +2738,14 @@ def ai_status(req: func.HttpRequest) -> func.HttpResponse:
                         }
                     )
                 else:
-                    quantum_info["azure_quantum"][
-                        "error"
-                    ] = "quantum_config.yaml missing"
+                    quantum_info["azure_quantum"].update(
+                        {"error": "quantum_config.yaml missing"}
+                    )
             except Exception as aq_err:  # noqa: BLE001
-                quantum_info["azure_quantum"]["error"] = str(aq_err)
+                quantum_info["azure_quantum"].update({"error": str(aq_err)})
 
         # Self-Learning System Status
-        learning_info = {
+        learning_info: dict = {
             "enabled": False,
             "training_cycles": 0,
             "total_conversations": 0,
@@ -2890,6 +2923,28 @@ def ai_status(req: func.HttpRequest) -> func.HttpResponse:
             orchestrator_health["overall_status"] = "error"
             orchestrator_health["error"] = str(_oh)
 
+        public_endpoints = [
+            "/api/chat-web",
+            "/api/chat-web/chat.js",
+            "/api/chat",
+            "/api/chat/stream",
+            "/api/health",
+            "/api/ai/status",
+            "/api/ai/capabilities",
+            "/api/ai/routes",
+            "/api/ai/provider-probe",
+            "/api/agi/analyze",
+            "/api/agi/reason",
+            "/api/agi/stream",
+            "/api/agi/status",
+            "/api/vision/infer",
+            "/api/vision/batch-infer",
+            "/api/image/generate",
+            "/api/quantum-llm/status",
+            "/api/quantum-llm/chat",
+            "/api/quantum-llm/stream",
+        ]
+
         payload = {
             "active_provider": info.name,
             "model": info.model,
@@ -2920,25 +2975,7 @@ def ai_status(req: func.HttpRequest) -> func.HttpResponse:
                 "chat_web_html": chat_web_html,
                 "chat_web_js": chat_web_js,
             },
-            "endpoints": [
-                "/api/chat-web",
-                "/api/chat-web/chat.js",
-                "/api/chat",
-                "/api/chat/stream",
-                "/api/health",
-                "/api/ai/status",
-                "/api/ai/capabilities",
-                "/api/agi/analyze",
-                "/api/agi/reason",
-                "/api/agi/stream",
-                "/api/agi/status",
-                "/api/vision/infer",
-                "/api/vision/batch-infer",
-                "/api/image/generate",
-                "/api/quantum-llm/status",
-                "/api/quantum-llm/chat",
-                "/api/quantum-llm/stream",
-            ],
+            "endpoints": public_endpoints,
             "status": "ok",
         }
 
@@ -2953,6 +2990,119 @@ def ai_status(req: func.HttpRequest) -> func.HttpResponse:
         logging.error(f"ai/status error: {e}")
         return func.HttpResponse(
             json.dumps({"status": "error", "error": str(e)}),
+            status_code=500,
+            mimetype="application/json",
+            headers=create_cors_response_headers(),
+        )
+
+
+@app.route(route="ai/routes", methods=["GET"], auth_level=func.AuthLevel.ANONYMOUS)
+def ai_routes(req: func.HttpRequest) -> func.HttpResponse:
+    """Compatibility endpoint listing key public HTTP routes."""
+    try:
+        routes = [
+            {"route": "ai/status",
+                "methods": ["GET"], "authLevel": "anonymous"},
+            {"route": "ai/capabilities",
+                "methods": ["GET"], "authLevel": "anonymous"},
+            {"route": "ai/routes",
+                "methods": ["GET"], "authLevel": "anonymous"},
+            {
+                "route": "ai/provider-probe",
+                "methods": ["GET", "POST"],
+                "authLevel": "anonymous",
+            },
+            {"route": "agi/status",
+                "methods": ["GET"], "authLevel": "anonymous"},
+            {"route": "agi/analyze",
+                "methods": ["POST"], "authLevel": "anonymous"},
+            {"route": "agi/reason",
+                "methods": ["POST"], "authLevel": "anonymous"},
+            {"route": "agi/stream",
+                "methods": ["POST"], "authLevel": "anonymous"},
+            {"route": "chat", "methods": [
+                "POST", "OPTIONS"], "authLevel": "anonymous"},
+            {
+                "route": "chat/stream",
+                "methods": ["POST", "OPTIONS"],
+                "authLevel": "anonymous",
+            },
+            {"route": "chat-web",
+                "methods": ["GET"], "authLevel": "anonymous"},
+            {
+                "route": "chat-web/chat.js",
+                "methods": ["GET"],
+                "authLevel": "anonymous",
+            },
+        ]
+        payload = {"count": len(routes), "functions": routes}
+        return func.HttpResponse(
+            json.dumps(payload),
+            status_code=200,
+            mimetype="application/json",
+            headers=create_cors_response_headers(),
+        )
+    except Exception as e:  # noqa: BLE001
+        logging.error(f"ai/routes error: {e}")
+        return func.HttpResponse(
+            json.dumps({"status": "error", "error": str(e)}),
+            status_code=500,
+            mimetype="application/json",
+            headers=create_cors_response_headers(),
+        )
+
+
+@app.route(
+    route="ai/provider-probe", methods=["GET", "POST"], auth_level=func.AuthLevel.ANONYMOUS
+)
+def ai_provider_probe(req: func.HttpRequest) -> func.HttpResponse:
+    """Return provider selection diagnostics for requested provider/model."""
+    try:
+        body: dict = {}
+        if req.method.upper() == "POST":
+            try:
+                body = _parse_json_object_body(req)
+            except ValueError:
+                body = {}
+
+        requested_provider = (
+            req.params.get("provider")
+            or body.get("provider")
+            or os.getenv("DEFAULT_AI_PROVIDER", "auto")
+        )
+        requested_model = req.params.get("model") or body.get("model")
+
+        provider, info = _detect_provider_with_runtime_fallback(
+            explicit=requested_provider,
+            model_override=requested_model,
+        )
+
+        payload = {
+            "requested_provider": requested_provider,
+            "requested_model": requested_model,
+            "resolved_provider": info.name,
+            "resolved_model": info.model,
+            "provider_class": provider.__class__.__name__,
+            "status": "ok",
+        }
+        return func.HttpResponse(
+            json.dumps(payload),
+            status_code=200,
+            mimetype="application/json",
+            headers=create_cors_response_headers(),
+        )
+    except Exception as e:  # noqa: BLE001
+        logging.error(f"ai/provider-probe error: {e}")
+        return func.HttpResponse(
+            json.dumps(
+                {
+                    "requested_provider": req.params.get("provider")
+                    or os.getenv("DEFAULT_AI_PROVIDER", "auto"),
+                    "requested_model": req.params.get("model"),
+                    "status": "error",
+                    "error": str(e),
+                }
+            ),
             status_code=500,
             mimetype="application/json",
             headers=create_cors_response_headers(),
@@ -3029,7 +3179,7 @@ def vision_infer(req: func.HttpRequest) -> func.HttpResponse:
     try:
         # Lazy import vision inference (only loaded when needed)
         try:
-            from vision_inference import VisionInference
+            from vision_inference import VisionInference  # type: ignore
         except ImportError as e:
             return func.HttpResponse(
                 json.dumps({"error": f"Vision inference not available: {e}"}),
@@ -3367,6 +3517,9 @@ def image_generate(req: func.HttpRequest) -> func.HttpResponse:
                 n=1,
                 response_format="url",
             )
+
+            if not response.data:
+                raise ValueError("No image data returned from OpenAI")
 
             image_url = response.data[0].url
 
@@ -4819,11 +4972,16 @@ def quantum_llm_chat(req: func.HttpRequest) -> func.HttpResponse:
 
         pipeline = _get_quantum_llm_pipeline()
         if pipeline is None:
+            def _unavail():
+                yield b'data: {"error": "Quantum LLM pipeline unavailable"}\n\n'
+                yield b"data: [DONE]\n\n"
+
             return func.HttpResponse(
-                json.dumps({"error": "Quantum LLM pipeline unavailable"}),
+                body=_unavail(),
                 status_code=503,
-                mimetype="application/json",
-                headers=create_cors_response_headers(),
+                mimetype="text/event-stream",
+                headers={**create_cors_response_headers(),
+                         "Cache-Control": "no-cache"},
             )
 
         # Honour per-request max_tokens (within cap) — use a local override dict

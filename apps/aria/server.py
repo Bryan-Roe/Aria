@@ -1754,6 +1754,21 @@ def tags_to_actions(tags: List[str]) -> List[dict]:
                     inferred.append({"action": "gesture", "gesture_type": "wave"})
                 continue
 
+            # throw
+            m = re.match(r"\[aria:throw:(\d{1,3}):(\d{1,3})\]", tag)
+            if m:
+                x = max(0, min(100, int(m.group(1))))
+                y = max(0, min(100, int(m.group(2))))
+                inferred.append({"action": "throw", "target": {"x": x, "y": y}, "force": "medium"})
+                continue
+
+            # wait
+            m = re.match(r"\[aria:wait:([0-9]+(?:\.[0-9]+)?)\]", tag)
+            if m:
+                duration = max(0.0, min(30.0, float(m.group(1))))
+                inferred.append({"action": "wait", "duration": duration})
+                continue
+
         except Exception:
             # Be tolerant: skip tags we don't understand
             continue
@@ -1793,6 +1808,24 @@ class AriaRequestHandler(SimpleHTTPRequestHandler):
             self.send_header("Content-Type", "application/json")
             self.end_headers()
             payload = {"objects": stage_state.get("objects", {})}
+            self.wfile.write(json.dumps(payload).encode("utf-8"))
+            return
+        if self.path == "/api/aria/schema":
+            # Machine-readable action schema so AI agents/clients can discover
+            # the canonical action contract (action types, params, examples).
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.end_headers()
+            payload = {
+                "actions": ARIA_ACTIONS,
+                "valid_gestures": sorted(VALID_GESTURES),
+                "limits": {
+                    "max_actions_per_sequence": 25,
+                    "coordinate_range": [0, 100],
+                    "max_say_text_chars": 200,
+                    "max_wait_seconds": 30,
+                },
+            }
             self.wfile.write(json.dumps(payload).encode("utf-8"))
             return
         if self.path == "/":
