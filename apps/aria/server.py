@@ -743,10 +743,36 @@ Rules:
         elif "wait" in command_lower or "pause" in command_lower or "hold on" in command_lower:
             actions.append({"action": "wait", "duration": 1.0})
 
-        # Parse gesture commands
-        gestures = ["wave", "thumbs_up", "clap", "shrug", "bow", "nod"]
-        for gesture in gestures:
-            trigger = gesture.replace("_", " ")
+        # Parse gesture commands. Each entry maps a natural-language trigger
+        # phrase to a canonical gesture in VALID_GESTURES so AI-issued commands
+        # like "thanks", "applaud", or "yo" still resolve to a valid action.
+        gesture_triggers = [
+            ("wave", "wave"),
+            ("hello", "wave"),
+            ("hi ", "wave"),
+            ("greet", "wave"),
+            ("yo ", "wave"),
+            ("hey", "wave"),
+            ("thumbs up", "thumbs_up"),
+            ("thumbs-up", "thumbs_up"),
+            ("good job", "thumbs_up"),
+            ("nice work", "thumbs_up"),
+            ("approve", "thumbs_up"),
+            ("clap", "clap"),
+            ("applaud", "clap"),
+            ("celebrate", "clap"),
+            ("shrug", "shrug"),
+            ("dunno", "shrug"),
+            ("don't know", "shrug"),
+            ("bow", "bow"),
+            ("bow down", "bow"),
+            ("nod", "nod"),
+            ("yes", "nod"),
+            ("agree", "nod"),
+            ("thanks", "nod"),
+            ("thank you", "nod"),
+        ]
+        for trigger, gesture in gesture_triggers:
             if trigger in command_lower:
                 actions.append({"action": "gesture", "gesture_type": gesture})
                 break
