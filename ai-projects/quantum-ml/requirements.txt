@@ -1,5 +1,5 @@
 # Azure Quantum SDK
-azure-quantum[qiskit]>=3.9.1,<4.0.0
+azure-quantum[qiskit]>=3.10.0,<4.0.0
 # Qiskit 1.x baseline (security-patched and compatible with current torch baseline)
 qiskit==2.4.1
 qiskit-aer==0.17.2
