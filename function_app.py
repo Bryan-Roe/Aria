@@ -102,9 +102,19 @@ chat_memory_funcs = safe_import(
         "store_embedding": lambda message_id, embedding, model: False,
     }.get(name, lambda *args, **kwargs: None),
 )
-shared.chat_memory.generate_embedding = chat_memory_funcs["generate_embedding"]
-shared.chat_memory.fetch_similar_messages = chat_memory_funcs["fetch_similar_messages"]
-shared.chat_memory.store_embedding = chat_memory_funcs["store_embedding"]
+try:
+    import shared as _shared_pkg  # noqa: F401
+    import shared.chat_memory as _shared_chat_memory_mod
+    _shared_chat_memory_mod.generate_embedding = chat_memory_funcs["generate_embedding"]
+    _shared_chat_memory_mod.fetch_similar_messages = chat_memory_funcs["fetch_similar_messages"]
+    _shared_chat_memory_mod.store_embedding = chat_memory_funcs["store_embedding"]
+except Exception:
+    # shared.chat_memory not importable; the try/except block below installs a stub module.
+    pass
+
+generate_embedding = chat_memory_funcs["generate_embedding"]
+fetch_similar_messages = chat_memory_funcs["fetch_similar_messages"]
+store_embedding = chat_memory_funcs["store_embedding"]
 
 # AI safety middleware (optional, non-blocking)
 ai_safety_funcs = safe_import(
@@ -163,8 +173,8 @@ except Exception:
         setattr(shared_chat_memory, 'store_embedding', _store_embedding)
         sys.modules['shared.chat_memory'] = shared_chat_memory
 
-        if not hasattr(shared, 'chat_memory'):
-            import shared as shared_module
+        import shared as shared_module
+        if not hasattr(shared_module, 'chat_memory'):
             shared_module.chat_memory = shared_chat_memory
 
 
@@ -863,9 +873,9 @@ def agi_stream(req: func.HttpRequest) -> func.HttpResponse:
                 yield (f"event: error\n" f"data: {err_payload}\n\n").encode("utf-8")
                 yield b"data: [DONE]\n\n"
 
-        # Azure Functions HttpResponse requires bytes/str body; materialize SSE payload.
+        # Pass generator directly so SSE chunks stream incrementally.
         return func.HttpResponse(
-            body=b"".join(_sse_iterable()),
+            body=_sse_iterable(),
             status_code=200,
             mimetype="text/event-stream",
             headers={**create_cors_response_headers(),
@@ -1132,9 +1142,9 @@ def chat(req: func.HttpRequest) -> func.HttpResponse:
         user_embedding = None
         if user_message_content:
             try:
-                user_embedding = shared.chat_memory.generate_embedding(
+                user_embedding = generate_embedding(
                     user_message_content)
-                similar = shared.chat_memory.fetch_similar_messages(
+                similar = fetch_similar_messages(
                     user_embedding,
                     top_k=_safe_int_env("QAI_MEMORY_TOP_K", 5),
                     session_id=session_id,
@@ -1297,7 +1307,7 @@ def chat(req: func.HttpRequest) -> func.HttpResponse:
                     )
                     if user_log.get("success") and user_embedding:
                         try:
-                            shared.chat_memory.store_embedding(
+                            store_embedding(
                                 user_log.get("message_id"),
                                 user_embedding,
                                 model=info.model,
@@ -1749,9 +1759,9 @@ def chat_stream(req: func.HttpRequest) -> func.HttpResponse:
         stream_memory_messages: list[dict] = []
         if stream_user_content:
             try:
-                stream_embedding = shared.chat_memory.generate_embedding(
+                stream_embedding = generate_embedding(
                     stream_user_content)
-                similar_msgs = shared.chat_memory.fetch_similar_messages(
+                similar_msgs = fetch_similar_messages(
                     stream_embedding,
                     top_k=_safe_int_env("QAI_MEMORY_TOP_K", 5),
                     session_id=body.get("session_id"),
@@ -1825,7 +1835,7 @@ def chat_stream(req: func.HttpRequest) -> func.HttpResponse:
                     "memory_messages": len(stream_memory_messages),
                     "pruning": {
                         "original_tokens": stats.original_tokens,
-                        "pruned_tokens": stats.pruned_tokens
+                        "pruned_tokens": stats.pruned_tokens,
                         "removed_count": stats.removed_count,
                         "budget": stats.budget,
                         "reserve_output_tokens": stats.reserve_output_tokens,
