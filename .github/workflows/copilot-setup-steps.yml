@@ -73,7 +73,7 @@ jobs:
           set -euo pipefail
           python -m pip install --upgrade pip
           pip install --disable-pip-version-check yamllint==1.35.1
-          npm install -g markdownlint-cli@0.33.0 markdownlint-rule-helpers@0.0.0
+          npm install -g markdownlint-cli@0.33.0
 
       - name: Lint YAML workflow files
         id: yamllint
@@ -206,7 +206,7 @@ jobs:
           cat "$REPORT"
 
       - name: Upload report artifact
-        if: always()
+        if: ${{ always() && steps.checks.outputs.report_path != '' }}
         uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08
         with:
           name: copilot-setup-report
