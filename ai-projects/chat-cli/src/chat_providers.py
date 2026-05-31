@@ -107,6 +107,9 @@ _PROVIDER_ALIASES: Dict[str, str] = {
     "lm-studio": "lmstudio",
     "local_echo": "local",
     "local-echo": "local",
+    "qai": "quantum",
+    "qai_quantum": "quantum",
+    "qai-quantum": "quantum",
     "quantum_llm": "quantum",
     "quantum-llm": "quantum",
 }
@@ -120,6 +123,7 @@ _KNOWN_PROVIDER_CHOICES: set[str] = {
     "local",
     "lora",
     "agi",
+    "qai",
     "quantum",
 }
 

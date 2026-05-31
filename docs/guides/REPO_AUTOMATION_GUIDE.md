@@ -14,6 +14,9 @@ python scripts/repo_automation.py --start --daemon
 # Check status
 ./scripts/start_repo_automation.sh status
 
+# Validate configs
+./scripts/start_repo_automation.sh validate
+
 # Stop all
 ./scripts/start_repo_automation.sh stop
 ```
@@ -319,6 +322,13 @@ ComponentConfig(
 )
 ```
 
+
+# Using Python directly
+python scripts/repo_automation.py --validate
+```
+
+This runs the same config gate used before startup and exits without launching
+any components.
 ### Environment Variables
 
 ```bash

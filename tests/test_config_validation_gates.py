@@ -38,6 +38,18 @@ class TestConfigValidationGates:
         assert result.returncode == 0
         assert "✅" in result.stdout or "valid" in result.stdout.lower()
 
+    def test_repo_automation_wrapper_validate_mode(self):
+        """Test start_repo_automation.sh validate mode."""
+        result = subprocess.run(
+            ["bash", "scripts/start_repo_automation.sh", "validate"],
+            cwd=REPO_ROOT,
+            capture_output=True,
+            text=True,
+            timeout=20,
+        )
+        assert result.returncode == 0
+        assert "validate" in result.stdout.lower() or "valid" in result.stdout.lower()
+
     def test_master_orchestrator_validation(self):
         """Test master_orchestrator.py validation gate."""
         result = subprocess.run(

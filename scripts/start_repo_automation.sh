@@ -49,11 +49,12 @@ function show_menu() {
     echo "  ${GREEN}2)${NC} Aria Only          - Just Aria character automation"
     echo "  ${GREEN}3)${NC} Training Pipeline  - Training + evaluation only"
     echo "  ${GREEN}4)${NC} Custom Selection   - Choose specific components"
-    echo "  ${GREEN}5)${NC} Status             - Check current automation status"
-    echo "  ${GREEN}6)${NC} Stop All           - Stop all automation"
+    echo "  ${GREEN}5)${NC} Validate           - Preflight configuration checks"
+    echo "  ${GREEN}6)${NC} Status             - Check current automation status"
+    echo "  ${GREEN}7)${NC} Stop All           - Stop all automation"
     echo "  ${GREEN}0)${NC} Exit"
     echo ""
-    read -p "Enter choice [0-6]: " choice
+    read -p "Enter choice [0-7]: " choice
 }
 
 function check_dependencies() {
@@ -107,6 +108,12 @@ function start_custom() {
 
 function show_status() {
     python3 "$REPO_ROOT/scripts/repo_automation.py" --status
+}
+
+function validate_repo_automation() {
+    echo -e "${YELLOW}🔍 Validating repository automation...${NC}"
+    python3 "$REPO_ROOT/scripts/repo_automation.py" --validate
+    echo -e "${GREEN}✅ Repository automation configuration is valid${NC}"
 }
 
 function stop_all() {
@@ -179,6 +186,10 @@ if [ $# -gt 0 ]; then
             show_status
             exit 0
             ;;
+        validate)
+            validate_repo_automation
+            exit 0
+            ;;
         stop)
             stop_all
             exit 0
@@ -204,6 +215,7 @@ if [ $# -gt 0 ]; then
             echo "  aria           Aria character only"
             echo "  training       Training pipeline only"
             echo "  components     List available components"
+            echo "  validate       Validate orchestrator configs"
             echo "  status         Check automation status"
             echo "  stop           Stop all automation"
             echo ""
@@ -248,9 +260,12 @@ while true; do
             break
             ;;
         5)
-            show_status
+            validate_repo_automation
             ;;
         6)
+            show_status
+            ;;
+        7)
             stop_all
             ;;
         0)

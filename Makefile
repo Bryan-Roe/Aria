@@ -26,9 +26,9 @@ FUNC_PORT    ?= 7071
 GRADIO_PORT  ?= 7860
 GRADIO_SHARE ?= false
 
-.PHONY: all install dev start stop build test test-unit test-integration \
+.PHONY: all install install-qai dev start stop build test test-unit test-integration \
         lint format type-check clean docker-build docker-dev start-gradio \
-        start-local-status help
+        start-local-status start-qai help
 
 # Default target
 all: lint test
@@ -70,6 +70,15 @@ start-functions:
 ## Start the lightweight local /api/ai/status adapter on FUNC_PORT
 start-local-status:
 	$(PYTHON) local_dev_adapter.py --port $(FUNC_PORT)
+
+## Install QAI integration service dependencies
+install-qai:
+	$(PIP) install -r mount/requirements.txt
+
+## Start the QAI integration service on port 8000
+start-qai: install-qai
+	@echo "🚀 Starting QAI integration service on http://localhost:8000..."
+	$(PYTHON) mount/app.py
 
 ## Start local Gradio demo UI
 start-gradio:

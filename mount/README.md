@@ -43,6 +43,12 @@ python app.py
 uvicorn app:app --host 0.0.0.0 --port 8000
 ```
 
+From the repository root on macOS/Linux, you can also start it with:
+
+```bash
+make start-qai
+```
+
 **Access the Web UI**: Open http://localhost:8000 in your browser
 
 **Access the API docs**: http://localhost:8000/docs
@@ -121,11 +127,13 @@ Example:
 curl -X POST http://localhost:8000/training/lora \
   -H "Content-Type: application/json" \
   -d '{
-    "dataset": "../../datasets/chat/dolly",
+    "dataset": "dolly",
     "max_train_samples": 64,
     "epochs": 1
   }'
 ```
+
+Use the discovered dataset name (for example `dolly`), not a filesystem path.
 
 ## 🏗️ Architecture
 
@@ -175,9 +183,9 @@ All paths are relative to the workspace root:
 ```yaml
 paths:
   workspace_root: ..
-  quantum_ai: ../quantum-ai
-  talk_to_ai: ../talk-to-ai
-  phi_training: ../AI/microsoft_phi-silica-3.6_v1
+  quantum_ai: ../ai-projects/quantum-ml
+  talk_to_ai: ../ai-projects/chat-cli
+  phi_training: ../ai-projects/lora-training/microsoft_phi-silica-3.6_v1
   datasets: ../datasets
   data_out: ../data_out
 ```

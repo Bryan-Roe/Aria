@@ -1,4 +1,4 @@
-"""Enhanced Gradio demo for Aria.
+"""Enhanced Gradio demo for QAI.
 
 Run after installing dependencies:
     ./.venv/bin/python scripts/gradio_demo.py
@@ -23,49 +23,393 @@ from contextlib import contextmanager
 # Request-scoped cancellation tokens are stored in a Gradio State (request_tokens) instead of a module-global flag.
 # See respond() and cancel_stream() implementations for details.
 
+APP_NAME = "QAI"
+
+
+def default_provider_choice() -> str:
+    """Prefer the QAI quantum backend when it is configured, otherwise stay on auto."""
+    if os.getenv("QAI_QUANTUM_MODEL_PATH") or os.getenv("QAI_QUANTUM_MODEL"):
+        return "qai"
+    return "auto"
+
+
+def provider_readiness_note() -> str:
+    """Summarize the currently available QAI provider path for the sidebar."""
+    model_path = os.getenv("QAI_QUANTUM_MODEL_PATH") or os.getenv("QAI_QUANTUM_MODEL")
+    if model_path:
+        return f"QAI quantum backend ready: {model_path}"
+    return "QAI quantum backend not configured. Set QAI_QUANTUM_MODEL_PATH or choose auto."
+
+
+def provider_diagnostics_summary() -> str:
+    """Combine the selected provider mode and readiness into a single diagnostic string."""
+    provider_mode = default_provider_choice()
+    if provider_mode == "qai":
+        return f"Provider: QAI quantum alias active · {provider_readiness_note()}"
+    return f"Provider: auto · {provider_readiness_note()}"
+
 
 # Simple theme CSS snippets (injected into the page)
 LIGHT_CSS = """<style>
-:root { --bg: #ffffff; --fg: #0a0a0a; --card: #f3f4f6; }
-body, .gradio-container { background: var(--bg); color: var(--fg); }
-.gradio-container { padding: 12px; border-radius: 8px; }
-.chatbot { max-height: 420px; overflow: auto; }
+:root {
+    --bg: #f6f7fb;
+    --fg: #101828;
+    --muted: #667085;
+    --card: rgba(255, 255, 255, 0.84);
+    --card-border: rgba(15, 23, 42, 0.08);
+    --accent: #7c3aed;
+    --accent-strong: #5b21b6;
+    --accent-soft: rgba(124, 58, 237, 0.12);
+    --shadow: 0 20px 60px rgba(15, 23, 42, 0.10);
+}
+body, .gradio-container {
+    background:
+        radial-gradient(circle at top left, rgba(124, 58, 237, 0.16), transparent 34%),
+        radial-gradient(circle at top right, rgba(59, 130, 246, 0.14), transparent 26%),
+        linear-gradient(180deg, #fbfcff 0%, #f4f6fb 55%, #eef1f7 100%);
+    color: var(--fg);
+}
+    .gradio-container,
+    .gradio-container * {
+        transition: background-color 180ms ease, border-color 180ms ease, color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
+    }
+    .gradio-container ::selection {
+        background: rgba(124, 58, 237, 0.22);
+        color: var(--fg);
+    }
+.gradio-container {
+    padding: 20px !important;
+    border-radius: 20px;
+}
+.hero-banner {
+    border: 1px solid var(--card-border);
+    border-radius: 24px;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.96), rgba(255, 255, 255, 0.74));
+    box-shadow: var(--shadow);
+    padding: 22px 24px;
+    margin-bottom: 16px;
+    backdrop-filter: blur(10px);
+}
+.hero-banner:hover {
+    transform: translateY(-1px);
+}
+.hero-title {
+    font-size: 1.6rem;
+    font-weight: 750;
+    letter-spacing: -0.03em;
+    margin: 0 0 8px;
+}
+.hero-subtitle {
+    color: var(--muted);
+    margin: 0;
+    line-height: 1.5;
+}
+.surface-card {
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: 20px;
+    box-shadow: var(--shadow);
+    padding: 16px;
+    backdrop-filter: blur(12px);
+}
+.surface-card:hover {
+    box-shadow: 0 24px 70px rgba(15, 23, 42, 0.14);
+}
+.surface-card details,
+.surface-card summary {
+    border-radius: 14px;
+}
+.surface-card details {
+    border: 1px solid var(--card-border);
+    background: rgba(255, 255, 255, 0.32);
+    padding: 8px 12px;
+    margin-bottom: 10px;
+}
+.surface-card summary {
+    cursor: pointer;
+    font-weight: 700;
+    color: var(--fg);
+    outline: none;
+}
+.surface-card details[open] {
+    background: rgba(255, 255, 255, 0.42);
+}
+.surface-card .gradio-group,
+.surface-card .gradio-row,
+.surface-card .gradio-column {
+    background: transparent !important;
+}
+.chat-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+.sidebar-panel {
+    position: sticky;
+    top: 16px;
+    align-self: flex-start;
+    max-height: calc(100vh - 32px);
+    overflow: auto;
+}
+.chatbot {
+    max-height: 560px;
+    min-height: 460px;
+    overflow: auto;
+    border-radius: 18px;
+}
+.primary-chatbot {
+    margin-bottom: 10px;
+}
+.chatbot [data-testid="chatbot"] {
+    scrollbar-width: thin;
+}
+.pill-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 10px 0 0;
+}
+.pill {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 999px;
+    padding: 6px 10px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--accent-strong);
+    background: var(--accent-soft);
+    border: 1px solid rgba(124, 58, 237, 0.18);
+}
+.section-label {
+    margin: 4px 0 8px;
+    font-size: 0.78rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 700;
+}
+.gradio-container button.primary {
+    background: linear-gradient(135deg, var(--accent), var(--accent-strong)) !important;
+    border: none !important;
+    box-shadow: 0 12px 24px rgba(91, 33, 182, 0.22);
+}
+.gradio-container button.primary:hover {
+    filter: brightness(1.04);
+    transform: translateY(-1px);
+}
+.gradio-container input,
+.gradio-container textarea,
+.gradio-container select {
+    border-radius: 14px !important;
+}
+.gradio-container textarea::placeholder,
+.gradio-container input::placeholder {
+    color: var(--muted);
+    opacity: 0.75;
+}
+.sidebar-note {
+    margin: 4px 0 12px;
+    color: var(--muted);
+    font-size: 0.94rem;
+    line-height: 1.45;
+}
+@media (max-width: 1024px) {
+    .sidebar-panel {
+        position: static;
+        max-height: none;
+        overflow: visible;
+    }
+}
 </style>"""
 
 DARK_CSS = """<style>
-:root { --bg: #0b0f19; --fg: #e6eef8; --card: #0f1720; }
-body, .gradio-container { background: var(--bg); color: var(--fg); }
-.gradio-container { padding: 12px; border-radius: 8px; }
-.chatbot { max-height: 420px; overflow: auto; }
+:root {
+    --bg: #070b14;
+    --fg: #e5eefc;
+    --muted: #94a3b8;
+    --card: rgba(11, 16, 28, 0.82);
+    --card-border: rgba(148, 163, 184, 0.14);
+    --accent: #a855f7;
+    --accent-strong: #d8b4fe;
+    --accent-soft: rgba(168, 85, 247, 0.16);
+    --shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+}
+body, .gradio-container {
+    background:
+        radial-gradient(circle at top left, rgba(168, 85, 247, 0.18), transparent 32%),
+        radial-gradient(circle at top right, rgba(14, 165, 233, 0.14), transparent 26%),
+        linear-gradient(180deg, #0b1020 0%, #080d18 58%, #050811 100%);
+    color: var(--fg);
+}
+    .gradio-container,
+    .gradio-container * {
+        transition: background-color 180ms ease, border-color 180ms ease, color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
+    }
+    .gradio-container ::selection {
+        background: rgba(168, 85, 247, 0.28);
+        color: #f8fafc;
+    }
+.gradio-container {
+    padding: 20px !important;
+    border-radius: 20px;
+}
+.hero-banner {
+    border: 1px solid var(--card-border);
+    border-radius: 24px;
+    background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(17, 24, 39, 0.78));
+    box-shadow: var(--shadow);
+    padding: 22px 24px;
+    margin-bottom: 16px;
+    backdrop-filter: blur(12px);
+}
+.hero-banner:hover {
+    transform: translateY(-1px);
+}
+.hero-title {
+    font-size: 1.6rem;
+    font-weight: 750;
+    letter-spacing: -0.03em;
+    margin: 0 0 8px;
+}
+.hero-subtitle {
+    color: var(--muted);
+    margin: 0;
+    line-height: 1.5;
+}
+.surface-card {
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: 20px;
+    box-shadow: var(--shadow);
+    padding: 16px;
+    backdrop-filter: blur(12px);
+}
+.surface-card:hover {
+    box-shadow: 0 24px 70px rgba(0, 0, 0, 0.45);
+}
+.surface-card details,
+.surface-card summary {
+    border-radius: 14px;
+}
+.surface-card details {
+    border: 1px solid var(--card-border);
+    background: rgba(8, 13, 24, 0.36);
+    padding: 8px 12px;
+    margin-bottom: 10px;
+}
+.surface-card summary {
+    cursor: pointer;
+    font-weight: 700;
+    color: var(--fg);
+    outline: none;
+}
+.surface-card details[open] {
+    background: rgba(8, 13, 24, 0.5);
+}
+.surface-card .gradio-group,
+.surface-card .gradio-row,
+.surface-card .gradio-column {
+    background: transparent !important;
+}
+.chat-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+.sidebar-panel {
+    position: sticky;
+    top: 16px;
+    align-self: flex-start;
+    max-height: calc(100vh - 32px);
+    overflow: auto;
+}
+.chatbot {
+    max-height: 560px;
+    min-height: 460px;
+    overflow: auto;
+    border-radius: 18px;
+}
+.primary-chatbot {
+    margin-bottom: 10px;
+}
+.chatbot [data-testid="chatbot"] {
+    scrollbar-width: thin;
+}
+.pill-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 10px 0 0;
+}
+.pill {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 999px;
+    padding: 6px 10px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--accent-strong);
+    background: var(--accent-soft);
+    border: 1px solid rgba(168, 85, 247, 0.18);
+}
+.section-label {
+    margin: 4px 0 8px;
+    font-size: 0.78rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 700;
+}
+.gradio-container button.primary {
+    background: linear-gradient(135deg, var(--accent), #6d28d9) !important;
+    border: none !important;
+    box-shadow: 0 12px 24px rgba(88, 28, 135, 0.35);
+}
+.gradio-container button.primary:hover {
+    filter: brightness(1.04);
+    transform: translateY(-1px);
+}
+.gradio-container input,
+.gradio-container textarea,
+.gradio-container select {
+    border-radius: 14px !important;
+}
+.gradio-container textarea::placeholder,
+.gradio-container input::placeholder {
+    color: var(--muted);
+    opacity: 0.82;
+}
+.sidebar-note {
+    margin: 4px 0 12px;
+    color: var(--muted);
+    font-size: 0.94rem;
+    line-height: 1.45;
+}
+@media (max-width: 1024px) {
+    .sidebar-panel {
+        position: static;
+        max-height: none;
+        overflow: visible;
+    }
+}
+.chat-panel { display: flex; flex-direction: column; gap: 12px; }
+.sidebar-panel { position: static; max-height: none; overflow: visible; }
 </style>"""
 
 COMPACT_CSS = """<style>
-.gradio-container { padding: 6px; }
+.gradio-container { padding: 10px !important; }
+.hero-banner { padding: 16px 18px; margin-bottom: 12px; }
+.hero-title { font-size: 1.28rem; }
+.hero-subtitle { font-size: 0.92rem; }
+.surface-card { padding: 12px; border-radius: 18px; }
+.chatbot { max-height: 420px; min-height: 360px; }
 .gradio-chat { font-size: 12px; line-height: 1.1; }
-.gradio-container .gradio-chatbot { max-height: 300px; }
+.sidebar-note { margin: 4px 0 12px; color: var(--muted); font-size: 0.92rem; line-height: 1.4; }
 </style>"""
 
 
 def timestamp_now() -> str:
     return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-
-
-def make_greeting(name: str, style: str, excitement: int, language: str) -> str:
-    """Construct a greeting based on selected style and language."""
-    name = (name or "World").strip()
-    greetings = {
-        "English": "Hello",
-        "Spanish": "Hola",
-        "French": "Bonjour",
-        "German": "Hallo",
-    }
-    base = greetings.get(language, "Hello")
-    if style == "Formal":
-        return f"{base}, {name}."
-    if style == "Friendly":
-        return f"{base} {name}"
-    # Enthusiastic
-    return f"{base} {name}" + "!" * max(1, int(excitement))
 
 
 # ---------------------------------------------------------------------------
@@ -87,11 +431,12 @@ def _conv_lock():
     ensure_conv_dir()
     lock_path = os.path.join(CONV_DIR, ".lock")
     lf = open(lock_path, "w")
+    fcntl_module: Any = None
     try:
         try:
-            import fcntl as fcntl_module
+            fcntl_module = importlib.import_module("fcntl")
         except Exception:
-            fcntl_module = None
+            fcntl_module = cast(Any, None)
         if fcntl_module:
             fcntl_module.flock(lf, fcntl_module.LOCK_EX)
         yield
@@ -349,151 +694,152 @@ def auto_improve_daemon():
 with gr.Blocks() as demo:
     # Theme injection element + toggle
     theme_css = gr.HTML(value=LIGHT_CSS)
-    with gr.Row():
-        gr.Markdown(
-            "# Aria — Gradio Demo  \nEnhanced greeting and chat demo with persistence, export, search, sessions, streaming, and TTS.")
-        theme_toggle = gr.Checkbox(label="Dark mode", value=False)
-        compact_toggle = gr.Checkbox(label="Compact layout", value=False)
-
-    # Greeting controls
-    with gr.Row():
-        name = gr.Textbox(
-            label="Name", placeholder="Your name here", elem_id="nameInput")
-        language = gr.Dropdown(
-            choices=["English", "Spanish", "French", "German"],
-            value="English",
-            label="Language",
-            elem_id="languageSelect",
-        )
-
-    with gr.Row():
-        style = gr.Radio(
-            choices=["Friendly", "Formal", "Enthusiastic"],
-            value="Friendly",
-            label="Style",
-            elem_id="styleSelect",
-        )
-        excitement = gr.Slider(minimum=1, maximum=10, value=1, step=1,
-                               label="Exclamation count", elem_id="excitementSlider")
-
-    greet_btn = gr.Button("Greet", variant="primary")
-    output = gr.Textbox(label="Greeting", interactive=False,
-                        lines=2, elem_id="greetingOutput")
-    examples = gr.Examples(
-        examples=[["Alice", "English", "Friendly", 1], [
-            "Carlos", "Spanish", "Friendly", 2], ["Marie", "French", "Enthusiastic", 4]],
-        inputs=[name, language, style, excitement],
+    hero_banner = gr.HTML(
+        value="""
+        <div class="hero-banner">
+            <div class="hero-title">QAI Gradio Demo</div>
+            <p class="hero-subtitle">A polished chat workspace for QAI session management, exports, and lightweight automation experiments.</p>
+            <div class="pill-row">
+                <span class="pill">{provider_status}</span>
+            </div>
+            <div class="pill-row">
+                <span class="pill">Streaming chat</span>
+                <span class="pill">Session tools</span>
+                <span class="pill">Export flows</span>
+                <span class="pill">Auto-improve</span>
+            </div>
+        </div>
+        """.format(provider_status=html.escape(provider_diagnostics_summary()))
     )
-    greet_btn.click(lambda n, s, e, l: make_greeting(n, s, e, l), inputs=[
-                    name, style, excitement, language], outputs=output)
+    with gr.Row(elem_classes=["surface-card"]):
+        with gr.Column(scale=4):
+            gr.Markdown(
+                f"# {APP_NAME} — Gradio Demo  \nEnhanced chat demo with persistence, export, search, sessions, streaming, and TTS.")
+        with gr.Column(scale=1, min_width=220):
+            theme_toggle = gr.Checkbox(label="Dark mode", value=False)
+            compact_toggle = gr.Checkbox(label="Compact layout", value=False)
 
     # Chat area
     initial_display, initial_hist_state = load_latest_conversation()
     initial_messages = hist_state_to_messages(initial_hist_state)
 
     with gr.Row():
-        with gr.Column(scale=3):
+        with gr.Column(scale=3, elem_classes=["surface-card", "chat-panel"]):
+            gr.Markdown("### Conversation")
             chatbot = gr.Chatbot(value=initial_messages,
-                                 label="Conversation", elem_id="ariaChatbot")
+                                 label="Conversation", elem_id="ariaChatbot", elem_classes=["primary-chatbot"])
             user_input = gr.Textbox(
                 placeholder="Type a message and press Enter or Send", label="Your message", elem_id="userInput")
 
-            # Controls
-            use_model = gr.Checkbox(
-                label="Use simulation (override provider)", value=False)
-            provider_select = gr.Dropdown(choices=["auto", "local", "ollama", "lmstudio", "openai", "azure",
-                                          "lora", "agi", "quantum"], value="auto", label="Provider", elem_id="providerSelect")
-            model_override = gr.Textbox(label="Model override (optional)",
-                                        placeholder="e.g., llama3.2 or gpt-4o-mini", elem_id="modelOverride")
-            temperature = gr.Slider(minimum=0.0, maximum=1.0, value=0.7,
-                                    step=0.05, label="Temperature", elem_id="temperature")
-            max_output_tokens = gr.Slider(
-                minimum=16, maximum=2048, step=16, value=512, label="Max output tokens", elem_id="maxTokens")
-            persona = gr.Textbox(label="Assistant name", value="Aria")
-            persona_presets = gr.Dropdown(choices=[
-                                          "Aria (Friendly)", "Researcher", "Code Assistant"], value="Aria (Friendly)", label="Persona presets")
-            autosave = gr.Checkbox(label="Autosave conversation", value=True)
-            max_history = gr.Slider(
-                minimum=10, maximum=1000, step=10, value=200, label="Max history (messages)")
-            session_name = gr.Textbox(
-                label="Session name (optional)", placeholder="session-2026-05-16")
+            with gr.Row():
+                send_btn = gr.Button("Send", variant="primary")
+                cancel_btn = gr.Button("Cancel")
+                clear_btn = gr.Button("Clear")
+                save_btn = gr.Button("Save now")
 
-            # Status / provider info
             provider_info = gr.Textbox(
                 label="Detected provider", interactive=False)
             status = gr.Textbox(
                 label="Status", interactive=False, value="Idle")
 
-            with gr.Row():
-                send_btn = gr.Button("Send")
-                cancel_btn = gr.Button("Cancel")
-                clear_btn = gr.Button("Clear")
-                save_btn = gr.Button("Save now")
+        with gr.Column(scale=2, elem_classes=["surface-card", "sidebar-panel"]):
+            gr.Markdown("### Sidebar", elem_classes=["section-label"])
+            gr.Markdown(
+                "Use the sidebar for advanced settings, session history, exports, and automation helpers.",
+                elem_classes=["sidebar-note"],
+            )
 
-            with gr.Row():
-                export_json_btn = gr.Button("Export JSON")
-                export_jsonl_btn = gr.Button("Export JSONL")
-                export_md_btn = gr.Button("Export Markdown")
-                export_txt_btn = gr.Button("Export TXT")
-                load_latest_btn = gr.Button("Load latest")
+            with gr.Accordion("Model & persona", open=False):
+                use_model = gr.Checkbox(
+                    label="Use simulation (override provider)", value=False)
+                provider_select = gr.Dropdown(
+                    choices=["auto", "qai", "quantum", "local", "ollama", "lmstudio", "openai", "azure", "lora", "agi"],
+                    value=default_provider_choice(),
+                    label="Provider",
+                    elem_id="providerSelect",
+                )
+                model_override = gr.Textbox(label="Model override (optional)",
+                                            placeholder="e.g., data_out/quantum_llm_training or gpt-4o-mini", elem_id="modelOverride")
+                gr.Markdown(provider_readiness_note(), elem_classes=["sidebar-note"])
+                gr.Markdown(provider_diagnostics_summary(), elem_classes=["sidebar-note"])
+                temperature = gr.Slider(minimum=0.0, maximum=1.0, value=0.7,
+                                        step=0.05, label="Temperature", elem_id="temperature")
+                max_output_tokens = gr.Slider(
+                    minimum=16, maximum=2048, step=16, value=512, label="Max output tokens", elem_id="maxTokens")
+                persona = gr.Textbox(label="Assistant name", value="QAI")
+                persona_presets = gr.Dropdown(choices=[
+                                              "QAI (Friendly)", "Researcher", "Code Assistant"], value="QAI (Friendly)", label="Persona presets")
+                autosave = gr.Checkbox(label="Autosave conversation", value=True)
+                max_history = gr.Slider(
+                    minimum=10, maximum=1000, step=10, value=200, label="Max history (messages)")
+                session_name = gr.Textbox(
+                    label="Session name (optional)", placeholder="session-2026-05-16")
 
-            export_file = gr.File(label="Conversation file", interactive=False)
-
-            # Saved sessions manager
-            saved_sessions = gr.Dropdown(
-                choices=[], label="Saved sessions", elem_id="savedSessions")
-            with gr.Row():
-                refresh_sessions_btn = gr.Button("Refresh sessions")
-                load_session_btn = gr.Button("Load session")
-                delete_session_btn = gr.Button("Delete session")
-            # Message edit/delete UI
-            with gr.Row():
-                message_index = gr.Number(
-                    value=0, label="Conversation index (0-based)")
-                edit_side = gr.Dropdown(
-                    choices=["user", "assistant"], value="assistant", label="Edit side")
+            with gr.Accordion("Session library", open=False):
+                saved_sessions = gr.Dropdown(
+                    choices=[], label="Saved sessions", elem_id="savedSessions")
+                with gr.Row():
+                    refresh_sessions_btn = gr.Button("Refresh sessions")
+                    load_session_btn = gr.Button("Load session")
+                    delete_session_btn = gr.Button("Delete session")
+                with gr.Row():
+                    message_index = gr.Number(
+                        value=0, label="Conversation index (0-based)")
+                    edit_side = gr.Dropdown(
+                        choices=["user", "assistant"], value="assistant", label="Edit side")
                 edit_message_text = gr.Textbox(
                     label="New message content", placeholder="Replace text")
-            with gr.Row():
-                edit_message_btn = gr.Button("Edit message")
-                delete_message_btn = gr.Button("Delete message")
-            # End message edit/delete UI
-            with gr.Row():
-                refresh_sessions_btn = gr.Button("Refresh sessions")
-                load_session_btn = gr.Button("Load session")
-                delete_session_btn = gr.Button("Delete session")
+                with gr.Row():
+                    edit_message_btn = gr.Button("Edit message")
+                    delete_message_btn = gr.Button("Delete message")
+                search_input = gr.Textbox(
+                    label="Search conversation", placeholder="Enter text to search")
+                with gr.Row():
+                    search_btn = gr.Button("Search")
+                    revert_btn = gr.Button("Show all")
+                load_latest_btn = gr.Button("Load latest")
 
-            search_input = gr.Textbox(
-                label="Search conversation", placeholder="Enter text to search")
-            with gr.Row():
-                search_btn = gr.Button("Search")
-                revert_btn = gr.Button("Show all")
+            with gr.Accordion("Exports & webhook", open=False):
+                with gr.Row():
+                    export_json_btn = gr.Button("Export JSON")
+                    export_jsonl_btn = gr.Button("Export JSONL")
+                with gr.Row():
+                    export_md_btn = gr.Button("Export Markdown")
+                    export_txt_btn = gr.Button("Export TXT")
+                export_file = gr.File(label="Conversation file", interactive=False)
+                webhook_name = gr.Textbox(
+                    label="Webhook name", placeholder="webhook-id")
+                webhook_dir = gr.Textbox(
+                    label="Webhook directory (optional)", placeholder="data_out/webhooks")
+                webhook_autocommit = gr.Checkbox(
+                    label="Auto-commit (git)", value=False)
+                send_to_webhook_btn = gr.Button("Send to Webhook")
 
-            # TTS
-            with gr.Row():
-                tts_autoplay = gr.Checkbox(
-                    label="Autoplay assistant audio", value=False)
-                tts_backend = gr.Dropdown(
-                    choices=["auto", "pyttsx3", "gtts"], value="auto", label="TTS backend")
+            with gr.Accordion("TTS & suggestions", open=False):
+                with gr.Row():
+                    tts_autoplay = gr.Checkbox(
+                        label="Autoplay assistant audio", value=False)
+                    tts_backend = gr.Dropdown(
+                        choices=["auto", "pyttsx3", "gtts"], value="auto", label="TTS backend")
                 speak_btn = gr.Button("Speak last reply")
-            tts_audio = gr.Audio(label="Assistant audio", interactive=False)
-
-            with gr.Row():
+                tts_audio = gr.Audio(label="Assistant audio", interactive=False)
                 auto_improve_enable = gr.Checkbox(
                     label="Auto-improve (background)", value=False)
                 auto_improve_interval = gr.Slider(
                     minimum=5, maximum=3600, step=5, value=60, label="Auto-improve interval (sec)")
                 suggestions_dropdown = gr.Dropdown(
                     choices=[], label="Auto suggestions", elem_id="suggestionsDropdown")
-                refresh_suggestions_btn = gr.Button("Refresh suggestions")
-                apply_suggestion_btn = gr.Button("Apply suggestion")
-                delete_suggestion_btn = gr.Button("Delete suggestion")
+                with gr.Row():
+                    refresh_suggestions_btn = gr.Button("Refresh suggestions")
+                    apply_suggestion_btn = gr.Button("Apply suggestion")
+                    delete_suggestion_btn = gr.Button("Delete suggestion")
 
         # Hidden state that stores structured conversation (list of dicts)
         hist_state = gr.State(initial_hist_state)
 
         suggestions_state = gr.State([])
         request_tokens = gr.State({"latest": None, "tokens": {}})
+        default_language = gr.State("English")
 
         # ------------------------------------------------------------------
         # Actions / Callbacks
@@ -502,6 +848,8 @@ with gr.Blocks() as demo:
             """Respond and stream updates. Returns (chat_history, cleared_input, hist_state, provider_info, status)."""
             chat_history = chat_history or []
             hist_state = hist_state or []
+            if request_tokens is not None and not isinstance(request_tokens, dict):
+                request_tokens = None
             # Normalize legacy tuple-pair history into message dicts.
             if chat_history and isinstance(chat_history[0], (tuple, list)):
                 normalized = []
@@ -751,7 +1099,7 @@ with gr.Blocks() as demo:
         send_btn.click(
             respond,
             inputs=[user_input, chatbot, hist_state, use_model, provider_select, model_override, temperature,
-                    max_output_tokens, language, persona, autosave, max_history, session_name, request_tokens],
+                max_output_tokens, default_language, persona, autosave, max_history, session_name, request_tokens],
             outputs=[chatbot, user_input, hist_state,
                      provider_info, status, request_tokens],
             queue=True,
@@ -759,7 +1107,7 @@ with gr.Blocks() as demo:
         user_input.submit(
             respond,
             inputs=[user_input, chatbot, hist_state, use_model, provider_select, model_override, temperature,
-                    max_output_tokens, language, persona, autosave, max_history, session_name, request_tokens],
+                max_output_tokens, default_language, persona, autosave, max_history, session_name, request_tokens],
             outputs=[chatbot, user_input, hist_state,
                      provider_info, status, request_tokens],
             queue=True,
@@ -791,12 +1139,12 @@ with gr.Blocks() as demo:
         def apply_persona(preset, persona_field):
             if not preset:
                 return persona_field
-            if preset.startswith("Aria"):
-                return "Aria"
+            if preset.startswith("QAI"):
+                return "QAI"
             if preset == "Researcher":
-                return "Dr. Aria"
+                return "QAI Research"
             if preset == "Code Assistant":
-                return "Aria-Dev"
+                return "QAI-Dev"
             return persona_field
 
         persona_presets.change(apply_persona, inputs=[

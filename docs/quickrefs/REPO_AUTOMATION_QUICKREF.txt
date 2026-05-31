@@ -22,6 +22,9 @@
   Check Status:
     ./scripts/start_repo_automation.sh status
 
+  Validate Configs:
+    ./scripts/start_repo_automation.sh validate
+
   Stop All:
     ./scripts/start_repo_automation.sh stop
 
@@ -80,6 +83,7 @@
   python3 scripts/repo_automation.py --start              # Start all
   python3 scripts/repo_automation.py --start --daemon     # Daemon mode
   python3 scripts/repo_automation.py --start --components aria,training
+  python3 scripts/repo_automation.py --validate           # Validate configs only
   python3 scripts/repo_automation.py --status             # Check status
   python3 scripts/repo_automation.py --stop               # Stop all
 

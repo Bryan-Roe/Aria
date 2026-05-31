@@ -34,25 +34,8 @@ def _is_safe_dataset_name(name: str) -> bool:
     return bool(DATASET_NAME_PATTERN.fullmatch(name_norm))
 
 
-def _error_response(code: str, message: str) -> Dict[str, Any]:
-    """Return a consistent error payload."""
-    return {"success": False, "error": code, "message": message}
-
-_DATASET_NAME_PATTERN = re.compile(r"^[A-Za-z0-9_.-]+$")
-
-
-def _normalize_dataset_name(name: str) -> str:
-    return name.strip().lower()
-
-
-def _is_safe_dataset_name(name: str) -> bool:
-    name_norm = name.strip()
-    if any(token in name_norm for token in ("/", "\\", "..")):
-        return False
-    return bool(_DATASET_NAME_PATTERN.fullmatch(name_norm))
-
-
 def _error_response(code: str, message: str, **extra: Any) -> Dict[str, Any]:
+    """Return a consistent error payload."""
     response: Dict[str, Any] = {"success": False, "error": code, "message": message}
     if extra:
         response.update(extra)
@@ -64,10 +47,30 @@ class TrainingIntegration:
 
     def __init__(self, config: Dict[str, Any]):
         self.config = config
-        self.workspace_root = Path(config["paths"]["workspace_root"]).resolve()
-        self.phi_path = Path(config["paths"]["phi_training"]).resolve()
-        self.scripts_path = Path(config["paths"]["scripts"]).resolve()
-        self.output_dir = Path(config["paths"]["data_out"]).resolve()
+        self.workspace_root = Path(config["paths"]["workspace_root"])
+        self.phi_path = Path(config["paths"]["phi_training"])
+        self.scripts_path = Path(config["paths"]["scripts"])
+        self.output_dir = Path(config["paths"]["data_out"])
+        training_cfg = config.get("training") or {}
+        orchestrators = training_cfg.get("orchestrators") or {}
+        autotrain_cfg = dict(orchestrators.get("autotrain") or {})
+        quantum_cfg = dict(orchestrators.get("quantum_autorun") or {})
+        self.autotrain_config = Path(
+            autotrain_cfg.get("config_file")
+            or self.workspace_root / "config" / "training" / "autotrain.yaml"
+        )
+        self.autotrain_status_file = Path(
+            autotrain_cfg.get("status_file")
+            or self.output_dir / "autotrain" / "status.json"
+        )
+        self.quantum_autorun_config = Path(
+            quantum_cfg.get("config_file")
+            or self.workspace_root / "config" / "quantum" / "quantum_autorun.yaml"
+        )
+        self.quantum_autorun_status_file = Path(
+            quantum_cfg.get("status_file")
+            or self.output_dir / "quantum_autorun" / "status.json"
+        )
 
     async def get_status(self) -> Dict[str, Any]:
         """Get current training system status"""
@@ -83,8 +86,8 @@ class TrainingIntegration:
 
     def _get_autotrain_status(self) -> Dict[str, Any]:
         """Get AutoTrain orchestrator status"""
-        config_file = self.workspace_root / "autotrain.yaml"
-        status_file = self.output_dir / "autotrain" / "status.json"
+        config_file = self.autotrain_config
+        status_file = self.autotrain_status_file
 
         status = {
             "config_exists": config_file.exists(),
@@ -106,8 +109,8 @@ class TrainingIntegration:
 
     def _get_quantum_autorun_status(self) -> Dict[str, Any]:
         """Get Quantum AutoRun orchestrator status"""
-        config_file = self.workspace_root / "quantum_autorun.yaml"
-        status_file = self.output_dir / "quantum_autorun" / "status.json"
+        config_file = self.quantum_autorun_config
+        status_file = self.quantum_autorun_status_file
 
         status = {
             "config_exists": config_file.exists(),
@@ -184,17 +187,19 @@ class TrainingIntegration:
             autotrain_script = self.scripts_path / "autotrain.py"
 
             cmd = [sys.executable, str(autotrain_script)]
+            cmd.extend(["--config", str(self.autotrain_config)])
             if dry_run:
                 cmd.append("--dry-run")
             if job_name:
                 cmd.extend(["--job", job_name])
 
+            env = os.environ.copy()
             result = subprocess.run(
                 cmd,
                 capture_output=True,
                 text=True,
                 cwd=str(self.workspace_root),
-                env={"PATH": os.environ.get("PATH", "")},
+                env=env,
             )
 
             return {
@@ -214,11 +219,11 @@ class TrainingIntegration:
             autotrain_script = self.scripts_path / "autotrain.py"
 
             result = subprocess.run(
-                [sys.executable, str(autotrain_script), "--list"],
+                [sys.executable, str(autotrain_script), "--config", str(self.autotrain_config), "--list"],
                 capture_output=True,
                 text=True,
                 cwd=str(self.workspace_root),
-                env={"PATH": os.environ.get("PATH", "")},
+                env=os.environ.copy(),
             )
 
             if result.returncode == 0:

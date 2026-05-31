@@ -155,6 +155,14 @@ python scripts/autonomous_training_orchestrator.py --cycles 1
 python scripts/autonomous_training_orchestrator.py --force-run --cycles 1
 ```
 
+### 6 — Start the QAI integration service
+
+```bash
+make start-qai
+# Open http://localhost:8000
+# API docs: http://localhost:8000/docs
+```
+
 ---
 
 ## 🧭 AI Contributor Quickstart

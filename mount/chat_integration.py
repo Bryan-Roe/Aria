@@ -16,10 +16,10 @@ class ChatIntegration:
 
     def __init__(self, config: Dict[str, Any]):
         self.config = config
-        self.workspace_root = Path(config["paths"]["workspace_root"]).resolve()
-        self.chat_path = Path(config["paths"]["talk_to_ai"]).resolve()
+        self.workspace_root = Path(config["paths"]["workspace_root"])
+        self.chat_path = Path(config["paths"]["talk_to_ai"])
         self.logs_dir = self.chat_path / "logs"
-        self.logs_dir.mkdir(exist_ok=True)
+        self.logs_dir.mkdir(parents=True, exist_ok=True)
 
     async def get_status(self) -> Dict[str, Any]:
         """Get current chat system status"""

@@ -18,17 +18,20 @@ class QuantumIntegration:
 
     def __init__(self, config: Dict[str, Any]):
         self.config = config
-        self.workspace_root = Path(config["paths"]["workspace_root"]).resolve()
-        self.quantum_path = Path(config["paths"]["quantum_ai"]).resolve()
-        self.results_dir = (
-            Path(config["paths"].get("quantum_ai", "../quantum-ai")) / "results"
+        self.workspace_root = Path(config["paths"]["workspace_root"])
+        self.quantum_path = Path(config["paths"]["quantum_ai"])
+        self.results_dir = Path(
+            config["quantum"].get("results_dir") or (self.quantum_path / "results")
         )
         self.quantum_config = self._load_quantum_config()
 
     def _load_quantum_config(self) -> Dict[str, Any]:
         """Load quantum configuration from YAML"""
+        configured = self.config["quantum"].get("config_file")
         config_path = (
-            self.workspace_root / "quantum-ai" / "config" / "quantum_config.yaml"
+            Path(configured)
+            if configured
+            else self.quantum_path / "config" / "quantum_config.yaml"
         )
         if config_path.exists():
             with open(config_path) as f:
@@ -65,7 +68,7 @@ class QuantumIntegration:
     def _get_recent_results(self, limit: int = 5) -> List[Dict[str, Any]]:
         """Get recent quantum training results"""
         results = []
-        results_path = self.workspace_root / "quantum-ai" / "results"
+        results_path = self.results_dir
 
         if not results_path.exists():
             return results

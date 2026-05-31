@@ -1,13 +1,28 @@
 import importlib.util
 import os
 import json
+import sys
 
 
 def load_module():
     path = os.path.join(os.path.dirname(__file__), "..", "scripts", "gradio_demo.py")
     path = os.path.abspath(path)
     spec = importlib.util.spec_from_file_location("gradio_demo", path)
+    if spec is None or spec.loader is None:
+        raise RuntimeError("Unable to load gradio_demo module")
     module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def load_chat_providers_module():
+    path = os.path.join(os.path.dirname(__file__), "..", "ai-projects", "chat-cli", "src", "chat_providers.py")
+    path = os.path.abspath(path)
+    spec = importlib.util.spec_from_file_location("chat_providers", path)
+    if spec is None or spec.loader is None:
+        raise RuntimeError("Unable to load chat_providers module")
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = module
     spec.loader.exec_module(module)
     return module
 
@@ -33,8 +48,8 @@ def test_save_and_load(tmp_path):
 def test_respond_simulation():
     m = load_module()
     # call respond directly in simulation mode
-    chat_history = []
-    hist_state = []
+    chat_history: list = []
+    hist_state: list = []
     import types
     gen = m.respond("hello", chat_history, hist_state, True, "auto", None, 0.5, 256, "English", "Aria", False, 100, "test")
     # respond is a generator-function (contains yield); collect final output
@@ -54,3 +69,48 @@ def test_respond_simulation():
     assert cleared_input == ""
     assert isinstance(new_hist_state, list)
     assert new_hist_state and new_hist_state[-1]["assistant"].startswith("[Aria-")
+
+
+def test_default_provider_prefers_qai_when_quantum_model_is_configured(monkeypatch):
+    m = load_module()
+    monkeypatch.setenv("QAI_QUANTUM_MODEL_PATH", "data_out/quantum_llm_training")
+    assert m.default_provider_choice() == "qai"
+
+
+def test_default_provider_stays_auto_without_quantum_model(monkeypatch):
+    m = load_module()
+    monkeypatch.delenv("QAI_QUANTUM_MODEL_PATH", raising=False)
+    monkeypatch.delenv("QAI_QUANTUM_MODEL", raising=False)
+    assert m.default_provider_choice() == "auto"
+
+
+def test_provider_readiness_note_reflects_quantum_configuration(monkeypatch):
+    m = load_module()
+    monkeypatch.setenv("QAI_QUANTUM_MODEL_PATH", "data_out/qai_quantum")
+    assert m.provider_readiness_note() == "QAI quantum backend ready: data_out/qai_quantum"
+
+
+def test_provider_readiness_note_reflects_missing_configuration(monkeypatch):
+    m = load_module()
+    monkeypatch.delenv("QAI_QUANTUM_MODEL_PATH", raising=False)
+    monkeypatch.delenv("QAI_QUANTUM_MODEL", raising=False)
+    assert m.provider_readiness_note() == "QAI quantum backend not configured. Set QAI_QUANTUM_MODEL_PATH or choose auto."
+
+
+def test_provider_diagnostics_summary_reflects_qai_configuration(monkeypatch):
+    m = load_module()
+    monkeypatch.setenv("QAI_QUANTUM_MODEL_PATH", "data_out/qai_quantum")
+    assert m.provider_diagnostics_summary() == "Provider: QAI quantum alias active · QAI quantum backend ready: data_out/qai_quantum"
+
+
+def test_provider_diagnostics_summary_reflects_auto_mode(monkeypatch):
+    m = load_module()
+    monkeypatch.delenv("QAI_QUANTUM_MODEL_PATH", raising=False)
+    monkeypatch.delenv("QAI_QUANTUM_MODEL", raising=False)
+    assert m.provider_diagnostics_summary() == "Provider: auto · QAI quantum backend not configured. Set QAI_QUANTUM_MODEL_PATH or choose auto."
+
+
+def test_qai_provider_alias_maps_to_quantum_provider():
+    chat_providers = load_chat_providers_module()
+    assert chat_providers._PROVIDER_ALIASES["qai"] == "quantum"
+    assert "qai" in chat_providers._KNOWN_PROVIDER_CHOICES

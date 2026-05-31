@@ -8,17 +8,17 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Optional
 
-import yaml
 from fastapi import BackgroundTasks, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
-# Add parent directory to path for imports
+# Add mount directory to path for local imports
 sys.path.insert(0, str(Path(__file__).parent))
 
 from chat_integration import ChatIntegration
+from path_resolver import load_qai_config
 from quantum_integration import QuantumIntegration
 from training_integration import TrainingIntegration
 
@@ -63,8 +63,7 @@ class OrchestratorRequest(BaseModel):
 
 # Load configuration
 config_path = Path(__file__).parent / "config.yaml"
-with open(config_path) as f:
-    config = yaml.safe_load(f)
+config = load_qai_config(config_path)
 
 
 # Initialize integration modules

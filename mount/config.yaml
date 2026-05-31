@@ -10,9 +10,9 @@ service:
 # Paths (relative to workspace root)
 paths:
   workspace_root: ..
-  quantum_ai: ../quantum-ai
-  talk_to_ai: ../talk-to-ai
-  phi_training: ../AI/microsoft_phi-silica-3.6_v1
+  quantum_ai: ../ai-projects/quantum-ml
+  talk_to_ai: ../ai-projects/chat-cli
+  phi_training: ../ai-projects/lora-training/microsoft_phi-silica-3.6_v1
   datasets: ../datasets
   data_out: ../data_out
   scripts: ../scripts
@@ -45,10 +45,10 @@ training:
   enabled: true
   orchestrators:
     autotrain:
-      config_file: ../autotrain.yaml
+      config_file: ../config/training/autotrain.yaml
       status_file: ../data_out/autotrain/status.json
     quantum_autorun:
-      config_file: ../quantum_autorun.yaml
+      config_file: ../config/quantum/quantum_autorun.yaml
       status_file: ../data_out/quantum_autorun/status.json
   output_dir: ../data_out
 
