@@ -134,4 +134,4 @@ class SummarizerAgent(BaseAgent):
             if isinstance(data, (dict, list))
             else str(data)
         )
-        return "{}: {}".format(event_type, data_str)
+        return f"{event_type}: {data_str}"

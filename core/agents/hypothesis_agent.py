@@ -117,7 +117,7 @@ class HypothesisAgent(BaseAgent):
         fallback: Dict[str, Any] = {
             "hypotheses": [
                 {
-                    "statement": "Hypothesis generation unavailable",
+                    "statement": "Hypothesis generation failed: no valid response from LLM",
                     "rationale": "",
                     "testable": False,
                 }

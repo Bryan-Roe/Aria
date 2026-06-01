@@ -122,7 +122,10 @@ class TaskRouter:
         if task.type in {"retrospect", "meta_learn"} and agent.name == "reflection_agent":
             base += 0.6
 
-        # Boost reflection_agent over goal_evolution_agent for the reflect task type.
+        # Prefer reflection_agent for "reflect" tasks: it performs backward-looking
+        # retrospective analysis, while goal_evolution_agent focuses on forward-looking
+        # goal generation.  Both can handle the task type, so explicit scoring separates
+        # them without removing goal_evolution_agent as a fallback.
         if task.type == "reflect" and agent.name == "reflection_agent":
             base += 0.55
 
