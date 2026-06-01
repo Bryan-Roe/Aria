@@ -1,0 +1,8 @@
+version: 1
+entrypoints:
+  quick_instructions: .github/copilot-instructions.md
+  full_instructions: .github/copilot-instructions.full.md
+  setup_guide: .github/COPILOT_SETUP_GUIDE.md
+recommended_validation:
+  - python scripts/test_runner.py --unit
+  - python -m pytest tests/test_copilot_setup_workflow.py -q
