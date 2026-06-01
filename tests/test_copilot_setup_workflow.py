@@ -17,7 +17,7 @@ def test_copilot_setup_workflow_concurrency_is_ref_scoped() -> None:
 
 
 @pytest.mark.unit
-def test_copilot_setup_workflow_lints_changed_files_only() -> None:
+def test_copilot_setup_workflow_has_selective_lint_logic() -> None:
     workflow_path = Path(__file__).resolve().parents[1] / ".github" / "workflows" / "copilot-setup-steps.yml"
     assert workflow_path.exists(), "Expected copilot setup workflow to exist"
 
