@@ -275,6 +275,53 @@ def test_router_route_text_normalizes_feedback_payload() -> None:
     assert feedback_task.payload["message"] == "Please review this feedback"
 
 
+def test_runner_normalize_plan_step_accepts_valid_step() -> None:
+    runner = AriaRunner(config={"sleep_seconds": 0})
+
+    task, skip_reason = runner._normalize_plan_step(
+        {"type": "tool", "payload": {"tool": "cleanup"}, "priority": 3}, 0
+    )
+
+    assert skip_reason is None
+    assert task is not None
+    assert task.type == "tool"
+    assert task.payload == {"tool": "cleanup"}
+    assert task.priority == 3
+
+
+def test_runner_normalize_plan_step_defaults_missing_payload() -> None:
+    runner = AriaRunner(config={"sleep_seconds": 0})
+
+    task, skip_reason = runner._normalize_plan_step({"type": "plan"}, 1)
+
+    assert skip_reason is None
+    assert task is not None
+    assert task.payload == {}
+    assert task.priority == 0
+
+
+@pytest.mark.parametrize(
+    ("step", "expected_error_fragment"),
+    [
+        (["not", "a", "dict"], "must be a dictionary"),
+        ({"type": "   "}, "missing a valid type"),
+        ({"payload": {}}, "missing a valid type"),
+        ({"type": "tool", "payload": ["bad"]}, "payload must be a dictionary"),
+    ],
+)
+def test_runner_normalize_plan_step_rejects_invalid_steps(
+    step: object, expected_error_fragment: str
+) -> None:
+    runner = AriaRunner(config={"sleep_seconds": 0})
+
+    task, skip_reason = runner._normalize_plan_step(step, 4)
+
+    assert task is None
+    assert skip_reason is not None
+    assert skip_reason["index"] == 4
+    assert expected_error_fragment in skip_reason["error"]
+
+
 def test_training_agent_summary_tracks_signal_counts() -> None:
     agent = TrainingAgent()
 
