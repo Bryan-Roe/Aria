@@ -43,6 +43,9 @@ def test_copilot_entrypoint_files_exist_and_reference_instructions() -> None:
 
     assert copilot_md.exists(), "Expected .github/COPILOT.md to exist"
     assert copilot_yml.exists(), "Expected .github/copilot.yml to exist"
+    assert (repo_root / ".github" / "copilot-instructions.md").exists()
+    assert (repo_root / ".github" / "copilot-instructions.full.md").exists()
+    assert (repo_root / ".github" / "COPILOT_SETUP_GUIDE.md").exists()
 
     copilot_md_content = copilot_md.read_text(encoding="utf-8")
     assert ".github/copilot-instructions.md" in copilot_md_content
@@ -51,5 +54,7 @@ def test_copilot_entrypoint_files_exist_and_reference_instructions() -> None:
     copilot_yml_content = copilot_yml.read_text(encoding="utf-8")
     assert "quick_instructions" in copilot_yml_content
     assert "full_instructions" in copilot_yml_content
+    assert "setup_guide" in copilot_yml_content
     assert ".github/copilot-instructions.md" in copilot_yml_content
     assert ".github/copilot-instructions.full.md" in copilot_yml_content
+    assert ".github/COPILOT_SETUP_GUIDE.md" in copilot_yml_content
