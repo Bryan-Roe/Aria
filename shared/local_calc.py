@@ -96,7 +96,7 @@ class _SafeEvaluator(ast.NodeVisitor):
 
 
 def _normalize_expression(text: str) -> str:
-    """Lower-case word operators and strip a natural-language question prefix."""
+    """Replace word operators with symbols and strip a question prefix."""
     cleaned = text.strip().rstrip("?.! ")
     for pattern, replacement in _WORD_REPLACEMENTS:
         cleaned = re.sub(pattern, replacement, cleaned, flags=re.IGNORECASE)
