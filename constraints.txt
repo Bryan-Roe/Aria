@@ -7,7 +7,7 @@ opentelemetry-api==1.41.1
 opentelemetry-sdk==1.41.1
 opentelemetry-instrumentation==0.62b1
 
-azure-cosmos==4.15.0
+azure-cosmos==4.16.0
 openai==2.38.0
 colorama==0.4.6
 pytest==8.4.2
