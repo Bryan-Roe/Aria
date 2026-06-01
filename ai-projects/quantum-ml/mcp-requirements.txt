@@ -1,2 +1,2 @@
 # Model Context Protocol server dependencies
-mcp>=1.27.1
+mcp>=1.27.2

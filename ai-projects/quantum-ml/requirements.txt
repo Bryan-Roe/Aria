@@ -36,7 +36,7 @@ pytest==9.0.3
 black>=26.5.1,<27.0.0
 
 # Model Context Protocol (MCP) Server
-mcp>=1.27.1
+mcp>=1.27.2
 pydantic>=2.13.4
 anyio>=4.13.0
 
