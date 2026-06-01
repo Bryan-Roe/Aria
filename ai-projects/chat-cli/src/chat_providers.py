@@ -13,6 +13,7 @@ from pathlib import Path
 from typing import Any, Dict, Generator, Iterable, List, Optional
 
 try:
+    from shared.local_calc import evaluate_arithmetic, normalize_expression
     from shared.local_summary import is_summary_request, summarize_text
 except ModuleNotFoundError:
     # Support direct CLI execution from ai-projects/chat-cli/src where repo root
@@ -24,6 +25,7 @@ except ModuleNotFoundError:
             if _parent_str not in sys.path:
                 sys.path.insert(0, _parent_str)
             break
+    from shared.local_calc import evaluate_arithmetic, normalize_expression
     from shared.local_summary import is_summary_request, summarize_text
 
 # Helpers for Azure quota/rate-limit detection
@@ -693,6 +695,12 @@ class LocalEchoProvider(BaseChatProvider):
             or "choose the next useful step yourself" in lower
         ):
             return self._craft_autonomous_reply(messages, last_user, turn_count)
+
+        # --- Arithmetic (real, deterministic answers even offline) ---
+        calc_result = evaluate_arithmetic(last_user)
+        if calc_result is not None:
+            expression = normalize_expression(last_user) or last_user.strip().rstrip("?.! ")
+            return f"{expression} = {calc_result}"
 
         if is_summary_request(last_user):
             summary = summarize_text(last_user, max_sentences=3, max_chars=420)

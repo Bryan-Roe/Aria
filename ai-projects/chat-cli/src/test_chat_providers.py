@@ -124,6 +124,31 @@ class ChatProviderTests(unittest.TestCase):
         self.assertIn("It removes prompt boilerplate before scoring.", reply)
         self.assertNotIn("Summarize this", reply)
 
+    def test_local_echo_answers_arithmetic_offline(self) -> None:
+        """Offline mode should compute real answers for arithmetic questions."""
+        provider = chat_providers.LocalEchoProvider(seed=5)
+
+        reply = provider.complete(
+            [{"role": "user", "content": "What is 12 * 7?"}], stream=False
+        )
+
+        self.assertIsInstance(reply, str)
+        self.assertIn("84", reply)
+        # Must give the actual answer, not deflect to a live provider.
+        self.assertNotIn("provider", reply.lower())
+
+    def test_local_echo_non_math_question_still_deflects(self) -> None:
+        """Non-arithmetic questions should not be misread as math."""
+        provider = chat_providers.LocalEchoProvider(seed=6)
+
+        reply = provider.complete(
+            [{"role": "user", "content": "What is quantum entanglement?"}],
+            stream=False,
+        )
+
+        self.assertIsInstance(reply, str)
+        self.assertTrue("provider" in reply.lower() or "offline" in reply.lower())
+
     def test_save_conversation_writes_jsonl(self) -> None:
         """save_conversation should persist one JSON object per line in order."""
         messages = [
