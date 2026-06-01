@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-05-16T16:24:24Z",
-  "run_id": "20260516T162424Z",
+  "generated_at": "2026-05-31T23:49:18Z",
+  "run_id": "20260531T234918Z",
   "config_path": null,
   "config_paths": {
     "master_orchestrator": "config/master_orchestrator.yaml",
@@ -41,56 +41,56 @@
       "name": "master_orchestrator_status",
       "status": "succeeded",
       "critical": true,
-      "duration_sec": 1.12,
-      "detail": "rc=0 | stdout=    \"schedule\": null,\n      \"orchestrators\": [\n        \"aria_automation\"\n      ]\n    },\n    {\n      \"name\": \"aria_server_only\",\n      \"enabled\": false,\n      \"trigger\": \"manual\",\n      \"schedule\": null,\n      \"orchestrators\": [\n        \"aria_automation\"\n      ]\n    }\n  ],\n  \"resource_usage\": {\n    \"available\": true,\n    \"cpu_percent\": 7.5,\n    \"memory_percent\": 27.1,\n    \"disk_percent\": 16.5\n  }\n}"
+      "duration_sec": 1.15,
+      "detail": "rc=0 | stdout=   \"schedule\": null,\n      \"orchestrators\": [\n        \"aria_automation\"\n      ]\n    },\n    {\n      \"name\": \"aria_server_only\",\n      \"enabled\": false,\n      \"trigger\": \"manual\",\n      \"schedule\": null,\n      \"orchestrators\": [\n        \"aria_automation\"\n      ]\n    }\n  ],\n  \"resource_usage\": {\n    \"available\": true,\n    \"cpu_percent\": 11.7,\n    \"memory_percent\": 40.2,\n    \"disk_percent\": 10.3\n  }\n}"
     },
     {
       "name": "quantum_autorun_dry_run",
       "status": "succeeded",
       "critical": true,
-      "duration_sec": 0.09,
+      "duration_sec": 0.1,
       "detail": "rc=0 | stdout=Validated 4 job(s): heart_quick, ionosphere_quick, azure_quantinuum_simulator, azure_ionq_qpu_test"
     },
     {
       "name": "repo_automation_status",
       "status": "succeeded",
       "critical": true,
-      "duration_sec": 0.11,
-      "detail": "rc=0 | stdout=r install (training): pandas, torch\n  - Dependencies still missing after install (training): pandas, torch\n  - Dependencies still missing after install (training): pandas, torch\n  - Dependencies still missing after install (training): pandas, torch\n  - Dependencies still missing after install (training): pandas, torch\n================================================================================"
+      "duration_sec": 0.13,
+      "detail": "rc=0 | stdout=Aria Character Automation (PID 17031) (\ud83e\udde9 deps)\n  \u2705 Autonomous Training System (PID 17079) (\ud83e\udde9 deps)\n  \u2705 Quantum Computing Workflows (PID 17081) (\ud83e\udde9 deps)\n  \u2705 Model Evaluation System (PID 17102) (\ud83e\udde9 deps)\n  \u2705 Dataset Auto-Discovery (Integrated in training) (\ud83e\udde9 deps)\n  \u274c Status Dashboard (\ud83e\udde9 deps)\n  \u274c Backup Manager (\ud83e\udde9 deps)\n================================================================================"
     },
     {
       "name": "chat_cli_local_once",
       "status": "succeeded",
       "critical": true,
-      "duration_sec": 1.11,
-      "detail": "rc=0 | stdout=Provider: local | Model: local-echo\nassistant> No live model detected. Run with `--provider lmstudio` (LM Studio running locally), `--provider ollama`, `--provider openai`, or `--provider azure`."
+      "duration_sec": 1.82,
+      "detail": "rc=0 | stdout=\u274c Model 'llama3.2' not found in Ollama.\n\nTroubleshooting steps:\n1. Pull the model first:\n   ollama pull llama3.2\n\n2. List available models:\n   ollama list\n\n3. Popular models to try:\n   - llama2:latest (7B general purpose)\n   - codellama:latest (7B for coding)\n   - mistral:latest (7B high quality)\n   - llama3.2:latest (3B latest from Meta)\n\nUse --model flag or set OLLAMA_MODEL environment variable."
     },
     {
       "name": "functions_ai_status_endpoint",
       "status": "skipped",
       "critical": false,
-      "duration_sec": 0.01,
+      "duration_sec": 2.01,
       "detail": "functions host not running (non-strict mode)"
     },
     {
       "name": "functions_agi_status_endpoint",
       "status": "skipped",
       "critical": false,
-      "duration_sec": 0.0,
+      "duration_sec": 10.01,
       "detail": "functions host not running (non-strict mode)"
     },
     {
       "name": "functions_agi_analyze_endpoint",
       "status": "skipped",
       "critical": false,
-      "duration_sec": 0.0,
+      "duration_sec": 10.01,
       "detail": "functions host not running (non-strict mode)"
     },
     {
       "name": "functions_agi_stream_endpoint",
       "status": "skipped",
       "critical": false,
-      "duration_sec": 0.0,
+      "duration_sec": 10.01,
       "detail": "functions host not running (non-strict mode)"
     }
   ]

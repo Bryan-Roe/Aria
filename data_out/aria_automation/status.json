@@ -1,11 +1,11 @@
 {
   "mode": "full",
   "started": "2026-05-30T05:11:19.443701",
-  "uptime_seconds": 152743.533063,
+  "uptime_seconds": 209159.147639,
   "server_running": true,
   "backend_running": false,
   "training_active": false,
-  "last_health_check": "2026-05-31T23:37:02.976945",
+  "last_health_check": "2026-06-01T15:17:18.591466",
   "processes": [
     {
       "name": "aria_server",

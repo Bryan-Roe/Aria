@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 
 class TaskCategory(Enum):
@@ -32,8 +32,8 @@ class TaskDefinition:
     category: TaskCategory
     title: str
     description: str
-    file_patterns: List[str]  # Which files to look at
-    success_criteria: List[str]
+    file_patterns: list[str]  # Which files to look at
+    success_criteria: list[str]
     risk_level: str  # low, medium, high
     estimated_complexity: str  # simple, moderate, complex
     prompt_template: str
@@ -190,7 +190,7 @@ Focus on:
 """
 
 # Task definition database
-TASK_DEFINITIONS: Dict[TaskCategory, TaskDefinition] = {
+TASK_DEFINITIONS: dict[TaskCategory, TaskDefinition] = {
     TaskCategory.BUG_FIX: TaskDefinition(
         category=TaskCategory.BUG_FIX,
         title="Bug Fix",
@@ -314,7 +314,7 @@ TASK_DEFINITIONS: Dict[TaskCategory, TaskDefinition] = {
 }
 
 
-def get_task_definition(category: TaskCategory) -> Optional[TaskDefinition]:
+def get_task_definition(category: TaskCategory) -> TaskDefinition | None:
     """Get task definition by category."""
     return TASK_DEFINITIONS.get(category)
 
@@ -357,7 +357,7 @@ def get_specialized_prompt(task_description: str) -> str:
     return definition.get_specialized_prompt(task_description)
 
 
-def get_task_guidance(task_description: str) -> Dict[str, Any]:
+def get_task_guidance(task_description: str) -> dict[str, Any]:
     """Get comprehensive guidance for a task."""
     category = detect_task_category(task_description)
     definition = get_task_definition(category)

@@ -232,6 +232,22 @@ class QuantumLLMPipeline:
 
         t0 = time.monotonic()
 
+        # Empty / whitespace-only prompts are handled gracefully without calling
+        # the LLM provider, which rejects empty message content.
+        if not prompt.strip():
+            latency_ms = round((time.monotonic() - t0) * 1000, 1)
+            return {
+                "response": "",
+                "provider": "none",
+                "backend": self.effective_backend,
+                "qubits": self.config.num_qubits,
+                "shots": self.config.shots,
+                "embedding_dim": 0,
+                "embedding_norm": 0.0,
+                "latency_ms": latency_ms,
+                "quantum_augmented": False,
+            }
+
         # Quantum embedding augmentation (run in thread to avoid blocking)
         if self.config.use_thread:
             embedding = await asyncio.to_thread(self._augment_embedding, prompt)

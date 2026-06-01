@@ -22,8 +22,20 @@ def load_chat_providers_module():
     if spec is None or spec.loader is None:
         raise RuntimeError("Unable to load chat_providers module")
     module = importlib.util.module_from_spec(spec)
+    # Temporarily register under the canonical name so any self-referential
+    # imports resolve during execution, then restore the original entry. This
+    # prevents clobbering the shared `chat_providers` module that other tests
+    # import at module load time and patch via `unittest.mock.patch`; replacing
+    # it here would silently break those patches (test pollution).
+    original = sys.modules.get(spec.name)
     sys.modules[spec.name] = module
-    spec.loader.exec_module(module)
+    try:
+        spec.loader.exec_module(module)
+    finally:
+        if original is not None:
+            sys.modules[spec.name] = original
+        else:
+            sys.modules.pop(spec.name, None)
     return module
 
 
@@ -114,3 +126,103 @@ def test_qai_provider_alias_maps_to_quantum_provider():
     chat_providers = load_chat_providers_module()
     assert chat_providers._PROVIDER_ALIASES["qai"] == "quantum"
     assert "qai" in chat_providers._KNOWN_PROVIDER_CHOICES
+
+
+def test_repo_automation_status_summary_reflects_live_status(monkeypatch):
+    m = load_module()
+    monkeypatch.setattr(
+        m,
+        "load_repo_automation_status",
+        lambda: {
+            "components_running": {"aria": True, "training": True, "quantum": False},
+            "errors": ["example error"],
+            "uptime_seconds": 3661,
+            "generated_at": "2026-05-31T23:50:00Z",
+            "config_paths": {"quantum": "config/quantum/quantum_autorun.yaml"},
+        },
+    )
+
+    summary = m.repo_automation_status_summary()
+    assert "Repo automation: 2/3 components running" in summary
+    assert "uptime 1:01:01" in summary
+    assert "errors 1" in summary
+    assert "active: aria, training" in summary
+    assert "updated: 2026-05-31T23:50:00Z" in summary
+    assert "quantum: config/quantum/quantum_autorun.yaml" in summary
+
+
+def test_repo_automation_status_summary_handles_missing_status(monkeypatch):
+    m = load_module()
+    monkeypatch.setattr(m, "load_repo_automation_status", lambda: None)
+
+    assert m.repo_automation_status_summary().startswith("Repo automation: no status available.")
+
+
+def test_repo_automation_actions_markdown_lists_supported_commands():
+    m = load_module()
+
+    actions = m.repo_automation_actions_markdown()
+    assert "--start" in actions
+    assert "--status" in actions
+    assert "--stop" in actions
+    assert "--validate" in actions
+
+
+def test_repo_automation_next_step_reflects_status(monkeypatch):
+    m = load_module()
+    monkeypatch.setattr(
+        m,
+        "load_repo_automation_status",
+        lambda: {
+            "components_running": {"aria": True, "training": True, "quantum": False},
+            "errors": [],
+        },
+    )
+
+    assert "remaining components online" in m.repo_automation_next_step()
+
+
+def test_repo_automation_next_step_reflects_validation_when_errors_present(monkeypatch):
+    m = load_module()
+    monkeypatch.setattr(
+        m,
+        "load_repo_automation_status",
+        lambda: {
+            "components_running": {"aria": True, "training": True, "quantum": True},
+            "errors": ["problem"],
+        },
+    )
+
+    assert "--validate" in m.repo_automation_next_step()
+
+
+def test_run_repo_automation_command_formats_stdout(monkeypatch):
+    m = load_module()
+
+    class Result:
+        returncode = 0
+        stdout = "Repository Automation Status\nStarted: 2026-05-31T23:50:00Z"
+        stderr = ""
+
+    monkeypatch.setattr(m.subprocess, "run", lambda *args, **kwargs: Result())
+
+    output = m.run_repo_automation_command("--status")
+    assert "python scripts/repo_automation.py --status" in output
+    assert "Exit code: `0`" in output
+    assert "Repository Automation Status" in output
+
+
+def test_run_repo_automation_command_formats_stderr(monkeypatch):
+    m = load_module()
+
+    class Result:
+        returncode = 1
+        stdout = ""
+        stderr = "validation failed"
+
+    monkeypatch.setattr(m.subprocess, "run", lambda *args, **kwargs: Result())
+
+    output = m.run_repo_automation_command("--validate")
+    assert "Repo automation command failed." in output
+    assert "Exit code: `1`" in output
+    assert "validation failed" in output

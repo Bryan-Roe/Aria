@@ -10,13 +10,15 @@ import importlib
 import gradio as gr
 import os
 import json
+import subprocess
+import sys
 import time
 import tempfile
 import threading
 import re
 import html
 from collections import Counter
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Any, List, Tuple, Optional, cast
 from contextlib import contextmanager
 
@@ -24,6 +26,13 @@ from contextlib import contextmanager
 # See respond() and cancel_stream() implementations for details.
 
 APP_NAME = "QAI"
+REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+REPO_AUTOMATION_STATUS_PATH = os.path.join(
+    REPO_ROOT, "data_out", "repo_automation", "status.json"
+)
+REPO_AUTOMATION_LEGACY_STATUS_PATH = os.path.join(
+    REPO_ROOT, "automation_status.json"
+)
 
 
 def default_provider_choice() -> str:
@@ -47,6 +56,145 @@ def provider_diagnostics_summary() -> str:
     if provider_mode == "qai":
         return f"Provider: QAI quantum alias active · {provider_readiness_note()}"
     return f"Provider: auto · {provider_readiness_note()}"
+
+
+def _read_json_dict(path: str) -> Optional[dict[str, Any]]:
+    if not os.path.exists(path):
+        return None
+    try:
+        with open(path, "r", encoding="utf-8") as handle:
+            data = json.load(handle)
+        return data if isinstance(data, dict) else None
+    except Exception:
+        return None
+
+
+def load_repo_automation_status() -> Optional[dict[str, Any]]:
+    """Read the current repo automation status from canonical or legacy paths."""
+    for candidate in (REPO_AUTOMATION_STATUS_PATH, REPO_AUTOMATION_LEGACY_STATUS_PATH):
+        status = _read_json_dict(candidate)
+        if status:
+            return status
+    return None
+
+
+def repo_automation_status_summary() -> str:
+    """Summarize repo automation health for the QAI sidebar."""
+    status = load_repo_automation_status()
+    if not status:
+        return (
+            "Repo automation: no status available. Use `python scripts/repo_automation.py --start`, "
+            "`--status`, `--stop`, or `--validate`."
+        )
+
+    components = status.get("components_running", {}) or {}
+    running = sum(1 for value in components.values() if value)
+    total = len(components)
+    active_components = [name for name, value in components.items() if value]
+    active_text = ", ".join(active_components[:4]) if active_components else "none"
+    if len(active_components) > 4:
+        active_text += f" (+{len(active_components) - 4} more)"
+    errors = status.get("errors", []) or []
+    uptime_seconds = int(float(status.get("uptime_seconds", 0) or 0))
+    uptime_text = str(timedelta(seconds=uptime_seconds))
+    refreshed_at = status.get("generated_at") or status.get("last_health_check") or "unknown"
+    config_paths = status.get("config_paths", {}) or {}
+    config_bits = []
+    if config_paths.get("quantum"):
+        config_bits.append(f"quantum: {config_paths['quantum']}")
+    if config_paths.get("evaluation"):
+        config_bits.append(f"evaluation: {config_paths['evaluation']}")
+    config_text = " · ".join(config_bits) if config_bits else "no optional configs detected"
+
+    return (
+        f"Repo automation: {running}/{total} components running · uptime {uptime_text} · "
+        f"errors {len(errors)} · active: {active_text} · updated: {refreshed_at} · {config_text}"
+    )
+
+
+def repo_automation_next_step() -> str:
+    """Return a short action-oriented hint for the repo automation panel."""
+    status = load_repo_automation_status()
+    if not status:
+        return (
+            "**Next step:** run `python scripts/repo_automation.py --validate` before starting, "
+            "or `--start` to launch the automation stack."
+        )
+
+    errors = status.get("errors", []) or []
+    components = status.get("components_running", {}) or {}
+    running = sum(1 for value in components.values() if value)
+    total = len(components)
+    if errors:
+        return (
+            "**Next step:** run `python scripts/repo_automation.py --validate` to inspect the issues "
+            "before restarting automation."
+        )
+    if total and running < total:
+        return (
+            "**Next step:** run `python scripts/repo_automation.py --start` to bring the remaining "
+            "components online, then check `--status`."
+        )
+    return (
+        "**Next step:** run `python scripts/repo_automation.py --status` to confirm everything is "
+        "healthy, or `--stop` when you are done."
+    )
+
+
+def repo_automation_actions_markdown() -> str:
+    """Show the supported repo automation actions in the sidebar."""
+    return (
+        "**Actions**\n\n"
+        "- `python scripts/repo_automation.py --start`\n"
+        "- `python scripts/repo_automation.py --status`\n"
+        "- `python scripts/repo_automation.py --stop`\n"
+        "- `python scripts/repo_automation.py --validate`\n"
+    )
+
+
+def _sanitize_cli_output(text: str, limit: int = 4000) -> str:
+    text = (text or "").strip()
+    if not text:
+        return ""
+    text = text.replace("```", "`\u200b``")
+    if len(text) > limit:
+        text = text[:limit] + "\n... (truncated)"
+    return text
+
+
+def run_repo_automation_command(*args: str) -> str:
+    """Run a repo automation command and format the captured output for the UI."""
+    command = [sys.executable, os.path.join(REPO_ROOT, "scripts", "repo_automation.py"), *args]
+    pretty_command = "python scripts/repo_automation.py " + " ".join(args)
+    try:
+        completed = subprocess.run(
+            command,
+            cwd=REPO_ROOT,
+            capture_output=True,
+            text=True,
+            timeout=120,
+            check=False,
+        )
+    except Exception as exc:
+        return (
+            "**Repo automation command failed to start.**\n\n"
+            f"Command: `{pretty_command}`\n\n"
+            f"Error: `{html.escape(str(exc))}`"
+        )
+
+    stdout = _sanitize_cli_output(completed.stdout)
+    stderr = _sanitize_cli_output(completed.stderr)
+    lines = [
+        f"**Repo automation command:** `{pretty_command}`",
+        f"Exit code: `{completed.returncode}`",
+    ]
+    if stdout:
+        lines.append(f"**Stdout:**\n\n```text\n{stdout}\n```")
+    if stderr:
+        lines.append(f"**Stderr:**\n\n```text\n{stderr}\n```")
+    if completed.returncode == 0:
+        return "\n\n".join(lines)
+    return "**Repo automation command failed.**\n\n" + "\n\n".join(lines)
 
 
 # Simple theme CSS snippets (injected into the page)
@@ -799,6 +947,16 @@ with gr.Blocks() as demo:
                     revert_btn = gr.Button("Show all")
                 load_latest_btn = gr.Button("Load latest")
 
+                with gr.Accordion("Repo automation", open=False):
+                    repo_automation_status = gr.Markdown(repo_automation_status_summary())
+                    repo_automation_next = gr.Markdown(repo_automation_next_step())
+                    repo_automation_actions = gr.Markdown(repo_automation_actions_markdown())
+                    with gr.Row():
+                        refresh_repo_automation_btn = gr.Button("Refresh repo automation status")
+                        run_repo_automation_status_btn = gr.Button("Run repo automation status")
+                        run_repo_automation_validate_btn = gr.Button("Run repo automation validate")
+                    repo_automation_command_output = gr.Markdown("")
+
             with gr.Accordion("Exports & webhook", open=False):
                 with gr.Row():
                     export_json_btn = gr.Button("Export JSON")
@@ -1547,6 +1705,29 @@ with gr.Blocks() as demo:
                                    suggestions_dropdown, hist_state, session_name, autosave], outputs=[chatbot, hist_state])
         delete_suggestion_btn.click(delete_suggestion, inputs=[
                                     suggestions_dropdown], outputs=[suggestions_dropdown])
+
+        def refresh_repo_automation_status():
+            return repo_automation_status_summary(), repo_automation_next_step()
+
+        refresh_repo_automation_btn.click(
+            refresh_repo_automation_status,
+            outputs=[repo_automation_status, repo_automation_next],
+        )
+
+        def run_repo_automation_status():
+            return run_repo_automation_command("--status")
+
+        def run_repo_automation_validate():
+            return run_repo_automation_command("--validate")
+
+        run_repo_automation_status_btn.click(
+            run_repo_automation_status,
+            outputs=[repo_automation_command_output],
+        )
+        run_repo_automation_validate_btn.click(
+            run_repo_automation_validate,
+            outputs=[repo_automation_command_output],
+        )
 
         def apply_theme(is_dark: bool, is_compact: bool):
             base = DARK_CSS if is_dark else LIGHT_CSS

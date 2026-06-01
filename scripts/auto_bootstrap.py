@@ -47,7 +47,8 @@ def check_requirements() -> dict:
     req_file = REPO_ROOT / "requirements.txt"
     if not req_file.exists():
         return {"status": "missing", "detail": "requirements.txt not found"}
-    lines = [l.strip() for l in req_file.read_text().splitlines() if l.strip() and not l.startswith("#")]
+    lines = [line.strip() for line in req_file.read_text().splitlines()
+             if line.strip() and not line.startswith("#")]
     return {"status": "ok", "requirement_count": len(lines)}
 
 
@@ -110,7 +111,8 @@ def run_orchestrator_dry_run(script: str, name: str) -> dict:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Auto bootstrap — env and orchestrator validation")
+    parser = argparse.ArgumentParser(
+        description="Auto bootstrap — env and orchestrator validation")
     parser.add_argument(
         "--skip-orchestrators",
         action="store_true",
@@ -134,11 +136,14 @@ def main() -> int:
     orchestrators: dict = {}
     if not args.skip_orchestrators:
         print("\n🔄 Running orchestrator dry-runs...")
-        orchestrators["autotrain"] = run_orchestrator_dry_run("scripts/autotrain.py", "autotrain")
-        orchestrators["quantum_autorun"] = run_orchestrator_dry_run("scripts/quantum_autorun.py", "quantum_autorun")
+        orchestrators["autotrain"] = run_orchestrator_dry_run(
+            "scripts/autotrain.py", "autotrain")
+        orchestrators["quantum_autorun"] = run_orchestrator_dry_run(
+            "scripts/quantum_autorun.py", "quantum_autorun")
         for name, result in orchestrators.items():
             icon = "✓" if result.get("status") == "ok" else "⚠"
-            print(f"  {icon} {name}: {result.get('status')} ({result.get('elapsed_s', 'n/a')}s)")
+            print(
+                f"  {icon} {name}: {result.get('status')} ({result.get('elapsed_s', 'n/a')}s)")
 
     critical_failed = any(
         v.get("status") not in ("ok", "warn", "skipped") for v in {**checks, **orchestrators}.values()

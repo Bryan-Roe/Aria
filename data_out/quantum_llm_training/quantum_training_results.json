@@ -1,7 +1,7 @@
 {
   "status": "success",
   "epochs_completed": 1,
-  "final_loss": 0.9866212448482706,
+  "final_loss": 1.0559566893724315,
   "quantum_metrics": {
     "circuit_executions": 1,
     "optimization_steps": 1,
@@ -21,8 +21,8 @@
     "use_quantum_ffn": true,
     "tie_embeddings": true
   },
-  "started_at": "2026-05-31T22:53:50.036662",
-  "completed_at": "2026-05-31T22:53:50.046007",
-  "best_loss": 0.9866212448482706,
+  "started_at": "2026-06-01T15:04:44.102964",
+  "completed_at": "2026-06-01T15:04:44.115923",
+  "best_loss": 1.0559566893724315,
   "checkpoint_path": "/workspaces/Aria/data_out/quantum_llm_training/best_quantum_llm.pt"
 }

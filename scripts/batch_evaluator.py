@@ -30,7 +30,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Any
 
 import yaml
 
@@ -39,7 +39,7 @@ DATA_OUT = REPO_ROOT / "data_out" / "batch_evaluator"
 
 # Add shared directory to path for performance utilities
 sys.path.insert(0, str(REPO_ROOT / "shared"))
-from performance_utils import find_json_in_output
+from performance_utils import find_json_in_output  # noqa: E402
 
 
 @dataclass
@@ -50,8 +50,8 @@ class EvaluationTask:
     model_type: str
     model_path: str
     dataset: str
-    metrics: List[str]
-    max_samples: Optional[int] = None
+    metrics: list[str]
+    max_samples: int | None = None
     batch_size: int = 8
 
 
@@ -65,8 +65,8 @@ class EvaluationResult:
     status: str = "succeeded"  # succeeded, failed, timeout
     duration: float = 0.0
     model_path: str = ""  # Path to the evaluated model
-    metrics: Dict[str, float] = field(default_factory=dict)
-    error: Optional[str] = None
+    metrics: dict[str, float] = field(default_factory=dict)
+    error: str | None = None
 
 
 # Backward-compatible alias used by older tests and scripts.
@@ -80,10 +80,10 @@ class BatchEvaluator:
         self.data_out = DATA_OUT
         self.data_out.mkdir(parents=True, exist_ok=True)
         self.max_workers = max_workers
-        self.tasks: List[EvaluationTask] = []
-        self.results: List[EvaluationResult] = []
+        self.tasks: list[EvaluationTask] = []
+        self.results: list[EvaluationResult] = []
         # Performance optimization: cache results lookup by model_id
-        self._results_cache: Dict[str, EvaluationResult] = {}
+        self._results_cache: dict[str, EvaluationResult] = {}
 
     def load_config(self, config_file: Path):
         """Load evaluation tasks from config file."""
@@ -91,11 +91,12 @@ class BatchEvaluator:
             config = yaml.safe_load(f)
 
         # Use list comprehension for better performance
-        self.tasks.extend([EvaluationTask(**task_data) for task_data in config.get("evaluation_tasks", [])])
+        self.tasks.extend([EvaluationTask(**task_data)
+                          for task_data in config.get("evaluation_tasks", [])])
 
         print(f"[batch_eval] Loaded {len(self.tasks)} evaluation tasks")
 
-    def scan_models(self) -> List[EvaluationTask]:
+    def scan_models(self) -> list[EvaluationTask]:
         """Scan for trained models and create evaluation tasks."""
         # Scan LoRA models - use list comprehension
         lora_dir = DATA_OUT.parent / "lora_training"
@@ -165,7 +166,8 @@ class BatchEvaluator:
 
             # Try to extract metrics from output using optimized utility
             if result.returncode == 0:
-                data = find_json_in_output(result.stdout, key="metrics", search_from_end=True, max_lines=50)
+                data = find_json_in_output(
+                    result.stdout, key="metrics", search_from_end=True, max_lines=50)
                 if data and "metrics" in data:
                     result_obj.metrics = data["metrics"]
             else:
@@ -201,7 +203,8 @@ class BatchEvaluator:
         print(f"[batch_eval] Workers: {self.max_workers}\n")
 
         with ThreadPoolExecutor(max_workers=self.max_workers) as executor:
-            futures = {executor.submit(self.evaluate_model, task): task for task in self.tasks}
+            futures = {executor.submit(
+                self.evaluate_model, task): task for task in self.tasks}
 
             for future in as_completed(futures):
                 task = futures[future]
@@ -213,7 +216,8 @@ class BatchEvaluator:
 
                     # Use ASCII-safe status indicators
                     status_icon = "[OK]" if result.status == "succeeded" else "[FAIL]"
-                    print(f"{status_icon} {result.model_id}: {result.status} ({result.duration:.1f}s)")
+                    print(
+                        f"{status_icon} {result.model_id}: {result.status} ({result.duration:.1f}s)")
 
                     if result.metrics:
                         for metric, value in result.metrics.items():
@@ -224,12 +228,13 @@ class BatchEvaluator:
 
         print("\n[batch_eval] Evaluation complete")
         # Use already classified results from aggregate to avoid redundant passes
-        succeeded_count = sum(1 for r in self.results if r.status == "succeeded")
+        succeeded_count = sum(
+            1 for r in self.results if r.status == "succeeded")
         failed_count = len(self.results) - succeeded_count
         print(f"[batch_eval] Succeeded: {succeeded_count}")
         print(f"[batch_eval] Failed: {failed_count}")
 
-    def aggregate_results(self) -> Dict:
+    def aggregate_results(self) -> dict[str, Any]:
         """Aggregate all evaluation results.
 
         Optimized to iterate results only once for classification and metrics.
@@ -249,12 +254,14 @@ class BatchEvaluator:
         # Rank by primary metric (accuracy if available)
         ranked = sorted(
             succeeded,
-            key=lambda r: r.metrics.get("accuracy", r.metrics.get("perplexity", 0)),
+            key=lambda r: r.metrics.get(
+                "accuracy", r.metrics.get("perplexity", 0)),
             reverse=True,
         )
 
         # Pre-compute ranking list
-        ranking = [{"rank": i + 1, "model_id": r.model_id, "metrics": r.metrics} for i, r in enumerate(ranked)]
+        ranking = [{"rank": i + 1, "model_id": r.model_id,
+                    "metrics": r.metrics} for i, r in enumerate(ranked)]
 
         return {
             "evaluated_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
@@ -277,7 +284,8 @@ class BatchEvaluator:
             f.write(f"**Total Models:** {aggregated['total_models']}\n")
             f.write(f"**Succeeded:** {aggregated['succeeded']}\n")
             f.write(f"**Failed:** {aggregated['failed']}\n")
-            f.write(f"**Total Duration:** {aggregated['total_duration']:.1f}s\n\n")
+            f.write(
+                f"**Total Duration:** {aggregated['total_duration']:.1f}s\n\n")
 
             if aggregated["best_model"]:
                 f.write(f"**Best Model:** {aggregated['best_model']}\n\n")
@@ -288,8 +296,10 @@ class BatchEvaluator:
             f.write("|------|-------|------|--------|----------|----------|\n")
 
             for item in aggregated["ranking"]:
-                metrics_str = ", ".join(f"{k}={v:.3f}" for k, v in item["metrics"].items())
-                f.write(f"| {item['rank']} | {item['model_id']} | - | ✓ | - | {metrics_str} |\n")
+                metrics_str = ", ".join(
+                    f"{k}={v:.3f}" for k, v in item["metrics"].items())
+                f.write(
+                    f"| {item['rank']} | {item['model_id']} | - | ✓ | - | {metrics_str} |\n")
 
             # Failed models
             failed = [r for r in self.results if r.status != "succeeded"]
@@ -310,9 +320,9 @@ class BatchEvaluator:
             json.dump(aggregated, f, indent=2)
         print(f"[batch_eval] Exported JSON to: {output_file}")
 
-    def compare_models(self, model_ids: List[str]) -> Dict:
+    def compare_models(self, model_ids: list[str]) -> dict[str, Any]:
         """Compare specific models side-by-side using fast lookups with fallback."""
-        comparison: List[EvaluationResult] = []
+        comparison: list[EvaluationResult] = []
 
         # Primary path: O(1) cache lookup.
         for model_id in model_ids:
@@ -331,7 +341,8 @@ class BatchEvaluator:
 
             # Preserve requested ordering.
             comparison_by_id = {r.model_id: r for r in comparison}
-            comparison = [comparison_by_id[mid] for mid in model_ids if mid in comparison_by_id]
+            comparison = [comparison_by_id[mid]
+                          for mid in model_ids if mid in comparison_by_id]
 
         return {
             "models": [r.model_id for r in comparison],
@@ -347,7 +358,7 @@ class BatchEvaluator:
             ],
         }
 
-    def promote_best_model(self, target_dir: Path | None = None, dry_run: bool = False) -> Dict:
+    def promote_best_model(self, target_dir: Path | None = None, dry_run: bool = False) -> dict[str, Any]:
         """
         Promote the best-ranked model to deployed_models/.
 
@@ -359,14 +370,16 @@ class BatchEvaluator:
             Dict with promotion details (model_id, source, destination, metrics, timestamp)
         """
         if not self.results:
-            raise ValueError("No evaluation results available. Run evaluation first.")
+            raise ValueError(
+                "No evaluation results available. Run evaluation first.")
 
         # Get best model from aggregated results
         aggregated = self.aggregate_results()
         best_model_id = aggregated.get("best_model")
 
         if not best_model_id:
-            raise ValueError("No best model found (all evaluations may have failed)")
+            raise ValueError(
+                "No best model found (all evaluations may have failed)")
 
         # Prefer O(1) cache lookup instead of O(n) linear search, but fall back if needed
         best_result = self._results_cache.get(best_model_id)
@@ -405,7 +418,8 @@ class BatchEvaluator:
             print(f"[promote] DRY-RUN: Would promote {best_model_id}")
             print(f"[promote]   Source: {best_result.model_path}")
             print(f"[promote]   Target: {deployment_path}")
-            print(f"[promote]   Metrics: {json.dumps(best_result.metrics, indent=2)}")
+            print(
+                f"[promote]   Metrics: {json.dumps(best_result.metrics, indent=2)}")
             return promotion_info
 
         # Create deployment directory
@@ -437,7 +451,8 @@ class BatchEvaluator:
         # Create relative symlink on Windows (requires admin or developer mode)
         try:
             latest_link.symlink_to(deployment_name, target_is_directory=True)
-            print(f"[promote] Updated symlink: {latest_link} -> {deployment_name}")
+            print(
+                f"[promote] Updated symlink: {latest_link} -> {deployment_name}")
         except (OSError, NotImplementedError) as e:
             print(f"[promote] Warning: Could not create symlink ({e})")
             # Fallback: write a text file pointing to latest
@@ -451,13 +466,18 @@ class BatchEvaluator:
 
 def main():
     ap = argparse.ArgumentParser(description="Batch Model Evaluator")
-    ap.add_argument("--config", type=Path, help="Load evaluation tasks from config")
-    ap.add_argument("--scan-models", action="store_true", help="Scan for trained models")
-    ap.add_argument("--evaluate-all", action="store_true", help="Evaluate all scanned models")
+    ap.add_argument("--config", type=Path,
+                    help="Load evaluation tasks from config")
+    ap.add_argument("--scan-models", action="store_true",
+                    help="Scan for trained models")
+    ap.add_argument("--evaluate-all", action="store_true",
+                    help="Evaluate all scanned models")
     ap.add_argument("--compare", nargs="+", help="Compare specific models")
-    ap.add_argument("--export", choices=["json", "markdown", "both"], help="Export results")
+    ap.add_argument(
+        "--export", choices=["json", "markdown", "both"], help="Export results")
     ap.add_argument("--output", type=Path, help="Output file for export")
-    ap.add_argument("--max-workers", type=int, default=3, help="Number of parallel workers")
+    ap.add_argument("--max-workers", type=int, default=3,
+                    help="Number of parallel workers")
     ap.add_argument(
         "--promote-best",
         action="store_true",
@@ -489,16 +509,19 @@ def main():
         evaluator.run_parallel()
 
         # Auto-save results
-        results_file = evaluator.data_out / f"results_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+        results_file = evaluator.data_out / \
+            f"results_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
         evaluator.export_json(results_file)
 
         # Auto-promote if requested
         if args.promote_best:
             try:
-                promotion_info = evaluator.promote_best_model(target_dir=args.promote_target, dry_run=args.dry_run)
+                promotion_info = evaluator.promote_best_model(
+                    target_dir=args.promote_target, dry_run=args.dry_run)
                 if not args.dry_run:
                     # Save promotion info
-                    promo_file = evaluator.data_out / f"promotion_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+                    promo_file = evaluator.data_out / \
+                        f"promotion_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
                     with promo_file.open("w") as f:
                         json.dump(promotion_info, f, indent=2)
                     print(f"[promote] Saved promotion info to: {promo_file}")
@@ -511,7 +534,8 @@ def main():
 
     if args.export:
         if not args.output:
-            args.output = evaluator.data_out / f"report_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+            args.output = evaluator.data_out / \
+                f"report_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
 
         if args.export in ["json", "both"]:
             json_file = args.output.with_suffix(".json")

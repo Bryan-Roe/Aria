@@ -4,13 +4,14 @@ import sys
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(REPO_ROOT / "ai-projects" / "lora-training" / "microsoft_phi-silica-3.6_v1"))
+sys.path.insert(0, str(REPO_ROOT / "ai-projects" /
+                "lora-training" / "microsoft_phi-silica-3.6_v1"))
 
-import re
+import re  # noqa: E402
 
-import torch
-from peft import PeftModel
-from transformers import AutoModelForCausalLM, AutoTokenizer
+import torch  # noqa: E402
+from peft import PeftModel  # noqa: E402
+from transformers import AutoModelForCausalLM, AutoTokenizer  # noqa: E402
 
 
 class AriaCommandGenerator:
@@ -19,14 +20,16 @@ class AriaCommandGenerator:
         print("🎨 Loading Aria Visual Model...")
 
         self.tokenizer = AutoTokenizer.from_pretrained(base_model)
-        model = AutoModelForCausalLM.from_pretrained(base_model, torch_dtype=torch.float16, device_map="auto")
+        model = AutoModelForCausalLM.from_pretrained(
+            base_model, torch_dtype=torch.float16, device_map="auto")
         self.model = PeftModel.from_pretrained(model, adapter_path)
         print("✅ Model loaded!\n")
 
     def generate_command(self, user_input: str) -> list[str]:
         """Generate Aria command tags from natural language"""
         input_text = f"<|user|>\n{user_input}</s>\n<|assistant|>\n"
-        inputs = self.tokenizer(input_text, return_tensors="pt").to(self.model.device)
+        inputs = self.tokenizer(
+            input_text, return_tensors="pt").to(self.model.device)
 
         with torch.no_grad():
             outputs = self.model.generate(
@@ -39,7 +42,8 @@ class AriaCommandGenerator:
                 pad_token_id=self.tokenizer.pad_token_id or self.tokenizer.eos_token_id,
             )
 
-        response = self.tokenizer.decode(outputs[0][inputs["input_ids"].shape[1] :], skip_special_tokens=True)
+        response = self.tokenizer.decode(
+            outputs[0][inputs["input_ids"].shape[1]:], skip_special_tokens=True)
         tags = re.findall(r"\[aria:[^\]]+\]", response)
         return tags if tags else []
 
@@ -67,7 +71,8 @@ class AriaCommandGenerator:
 
 
 def main():
-    adapter = REPO_ROOT / "data_out" / "aria_models" / "aria_expanded_v2" / "lora_adapter"
+    adapter = REPO_ROOT / "data_out" / "aria_models" / \
+        "aria_expanded_v2" / "lora_adapter"
 
     if not adapter.exists():
         print(f"❌ Model not found: {adapter}")

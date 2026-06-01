@@ -19,14 +19,14 @@ from pathlib import Path
 
 import pytest
 
-
 REPO_ROOT = Path(__file__).resolve().parents[2]
 SERVER_PATH = REPO_ROOT / "apps" / "aria" / "server.py"
 
 
 def _load_server_module():
     """Load apps/aria/server.py as a module without executing main()."""
-    spec = importlib.util.spec_from_file_location("aria_server_under_test", SERVER_PATH)
+    spec = importlib.util.spec_from_file_location(
+        "aria_server_under_test", SERVER_PATH)
     assert spec and spec.loader, "Could not create import spec for server.py"
     module = importlib.util.module_from_spec(spec)
     sys.modules[spec.name] = module
@@ -95,7 +95,8 @@ def test_state_endpoint_shape(aria_server):
 
 
 def test_command_endpoint_returns_actions_for_wave(aria_server):
-    body = _post_json(aria_server["port"], "/api/aria/command", {"command": "wave"})
+    body = _post_json(aria_server["port"],
+                      "/api/aria/command", {"command": "wave"})
     # Response should contain either tags or actions (or both); for wave we
     # expect a gesture action via fallback or tag inference.
     assert "actions" in body or "tags" in body

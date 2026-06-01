@@ -19,7 +19,7 @@ import urllib.request
 from datetime import timezone
 from http.server import HTTPServer, SimpleHTTPRequestHandler
 from pathlib import Path
-from typing import List, Optional, Tuple
+from typing import Optional
 
 # Pre-compile regex patterns for performance (avoid recompiling in loops)
 _RE_JSON_BLOCK = re.compile(r"\[.*\]", re.DOTALL)
@@ -32,6 +32,8 @@ def _sanitize_for_log(value: str) -> str:
     sanitized = value.replace("\r", "").replace("\n", " ")
     sanitized = re.sub(r"[\x00-\x1f\x7f]", "", sanitized)
     return sanitized
+
+
 _RE_ARIA_TAGS = re.compile(r"\[aria:[^\]]+\]")
 _RE_SAY_COMMAND = re.compile(
     r"(?:\b(?:say|announce|shout|speak|tell)\b)(?:\s+(?:everyone|that|to))?[:\-\s]+(.+)",
@@ -99,6 +101,7 @@ def _provider_response_to_text(raw) -> str:
     except Exception:
         return ""
 
+
 def _coerce_and_clamp_position(position, fallback: Optional[dict] = None) -> Optional[dict]:
     """Clamp x/y coordinates to [0,100] and return floats (e.g. {"x":150.0,"y":-10.0} -> {"x":100.0,"y":0.0}); else return fallback."""
     if not isinstance(position, dict):
@@ -114,7 +117,8 @@ def _coerce_and_clamp_position(position, fallback: Optional[dict] = None) -> Opt
 
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+logging.basicConfig(level=logging.INFO,
+                    format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 # Resolve repository root robustly (apps/aria/server.py -> repo root is parents[2]).
@@ -131,7 +135,8 @@ def _load_detect_provider():
         shared_chat_providers = REPO_ROOT / "shared" / "chat_providers.py"
         if not shared_chat_providers.exists():
             return None
-        spec = importlib.util.spec_from_file_location("_aria_shared_chat_providers", shared_chat_providers)
+        spec = importlib.util.spec_from_file_location(
+            "_aria_shared_chat_providers", shared_chat_providers)
         if spec is None or spec.loader is None:
             return None
         module = importlib.util.module_from_spec(spec)
@@ -144,7 +149,8 @@ LLM_AVAILABLE = callable(detect_provider)
 if LLM_AVAILABLE:
     logger.info("✓ LLM providers available for automatic action generation")
 else:
-    logger.warning("✗ LLM providers not available - will use rule-based fallback only")
+    logger.warning(
+        "✗ LLM providers not available - will use rule-based fallback only")
 
 # Skip AI model loading for faster startup - use rule-based fallback
 MODEL = None
@@ -172,7 +178,8 @@ LEFT_ARM_KEYWORDS = frozenset(["left arm", "arm left", "left hand"])
 RIGHT_ARM_KEYWORDS = frozenset(["right arm", "arm right", "right hand"])
 LEFT_LEG_KEYWORDS = frozenset(["left leg", "leg left"])
 RIGHT_LEG_KEYWORDS = frozenset(["right leg", "leg right"])
-SPARKLE_KEYWORDS = frozenset(["sparkle", "sparkles", "glitter", "shimmer", "shine"])
+SPARKLE_KEYWORDS = frozenset(
+    ["sparkle", "sparkles", "glitter", "shimmer", "shine"])
 GLOW_KEYWORDS = frozenset(["glow", "glowing", "radiate", "illuminate"])
 HEARTS_KEYWORDS = frozenset(["hearts", "heart", "love"])
 WALK_LEFT_KEYWORDS = frozenset(["walk left", "go left", "left"])
@@ -181,8 +188,10 @@ COME_HERE_KEYWORDS = frozenset(["come here", "come to me", "over here"])
 FOLLOW_ME_KEYWORDS = frozenset(["follow me", "come with me"])
 BRING_ME_KEYWORDS = frozenset(["bring me", "fetch", "hand me"])
 BRING_IT_KEYWORDS = frozenset(["bring it", "bring it here", "bring it to me"])
-DROP_HERE_KEYWORDS = frozenset(["drop it here", "put it here", "place it here", "set it down"])
-VALID_GESTURES = frozenset(["wave", "thumbs_up", "clap", "shrug", "bow", "nod"])
+DROP_HERE_KEYWORDS = frozenset(
+    ["drop it here", "put it here", "place it here", "set it down"])
+VALID_GESTURES = frozenset(
+    ["wave", "thumbs_up", "clap", "shrug", "bow", "nod"])
 PICKUP_X_OFFSET = -10
 PICKUP_Y_OFFSET = 5
 PICKUP_DISTANCE_THRESHOLD = 30
@@ -213,7 +222,8 @@ _PICKUP_KEYWORDS = PICKUP_KEYWORDS
 _JUMP_KEYWORDS = JUMP_KEYWORDS
 _DANCE_KEYWORDS = DANCE_KEYWORDS
 _LIMB_KEYWORDS = frozenset(
-    set(LEFT_ARM_KEYWORDS) | set(RIGHT_ARM_KEYWORDS) | set(LEFT_LEG_KEYWORDS) | set(RIGHT_LEG_KEYWORDS)
+    set(LEFT_ARM_KEYWORDS) | set(RIGHT_ARM_KEYWORDS) | set(
+        LEFT_LEG_KEYWORDS) | set(RIGHT_LEG_KEYWORDS)
 )
 
 # Global stage state that AI can see
@@ -371,7 +381,7 @@ class AriaActionParser:
         *,
         explicit: Optional[str] = None,
         model_override: Optional[str] = None,
-    ) -> Tuple[object | None, object | None]:
+    ) -> tuple[object | None, object | None]:
         """Resolve provider for a specific request while preserving cached default."""
         if not LLM_AVAILABLE:
             return None, None
@@ -402,7 +412,8 @@ class AriaActionParser:
 
             # Convenience: if ARIA_QUANTUM_MODEL_PATH is set and no provider is
             # configured, default Aria LLM parsing to the quantum provider.
-            quantum_model_path = os.getenv("ARIA_QUANTUM_MODEL_PATH") or os.getenv("QAI_QUANTUM_MODEL_PATH")
+            quantum_model_path = os.getenv(
+                "ARIA_QUANTUM_MODEL_PATH") or os.getenv("QAI_QUANTUM_MODEL_PATH")
             if not configured_model and quantum_model_path:
                 configured_model = quantum_model_path
             if not configured_explicit and configured_model == quantum_model_path and quantum_model_path:
@@ -415,7 +426,8 @@ class AriaActionParser:
             provider_name = getattr(
                 self.provider_choice,
                 "name",
-                getattr(self.provider, "__class__", type(self.provider)).__class__.__name__,
+                getattr(self.provider, "__class__", type(
+                    self.provider)).__class__.__name__,
             )
             logger.info(f"✓ Initialized LLM provider: {provider_name}")
         except Exception as e:
@@ -456,7 +468,7 @@ Rules:
 4. Stage bounds: 0-100 for both x and y
 5. If command is unclear, choose most reasonable interpretation"""
 
-    def parse_with_llm(self, command: str, provider=None) -> List[dict]:
+    def parse_with_llm(self, command: str, provider=None) -> list[dict]:
         """Parse command using LLM provider"""
         active_provider = provider if provider is not None else self.provider
 
@@ -506,19 +518,21 @@ Rules:
         _allow_split: bool = True,
         _planned_held_object=_UNSET,
         _referenced_object=_UNSET,
-    ) -> List[dict]:
+    ) -> list[dict]:
         """Rule-based fallback parser (uses existing generate_tags_fallback logic)"""
         actions = []
         command_lower = command.lower()
         known_objects = ["apple", "book", "cup", "ball", "flower"]
         planned_held_object = (
-            stage_state["aria"].get("held_object") if _planned_held_object is _UNSET else _planned_held_object
+            stage_state["aria"].get(
+                "held_object") if _planned_held_object is _UNSET else _planned_held_object
         )
         referenced_object = None if _referenced_object is _UNSET else _referenced_object
 
         # Compound command handling (e.g., "pick up cup and bring it here then put it on table")
         if _allow_split:
-            segments = [seg.strip() for seg in _RE_COMMAND_SEPARATORS.split(command) if seg and seg.strip()]
+            segments = [seg.strip() for seg in _RE_COMMAND_SEPARATORS.split(
+                command) if seg and seg.strip()]
             if len(segments) > 1:
                 combined_actions = []
                 current_planned_held = planned_held_object
@@ -540,7 +554,8 @@ Rules:
                     for action in seg_actions:
                         action_type = action.get("action")
                         if action_type == "pickup":
-                            picked_obj = action.get("object_id", current_planned_held)
+                            picked_obj = action.get(
+                                "object_id", current_planned_held)
                             current_planned_held = picked_obj
                             current_referenced_object = picked_obj
                         elif action_type in ("drop", "throw"):
@@ -573,18 +588,21 @@ Rules:
 
         # Conversational movement commands
         if _contains_any_keyword(command_lower, COME_HERE_KEYWORDS):
-            actions.append({"action": "move", "target": {"x": 50, "y": 85}, "speed": "normal"})
+            actions.append({"action": "move", "target": {
+                           "x": 50, "y": 85}, "speed": "normal"})
 
         if _contains_any_keyword(command_lower, FOLLOW_ME_KEYWORDS):
             actions.append({"action": "gesture", "gesture_type": "nod"})
-            actions.append({"action": "move", "target": {"x": 50, "y": 75}, "speed": "normal"})
+            actions.append({"action": "move", "target": {
+                           "x": 50, "y": 75}, "speed": "normal"})
 
         # Conversational object delivery commands
         if _contains_any_keyword(command_lower, BRING_ME_KEYWORDS):
             for obj in known_objects:
                 if obj in command_lower and obj in stage_state["objects"]:
                     obj_pos = stage_state["objects"][obj]["position"]
-                    actions.append({"action": "move", "target": obj_pos, "speed": "normal"})
+                    actions.append(
+                        {"action": "move", "target": obj_pos, "speed": "normal"})
                     actions.append({"action": "pickup", "object_id": obj})
                     actions.append(
                         {
@@ -593,7 +611,8 @@ Rules:
                             "speed": "normal",
                         }
                     )
-                    actions.append({"action": "gesture", "gesture_type": "nod"})
+                    actions.append(
+                        {"action": "gesture", "gesture_type": "nod"})
                     break
 
         # Pronoun follow-up delivery command (e.g., "bring it here")
@@ -607,7 +626,8 @@ Rules:
                             held_obj = obj
                             break
             if held_obj:
-                actions.append({"action": "move", "target": {"x": 50, "y": 85}, "speed": "normal"})
+                actions.append({"action": "move", "target": {
+                               "x": 50, "y": 85}, "speed": "normal"})
                 actions.append({"action": "gesture", "gesture_type": "nod"})
             else:
                 actions.append(
@@ -643,20 +663,25 @@ Rules:
                 if "table" in command_lower:
                     table_pos = stage_state["environment"]["table"]["position"]
                     drop_target = {"x": table_pos["x"], "y": 35}
-                actions.append({"action": "move", "target": drop_target, "speed": "normal"})
+                actions.append(
+                    {"action": "move", "target": drop_target, "speed": "normal"})
                 actions.append({"action": "drop", "position": drop_target})
 
         # Parse move commands
         if _contains_any_keyword(command_lower, MOVE_KEYWORDS):
             # Extract target from command
             if "table" in command_lower:
-                actions.append({"action": "move", "target": {"x": 60, "y": 35}, "speed": "normal"})
+                actions.append({"action": "move", "target": {
+                               "x": 60, "y": 35}, "speed": "normal"})
             elif "center" in command_lower or "middle" in command_lower:
-                actions.append({"action": "move", "target": {"x": 50, "y": 50}, "speed": "normal"})
+                actions.append({"action": "move", "target": {
+                               "x": 50, "y": 50}, "speed": "normal"})
             elif "left" in command_lower:
-                actions.append({"action": "move", "target": {"x": 20, "y": 50}, "speed": "normal"})
+                actions.append({"action": "move", "target": {
+                               "x": 20, "y": 50}, "speed": "normal"})
             elif "right" in command_lower:
-                actions.append({"action": "move", "target": {"x": 80, "y": 50}, "speed": "normal"})
+                actions.append({"action": "move", "target": {
+                               "x": 80, "y": 50}, "speed": "normal"})
             else:
                 for obj in known_objects:
                     if obj in command_lower and obj in stage_state["objects"]:
@@ -674,9 +699,12 @@ Rules:
             # Extract text after say/speak
             for trigger in ["say ", "speak ", "tell ", "greet "]:
                 if trigger in command_lower:
-                    text = command[command_lower.index(trigger) + len(trigger) :].strip(" \"'")
-                    emotion = "happy" if any(w in text.lower() for w in ["!", "hello", "hi"]) else "neutral"
-                    actions.append({"action": "say", "text": text, "emotion": emotion})
+                    text = command[command_lower.index(
+                        trigger) + len(trigger):].strip(" \"'")
+                    emotion = "happy" if any(w in text.lower() for w in [
+                                             "!", "hello", "hi"]) else "neutral"
+                    actions.append(
+                        {"action": "say", "text": text, "emotion": emotion})
                     break
 
         # Parse pickup commands
@@ -685,7 +713,8 @@ Rules:
             if obj in command_lower and _contains_any_keyword(command_lower, PICKUP_KEYWORDS):
                 # Move to object first
                 obj_pos = stage_state["objects"][obj]["position"]
-                actions.append({"action": "move", "target": obj_pos, "speed": "normal"})
+                actions.append(
+                    {"action": "move", "target": obj_pos, "speed": "normal"})
                 actions.append({"action": "pickup", "object_id": obj})
                 pickup_added = True
                 break
@@ -697,8 +726,10 @@ Rules:
             and referenced_object in stage_state["objects"]
         ):
             obj_pos = stage_state["objects"][referenced_object]["position"]
-            actions.append({"action": "move", "target": obj_pos, "speed": "normal"})
-            actions.append({"action": "pickup", "object_id": referenced_object})
+            actions.append(
+                {"action": "move", "target": obj_pos, "speed": "normal"})
+            actions.append(
+                {"action": "pickup", "object_id": referenced_object})
 
         # Parse throw commands
         if "throw" in command_lower:
@@ -711,14 +742,17 @@ Rules:
                 target = {"x": 50, "y": 85}
 
             if "it" in command_lower:
-                actions.append({"action": "throw", "target": target, "force": "medium"})
+                actions.append(
+                    {"action": "throw", "target": target, "force": "medium"})
             else:
                 for obj in known_objects:
                     if obj in command_lower and obj in stage_state["objects"]:
                         obj_pos = stage_state["objects"][obj]["position"]
-                        actions.append({"action": "move", "target": obj_pos, "speed": "normal"})
+                        actions.append(
+                            {"action": "move", "target": obj_pos, "speed": "normal"})
                         actions.append({"action": "pickup", "object_id": obj})
-                        actions.append({"action": "throw", "target": target, "force": "medium"})
+                        actions.append(
+                            {"action": "throw", "target": target, "force": "medium"})
                         break
 
         # Parse look commands
@@ -729,9 +763,11 @@ Rules:
                     break
             else:
                 if "left" in command_lower:
-                    actions.append({"action": "look", "target": {"x": 0, "y": 50}})
+                    actions.append(
+                        {"action": "look", "target": {"x": 0, "y": 50}})
                 elif "right" in command_lower:
-                    actions.append({"action": "look", "target": {"x": 100, "y": 50}})
+                    actions.append(
+                        {"action": "look", "target": {"x": 100, "y": 50}})
                 else:
                     table_pos = stage_state["environment"]["table"]["position"]
                     actions.append({"action": "look", "target": table_pos})
@@ -739,7 +775,8 @@ Rules:
         # Parse wait commands
         wait_match = _RE_WAIT_DURATION.search(command_lower)
         if wait_match:
-            actions.append({"action": "wait", "duration": float(wait_match.group(1))})
+            actions.append(
+                {"action": "wait", "duration": float(wait_match.group(1))})
         elif "wait" in command_lower or "pause" in command_lower or "hold on" in command_lower:
             actions.append({"action": "wait", "duration": 1.0})
 
@@ -785,7 +822,7 @@ Rules:
         use_llm: bool = True,
         provider_choice: Optional[str] = None,
         model_override: Optional[str] = None,
-    ) -> List[dict]:
+    ) -> list[dict]:
         """
         Parse command into structured actions
 
@@ -807,7 +844,8 @@ Rules:
                 if request_provider is None:
                     raise ValueError("LLM provider not available")
 
-                actions = self.parse_with_llm(command, provider=request_provider)
+                actions = self.parse_with_llm(
+                    command, provider=request_provider)
                 used_provider_name = (
                     getattr(request_choice, "name", None)
                     or getattr(self.provider_choice, "name", None)
@@ -816,14 +854,16 @@ Rules:
                 )
                 safe_provider_name = _sanitize_for_log(str(used_provider_name))
                 safe_command = _sanitize_for_log(command)
-                logger.info(f"✓ LLM parsed via {safe_provider_name}: {safe_command} -> {len(actions)} actions")
+                logger.info(
+                    f"✓ LLM parsed via {safe_provider_name}: {safe_command} -> {len(actions)} actions")
                 return actions
             except Exception as e:
                 logger.warning(f"LLM parsing failed, using fallback: {e}")
 
         actions = self.parse_with_fallback(command)
         safe_command = _sanitize_for_log(command)
-        logger.info(f"✓ Fallback parsed: {safe_command} -> {len(actions)} actions")
+        logger.info(
+            f"✓ Fallback parsed: {safe_command} -> {len(actions)} actions")
         return actions
 
 
@@ -913,14 +953,15 @@ THEME_OBJECT_LIBRARY = {
 
 def generate_world_fallback(theme: str, count: int) -> dict:
     """Generate a world procedurally without LLM."""
-    objects_catalog = THEME_OBJECT_LIBRARY.get(theme.lower(), THEME_OBJECT_LIBRARY["forest"])
+    objects_catalog = THEME_OBJECT_LIBRARY.get(
+        theme.lower(), THEME_OBJECT_LIBRARY["forest"])
     random.shuffle(objects_catalog)
     chosen = objects_catalog[: max(1, count)]
     stage_objects = {}
     used_positions = []
     for name, emoji in chosen:
         # Avoid overlapping positions (simple Poisson-ish attempt)
-        for attempt in range(10):
+        for _attempt in range(10):
             x = random.randint(10, 90)
             y = random.randint(20, 80)
             if all(math.hypot(x - px, y - py) > 8 for px, py in used_positions):
@@ -958,7 +999,8 @@ def generate_world_with_llm(theme: str, count: int, provider) -> dict:
         raw_str = _provider_response_to_text(raw).strip()
         # Strip code fences
         if "```" in raw_str:
-            m = re.search(r"```(?:json)?\n(.*?)(```)", raw_str, flags=re.DOTALL)
+            m = re.search(r"```(?:json)?\n(.*?)(```)",
+                          raw_str, flags=re.DOTALL)
             if m:
                 raw_str = m.group(1).strip()
 
@@ -1002,7 +1044,8 @@ def generate_world_with_llm(theme: str, count: int, provider) -> dict:
         if not sanitized_objects:
             return generate_world_fallback(theme, count)
         env.setdefault("theme", theme)
-        env.setdefault("generated_at", datetime.datetime.now(timezone.utc).isoformat() + "Z")
+        env.setdefault("generated_at", datetime.datetime.now(
+            timezone.utc).isoformat() + "Z")
         env.setdefault("stage_bounds", {"width": 100, "height": 100})
         return {
             "objects": sanitized_objects,
@@ -1034,7 +1077,8 @@ def get_stage_context() -> str:
         obj_pos = obj_data["position"]
         if not isinstance(obj_pos, dict) or "x" not in obj_pos or "y" not in obj_pos:
             continue
-        distance = ((aria_pos["x"] - obj_pos["x"]) ** 2 + (aria_pos["y"] - obj_pos["y"]) ** 2) ** 0.5
+        distance = ((aria_pos["x"] - obj_pos["x"]) ** 2 +
+                    (aria_pos["y"] - obj_pos["y"]) ** 2) ** 0.5
         if distance < 30:  # Within reach
             nearby_objects.append(obj_name)
 
@@ -1052,7 +1096,6 @@ def get_stage_context() -> str:
 
 def determine_position_from_context(cmd: str) -> str:
     """AI-driven position determination based on command semantics and stage state"""
-    aria_pos = stage_state["aria"]["position"]
     objects = stage_state["objects"]
     table_pos = stage_state["environment"]["table"]["position"]
 
@@ -1124,7 +1167,7 @@ def determine_position_from_context(cmd: str) -> str:
         return f"[aria:position:{x}:{y}]"
 
 
-def generate_tags_ai(command: str) -> List[str]:
+def generate_tags_ai(command: str) -> list[str]:
     """Generate tags using AI model"""
     if MODEL is None:
         return []
@@ -1150,7 +1193,8 @@ def generate_tags_ai(command: str) -> List[str]:
                 pad_token_id=tokenizer.pad_token_id or tokenizer.eos_token_id,
             )
 
-        response = tokenizer.decode(outputs[0][inputs["input_ids"].shape[1] :], skip_special_tokens=True)
+        response = tokenizer.decode(
+            outputs[0][inputs["input_ids"].shape[1]:], skip_special_tokens=True)
         tags = _RE_ARIA_TAGS.findall(response)
         return tags[:2]  # Return first 2 tags max
     except Exception as e:
@@ -1158,7 +1202,7 @@ def generate_tags_ai(command: str) -> List[str]:
         return []
 
 
-def generate_tags_fallback(command: str) -> List[str]:
+def generate_tags_fallback(command: str) -> list[str]:
     """Simple rule-based fallback tag generation with automatic positioning"""
     cmd = command.lower()
     tags = []
@@ -1347,7 +1391,8 @@ def generate_tags_fallback(command: str) -> List[str]:
     if "center" in cmd:
         tags.append("[aria:camera:center]")
     elif "zoom" in cmd:
-        tags.append("[aria:camera:zoom_in]" if "in" in cmd else "[aria:camera:zoom_out]")
+        tags.append(
+            "[aria:camera:zoom_in]" if "in" in cmd else "[aria:camera:zoom_out]")
 
     # Poses (body positions)
     if "sit" in cmd:
@@ -1436,9 +1481,11 @@ def execute_aria_action(action: dict) -> dict:
             target = action.get("target")
             if isinstance(target, dict) and "x" in target and "y" in target:
                 original_target = target
-                target = _coerce_and_clamp_position(target, fallback=stage_state["aria"]["position"])
+                target = _coerce_and_clamp_position(
+                    target, fallback=stage_state["aria"]["position"])
                 if target == stage_state["aria"]["position"] and original_target != stage_state["aria"]["position"]:
-                    logger.warning("Invalid move target coerced to current position: %s", _sanitize_for_log(str(original_target)))
+                    logger.warning("Invalid move target coerced to current position: %s", _sanitize_for_log(
+                        str(original_target)))
                 stage_state["aria"]["position"] = target
                 return {
                     "status": "success",
@@ -1486,7 +1533,8 @@ def execute_aria_action(action: dict) -> dict:
             # Check distance
             aria_pos = stage_state["aria"]["position"]
             obj_pos = stage_state["objects"][obj_id]["position"]
-            distance = ((aria_pos["x"] - obj_pos["x"]) ** 2 + (aria_pos["y"] - obj_pos["y"]) ** 2) ** 0.5
+            distance = ((aria_pos["x"] - obj_pos["x"]) **
+                        2 + (aria_pos["y"] - obj_pos["y"]) ** 2) ** 0.5
 
             if distance > PICKUP_DISTANCE_THRESHOLD:
                 auto_target = _coerce_and_clamp_position(
@@ -1544,7 +1592,8 @@ def execute_aria_action(action: dict) -> dict:
                 return {"status": "error", "message": "Not holding anything"}
 
             obj_id = stage_state["aria"]["held_object"]
-            target = _coerce_and_clamp_position(action.get("target", {"x": 70, "y": 40}), fallback={"x": 70, "y": 40})
+            target = _coerce_and_clamp_position(action.get(
+                "target", {"x": 70, "y": 40}), fallback={"x": 70, "y": 40})
             force = action.get("force", "medium")
 
             stage_state["objects"][obj_id]["position"] = target
@@ -1614,7 +1663,7 @@ def execute_aria_action(action: dict) -> dict:
         return {"status": "error", "message": str(e)}
 
 
-def action_to_tags(action: dict) -> List[str]:
+def action_to_tags(action: dict) -> list[str]:
     """Convert a structured action to Aria tag(s) without mutating stage state."""
     action_type = action.get("action")
     if not action_type:
@@ -1671,15 +1720,15 @@ def action_to_tags(action: dict) -> List[str]:
     return []
 
 
-def tags_from_actions(actions: List[dict]) -> List[str]:
+def tags_from_actions(actions: list[dict]) -> list[str]:
     """Flatten tags from a list of structured actions."""
-    tags: List[str] = []
+    tags: list[str] = []
     for action in actions:
         tags.extend(action_to_tags(action))
     return tags
 
 
-def tags_to_actions(tags: List[str]) -> List[dict]:
+def tags_to_actions(tags: list[str]) -> list[dict]:
     """Infer a minimal list of structured actions from simple tags.
 
     This helps the web UI receive actionable 'actions' even when the
@@ -1691,7 +1740,7 @@ def tags_to_actions(tags: List[str]) -> List[dict]:
     - [aria:drop] or [aria:drop:obj] -> drop
     - [aria:look:target] -> look
     """
-    inferred: List[dict] = []
+    inferred: list[dict] = []
     for tag in tags:
         try:
             # [aria:position:12:34]
@@ -1699,7 +1748,8 @@ def tags_to_actions(tags: List[str]) -> List[dict]:
             if m:
                 x = max(0, min(100, int(m.group(1))))
                 y = max(0, min(100, int(m.group(2))))
-                inferred.append({"action": "move", "target": {"x": x, "y": y}, "speed": "normal"})
+                inferred.append({"action": "move", "target": {
+                                "x": x, "y": y}, "speed": "normal"})
                 continue
 
             # Named positions: [aria:position:center]
@@ -1717,13 +1767,15 @@ def tags_to_actions(tags: List[str]) -> List[dict]:
                 }
                 coords = named_map.get(name)
                 if coords:
-                    inferred.append({"action": "move", "target": coords, "speed": "normal"})
+                    inferred.append(
+                        {"action": "move", "target": coords, "speed": "normal"})
                     continue
 
             # gesture & animation -> gesture if allowed
             m = re.match(r"\[aria:gesture:([a-z_]+)\]", tag)
             if m:
-                inferred.append({"action": "gesture", "gesture_type": m.group(1)})
+                inferred.append(
+                    {"action": "gesture", "gesture_type": m.group(1)})
                 continue
 
             m = re.match(r"\[aria:animation:([a-z_]+)\]", tag)
@@ -1731,9 +1783,11 @@ def tags_to_actions(tags: List[str]) -> List[dict]:
                 anim = m.group(1)
                 # map some animations to allowed gestures; fall back to 'wave'
                 if anim in VALID_GESTURES:
-                    inferred.append({"action": "gesture", "gesture_type": anim})
+                    inferred.append(
+                        {"action": "gesture", "gesture_type": anim})
                 else:
-                    inferred.append({"action": "gesture", "gesture_type": "wave"})
+                    inferred.append(
+                        {"action": "gesture", "gesture_type": "wave"})
                 continue
 
             # Expression -> set expression via say action (emotion)
@@ -1747,7 +1801,8 @@ def tags_to_actions(tags: List[str]) -> List[dict]:
             m = re.match(r"\[aria:say:(.+)\]", tag)
             if m:
                 text = m.group(1)
-                inferred.append({"action": "say", "text": text, "emotion": "neutral"})
+                inferred.append(
+                    {"action": "say", "text": text, "emotion": "neutral"})
                 continue
 
             # pickup/drop
@@ -1777,7 +1832,8 @@ def tags_to_actions(tags: List[str]) -> List[dict]:
                 effect = m.group(1)
                 # only map some known effects to gestures
                 if effect in ("sparkle", "hearts", "glow"):
-                    inferred.append({"action": "gesture", "gesture_type": "wave"})
+                    inferred.append(
+                        {"action": "gesture", "gesture_type": "wave"})
                 continue
 
             # throw
@@ -1785,7 +1841,8 @@ def tags_to_actions(tags: List[str]) -> List[dict]:
             if m:
                 x = max(0, min(100, int(m.group(1))))
                 y = max(0, min(100, int(m.group(2))))
-                inferred.append({"action": "throw", "target": {"x": x, "y": y}, "force": "medium"})
+                inferred.append({"action": "throw", "target": {
+                                "x": x, "y": y}, "force": "medium"})
                 continue
 
             # wait
@@ -1860,11 +1917,13 @@ class AriaRequestHandler(SimpleHTTPRequestHandler):
             self.send_response(200)
             self.send_header("Content-Type", "application/json")
             self.end_headers()
-            presets_path = Path(__file__).resolve().parent / "command_presets.generated.json"
+            presets_path = Path(__file__).resolve().parent / \
+                "command_presets.generated.json"
             try:
                 payload = json.loads(presets_path.read_text(encoding="utf-8"))
             except Exception as exc:  # pragma: no cover - defensive
-                payload = {"error": f"presets file unavailable: {exc}", "presets": []}
+                payload = {
+                    "error": f"presets file unavailable: {exc}", "presets": []}
             self.wfile.write(json.dumps(payload).encode("utf-8"))
             return
         if self.path == "/":
@@ -1924,16 +1983,20 @@ class AriaRequestHandler(SimpleHTTPRequestHandler):
                         )
                         tags = tags_from_actions(actions)
                     except Exception as parse_err:
-                        logger.warning(f"/api/aria/command parser path failed, falling back: {parse_err}")
+                        logger.warning(
+                            f"/api/aria/command parser path failed, falling back: {parse_err}")
 
                 # Legacy fallback path: rule-based tag generation.
                 if not tags:
                     legacy_tags = generate_tags_ai(command)
-                    tags = legacy_tags if legacy_tags else generate_tags_fallback(command)
+                    tags = legacy_tags if legacy_tags else generate_tags_fallback(
+                        command)
                 elif actions:
-                    valid_actions, validation_reason = validate_action_sequence(actions)
+                    valid_actions, validation_reason = validate_action_sequence(
+                        actions)
                     if not valid_actions:
-                        safe_validation_reason = validation_reason.replace("\r", "\\r").replace("\n", "\\n")
+                        safe_validation_reason = validation_reason.replace(
+                            "\r", "\\r").replace("\n", "\\n")
                         logger.warning(
                             "Rejecting invalid parsed action sequence for /api/aria/command: %s",
                             safe_validation_reason,
@@ -1947,11 +2010,13 @@ class AriaRequestHandler(SimpleHTTPRequestHandler):
                 if tags and not actions:
                     inferred_actions = tags_to_actions(tags)
                     if inferred_actions:
-                        valid_actions, validation_reason = validate_action_sequence(inferred_actions)
+                        valid_actions, validation_reason = validate_action_sequence(
+                            inferred_actions)
                         if valid_actions:
                             actions = inferred_actions
                         else:
-                            logger.info(f"Inferred actions failed validation: {validation_reason}")
+                            logger.info(
+                                f"Inferred actions failed validation: {validation_reason}")
 
                 print(f"✨ Generated tags: {tags}")
 
@@ -1996,13 +2061,15 @@ class AriaRequestHandler(SimpleHTTPRequestHandler):
                     for k, v in request_data["objects"].items():
                         if isinstance(v, dict) and "position" in v:
                             stage_state["objects"][k] = v
-                    api_response = {"status": "ok", "objects": stage_state["objects"]}
+                    api_response = {"status": "ok",
+                                    "objects": stage_state["objects"]}
                 elif "object" in request_data and "action" in request_data:
                     action = request_data["action"]
                     obj = request_data["object"]
                     obj_id = obj.get("id") or obj.get("name")
                     if not obj_id:
-                        raise ValueError('Object payload must include "id" or "name" field.')
+                        raise ValueError(
+                            'Object payload must include "id" or "name" field.')
 
                     if action == "add":
                         position = obj.get("position", {"x": 50, "y": 50})
@@ -2036,7 +2103,8 @@ class AriaRequestHandler(SimpleHTTPRequestHandler):
                             "object": removed,
                         }
                     else:
-                        raise ValueError(f"Unknown action: {action}. Supported: add, update, remove/delete.")
+                        raise ValueError(
+                            f"Unknown action: {action}. Supported: add, update, remove/delete.")
 
                 else:
                     raise ValueError(
@@ -2054,7 +2122,8 @@ class AriaRequestHandler(SimpleHTTPRequestHandler):
                     self.send_response(400)
                     self.send_header("Content-Type", "application/json")
                     self.end_headers()
-                    self.wfile.write(json.dumps({"error": str(e)}).encode("utf-8"))
+                    self.wfile.write(json.dumps(
+                        {"error": str(e)}).encode("utf-8"))
                 except Exception:
                     pass
                 return
@@ -2100,27 +2169,34 @@ class AriaRequestHandler(SimpleHTTPRequestHandler):
                         "actions": [],
                     }
                 else:
-                    valid_actions, validation_reason = validate_action_sequence(actions)
+                    valid_actions, validation_reason = validate_action_sequence(
+                        actions)
                     if not valid_actions:
-                        raise ValueError(f"Action sequence failed validation: {validation_reason}")
+                        raise ValueError(
+                            f"Action sequence failed validation: {validation_reason}")
 
                     # Execute actions if auto_execute is True
                     execution_results = []
                     all_tags = []
 
                     if auto_execute:
-                        actions_for_log = json.dumps(actions, ensure_ascii=False, separators=(",", ":"))
+                        actions_for_log = json.dumps(
+                            actions, ensure_ascii=False, separators=(",", ":"))
                         actions_for_log = _sanitize_for_log(actions_for_log)
-                        logger.info("Executing validated action sequence: %s", actions_for_log)
+                        logger.info(
+                            "Executing validated action sequence: %s", actions_for_log)
                         for action in actions:
                             exec_result = execute_aria_action(action)
-                            execution_results.append({"action": action, "result": exec_result})
+                            execution_results.append(
+                                {"action": action, "result": exec_result})
                             if exec_result.get("tags"):
                                 all_tags.extend(exec_result["tags"])
                     else:
-                        actions_for_log = json.dumps(actions, ensure_ascii=False, separators=(",", ":"))
+                        actions_for_log = json.dumps(
+                            actions, ensure_ascii=False, separators=(",", ":"))
                         actions_for_log = _sanitize_for_log(actions_for_log)
-                        logger.info("Dry-run plan mode for command '%s': %s", command_for_log, actions_for_log)
+                        logger.info(
+                            "Dry-run plan mode for command '%s': %s", command_for_log, actions_for_log)
 
                     api_response = {
                         "status": "success",
@@ -2139,7 +2215,8 @@ class AriaRequestHandler(SimpleHTTPRequestHandler):
                 self.send_response(200)
                 self.send_header("Content-Type", "application/json")
                 self.end_headers()
-                self.wfile.write(json.dumps(api_response, indent=2).encode("utf-8"))
+                self.wfile.write(json.dumps(
+                    api_response, indent=2).encode("utf-8"))
 
                 print(
                     f"✓ Execute API: {command} -> {len(actions)} actions"
@@ -2177,7 +2254,8 @@ class AriaRequestHandler(SimpleHTTPRequestHandler):
                 request_data = json.loads(body.decode("utf-8")) if body else {}
                 theme = request_data.get("theme", "forest")
                 # Sanitize user-controlled value before writing to logs (prevent log injection)
-                safe_theme_for_log = re.sub(r"[\r\n\t\x00-\x1f\x7f]+", " ", str(theme))
+                safe_theme_for_log = re.sub(
+                    r"[\r\n\t\x00-\x1f\x7f]+", " ", str(theme))
                 count = int(request_data.get("count", 6))
                 use_llm = bool(request_data.get("use_llm", True))
                 provider_choice = request_data.get("provider")
@@ -2191,11 +2269,13 @@ class AriaRequestHandler(SimpleHTTPRequestHandler):
                             model_override=model_override,
                         )
                     except Exception as provider_err:
-                        logger.warning(f"World generation provider resolution failed: {provider_err}")
+                        logger.warning(
+                            f"World generation provider resolution failed: {provider_err}")
                         world_provider = None
 
                     if world_provider:
-                        world = generate_world_with_llm(theme, count, world_provider)
+                        world = generate_world_with_llm(
+                            theme, count, world_provider)
                     else:
                         world = generate_world_fallback(theme, count)
                         world["llm"] = False
@@ -2212,8 +2292,10 @@ class AriaRequestHandler(SimpleHTTPRequestHandler):
                         "emoji": obj.get("emoji", ""),
                     }
                 # Update environment meta
-                stage_state["environment"]["theme"] = world["environment"].get("theme", theme)
-                stage_state["environment"]["generated_at"] = world["environment"].get("generated_at")
+                stage_state["environment"]["theme"] = world["environment"].get(
+                    "theme", theme)
+                stage_state["environment"]["generated_at"] = world["environment"].get(
+                    "generated_at")
 
                 response = {
                     "status": "success",
@@ -2229,8 +2311,10 @@ class AriaRequestHandler(SimpleHTTPRequestHandler):
                 self.send_response(200)
                 self.send_header("Content-Type", "application/json")
                 self.end_headers()
-                self.wfile.write(json.dumps(response, indent=2).encode("utf-8"))
-                safe_used_llm_for_log = str(bool(response.get("used_llm", False)))
+                self.wfile.write(json.dumps(
+                    response, indent=2).encode("utf-8"))
+                safe_used_llm_for_log = str(
+                    bool(response.get("used_llm", False)))
                 safe_count_for_log = str(int(response.get("count", 0)))
                 logger.info(
                     f"✓ World generated (theme={safe_theme_for_log}, llm={safe_used_llm_for_log}, count={safe_count_for_log})"
@@ -2241,7 +2325,8 @@ class AriaRequestHandler(SimpleHTTPRequestHandler):
                 self.send_response(400)
                 self.send_header("Content-Type", "application/json")
                 self.end_headers()
-                self.wfile.write(json.dumps({"status": "error", "error": str(e)}).encode("utf-8"))
+                self.wfile.write(json.dumps(
+                    {"status": "error", "error": str(e)}).encode("utf-8"))
                 return
 
         else:
@@ -2299,8 +2384,10 @@ def main():
                 sock.bind((host, 0))
                 fallback_port = sock.getsockname()[1]
 
-            print(f"⚠️ Port {port} is in use by another service; starting Aria on free port {fallback_port}.")
-            print(f"💡 Set ARIA_PORT={fallback_port} (or another free port) to control startup port explicitly.")
+            print(
+                f"⚠️ Port {port} is in use by another service; starting Aria on free port {fallback_port}.")
+            print(
+                f"💡 Set ARIA_PORT={fallback_port} (or another free port) to control startup port explicitly.")
             port = fallback_port
             server = HTTPServer((host, port), AriaRequestHandler)
         else:
@@ -2310,7 +2397,8 @@ def main():
     print("🎨 Aria Visual Command System - Web Server")
     print("=" * 70)
     print(f"🌐 Open in browser: http://localhost:{port}")
-    print(f"🤖 Model: {'AI (aria_expanded_v2)' if MODEL else 'Rule-based fallback'}")
+    print(
+        f"🤖 Model: {'AI (aria_expanded_v2)' if MODEL else 'Rule-based fallback'}")
     print("📝 Type commands in the web interface to control Aria")
     print("\nPress Ctrl+C to stop the server")
     print("=" * 70 + "\n")

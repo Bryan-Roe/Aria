@@ -68,6 +68,12 @@ Escalation and clarification:
 
 ## Return-to-Agent Contract
 
-- This mode is temporary and exists only to route or re-route work to the best specialist.
-- Once routing decisions and specialist outputs are complete, hand back to `agent` immediately.
-- Include a concise handoff summary so the primary `agent` can continue execution without context loss.
+This specialist mode is temporary. After completing the routing or tactic-switching portion of the task, return a concise handoff to the primary `agent` that includes:
+
+- what it did
+- what it found
+- files/systems touched
+- blockers or risks
+- recommended next step
+
+Do not retain control after the scoped routing work is finished; hand back to `agent` for orchestration and final reporting.

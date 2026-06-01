@@ -22,7 +22,7 @@ import sys
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 try:
     from .config_paths import resolve_config_path
@@ -39,7 +39,8 @@ DEFAULT_CONFIG = resolve_config_path(REPO_ROOT, "autotrain")
 DATA_OUT = REPO_ROOT / "data_out" / "autotrain"
 STATUS_FILE = DATA_OUT / "status.json"
 
-HF_TRAIN_SCRIPT = REPO_ROOT / "ai-projects" / "lora-training" / "microsoft_phi-silica-3.6_v1" / "scripts" / "train_lora.py"
+HF_TRAIN_SCRIPT = REPO_ROOT / "ai-projects" / "lora-training" / \
+    "microsoft_phi-silica-3.6_v1" / "scripts" / "train_lora.py"
 
 
 # ---------------------------------------------------------------------------
@@ -53,17 +54,17 @@ class TrainJob:
     runner: str = "hf"
     category: str = "baseline"
     enabled: bool = True
-    config: Optional[str] = None
-    dataset: Optional[str] = None
-    save_dir: Optional[str] = None
+    config: str | None = None
+    dataset: str | None = None
+    save_dir: str | None = None
     epochs: int = 1
-    max_train_samples: Optional[int] = None
-    max_eval_samples: Optional[int] = None
+    max_train_samples: int | None = None
+    max_eval_samples: int | None = None
     learning_rate: float = 2e-4
     lora_dropout: float = 0.1
-    hf_model_id: Optional[str] = None
+    hf_model_id: str | None = None
     device: str = "auto"
-    extra_args: List[str] = field(default_factory=list)
+    extra_args: list[str] = field(default_factory=list)
 
 
 # ---------------------------------------------------------------------------
@@ -87,7 +88,7 @@ def _parse_bool(value: Any, default: bool = True) -> bool:
     return default
 
 
-def _parse_int(value: Any) -> Optional[int]:
+def _parse_int(value: Any) -> int | None:
     if value is None:
         return None
     if isinstance(value, bool):
@@ -107,7 +108,7 @@ def _parse_int(value: Any) -> Optional[int]:
     return None
 
 
-def _parse_float(value: Any) -> Optional[float]:
+def _parse_float(value: Any) -> float | None:
     if value is None:
         return None
     if isinstance(value, bool):
@@ -125,7 +126,7 @@ def _parse_float(value: Any) -> Optional[float]:
     return None
 
 
-def _parse_str(value: Any) -> Optional[str]:
+def _parse_str(value: Any) -> str | None:
     if value is None:
         return None
     if isinstance(value, str):
@@ -134,11 +135,11 @@ def _parse_str(value: Any) -> Optional[str]:
     return str(value)
 
 
-def _parse_str_list(value: Any) -> List[str]:
+def _parse_str_list(value: Any) -> list[str]:
     if value is None:
         return []
     if isinstance(value, list):
-        out: List[str] = []
+        out: list[str] = []
         for item in value:
             s = _parse_str(item)
             if s:
@@ -152,7 +153,7 @@ def _parse_str_list(value: Any) -> List[str]:
     return [str(value)]
 
 
-def _norm_relpath(value: Optional[str]) -> Optional[str]:
+def _norm_relpath(value: str | None) -> str | None:
     if not value:
         return None
 
@@ -166,7 +167,7 @@ def _norm_relpath(value: Optional[str]) -> Optional[str]:
     return norm
 
 
-def load_config(path: Path) -> Dict[str, Any]:
+def load_config(path: Path) -> dict[str, Any]:
     if not path.exists():
         return {"jobs": []}
 
@@ -182,8 +183,8 @@ def load_config(path: Path) -> Dict[str, Any]:
         data.setdefault("jobs", jobs)
         return data
 
-    jobs: List[Dict[str, Any]] = []
-    current: Dict[str, Any] = {}
+    jobs: list[dict[str, Any]] = []
+    current: dict[str, Any] = {}
 
     for line in text.splitlines():
         line = line.rstrip()
@@ -208,14 +209,14 @@ def load_config(path: Path) -> Dict[str, Any]:
     return {"jobs": jobs}
 
 
-def load_jobs(path: Path) -> List[TrainJob]:
+def load_jobs(path: Path) -> list[TrainJob]:
     data = load_config(path)
     raw_jobs = data.get("jobs", [])
 
     if not isinstance(raw_jobs, list):
         return []
 
-    jobs: List[TrainJob] = []
+    jobs: list[TrainJob] = []
     for raw in raw_jobs:
         if not isinstance(raw, dict):
             continue
@@ -263,8 +264,8 @@ def load_jobs(path: Path) -> List[TrainJob]:
 # ---------------------------------------------------------------------------
 
 
-def validate_job(job: TrainJob) -> Dict[str, Any]:
-    missing: List[str] = []
+def validate_job(job: TrainJob) -> dict[str, Any]:
+    missing: list[str] = []
 
     if not job.dataset:
         missing.append("dataset")
@@ -275,7 +276,8 @@ def validate_job(job: TrainJob) -> Dict[str, Any]:
 
     if job.runner == "hf":
         if not HF_TRAIN_SCRIPT.exists():
-            missing.append(f"train script not found: {HF_TRAIN_SCRIPT.relative_to(REPO_ROOT)}")
+            missing.append(
+                f"train script not found: {HF_TRAIN_SCRIPT.relative_to(REPO_ROOT)}")
 
     if job.config:
         config_path = REPO_ROOT / job.config
@@ -295,7 +297,7 @@ def validate_job(job: TrainJob) -> Dict[str, Any]:
 # ---------------------------------------------------------------------------
 
 
-def build_command(job: TrainJob) -> List[str]:
+def build_command(job: TrainJob) -> list[str]:
     py = sys.executable or "python"
 
     if job.runner == "local":
@@ -329,7 +331,7 @@ def build_command(job: TrainJob) -> List[str]:
 # ---------------------------------------------------------------------------
 
 
-def _write_status(payload: Dict[str, Any]) -> None:
+def _write_status(payload: dict[str, Any]) -> None:
     DATA_OUT.mkdir(parents=True, exist_ok=True)
     STATUS_FILE.write_text(
         json.dumps(payload, indent=2, ensure_ascii=False) + "\n",
@@ -337,7 +339,7 @@ def _write_status(payload: Dict[str, Any]) -> None:
     )
 
 
-def _build_status(jobs_info: List[Dict[str, Any]]) -> Dict[str, Any]:
+def _build_status(jobs_info: list[dict[str, Any]]) -> dict[str, Any]:
     succeeded = sum(1 for j in jobs_info if j.get("status") == "ok")
     failed = sum(1 for j in jobs_info if j.get("status") == "failed")
     skipped = sum(1 for j in jobs_info if j.get("status") == "skipped")
@@ -359,36 +361,44 @@ def _build_status(jobs_info: List[Dict[str, Any]]) -> Dict[str, Any]:
 # ---------------------------------------------------------------------------
 
 
-def main(argv: Optional[List[str]] = None) -> int:
-    parser = argparse.ArgumentParser(description="AutoTrain — LoRA fine-tuning orchestrator")
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(
+        description="AutoTrain — LoRA fine-tuning orchestrator")
     parser.add_argument(
         "--config",
         type=Path,
         default=DEFAULT_CONFIG,
         help=f"Path to YAML config (default: {DEFAULT_CONFIG})",
     )
-    parser.add_argument("--dry-run", action="store_true", help="Validate config only; do not execute")
-    parser.add_argument("--list", action="store_true", help="Print jobs as JSON and exit")
-    parser.add_argument("--run", action="store_true", help="Execute training jobs")
-    parser.add_argument("--job", metavar="NAME", help="Filter to a single job by name")
+    parser.add_argument("--dry-run", action="store_true",
+                        help="Validate config only; do not execute")
+    parser.add_argument("--list", action="store_true",
+                        help="Print jobs as JSON and exit")
+    parser.add_argument("--run", action="store_true",
+                        help="Execute training jobs")
+    parser.add_argument("--job", metavar="NAME",
+                        help="Filter to a single job by name")
 
     args = parser.parse_args(argv)
 
     config_path = Path(args.config)
     if not config_path.exists():
-        print(f"Config not found: {config_path} — using empty job list", file=sys.stderr)
-        jobs: List[TrainJob] = []
+        print(
+            f"Config not found: {config_path} — using empty job list", file=sys.stderr)
+        jobs: list[TrainJob] = []
     else:
         jobs = load_jobs(config_path)
 
     if args.job:
         jobs = [j for j in jobs if j.name == args.job]
         if not jobs:
-            print(f"No job named '{args.job}' found in config", file=sys.stderr)
+            print(
+                f"No job named '{args.job}' found in config", file=sys.stderr)
             return 1
 
     if args.list:
-        print(json.dumps([vars(j) for j in jobs], indent=2, ensure_ascii=False))
+        print(json.dumps([vars(j)
+              for j in jobs], indent=2, ensure_ascii=False))
         return 0
 
     if not (args.dry_run or args.run):
@@ -396,7 +406,7 @@ def main(argv: Optional[List[str]] = None) -> int:
 
     print(f"AutoTrain — {len(jobs)} job(s) from {config_path}")
 
-    jobs_info: List[Dict[str, Any]] = []
+    jobs_info: list[dict[str, Any]] = []
     for job in jobs:
         if not job.enabled:
             print(f"  [skip] {job.name} (disabled)")
@@ -407,7 +417,8 @@ def main(argv: Optional[List[str]] = None) -> int:
         if validation["status"] != "ok":
             print(f"  [warn] {job.name}: missing {validation['missing']}")
         else:
-            print(f"  [ok]   {job.name} (runner={job.runner}, epochs={job.epochs})")
+            print(
+                f"  [ok]   {job.name} (runner={job.runner}, epochs={job.epochs})")
 
         if args.dry_run and not args.run:
             jobs_info.append(
@@ -430,11 +441,13 @@ def main(argv: Optional[List[str]] = None) -> int:
                 check=False,
             )
         except OSError as e:
-            jobs_info.append({"name": job.name, "status": "failed", "error": str(e), "returncode": None})
+            jobs_info.append(
+                {"name": job.name, "status": "failed", "error": str(e), "returncode": None})
             continue
 
         status = "ok" if result.returncode == 0 else "failed"
-        jobs_info.append({"name": job.name, "status": status, "returncode": result.returncode})
+        jobs_info.append({"name": job.name, "status": status,
+                         "returncode": result.returncode})
 
     status_payload = _build_status(jobs_info)
     _write_status(status_payload)
