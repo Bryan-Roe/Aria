@@ -79,8 +79,7 @@ class SummarizerAgent(BaseAgent):
             {
                 "role": "system",
                 "content": (
-                    "You are a summarization engine. "
-                    'Output ONLY a JSON object with a single field: summary.'
+                    "You are a summarization engine. " "Output ONLY a JSON object with a single field: summary."
                 ),
             },
             {
@@ -129,9 +128,5 @@ class SummarizerAgent(BaseAgent):
     def _format_event(event: Dict[str, Any]) -> str:
         event_type = event.get("type", "event")
         data = event.get("data", "")
-        data_str = (
-            json.dumps(data, ensure_ascii=False)
-            if isinstance(data, (dict, list))
-            else str(data)
-        )
+        data_str = json.dumps(data, ensure_ascii=False) if isinstance(data, (dict, list)) else str(data)
         return f"{event_type}: {data_str}"

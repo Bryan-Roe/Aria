@@ -365,9 +365,7 @@ For questions or issues, refer to:
 
 def main():
     """Main entry point."""
-    parser = argparse.ArgumentParser(
-        description="Quantum LLM Integration & Migration Guide"
-    )
+    parser = argparse.ArgumentParser(description="Quantum LLM Integration & Migration Guide")
     parser.add_argument(
         "--mode",
         type=str,
@@ -379,9 +377,7 @@ def main():
     args = parser.parse_args()
 
     # Setup logging
-    logging.basicConfig(
-        level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
-    )
+    logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
     # Execute based on mode
     if args.mode == "compare":

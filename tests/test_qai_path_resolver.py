@@ -14,12 +14,7 @@ def test_resolve_qai_config_maps_legacy_defaults_to_repo_layout(tmp_path: Path) 
     (repo_root / "mount").mkdir(parents=True, exist_ok=True)
     (repo_root / "ai-projects" / "chat-cli").mkdir(parents=True, exist_ok=True)
     (repo_root / "ai-projects" / "quantum-ml" / "config").mkdir(parents=True, exist_ok=True)
-    (
-        repo_root
-        / "ai-projects"
-        / "lora-training"
-        / "microsoft_phi-silica-3.6_v1"
-    ).mkdir(parents=True, exist_ok=True)
+    (repo_root / "ai-projects" / "lora-training" / "microsoft_phi-silica-3.6_v1").mkdir(parents=True, exist_ok=True)
     (repo_root / "datasets").mkdir()
     (repo_root / "data_out").mkdir()
     (repo_root / "scripts").mkdir()
@@ -138,9 +133,7 @@ def test_resolve_qai_config_uses_custom_workspace_for_relative_overrides(
     resolved = resolve_qai_config(raw_config, config_path)
 
     assert resolved["paths"]["workspace_root"] == str(custom_workspace)
-    assert resolved["paths"]["quantum_ai"] == str(
-        custom_workspace / "ai-projects" / "quantum-ml"
-    )
+    assert resolved["paths"]["quantum_ai"] == str(custom_workspace / "ai-projects" / "quantum-ml")
     assert resolved["training"]["orchestrators"]["autotrain"]["config_file"] == str(
         custom_workspace / "config" / "training" / "autotrain.yaml"
     )

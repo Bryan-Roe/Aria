@@ -34,6 +34,4 @@ def test_validate_perf_runs_under_threshold():
     elapsed = time.perf_counter() - start
 
     # allow a generous threshold to avoid flaky CI; this captures large regressions
-    assert (
-        elapsed < 1.0
-    ), f"Validation too slow: {elapsed:.3f}s for {iterations} iterations"
+    assert elapsed < 1.0, f"Validation too slow: {elapsed:.3f}s for {iterations} iterations"

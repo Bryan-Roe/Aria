@@ -9,9 +9,7 @@ from __future__ import annotations
 from typing import Any, Callable, Iterable
 
 
-def select_fields(
-    records: Iterable[dict[str, Any]], fields: Iterable[str]
-) -> list[dict[str, Any]]:
+def select_fields(records: Iterable[dict[str, Any]], fields: Iterable[str]) -> list[dict[str, Any]]:
     """Return records containing only selected fields.
 
     Missing fields are skipped from individual output records.
@@ -20,17 +18,13 @@ def select_fields(
     return [{k: rec[k] for k in field_list if k in rec} for rec in records]
 
 
-def drop_fields(
-    records: Iterable[dict[str, Any]], fields: Iterable[str]
-) -> list[dict[str, Any]]:
+def drop_fields(records: Iterable[dict[str, Any]], fields: Iterable[str]) -> list[dict[str, Any]]:
     """Return records with specified fields removed."""
     drop = set(fields)
     return [{k: v for k, v in rec.items() if k not in drop} for rec in records]
 
 
-def rename_fields(
-    records: Iterable[dict[str, Any]], mapping: dict[str, str]
-) -> list[dict[str, Any]]:
+def rename_fields(records: Iterable[dict[str, Any]], mapping: dict[str, str]) -> list[dict[str, Any]]:
     """Rename keys according to mapping for each record."""
     out: list[dict[str, Any]] = []
     for rec in records:
@@ -72,9 +66,7 @@ def map_field(
     return out
 
 
-def deduplicate_records(
-    records: Iterable[dict[str, Any]], keys: Iterable[str]
-) -> list[dict[str, Any]]:
+def deduplicate_records(records: Iterable[dict[str, Any]], keys: Iterable[str]) -> list[dict[str, Any]]:
     """Deduplicate records using tuple of key values, preserving first occurrence."""
     key_list = list(keys)
     seen: set[tuple[Any, ...]] = set()
@@ -114,9 +106,7 @@ def sort_records(
     return sorted(records, key=sort_key, reverse=descending)
 
 
-def aggregate_sum(
-    records: Iterable[dict[str, Any]], group_key: str, value_key: str
-) -> dict[str, float]:
+def aggregate_sum(records: Iterable[dict[str, Any]], group_key: str, value_key: str) -> dict[str, float]:
     """Group by group_key and sum numeric value_key per group.
 
     Non-numeric or missing value_key entries are ignored.

@@ -90,6 +90,7 @@ _REMINDER = (
 
 # ── Helpers ──────────────────────────────────────────────────────────────────
 
+
 def _walk_strings(obj: Any) -> Iterator[str]:
     if isinstance(obj, str):
         yield obj
@@ -118,6 +119,7 @@ def _extract_command(payload: dict[str, Any]) -> str:
 
 
 # ── Main ─────────────────────────────────────────────────────────────────────
+
 
 def main() -> None:
     if _SKIP:

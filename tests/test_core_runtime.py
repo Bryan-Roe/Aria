@@ -43,9 +43,7 @@ def test_planner_agent_returns_structured_plan() -> None:
     memory.write("goal_created", {"goal": "improve local tool execution"})
     agent = PlannerAgent(memory)
 
-    result = agent.execute(
-        Task(type="plan", payload={"goal": "Use a tool to inspect files"})
-    )
+    result = agent.execute(Task(type="plan", payload={"goal": "Use a tool to inspect files"}))
     plan = result["plan"]
 
     assert len(plan) >= 2

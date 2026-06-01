@@ -75,9 +75,7 @@ def _load_runtime_dependencies(
 
     if load_integrated and INTEGRATED_AVAILABLE is None:
         try:
-            from src.quantum_llm_integrated import (IntegratedQuantumLLM,
-                                                    QuantumLLMConfig,
-                                                    QuantumLLMSystem)
+            from src.quantum_llm_integrated import IntegratedQuantumLLM, QuantumLLMConfig, QuantumLLMSystem
 
             globals().update(
                 {
@@ -94,9 +92,7 @@ def _load_runtime_dependencies(
 
     if load_datasets and DATASETS_AVAILABLE is None:
         try:
-            from src.quantum_llm_datasets import (CharacterTokenizer,
-                                                  DatasetBuilder, TextDataset,
-                                                  create_train_val_split)
+            from src.quantum_llm_datasets import CharacterTokenizer, DatasetBuilder, TextDataset, create_train_val_split
 
             globals().update(
                 {
@@ -119,9 +115,7 @@ DEFAULT_QUANTUM_QUICKSTART_OUTPUT_DIR = Path("data_out/quantum_llm_quickstart")
 DEFAULT_QUANTUM_FULL_OUTPUT_DIR = Path("data_out/quantum_llm_full")
 
 
-def _resolve_generate_model_path(
-    model_path: Optional[str], output_dir: Optional[str]
-) -> Optional[Path]:
+def _resolve_generate_model_path(model_path: Optional[str], output_dir: Optional[str]) -> Optional[Path]:
     """Resolve model path for generate mode.
 
     Priority:
@@ -139,9 +133,7 @@ def _resolve_generate_model_path(
     if output_dir:
         candidate_roots.append(Path(output_dir))
 
-    candidate_roots.extend(
-        [DEFAULT_QUANTUM_QUICKSTART_OUTPUT_DIR, DEFAULT_QUANTUM_FULL_OUTPUT_DIR]
-    )
+    candidate_roots.extend([DEFAULT_QUANTUM_QUICKSTART_OUTPUT_DIR, DEFAULT_QUANTUM_FULL_OUTPUT_DIR])
 
     candidate_relative_paths = [
         Path("final_model.pt"),
@@ -161,9 +153,7 @@ def _resolve_generate_model_path(
 
 def _ensure_torch_available(context: str) -> bool:
     """Ensure torch is available before running training/inference paths."""
-    _load_runtime_dependencies(
-        load_torch=True, load_integrated=False, load_datasets=False
-    )
+    _load_runtime_dependencies(load_torch=True, load_integrated=False, load_datasets=False)
 
     if TORCH_AVAILABLE:
         return True
@@ -188,9 +178,7 @@ def quick_start_example():
 
     if not INTEGRATED_AVAILABLE or not DATASETS_AVAILABLE:
         logger.error("Required components not available")
-        logger.error(
-            f"Integrated: {INTEGRATED_AVAILABLE}, Datasets: {DATASETS_AVAILABLE}"
-        )
+        logger.error(f"Integrated: {INTEGRATED_AVAILABLE}, Datasets: {DATASETS_AVAILABLE}")
         return
 
     # Step 1: Create configuration
@@ -249,9 +237,7 @@ def quick_start_example():
 
     # Step 5: Start training
     logger.info("Step 5: Starting training...")
-    logger.info(
-        f"Model parameters: {sum(p.numel() for p in system.model.parameters()):,}"
-    )
+    logger.info(f"Model parameters: {sum(p.numel() for p in system.model.parameters()):,}")
 
     start_time = time.time()
     system.train(train_dataset, val_dataset)
@@ -402,9 +388,7 @@ def monitor_training(output_dir: Path):
 
         metrics = dashboard_data.get("metrics_summary", {})
         logger.info(f"  Loss (MA): {metrics.get('moving_avg_loss', 'N/A'):.4f}")
-        logger.info(
-            f"  Perplexity (MA): {metrics.get('moving_avg_perplexity', 'N/A'):.2f}"
-        )
+        logger.info(f"  Perplexity (MA): {metrics.get('moving_avg_perplexity', 'N/A'):.2f}")
         logger.info(f"  Loss Trend: {metrics.get('loss_trend', 'N/A')}")
 
         alerts = dashboard_data.get("recent_alerts", [])
@@ -430,9 +414,7 @@ def monitor_training(output_dir: Path):
     logger.info("=" * 80)
 
 
-def generate_text(
-    model_path: Path, tokenizer: CharacterTokenizer, prompt: str, max_length: int = 100
-):
+def generate_text(model_path: Path, tokenizer: CharacterTokenizer, prompt: str, max_length: int = 100):
     """
     Generate text using trained quantum LLM.
     """
@@ -461,11 +443,7 @@ def generate_text(
     logger.info(f"Prompt: {prompt}")
 
     # Encode prompt
-    input_ids = (
-        torch.tensor(tokenizer.encode(prompt, add_special_tokens=False))
-        .unsqueeze(0)
-        .to(device)
-    )
+    input_ids = torch.tensor(tokenizer.encode(prompt, add_special_tokens=False)).unsqueeze(0).to(device)
 
     # Generate
     generated_ids = input_ids[0].tolist()
@@ -522,9 +500,7 @@ def main():
         help="Path to trained model (optional in generate mode if checkpoint auto-discovery succeeds)",
     )
     parser.add_argument("--prompt", type=str, default="Hello", help="Generation prompt")
-    parser.add_argument(
-        "--max-length", type=int, default=100, help="Max generation length"
-    )
+    parser.add_argument("--max-length", type=int, default=100, help="Max generation length")
 
     args = parser.parse_args()
 
@@ -539,9 +515,7 @@ def main():
         if not _ensure_torch_available(args.mode):
             return
 
-        _load_runtime_dependencies(
-            load_torch=True, load_integrated=True, load_datasets=True
-        )
+        _load_runtime_dependencies(load_torch=True, load_integrated=True, load_datasets=True)
 
         if not INTEGRATED_AVAILABLE:
             logger.error("❌ Integrated components not available")
@@ -566,11 +540,7 @@ def main():
         system, tokenizer = full_training_example(config_path)
 
     elif args.mode == "monitor":
-        output_dir = (
-            Path(args.output_dir)
-            if args.output_dir
-            else Path("data_out/quantum_llm_quickstart")
-        )
+        output_dir = Path(args.output_dir) if args.output_dir else Path("data_out/quantum_llm_quickstart")
         monitor_training(output_dir)
 
     elif args.mode == "generate":
@@ -585,9 +555,7 @@ def main():
                 "Provide --model <path> or ensure one of these files exists under --output-dir (or defaults): "
                 "final_model.pt, model.pt, best_model.pt, training/final_model.pt"
             )
-            logger.error(
-                "Tip: run quick training first: python quantum_llm_quickstart.py --mode quick"
-            )
+            logger.error("Tip: run quick training first: python quantum_llm_quickstart.py --mode quick")
             return
 
         if not args.model:

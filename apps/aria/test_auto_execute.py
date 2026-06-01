@@ -57,9 +57,7 @@ def plan_mode(command: str) -> Dict:
     if data["status"] == "success":
         print_result(True, f"Parsed {len(data['actions'])} actions:")
         for i, action in enumerate(data["actions"], 1):
-            print(
-                f"    {i}. {action['action']}: {json.dumps(action, separators=(',', ':'))}"
-            )
+            print(f"    {i}. {action['action']}: {json.dumps(action, separators=(',', ':'))}")
     else:
         print_result(False, f"Failed: {data.get('message', 'Unknown error')}")
 

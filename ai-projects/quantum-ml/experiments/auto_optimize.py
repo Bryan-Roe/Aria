@@ -22,6 +22,7 @@ sys.path.insert(0, str(parent_dir))
 
 import torch.nn as nn
 import torch.optim as optim
+
 # Import from src package
 from src.quantum_classifier import QuantumClassifier
 
@@ -82,9 +83,7 @@ class QuantumClassicalTrainer:
             self.val_accuracies.append(acc)
 
             if (epoch + 1) % 5 == 0:
-                print(
-                    f"    Epoch {epoch+1}/{num_epochs} - Loss: {self.train_losses[-1]:.4f}, Val Acc: {acc:.4f}"
-                )
+                print(f"    Epoch {epoch+1}/{num_epochs} - Loss: {self.train_losses[-1]:.4f}, Val Acc: {acc:.4f}")
 
 
 import torch
@@ -197,9 +196,7 @@ for lr in learning_rates:
     model = HybridQuantumClassifier(input_dim=4, quantum_classifier=quantum_clf)
 
     try:
-        history = train_quantum_model(
-            model, X_train_padded, y_train, X_val_padded, y_val
-        )
+        history = train_quantum_model(model, X_train_padded, y_train, X_val_padded, y_val)
 
         final_acc = history["val_acc"][-1]
         best_acc = max(history["val_acc"])
@@ -267,15 +264,11 @@ for pattern in entanglement_patterns:
     model = HybridQuantumClassifier(input_dim=4, quantum_classifier=quantum_clf)
 
     try:
-        history = train_quantum_model(
-            model, X_train_padded, y_train, X_val_padded, y_val
-        )
+        history = train_quantum_model(model, X_train_padded, y_train, X_val_padded, y_val)
 
         final_acc = history["val_acc"][-1]
         best_acc = max(history["val_acc"])
-        ent_results.append(
-            {"pattern": pattern, "final_acc": final_acc, "best_acc": best_acc}
-        )
+        ent_results.append({"pattern": pattern, "final_acc": final_acc, "best_acc": best_acc})
 
         print(f"    Final Accuracy: {final_acc:.4f}")
         print(f"    Best Accuracy:  {best_acc:.4f}")
@@ -326,9 +319,7 @@ for r in lr_results:
     print(f"  LR {r['lr']:.4f}: Final={r['final_acc']:.4f}, Best={r['best_acc']:.4f}")
 
 best_lr = max(lr_results, key=lambda x: x["best_acc"])
-print(
-    f"\n🏆 Best Learning Rate: {best_lr['lr']:.4f} (Accuracy: {best_lr['best_acc']:.4f})"
-)
+print(f"\n🏆 Best Learning Rate: {best_lr['lr']:.4f} (Accuracy: {best_lr['best_acc']:.4f})")
 
 print("\n📊 ENTANGLEMENT RESULTS:")
 print("-" * 50)
@@ -336,9 +327,7 @@ for r in ent_results:
     print(f"  {r['pattern']:8s}: Final={r['final_acc']:.4f}, Best={r['best_acc']:.4f}")
 
 best_ent = max(ent_results, key=lambda x: x["best_acc"])
-print(
-    f"\n🏆 Best Entanglement: {best_ent['pattern']} (Accuracy: {best_ent['best_acc']:.4f})"
-)
+print(f"\n🏆 Best Entanglement: {best_ent['pattern']} (Accuracy: {best_ent['best_acc']:.4f})")
 
 print("\n💡 OPTIMAL CONFIGURATION:")
 print("-" * 50)

@@ -70,6 +70,7 @@ _REMINDER = (
 
 # ── Helpers ──────────────────────────────────────────────────────────────────
 
+
 def _walk_strings(obj: Any) -> Iterator[str]:
     if isinstance(obj, str):
         yield obj
@@ -82,12 +83,7 @@ def _walk_strings(obj: Any) -> Iterator[str]:
 
 
 def _get_path(payload: dict[str, Any]) -> str:
-    return (
-        payload.get("filePath")
-        or payload.get("path")
-        or payload.get("file_path")
-        or ""
-    )
+    return payload.get("filePath") or payload.get("path") or payload.get("file_path") or ""
 
 
 def _companion_file(adapter_path: str) -> str:
@@ -106,6 +102,7 @@ def _companion_exists_on_disk(adapter_path: str) -> bool:
 
 
 # ── Main ─────────────────────────────────────────────────────────────────────
+
 
 def main() -> None:
     if _SKIP:

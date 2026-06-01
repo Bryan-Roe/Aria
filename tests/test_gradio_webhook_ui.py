@@ -1,6 +1,7 @@
 import importlib.util
 import os
 
+
 def load_module():
     path = os.path.join(os.path.dirname(__file__), "..", "scripts", "gradio_demo.py")
     path = os.path.abspath(path)

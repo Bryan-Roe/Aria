@@ -17,24 +17,16 @@ app = func.FunctionApp()
 def serve_chat_web(req: func.HttpRequest) -> func.HttpResponse:
     """Serve the chat web interface"""
     html_path = Path(__file__).resolve().parent.parent / "apps" / "chat" / "index.html"
-    content, status_code, headers = serve_static_file(
-        html_path, "text/html", use_cache_headers=True
-    )
+    content, status_code, headers = serve_static_file(html_path, "text/html", use_cache_headers=True)
 
-    return func.HttpResponse(
-        content, status_code=status_code, mimetype="text/html", headers=headers
-    )
+    return func.HttpResponse(content, status_code=status_code, mimetype="text/html", headers=headers)
 
 
-@app.route(
-    route="chat-web/chat.js", methods=["GET"], auth_level=func.AuthLevel.ANONYMOUS
-)
+@app.route(route="chat-web/chat.js", methods=["GET"], auth_level=func.AuthLevel.ANONYMOUS)
 def serve_chat_js(req: func.HttpRequest) -> func.HttpResponse:
     """Serve the chat JavaScript file"""
     js_path = Path(__file__).resolve().parent.parent / "apps" / "chat" / "chat.js"
-    content, status_code, headers = serve_static_file(
-        js_path, "application/javascript", use_cache_headers=True
-    )
+    content, status_code, headers = serve_static_file(js_path, "application/javascript", use_cache_headers=True)
 
     return func.HttpResponse(
         content,

@@ -49,24 +49,16 @@ class AzureQuantumManager:
 
         if not self.resource_id:
             self.subscription_id = subscription_id or os.getenv("AZURE_SUBSCRIPTION_ID")
-            self.resource_group = resource_group or os.getenv(
-                "AZURE_QUANTUM_RESOURCE_GROUP"
-            )
-            self.workspace_name = workspace_name or os.getenv(
-                "AZURE_QUANTUM_WORKSPACE_NAME"
-            )
+            self.resource_group = resource_group or os.getenv("AZURE_QUANTUM_RESOURCE_GROUP")
+            self.workspace_name = workspace_name or os.getenv("AZURE_QUANTUM_WORKSPACE_NAME")
 
     def connect(self):
         """Establish connection to Azure Quantum workspace"""
         try:
             if self.resource_id:
-                self.workspace = Workspace(
-                    resource_id=self.resource_id, location=self.location
-                )
+                self.workspace = Workspace(resource_id=self.resource_id, location=self.location)
             else:
-                if not all(
-                    [self.subscription_id, self.resource_group, self.workspace_name]
-                ):
+                if not all([self.subscription_id, self.resource_group, self.workspace_name]):
                     raise ValueError(
                         "Either resource_id or (subscription_id, resource_group, workspace_name) must be provided"
                     )
@@ -117,9 +109,7 @@ class AzureQuantumManager:
             else:
                 # Use IonQ simulator as default
                 backends = self.provider.backends()
-                simulator_backends = [
-                    b for b in backends if "simulator" in b.name().lower()
-                ]
+                simulator_backends = [b for b in backends if "simulator" in b.name().lower()]
                 if simulator_backends:
                     self.backend = simulator_backends[0]
                 else:
@@ -194,9 +184,7 @@ class AzureQuantumManager:
         job = self.workspace.get_job(job_id)
         return job.details.status
 
-    def estimate_cost(
-        self, circuit: QuantumCircuit, backend_name: str
-    ) -> Dict[str, Any]:
+    def estimate_cost(self, circuit: QuantumCircuit, backend_name: str) -> Dict[str, Any]:
         """
         Estimate the cost of running a circuit
 
@@ -267,9 +255,7 @@ class QuantumJobManager:
             logger.info(f"Submitting circuit {i+1}/{len(circuits)}")
             result = self.azure_manager.run_circuit(circuit, shots, backend_name)
             job_ids.append(result["job_id"])
-            self.jobs.append(
-                {"job_id": result["job_id"], "circuit_index": i, "status": "submitted"}
-            )
+            self.jobs.append({"job_id": result["job_id"], "circuit_index": i, "status": "submitted"})
 
         return job_ids
 
@@ -316,6 +302,4 @@ if __name__ == "__main__":
         print("Failed to connect to Azure Quantum")
         print("Please set environment variables:")
         print("  AZURE_QUANTUM_RESOURCE_ID or")
-        print(
-            "  AZURE_SUBSCRIPTION_ID, AZURE_QUANTUM_RESOURCE_GROUP, AZURE_QUANTUM_WORKSPACE_NAME"
-        )
+        print("  AZURE_SUBSCRIPTION_ID, AZURE_QUANTUM_RESOURCE_GROUP, AZURE_QUANTUM_WORKSPACE_NAME")

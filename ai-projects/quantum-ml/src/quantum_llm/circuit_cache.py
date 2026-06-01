@@ -140,9 +140,7 @@ class CircuitCache:
     def stats(self) -> dict[str, Any]:
         """Return cache performance statistics."""
         total = self._stats["hits"] + self._stats["misses"]
-        hit_rate = (
-            self._stats["hits"] / total if total > 0 else 0.0
-        )
+        hit_rate = self._stats["hits"] / total if total > 0 else 0.0
         return {
             "size": len(self._cache),
             "max_size": self.max_size,

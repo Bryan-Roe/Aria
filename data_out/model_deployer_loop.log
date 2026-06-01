@@ -240,4 +240,3 @@ options:
                         Deployment strategy
   --list                List candidate models
   --status              Print registry status
-

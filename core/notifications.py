@@ -1,4 +1,5 @@
 """Notification adapter for sending structured webhook events."""
+
 from __future__ import annotations
 
 import json

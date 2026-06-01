@@ -77,9 +77,7 @@ class MetricsAggregator:
         """Add a training snapshot."""
         self.loss_history.append(snapshot.loss)
         self.perplexity_history.append(snapshot.perplexity)
-        self.quantum_time_history.append(
-            snapshot.quantum_metrics.circuit_execution_time
-        )
+        self.quantum_time_history.append(snapshot.quantum_metrics.circuit_execution_time)
         self.snapshots.append(snapshot)
 
     def get_moving_average(self, metric: str, window: Optional[int] = None) -> float:
@@ -203,15 +201,11 @@ class PerformanceMonitor:
             import torch
 
             self.torch = torch
-            self.torch_available = (
-                torch.cuda.is_available() if self.enable_gpu else False
-            )
+            self.torch_available = torch.cuda.is_available() if self.enable_gpu else False
         except ImportError:
             self.torch_available = False
 
-        logger.info(
-            f"PerformanceMonitor: CPU={self.psutil_available}, GPU={self.torch_available}"
-        )
+        logger.info(f"PerformanceMonitor: CPU={self.psutil_available}, GPU={self.torch_available}")
 
     def get_current_performance(self) -> Dict[str, float]:
         """Get current system performance metrics."""
@@ -231,9 +225,7 @@ class PerformanceMonitor:
 
         if self.torch_available:
             try:
-                metrics["gpu_memory_used_mb"] = self.torch.cuda.memory_allocated() / (
-                    1024 * 1024
-                )
+                metrics["gpu_memory_used_mb"] = self.torch.cuda.memory_allocated() / (1024 * 1024)
             except Exception:
                 pass
 
@@ -313,10 +305,7 @@ class QuantumCircuitProfiler:
 
     def get_all_stats(self) -> Dict[str, Any]:
         """Get statistics for all circuits."""
-        return {
-            circuit_id: self.get_circuit_stats(circuit_id)
-            for circuit_id in self.circuit_profiles.keys()
-        }
+        return {circuit_id: self.get_circuit_stats(circuit_id) for circuit_id in self.circuit_profiles.keys()}
 
 
 class TrainingDashboard:
@@ -385,21 +374,13 @@ class TrainingDashboard:
         logger.info("=" * 80)
         logger.info("TRAINING DASHBOARD")
         logger.info("=" * 80)
-        logger.info(
-            f"Loss (MA): {summary['moving_avg_loss']:.4f} [{summary['loss_trend']}]"
-        )
-        logger.info(
-            f"Perplexity (MA): {summary['moving_avg_perplexity']:.2f} [{summary['perplexity_trend']}]"
-        )
+        logger.info(f"Loss (MA): {summary['moving_avg_loss']:.4f} [{summary['loss_trend']}]")
+        logger.info(f"Perplexity (MA): {summary['moving_avg_perplexity']:.2f} [{summary['perplexity_trend']}]")
         logger.info(f"Quantum Time (MA): {summary['moving_avg_quantum_time']:.4f}s")
 
         if perf_report.get("status") != "no_data":
-            logger.info(
-                f"CPU: {perf_report['avg_cpu_percent']:.1f}% (max: {perf_report['max_cpu_percent']:.1f}%)"
-            )
-            logger.info(
-                f"Memory: {perf_report['avg_memory_mb']:.0f}MB (max: {perf_report['max_memory_mb']:.0f}MB)"
-            )
+            logger.info(f"CPU: {perf_report['avg_cpu_percent']:.1f}% (max: {perf_report['max_cpu_percent']:.1f}%)")
+            logger.info(f"Memory: {perf_report['avg_memory_mb']:.0f}MB (max: {perf_report['max_memory_mb']:.0f}MB)")
 
         if self.alerts:
             logger.info(
@@ -479,9 +460,7 @@ class VisualizationExporter:
 
         logger.info(f"VisualizationExporter: output_dir={output_dir}")
 
-    def export_loss_curve(
-        self, snapshots: List[TrainingSnapshot], filename: str = "loss_curve.json"
-    ):
+    def export_loss_curve(self, snapshots: List[TrainingSnapshot], filename: str = "loss_curve.json"):
         """Export loss curve data."""
         data = {
             "steps": [s.global_step for s in snapshots],
@@ -496,18 +475,12 @@ class VisualizationExporter:
         logger.info(f"Loss curve exported: {path}")
         return path
 
-    def export_quantum_metrics(
-        self, snapshots: List[TrainingSnapshot], filename: str = "quantum_metrics.json"
-    ):
+    def export_quantum_metrics(self, snapshots: List[TrainingSnapshot], filename: str = "quantum_metrics.json"):
         """Export quantum-specific metrics."""
         data = {
             "steps": [s.global_step for s in snapshots],
-            "circuit_time": [
-                s.quantum_metrics.circuit_execution_time for s in snapshots
-            ],
-            "quantum_ratio": [
-                s.quantum_metrics.quantum_classical_ratio for s in snapshots
-            ],
+            "circuit_time": [s.quantum_metrics.circuit_execution_time for s in snapshots],
+            "quantum_ratio": [s.quantum_metrics.quantum_classical_ratio for s in snapshots],
             "cache_hit_rate": [s.quantum_metrics.cache_hit_rate for s in snapshots],
         }
 

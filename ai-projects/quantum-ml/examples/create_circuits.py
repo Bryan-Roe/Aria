@@ -11,14 +11,7 @@ from qiskit import QuantumCircuit
 from qiskit.circuit import Parameter
 
 # Add parent directory to path for imports
-sys.path.append(
-    str(
-        Path(__file__).parent.parent.parent.parent
-        / "ai-projects"
-        / "quantum-ml"
-        / "src"
-    )
-)
+sys.path.append(str(Path(__file__).parent.parent.parent.parent / "ai-projects" / "quantum-ml" / "src"))
 
 print("=" * 60)
 print("QUANTUM CIRCUIT CREATION EXAMPLES")
@@ -96,9 +89,7 @@ print("Features: RY rotations + Linear entanglement")
 
 # Create parameters
 params = [
-    [Parameter(f"θ_{layer}_{i}_{gate}") for gate in ["y", "z"]]
-    for i in range(n_qubits)
-    for layer in range(n_layers)
+    [Parameter(f"θ_{layer}_{i}_{gate}") for gate in ["y", "z"]] for i in range(n_qubits) for layer in range(n_layers)
 ]
 
 for layer in range(n_layers):

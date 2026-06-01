@@ -36,9 +36,7 @@ class LocalCalcTests(unittest.TestCase):
         self.assertEqual(evaluate_arithmetic("4 / 2"), "2")
 
     def test_division_by_zero_is_reported(self) -> None:
-        self.assertEqual(
-            evaluate_arithmetic("10 / 0"), "undefined (division by zero)"
-        )
+        self.assertEqual(evaluate_arithmetic("10 / 0"), "undefined (division by zero)")
 
     def test_non_arithmetic_returns_none(self) -> None:
         self.assertIsNone(evaluate_arithmetic("what is quantum entanglement?"))

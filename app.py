@@ -53,6 +53,7 @@ try:
         try:
             # Lazy import of importlib for dynamic openai.error module loading
             import importlib
+
             openai_error = importlib.import_module("openai.error")
             OpenAIAPIConnectionError = openai_error.APIConnectionError
             OpenAIAPIError = openai_error.APIError
@@ -85,10 +86,13 @@ else:
 try:
     from shared.local_summary import is_summary_request, summarize_text
 except Exception:
+
     def is_summary_request(text: str) -> bool:  # pragma: no cover - fallback
         return False
 
-    def summarize_text(text: str, *, max_sentences: int = 3, max_chars: int = 420) -> str:  # pragma: no cover - fallback
+    def summarize_text(
+        text: str, *, max_sentences: int = 3, max_chars: int = 420
+    ) -> str:  # pragma: no cover - fallback
         return ""
 
 
@@ -102,10 +106,7 @@ DEFAULT_TIMEOUT_ENV = os.getenv("OPENAI_TIMEOUT", "60")
 MAX_PROMPT_CHARS = 10_000
 MAX_SYSTEM_PROMPT_CHARS = 4_000
 MAX_MODEL_NAME_CHARS = 128
-SYSTEM_PROMPT = (
-    "You are a concise AI coding assistant. "
-    "Return practical, code-focused responses."
-)
+SYSTEM_PROMPT = "You are a concise AI coding assistant. " "Return practical, code-focused responses."
 
 # Exit codes
 EXIT_OK = 0
@@ -122,6 +123,7 @@ logger = logging.getLogger("aria.app")
 # --------------------------------------------------------------------------- #
 # Validation & parsing helpers
 # --------------------------------------------------------------------------- #
+
 
 def _parse_timeout(value: str) -> float:
     """Parse and validate a timeout value from the environment."""
@@ -152,8 +154,7 @@ def _validate_prompt(prompt: str, *, max_chars: int = MAX_PROMPT_CHARS) -> str:
         raise ValueError("Prompt cannot be empty.")
     if len(normalized) > max_chars:
         raise ValueError(
-            f"Prompt is too long ({len(normalized)} chars). "
-            f"Maximum supported length is {max_chars} chars."
+            f"Prompt is too long ({len(normalized)} chars). " f"Maximum supported length is {max_chars} chars."
         )
     return normalized
 
@@ -182,9 +183,7 @@ def _validate_model_name(model: str) -> str:
             f"Maximum supported length is {MAX_MODEL_NAME_CHARS} chars."
         )
     if not re.fullmatch(r"[A-Za-z0-9._:-]+", normalized):
-        raise ValueError(
-            "Model contains unsupported characters. Allowed: letters, digits, '.', '_', ':', '-'"
-        )
+        raise ValueError("Model contains unsupported characters. Allowed: letters, digits, '.', '_', ':', '-'")
     return normalized
 
 
@@ -211,11 +210,9 @@ def _extract_text(resp: typing.Any) -> str:
         return output_text.strip()
 
     parts: list[str] = []
-    output: typing.Iterable[typing.Any] = getattr(
-        resp, "output", None) or []
+    output: typing.Iterable[typing.Any] = getattr(resp, "output", None) or []
     for item in output:
-        contents: typing.Iterable[typing.Any] = getattr(
-            item, "content", None) or []
+        contents: typing.Iterable[typing.Any] = getattr(item, "content", None) or []
         for content in contents:
             content_type = getattr(content, "type", "")
             if content_type not in {"output_text", "text"}:
@@ -237,6 +234,7 @@ def _extract_text(resp: typing.Any) -> str:
 # Core request
 # --------------------------------------------------------------------------- #
 
+
 def ask_ai(
     client: OpenAI,
     prompt: str,
@@ -251,8 +249,7 @@ def ask_ai(
     model = _validate_model_name(model)
     temperature = _validate_temperature(temperature)
 
-    logger.debug("Requesting completion: model=%s temperature=%s",
-                 model, temperature)
+    logger.debug("Requesting completion: model=%s temperature=%s", model, temperature)
     resp = client.responses.create(
         model=model,
         input=[
@@ -287,8 +284,7 @@ def ask_local(prompt: str, *, system_prompt: str = SYSTEM_PROMPT) -> str:
 
     if "explain" in lower or "what is" in lower:
         # Build sentences lazily — only needed in this branch.
-        sentences = [s.strip()
-                     for s in ptext.replace("\n", " ").split(".") if s.strip()]
+        sentences = [s.strip() for s in ptext.replace("\n", " ").split(".") if s.strip()]
         expl = sentences[0] if sentences else ptext
         return (
             "[Local fallback explanation]\n\n"
@@ -309,6 +305,7 @@ def ask_local(prompt: str, *, system_prompt: str = SYSTEM_PROMPT) -> str:
 # --------------------------------------------------------------------------- #
 # CLI plumbing
 # --------------------------------------------------------------------------- #
+
 
 def _read_prompt(args_prompt: list[str]) -> str:
     """Read prompt from CLI args, piped stdin, or interactive input."""
@@ -363,7 +360,8 @@ def _build_parser() -> argparse.ArgumentParser:
         help="Disable automatic fallback to local mode on OpenAI failures.",
     )
     parser.add_argument(
-        "-v", "--verbose",
+        "-v",
+        "--verbose",
         action="store_true",
         help="Enable debug logging.",
     )
@@ -381,8 +379,7 @@ def _handle_openai_error(
 ) -> int:
     """Shared handler for OpenAI API errors: fall back locally or exit with code."""
     if local_fallback:
-        print(f"{type(exc).__name__} ({exc}); using local fallback.",
-              file=sys.stderr)
+        print(f"{type(exc).__name__} ({exc}); using local fallback.", file=sys.stderr)
         print(ask_local(prompt, system_prompt=system))
         return EXIT_OK
     print(f"{err_msg}: {exc}", file=sys.stderr)
@@ -423,13 +420,11 @@ def main(argv: list[str] | None = None) -> int:
     api_key = _env_str("OPENAI_API_KEY")
     if not api_key:
         if args.provider == "openai":
-            print("Error: missing OPENAI_API_KEY environment variable.",
-                  file=sys.stderr)
+            print("Error: missing OPENAI_API_KEY environment variable.", file=sys.stderr)
             return EXIT_AUTH
         # auto mode: transparently degrade to local when allowed
         if args.local_fallback:
-            print(
-                "Warning: missing OPENAI_API_KEY; falling back to local mode.", file=sys.stderr)
+            print("Warning: missing OPENAI_API_KEY; falling back to local mode.", file=sys.stderr)
             print(ask_local(prompt, system_prompt=args.system))
             return EXIT_OK
         print("Error: missing OPENAI_API_KEY environment variable.", file=sys.stderr)
@@ -449,8 +444,7 @@ def main(argv: list[str] | None = None) -> int:
     # preference before attempting to construct the client.
     if OpenAI is None:
         if args.local_fallback:
-            print(
-                "Warning: 'openai' package not installed; falling back to local mode.", file=sys.stderr)
+            print("Warning: 'openai' package not installed; falling back to local mode.", file=sys.stderr)
             print(ask_local(prompt, system_prompt=args.system))
             return EXIT_OK
         print("Error: the 'openai' package is not installed. Install it with: pip install openai", file=sys.stderr)
@@ -467,23 +461,39 @@ def main(argv: list[str] | None = None) -> int:
         )
     except OpenAIAuthenticationError as exc:
         return _handle_openai_error(
-            exc, "Authentication failed", EXIT_AUTH,
-            local_fallback=args.local_fallback, prompt=prompt, system=args.system,
+            exc,
+            "Authentication failed",
+            EXIT_AUTH,
+            local_fallback=args.local_fallback,
+            prompt=prompt,
+            system=args.system,
         )
     except OpenAIRateLimitError as exc:
         return _handle_openai_error(
-            exc, "Rate limit exceeded", EXIT_RATE_LIMIT,
-            local_fallback=args.local_fallback, prompt=prompt, system=args.system,
+            exc,
+            "Rate limit exceeded",
+            EXIT_RATE_LIMIT,
+            local_fallback=args.local_fallback,
+            prompt=prompt,
+            system=args.system,
         )
     except OpenAIAPIConnectionError as exc:
         return _handle_openai_error(
-            exc, "Network error reaching OpenAI", EXIT_NETWORK,
-            local_fallback=args.local_fallback, prompt=prompt, system=args.system,
+            exc,
+            "Network error reaching OpenAI",
+            EXIT_NETWORK,
+            local_fallback=args.local_fallback,
+            prompt=prompt,
+            system=args.system,
         )
     except OpenAIAPIError as exc:
         return _handle_openai_error(
-            exc, "OpenAI API error", EXIT_API,
-            local_fallback=args.local_fallback, prompt=prompt, system=args.system,
+            exc,
+            "OpenAI API error",
+            EXIT_API,
+            local_fallback=args.local_fallback,
+            prompt=prompt,
+            system=args.system,
         )
     except ValueError as exc:
         print(f"Invalid input: {exc}", file=sys.stderr)

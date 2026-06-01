@@ -36,9 +36,7 @@ from pathlib import Path
 try:
     from sklearn.decomposition import PCA
     from sklearn.impute import SimpleImputer
-    from sklearn.metrics import (confusion_matrix,
-                                 precision_recall_fscore_support,
-                                 roc_auc_score)
+    from sklearn.metrics import confusion_matrix, precision_recall_fscore_support, roc_auc_score
     from sklearn.model_selection import train_test_split
     from sklearn.preprocessing import StandardScaler
 except Exception:  # pragma: no cover
@@ -85,9 +83,7 @@ def _prune_old_sessions() -> None:
     stale = [
         sid
         for sid, s in training_sessions.items()
-        if s.status in ("completed", "error", "stopped")
-        and s.end_time is not None
-        and s.end_time < cutoff
+        if s.status in ("completed", "error", "stopped") and s.end_time is not None and s.end_time < cutoff
     ]
     for sid in stale:
         del training_sessions[sid]
@@ -154,11 +150,7 @@ class TrainingSession:
             "optimizer": self.optimizer_type,
             "epochs_without_improvement": self.epochs_without_improvement,
             "metrics": self.metrics_history,
-            "progress_percent": (
-                (self.current_epoch / self.total_epochs * 100)
-                if self.total_epochs > 0
-                else 0
-            ),
+            "progress_percent": ((self.current_epoch / self.total_epochs * 100) if self.total_epochs > 0 else 0),
         }
 
 
@@ -206,9 +198,7 @@ def load_dataset(name: str):
 def preprocess_data(X, y, n_qubits):
     """Preprocess data for quantum circuit"""
     # Train/val split
-    X_train, X_val, y_train, y_val = train_test_split(
-        X, y, test_size=0.2, random_state=42, stratify=y
-    )
+    X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
 
     # Standardize
     scaler = StandardScaler()
@@ -236,9 +226,7 @@ def create_quantum_circuit(n_qubits, n_layers):
     @qml.qnode(dev, interface="autograd")
     def circuit(inputs, weights):
         # Amplitude embedding
-        qml.AmplitudeEmbedding(
-            features=inputs, wires=range(n_qubits), pad_with=0.0, normalize=True
-        )
+        qml.AmplitudeEmbedding(features=inputs, wires=range(n_qubits), pad_with=0.0, normalize=True)
 
         # Variational layers
         for layer in range(n_layers):
@@ -348,9 +336,7 @@ class AdamOptimizer:
         v_hat = self.v / (1 - self.beta2**self.t)
 
         # Update weights
-        weights_new = weights - self.learning_rate * m_hat / (
-            np.sqrt(v_hat) + self.epsilon
-        )
+        weights_new = weights - self.learning_rate * m_hat / (np.sqrt(v_hat) + self.epsilon)
 
         return weights_new
 
@@ -553,10 +539,7 @@ def train_model(session: TrainingSession):
 
             # Checkpoint saving
             if epoch % checkpoint_every == 0:
-                checkpoint_path = (
-                    checkpoint_dir
-                    / f"checkpoint_{session.session_id}_epoch_{epoch}.npz"
-                )
+                checkpoint_path = checkpoint_dir / f"checkpoint_{session.session_id}_epoch_{epoch}.npz"
                 np.savez(
                     checkpoint_path,
                     weights=weights,
@@ -580,9 +563,7 @@ def train_model(session: TrainingSession):
                 session.epochs_per_second = 1.0 / epoch_time
                 remaining_epochs = (deadline - time.time()) * session.epochs_per_second
                 session.eta_seconds = (
-                    remaining_epochs / session.epochs_per_second
-                    if session.epochs_per_second > 0
-                    else None
+                    remaining_epochs / session.epochs_per_second if session.epochs_per_second > 0 else None
                 )
             session.last_epoch_time = epoch_time
 
@@ -590,16 +571,11 @@ def train_model(session: TrainingSession):
             session.metrics_history["train_loss"].append(float(train_loss))
             session.metrics_history["val_loss"].append(float(val_loss))
             session.metrics_history["val_accuracy"].append(float(val_acc))
-            session.metrics_history["timestamps"].append(
-                time.time() - session.start_time
-            )
+            session.metrics_history["timestamps"].append(time.time() - session.start_time)
 
             # Keep only recent history for memory efficiency
             if len(session.metrics_history["epochs"]) > 1000:
-                session.metrics_history = {
-                    key: values[-1000:]
-                    for key, values in session.metrics_history.items()
-                }
+                session.metrics_history = {key: values[-1000:] for key, values in session.metrics_history.items()}
 
             logger.info(
                 f"Epoch {epoch}: Loss={train_loss:.4f}, Val Acc={val_acc:.4f}, Val Loss={val_loss:.4f}, Speed={session.epochs_per_second:.2f} ep/s, LR={session.learning_rate:.6f}, Grad Norm={session.gradient_norm:.6f}"
@@ -608,9 +584,7 @@ def train_model(session: TrainingSession):
         # Use best weights for final model
         weights = best_weights
 
-        session.status = (
-            "completed" if session.status != "early_stopped" else "early_stopped"
-        )
+        session.status = "completed" if session.status != "early_stopped" else "early_stopped"
         session.end_time = time.time()
         session.total_epochs = epoch
 
@@ -718,24 +692,16 @@ def start_training():
         _prune_old_sessions()
 
         # Reject if too many sessions are already active.
-        active = sum(
-            1
-            for s in training_sessions.values()
-            if s.status not in ("completed", "error", "stopped")
-        )
+        active = sum(1 for s in training_sessions.values() if s.status not in ("completed", "error", "stopped"))
         if active >= MAX_ACTIVE_SESSIONS:
             return (
-                jsonify(
-                    {"error": "Too many active training sessions. Try again later."}
-                ),
+                jsonify({"error": "Too many active training sessions. Try again later."}),
                 429,
             )
 
         if len(training_sessions) >= MAX_TOTAL_SESSIONS:
             return (
-                jsonify(
-                    {"error": "Session limit reached. Too many sessions in memory."}
-                ),
+                jsonify({"error": "Session limit reached. Too many sessions in memory."}),
                 429,
             )
 
@@ -886,16 +852,12 @@ def export_metrics(session_id):
         metrics = session.metrics_history
         for i in range(len(metrics["epochs"])):
             output.write(f"{metrics['epochs'][i]},{metrics['train_loss'][i]:.6f},")
-            output.write(
-                f"{metrics['val_loss'][i]:.6f},{metrics['val_accuracy'][i]:.6f},"
-            )
+            output.write(f"{metrics['val_loss'][i]:.6f},{metrics['val_accuracy'][i]:.6f},")
             output.write(f"{metrics['timestamps'][i]:.2f}\n")
 
         # Create response
         response = make_response(output.getvalue())
-        response.headers["Content-Disposition"] = (
-            f"attachment; filename=metrics_{session_id}.csv"
-        )
+        response.headers["Content-Disposition"] = f"attachment; filename=metrics_{session_id}.csv"
         response.headers["Content-Type"] = "text/csv"
         return response
 
@@ -927,9 +889,7 @@ def compare_sessions():
                                 else None
                             ),
                             "val_loss": (
-                                session.metrics_history["val_loss"][-1]
-                                if session.metrics_history["val_loss"]
-                                else None
+                                session.metrics_history["val_loss"][-1] if session.metrics_history["val_loss"] else None
                             ),
                             "val_accuracy": (
                                 session.metrics_history["val_accuracy"][-1]
@@ -1065,11 +1025,7 @@ def load_checkpoint():
         if hasattr(resolved_path, "is_relative_to"):
             if not resolved_path.is_relative_to(allowed_dir):
                 return (
-                    jsonify(
-                        {
-                            "error": "Invalid checkpoint path: must be within checkpoints directory"
-                        }
-                    ),
+                    jsonify({"error": "Invalid checkpoint path: must be within checkpoints directory"}),
                     403,
                 )
         else:
@@ -1077,11 +1033,7 @@ def load_checkpoint():
                 resolved_path.relative_to(allowed_dir)
             except ValueError:
                 return (
-                    jsonify(
-                        {
-                            "error": "Invalid checkpoint path: must be within checkpoints directory"
-                        }
-                    ),
+                    jsonify({"error": "Invalid checkpoint path: must be within checkpoints directory"}),
                     403,
                 )
 
@@ -1094,22 +1046,14 @@ def load_checkpoint():
         try:
             config_value = checkpoint["config"]
             if isinstance(config_value, np.ndarray):
-                config = (
-                    config_value.item()
-                    if config_value.ndim == 0
-                    else config_value.tolist()
-                )
+                config = config_value.item() if config_value.ndim == 0 else config_value.tolist()
             elif isinstance(config_value, np.generic):
                 config = config_value.item()
             else:
                 config = config_value
         except ValueError:
             return (
-                jsonify(
-                    {
-                        "error": "Unsupported checkpoint format; re-save checkpoint in safe format"
-                    }
-                ),
+                jsonify({"error": "Unsupported checkpoint format; re-save checkpoint in safe format"}),
                 422,
             )
 
@@ -1130,21 +1074,11 @@ def get_global_stats():
     """Get global statistics across all sessions"""
     with training_lock:
         total_sessions = len(training_sessions)
-        active_sessions = sum(
-            1 for s in training_sessions.values() if s.status == "training"
-        )
-        completed_sessions = sum(
-            1 for s in training_sessions.values() if s.status == "completed"
-        )
+        active_sessions = sum(1 for s in training_sessions.values() if s.status == "training")
+        completed_sessions = sum(1 for s in training_sessions.values() if s.status == "completed")
         total_epochs = sum(s.current_epoch for s in training_sessions.values())
         avg_accuracy = (
-            np.mean(
-                [
-                    s.best_val_acc
-                    for s in training_sessions.values()
-                    if s.best_val_acc > 0
-                ]
-            )
+            np.mean([s.best_val_acc for s in training_sessions.values() if s.best_val_acc > 0])
             if training_sessions
             else 0
         )
@@ -1168,9 +1102,7 @@ def health_check():
         {
             "status": "healthy",
             "timestamp": time.time(),
-            "active_sessions": sum(
-                1 for s in training_sessions.values() if s.status == "training"
-            ),
+            "active_sessions": sum(1 for s in training_sessions.values() if s.status == "training"),
         }
     )
 

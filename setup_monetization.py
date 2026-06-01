@@ -107,8 +107,7 @@ def test_subscription_manager():
     try:
         # Import the subscription manager
         sys.path.insert(0, "shared")
-        from subscription_manager import (SubscriptionTier,
-                                          get_subscription_manager)
+        from subscription_manager import SubscriptionTier, get_subscription_manager
 
         # Create manager instance
         manager = get_subscription_manager()
@@ -118,16 +117,12 @@ def test_subscription_manager():
         manager.upgrade_subscription("test_user_1", SubscriptionTier.PRO, 30, "test")
         print_success("  Pro subscription created")
 
-        manager.upgrade_subscription(
-            "test_user_2", SubscriptionTier.ENTERPRISE, 30, "test"
-        )
+        manager.upgrade_subscription("test_user_2", SubscriptionTier.ENTERPRISE, 30, "test")
         print_success("  Enterprise subscription created")
 
         # Get revenue stats
         stats = manager.get_revenue_stats()
-        print_success(
-            f"  Revenue stats retrieved: ${stats['monthly_recurring_revenue']} MRR"
-        )
+        print_success(f"  Revenue stats retrieved: ${stats['monthly_recurring_revenue']} MRR")
 
         return True
     except Exception as e:
@@ -141,23 +136,18 @@ def generate_demo_data():
 
     try:
         sys.path.insert(0, "shared")
-        from subscription_manager import (SubscriptionTier,
-                                          get_subscription_manager)
+        from subscription_manager import SubscriptionTier, get_subscription_manager
 
         manager = get_subscription_manager()
 
         # Create 5 Pro subscribers
         for i in range(5):
-            manager.upgrade_subscription(
-                f"pro_user_{i+1}", SubscriptionTier.PRO, 30, "demo"
-            )
+            manager.upgrade_subscription(f"pro_user_{i+1}", SubscriptionTier.PRO, 30, "demo")
         print_success("  Created 5 Pro subscribers")
 
         # Create 10 Enterprise subscribers
         for i in range(10):
-            manager.upgrade_subscription(
-                f"ent_user_{i+1}", SubscriptionTier.ENTERPRISE, 30, "demo"
-            )
+            manager.upgrade_subscription(f"ent_user_{i+1}", SubscriptionTier.ENTERPRISE, 30, "demo")
         print_success("  Created 10 Enterprise subscribers")
 
         # Get final stats
@@ -166,9 +156,7 @@ def generate_demo_data():
         print_success(f"  Total ARR: ${stats['annual_recurring_revenue']}")
 
         if stats["monthly_recurring_revenue"] >= 2000:
-            print_success(
-                f"  🎉 TARGET ACHIEVED! ({stats['monthly_recurring_revenue']/2000*100:.1f}% of $2,000 goal)"
-            )
+            print_success(f"  🎉 TARGET ACHIEVED! ({stats['monthly_recurring_revenue']/2000*100:.1f}% of $2,000 goal)")
 
         return True
     except Exception as e:
@@ -284,9 +272,7 @@ def main():
     print_next_steps()
 
     # Step 7: Offer to start server
-    start_server = input(
-        f"{Colors.BLUE}Start test server now? (y/n): {Colors.END}"
-    ).lower()
+    start_server = input(f"{Colors.BLUE}Start test server now? (y/n): {Colors.END}").lower()
     if start_server == "y":
         start_test_server()
 

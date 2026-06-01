@@ -267,9 +267,7 @@ class LLMMakerHandler(BaseHTTPRequestHandler):
                     }
                 )
             else:
-                self.send_json_response(
-                    {"success": False, "error": f"Tool '{tool_id}' not found"}, 404
-                )
+                self.send_json_response({"success": False, "error": f"Tool '{tool_id}' not found"}, 404)
 
         except Exception as e:
             logger.error(f"Error getting tool: {e}", exc_info=True)
@@ -282,9 +280,7 @@ class LLMMakerHandler(BaseHTTPRequestHandler):
             arguments = data.get("arguments", {})
 
             if not tool_id:
-                self.send_json_response(
-                    {"success": False, "error": "Missing tool_id"}, 400
-                )
+                self.send_json_response({"success": False, "error": "Missing tool_id"}, 400)
                 return
 
             # Get the tool
@@ -293,9 +289,7 @@ class LLMMakerHandler(BaseHTTPRequestHandler):
                 tool = registry.get_by_name(tool_id)
 
             if not tool:
-                self.send_json_response(
-                    {"success": False, "error": f"Tool '{tool_id}' not found"}, 404
-                )
+                self.send_json_response({"success": False, "error": f"Tool '{tool_id}' not found"}, 404)
                 return
 
             logger.info(f"Executing tool: {tool.name}")
@@ -319,9 +313,7 @@ class LLMMakerHandler(BaseHTTPRequestHandler):
             tool_id = data.get("tool_id")
 
             if not tool_id:
-                self.send_json_response(
-                    {"success": False, "error": "Missing tool_id"}, 400
-                )
+                self.send_json_response({"success": False, "error": "Missing tool_id"}, 400)
                 return
 
             tool = registry.get(tool_id)
@@ -329,9 +321,7 @@ class LLMMakerHandler(BaseHTTPRequestHandler):
                 tool = registry.get_by_name(tool_id)
 
             if not tool:
-                self.send_json_response(
-                    {"success": False, "error": f"Tool '{tool_id}' not found"}, 404
-                )
+                self.send_json_response({"success": False, "error": f"Tool '{tool_id}' not found"}, 404)
                 return
 
             is_valid, errors = validator.validate(tool.code)
@@ -355,13 +345,9 @@ class LLMMakerHandler(BaseHTTPRequestHandler):
             success = registry.delete(tool_id)
 
             if success:
-                self.send_json_response(
-                    {"success": True, "message": f"Tool '{tool_id}' deleted"}
-                )
+                self.send_json_response({"success": True, "message": f"Tool '{tool_id}' deleted"})
             else:
-                self.send_json_response(
-                    {"success": False, "error": f"Tool '{tool_id}' not found"}, 404
-                )
+                self.send_json_response({"success": False, "error": f"Tool '{tool_id}' not found"}, 404)
 
         except Exception as e:
             logger.error(f"Error deleting tool: {e}", exc_info=True)
@@ -474,9 +460,7 @@ class LLMMakerHandler(BaseHTTPRequestHandler):
 
                 self.send_json_response({"success": True, "website": website})
             else:
-                self.send_json_response(
-                    {"success": False, "error": f"Website '{name}' not found"}, 404
-                )
+                self.send_json_response({"success": False, "error": f"Website '{name}' not found"}, 404)
 
         except Exception as e:
             logger.error(f"Error getting website: {e}", exc_info=True)

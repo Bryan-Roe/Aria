@@ -97,6 +97,7 @@ class AIProjectsRegistry:
         cache_key = "chat_cli"
         if cache_key not in cls._cache:
             import sys
+
             # Ensure project path exists; if missing, this is a hard failure for tests.
             try:
                 chat_cli_src = cls._get_ai_project_path("chat-cli", "src")
@@ -170,8 +171,10 @@ class AIProjectsRegistry:
                                     break
                         reply = f"Echo (fallback): {last}" if last else "Echo (fallback): Hello"
                         if stream:
+
                             def _gen():
                                 yield reply
+
                             return _gen()
                         return reply
 

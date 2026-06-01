@@ -136,8 +136,7 @@ def discover_datasets():
             return
         for category_dir in root.iterdir():
             if category_dir.is_dir():
-                files = list(category_dir.glob("**/train.json")) + \
-                    list(category_dir.glob("**/train.jsonl"))
+                files = list(category_dir.glob("**/train.json")) + list(category_dir.glob("**/train.jsonl"))
                 if files:
                     key = f"{prefix}{category_dir.name}" if prefix else category_dir.name
                     inventory[key] = {
@@ -183,8 +182,7 @@ def simulate_training_cycle(cycle_num, accuracy_baseline=0.65, plateau_cycles=0)
     cap = _accuracy_cap(n_cats)
 
     # Growth phase: standard sigmoid-like ramp toward cap
-    cycle_accuracy = accuracy_baseline + \
-        (cycle_num * 0.02) + (0.05 * (1 - (cycle_num * 0.1)))
+    cycle_accuracy = accuracy_baseline + (cycle_num * 0.02) + (0.05 * (1 - (cycle_num * 0.1)))
     cycle_accuracy = min(cycle_accuracy, cap)
 
     # Post-plateau: add realistic noise so it isn't frozen
@@ -220,8 +218,7 @@ def promote_model(status: dict) -> None:
     out = DEPLOYED_ROOT / f"chat_model_v{version}.json"
     with open(out, "w") as f:
         json.dump(payload, f, indent=2)
-    logger.info(
-        f"🚀 Model v{version} promoted → {out} (accuracy={accuracy:.4f})")
+    logger.info(f"🚀 Model v{version} promoted → {out} (accuracy={accuracy:.4f})")
 
 
 def run_autonomously(max_cycles=3, cycle_interval_sec=10):
@@ -247,8 +244,7 @@ def run_autonomously(max_cycles=3, cycle_interval_sec=10):
     if infinite_mode:
         logger.info("Starting continuous training mode (infinite cycles)...")
     else:
-        logger.info(
-            f"Starting continuous training mode (max {max_cycles} cycles)...")
+        logger.info(f"Starting continuous training mode (max {max_cycles} cycles)...")
     logger.info(f"Cycle interval: {cycle_interval_sec}s")
 
     # Plateau tracking (persisted across restart via status)
@@ -273,8 +269,7 @@ def run_autonomously(max_cycles=3, cycle_interval_sec=10):
             save_heartbeat("training", current_cycle=cycle_num + 1)
 
             # Run training cycle (pass plateau_cycles for noise injection)
-            result = simulate_training_cycle(
-                cycle_num + 1, plateau_cycles=status["plateau_cycles"])
+            result = simulate_training_cycle(cycle_num + 1, plateau_cycles=status["plateau_cycles"])
 
             # Update status
             status["cycles_completed"] = cycle_num + 1
@@ -296,8 +291,7 @@ def run_autonomously(max_cycles=3, cycle_interval_sec=10):
 
             # Auto-promotion: stable at peak for N cycles → deploy
             if status["plateau_cycles"] > 0 and status["plateau_cycles"] % PLATEAU_PROMOTION_CYCLES == 0:
-                logger.info(
-                    f"📦 Plateau reached {status['plateau_cycles']} stable cycles — promoting model...")
+                logger.info(f"📦 Plateau reached {status['plateau_cycles']} stable cycles — promoting model...")
                 promote_model(status)
                 promotion_record = {
                     "version": len(status["promotions"]) + 1,
@@ -317,8 +311,7 @@ def run_autonomously(max_cycles=3, cycle_interval_sec=10):
             if not infinite_mode and end_cycle is not None and cycle_num >= end_cycle:
                 status["next_cycle_eta"] = None
             else:
-                status["next_cycle_eta"] = (
-                    datetime.now() + timedelta(seconds=cycle_interval_sec)).isoformat()
+                status["next_cycle_eta"] = (datetime.now() + timedelta(seconds=cycle_interval_sec)).isoformat()
             save_status(status)
             save_heartbeat(
                 "running",
@@ -330,8 +323,7 @@ def run_autonomously(max_cycles=3, cycle_interval_sec=10):
             if not infinite_mode and end_cycle is not None and cycle_num >= end_cycle:
                 break
 
-            logger.info(
-                f"Cycle complete. Next cycle in {cycle_interval_sec}s...")
+            logger.info(f"Cycle complete. Next cycle in {cycle_interval_sec}s...")
             time.sleep(cycle_interval_sec)
 
         # Final summary (bounded mode only)
@@ -341,21 +333,18 @@ def run_autonomously(max_cycles=3, cycle_interval_sec=10):
             logger.info(f"{'='*70}")
             logger.info(f"Cycles completed: {status['cycles_completed']}")
             logger.info(f"Best accuracy: {status['best_accuracy']:.4f}")
-            logger.info(
-                f"Datasets discovered: {len(status['dataset_inventory'])}")
+            logger.info(f"Datasets discovered: {len(status['dataset_inventory'])}")
 
             status["status"] = "completed"
             status["current_cycle"] = status["cycles_completed"]
             status["next_cycle_eta"] = None
             save_status(status)
-            save_heartbeat(
-                "completed", current_cycle=status["cycles_completed"])
+            save_heartbeat("completed", current_cycle=status["cycles_completed"])
 
             # Print performance history
             logger.info("\n📊 Performance History:")
             for h in status["performance_history"][-20:]:
-                logger.info(
-                    f"  Cycle {h['cycle']}: accuracy={h['accuracy']:.4f}, samples={h['samples_processed']}")
+                logger.info(f"  Cycle {h['cycle']}: accuracy={h['accuracy']:.4f}, samples={h['samples_processed']}")
 
             return 0
 
@@ -366,8 +355,7 @@ def run_autonomously(max_cycles=3, cycle_interval_sec=10):
         status["status"] = "paused"
         status["next_cycle_eta"] = None
         save_status(status)
-        save_heartbeat("paused", current_cycle=status.get(
-            "cycles_completed", 0))
+        save_heartbeat("paused", current_cycle=status.get("cycles_completed", 0))
         return 130
     except Exception as e:
         logger.error(f"❌ Training failed: {e}", exc_info=True)
@@ -375,22 +363,17 @@ def run_autonomously(max_cycles=3, cycle_interval_sec=10):
         status["error"] = str(e)
         status["next_cycle_eta"] = None
         save_status(status)
-        save_heartbeat("error", current_cycle=status.get(
-            "cycles_completed", 0), error=str(e))
+        save_heartbeat("error", current_cycle=status.get("cycles_completed", 0), error=str(e))
         return 1
 
 
 if __name__ == "__main__":
     import argparse
 
-    parser = argparse.ArgumentParser(
-        description="Autonomous training orchestrator")
-    parser.add_argument("--cycles", type=int, default=3,
-                        help="Number of training cycles (0 = infinite)")
-    parser.add_argument("--interval", type=int, default=10,
-                        help="Seconds between cycles")
-    parser.add_argument("--status", action="store_true",
-                        help="Show current status and exit")
+    parser = argparse.ArgumentParser(description="Autonomous training orchestrator")
+    parser.add_argument("--cycles", type=int, default=3, help="Number of training cycles (0 = infinite)")
+    parser.add_argument("--interval", type=int, default=10, help="Seconds between cycles")
+    parser.add_argument("--status", action="store_true", help="Show current status and exit")
     parser.add_argument(
         "--compact-status",
         action="store_true",
@@ -415,5 +398,4 @@ if __name__ == "__main__":
         print(json.dumps(status, indent=2))
         sys.exit(0)
 
-    sys.exit(run_autonomously(max_cycles=args.cycles,
-             cycle_interval_sec=args.interval))
+    sys.exit(run_autonomously(max_cycles=args.cycles, cycle_interval_sec=args.interval))

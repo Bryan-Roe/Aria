@@ -1,4 +1,5 @@
 """SQLite backend for persistent MemoryStore events."""
+
 from __future__ import annotations
 
 import json
@@ -42,9 +43,7 @@ class SQLiteMemoryBackend:
         self._conn.commit()
 
     def load_all(self) -> List[Event]:
-        cursor = self._conn.execute(
-            "SELECT id, timestamp, epoch, type, data FROM events ORDER BY epoch ASC"
-        )
+        cursor = self._conn.execute("SELECT id, timestamp, epoch, type, data FROM events ORDER BY epoch ASC")
         events: List[Event] = []
         for row in cursor.fetchall():
             events.append(

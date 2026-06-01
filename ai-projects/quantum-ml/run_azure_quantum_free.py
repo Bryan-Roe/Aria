@@ -44,9 +44,7 @@ def main():
     print("Submitting to rigetti.sim.qvm...")
 
     try:
-        job_bell = azure.submit_circuit(
-            qc_bell, backend_name="rigetti.sim.qvm", shots=1000
-        )
+        job_bell = azure.submit_circuit(qc_bell, backend_name="rigetti.sim.qvm", shots=1000)
         print(f"✅ Bell State job submitted: {job_bell}")
         print("⏳ Job is running on Azure Quantum servers...")
 
@@ -75,9 +73,7 @@ def main():
     print("Submitting to rigetti.sim.qvm...")
 
     try:
-        job_super = azure.submit_circuit(
-            qc_super, backend_name="rigetti.sim.qvm", shots=1000
-        )
+        job_super = azure.submit_circuit(qc_super, backend_name="rigetti.sim.qvm", shots=1000)
         print(f"✅ Superposition job submitted: {job_super}")
 
         result_super = job_super.result()
@@ -104,9 +100,7 @@ def main():
     print("Submitting to rigetti.sim.qvm...")
 
     try:
-        job_ghz = azure.submit_circuit(
-            qc_ghz, backend_name="rigetti.sim.qvm", shots=1000
-        )
+        job_ghz = azure.submit_circuit(qc_ghz, backend_name="rigetti.sim.qvm", shots=1000)
         print(f"✅ GHZ State job submitted: {job_ghz}")
 
         result_ghz = job_ghz.result()
@@ -134,9 +128,7 @@ def main():
     print("Submitting to rigetti.sim.qvm...")
 
     try:
-        job_int = azure.submit_circuit(
-            qc_interference, backend_name="rigetti.sim.qvm", shots=1000
-        )
+        job_int = azure.submit_circuit(qc_interference, backend_name="rigetti.sim.qvm", shots=1000)
         print(f"✅ Interference job submitted: {job_int}")
 
         result_int = job_int.result()

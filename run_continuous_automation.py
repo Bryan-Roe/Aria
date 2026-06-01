@@ -15,7 +15,12 @@ from typing import Optional
 
 # Use .venv environment if available
 workspace_root = Path(__file__).parent
-venv_python = workspace_root / ".venv" / ("Scripts" if sys.platform == "win32" else "bin") / ("python.exe" if sys.platform == "win32" else "python")
+venv_python = (
+    workspace_root
+    / ".venv"
+    / ("Scripts" if sys.platform == "win32" else "bin")
+    / ("python.exe" if sys.platform == "win32" else "python")
+)
 
 if venv_python.exists():
     # Prepend venv bin to PATH so subprocess uses venv Python
@@ -58,13 +63,9 @@ def get_marker(name: str) -> str:
 
 def print_section(title: str) -> None:
     """Print a section header."""
-    print(
-        f"\n{BOLD}{BLUE}═══════════════════════════════════════════════════════════{RESET}"
-    )
+    print(f"\n{BOLD}{BLUE}═══════════════════════════════════════════════════════════{RESET}")
     print(f"{BOLD}{BLUE}{title}{RESET}")
-    print(
-        f"{BOLD}{BLUE}═══════════════════════════════════════════════════════════{RESET}"
-    )
+    print(f"{BOLD}{BLUE}═══════════════════════════════════════════════════════════{RESET}")
 
 
 def print_ok(msg: str) -> None:
@@ -141,8 +142,8 @@ class ContinuousAutomationDaemon:
                 cwd=str(self.workspace_root),
                 capture_output=True,
                 text=True,
-                encoding='utf-8',
-                errors='replace',
+                encoding="utf-8",
+                errors="replace",
                 timeout=600,  # 10 minute timeout
             )
 
@@ -188,9 +189,7 @@ class ContinuousAutomationDaemon:
 
         try:
             while self.running:
-                print_section(
-                    f"Automation Cycle #{self.run_count + 1} at {datetime.now().strftime('%H:%M:%S')}"
-                )
+                print_section(f"Automation Cycle #{self.run_count + 1} at {datetime.now().strftime('%H:%M:%S')}")
 
                 self.run_automation()
 
@@ -244,9 +243,7 @@ def main() -> None:
 
     args = parser.parse_args()
 
-    daemon = ContinuousAutomationDaemon(
-        workspace_root=args.workspace, interval_minutes=args.interval
-    )
+    daemon = ContinuousAutomationDaemon(workspace_root=args.workspace, interval_minutes=args.interval)
     daemon.run()
 
 

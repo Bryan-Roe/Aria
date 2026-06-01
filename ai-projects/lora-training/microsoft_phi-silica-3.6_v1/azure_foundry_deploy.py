@@ -21,14 +21,16 @@ from pathlib import Path
 try:
     from azure.ai.ml import MLClient
     from azure.ai.ml.constants import AssetTypes
-    from azure.ai.ml.entities import (CodeConfiguration, Environment,
-                                      ManagedOnlineDeployment,
-                                      ManagedOnlineEndpoint, Model)
+    from azure.ai.ml.entities import (
+        CodeConfiguration,
+        Environment,
+        ManagedOnlineDeployment,
+        ManagedOnlineEndpoint,
+        Model,
+    )
     from azure.identity import AzureCliCredential, DefaultAzureCredential
 except Exception:
-    raise SystemExit(
-        "Install Azure ML SDK: pip install azure-ai-ml azure-identity"
-    ) from None
+    raise SystemExit("Install Azure ML SDK: pip install azure-ai-ml azure-identity") from None
 
 
 def get_credential():
@@ -127,9 +129,7 @@ def main():
         name=args.deployment_name,
         endpoint_name=endpoint_name,
         model=f"azureml:{model.name}:{model.version}",
-        code_configuration=CodeConfiguration(
-            code=str(code_dir), scoring_script="score_foundry.py"
-        ),
+        code_configuration=CodeConfiguration(code=str(code_dir), scoring_script="score_foundry.py"),
         environment=f"{env.name}:{env.version}",
         instance_type=args.instance_type,
         instance_count=args.instance_count,

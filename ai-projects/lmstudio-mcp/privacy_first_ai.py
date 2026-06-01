@@ -125,6 +125,7 @@ class PrivacyAuditLog:
             return True
 
         from datetime import timedelta
+
         cutoff = datetime.now() - timedelta(hours=hours_lookback)
 
         recent_entries = []
@@ -137,9 +138,7 @@ class PrivacyAuditLog:
 
         # Check no cloud actions
         cloud_actions = [
-            e for e in recent_entries
-            if "cloud" in e.get("agent", "").lower()
-            or "api" in e.get("action", "").lower()
+            e for e in recent_entries if "cloud" in e.get("agent", "").lower() or "api" in e.get("action", "").lower()
         ]
 
         logger.info(f"Privacy audit: {len(recent_entries)} actions, {len(cloud_actions)} cloud")
@@ -222,7 +221,7 @@ class LocalOnlyProcessor:
                     {
                         "role": "system",
                         "content": "You process sensitive information with maximum privacy. "
-                                   "Never log, store, or expose the data content.",
+                        "Never log, store, or expose the data content.",
                     },
                     {
                         "role": "user",
@@ -340,7 +339,7 @@ async def example_healthcare_analysis():
     Scenario: A hospital wants to analyze patient data locally without
     using cloud APIs, maintaining HIPAA compliance.
     """
-    print("\n" + "="*70)
+    print("\n" + "=" * 70)
     print("Example 1: Healthcare Data Analysis (HIPAA-Compliant)")
     print("=" * 70 + "\n")
 
@@ -383,13 +382,12 @@ async def example_financial_analysis():
     Scenario: A financial advisor wants to analyze client portfolios
     locally without exposing to third parties.
     """
-    print("="*70)
+    print("=" * 70)
     print("Example 2: Financial Data Analysis (PCI-DSS Compliant)")
-    print("="*70 + "\n")
+    print("=" * 70 + "\n")
 
     financial_data = PrivateData(
-        content="Portfolio: $500K in stocks, $200K bonds, Cash: $50K, "
-                "Liabilities: Mortgage $300K at 3.5%",
+        content="Portfolio: $500K in stocks, $200K bonds, Cash: $50K, " "Liabilities: Mortgage $300K at 3.5%",
         classification=DataClassification.FINANCIAL,
         privacy_level=PrivacyLevel.RESTRICTED,
         source="financial_advisor",
@@ -421,9 +419,9 @@ async def example_proprietary_code_review():
     Scenario: A company wants to analyze internal code without exposing
     proprietary algorithms to external services.
     """
-    print("="*70)
+    print("=" * 70)
     print("Example 3: Proprietary Code Review (Trade Secret Compliant)")
-    print("="*70 + "\n")
+    print("=" * 70 + "\n")
 
     code_data = PrivateData(
         content="""
@@ -462,9 +460,9 @@ async def example_compliance_monitoring():
 
     Shows audit trail and verification of local-only processing.
     """
-    print("="*70)
+    print("=" * 70)
     print("Example 4: Compliance Monitoring & Audit Trail")
-    print("="*70 + "\n")
+    print("=" * 70 + "\n")
 
     processor = LocalOnlyProcessor()
 
@@ -500,9 +498,9 @@ async def example_configuration():
     """
     Example: Configuration for privacy-first deployment.
     """
-    print("="*70)
+    print("=" * 70)
     print("Example 5: Privacy Configuration")
-    print("="*70 + "\n")
+    print("=" * 70 + "\n")
 
     config = {
         "privacy_mode": "strict",
@@ -537,9 +535,9 @@ async def example_configuration():
 
 async def main():
     """Run all privacy examples."""
-    print("\n" + "="*70)
+    print("\n" + "=" * 70)
     print("Privacy-First AI Reasoning with LM Studio + AGI Provider")
-    print("="*70)
+    print("=" * 70)
 
     await example_healthcare_analysis()
     await example_financial_analysis()
@@ -547,9 +545,9 @@ async def main():
     await example_compliance_monitoring()
     await example_configuration()
 
-    print("="*70)
+    print("=" * 70)
     print("Privacy Examples Complete")
-    print("="*70 + "\n")
+    print("=" * 70 + "\n")
 
     print("Key Takeaways:")
     print("  ✓ Use LM Studio for all processing (stays local)")
@@ -570,4 +568,5 @@ if __name__ == "__main__":
     except Exception as e:
         print(f"\nError: {e}")
         import traceback
+
         traceback.print_exc()

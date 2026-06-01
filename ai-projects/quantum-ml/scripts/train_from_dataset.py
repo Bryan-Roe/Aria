@@ -90,9 +90,7 @@ def load_dataset_from_csv(name: str, path: Path) -> tuple[np.ndarray, np.ndarray
 
 
 def preprocess(X: np.ndarray, y: np.ndarray, n_qubits: int, test_size: float = 0.2):
-    X_train, X_val, y_train, y_val = train_test_split(
-        X, y, test_size=test_size, random_state=42, stratify=y
-    )
+    X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=test_size, random_state=42, stratify=y)
     scaler = StandardScaler()
     X_train = scaler.fit_transform(X_train)
     X_val = scaler.transform(X_val)
@@ -131,9 +129,7 @@ def make_quick_config(
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        description="Train hybrid quantum model from CSV dataset"
-    )
+    parser = argparse.ArgumentParser(description="Train hybrid quantum model from CSV dataset")
     parser.add_argument(
         "--dataset",
         default="banknote",
@@ -180,14 +176,10 @@ def main():
     model = HybridQuantumClassifier(input_dim=X_train.shape[1], quantum_classifier=qc)
 
     # Make quick config override for fast training
-    quick_cfg = make_quick_config(
-        DEFAULT_CONFIG, epochs=args.epochs, batch_size=args.batch_size, lr=args.lr
-    )
+    quick_cfg = make_quick_config(DEFAULT_CONFIG, epochs=args.epochs, batch_size=args.batch_size, lr=args.lr)
 
     # Train
-    history = train_quantum_model(
-        model, X_train, y_train, X_val, y_val, config_path=str(quick_cfg)
-    )
+    history = train_quantum_model(model, X_train, y_train, X_val, y_val, config_path=str(quick_cfg))
 
     # Save results
     out_dir = RESULTS_DIR / args.dataset
@@ -200,9 +192,7 @@ def main():
         "samples_val": int(X_val.shape[0]),
         "features": int(X_train.shape[1]),
         "epochs": int(args.epochs),
-        "final_val_acc": (
-            float(history["val_acc"][-1]) if history.get("val_acc") else None
-        ),
+        "final_val_acc": (float(history["val_acc"][-1]) if history.get("val_acc") else None),
     }
     with open(out_dir / "training_summary.json", "w") as f:
         json.dump(summary, f, indent=2)

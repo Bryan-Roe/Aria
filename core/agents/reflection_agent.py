@@ -61,9 +61,7 @@ class ReflectionAgent(BaseAgent):
         cycle_limit: int = max(1, int(payload.get("cycle_limit", _DEFAULT_CYCLE_LIMIT)))
 
         # Prefer cycle_completed events; fall back to recent general events.
-        cycles: List[Dict[str, Any]] = self.memory.query(
-            event_type="cycle_completed", limit=cycle_limit
-        )
+        cycles: List[Dict[str, Any]] = self.memory.query(event_type="cycle_completed", limit=cycle_limit)
         if not cycles:
             cycles = self.memory.last(cycle_limit)
 
@@ -180,10 +178,7 @@ class ReflectionAgent(BaseAgent):
                 skipped = data.get("skipped_steps", "?")
                 assessment = data.get("self_assessment", {})
                 score = assessment.get("score", "N/A") if isinstance(assessment, dict) else "N/A"
-                parts.append(
-                    f"Cycle {i}: goal={goal}, "
-                    f"executed={executed}, skipped={skipped}, score={score}"
-                )
+                parts.append(f"Cycle {i}: goal={goal}, " f"executed={executed}, skipped={skipped}, score={score}")
             else:
                 parts.append(f"Cycle {i}: {json.dumps(data, ensure_ascii=False)[:200]}")
         return "\n".join(parts)

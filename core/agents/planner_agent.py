@@ -76,10 +76,12 @@ Return a JSON list of tasks in this format:
         except Exception:
             pass
 
-        return self._attach_ids([
-            {"type": "llm", "payload": {"prompt": goal}},
-            {"type": "tool", "payload": {"tool": "inspect_context", "args": {"goal": goal}}},
-        ])
+        return self._attach_ids(
+            [
+                {"type": "llm", "payload": {"prompt": goal}},
+                {"type": "tool", "payload": {"tool": "inspect_context", "args": {"goal": goal}}},
+            ]
+        )
 
     def _attach_ids(self, steps: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         confidence_map = {"llm": 0.8, "tool": 0.9, "train": 0.7}

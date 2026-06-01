@@ -126,9 +126,7 @@ def main():
         default=DEFAULT_QML_VERSION,
         help="Target qiskit-machine-learning version (default 0.7.0)",
     )
-    parser.add_argument(
-        "--dry-run", action="store_true", help="Show planned changes without writing"
-    )
+    parser.add_argument("--dry-run", action="store_true", help="Show planned changes without writing")
     parser.add_argument(
         "--install",
         action="store_true",

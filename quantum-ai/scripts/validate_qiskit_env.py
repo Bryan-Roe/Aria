@@ -11,20 +11,12 @@ from __future__ import annotations
 import importlib.util
 from pathlib import Path
 
-_CANONICAL = (
-    Path(__file__).resolve().parents[2]
-    / "ai-projects"
-    / "quantum-ml"
-    / "scripts"
-    / "validate_qiskit_env.py"
-)
+_CANONICAL = Path(__file__).resolve().parents[2] / "ai-projects" / "quantum-ml" / "scripts" / "validate_qiskit_env.py"
 
 if not _CANONICAL.exists():
     raise FileNotFoundError(f"Canonical validator not found: {_CANONICAL}")
 
-_spec = importlib.util.spec_from_file_location(
-    "_validate_qiskit_env_canonical", _CANONICAL
-)
+_spec = importlib.util.spec_from_file_location("_validate_qiskit_env_canonical", _CANONICAL)
 if _spec is None or _spec.loader is None:
     raise ImportError(f"Unable to load spec for {_CANONICAL}")
 

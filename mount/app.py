@@ -190,9 +190,7 @@ async def list_quantum_backends():
 
 
 @app.post("/quantum/train")
-async def train_quantum_classifier(
-    request: TrainQuantumRequest, background_tasks: BackgroundTasks
-):
+async def train_quantum_classifier(request: TrainQuantumRequest, background_tasks: BackgroundTasks):
     """Train a quantum classifier"""
     result = await quantum_integration.train_classifier(
         dataset=request.dataset,
@@ -211,9 +209,7 @@ async def run_quantum_autorun(request: OrchestratorRequest):
     if not normalized_job_name:
         raise HTTPException(status_code=400, detail="job_name is required")
 
-    result = await quantum_integration.run_autorun_job(
-        job_name=normalized_job_name, dry_run=request.dry_run
-    )
+    result = await quantum_integration.run_autorun_job(job_name=normalized_job_name, dry_run=request.dry_run)
     return result
 
 
@@ -307,9 +303,7 @@ async def train_lora(request: TrainLoRARequest, background_tasks: BackgroundTask
 @app.post("/training/autotrain")
 async def run_autotrain(request: OrchestratorRequest):
     """Run AutoTrain orchestrator"""
-    result = await training_integration.run_autotrain(
-        job_name=request.job_name, dry_run=request.dry_run
-    )
+    result = await training_integration.run_autotrain(job_name=request.job_name, dry_run=request.dry_run)
     return result
 
 

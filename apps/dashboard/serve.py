@@ -50,9 +50,7 @@ class MyHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
         now = time.time()
 
         # Clean old requests (older than 1 minute)
-        request_counts[client_ip] = [
-            t for t in request_counts[client_ip] if now - t < 60
-        ]
+        request_counts[client_ip] = [t for t in request_counts[client_ip] if now - t < 60]
 
         # Check limit
         if len(request_counts[client_ip]) >= MAX_REQUESTS_PER_MINUTE:
@@ -140,9 +138,7 @@ class MyHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
             datasets = self.get_datasets()
             dataset_path = None
             for ds in datasets.get("datasets", []):
-                if ds.get("name") == dataset_name or ds.get("path", "").endswith(
-                    dataset_name
-                ):
+                if ds.get("name") == dataset_name or ds.get("path", "").endswith(dataset_name):
                     dataset_path = Path(ds["path"])
                     break
 
@@ -175,9 +171,7 @@ class MyHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
                     profile_data = json.loads(result.stdout)
                     self.send_json_response(profile_data)
                 else:
-                    self.send_json_response(
-                        {"error": f"Profiler failed: {result.stderr}"}
-                    )
+                    self.send_json_response({"error": f"Profiler failed: {result.stderr}"})
             except subprocess.TimeoutExpired:
                 self.send_json_response({"error": "Profiler timed out (30s limit)"})
             except Exception as e:
@@ -327,22 +321,16 @@ class MyHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
         try:
             with open(status_file, "r") as f:
                 data = json.load(f)
-            job = next(
-                (j for j in data.get("jobs", []) if j.get("name") == job_id), None
-            )
+            job = next((j for j in data.get("jobs", []) if j.get("name") == job_id), None)
             if not job:
                 return {"error": "Job not found", "job_id": job_id}
 
             metrics = job.get("metrics", {})
-            current_epoch = (
-                job.get("current_epoch") or metrics.get("current_epoch") or 0
-            )
+            current_epoch = job.get("current_epoch") or metrics.get("current_epoch") or 0
             total_epochs = job.get("epochs") or job.get("config", {}).get("epochs") or 0
             post_loss = metrics.get("post_eval_loss")
             current_loss = metrics.get("current_loss", post_loss)
-            lr = job.get("config", {}).get("learning_rate") or metrics.get(
-                "learning_rate"
-            )
+            lr = job.get("config", {}).get("learning_rate") or metrics.get("learning_rate")
             steps_per_sec = metrics.get("steps_per_sec")
             status = job.get("status", "unknown")
             duration = job.get("duration_sec")
@@ -351,11 +339,7 @@ class MyHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
             progress_percent = job.get("progress_percent")
             if progress_percent is None:
                 try:
-                    progress_percent = (
-                        round((current_epoch / total_epochs) * 100, 2)
-                        if total_epochs
-                        else 0
-                    )
+                    progress_percent = round((current_epoch / total_epochs) * 100, 2) if total_epochs else 0
                 except Exception:
                     progress_percent = 0
 
@@ -383,9 +367,7 @@ class MyHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
         try:
             with open(status_file, "r") as f:
                 data = json.load(f)
-            job = next(
-                (j for j in data.get("jobs", []) if j.get("name") == job_id), None
-            )
+            job = next((j for j in data.get("jobs", []) if j.get("name") == job_id), None)
             if not job:
                 return {"error": "Job not found", "job_id": job_id}
 
@@ -403,9 +385,7 @@ class MyHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
                 log_file = job.get("log")
                 if log_file and Path(log_file).exists():
                     try:
-                        with open(
-                            log_file, "r", encoding="utf-8", errors="ignore"
-                        ) as f:
+                        with open(log_file, "r", encoding="utf-8", errors="ignore") as f:
                             for i, line in enumerate(f):
                                 m = re.search(
                                     r"step\s*(\d+).*?train_loss=([0-9\.]+).*?eval_loss=([0-9\.]+)",
@@ -520,9 +500,7 @@ class MyHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
             if models_dir.exists():
                 for model_dir in models_dir.iterdir():
                     if model_dir.is_dir():
-                        adapter_config = (
-                            model_dir / "lora_adapter" / "adapter_config.json"
-                        )
+                        adapter_config = model_dir / "lora_adapter" / "adapter_config.json"
                         if adapter_config.exists():
                             with open(adapter_config) as f:
                                 config = json.load(f)
@@ -530,9 +508,7 @@ class MyHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
                                 {
                                     "name": model_dir.name,
                                     "path": str(model_dir.relative_to(root_dir)),
-                                    "base_model": config.get(
-                                        "base_model_name_or_path", "unknown"
-                                    ),
+                                    "base_model": config.get("base_model_name_or_path", "unknown"),
                                     "rank": config.get("r", "unknown"),
                                 }
                             )
@@ -596,9 +572,7 @@ class MyHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
                     if "output_dir" in job and job["output_dir"]:
                         output_path = root_dir / job["output_dir"]
                         if output_path.exists():
-                            job["output_files"] = [
-                                f.name for f in output_path.rglob("*") if f.is_file()
-                            ]
+                            job["output_files"] = [f.name for f in output_path.rglob("*") if f.is_file()]
                     return {"job": job}
 
             return {"error": "Job not found"}
@@ -618,9 +592,7 @@ class MyHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
                 if job.get("name") == job_name and "log" in job:
                     log_file = Path(job["log"])
                     if log_file.exists():
-                        with open(
-                            log_file, "r", encoding="utf-8", errors="ignore"
-                        ) as f:
+                        with open(log_file, "r", encoding="utf-8", errors="ignore") as f:
                             # Efficiently tail last 500 lines without loading entire file
                             lines = []
                             for line in f:
@@ -644,9 +616,7 @@ class MyHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
             model = params.get("model") or "microsoft/Phi-3.5-mini-instruct"
             dataset = params.get("dataset")
             epochs = params.get("epochs", 3)
-            max_samples = params.get(
-                "max_train_samples", params.get("max_samples", 1000)
-            )
+            max_samples = params.get("max_train_samples", params.get("max_samples", 1000))
             learning_rate = params.get("learning_rate", "2e-4")
             batch_size = params.get("batch_size", 4)
             lora_rank = params.get("lora_rank", 16)
@@ -694,11 +664,7 @@ class MyHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
                 cwd=str(root_dir),
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.DEVNULL,
-                creationflags=(
-                    subprocess.CREATE_NO_WINDOW
-                    if hasattr(subprocess, "CREATE_NO_WINDOW")
-                    else 0
-                ),
+                creationflags=(subprocess.CREATE_NO_WINDOW if hasattr(subprocess, "CREATE_NO_WINDOW") else 0),
             )
 
             return {
@@ -776,9 +742,7 @@ class MyHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
                             "pre_loss": job["metrics"].get("pre_eval_loss"),
                             "post_loss": job["metrics"].get("post_eval_loss"),
                             "pre_perplexity": job["metrics"].get("pre_eval_perplexity"),
-                            "post_perplexity": job["metrics"].get(
-                                "post_eval_perplexity"
-                            ),
+                            "post_perplexity": job["metrics"].get("post_eval_perplexity"),
                             "duration": job.get("duration_sec"),
                             "status": job.get("status"),
                         }
@@ -813,20 +777,14 @@ class MyHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
             datasets_dir = root_dir / "datasets" / "chat"
             health["checks"]["datasets"] = {
                 "exists": datasets_dir.exists(),
-                "count": (
-                    len(list(datasets_dir.glob("*/train.json")))
-                    if datasets_dir.exists()
-                    else 0
-                ),
+                "count": (len(list(datasets_dir.glob("*/train.json"))) if datasets_dir.exists() else 0),
             }
 
             # Check output directory
             output_dir = root_dir / "data_out"
             health["checks"]["output"] = {
                 "exists": output_dir.exists(),
-                "writable": (
-                    os.access(output_dir, os.W_OK) if output_dir.exists() else False
-                ),
+                "writable": (os.access(output_dir, os.W_OK) if output_dir.exists() else False),
             }
 
             # Check GPU availability
@@ -838,13 +796,9 @@ class MyHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
 
             # Check virtual environments
             health["checks"]["venvs"] = {
-                "quantum_ai": (
-                    root_dir / "ai-projects" / "quantum-ml" / "venv"
-                ).exists(),
+                "quantum_ai": (root_dir / "ai-projects" / "quantum-ml" / "venv").exists(),
                 "talk_to_ai": (root_dir / "ai-projects" / "chat-cli" / "venv").exists(),
-                "lora_training": (
-                    root_dir / "AI" / "microsoft_phi-silica-3.6_v1" / "venv"
-                ).exists(),
+                "lora_training": (root_dir / "AI" / "microsoft_phi-silica-3.6_v1" / "venv").exists(),
             }
 
             # Overall health
@@ -884,9 +838,7 @@ class MyHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
             # Datasets
             datasets_dir = root_dir / "datasets" / "chat"
             if datasets_dir.exists():
-                stats["datasets"] = len(
-                    [d for d in datasets_dir.iterdir() if d.is_dir()]
-                )
+                stats["datasets"] = len([d for d in datasets_dir.iterdir() if d.is_dir()])
 
             # Models
             models_dir = root_dir / "data_out" / "lora_training" / "marathon"
@@ -913,9 +865,7 @@ class MyHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
 
         processes = []
         try:
-            for proc in psutil.process_iter(
-                ["pid", "name", "cmdline", "memory_info", "cpu_percent"]
-            ):
+            for proc in psutil.process_iter(["pid", "name", "cmdline", "memory_info", "cpu_percent"]):
                 try:
                     pinfo = proc.info
                     if pinfo["name"] and "python" in pinfo["name"].lower():
@@ -934,14 +884,8 @@ class MyHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
                                 {
                                     "pid": pinfo["pid"],
                                     "name": pinfo["name"],
-                                    "command": (
-                                        cmdline[:100] + "..."
-                                        if len(cmdline) > 100
-                                        else cmdline
-                                    ),
-                                    "memory_mb": round(
-                                        pinfo["memory_info"].rss / 1024 / 1024, 1
-                                    ),
+                                    "command": (cmdline[:100] + "..." if len(cmdline) > 100 else cmdline),
+                                    "memory_mb": round(pinfo["memory_info"].rss / 1024 / 1024, 1),
                                     "cpu_percent": pinfo["cpu_percent"],
                                 }
                             )

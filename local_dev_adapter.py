@@ -64,9 +64,7 @@ try:
 except ModuleNotFoundError as e:
     # Provide a lightweight shim for azure.functions when it's not installed.
     if "azure.functions" in str(e):
-        logger.debug(
-            "azure.functions not found; installing lightweight shim for local dev adapter"
-        )
+        logger.debug("azure.functions not found; installing lightweight shim for local dev adapter")
         fake_mod = types.ModuleType("azure.functions")
 
         class AuthLevel:
@@ -222,9 +220,7 @@ def _azure_to_flask(resp: AzureHttpResponse) -> Response:
             flask_resp.headers[k] = v
     except Exception:
         # best-effort fallback for unexpected header shapes
-        logger.debug(
-            "Unexpected header shape when converting azure HttpResponse to Flask Response"
-        )
+        logger.debug("Unexpected header shape when converting azure HttpResponse to Flask Response")
 
     return flask_resp
 
@@ -245,8 +241,7 @@ def get_ai_status_response() -> Tuple[Response, int]:
     if req is None or not hasattr(req, "get_body"):
         # Use shim's HttpRequest if available in sys.modules
         try:
-            from azure.functions import \
-                HttpRequest as ShimHttpRequest  # type: ignore
+            from azure.functions import HttpRequest as ShimHttpRequest  # type: ignore
 
             fake_req = ShimHttpRequest(method="GET", url="/api/ai/status")
         except Exception:
@@ -268,8 +263,7 @@ def get_ai_status_parts() -> Tuple[bytes, int, Optional[str], Dict[str, Any]]:
 
     if req is None or not hasattr(req, "get_body"):
         try:
-            from azure.functions import \
-                HttpRequest as ShimHttpRequest  # type: ignore
+            from azure.functions import HttpRequest as ShimHttpRequest  # type: ignore
 
             fake_req = ShimHttpRequest(method="GET", url="/api/ai/status")
         except Exception:
@@ -370,9 +364,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
 
 def main(argv: list[str] | None = None) -> None:
     args = parse_args(argv)
-    print(
-        f"Starting local dev adapter for /api/ai/status on http://{args.host}:{args.port}"
-    )
+    print(f"Starting local dev adapter for /api/ai/status on http://{args.host}:{args.port}")
 
     if HAS_FLASK:
         app = create_app()

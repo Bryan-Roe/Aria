@@ -73,9 +73,7 @@ class PrototypeRequest:
             fallback="generated_function",
         )
         arguments = [
-            FunctionArgument.from_dict(item)
-            for item in payload.get("arguments", [])
-            if isinstance(item, dict)
+            FunctionArgument.from_dict(item) for item in payload.get("arguments", []) if isinstance(item, dict)
         ]
         if not arguments:
             arguments = [FunctionArgument(name="value", arg_type="Any")]
@@ -99,8 +97,7 @@ class PrototypeRequest:
         return cls(
             module_name=module_name,
             function_name=function_name,
-            description=str(payload.get("description", "Generated function")).strip()
-            or "Generated function",
+            description=str(payload.get("description", "Generated function")).strip() or "Generated function",
             expression=expression,
             arguments=arguments,
             examples=examples,
@@ -132,9 +129,7 @@ class FolderMonitorWorkflow:
     ) -> None:
         self.watch_dir = Path(watch_dir)
         self.output_dir = Path(output_dir)
-        self.archive_dir = (
-            Path(archive_dir) if archive_dir else self.watch_dir / "archive"
-        )
+        self.archive_dir = Path(archive_dir) if archive_dir else self.watch_dir / "archive"
         self.run_generated_tests = run_generated_tests
         self.python_executable = python_executable or sys.executable
 
@@ -161,9 +156,7 @@ class FolderMonitorWorkflow:
         return PrototypeRequest.from_dict(payload)
 
     def _render_module(self, request: PrototypeRequest) -> str:
-        args_signature = ", ".join(
-            f"{arg.name}: {arg.arg_type}" for arg in request.arguments
-        )
+        args_signature = ", ".join(f"{arg.name}: {arg.arg_type}" for arg in request.arguments)
         return f'''"""Auto-generated module for {request.function_name}."""
 
 from __future__ import annotations
@@ -178,11 +171,7 @@ def {request.function_name}({args_signature}) -> {request.return_type}:
 
     def _render_tests(self, request: PrototypeRequest) -> str:
         cases_literal = ",\n    ".join(
-            "("
-            + _python_literal(example["inputs"])
-            + ", "
-            + _python_literal(example["output"])
-            + ")"
+            "(" + _python_literal(example["inputs"]) + ", " + _python_literal(example["output"]) + ")"
             for example in request.examples
         )
         return f'''"""Auto-generated tests for {request.function_name}."""
@@ -221,9 +210,7 @@ def test_{request.function_name}(inputs, expected):
             check=False,
         )
         if completed.returncode != 0:
-            raise RuntimeError(
-                f"generated pytest failed for {test_path.name}: {completed.stdout}\n{completed.stderr}"
-            )
+            raise RuntimeError(f"generated pytest failed for {test_path.name}: {completed.stdout}\n{completed.stderr}")
 
     def process_request_file(self, spec_path: str | Path) -> PrototypeGenerationResult:
         spec_path = Path(spec_path)
@@ -292,9 +279,7 @@ def test_{request.function_name}(inputs, expected):
                 self._record_failure(spec_path, exc)
         return processed
 
-    def watch(
-        self, poll_interval: float = 2.0, max_iterations: int | None = None
-    ) -> int:
+    def watch(self, poll_interval: float = 2.0, max_iterations: int | None = None) -> int:
         iterations = 0
         processed_count = 0
         while True:

@@ -20,8 +20,7 @@ if str(project_root) not in sys.path:
     sys.path.insert(0, str(project_root))
 
 try:
-    from src.quantum_classifier import (HybridQuantumClassifier,
-                                        QuantumClassifier, train_quantum_model)
+    from src.quantum_classifier import HybridQuantumClassifier, QuantumClassifier, train_quantum_model
 except ModuleNotFoundError:
     # Fallback for environments without namespace package support
     sys.path.insert(0, str(project_root / "src"))
@@ -98,12 +97,8 @@ print("\n2. BINARY CLASSIFICATION: CIRCLES DATASET")
 print("-" * 60)
 
 # Generate circles data
-X_circles, y_circles = make_circles(
-    n_samples=200, noise=0.1, factor=0.5, random_state=42
-)
-X_train_c, X_val_c, y_train_c, y_val_c = train_test_split(
-    X_circles, y_circles, test_size=0.2, random_state=42
-)
+X_circles, y_circles = make_circles(n_samples=200, noise=0.1, factor=0.5, random_state=42)
+X_train_c, X_val_c, y_train_c, y_val_c = train_test_split(X_circles, y_circles, test_size=0.2, random_state=42)
 
 # Normalize and pad
 scaler_c = StandardScaler()
@@ -117,9 +112,7 @@ qc_circles = QuantumClassifier()
 model_circles = HybridQuantumClassifier(input_dim=4, quantum_classifier=qc_circles)
 
 print(f"Training on circles dataset ({len(X_train_c)} samples)...")
-history_circles = train_quantum_model(
-    model_circles, X_train_c_padded, y_train_c, X_val_c_padded, y_val_c
-)
+history_circles = train_quantum_model(model_circles, X_train_c_padded, y_train_c, X_val_c_padded, y_val_c)
 
 print("\nFinal Results:")
 print(f"  Validation Accuracy: {history_circles['val_acc'][-1]:.4f}")
@@ -138,9 +131,7 @@ y_iris = iris.target
 # Convert to binary classification (class 0 vs rest)
 y_iris_binary = (y_iris == 0).astype(int)
 
-X_train_i, X_val_i, y_train_i, y_val_i = train_test_split(
-    X_iris, y_iris_binary, test_size=0.2, random_state=42
-)
+X_train_i, X_val_i, y_train_i, y_val_i = train_test_split(X_iris, y_iris_binary, test_size=0.2, random_state=42)
 
 # Normalize
 scaler_i = StandardScaler()
@@ -183,9 +174,7 @@ datasets = list(results.keys())
 accuracies = list(results.values())
 colors = ["#1f77b4", "#ff7f0e", "#2ca02c"]
 
-bars = ax.bar(
-    datasets, accuracies, color=colors, alpha=0.7, edgecolor="black", linewidth=2
-)
+bars = ax.bar(datasets, accuracies, color=colors, alpha=0.7, edgecolor="black", linewidth=2)
 ax.set_ylabel("Validation Accuracy", fontsize=12)
 ax.set_title("Quantum ML Model Performance Comparison", fontsize=14, fontweight="bold")
 ax.set_ylim([0, 1])

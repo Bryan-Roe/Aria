@@ -210,10 +210,7 @@ class ToolRegistry:
         results = []
 
         for tool in self._tools.values():
-            if (
-                query_lower in tool.name.lower()
-                or query_lower in tool.description.lower()
-            ):
+            if query_lower in tool.name.lower() or query_lower in tool.description.lower():
                 results.append(tool)
 
         return results
@@ -233,11 +230,7 @@ class ToolRegistry:
             "validated_tools": validated_count,
             "total_executions": total_executions,
             "most_used": (
-                max(
-                    self._tools.values(), key=lambda t: t.execution_count, default=None
-                ).name
-                if self._tools
-                else None
+                max(self._tools.values(), key=lambda t: t.execution_count, default=None).name if self._tools else None
             ),
             "registry_path": str(self.tools_dir),
         }

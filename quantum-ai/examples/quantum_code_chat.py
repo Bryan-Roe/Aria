@@ -41,9 +41,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 try:
     import quantum_code_llm
 except ImportError:
-    print(
-        f"Error: Could not import quantum_code_llm. Make sure it's installed in {sys.path[0]}"
-    )
+    print(f"Error: Could not import quantum_code_llm. Make sure it's installed in {sys.path[0]}")
     raise
 
 CHECKPOINT = "data_out/quantum_code_llm/checkpoint.pt"
@@ -60,19 +58,13 @@ MODEL_CFG = {
 }
 
 
-def save_checkpoint(
-    model: quantum_code_llm.QuantumCodeLLM, tokenizer: quantum_code_llm.CodeTokenizer
-) -> None:
+def save_checkpoint(model: quantum_code_llm.QuantumCodeLLM, tokenizer: quantum_code_llm.CodeTokenizer) -> None:
     quantum_code_llm.save_checkpoint(model, tokenizer, CHECKPOINT)
     print(f"  ✓ Saved -> {CHECKPOINT}")
 
 
-def load_checkpoint() -> (
-    tuple[quantum_code_llm.QuantumCodeLLM, quantum_code_llm.CodeTokenizer]
-):
-    model, tokenizer, _metadata = quantum_code_llm.load_checkpoint(
-        CHECKPOINT, map_location="cpu"
-    )
+def load_checkpoint() -> tuple[quantum_code_llm.QuantumCodeLLM, quantum_code_llm.CodeTokenizer]:
+    model, tokenizer, _metadata = quantum_code_llm.load_checkpoint(CHECKPOINT, map_location="cpu")
     print(f"  ✓ Loaded <- {CHECKPOINT}")
     return model, tokenizer
 
@@ -82,16 +74,12 @@ def retrain(
     tokenizer: quantum_code_llm.CodeTokenizer,
     n_epochs: int = 5,
 ) -> None:
-    tcfg = quantum_code_llm.TrainConfig(
-        n_epochs=n_epochs, batch_size=8, lr=1e-3, log_every=40
-    )
+    tcfg = quantum_code_llm.TrainConfig(n_epochs=n_epochs, batch_size=8, lr=1e-3, log_every=40)
     trainer = quantum_code_llm.QuantumCodeTrainer(model, tokenizer, tcfg)
     trainer.train()
 
 
-def chat_loop(
-    model: quantum_code_llm.QuantumCodeLLM, tokenizer: quantum_code_llm.CodeTokenizer
-) -> None:
+def chat_loop(model: quantum_code_llm.QuantumCodeLLM, tokenizer: quantum_code_llm.CodeTokenizer) -> None:
     temperature = 0.8
     top_k = 40
     max_new = 80
@@ -99,9 +87,7 @@ def chat_loop(
     print()
     print("━" * 60)
     print("  Quantum Code LLM — Chat  (type /help for commands)")
-    print(
-        f"  backend: {model.backend}  |  params: {model.parameter_count()['total']:,}"
-    )
+    print(f"  backend: {model.backend}  |  params: {model.parameter_count()['total']:,}")
     print("━" * 60)
     print()
 
@@ -129,9 +115,7 @@ def chat_loop(
             print(f"  params    : {p['total']:,} total  {p['trainable']:,} trainable")
             print(f"  vocab     : {tokenizer.vocab_size}")
             cfg = model.config
-            print(
-                f"  d_model   : {cfg.d_model}  n_layers: {cfg.n_layers}  n_qubits: {cfg.n_qubits}"
-            )
+            print(f"  d_model   : {cfg.d_model}  n_layers: {cfg.n_layers}  n_qubits: {cfg.n_qubits}")
             print(f"  temp      : {temperature}  top_k: {top_k}  max_tokens: {max_new}")
 
         elif prompt.startswith("/temp "):
@@ -188,12 +172,8 @@ def chat_loop(
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Quantum Code LLM chat REPL")
-    parser.add_argument(
-        "--load", action="store_true", help="load checkpoint instead of training"
-    )
-    parser.add_argument(
-        "--epochs", type=int, default=15, help="epochs to train (default 15)"
-    )
+    parser.add_argument("--load", action="store_true", help="load checkpoint instead of training")
+    parser.add_argument("--epochs", type=int, default=15, help="epochs to train (default 15)")
     args = parser.parse_args()
 
     tokenizer = quantum_code_llm.CodeTokenizer()

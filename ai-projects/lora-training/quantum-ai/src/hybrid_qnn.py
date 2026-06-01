@@ -60,9 +60,7 @@ class QuantumLayer(nn.Module):
         # Wrap QNN for PyTorch
         self.quantum_layer = TorchConnector(self.qnn)
 
-        logger.info(
-            f"Created QuantumLayer with {num_qubits} qubits, {num_layers} layers"
-        )
+        logger.info(f"Created QuantumLayer with {num_qubits} qubits, {num_layers} layers")
 
     def _build_qnn(self):
         """Build the quantum neural network"""
@@ -96,9 +94,7 @@ class QuantumLayer(nn.Module):
                 qc.cx(self.num_qubits - 1, 0)
 
         # Create QNN
-        qnn = SamplerQNN(
-            circuit=qc, input_params=inputs, weight_params=weights, sampler=Sampler()
-        )
+        qnn = SamplerQNN(circuit=qc, input_params=inputs, weight_params=weights, sampler=Sampler())
 
         return qnn
 
@@ -202,9 +198,7 @@ class QuantumClassicalTrainer:
     Trainer for hybrid quantum-classical models
     """
 
-    def __init__(
-        self, model: nn.Module, learning_rate: float = 0.001, device: str = "cpu"
-    ):
+    def __init__(self, model: nn.Module, learning_rate: float = 0.001, device: str = "cpu"):
         """
         Initialize trainer
 
@@ -257,9 +251,7 @@ class QuantumClassicalTrainer:
             total_loss += loss.item()
 
             if (batch_idx + 1) % 10 == 0:
-                logger.info(
-                    f"Batch {batch_idx + 1}/{len(train_loader)}, Loss: {loss.item():.4f}"
-                )
+                logger.info(f"Batch {batch_idx + 1}/{len(train_loader)}, Loss: {loss.item():.4f}")
 
         avg_loss = total_loss / len(train_loader)
         self.train_losses.append(avg_loss)
@@ -325,9 +317,7 @@ class QuantumClassicalTrainer:
             # Evaluate
             val_acc, val_loss = self.evaluate(val_loader)
 
-            logger.info(
-                f"Train Loss: {train_loss:.4f}, Val Loss: {val_loss:.4f}, Val Acc: {val_acc:.2f}%"
-            )
+            logger.info(f"Train Loss: {train_loss:.4f}, Val Loss: {val_loss:.4f}, Val Acc: {val_acc:.2f}%")
 
         logger.info("Training complete!")
 
@@ -350,9 +340,7 @@ if __name__ == "__main__":
     )
 
     # Split and scale
-    X_train, X_val, y_train, y_val = train_test_split(
-        X, y, test_size=0.2, random_state=42
-    )
+    X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.2, random_state=42)
 
     scaler = StandardScaler()
     X_train = scaler.fit_transform(X_train)

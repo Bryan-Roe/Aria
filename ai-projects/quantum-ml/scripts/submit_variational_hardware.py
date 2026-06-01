@@ -31,9 +31,7 @@ from azure_quantum_integration import AzureQuantumIntegration
 CONFIG_PATH = REPO_ROOT / "config" / "quantum_config.yaml"
 
 
-def create_variational_circuit(
-    n_qubits: int, n_layers: int, entanglement: str = "linear"
-) -> QuantumCircuit:
+def create_variational_circuit(n_qubits: int, n_layers: int, entanglement: str = "linear") -> QuantumCircuit:
     """
     Create a variational circuit matching the MPS simulation pattern.
 
@@ -78,39 +76,25 @@ def compute_entropy(counts: dict[str, int]) -> float:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(
-        description="Submit variational circuits to Azure Quantum"
-    )
-    parser.add_argument(
-        "--backend", type=str, default="rigetti.sim.qvm", help="Backend name"
-    )
-    parser.add_argument(
-        "--n-qubits", type=int, default=4, help="Number of qubits (default: 4)"
-    )
-    parser.add_argument(
-        "--layers", type=int, default=2, help="Number of layers (default: 2)"
-    )
+    parser = argparse.ArgumentParser(description="Submit variational circuits to Azure Quantum")
+    parser.add_argument("--backend", type=str, default="rigetti.sim.qvm", help="Backend name")
+    parser.add_argument("--n-qubits", type=int, default=4, help="Number of qubits (default: 4)")
+    parser.add_argument("--layers", type=int, default=2, help="Number of layers (default: 2)")
     parser.add_argument(
         "--entanglement",
         choices=["linear", "circular", "full"],
         default="linear",
         help="Entanglement pattern (default: linear)",
     )
-    parser.add_argument(
-        "--shots", type=int, default=1000, help="Number of shots (default: 1000)"
-    )
+    parser.add_argument("--shots", type=int, default=1000, help="Number of shots (default: 1000)")
     args = parser.parse_args()
 
     cfg = yaml.safe_load(CONFIG_PATH.read_text(encoding="utf-8"))
-    results_dir = (
-        REPO_ROOT / Path(cfg["logging"]["results_dir"]).expanduser()
-    ).resolve()
+    results_dir = (REPO_ROOT / Path(cfg["logging"]["results_dir"]).expanduser()).resolve()
     results_dir.mkdir(parents=True, exist_ok=True)
 
     print("\n=== Variational Circuit Hardware Submission ===")
-    print(
-        f"Circuit: {args.n_qubits}-qubit, {args.layers} layers, {args.entanglement} entanglement"
-    )
+    print(f"Circuit: {args.n_qubits}-qubit, {args.layers} layers, {args.entanglement} entanglement")
     print(f"Backend: {args.backend}, Shots: {args.shots}\n")
 
     # Create circuit
@@ -142,9 +126,7 @@ def main() -> int:
     job_name = f"variational_{args.n_qubits}q_L{args.layers}_{args.entanglement}_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')}"
 
     try:
-        job = azure.submit_circuit(
-            qc, backend_name=args.backend, shots=args.shots, job_name=job_name
-        )
+        job = azure.submit_circuit(qc, backend_name=args.backend, shots=args.shots, job_name=job_name)
         print(f"Job ID: {job.id()}")
         print("Waiting for results...")
         result_data = azure.get_job_results(job)
@@ -159,9 +141,7 @@ def main() -> int:
 
     print("\n✓ Results received:")
     print(f"  Unique states: {len(counts)} / {2 ** args.n_qubits}")
-    print(
-        f"  Entropy: {entropy:.3f} / {max_entropy:.3f} ({(entropy/max_entropy*100 if max_entropy>0 else 0):.1f}%)"
-    )
+    print(f"  Entropy: {entropy:.3f} / {max_entropy:.3f} ({(entropy/max_entropy*100 if max_entropy>0 else 0):.1f}%)")
 
     # Save in same format as local simulations
     ts = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
@@ -191,10 +171,7 @@ def main() -> int:
         },
     }
 
-    out_path = (
-        results_dir
-        / f"azure_variational_{args.n_qubits}q_L{args.layers}_{args.entanglement}_{ts}.json"
-    )
+    out_path = results_dir / f"azure_variational_{args.n_qubits}q_L{args.layers}_{args.entanglement}_{ts}.json"
     out_path.write_text(json.dumps(out, indent=2), encoding="utf-8")
     print(f"\nSaved: {out_path}")
 

@@ -11,8 +11,7 @@ SRC = ROOT / "src"
 if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
 
-from utils.json_utils import (INGREDIENT_EXTRACTION_SCHEMA,
-                              RECIPE_SEARCH_SCHEMA, parse_and_validate)
+from utils.json_utils import INGREDIENT_EXTRACTION_SCHEMA, RECIPE_SEARCH_SCHEMA, parse_and_validate
 
 
 @pytest.mark.unit

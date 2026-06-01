@@ -181,9 +181,7 @@ def interactive_chat(args: argparse.Namespace) -> int:
         messages.append({"role": "system", "content": system_prompt})
 
     print_system(f"Provider: {info.name} | Model: {info.model}")
-    print_system(
-        "Type your message. Commands: /help, /new, /save, /history, /model, /providers, /reasoning, /exit"
-    )
+    print_system("Type your message. Commands: /help, /new, /save, /history, /model, /providers, /reasoning, /exit")
 
     while True:
         try:
@@ -225,10 +223,7 @@ def interactive_chat(args: argparse.Namespace) -> int:
         if cmd == "/history":
             user_msgs = [m for m in messages if m.get("role") == "user"]
             asst_msgs = [m for m in messages if m.get("role") == "assistant"]
-            print_system(
-                f"Conversation: {len(user_msgs)} user message(s), "
-                f"{len(asst_msgs)} assistant reply(ies)."
-            )
+            print_system(f"Conversation: {len(user_msgs)} user message(s), " f"{len(asst_msgs)} assistant reply(ies).")
             if user_msgs:
                 last = user_msgs[-1]["content"]
                 preview = last[:120] + "..." if len(last) > 120 else last
@@ -277,9 +272,7 @@ def interactive_chat(args: argparse.Namespace) -> int:
                     f"  Available agents        : {available}"
                 )
             else:
-                print_system(
-                    "Reasoning summary is only available with the AGI provider (--provider agi)."
-                )
+                print_system("Reasoning summary is only available with the AGI provider (--provider agi).")
             continue
 
         if not user.strip():
@@ -316,9 +309,7 @@ def one_shot(args: argparse.Namespace) -> int:
 
 
 def build_arg_parser() -> argparse.ArgumentParser:
-    p = argparse.ArgumentParser(
-        description="Simple terminal chat app with local/OpenAI/Azure providers"
-    )
+    p = argparse.ArgumentParser(description="Simple terminal chat app with local/OpenAI/Azure providers")
     p.add_argument(
         "--provider",
         choices=[

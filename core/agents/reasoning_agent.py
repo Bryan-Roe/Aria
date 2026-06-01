@@ -54,12 +54,7 @@ class ReasoningAgent(BaseAgent):
 
     def execute(self, task: Task) -> Dict[str, Any]:
         payload = task.payload or {}
-        question: str = (
-            payload.get("question")
-            or payload.get("prompt")
-            or payload.get("text")
-            or ""
-        ).strip()
+        question: str = (payload.get("question") or payload.get("prompt") or payload.get("text") or "").strip()
         num_steps: int = max(1, int(payload.get("num_steps", _DEFAULT_NUM_STEPS)))
 
         if not question:
@@ -98,10 +93,7 @@ class ReasoningAgent(BaseAgent):
             },
             {
                 "role": "user",
-                "content": (
-                    f"Reason through the following in {num_steps} explicit steps:\n"
-                    f"{truncated}"
-                ),
+                "content": (f"Reason through the following in {num_steps} explicit steps:\n" f"{truncated}"),
             },
         ]
 
@@ -132,9 +124,7 @@ class ReasoningAgent(BaseAgent):
             if not isinstance(steps, list):
                 steps = [str(steps)]
             conclusion = str(data.get("conclusion", "")).strip()
-            confidence = float(
-                max(0.0, min(1.0, float(data.get("confidence", 0.5))))
-            )
+            confidence = float(max(0.0, min(1.0, float(data.get("confidence", 0.5)))))
             return {
                 "steps": [str(s) for s in steps],
                 "conclusion": conclusion or "No conclusion reached.",

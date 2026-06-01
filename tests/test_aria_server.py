@@ -34,9 +34,7 @@ def test_generate_tags_fallback_add_object():
 
 
 def test_validate_action_sequence_rejects_invalid_coordinates():
-    valid, reason = aria_server.validate_action_sequence(
-        [{"action": "move", "target": {"x": 1000, "y": 50}}]
-    )
+    valid, reason = aria_server.validate_action_sequence([{"action": "move", "target": {"x": 1000, "y": 50}}])
     assert valid is False
     assert "between 0 and 100" in reason
 
@@ -837,9 +835,7 @@ def test_parse_with_fallback_supports_look_throw_and_wait_actions():
     ), f"Expected look-at-cup action but got {look_actions}"
 
     throw_actions = parser.parse_with_fallback("throw the ball")
-    assert any(
-        a.get("action") == "throw" for a in throw_actions
-    ), f"Expected throw action but got {throw_actions}"
+    assert any(a.get("action") == "throw" for a in throw_actions), f"Expected throw action but got {throw_actions}"
 
     wait_actions = parser.parse_with_fallback("wave then wait 2 seconds")
     assert any(
@@ -864,8 +860,7 @@ def test_parse_with_fallback_pickup_and_bring_it_same_segment():
         for a in actions
     ), f"Expected delivery move action in same-segment bring-it command but got {actions}"
     assert not any(
-        a.get("action") == "say" and "pick something up first" in a.get("text", "").lower()
-        for a in actions
+        a.get("action") == "say" and "pick something up first" in a.get("text", "").lower() for a in actions
     ), f"Did not expect fallback failure say action but got {actions}"
     assert "pickup" in action_types, f"Expected pickup in action chain but got {actions}"
     assert action_types.count("move") >= 2, f"Expected move-to-cup and move-to-delivery actions but got {actions}"

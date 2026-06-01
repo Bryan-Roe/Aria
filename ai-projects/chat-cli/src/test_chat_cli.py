@@ -20,11 +20,7 @@ class _FakeProvider:
         self.user_messages: list[str] = []
 
     def complete(self, messages, stream: bool = True):
-        last_user = next(
-            message["content"]
-            for message in reversed(messages)
-            if message["role"] == "user"
-        )
+        last_user = next(message["content"] for message in reversed(messages) if message["role"] == "user")
         self.user_messages.append(last_user)
         return f"reply to: {last_user}"
 
@@ -94,9 +90,7 @@ class ChatCliTests(unittest.TestCase):
             ),
             patch(
                 "builtins.input",
-                side_effect=AssertionError(
-                    "input() should not be called in autonomous mode"
-                ),
+                side_effect=AssertionError("input() should not be called in autonomous mode"),
             ),
             redirect_stdout(io.StringIO()),
         ):
@@ -110,9 +104,7 @@ class ChatCliTests(unittest.TestCase):
 
     def test_main_dispatches_to_autonomous_mode(self) -> None:
         with (
-            patch.object(
-                chat_cli, "autonomous_chat", return_value=0
-            ) as autonomous_chat,
+            patch.object(chat_cli, "autonomous_chat", return_value=0) as autonomous_chat,
             patch.object(
                 chat_cli,
                 "interactive_chat",
@@ -133,9 +125,7 @@ class ChatCliTests(unittest.TestCase):
 
     def test_main_defaults_to_autonomous_mode(self) -> None:
         with (
-            patch.object(
-                chat_cli, "autonomous_chat", return_value=0
-            ) as autonomous_chat,
+            patch.object(chat_cli, "autonomous_chat", return_value=0) as autonomous_chat,
             patch.object(
                 chat_cli,
                 "interactive_chat",
@@ -149,9 +139,7 @@ class ChatCliTests(unittest.TestCase):
 
     def test_main_interactive_override_uses_interactive_mode(self) -> None:
         with (
-            patch.object(
-                chat_cli, "interactive_chat", return_value=0
-            ) as interactive_chat,
+            patch.object(chat_cli, "interactive_chat", return_value=0) as interactive_chat,
             patch.object(
                 chat_cli,
                 "autonomous_chat",
@@ -205,9 +193,7 @@ class ChatCliTests(unittest.TestCase):
                     SimpleNamespace(name="fake", model="fake-model"),
                 ),
             ),
-            patch.object(
-                chat_cli, "save_conversation", return_value=Path("/tmp/chat.jsonl")
-            ) as save_conversation,
+            patch.object(chat_cli, "save_conversation", return_value=Path("/tmp/chat.jsonl")) as save_conversation,
             patch("builtins.input", side_effect=["/save", "/exit"]),
             redirect_stdout(io.StringIO()) as stdout,
         ):

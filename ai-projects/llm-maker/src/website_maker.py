@@ -38,9 +38,7 @@ class WebsiteMaker:
         # detect_provider() returns the provider instance directly
         self.provider = detect_provider()
 
-        self.output_dir = os.path.join(
-            os.path.dirname(__file__), "..", "generated_sites"
-        )
+        self.output_dir = os.path.join(os.path.dirname(__file__), "..", "generated_sites")
         os.makedirs(self.output_dir, exist_ok=True)
 
     def create_website(
@@ -134,9 +132,7 @@ class WebsiteMaker:
                 "path": None,
             }
 
-    def update_website(
-        self, name: str, update_description: str, target_file: Optional[str] = None
-    ) -> Dict:
+    def update_website(self, name: str, update_description: str, target_file: Optional[str] = None) -> Dict:
         """
         Update an existing website based on natural language instructions.
 
@@ -168,9 +164,7 @@ class WebsiteMaker:
 
         # Determine which files to update
         if target_file:
-            files_to_update = (
-                [target_file] if target_file in metadata.get("files", []) else []
-            )
+            files_to_update = [target_file] if target_file in metadata.get("files", []) else []
         else:
             files_to_update = metadata.get("files", [])
 
@@ -343,15 +337,10 @@ body {{
 """
         return prompt
 
-    def _build_update_prompt(
-        self, name: str, update_description: str, current_files: Dict[str, str]
-    ) -> str:
+    def _build_update_prompt(self, name: str, update_description: str, current_files: Dict[str, str]) -> str:
         """Build prompt for website update."""
         files_section = "\n\n".join(
-            [
-                f"**{filename}:**\n```\n{content}\n```"
-                for filename, content in current_files.items()
-            ]
+            [f"**{filename}:**\n```\n{content}\n```" for filename, content in current_files.items()]
         )
 
         prompt = f"""Update the website '{name}' with the following changes:
@@ -412,7 +401,9 @@ Only include files that need to be updated. Keep the same structure and style un
 
         # Pattern 3: Generic code blocks with filename mentioned before
         if not files:
-            pattern3 = r"(?:File|Filename|Save as):\s*[`'\"]?([^\n`'\"]+\.(html|css|js))[`'\"]?\s*\n+```(?:\w+)?\n(.*?)```"
+            pattern3 = (
+                r"(?:File|Filename|Save as):\s*[`'\"]?([^\n`'\"]+\.(html|css|js))[`'\"]?\s*\n+```(?:\w+)?\n(.*?)```"
+            )
             matches3 = re.findall(pattern3, text, re.DOTALL | re.IGNORECASE)
 
             for filename, ext, content in matches3:
@@ -455,9 +446,7 @@ class WebsiteValidator:
 
         # Check for viewport meta tag (responsive design)
         if "viewport" not in html.lower():
-            warnings.append(
-                "Missing viewport meta tag (important for mobile responsiveness)"
-            )
+            warnings.append("Missing viewport meta tag (important for mobile responsiveness)")
 
         is_valid = len(warnings) == 0
         return is_valid, warnings
@@ -474,17 +463,13 @@ class WebsiteValidator:
 
         # Check for basic responsive design
         if "@media" not in css.lower():
-            warnings.append(
-                "No media queries found (consider adding for responsive design)"
-            )
+            warnings.append("No media queries found (consider adding for responsive design)")
 
         # Check for potential syntax errors (very basic)
         open_braces = css.count("{")
         close_braces = css.count("}")
         if open_braces != close_braces:
-            warnings.append(
-                f"Mismatched braces: {open_braces} opening, {close_braces} closing"
-            )
+            warnings.append(f"Mismatched braces: {open_braces} opening, {close_braces} closing")
 
         is_valid = open_braces == close_braces
         return is_valid, warnings

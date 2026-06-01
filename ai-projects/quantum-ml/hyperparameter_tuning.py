@@ -33,9 +33,7 @@ def load_heart_disease():
 
 def preprocess(X, y, n_components=4):
     """Preprocess data - wrapper using shared preprocess_for_qubits"""
-    X_train, X_val, y_train, y_val = train_test_split(
-        X, y, test_size=0.2, random_state=42, stratify=y
-    )
+    X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
 
     X_train, X_val, scaler, pca = preprocess_for_qubits(X_train, X_val, n_components)
 
@@ -56,12 +54,8 @@ def train_eval(config, X_train, X_val, y_train, y_val):
     train_ds = TensorDataset(X_train_t, y_train_t)
     val_ds = TensorDataset(X_val_t, y_val_t)
 
-    train_loader = DataLoader(
-        train_ds, batch_size=batch_size, shuffle=True, drop_last=True
-    )
-    val_loader = DataLoader(
-        val_ds, batch_size=batch_size, shuffle=False, drop_last=False
-    )
+    train_loader = DataLoader(train_ds, batch_size=batch_size, shuffle=True, drop_last=True)
+    val_loader = DataLoader(val_ds, batch_size=batch_size, shuffle=False, drop_last=False)
 
     model = HybridQNN(
         input_dim=4,
@@ -81,9 +75,7 @@ def train_eval(config, X_train, X_val, y_train, y_val):
     return {
         "config": config,
         "best_val_acc": float(best_val_acc),
-        "final_val_acc": (
-            float(trainer.val_accuracies[-1]) if trainer.val_accuracies else 0.0
-        ),
+        "final_val_acc": (float(trainer.val_accuracies[-1]) if trainer.val_accuracies else 0.0),
         "final_val_loss": float(trainer.val_losses[-1]) if trainer.val_losses else 0.0,
         "history": {
             "train_loss": [float(x) for x in trainer.train_losses],
@@ -116,9 +108,7 @@ def main(quick=True):
         hidden_dims = [16, 32]
         epochs = 15
 
-    grid = list(
-        itertools.product(learning_rates, batch_sizes, n_layers_list, hidden_dims)
-    )
+    grid = list(itertools.product(learning_rates, batch_sizes, n_layers_list, hidden_dims))
     print(f"Total trials: {len(grid)}")
 
     results = []
@@ -146,9 +136,7 @@ def main(quick=True):
     best_path = results_dir / "hyperparameter_best_config.json"
 
     with open(out_path, "w") as f:
-        json.dump(
-            {"timestamp": datetime.now().isoformat(), "results": results}, f, indent=2
-        )
+        json.dump({"timestamp": datetime.now().isoformat(), "results": results}, f, indent=2)
 
     with open(best_path, "w") as f:
         json.dump(best, f, indent=2)

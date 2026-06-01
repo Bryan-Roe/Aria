@@ -88,9 +88,7 @@ def load_model():
         print(f"   ✅ Loaded metadata from {summary_path}")
 
     print("✅ Model loaded successfully!")
-    print(
-        f"   Validation Accuracy: {model_metadata.get('metrics', {}).get('val_acc_best', 'N/A')}"
-    )
+    print(f"   Validation Accuracy: {model_metadata.get('metrics', {}).get('val_acc_best', 'N/A')}")
 
 
 @app.route("/api/health", methods=["GET"])
@@ -121,12 +119,8 @@ def model_info():
                 "output_classes": 2,
             },
             "performance": {
-                "validation_accuracy": model_metadata.get("metrics", {}).get(
-                    "val_acc_best", "N/A"
-                ),
-                "training_loss": model_metadata.get("metrics", {}).get(
-                    "train_loss_last", "N/A"
-                ),
+                "validation_accuracy": model_metadata.get("metrics", {}).get("val_acc_best", "N/A"),
+                "training_loss": model_metadata.get("metrics", {}).get("train_loss_last", "N/A"),
             },
             "features": {
                 "names": ["variance", "skewness", "curtosis", "entropy"],
@@ -154,9 +148,7 @@ def predict():
                 jsonify(
                     {
                         "error": "Missing required field: features",
-                        "expected_format": {
-                            "features": ["variance", "skewness", "curtosis", "entropy"]
-                        },
+                        "expected_format": {"features": ["variance", "skewness", "curtosis", "entropy"]},
                     }
                 ),
                 400,
@@ -294,9 +286,7 @@ def predict_batch():
 
         # Summary statistics
         valid_predictions = [r for r in results if "prediction" in r]
-        genuine_count = sum(
-            1 for r in valid_predictions if r["prediction"] == "GENUINE"
-        )
+        genuine_count = sum(1 for r in valid_predictions if r["prediction"] == "GENUINE")
         forged_count = len(valid_predictions) - genuine_count
 
         return jsonify(

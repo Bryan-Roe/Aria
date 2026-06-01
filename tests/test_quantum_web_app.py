@@ -22,8 +22,7 @@ from pytest import MonkeyPatch
 def _load_wrapper():
     # Load the wrapper module by file path so tests don't rely on package imports.
     file = Path(__file__).resolve().parents[1] / "quantum-ai" / "web_app.py"
-    spec = importlib.util.spec_from_file_location(
-        "quantum_ai_web_app_for_tests", str(file))
+    spec = importlib.util.spec_from_file_location("quantum_ai_web_app_for_tests", str(file))
     if spec is None:
         raise RuntimeError(f"Could not create spec for {file}")
     mod = importlib.util.module_from_spec(spec)
@@ -45,8 +44,7 @@ def test_compat_load_checkpoint_success(tmp_path: Path, monkeypatch: MonkeyPatch
     config = {"lr": 0.01}
     chk_file = chk_dir / "test_checkpoint.npz"
 
-    np.savez(chk_file, weights=weights, epoch=epoch,
-             config=np.array(config, dtype=object))
+    np.savez(chk_file, weights=weights, epoch=epoch, config=np.array(config, dtype=object))
 
     mod = _load_wrapper()
 

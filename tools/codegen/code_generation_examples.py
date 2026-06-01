@@ -167,9 +167,7 @@ def example_4_compound_interest():
 
     for principal, rate, years, compounds in scenarios:
         amount = compound_interest(principal, rate, years, compounds)
-        print(
-            f"  ${principal:>7.0f} @ {rate:>4.1f}% for {years:>2.0f} years → ${amount:>10.2f}"
-        )
+        print(f"  ${principal:>7.0f} @ {rate:>4.1f}% for {years:>2.0f} years → ${amount:>10.2f}")
 
     return code
 

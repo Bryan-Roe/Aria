@@ -76,8 +76,7 @@ def test_orchestrator_health_aggregates_autonomous_training(app_module: ModuleTy
     status_file = repo_root / "data_out" / "autonomous_training_status.json"
 
     if not status_file.exists():
-        pytest.skip(
-            "autonomous_training_status.json does not exist; skipping test.")
+        pytest.skip("autonomous_training_status.json does not exist; skipping test.")
 
     req = MockRequest("GET")
     resp = app_module.ai_status(req)
@@ -296,9 +295,7 @@ def test_orchestrator_heartbeat_stale_not_running(app_module: ModuleType):
         _write_json(
             heartbeat_file,
             {
-                "timestamp": (
-                    datetime.now(timezone.utc) - timedelta(minutes=10)
-                ).isoformat(),
+                "timestamp": (datetime.now(timezone.utc) - timedelta(minutes=10)).isoformat(),
                 "state": "training",
                 "pid": 34567,
                 "current_cycle": 5,

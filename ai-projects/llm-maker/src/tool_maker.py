@@ -108,9 +108,7 @@ Return ONLY the Python function code, starting with 'def'."""
         logger.info(f"Creating tool '{name}': {description}")
 
         # Build the prompt
-        prompt = self._build_prompt(
-            name, description, parameters, return_type, examples
-        )
+        prompt = self._build_prompt(name, description, parameters, return_type, examples)
 
         # Try to generate valid code
         for attempt in range(max_attempts):
@@ -129,9 +127,7 @@ Return ONLY the Python function code, starting with 'def'."""
             if is_valid:
                 # Check function signature
                 param_names = list(parameters.keys())
-                sig_valid, sig_errors = self.validator.check_function_signature(
-                    code, name, param_names
-                )
+                sig_valid, sig_errors = self.validator.check_function_signature(code, name, param_names)
 
                 if sig_valid:
                     logger.info(f"Successfully created tool '{name}'")
@@ -147,19 +143,13 @@ Return ONLY the Python function code, starting with 'def'."""
                         examples=examples or [],
                     )
                 else:
-                    logger.warning(
-                        f"Function signature validation failed: {sig_errors}"
-                    )
+                    logger.warning(f"Function signature validation failed: {sig_errors}")
                     # Add feedback to prompt for next attempt
-                    prompt += "\n\nPrevious attempt had these issues:\n" + "\n".join(
-                        sig_errors
-                    )
+                    prompt += "\n\nPrevious attempt had these issues:\n" + "\n".join(sig_errors)
             else:
                 logger.warning(f"Code validation failed: {errors}")
                 # Add feedback to prompt for next attempt
-                prompt += "\n\nPrevious attempt had these safety issues:\n" + "\n".join(
-                    errors
-                )
+                prompt += "\n\nPrevious attempt had these safety issues:\n" + "\n".join(errors)
 
         logger.error(f"Failed to create tool '{name}' after {max_attempts} attempts")
         return None
@@ -267,9 +257,7 @@ Description: {description}
 
         return is_valid
 
-    def refine_tool(
-        self, tool: Tool, feedback: str, max_attempts: int = 2
-    ) -> Optional[Tool]:
+    def refine_tool(self, tool: Tool, feedback: str, max_attempts: int = 2) -> Optional[Tool]:
         """
         Refine an existing tool based on feedback
 

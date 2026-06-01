@@ -80,11 +80,11 @@ class ParallelTrainer:
         """
         str_value = str(value)
         # Check for null bytes which could truncate paths
-        if '\x00' in str_value:
+        if "\x00" in str_value:
             raise ValueError(f"Invalid null byte in {arg_name}")
         # Check for shell metacharacters that might indicate injection attempt
         # These aren't interpreted by subprocess_exec, but their presence is suspicious
-        dangerous_patterns = re.compile(r'[;&|`$]|\$\(|`.*`')
+        dangerous_patterns = re.compile(r"[;&|`$]|\$\(|`.*`")
         if dangerous_patterns.search(str_value):
             raise ValueError(f"Suspicious characters in {arg_name}: {str_value!r}")
         return str_value
@@ -205,15 +205,19 @@ class ParallelTrainer:
             env["CUDA_VISIBLE_DEVICES"] = str(device_id)
 
         if job.get("max_train_samples"):
-            cmd.extend([
-                "--max-train-samples",
-                self._validate_cmd_arg(job["max_train_samples"], "max_train_samples"),
-            ])
+            cmd.extend(
+                [
+                    "--max-train-samples",
+                    self._validate_cmd_arg(job["max_train_samples"], "max_train_samples"),
+                ]
+            )
         if job.get("max_eval_samples"):
-            cmd.extend([
-                "--max-eval-samples",
-                self._validate_cmd_arg(job["max_eval_samples"], "max_eval_samples"),
-            ])
+            cmd.extend(
+                [
+                    "--max-eval-samples",
+                    self._validate_cmd_arg(job["max_eval_samples"], "max_eval_samples"),
+                ]
+            )
         # Note: lora_rank should be set in config YAML, not via CLI
         if job.get("no_stream"):
             cmd.append("--no-stream")

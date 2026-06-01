@@ -122,11 +122,7 @@ class AdaptiveQuantumLayer(nn.Module):
             {
                 "linear": QuantumLayer(n_qubits, n_layers, device, "linear"),
                 "circular": QuantumLayer(n_qubits, n_layers, device, "circular"),
-                "full": (
-                    QuantumLayer(n_qubits, n_layers, device, "full")
-                    if n_qubits <= 6
-                    else None
-                ),
+                "full": (QuantumLayer(n_qubits, n_layers, device, "full") if n_qubits <= 6 else None),
             }
         )
 
@@ -271,22 +267,14 @@ class MultiScaleQuantumAttention(nn.Module):
             self.quantum_layers.append(layer)
 
         # Quantum projection layers
-        self.quantum_proj_q = nn.ModuleList(
-            [nn.Linear(self.d_head, 2**q) for q in self.qubit_counts]
-        )
-        self.quantum_proj_k = nn.ModuleList(
-            [nn.Linear(self.d_head, 2**q) for q in self.qubit_counts]
-        )
+        self.quantum_proj_q = nn.ModuleList([nn.Linear(self.d_head, 2**q) for q in self.qubit_counts])
+        self.quantum_proj_k = nn.ModuleList([nn.Linear(self.d_head, 2**q) for q in self.qubit_counts])
 
         self.attn_dropout = nn.Dropout(dropout)
 
-        logger.info(
-            f"MultiScaleQuantumAttention: {n_heads} heads with qubits {qubit_counts}"
-        )
+        logger.info(f"MultiScaleQuantumAttention: {n_heads} heads with qubits {qubit_counts}")
 
-    def forward(
-        self, x: torch.Tensor, mask: Optional[torch.Tensor] = None
-    ) -> torch.Tensor:
+    def forward(self, x: torch.Tensor, mask: Optional[torch.Tensor] = None) -> torch.Tensor:
         batch, seq_len, _ = x.shape
 
         # Project to Q, K, V
@@ -311,28 +299,16 @@ class MultiScaleQuantumAttention(nn.Module):
             # Apply quantum layer
             if self.quantum_layers[h] is not None:
                 try:
-                    Q_q = self.quantum_layers[h](Q_proj).view(
-                        batch, seq_len, self.qubit_counts[h]
-                    )
-                    K_q = self.quantum_layers[h](K_proj).view(
-                        batch, seq_len, self.qubit_counts[h]
-                    )
+                    Q_q = self.quantum_layers[h](Q_proj).view(batch, seq_len, self.qubit_counts[h])
+                    K_q = self.quantum_layers[h](K_proj).view(batch, seq_len, self.qubit_counts[h])
                 except Exception as e:
                     logger.warning(f"Quantum head {h} failed: {e}, using classical")
-                    Q_q = torch.tanh(Q_proj[..., : self.qubit_counts[h]]).view(
-                        batch, seq_len, self.qubit_counts[h]
-                    )
-                    K_q = torch.tanh(K_proj[..., : self.qubit_counts[h]]).view(
-                        batch, seq_len, self.qubit_counts[h]
-                    )
+                    Q_q = torch.tanh(Q_proj[..., : self.qubit_counts[h]]).view(batch, seq_len, self.qubit_counts[h])
+                    K_q = torch.tanh(K_proj[..., : self.qubit_counts[h]]).view(batch, seq_len, self.qubit_counts[h])
             else:
                 # Classical fallback
-                Q_q = torch.tanh(Q_proj[..., : self.qubit_counts[h]]).view(
-                    batch, seq_len, self.qubit_counts[h]
-                )
-                K_q = torch.tanh(K_proj[..., : self.qubit_counts[h]]).view(
-                    batch, seq_len, self.qubit_counts[h]
-                )
+                Q_q = torch.tanh(Q_proj[..., : self.qubit_counts[h]]).view(batch, seq_len, self.qubit_counts[h])
+                K_q = torch.tanh(K_proj[..., : self.qubit_counts[h]]).view(batch, seq_len, self.qubit_counts[h])
 
             # Compute attention
             attn_logits = torch.bmm(Q_q, K_q.transpose(1, 2)) * self.scales[h]

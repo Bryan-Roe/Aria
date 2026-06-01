@@ -94,35 +94,23 @@ class AutomaticEvaluator:
             try:
                 import json as _json
 
-                with open(
-                    adapter_dir / "adapter_config.json", "r", encoding="utf-8"
-                ) as f:
+                with open(adapter_dir / "adapter_config.json", "r", encoding="utf-8") as f:
                     adapter_cfg = _json.load(f)
-                base_model_id = adapter_cfg.get(
-                    "base_model_name_or_path"
-                ) or self.config.get("model")
+                base_model_id = adapter_cfg.get("base_model_name_or_path") or self.config.get("model")
                 # Fallback mapping similar to training script
                 if base_model_id == "Phi-3.6-mini-instruct":
                     base_model_id = "microsoft/Phi-3.5-mini-instruct"
                 print(f"Detected LoRA adapter. Base model: {base_model_id}")
                 base_model = AutoModelForCausalLM.from_pretrained(
                     base_model_id,
-                    torch_dtype=(
-                        torch.float16 if self.device == "cuda" else torch.float32
-                    ),
+                    torch_dtype=(torch.float16 if self.device == "cuda" else torch.float32),
                     device_map="auto" if self.device == "cuda" else None,
                 )
-                tokenizer_source = (
-                    model_dir / "tokenizer"
-                    if (model_dir / "tokenizer").exists()
-                    else base_model_id
-                )
+                tokenizer_source = model_dir / "tokenizer" if (model_dir / "tokenizer").exists() else base_model_id
                 tokenizer = AutoTokenizer.from_pretrained(tokenizer_source)
                 model = PeftModel.from_pretrained(base_model, adapter_dir)
             except Exception as e:
-                raise RuntimeError(
-                    f"Failed to load LoRA adapter from {adapter_dir}: {e}"
-                ) from e
+                raise RuntimeError(f"Failed to load LoRA adapter from {adapter_dir}: {e}") from e
         else:
             model = AutoModelForCausalLM.from_pretrained(
                 model_path,
@@ -147,23 +135,17 @@ class AutomaticEvaluator:
 
         # Compute inference metrics
         if "inference_time" in metrics:
-            inference_metrics = self._compute_inference_metrics(
-                model, tokenizer, dataset
-            )
+            inference_metrics = self._compute_inference_metrics(model, tokenizer, dataset)
             results.update(inference_metrics)
 
         # Compute generation quality metrics
         if "bleu" in metrics or "rouge" in metrics:
-            quality_metrics = self._compute_quality_metrics(
-                model, tokenizer, dataset, metrics
-            )
+            quality_metrics = self._compute_quality_metrics(model, tokenizer, dataset, metrics)
             results.update(quality_metrics)
 
         return EvaluationMetrics(**results)
 
-    def _load_test_data(
-        self, dataset_path: str, num_samples: int
-    ) -> List[Dict[str, Any]]:
+    def _load_test_data(self, dataset_path: str, num_samples: int) -> List[Dict[str, Any]]:
         """Load test dataset"""
         dataset_path = Path(dataset_path)
 
@@ -182,9 +164,7 @@ class AutomaticEvaluator:
                 dataset = load_dataset(str(dataset_path), split=f"test[:{num_samples}]")
                 return list(dataset)
             except Exception:
-                raise ValueError(
-                    f"Unsupported dataset format: {dataset_path}"
-                ) from None
+                raise ValueError(f"Unsupported dataset format: {dataset_path}") from None
 
     def _compute_perplexity(
         self,
@@ -200,9 +180,7 @@ class AutomaticEvaluator:
         with torch.no_grad():
             for example in dataset:
                 text = self._extract_text(example)
-                inputs = tokenizer(
-                    text, return_tensors="pt", truncation=True, max_length=512
-                )
+                inputs = tokenizer(text, return_tensors="pt", truncation=True, max_length=512)
                 inputs = {k: v.to(self.device) for k, v in inputs.items()}
 
                 outputs = model(**inputs, labels=inputs["input_ids"])
@@ -229,9 +207,7 @@ class AutomaticEvaluator:
         with torch.no_grad():
             for example in dataset[:10]:  # Use subset for timing
                 text = self._extract_text(example)
-                inputs = tokenizer(
-                    text, return_tensors="pt", truncation=True, max_length=256
-                )
+                inputs = tokenizer(text, return_tensors="pt", truncation=True, max_length=256)
                 inputs = {k: v.to(self.device) for k, v in inputs.items()}
 
                 start = time.perf_counter()
@@ -290,13 +266,9 @@ class AutomaticEvaluator:
         model.eval()
         with torch.no_grad():
             for p, r in pairs:
-                inputs = tokenizer(
-                    p, return_tensors="pt", truncation=True, max_length=512
-                )
+                inputs = tokenizer(p, return_tensors="pt", truncation=True, max_length=512)
                 inputs = {k: v.to(self.device) for k, v in inputs.items()}
-                output_ids = model.generate(
-                    **inputs, max_new_tokens=96, do_sample=False
-                )
+                output_ids = model.generate(**inputs, max_new_tokens=96, do_sample=False)
                 text = tokenizer.decode(output_ids[0], skip_special_tokens=True)
                 # Heuristic: keep only completion after prompt
                 if text.startswith(p):
@@ -316,9 +288,7 @@ class AutomaticEvaluator:
 
         if want_rouge and preds and refs:
             try:
-                scorer = rouge_scorer.RougeScorer(
-                    ["rouge1", "rouge2", "rougeL"], use_stemmer=True
-                )
+                scorer = rouge_scorer.RougeScorer(["rouge1", "rouge2", "rougeL"], use_stemmer=True)
                 totals = {"rouge1": 0.0, "rouge2": 0.0, "rougeL": 0.0}
                 for hyp, ref in zip(preds, refs):
                     scores = scorer.score(ref, hyp)
@@ -359,9 +329,7 @@ class AutomaticEvaluator:
             return example["text"]
         elif "messages" in example:
             # Chat format
-            return "\n".join(
-                [f"{m['role']}: {m['content']}" for m in example["messages"]]
-            )
+            return "\n".join([f"{m['role']}: {m['content']}" for m in example["messages"]])
         elif "instruction" in example:
             return f"Instruction: {example['instruction']}\nResponse: {example.get('response', '')}"
         else:
@@ -386,9 +354,7 @@ class AutomaticEvaluator:
         for model_path in model_paths:
             model_name = Path(model_path).name
             print(f"\nEvaluating {model_name}...")
-            metrics = self.evaluate_model(
-                model_path, test_dataset, num_samples=num_samples
-            )
+            metrics = self.evaluate_model(model_path, test_dataset, num_samples=num_samples)
             results[model_name] = metrics
 
             print(f"  Perplexity: {metrics.perplexity:.2f}")
@@ -404,31 +370,21 @@ def main():
 
     parser = argparse.ArgumentParser(description="Automatic Model Evaluation")
     parser.add_argument("--model", type=str, required=True, help="Path to model")
-    parser.add_argument(
-        "--dataset", type=str, required=True, help="Path to test dataset"
-    )
-    parser.add_argument(
-        "--config", type=str, default="lora/lora.yaml", help="Config file"
-    )
-    parser.add_argument(
-        "--num-samples", type=int, default=100, help="Number of test samples"
-    )
+    parser.add_argument("--dataset", type=str, required=True, help="Path to test dataset")
+    parser.add_argument("--config", type=str, default="lora/lora.yaml", help="Config file")
+    parser.add_argument("--num-samples", type=int, default=100, help="Number of test samples")
     parser.add_argument(
         "--metrics",
         nargs="+",
         default=["perplexity", "inference_time"],
         help="Metrics to compute",
     )
-    parser.add_argument(
-        "--output-name", type=str, default="evaluation", help="Output name"
-    )
+    parser.add_argument("--output-name", type=str, default="evaluation", help="Output name")
 
     args = parser.parse_args()
 
     evaluator = AutomaticEvaluator(config_path=args.config)
-    metrics = evaluator.evaluate_model(
-        args.model, args.dataset, metrics=args.metrics, num_samples=args.num_samples
-    )
+    metrics = evaluator.evaluate_model(args.model, args.dataset, metrics=args.metrics, num_samples=args.num_samples)
 
     print("\n=== Evaluation Results ===")
     print(f"Perplexity: {metrics.perplexity:.2f}")

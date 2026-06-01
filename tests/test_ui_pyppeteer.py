@@ -110,10 +110,7 @@ def ensure_server_running() -> Optional[subprocess.Popen]:
         return None
 
     if ARIA_WEB is None:
-        pytest.skip(
-            "Aria web app not found in any known location: "
-            + ", ".join(str(p) for p in _CANDIDATE_ARIA_DIRS)
-        )
+        pytest.skip("Aria web app not found in any known location: " + ", ".join(str(p) for p in _CANDIDATE_ARIA_DIRS))
 
     # If :8080 is occupied by something else, run Aria on a free port.
     target_port = DEFAULT_PORT if not is_port_open(DEFAULT_PORT) else _find_free_port()
@@ -134,9 +131,7 @@ def ensure_server_running() -> Optional[subprocess.Popen]:
     try:
         while time.monotonic() < deadline:
             if proc.poll() is not None:
-                raise RuntimeError(
-                    f"Aria server exited prematurely with code {proc.returncode}"
-                )
+                raise RuntimeError(f"Aria server exited prematurely with code {proc.returncode}")
             if is_aria_api_healthy(target_url):
                 SERVER_URL = target_url
                 return proc
@@ -146,9 +141,7 @@ def ensure_server_running() -> Optional[subprocess.Popen]:
         raise
 
     _terminate_process(proc)
-    raise RuntimeError(
-        f"Failed to start Aria server on {target_url} within {SERVER_BOOT_TIMEOUT:.1f}s"
-    )
+    raise RuntimeError(f"Failed to start Aria server on {target_url} within {SERVER_BOOT_TIMEOUT:.1f}s")
 
 
 def _terminate_process(proc: subprocess.Popen, timeout: float = 2.0) -> None:
@@ -190,9 +183,7 @@ def wait_for_object(name: str, timeout: float = 4.0) -> Optional[dict]:
     return None
 
 
-async def wait_for_object_state(
-    name: str, expected_states: tuple[str, ...], timeout: float = 4.0
-) -> Optional[dict]:
+async def wait_for_object_state(name: str, expected_states: tuple[str, ...], timeout: float = 4.0) -> Optional[dict]:
     """Async variant: poll until the named object reaches one of ``expected_states``."""
     deadline = time.monotonic() + timeout
     while time.monotonic() < deadline:
@@ -269,12 +260,8 @@ async def _run_pyppeteer_scenario() -> None:
 
         # Drop.
         await page.evaluate("() => dropObject()")
-        dropped = await wait_for_object_state(
-            name, ("on_stage", "on_table"), timeout=5.0
-        )
-        assert dropped is not None, (
-            f"Object {name} did not return to a resting state after dropObject"
-        )
+        dropped = await wait_for_object_state(name, ("on_stage", "on_table"), timeout=5.0)
+        assert dropped is not None, f"Object {name} did not return to a resting state after dropObject"
 
         # Cleanup the test object.
         cleanup = await asyncio.to_thread(

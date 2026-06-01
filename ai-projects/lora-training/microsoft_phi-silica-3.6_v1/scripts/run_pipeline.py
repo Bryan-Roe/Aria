@@ -277,12 +277,8 @@ Examples:
     )
 
     # Input/Output
-    parser.add_argument(
-        "--input-dataset", type=str, help="Input training dataset (JSONL)"
-    )
-    parser.add_argument(
-        "--test-dataset", type=str, help="Test dataset for evaluation (JSONL)"
-    )
+    parser.add_argument("--input-dataset", type=str, help="Input training dataset (JSONL)")
+    parser.add_argument("--test-dataset", type=str, help="Test dataset for evaluation (JSONL)")
     parser.add_argument(
         "--training-config",
         type=str,
@@ -297,9 +293,7 @@ Examples:
     )
 
     # GPU Optimization
-    parser.add_argument(
-        "--model-size-gb", type=float, default=7.0, help="Model size in GB"
-    )
+    parser.add_argument("--model-size-gb", type=float, default=7.0, help="Model size in GB")
     parser.add_argument(
         "--memory-usage",
         type=float,
@@ -331,25 +325,15 @@ Examples:
         default=0.3,
         help="Quality threshold for pruning",
     )
-    parser.add_argument(
-        "--no-embeddings", action="store_true", help="Skip semantic deduplication"
-    )
+    parser.add_argument("--no-embeddings", action="store_true", help="Skip semantic deduplication")
 
     # Training
-    parser.add_argument(
-        "--max-train-samples", type=int, help="Maximum training samples (for testing)"
-    )
-    parser.add_argument(
-        "--no-stream", action="store_true", help="Disable streaming during training"
-    )
-    parser.add_argument(
-        "--dry-run", action="store_true", help="Dry run (validate config only)"
-    )
+    parser.add_argument("--max-train-samples", type=int, help="Maximum training samples (for testing)")
+    parser.add_argument("--no-stream", action="store_true", help="Disable streaming during training")
+    parser.add_argument("--dry-run", action="store_true", help="Dry run (validate config only)")
 
     # Evaluation
-    parser.add_argument(
-        "--eval-samples", type=int, default=100, help="Number of samples for evaluation"
-    )
+    parser.add_argument("--eval-samples", type=int, default=100, help="Number of samples for evaluation")
     parser.add_argument(
         "--eval-metrics",
         nargs="+",
@@ -371,23 +355,13 @@ Examples:
         default="data_out/rag_index",
         help="Path for RAG index",
     )
-    parser.add_argument(
-        "--no-rebuild-rag-index", action="store_true", help="Don't rebuild RAG index"
-    )
+    parser.add_argument("--no-rebuild-rag-index", action="store_true", help="Don't rebuild RAG index")
 
     # Pipeline Control
-    parser.add_argument(
-        "--skip-optimization", action="store_true", help="Skip GPU optimization step"
-    )
-    parser.add_argument(
-        "--skip-pruning", action="store_true", help="Skip data pruning step"
-    )
-    parser.add_argument(
-        "--skip-training", action="store_true", help="Skip training step"
-    )
-    parser.add_argument(
-        "--skip-evaluation", action="store_true", help="Skip evaluation step"
-    )
+    parser.add_argument("--skip-optimization", action="store_true", help="Skip GPU optimization step")
+    parser.add_argument("--skip-pruning", action="store_true", help="Skip data pruning step")
+    parser.add_argument("--skip-training", action="store_true", help="Skip training step")
+    parser.add_argument("--skip-evaluation", action="store_true", help="Skip evaluation step")
     parser.add_argument("--skip-rag", action="store_true", help="Skip RAG setup step")
     parser.add_argument(
         "--continue-on-error",

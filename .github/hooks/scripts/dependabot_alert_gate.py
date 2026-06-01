@@ -210,9 +210,7 @@ def _format_context(data: dict[str, Any]) -> str:
         f"    {total} known vulnerabilities across {len(files)} requirements file(s).",
     ]
     if critical > 0:
-        lines.append(
-            f"    ⛔ {critical} CRITICAL — address before modifying any requirements files."
-        )
+        lines.append(f"    ⛔ {critical} CRITICAL — address before modifying any requirements files.")
     if high > 0:
         lines.append(f"    ⚠️  {high} HIGH — review when updating dependencies.")
 
@@ -220,9 +218,7 @@ def _format_context(data: dict[str, Any]) -> str:
         lines.append("    Sample affected packages:")
         for v in sample:
             fix = ", ".join(v.get("fix_versions", [])) or "no fix"
-            lines.append(
-                f"      • {v['package']} {v['version']} ({v['id']}) → fix: {fix}"
-            )
+            lines.append(f"      • {v['package']} {v['version']} ({v['id']}) → fix: {fix}")
 
     lines += [
         "",
@@ -273,9 +269,7 @@ def main() -> None:
     critical = data.get("critical", 0)
     high = data.get("high", 0)
 
-    should_inject = total > 0 and (
-        critical >= CRITICAL_THRESHOLD or high >= HIGH_THRESHOLD
-    )
+    should_inject = total > 0 and (critical >= CRITICAL_THRESHOLD or high >= HIGH_THRESHOLD)
     if should_inject:
         print(_format_context(data))
 

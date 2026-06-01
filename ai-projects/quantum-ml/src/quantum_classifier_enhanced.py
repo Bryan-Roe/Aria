@@ -49,9 +49,7 @@ class EnhancedQuantumClassifier:
         self.data_reuploading = True  # Enable data re-uploading
 
         # Initialize quantum device
-        self.dev = qml.device(
-            self.config["quantum"]["simulator"]["backend"], wires=self.n_qubits
-        )
+        self.dev = qml.device(self.config["quantum"]["simulator"]["backend"], wires=self.n_qubits)
 
         # Create quantum circuit
         self.qnode = qml.QNode(self._circuit, self.dev, interface="torch")
@@ -84,9 +82,7 @@ class EnhancedQuantumClassifier:
         for i in range(self.n_qubits):
             qml.RY(weights[layer_idx, i, 0], wires=i)
             qml.RZ(weights[layer_idx, i, 1], wires=i)
-            qml.RX(
-                weights[layer_idx, i, 2], wires=i
-            )  # Additional rotation for expressivity
+            qml.RX(weights[layer_idx, i, 2], wires=i)  # Additional rotation for expressivity
 
     def _entanglement_layer(self):
         """
@@ -262,14 +258,10 @@ class HybridEnhancedClassifier(nn.Module):
         )
 
         # Enhanced quantum layer
-        self.quantum_classifier = EnhancedQuantumClassifier(
-            n_qubits=n_qubits, n_layers=n_layers
-        )
+        self.quantum_classifier = EnhancedQuantumClassifier(n_qubits=n_qubits, n_layers=n_layers)
 
         # Initialize quantum weights as trainable parameters
-        self.quantum_weights = nn.Parameter(
-            self.quantum_classifier.initialize_weights()
-        )
+        self.quantum_weights = nn.Parameter(self.quantum_classifier.initialize_weights())
 
         # Classical postprocessing layers
         self.classical_output = nn.Sequential(
@@ -284,9 +276,7 @@ class HybridEnhancedClassifier(nn.Module):
         else:
             self.activation = nn.Softmax(dim=1)
 
-        logger.info(
-            f"HybridEnhancedClassifier: {input_dim}→{n_qubits}Q({n_layers}L)→{output_dim}"
-        )
+        logger.info(f"HybridEnhancedClassifier: {input_dim}→{n_qubits}Q({n_layers}L)→{output_dim}")
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """
@@ -345,17 +335,9 @@ def train_enhanced_model(
 
     # Convert to tensors
     X_train_t = torch.FloatTensor(X_train)
-    y_train_t = (
-        torch.FloatTensor(y_train).reshape(-1, 1)
-        if model.output_dim == 1
-        else torch.LongTensor(y_train)
-    )
+    y_train_t = torch.FloatTensor(y_train).reshape(-1, 1) if model.output_dim == 1 else torch.LongTensor(y_train)
     X_val_t = torch.FloatTensor(X_val)
-    y_val_t = (
-        torch.FloatTensor(y_val).reshape(-1, 1)
-        if model.output_dim == 1
-        else torch.LongTensor(y_val)
-    )
+    y_val_t = torch.FloatTensor(y_val).reshape(-1, 1) if model.output_dim == 1 else torch.LongTensor(y_val)
 
     history = {"train_loss": [], "val_loss": [], "val_acc": []}
 
@@ -426,9 +408,7 @@ if __name__ == "__main__":
     X_val = scaler.transform(X_val)
 
     # Create enhanced model with 8 qubits
-    model = HybridEnhancedClassifier(
-        input_dim=2, n_qubits=8, n_layers=4, output_dim=1, hidden_dim=16
-    )
+    model = HybridEnhancedClassifier(input_dim=2, n_qubits=8, n_layers=4, output_dim=1, hidden_dim=16)
 
     print("\nModel Architecture:")
     print(f"  Input: {model.input_dim} features")

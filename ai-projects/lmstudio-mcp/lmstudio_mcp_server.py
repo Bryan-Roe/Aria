@@ -195,10 +195,8 @@ def get_client() -> LMStudioClient:
         base_url = os.getenv("LMSTUDIO_BASE_URL", DEFAULT_BASE_URL)
         model = os.getenv("LMSTUDIO_MODEL", DEFAULT_MODEL)
         # Ensure environment defaults are strings before casting
-        temperature = float(
-            os.getenv("LMSTUDIO_TEMPERATURE", str(DEFAULT_TEMPERATURE)))
-        max_tokens = int(
-            os.getenv("LMSTUDIO_MAX_TOKENS", str(DEFAULT_MAX_TOKENS)))
+        temperature = float(os.getenv("LMSTUDIO_TEMPERATURE", str(DEFAULT_TEMPERATURE)))
+        max_tokens = int(os.getenv("LMSTUDIO_MAX_TOKENS", str(DEFAULT_MAX_TOKENS)))
 
         _client = LMStudioClient(
             base_url=base_url,
@@ -296,8 +294,7 @@ async def call_tool(name: str, arguments: Dict[str, Any]) -> List[TextContent]:
                 return [
                     TextContent(
                         type="text",
-                        text=json.dumps(
-                            {"error": "No messages provided"}, indent=2),
+                        text=json.dumps({"error": "No messages provided"}, indent=2),
                     )
                 ]
 
@@ -332,8 +329,7 @@ async def call_tool(name: str, arguments: Dict[str, Any]) -> List[TextContent]:
             return [
                 TextContent(
                     type="text",
-                    text=json.dumps(
-                        {"error": f"Unknown tool: {name}"}, indent=2),
+                    text=json.dumps({"error": f"Unknown tool: {name}"}, indent=2),
                 )
             ]
 
@@ -358,13 +354,10 @@ async def main():
     if connected:
         logger.info("✓ Successfully connected to LM Studio")
         models = await client.list_models()
-        logger.info(
-            f"✓ Available models: {models.get('available_models', [])}")
+        logger.info(f"✓ Available models: {models.get('available_models', [])}")
     else:
-        logger.warning(
-            f"⚠ Could not connect to LM Studio at {client.base_url}")
-        logger.info(
-            "Make sure LM Studio is running and the local server is enabled.")
+        logger.warning(f"⚠ Could not connect to LM Studio at {client.base_url}")
+        logger.info("Make sure LM Studio is running and the local server is enabled.")
 
     # Start MCP server
     async with stdio_server() as (read_stream, write_stream):

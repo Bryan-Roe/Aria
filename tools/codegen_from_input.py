@@ -42,24 +42,12 @@ class ImplementationInput:
     def from_dict(cls, data: dict[str, Any]) -> "ImplementationInput":
         return cls(
             goal=str(data.get("goal", "")).strip(),
-            target_paths=[
-                str(p).strip() for p in data.get("target_paths", []) if str(p).strip()
-            ],
+            target_paths=[str(p).strip() for p in data.get("target_paths", []) if str(p).strip()],
             language=str(data.get("language", "")).strip(),
-            constraints=[
-                str(c).strip() for c in data.get("constraints", []) if str(c).strip()
-            ],
+            constraints=[str(c).strip() for c in data.get("constraints", []) if str(c).strip()],
             api_contract=str(data.get("api_contract", "")).strip(),
-            acceptance_criteria=[
-                str(a).strip()
-                for a in data.get("acceptance_criteria", [])
-                if str(a).strip()
-            ],
-            validation_commands=[
-                str(v).strip()
-                for v in data.get("validation_commands", [])
-                if str(v).strip()
-            ],
+            acceptance_criteria=[str(a).strip() for a in data.get("acceptance_criteria", []) if str(a).strip()],
+            validation_commands=[str(v).strip() for v in data.get("validation_commands", []) if str(v).strip()],
             notes=str(data.get("notes", "")).strip(),
         )
 
@@ -71,13 +59,9 @@ class ImplementationInput:
         if not self.language:
             raise ValueError("Missing required field: language")
         if not self.acceptance_criteria:
-            raise ValueError(
-                "Missing required field: acceptance_criteria (non-empty list)"
-            )
+            raise ValueError("Missing required field: acceptance_criteria (non-empty list)")
         if not self.validation_commands:
-            raise ValueError(
-                "Missing required field: validation_commands (non-empty list)"
-            )
+            raise ValueError("Missing required field: validation_commands (non-empty list)")
 
 
 HEADER_LINE = "#" * 78
@@ -355,20 +339,14 @@ def write_report(
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(
-        description="Generate scaffold code from implementation_input JSON"
-    )
+    parser = argparse.ArgumentParser(description="Generate scaffold code from implementation_input JSON")
     parser.add_argument(
         "--input",
         default="implementation_input.json",
         help="Path to implementation input JSON",
     )
-    parser.add_argument(
-        "--out-root", default=".", help="Workspace root where target_paths are resolved"
-    )
-    parser.add_argument(
-        "--dry-run", action="store_true", help="Preview files without writing"
-    )
+    parser.add_argument("--out-root", default=".", help="Workspace root where target_paths are resolved")
+    parser.add_argument("--dry-run", action="store_true", help="Preview files without writing")
     parser.add_argument("--force", action="store_true", help="Overwrite existing files")
     return parser.parse_args()
 

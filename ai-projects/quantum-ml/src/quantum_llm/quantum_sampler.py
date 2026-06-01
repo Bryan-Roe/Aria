@@ -93,8 +93,7 @@ def _classical_variational_probs(
         q = i % num_qubits
         # Apply single-qubit Ry rotation to qubit q using tensor product
         ry = np.array(
-            [[np.cos(theta / 2), -np.sin(theta / 2)],
-             [np.sin(theta / 2),  np.cos(theta / 2)]],
+            [[np.cos(theta / 2), -np.sin(theta / 2)], [np.sin(theta / 2), np.cos(theta / 2)]],
             dtype=complex,
         )
         # Embed into full Hilbert space
@@ -111,7 +110,7 @@ def _classical_variational_probs(
         cnot2[[2, 3]] = cnot2[[3, 2]]
 
         # Build operator: I for qubits < q, CNOT2 for q and q+1, I for qubits > q+1
-        before_dims = q          # number of qubits before the CNOT pair
+        before_dims = q  # number of qubits before the CNOT pair
         after_dims = num_qubits - q - 2  # number of qubits after the CNOT pair
 
         op = np.eye(1, dtype=complex)
@@ -295,18 +294,12 @@ class QuantumSampler:
 
         # Compute circuit
         if self.effective_backend == "pennylane":
-            probs = _pennylane_variational_probs(
-                params, self.num_qubits, self.shots, self.num_layers
-            )
+            probs = _pennylane_variational_probs(params, self.num_qubits, self.shots, self.num_layers)
         elif self.effective_backend == "qiskit":
-            probs = _qiskit_variational_probs(
-                params, self.num_qubits, self.shots, self.num_layers
-            )
+            probs = _qiskit_variational_probs(params, self.num_qubits, self.shots, self.num_layers)
         else:
             # Classical fallback
-            probs = _classical_variational_probs(
-                params, self.num_qubits, self.shots, self._rng
-            )
+            probs = _classical_variational_probs(params, self.num_qubits, self.shots, self._rng)
 
         # Cache result
         if self._cache_enabled and self._cache is not None:

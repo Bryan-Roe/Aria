@@ -42,12 +42,8 @@ class CodeTokenizer:
 
     def __init__(self) -> None:
         chars = string.printable  # 100 printable ASCII chars, fixed ordering
-        self._char_to_id: Dict[str, int] = {
-            c: self._NUM_SPECIAL + i for i, c in enumerate(chars)
-        }
-        self._id_to_char: Dict[int, str] = {
-            self._NUM_SPECIAL + i: c for i, c in enumerate(chars)
-        }
+        self._char_to_id: Dict[str, int] = {c: self._NUM_SPECIAL + i for i, c in enumerate(chars)}
+        self._id_to_char: Dict[int, str] = {self._NUM_SPECIAL + i: c for i, c in enumerate(chars)}
         self._vocab_size: int = self._NUM_SPECIAL + len(chars)
 
     # ------------------------------------------------------------------
@@ -181,10 +177,7 @@ class QuantumCodeLLM(nn.Module):
         self.token_emb = nn.Embedding(config.vocab_size, config.d_model)
         self.pos_emb = nn.Embedding(config.max_seq_len, config.d_model)
         self.blocks = nn.ModuleList(
-            [
-                _TransformerBlock(config.d_model, config.n_heads, config.max_seq_len)
-                for _ in range(config.n_layers)
-            ]
+            [_TransformerBlock(config.d_model, config.n_heads, config.max_seq_len) for _ in range(config.n_layers)]
         )
         self.norm = nn.LayerNorm(config.d_model)
         self.head = nn.Linear(config.d_model, config.vocab_size, bias=False)
@@ -214,14 +207,10 @@ class QuantumCodeLLM(nn.Module):
             If sequence length exceeds ``config.max_seq_len``.
         """
         if tokens.dim() != 2:
-            raise ValueError(
-                f"tokens must be 2-D (B, T), got shape {tuple(tokens.shape)}"
-            )
+            raise ValueError(f"tokens must be 2-D (B, T), got shape {tuple(tokens.shape)}")
         _B, T = tokens.shape
         if T > self.config.max_seq_len:
-            raise ValueError(
-                f"Sequence length {T} exceeds max_seq_len {self.config.max_seq_len}."
-            )
+            raise ValueError(f"Sequence length {T} exceeds max_seq_len {self.config.max_seq_len}.")
         positions = torch.arange(T, device=tokens.device).unsqueeze(0)
         x = self.token_emb(tokens) + self.pos_emb(positions)
         for block in self.blocks:
@@ -249,9 +238,7 @@ class QuantumCodeLLM(nn.Module):
         if top_k < 0:
             raise ValueError(f"top_k must be >= 0, got {top_k}")
         if prompt.dim() != 2 or prompt.shape[0] != 1:
-            raise ValueError(
-                f"prompt must have shape (1, T), got {tuple(prompt.shape)}"
-            )
+            raise ValueError(f"prompt must have shape (1, T), got {tuple(prompt.shape)}")
 
         generated = prompt.clone()
         for _ in range(max_new_tokens):
@@ -334,10 +321,7 @@ def load_checkpoint(
         metadata = {}
 
     else:
-        raise ValueError(
-            f"Unrecognised checkpoint format at {path}. "
-            f"Keys found: {sorted(payload.keys())}"
-        )
+        raise ValueError(f"Unrecognised checkpoint format at {path}. " f"Keys found: {sorted(payload.keys())}")
 
     model.eval()
     return model, tokenizer, metadata

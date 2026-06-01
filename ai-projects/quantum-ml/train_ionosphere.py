@@ -42,9 +42,7 @@ def load_ionosphere_data():
         y: numpy array of shape (n_samples,) with class labels
     """
     # Path to dataset
-    dataset_path = (
-        Path(__file__).parent.parent / "datasets" / "quantum" / "ionosphere.csv"
-    )
+    dataset_path = Path(__file__).parent.parent / "datasets" / "quantum" / "ionosphere.csv"
 
     print(f"📁 Loading ionosphere dataset from: {dataset_path}")
 
@@ -152,9 +150,7 @@ def plot_training_results(history, save_path="results/ionosphere_training.png"):
     ax1.grid(True, alpha=0.3)
 
     # Accuracy curve
-    ax2.plot(
-        history["val_acc"], label="Validation Accuracy", linewidth=2, color="green"
-    )
+    ax2.plot(history["val_acc"], label="Validation Accuracy", linewidth=2, color="green")
     ax2.axhline(
         y=max(history["val_acc"]),
         color="red",

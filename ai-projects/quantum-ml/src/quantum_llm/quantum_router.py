@@ -97,6 +97,7 @@ def _pennylane_qaoa_scores(
     dev = qml.device("default.qubit", wires=num_qubits, shots=None)
 
     for i, _provider in enumerate(providers):
+
         @qml.qnode(dev)
         def circuit(features, params, i=i):  # capture i
             # Encode features as rotation angles
@@ -193,9 +194,7 @@ class QuantumRouter:
 
         try:
             if self.effective_backend == "pennylane":
-                scores = _pennylane_qaoa_scores(
-                    features, candidates, self._params, self.num_qubits
-                )
+                scores = _pennylane_qaoa_scores(features, candidates, self._params, self.num_qubits)
             else:
                 scores = _classical_score_providers(features, candidates, self._params)
         except Exception as exc:  # noqa: BLE001
@@ -228,13 +227,9 @@ class QuantumRouter:
 
         try:
             if self.effective_backend == "pennylane":
-                scores_arr = _pennylane_qaoa_scores(
-                    features, self.providers, self._params, self.num_qubits
-                )
+                scores_arr = _pennylane_qaoa_scores(features, self.providers, self._params, self.num_qubits)
             else:
-                scores_arr = _classical_score_providers(
-                    features, self.providers, self._params
-                )
+                scores_arr = _classical_score_providers(features, self.providers, self._params)
         except Exception as exc:  # noqa: BLE001
             logger.warning("QuantumRouter scoring failed (%s)", exc)
             scores_arr = np.zeros(len(self.providers))

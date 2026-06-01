@@ -66,12 +66,8 @@ class RiskManager:
     """Evaluate whether a proposed change is safe to apply."""
 
     repo_root: Path
-    protected_prefixes: Sequence[str] = field(
-        default_factory=lambda: list(_DEFAULT_PROTECTED_PREFIXES)
-    )
-    protected_names: Sequence[str] = field(
-        default_factory=lambda: list(_DEFAULT_PROTECTED_NAMES)
-    )
+    protected_prefixes: Sequence[str] = field(default_factory=lambda: list(_DEFAULT_PROTECTED_PREFIXES))
+    protected_names: Sequence[str] = field(default_factory=lambda: list(_DEFAULT_PROTECTED_NAMES))
     max_file_bytes: int = _MAX_FILE_BYTES
     max_plan_delta_bytes: int = _MAX_PLAN_DELTA_BYTES
 
@@ -125,9 +121,7 @@ class RiskManager:
             return RiskAssessment.deny(f"unable to stat file: {exc}")
 
         if size > self.max_file_bytes:
-            return RiskAssessment.deny(
-                f"file exceeds size cap ({size} > {self.max_file_bytes} bytes)"
-            )
+            return RiskAssessment.deny(f"file exceeds size cap ({size} > {self.max_file_bytes} bytes)")
 
         return RiskAssessment.allow()
 
@@ -146,9 +140,7 @@ class RiskManager:
 
         delta = abs(len(modified) - len(original))
         if delta > self.max_plan_delta_bytes:
-            return RiskAssessment.deny(
-                f"change delta exceeds cap ({delta} > {self.max_plan_delta_bytes} bytes)"
-            )
+            return RiskAssessment.deny(f"change delta exceeds cap ({delta} > {self.max_plan_delta_bytes} bytes)")
 
         return RiskAssessment.allow()
 

@@ -43,16 +43,12 @@ class QuantumClassifier:
         self.entanglement = self.config["ml"]["model"]["entanglement"]
 
         # Initialize quantum device
-        self.dev = qml.device(
-            self.config["quantum"]["simulator"]["backend"], wires=self.n_qubits
-        )
+        self.dev = qml.device(self.config["quantum"]["simulator"]["backend"], wires=self.n_qubits)
 
         # Create quantum circuit
         self.qnode = qml.QNode(self._circuit, self.dev, interface="torch")
 
-        logger.info(
-            f"Initialized QuantumClassifier with {self.n_qubits} qubits and {self.n_layers} layers"
-        )
+        logger.info(f"Initialized QuantumClassifier with {self.n_qubits} qubits and {self.n_layers} layers")
 
     def _circuit(self, inputs: torch.Tensor, weights: torch.Tensor) -> List[float]:
         """
@@ -98,9 +94,7 @@ class QuantumClassifier:
                     qml.RY(weights[-1, qubit_index, 0] * 0.5, wires=qubit_index)
 
         # Measurements
-        return [
-            qml.expval(qml.PauliZ(qubit_index)) for qubit_index in range(self.n_qubits)
-        ]
+        return [qml.expval(qml.PauliZ(qubit_index)) for qubit_index in range(self.n_qubits)]
 
     def forward(self, inputs: torch.Tensor, weights: torch.Tensor) -> torch.Tensor:
         """
@@ -135,9 +129,7 @@ class QuantumClassifier:
         Returns:
             Random weight tensor
         """
-        weights = torch.randn(
-            self.n_layers, self.n_qubits, 2, requires_grad=True  # RY and RZ parameters
-        )
+        weights = torch.randn(self.n_layers, self.n_qubits, 2, requires_grad=True)  # RY and RZ parameters
         return weights
 
     def preprocess_data(self, feature_data: np.ndarray) -> torch.Tensor:
@@ -223,9 +215,7 @@ class HybridQuantumClassifier(nn.Module):
         classical_output = self.classical_layers(input_features)
 
         # Quantum processing
-        quantum_output = self.quantum_classifier.forward(
-            classical_output, self.quantum_weights
-        )
+        quantum_output = self.quantum_classifier.forward(classical_output, self.quantum_weights)
 
         # Classical postprocessing
         final_output = self.output_layer(quantum_output)
@@ -309,9 +299,7 @@ def train_quantum_model(
                 val_loss = criterion(val_predictions, y_val_tensor)
 
                 # Calculate accuracy
-                val_acc = (
-                    ((val_predictions > 0.5).float() == y_val_tensor).float().mean()
-                )
+                val_acc = ((val_predictions > 0.5).float() == y_val_tensor).float().mean()
 
                 history["val_loss"].append(val_loss.item())
                 history["val_acc"].append(val_acc.item())
@@ -331,12 +319,8 @@ if __name__ == "__main__":
     from sklearn.model_selection import train_test_split
 
     # Generate sample data
-    X, y = make_classification(
-        n_samples=200, n_features=4, n_classes=2, random_state=42
-    )
-    X_train, X_val, y_train, y_val = train_test_split(
-        X, y, test_size=0.2, random_state=42
-    )
+    X, y = make_classification(n_samples=200, n_features=4, n_classes=2, random_state=42)
+    X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.2, random_state=42)
 
     # Initialize and train
     qc = QuantumClassifier()

@@ -48,9 +48,7 @@ config = {
 # Use timeout for all requests to prevent hanging
 REQUEST_TIMEOUT = 30  # seconds
 
-response = requests.post(
-    f"{BASE_URL}/api/train/start", json=config, timeout=REQUEST_TIMEOUT
-)
+response = requests.post(f"{BASE_URL}/api/train/start", json=config, timeout=REQUEST_TIMEOUT)
 if response.status_code != 200:
     print(f"   ❌ Failed to start training: {response.text}")
     sys.exit(1)
@@ -65,18 +63,14 @@ print("   (Press Ctrl+C to stop)\n")
 
 try:
     for i in range(60):  # Monitor for up to 60 seconds
-        response = requests.get(
-            f"{BASE_URL}/api/train/status/{session_id}", timeout=REQUEST_TIMEOUT
-        )
+        response = requests.get(f"{BASE_URL}/api/train/status/{session_id}", timeout=REQUEST_TIMEOUT)
         status = response.json()
 
         epoch = status["current_epoch"]
         loss = status["current_loss"]
         acc = status["best_val_acc"] * 100
 
-        print(
-            f"   Epoch {epoch:3d} | Loss: {loss:.4f} | Best Acc: {acc:5.2f}%", end="\r"
-        )
+        print(f"   Epoch {epoch:3d} | Loss: {loss:.4f} | Best Acc: {acc:5.2f}%", end="\r")
 
         if status["status"] in ["completed", "error", "stopped"]:
             print()  # New line

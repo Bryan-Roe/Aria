@@ -155,9 +155,7 @@ def main():
         print(f"🧠 MODEL: {model_info['display']}")
         print("=" * 70)
         print(f"Local Accuracy: {model_info['accuracy']}%")
-        print(
-            f"Architecture: {model_info['n_qubits']} qubits, {model_info['n_layers']} layers\n"
-        )
+        print(f"Architecture: {model_info['n_qubits']} qubits, {model_info['n_layers']} layers\n")
 
         try:
             # Load model
@@ -167,9 +165,7 @@ def main():
             print(f"✅ Loaded trained parameters ({len(params)} parameters)\n")
 
             # Create quantum circuit with trained params
-            qc = create_test_circuit(
-                model_info["n_qubits"], model_info["n_layers"], params
-            )
+            qc = create_test_circuit(model_info["n_qubits"], model_info["n_layers"], params)
 
             print("📐 Circuit properties:")
             print(f"   Depth: {qc.depth()}")

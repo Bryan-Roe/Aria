@@ -32,9 +32,7 @@ def is_valid_slug(value: str) -> bool:
     return bool(SLUG_PATTERN.match(value.strip()))
 
 
-def in_numeric_range(
-    value: Any, minimum: float | None = None, maximum: float | None = None
-) -> bool:
+def in_numeric_range(value: Any, minimum: float | None = None, maximum: float | None = None) -> bool:
     """Return True if numeric value lies within [minimum, maximum] bounds.
 
     Bounds are inclusive when provided.
@@ -49,9 +47,7 @@ def in_numeric_range(
     return True
 
 
-def required_keys_present(
-    record: dict[str, Any], required_keys: Iterable[str]
-) -> tuple[bool, list[str]]:
+def required_keys_present(record: dict[str, Any], required_keys: Iterable[str]) -> tuple[bool, list[str]]:
     """Check whether all required keys exist and have non-None values.
 
     Returns:
@@ -61,9 +57,7 @@ def required_keys_present(
     return (len(missing) == 0, missing)
 
 
-def validate_record_types(
-    record: dict[str, Any], expected_types: dict[str, type | tuple[type, ...]]
-) -> dict[str, str]:
+def validate_record_types(record: dict[str, Any], expected_types: dict[str, type | tuple[type, ...]]) -> dict[str, str]:
     """Validate field types and return a mapping of field -> error message.
 
     Only validates fields that exist in record.

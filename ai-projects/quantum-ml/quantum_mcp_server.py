@@ -58,10 +58,8 @@ except ImportError as e:
 
 # Import quantum modules
 try:
-    from azure_quantum_integration import (AzureQuantumIntegration,
-                                           create_sample_circuit)
-    from quantum_classifier import (HybridQuantumClassifier, QuantumClassifier,
-                                    train_quantum_model)
+    from azure_quantum_integration import AzureQuantumIntegration, create_sample_circuit
+    from quantum_classifier import HybridQuantumClassifier, QuantumClassifier, train_quantum_model
 except ImportError as e:
     print(f"Error: Could not import quantum modules from {src_path}/")
     print("\nEnsure the following files exist:")
@@ -134,11 +132,7 @@ class CircuitCache:
     def clear_expired(self):
         """Remove all expired entries"""
         current_time = time.time()
-        expired = [
-            key
-            for key, timestamp in self.timestamps.items()
-            if current_time - timestamp > self.ttl_seconds
-        ]
+        expired = [key for key, timestamp in self.timestamps.items() if current_time - timestamp > self.ttl_seconds]
         for key in expired:
             self._evict(key)
         return len(expired)  # Return count for logging
@@ -202,9 +196,7 @@ def _cleanup_cache_if_needed():
     if current_time - quantum_state["last_cache_cleanup"] > 600:
         expired_count = quantum_state["circuit_cache"].clear_expired()
         if expired_count > 0:
-            logging.info(
-                f"[quantum_mcp] Cleaned {expired_count} expired circuits from cache"
-            )
+            logging.info(f"[quantum_mcp] Cleaned {expired_count} expired circuits from cache")
         quantum_state["last_cache_cleanup"] = current_time
 
 
@@ -237,16 +229,10 @@ def _require_string_arg(args: dict, key: str) -> tuple[Optional[str], Optional[l
 def _parse_shots_arg(args: dict, *, default: int) -> tuple[Optional[int], Optional[list[TextContent]]]:
     """Validate and normalize shots argument for bounded execution safety."""
     shots = args.get("shots", default)
-    if (
-        isinstance(shots, bool)
-        or not isinstance(shots, int)
-        or not (1 <= shots <= MAX_SHOTS_PER_CALL)
-    ):
+    if isinstance(shots, bool) or not isinstance(shots, int) or not (1 <= shots <= MAX_SHOTS_PER_CALL):
         return (
             None,
-            _text_response(
-                f"shots must be an integer between 1 and {MAX_SHOTS_PER_CALL}"
-            ),
+            _text_response(f"shots must be an integer between 1 and {MAX_SHOTS_PER_CALL}"),
         )
     return shots, None
 
@@ -309,15 +295,11 @@ def _estimate_job_cost_sync(circuit, backend_name: str, shots: int) -> float:
 def _normalize_backend_allowlist(backends: list[str]) -> set[str]:
     """Normalize allowlist for membership checks."""
     return {
-        _normalize_backend_name(name)
-        for name in backends
-        if isinstance(name, str) and _normalize_backend_name(name)
+        _normalize_backend_name(name) for name in backends if isinstance(name, str) and _normalize_backend_name(name)
     }
 
 
-def _backend_in_allowlist(
-    normalized_backend: str, normalized_backends: set[str]
-) -> bool:
+def _backend_in_allowlist(normalized_backend: str, normalized_backends: set[str]) -> bool:
     """Return True when backend is directly allowed or accepted via simulator aliases."""
     if normalized_backend in normalized_backends:
         return True
@@ -357,10 +339,7 @@ async def _validate_backend_against_allowlist(backend_name: str) -> Optional[str
     normalized_backends = _normalize_backend_allowlist(known_backends)
     normalized_backend = _normalize_backend_name(backend_name)
     refresh_error = None
-    if (
-        not _backend_in_allowlist(normalized_backend, normalized_backends)
-        and not did_refresh_allowlist
-    ):
+    if not _backend_in_allowlist(normalized_backend, normalized_backends) and not did_refresh_allowlist:
         # One-time recheck: backend inventories can change between cached refreshes.
         try:
             refreshed_backends = await loop.run_in_executor(
@@ -369,16 +348,13 @@ async def _validate_backend_against_allowlist(backend_name: str) -> Optional[str
             )
             quantum_state["known_backends"] = list(refreshed_backends)
             quantum_state["known_backends_refreshed_at"] = time.time()
-            normalized_backends = _normalize_backend_allowlist(
-                refreshed_backends)
+            normalized_backends = _normalize_backend_allowlist(refreshed_backends)
         except Exception as e:
             refresh_error = str(e)
 
     if not _backend_in_allowlist(normalized_backend, normalized_backends):
         allowed_sample = ", ".join(sorted(normalized_backends)[:12])
-        refresh_note = (
-            f" Backend list refresh failed: {refresh_error}." if refresh_error else ""
-        )
+        refresh_note = f" Backend list refresh failed: {refresh_error}." if refresh_error else ""
         return (
             f"Backend '{backend_name}' is not in the workspace allowlist. "
             f"Allowed backends: {allowed_sample or '(none)'}"
@@ -600,10 +576,7 @@ async def call_tool(name: str, arguments: Any) -> list[TextContent]:
         if arguments is None:
             arguments = {}
         if not isinstance(arguments, dict):
-            return [
-                TextContent(
-                    type="text", text="Invalid arguments: expected an object")
-            ]
+            return [TextContent(type="text", text="Invalid arguments: expected an object")]
 
         if name == "create_quantum_circuit":
             return await create_circuit_handler(arguments)
@@ -638,11 +611,7 @@ async def create_circuit_handler(args: dict) -> list[TextContent]:
     circuit_type = args.get("circuit_type")
 
     # Runtime validation (do not rely only on tool schema).
-    if (
-        isinstance(n_qubits, bool)
-        or not isinstance(n_qubits, int)
-        or not (1 <= n_qubits <= MAX_LOCAL_QUBITS)
-    ):
+    if isinstance(n_qubits, bool) or not isinstance(n_qubits, int) or not (1 <= n_qubits <= MAX_LOCAL_QUBITS):
         return [
             TextContent(
                 type="text",
@@ -778,9 +747,7 @@ def _create_circuit_sync(
                 if (
                     not isinstance(qubits, list)
                     or len(qubits) < 2
-                    or not all(
-                        isinstance(q, int) and 0 <= q < n_qubits for q in qubits[:2]
-                    )
+                    or not all(isinstance(q, int) and 0 <= q < n_qubits for q in qubits[:2])
                     or qubits[0] == qubits[1]
                 ):
                     continue
@@ -823,8 +790,7 @@ async def simulate_circuit_handler(args: dict) -> list[TextContent]:
     loop = asyncio.get_event_loop()
     try:
         counts = await asyncio.wait_for(
-            loop.run_in_executor(
-                cpu_executor, _simulate_circuit_sync, circuit, shots),
+            loop.run_in_executor(cpu_executor, _simulate_circuit_sync, circuit, shots),
             timeout=OPERATION_TIMEOUT_SECONDS,
         )
     except asyncio.TimeoutError:
@@ -835,13 +801,10 @@ async def simulate_circuit_handler(args: dict) -> list[TextContent]:
             )
         ]
     except Exception as exc:
-        logger.warning(
-            "Process-pool simulation failed (%s). Retrying in thread pool.", exc
-        )
+        logger.warning("Process-pool simulation failed (%s). Retrying in thread pool.", exc)
         try:
             counts = await asyncio.wait_for(
-                loop.run_in_executor(
-                    io_executor, _simulate_circuit_sync, circuit, shots),
+                loop.run_in_executor(io_executor, _simulate_circuit_sync, circuit, shots),
                 timeout=OPERATION_TIMEOUT_SECONDS,
             )
         except asyncio.TimeoutError:
@@ -852,15 +815,10 @@ async def simulate_circuit_handler(args: dict) -> list[TextContent]:
                 )
             ]
         except Exception as fallback_exc:
-            return [
-                TextContent(
-                    type="text", text=f"Error running circuit simulation: {fallback_exc}"
-                )
-            ]
+            return [TextContent(type="text", text=f"Error running circuit simulation: {fallback_exc}")]
 
     # Format results
-    sorted_counts = dict(
-        sorted(counts.items(), key=lambda x: x[1], reverse=True))
+    sorted_counts = dict(sorted(counts.items(), key=lambda x: x[1], reverse=True))
     total_shots = sum(sorted_counts.values())
 
     result_text = f"Simulation results for circuit {circuit_id} ({shots} shots):\n\n"
@@ -913,9 +871,7 @@ async def connect_azure_handler(args: dict) -> list[TextContent]:
                     "provider": "ionq",
                     "hardware": {"shots": 500, "optimization_level": 2},
                 },
-                "ml": {
-                    "model": {"n_qubits": 4, "n_layers": 2, "entanglement": "linear"}
-                },
+                "ml": {"model": {"n_qubits": 4, "n_layers": 2, "entanglement": "linear"}},
                 "logging": {"level": "INFO", "results_dir": "./results"},
             }
             quantum_state["config_cache"][config_key] = config
@@ -938,11 +894,7 @@ async def connect_azure_handler(args: dict) -> list[TextContent]:
         ]
 
     except Exception as e:
-        return [
-            TextContent(
-                type="text", text=f"Failed to connect to Azure Quantum: {str(e)}"
-            )
-        ]
+        return [TextContent(type="text", text=f"Failed to connect to Azure Quantum: {str(e)}")]
 
 
 def _connect_azure_sync(config: dict) -> AzureQuantumIntegration:
@@ -981,17 +933,11 @@ async def list_backends_handler(args: dict) -> list[TextContent]:
     try:
         # Offload to thread pool
         loop = asyncio.get_event_loop()
-        backends = await loop.run_in_executor(
-            io_executor, quantum_state["azure_integration"].list_backends
-        )
+        backends = await loop.run_in_executor(io_executor, quantum_state["azure_integration"].list_backends)
         quantum_state["known_backends"] = list(backends)
         quantum_state["known_backends_refreshed_at"] = time.time()
         backend_list = "\n".join(f"  • {backend}" for backend in backends)
-        return [
-            TextContent(
-                type="text", text=f"Available quantum backends:\n\n{backend_list}"
-            )
-        ]
+        return [TextContent(type="text", text=f"Available quantum backends:\n\n{backend_list}")]
     except Exception as e:
         return [TextContent(type="text", text=f"Error listing backends: {str(e)}")]
 
@@ -1002,8 +948,7 @@ async def submit_job_handler(args: dict) -> list[TextContent]:
     if circuit_id_error:
         return circuit_id_error
 
-    backend_name, backend_name_error = _require_string_arg(
-        args, "backend_name")
+    backend_name, backend_name_error = _require_string_arg(args, "backend_name")
     if backend_name_error:
         return backend_name_error
 
@@ -1030,11 +975,7 @@ async def submit_job_handler(args: dict) -> list[TextContent]:
 
     circuit = quantum_state["circuit_cache"].get(circuit_id)
     if circuit is None:
-        return [
-            TextContent(
-                type="text", text=f"Circuit ID '{circuit_id}' not found or expired."
-            )
-        ]
+        return [TextContent(type="text", text=f"Circuit ID '{circuit_id}' not found or expired.")]
 
     allowlist_error = await _validate_backend_against_allowlist(backend_name)
     if allowlist_error:
@@ -1044,9 +985,7 @@ async def submit_job_handler(args: dict) -> list[TextContent]:
 
     # Cost-gating: estimate cost and validate against budget limits
     try:
-        estimated_cost = await loop.run_in_executor(
-            io_executor, _estimate_job_cost_sync, circuit, backend_name, shots
-        )
+        estimated_cost = await loop.run_in_executor(io_executor, _estimate_job_cost_sync, circuit, backend_name, shots)
 
         if _requires_cost_confirmation(backend_name) and not confirm_cost:
             return [
@@ -1069,10 +1008,7 @@ async def submit_job_handler(args: dict) -> list[TextContent]:
                     text=f"Cost limit exceeded: Estimated cost ${safeguarded_cost:.2f} exceeds max ${MAX_COST_PER_JOB_USD:.2f} per job. Reduce shots or use a simulator backend.",
                 )
             ]
-        if (
-            quantum_state["cumulative_cost_usd"] + safeguarded_cost
-            > MAX_CUMULATIVE_COST_PER_SESSION_USD
-        ):
+        if quantum_state["cumulative_cost_usd"] + safeguarded_cost > MAX_CUMULATIVE_COST_PER_SESSION_USD:
             return [
                 TextContent(
                     type="text",
@@ -1115,40 +1051,14 @@ async def train_classifier_handler(args: dict) -> list[TextContent]:
                 text="dataset must be one of: iris, wine, breast_cancer, synthetic",
             )
         ]
-    if (
-        isinstance(n_qubits, bool)
-        or not isinstance(n_qubits, int)
-        or not (2 <= n_qubits <= 10)
-    ):
-        return [
-            TextContent(
-                type="text", text="n_qubits must be an integer between 2 and 10"
-            )
-        ]
-    if (
-        isinstance(n_layers, bool)
-        or not isinstance(n_layers, int)
-        or not (1 <= n_layers <= 5)
-    ):
-        return [
-            TextContent(
-                type="text", text="n_layers must be an integer between 1 and 5")
-        ]
-    if (
-        isinstance(epochs, bool)
-        or not isinstance(epochs, int)
-        or not (1 <= epochs <= 200)
-    ):
-        return [
-            TextContent(
-                type="text", text="epochs must be an integer between 1 and 200")
-        ]
+    if isinstance(n_qubits, bool) or not isinstance(n_qubits, int) or not (2 <= n_qubits <= 10):
+        return [TextContent(type="text", text="n_qubits must be an integer between 2 and 10")]
+    if isinstance(n_layers, bool) or not isinstance(n_layers, int) or not (1 <= n_layers <= 5):
+        return [TextContent(type="text", text="n_layers must be an integer between 1 and 5")]
+    if isinstance(epochs, bool) or not isinstance(epochs, int) or not (1 <= epochs <= 200):
+        return [TextContent(type="text", text="epochs must be an integer between 1 and 200")]
     if entanglement not in {"linear", "circular", "full"}:
-        return [
-            TextContent(
-                type="text", text="entanglement must be one of: linear, circular, full"
-            )
-        ]
+        return [TextContent(type="text", text="entanglement must be one of: linear, circular, full")]
 
     # Offload data loading and training to process pool
     loop = asyncio.get_event_loop()
@@ -1165,15 +1075,12 @@ async def train_classifier_handler(args: dict) -> list[TextContent]:
     return [TextContent(type="text", text=result_text)]
 
 
-def _train_classifier_sync(
-    dataset_name: str, n_qubits: int, n_layers: int, epochs: int, entanglement: str
-) -> str:
+def _train_classifier_sync(dataset_name: str, n_qubits: int, n_layers: int, epochs: int, entanglement: str) -> str:
     """Synchronous training (runs in process pool)"""
     import tempfile
 
     import yaml
-    from sklearn.datasets import (load_breast_cancer, load_iris, load_wine,
-                                  make_classification)
+    from sklearn.datasets import load_breast_cancer, load_iris, load_wine, make_classification
     from sklearn.model_selection import train_test_split
     from sklearn.preprocessing import StandardScaler
 
@@ -1188,18 +1095,14 @@ def _train_classifier_sync(
         data = load_breast_cancer()
         X, y = data.data, data.target
     elif dataset_name == "synthetic":
-        X, y = make_classification(
-            n_samples=200, n_features=4, n_classes=2, random_state=42
-        )
+        X, y = make_classification(n_samples=200, n_features=4, n_classes=2, random_state=42)
     else:
         return f"Unknown dataset: {dataset_name}"
 
     # Prepare data
     scaler = StandardScaler()
     X = scaler.fit_transform(X)
-    X_train, X_val, y_train, y_val = train_test_split(
-        X, y, test_size=0.2, random_state=42
-    )
+    X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.2, random_state=42)
 
     try:
         # Create config
@@ -1232,11 +1135,8 @@ def _train_classifier_sync(
             with os.fdopen(fd, "w") as f:
                 yaml.safe_dump(config, f)
             qc = QuantumClassifier(config_path=config_path)
-            model = HybridQuantumClassifier(
-                input_dim=X.shape[1], quantum_classifier=qc)
-            history = train_quantum_model(
-                model, X_train, y_train, X_val, y_val, config_path=config_path
-            )
+            model = HybridQuantumClassifier(input_dim=X.shape[1], quantum_classifier=qc)
+            history = train_quantum_model(model, X_train, y_train, X_val, y_val, config_path=config_path)
         finally:
             try:
                 os.unlink(config_path)
@@ -1275,8 +1175,7 @@ async def estimate_cost_handler(args: dict) -> list[TextContent]:
     if circuit_id_error:
         return circuit_id_error
 
-    backend_name, backend_name_error = _require_string_arg(
-        args, "backend_name")
+    backend_name, backend_name_error = _require_string_arg(args, "backend_name")
     if backend_name_error:
         return backend_name_error
 
@@ -1294,11 +1193,7 @@ async def estimate_cost_handler(args: dict) -> list[TextContent]:
 
     circuit = quantum_state["circuit_cache"].get(circuit_id)
     if circuit is None:
-        return [
-            TextContent(
-                type="text", text=f"Circuit ID '{circuit_id}' not found or expired."
-            )
-        ]
+        return [TextContent(type="text", text=f"Circuit ID '{circuit_id}' not found or expired.")]
 
     allowlist_error = await _validate_backend_against_allowlist(backend_name)
     if allowlist_error:
@@ -1345,11 +1240,7 @@ async def circuit_properties_handler(args: dict) -> list[TextContent]:
 
     circuit = quantum_state["circuit_cache"].get(circuit_id)
     if circuit is None:
-        return [
-            TextContent(
-                type="text", text=f"Circuit ID '{circuit_id}' not found or expired."
-            )
-        ]
+        return [TextContent(type="text", text=f"Circuit ID '{circuit_id}' not found or expired.")]
 
     gate_counts = circuit.count_ops()
 

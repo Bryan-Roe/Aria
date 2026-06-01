@@ -1,4 +1,5 @@
 """Thread-safe pub/sub bus for lightweight agent coordination."""
+
 from __future__ import annotations
 
 from collections import defaultdict

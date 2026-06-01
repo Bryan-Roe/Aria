@@ -47,9 +47,7 @@ async def broadcast_message(message):
     """Send message to all connected clients"""
     if clients:
         message_str = json.dumps(message)
-        await asyncio.gather(
-            *[client.send(message_str) for client in clients], return_exceptions=True
-        )
+        await asyncio.gather(*[client.send(message_str) for client in clients], return_exceptions=True)
 
 
 async def handler(websocket, path):
@@ -92,9 +90,7 @@ async def handler(websocket, path):
                     )
 
             except json.JSONDecodeError:
-                await websocket.send(
-                    json.dumps({"type": "error", "message": "Invalid JSON"})
-                )
+                await websocket.send(json.dumps({"type": "error", "message": "Invalid JSON"}))
 
     except websockets.exceptions.ConnectionClosed:
         pass

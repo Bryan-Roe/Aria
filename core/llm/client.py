@@ -81,73 +81,83 @@ class LLMClient:
             return json.dumps({"summary": f"Summary of: {excerpt}"})
 
         if "critique engine" in system_prompt.lower():
-            return json.dumps({
-                "score": 0.75,
-                "issues": ["Minor verbosity detected"],
-                "suggestions": ["Consider trimming the response for conciseness"],
-            })
+            return json.dumps(
+                {
+                    "score": 0.75,
+                    "issues": ["Minor verbosity detected"],
+                    "suggestions": ["Consider trimming the response for conciseness"],
+                }
+            )
 
         if "chain-of-thought reasoning engine" in system_prompt.lower():
             excerpt = " ".join(prompt.split())[:100]
-            return json.dumps({
-                "steps": [
-                    f"1. Identify the core question in: {excerpt}",
-                    "2. Break the problem into smaller sub-problems",
-                    "3. Evaluate each sub-problem systematically",
-                ],
-                "conclusion": f"Based on the reasoning above, a well-structured answer can be formed for: {excerpt}",
-                "confidence": 0.8,
-            })
+            return json.dumps(
+                {
+                    "steps": [
+                        f"1. Identify the core question in: {excerpt}",
+                        "2. Break the problem into smaller sub-problems",
+                        "3. Evaluate each sub-problem systematically",
+                    ],
+                    "conclusion": f"Based on the reasoning above, a well-structured answer can be formed for: {excerpt}",
+                    "confidence": 0.8,
+                }
+            )
 
         if "debate and critical-thinking engine" in system_prompt.lower():
             excerpt = " ".join(prompt.split())[:80]
-            return json.dumps({
-                "counter_arguments": [
-                    f"The claim '{excerpt}' may not hold under different assumptions",
-                    "Evidence may be incomplete or biased",
-                ],
-                "weaknesses": [
-                    "Relies on unverified premises",
-                    "Does not account for edge cases",
-                ],
-                "steelman": f"The strongest case for '{excerpt}' rests on its core logic being sound under ideal conditions.",
-                "verdict": "The claim has merit but requires stronger evidence and broader scope.",
-            })
+            return json.dumps(
+                {
+                    "counter_arguments": [
+                        f"The claim '{excerpt}' may not hold under different assumptions",
+                        "Evidence may be incomplete or biased",
+                    ],
+                    "weaknesses": [
+                        "Relies on unverified premises",
+                        "Does not account for edge cases",
+                    ],
+                    "steelman": f"The strongest case for '{excerpt}' rests on its core logic being sound under ideal conditions.",
+                    "verdict": "The claim has merit but requires stronger evidence and broader scope.",
+                }
+            )
 
         if "hypothesis generation engine" in system_prompt.lower():
             excerpt = " ".join(prompt.split())[:80]
-            return json.dumps({
-                "hypotheses": [
-                    {
-                        "statement": f"Increasing cycle frequency improves goal achievement given: {excerpt}",
-                        "rationale": "More cycles allow faster feedback and course correction.",
-                        "testable": True,
-                    },
-                    {
-                        "statement": "Skipped steps correlate with inadequate goal specificity.",
-                        "rationale": "Vague goals produce incomplete plans, leading to skips.",
-                        "testable": True,
-                    },
-                ],
-                "summary": "System patterns suggest optimisation opportunities in cycle frequency and goal clarity.",
-            })
+            return json.dumps(
+                {
+                    "hypotheses": [
+                        {
+                            "statement": f"Increasing cycle frequency improves goal achievement given: {excerpt}",
+                            "rationale": "More cycles allow faster feedback and course correction.",
+                            "testable": True,
+                        },
+                        {
+                            "statement": "Skipped steps correlate with inadequate goal specificity.",
+                            "rationale": "Vague goals produce incomplete plans, leading to skips.",
+                            "testable": True,
+                        },
+                    ],
+                    "summary": "System patterns suggest optimisation opportunities in cycle frequency and goal clarity.",
+                }
+            )
 
         if "meta-learning reflection engine" in system_prompt.lower():
-            return json.dumps({
-                "lessons": [
-                    "Smaller, focused goals lead to higher execution rates.",
-                    "Self-assessment scores improve after targeted retraining cycles.",
-                ],
-                "patterns": [
-                    "Skipped steps tend to cluster around tool-type tasks.",
-                    "Goal quality degrades when memory context exceeds 20 events.",
-                ],
-                "adjustments": [
-                    "Decompose goals into at most 3 sub-tasks per cycle.",
-                    "Trigger summarization when memory exceeds 50 events.",
-                ],
-                "overall": "The system is converging but benefits from tighter goal scoping and memory compression.",
-            })
+            return json.dumps(
+                {
+                    "lessons": [
+                        "Smaller, focused goals lead to higher execution rates.",
+                        "Self-assessment scores improve after targeted retraining cycles.",
+                    ],
+                    "patterns": [
+                        "Skipped steps tend to cluster around tool-type tasks.",
+                        "Goal quality degrades when memory context exceeds 20 events.",
+                    ],
+                    "adjustments": [
+                        "Decompose goals into at most 3 sub-tasks per cycle.",
+                        "Trigger summarization when memory exceeds 50 events.",
+                    ],
+                    "overall": "The system is converging but benefits from tighter goal scoping and memory compression.",
+                }
+            )
 
         return json.dumps(
             {

@@ -131,10 +131,7 @@ def run_prototype_monitor(
         results = workflow.run_once()
         print(f"Processed {len(results)} request(s).")
         for result in results:
-            print(
-                f"- {result.processed_path.name}: module={result.module_path.name}, "
-                f"test={result.test_path.name}"
-            )
+            print(f"- {result.processed_path.name}: module={result.module_path.name}, " f"test={result.test_path.name}")
         return
 
     processed_count = workflow.watch(

@@ -17,7 +17,9 @@ import time
 from typing import Any
 
 
-def prune_sqlite(path: str, keep_days: int | None = None, keep_rows: int | None = None, dry_run: bool = False) -> dict[str, Any]:
+def prune_sqlite(
+    path: str, keep_days: int | None = None, keep_rows: int | None = None, dry_run: bool = False
+) -> dict[str, Any]:
     path = os.path.abspath(path)
     if not os.path.exists(path):
         print(f"No DB at {path}", file=sys.stderr)
@@ -30,19 +32,16 @@ def prune_sqlite(path: str, keep_days: int | None = None, keep_rows: int | None 
 
         if keep_rows is not None and total > keep_rows:
             to_delete = total - keep_rows
-            cur = conn.execute(
-                "SELECT id FROM agi_events ORDER BY ts ASC LIMIT ?", (to_delete,))
+            cur = conn.execute("SELECT id FROM agi_events ORDER BY ts ASC LIMIT ?", (to_delete,))
             ids = [r[0] for r in cur.fetchall()]
             if not dry_run and ids:
-                conn.executemany("DELETE FROM agi_events WHERE id = ?", [
-                                 (i,) for i in ids])
+                conn.executemany("DELETE FROM agi_events WHERE id = ?", [(i,) for i in ids])
                 conn.commit()
             return {"deleted": len(ids), "remaining": total - len(ids)}
 
         if keep_days is not None:
             cutoff = time.time() - (keep_days * 86400)
-            cur = conn.execute(
-                "SELECT COUNT(*) FROM agi_events WHERE ts < ?", (cutoff,))
+            cur = conn.execute("SELECT COUNT(*) FROM agi_events WHERE ts < ?", (cutoff,))
             to_delete = int((cur.fetchone() or [0])[0] or 0)
             if not dry_run and to_delete > 0:
                 conn.execute("DELETE FROM agi_events WHERE ts < ?", (cutoff,))
@@ -75,18 +74,13 @@ def prune_jsonl(path: str, keep_last: int | None = None, dry_run: bool = False) 
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(
-        description="Prune AGI persistence backends (SQLite or JSONL).")
+    parser = argparse.ArgumentParser(description="Prune AGI persistence backends (SQLite or JSONL).")
     parser.add_argument("--sqlite", help="Path to SQLite AGI DB")
     parser.add_argument("--jsonl", help="Path to JSONL AGI file")
-    parser.add_argument("--keep-days", type=int,
-                        help="Prune SQLite rows older than DAYS")
-    parser.add_argument("--keep-rows", type=int,
-                        help="Keep only the newest N rows in SQLite")
-    parser.add_argument("--keep-last", type=int,
-                        help="Keep only the last N lines in JSONL")
-    parser.add_argument("--dry-run", action="store_true",
-                        help="Don't modify data, just report")
+    parser.add_argument("--keep-days", type=int, help="Prune SQLite rows older than DAYS")
+    parser.add_argument("--keep-rows", type=int, help="Keep only the newest N rows in SQLite")
+    parser.add_argument("--keep-last", type=int, help="Keep only the last N lines in JSONL")
+    parser.add_argument("--dry-run", action="store_true", help="Don't modify data, just report")
 
     args = parser.parse_args(argv)
 
@@ -94,10 +88,10 @@ def main(argv: list[str] | None = None) -> int:
         results = {}
         if args.sqlite:
             results["sqlite"] = prune_sqlite(
-                args.sqlite, keep_days=args.keep_days, keep_rows=args.keep_rows, dry_run=args.dry_run)
+                args.sqlite, keep_days=args.keep_days, keep_rows=args.keep_rows, dry_run=args.dry_run
+            )
         if args.jsonl:
-            results["jsonl"] = prune_jsonl(
-                args.jsonl, keep_last=args.keep_last, dry_run=args.dry_run)
+            results["jsonl"] = prune_jsonl(args.jsonl, keep_last=args.keep_last, dry_run=args.dry_run)
 
         print(json.dumps({"status": "ok", "results": results}))
         return 0

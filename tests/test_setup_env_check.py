@@ -104,9 +104,7 @@ def test_check_ai_token_health_no_healthy_providers(tmp_path, monkeypatch, capsy
                 "last_updated": "2026-03-29T09:00:00Z",
                 "healthy": 0,
                 "total": 4,
-                "providers": {
-                    "openai": {"status": "fail", "model": "", "error": "401"}
-                },
+                "providers": {"openai": {"status": "fail", "model": "", "error": "401"}},
             }
         )
     )

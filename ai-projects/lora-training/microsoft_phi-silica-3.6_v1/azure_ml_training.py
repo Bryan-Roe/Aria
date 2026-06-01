@@ -10,9 +10,15 @@ from typing import Any, Optional
 try:
     from azure.ai.ml import Input, MLClient, Output, command
     from azure.ai.ml.constants import AssetTypes
-    from azure.ai.ml.entities import (AmlCompute, CodeConfiguration, Data,
-                                      Environment, ManagedOnlineDeployment,
-                                      ManagedOnlineEndpoint, Model)
+    from azure.ai.ml.entities import (
+        AmlCompute,
+        CodeConfiguration,
+        Data,
+        Environment,
+        ManagedOnlineDeployment,
+        ManagedOnlineEndpoint,
+        Model,
+    )
     from azure.identity import AzureCliCredential, DefaultAzureCredential
 
     AZURE_ML_AVAILABLE = True
@@ -34,9 +40,7 @@ class AzureMLLoRATrainer:
             workspace_name: ML workspace name
         """
         if not AZURE_ML_AVAILABLE:
-            raise ImportError(
-                "Azure ML SDK required. Install: pip install azure-ai-ml azure-identity"
-            )
+            raise ImportError("Azure ML SDK required. Install: pip install azure-ai-ml azure-identity")
 
         # Try CLI credential first, then default
         try:
@@ -95,9 +99,7 @@ class AzureMLLoRATrainer:
 
         return compute
 
-    def create_environment(
-        self, env_name: str = "phi36-lora-env", python_version: str = "3.10"
-    ) -> Environment:
+    def create_environment(self, env_name: str = "phi36-lora-env", python_version: str = "3.10") -> Environment:
         """
         Create Azure ML environment with all dependencies.
 
@@ -109,9 +111,7 @@ class AzureMLLoRATrainer:
             Environment configuration
         """
         # Use curated PyTorch environment as base
-        base_env = (
-            "azureml://registries/azureml/environments/acft-hf-nlp-gpu/versions/63"
-        )
+        base_env = "azureml://registries/azureml/environments/acft-hf-nlp-gpu/versions/63"
 
         # Create custom environment with additional dependencies
         env = Environment(
@@ -230,9 +230,7 @@ class AzureMLLoRATrainer:
             compute=compute_name,
             experiment_name=experiment_name,
             display_name=display_name or f"phi36-lora-{Path(config_path).stem}",
-            outputs={
-                "model_output": Output(type=AssetTypes.URI_FOLDER, mode="rw_mount")
-            },
+            outputs={"model_output": Output(type=AssetTypes.URI_FOLDER, mode="rw_mount")},
             # Enable MLflow tracking
             environment_variables={
                 "MLFLOW_TRACKING_URI": "azureml://tracking",
@@ -287,9 +285,7 @@ def main():
     parser = argparse.ArgumentParser(description="Azure ML training for Phi-3.6 LoRA")
 
     # Azure settings
-    parser.add_argument(
-        "--subscription-id", required=True, help="Azure subscription ID"
-    )
+    parser.add_argument("--subscription-id", required=True, help="Azure subscription ID")
     parser.add_argument("--resource-group", required=True, help="Resource group name")
     parser.add_argument("--workspace-name", required=True, help="ML workspace name")
 
@@ -302,26 +298,16 @@ def main():
     )
 
     # Training settings
-    parser.add_argument(
-        "--experiment-name", default="phi36-lora-training", help="Experiment name"
-    )
-    parser.add_argument(
-        "--compute-name", default="phi36-gpu-cluster", help="Compute cluster name"
-    )
+    parser.add_argument("--experiment-name", default="phi36-lora-training", help="Experiment name")
+    parser.add_argument("--compute-name", default="phi36-gpu-cluster", help="Compute cluster name")
     parser.add_argument(
         "--vm-size",
         default="Standard_NC6s_v3",
         help="VM size for compute (Standard_NC6s_v3 = 1x V100)",
     )
-    parser.add_argument(
-        "--dataset-path", default="../../datasets/chat/dolly", help="Local dataset path"
-    )
-    parser.add_argument(
-        "--dataset-name", default="dolly-chat-dataset", help="Dataset name in Azure ML"
-    )
-    parser.add_argument(
-        "--config", default="./lora/lora.yaml", help="Path to lora.yaml config"
-    )
+    parser.add_argument("--dataset-path", default="../../datasets/chat/dolly", help="Local dataset path")
+    parser.add_argument("--dataset-name", default="dolly-chat-dataset", help="Dataset name in Azure ML")
+    parser.add_argument("--config", default="./lora/lora.yaml", help="Path to lora.yaml config")
     parser.add_argument(
         "--max-train-samples",
         type=int,
@@ -331,9 +317,7 @@ def main():
 
     # Model registration
     parser.add_argument("--job-name", help="Job name for model registration")
-    parser.add_argument(
-        "--model-name", default="phi36-lora-adapter", help="Registered model name"
-    )
+    parser.add_argument("--model-name", default="phi36-lora-adapter", help="Registered model name")
 
     args = parser.parse_args()
 
@@ -346,17 +330,13 @@ def main():
 
     if args.action == "setup":
         print("\n=== Setting up Azure ML infrastructure ===")
-        trainer.create_or_get_compute(
-            compute_name=args.compute_name, vm_size=args.vm_size
-        )
+        trainer.create_or_get_compute(compute_name=args.compute_name, vm_size=args.vm_size)
         trainer.create_environment()
         print("\n✓ Setup complete!")
 
     elif args.action == "upload":
         print("\n=== Uploading dataset ===")
-        trainer.upload_dataset(
-            dataset_path=args.dataset_path, dataset_name=args.dataset_name
-        )
+        trainer.upload_dataset(dataset_path=args.dataset_path, dataset_name=args.dataset_name)
         print("\n✓ Upload complete!")
 
     elif args.action == "train":
@@ -376,9 +356,7 @@ def main():
             print("Error: --job-name required for model registration")
             return
         print("\n=== Registering model ===")
-        model = trainer.register_model(
-            job_name=args.job_name, model_name=args.model_name
-        )
+        model = trainer.register_model(job_name=args.job_name, model_name=args.model_name)
         print("\n✓ Model registered!")
 
 

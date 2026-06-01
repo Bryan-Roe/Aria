@@ -64,7 +64,7 @@ _HIGH_IMPACT_DRIFT_WORDS = re.compile(
 )
 
 # Thresholds
-_MIN_PROMPT_WORDS = 6   # ignore very short prompts (< 6 words)
+_MIN_PROMPT_WORDS = 6  # ignore very short prompts (< 6 words)
 _MAX_INJECTION_LENGTH = 50  # chars — only inject if base message is short enough to scan
 
 _COMMAND_KEYS = {
@@ -84,6 +84,7 @@ _COMMAND_KEYS = {
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
 
 def _walk(obj: Any) -> Iterable[tuple[str, Any]]:
     if isinstance(obj, dict):
@@ -147,6 +148,7 @@ def _reminder_message() -> str:
 # ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
+
 
 def main() -> None:
     raw = sys.stdin.read().strip()

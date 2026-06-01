@@ -16,9 +16,7 @@ import traceback
 from pathlib import Path
 from typing import Any, Dict, Optional
 
-_CANONICAL = (
-    Path(__file__).resolve().parents[1] / "ai-projects" / "quantum-ml" / "web_app.py"
-)
+_CANONICAL = Path(__file__).resolve().parents[1] / "ai-projects" / "quantum-ml" / "web_app.py"
 
 if not _CANONICAL.exists():
     raise FileNotFoundError(f"Canonical web app not found: {_CANONICAL}")
@@ -212,9 +210,11 @@ def _compat_load_checkpoint() -> Any:
 
         response = {
             "success": True,
-            "weights_shape": list(getattr(getattr(weights, "shape", None), "__iter__", lambda: [])())
-            if hasattr(weights, "shape")
-            else [],
+            "weights_shape": (
+                list(getattr(getattr(weights, "shape", None), "__iter__", lambda: [])())
+                if hasattr(weights, "shape")
+                else []
+            ),
             "epoch": epoch,
             "config": config,
             "message": f"Checkpoint loaded from epoch {epoch}",

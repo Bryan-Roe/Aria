@@ -14,24 +14,18 @@ from typing import Any, Dict, List, Optional, Protocol
 
 try:
     # When running tests that inject src/ into sys.path
-    from utils.json_utils import (INGREDIENT_EXTRACTION_SCHEMA,
-                                  RECIPE_SEARCH_SCHEMA, parse_and_validate)
+    from utils.json_utils import INGREDIENT_EXTRACTION_SCHEMA, RECIPE_SEARCH_SCHEMA, parse_and_validate
 except ImportError:  # pragma: no cover
     # Fallback for package-style execution (not typical here but defensive)
-    from ..utils.json_utils import (INGREDIENT_EXTRACTION_SCHEMA,
-                                    RECIPE_SEARCH_SCHEMA, parse_and_validate)
+    from ..utils.json_utils import INGREDIENT_EXTRACTION_SCHEMA, RECIPE_SEARCH_SCHEMA, parse_and_validate
 
 
 class ProviderProtocol(Protocol):  # Structural typing for providers
-    def complete(
-        self, messages: List[Dict[str, str]], json_mode: bool = False
-    ) -> str:  # pragma: no cover
+    def complete(self, messages: List[Dict[str, str]], json_mode: bool = False) -> str:  # pragma: no cover
         ...
 
 
-SYSTEM_PROMPT = (
-    "You are a helpful cooking assistant. Always output STRICT JSON with no commentary."
-)
+SYSTEM_PROMPT = "You are a helpful cooking assistant. Always output STRICT JSON with no commentary."
 
 SEARCH_PROMPT_TEMPLATE = """
 TASK:RECIPE_SEARCH
@@ -115,13 +109,9 @@ class RecipeAgent:
             return {"ingredients": []}
         return {"recipes": []}
 
-    def search_recipes(
-        self, query: str, filters: Optional[List[str]] = None, limit: int = 5
-    ) -> Dict[str, Any]:
+    def search_recipes(self, query: str, filters: Optional[List[str]] = None, limit: int = 5) -> Dict[str, Any]:
         filters = filters or []
-        prompt = SEARCH_PROMPT_TEMPLATE.format(
-            query=query, filters=", ".join(filters), limit=limit
-        )
+        prompt = SEARCH_PROMPT_TEMPLATE.format(query=query, filters=", ".join(filters), limit=limit)
         return self._invoke(prompt, RECIPE_SEARCH_SCHEMA)
 
     def extract_ingredients(self, text: str) -> Dict[str, Any]:

@@ -55,12 +55,7 @@ class DebateAgent(BaseAgent):
 
     def execute(self, task: Task) -> Dict[str, Any]:
         payload = task.payload or {}
-        claim: str = (
-            payload.get("claim")
-            or payload.get("proposal")
-            or payload.get("text")
-            or ""
-        ).strip()
+        claim: str = (payload.get("claim") or payload.get("proposal") or payload.get("text") or "").strip()
         include_steelman: bool = bool(payload.get("steelman", True))
 
         if not claim:
@@ -88,9 +83,7 @@ class DebateAgent(BaseAgent):
     def _debate(self, claim: str, include_steelman: bool) -> Dict[str, Any]:
         truncated = claim[:_MAX_INPUT_CHARS]
         steelman_instruction = (
-            'Include "steelman" (string): the strongest possible defence of the claim. '
-            if include_steelman
-            else ""
+            'Include "steelman" (string): the strongest possible defence of the claim. ' if include_steelman else ""
         )
         messages = [
             {
@@ -100,15 +93,14 @@ class DebateAgent(BaseAgent):
                     "Output ONLY a JSON object with these fields: "
                     '"counter_arguments" (list of strings), '
                     '"weaknesses" (list of strings), '
-                    f'{steelman_instruction}'
+                    f"{steelman_instruction}"
                     '"verdict" (string: brief overall assessment).'
                 ),
             },
             {
                 "role": "user",
                 "content": (
-                    f"Challenge the following claim or proposal from a devil's advocate "
-                    f"perspective:\n{truncated}"
+                    f"Challenge the following claim or proposal from a devil's advocate " f"perspective:\n{truncated}"
                 ),
             },
         ]

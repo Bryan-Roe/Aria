@@ -31,9 +31,7 @@ class TextAugmenter:
         self.results_dir = Path("data_out/augmented_data")
         self.results_dir.mkdir(parents=True, exist_ok=True)
 
-    def augment_dataset(
-        self, input_path: str, output_path: str, techniques: List[str] = None
-    ) -> Dict[str, Any]:
+    def augment_dataset(self, input_path: str, output_path: str, techniques: List[str] = None) -> Dict[str, Any]:
         """
         Augment entire dataset
 
@@ -92,25 +90,16 @@ class TextAugmenter:
         """Apply augmentation techniques to text"""
         words = text.split()
 
-        if (
-            "synonym" in techniques
-            and random.random() < self.config.synonym_replacement_prob
-        ):
+        if "synonym" in techniques and random.random() < self.config.synonym_replacement_prob:
             words = self._synonym_replacement(words)
 
-        if (
-            "insertion" in techniques
-            and random.random() < self.config.random_insertion_prob
-        ):
+        if "insertion" in techniques and random.random() < self.config.random_insertion_prob:
             words = self._random_insertion(words)
 
         if "swap" in techniques and random.random() < self.config.random_swap_prob:
             words = self._random_swap(words)
 
-        if (
-            "deletion" in techniques
-            and random.random() < self.config.random_deletion_prob
-        ):
+        if "deletion" in techniques and random.random() < self.config.random_deletion_prob:
             words = self._random_deletion(words)
 
         return " ".join(words)
@@ -263,24 +252,16 @@ def main():
     import argparse
 
     parser = argparse.ArgumentParser(description="Text Data Augmentation")
-    parser.add_argument(
-        "--input", type=str, required=True, help="Input dataset (JSONL)"
-    )
-    parser.add_argument(
-        "--output", type=str, required=True, help="Output dataset (JSONL)"
-    )
+    parser.add_argument("--input", type=str, required=True, help="Input dataset (JSONL)")
+    parser.add_argument("--output", type=str, required=True, help="Output dataset (JSONL)")
     parser.add_argument(
         "--techniques",
         nargs="+",
         default=["synonym", "insertion", "swap", "deletion"],
         help="Augmentation techniques",
     )
-    parser.add_argument(
-        "--num-aug", type=int, default=1, help="Number of augmentations per sample"
-    )
-    parser.add_argument(
-        "--prob", type=float, default=0.1, help="Probability for each technique"
-    )
+    parser.add_argument("--num-aug", type=int, default=1, help="Number of augmentations per sample")
+    parser.add_argument("--prob", type=float, default=0.1, help="Probability for each technique")
 
     args = parser.parse_args()
 
@@ -293,9 +274,7 @@ def main():
     )
 
     augmenter = TextAugmenter(config)
-    stats = augmenter.augment_dataset(
-        args.input, args.output, techniques=args.techniques
-    )
+    stats = augmenter.augment_dataset(args.input, args.output, techniques=args.techniques)
 
     print(f"\n✓ Augmented dataset saved to {args.output}")
 

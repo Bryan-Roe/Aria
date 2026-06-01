@@ -20,9 +20,7 @@ def print_banner(text):
 print_banner("QUANTUM AI - QUICK EXPERIMENT DEMO")
 
 print("\033[93m📊 Running Extended Datasets Experiment (XOR Dataset)\033[0m")
-print(
-    "\033[90mThis demonstrates quantum classifier on linearly inseparable data\033[0m\n"
-)
+print("\033[90mThis demonstrates quantum classifier on linearly inseparable data\033[0m\n")
 
 try:
     # Import extended datasets module

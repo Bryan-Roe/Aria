@@ -218,24 +218,16 @@ def analyze_results(results):
 
     # Most common state
     most_common = sorted_results[0]
-    print(
-        f"\n🎯 Most Probable State: |{most_common[0]}⟩ ({most_common[1]/total_shots*100:.1f}%)"
-    )
+    print(f"\n🎯 Most Probable State: |{most_common[0]}⟩ ({most_common[1]/total_shots*100:.1f}%)")
 
     # Binary classification interpretation
     # For banknote: even parity → genuine, odd parity → forged (example)
-    genuine_count = sum(
-        count for state, count in results.items() if state.count("0") % 2 == 0
-    )
+    genuine_count = sum(count for state, count in results.items() if state.count("0") % 2 == 0)
     forged_count = total_shots - genuine_count
 
     print("\n💵 Banknote Classification Simulation:")
-    print(
-        f"   Genuine (even parity): {genuine_count} ({genuine_count/total_shots*100:.1f}%)"
-    )
-    print(
-        f"   Forged (odd parity):   {forged_count} ({forged_count/total_shots*100:.1f}%)"
-    )
+    print(f"   Genuine (even parity): {genuine_count} ({genuine_count/total_shots*100:.1f}%)")
+    print(f"   Forged (odd parity):   {forged_count} ({forged_count/total_shots*100:.1f}%)")
 
     return {
         "total_shots": total_shots,

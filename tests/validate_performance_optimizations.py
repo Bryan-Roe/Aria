@@ -24,20 +24,14 @@ def test_basic_functionality():
     print("Testing basic functionality...")
 
     # Test jump keywords
-    assert _contains_any_keyword(
-        "jump high", JUMP_KEYWORDS), "Failed: jump high"
-    assert _contains_any_keyword(
-        "leap forward", JUMP_KEYWORDS), "Failed: leap forward"
-    assert not _contains_any_keyword(
-        "walk slowly", JUMP_KEYWORDS), "Failed: walk slowly should not match jump"
+    assert _contains_any_keyword("jump high", JUMP_KEYWORDS), "Failed: jump high"
+    assert _contains_any_keyword("leap forward", JUMP_KEYWORDS), "Failed: leap forward"
+    assert not _contains_any_keyword("walk slowly", JUMP_KEYWORDS), "Failed: walk slowly should not match jump"
 
     # Test dance keywords
-    assert _contains_any_keyword(
-        "dance now", DANCE_KEYWORDS), "Failed: dance now"
-    assert _contains_any_keyword(
-        "spin around", DANCE_KEYWORDS), "Failed: spin around"
-    assert not _contains_any_keyword(
-        "sit down", DANCE_KEYWORDS), "Failed: sit down should not match dance"
+    assert _contains_any_keyword("dance now", DANCE_KEYWORDS), "Failed: dance now"
+    assert _contains_any_keyword("spin around", DANCE_KEYWORDS), "Failed: spin around"
+    assert not _contains_any_keyword("sit down", DANCE_KEYWORDS), "Failed: sit down should not match dance"
 
     print("✓ Basic functionality tests passed")
 
@@ -118,8 +112,7 @@ def test_connection_pooling():
 
         assert callable(_get_conn), "Failed: _get_conn not callable"
         assert callable(_return_conn), "Failed: _return_conn not callable"
-        assert isinstance(_connection_pool,
-                          list), "Failed: _connection_pool not a list"
+        assert isinstance(_connection_pool, list), "Failed: _connection_pool not a list"
         print("✓ Connection pooling imports successful")
     except ImportError as e:
         print(f"⚠ Connection pooling test skipped: {e}")

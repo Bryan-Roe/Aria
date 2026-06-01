@@ -15,8 +15,7 @@ from mcp.client.stdio import stdio_client
 try:
     from azure.ai.inference import ChatCompletionsClient  # type: ignore
     from azure.ai.inference.models import AssistantMessage  # type: ignore
-    from azure.ai.inference.models import (SystemMessage, ToolMessage,
-                                           UserMessage)
+    from azure.ai.inference.models import SystemMessage, ToolMessage, UserMessage
     from azure.core.credentials import AzureKeyCredential  # type: ignore
 
     HAS_AZURE_AI = True
@@ -37,17 +36,11 @@ class QuantumMCPClient:
 
     async def connect(self):
         """Connect to the Quantum AI MCP server"""
-        server_params = StdioServerParameters(
-            command="python", args=[self.server_script_path], env=os.environ.copy()
-        )
+        server_params = StdioServerParameters(command="python", args=[self.server_script_path], env=os.environ.copy())
 
-        stdio_transport = await self.exit_stack.enter_async_context(
-            stdio_client(server_params)
-        )
+        stdio_transport = await self.exit_stack.enter_async_context(stdio_client(server_params))
         stdio, write = stdio_transport
-        self.session = await self.exit_stack.enter_async_context(
-            ClientSession(stdio, write)
-        )
+        self.session = await self.exit_stack.enter_async_context(ClientSession(stdio, write))
         await self.session.initialize()
 
         print("✓ Connected to Quantum AI MCP server")
@@ -74,9 +67,7 @@ class QuantumMCPClient:
 
     async def simulate_circuit(self, circuit_id: str, shots: int = 1024):
         """Simulate a quantum circuit"""
-        result = await self.session.call_tool(
-            "simulate_quantum_circuit", {"circuit_id": circuit_id, "shots": shots}
-        )
+        result = await self.session.call_tool("simulate_quantum_circuit", {"circuit_id": circuit_id, "shots": shots})
         print(result.content[0].text)
 
     async def train_classifier(self, dataset: str, **kwargs):
@@ -87,9 +78,7 @@ class QuantumMCPClient:
         result = await self.session.call_tool("train_quantum_classifier", args)
         print(result.content[0].text)
 
-    async def connect_azure(
-        self, subscription_id: str, resource_group: str, workspace_name: str
-    ):
+    async def connect_azure(self, subscription_id: str, resource_group: str, workspace_name: str):
         """Connect to Azure Quantum"""
         result = await self.session.call_tool(
             "connect_azure_quantum",
@@ -169,9 +158,7 @@ async def example_quantum_ml():
         await client.connect()
 
         # Train quantum classifier
-        await client.train_classifier(
-            dataset="iris", n_qubits=4, n_layers=2, epochs=30, entanglement="linear"
-        )
+        await client.train_classifier(dataset="iris", n_qubits=4, n_layers=2, epochs=30, entanglement="linear")
 
     finally:
         await client.cleanup()

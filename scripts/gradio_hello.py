@@ -153,9 +153,9 @@ button:hover {
 """
 
 THEME = gr.themes.Soft(
-        primary_hue="green",
-        secondary_hue="amber",
-        neutral_hue="stone",
+    primary_hue="green",
+    secondary_hue="amber",
+    neutral_hue="stone",
 )
 
 
@@ -234,14 +234,18 @@ def hist_state_to_display(hist_state: list[dict[str, Any]]) -> list[dict[str, st
         return []
     display: list[dict[str, str]] = []
     for e in hist_state:
-        display.append({
-            "role": "user",
-            "content": f"{e.get('user', '')}\n\n[{e.get('user_ts', '')}]",
-        })
-        display.append({
-            "role": "assistant",
-            "content": f"{e.get('assistant', '')}\n\n[{e.get('assistant_ts', '')}]",
-        })
+        display.append(
+            {
+                "role": "user",
+                "content": f"{e.get('user', '')}\n\n[{e.get('user_ts', '')}]",
+            }
+        )
+        display.append(
+            {
+                "role": "assistant",
+                "content": f"{e.get('assistant', '')}\n\n[{e.get('assistant_ts', '')}]",
+            }
+        )
     return display
 
 
@@ -291,7 +295,9 @@ def generate_tts_for_text(text: str) -> str | None:
         return None
 
 
-def detect_provider(provider_choice: str, model_override_val: str, temperature_val: float, max_output_tokens_val: int) -> tuple[Any, str]:
+def detect_provider(
+    provider_choice: str, model_override_val: str, temperature_val: float, max_output_tokens_val: int
+) -> tuple[Any, str]:
     chat_cli_src = Path(__file__).resolve().parents[1] / "ai-projects" / "chat-cli" / "src"
     if str(chat_cli_src) not in sys.path:
         sys.path.insert(0, str(chat_cli_src))
@@ -360,13 +366,13 @@ def respond(
                 "assistant_ts": assistant_ts,
             }
         ]
-        hist_state = hist_state[-int(max_history):]
+        hist_state = hist_state[-int(max_history) :]
         if autosave:
             try:
                 save_conversation_json(hist_state, session_name or "session")
             except Exception:
                 pass
-        yield chat_history[-int(max_history * 2):], "", hist_state, "simulation", "Replied with simulation mode."
+        yield chat_history[-int(max_history * 2) :], "", hist_state, "simulation", "Replied with simulation mode."
         return
 
     provider_display = ""
@@ -394,13 +400,15 @@ def respond(
                 "assistant_ts": assistant_ts,
             }
         ]
-        hist_state = hist_state[-int(max_history):]
+        hist_state = hist_state[-int(max_history) :]
         if autosave:
             try:
                 save_conversation_json(hist_state, session_name or "session")
             except Exception:
                 pass
-        yield chat_history[-int(max_history * 2):], "", hist_state, "fallback", "Provider unavailable, used local echo fallback."
+        yield chat_history[
+            -int(max_history * 2) :
+        ], "", hist_state, "fallback", "Provider unavailable, used local echo fallback."
         return
 
     display_user = f"{user_message}\n\n[{user_ts}]"
@@ -409,7 +417,7 @@ def respond(
         {"role": "user", "content": display_user},
         {"role": "assistant", "content": display_assistant},
     ]
-    yield chat_history[-int(max_history * 2):], "", hist_state, provider_display, "Streaming response..."
+    yield chat_history[-int(max_history * 2) :], "", hist_state, provider_display, "Streaming response..."
 
     partial = ""
     try:
@@ -418,7 +426,7 @@ def respond(
             for chunk in stream_resp:
                 partial += str(chunk)
                 chat_history[-1] = {"role": "assistant", "content": f"{partial}\n\n[{timestamp_now()}]"}
-                yield chat_history[-int(max_history * 2):], "", hist_state, provider_display, "Streaming response..."
+                yield chat_history[-int(max_history * 2) :], "", hist_state, provider_display, "Streaming response..."
         else:
             partial = str(stream_resp)
     except Exception as e:
@@ -432,13 +440,15 @@ def respond(
                 "assistant_ts": timestamp_now(),
             }
         ]
-        hist_state = hist_state[-int(max_history):]
+        hist_state = hist_state[-int(max_history) :]
         if autosave:
             try:
                 save_conversation_json(hist_state, session_name or "session")
             except Exception:
                 pass
-        yield chat_history[-int(max_history * 2):], "", hist_state, provider_display, "Provider failed; error captured in chat."
+        yield chat_history[
+            -int(max_history * 2) :
+        ], "", hist_state, provider_display, "Provider failed; error captured in chat."
         return
 
     assistant_ts = timestamp_now()
@@ -451,13 +461,13 @@ def respond(
             "assistant_ts": assistant_ts,
         }
     ]
-    hist_state = hist_state[-int(max_history):]
+    hist_state = hist_state[-int(max_history) :]
     if autosave:
         try:
             save_conversation_json(hist_state, session_name or "session")
         except Exception:
             pass
-    yield chat_history[-int(max_history * 2):], "", hist_state, provider_display, "Complete."
+    yield chat_history[-int(max_history * 2) :], "", hist_state, provider_display, "Complete."
 
 
 initial_display, initial_hist_state = load_latest_conversation()
@@ -558,7 +568,9 @@ with gr.Blocks() as demo:
                             delete_session_btn = gr.Button("Delete session", variant="secondary")
 
                     with gr.Accordion("Search and Audio", open=False):
-                        search_input = gr.Textbox(label="Search conversation", placeholder="Search user or assistant text")
+                        search_input = gr.Textbox(
+                            label="Search conversation", placeholder="Search user or assistant text"
+                        )
                         with gr.Row():
                             search_btn = gr.Button("Search", variant="secondary")
                             revert_btn = gr.Button("Show all", variant="secondary")
@@ -659,10 +671,7 @@ with gr.Blocks() as demo:
             if not query or not hist:
                 return []
             q = query.lower()
-            filtered = [
-                e for e in hist
-                if q in e.get("user", "").lower() or q in e.get("assistant", "").lower()
-            ]
+            filtered = [e for e in hist if q in e.get("user", "").lower() or q in e.get("assistant", "").lower()]
             return hist_state_to_display(filtered)
 
         search_btn.click(search_chat, inputs=[search_input, hist_state], outputs=[chatbot])

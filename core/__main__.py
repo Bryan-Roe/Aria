@@ -14,8 +14,7 @@ from core.runner import AriaRunner
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(
-        description="Run Aria core autonomous runtime")
+    parser = argparse.ArgumentParser(description="Run Aria core autonomous runtime")
     parser.add_argument(
         "--cycles",
         type=int,
@@ -30,8 +29,7 @@ def main() -> None:
     )
     args = parser.parse_args()
 
-    runner = AriaRunner(
-        config={"max_cycles": args.cycles, "sleep_seconds": args.sleep})
+    runner = AriaRunner(config={"max_cycles": args.cycles, "sleep_seconds": args.sleep})
 
     if args.cycles <= 1:
         summary = runner.run_once()

@@ -27,9 +27,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
     params = {k.lower(): v for k, v in req.params.items()}
     body = _parse_body(req)
 
-    provider_choice = (
-        params.get("provider") or body.get("provider") or os.getenv("DEFAULT_AI_PROVIDER", "auto")
-    )
+    provider_choice = params.get("provider") or body.get("provider") or os.getenv("DEFAULT_AI_PROVIDER", "auto")
     model = params.get("model") or body.get("model")
 
     try:

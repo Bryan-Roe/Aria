@@ -80,9 +80,7 @@ DATASETS = [
 
 def load_and_preprocess(dataset_name, n_qubits=4):
     """Load and preprocess a dataset"""
-    dataset_path = (
-        Path(__file__).parent.parent / "datasets" / "quantum" / f"{dataset_name}.csv"
-    )
+    dataset_path = Path(__file__).parent.parent / "datasets" / "quantum" / f"{dataset_name}.csv"
 
     print(f"  Loading {dataset_name}...", end=" ")
 
@@ -96,17 +94,13 @@ def load_and_preprocess(dataset_name, n_qubits=4):
             df = pd.read_csv(dataset_path, na_values=["?", "NA", "", "NaN"])
         elif dataset_name in {"wheat_seeds", "seeds"}:
             # Whitespace-delimited datasets with no header
-            df = pd.read_csv(
-                dataset_path, sep=r"\s+", header=None, na_values=["?", "NA", "", "NaN"]
-            )
+            df = pd.read_csv(dataset_path, sep=r"\s+", header=None, na_values=["?", "NA", "", "NaN"])
         elif dataset_name == "ecoli":
             # Known corrupted dataset - skip
             raise ValueError("Dataset file appears to be corrupted or empty")
         elif dataset_name == "yeast":
             # Whitespace-delimited, no header, skip first column (sequence name)
-            df = pd.read_csv(
-                dataset_path, sep=r"\s+", header=None, na_values=["?", "NA", "", "NaN"]
-            )
+            df = pd.read_csv(dataset_path, sep=r"\s+", header=None, na_values=["?", "NA", "", "NaN"])
             df = df.iloc[:, 1:]  # Skip sequence name column
         elif dataset_name == "parkinsons":
             # Comma-delimited with header, skip first column (name)
@@ -114,9 +108,7 @@ def load_and_preprocess(dataset_name, n_qubits=4):
             df = df.drop(columns=df.columns[0])  # Skip name column
         elif dataset_name in {"statlog_australian", "statlog_heart"}:
             # Space-delimited, no header
-            df = pd.read_csv(
-                dataset_path, sep=" ", header=None, na_values=["?", "NA", "", "NaN"]
-            )
+            df = pd.read_csv(dataset_path, sep=" ", header=None, na_values=["?", "NA", "", "NaN"])
         elif dataset_name == "vertebral_column":
             # Binary file or severely corrupted - skip for now
             raise ValueError("Dataset file appears to be corrupted or binary format")
@@ -125,9 +117,7 @@ def load_and_preprocess(dataset_name, n_qubits=4):
             df = pd.read_csv(dataset_path, skiprows=1, na_values=["?", "NA", "", "NaN"])
         elif dataset_name == "breast_cancer":
             # No header, need to skip ID column
-            df = pd.read_csv(
-                dataset_path, header=None, na_values=["?", "NA", "", "NaN"]
-            )
+            df = pd.read_csv(dataset_path, header=None, na_values=["?", "NA", "", "NaN"])
         elif dataset_name == "balance_scale":
             # Comma-delimited with header
             df = pd.read_csv(dataset_path, na_values=["?", "NA", "", "NaN"])
@@ -140,18 +130,14 @@ def load_and_preprocess(dataset_name, n_qubits=4):
             "thyroid",
         }:
             # Comma-delimited, no header
-            df = pd.read_csv(
-                dataset_path, header=None, na_values=["?", "NA", "", "NaN"]
-            )
+            df = pd.read_csv(dataset_path, header=None, na_values=["?", "NA", "", "NaN"])
         else:
             # Standard loading with fallback
             try:
                 df = pd.read_csv(dataset_path, na_values=["?", "NA", "", "NaN"])
                 # Check if it looks like semicolon-delimited
                 if df.shape[1] == 1 and ";" in str(df.iloc[0, 0]):
-                    df = pd.read_csv(
-                        dataset_path, sep=";", na_values=["?", "NA", "", "NaN"]
-                    )
+                    df = pd.read_csv(dataset_path, sep=";", na_values=["?", "NA", "", "NaN"])
             except UnicodeDecodeError:
                 # Try different encoding
                 try:
@@ -179,29 +165,15 @@ def load_and_preprocess(dataset_name, n_qubits=4):
             "wheat_seeds",
         }:
             first_row_numeric = all(
-                str(df.iloc[0, i])
-                .replace(".", "")
-                .replace("-", "")
-                .replace("e", "")
-                .isdigit()
-                or str(df.iloc[0, i])
-                .replace(".", "")
-                .replace("-", "")
-                .replace("e", "")
-                .replace("+", "")
-                .isdigit()
+                str(df.iloc[0, i]).replace(".", "").replace("-", "").replace("e", "").isdigit()
+                or str(df.iloc[0, i]).replace(".", "").replace("-", "").replace("e", "").replace("+", "").isdigit()
                 for i in range(min(3, df.shape[1] - 1))
             )
 
-            if (
-                first_row_numeric
-                or df.columns[0].replace(".", "").replace("-", "").isdigit()
-            ):
+            if first_row_numeric or df.columns[0].replace(".", "").replace("-", "").isdigit():
                 # No header - reload without header
                 try:
-                    df = pd.read_csv(
-                        dataset_path, header=None, na_values=["?", "NA", "", "NaN"]
-                    )
+                    df = pd.read_csv(dataset_path, header=None, na_values=["?", "NA", "", "NaN"])
                 except UnicodeDecodeError:
                     df = pd.read_csv(
                         dataset_path,
@@ -219,15 +191,11 @@ def load_and_preprocess(dataset_name, n_qubits=4):
             # Column 0 is ID, Column 1 is diagnosis (M/B), rest are features
             # We need to use column 1 as label and skip column 0
             if X.shape[1] > 20:  # Has ID column
-                y = X.iloc[
-                    :, 0
-                ].values  # Second column (index 1 in original) is now at index 0 after removing last
+                y = X.iloc[:, 0].values  # Second column (index 1 in original) is now at index 0 after removing last
                 X = X.iloc[:, 1:]  # Skip both ID and diagnosis, keep only features
                 # Now y is from what was the label column, and X has only numeric features
                 # Actually, let's reload this correctly
-                X = df.iloc[
-                    :, 2:-1
-                ]  # Skip ID (col 0) and diagnosis (col 1), take features
+                X = df.iloc[:, 2:-1]  # Skip ID (col 0) and diagnosis (col 1), take features
                 y = df.iloc[:, 1].values  # Diagnosis column
 
         # Impute missing values in features if any
@@ -254,14 +222,10 @@ def load_and_preprocess(dataset_name, n_qubits=4):
 
         # Use stratified split only if each class has at least 2 samples
         if min_class_count >= 2:
-            X_train, X_val, y_train, y_val = train_test_split(
-                X, y, test_size=0.2, random_state=42, stratify=y
-            )
+            X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
         else:
             # Non-stratified split for very imbalanced data
-            X_train, X_val, y_train, y_val = train_test_split(
-                X, y, test_size=0.2, random_state=42
-            )
+            X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.2, random_state=42)
 
         # Standardize
         scaler = StandardScaler()
@@ -305,14 +269,10 @@ def quick_train(X_train, y_train, X_val, y_val, dataset_name):
         )
 
         # Create data loaders
-        train_dataset = TensorDataset(
-            torch.FloatTensor(X_train), torch.LongTensor(y_train)
-        )
+        train_dataset = TensorDataset(torch.FloatTensor(X_train), torch.LongTensor(y_train))
         val_dataset = TensorDataset(torch.FloatTensor(X_val), torch.LongTensor(y_val))
 
-        train_loader = DataLoader(
-            train_dataset, batch_size=16, shuffle=True, drop_last=True
-        )
+        train_loader = DataLoader(train_dataset, batch_size=16, shuffle=True, drop_last=True)
         val_loader = DataLoader(val_dataset, batch_size=16, drop_last=True)
 
         # Create trainer
@@ -355,9 +315,7 @@ def main():
         print("-" * 70)
 
         # Load and preprocess
-        X_train, X_val, y_train, y_val, load_success, load_error = load_and_preprocess(
-            dataset_name
-        )
+        X_train, X_val, y_train, y_val, load_success, load_error = load_and_preprocess(dataset_name)
 
         if not load_success:
             load_failures.append((dataset_name, load_error))

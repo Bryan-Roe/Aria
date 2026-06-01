@@ -52,8 +52,7 @@ def run_core_smoke(repo_root: Path, timeout_seconds: int) -> dict[str, Any]:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(
-        description="Automate core/ file validation")
+    parser = argparse.ArgumentParser(description="Automate core/ file validation")
     parser.add_argument(
         "--skip-smoke",
         action="store_true",
@@ -84,11 +83,9 @@ def main() -> int:
 
     smoke_result: dict[str, Any] | None = None
     if not args.skip_smoke:
-        smoke_result = run_core_smoke(
-            repo_root, timeout_seconds=max(args.smoke_timeout, 1))
+        smoke_result = run_core_smoke(repo_root, timeout_seconds=max(args.smoke_timeout, 1))
 
-    passed = not compile_failed and (
-        smoke_result is None or smoke_result["status"] == "ok")
+    passed = not compile_failed and (smoke_result is None or smoke_result["status"] == "ok")
     summary = {
         "generated_at": utc_now(),
         "core_dir": str(core_dir),

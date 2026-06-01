@@ -180,9 +180,7 @@ class TestGetEndpoints:
         assert data["status"] == "ok"
         assert "settings" in data
 
-    def test_ai_status_uses_shared_status_loader_without_leaking_metadata(
-        self, app_module, monkeypatch
-    ):
+    def test_ai_status_uses_shared_status_loader_without_leaking_metadata(self, app_module, monkeypatch):
         """GET /api/ai/status should strip shared loader metadata from payloads."""
 
         def _fake_status(path, *_, **__):
@@ -234,8 +232,7 @@ class TestGetEndpoints:
         assert orch["autonomous_training"]["cycles_completed"] == 4
         assert orch["autonomous_training"]["heartbeat_running"] is False
         assert orch["autotrain"]["status"] == "ok"
-        assert not any(key.startswith("_status_file_")
-                       for key in orch["autonomous_training"])
+        assert not any(key.startswith("_status_file_") for key in orch["autonomous_training"])
 
     def test_chat_options(self, app_module):
         """OPTIONS /api/chat returns CORS headers."""
@@ -564,8 +561,7 @@ class TestPostValidation:
 
         import azure.functions as _af
 
-        captured: dict = {"embedding": None,
-                          "session_id": None, "sse_body": b""}
+        captured: dict = {"embedding": None, "session_id": None, "sse_body": b""}
 
         def _fake_embedding(text: str):
             captured["embedding"] = text
@@ -585,11 +581,9 @@ class TestPostValidation:
                 return _real_HttpResponse(consumed, **kwargs)
             return _real_HttpResponse(body, **kwargs)
 
-        monkeypatch.setattr(app_module.func, "HttpResponse",
-                            _capturing_HttpResponse)
+        monkeypatch.setattr(app_module.func, "HttpResponse", _capturing_HttpResponse)
         monkeypatch.setattr(app_module, "generate_embedding", _fake_embedding)
-        monkeypatch.setattr(
-            app_module, "fetch_similar_messages", _fake_similar)
+        monkeypatch.setattr(app_module, "fetch_similar_messages", _fake_similar)
 
         req = _mock_request(
             "POST",
@@ -657,8 +651,7 @@ class TestPostValidation:
                 return _real_HttpResponse(consumed, **kwargs)
             return _real_HttpResponse(body, **kwargs)
 
-        monkeypatch.setattr(app_module.func, "HttpResponse",
-                            _capturing_HttpResponse)
+        monkeypatch.setattr(app_module.func, "HttpResponse", _capturing_HttpResponse)
 
         req = _mock_request(
             "POST",
@@ -853,8 +846,7 @@ class TestAgiEndpoints:
                 return _real_HttpResponse(consumed, **kwargs)
             return _real_HttpResponse(body, **kwargs)
 
-        monkeypatch.setattr(app_module.func, "HttpResponse",
-                            _capturing_HttpResponse)
+        monkeypatch.setattr(app_module.func, "HttpResponse", _capturing_HttpResponse)
 
         req = _mock_request(
             "POST",
@@ -986,8 +978,7 @@ class TestQuantumLlmEndpoint:
         train_args = capture["train_args"]
         assert train_args["epochs"] == 5
         assert train_args["dataset_path"].is_absolute()
-        assert str(train_args["output_dir"]).endswith(
-            "data_out/quantum_llm_api")
+        assert str(train_args["output_dir"]).endswith("data_out/quantum_llm_api")
 
     def test_quantum_llm_post_unknown_action(self, app_module, monkeypatch):
         _install_fake_quantum_trainer_module(monkeypatch)
@@ -1108,8 +1099,7 @@ class TestRequestValidator:
         from shared.request_validator import validate_fields
 
         err = validate_fields(
-            {"messages": [{"role": "user", "content": "hi"}],
-                "temperature": 0.7},
+            {"messages": [{"role": "user", "content": "hi"}], "temperature": 0.7},
             {
                 "messages": {"type": list, "required": True, "min_length": 1},
                 "temperature": {"type": (int, float), "min": 0, "max": 2},

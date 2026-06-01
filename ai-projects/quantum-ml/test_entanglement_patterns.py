@@ -65,9 +65,7 @@ def load_heart_disease():
 
 
 def preprocess(X, y, n_components=4):
-    X_train, X_val, y_train, y_val = train_test_split(
-        X, y, test_size=0.2, random_state=42, stratify=y
-    )
+    X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
 
     scaler = StandardScaler()
     X_train_scaled = scaler.fit_transform(X_train)
@@ -92,12 +90,8 @@ def run_experiment(entanglement: str, epochs=12, batch_size=16, lr=0.001):
     train_ds = TensorDataset(X_train_t, y_train_t)
     val_ds = TensorDataset(X_val_t, y_val_t)
 
-    train_loader = DataLoader(
-        train_ds, batch_size=batch_size, shuffle=True, drop_last=True
-    )
-    val_loader = DataLoader(
-        val_ds, batch_size=batch_size, shuffle=False, drop_last=False
-    )
+    train_loader = DataLoader(train_ds, batch_size=batch_size, shuffle=True, drop_last=True)
+    val_loader = DataLoader(val_ds, batch_size=batch_size, shuffle=False, drop_last=False)
 
     model = HybridQNN(
         input_dim=4,
@@ -175,9 +169,7 @@ def main():
     md.append(f"\nGenerated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     md.append("\n## Summary")
     for p in patterns:
-        md.append(
-            f"- {p.title()}: Final Val Acc = {histories[p]['val_acc'][-1]*100:.2f}%"
-        )
+        md.append(f"- {p.title()}: Final Val Acc = {histories[p]['val_acc'][-1]*100:.2f}%")
 
     report_path = results_dir / "entanglement_patterns_report.md"
     with open(report_path, "w", encoding="utf-8") as f:

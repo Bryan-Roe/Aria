@@ -149,9 +149,7 @@ for n_qubits in [2, 4, 6, 8]:
     result = benchmark_circuit(params)
     state_dim = 2**n_qubits
 
-    print(
-        f"  {n_qubits} qubits: State dimension = {state_dim:5d}, Result = {result:.4f}"
-    )
+    print(f"  {n_qubits} qubits: State dimension = {state_dim:5d}, Result = {result:.4f}")
 
 print("\nNote: Classical simulation becomes exponentially harder!")
 print("Real quantum hardware scales linearly with qubits.")
@@ -177,9 +175,7 @@ bell_noisy.h(0)
 bell_noisy.cx(0, 1)
 bell_noisy.measure([0, 1], [0, 1])
 
-job_noisy = simulator.run(
-    transpile(bell_noisy, simulator), shots=1000, noise_model=noise_model
-)
+job_noisy = simulator.run(transpile(bell_noisy, simulator), shots=1000, noise_model=noise_model)
 counts_noisy = job_noisy.result().get_counts()
 
 print("Noisy Bell state (1% single-qubit, 2% two-qubit error):")

@@ -17,17 +17,18 @@ except ImportError:
 
 try:
     import torch
-    from peft import (LoraConfig, PeftModel, get_peft_model,
-                      prepare_model_for_kbit_training)
-    from transformers import (AutoModelForCausalLM, AutoTokenizer,
-                              DataCollatorForLanguageModeling, Trainer,
-                              TrainingArguments)
+    from peft import LoraConfig, PeftModel, get_peft_model, prepare_model_for_kbit_training
+    from transformers import (
+        AutoModelForCausalLM,
+        AutoTokenizer,
+        DataCollatorForLanguageModeling,
+        Trainer,
+        TrainingArguments,
+    )
 
     from datasets import load_dataset
 except ImportError as e:
-    raise SystemExit(
-        f"Missing training dependencies: {e}\nInstall with: pip install -r requirements.txt"
-    ) from e
+    raise SystemExit(f"Missing training dependencies: {e}\nInstall with: pip install -r requirements.txt") from e
 
 
 @dataclass
@@ -73,18 +74,14 @@ def load_config(config_path: Path) -> LocalConfig:
     if config_path.exists():
         with config_path.open("r") as f:
             cfg_dict = yaml.safe_load(f) or {}
-        return LocalConfig(
-            **{k: v for k, v in cfg_dict.items() if hasattr(LocalConfig, k)}
-        )
+        return LocalConfig(**{k: v for k, v in cfg_dict.items() if hasattr(LocalConfig, k)})
     return LocalConfig()
 
 
 def format_chat_messages(messages: List[Dict[str, str]], tokenizer) -> str:
     """Format chat messages using tokenizer template or fallback"""
     if hasattr(tokenizer, "apply_chat_template"):
-        return tokenizer.apply_chat_template(
-            messages, tokenize=False, add_generation_prompt=False
-        )
+        return tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=False)
 
     # Fallback formatting
     parts = []
@@ -102,12 +99,8 @@ def format_chat_messages(messages: List[Dict[str, str]], tokenizer) -> str:
 
 def main():
     parser = argparse.ArgumentParser(description="Local LoRA fine-tuning")
-    parser.add_argument(
-        "--config", type=str, default="local_config.yaml", help="Config file"
-    )
-    parser.add_argument(
-        "--data-dir", type=str, default="../data", help="Dataset directory"
-    )
+    parser.add_argument("--config", type=str, default="local_config.yaml", help="Config file")
+    parser.add_argument("--data-dir", type=str, default="../data", help="Dataset directory")
     parser.add_argument("--model", type=str, help="Override model ID")
     parser.add_argument("--output", type=str, help="Override output directory")
     parser.add_argument("--epochs", type=int, help="Override epochs")
@@ -176,9 +169,7 @@ def main():
     )
 
     if args.max_samples:
-        dataset["train"] = dataset["train"].select(
-            range(min(args.max_samples, len(dataset["train"])))
-        )
+        dataset["train"] = dataset["train"].select(range(min(args.max_samples, len(dataset["train"]))))
         dataset["validation"] = dataset["validation"].select(
             range(min(args.max_samples // 4, len(dataset["validation"])))
         )
@@ -217,11 +208,7 @@ def main():
         quantization_config=quantization_config,
         device_map="auto" if torch.cuda.is_available() else None,
         trust_remote_code=True,
-        torch_dtype=(
-            torch.bfloat16
-            if cfg.use_bf16
-            else (torch.float16 if cfg.use_fp16 else torch.float32)
-        ),
+        torch_dtype=(torch.bfloat16 if cfg.use_bf16 else (torch.float16 if cfg.use_fp16 else torch.float32)),
     )
 
     if quantization_config:

@@ -9,9 +9,7 @@ from chat_providers import detect_provider
 from shared.http_utils import create_cors_headers, validate_messages
 
 # Add chat-cli to path so we can import chat_providers
-talk_to_ai_path = (
-    Path(__file__).resolve().parent.parent / "ai-projects" / "chat-cli" / "src"
-)
+talk_to_ai_path = Path(__file__).resolve().parent.parent / "ai-projects" / "chat-cli" / "src"
 sys.path.insert(0, str(talk_to_ai_path))
 
 # Add repo root to path so we can import shared utilities as a package
@@ -52,12 +50,7 @@ def chat(req: func.HttpRequest) -> func.HttpResponse:
 
         # If LoRA provider selected without a model path, try default path
         if (provider_choice or "").lower() == "lora" and not model_override:
-            default_adapter = (
-                Path(__file__).resolve().parent.parent
-                / "data_out"
-                / "lora_training"
-                / "lora_adapter"
-            )
+            default_adapter = Path(__file__).resolve().parent.parent / "data_out" / "lora_training" / "lora_adapter"
             if default_adapter.exists():
                 model_override = str(default_adapter)
             else:
@@ -90,9 +83,7 @@ def chat(req: func.HttpRequest) -> func.HttpResponse:
             )
 
         # Get provider
-        provider, info = detect_provider(
-            explicit=provider_choice, model_override=model_override
-        )
+        provider, info = detect_provider(explicit=provider_choice, model_override=model_override)
 
         logging.info(f"Using provider: {info.name}, model: {info.model}")
 

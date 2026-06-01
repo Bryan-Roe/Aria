@@ -59,10 +59,7 @@ def build_workflow():
     model = os.environ.get("FOUNDRY_MODEL_DEPLOYMENT_NAME", "").strip()
 
     if not endpoint:
-        raise ValueError(
-            "AZURE_AI_PROJECT_ENDPOINT is not set. "
-            "Add it to your .env file or environment variables."
-        )
+        raise ValueError("AZURE_AI_PROJECT_ENDPOINT is not set. " "Add it to your .env file or environment variables.")
     if not model:
         raise ValueError(
             "FOUNDRY_MODEL_DEPLOYMENT_NAME is not set. "

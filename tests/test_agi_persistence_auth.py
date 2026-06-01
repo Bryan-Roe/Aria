@@ -17,7 +17,9 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 
-def _mock_request(method: str = "GET", body: dict | None = None, params: dict | None = None, route_params: dict | None = None):
+def _mock_request(
+    method: str = "GET", body: dict | None = None, params: dict | None = None, route_params: dict | None = None
+):
     req = MagicMock()
     req.method = method
     req.params = params or {}

@@ -39,6 +39,7 @@ Short & actionable summary for AI agents editing Aria — an interactive AI char
 ## Key Features
 
 **Interactive Character System:**
+
 - 3D CSS-animated character with smooth transitions and physics-based movement
 - Natural language command processing ("move left", "wave at me", "dance", "jump", "pickup ball")
 - **Auto-Execute System**: LLM-powered action parser converts natural language to structured action sequences
@@ -53,6 +54,7 @@ Short & actionable summary for AI agents editing Aria — an interactive AI char
 - Server-synchronized state management (character position, objects, expressions)
 
 **Autonomous Learning:**
+
 - Self-discovering dataset collection from multiple sources
 - Adaptive epoch selection based on performance history
 - Automatic model promotion when accuracy thresholds met
@@ -60,6 +62,7 @@ Short & actionable summary for AI agents editing Aria — an interactive AI char
 - Continuous 30-minute training cycles with graceful error recovery
 
 **Multi-Provider Chat:**
+
 - Azure OpenAI, OpenAI, LMStudio, local models
 - LoRA adapter support for fine-tuned models
 - Automatic provider fallback chain
@@ -133,6 +136,7 @@ watch -n 5 'cat data_out/autonomous_training_status.json | python -m json.tool' 
 ## Critical Patterns
 
 **Autonomous/self-managing systems:**
+
 - `scripts/autonomous_training_orchestrator.py` — Continuous learning with 30-min cycles (infinite by default)
   - Self-discovers datasets (scans `datasets/quantum`, `datasets/chat`, `datasets/massive_quantum`)
   - Self-optimizes: Adaptive epochs `[25, 50, 100, 200]` based on performance history
@@ -146,12 +150,14 @@ watch -n 5 'cat data_out/autonomous_training_status.json | python -m json.tool' 
   - Config: `config/master_orchestrator.yaml` (cron schedules, priorities, retry logic, timeouts)
 
 **Data conventions:**
+
 - `datasets/` is **read-only** — never modify existing datasets
 - All outputs go to `data_out/<orchestrator>/` with `status.json` as source of truth
 - Chat datasets: `[{"messages": [{"role": "user|assistant", "content": "..."}]}]`
 - LoRA adapters need both `adapter_config.json` + `adapter_model.safetensors`
 
 **Provider detection chain** (in `shared/chat_providers.py`):
+
 1. Explicit choice (--provider flag)
 2. LMStudio (if `LMSTUDIO_BASE_URL` configured)
 3. Azure OpenAI (needs all 4: `AZURE_OPENAI_API_KEY`, `AZURE_OPENAI_ENDPOINT`, `AZURE_OPENAI_DEPLOYMENT`, `AZURE_OPENAI_API_VERSION`)
@@ -163,11 +169,13 @@ watch -n 5 'cat data_out/autonomous_training_status.json | python -m json.tool' 
 `YAML base` < `CLI flags` < `per-job YAML` < `env vars`
 
 **YAML orchestrators:**
+
 - All in `scripts/` with matching root YAMLs (e.g., `autotrain.yaml`, `quantum_autorun.yaml`)
 - Write `data_out/<name>/status.json` with machine-readable job status
 - Support `--dry-run` to validate before execution
 
 **Autonomous training implementation patterns:**
+
 ```python
 # State machine: discovery → collection → training → analysis → optimization → deployment
 async def run_single_cycle(cycle_number):
@@ -181,12 +189,14 @@ async def run_single_cycle(cycle_number):
 ```
 
 **Process management:**
+
 - Autonomous systems run via `nohup` in background, logs to `data_out/*.log`
 - Check status: `ps aux | grep -E "(autonomous|aria)" | grep -v grep`
 - Manual trigger: `pkill -USR1 -f autonomous_training` forces immediate cycle
 - Graceful shutdown: `pkill -TERM -f autonomous_training`
 
 **Performance monitoring & observability:**
+
 - **Health endpoint**: `GET /api/ai/status` — Comprehensive system diagnostics
   - Active provider detection (azure|openai|local|lora)
   - Environment variable presence (Azure OpenAI, OpenAI, Cosmos, SQL)
@@ -265,22 +275,26 @@ async def run_single_cycle(cycle_number):
 ## Optional Services
 
 **SQL persistence** (optional):
+
 - Enable via `QAI_DB_CONN` env var (SQLite, PostgreSQL, Azure SQL)
 - Pool size: `QAI_SQL_POOL_SIZE` (default: 10)
 - Health: Check `/api/ai/status` for pool saturation (warns ≥80%)
 
 **Cosmos DB** (optional, feature-flagged):
+
 - Enable: `QAI_ENABLE_COSMOS=true`
 - Config: `COSMOS_ENDPOINT`, `COSMOS_KEY`, `COSMOS_DATABASE`, `COSMOS_CONTAINER`
 - Partition key: `/session_id`, enable TTL for cost savings
 
 **Telemetry** (optional):
+
 - Application Insights via `APPLICATIONINSIGHTS_CONNECTION_STRING`
 - Non-blocking, gracefully degrades if unavailable
 
 ## Modular Instructions
 
 This repo uses component-specific instruction files in `.github/instructions/`:
+
 - `functions.instructions.md` — Azure Functions API endpoints
 - `shared-python.instructions.md` — Shared infrastructure patterns
 - `quantum-ai*.instructions.md` — Quantum ML workflows
@@ -330,6 +344,7 @@ Available agents in `.github/agents/`:
 | `data-pipeline.agent.md` | Batch evaluation, dataset management |
 
 **Mode equivalents now live in `.github/agents/`**:
+
 - `AI_model_training.agent.md` — End-to-end LoRA training, evaluation, and model promotion
 - `Aria_character_development.agent.md` — Interactive character commands, actions, world generation
 - `Quantum_ML_development.agent.md` — Quantum circuits, simulation, Azure Quantum pipelines
@@ -339,6 +354,7 @@ Available agents in `.github/agents/`:
 - `Azure_Static_Web_App.agent.md` — Static web app deployment patterns
 
 **Prompts** (`.github/prompts/`):
+
 - `agi.prompt.md` — Autonomous AGI reasoning with multi-step analysis and self-correction (chain-of-thought is internal, not exposed in output)
 - `reason.prompt.md` — Visible step-by-step reasoning that exposes chain-of-thought, confidence scores, and self-reflection to the user (uses `visible-reasoning` agent)
 - `debug.prompt.md` — Systematic diagnostic protocol
