@@ -17,15 +17,13 @@ jobs:
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
 
-      - name: Set up Python
-        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+      - name: Set up Python and minimal dependencies
+        uses: ./.github/actions/setup-python-env
         with:
           python-version: '3.11'
-
-      - name: Install minimal dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install pytest gradio
+          install-requirements: 'false'
+          install-dev-requirements: 'false'
+          extra-packages: 'pytest gradio'
 
       - name: Run focused Gradio tests
         run: pytest -q tests/test_gradio_*.py -q
