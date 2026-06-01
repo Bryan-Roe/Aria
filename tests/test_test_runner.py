@@ -5,6 +5,7 @@ import subprocess
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
+
 import pytest
 
 import scripts.test_runner as test_runner
@@ -185,9 +186,7 @@ def test_main_defaults_to_unit_and_exits_success(monkeypatch: pytest.MonkeyPatch
     monkeypatch.setattr(
         test_runner,
         "_run_selected",
-        lambda suites, coverage, verbose: captured.update(
-            {"suites": suites, "coverage": coverage, "verbose": verbose}
-        )
+        lambda suites, coverage, verbose: captured.update({"suites": suites, "coverage": coverage, "verbose": verbose})
         or True,
     )
 
