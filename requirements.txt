@@ -6,7 +6,7 @@ azure-monitor-opentelemetry>=1.8.8,<2.0.0  # Application Insights telemetry
 # opentelemetry-api>=1.41.1,<2.0.0
 # opentelemetry-sdk>=1.41.1,<2.0.0
 
-azure-cosmos>=4.15.0,<5.0.0  # Cosmos DB client
+azure-cosmos>=4.16.0,<5.0.0  # Cosmos DB client
 
 azure-functions
 openai>=2.38.0
