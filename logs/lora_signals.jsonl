@@ -34,3 +34,5 @@
 {"signal": "train", "payload": {"goal": "improve"}}
 {"signal": "train", "payload": {"goal": "Refine runtime behavior based on: Balance near-term execution with mid-term improvement. No history. Generate a simple useful system improvement goal.", "source": "self_assess"}}
 {"signal": "train", "payload": {"goal": "improve"}}
+{"signal": "train", "payload": {"goal": "Refine runtime behavior based on: Balance near-term execution with mid-term improvement. No history. Generate a simple useful system improvement goal.", "source": "self_assess"}}
+{"signal": "train", "payload": {"goal": "improve"}}
