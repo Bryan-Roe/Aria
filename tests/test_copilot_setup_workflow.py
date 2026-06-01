@@ -33,3 +33,28 @@ def test_copilot_setup_workflow_has_selective_lint_logic() -> None:
     assert 'load_changed_targets "${PUSH_BEFORE_SHA}" "${HEAD_SHA}" || load_default_targets' in content
     assert 'YAML_LIST_FILE="${{ steps.targets.outputs.yaml_list_file }}"' in content
     assert 'MD_LIST_FILE="${{ steps.targets.outputs.md_list_file }}"' in content
+
+
+@pytest.mark.unit
+def test_copilot_entrypoint_files_exist_and_reference_instructions() -> None:
+    repo_root = Path(__file__).resolve().parents[1]
+    copilot_md = repo_root / ".github" / "COPILOT.md"
+    copilot_yml = repo_root / ".github" / "copilot.yml"
+
+    assert copilot_md.exists(), "Expected .github/COPILOT.md to exist"
+    assert copilot_yml.exists(), "Expected .github/copilot.yml to exist"
+    assert (repo_root / ".github" / "copilot-instructions.md").exists()
+    assert (repo_root / ".github" / "copilot-instructions.full.md").exists()
+    assert (repo_root / ".github" / "COPILOT_SETUP_GUIDE.md").exists()
+
+    copilot_md_content = copilot_md.read_text(encoding="utf-8")
+    assert ".github/copilot-instructions.md" in copilot_md_content
+    assert ".github/copilot-instructions.full.md" in copilot_md_content
+
+    copilot_yml_content = copilot_yml.read_text(encoding="utf-8")
+    assert "quick_instructions" in copilot_yml_content
+    assert "full_instructions" in copilot_yml_content
+    assert "setup_guide" in copilot_yml_content
+    assert ".github/copilot-instructions.md" in copilot_yml_content
+    assert ".github/copilot-instructions.full.md" in copilot_yml_content
+    assert ".github/COPILOT_SETUP_GUIDE.md" in copilot_yml_content
