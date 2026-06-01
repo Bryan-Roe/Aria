@@ -149,7 +149,7 @@ class ReasoningAgent(BaseAgent):
             pass
 
         try:
-            match = re.search(r"\{.*\}", raw, re.S)
+            match = re.search(r"\{.*?\}", raw, re.S)
             if match:
                 result = _extract(json.loads(match.group(0)))
                 if result is not None:
