@@ -28,6 +28,23 @@ def test_parse_pytest_summary_returns_zeroes_without_match() -> None:
     }
 
 
+def test_parse_pytest_summary_ignores_non_summary_dividers() -> None:
+    output = "\n".join(
+        [
+            "============================================================",
+            "  Running suite: unit",
+            "============================================================",
+            "============================= test session starts ==============================",
+            "collected 2404 items / 18 deselected / 2 skipped / 2386 selected",
+            "=============== 2344 passed, 44 skipped, 18 deselected in 51.21s ===============",
+        ]
+    )
+
+    summary = test_runner._parse_pytest_summary(output)
+
+    assert summary == {"passed": 2344, "failed": 0, "errors": 0, "skipped": 44}
+
+
 def test_run_suite_builds_pytest_command_and_parses_summary(monkeypatch: pytest.MonkeyPatch) -> None:
     captured: dict[str, object] = {}
     monotonic_values = iter([10.0, 13.75])
