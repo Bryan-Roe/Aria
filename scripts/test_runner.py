@@ -77,27 +77,20 @@ SUITES = {
 # ---------------------------------------------------------------------------
 # Result Parsing
 # ---------------------------------------------------------------------------
-_RESULT_RE = re.compile(
-    r"=+ (?:(\d+) passed)?"
-    r"(?:,? ?(\d+) failed)?"
-    r"(?:,? ?(\d+) error)?"
-    r"(?:,? ?(\d+) skipped)?"
-    r"(?:,? ?(\d+) warning)?"
-    r".*=+",
-)
+_RESULT_LINE_RE = re.compile(r"=+\s+(.+?)\s+=+")
+_RESULT_COUNT_RE = re.compile(r"(\d+)\s+(passed|failed|errors?|skipped)")
 
 
 def _parse_pytest_summary(output: str) -> dict:
     """Extract counts from pytest's one-line summary."""
-    m = _RESULT_RE.search(output)
+    m = _RESULT_LINE_RE.search(output)
     if not m:
         return {"passed": 0, "failed": 0, "errors": 0, "skipped": 0}
-    return {
-        "passed": int(m.group(1) or 0),
-        "failed": int(m.group(2) or 0),
-        "errors": int(m.group(3) or 0),
-        "skipped": int(m.group(4) or 0),
-    }
+    counts = {"passed": 0, "failed": 0, "errors": 0, "skipped": 0}
+    for count, label in _RESULT_COUNT_RE.findall(m.group(1)):
+        key = "errors" if label.startswith("error") else label
+        counts[key] = int(count)
+    return counts
 
 
 # ---------------------------------------------------------------------------
