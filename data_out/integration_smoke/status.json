@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-06-01T18:23:20Z",
-  "run_id": "20260601T182320Z",
+  "generated_at": "2026-06-01T19:13:38Z",
+  "run_id": "20260601T191338Z",
   "config_path": null,
   "config_paths": {
     "master_orchestrator": "config/master_orchestrator.yaml",
@@ -41,35 +41,35 @@
       "name": "master_orchestrator_status",
       "status": "succeeded",
       "critical": true,
-      "duration_sec": 1.18,
-      "detail": "rc=0 | stdout=   \"schedule\": null,\n      \"orchestrators\": [\n        \"aria_automation\"\n      ]\n    },\n    {\n      \"name\": \"aria_server_only\",\n      \"enabled\": false,\n      \"trigger\": \"manual\",\n      \"schedule\": null,\n      \"orchestrators\": [\n        \"aria_automation\"\n      ]\n    }\n  ],\n  \"resource_usage\": {\n    \"available\": true,\n    \"cpu_percent\": 25.8,\n    \"memory_percent\": 35.3,\n    \"disk_percent\": 12.8\n  }\n}"
+      "duration_sec": 1.1,
+      "detail": "rc=0 | stdout=   \"schedule\": null,\n      \"orchestrators\": [\n        \"aria_automation\"\n      ]\n    },\n    {\n      \"name\": \"aria_server_only\",\n      \"enabled\": false,\n      \"trigger\": \"manual\",\n      \"schedule\": null,\n      \"orchestrators\": [\n        \"aria_automation\"\n      ]\n    }\n  ],\n  \"resource_usage\": {\n    \"available\": true,\n    \"cpu_percent\": 16.0,\n    \"memory_percent\": 37.8,\n    \"disk_percent\": 12.8\n  }\n}"
     },
     {
       "name": "quantum_autorun_dry_run",
       "status": "succeeded",
       "critical": true,
-      "duration_sec": 0.09,
+      "duration_sec": 0.08,
       "detail": "rc=0 | stdout=Validated 4 job(s): heart_quick, ionosphere_quick, azure_quantinuum_simulator, azure_ionq_qpu_test"
     },
     {
       "name": "repo_automation_status",
       "status": "succeeded",
       "critical": true,
-      "duration_sec": 0.14,
+      "duration_sec": 0.11,
       "detail": "rc=0 | stdout=Aria Character Automation (PID 17031) (\ud83e\udde9 deps)\n  \u2705 Autonomous Training System (PID 17079) (\ud83e\udde9 deps)\n  \u2705 Quantum Computing Workflows (PID 17081) (\ud83e\udde9 deps)\n  \u2705 Model Evaluation System (PID 17102) (\ud83e\udde9 deps)\n  \u2705 Dataset Auto-Discovery (Integrated in training) (\ud83e\udde9 deps)\n  \u274c Status Dashboard (\ud83e\udde9 deps)\n  \u274c Backup Manager (\ud83e\udde9 deps)\n================================================================================"
     },
     {
       "name": "chat_cli_local_once",
       "status": "succeeded",
       "critical": true,
-      "duration_sec": 2.16,
+      "duration_sec": 1.29,
       "detail": "rc=0 | stdout=\u274c Model 'llama3.2' not found in Ollama.\n\nTroubleshooting steps:\n1. Pull the model first:\n   ollama pull llama3.2\n\n2. List available models:\n   ollama list\n\n3. Popular models to try:\n   - llama2:latest (7B general purpose)\n   - codellama:latest (7B for coding)\n   - mistral:latest (7B high quality)\n   - llama3.2:latest (3B latest from Meta)\n\nUse --model flag or set OLLAMA_MODEL environment variable."
     },
     {
       "name": "functions_ai_status_endpoint",
       "status": "failed",
       "critical": false,
-      "duration_sec": 0.58,
+      "duration_sec": 0.02,
       "detail": "invalid_ai_status_payload"
     },
     {
@@ -83,7 +83,7 @@
       "name": "functions_agi_status_endpoint",
       "status": "succeeded",
       "critical": false,
-      "duration_sec": 0.02,
+      "duration_sec": 0.01,
       "detail": "has_key=available"
     },
     {
@@ -97,7 +97,7 @@
       "name": "functions_agi_stream_endpoint",
       "status": "skipped",
       "critical": false,
-      "duration_sec": 10.01,
+      "duration_sec": 9.6,
       "detail": "functions host not running (non-strict mode)"
     }
   ]

@@ -1,99 +1,91 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="color-scheme" content="light dark">
     <title>QAI Control Center</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="/static/styles.css">
 </head>
 <body>
     <div class="container">
         <!-- Header -->
         <header class="header">
-            <h1>🧠 QAI Control Center</h1>
-            <div class="status-indicator" id="serviceStatus">
-                <span class="status-dot"></span>
-                <span class="status-text">Checking...</span>
+            <div class="header-title">
+                <h1>🧠 QAI Control Center</h1>
+                <p class="header-subtitle">Quantum AI · Chat · Training</p>
+            </div>
+            <div class="header-actions">
+                <div class="status-indicator" id="serviceStatus" role="status" aria-live="polite">
+                    <span class="status-dot"></span>
+                    <span class="status-text">Checking…</span>
+                </div>
+                <button class="theme-toggle" id="themeToggle" type="button"
+                        aria-label="Toggle dark mode" title="Toggle dark mode">🌙</button>
             </div>
         </header>
 
         <!-- Navigation Tabs -->
-        <nav class="tabs">
-            <button class="tab-btn active" data-tab="dashboard">📊 Dashboard</button>
-            <button class="tab-btn" data-tab="quantum">⚛️ Quantum AI</button>
-            <button class="tab-btn" data-tab="chat">💬 Chat</button>
-            <button class="tab-btn" data-tab="training">🎓 Training</button>
-            <button class="tab-btn" data-tab="logs">📝 Logs</button>
+        <nav class="tabs" role="tablist" aria-label="Sections">
+            <button class="tab-btn active" data-tab="dashboard" role="tab" aria-selected="true">📊 Dashboard</button>
+            <button class="tab-btn" data-tab="quantum" role="tab" aria-selected="false">⚛️ Quantum AI</button>
+            <button class="tab-btn" data-tab="chat" role="tab" aria-selected="false">💬 Chat</button>
+            <button class="tab-btn" data-tab="training" role="tab" aria-selected="false">🎓 Training</button>
+            <button class="tab-btn" data-tab="logs" role="tab" aria-selected="false">📝 Logs</button>
         </nav>
 
         <!-- Dashboard Tab -->
-        <div class="tab-content active" id="dashboard">
+        <div class="tab-content active" id="dashboard" role="tabpanel">
             <div class="dashboard-grid">
-                <!-- System Status Card -->
                 <div class="card">
                     <h2>System Status</h2>
-                    <div id="systemStatus">
-                        <div class="loading">Loading...</div>
-                    </div>
+                    <div id="systemStatus"><div class="loading">Loading</div></div>
                 </div>
 
-                <!-- Quick Actions Card -->
                 <div class="card">
                     <h2>Quick Actions</h2>
                     <div class="quick-actions">
-                        <button class="btn btn-primary" onclick="quickAction('quantum')">
-                            ⚛️ Train Quantum Model
-                        </button>
-                        <button class="btn btn-primary" onclick="quickAction('chat')">
-                            💬 Start Chat
-                        </button>
-                        <button class="btn btn-primary" onclick="quickAction('training')">
-                            🎓 Train LoRA
-                        </button>
-                        <button class="btn btn-secondary" onclick="refreshStatus()">
-                            🔄 Refresh Status
-                        </button>
+                        <button class="btn btn-primary" onclick="quickAction('quantum')">⚛️ Train Quantum Model</button>
+                        <button class="btn btn-primary" onclick="quickAction('chat')">💬 Start Chat</button>
+                        <button class="btn btn-primary" onclick="quickAction('training')">🎓 Train LoRA</button>
+                        <button class="btn btn-secondary" onclick="refreshStatus(this)">🔄 Refresh Status</button>
                     </div>
                 </div>
 
-                <!-- Recent Activity Card -->
                 <div class="card full-width">
                     <h2>Recent Activity</h2>
-                    <div id="recentActivity">
-                        <div class="loading">Loading...</div>
-                    </div>
+                    <div id="recentActivity"><div class="loading">Loading</div></div>
                 </div>
             </div>
         </div>
 
         <!-- Quantum AI Tab -->
-        <div class="tab-content" id="quantum">
+        <div class="tab-content" id="quantum" role="tabpanel">
             <div class="grid-2">
-                <!-- Train Quantum Classifier -->
                 <div class="card">
                     <h2>Train Quantum Classifier</h2>
                     <form id="quantumTrainForm">
                         <div class="form-group">
                             <label for="quantumDataset">Dataset</label>
-                            <select id="quantumDataset" aria-label="Select quantum dataset" required>
-                                <option value="">Select dataset...</option>
+                            <select id="quantumDataset" required>
+                                <option value="">Select dataset…</option>
                             </select>
                         </div>
                         <div class="form-group">
-                            <label for="quantumQubits">Number of Qubits (2-20)</label>
+                            <label for="quantumQubits">Number of Qubits (2–20)</label>
                             <input type="number" id="quantumQubits" value="4" min="2" max="20" required>
                         </div>
                         <div class="form-group">
-                            <label for="quantumLayers">Number of Layers (1-10)</label>
+                            <label for="quantumLayers">Number of Layers (1–10)</label>
                             <input type="number" id="quantumLayers" value="2" min="1" max="10" required>
                         </div>
                         <div class="form-group">
-                            <label for="quantumEpochs">Epochs (1-1000)</label>
+                            <label for="quantumEpochs">Epochs (1–1000)</label>
                             <input type="number" id="quantumEpochs" value="10" min="1" max="1000" required>
                         </div>
                         <div class="form-group">
                             <label for="quantumBackend">Backend</label>
-                            <select id="quantumBackend" aria-label="Select quantum backend" required>
+                            <select id="quantumBackend" required>
                                 <option value="qiskit_aer">Qiskit Aer (Free)</option>
                                 <option value="lightning.qubit">Lightning Qubit (Fast)</option>
                             </select>
@@ -102,39 +94,30 @@
                     </form>
                 </div>
 
-                <!-- Quantum Status & Results -->
                 <div class="card">
                     <h2>Quantum System Status</h2>
-                    <div id="quantumStatus">
-                        <div class="loading">Loading...</div>
-                    </div>
+                    <div id="quantumStatus"><div class="loading">Loading</div></div>
                     <hr>
                     <h3>Recent Results</h3>
-                    <div id="quantumResults">
-                        <div class="loading">Loading...</div>
-                    </div>
+                    <div id="quantumResults"><div class="loading">Loading</div></div>
                 </div>
 
-                <!-- AutoRun Jobs -->
                 <div class="card full-width">
                     <h2>Quantum AutoRun Jobs</h2>
-                    <div id="quantumAutorunJobs">
-                        <div class="loading">Loading...</div>
-                    </div>
+                    <div id="quantumAutorunJobs"><div class="loading">Loading</div></div>
                 </div>
             </div>
         </div>
 
         <!-- Chat Tab -->
-        <div class="tab-content" id="chat">
+        <div class="tab-content" id="chat" role="tabpanel">
             <div class="grid-2">
-                <!-- Chat Interface -->
                 <div class="card chat-card">
                     <div class="chat-header">
                         <h2>💬 Chat Interface</h2>
                         <div class="form-group">
                             <label for="chatProvider">Provider</label>
-                            <select id="chatProvider" aria-label="Select chat provider">
+                            <select id="chatProvider">
                                 <option value="auto">Auto-detect</option>
                                 <option value="local">Local (Free)</option>
                                 <option value="azure">Azure OpenAI</option>
@@ -143,48 +126,39 @@
                             </select>
                         </div>
                     </div>
-                    <div class="chat-messages" id="chatMessages">
-                        <div class="chat-message system">
-                            👋 Welcome to QAI Chat! Select a provider and start chatting.
-                        </div>
+                    <div class="chat-messages" id="chatMessages" aria-live="polite">
+                        <div class="chat-message system">👋 Welcome to QAI Chat! Select a provider and start chatting.</div>
                     </div>
                     <form id="chatForm" class="chat-input-form">
-                        <input type="text" id="chatInput" placeholder="Type your message..." required>
-                        <button type="submit" class="btn btn-primary">Send</button>
+                        <input type="text" id="chatInput" placeholder="Type your message…"
+                               autocomplete="off" required>
+                        <button type="submit" class="btn btn-primary" id="chatSendBtn">Send</button>
                     </form>
                 </div>
 
-                <!-- Chat Status & History -->
                 <div class="card">
                     <h2>Chat Status</h2>
-                    <div id="chatStatus">
-                        <div class="loading">Loading...</div>
-                    </div>
+                    <div id="chatStatus"><div class="loading">Loading</div></div>
                     <hr>
                     <h3>Provider Status</h3>
-                    <div id="chatProviders">
-                        <div class="loading">Loading...</div>
-                    </div>
+                    <div id="chatProviders"><div class="loading">Loading</div></div>
                     <hr>
                     <h3>Conversation History</h3>
-                    <div id="chatHistory">
-                        <div class="loading">Loading...</div>
-                    </div>
+                    <div id="chatHistory"><div class="loading">Loading</div></div>
                 </div>
             </div>
         </div>
 
         <!-- Training Tab -->
-        <div class="tab-content" id="training">
+        <div class="tab-content" id="training" role="tabpanel">
             <div class="grid-2">
-                <!-- Train LoRA -->
                 <div class="card">
                     <h2>Train LoRA Adapter</h2>
                     <form id="loraTrainForm">
                         <div class="form-group">
                             <label for="loraDataset">Dataset Path</label>
-                            <select id="loraDataset" aria-label="Select LoRA dataset" required>
-                                <option value="">Select dataset...</option>
+                            <select id="loraDataset" required>
+                                <option value="">Select dataset…</option>
                             </select>
                         </div>
                         <div class="form-group">
@@ -203,47 +177,34 @@
                     </form>
                 </div>
 
-                <!-- Training Status -->
                 <div class="card">
                     <h2>Training System Status</h2>
-                    <div id="trainingStatus">
-                        <div class="loading">Loading...</div>
-                    </div>
+                    <div id="trainingStatus"><div class="loading">Loading</div></div>
                     <hr>
                     <h3>LoRA Adapter</h3>
-                    <div id="loraAdapterStatus">
-                        <div class="loading">Loading...</div>
-                    </div>
+                    <div id="loraAdapterStatus"><div class="loading">Loading</div></div>
                 </div>
 
-                <!-- AutoTrain Jobs -->
                 <div class="card full-width">
                     <h2>AutoTrain Orchestrator</h2>
                     <div class="form-inline">
-                        <select id="autotrainJob" aria-label="Select autotrain job">
-                            <option value="">Select job...</option>
-                        </select>
-                        <button class="btn btn-secondary" onclick="runAutoTrain(true)">Dry Run</button>
-                        <button class="btn btn-primary" onclick="runAutoTrain(false)">Run Job</button>
+                        <select id="autotrainJob"><option value="">Select job…</option></select>
+                        <button class="btn btn-secondary" onclick="runAutoTrain(true, this)">Dry Run</button>
+                        <button class="btn btn-primary" onclick="runAutoTrain(false, this)">Run Job</button>
                     </div>
                     <hr>
-                    <div id="autotrainStatus">
-                        <div class="loading">Loading...</div>
-                    </div>
+                    <div id="autotrainStatus"><div class="loading">Loading</div></div>
                 </div>
 
-                <!-- Available Datasets -->
                 <div class="card full-width">
                     <h2>Available Datasets</h2>
-                    <div id="datasetList">
-                        <div class="loading">Loading...</div>
-                    </div>
+                    <div id="datasetList"><div class="loading">Loading</div></div>
                 </div>
             </div>
         </div>
 
         <!-- Logs Tab -->
-        <div class="tab-content" id="logs">
+        <div class="tab-content" id="logs" role="tabpanel">
             <div class="card">
                 <div class="log-header">
                     <h2>System Logs</h2>
@@ -259,6 +220,9 @@
         </div>
     </div>
 
-    <script src="app.js"></script>
+    <!-- Toast notifications -->
+    <div class="toast-container" id="toastContainer" aria-live="assertive" aria-atomic="true"></div>
+
+    <script src="/static/app.js"></script>
 </body>
 </html>

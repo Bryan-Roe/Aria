@@ -1,296 +1,294 @@
 // QAI Control Center JavaScript
 
-const API_BASE = 'http://localhost:8000';
+// Same-origin: the FastAPI service serves this UI, so use relative URLs.
+// This works regardless of host/port (localhost, 0.0.0.0, remote, proxy).
+const API_BASE = '';
 
 // Global state
 let currentProvider = 'auto';
-let chatHistory = [];
 
-// Initialize app
+// ---------------------------------------------------------------------------
+// Utilities
+// ---------------------------------------------------------------------------
+
+/** Escape text for safe insertion into HTML (prevents XSS via innerHTML). */
+function esc(value) {
+    return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
+/** Fetch JSON with error handling; throws on non-2xx responses. */
+async function fetchJSON(path, options) {
+    const response = await fetch(`${API_BASE}${path}`, options);
+    if (!response.ok) {
+        let detail = response.statusText;
+        try {
+            const body = await response.json();
+            detail = body.detail || body.error || detail;
+        } catch (_) { /* ignore parse errors */ }
+        throw new Error(`${response.status}: ${detail}`);
+    }
+    return response.json();
+}
+
+/** Toggle a button into/out of a loading state. */
+function setLoading(btn, loading) {
+    if (!btn) return;
+    if (loading) {
+        btn.classList.add('is-loading');
+        btn.disabled = true;
+    } else {
+        btn.classList.remove('is-loading');
+        btn.disabled = false;
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Initialization
+// ---------------------------------------------------------------------------
+
 document.addEventListener('DOMContentLoaded', () => {
+    initializeTheme();
     initializeTabs();
     initializeForms();
+    restoreProvider();
     checkServiceStatus();
     loadDashboard();
 
-    // Refresh status every 30 seconds
     setInterval(checkServiceStatus, 30000);
 });
 
-// Tab Management
-function initializeTabs() {
-    const tabBtns = document.querySelectorAll('.tab-btn');
+// ---------------------------------------------------------------------------
+// Theme
+// ---------------------------------------------------------------------------
 
-    tabBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-            const tabName = btn.dataset.tab;
-            switchTab(tabName);
+function initializeTheme() {
+    const stored = localStorage.getItem('qai-theme');
+    const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const theme = stored || (prefersDark ? 'dark' : 'light');
+    applyTheme(theme);
+
+    const toggle = document.getElementById('themeToggle');
+    if (toggle) {
+        toggle.addEventListener('click', () => {
+            const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+            applyTheme(next);
+            localStorage.setItem('qai-theme', next);
         });
+    }
+}
+
+function applyTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+    const toggle = document.getElementById('themeToggle');
+    if (toggle) toggle.textContent = theme === 'dark' ? '☀️' : '🌙';
+}
+
+// ---------------------------------------------------------------------------
+// Tabs
+// ---------------------------------------------------------------------------
+
+function initializeTabs() {
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => switchTab(btn.dataset.tab));
     });
+
+    const lastTab = localStorage.getItem('qai-tab');
+    if (lastTab && document.getElementById(lastTab)) switchTab(lastTab);
 }
 
 function switchTab(tabName) {
-    // Update buttons
     document.querySelectorAll('.tab-btn').forEach(btn => {
-        btn.classList.remove('active');
-        if (btn.dataset.tab === tabName) {
-            btn.classList.add('active');
-        }
+        const active = btn.dataset.tab === tabName;
+        btn.classList.toggle('active', active);
+        btn.setAttribute('aria-selected', active ? 'true' : 'false');
     });
-
-    // Update content
     document.querySelectorAll('.tab-content').forEach(content => {
-        content.classList.remove('active');
+        content.classList.toggle('active', content.id === tabName);
     });
-    document.getElementById(tabName).classList.add('active');
-
-    // Load tab-specific data
+    localStorage.setItem('qai-tab', tabName);
     loadTabData(tabName);
 }
 
 function loadTabData(tabName) {
-    switch(tabName) {
-        case 'dashboard':
-            loadDashboard();
-            break;
-        case 'quantum':
-            loadQuantumData();
-            break;
-        case 'chat':
-            loadChatData();
-            break;
-        case 'training':
-            loadTrainingData();
-            break;
+    switch (tabName) {
+        case 'dashboard': loadDashboard(); break;
+        case 'quantum': loadQuantumData(); break;
+        case 'chat': loadChatData(); break;
+        case 'training': loadTrainingData(); break;
     }
 }
 
+// ---------------------------------------------------------------------------
 // Service Status
+// ---------------------------------------------------------------------------
+
 async function checkServiceStatus() {
+    const indicator = document.getElementById('serviceStatus');
+    const dot = indicator.querySelector('.status-dot');
+    const text = indicator.querySelector('.status-text');
     try {
-        const response = await fetch(`${API_BASE}/health`);
-        const data = await response.json();
-
-        const indicator = document.getElementById('serviceStatus');
-        const dot = indicator.querySelector('.status-dot');
-        const text = indicator.querySelector('.status-text');
-
-        if (data.status === 'healthy') {
-            dot.classList.add('online');
-            dot.classList.remove('offline');
-            text.textContent = 'Online';
-        } else {
-            dot.classList.remove('online');
-            dot.classList.add('offline');
-            text.textContent = 'Error';
-        }
+        const data = await fetchJSON('/health');
+        const healthy = data.status === 'healthy';
+        dot.classList.toggle('online', healthy);
+        dot.classList.toggle('offline', !healthy);
+        text.textContent = healthy ? 'Online' : 'Error';
     } catch (error) {
-        const indicator = document.getElementById('serviceStatus');
-        const dot = indicator.querySelector('.status-dot');
-        const text = indicator.querySelector('.status-text');
         dot.classList.remove('online');
         dot.classList.add('offline');
         text.textContent = 'Offline';
     }
 }
 
+// ---------------------------------------------------------------------------
 // Dashboard
+// ---------------------------------------------------------------------------
+
 async function loadDashboard() {
     try {
-        const response = await fetch(`${API_BASE}/status`);
-        const data = await response.json();
+        const data = await fetchJSON('/status');
 
-        // Update system status
-        const statusHtml = `
+        document.getElementById('systemStatus').innerHTML = `
             <div class="status-item">
                 <span class="status-label">Service</span>
-                <span class="status-value success">${data.service}</span>
+                <span class="status-value success">${esc(data.service)}</span>
             </div>
             <div class="status-item">
                 <span class="status-label">Version</span>
-                <span class="status-value">${data.version}</span>
+                <span class="status-value">${esc(data.version)}</span>
             </div>
-            <div class="status-item">
-                <span class="status-label">Quantum Enabled</span>
-                <span class="status-value ${data.quantum.enabled ? 'success' : 'error'}">
-                    ${data.quantum.enabled ? '✓ Yes' : '✗ No'}
-                </span>
-            </div>
-            <div class="status-item">
-                <span class="status-label">Chat Enabled</span>
-                <span class="status-value ${data.chat.enabled ? 'success' : 'error'}">
-                    ${data.chat.enabled ? '✓ Yes' : '✗ No'}
-                </span>
-            </div>
-            <div class="status-item">
-                <span class="status-label">Training Enabled</span>
-                <span class="status-value ${data.training.enabled ? 'success' : 'error'}">
-                    ${data.training.enabled ? '✓ Yes' : '✗ No'}
-                </span>
-            </div>
+            ${statusRow('Quantum Enabled', data.quantum?.enabled)}
+            ${statusRow('Chat Enabled', data.chat?.enabled)}
+            ${statusRow('Training Enabled', data.training?.enabled)}
         `;
-        document.getElementById('systemStatus').innerHTML = statusHtml;
 
-        // Update recent activity
-        let activityHtml = '<div class="status-item"><span class="status-label">No recent activity</span></div>';
-
-        if (data.quantum.recent_results && data.quantum.recent_results.length > 0) {
-            activityHtml = data.quantum.recent_results.map(result => `
+        const results = data.quantum?.recent_results || [];
+        document.getElementById('recentActivity').innerHTML = results.length
+            ? results.map(r => `
                 <div class="result-item">
-                    <strong>Quantum:</strong> ${result.dataset} -
-                    <span class="accuracy">${(result.accuracy * 100).toFixed(1)}%</span> accuracy
-                    <br><small>${result.backend} - ${result.timestamp}</small>
-                </div>
-            `).join('');
-        }
-
-        document.getElementById('recentActivity').innerHTML = activityHtml;
+                    <strong>Quantum:</strong> ${esc(r.dataset)} —
+                    <span class="accuracy">${formatPct(r.accuracy)}</span> accuracy
+                    <br><small>${esc(r.backend)} · ${esc(r.timestamp)}</small>
+                </div>`).join('')
+            : emptyRow('No recent activity');
 
         addLog('Dashboard loaded successfully', 'success');
     } catch (error) {
+        document.getElementById('systemStatus').innerHTML = emptyRow('Unable to load status');
         addLog(`Dashboard load error: ${error.message}`, 'error');
+        toast(`Dashboard unavailable: ${error.message}`, 'error');
     }
 }
 
+// ---------------------------------------------------------------------------
 // Quantum AI
+// ---------------------------------------------------------------------------
+
 async function loadQuantumData() {
     try {
-        // Load datasets
-        const datasetsResponse = await fetch(`${API_BASE}/quantum/datasets`);
-        const datasets = await datasetsResponse.json();
+        const datasets = await fetchJSON('/quantum/datasets');
+        fillSelect('quantumDataset', (datasets || []).map(d => ({ value: d.name, label: d.name })));
 
-        const datasetSelect = document.getElementById('quantumDataset');
-        datasetSelect.innerHTML = '<option value="">Select dataset...</option>' +
-            datasets.map(d => `<option value="${d.name}">${d.name}</option>`).join('');
-
-        // Load status
-        const statusResponse = await fetch(`${API_BASE}/quantum/status`);
-        const status = await statusResponse.json();
-
-        const statusHtml = `
+        const status = await fetchJSON('/quantum/status');
+        document.getElementById('quantumStatus').innerHTML = `
             <div class="status-item">
                 <span class="status-label">Backend</span>
-                <span class="status-value">${status.backend}</span>
+                <span class="status-value">${esc(status.backend)}</span>
             </div>
-            <div class="status-item">
-                <span class="status-label">Azure Connected</span>
-                <span class="status-value ${status.azure_connected ? 'success' : 'error'}">
-                    ${status.azure_connected ? '✓ Yes' : '✗ No'}
-                </span>
-            </div>
+            ${statusRow('Azure Connected', status.azure_connected)}
             <div class="status-item">
                 <span class="status-label">Available Backends</span>
-                <span class="status-value">${status.available_backends.length}</span>
+                <span class="status-value">${esc((status.available_backends || []).length)}</span>
             </div>
         `;
-        document.getElementById('quantumStatus').innerHTML = statusHtml;
 
-        // Load recent results
-        const resultsHtml = status.recent_results && status.recent_results.length > 0
-            ? status.recent_results.map(r => `
+        const results = status.recent_results || [];
+        document.getElementById('quantumResults').innerHTML = results.length
+            ? results.map(r => `
                 <div class="result-item">
-                    <strong>${r.dataset}</strong><br>
-                    Accuracy: <span class="accuracy">${(r.accuracy * 100).toFixed(1)}%</span><br>
-                    <small>${r.backend} - ${r.timestamp}</small>
-                </div>
-            `).join('')
-            : '<div class="status-item"><span class="status-label">No results yet</span></div>';
+                    <strong>${esc(r.dataset)}</strong><br>
+                    Accuracy: <span class="accuracy">${formatPct(r.accuracy)}</span><br>
+                    <small>${esc(r.backend)} · ${esc(r.timestamp)}</small>
+                </div>`).join('')
+            : emptyRow('No results yet');
 
-        document.getElementById('quantumResults').innerHTML = resultsHtml;
-
-        // Load AutoRun jobs (placeholder)
-        document.getElementById('quantumAutorunJobs').innerHTML = `
-            <div class="status-item">
-                <span class="status-label">Available jobs will appear here</span>
-            </div>
-        `;
+        document.getElementById('quantumAutorunJobs').innerHTML =
+            emptyRow('Available jobs will appear here');
 
         addLog('Quantum data loaded', 'info');
     } catch (error) {
         addLog(`Quantum load error: ${error.message}`, 'error');
+        toast(`Quantum data error: ${error.message}`, 'error');
     }
 }
 
+// ---------------------------------------------------------------------------
 // Chat
+// ---------------------------------------------------------------------------
+
 async function loadChatData() {
     try {
-        const response = await fetch(`${API_BASE}/chat/status`);
-        const data = await response.json();
+        const data = await fetchJSON('/chat/status');
 
-        // Update provider status
-        const providersHtml = Object.entries(data.providers).map(([name, info]) => `
-            <div class="status-item">
-                <span class="status-label">${name.toUpperCase()}</span>
-                <span class="status-value ${info.available ? 'success' : 'error'}">
-                    ${info.available ? '✓ Available' : '✗ Unavailable'}
-                    ${info.cost ? ` (${info.cost})` : ''}
-                </span>
-            </div>
-        `).join('');
+        document.getElementById('chatProviders').innerHTML =
+            Object.entries(data.providers || {}).map(([name, info]) => `
+                <div class="status-item">
+                    <span class="status-label">${esc(name.toUpperCase())}</span>
+                    <span class="status-value ${info.available ? 'success' : 'error'}">
+                        ${info.available ? '✓ Available' : '✗ Unavailable'}${info.cost ? ` (${esc(info.cost)})` : ''}
+                    </span>
+                </div>`).join('') || emptyRow('No providers');
 
-        document.getElementById('chatProviders').innerHTML = providersHtml;
-
-        // Update chat status
-        const statusHtml = `
+        document.getElementById('chatStatus').innerHTML = `
             <div class="status-item">
                 <span class="status-label">Default Provider</span>
-                <span class="status-value">${data.default_provider}</span>
-            </div>
-        `;
-        document.getElementById('chatStatus').innerHTML = statusHtml;
+                <span class="status-value">${esc(data.default_provider)}</span>
+            </div>`;
 
-        // Load conversation history
-        if (data.recent_conversations && data.recent_conversations.length > 0) {
-            const historyHtml = data.recent_conversations.map(conv => `
+        const convos = data.recent_conversations || [];
+        document.getElementById('chatHistory').innerHTML = convos.length
+            ? convos.map(c => `
                 <div class="result-item">
-                    <strong>${conv.file}</strong><br>
-                    ${conv.message_count} messages<br>
-                    <small>${conv.preview}</small>
-                </div>
-            `).join('');
-            document.getElementById('chatHistory').innerHTML = historyHtml;
-        } else {
-            document.getElementById('chatHistory').innerHTML =
-                '<div class="status-item"><span class="status-label">No conversations yet</span></div>';
-        }
+                    <strong>${esc(c.file)}</strong><br>
+                    ${esc(c.message_count)} messages<br>
+                    <small>${esc(c.preview)}</small>
+                </div>`).join('')
+            : emptyRow('No conversations yet');
 
         addLog('Chat data loaded', 'info');
     } catch (error) {
         addLog(`Chat load error: ${error.message}`, 'error');
+        toast(`Chat data error: ${error.message}`, 'error');
     }
 }
 
+// ---------------------------------------------------------------------------
 // Training
+// ---------------------------------------------------------------------------
+
 async function loadTrainingData() {
     try {
-        // Load datasets
-        const datasetsResponse = await fetch(`${API_BASE}/training/datasets`);
-        const datasets = await datasetsResponse.json();
+        const datasets = await fetchJSON('/training/datasets');
 
-        // Populate LoRA dataset select
-        const loraSelect = document.getElementById('loraDataset');
-        loraSelect.innerHTML = '<option value="">Select dataset...</option>';
+        const chatOptions = (datasets.chat || []).map(ds => ({
+            value: `../../datasets/chat/${ds}`, label: ds,
+        }));
+        fillSelect('loraDataset', chatOptions);
 
-        if (datasets.chat && datasets.chat.length > 0) {
-            datasets.chat.forEach(ds => {
-                loraSelect.innerHTML += `<option value="../../datasets/chat/${ds}">${ds}</option>`;
-            });
-        }
+        const status = await fetchJSON('/training/status');
 
-        // Load training status
-        const statusResponse = await fetch(`${API_BASE}/training/status`);
-        const status = await statusResponse.json();
-
-        const statusHtml = `
+        document.getElementById('trainingStatus').innerHTML = `
             <div class="status-item">
                 <span class="status-label">System</span>
                 <span class="status-value success">Ready</span>
-            </div>
-        `;
-        document.getElementById('trainingStatus').innerHTML = statusHtml;
+            </div>`;
 
-        // LoRA adapter status
-        const adapterHtml = status.lora_adapter.available
+        const adapter = status.lora_adapter || {};
+        document.getElementById('loraAdapterStatus').innerHTML = adapter.available
             ? `
                 <div class="status-item">
                     <span class="status-label">Status</span>
@@ -298,184 +296,168 @@ async function loadTrainingData() {
                 </div>
                 <div class="status-item">
                     <span class="status-label">Model</span>
-                    <span class="status-value">${status.lora_adapter.model || 'N/A'}</span>
+                    <span class="status-value">${esc(adapter.model || 'N/A')}</span>
                 </div>
                 <div class="status-item">
                     <span class="status-label">Rank</span>
-                    <span class="status-value">${status.lora_adapter.rank || 'N/A'}</span>
-                </div>
-            `
-            : '<div class="status-item"><span class="status-label">No adapter trained yet</span></div>';
+                    <span class="status-value">${esc(adapter.rank || 'N/A')}</span>
+                </div>`
+            : emptyRow('No adapter trained yet');
 
-        document.getElementById('loraAdapterStatus').innerHTML = adapterHtml;
+        const jobs = await fetchJSON('/training/autotrain/jobs');
+        fillSelect('autotrainJob', (jobs.jobs || []).map(j => ({ value: j, label: j })), 'Select job…');
 
-        // Load AutoTrain jobs
-        const jobsResponse = await fetch(`${API_BASE}/training/autotrain/jobs`);
-        const jobs = await jobsResponse.json();
-
-        const jobSelect = document.getElementById('autotrainJob');
-        jobSelect.innerHTML = '<option value="">Select job...</option>' +
-            (jobs.jobs || []).map(job => `<option value="${job}">${job}</option>`).join('');
-
-        // AutoTrain status
-        const autotrainHtml = status.orchestrators.autotrain.jobs &&
-            Object.keys(status.orchestrators.autotrain.jobs).length > 0
-            ? Object.entries(status.orchestrators.autotrain.jobs).map(([name, job]) => `
+        const autotrainJobs = status.orchestrators?.autotrain?.jobs || {};
+        document.getElementById('autotrainStatus').innerHTML = Object.keys(autotrainJobs).length
+            ? Object.entries(autotrainJobs).map(([name, job]) => `
                 <div class="job-item">
-                    <span><strong>${name}</strong> - ${job.status || 'unknown'}</span>
-                </div>
-            `).join('')
-            : '<div class="status-item"><span class="status-label">No jobs run yet</span></div>';
+                    <span><strong>${esc(name)}</strong> — ${esc(job.status || 'unknown')}</span>
+                </div>`).join('')
+            : emptyRow('No jobs run yet');
 
-        document.getElementById('autotrainStatus').innerHTML = autotrainHtml;
-
-        // Dataset list
-        const datasetHtml = `
-            <h4>Quantum (${datasets.quantum ? datasets.quantum.length : 0})</h4>
-            <div class="dataset-grid">
-                ${(datasets.quantum || []).map(d => `<div class="dataset-item quantum">${d}</div>`).join('')}
-            </div>
-            <h4>Chat (${datasets.chat ? datasets.chat.length : 0})</h4>
-            <div class="dataset-grid">
-                ${(datasets.chat || []).map(d => `<div class="dataset-item chat">${d}</div>`).join('')}
-            </div>
-            <h4>Vision (${datasets.vision ? datasets.vision.length : 0})</h4>
-            <div class="dataset-grid">
-                ${(datasets.vision || []).map(d => `<div class="dataset-item vision">${d}</div>`).join('')}
-            </div>
+        document.getElementById('datasetList').innerHTML = `
+            <h4>Quantum (${(datasets.quantum || []).length})</h4>
+            <div class="dataset-grid">${(datasets.quantum || []).map(d => `<div class="dataset-item quantum">${esc(d)}</div>`).join('')}</div>
+            <h4>Chat (${(datasets.chat || []).length})</h4>
+            <div class="dataset-grid">${(datasets.chat || []).map(d => `<div class="dataset-item chat">${esc(d)}</div>`).join('')}</div>
+            <h4>Vision (${(datasets.vision || []).length})</h4>
+            <div class="dataset-grid">${(datasets.vision || []).map(d => `<div class="dataset-item vision">${esc(d)}</div>`).join('')}</div>
         `;
-        document.getElementById('datasetList').innerHTML = datasetHtml;
 
         addLog('Training data loaded', 'info');
     } catch (error) {
         addLog(`Training load error: ${error.message}`, 'error');
+        toast(`Training data error: ${error.message}`, 'error');
     }
 }
 
-// Form Handlers
+// ---------------------------------------------------------------------------
+// Forms & Actions
+// ---------------------------------------------------------------------------
+
 function initializeForms() {
-    // Quantum training form
     document.getElementById('quantumTrainForm').addEventListener('submit', async (e) => {
         e.preventDefault();
-        await trainQuantumClassifier();
+        await trainQuantumClassifier(e.submitter || e.target.querySelector('[type="submit"]'));
     });
-
-    // LoRA training form
     document.getElementById('loraTrainForm').addEventListener('submit', async (e) => {
         e.preventDefault();
-        await trainLoRA();
+        await trainLoRA(e.submitter || e.target.querySelector('[type="submit"]'));
     });
-
-    // Chat form
     document.getElementById('chatForm').addEventListener('submit', async (e) => {
         e.preventDefault();
         await sendChatMessage();
     });
-
-    // Chat provider change
     document.getElementById('chatProvider').addEventListener('change', (e) => {
         currentProvider = e.target.value;
+        localStorage.setItem('qai-provider', currentProvider);
     });
 }
 
-async function trainQuantumClassifier() {
-    const dataset = document.getElementById('quantumDataset').value;
-    const n_qubits = parseInt(document.getElementById('quantumQubits').value);
-    const n_layers = parseInt(document.getElementById('quantumLayers').value);
-    const epochs = parseInt(document.getElementById('quantumEpochs').value);
-    const backend = document.getElementById('quantumBackend').value;
-
-    if (!dataset) {
-        addLog('Please select a dataset', 'error');
-        return;
-    }
-
-    addLog(`Starting quantum training: ${dataset}`, 'info');
-
-    try {
-        const response = await fetch(`${API_BASE}/quantum/train`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ dataset, n_qubits, n_layers, epochs, backend })
-        });
-
-        const result = await response.json();
-
-        if (result.success) {
-            addLog('Quantum training started successfully!', 'success');
-            setTimeout(() => loadQuantumData(), 2000);
-        } else {
-            addLog(`Training error: ${result.stderr || result.error}`, 'error');
-        }
-    } catch (error) {
-        addLog(`Request failed: ${error.message}`, 'error');
+function restoreProvider() {
+    const stored = localStorage.getItem('qai-provider');
+    if (stored) {
+        currentProvider = stored;
+        const select = document.getElementById('chatProvider');
+        if (select) select.value = stored;
     }
 }
 
-async function trainLoRA() {
-    const dataset = document.getElementById('loraDataset').value;
-    const max_train_samples = parseInt(document.getElementById('loraTrainSamples').value);
-    const max_eval_samples = parseInt(document.getElementById('loraEvalSamples').value);
-    const epochs = parseInt(document.getElementById('loraEpochs').value);
+async function trainQuantumClassifier(btn) {
+    const dataset = document.getElementById('quantumDataset').value;
+    if (!dataset) { toast('Please select a dataset', 'warning'); return; }
 
-    if (!dataset) {
-        addLog('Please select a dataset', 'error');
-        return;
-    }
+    const payload = {
+        dataset,
+        n_qubits: parseInt(document.getElementById('quantumQubits').value, 10),
+        n_layers: parseInt(document.getElementById('quantumLayers').value, 10),
+        epochs: parseInt(document.getElementById('quantumEpochs').value, 10),
+        backend: document.getElementById('quantumBackend').value,
+    };
 
-    addLog(`Starting LoRA training on ${dataset}`, 'info');
-
+    setLoading(btn, true);
+    addLog(`Starting quantum training: ${dataset}`, 'info');
     try {
-        const response = await fetch(`${API_BASE}/training/lora`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ dataset, max_train_samples, max_eval_samples, epochs })
-        });
-
-        const result = await response.json();
-
+        const result = await fetchJSON('/quantum/train', jsonPost(payload));
         if (result.success) {
-            addLog('LoRA training started successfully!', 'success');
-            setTimeout(() => loadTrainingData(), 2000);
+            toast('Quantum training started!', 'success');
+            addLog('Quantum training started successfully!', 'success');
+            setTimeout(loadQuantumData, 2000);
         } else {
-            addLog(`Training error: ${result.stderr || result.error}`, 'error');
+            const msg = result.stderr || result.error || 'Unknown error';
+            toast(`Training error: ${msg}`, 'error');
+            addLog(`Training error: ${msg}`, 'error');
         }
     } catch (error) {
+        toast(`Request failed: ${error.message}`, 'error');
         addLog(`Request failed: ${error.message}`, 'error');
+    } finally {
+        setLoading(btn, false);
+    }
+}
+
+async function trainLoRA(btn) {
+    const dataset = document.getElementById('loraDataset').value;
+    if (!dataset) { toast('Please select a dataset', 'warning'); return; }
+
+    const payload = {
+        dataset,
+        max_train_samples: parseInt(document.getElementById('loraTrainSamples').value, 10),
+        max_eval_samples: parseInt(document.getElementById('loraEvalSamples').value, 10),
+        epochs: parseInt(document.getElementById('loraEpochs').value, 10),
+    };
+
+    setLoading(btn, true);
+    addLog(`Starting LoRA training on ${dataset}`, 'info');
+    try {
+        const result = await fetchJSON('/training/lora', jsonPost(payload));
+        if (result.success) {
+            toast('LoRA training started!', 'success');
+            addLog('LoRA training started successfully!', 'success');
+            setTimeout(loadTrainingData, 2000);
+        } else {
+            const msg = result.stderr || result.error || 'Unknown error';
+            toast(`Training error: ${msg}`, 'error');
+            addLog(`Training error: ${msg}`, 'error');
+        }
+    } catch (error) {
+        toast(`Request failed: ${error.message}`, 'error');
+        addLog(`Request failed: ${error.message}`, 'error');
+    } finally {
+        setLoading(btn, false);
     }
 }
 
 async function sendChatMessage() {
     const input = document.getElementById('chatInput');
+    const sendBtn = document.getElementById('chatSendBtn');
     const message = input.value.trim();
-
     if (!message) return;
 
-    // Add user message to chat
     addChatMessage(message, 'user');
     input.value = '';
+    setLoading(sendBtn, true);
+    const typing = showTyping();
 
     try {
         const provider = currentProvider === 'auto' ? null : currentProvider;
-
-        const response = await fetch(`${API_BASE}/chat/message`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ message, provider })
-        });
-
-        const result = await response.json();
-
+        const result = await fetchJSON('/chat/message', jsonPost({ message, provider }));
+        removeTyping(typing);
         if (result.success) {
             addChatMessage(result.response, 'assistant');
             addLog(`Chat response from ${result.provider}`, 'info');
         } else {
-            addChatMessage('Error: ' + (result.error || 'Unknown error'), 'system');
-            addLog(`Chat error: ${result.error}`, 'error');
+            const msg = result.error || 'Unknown error';
+            addChatMessage('Error: ' + msg, 'system');
+            addLog(`Chat error: ${msg}`, 'error');
         }
     } catch (error) {
+        removeTyping(typing);
         addChatMessage('Error: ' + error.message, 'system');
         addLog(`Chat request failed: ${error.message}`, 'error');
+    } finally {
+        setLoading(sendBtn, false);
+        input.focus();
     }
 }
 
@@ -483,68 +465,69 @@ function addChatMessage(content, role) {
     const messagesDiv = document.getElementById('chatMessages');
     const messageDiv = document.createElement('div');
     messageDiv.className = `chat-message ${role}`;
-    messageDiv.textContent = content;
+    messageDiv.textContent = content;  // textContent => XSS-safe
     messagesDiv.appendChild(messageDiv);
     messagesDiv.scrollTop = messagesDiv.scrollHeight;
 }
 
-async function runAutoTrain(dryRun) {
+function showTyping() {
+    const messagesDiv = document.getElementById('chatMessages');
+    const el = document.createElement('div');
+    el.className = 'chat-message assistant';
+    el.innerHTML = '<span class="typing-dots"><span></span><span></span><span></span></span>';
+    messagesDiv.appendChild(el);
+    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    return el;
+}
+
+function removeTyping(el) {
+    if (el && el.parentNode) el.parentNode.removeChild(el);
+}
+
+async function runAutoTrain(dryRun, btn) {
     const job = document.getElementById('autotrainJob').value;
+    if (!job) { toast('Please select a job', 'warning'); return; }
 
-    if (!job) {
-        addLog('Please select a job', 'error');
-        return;
-    }
-
+    setLoading(btn, true);
     addLog(`Running AutoTrain job: ${job} ${dryRun ? '(dry run)' : ''}`, 'info');
-
     try {
-        const response = await fetch(`${API_BASE}/training/autotrain`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ job_name: job, dry_run: dryRun })
-        });
-
-        const result = await response.json();
-
+        const result = await fetchJSON('/training/autotrain', jsonPost({ job_name: job, dry_run: dryRun }));
         if (result.success) {
+            toast('AutoTrain job completed!', 'success');
             addLog('AutoTrain job completed successfully!', 'success');
-            setTimeout(() => loadTrainingData(), 2000);
+            setTimeout(loadTrainingData, 2000);
         } else {
-            addLog(`AutoTrain error: ${result.stderr || result.error}`, 'error');
+            const msg = result.stderr || result.error || 'Unknown error';
+            toast(`AutoTrain error: ${msg}`, 'error');
+            addLog(`AutoTrain error: ${msg}`, 'error');
         }
     } catch (error) {
+        toast(`Request failed: ${error.message}`, 'error');
         addLog(`Request failed: ${error.message}`, 'error');
+    } finally {
+        setLoading(btn, false);
     }
 }
 
-// Quick Actions
 function quickAction(action) {
-    switch(action) {
-        case 'quantum':
-            switchTab('quantum');
-            break;
-        case 'chat':
-            switchTab('chat');
-            break;
-        case 'training':
-            switchTab('training');
-            break;
-    }
+    if (['quantum', 'chat', 'training'].includes(action)) switchTab(action);
 }
 
-function refreshStatus() {
-    addLog('Refreshing status...', 'info');
-    loadDashboard();
+function refreshStatus(btn) {
+    addLog('Refreshing status…', 'info');
+    setLoading(btn, true);
+    Promise.all([checkServiceStatus(), loadDashboard()]).finally(() => setLoading(btn, false));
 }
 
-// Logging
+// ---------------------------------------------------------------------------
+// Logging & Toasts
+// ---------------------------------------------------------------------------
+
 function addLog(message, type = 'info') {
     const logOutput = document.getElementById('logOutput');
     const entry = document.createElement('div');
     entry.className = `log-entry ${type}`;
-    const timestamp = new Date().toLocaleTimeString();
-    entry.textContent = `[${timestamp}] ${message}`;
+    entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
     logOutput.appendChild(entry);
     logOutput.scrollTop = logOutput.scrollHeight;
 }
@@ -556,4 +539,55 @@ function clearLogs() {
 
 function refreshLogs() {
     addLog('Logs refreshed', 'info');
+}
+
+function toast(message, type = 'info', timeout = 4000) {
+    const container = document.getElementById('toastContainer');
+    if (!container) return;
+    const el = document.createElement('div');
+    el.className = `toast ${type}`;
+    el.textContent = message;
+    container.appendChild(el);
+    setTimeout(() => {
+        el.classList.add('hide');
+        setTimeout(() => el.remove(), 250);
+    }, timeout);
+}
+
+// ---------------------------------------------------------------------------
+// Small helpers
+// ---------------------------------------------------------------------------
+
+function jsonPost(body) {
+    return {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+    };
+}
+
+function statusRow(label, value) {
+    return `
+        <div class="status-item">
+            <span class="status-label">${esc(label)}</span>
+            <span class="status-value ${value ? 'success' : 'error'}">${value ? '✓ Yes' : '✗ No'}</span>
+        </div>`;
+}
+
+function emptyRow(text) {
+    return `<div class="status-item"><span class="status-label">${esc(text)}</span></div>`;
+}
+
+function formatPct(value) {
+    const n = Number(value);
+    return Number.isFinite(n) ? `${(n * 100).toFixed(1)}%` : 'N/A';
+}
+
+function fillSelect(id, options, placeholder = 'Select dataset…') {
+    const select = document.getElementById(id);
+    if (!select) return;
+    const previous = select.value;
+    select.innerHTML = `<option value="">${esc(placeholder)}</option>` +
+        options.map(o => `<option value="${esc(o.value)}">${esc(o.label)}</option>`).join('');
+    if (previous && options.some(o => o.value === previous)) select.value = previous;
 }

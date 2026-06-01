@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import pytest
 
+from core.agent import BaseAgent
 from core.agents.goal_evolution_agent import GoalEvolutionAgent
 from core.agents.llm_agent import LLMAgent
 from core.agents.planner_agent import PlannerAgent
@@ -129,6 +130,90 @@ def test_router_prioritizes_matching_agent_types() -> None:
     assert result["candidates"][0]["agent"] == "planner_agent"
 
 
+def test_router_route_text_populates_plan_goal() -> None:
+    runner = AriaRunner(config={"sleep_seconds": 0})
+    planner = runner.registry.get("planner_agent")
+
+    assert planner is not None
+
+    seen_tasks: list[Task] = []
+
+    def _capture_plan(task: Task) -> dict:
+        seen_tasks.append(task)
+        return {
+            "agent": "planner_agent",
+            "task_id": task.id,
+            "goal": task.payload.get("goal"),
+            "plan": [],
+        }
+
+    setattr(planner, "execute", _capture_plan)
+
+    result = runner.router.route_text("Plan the next runtime steps")
+
+    assert result["agent"] == "planner_agent"
+    assert seen_tasks[0].type == "plan"
+    assert seen_tasks[0].payload["goal"] == "Plan the next runtime steps"
+
+
+def test_router_route_text_normalizes_tool_and_default_payloads() -> None:
+    captured: list[Task] = []
+
+    class _CaptureAgent(BaseAgent):
+        name = "capture_agent"
+
+        def can_handle(self, task: Task) -> bool:
+            return True
+
+        def execute(self, task: Task) -> dict:
+            captured.append(task)
+            return {"agent": self.name, "task_id": task.id}
+
+    registry = AgentRegistry()
+    registry.register(_CaptureAgent())
+    router = TaskRouter(registry)
+
+    router.route_text("Run the cleanup tool")
+    tool_task = captured[-1]
+    assert tool_task.type == "tool"
+    assert tool_task.payload["tool"] == "Run the cleanup tool"
+    assert tool_task.payload["args"] == {}
+
+    router.route_text("Say something friendly")
+    default_task = captured[-1]
+    assert default_task.type == "llm"
+    assert default_task.payload["prompt"] == "Say something friendly"
+
+
+def test_router_route_text_preserves_caller_payload() -> None:
+    captured: list[Task] = []
+
+    class _CaptureAgent(BaseAgent):
+        name = "capture_agent"
+
+        def can_handle(self, task: Task) -> bool:
+            return True
+
+        def execute(self, task: Task) -> dict:
+            captured.append(task)
+            return {"agent": self.name, "task_id": task.id}
+
+    registry = AgentRegistry()
+    registry.register(_CaptureAgent())
+    router = TaskRouter(registry)
+
+    router.route_text(
+        "Plan the rollout",
+        payload={"goal": "explicit goal", "extra": 42},
+    )
+
+    task = captured[-1]
+    assert task.type == "plan"
+    # Caller-provided goal must not be overwritten by route_text.
+    assert task.payload["goal"] == "explicit goal"
+    assert task.payload["extra"] == 42
+
+
 def test_router_classifies_reflection_requests_for_reflection_agent() -> None:
     runner = AriaRunner(config={"sleep_seconds": 0})
 
@@ -137,6 +222,57 @@ def test_router_classifies_reflection_requests_for_reflection_agent() -> None:
     )
 
     assert result["agent"] == "reflection_agent"
+
+
+@pytest.mark.parametrize(
+    ("text", "expected"),
+    [
+        ("Retrospect on the sprint and meta-learn", "retrospect"),
+        ("Reflect on the postmortem", "reflect"),
+        ("Plan the migration strategy", "plan"),
+        ("Retrain the model to fine-tune", "train"),
+        ("Please review the feedback rating", "feedback"),
+        ("Run the inspect tool", "tool"),
+        ("Set the next goal to improve next", "goal_evolve"),
+        ("Summarize and condense the notes", "summarize"),
+        ("Critique and assess quality", "critique"),
+        ("Explain your chain of thought", "reason"),
+        ("Debate and stress test the claim", "debate"),
+        ("Hypothesize and infer pattern", "hypothesize"),
+        ("Tell me a friendly joke", "llm"),
+        ("", "llm"),
+    ],
+)
+def test_router_classify_intent_maps_tokens_to_types(
+    text: str, expected: str
+) -> None:
+    router = TaskRouter(AgentRegistry())
+
+    assert router.classify_intent(text) == expected
+
+
+def test_router_route_text_normalizes_feedback_payload() -> None:
+    captured: list[Task] = []
+
+    class _CaptureAgent(BaseAgent):
+        name = "capture_agent"
+
+        def can_handle(self, task: Task) -> bool:
+            return True
+
+        def execute(self, task: Task) -> dict:
+            captured.append(task)
+            return {"agent": self.name, "task_id": task.id}
+
+    registry = AgentRegistry()
+    registry.register(_CaptureAgent())
+    router = TaskRouter(registry)
+
+    router.route_text("Please review this feedback")
+    feedback_task = captured[-1]
+
+    assert feedback_task.type == "feedback"
+    assert feedback_task.payload["message"] == "Please review this feedback"
 
 
 def test_training_agent_summary_tracks_signal_counts() -> None:

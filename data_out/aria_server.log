@@ -1517,3 +1517,308 @@ nohup: ignoring input
 ⚠️ Skipping AI model loading - using rule-based fallback for faster startup
 ⚠️ Aria server already running at http://127.0.0.1:8080 (detected healthy /api/aria/state).
 ℹ️ Reusing existing server; exiting this process cleanly.
+2026-06-01 18:28:01,602 - INFO - ✓ LLM providers available for automatic action generation
+2026-06-01 18:28:01,602 - INFO - ✓ Initialized LLM provider: type
+⚠️ Skipping AI model loading - using rule-based fallback for faster startup
+⚠️ Aria server already running at http://127.0.0.1:8080 (detected healthy /api/aria/state).
+ℹ️ Reusing existing server; exiting this process cleanly.
+2026-06-01 18:44:22,781 - INFO - ✓ LLM providers available for automatic action generation
+2026-06-01 18:44:22,782 - INFO - ✓ Initialized LLM provider: type
+⚠️ Skipping AI model loading - using rule-based fallback for faster startup
+⚠️ Aria server already running at http://127.0.0.1:8080 (detected healthy /api/aria/state).
+ℹ️ Reusing existing server; exiting this process cleanly.
+2026-06-01 18:44:53,177 - INFO - ✓ LLM providers available for automatic action generation
+2026-06-01 18:44:53,178 - INFO - ✓ Initialized LLM provider: type
+⚠️ Skipping AI model loading - using rule-based fallback for faster startup
+⚠️ Aria server already running at http://127.0.0.1:8080 (detected healthy /api/aria/state).
+ℹ️ Reusing existing server; exiting this process cleanly.
+2026-06-01 18:45:22,890 - INFO - ✓ LLM providers available for automatic action generation
+2026-06-01 18:45:22,891 - INFO - ✓ Initialized LLM provider: type
+⚠️ Skipping AI model loading - using rule-based fallback for faster startup
+⚠️ Aria server already running at http://127.0.0.1:8080 (detected healthy /api/aria/state).
+ℹ️ Reusing existing server; exiting this process cleanly.
+2026-06-01 18:45:53,182 - INFO - ✓ LLM providers available for automatic action generation
+2026-06-01 18:45:53,182 - INFO - ✓ Initialized LLM provider: type
+⚠️ Skipping AI model loading - using rule-based fallback for faster startup
+⚠️ Aria server already running at http://127.0.0.1:8080 (detected healthy /api/aria/state).
+ℹ️ Reusing existing server; exiting this process cleanly.
+2026-06-01 18:46:23,528 - INFO - ✓ LLM providers available for automatic action generation
+2026-06-01 18:46:23,528 - INFO - ✓ Initialized LLM provider: type
+⚠️ Skipping AI model loading - using rule-based fallback for faster startup
+⚠️ Aria server already running at http://127.0.0.1:8080 (detected healthy /api/aria/state).
+ℹ️ Reusing existing server; exiting this process cleanly.
+2026-06-01 18:46:53,617 - INFO - ✓ LLM providers available for automatic action generation
+2026-06-01 18:46:53,617 - INFO - ✓ Initialized LLM provider: type
+⚠️ Skipping AI model loading - using rule-based fallback for faster startup
+⚠️ Aria server already running at http://127.0.0.1:8080 (detected healthy /api/aria/state).
+ℹ️ Reusing existing server; exiting this process cleanly.
+2026-06-01 18:47:23,885 - INFO - ✓ LLM providers available for automatic action generation
+2026-06-01 18:47:23,885 - INFO - ✓ Initialized LLM provider: type
+⚠️ Skipping AI model loading - using rule-based fallback for faster startup
+⚠️ Aria server already running at http://127.0.0.1:8080 (detected healthy /api/aria/state).
+ℹ️ Reusing existing server; exiting this process cleanly.
+2026-06-01 18:47:54,074 - INFO - ✓ LLM providers available for automatic action generation
+2026-06-01 18:47:54,074 - INFO - ✓ Initialized LLM provider: type
+⚠️ Skipping AI model loading - using rule-based fallback for faster startup
+⚠️ Aria server already running at http://127.0.0.1:8080 (detected healthy /api/aria/state).
+ℹ️ Reusing existing server; exiting this process cleanly.
+2026-06-01 18:48:24,846 - INFO - ✓ LLM providers available for automatic action generation
+2026-06-01 18:48:24,846 - INFO - ✓ Initialized LLM provider: type
+⚠️ Skipping AI model loading - using rule-based fallback for faster startup
+⚠️ Aria server already running at http://127.0.0.1:8080 (detected healthy /api/aria/state).
+ℹ️ Reusing existing server; exiting this process cleanly.
+2026-06-01 18:48:54,704 - INFO - ✓ LLM providers available for automatic action generation
+2026-06-01 18:48:54,705 - INFO - ✓ Initialized LLM provider: type
+⚠️ Skipping AI model loading - using rule-based fallback for faster startup
+⚠️ Aria server already running at http://127.0.0.1:8080 (detected healthy /api/aria/state).
+ℹ️ Reusing existing server; exiting this process cleanly.
+2026-06-01 18:49:24,827 - INFO - ✓ LLM providers available for automatic action generation
+2026-06-01 18:49:24,827 - INFO - ✓ Initialized LLM provider: type
+⚠️ Skipping AI model loading - using rule-based fallback for faster startup
+⚠️ Aria server already running at http://127.0.0.1:8080 (detected healthy /api/aria/state).
+ℹ️ Reusing existing server; exiting this process cleanly.
+2026-06-01 18:49:55,134 - INFO - ✓ LLM providers available for automatic action generation
+2026-06-01 18:49:55,135 - INFO - ✓ Initialized LLM provider: type
+⚠️ Skipping AI model loading - using rule-based fallback for faster startup
+⚠️ Aria server already running at http://127.0.0.1:8080 (detected healthy /api/aria/state).
+ℹ️ Reusing existing server; exiting this process cleanly.
+2026-06-01 18:50:25,424 - INFO - ✓ LLM providers available for automatic action generation
+2026-06-01 18:50:25,425 - INFO - ✓ Initialized LLM provider: type
+⚠️ Skipping AI model loading - using rule-based fallback for faster startup
+⚠️ Aria server already running at http://127.0.0.1:8080 (detected healthy /api/aria/state).
+ℹ️ Reusing existing server; exiting this process cleanly.
+2026-06-01 18:50:55,523 - INFO - ✓ LLM providers available for automatic action generation
+2026-06-01 18:50:55,523 - INFO - ✓ Initialized LLM provider: type
+⚠️ Skipping AI model loading - using rule-based fallback for faster startup
+⚠️ Aria server already running at http://127.0.0.1:8080 (detected healthy /api/aria/state).
+ℹ️ Reusing existing server; exiting this process cleanly.
+2026-06-01 18:51:26,174 - INFO - ✓ LLM providers available for automatic action generation
+2026-06-01 18:51:26,174 - INFO - ✓ Initialized LLM provider: type
+⚠️ Skipping AI model loading - using rule-based fallback for faster startup
+⚠️ Aria server already running at http://127.0.0.1:8080 (detected healthy /api/aria/state).
+ℹ️ Reusing existing server; exiting this process cleanly.
+2026-06-01 18:51:56,742 - INFO - ✓ LLM providers available for automatic action generation
+2026-06-01 18:51:56,743 - INFO - ✓ Initialized LLM provider: type
+⚠️ Skipping AI model loading - using rule-based fallback for faster startup
+⚠️ Aria server already running at http://127.0.0.1:8080 (detected healthy /api/aria/state).
+ℹ️ Reusing existing server; exiting this process cleanly.
+2026-06-01 18:52:26,584 - INFO - ✓ LLM providers available for automatic action generation
+2026-06-01 18:52:26,584 - INFO - ✓ Initialized LLM provider: type
+⚠️ Skipping AI model loading - using rule-based fallback for faster startup
+⚠️ Aria server already running at http://127.0.0.1:8080 (detected healthy /api/aria/state).
+ℹ️ Reusing existing server; exiting this process cleanly.
+2026-06-01 18:52:56,704 - INFO - ✓ LLM providers available for automatic action generation
+2026-06-01 18:52:56,705 - INFO - ✓ Initialized LLM provider: type
+⚠️ Skipping AI model loading - using rule-based fallback for faster startup
+⚠️ Aria server already running at http://127.0.0.1:8080 (detected healthy /api/aria/state).
+ℹ️ Reusing existing server; exiting this process cleanly.
+2026-06-01 18:53:26,918 - INFO - ✓ LLM providers available for automatic action generation
+2026-06-01 18:53:26,919 - INFO - ✓ Initialized LLM provider: type
+⚠️ Skipping AI model loading - using rule-based fallback for faster startup
+⚠️ Aria server already running at http://127.0.0.1:8080 (detected healthy /api/aria/state).
+ℹ️ Reusing existing server; exiting this process cleanly.
+2026-06-01 18:53:57,247 - INFO - ✓ LLM providers available for automatic action generation
+2026-06-01 18:53:57,247 - INFO - ✓ Initialized LLM provider: type
+⚠️ Skipping AI model loading - using rule-based fallback for faster startup
+⚠️ Aria server already running at http://127.0.0.1:8080 (detected healthy /api/aria/state).
+ℹ️ Reusing existing server; exiting this process cleanly.
+2026-06-01 18:54:27,671 - INFO - ✓ LLM providers available for automatic action generation
+2026-06-01 18:54:27,672 - INFO - ✓ Initialized LLM provider: type
+⚠️ Skipping AI model loading - using rule-based fallback for faster startup
+⚠️ Aria server already running at http://127.0.0.1:8080 (detected healthy /api/aria/state).
+ℹ️ Reusing existing server; exiting this process cleanly.
+2026-06-01 18:54:58,251 - INFO - ✓ LLM providers available for automatic action generation
+2026-06-01 18:54:58,252 - INFO - ✓ Initialized LLM provider: type
+⚠️ Skipping AI model loading - using rule-based fallback for faster startup
+⚠️ Aria server already running at http://127.0.0.1:8080 (detected healthy /api/aria/state).
+ℹ️ Reusing existing server; exiting this process cleanly.
+2026-06-01 18:55:28,782 - INFO - ✓ LLM providers available for automatic action generation
+2026-06-01 18:55:28,783 - INFO - ✓ Initialized LLM provider: type
+⚠️ Skipping AI model loading - using rule-based fallback for faster startup
+⚠️ Aria server already running at http://127.0.0.1:8080 (detected healthy /api/aria/state).
+ℹ️ Reusing existing server; exiting this process cleanly.
+2026-06-01 18:55:58,520 - INFO - ✓ LLM providers available for automatic action generation
+2026-06-01 18:55:58,520 - INFO - ✓ Initialized LLM provider: type
+⚠️ Skipping AI model loading - using rule-based fallback for faster startup
+⚠️ Aria server already running at http://127.0.0.1:8080 (detected healthy /api/aria/state).
+ℹ️ Reusing existing server; exiting this process cleanly.
+2026-06-01 18:56:28,877 - INFO - ✓ LLM providers available for automatic action generation
+2026-06-01 18:56:28,878 - INFO - ✓ Initialized LLM provider: type
+⚠️ Skipping AI model loading - using rule-based fallback for faster startup
+⚠️ Aria server already running at http://127.0.0.1:8080 (detected healthy /api/aria/state).
+ℹ️ Reusing existing server; exiting this process cleanly.
+2026-06-01 18:57:00,277 - INFO - ✓ LLM providers available for automatic action generation
+2026-06-01 18:57:00,279 - INFO - ✓ Initialized LLM provider: type
+⚠️ Skipping AI model loading - using rule-based fallback for faster startup
+⚠️ Aria server already running at http://127.0.0.1:8080 (detected healthy /api/aria/state).
+ℹ️ Reusing existing server; exiting this process cleanly.
+2026-06-01 18:57:29,811 - INFO - ✓ LLM providers available for automatic action generation
+2026-06-01 18:57:29,811 - INFO - ✓ Initialized LLM provider: type
+⚠️ Skipping AI model loading - using rule-based fallback for faster startup
+⚠️ Aria server already running at http://127.0.0.1:8080 (detected healthy /api/aria/state).
+ℹ️ Reusing existing server; exiting this process cleanly.
+2026-06-01 18:58:00,742 - INFO - ✓ LLM providers available for automatic action generation
+2026-06-01 18:58:00,742 - INFO - ✓ Initialized LLM provider: type
+⚠️ Skipping AI model loading - using rule-based fallback for faster startup
+⚠️ Aria server already running at http://127.0.0.1:8080 (detected healthy /api/aria/state).
+ℹ️ Reusing existing server; exiting this process cleanly.
+2026-06-01 18:58:30,420 - INFO - ✓ LLM providers available for automatic action generation
+2026-06-01 18:58:30,420 - INFO - ✓ Initialized LLM provider: type
+⚠️ Skipping AI model loading - using rule-based fallback for faster startup
+⚠️ Aria server already running at http://127.0.0.1:8080 (detected healthy /api/aria/state).
+ℹ️ Reusing existing server; exiting this process cleanly.
+2026-06-01 18:59:00,529 - INFO - ✓ LLM providers available for automatic action generation
+2026-06-01 18:59:00,529 - INFO - ✓ Initialized LLM provider: type
+⚠️ Skipping AI model loading - using rule-based fallback for faster startup
+⚠️ Aria server already running at http://127.0.0.1:8080 (detected healthy /api/aria/state).
+ℹ️ Reusing existing server; exiting this process cleanly.
+2026-06-01 18:59:30,893 - INFO - ✓ LLM providers available for automatic action generation
+2026-06-01 18:59:30,893 - INFO - ✓ Initialized LLM provider: type
+⚠️ Skipping AI model loading - using rule-based fallback for faster startup
+⚠️ Aria server already running at http://127.0.0.1:8080 (detected healthy /api/aria/state).
+ℹ️ Reusing existing server; exiting this process cleanly.
+2026-06-01 19:00:00,986 - INFO - ✓ LLM providers available for automatic action generation
+2026-06-01 19:00:00,987 - INFO - ✓ Initialized LLM provider: type
+⚠️ Skipping AI model loading - using rule-based fallback for faster startup
+⚠️ Aria server already running at http://127.0.0.1:8080 (detected healthy /api/aria/state).
+ℹ️ Reusing existing server; exiting this process cleanly.
+2026-06-01 19:00:31,305 - INFO - ✓ LLM providers available for automatic action generation
+2026-06-01 19:00:31,306 - INFO - ✓ Initialized LLM provider: type
+⚠️ Skipping AI model loading - using rule-based fallback for faster startup
+⚠️ Aria server already running at http://127.0.0.1:8080 (detected healthy /api/aria/state).
+ℹ️ Reusing existing server; exiting this process cleanly.
+2026-06-01 19:01:01,377 - INFO - ✓ LLM providers available for automatic action generation
+2026-06-01 19:01:01,377 - INFO - ✓ Initialized LLM provider: type
+⚠️ Skipping AI model loading - using rule-based fallback for faster startup
+⚠️ Aria server already running at http://127.0.0.1:8080 (detected healthy /api/aria/state).
+ℹ️ Reusing existing server; exiting this process cleanly.
+2026-06-01 19:01:31,838 - INFO - ✓ LLM providers available for automatic action generation
+2026-06-01 19:01:31,838 - INFO - ✓ Initialized LLM provider: type
+⚠️ Skipping AI model loading - using rule-based fallback for faster startup
+⚠️ Aria server already running at http://127.0.0.1:8080 (detected healthy /api/aria/state).
+ℹ️ Reusing existing server; exiting this process cleanly.
+2026-06-01 19:02:01,834 - INFO - ✓ LLM providers available for automatic action generation
+2026-06-01 19:02:01,835 - INFO - ✓ Initialized LLM provider: type
+⚠️ Skipping AI model loading - using rule-based fallback for faster startup
+⚠️ Aria server already running at http://127.0.0.1:8080 (detected healthy /api/aria/state).
+ℹ️ Reusing existing server; exiting this process cleanly.
+2026-06-01 19:02:32,089 - INFO - ✓ LLM providers available for automatic action generation
+2026-06-01 19:02:32,089 - INFO - ✓ Initialized LLM provider: type
+⚠️ Skipping AI model loading - using rule-based fallback for faster startup
+⚠️ Aria server already running at http://127.0.0.1:8080 (detected healthy /api/aria/state).
+ℹ️ Reusing existing server; exiting this process cleanly.
+2026-06-01 19:03:02,382 - INFO - ✓ LLM providers available for automatic action generation
+2026-06-01 19:03:02,382 - INFO - ✓ Initialized LLM provider: type
+⚠️ Skipping AI model loading - using rule-based fallback for faster startup
+⚠️ Aria server already running at http://127.0.0.1:8080 (detected healthy /api/aria/state).
+ℹ️ Reusing existing server; exiting this process cleanly.
+2026-06-01 19:03:32,743 - INFO - ✓ LLM providers available for automatic action generation
+2026-06-01 19:03:32,743 - INFO - ✓ Initialized LLM provider: type
+⚠️ Skipping AI model loading - using rule-based fallback for faster startup
+⚠️ Aria server already running at http://127.0.0.1:8080 (detected healthy /api/aria/state).
+ℹ️ Reusing existing server; exiting this process cleanly.
+2026-06-01 19:04:02,674 - INFO - ✓ LLM providers available for automatic action generation
+2026-06-01 19:04:02,675 - INFO - ✓ Initialized LLM provider: type
+⚠️ Skipping AI model loading - using rule-based fallback for faster startup
+⚠️ Aria server already running at http://127.0.0.1:8080 (detected healthy /api/aria/state).
+ℹ️ Reusing existing server; exiting this process cleanly.
+2026-06-01 19:04:32,894 - INFO - ✓ LLM providers available for automatic action generation
+2026-06-01 19:04:32,894 - INFO - ✓ Initialized LLM provider: type
+⚠️ Skipping AI model loading - using rule-based fallback for faster startup
+⚠️ Aria server already running at http://127.0.0.1:8080 (detected healthy /api/aria/state).
+ℹ️ Reusing existing server; exiting this process cleanly.
+2026-06-01 19:05:03,180 - INFO - ✓ LLM providers available for automatic action generation
+2026-06-01 19:05:03,180 - INFO - ✓ Initialized LLM provider: type
+⚠️ Skipping AI model loading - using rule-based fallback for faster startup
+⚠️ Aria server already running at http://127.0.0.1:8080 (detected healthy /api/aria/state).
+ℹ️ Reusing existing server; exiting this process cleanly.
+2026-06-01 19:05:33,424 - INFO - ✓ LLM providers available for automatic action generation
+2026-06-01 19:05:33,424 - INFO - ✓ Initialized LLM provider: type
+⚠️ Skipping AI model loading - using rule-based fallback for faster startup
+⚠️ Aria server already running at http://127.0.0.1:8080 (detected healthy /api/aria/state).
+ℹ️ Reusing existing server; exiting this process cleanly.
+2026-06-01 19:06:03,670 - INFO - ✓ LLM providers available for automatic action generation
+2026-06-01 19:06:03,671 - INFO - ✓ Initialized LLM provider: type
+⚠️ Skipping AI model loading - using rule-based fallback for faster startup
+⚠️ Aria server already running at http://127.0.0.1:8080 (detected healthy /api/aria/state).
+ℹ️ Reusing existing server; exiting this process cleanly.
+2026-06-01 19:06:34,536 - INFO - ✓ LLM providers available for automatic action generation
+2026-06-01 19:06:34,536 - INFO - ✓ Initialized LLM provider: type
+⚠️ Skipping AI model loading - using rule-based fallback for faster startup
+⚠️ Aria server already running at http://127.0.0.1:8080 (detected healthy /api/aria/state).
+ℹ️ Reusing existing server; exiting this process cleanly.
+2026-06-01 19:07:05,219 - INFO - ✓ LLM providers available for automatic action generation
+2026-06-01 19:07:05,220 - INFO - ✓ Initialized LLM provider: type
+⚠️ Skipping AI model loading - using rule-based fallback for faster startup
+⚠️ Aria server already running at http://127.0.0.1:8080 (detected healthy /api/aria/state).
+ℹ️ Reusing existing server; exiting this process cleanly.
+2026-06-01 19:07:35,629 - INFO - ✓ LLM providers available for automatic action generation
+2026-06-01 19:07:35,630 - INFO - ✓ Initialized LLM provider: type
+⚠️ Skipping AI model loading - using rule-based fallback for faster startup
+⚠️ Aria server already running at http://127.0.0.1:8080 (detected healthy /api/aria/state).
+ℹ️ Reusing existing server; exiting this process cleanly.
+2026-06-01 19:08:06,159 - INFO - ✓ LLM providers available for automatic action generation
+2026-06-01 19:08:06,160 - INFO - ✓ Initialized LLM provider: type
+⚠️ Skipping AI model loading - using rule-based fallback for faster startup
+⚠️ Aria server already running at http://127.0.0.1:8080 (detected healthy /api/aria/state).
+ℹ️ Reusing existing server; exiting this process cleanly.
+2026-06-01 19:08:36,765 - INFO - ✓ LLM providers available for automatic action generation
+2026-06-01 19:08:36,766 - INFO - ✓ Initialized LLM provider: type
+⚠️ Skipping AI model loading - using rule-based fallback for faster startup
+⚠️ Aria server already running at http://127.0.0.1:8080 (detected healthy /api/aria/state).
+ℹ️ Reusing existing server; exiting this process cleanly.
+2026-06-01 19:09:06,311 - INFO - ✓ LLM providers available for automatic action generation
+2026-06-01 19:09:06,312 - INFO - ✓ Initialized LLM provider: type
+⚠️ Skipping AI model loading - using rule-based fallback for faster startup
+⚠️ Aria server already running at http://127.0.0.1:8080 (detected healthy /api/aria/state).
+ℹ️ Reusing existing server; exiting this process cleanly.
+2026-06-01 19:09:36,586 - INFO - ✓ LLM providers available for automatic action generation
+2026-06-01 19:09:36,586 - INFO - ✓ Initialized LLM provider: type
+⚠️ Skipping AI model loading - using rule-based fallback for faster startup
+⚠️ Aria server already running at http://127.0.0.1:8080 (detected healthy /api/aria/state).
+ℹ️ Reusing existing server; exiting this process cleanly.
+2026-06-01 19:10:06,786 - INFO - ✓ LLM providers available for automatic action generation
+2026-06-01 19:10:06,786 - INFO - ✓ Initialized LLM provider: type
+⚠️ Skipping AI model loading - using rule-based fallback for faster startup
+⚠️ Aria server already running at http://127.0.0.1:8080 (detected healthy /api/aria/state).
+ℹ️ Reusing existing server; exiting this process cleanly.
+2026-06-01 19:10:37,006 - INFO - ✓ LLM providers available for automatic action generation
+2026-06-01 19:10:37,007 - INFO - ✓ Initialized LLM provider: type
+⚠️ Skipping AI model loading - using rule-based fallback for faster startup
+⚠️ Aria server already running at http://127.0.0.1:8080 (detected healthy /api/aria/state).
+ℹ️ Reusing existing server; exiting this process cleanly.
+2026-06-01 19:11:07,620 - INFO - ✓ LLM providers available for automatic action generation
+2026-06-01 19:11:07,621 - INFO - ✓ Initialized LLM provider: type
+⚠️ Skipping AI model loading - using rule-based fallback for faster startup
+⚠️ Aria server already running at http://127.0.0.1:8080 (detected healthy /api/aria/state).
+ℹ️ Reusing existing server; exiting this process cleanly.
+2026-06-01 19:11:37,551 - INFO - ✓ LLM providers available for automatic action generation
+2026-06-01 19:11:37,551 - INFO - ✓ Initialized LLM provider: type
+⚠️ Skipping AI model loading - using rule-based fallback for faster startup
+⚠️ Aria server already running at http://127.0.0.1:8080 (detected healthy /api/aria/state).
+ℹ️ Reusing existing server; exiting this process cleanly.
+2026-06-01 19:12:07,706 - INFO - ✓ LLM providers available for automatic action generation
+2026-06-01 19:12:07,706 - INFO - ✓ Initialized LLM provider: type
+⚠️ Skipping AI model loading - using rule-based fallback for faster startup
+⚠️ Aria server already running at http://127.0.0.1:8080 (detected healthy /api/aria/state).
+ℹ️ Reusing existing server; exiting this process cleanly.
+2026-06-01 19:12:37,921 - INFO - ✓ LLM providers available for automatic action generation
+2026-06-01 19:12:37,921 - INFO - ✓ Initialized LLM provider: type
+⚠️ Skipping AI model loading - using rule-based fallback for faster startup
+⚠️ Aria server already running at http://127.0.0.1:8080 (detected healthy /api/aria/state).
+ℹ️ Reusing existing server; exiting this process cleanly.
+2026-06-01 19:13:08,169 - INFO - ✓ LLM providers available for automatic action generation
+2026-06-01 19:13:08,170 - INFO - ✓ Initialized LLM provider: type
+⚠️ Skipping AI model loading - using rule-based fallback for faster startup
+⚠️ Aria server already running at http://127.0.0.1:8080 (detected healthy /api/aria/state).
+ℹ️ Reusing existing server; exiting this process cleanly.
+2026-06-01 19:13:38,857 - INFO - ✓ LLM providers available for automatic action generation
+2026-06-01 19:13:38,857 - INFO - ✓ Initialized LLM provider: type
+⚠️ Skipping AI model loading - using rule-based fallback for faster startup
+⚠️ Aria server already running at http://127.0.0.1:8080 (detected healthy /api/aria/state).
+ℹ️ Reusing existing server; exiting this process cleanly.
+2026-06-01 19:14:11,228 - INFO - ✓ LLM providers available for automatic action generation
+2026-06-01 19:14:11,228 - INFO - ✓ Initialized LLM provider: type
+⚠️ Skipping AI model loading - using rule-based fallback for faster startup
+⚠️ Aria server already running at http://127.0.0.1:8080 (detected healthy /api/aria/state).
+ℹ️ Reusing existing server; exiting this process cleanly.
