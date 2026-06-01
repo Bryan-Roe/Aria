@@ -207,11 +207,12 @@ async def train_quantum_classifier(
 @app.post("/quantum/autorun")
 async def run_quantum_autorun(request: OrchestratorRequest):
     """Run a quantum autorun job"""
-    if not request.job_name:
+    normalized_job_name = (request.job_name or "").strip()
+    if not normalized_job_name:
         raise HTTPException(status_code=400, detail="job_name is required")
 
     result = await quantum_integration.run_autorun_job(
-        job_name=request.job_name, dry_run=request.dry_run
+        job_name=normalized_job_name, dry_run=request.dry_run
     )
     return result
 

@@ -191,19 +191,24 @@ class QuantumIntegration:
         """Run a quantum autorun job"""
         try:
             autorun_script = self.workspace_root / "scripts" / "quantum_autorun.py"
+            normalized_job_name = (job_name or "").strip()
 
-            if not re.fullmatch(r"[A-Za-z0-9_-]{1,64}", job_name):
+            if not re.fullmatch(r"[A-Za-z0-9_-]{1,64}", normalized_job_name):
                 return {
                     "success": False,
                     "error": "Invalid job_name format. Allowed: letters, numbers, underscore, hyphen (max 64 chars).",
                 }
 
-            cmd = [sys.executable, str(autorun_script), "--job", job_name]
+            cmd = [sys.executable, str(autorun_script), "--job", normalized_job_name]
             if dry_run:
                 cmd.append("--dry-run")
 
             result = subprocess.run(
-                cmd, capture_output=True, text=True, cwd=str(self.workspace_root)
+                cmd,
+                capture_output=True,
+                text=True,
+                cwd=str(self.workspace_root),
+                check=False,
             )
 
             # Load status file if it exists
@@ -217,11 +222,11 @@ class QuantumIntegration:
 
             return {
                 "success": result.returncode == 0,
-                "job_name": job_name,
+                "job_name": normalized_job_name,
                 "dry_run": dry_run,
                 "stdout": result.stdout,
                 "stderr": result.stderr,
-                "status": status_data.get("jobs", {}).get(job_name, {}),
+                "status": status_data.get("jobs", {}).get(normalized_job_name, {}),
             }
         except Exception as e:
             return {"success": False, "error": str(e)}
