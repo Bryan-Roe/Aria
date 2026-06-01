@@ -81,9 +81,7 @@ class Executor:
         # Final path-level safety check — never trust the planner alone.
         path_assessment = self.risk_manager.assess_file(path)
         if not path_assessment.allowed:
-            return ExecutionResult(
-                plan=plan, applied=False, reason="; ".join(path_assessment.reasons)
-            )
+            return ExecutionResult(plan=plan, applied=False, reason="; ".join(path_assessment.reasons))
 
         unsupported = [k for k in plan.kinds if k not in _TRANSFORMS]
         if unsupported:
@@ -102,9 +100,7 @@ class Executor:
         try:
             text = original.decode("utf-8")
         except UnicodeDecodeError:
-            return ExecutionResult(
-                plan=plan, applied=False, reason="file is not valid UTF-8"
-            )
+            return ExecutionResult(plan=plan, applied=False, reason="file is not valid UTF-8")
 
         new_text = text
         for kind in plan.kinds:
@@ -114,9 +110,7 @@ class Executor:
         # Diff-level safety: re-check size delta and require an actual change.
         change_assessment = self.risk_manager.assess_change(path, original, new_bytes)
         if not change_assessment.allowed:
-            return ExecutionResult(
-                plan=plan, applied=False, reason="; ".join(change_assessment.reasons)
-            )
+            return ExecutionResult(plan=plan, applied=False, reason="; ".join(change_assessment.reasons))
 
         if self.dry_run:
             _logger.info("[dry-run] would update %s (%s)", path, plan.description())

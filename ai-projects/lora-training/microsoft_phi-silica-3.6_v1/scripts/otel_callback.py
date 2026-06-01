@@ -101,11 +101,9 @@ __all__ = ["OpenTelemetryTrainerCallback"]
 # Optional OpenTelemetry imports
 try:
     from opentelemetry import trace  # type: ignore
-    from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import \
-        OTLPSpanExporter  # type: ignore
+    from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter  # type: ignore
     from opentelemetry.sdk.trace import TracerProvider  # type: ignore
-    from opentelemetry.sdk.trace.export import \
-        BatchSpanProcessor  # type: ignore
+    from opentelemetry.sdk.trace.export import BatchSpanProcessor  # type: ignore
 except Exception:
     trace = None  # type: ignore
     TracerProvider = OTLPSpanExporter = BatchSpanProcessor = None  # type: ignore
@@ -125,13 +123,7 @@ class OpenTelemetryTrainerCallback:
         self.training_span: Optional[Any] = None
 
         otel_endpoint = os.environ.get("OTEL_EXPORTER_OTLP_ENDPOINT")
-        if (
-            otel_endpoint
-            and trace
-            and TracerProvider
-            and OTLPSpanExporter
-            and BatchSpanProcessor
-        ):
+        if otel_endpoint and trace and TracerProvider and OTLPSpanExporter and BatchSpanProcessor:
             try:
                 provider = TracerProvider()
                 exporter = OTLPSpanExporter(endpoint=otel_endpoint, insecure=True)
@@ -140,33 +132,23 @@ class OpenTelemetryTrainerCallback:
                 service_name = os.environ.get("OTEL_SERVICE_NAME", "lora-training")
                 self.tracer = trace.get_tracer(service_name)
             except Exception as e:
-                print(
-                    f"[otel] Failed to init OpenTelemetry tracer: {e}", file=sys.stderr
-                )
+                print(f"[otel] Failed to init OpenTelemetry tracer: {e}", file=sys.stderr)
 
     # type: ignore[no-untyped-def]
     def on_train_begin(self, args, state, control, **kwargs):
         if self.tracer:
-            self.training_span = self.tracer.start_span(
-                "training_run"
-            )  # type: ignore[union-attr]
-            self.training_span.set_attribute(
-                "num_train_epochs", int(getattr(args, "num_train_epochs", 0))
-            )
+            self.training_span = self.tracer.start_span("training_run")  # type: ignore[union-attr]
+            self.training_span.set_attribute("num_train_epochs", int(getattr(args, "num_train_epochs", 0)))
             self.training_span.set_attribute(
                 "per_device_train_batch_size",
                 int(getattr(args, "per_device_train_batch_size", 0)),
             )
-            self.training_span.set_attribute(
-                "learning_rate", float(getattr(args, "learning_rate", 0.0))
-            )
+            self.training_span.set_attribute("learning_rate", float(getattr(args, "learning_rate", 0.0)))
 
     # type: ignore[no-untyped-def]
     def on_train_end(self, args, state, control, **kwargs):
         if self.training_span:
-            self.training_span.set_attribute(
-                "final_global_step", int(getattr(state, "global_step", 0))
-            )
+            self.training_span.set_attribute("final_global_step", int(getattr(state, "global_step", 0)))
             self.training_span.end()
             self.training_span = None
 
@@ -214,8 +196,6 @@ class OpenTelemetryTrainerCallback:
         if self.tracer:
             try:
                 with self.tracer.start_as_current_span("prediction_step") as span:
-                    span.set_attribute(
-                        "global_step", int(getattr(state, "global_step", 0))
-                    )
+                    span.set_attribute("global_step", int(getattr(state, "global_step", 0)))
             except Exception:
                 pass

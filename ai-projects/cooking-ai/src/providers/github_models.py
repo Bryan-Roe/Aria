@@ -27,16 +27,10 @@ class GitHubModelsProvider:
         base_url: str = "https://models.inference.ai.azure.com",
     ) -> None:
         if OpenAI is None:
-            raise RuntimeError(
-                "openai package not available. Install with: pip install openai>=1.43.0"
-            )
-        api_key = (
-            api_key or os.getenv("GITHUB_MODELS_API_KEY") or os.getenv("GITHUB_TOKEN")
-        )
+            raise RuntimeError("openai package not available. Install with: pip install openai>=1.43.0")
+        api_key = api_key or os.getenv("GITHUB_MODELS_API_KEY") or os.getenv("GITHUB_TOKEN")
         if not api_key:
-            raise RuntimeError(
-                "GitHub Models provider requires GITHUB_MODELS_API_KEY or GITHUB_TOKEN to be set."
-            )
+            raise RuntimeError("GitHub Models provider requires GITHUB_MODELS_API_KEY or GITHUB_TOKEN to be set.")
         self.model = model or os.getenv("GITHUB_MODELS_MODEL", "gpt-4o-mini")
         self.temperature = 0.4 if temperature is None else float(temperature)
         # Create client with custom base URL

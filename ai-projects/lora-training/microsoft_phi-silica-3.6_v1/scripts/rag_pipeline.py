@@ -72,9 +72,7 @@ class DocumentStore:
         words = text.split()
         chunks = []
 
-        for i in range(
-            0, len(words), self.config.chunk_size - self.config.chunk_overlap
-        ):
+        for i in range(0, len(words), self.config.chunk_size - self.config.chunk_overlap):
             chunk = " ".join(words[i : i + self.config.chunk_size])
             if chunk.strip():
                 chunks.append(chunk)
@@ -91,15 +89,11 @@ class DocumentStore:
             self.embedding_model = SentenceTransformer(self.config.embedding_model)
 
             texts = [doc["content"] for doc in self.documents]
-            self.embeddings = self.embedding_model.encode(
-                texts, show_progress_bar=True, convert_to_numpy=True
-            )
+            self.embeddings = self.embedding_model.encode(texts, show_progress_bar=True, convert_to_numpy=True)
             print(f"✓ Index built with {len(self.embeddings)} embeddings")
 
         except ImportError:
-            print(
-                "⚠ sentence-transformers not installed. Using simple keyword matching."
-            )
+            print("⚠ sentence-transformers not installed. Using simple keyword matching.")
             self.embedding_model = None
 
     def retrieve(self, query: str, top_k: int = None) -> List[Dict[str, Any]]:
@@ -192,9 +186,7 @@ class DocumentStore:
 class RAGPipeline:
     """Complete RAG pipeline with retrieval and generation"""
 
-    def __init__(
-        self, model_path: str, document_store: DocumentStore, config: RAGConfig = None
-    ):
+    def __init__(self, model_path: str, document_store: DocumentStore, config: RAGConfig = None):
         self.config = config or RAGConfig()
         self.document_store = document_store
 
@@ -210,9 +202,7 @@ class RAGPipeline:
         if self.tokenizer.pad_token is None:
             self.tokenizer.pad_token = self.tokenizer.eos_token
 
-    def query(
-        self, question: str, return_context: bool = False, max_new_tokens: int = 256
-    ) -> Dict[str, Any]:
+    def query(self, question: str, return_context: bool = False, max_new_tokens: int = 256) -> Dict[str, Any]:
         """
         Query the RAG pipeline
 
@@ -300,12 +290,8 @@ def main():
 
     parser = argparse.ArgumentParser(description="RAG Pipeline")
     parser.add_argument("--model", type=str, required=True, help="Path to model")
-    parser.add_argument(
-        "--docs", type=str, required=True, help="Path to documents directory"
-    )
-    parser.add_argument(
-        "--index-dir", type=str, default="data_out/rag_index", help="Index directory"
-    )
+    parser.add_argument("--docs", type=str, required=True, help="Path to documents directory")
+    parser.add_argument("--index-dir", type=str, default="data_out/rag_index", help="Index directory")
     parser.add_argument("--query", type=str, help="Query to run")
     parser.add_argument("--interactive", action="store_true", help="Interactive mode")
     parser.add_argument("--rebuild-index", action="store_true", help="Rebuild index")

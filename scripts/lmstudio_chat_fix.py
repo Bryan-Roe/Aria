@@ -176,10 +176,7 @@ def fix_file(
         messages=[
             {
                 "role": "system",
-                "content": (
-                    "You are a precise coding assistant. "
-                    "Output only the final file text."
-                ),
+                "content": ("You are a precise coding assistant. " "Output only the final file text."),
             },
             {"role": "user", "content": prompt},
         ],

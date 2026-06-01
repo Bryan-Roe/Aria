@@ -27,12 +27,8 @@ from contextlib import contextmanager
 
 APP_NAME = "QAI"
 REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-REPO_AUTOMATION_STATUS_PATH = os.path.join(
-    REPO_ROOT, "data_out", "repo_automation", "status.json"
-)
-REPO_AUTOMATION_LEGACY_STATUS_PATH = os.path.join(
-    REPO_ROOT, "automation_status.json"
-)
+REPO_AUTOMATION_STATUS_PATH = os.path.join(REPO_ROOT, "data_out", "repo_automation", "status.json")
+REPO_AUTOMATION_LEGACY_STATUS_PATH = os.path.join(REPO_ROOT, "automation_status.json")
 
 
 def default_provider_choice() -> str:
@@ -682,8 +678,10 @@ def hist_state_to_display(hist_state: List[dict]) -> List[Tuple[str, str]]:
     if not hist_state:
         return []
     return [
-        (f"{e.get('user', '')}\n\n[{e.get('user_ts', '')}]",
-         f"{e.get('assistant', '')}\n\n[{e.get('assistant_ts', '')}]")
+        (
+            f"{e.get('user', '')}\n\n[{e.get('user_ts', '')}]",
+            f"{e.get('assistant', '')}\n\n[{e.get('assistant_ts', '')}]",
+        )
         for e in hist_state
     ]
 
@@ -709,6 +707,7 @@ def hist_state_to_messages(hist_state: List[dict]) -> Any:
 # Helper utilities (export, summarization, auto-improve daemon)
 # ---------------------------------------------------------------------------
 
+
 # Export conversation to HTML for sharing/viewing
 def generate_html_export(hist_state: List[dict], session_name: str = "session") -> str:
     ensure_conv_dir()
@@ -725,14 +724,12 @@ def generate_html_export(hist_state: List[dict], session_name: str = "session") 
         "<div>",
     ]
     for e in hist_state:
-        ut = e.get('user_ts', '')
-        at = e.get('assistant_ts', '')
-        user = html.escape(e.get('user', ''))
-        assistant = html.escape(e.get('assistant', ''))
-        parts.append(
-            f"<div class='user'><strong>User [{ut}]</strong><div>{user}</div></div>")
-        parts.append(
-            f"<div class='assistant'><strong>Assistant [{at}]</strong><div>{assistant}</div></div>")
+        ut = e.get("user_ts", "")
+        at = e.get("assistant_ts", "")
+        user = html.escape(e.get("user", ""))
+        assistant = html.escape(e.get("assistant", ""))
+        parts.append(f"<div class='user'><strong>User [{ut}]</strong><div>{user}</div></div>")
+        parts.append(f"<div class='assistant'><strong>Assistant [{at}]</strong><div>{assistant}</div></div>")
     parts.append("</div></body></html>")
     try:
         with _conv_lock():
@@ -752,24 +749,48 @@ def generate_html_export(hist_state: List[dict], session_name: str = "session") 
 def summarize_conversation_simple(hist_state: List[dict], top_n: int = 5) -> str:
     if not hist_state:
         return "No conversation yet."
-    texts = " ".join(((e.get('user', '') or '') + " " +
-                     (e.get('assistant', '') or '') for e in hist_state))
+    texts = " ".join(((e.get("user", "") or "") + " " + (e.get("assistant", "") or "") for e in hist_state))
     tokens = re.findall(r"\w+", texts.lower())
-    stopwords = set(["the", "and", "to", "a", "is", "in", "it", "of", "for", "on", "that", "this",
-                    "with", "as", "are", "was", "i", "you", "we", "they", "he", "she", "be"])  # simple stoplist
+    stopwords = set(
+        [
+            "the",
+            "and",
+            "to",
+            "a",
+            "is",
+            "in",
+            "it",
+            "of",
+            "for",
+            "on",
+            "that",
+            "this",
+            "with",
+            "as",
+            "are",
+            "was",
+            "i",
+            "you",
+            "we",
+            "they",
+            "he",
+            "she",
+            "be",
+        ]
+    )  # simple stoplist
     words = [t for t in tokens if t not in stopwords and len(t) > 2]
     common = Counter(words).most_common(top_n)
     top = [w for w, _ in common]
-    user_msgs = sum(1 for e in hist_state if e.get('user'))
-    assistant_msgs = sum(1 for e in hist_state if e.get('assistant'))
+    user_msgs = sum(1 for e in hist_state if e.get("user"))
+    assistant_msgs = sum(1 for e in hist_state if e.get("assistant"))
     last_msgs = hist_state[-5:]
     last_lines = []
     for e in last_msgs:
-        if e.get('user'):
-            user_text = str(e.get('user') or '')
+        if e.get("user"):
+            user_text = str(e.get("user") or "")
             last_lines.append(f"U: {user_text[:120]}")
-        if e.get('assistant'):
-            assistant_text = str(e.get('assistant') or '')
+        if e.get("assistant"):
+            assistant_text = str(e.get("assistant") or "")
             last_lines.append(f"A: {assistant_text[:120]}")
     suggestion = f"Summary: {user_msgs} user messages, {assistant_msgs} assistant messages. Top topics: {', '.join(top)}. Recent: {' | '.join(last_lines)}. Suggested follow-ups: Ask for clarification on {top[0] if top else 'the topic'}."
     return suggestion
@@ -857,12 +878,15 @@ with gr.Blocks() as demo:
                 <span class="pill">Auto-improve</span>
             </div>
         </div>
-        """.format(provider_status=html.escape(provider_diagnostics_summary()))
+        """.format(
+            provider_status=html.escape(provider_diagnostics_summary())
+        )
     )
     with gr.Row(elem_classes=["surface-card"]):
         with gr.Column(scale=4):
             gr.Markdown(
-                f"# {APP_NAME} — Gradio Demo  \nEnhanced chat demo with persistence, export, search, sessions, streaming, and TTS.")
+                f"# {APP_NAME} — Gradio Demo  \nEnhanced chat demo with persistence, export, search, sessions, streaming, and TTS."
+            )
         with gr.Column(scale=1, min_width=220):
             theme_toggle = gr.Checkbox(label="Dark mode", value=False)
             compact_toggle = gr.Checkbox(label="Compact layout", value=False)
@@ -874,10 +898,12 @@ with gr.Blocks() as demo:
     with gr.Row():
         with gr.Column(scale=3, elem_classes=["surface-card", "chat-panel"]):
             gr.Markdown("### Conversation")
-            chatbot = gr.Chatbot(value=initial_messages,
-                                 label="Conversation", elem_id="ariaChatbot", elem_classes=["primary-chatbot"])
+            chatbot = gr.Chatbot(
+                value=initial_messages, label="Conversation", elem_id="ariaChatbot", elem_classes=["primary-chatbot"]
+            )
             user_input = gr.Textbox(
-                placeholder="Type a message and press Enter or Send", label="Your message", elem_id="userInput")
+                placeholder="Type a message and press Enter or Send", label="Your message", elem_id="userInput"
+            )
 
             with gr.Row():
                 send_btn = gr.Button("Send", variant="primary")
@@ -885,10 +911,8 @@ with gr.Blocks() as demo:
                 clear_btn = gr.Button("Clear")
                 save_btn = gr.Button("Save now")
 
-            provider_info = gr.Textbox(
-                label="Detected provider", interactive=False)
-            status = gr.Textbox(
-                label="Status", interactive=False, value="Idle")
+            provider_info = gr.Textbox(label="Detected provider", interactive=False)
+            status = gr.Textbox(label="Status", interactive=False, value="Idle")
 
         with gr.Column(scale=2, elem_classes=["surface-card", "sidebar-panel"]):
             gr.Markdown("### Sidebar", elem_classes=["section-label"])
@@ -898,50 +922,50 @@ with gr.Blocks() as demo:
             )
 
             with gr.Accordion("Model & persona", open=False):
-                use_model = gr.Checkbox(
-                    label="Use simulation (override provider)", value=False)
+                use_model = gr.Checkbox(label="Use simulation (override provider)", value=False)
                 provider_select = gr.Dropdown(
                     choices=["auto", "qai", "quantum", "local", "ollama", "lmstudio", "openai", "azure", "lora", "agi"],
                     value=default_provider_choice(),
                     label="Provider",
                     elem_id="providerSelect",
                 )
-                model_override = gr.Textbox(label="Model override (optional)",
-                                            placeholder="e.g., data_out/quantum_llm_training or gpt-4o-mini", elem_id="modelOverride")
+                model_override = gr.Textbox(
+                    label="Model override (optional)",
+                    placeholder="e.g., data_out/quantum_llm_training or gpt-4o-mini",
+                    elem_id="modelOverride",
+                )
                 gr.Markdown(provider_readiness_note(), elem_classes=["sidebar-note"])
                 gr.Markdown(provider_diagnostics_summary(), elem_classes=["sidebar-note"])
-                temperature = gr.Slider(minimum=0.0, maximum=1.0, value=0.7,
-                                        step=0.05, label="Temperature", elem_id="temperature")
+                temperature = gr.Slider(
+                    minimum=0.0, maximum=1.0, value=0.7, step=0.05, label="Temperature", elem_id="temperature"
+                )
                 max_output_tokens = gr.Slider(
-                    minimum=16, maximum=2048, step=16, value=512, label="Max output tokens", elem_id="maxTokens")
+                    minimum=16, maximum=2048, step=16, value=512, label="Max output tokens", elem_id="maxTokens"
+                )
                 persona = gr.Textbox(label="Assistant name", value="QAI")
-                persona_presets = gr.Dropdown(choices=[
-                                              "QAI (Friendly)", "Researcher", "Code Assistant"], value="QAI (Friendly)", label="Persona presets")
+                persona_presets = gr.Dropdown(
+                    choices=["QAI (Friendly)", "Researcher", "Code Assistant"],
+                    value="QAI (Friendly)",
+                    label="Persona presets",
+                )
                 autosave = gr.Checkbox(label="Autosave conversation", value=True)
-                max_history = gr.Slider(
-                    minimum=10, maximum=1000, step=10, value=200, label="Max history (messages)")
-                session_name = gr.Textbox(
-                    label="Session name (optional)", placeholder="session-2026-05-16")
+                max_history = gr.Slider(minimum=10, maximum=1000, step=10, value=200, label="Max history (messages)")
+                session_name = gr.Textbox(label="Session name (optional)", placeholder="session-2026-05-16")
 
             with gr.Accordion("Session library", open=False):
-                saved_sessions = gr.Dropdown(
-                    choices=[], label="Saved sessions", elem_id="savedSessions")
+                saved_sessions = gr.Dropdown(choices=[], label="Saved sessions", elem_id="savedSessions")
                 with gr.Row():
                     refresh_sessions_btn = gr.Button("Refresh sessions")
                     load_session_btn = gr.Button("Load session")
                     delete_session_btn = gr.Button("Delete session")
                 with gr.Row():
-                    message_index = gr.Number(
-                        value=0, label="Conversation index (0-based)")
-                    edit_side = gr.Dropdown(
-                        choices=["user", "assistant"], value="assistant", label="Edit side")
-                edit_message_text = gr.Textbox(
-                    label="New message content", placeholder="Replace text")
+                    message_index = gr.Number(value=0, label="Conversation index (0-based)")
+                    edit_side = gr.Dropdown(choices=["user", "assistant"], value="assistant", label="Edit side")
+                edit_message_text = gr.Textbox(label="New message content", placeholder="Replace text")
                 with gr.Row():
                     edit_message_btn = gr.Button("Edit message")
                     delete_message_btn = gr.Button("Delete message")
-                search_input = gr.Textbox(
-                    label="Search conversation", placeholder="Enter text to search")
+                search_input = gr.Textbox(label="Search conversation", placeholder="Enter text to search")
                 with gr.Row():
                     search_btn = gr.Button("Search")
                     revert_btn = gr.Button("Show all")
@@ -965,28 +989,22 @@ with gr.Blocks() as demo:
                     export_md_btn = gr.Button("Export Markdown")
                     export_txt_btn = gr.Button("Export TXT")
                 export_file = gr.File(label="Conversation file", interactive=False)
-                webhook_name = gr.Textbox(
-                    label="Webhook name", placeholder="webhook-id")
-                webhook_dir = gr.Textbox(
-                    label="Webhook directory (optional)", placeholder="data_out/webhooks")
-                webhook_autocommit = gr.Checkbox(
-                    label="Auto-commit (git)", value=False)
+                webhook_name = gr.Textbox(label="Webhook name", placeholder="webhook-id")
+                webhook_dir = gr.Textbox(label="Webhook directory (optional)", placeholder="data_out/webhooks")
+                webhook_autocommit = gr.Checkbox(label="Auto-commit (git)", value=False)
                 send_to_webhook_btn = gr.Button("Send to Webhook")
 
             with gr.Accordion("TTS & suggestions", open=False):
                 with gr.Row():
-                    tts_autoplay = gr.Checkbox(
-                        label="Autoplay assistant audio", value=False)
-                    tts_backend = gr.Dropdown(
-                        choices=["auto", "pyttsx3", "gtts"], value="auto", label="TTS backend")
+                    tts_autoplay = gr.Checkbox(label="Autoplay assistant audio", value=False)
+                    tts_backend = gr.Dropdown(choices=["auto", "pyttsx3", "gtts"], value="auto", label="TTS backend")
                 speak_btn = gr.Button("Speak last reply")
                 tts_audio = gr.Audio(label="Assistant audio", interactive=False)
-                auto_improve_enable = gr.Checkbox(
-                    label="Auto-improve (background)", value=False)
+                auto_improve_enable = gr.Checkbox(label="Auto-improve (background)", value=False)
                 auto_improve_interval = gr.Slider(
-                    minimum=5, maximum=3600, step=5, value=60, label="Auto-improve interval (sec)")
-                suggestions_dropdown = gr.Dropdown(
-                    choices=[], label="Auto suggestions", elem_id="suggestionsDropdown")
+                    minimum=5, maximum=3600, step=5, value=60, label="Auto-improve interval (sec)"
+                )
+                suggestions_dropdown = gr.Dropdown(choices=[], label="Auto suggestions", elem_id="suggestionsDropdown")
                 with gr.Row():
                     refresh_suggestions_btn = gr.Button("Refresh suggestions")
                     apply_suggestion_btn = gr.Button("Apply suggestion")
@@ -1002,7 +1020,22 @@ with gr.Blocks() as demo:
         # ------------------------------------------------------------------
         # Actions / Callbacks
         # ------------------------------------------------------------------
-        def respond(user_message, chat_history, hist_state, use_model, provider_choice, model_override_val, temperature_val, max_output_tokens_val, lang, persona_val, autosave, max_history, session_name, request_tokens=None):
+        def respond(
+            user_message,
+            chat_history,
+            hist_state,
+            use_model,
+            provider_choice,
+            model_override_val,
+            temperature_val,
+            max_output_tokens_val,
+            lang,
+            persona_val,
+            autosave,
+            max_history,
+            session_name,
+            request_tokens=None,
+        ):
             """Respond and stream updates. Returns (chat_history, cleared_input, hist_state, provider_info, status)."""
             chat_history = chat_history or []
             hist_state = hist_state or []
@@ -1014,10 +1047,8 @@ with gr.Blocks() as demo:
                 for pair in chat_history:
                     if not isinstance(pair, (tuple, list)) or len(pair) != 2:
                         continue
-                    normalized.append(
-                        {"role": "user", "content": str(pair[0])})
-                    normalized.append(
-                        {"role": "assistant", "content": str(pair[1])})
+                    normalized.append({"role": "user", "content": str(pair[0])})
+                    normalized.append({"role": "assistant", "content": str(pair[1])})
                 chat_history = normalized
             if not user_message or not str(user_message).strip():
                 if request_tokens:
@@ -1034,8 +1065,7 @@ with gr.Blocks() as demo:
                 token_id = str(time.time())
                 # request_tokens is a gr.State dict like {"latest": id, "tokens": {id: Event}}
                 try:
-                    req_tokens = request_tokens or {
-                        "latest": None, "tokens": {}}
+                    req_tokens = request_tokens or {"latest": None, "tokens": {}}
                     tokens_map = req_tokens.get("tokens", {})
                     tokens_map[token_id] = token_event
                     req_tokens["tokens"] = tokens_map
@@ -1070,9 +1100,9 @@ with gr.Blocks() as demo:
                     {"role": "user", "content": display_user},
                     {"role": "assistant", "content": display_assistant},
                 ]
-                hist_state = hist_state + \
-                    [{"user": user_message, "assistant": reply,
-                        "user_ts": user_ts, "assistant_ts": assistant_ts}]
+                hist_state = hist_state + [
+                    {"user": user_message, "assistant": reply, "user_ts": user_ts, "assistant_ts": assistant_ts}
+                ]
                 # enforce max_history
                 try:
                     mh = int(max_history) if max_history else None
@@ -1082,8 +1112,7 @@ with gr.Blocks() as demo:
                     hist_state = hist_state[-mh:]
                 if autosave:
                     try:
-                        save_conversation_json(
-                            hist_state, session_name or "session")
+                        save_conversation_json(hist_state, session_name or "session")
                     except Exception:
                         pass
                 if request_tokens:
@@ -1094,20 +1123,17 @@ with gr.Blocks() as demo:
             try:
                 import sys
                 from pathlib import Path
-                chat_cli_src = Path(__file__).resolve(
-                ).parents[1] / "ai-projects" / "chat-cli" / "src"
+
+                chat_cli_src = Path(__file__).resolve().parents[1] / "ai-projects" / "chat-cli" / "src"
                 if str(chat_cli_src) not in sys.path:
                     sys.path.insert(0, str(chat_cli_src))
                 from shared.chat_providers import detect_provider  # pyright: ignore[reportAttributeAccessIssue]
 
                 provider, info = detect_provider(
                     explicit=str(provider_choice) if provider_choice else None,
-                    model_override=str(
-                        model_override_val) if model_override_val else None,
-                    temperature=float(
-                        temperature_val) if temperature_val is not None else None,
-                    max_output_tokens=int(
-                        max_output_tokens_val) if max_output_tokens_val else None,
+                    model_override=str(model_override_val) if model_override_val else None,
+                    temperature=float(temperature_val) if temperature_val is not None else None,
+                    max_output_tokens=int(max_output_tokens_val) if max_output_tokens_val else None,
                 )
                 provider_display = f"{info.name} ({info.model})"
             except Exception:
@@ -1121,9 +1147,9 @@ with gr.Blocks() as demo:
                     {"role": "user", "content": display_user},
                     {"role": "assistant", "content": display_assistant},
                 ]
-                hist_state = hist_state + \
-                    [{"user": user_message, "assistant": reply,
-                        "user_ts": user_ts, "assistant_ts": assistant_ts}]
+                hist_state = hist_state + [
+                    {"user": user_message, "assistant": reply, "user_ts": user_ts, "assistant_ts": assistant_ts}
+                ]
                 # enforce max_history
                 try:
                     mh = int(max_history) if max_history else None
@@ -1133,8 +1159,7 @@ with gr.Blocks() as demo:
                     hist_state = hist_state[-mh:]
                 if autosave:
                     try:
-                        save_conversation_json(
-                            hist_state, session_name or "session")
+                        save_conversation_json(hist_state, session_name or "session")
                     except Exception:
                         pass
                 if request_tokens:
@@ -1164,8 +1189,7 @@ with gr.Blocks() as demo:
                         if token_event is not None and token_event.is_set():
                             partial += "\n\n[Cancelled]"
                             display_assistant = f"{partial}\n\n[{timestamp_now()}]"
-                            chat_history[-1] = {"role": "assistant",
-                                                "content": display_assistant}
+                            chat_history[-1] = {"role": "assistant", "content": display_assistant}
                             # best-effort provider cleanup
                             try:
                                 if hasattr(provider, "cancel"):
@@ -1184,8 +1208,7 @@ with gr.Blocks() as demo:
                             # cleanup token
                             try:
                                 if token_id and isinstance(request_tokens, dict):
-                                    request_tokens.get(
-                                        "tokens", {}).pop(token_id, None)
+                                    request_tokens.get("tokens", {}).pop(token_id, None)
                                     request_tokens["latest"] = None
                             except Exception:
                                 pass
@@ -1197,8 +1220,7 @@ with gr.Blocks() as demo:
                         chunk_text = str(chunk) if chunk is not None else ""
                         partial += chunk_text
                         display_assistant = f"{partial}\n\n[{timestamp_now()}]"
-                        chat_history[-1] = {"role": "assistant",
-                                            "content": display_assistant}
+                        chat_history[-1] = {"role": "assistant", "content": display_assistant}
                         if request_tokens:
                             yield chat_history, "", hist_state, provider_display, "Streaming...", request_tokens
                         else:
@@ -1208,15 +1230,13 @@ with gr.Blocks() as demo:
             except Exception as e:
                 err = f"[Provider error: {str(e)}]"
                 display_assistant = f"{err}\n\n[{timestamp_now()}]"
-                chat_history[-1] = {"role": "assistant",
-                                    "content": display_assistant}
-                hist_state = hist_state + \
-                    [{"user": user_message, "assistant": err,
-                        "user_ts": user_ts, "assistant_ts": timestamp_now()}]
+                chat_history[-1] = {"role": "assistant", "content": display_assistant}
+                hist_state = hist_state + [
+                    {"user": user_message, "assistant": err, "user_ts": user_ts, "assistant_ts": timestamp_now()}
+                ]
                 if autosave:
                     try:
-                        save_conversation_json(
-                            hist_state, session_name or "session")
+                        save_conversation_json(hist_state, session_name or "session")
                     except Exception:
                         pass
                 if request_tokens:
@@ -1229,11 +1249,10 @@ with gr.Blocks() as demo:
             assistant_ts = timestamp_now()
             reply = partial
             display_assistant = f"{reply}\n\n[{assistant_ts}]"
-            chat_history[-1] = {"role": "assistant",
-                                "content": display_assistant}
-            hist_state = hist_state + \
-                [{"user": user_message, "assistant": reply,
-                    "user_ts": user_ts, "assistant_ts": assistant_ts}]
+            chat_history[-1] = {"role": "assistant", "content": display_assistant}
+            hist_state = hist_state + [
+                {"user": user_message, "assistant": reply, "user_ts": user_ts, "assistant_ts": assistant_ts}
+            ]
             # enforce max_history
             try:
                 mh = int(max_history) if max_history else None
@@ -1243,8 +1262,7 @@ with gr.Blocks() as demo:
                 hist_state = hist_state[-mh:]
             if autosave:
                 try:
-                    save_conversation_json(
-                        hist_state, session_name or "session")
+                    save_conversation_json(hist_state, session_name or "session")
                 except Exception:
                     pass
             if request_tokens:
@@ -1256,18 +1274,44 @@ with gr.Blocks() as demo:
         # Wire send button and Enter key (submit)
         send_btn.click(
             respond,
-            inputs=[user_input, chatbot, hist_state, use_model, provider_select, model_override, temperature,
-                max_output_tokens, default_language, persona, autosave, max_history, session_name, request_tokens],
-            outputs=[chatbot, user_input, hist_state,
-                     provider_info, status, request_tokens],
+            inputs=[
+                user_input,
+                chatbot,
+                hist_state,
+                use_model,
+                provider_select,
+                model_override,
+                temperature,
+                max_output_tokens,
+                default_language,
+                persona,
+                autosave,
+                max_history,
+                session_name,
+                request_tokens,
+            ],
+            outputs=[chatbot, user_input, hist_state, provider_info, status, request_tokens],
             queue=True,
         )
         user_input.submit(
             respond,
-            inputs=[user_input, chatbot, hist_state, use_model, provider_select, model_override, temperature,
-                max_output_tokens, default_language, persona, autosave, max_history, session_name, request_tokens],
-            outputs=[chatbot, user_input, hist_state,
-                     provider_info, status, request_tokens],
+            inputs=[
+                user_input,
+                chatbot,
+                hist_state,
+                use_model,
+                provider_select,
+                model_override,
+                temperature,
+                max_output_tokens,
+                default_language,
+                persona,
+                autosave,
+                max_history,
+                session_name,
+                request_tokens,
+            ],
+            outputs=[chatbot, user_input, hist_state, provider_info, status, request_tokens],
             queue=True,
         )
 
@@ -1291,8 +1335,7 @@ with gr.Blocks() as demo:
                 pass
             return "No active stream"
 
-        cancel_btn.click(cancel_stream, inputs=[request_tokens], outputs=[
-                         status, request_tokens])
+        cancel_btn.click(cancel_stream, inputs=[request_tokens], outputs=[status, request_tokens])
 
         def apply_persona(preset, persona_field):
             if not preset:
@@ -1305,8 +1348,7 @@ with gr.Blocks() as demo:
                 return "QAI-Dev"
             return persona_field
 
-        persona_presets.change(apply_persona, inputs=[
-                               persona_presets, persona], outputs=[persona])
+        persona_presets.change(apply_persona, inputs=[persona_presets, persona], outputs=[persona])
 
         def clear_history():
             return [], []
@@ -1318,8 +1360,7 @@ with gr.Blocks() as demo:
                 return None
             return save_conversation_json(hist_state, session_name or "session")
 
-        save_btn.click(save_now, inputs=[
-                       hist_state, session_name], outputs=[export_file])
+        save_btn.click(save_now, inputs=[hist_state, session_name], outputs=[export_file])
 
         def export_json(hist_state, session_name):
             if not hist_state:
@@ -1331,10 +1372,8 @@ with gr.Blocks() as demo:
                 return None
             return save_conversation_markdown(hist_state, session_name or "session")
 
-        export_json_btn.click(export_json, inputs=[
-                              hist_state, session_name], outputs=[export_file])
-        export_md_btn.click(export_md, inputs=[
-                            hist_state, session_name], outputs=[export_file])
+        export_json_btn.click(export_json, inputs=[hist_state, session_name], outputs=[export_file])
+        export_md_btn.click(export_md, inputs=[hist_state, session_name], outputs=[export_file])
 
         def export_txt(hist_state, session_name):
             if not hist_state:
@@ -1385,23 +1424,19 @@ with gr.Blocks() as demo:
                         pass
             return filename
 
-        export_jsonl_btn.click(export_jsonl, inputs=[
-                               hist_state, session_name], outputs=[export_file])
-        export_txt_btn.click(export_txt, inputs=[
-                             hist_state, session_name], outputs=[export_file])
+        export_jsonl_btn.click(export_jsonl, inputs=[hist_state, session_name], outputs=[export_file])
+        export_txt_btn.click(export_txt, inputs=[hist_state, session_name], outputs=[export_file])
 
         # Webhook controls
-        webhook_name = gr.Textbox(
-            label="Webhook name", placeholder="webhook-id")
-        webhook_dir = gr.Textbox(
-            label="Webhook directory (optional)", placeholder="data_out/webhooks")
-        webhook_autocommit = gr.Checkbox(
-            label="Auto-commit (git)", value=False)
+        webhook_name = gr.Textbox(label="Webhook name", placeholder="webhook-id")
+        webhook_dir = gr.Textbox(label="Webhook directory (optional)", placeholder="data_out/webhooks")
+        webhook_autocommit = gr.Checkbox(label="Auto-commit (git)", value=False)
         send_to_webhook_btn = gr.Button("Send to Webhook")
 
         def _git_commit_file(path: str) -> bool:
             try:
                 import subprocess
+
                 if not path or not os.path.exists(path):
                     return False
                 # best-effort commit
@@ -1420,18 +1455,19 @@ with gr.Blocks() as demo:
                     # attempt to load local scripts/gradio_webhook.py relative to this file
                     from pathlib import Path
                     import importlib.util
+
                     p = Path(__file__).resolve().parent / "gradio_webhook.py"
                     if not p.exists():
                         raise
-                    spec = importlib.util.spec_from_file_location(
-                        "gradio_webhook", str(p))
+                    spec = importlib.util.spec_from_file_location("gradio_webhook", str(p))
                     if spec is None or spec.loader is None:
                         raise RuntimeError("Unable to load gradio_webhook module")
                     gradio_webhook = importlib.util.module_from_spec(spec)
                     spec.loader.exec_module(gradio_webhook)
                 target = webhook_dir if webhook_dir else None
                 path = gradio_webhook.post_conversation_to_webhook(
-                    hist_state, webhook_name=webhook_name, webhook_dir=target)
+                    hist_state, webhook_name=webhook_name, webhook_dir=target
+                )
                 if autocommit:
                     try:
                         _git_commit_file(path)
@@ -1441,8 +1477,11 @@ with gr.Blocks() as demo:
             except Exception as e:
                 return None, f"Error: {str(e)}"
 
-        send_to_webhook_btn.click(send_to_webhook, inputs=[
-                                  hist_state, webhook_name, webhook_dir, webhook_autocommit], outputs=[export_file, status])
+        send_to_webhook_btn.click(
+            send_to_webhook,
+            inputs=[hist_state, webhook_name, webhook_dir, webhook_autocommit],
+            outputs=[export_file, status],
+        )
 
         def list_sessions():
             ensure_conv_dir()
@@ -1459,15 +1498,14 @@ with gr.Blocks() as demo:
                 return [], []
             path = os.path.join(CONV_DIR, filename)
             try:
-                with open(path, 'r', encoding='utf-8') as f:
+                with open(path, "r", encoding="utf-8") as f:
                     data = json.load(f)
                 display = hist_state_to_messages(data)
                 return display, data
             except Exception:
                 return [], []
 
-        load_session_btn.click(load_session, inputs=[
-                               saved_sessions], outputs=[chatbot, hist_state])
+        load_session_btn.click(load_session, inputs=[saved_sessions], outputs=[chatbot, hist_state])
 
         def delete_session(filename):
             if not filename:
@@ -1483,8 +1521,7 @@ with gr.Blocks() as demo:
                     files.append(fname)
             return gr.update(choices=files, value=files[0] if files else None)
 
-        delete_session_btn.click(delete_session, inputs=[
-                                 saved_sessions], outputs=[saved_sessions])
+        delete_session_btn.click(delete_session, inputs=[saved_sessions], outputs=[saved_sessions])
 
         def edit_message(index, side, new_text, hist_state, autosave, session_name):
             try:
@@ -1503,8 +1540,7 @@ with gr.Blocks() as demo:
             hist_state[i] = entry
             if autosave:
                 try:
-                    save_conversation_json(
-                        hist_state, session_name or "session")
+                    save_conversation_json(hist_state, session_name or "session")
                 except Exception:
                     pass
             return hist_state_to_messages(hist_state), hist_state
@@ -1520,16 +1556,21 @@ with gr.Blocks() as demo:
             hist_state.pop(i)
             if autosave:
                 try:
-                    save_conversation_json(
-                        hist_state, session_name or "session")
+                    save_conversation_json(hist_state, session_name or "session")
                 except Exception:
                     pass
             return hist_state_to_messages(hist_state), hist_state
 
-        edit_message_btn.click(edit_message, inputs=[
-                               message_index, edit_side, edit_message_text, hist_state, autosave, session_name], outputs=[chatbot, hist_state])
-        delete_message_btn.click(delete_message_by_index, inputs=[
-                                 message_index, hist_state, autosave, session_name], outputs=[chatbot, hist_state])
+        edit_message_btn.click(
+            edit_message,
+            inputs=[message_index, edit_side, edit_message_text, hist_state, autosave, session_name],
+            outputs=[chatbot, hist_state],
+        )
+        delete_message_btn.click(
+            delete_message_by_index,
+            inputs=[message_index, hist_state, autosave, session_name],
+            outputs=[chatbot, hist_state],
+        )
 
         def load_latest_click():
             display, hist = load_latest_conversation()
@@ -1554,6 +1595,7 @@ with gr.Blocks() as demo:
                 def try_pyttsx3():
                     try:
                         import pyttsx3
+
                         engine = pyttsx3.init()
                         engine.save_to_file(text, wav_path)
                         engine.runAndWait()
@@ -1564,7 +1606,8 @@ with gr.Blocks() as demo:
                 def try_gtts():
                     try:
                         from gtts import gTTS
-                        mp3_path = wav_path.replace('.wav', '.mp3')
+
+                        mp3_path = wav_path.replace(".wav", ".mp3")
                         tts = gTTS(text)
                         tts.save(mp3_path)
                         return mp3_path
@@ -1574,12 +1617,13 @@ with gr.Blocks() as demo:
                 def write_silent_wav(path: str, duration: float = 0.1) -> Optional[str]:
                     try:
                         import wave
+
                         n_channels = 1
                         sampwidth = 2
                         framerate = 22050
                         n_frames = int(framerate * duration)
                         silence = (b"\x00\x00") * n_frames
-                        with wave.open(path, 'wb') as wf:
+                        with wave.open(path, "wb") as wf:
                             wf.setnchannels(n_channels)
                             wf.setsampwidth(sampwidth)
                             wf.setframerate(framerate)
@@ -1616,12 +1660,11 @@ with gr.Blocks() as demo:
             if not hist_state:
                 return None
             last = hist_state[-1]
-            assistant_text = last.get('assistant', '')
+            assistant_text = last.get("assistant", "")
             path = generate_tts_for_text(assistant_text, backend=tts_backend)
             return path
 
-        speak_btn.click(speak_last, inputs=[
-                        hist_state, tts_autoplay, tts_backend], outputs=[tts_audio])
+        speak_btn.click(speak_last, inputs=[hist_state, tts_autoplay, tts_backend], outputs=[tts_audio])
 
         def search_chat(query, hist_state):
             if not query or not hist_state:
@@ -1634,14 +1677,11 @@ with gr.Blocks() as demo:
                 if q in u.lower() or q in a.lower():
                     ut = e.get("user_ts", "")
                     at = e.get("assistant_ts", "")
-                    filtered.append(
-                        {"role": "user", "content": f"{u}\n\n[{ut}]"})
-                    filtered.append(
-                        {"role": "assistant", "content": f"{a}\n\n[{at}]"})
+                    filtered.append({"role": "user", "content": f"{u}\n\n[{ut}]"})
+                    filtered.append({"role": "assistant", "content": f"{a}\n\n[{at}]"})
             return filtered
 
-        search_btn.click(search_chat, inputs=[
-                         search_input, hist_state], outputs=[chatbot])
+        search_btn.click(search_chat, inputs=[search_input, hist_state], outputs=[chatbot])
 
         def revert_search(hist_state):
             return hist_state_to_messages(hist_state)
@@ -1652,7 +1692,7 @@ with gr.Blocks() as demo:
             items = load_suggestions()
             choices = []
             for it in items:
-                stext = it.get('suggestion', '').replace('\n', ' ')
+                stext = it.get("suggestion", "").replace("\n", " ")
                 choices.append(f"{it.get('ts', '')} - {stext[:140]}")
             return gr.update(choices=choices, value=choices[0] if choices else None)
 
@@ -1662,21 +1702,18 @@ with gr.Blocks() as demo:
             items = load_suggestions()
             stext = None
             for it in items:
-                s_preview = it.get('suggestion', '').replace('\n', ' ')[:140]
+                s_preview = it.get("suggestion", "").replace("\n", " ")[:140]
                 label = f"{it.get('ts', '')} - {s_preview}"
-                if label == choice or choice in it.get('suggestion', ''):
-                    stext = it.get('suggestion')
+                if label == choice or choice in it.get("suggestion", ""):
+                    stext = it.get("suggestion")
                     break
             if not stext:
                 return hist_state_to_messages(hist_state), hist_state
             assistant_ts = timestamp_now()
-            hist_state = hist_state + \
-                [{"user": "", "assistant": stext, "user_ts": "",
-                    "assistant_ts": assistant_ts}]
+            hist_state = hist_state + [{"user": "", "assistant": stext, "user_ts": "", "assistant_ts": assistant_ts}]
             if autosave:
                 try:
-                    save_conversation_json(
-                        hist_state, session_name or "session")
+                    save_conversation_json(hist_state, session_name or "session")
                 except Exception:
                     pass
             return hist_state_to_messages(hist_state), hist_state
@@ -1684,27 +1721,31 @@ with gr.Blocks() as demo:
         def delete_suggestion(choice):
             items = load_suggestions()
             if not choice:
-                choices = ["{} - {}".format(it.get('ts', ''), it.get('suggestion', '')[
-                                            :140].replace('\n', ' ')) for it in items]
+                choices = [
+                    "{} - {}".format(it.get("ts", ""), it.get("suggestion", "")[:140].replace("\n", " "))
+                    for it in items
+                ]
                 return gr.update(choices=choices, value=choices[0] if choices else None)
             new_items = []
             for it in items:
-                label = "{} - {}".format(it.get('ts', ''),
-                                         it.get('suggestion', '')[:140].replace('\n', ' '))
+                label = "{} - {}".format(it.get("ts", ""), it.get("suggestion", "")[:140].replace("\n", " "))
                 if label != choice:
                     new_items.append(it)
             save_suggestions(new_items)
-            choices = ["{} - {}".format(it.get('ts', ''), it.get('suggestion', '')[
-                                        :140].replace('\n', ' ')) for it in new_items]
+            choices = [
+                "{} - {}".format(it.get("ts", ""), it.get("suggestion", "")[:140].replace("\n", " "))
+                for it in new_items
+            ]
             return gr.update(choices=choices, value=choices[0] if choices else None)
 
         # Wire suggestion controls
-        refresh_suggestions_btn.click(
-            refresh_suggestions, outputs=[suggestions_dropdown])
-        apply_suggestion_btn.click(apply_suggestion, inputs=[
-                                   suggestions_dropdown, hist_state, session_name, autosave], outputs=[chatbot, hist_state])
-        delete_suggestion_btn.click(delete_suggestion, inputs=[
-                                    suggestions_dropdown], outputs=[suggestions_dropdown])
+        refresh_suggestions_btn.click(refresh_suggestions, outputs=[suggestions_dropdown])
+        apply_suggestion_btn.click(
+            apply_suggestion,
+            inputs=[suggestions_dropdown, hist_state, session_name, autosave],
+            outputs=[chatbot, hist_state],
+        )
+        delete_suggestion_btn.click(delete_suggestion, inputs=[suggestions_dropdown], outputs=[suggestions_dropdown])
 
         def refresh_repo_automation_status():
             return repo_automation_status_summary(), repo_automation_next_step()
@@ -1734,10 +1775,8 @@ with gr.Blocks() as demo:
             value = base + (COMPACT_CSS if is_compact else "")
             return gr.update(value=value)
 
-        theme_toggle.change(apply_theme, inputs=[
-                            theme_toggle, compact_toggle], outputs=[theme_css])
-        compact_toggle.change(apply_theme, inputs=[
-                              theme_toggle, compact_toggle], outputs=[theme_css])
+        theme_toggle.change(apply_theme, inputs=[theme_toggle, compact_toggle], outputs=[theme_css])
+        compact_toggle.change(apply_theme, inputs=[theme_toggle, compact_toggle], outputs=[theme_css])
 
 
 if __name__ == "__main__":

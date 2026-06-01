@@ -64,11 +64,7 @@ _last_connect_impl_id: Optional[int] = None
 
 
 def _conn_str() -> Optional[str]:
-    return (
-        os.getenv("QAI_DB_CONN")
-        or os.getenv("DB_CONN_STRING")
-        or os.getenv("CONN_STRING")
-    )
+    return os.getenv("QAI_DB_CONN") or os.getenv("DB_CONN_STRING") or os.getenv("CONN_STRING")
 
 
 def _memory_min_similarity_default() -> float:
@@ -84,9 +80,7 @@ def _create_connection() -> Any:
     # Use module-level pyodbc (may be None if not installed). Keep behavior
     # consistent: raise a clear RuntimeError when the dependency is missing.
     if pyodbc is None:
-        raise RuntimeError(
-            "pyodbc import failed. Install unixODBC system libs and the `pyodbc` package."
-        )
+        raise RuntimeError("pyodbc import failed. Install unixODBC system libs and the `pyodbc` package.")
 
     conn_str = _conn_str()
     if not conn_str:
@@ -176,6 +170,7 @@ def _get_conn() -> Any:
 # Hash-based embedding fallback
 # ---------------------------------------------------------------------------
 
+
 def _hash_embedding(text: str, dim: int = _LOCAL_DIM) -> List[float]:
     """
     Deterministic, unit-normalized hash embedding used when no embedding API
@@ -212,6 +207,7 @@ def generate_embedding(text: str) -> List[float]:
     try:
         if azure_key and azure_endpoint and azure_deploy:
             from openai import AzureOpenAI  # type: ignore
+
             client = AzureOpenAI(
                 api_key=azure_key,
                 azure_endpoint=azure_endpoint,
@@ -222,6 +218,7 @@ def generate_embedding(text: str) -> List[float]:
 
         if openai_key:
             from openai import OpenAI  # type: ignore
+
             client = OpenAI(api_key=openai_key)
             resp = client.embeddings.create(
                 model=os.getenv("OPENAI_EMBEDDING_MODEL", "text-embedding-3-small"),
@@ -237,6 +234,7 @@ def generate_embedding(text: str) -> List[float]:
 # ---------------------------------------------------------------------------
 # Binary (de)serialization for float32 vectors
 # ---------------------------------------------------------------------------
+
 
 def _serialize_f32(vec: Sequence[float]) -> bytes:
     """Pack a sequence of floats as little-endian float32 bytes."""
@@ -263,6 +261,7 @@ def _deserialize_f32(blob: bytes, dim: int) -> List[float]:
 # Cosine similarity
 # ---------------------------------------------------------------------------
 
+
 def _cosine(a: Sequence[float], b: Sequence[float]) -> float:
     """Return cosine similarity in [-1, 1]; 0.0 if inputs are empty or mismatched."""
     if not a or not b or len(a) != len(b):
@@ -282,6 +281,7 @@ def _cosine(a: Sequence[float], b: Sequence[float]) -> float:
 # ---------------------------------------------------------------------------
 # DB-backed storage and retrieval (graceful no-op when no DB)
 # ---------------------------------------------------------------------------
+
 
 def store_embedding(
     message_id: Optional[str],
@@ -349,9 +349,7 @@ def fetch_similar_messages(
     if effective_top_k <= 0:
         return []
     effective_min_similarity = (
-        _memory_min_similarity_default()
-        if min_similarity is None
-        else max(-1.0, min(1.0, float(min_similarity)))
+        _memory_min_similarity_default() if min_similarity is None else max(-1.0, min(1.0, float(min_similarity)))
     )
 
     conn: Optional[Any] = None

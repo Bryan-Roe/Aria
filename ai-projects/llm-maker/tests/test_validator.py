@@ -91,9 +91,7 @@ def bad_syntax(
 def my_function(a: int, b: str) -> int:
     return int(b) + a
 """
-        is_valid, errors = self.validator.check_function_signature(
-            code, "my_function", ["a", "b"]
-        )
+        is_valid, errors = self.validator.check_function_signature(code, "my_function", ["a", "b"])
         assert is_valid, f"Expected valid but got errors: {errors}"
 
     def test_function_signature_mismatch(self):
@@ -102,9 +100,7 @@ def my_function(a: int, b: str) -> int:
 def my_function(x: int) -> int:
     return x * 2
 """
-        is_valid, errors = self.validator.check_function_signature(
-            code, "my_function", ["a", "b"]
-        )
+        is_valid, errors = self.validator.check_function_signature(code, "my_function", ["a", "b"])
         assert not is_valid
         assert any("parameter" in str(e).lower() for e in errors)
 
@@ -115,9 +111,7 @@ def my_function(a: int) -> int:
     x = a * 2
     # Missing return
 """
-        is_valid, errors = self.validator.check_function_signature(
-            code, "my_function", ["a"]
-        )
+        is_valid, errors = self.validator.check_function_signature(code, "my_function", ["a"])
         assert not is_valid
         assert any("return" in str(e).lower() for e in errors)
 

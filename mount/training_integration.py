@@ -56,20 +56,16 @@ class TrainingIntegration:
         autotrain_cfg = dict(orchestrators.get("autotrain") or {})
         quantum_cfg = dict(orchestrators.get("quantum_autorun") or {})
         self.autotrain_config = Path(
-            autotrain_cfg.get("config_file")
-            or self.workspace_root / "config" / "training" / "autotrain.yaml"
+            autotrain_cfg.get("config_file") or self.workspace_root / "config" / "training" / "autotrain.yaml"
         )
         self.autotrain_status_file = Path(
-            autotrain_cfg.get("status_file")
-            or self.output_dir / "autotrain" / "status.json"
+            autotrain_cfg.get("status_file") or self.output_dir / "autotrain" / "status.json"
         )
         self.quantum_autorun_config = Path(
-            quantum_cfg.get("config_file")
-            or self.workspace_root / "config" / "quantum" / "quantum_autorun.yaml"
+            quantum_cfg.get("config_file") or self.workspace_root / "config" / "quantum" / "quantum_autorun.yaml"
         )
         self.quantum_autorun_status_file = Path(
-            quantum_cfg.get("status_file")
-            or self.output_dir / "quantum_autorun" / "status.json"
+            quantum_cfg.get("status_file") or self.output_dir / "quantum_autorun" / "status.json"
         )
 
     async def get_status(self) -> Dict[str, Any]:
@@ -162,9 +158,7 @@ class TrainingIntegration:
 
         # Look for training logs and checkpoints
         try:
-            for run_dir in sorted(
-                lora_output.iterdir(), key=lambda p: p.stat().st_mtime, reverse=True
-            )[:limit]:
+            for run_dir in sorted(lora_output.iterdir(), key=lambda p: p.stat().st_mtime, reverse=True)[:limit]:
                 if run_dir.is_dir():
                     trainings.append(
                         {
@@ -179,9 +173,7 @@ class TrainingIntegration:
 
         return trainings
 
-    async def run_autotrain(
-        self, job_name: Optional[str] = None, dry_run: bool = False
-    ) -> Dict[str, Any]:
+    async def run_autotrain(self, job_name: Optional[str] = None, dry_run: bool = False) -> Dict[str, Any]:
         """Run AutoTrain orchestrator"""
         try:
             autotrain_script = self.scripts_path / "autotrain.py"
@@ -229,11 +221,7 @@ class TrainingIntegration:
             if result.returncode == 0:
                 # Parse job names from output
                 lines = result.stdout.strip().split("\n")
-                jobs = [
-                    line.strip()
-                    for line in lines
-                    if line.strip() and not line.startswith("-")
-                ]
+                jobs = [line.strip() for line in lines if line.strip() and not line.startswith("-")]
                 return jobs
             return []
         except Exception:
@@ -258,9 +246,7 @@ class TrainingIntegration:
         try:
             # Basic type/format checks
             if not isinstance(dataset, str) or not dataset.strip():
-                return _error_response(
-                    "invalid_dataset", "Dataset must be a non-empty string."
-                )
+                return _error_response("invalid_dataset", "Dataset must be a non-empty string.")
 
             # Fetch available datasets (list_datasets uses a thread for FS ops)
             available_datasets = await self.list_datasets()
@@ -272,9 +258,7 @@ class TrainingIntegration:
                     if isinstance(name, str) and _is_safe_dataset_name(name):
                         allowed_dataset_map[_normalize_dataset_name(name)] = name.strip()
 
-            logger.debug(
-                "train_lora: allowed dataset names=%s", sorted(allowed_dataset_map.keys())
-            )
+            logger.debug("train_lora: allowed dataset names=%s", sorted(allowed_dataset_map.keys()))
 
             if not _is_safe_dataset_name(dataset):
                 logger.warning(

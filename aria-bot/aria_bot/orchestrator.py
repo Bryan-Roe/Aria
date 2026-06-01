@@ -128,12 +128,7 @@ class Orchestrator:
             notes.append("validation failed; skipping commit")
 
         commit_sha: Optional[str] = None
-        if (
-            self.config.apply
-            and self.config.commit
-            and validation.ok
-            and applied_paths
-        ):
+        if self.config.apply and self.config.commit and validation.ok and applied_paths:
             message = self._commit_message(executions)
             commit_sha = commits.commit(applied_paths, message)
             if commit_sha is None:

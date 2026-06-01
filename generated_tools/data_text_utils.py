@@ -60,9 +60,7 @@ def chunk_list(items: list[Any], chunk_size: int) -> list[list[Any]]:
     return [items[i : i + chunk_size] for i in range(0, len(items), chunk_size)]
 
 
-def group_records_by_key(
-    records: Iterable[dict[str, Any]], key: str
-) -> dict[str, list[dict[str, Any]]]:
+def group_records_by_key(records: Iterable[dict[str, Any]], key: str) -> dict[str, list[dict[str, Any]]]:
     """Group dict records by a chosen key.
 
     Missing/None keys are grouped under "__missing__".

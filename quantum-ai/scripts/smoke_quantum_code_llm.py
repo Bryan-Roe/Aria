@@ -38,12 +38,8 @@ def main() -> int:
     except ModuleNotFoundError as exc:
         missing = getattr(exc, "name", "<unknown>")
         print(f"[smoke] FAIL: missing dependency '{missing}'")
-        print(
-            "[smoke] Install minimum deps: python3 -m pip install -r quantum-ai/requirements-smoke.txt"
-        )
-        print(
-            "[smoke] Then retry: python3 quantum-ai/scripts/smoke_quantum_code_llm.py"
-        )
+        print("[smoke] Install minimum deps: python3 -m pip install -r quantum-ai/requirements-smoke.txt")
+        print("[smoke] Then retry: python3 quantum-ai/scripts/smoke_quantum_code_llm.py")
         return 2
 
     model_cfg = {

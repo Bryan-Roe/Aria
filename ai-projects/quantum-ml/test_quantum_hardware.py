@@ -71,9 +71,7 @@ def create_8qubit_classifier_circuit():
 
 def main():
     if _OPTIONAL_IMPORT_ERROR is not None:
-        print(
-            f"Missing optional quantum hardware dependencies: {_OPTIONAL_IMPORT_ERROR}"
-        )
+        print(f"Missing optional quantum hardware dependencies: {_OPTIONAL_IMPORT_ERROR}")
         return 1
 
     print("=" * 70)
@@ -171,9 +169,7 @@ def main():
         try:
             print("\nSubmitting to Rigetti QVM Simulator...")
             target = workspace.get_targets("rigetti.sim.qvm")
-            job = target.submit(
-                circuit_8q, shots=100, job_name="8qubit-classifier-test"
-            )
+            job = target.submit(circuit_8q, shots=100, job_name="8qubit-classifier-test")
 
             print(f"✓ Job submitted: {job.id}")
             print("  Waiting for results...")
@@ -183,9 +179,7 @@ def main():
             print("\n✓ 8-Qubit Results!")
             print("\nTop 10 Measurement States:")
 
-            sorted_results = sorted(results.items(), key=lambda x: x[1], reverse=True)[
-                :10
-            ]
+            sorted_results = sorted(results.items(), key=lambda x: x[1], reverse=True)[:10]
             total = sum(results.values())
 
             for state, count in sorted_results:

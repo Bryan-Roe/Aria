@@ -81,8 +81,7 @@ class GPUOptimizer:
 
             gpu_info = GPUInfo(
                 name=torch.cuda.get_device_name(device),
-                memory_total_gb=torch.cuda.get_device_properties(device).total_memory
-                / (1024**3),
+                memory_total_gb=torch.cuda.get_device_properties(device).total_memory / (1024**3),
                 memory_available_gb=self._get_available_memory_gb(),
                 compute_capability=f"{torch.cuda.get_device_capability(device)[0]}.{torch.cuda.get_device_capability(device)[1]}",
                 cuda_version=torch.version.cuda or "N/A",
@@ -278,9 +277,7 @@ class GPUOptimizer:
         print("\n=== Recommended Settings ===")
         print(f"Batch Size: {profile.batch_size}")
         print(f"Gradient Accumulation: {profile.gradient_accumulation_steps}")
-        print(
-            f"Effective Batch Size: {profile.batch_size * profile.gradient_accumulation_steps}"
-        )
+        print(f"Effective Batch Size: {profile.batch_size * profile.gradient_accumulation_steps}")
         print(f"Max Sequence Length: {profile.max_seq_length}")
         print(f"LoRA Rank: {profile.lora_rank}")
         print(
@@ -338,9 +335,7 @@ def main():
         default=7.0,
         help="Model size in GB (default: 7.0 for Phi-3)",
     )
-    parser.add_argument(
-        "--memory-usage", type=float, default=0.8, help="Target memory usage (0.0-1.0)"
-    )
+    parser.add_argument("--memory-usage", type=float, default=0.8, help="Target memory usage (0.0-1.0)")
     parser.add_argument(
         "--output",
         type=str,
@@ -352,9 +347,7 @@ def main():
         type=str,
         help="Update existing config file with optimizations",
     )
-    parser.add_argument(
-        "--export-env", action="store_true", help="Export as environment variables"
-    )
+    parser.add_argument("--export-env", action="store_true", help="Export as environment variables")
 
     args = parser.parse_args()
 

@@ -22,9 +22,7 @@ def _extract_status_script() -> str:
 
 def _run_status_script(tmp_path: Path, training: dict) -> dict:
     (tmp_path / "data_out").mkdir(parents=True, exist_ok=True)
-    (tmp_path / "data_out" / "autonomous_training_status.json").write_text(
-        json.dumps(training), encoding="utf-8"
-    )
+    (tmp_path / "data_out" / "autonomous_training_status.json").write_text(json.dumps(training), encoding="utf-8")
 
     github_output = tmp_path / "github_output.txt"
     env = os.environ.copy()

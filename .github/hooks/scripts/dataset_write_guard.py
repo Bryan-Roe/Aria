@@ -62,12 +62,7 @@ def _get_event() -> str:
 
 
 def _get_tool_name(payload: dict) -> str:
-    return (
-        payload.get("toolName")
-        or payload.get("tool_name")
-        or payload.get("name")
-        or ""
-    ).lower()
+    return (payload.get("toolName") or payload.get("tool_name") or payload.get("name") or "").lower()
 
 
 def _get_file_path(payload: dict) -> str:

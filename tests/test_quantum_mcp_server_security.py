@@ -247,8 +247,7 @@ class TestTempFileCleanup:
                 pass  # We only care about the file being cleaned up.
 
         for path in captured_paths:
-            assert not os.path.exists(
-                path), f"Temp file was not deleted: {path}"
+            assert not os.path.exists(path), f"Temp file was not deleted: {path}"
 
     def test_connect_azure_cleans_up_temp_file_on_failure(self):
         """On a connection error, the temp YAML must still be deleted."""
@@ -273,12 +272,10 @@ class TestTempFileCleanup:
             ),
         ):
             with pytest.raises(RuntimeError):
-                _connect_azure_sync(
-                    {"azure": {}, "quantum": {}, "ml": {}, "logging": {}})
+                _connect_azure_sync({"azure": {}, "quantum": {}, "ml": {}, "logging": {}})
 
         for path in captured_paths:
-            assert not os.path.exists(
-                path), f"Temp file leaked on failure: {path}"
+            assert not os.path.exists(path), f"Temp file leaked on failure: {path}"
 
 
 # ---------------------------------------------------------------------------
@@ -299,20 +296,17 @@ class TestRuntimeValidationGuards:
 
     def test_call_tool_rejects_non_object_arguments(self):
         mcp_server = self._import_server()
-        result = _run(mcp_server.call_tool(
-            "list_quantum_backends", ["bad", "args"]))
+        result = _run(mcp_server.call_tool("list_quantum_backends", ["bad", "args"]))
         assert "expected an object" in result[0].text.lower()
 
     def test_create_circuit_rejects_boolean_qubit_count(self):
         mcp_server = self._import_server()
-        result = _run(mcp_server.create_circuit_handler(
-            {"n_qubits": True, "circuit_type": "ghz"}))
+        result = _run(mcp_server.create_circuit_handler({"n_qubits": True, "circuit_type": "ghz"}))
         assert "n_qubits" in result[0].text
 
     def test_submit_job_rejects_invalid_shots_before_connection(self):
         mcp_server = self._import_server()
-        result = _run(mcp_server.submit_job_handler(
-            {"circuit_id": "abc123", "backend_name": "simulator", "shots": 0}))
+        result = _run(mcp_server.submit_job_handler({"circuit_id": "abc123", "backend_name": "simulator", "shots": 0}))
         assert "shots must be" in result[0].text.lower()
 
     def test_submit_job_rejects_non_boolean_confirm_cost(self):
@@ -331,8 +325,7 @@ class TestRuntimeValidationGuards:
 
     def test_connect_azure_rejects_missing_subscription_id(self):
         mcp_server = self._import_server()
-        result = _run(mcp_server.connect_azure_handler(
-            {"resource_group": "rg", "workspace_name": "ws"}))
+        result = _run(mcp_server.connect_azure_handler({"resource_group": "rg", "workspace_name": "ws"}))
         assert "subscription_id is required" in result[0].text
 
     def test_connect_azure_rejects_whitespace_workspace_name(self):
@@ -350,14 +343,12 @@ class TestRuntimeValidationGuards:
 
     def test_estimate_cost_rejects_missing_backend_name(self):
         mcp_server = self._import_server()
-        result = _run(mcp_server.estimate_cost_handler(
-            {"circuit_id": "abc123", "backend_name": "", "shots": 100}))
+        result = _run(mcp_server.estimate_cost_handler({"circuit_id": "abc123", "backend_name": "", "shots": 100}))
         assert "backend_name is required" in result[0].text
 
     def test_estimate_cost_rejects_whitespace_backend_name(self):
         mcp_server = self._import_server()
-        result = _run(mcp_server.estimate_cost_handler(
-            {"circuit_id": "abc123", "backend_name": "   ", "shots": 100}))
+        result = _run(mcp_server.estimate_cost_handler({"circuit_id": "abc123", "backend_name": "   ", "shots": 100}))
         assert "backend_name is required" in result[0].text
 
     def test_circuit_properties_rejects_missing_circuit_id(self):
@@ -367,14 +358,12 @@ class TestRuntimeValidationGuards:
 
     def test_circuit_properties_rejects_whitespace_circuit_id(self):
         mcp_server = self._import_server()
-        result = _run(mcp_server.circuit_properties_handler(
-            {"circuit_id": "   "}))
+        result = _run(mcp_server.circuit_properties_handler({"circuit_id": "   "}))
         assert "circuit_id is required" in result[0].text
 
     def test_submit_job_rejects_whitespace_backend_name(self):
         mcp_server = self._import_server()
-        result = _run(mcp_server.submit_job_handler(
-            {"circuit_id": "abc123", "backend_name": "   ", "shots": 10}))
+        result = _run(mcp_server.submit_job_handler({"circuit_id": "abc123", "backend_name": "   ", "shots": 10}))
         assert "backend_name is required" in result[0].text
 
     def test_simulate_circuit_rejects_whitespace_circuit_id(self):
@@ -383,8 +372,7 @@ class TestRuntimeValidationGuards:
         except (ImportError, SystemExit):
             pytest.skip("quantum_mcp_server dependencies not installed")
 
-        result = _run(simulate_circuit_handler(
-            {"circuit_id": "   ", "shots": 10}))
+        result = _run(simulate_circuit_handler({"circuit_id": "   ", "shots": 10}))
         assert "circuit_id is required" in result[0].text
 
     def test_train_classifier_rejects_invalid_bounds(self):
@@ -498,8 +486,7 @@ class TestCostGatingEnforcement:
                 )
             )
 
-        assert "cost" in result[0].text.lower(
-        ) or "limit" in result[0].text.lower()
+        assert "cost" in result[0].text.lower() or "limit" in result[0].text.lower()
         assert "exceed" in result[0].text.lower()
 
     def test_submit_job_rejects_cumulative_cost_limit(self):
@@ -510,8 +497,7 @@ class TestCostGatingEnforcement:
 
         # Pre-set cumulative cost to near-limit
         with (
-            patch.object(
-                mcp_server, "MAX_CUMULATIVE_COST_PER_SESSION_USD", 0.50),
+            patch.object(mcp_server, "MAX_CUMULATIVE_COST_PER_SESSION_USD", 0.50),
             patch.dict(
                 mcp_server.quantum_state,
                 {
@@ -535,8 +521,7 @@ class TestCostGatingEnforcement:
             )
 
             # Should reject due to cumulative cost
-            assert "budget" in result[0].text.lower(
-            ) or "exceed" in result[0].text.lower()
+            assert "budget" in result[0].text.lower() or "exceed" in result[0].text.lower()
 
     def test_submit_job_accepts_within_cost_limits(self):
         """Accepts job when within both per-job and cumulative limits."""
@@ -552,8 +537,7 @@ class TestCostGatingEnforcement:
 
         with (
             patch.object(mcp_server, "MAX_COST_PER_JOB_USD", 1.0),
-            patch.object(
-                mcp_server, "MAX_CUMULATIVE_COST_PER_SESSION_USD", 100.0),
+            patch.object(mcp_server, "MAX_CUMULATIVE_COST_PER_SESSION_USD", 100.0),
             patch.dict(
                 mcp_server.quantum_state,
                 {
@@ -575,8 +559,7 @@ class TestCostGatingEnforcement:
                 )
             )
 
-        assert "submitted" in result[0].text.lower(
-        ) or "job" in result[0].text.lower()
+        assert "submitted" in result[0].text.lower() or "job" in result[0].text.lower()
 
     def test_submit_job_requires_confirmation_for_paid_backend(self):
         """Paid backends should require explicit cost confirmation."""
@@ -661,8 +644,7 @@ class TestCostGatingEnforcement:
         fake_job = MagicMock()
         fake_job.id.return_value = "job_miss_refresh_1"
         fake_azure = MagicMock()
-        fake_azure.list_backends.return_value = [
-            "old.backend", "microsoft.simulator"]
+        fake_azure.list_backends.return_value = ["old.backend", "microsoft.simulator"]
         fake_azure.submit_circuit.return_value = fake_job
 
         with patch.dict(
@@ -721,8 +703,7 @@ class TestCostGatingEnforcement:
             )
 
             assert "submitted" in result[0].text.lower()
-            assert "microsoft.simulator" in [
-                b.lower() for b in mcp_server.quantum_state["known_backends"]]
+            assert "microsoft.simulator" in [b.lower() for b in mcp_server.quantum_state["known_backends"]]
 
     def test_submit_job_allowlist_refresh_error_is_reported(self):
         """When backend is missing and refresh fails, response should include refresh failure context."""
@@ -730,8 +711,7 @@ class TestCostGatingEnforcement:
         circuit_id, _ = self._make_circuit_in_cache()
 
         fake_azure = MagicMock()
-        fake_azure.list_backends.side_effect = RuntimeError(
-            "backend API unavailable")
+        fake_azure.list_backends.side_effect = RuntimeError("backend API unavailable")
 
         with patch.dict(
             mcp_server.quantum_state,
@@ -829,8 +809,7 @@ class TestCostGatingEnforcement:
         fake_job.id.return_value = "job_stale_1"
         fake_azure = MagicMock()
         # Return new list that differs from the stale one
-        fake_azure.list_backends.return_value = [
-            "ionq.updated", "microsoft.simulator"]
+        fake_azure.list_backends.return_value = ["ionq.updated", "microsoft.simulator"]
         fake_azure.submit_circuit.return_value = fake_job
 
         with patch.dict(
@@ -857,9 +836,7 @@ class TestCostGatingEnforcement:
             # Should succeed using the refreshed list
             assert "submitted" in result[0].text.lower()
             # Cache should now hold the refreshed list, not the stale one
-            assert "old.backend" not in [
-                b.lower() for b in mcp_server.quantum_state["known_backends"]]
-            assert "microsoft.simulator" in [
-                b.lower() for b in mcp_server.quantum_state["known_backends"]]
+            assert "old.backend" not in [b.lower() for b in mcp_server.quantum_state["known_backends"]]
+            assert "microsoft.simulator" in [b.lower() for b in mcp_server.quantum_state["known_backends"]]
             # Timestamp should be updated
             assert mcp_server.quantum_state["known_backends_refreshed_at"] > stale_ts

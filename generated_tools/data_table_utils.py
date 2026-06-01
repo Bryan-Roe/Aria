@@ -29,9 +29,7 @@ def count_records_by_key(
     return counts
 
 
-def summarize_numeric_field(
-    records: Iterable[dict[str, Any]], key: str
-) -> dict[str, float | int | None]:
+def summarize_numeric_field(records: Iterable[dict[str, Any]], key: str) -> dict[str, float | int | None]:
     """Return count, sum, min, max, and average for a numeric field.
 
     Non-numeric values are ignored.

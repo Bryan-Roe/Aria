@@ -6,6 +6,7 @@ This module adjusts the package search path so imports like:
 
 resolve to files located at: ai-projects/quantum-ml/src/...
 """
+
 from pathlib import Path
 
 # Compute repository root from this file's location (.. -> ai_projects -> repo root)

@@ -62,9 +62,7 @@ def resources():
 @app.route("/results")
 def results():
     # Load latest exported results
-    res_path = (
-        Path(__file__).resolve().parents[1] / "exports" / "all_orchestrators.json"
-    )
+    res_path = Path(__file__).resolve().parents[1] / "exports" / "all_orchestrators.json"
     if res_path.exists():
         with res_path.open() as f:
             return jsonify(json.load(f))
@@ -82,11 +80,7 @@ def _compute_training_progress():
     """
     cfg_path = REPO_ROOT / "autotrain.yaml"
     try:
-        cfg = (
-            yaml.safe_load(cfg_path.read_text(encoding="utf-8"))
-            if cfg_path.exists()
-            else {}
-        )
+        cfg = yaml.safe_load(cfg_path.read_text(encoding="utf-8")) if cfg_path.exists() else {}
         configured_jobs = [j.get("name") for j in cfg.get("jobs", []) if j.get("name")]
     except Exception:
         configured_jobs = []
@@ -180,9 +174,7 @@ def _compute_training_progress():
         avg = sum(succeeded_durations) / len(succeeded_durations)
         remaining_jobs = total_jobs - succeeded
         eta_seconds = avg * remaining_jobs
-        eta_iso = (
-            datetime.now(timezone.utc) + timedelta(seconds=eta_seconds)
-        ).isoformat() + "Z"
+        eta_iso = (datetime.now(timezone.utc) + timedelta(seconds=eta_seconds)).isoformat() + "Z"
     else:
         avg = None
         eta_seconds = None
@@ -221,9 +213,7 @@ def _compute_training_progress():
                     current_epoch = last_epoch
                     total_epochs = last_total_epochs
                     # Compute epoch-based percent if no steps
-                    current_job_percent = round(
-                        ((last_epoch - 1) / max(1, last_total_epochs)) * 100, 2
-                    )
+                    current_job_percent = round(((last_epoch - 1) / max(1, last_total_epochs)) * 100, 2)
                 # If we have steps and epochs, approximate total steps
                 if last_step is not None and total_epochs is not None:
                     # Heuristic: use max observed step as current_step; total steps unknown until training end.
@@ -232,9 +222,7 @@ def _compute_training_progress():
                     trainer_state = log_file.parent / "trainer_state.json"
                     if trainer_state.exists():
                         try:
-                            st_obj = json.loads(
-                                trainer_state.read_text(encoding="utf-8")
-                            )
+                            st_obj = json.loads(trainer_state.read_text(encoding="utf-8"))
                             opt = st_obj.get("trainer_state", st_obj)
                             max_steps = opt.get("max_steps")
                             if isinstance(max_steps, int) and max_steps > 0:
@@ -242,9 +230,7 @@ def _compute_training_progress():
                         except Exception:
                             pass
                     if total_steps:
-                        step_percent = round(
-                            (current_step / max(1, total_steps)) * 100, 2
-                        )
+                        step_percent = round((current_step / max(1, total_steps)) * 100, 2)
                         # Prefer finer-grained step percent when available
                         current_job_percent = step_percent
         except Exception:
@@ -356,9 +342,7 @@ def retry_job(job_name: str):
             {
                 "status": "retry_running",
                 "retry_count": retry_count,
-                "retry_start_time": datetime.now(timezone.utc).strftime(
-                    "%Y%m%dT%H%M%SZ"
-                ),
+                "retry_start_time": datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ"),
             }
         )
         status_obj["generated_at"] = datetime.now(timezone.utc).isoformat() + "Z"
@@ -387,9 +371,7 @@ def retry_job(job_name: str):
                     preserved_retry = entry.get("retry_count", retry_num)
                     result["retry_count"] = preserved_retry
                     result["status"] = result.get("status")
-                    result["retry_completed_time"] = datetime.now(
-                        timezone.utc
-                    ).strftime("%Y%m%dT%H%M%SZ")
+                    result["retry_completed_time"] = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
                     # Mark as succeeded/failed (no special retry_running state anymore)
                     for k in [
                         "status",
@@ -407,15 +389,11 @@ def retry_job(job_name: str):
                         v = result.get(k)
                         if v is not None:
                             entry[k] = v
-                    current_status["generated_at"] = (
-                        datetime.now(timezone.utc).isoformat() + "Z"
-                    )
+                    current_status["generated_at"] = datetime.now(timezone.utc).isoformat() + "Z"
                     _write_status(current_status)
                 ACTIVE_RETRY = None
 
-        threading.Thread(
-            target=_do_retry, args=(job_obj, retry_count), daemon=True
-        ).start()
+        threading.Thread(target=_do_retry, args=(job_obj, retry_count), daemon=True).start()
 
         return jsonify({"accepted": True, "job": job_name, "retry_count": retry_count})
 
@@ -452,14 +430,10 @@ def cancel_job(job_name: str):
 
             # Update status to cancelled
             target_entry["status"] = "cancelled"
-            target_entry["cancelled_time"] = datetime.now(timezone.utc).strftime(
-                "%Y%m%dT%H%M%SZ"
-            )
+            target_entry["cancelled_time"] = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
             if "start_time" in target_entry:
                 try:
-                    start = datetime.strptime(
-                        target_entry["start_time"], "%Y%m%dT%H%M%SZ"
-                    )
+                    start = datetime.strptime(target_entry["start_time"], "%Y%m%dT%H%M%SZ")
                     elapsed = (datetime.now(timezone.utc) - start).total_seconds()
                     target_entry["duration_sec"] = round(elapsed, 2)
                 except Exception:

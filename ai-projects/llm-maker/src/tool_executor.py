@@ -25,9 +25,7 @@ ALLOWED_IMPORT_MODULES = {
 # Try to import RestrictedPython if available
 try:
     from RestrictedPython import compile_restricted
-    from RestrictedPython.Guards import (guarded_getattr, guarded_getitem,
-                                         guarded_iter_unpack_sequence,
-                                         safe_builtins)
+    from RestrictedPython.Guards import guarded_getattr, guarded_getitem, guarded_iter_unpack_sequence, safe_builtins
 
     HAS_RESTRICTED_PYTHON = True
 except ImportError:
@@ -61,11 +59,7 @@ class ToolExecutor:
         # Setup safe globals
         if HAS_RESTRICTED_PYTHON:
             # Use RestrictedPython's safe_builtins and inject our safe __import__ handler
-            sb = (
-                safe_builtins.copy()
-                if isinstance(safe_builtins, dict)
-                else dict(safe_builtins)
-            )
+            sb = safe_builtins.copy() if isinstance(safe_builtins, dict) else dict(safe_builtins)
             sb["__import__"] = self._safe_import
             self.safe_globals = {
                 "__builtins__": sb,
@@ -166,9 +160,7 @@ class ToolExecutor:
                 if timer:
                     timer.cancel()
 
-    def execute(
-        self, code: str, function_name: str, args: Dict[str, Any]
-    ) -> Dict[str, Any]:
+    def execute(self, code: str, function_name: str, args: Dict[str, Any]) -> Dict[str, Any]:
         """
         Execute tool code with given arguments
 

@@ -17,15 +17,15 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from test_azure_quantum import (test_azure_quantum_connection,
-                                test_bell_state_on_hardware,
-                                test_optimized_circuit_on_hardware)
+from test_azure_quantum import (
+    test_azure_quantum_connection,
+    test_bell_state_on_hardware,
+    test_optimized_circuit_on_hardware,
+)
 
 
 def parse_args() -> argparse.Namespace:
-    p = argparse.ArgumentParser(
-        description="Run Azure Quantum hardware tests non-interactively"
-    )
+    p = argparse.ArgumentParser(description="Run Azure Quantum hardware tests non-interactively")
     p.add_argument(
         "--backend",
         default="ionq.simulator",
@@ -57,9 +57,7 @@ def main() -> int:
 
     print(f"Using backend: {args.backend}")
     if args.backend not in backends:
-        print(
-            "Warning: chosen backend not found in workspace backends. Proceeding anyway...\n"
-        )
+        print("Warning: chosen backend not found in workspace backends. Proceeding anyway...\n")
 
     # 2) Run Bell state unless skipped
     if not args.skip_bell:

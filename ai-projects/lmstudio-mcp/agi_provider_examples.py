@@ -17,8 +17,11 @@ sys.path.insert(0, str(Path(__file__).parent))
 
 try:
     from lmstudio_agi_integration import (
-        AGILMStudioRouter, complete_with_lmstudio_routing,
-        decompose_task_with_lmstudio, reason_with_lmstudio_chain_of_thought)
+        AGILMStudioRouter,
+        complete_with_lmstudio_routing,
+        decompose_task_with_lmstudio,
+        reason_with_lmstudio_chain_of_thought,
+    )
 except ImportError as e:
     print(f"Error importing integration: {e}")
     sys.exit(1)
@@ -89,9 +92,7 @@ async def example_1_basic_routing():
 
         print(f"Query: {test['name']}")
         print(f"  Text: {test['query']}")
-        print(
-            f"  Domain: {test['analysis']['domain']:12} Intent: {test['analysis']['intent']}"
-        )
+        print(f"  Domain: {test['analysis']['domain']:12} Intent: {test['analysis']['intent']}")
         print(f"  Decision: {decision}\n")
 
 
@@ -206,9 +207,7 @@ async def example_4_reasoning_chain():
         print(f"    {conclusion}...\n")
 
     except Exception as e:
-        print(
-            f"Note: Could not generate reasoning (LM Studio may not be running): {e}\n"
-        )
+        print(f"Note: Could not generate reasoning (LM Studio may not be running): {e}\n")
         print("Example reasoning would be:")
         print("  Step 1 - Problem: Gradients vanish as they backpropagate")
         print("  Step 2 - Why: Multiplication by small numbers causes decay")

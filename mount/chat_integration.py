@@ -106,9 +106,7 @@ class ChatIntegration:
                         "file": jsonl_file.name,
                         "timestamp": messages[0].get("timestamp") if messages else None,
                         "message_count": len(messages),
-                        "preview": (
-                            messages[0].get("content", "")[:100] if messages else ""
-                        ),
+                        "preview": (messages[0].get("content", "")[:100] if messages else ""),
                     }
                 )
             except Exception:
@@ -140,17 +138,14 @@ class ChatIntegration:
                 message,
             ]
 
-            result = subprocess.run(
-                cmd, capture_output=True, text=True, cwd=str(self.chat_path)
-            )
+            result = subprocess.run(cmd, capture_output=True, text=True, cwd=str(self.chat_path))
 
             return {
                 "success": result.returncode == 0,
                 "provider": provider,
                 "message": message,
                 "response": result.stdout.strip(),
-                "conversation_id": conversation_id
-                or f"conv_{datetime.now().strftime('%Y%m%d_%H%M%S')}",
+                "conversation_id": conversation_id or f"conv_{datetime.now().strftime('%Y%m%d_%H%M%S')}",
                 "timestamp": datetime.now().isoformat(),
             }
         except Exception as e:
@@ -175,9 +170,7 @@ class ChatIntegration:
 
         return messages
 
-    async def save_conversation(
-        self, messages: List[Dict[str, Any]], filename: Optional[str] = None
-    ) -> Dict[str, Any]:
+    async def save_conversation(self, messages: List[Dict[str, Any]], filename: Optional[str] = None) -> Dict[str, Any]:
         """Save conversation to JSONL file"""
         try:
             if not filename:

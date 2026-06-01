@@ -58,9 +58,7 @@ def _get_text_encoder(provider: str, model: Optional[str]) -> Callable[[str], in
     mdl = (model or "").lower()
 
     # Try tiktoken for OpenAI/Azure
-    if tiktoken is not None and (
-        prov in ("openai", "azure") or any(k in mdl for k in ("gpt-", "-o"))
-    ):
+    if tiktoken is not None and (prov in ("openai", "azure") or any(k in mdl for k in ("gpt-", "-o"))):
         try:
             from tiktoken import encoding_for_model
 
@@ -138,9 +136,7 @@ def prune_messages(
     system_msgs = [m for m in msgs if m.get("role") == "system"]
     non_system = [m for m in msgs if m.get("role") != "system"]
 
-    system_text = system_prompt or "\n\n".join(
-        m.get("content", "") for m in system_msgs
-    )
+    system_text = system_prompt or "\n\n".join(m.get("content", "") for m in system_msgs)
     system_msg = {"role": "system", "content": system_text} if system_text else None
 
     original_tokens = count_messages_tokens(msgs, provider, model, system_prompt)
@@ -150,9 +146,7 @@ def prune_messages(
 
     # Pre-compute token counts for each message (O(n) - done once)
     # Each message costs: role tokens + content tokens + 4 (framing)
-    message_token_counts = [
-        enc(m.get("role", "")) + enc(m.get("content", "")) + 4 for m in non_system
-    ]
+    message_token_counts = [enc(m.get("role", "")) + enc(m.get("content", "")) + 4 for m in non_system]
 
     # Calculate base system token cost (done once)
     system_tokens = (enc(system_text) + 4) if system_text else 0
@@ -163,9 +157,7 @@ def prune_messages(
     # Prune from front (oldest messages) while over budget
     # Uses running total instead of recalculating each iteration (O(n) total)
     start_idx = 0
-    while (
-        start_idx < len(non_system) and (total_tokens + reserve_output_tokens) > budget
-    ):
+    while start_idx < len(non_system) and (total_tokens + reserve_output_tokens) > budget:
         total_tokens -= message_token_counts[start_idx]
         start_idx += 1
 

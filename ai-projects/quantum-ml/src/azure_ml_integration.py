@@ -9,8 +9,7 @@ from typing import Any, Dict
 
 # Azure ML imports (install with: pip install azureml-sdk)
 try:
-    from azureml.core import (Environment, Experiment, ScriptRunConfig,
-                              Workspace)
+    from azureml.core import Environment, Experiment, ScriptRunConfig, Workspace
     from azureml.core.compute import AmlCompute, ComputeTarget
     from azureml.core.model import Model
     from azureml.core.runconfig import RunConfiguration
@@ -38,20 +37,13 @@ class QuantumAzureMLDeployment:
             config_path: Path to quantum config file
         """
         if not AZUREML_AVAILABLE:
-            raise ImportError(
-                "Azure ML SDK required. Install with: pip install azureml-sdk"
-            )
+            raise ImportError("Azure ML SDK required. Install with: pip install azureml-sdk")
 
-        self.config_path = (
-            config_path
-            or Path(__file__).parent.parent / "config" / "quantum_config.yaml"
-        )
+        self.config_path = config_path or Path(__file__).parent.parent / "config" / "quantum_config.yaml"
         self.workspace = None
         self.compute_target = None
 
-    def connect_workspace(
-        self, subscription_id: str, resource_group: str, workspace_name: str
-    ) -> Workspace:
+    def connect_workspace(self, subscription_id: str, resource_group: str, workspace_name: str) -> Workspace:
         """
         Connect to Azure ML workspace.
 
@@ -103,9 +95,7 @@ class QuantumAzureMLDeployment:
 
         try:
             # Check if cluster exists
-            self.compute_target = ComputeTarget(
-                workspace=self.workspace, name=cluster_name
-            )
+            self.compute_target = ComputeTarget(workspace=self.workspace, name=cluster_name)
             logger.info(f"✓ Using existing cluster: {cluster_name}")
 
         except Exception:
@@ -119,9 +109,7 @@ class QuantumAzureMLDeployment:
                 idle_seconds_before_scaledown=300,
             )
 
-            self.compute_target = ComputeTarget.create(
-                self.workspace, cluster_name, compute_config
-            )
+            self.compute_target = ComputeTarget.create(self.workspace, cluster_name, compute_config)
 
             self.compute_target.wait_for_completion(show_output=True)
             logger.info(f"✓ Cluster created: {cluster_name}")
@@ -158,9 +146,7 @@ class QuantumAzureMLDeployment:
 
         return env
 
-    def submit_training_job(
-        self, script_path: str, experiment_name: str, arguments: Dict[str, Any] = None
-    ) -> Any:
+    def submit_training_job(self, script_path: str, experiment_name: str, arguments: Dict[str, Any] = None) -> Any:
         """
         Submit quantum model training job to Azure ML.
 

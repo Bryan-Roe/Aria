@@ -40,9 +40,7 @@ class PruningStatistics:
         print("\n=== Semantic Pruning Results ===")
         print(f"Original samples: {self.original_count:,}")
         print(f"Final samples: {self.final_count:,}")
-        print(
-            f"Total removed: {self.original_count - self.final_count:,} ({self.reduction_percentage:.1f}%)"
-        )
+        print(f"Total removed: {self.original_count - self.final_count:,} ({self.reduction_percentage:.1f}%)")
         print("\nBreakdown:")
         print(f"  - Duplicates: {self.removed_duplicates:,}")
         print(f"  - Low quality: {self.removed_low_quality:,}")
@@ -57,9 +55,7 @@ class SemanticPruner:
         self.config = config or PruningConfig()
         self.embedding_model = None
 
-    def prune_dataset(
-        self, input_path: str, output_path: str, use_embeddings: bool = True
-    ) -> PruningStatistics:
+    def prune_dataset(self, input_path: str, output_path: str, use_embeddings: bool = True) -> PruningStatistics:
         """
         Prune dataset using multiple strategies
 
@@ -118,9 +114,7 @@ class SemanticPruner:
         samples = self._ensure_diversity(samples)
 
         stats.final_count = len(samples)
-        stats.reduction_percentage = (
-            (original_count - stats.final_count) / original_count * 100
-        )
+        stats.reduction_percentage = (original_count - stats.final_count) / original_count * 100
 
         # Save pruned dataset
         self._save_dataset(samples, output_path)
@@ -147,9 +141,7 @@ class SemanticPruner:
             for sample in samples:
                 f.write(json.dumps(sample, ensure_ascii=False) + "\n")
 
-    def _remove_duplicates(
-        self, samples: List[Dict[str, Any]]
-    ) -> Tuple[List[Dict[str, Any]], int]:
+    def _remove_duplicates(self, samples: List[Dict[str, Any]]) -> Tuple[List[Dict[str, Any]], int]:
         """Remove exact duplicate samples"""
         seen = set()
         unique_samples = []
@@ -178,9 +170,7 @@ class SemanticPruner:
 
         return str(hash(text))
 
-    def _filter_by_length(
-        self, samples: List[Dict[str, Any]]
-    ) -> Tuple[List[Dict[str, Any]], int]:
+    def _filter_by_length(self, samples: List[Dict[str, Any]]) -> Tuple[List[Dict[str, Any]], int]:
         """Filter samples by length"""
         filtered = []
         removed = 0
@@ -196,9 +186,7 @@ class SemanticPruner:
 
         return filtered, removed
 
-    def _filter_by_quality(
-        self, samples: List[Dict[str, Any]]
-    ) -> Tuple[List[Dict[str, Any]], int]:
+    def _filter_by_quality(self, samples: List[Dict[str, Any]]) -> Tuple[List[Dict[str, Any]], int]:
         """Filter low quality samples"""
         filtered = []
         removed = 0
@@ -244,9 +232,7 @@ class SemanticPruner:
 
         return np.mean(scores) if scores else 0.0
 
-    def _semantic_deduplication(
-        self, samples: List[Dict[str, Any]]
-    ) -> Tuple[List[Dict[str, Any]], int]:
+    def _semantic_deduplication(self, samples: List[Dict[str, Any]]) -> Tuple[List[Dict[str, Any]], int]:
         """Remove semantically similar samples"""
         try:
             from sentence_transformers import SentenceTransformer
@@ -260,9 +246,7 @@ class SemanticPruner:
 
             # Compute embeddings
             print("  Computing embeddings...")
-            embeddings = self.embedding_model.encode(
-                texts, show_progress_bar=True, convert_to_numpy=True
-            )
+            embeddings = self.embedding_model.encode(texts, show_progress_bar=True, convert_to_numpy=True)
 
             # Compute pairwise similarities
             print("  Computing similarities...")
@@ -334,24 +318,16 @@ def main():
     import argparse
 
     parser = argparse.ArgumentParser(description="Semantic Data Pruning")
-    parser.add_argument(
-        "--input", type=str, required=True, help="Input dataset (JSONL)"
-    )
-    parser.add_argument(
-        "--output", type=str, required=True, help="Output dataset (JSONL)"
-    )
+    parser.add_argument("--input", type=str, required=True, help="Input dataset (JSONL)")
+    parser.add_argument("--output", type=str, required=True, help="Output dataset (JSONL)")
     parser.add_argument(
         "--similarity-threshold",
         type=float,
         default=0.95,
         help="Similarity threshold for deduplication",
     )
-    parser.add_argument(
-        "--quality-threshold", type=float, default=0.3, help="Minimum quality threshold"
-    )
-    parser.add_argument(
-        "--no-embeddings", action="store_true", help="Skip semantic deduplication"
-    )
+    parser.add_argument("--quality-threshold", type=float, default=0.3, help="Minimum quality threshold")
+    parser.add_argument("--no-embeddings", action="store_true", help="Skip semantic deduplication")
 
     args = parser.parse_args()
 
@@ -361,9 +337,7 @@ def main():
     )
 
     pruner = SemanticPruner(config)
-    stats = pruner.prune_dataset(
-        args.input, args.output, use_embeddings=not args.no_embeddings
-    )
+    stats = pruner.prune_dataset(args.input, args.output, use_embeddings=not args.no_embeddings)
 
     stats.print_summary()
 

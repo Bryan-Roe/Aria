@@ -14,12 +14,14 @@ def load_module():
 def test_generate_html_export(tmp_path):
     m = load_module()
     m.CONV_DIR = str(tmp_path)
-    fname = m.generate_html_export([{"user": "hi", "assistant": "hello", "user_ts": "u", "assistant_ts": "a"}], "testsession")
+    fname = m.generate_html_export(
+        [{"user": "hi", "assistant": "hello", "user_ts": "u", "assistant_ts": "a"}], "testsession"
+    )
     assert os.path.exists(fname)
-    assert fname.endswith('.html')
-    with open(fname, 'r', encoding='utf-8') as f:
+    assert fname.endswith(".html")
+    with open(fname, "r", encoding="utf-8") as f:
         content = f.read()
-    assert 'User' in content and 'Assistant' in content
+    assert "User" in content and "Assistant" in content
 
 
 def test_summarize_conversation_simple():

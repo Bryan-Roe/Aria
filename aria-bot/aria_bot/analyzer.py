@@ -94,11 +94,7 @@ class Analyzer:
             return results
 
         # trailing whitespace
-        offending_lines = [
-            i + 1
-            for i, line in enumerate(text.splitlines())
-            if line != line.rstrip(" \t")
-        ]
+        offending_lines = [i + 1 for i, line in enumerate(text.splitlines()) if line != line.rstrip(" \t")]
         if offending_lines:
             preview = ",".join(str(n) for n in offending_lines[:5])
             results.append(

@@ -42,14 +42,14 @@ async def demo_basic_generation():
     print("\n" + "=" * 70)
     print("DEMO 1: Basic Generation")
     print("=" * 70)
-    
+
     pipeline = QuantumLLMPipeline()
-    
+
     prompt = "What is quantum computing?"
     print(f"\nPrompt: {prompt}")
-    
+
     result = await pipeline.generate(prompt)
-    
+
     print(f"\nResponse: {result['response'][:100]}...")
     print(f"Provider: {result['provider']}")
     print(f"Backend: {result['backend']}")
@@ -62,13 +62,13 @@ async def demo_streaming():
     print("\n" + "=" * 70)
     print("DEMO 2: Streaming Generation")
     print("=" * 70)
-    
+
     pipeline = QuantumLLMPipeline()
-    
+
     prompt = "Tell me about superposition"
     print(f"\nPrompt: {prompt}")
     print("\nStreaming response:")
-    
+
     async for chunk in pipeline.stream(prompt):
         if "[DONE]" in chunk:
             break
@@ -80,7 +80,7 @@ async def demo_streaming():
                     print(data["delta"], end="", flush=True)
             except (IndexError, json.JSONDecodeError):
                 pass
-    
+
     print("\n\n✓ Stream completed")
 
 
@@ -89,7 +89,7 @@ async def demo_configuration():
     print("\n" + "=" * 70)
     print("DEMO 3: Configuration Management")
     print("=" * 70)
-    
+
     # Create custom config
     config = QuantumLLMConfig(
         backend="classical",
@@ -100,13 +100,13 @@ async def demo_configuration():
         cache_enabled=True,
         cache_max_size=128,
     )
-    
+
     print("\nCustom Configuration:")
     print(json.dumps(config.to_dict(), indent=2))
-    
+
     pipeline = QuantumLLMPipeline(config=config)
     result = await pipeline.generate("Hello!")
-    
+
     print(f"\n✓ Generated with custom config")
     print(f"  Backend: {result['backend']}")
     print(f"  Latency: {result['latency_ms']}ms")
@@ -117,25 +117,25 @@ async def demo_caching():
     print("\n" + "=" * 70)
     print("DEMO 4: Circuit Caching")
     print("=" * 70)
-    
+
     config = QuantumLLMConfig(cache_enabled=True, cache_max_size=256)
     pipeline = QuantumLLMPipeline(config=config)
-    
+
     # Generate multiple prompts to populate cache
     prompts = [
         "What is entanglement?",
         "Explain superposition",
         "What is entanglement?",  # Repeat to test cache hit
     ]
-    
+
     for prompt in prompts:
         print(f"\nGenerating: {prompt[:40]}...")
         await pipeline.generate(prompt)
-    
+
     # Get cache stats
     status = pipeline.status()
     cache_stats = status["cache"]["stats"]
-    
+
     print("\n\nCache Statistics:")
     print(json.dumps(cache_stats, indent=2))
 
@@ -145,25 +145,26 @@ def demo_sampler_directly():
     print("\n" + "=" * 70)
     print("DEMO 5: Direct Sampler Usage")
     print("=" * 70)
-    
+
     sampler = QuantumSampler(backend="classical", num_qubits=4, shots=512)
-    
+
     # Sample from logits multiple times
     logits = [10.0, 2.0, 1.0, 0.5]  # Top-k logits from LLM
-    
+
     print(f"\nLogits: {logits}")
     print("\nSampling 20 times with blend_factor=0.3:")
-    
+
     samples = []
     for i in range(20):
         idx = sampler.sample(logits, blend_factor=0.3, seed=None)
         samples.append(idx)
-    
+
     # Count distribution
     from collections import Counter
+
     distribution = Counter(samples)
     print(f"Distribution: {dict(distribution)}")
-    
+
     # Get cache stats
     stats = sampler.cache_stats()
     print(f"\nCache Stats: {stats}")
@@ -174,30 +175,30 @@ def demo_circuit_cache_directly():
     print("\n" + "=" * 70)
     print("DEMO 6: Direct CircuitCache Usage")
     print("=" * 70)
-    
+
     cache = CircuitCache(max_size=10, max_age_seconds=3600)
-    
+
     # Store some values
     print("\nStoring 5 probability distributions...")
     for i in range(5):
         params = np.array([float(i) * 0.1, float(i) * 0.2])
         probs = np.random.dirichlet([1, 1, 1, 1])  # Random 4-element distribution
         cache.put(params, num_qubits=2, probs=probs)
-    
+
     # Retrieve and access patterns
     print("Accessing 3 times each...")
     for i in range(3):
         for j in range(3):
             params = np.array([float(i) * 0.1, float(i) * 0.2])
             cache.get(params, num_qubits=2)
-    
+
     # Add two more to trigger eviction
     print("Adding 2 more entries (triggers LRU eviction)...")
     for i in range(5, 7):
         params = np.array([float(i) * 0.1, float(i) * 0.2])
         probs = np.random.dirichlet([1, 1, 1, 1])
         cache.put(params, num_qubits=2, probs=probs)
-    
+
     # Stats
     stats = cache.stats()
     print("\nCache Stats:")
@@ -210,15 +211,15 @@ async def demo_status_endpoint():
     print("\n" + "=" * 70)
     print("DEMO 7: Health Check / Status Endpoint")
     print("=" * 70)
-    
+
     pipeline = QuantumLLMPipeline()
-    
+
     # Generate a few items to populate cache
     for i in range(3):
         await pipeline.generate(f"Query {i}")
-    
+
     status = pipeline.status()
-    
+
     print("\nFull Status Response:")
     print(json.dumps(status, indent=2, default=str))
 
@@ -228,10 +229,10 @@ async def demo_error_handling():
     print("\n" + "=" * 70)
     print("DEMO 8: Error Handling")
     print("=" * 70)
-    
+
     config = QuantumLLMConfig(max_prompt_chars=100)
     pipeline = QuantumLLMPipeline(config=config)
-    
+
     # Test 1: Oversized prompt
     print("\nTest 1: Oversized prompt")
     try:
@@ -240,7 +241,7 @@ async def demo_error_handling():
         print("ERROR: Should have raised ValueError!")
     except ValueError as e:
         print(f"✓ Caught error: {str(e)[:60]}...")
-    
+
     # Test 2: Empty prompt (should handle gracefully)
     print("\nTest 2: Empty prompt")
     try:
@@ -255,15 +256,15 @@ async def demo_provider_selection():
     print("\n" + "=" * 70)
     print("DEMO 9: Provider Selection & Routing")
     print("=" * 70)
-    
+
     pipeline = QuantumLLMPipeline()
-    
+
     prompts = [
         "Short query",
         "Is this a question?",
         "```python\nprint('code')\n```",
     ]
-    
+
     print("\nProvider routing for different prompt types:")
     for prompt in prompts:
         result = await pipeline.generate(prompt)
@@ -275,12 +276,12 @@ async def main():
     print("\n" + "=" * 70)
     print("QUANTUM LLM COMPREHENSIVE DEMO")
     print("=" * 70)
-    
+
     try:
         # Synchronous demos
         demo_sampler_directly()
         demo_circuit_cache_directly()
-        
+
         # Asynchronous demos
         await demo_basic_generation()
         await demo_streaming()
@@ -289,13 +290,14 @@ async def main():
         await demo_status_endpoint()
         await demo_error_handling()
         await demo_provider_selection()
-        
+
     except Exception as e:
         print(f"\n❌ Error: {e}")
         import traceback
+
         traceback.print_exc()
         return 1
-    
+
     print("\n" + "=" * 70)
     print("✓ ALL DEMOS COMPLETED SUCCESSFULLY")
     print("=" * 70 + "\n")

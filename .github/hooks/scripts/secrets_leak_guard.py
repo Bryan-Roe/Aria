@@ -57,34 +57,52 @@ _SAFE_PATH_PATTERNS = (
 # Each entry: (name, pattern)
 _SECRET_PATTERNS: list[tuple[str, re.Pattern[str]]] = [
     # OpenAI API key (sk-proj-... or sk-...)
-    ("OpenAI API key", re.compile(
-        r"""(?:openai_api_key|api[_-]?key)\s*[=:]\s*['"]?(sk-[A-Za-z0-9\-_]{20,})['"]?""",
-        re.IGNORECASE,
-    )),
+    (
+        "OpenAI API key",
+        re.compile(
+            r"""(?:openai_api_key|api[_-]?key)\s*[=:]\s*['"]?(sk-[A-Za-z0-9\-_]{20,})['"]?""",
+            re.IGNORECASE,
+        ),
+    ),
     # Azure OpenAI key (32-hex or base64-looking long value in an assignment)
-    ("Azure API key assignment", re.compile(
-        r"""(?:azure_openai_api_key|azure_api_key|openai_api_key|api[_-]?key)\s*[=:]\s*['"]([0-9a-fA-F]{32,}|[A-Za-z0-9+/]{40,}={0,2})['"]""",
-        re.IGNORECASE,
-    )),
+    (
+        "Azure API key assignment",
+        re.compile(
+            r"""(?:azure_openai_api_key|azure_api_key|openai_api_key|api[_-]?key)\s*[=:]\s*['"]([0-9a-fA-F]{32,}|[A-Za-z0-9+/]{40,}={0,2})['"]""",
+            re.IGNORECASE,
+        ),
+    ),
     # Bearer token with a non-placeholder value in code/config
-    ("Bearer token literal", re.compile(
-        r"""Authorization\s*[=:]\s*['"]?Bearer\s+(?!<|%|{|\$|your|MY_|placeholder|xxx|TOKEN)[A-Za-z0-9\-_\.]{20,}['"]?""",
-        re.IGNORECASE,
-    )),
+    (
+        "Bearer token literal",
+        re.compile(
+            r"""Authorization\s*[=:]\s*['"]?Bearer\s+(?!<|%|{|\$|your|MY_|placeholder|xxx|TOKEN)[A-Za-z0-9\-_\.]{20,}['"]?""",
+            re.IGNORECASE,
+        ),
+    ),
     # SQL / Cosmos connection string with inline password
-    ("Connection string password", re.compile(
-        r"""(?:AccountKey|Password|Pwd)\s*=\s*(?!<|%|{|\$|your|placeholder|xxx|PASS)[A-Za-z0-9+/=!@#$%^&*\-_]{8,}""",
-        re.IGNORECASE,
-    )),
+    (
+        "Connection string password",
+        re.compile(
+            r"""(?:AccountKey|Password|Pwd)\s*=\s*(?!<|%|{|\$|your|placeholder|xxx|PASS)[A-Za-z0-9+/=!@#$%^&*\-_]{8,}""",
+            re.IGNORECASE,
+        ),
+    ),
     # Generic high-entropy secret assignment (api_secret, client_secret, access_token, etc.)
-    ("Secret/token literal assignment", re.compile(
-        r"""(?:client_secret|access_token|secret_key|app_secret|auth_token|private_key)\s*[=:]\s*['"](?!<|%|{|\$|your|placeholder|xxx|MY_|REPLACE|test|mock|fake)[A-Za-z0-9+/\-_\.!@#]{16,}['"]""",
-        re.IGNORECASE,
-    )),
+    (
+        "Secret/token literal assignment",
+        re.compile(
+            r"""(?:client_secret|access_token|secret_key|app_secret|auth_token|private_key)\s*[=:]\s*['"](?!<|%|{|\$|your|placeholder|xxx|MY_|REPLACE|test|mock|fake)[A-Za-z0-9+/\-_\.!@#]{16,}['"]""",
+            re.IGNORECASE,
+        ),
+    ),
     # Cosmos / Storage account key (looks like base64, 88+ chars ending in ==)
-    ("Storage/Cosmos account key", re.compile(
-        r"""['"][A-Za-z0-9+/]{86,88}={0,2}['"]""",
-    )),
+    (
+        "Storage/Cosmos account key",
+        re.compile(
+            r"""['"][A-Za-z0-9+/]{86,88}={0,2}['"]""",
+        ),
+    ),
 ]
 
 # Prompt-level reminder trigger words
@@ -103,6 +121,7 @@ _REMINDER = (
 
 
 # ── Helpers ──────────────────────────────────────────────────────────────────
+
 
 def _walk_strings(obj: Any) -> Iterator[str]:
     """Recursively yield all string values from nested dicts/lists."""
@@ -149,15 +168,11 @@ def _find_content_field(payload: dict[str, Any]) -> str:
 
 
 def _get_path(payload: dict[str, Any]) -> str:
-    return (
-        payload.get("filePath")
-        or payload.get("path")
-        or payload.get("file_path")
-        or ""
-    )
+    return payload.get("filePath") or payload.get("path") or payload.get("file_path") or ""
 
 
 # ── Main ─────────────────────────────────────────────────────────────────────
+
 
 def main() -> None:
     if _SKIP:

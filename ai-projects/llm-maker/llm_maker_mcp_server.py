@@ -27,6 +27,7 @@ except ImportError as e:
     sys.exit(1)
 
 from src.tool_executor import ToolExecutor
+
 # Import LLM Maker components
 from src.tool_maker import ToolMaker
 from src.tool_registry import ToolRegistry
@@ -114,9 +115,7 @@ async def list_tools() -> list[MCPTool]:
             description="Get details of a specific tool",
             inputSchema={
                 "type": "object",
-                "properties": {
-                    "tool_id": {"type": "string", "description": "Tool ID or name"}
-                },
+                "properties": {"tool_id": {"type": "string", "description": "Tool ID or name"}},
                 "required": ["tool_id"],
             },
         ),
@@ -125,9 +124,7 @@ async def list_tools() -> list[MCPTool]:
             description="Delete a tool from the registry",
             inputSchema={
                 "type": "object",
-                "properties": {
-                    "tool_id": {"type": "string", "description": "Tool ID to delete"}
-                },
+                "properties": {"tool_id": {"type": "string", "description": "Tool ID to delete"}},
                 "required": ["tool_id"],
             },
         ),
@@ -136,9 +133,7 @@ async def list_tools() -> list[MCPTool]:
             description="Validate a tool for safety",
             inputSchema={
                 "type": "object",
-                "properties": {
-                    "tool_id": {"type": "string", "description": "Tool ID or name"}
-                },
+                "properties": {"tool_id": {"type": "string", "description": "Tool ID or name"}},
                 "required": ["tool_id"],
             },
         ),

@@ -43,6 +43,7 @@ def _normalize_provider_priority(value: object) -> List[str]:
 try:
     from pydantic import Field, field_validator
     from pydantic_settings import BaseSettings, NoDecode
+
     try:
         from pydantic_settings import NoDecode as _NoDecode
     except ImportError:
@@ -58,6 +59,7 @@ except ImportError:  # pragma: no cover
         # pydantic v1 compatibility
         # type: ignore[assignment,no-redef]
         from pydantic import BaseSettings, Field, validator as field_validator
+
         NoDecode = None  # type: ignore[assignment]
         _ConfigDict = None  # type: ignore[assignment]
         _NoDecode = None  # type: ignore[assignment]
@@ -80,10 +82,7 @@ def _provider_priority_field():
     )
 
 
-ProviderPriority = (
-    Annotated[List[str],
-              NoDecode] if _PYDANTIC_AVAILABLE and NoDecode is not None else List[str]
-)
+ProviderPriority = Annotated[List[str], NoDecode] if _PYDANTIC_AVAILABLE and NoDecode is not None else List[str]
 
 
 # ---------------------------------------------------------------------------
@@ -104,28 +103,20 @@ if _PYDANTIC_AVAILABLE:
         # ------------------------------------------------------------------
         # Azure OpenAI
         # ------------------------------------------------------------------
-        azure_openai_api_key: Optional[str] = Field(
-            default=None, alias="AZURE_OPENAI_API_KEY")
-        azure_openai_endpoint: Optional[str] = Field(
-            default=None, alias="AZURE_OPENAI_ENDPOINT")
-        azure_openai_deployment: Optional[str] = Field(
-            default=None, alias="AZURE_OPENAI_DEPLOYMENT"
-        )
-        azure_openai_api_version: str = Field(
-            default="2024-02-01", alias="AZURE_OPENAI_API_VERSION"
-        )
+        azure_openai_api_key: Optional[str] = Field(default=None, alias="AZURE_OPENAI_API_KEY")
+        azure_openai_endpoint: Optional[str] = Field(default=None, alias="AZURE_OPENAI_ENDPOINT")
+        azure_openai_deployment: Optional[str] = Field(default=None, alias="AZURE_OPENAI_DEPLOYMENT")
+        azure_openai_api_version: str = Field(default="2024-02-01", alias="AZURE_OPENAI_API_VERSION")
 
         # ------------------------------------------------------------------
         # OpenAI
         # ------------------------------------------------------------------
-        openai_api_key: Optional[str] = Field(
-            default=None, alias="OPENAI_API_KEY")
+        openai_api_key: Optional[str] = Field(default=None, alias="OPENAI_API_KEY")
 
         # ------------------------------------------------------------------
         # LM Studio / local inference
         # ------------------------------------------------------------------
-        lmstudio_base_url: Optional[str] = Field(
-            default=None, alias="LMSTUDIO_BASE_URL")
+        lmstudio_base_url: Optional[str] = Field(default=None, alias="LMSTUDIO_BASE_URL")
 
         # ------------------------------------------------------------------
         # Provider selection
@@ -138,35 +129,28 @@ if _PYDANTIC_AVAILABLE:
         # ------------------------------------------------------------------
         # Database
         # ------------------------------------------------------------------
-        db_connection_string: Optional[str] = Field(
-            default=None, alias="QAI_DB_CONN")
+        db_connection_string: Optional[str] = Field(default=None, alias="QAI_DB_CONN")
         sql_pool_size: int = Field(default=10, alias="QAI_SQL_POOL_SIZE")
 
         # ------------------------------------------------------------------
         # Cosmos DB (optional, feature-flagged)
         # ------------------------------------------------------------------
         enable_cosmos: bool = Field(default=False, alias="QAI_ENABLE_COSMOS")
-        cosmos_endpoint: Optional[str] = Field(
-            default=None, alias="COSMOS_ENDPOINT")
+        cosmos_endpoint: Optional[str] = Field(default=None, alias="COSMOS_ENDPOINT")
         cosmos_key: Optional[str] = Field(default=None, alias="COSMOS_KEY")
-        cosmos_database: Optional[str] = Field(
-            default=None, alias="COSMOS_DATABASE")
-        cosmos_container: Optional[str] = Field(
-            default=None, alias="COSMOS_CONTAINER")
+        cosmos_database: Optional[str] = Field(default=None, alias="COSMOS_DATABASE")
+        cosmos_container: Optional[str] = Field(default=None, alias="COSMOS_CONTAINER")
 
         # ------------------------------------------------------------------
         # Azure Key Vault (optional)
         # ------------------------------------------------------------------
-        keyvault_url: Optional[str] = Field(
-            default=None, alias="QAI_KEYVAULT_URL")
+        keyvault_url: Optional[str] = Field(default=None, alias="QAI_KEYVAULT_URL")
 
         # ------------------------------------------------------------------
         # Observability
         # ------------------------------------------------------------------
         log_level: str = Field(default="INFO", alias="QAI_LOG_LEVEL")
-        enable_structured_logging: bool = Field(
-            default=False, alias="QAI_STRUCTURED_LOGGING"
-        )
+        enable_structured_logging: bool = Field(default=False, alias="QAI_STRUCTURED_LOGGING")
         applicationinsights_connection_string: Optional[str] = Field(
             default=None, alias="APPLICATIONINSIGHTS_CONNECTION_STRING"
         )
@@ -174,27 +158,19 @@ if _PYDANTIC_AVAILABLE:
         # ------------------------------------------------------------------
         # Autonomous training orchestrator
         # ------------------------------------------------------------------
-        orchestrator_cycle_interval_minutes: int = Field(
-            default=30, alias="QAI_ORCHESTRATOR_CYCLE_MINUTES"
-        )
-        orchestrator_max_retries: int = Field(
-            default=3, alias="QAI_ORCHESTRATOR_MAX_RETRIES")
-        orchestrator_backoff_base: float = Field(
-            default=2.0, alias="QAI_ORCHESTRATOR_BACKOFF_BASE"
-        )
+        orchestrator_cycle_interval_minutes: int = Field(default=30, alias="QAI_ORCHESTRATOR_CYCLE_MINUTES")
+        orchestrator_max_retries: int = Field(default=3, alias="QAI_ORCHESTRATOR_MAX_RETRIES")
+        orchestrator_backoff_base: float = Field(default=2.0, alias="QAI_ORCHESTRATOR_BACKOFF_BASE")
 
         # ------------------------------------------------------------------
         # Local TTS fallback
         # ------------------------------------------------------------------
-        enable_local_tts: bool = Field(
-            default=False, alias="QAI_ENABLE_LOCAL_TTS")
+        enable_local_tts: bool = Field(default=False, alias="QAI_ENABLE_LOCAL_TTS")
 
         # ------------------------------------------------------------------
         # Concurrency limits
         # ------------------------------------------------------------------
-        max_concurrent_training_jobs: int = Field(
-            default=4, alias="QAI_MAX_CONCURRENT_TRAINING_JOBS"
-        )
+        max_concurrent_training_jobs: int = Field(default=4, alias="QAI_MAX_CONCURRENT_TRAINING_JOBS")
 
         if _ConfigDict is not None:
             model_config = _ConfigDict(
@@ -284,7 +260,6 @@ if _PYDANTIC_AVAILABLE:
                 "local_tts_enabled": self.enable_local_tts,
             }
 
-
 else:
     # Minimal fallback when pydantic is not installed
     class Settings:  # type: ignore[no-redef]
@@ -292,18 +267,13 @@ else:
 
         def __init__(self) -> None:
             self.azure_openai_api_key = os.environ.get("AZURE_OPENAI_API_KEY")
-            self.azure_openai_endpoint = os.environ.get(
-                "AZURE_OPENAI_ENDPOINT")
-            self.azure_openai_deployment = os.environ.get(
-                "AZURE_OPENAI_DEPLOYMENT")
-            self.azure_openai_api_version = os.environ.get(
-                "AZURE_OPENAI_API_VERSION", "2024-02-01"
-            )
+            self.azure_openai_endpoint = os.environ.get("AZURE_OPENAI_ENDPOINT")
+            self.azure_openai_deployment = os.environ.get("AZURE_OPENAI_DEPLOYMENT")
+            self.azure_openai_api_version = os.environ.get("AZURE_OPENAI_API_VERSION", "2024-02-01")
             self.openai_api_key = os.environ.get("OPENAI_API_KEY")
             self.lmstudio_base_url = os.environ.get("LMSTUDIO_BASE_URL")
             self.provider_priority = _normalize_provider_priority(
-                os.environ.get("QAI_PROVIDER_PRIORITY",
-                               "azure,openai,lmstudio,local")
+                os.environ.get("QAI_PROVIDER_PRIORITY", "azure,openai,lmstudio,local")
             )
             self.db_connection_string = os.environ.get("QAI_DB_CONN")
             self.sql_pool_size = int(os.environ.get("QAI_SQL_POOL_SIZE", "10"))
@@ -314,26 +284,20 @@ else:
             )
             self.keyvault_url = os.environ.get("QAI_KEYVAULT_URL")
             self.log_level = os.environ.get("QAI_LOG_LEVEL", "INFO").upper()
-            self.enable_structured_logging = os.environ.get(
-                "QAI_STRUCTURED_LOGGING", ""
-            ).lower() in ("1", "true", "yes")
-            self.orchestrator_cycle_interval_minutes = int(
-                os.environ.get("QAI_ORCHESTRATOR_CYCLE_MINUTES", "30")
+            self.enable_structured_logging = os.environ.get("QAI_STRUCTURED_LOGGING", "").lower() in (
+                "1",
+                "true",
+                "yes",
             )
-            self.orchestrator_max_retries = int(
-                os.environ.get("QAI_ORCHESTRATOR_MAX_RETRIES", "3")
-            )
-            self.orchestrator_backoff_base = float(
-                os.environ.get("QAI_ORCHESTRATOR_BACKOFF_BASE", "2.0")
-            )
+            self.orchestrator_cycle_interval_minutes = int(os.environ.get("QAI_ORCHESTRATOR_CYCLE_MINUTES", "30"))
+            self.orchestrator_max_retries = int(os.environ.get("QAI_ORCHESTRATOR_MAX_RETRIES", "3"))
+            self.orchestrator_backoff_base = float(os.environ.get("QAI_ORCHESTRATOR_BACKOFF_BASE", "2.0"))
             self.enable_local_tts = os.environ.get("QAI_ENABLE_LOCAL_TTS", "").lower() in (
                 "1",
                 "true",
                 "yes",
             )
-            self.max_concurrent_training_jobs = int(
-                os.environ.get("QAI_MAX_CONCURRENT_TRAINING_JOBS", "4")
-            )
+            self.max_concurrent_training_jobs = int(os.environ.get("QAI_MAX_CONCURRENT_TRAINING_JOBS", "4"))
 
         @property
         def azure_openai_ready(self) -> bool:
@@ -463,6 +427,7 @@ def reset_settings() -> None:
 # Runtime normalization: ensure log_level normalized on Settings instances
 try:
     _orig_settings_init = Settings.__init__
+
     def _wrapped_settings_init(self, *args, **kwargs):
         _orig_settings_init(self, *args, **kwargs)
         try:
@@ -477,9 +442,11 @@ try:
                     object.__setattr__(self, "log_level", up)
         except Exception:
             pass
+
     Settings.__init__ = _wrapped_settings_init
 except Exception:
     pass
+
 
 class AppSettings(Settings):
     """Backward-compatible alias for older settings API callers."""

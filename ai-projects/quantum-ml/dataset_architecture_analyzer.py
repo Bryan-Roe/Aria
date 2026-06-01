@@ -149,9 +149,7 @@ DATASET_INFO = {
 
 def analyze_dataset(dataset_name):
     """Analyze a dataset and recommend architecture"""
-    dataset_path = (
-        Path(__file__).parent.parent / "datasets" / "quantum" / f"{dataset_name}.csv"
-    )
+    dataset_path = Path(__file__).parent.parent / "datasets" / "quantum" / f"{dataset_name}.csv"
 
     # Load dataset with specific strategies
     try:
@@ -160,27 +158,19 @@ def analyze_dataset(dataset_name):
         elif dataset_name == "wine_quality_combined":
             df = pd.read_csv(dataset_path, na_values=["?", "NA", "", "NaN"])
         elif dataset_name in {"wheat_seeds", "seeds"}:
-            df = pd.read_csv(
-                dataset_path, sep=r"\s+", header=None, na_values=["?", "NA", "", "NaN"]
-            )
+            df = pd.read_csv(dataset_path, sep=r"\s+", header=None, na_values=["?", "NA", "", "NaN"])
         elif dataset_name == "yeast":
-            df = pd.read_csv(
-                dataset_path, sep=r"\s+", header=None, na_values=["?", "NA", "", "NaN"]
-            )
+            df = pd.read_csv(dataset_path, sep=r"\s+", header=None, na_values=["?", "NA", "", "NaN"])
             df = df.iloc[:, 1:]  # Skip sequence name
         elif dataset_name == "parkinsons":
             df = pd.read_csv(dataset_path, na_values=["?", "NA", "", "NaN"])
             df = df.drop(columns=df.columns[0])  # Skip name column
         elif dataset_name in {"statlog_australian", "statlog_heart"}:
-            df = pd.read_csv(
-                dataset_path, sep=" ", header=None, na_values=["?", "NA", "", "NaN"]
-            )
+            df = pd.read_csv(dataset_path, sep=" ", header=None, na_values=["?", "NA", "", "NaN"])
         elif dataset_name == "blood_transfusion":
             df = pd.read_csv(dataset_path, skiprows=1, na_values=["?", "NA", "", "NaN"])
         elif dataset_name == "breast_cancer":
-            df = pd.read_csv(
-                dataset_path, header=None, na_values=["?", "NA", "", "NaN"]
-            )
+            df = pd.read_csv(dataset_path, header=None, na_values=["?", "NA", "", "NaN"])
         elif dataset_name == "balance_scale":
             df = pd.read_csv(dataset_path, na_values=["?", "NA", "", "NaN"])
         elif dataset_name in {
@@ -191,9 +181,7 @@ def analyze_dataset(dataset_name):
             "liver_disorders",
             "thyroid",
         }:
-            df = pd.read_csv(
-                dataset_path, header=None, na_values=["?", "NA", "", "NaN"]
-            )
+            df = pd.read_csv(dataset_path, header=None, na_values=["?", "NA", "", "NaN"])
         else:
             df = pd.read_csv(dataset_path, na_values=["?", "NA", "", "NaN"])
     except Exception as e:
@@ -213,9 +201,7 @@ def analyze_dataset(dataset_name):
         class_counts = y.value_counts().values
 
     # Class imbalance ratio
-    imbalance_ratio = (
-        class_counts.max() / class_counts.min() if len(class_counts) > 1 else 1.0
-    )
+    imbalance_ratio = class_counts.max() / class_counts.min() if len(class_counts) > 1 else 1.0
 
     # Missing values
     missing_ratio = df.isnull().sum().sum() / (df.shape[0] * df.shape[1])
@@ -236,26 +222,18 @@ def analyze_dataset(dataset_name):
         qubit_reasoning = "Medium feature count (5-10) - standard 4 qubits"
     elif n_features <= 20:
         n_qubits = 5
-        qubit_reasoning = (
-            "High feature count (11-20) - use 5 qubits for better representation"
-        )
+        qubit_reasoning = "High feature count (11-20) - use 5 qubits for better representation"
     else:
         n_qubits = 6
-        qubit_reasoning = (
-            "Very high feature count (>20) - use 6 qubits for dimensionality"
-        )
+        qubit_reasoning = "Very high feature count (>20) - use 6 qubits for dimensionality"
 
     # 2. Layer Count (2-4)
     if n_samples < 300:
         n_layers = 2
-        layer_reasoning = (
-            "Small dataset (<300 samples) - use 2 layers to avoid overfitting"
-        )
+        layer_reasoning = "Small dataset (<300 samples) - use 2 layers to avoid overfitting"
     elif task_type == "multiclass" and n_classes > 3:
         n_layers = 4
-        layer_reasoning = (
-            f"Multi-class ({n_classes} classes) - use 4 layers for complexity"
-        )
+        layer_reasoning = f"Multi-class ({n_classes} classes) - use 4 layers for complexity"
     elif difficulty == "hard":
         n_layers = 3
         layer_reasoning = "Hard task - use 3 layers for learning capacity"
@@ -377,18 +355,14 @@ def main():
                 f"  Samples: {stats['samples']:,} | Features: {stats['features']} | "
                 f"Classes: {stats['classes']} | Type: {stats['task_type']}"
             )
-            print(
-                f"  Difficulty: {stats['difficulty']} | Imbalance: {stats['imbalance_ratio']:.2f}x"
-            )
+            print(f"  Difficulty: {stats['difficulty']} | Imbalance: {stats['imbalance_ratio']:.2f}x")
 
             # Print recommendations
             print("\n  🎯 RECOMMENDED ARCHITECTURE:")
             print(f"     Qubits: {arch['n_qubits']} → {reason['qubits']}")
             print(f"     Layers: {arch['n_quantum_layers']} → {reason['layers']}")
             print(f"     Hidden: {arch['hidden_dim']} → {reason['hidden_dim']}")
-            print(
-                f"     Learn Rate: {arch['learning_rate']} → {reason['learning_rate']}"
-            )
+            print(f"     Learn Rate: {arch['learning_rate']} → {reason['learning_rate']}")
             print(f"     Batch: {arch['batch_size']} → {reason['batch_size']}")
             print(f"     Epochs: {arch['epochs']} → {reason['epochs']}")
 
@@ -439,9 +413,7 @@ def main():
     for result in all_results:
         arch = result["recommended_architecture"]
         qubit_dist[arch["n_qubits"]] = qubit_dist.get(arch["n_qubits"], 0) + 1
-        layer_dist[arch["n_quantum_layers"]] = (
-            layer_dist.get(arch["n_quantum_layers"], 0) + 1
-        )
+        layer_dist[arch["n_quantum_layers"]] = layer_dist.get(arch["n_quantum_layers"], 0) + 1
 
     print("\n🔢 Qubit Distribution:")
     for qubits, count in sorted(qubit_dist.items()):

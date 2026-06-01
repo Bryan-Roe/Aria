@@ -56,9 +56,7 @@ class HypothesisAgent(BaseAgent):
 
     def execute(self, task: Task) -> Dict[str, Any]:
         payload = task.payload or {}
-        observation: str = (
-            payload.get("observation") or payload.get("text") or ""
-        ).strip()
+        observation: str = (payload.get("observation") or payload.get("text") or "").strip()
         limit: int = max(1, int(payload.get("limit", _DEFAULT_LIMIT)))
 
         if not observation:
@@ -177,10 +175,6 @@ class HypothesisAgent(BaseAgent):
         for e in events:
             event_type = e.get("type", "event")
             data = e.get("data", "")
-            data_str = (
-                json.dumps(data, ensure_ascii=False)
-                if isinstance(data, (dict, list))
-                else str(data)
-            )
+            data_str = json.dumps(data, ensure_ascii=False) if isinstance(data, (dict, list)) else str(data)
             parts.append(f"{event_type}: {data_str}")
         return "\n".join(parts)

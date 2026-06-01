@@ -223,7 +223,7 @@ class TestCircuitCacheStats:
         stats = cache.stats()
         assert stats["hits"] == 3
         assert stats["misses"] == 2
-        assert stats.get("hit_rate", 0.0) == pytest.approx(3/5)
+        assert stats.get("hit_rate", 0.0) == pytest.approx(3 / 5)
 
     def test_stats_zero_total_hit_rate(self):
         """Should handle zero total queries for hit rate."""

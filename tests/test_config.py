@@ -127,14 +127,12 @@ class TestEnvVarPropagation:
     def test_blank_provider_priority_falls_back_to_default_chain(self):
         with patch.dict(os.environ, {"QAI_PROVIDER_PRIORITY": ""}):
             s = Settings()
-            assert s.provider_chain() == [
-                "azure", "openai", "lmstudio", "local"]
+            assert s.provider_chain() == ["azure", "openai", "lmstudio", "local"]
 
     def test_whitespace_provider_priority_falls_back_to_default_chain(self):
         with patch.dict(os.environ, {"QAI_PROVIDER_PRIORITY": " ,  ,   "}):
             s = Settings()
-            assert s.provider_chain() == [
-                "azure", "openai", "lmstudio", "local"]
+            assert s.provider_chain() == ["azure", "openai", "lmstudio", "local"]
 
 
 class TestActiveProvider:

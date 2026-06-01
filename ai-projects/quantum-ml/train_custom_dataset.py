@@ -63,9 +63,7 @@ def _infer_label_column(df: pd.DataFrame, provided: str | None) -> str:
     """
     if provided:
         if provided not in df.columns:
-            raise ValueError(
-                f"Label column '{provided}' not in CSV columns: {list(df.columns)}"
-            )
+            raise ValueError(f"Label column '{provided}' not in CSV columns: {list(df.columns)}")
         return provided
     candidates = ["label", "target", "class", "y", "diagnosis", "outcome"]
     for c in candidates:
@@ -262,9 +260,7 @@ def plot_training_results(history, save_path="results/custom_training.png"):
     ax1.grid(True, alpha=0.3)
 
     # Accuracy curve
-    ax2.plot(
-        history["val_acc"], label="Validation Accuracy", linewidth=2, color="green"
-    )
+    ax2.plot(history["val_acc"], label="Validation Accuracy", linewidth=2, color="green")
     ax2.axhline(
         y=max(history["val_acc"]),
         color="red",
@@ -343,12 +339,8 @@ def train_quantum_model(
     val_dataset = TensorDataset(X_val_tensor, y_val_tensor)
 
     # Use drop_last=True to avoid batchnorm errors on final batch of size 1
-    train_loader = DataLoader(
-        train_dataset, batch_size=batch_size, shuffle=True, drop_last=True
-    )
-    val_loader = DataLoader(
-        val_dataset, batch_size=batch_size, shuffle=False, drop_last=False
-    )
+    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, drop_last=True)
+    val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False, drop_last=False)
 
     # Create trainer
     trainer = QuantumClassicalTrainer(model, learning_rate=learning_rate)
@@ -366,9 +358,7 @@ def train_quantum_model(
     return history
 
 
-def _default_n_qubits(
-    config_path: str = "config/quantum_config.yaml", fallback: int = 4
-) -> int:
+def _default_n_qubits(config_path: str = "config/quantum_config.yaml", fallback: int = 4) -> int:
     """Read default n_qubits from YAML config if available."""
     try:
         with open(config_path, "r") as f:
@@ -380,9 +370,7 @@ def _default_n_qubits(
 
 def main(argv: list[str] | None = None):
     """Main training pipeline"""
-    parser = argparse.ArgumentParser(
-        description="Train Hybrid Quantum-Classical model on CSV or preset dataset"
-    )
+    parser = argparse.ArgumentParser(description="Train Hybrid Quantum-Classical model on CSV or preset dataset")
     src_root = Path(__file__).parent
     default_results = src_root / "results"
     parser.add_argument("--csv", type=str, help="Path to CSV file containing dataset")
@@ -392,9 +380,7 @@ def main(argv: list[str] | None = None):
         choices=["heart", "ionosphere", "sonar", "banknote"],
         help="Use a built-in preset dataset",
     )
-    parser.add_argument(
-        "--label-col", type=str, help="Label/target column name (auto if omitted)"
-    )
+    parser.add_argument("--label-col", type=str, help="Label/target column name (auto if omitted)")
     parser.add_argument(
         "--drop-cols",
         type=str,
@@ -411,12 +397,8 @@ def main(argv: list[str] | None = None):
         type=int,
         help="Number of qubits (defaults from config ml.model.n_qubits or 4)",
     )
-    parser.add_argument(
-        "--epochs", type=int, default=20, help="Training epochs (default 20)"
-    )
-    parser.add_argument(
-        "--batch-size", type=int, default=32, help="Batch size (default 32)"
-    )
+    parser.add_argument("--epochs", type=int, default=20, help="Training epochs (default 20)")
+    parser.add_argument("--batch-size", type=int, default=32, help="Batch size (default 32)")
     parser.add_argument(
         "--learning-rate",
         type=float,
@@ -425,17 +407,13 @@ def main(argv: list[str] | None = None):
     )
     args = parser.parse_args(argv)
 
-    drop_cols = (
-        [c.strip() for c in args.drop_cols.split(",")] if args.drop_cols else None
-    )
+    drop_cols = [c.strip() for c in args.drop_cols.split(",")] if args.drop_cols else None
     n_qubits = args.n_qubits or _default_n_qubits()
 
     print("=" * 70)
     print("  QUANTUM AI - CUSTOM DATASET TRAINING")
     print("=" * 70)
-    print(
-        f"Using n_qubits={n_qubits}, epochs={args.epochs}, batch={args.batch_size}, lr={args.learning_rate}"
-    )
+    print(f"Using n_qubits={n_qubits}, epochs={args.epochs}, batch={args.batch_size}, lr={args.learning_rate}")
 
     # ============================================
     # 1. LOAD DATA
@@ -464,9 +442,7 @@ def main(argv: list[str] | None = None):
     # 2. PREPROCESS
     # ============================================
     print("\n🔧 Step 2: Preprocessing...")
-    X_train, X_val, y_train, y_val, scaler, pca = preprocess_data(
-        X, y, n_qubits=n_qubits, test_size=args.test_size
-    )
+    X_train, X_val, y_train, y_val, scaler, pca = preprocess_data(X, y, n_qubits=n_qubits, test_size=args.test_size)
 
     # ============================================
     # 3. CREATE MODEL

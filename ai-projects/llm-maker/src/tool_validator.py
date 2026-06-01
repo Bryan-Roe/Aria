@@ -82,9 +82,7 @@ class ToolValidator:
             config_path: Path to configuration file
         """
         self.config = self._load_config(config_path)
-        self.allowed_imports = set(
-            self.config.get("validation", {}).get("allowed_imports", [])
-        )
+        self.allowed_imports = set(self.config.get("validation", {}).get("allowed_imports", []))
         self.strict_mode = self.config.get("validation", {}).get("strict_mode", True)
 
     def _load_config(self, config_path: Optional[Path]) -> dict:
@@ -165,11 +163,7 @@ class ToolValidator:
     def _check_imports(self, tree_or_nodes) -> List[str]:
         """Check for dangerous imports"""
         errors = []
-        nodes = (
-            tree_or_nodes
-            if isinstance(tree_or_nodes, list)
-            else list(ast.walk(tree_or_nodes))
-        )
+        nodes = tree_or_nodes if isinstance(tree_or_nodes, list) else list(ast.walk(tree_or_nodes))
         for node in nodes:
             if isinstance(node, ast.Import):
                 for alias in node.names:
@@ -192,11 +186,7 @@ class ToolValidator:
     def _check_dangerous_calls(self, tree_or_nodes) -> List[str]:
         """Check for calls to dangerous built-in functions"""
         errors = []
-        nodes = (
-            tree_or_nodes
-            if isinstance(tree_or_nodes, list)
-            else list(ast.walk(tree_or_nodes))
-        )
+        nodes = tree_or_nodes if isinstance(tree_or_nodes, list) else list(ast.walk(tree_or_nodes))
         for node in nodes:
             if isinstance(node, ast.Call):
                 func_name = None
@@ -214,11 +204,7 @@ class ToolValidator:
     def _check_dangerous_attributes(self, tree_or_nodes) -> List[str]:
         """Check for access to dangerous attributes"""
         errors = []
-        nodes = (
-            tree_or_nodes
-            if isinstance(tree_or_nodes, list)
-            else list(ast.walk(tree_or_nodes))
-        )
+        nodes = tree_or_nodes if isinstance(tree_or_nodes, list) else list(ast.walk(tree_or_nodes))
         for node in nodes:
             if isinstance(node, ast.Attribute):
                 if node.attr in self.DANGEROUS_ATTRS:
@@ -246,14 +232,8 @@ class ToolValidator:
             if isinstance(node, ast.With):
                 for item in node.items:
                     ctx = item.context_expr
-                    if (
-                        isinstance(ctx, ast.Call)
-                        and isinstance(ctx.func, ast.Name)
-                        and ctx.func.id == "open"
-                    ):
-                        errors.append(
-                            "File operation detected: with open() context manager"
-                        )
+                    if isinstance(ctx, ast.Call) and isinstance(ctx.func, ast.Name) and ctx.func.id == "open":
+                        errors.append("File operation detected: with open() context manager")
 
         return errors
 
@@ -286,9 +266,7 @@ class ToolValidator:
                 if isinstance(node.func.value, ast.Name):
                     root = node.func.value.id
                     if root in ("requests", "socket", "urllib", "http"):
-                        errors.append(
-                            f"Network operation detected: {root}.{node.func.attr}()"
-                        )
+                        errors.append(f"Network operation detected: {root}.{node.func.attr}()")
 
         return errors
 
@@ -321,9 +299,7 @@ class ToolValidator:
                         "exec",
                         "compile",
                     ):
-                        errors.append(
-                            f"Code execution detected: {node.func.value.id}.{node.func.attr}()"
-                        )
+                        errors.append(f"Code execution detected: {node.func.value.id}.{node.func.attr}()")
 
         return errors
 
@@ -337,11 +313,7 @@ class ToolValidator:
     def _check_strict_mode(self, tree_or_nodes: ast.AST) -> List[str]:
         """Additional checks for strict mode"""
         errors = []
-        nodes = (
-            tree_or_nodes
-            if isinstance(tree_or_nodes, list)
-            else list(ast.walk(tree_or_nodes))
-        )
+        nodes = tree_or_nodes if isinstance(tree_or_nodes, list) else list(ast.walk(tree_or_nodes))
 
         # Check for lambda functions (can be used to bypass restrictions)
         for node in nodes:
@@ -392,9 +364,7 @@ class ToolValidator:
         # Check parameters
         actual_params = [arg.arg for arg in func_def.args.args]
         if actual_params != expected_params:
-            errors.append(
-                f"Parameter mismatch: expected {expected_params}, got {actual_params}"
-            )
+            errors.append(f"Parameter mismatch: expected {expected_params}, got {actual_params}")
 
         # Check for return statement
         has_return = any(isinstance(node, ast.Return) for node in ast.walk(func_def))

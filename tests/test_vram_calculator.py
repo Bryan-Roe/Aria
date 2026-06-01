@@ -70,8 +70,7 @@ class TestEstimateModelMemory:
         assert fp32 == pytest.approx(fp16 * 2, rel=0.01)
 
     def test_int4_smaller_than_int8(self):
-        assert estimate_model_memory_gb(
-            7.0, "int4") < estimate_model_memory_gb(7.0, "int8")
+        assert estimate_model_memory_gb(7.0, "int4") < estimate_model_memory_gb(7.0, "int8")
 
     def test_unknown_dtype_defaults(self):
         # _BYTES_PER_PARAM.get(unknown, 2) → fp16 behaviour
@@ -134,8 +133,7 @@ class TestEstimateActivationMemory:
 
 class TestGetArch:
     def test_known_tinyllama(self):
-        hidden_size, num_layers = _get_arch(
-            "TinyLlama/TinyLlama-1.1B-Chat-v1.0")
+        hidden_size, num_layers = _get_arch("TinyLlama/TinyLlama-1.1B-Chat-v1.0")
         assert hidden_size == 2048 and num_layers == 22
 
     def test_known_phi_mini(self):

@@ -118,15 +118,11 @@ def _looks_like_instruction(sentence: str) -> bool:
 
 def _sentence_tokens(sentence: str) -> list[str]:
     return [
-        token.lower()
-        for token in _WORD_RE.findall(sentence)
-        if len(token) > 2 and token.lower() not in _STOP_WORDS
+        token.lower() for token in _WORD_RE.findall(sentence) if len(token) > 2 and token.lower() not in _STOP_WORDS
     ]
 
 
-def summarize_text(
-    text: str, *, max_sentences: int = 3, max_chars: int = 420
-) -> str:
+def summarize_text(text: str, *, max_sentences: int = 3, max_chars: int = 420) -> str:
     """Create a deterministic extractive summary without external dependencies."""
     cleaned = _strip_summary_prompt(text)
     if not cleaned:
@@ -151,9 +147,7 @@ def summarize_text(
         ordered = sentences[: min(2, len(sentences))]
     else:
         max_frequency = max(frequencies.values())
-        weights = {
-            token: count / max_frequency for token, count in frequencies.items()
-        }
+        weights = {token: count / max_frequency for token, count in frequencies.items()}
         scored: list[tuple[float, int, str]] = []
         for idx, (sentence, tokens) in enumerate(zip(sentences, tokenized_sentences)):
             if not tokens:

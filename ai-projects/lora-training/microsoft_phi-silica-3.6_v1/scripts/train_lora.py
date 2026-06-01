@@ -18,21 +18,22 @@ try:
     try:
         import torch  # pip install torch  # type: ignore[reportMissingImports]
     except ImportError:
-        raise SystemExit(
-            "PyTorch is required. Install with: pip install torch"
-        ) from None
+        raise SystemExit("PyTorch is required. Install with: pip install torch") from None
     from datasets import load_dataset  # type: ignore[import]
 
     try:
         from peft import LoraConfig, PeftModel, get_peft_model
-        from transformers import (AutoModelForCausalLM, AutoTokenizer,
-                                  DataCollatorForLanguageModeling,
-                                  EarlyStoppingCallback, Trainer,
-                                  TrainerCallback, TrainingArguments)
+        from transformers import (
+            AutoModelForCausalLM,
+            AutoTokenizer,
+            DataCollatorForLanguageModeling,
+            EarlyStoppingCallback,
+            Trainer,
+            TrainerCallback,
+            TrainingArguments,
+        )
     except ImportError:
-        raise SystemExit(
-            "Transformers is required. Install with: pip install transformers"
-        ) from None
+        raise SystemExit("Transformers is required. Install with: pip install transformers") from None
 except Exception as e:
     # Provide visibility into which dependency import failed
     import traceback
@@ -124,13 +125,9 @@ def build_text_from_messages(messages: List[Dict[str, str]]) -> str:
     return "".join(parts)
 
 
-def make_hf_dataset_from_files(
-    train_files: List[str], eval_files: List[str], streaming: bool = True
-):
+def make_hf_dataset_from_files(train_files: List[str], eval_files: List[str], streaming: bool = True):
     if load_dataset is None:
-        raise RuntimeError(
-            "HuggingFace datasets not available. Install 'datasets' to load datasets."
-        )
+        raise RuntimeError("HuggingFace datasets not available. Install 'datasets' to load datasets.")
     data_files = {"train": train_files, "validation": eval_files}
     ds = load_dataset("json", data_files=data_files, streaming=streaming)
     return ds
@@ -143,13 +140,17 @@ def _validated_remote_url(path_or_url: str) -> str:
     if not parsed.hostname:
         raise ValueError("Remote manifest URL must include a hostname")
 
-    allowed_hosts = {h.strip().lower() for h in os.environ.get("LORA_MANIFEST_ALLOWED_HOSTS", "").split(",") if h.strip()}
+    allowed_hosts = {
+        h.strip().lower() for h in os.environ.get("LORA_MANIFEST_ALLOWED_HOSTS", "").split(",") if h.strip()
+    }
     host = parsed.hostname.lower()
     if allowed_hosts and host not in allowed_hosts:
         raise ValueError(f"Remote manifest host {host!r} is not in LORA_MANIFEST_ALLOWED_HOSTS")
 
     try:
-        addrinfos = socket.getaddrinfo(parsed.hostname, parsed.port or (443 if parsed.scheme == "https" else 80), type=socket.SOCK_STREAM)
+        addrinfos = socket.getaddrinfo(
+            parsed.hostname, parsed.port or (443 if parsed.scheme == "https" else 80), type=socket.SOCK_STREAM
+        )
     except socket.gaierror as e:
         raise ValueError(f"Could not resolve remote manifest host {parsed.hostname!r}: {e}") from e
 
@@ -237,16 +238,12 @@ def parse_manifest(path_or_url: str) -> List[str]:
 
 
 def main():
-    ap = argparse.ArgumentParser(
-        description="Train LoRA on chat dataset using lora.yaml config"
-    )
+    ap = argparse.ArgumentParser(description="Train LoRA on chat dataset using lora.yaml config")
     ap.add_argument(
         "--config",
         default=str(Path(__file__).resolve().parents[1] / "lora" / "lora.yaml"),
     )
-    ap.add_argument(
-        "--dataset", default=str(Path(__file__).resolve().parents[1] / "data")
-    )
+    ap.add_argument("--dataset", default=str(Path(__file__).resolve().parents[1] / "data"))
     ap.add_argument(
         "--dry-run",
         action="store_true",
@@ -269,9 +266,7 @@ def main():
         default=None,
         help="Override HF model id (e.g., microsoft/Phi-3.5-mini-instruct)",
     )
-    ap.add_argument(
-        "--no-stream", action="store_true", help="Disable streaming mode for datasets"
-    )
+    ap.add_argument("--no-stream", action="store_true", help="Disable streaming mode for datasets")
     ap.add_argument(
         "--deepspeed",
         default=None,
@@ -311,9 +306,7 @@ def main():
         default=None,
         help="Override lora_dropout from config",
     )
-    ap.add_argument(
-        "--epochs", type=int, default=None, help="Override epochs from config"
-    )
+    ap.add_argument("--epochs", type=int, default=None, help="Override epochs from config")
     ap.add_argument(
         "--train-batch-size",
         type=int,
@@ -343,11 +336,7 @@ def main():
     cfg = Config(
         model=cfg_raw.get("model") or "Phi-3.6-mini-instruct",
         finetune_dataset=cfg_raw.get("finetune_dataset") or str(Path(args.dataset)),
-        save_dir=(
-            args.save_dir
-            or cfg_raw.get("save_dir")
-            or str(Path(__file__).resolve().parents[1] / "outputs")
-        ),
+        save_dir=(args.save_dir or cfg_raw.get("save_dir") or str(Path(__file__).resolve().parents[1] / "outputs")),
         finetune_train_nsamples=cfg_raw.get("finetune_train_nsamples"),
         finetune_test_nsamples=cfg_raw.get("finetune_test_nsamples"),
         finetune_train_batch_size=int(cfg_raw.get("finetune_train_batch_size") or 2),
@@ -362,9 +351,7 @@ def main():
         gradient_checkpointing=bool(cfg_raw.get("gradient_checkpointing") or False),
         seed=int(cfg_raw.get("seed") or 42),
         warmup_steps=int(cfg_raw.get("warmup_steps") or 100),
-        gradient_accumulation_steps=int(
-            cfg_raw.get("gradient_accumulation_steps") or 4
-        ),
+        gradient_accumulation_steps=int(cfg_raw.get("gradient_accumulation_steps") or 4),
         max_grad_norm=float(cfg_raw.get("max_grad_norm") or 1.0),
         early_stopping_patience=int(cfg_raw.get("early_stopping_patience") or 3),
         early_stopping_threshold=float(cfg_raw.get("early_stopping_threshold") or 0.01),
@@ -401,18 +388,14 @@ def main():
             # Fallback: use a small subset of train for eval
             eval_files = train_files[:1]
     else:
-        dataset_path = (
-            Path(args.dataset) if args.dataset else resolve_path(cfg.finetune_dataset)
-        )
+        dataset_path = Path(args.dataset) if args.dataset else resolve_path(cfg.finetune_dataset)
         if dataset_path.is_file():
             # Allow direct file usage (.json or .jsonl)
             if dataset_path.suffix.lower() in (".json", ".jsonl"):
                 train_files = [str(dataset_path)]
                 eval_files = [str(dataset_path)]
             else:
-                raise FileNotFoundError(
-                    f"Unsupported dataset file type: {dataset_path}"
-                )
+                raise FileNotFoundError(f"Unsupported dataset file type: {dataset_path}")
         else:
             # Directory: accept train.json/test.json or train.jsonl/test.jsonl; fallback to single train file present
             candidates = [
@@ -448,11 +431,7 @@ def main():
     # Determine and report device early (even for dry-run)
     chosen_device = "cpu"
     if args.device == "auto":
-        if (
-            torch is not None
-            and getattr(torch, "cuda", None)
-            and getattr(torch.cuda, "is_available", lambda: False)()
-        ):
+        if torch is not None and getattr(torch, "cuda", None) and getattr(torch.cuda, "is_available", lambda: False)():
             chosen_device = "cuda"
         elif (
             torch is not None
@@ -501,12 +480,7 @@ def main():
         return
 
     # Real training requires heavy deps
-    if (
-        AutoTokenizer is None
-        or AutoModelForCausalLM is None
-        or load_dataset is None
-        or torch is None
-    ):
+    if AutoTokenizer is None or AutoModelForCausalLM is None or load_dataset is None or torch is None:
         missing = []
         if torch is None:
             missing.append("torch")
@@ -551,39 +525,23 @@ def main():
                     # Attempt to reconstruct per-sample conversations if messages is a dict of lists
                     # Expect shape: msgs[key][i] gives ith sample's list of that field
                     keys = list(msgs.keys())
-                    batch_size = (
-                        len(msgs[keys[0]])
-                        if keys and isinstance(msgs[keys[0]], list)
-                        else 0
-                    )
+                    batch_size = len(msgs[keys[0]]) if keys and isinstance(msgs[keys[0]], list) else 0
                     print(f"[preprocess] inferred batch_size from dict: {batch_size}")
                     for i in range(batch_size):
                         # Reconstruct sample i as list of dicts using available fields
                         sample_messages = []
                         # Try common fields 'role' and 'content'
                         roles = msgs.get("role", [])[i] if "role" in msgs else None
-                        contents = (
-                            msgs.get("content", [])[i] if "content" in msgs else None
-                        )
-                        if (
-                            isinstance(roles, list)
-                            and isinstance(contents, list)
-                            and len(roles) == len(contents)
-                        ):
+                        contents = msgs.get("content", [])[i] if "content" in msgs else None
+                        if isinstance(roles, list) and isinstance(contents, list) and len(roles) == len(contents):
                             for r, c in zip(roles, contents):
                                 sample_messages.append({"role": r, "content": c})
                         else:
                             # Fallback: try to rebuild from a generic list of dicts if present
                             # msgs may have a single key representing the full objects
                             for k in keys:
-                                candidate = (
-                                    msgs[k][i] if isinstance(msgs[k], list) else None
-                                )
-                                if (
-                                    isinstance(candidate, list)
-                                    and candidate
-                                    and isinstance(candidate[0], dict)
-                                ):
+                                candidate = msgs[k][i] if isinstance(msgs[k], list) else None
+                                if isinstance(candidate, list) and candidate and isinstance(candidate[0], dict):
                                     sample_messages = candidate
                                     break
                         if sample_messages:
@@ -646,9 +604,7 @@ def main():
             # Return empty dict for batch
             print("[preprocess] empty texts batch")
             return {"input_ids": [], "attention_mask": []}
-        tokenized = tokenizer(
-            texts, truncation=True, max_length=cfg.finetune_train_seqlen, padding=False
-        )
+        tokenized = tokenizer(texts, truncation=True, max_length=cfg.finetune_train_seqlen, padding=False)
         try:
             n_in = len(texts)
             n_out = len(tokenized.get("input_ids", []))
@@ -658,9 +614,7 @@ def main():
         # Return as dict of lists for batched mapping
         return tokenized
 
-    ds = make_hf_dataset_from_files(
-        train_files, eval_files, streaming=not args.no_stream
-    )
+    ds = make_hf_dataset_from_files(train_files, eval_files, streaming=not args.no_stream)
 
     # For streaming datasets, map with batched=False
     train_ds = ds["train"]
@@ -671,13 +625,9 @@ def main():
         sample0 = train_ds[0]
         print(f"[debug] raw train sample0 keys: {list(sample0.keys())}")
         if "messages" in sample0:
-            print(
-                f"[debug] raw train sample0 messages type: {type(sample0['messages'])}"
-            )
+            print(f"[debug] raw train sample0 messages type: {type(sample0['messages'])}")
             if isinstance(sample0["messages"], list) and sample0["messages"]:
-                print(
-                    f"[debug] raw train sample0 messages[0] type: {type(sample0['messages'][0])}"
-                )
+                print(f"[debug] raw train sample0 messages[0] type: {type(sample0['messages'][0])}")
     except Exception as e:
         print(f"[debug] error inspecting raw dataset: {e}")
 
@@ -691,9 +641,7 @@ def main():
     use_cuda = chosen_device == "cuda" and torch.cuda.is_available()
     dtype = torch.bfloat16 if use_cuda and hasattr(torch, "bfloat16") else torch.float32
     # Use explicit device for single GPU to avoid meta device issues with device_map="auto"
-    device_map_param = (
-        "cuda:0" if use_cuda and torch.cuda.device_count() == 1 else "auto"
-    )
+    device_map_param = "cuda:0" if use_cuda and torch.cuda.device_count() == 1 else "auto"
     base_model = AutoModelForCausalLM.from_pretrained(
         hf_model_id,
         torch_dtype=dtype,
@@ -711,9 +659,7 @@ def main():
     lora_config = LoraConfig(
         r=8,
         lora_alpha=16,
-        target_modules=(
-            config_target_modules if config_target_modules else default_target_modules
-        ),
+        target_modules=(config_target_modules if config_target_modules else default_target_modules),
         lora_dropout=cfg.lora_dropout,
         bias="none",
         task_type="CAUSAL_LM",
@@ -726,13 +672,7 @@ def main():
             filtered = []
             for f in features:
                 if isinstance(f, dict):
-                    filtered.append(
-                        {
-                            k: v
-                            for k, v in f.items()
-                            if k in ("input_ids", "attention_mask", "labels")
-                        }
-                    )
+                    filtered.append({k: v for k, v in f.items() if k in ("input_ids", "attention_mask", "labels")})
                 else:
                     filtered.append(f)
             return super().torch_call(filtered)
@@ -761,14 +701,8 @@ def main():
     if streaming_train:
         # Steps per epoch based on desired sample count and batch size
         # Use max_train_samples if provided, else finetune_train_nsamples from config, else fallback to 1000
-        target_samples = (
-            args.max_train_samples
-            or getattr(cfg, "finetune_train_nsamples", None)
-            or 1000
-        )
-        steps_per_epoch = max(
-            1, math.ceil(target_samples / max(1, cfg.finetune_train_batch_size))
-        )
+        target_samples = args.max_train_samples or getattr(cfg, "finetune_train_nsamples", None) or 1000
+        steps_per_epoch = max(1, math.ceil(target_samples / max(1, cfg.finetune_train_batch_size)))
         max_steps_override = max(1, steps_per_epoch * max(1, cfg.epochs))
 
     # Precision flags: enable bf16 if supported, otherwise leave fp16 False on CPU to avoid errors
@@ -837,9 +771,7 @@ def main():
     is_streaming = is_iterable_dataset(train_ds)
     # Remove 'messages' column so only tokenized output is kept
     # Note: IterableDataset.map() has limited parameter support compared to Dataset.map()
-    is_streaming = (
-        hasattr(train_ds, "__class__") and "Iterable" in train_ds.__class__.__name__
-    )
+    is_streaming = hasattr(train_ds, "__class__") and "Iterable" in train_ds.__class__.__name__
 
     map_kwargs_train = {
         "batched": True,
@@ -857,23 +789,12 @@ def main():
         map_kwargs_eval["load_from_cache_file"] = False
         map_kwargs_eval["desc"] = "Tokenizing eval"
 
-    train_dataset = (
-        train_ds.map(preprocess, **map_kwargs_train)
-        if hasattr(train_ds, "map")
-        else train_ds
-    )
-    eval_dataset = (
-        eval_ds.map(preprocess, **map_kwargs_eval)
-        if hasattr(eval_ds, "map")
-        else eval_ds
-    )
+    train_dataset = train_ds.map(preprocess, **map_kwargs_train) if hasattr(train_ds, "map") else train_ds
+    eval_dataset = eval_ds.map(preprocess, **map_kwargs_eval) if hasattr(eval_ds, "map") else eval_ds
     # Remove all non-model columns to avoid DataCollator confusion
     # Note: IterableDataset doesn't support column_names or remove_columns
     keep_cols = {"input_ids", "attention_mask"}
-    if (
-        hasattr(train_dataset, "column_names")
-        and train_dataset.column_names is not None
-    ):
+    if hasattr(train_dataset, "column_names") and train_dataset.column_names is not None:
         drop_train = [c for c in train_dataset.column_names if c not in keep_cols]
         if drop_train:
             train_dataset = train_dataset.remove_columns(drop_train)
@@ -925,15 +846,12 @@ def main():
         trainer.add_callback(PerplexityLoggingCallback(logger))
         # Add OpenTelemetry tracing callback if available and compatible
         try:
-            from otel_callback import \
-                OpenTelemetryTrainerCallback  # type: ignore
+            from otel_callback import OpenTelemetryTrainerCallback  # type: ignore
 
             if hasattr(OpenTelemetryTrainerCallback, "on_prediction_step"):
                 trainer.add_callback(OpenTelemetryTrainerCallback())
             else:
-                print(
-                    "[debug] Skipping OpenTelemetryTrainerCallback: missing on_prediction_step"
-                )
+                print("[debug] Skipping OpenTelemetryTrainerCallback: missing on_prediction_step")
         except Exception as e:
             print(f"[debug] Skipping OpenTelemetryTrainerCallback: {e}")
 

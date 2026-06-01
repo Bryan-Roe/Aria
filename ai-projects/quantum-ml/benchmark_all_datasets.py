@@ -229,9 +229,7 @@ def load_dataset(dataset_name):
     from sklearn.impute import SimpleImputer
 
     dataset_config = DATASETS[dataset_name]
-    dataset_path = (
-        Path(__file__).parent.parent / "datasets" / "quantum" / dataset_config["file"]
-    )
+    dataset_path = Path(__file__).parent.parent / "datasets" / "quantum" / dataset_config["file"]
 
     print(f"\n📁 Loading {dataset_name} dataset...")
     print(f"   File: {dataset_config['file']}")
@@ -246,18 +244,14 @@ def load_dataset(dataset_name):
         df = pd.read_csv(dataset_path, na_values=["?", "NA", "", "NaN"])
     elif dataset_name in {"wheat_seeds", "seeds"}:
         # Whitespace-delimited datasets with no header
-        df = pd.read_csv(
-            dataset_path, sep=r"\s+", header=None, na_values=["?", "NA", "", "NaN"]
-        )
+        df = pd.read_csv(dataset_path, sep=r"\s+", header=None, na_values=["?", "NA", "", "NaN"])
     elif dataset_name == "parkinsons":
         # Comma-delimited with header, skip first column (name)
         df = pd.read_csv(dataset_path, na_values=["?", "NA", "", "NaN"])
         df = df.drop(columns=df.columns[0])  # Skip name column
     elif dataset_name in {"statlog_australian", "statlog_heart"}:
         # Space-delimited, no header
-        df = pd.read_csv(
-            dataset_path, sep=" ", header=None, na_values=["?", "NA", "", "NaN"]
-        )
+        df = pd.read_csv(dataset_path, sep=" ", header=None, na_values=["?", "NA", "", "NaN"])
     elif dataset_name == "vertebral_column":
         # Binary file or severely corrupted - skip
         raise ValueError("Dataset file appears to be corrupted or binary format")
@@ -286,15 +280,11 @@ def load_dataset(dataset_name):
             df = pd.read_csv(dataset_path, na_values=["?", "NA", "", "NaN"])
             # Check if it looks like semicolon-delimited
             if df.shape[1] == 1 and ";" in str(df.iloc[0, 0]):
-                df = pd.read_csv(
-                    dataset_path, sep=";", na_values=["?", "NA", "", "NaN"]
-                )
+                df = pd.read_csv(dataset_path, sep=";", na_values=["?", "NA", "", "NaN"])
         except UnicodeDecodeError:
             # Try different encoding
             try:
-                df = pd.read_csv(
-                    dataset_path, na_values=["?", "NA", "", "NaN"], encoding="latin-1"
-                )
+                df = pd.read_csv(dataset_path, na_values=["?", "NA", "", "NaN"], encoding="latin-1")
             except:
                 df = pd.read_csv(
                     dataset_path,
@@ -315,29 +305,15 @@ def load_dataset(dataset_name):
         "seeds",
     }:
         first_row_numeric = all(
-            str(df.iloc[0, i])
-            .replace(".", "")
-            .replace("-", "")
-            .replace("e", "")
-            .isdigit()
-            or str(df.iloc[0, i])
-            .replace(".", "")
-            .replace("-", "")
-            .replace("e", "")
-            .replace("+", "")
-            .isdigit()
+            str(df.iloc[0, i]).replace(".", "").replace("-", "").replace("e", "").isdigit()
+            or str(df.iloc[0, i]).replace(".", "").replace("-", "").replace("e", "").replace("+", "").isdigit()
             for i in range(min(3, df.shape[1] - 1))
         )
 
-        if (
-            first_row_numeric
-            or df.columns[0].replace(".", "").replace("-", "").isdigit()
-        ):
+        if first_row_numeric or df.columns[0].replace(".", "").replace("-", "").isdigit():
             # No header - reload without header
             try:
-                df = pd.read_csv(
-                    dataset_path, header=None, na_values=["?", "NA", "", "NaN"]
-                )
+                df = pd.read_csv(dataset_path, header=None, na_values=["?", "NA", "", "NaN"])
             except UnicodeDecodeError:
                 df = pd.read_csv(
                     dataset_path,
@@ -387,9 +363,7 @@ def load_dataset(dataset_name):
 def preprocess_data(X, y, n_qubits=4, test_size=0.2):
     """Preprocess data for quantum ML"""
     # Split data
-    X_train, X_val, y_train, y_val = train_test_split(
-        X, y, test_size=test_size, random_state=42, stratify=y
-    )
+    X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=test_size, random_state=42, stratify=y)
 
     # Standardize
     scaler = StandardScaler()
@@ -405,9 +379,7 @@ def preprocess_data(X, y, n_qubits=4, test_size=0.2):
         X_train = pca.fit_transform(X_train)
         X_val = pca.transform(X_val)
         explained_var = pca.explained_variance_ratio_.sum()
-        print(
-            f"   PCA: {n_features} → {n_qubits} features ({explained_var:.2%} variance)"
-        )
+        print(f"   PCA: {n_features} → {n_qubits} features ({explained_var:.2%} variance)")
     elif n_features < n_qubits:
         pad_train = np.zeros((X_train.shape[0], n_qubits - n_features))
         pad_val = np.zeros((X_val.shape[0], n_qubits - n_features))
@@ -442,9 +414,7 @@ def train_model(X_train, y_train, X_val, y_val, num_epochs=25, batch_size=16):
     # Create data loaders with drop_last for training to avoid batch norm issues
     train_dataset = TensorDataset(X_train_t, y_train_t)
     val_dataset = TensorDataset(X_val_t, y_val_t)
-    train_loader = DataLoader(
-        train_dataset, batch_size=batch_size, shuffle=True, drop_last=True
-    )
+    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, drop_last=True)
     val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
 
     # Train
@@ -503,9 +473,7 @@ def plot_comparison(results, save_path="results/benchmark_comparison.png"):
     ax = axes[0, 0]
     datasets = [r["dataset"] for r in results]
     accuracies = [r["best_accuracy"] for r in results]
-    colors = [
-        "green" if a >= 0.85 else "orange" if a >= 0.75 else "red" for a in accuracies
-    ]
+    colors = ["green" if a >= 0.85 else "orange" if a >= 0.75 else "red" for a in accuracies]
     bars = ax.bar(datasets, accuracies, color=colors, alpha=0.7)
     ax.set_ylabel("Accuracy")
     ax.set_title("Best Validation Accuracy")
@@ -568,23 +536,15 @@ def generate_report(results, save_path="results/benchmark_report.md"):
     report.append("- **Optimizer:** Adam")
 
     report.append("\n## Results Summary\n")
-    report.append(
-        "| Dataset | Samples | Features | Best Accuracy | Final Accuracy | Grade |"
-    )
-    report.append(
-        "|---------|---------|----------|---------------|----------------|-------|"
-    )
+    report.append("| Dataset | Samples | Features | Best Accuracy | Final Accuracy | Grade |")
+    report.append("|---------|---------|----------|---------------|----------------|-------|")
 
     for r in results:
         acc = r["best_accuracy"]
         grade = (
             "🏆 Excellent"
             if acc >= 0.85
-            else (
-                "⭐ Very Good"
-                if acc >= 0.75
-                else "✅ Good" if acc >= 0.65 else "⚠️ Fair"
-            )
+            else ("⭐ Very Good" if acc >= 0.75 else "✅ Good" if acc >= 0.65 else "⚠️ Fair")
         )
         report.append(
             f"| {r['dataset']} | {r['n_samples']} | {r['n_features']} | {acc:.2%} | {r['final_accuracy']:.2%} | {grade} |"
@@ -605,9 +565,7 @@ def generate_report(results, save_path="results/benchmark_report.md"):
     best_dataset = max(results, key=lambda x: x["best_accuracy"])
     avg_acc = np.mean([r["best_accuracy"] for r in results])
 
-    report.append(
-        f"- **Best Performance:** {best_dataset['dataset']} ({best_dataset['best_accuracy']:.2%})"
-    )
+    report.append(f"- **Best Performance:** {best_dataset['dataset']} ({best_dataset['best_accuracy']:.2%})")
     report.append(f"- **Average Accuracy:** {avg_acc:.2%}")
     report.append(f"- **Total Datasets Tested:** {len(results)}")
 
@@ -632,9 +590,7 @@ def main():
     print("=" * 70)
     print(f"\n🔬 Testing on {len(DATASETS)} quantum datasets (27 total, 26 working)")
     print("   Model: Hybrid Quantum-Classical Neural Network")
-    print(
-        "   Configuration: Variable architecture (4-6 qubits, 2-4 layers per dataset)"
-    )
+    print("   Configuration: Variable architecture (4-6 qubits, 2-4 layers per dataset)")
     print("   Training: 25 epochs with dataset-specific hyperparameters")
 
     results = []
@@ -674,11 +630,7 @@ def main():
 
     for r in results:
         acc = r["best_accuracy"]
-        grade = (
-            "🏆 Excellent"
-            if acc >= 0.85
-            else "⭐ Very Good" if acc >= 0.75 else "✅ Good"
-        )
+        grade = "🏆 Excellent" if acc >= 0.85 else "⭐ Very Good" if acc >= 0.75 else "✅ Good"
         print(f"{r['dataset']:<15} {r['n_samples']:<10} {acc:>6.2%}      {grade}")
 
     avg_acc = np.mean([r["best_accuracy"] for r in results])

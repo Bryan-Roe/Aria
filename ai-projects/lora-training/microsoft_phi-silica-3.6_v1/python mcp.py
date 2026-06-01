@@ -11,8 +11,7 @@ from contextlib import AsyncExitStack
 from typing import Dict
 
 from azure.ai.inference import ChatCompletionsClient
-from azure.ai.inference.models import (AssistantMessage, TextContentItem,
-                                       ToolMessage, UserMessage)
+from azure.ai.inference.models import AssistantMessage, TextContentItem, ToolMessage, UserMessage
 from azure.core.credentials import AzureKeyCredential
 from mcp import ClientSession, StdioServerParameters
 from mcp.client.sse import sse_client
@@ -34,9 +33,7 @@ class MCPClient:
             api_version="2024-12-01-preview",
         )
 
-    async def connect_stdio_server(
-        self, server_id: str, command: str, args: list[str], env: Dict[str, str]
-    ):
+    async def connect_stdio_server(self, server_id: str, command: str, args: list[str], env: Dict[str, str]):
         """Connect to an MCP server using STDIO transport
 
         Args:
@@ -47,9 +44,7 @@ class MCPClient:
         """
         server_params = StdioServerParameters(command=command, args=args, env=env)
 
-        stdio_transport = await self.exit_stack.enter_async_context(
-            stdio_client(server_params)
-        )
+        stdio_transport = await self.exit_stack.enter_async_context(stdio_client(server_params))
         stdio, write = stdio_transport
         session = await self.exit_stack.enter_async_context(ClientSession(stdio, write))
         await session.initialize()
@@ -57,9 +52,7 @@ class MCPClient:
         # Register the server
         await self._register_server(server_id, session)
 
-    async def connect_sse_server(
-        self, server_id: str, url: str, headers: Dict[str, str]
-    ):
+    async def connect_sse_server(self, server_id: str, url: str, headers: Dict[str, str]):
         """Connect to an MCP server using SSE transport
 
         Args:
@@ -67,9 +60,7 @@ class MCPClient:
             url: URL of the SSE server
             headers: Optional HTTP headers
         """
-        sse_context = await self.exit_stack.enter_async_context(
-            sse_client(url=url, headers=headers)
-        )
+        sse_context = await self.exit_stack.enter_async_context(sse_client(url=url, headers=headers))
         read, write = sse_context
         session = await self.exit_stack.enter_async_context(ClientSession(read, write))
         await session.initialize()
@@ -77,9 +68,7 @@ class MCPClient:
         # Register the server
         await self._register_server(server_id, session)
 
-    async def connect_http_server(
-        self, server_id: str, url: str, headers: Dict[str, str]
-    ):
+    async def connect_http_server(self, server_id: str, url: str, headers: Dict[str, str]):
         """Connect to an MCP server using HTTP transport
 
         Args:
@@ -87,9 +76,7 @@ class MCPClient:
             url: URL of the HTTP server
             headers: Optional HTTP headers
         """
-        http_context = await self.exit_stack.enter_async_context(
-            streamablehttp_client(url=url, headers=headers)
-        )
+        http_context = await self.exit_stack.enter_async_context(streamablehttp_client(url=url, headers=headers))
         read, write, sessionId = http_context
         session = await self.exit_stack.enter_async_context(ClientSession(read, write))
         await session.initialize()
@@ -126,9 +113,7 @@ class MCPClient:
             messages: Messages to send to the model
         """
         if not self._servers:
-            raise ValueError(
-                "No MCP servers connected. Connect to at least one server first."
-            )
+            raise ValueError("No MCP servers connected. Connect to at least one server first.")
 
         # Collect tools from all connected servers
         available_tools = []
@@ -183,19 +168,11 @@ class MCPClient:
 
                         # Execute tool call on the appropriate server
                         result = await server_session.call_tool(tool_name, tool_args)
-                        print(
-                            f"[Server '{server_id}' call tool '{tool_name}' with args {tool_args}]: {result.content}"
-                        )
+                        print(f"[Server '{server_id}' call tool '{tool_name}' with args {tool_args}]: {result.content}")
 
-                        messages.append(
-                            ToolMessage(
-                                tool_call_id=tool.id, content=str(result.content)
-                            )
-                        )
+                        messages.append(ToolMessage(tool_call_id=tool.id, content=str(result.content)))
             else:
-                messages.append(
-                    AssistantMessage(content=response.choices[0].message.content)
-                )
+                messages.append(AssistantMessage(content=response.choices[0].message.content))
                 print(f"[Model Response]: {response.choices[0].message.content}")
 
             if not hasToolCall:
@@ -241,9 +218,7 @@ async def main():
             ],
             {},
         )
-        await client.connect_http_server(
-            "microsoft docs", "https://learn.microsoft.com/api/mcp", {}
-        )
+        await client.connect_http_server("microsoft docs", "https://learn.microsoft.com/api/mcp", {})
         await client.chatWithTools(messages)
     except Exception as e:
         print(f"\nError: {str(e)}")

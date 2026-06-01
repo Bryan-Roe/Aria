@@ -4,8 +4,7 @@ import sys
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(REPO_ROOT / "ai-projects" /
-                "lora-training" / "microsoft_phi-silica-3.6_v1"))
+sys.path.insert(0, str(REPO_ROOT / "ai-projects" / "lora-training" / "microsoft_phi-silica-3.6_v1"))
 
 import torch  # noqa: E402
 from peft import PeftModel  # noqa: E402
@@ -17,8 +16,7 @@ def test_aria_final(adapter_path: str):
 
     print(f"🔍 Loading model with adapter: {Path(adapter_path).name}")
     tokenizer = AutoTokenizer.from_pretrained(base_model)
-    model = AutoModelForCausalLM.from_pretrained(
-        base_model, torch_dtype=torch.float16, device_map="auto")
+    model = AutoModelForCausalLM.from_pretrained(base_model, torch_dtype=torch.float16, device_map="auto")
     model = PeftModel.from_pretrained(model, adapter_path)
 
     test_commands = [
@@ -52,8 +50,7 @@ def test_aria_final(adapter_path: str):
                 eos_token_id=tokenizer.eos_token_id,
             )
 
-        response = tokenizer.decode(
-            outputs[0][inputs["input_ids"].shape[1]:], skip_special_tokens=True)
+        response = tokenizer.decode(outputs[0][inputs["input_ids"].shape[1] :], skip_special_tokens=True)
 
         # Extract first command tag
         import re
@@ -71,6 +68,5 @@ def test_aria_final(adapter_path: str):
 
 
 if __name__ == "__main__":
-    adapter = REPO_ROOT / "data_out" / "aria_models" / \
-        "aria_expanded_v2" / "lora_adapter"
+    adapter = REPO_ROOT / "data_out" / "aria_models" / "aria_expanded_v2" / "lora_adapter"
     test_aria_final(str(adapter))

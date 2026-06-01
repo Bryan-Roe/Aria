@@ -129,9 +129,7 @@ def _abbr_label(label: str, max_len: int = 24) -> str:
     return f"{label[:8]}…{label[-8:]}"
 
 
-def plot_counts_bar(
-    counts: Dict[str, int], title: str, out_path: Path, top_n: int = 10
-) -> None:
+def plot_counts_bar(counts: Dict[str, int], title: str, out_path: Path, top_n: int = 10) -> None:
     total = sum(counts.values())
     items = sorted(counts.items(), key=lambda x: x[1], reverse=True)[:top_n]
     labels = [k for k, _ in items]
@@ -198,9 +196,7 @@ def plot_hamming_weight_hist(counts: Dict[str, int], out_path: Path) -> None:
     plt.close(fig)
 
 
-def try_fetch_azure_job_list(
-    resource_group: str, workspace: str, location: str
-) -> Optional[pd.DataFrame]:
+def try_fetch_azure_job_list(resource_group: str, workspace: str, location: str) -> Optional[pd.DataFrame]:
     cmd = [
         "az",
         "quantum",
@@ -321,18 +317,12 @@ def main() -> int:
     if local_files:
         # If they came from RESULTS_DIR this message is accurate; otherwise a message was already printed.
         if all(
-            (
-                p.is_relative_to(RESULTS_DIR)
-                if hasattr(p, "is_relative_to")
-                else str(p).startswith(str(RESULTS_DIR))
-            )
+            (p.is_relative_to(RESULTS_DIR) if hasattr(p, "is_relative_to") else str(p).startswith(str(RESULTS_DIR)))
             for p in local_files
         ):
             print(f"Found {len(local_files)} local result file(s) in {RESULTS_DIR}")
     else:
-        print(
-            "No local result JSON files found in results/. We'll still generate Azure job charts if available."
-        )
+        print("No local result JSON files found in results/. We'll still generate Azure job charts if available.")
 
     for p in local_files:
         counts = load_counts_from_json(p)
@@ -359,17 +349,12 @@ def main() -> int:
                 entanglement_summary.append((stem, ratio))
         # For large bitstrings, add Hamming weight histogram
         if max(bit_lengths) > 32:
-            plot_hamming_weight_hist(
-                counts, out_path=VIZ_DIR / f"{stem}_hamming_weight.png"
-            )
+            plot_hamming_weight_hist(counts, out_path=VIZ_DIR / f"{stem}_hamming_weight.png")
 
     # 1b) Summary charts for variational MPS runs by entanglement
     df_all = build_summary_df(local_files)
     if not df_all.empty:
-        df_mps = df_all[
-            (df_all["method"] == "matrix_product_state")
-            & (df_all["circuit"].str.contains("variational"))
-        ]
+        df_mps = df_all[(df_all["method"] == "matrix_product_state") & (df_all["circuit"].str.contains("variational"))]
         if not df_mps.empty:
             # For each (n_qubits, layers), plot entanglement vs entropy_pct for clean and noise separately
             for (nq, L), sub in df_mps.groupby(["n_qubits", "layers"]):
@@ -384,9 +369,7 @@ def main() -> int:
                     if pivot.empty:
                         continue
                     fig, ax = plt.subplots(figsize=(6, 4))
-                    pivot.reindex(["linear", "circular", "full"]).plot(
-                        kind="bar", ax=ax, color="#4C78A8"
-                    )
+                    pivot.reindex(["linear", "circular", "full"]).plot(kind="bar", ax=ax, color="#4C78A8")
                     ax.set_title(f"Entropy% by entanglement (n={nq}, L={L}, {nlbl})")
                     ax.set_xlabel("Entanglement")
                     ax.set_ylabel("Entropy %")
@@ -400,10 +383,7 @@ def main() -> int:
 
     # 1c) Summary for stabilizer random: weight coverage vs layers
     if not df_all.empty:
-        df_stab = df_all[
-            (df_all["circuit"].str.contains("stabilizer"))
-            & (df_all["stabilizer_type"] == "random")
-        ]
+        df_stab = df_all[(df_all["circuit"].str.contains("stabilizer")) & (df_all["stabilizer_type"] == "random")]
         if not df_stab.empty:
             # Compute weight coverage from counts
             coverage_rows = []
@@ -430,15 +410,11 @@ def main() -> int:
                     fig, ax = plt.subplots(figsize=(6, 4))
                     part = part.sort_values("clifford_layers")
                     ax.plot(part["clifford_layers"], part["coverage"], marker="o")
-                    ax.set_title(
-                        f"Stabilizer random: weight coverage vs layers (n={nq})"
-                    )
+                    ax.set_title(f"Stabilizer random: weight coverage vs layers (n={nq})")
                     ax.set_xlabel("Clifford layers")
                     ax.set_ylabel("Coverage % of weights (0..n)")
                     ax.set_ylim(0, 100)
-                    fig.savefig(
-                        VIZ_DIR / f"stabilizer_random_weight_coverage_n{nq}.png"
-                    )
+                    fig.savefig(VIZ_DIR / f"stabilizer_random_weight_coverage_n{nq}.png")
                     plt.close(fig)
 
     # Summary entanglement chart for 2-qubit results
@@ -465,9 +441,7 @@ def main() -> int:
             plot_provider_status_stacked(df, VIZ_DIR / "azure_jobs_provider_status.png")
             print("Azure job charts saved under visualizations/.")
         else:
-            print(
-                "Azure job list not available or empty (no charts generated for jobs)."
-            )
+            print("Azure job list not available or empty (no charts generated for jobs).")
     else:
         print("Azure config incomplete; skipping Azure job charts.")
 

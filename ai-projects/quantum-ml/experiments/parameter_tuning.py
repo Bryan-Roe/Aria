@@ -22,8 +22,7 @@ if str(project_root) not in sys.path:
     sys.path.insert(0, str(project_root))
 
 try:
-    from src.quantum_classifier import (HybridQuantumClassifier,
-                                        QuantumClassifier, train_quantum_model)
+    from src.quantum_classifier import HybridQuantumClassifier, QuantumClassifier, train_quantum_model
 except ModuleNotFoundError:
     # Fallback for environments without namespace package support
     sys.path.insert(0, str(project_root / "src"))
@@ -113,9 +112,7 @@ for x, y in zip(layers, accuracies):
 
 # Training curves for all layers
 for result in layer_results:
-    ax2.plot(
-        result["history"]["val_acc"], label=f"{result['n_layers']} layers", linewidth=2
-    )
+    ax2.plot(result["history"]["val_acc"], label=f"{result['n_layers']} layers", linewidth=2)
 
 ax2.set_xlabel("Epoch", fontsize=12)
 ax2.set_ylabel("Validation Accuracy", fontsize=12)
@@ -208,9 +205,7 @@ for ent_type in entanglement_types:
     history = train_quantum_model(model, X_train_padded, y_train, X_val_padded, y_val)
 
     final_acc = history["val_acc"][-1]
-    ent_results.append(
-        {"entanglement": ent_type, "accuracy": final_acc, "history": history}
-    )
+    ent_results.append({"entanglement": ent_type, "accuracy": final_acc, "history": history})
 
     print(f"    Final Validation Accuracy: {final_acc:.4f}")
 
@@ -221,9 +216,7 @@ ent_names = [r["entanglement"] for r in ent_results]
 ent_accs = [r["accuracy"] for r in ent_results]
 colors = ["#3498db", "#9b59b6", "#f39c12"]
 
-bars = ax1.bar(
-    ent_names, ent_accs, color=colors, alpha=0.7, edgecolor="black", linewidth=2
-)
+bars = ax1.bar(ent_names, ent_accs, color=colors, alpha=0.7, edgecolor="black", linewidth=2)
 ax1.set_ylabel("Validation Accuracy", fontsize=12)
 ax1.set_title("Impact of Entanglement Pattern", fontsize=14, fontweight="bold")
 ax1.set_ylim([0, 1])
@@ -267,9 +260,7 @@ print("-" * 70)
 
 # Best layer depth
 best_layer = max(layer_results, key=lambda x: x["accuracy"])
-print(
-    f"Optimal Layers: {best_layer['n_layers']} (Accuracy: {best_layer['accuracy']:.4f})"
-)
+print(f"Optimal Layers: {best_layer['n_layers']} (Accuracy: {best_layer['accuracy']:.4f})")
 
 # Best learning rate
 best_lr = max(lr_results, key=lambda x: x["accuracy"])
@@ -277,9 +268,7 @@ print(f"Optimal Learning Rate: {best_lr['lr']} (Accuracy: {best_lr['accuracy']:.
 
 # Best entanglement
 best_ent = max(ent_results, key=lambda x: x["accuracy"])
-print(
-    f"Optimal Entanglement: {best_ent['entanglement']} (Accuracy: {best_ent['accuracy']:.4f})"
-)
+print(f"Optimal Entanglement: {best_ent['entanglement']} (Accuracy: {best_ent['accuracy']:.4f})")
 
 print("\nKey Insights:")
 print("-" * 70)

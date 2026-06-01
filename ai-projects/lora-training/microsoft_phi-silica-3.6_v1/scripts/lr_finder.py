@@ -97,11 +97,7 @@ class LearningRateFinder:
 
             # Forward pass
             inputs = {k: v.to(self.device) for k, v in batch.items() if k != "labels"}
-            labels = (
-                batch["labels"].to(self.device)
-                if "labels" in batch
-                else inputs["input_ids"]
-            )
+            labels = batch["labels"].to(self.device) if "labels" in batch else inputs["input_ids"]
 
             outputs = self.model(**inputs, labels=labels)
             loss = outputs.loss
@@ -130,9 +126,7 @@ class LearningRateFinder:
 
             # Progress
             if (iteration + 1) % 10 == 0:
-                print(
-                    f"Iteration {iteration + 1}/{num_iter} | LR: {lr:.2e} | Loss: {smoothed_loss:.4f}"
-                )
+                print(f"Iteration {iteration + 1}/{num_iter} | LR: {lr:.2e} | Loss: {smoothed_loss:.4f}")
 
         # Restore initial state
         self.model.load_state_dict(self.initial_state["model"])
@@ -149,9 +143,7 @@ class LearningRateFinder:
 
         return results
 
-    def _analyze_results(
-        self, lrs: List[float], losses: List[float], smooth_f: float
-    ) -> Dict[str, Any]:
+    def _analyze_results(self, lrs: List[float], losses: List[float], smooth_f: float) -> Dict[str, Any]:
         """Analyze LR finder results"""
         # Smooth losses
         smoothed_losses = []
@@ -255,9 +247,7 @@ def main():
     parser.add_argument("--dataset", type=str, required=True, help="Dataset path")
     parser.add_argument("--start-lr", type=float, default=1e-7, help="Starting LR")
     parser.add_argument("--end-lr", type=float, default=10.0, help="Ending LR")
-    parser.add_argument(
-        "--num-iter", type=int, default=100, help="Number of iterations"
-    )
+    parser.add_argument("--num-iter", type=int, default=100, help="Number of iterations")
     parser.add_argument("--batch-size", type=int, default=1, help="Batch size")
 
     args = parser.parse_args()
@@ -271,9 +261,7 @@ def main():
 
     # Load dataset (simplified)
     # In practice, you'd load and prepare your actual dataset
-    print(
-        "Note: Using simplified dataset loading. Integrate with your actual data pipeline."
-    )
+    print("Note: Using simplified dataset loading. Integrate with your actual data pipeline.")
 
     # Create optimizer
     optimizer = torch.optim.AdamW(model.parameters(), lr=1e-3)

@@ -147,9 +147,7 @@ class QuantumLLMPipeline:
                     explicit=provider_name if provider_name != "auto" else None,
                     model_override=self.config.model,
                     temperature=self.config.temperature,
-                    max_output_tokens=min(
-                        self.config.max_tokens, self.config.max_tokens_cap
-                    ),
+                    max_output_tokens=min(self.config.max_tokens, self.config.max_tokens_cap),
                 )
                 return provider
             except Exception as exc:  # noqa: BLE001
@@ -226,9 +224,7 @@ class QuantumLLMPipeline:
         """
         # Validate
         if len(prompt) > self.config.max_prompt_chars:
-            raise ValueError(
-                f"Prompt too long: {len(prompt)} chars (max {self.config.max_prompt_chars})"
-            )
+            raise ValueError(f"Prompt too long: {len(prompt)} chars (max {self.config.max_prompt_chars})")
 
         t0 = time.monotonic()
 
@@ -361,7 +357,7 @@ class QuantumLLMPipeline:
 
         latency_ms = round((time.monotonic() - t0) * 1000, 1)
         done_meta = {"latency_ms": latency_ms, "quantum_augmented": True}
-        yield f'data: {json.dumps(done_meta)}\n\n'
+        yield f"data: {json.dumps(done_meta)}\n\n"
         yield "data: [DONE]\n\n"
 
     def status(self) -> dict[str, Any]:

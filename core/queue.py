@@ -28,8 +28,7 @@ class TaskQueue(Generic[TTask]):
 
     async def add_task(self, task: TTask) -> None:
         if not self.running:
-            raise RuntimeError(
-                "TaskQueue is not running. Call start() before add_task().")
+            raise RuntimeError("TaskQueue is not running. Call start() before add_task().")
         await self.queue.put(task)
 
     async def worker(self, handler: TaskHandler[TTask]) -> None:

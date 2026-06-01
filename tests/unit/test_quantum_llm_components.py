@@ -70,9 +70,7 @@ class TestClassicalVariationalProbs:
         """Should handle different numbers of qubits."""
         for n_qubits in [1, 2, 3, 4]:
             params = np.random.randn(n_qubits * 2)
-            probs = _classical_variational_probs(
-                params, num_qubits=n_qubits, shots=100, rng=None
-            )
+            probs = _classical_variational_probs(params, num_qubits=n_qubits, shots=100, rng=None)
             assert len(probs) == 2**n_qubits
 
 
@@ -106,10 +104,7 @@ class TestQuantumSampler:
         logits = np.array([10.0, 1.0, 1.0])  # Strongly prefer index 0
 
         # With blend_factor=0 (classical), should heavily favor index 0
-        classical_samples = [
-            sampler.sample(logits, blend_factor=0.0, seed=None)
-            for _ in range(100)
-        ]
+        classical_samples = [sampler.sample(logits, blend_factor=0.0, seed=None) for _ in range(100)]
         classical_mode = max(set(classical_samples), key=classical_samples.count)
         assert classical_mode == 0
 

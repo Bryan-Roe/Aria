@@ -29,30 +29,25 @@ from typing import Any
 # ---------------------------------------------------------------------------
 
 PR_CHECKLIST = [
-    ("Dry-run orchestrators",
-     "If modifying YAML configs or orchestrators, run `--dry-run` first."),
-    ("Provider detection intact",
-     "Changes to shared/chat_providers.py or function_app.py verified via /api/ai/status."),
-    ("Dataset immutability",
-     "No modifications to datasets/ — all outputs written to data_out/."),
-    ("Status.json compliance",
-     "Orchestrators write data_out/<name>/status.json."),
-    ("Test suite passes",
-     "Run `python scripts/test_runner.py --unit` (or --all)."),
-    ("No hardcoded secrets",
-     "All API keys/connection strings use env vars or local.settings.json."),
-    ("Quantum cost gates",
-     "QPU jobs include azure_confirm_cost: true in YAML configs."),
-    ("LoRA adapter validity",
-     "Training output includes adapter_config.json + adapter_model.safetensors."),
-    ("Documentation sync",
-     "READMEs/instruction files updated if core workflows changed."),
+    ("Dry-run orchestrators", "If modifying YAML configs or orchestrators, run `--dry-run` first."),
+    (
+        "Provider detection intact",
+        "Changes to shared/chat_providers.py or function_app.py verified via /api/ai/status.",
+    ),
+    ("Dataset immutability", "No modifications to datasets/ — all outputs written to data_out/."),
+    ("Status.json compliance", "Orchestrators write data_out/<name>/status.json."),
+    ("Test suite passes", "Run `python scripts/test_runner.py --unit` (or --all)."),
+    ("No hardcoded secrets", "All API keys/connection strings use env vars or local.settings.json."),
+    ("Quantum cost gates", "QPU jobs include azure_confirm_cost: true in YAML configs."),
+    ("LoRA adapter validity", "Training output includes adapter_config.json + adapter_model.safetensors."),
+    ("Documentation sync", "READMEs/instruction files updated if core workflows changed."),
 ]
 
 
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
 
 def _event_name() -> str:
     return os.environ.get("COPILOT_HOOK_EVENT", "Stop")
@@ -113,6 +108,7 @@ def _format_checklist() -> str:
 # ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
+
 
 def main() -> None:
     raw = sys.stdin.read().strip()

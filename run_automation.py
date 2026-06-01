@@ -13,7 +13,12 @@ from typing import List
 
 # Use .venv environment if available
 workspace_root = Path(__file__).parent
-venv_python = workspace_root / ".venv" / ("Scripts" if sys.platform == "win32" else "bin") / ("python.exe" if sys.platform == "win32" else "python")
+venv_python = (
+    workspace_root
+    / ".venv"
+    / ("Scripts" if sys.platform == "win32" else "bin")
+    / ("python.exe" if sys.platform == "win32" else "python")
+)
 
 if venv_python.exists():
     # Prepend venv bin to PATH so subprocess uses venv Python
@@ -44,13 +49,9 @@ BOLD = "\033[1m"
 
 def print_section(title: str) -> None:
     """Print a section header."""
-    print(
-        f"\n{BOLD}{BLUE}═══════════════════════════════════════════════════════════{RESET}"
-    )
+    print(f"\n{BOLD}{BLUE}═══════════════════════════════════════════════════════════{RESET}")
     print(f"{BOLD}{BLUE}{title}{RESET}")
-    print(
-        f"{BOLD}{BLUE}═══════════════════════════════════════════════════════════{RESET}"
-    )
+    print(f"{BOLD}{BLUE}═══════════════════════════════════════════════════════════{RESET}")
 
 
 def print_ok(msg: str) -> None:
@@ -139,8 +140,8 @@ class AutomationRunner:
                 cwd=str(self.workspace_root),
                 capture_output=True,
                 text=True,
-                encoding='utf-8',
-                errors='replace',
+                encoding="utf-8",
+                errors="replace",
                 timeout=30,
             )
 
@@ -179,8 +180,8 @@ class AutomationRunner:
                 cwd=str(self.workspace_root),
                 capture_output=True,
                 text=True,
-                encoding='utf-8',
-                errors='replace',
+                encoding="utf-8",
+                errors="replace",
                 timeout=300,
             )
 
@@ -193,9 +194,7 @@ class AutomationRunner:
                 print_ok("All tests passed")
                 return True
             if "No module named pytest" in (result.stderr or ""):
-                print_error(
-                    "pytest is not installed in the active Python environment"
-                )
+                print_error("pytest is not installed in the active Python environment")
                 return False
             if result.returncode == 5:
                 print_warning("pytest collected no tests")
@@ -227,8 +226,8 @@ class AutomationRunner:
                 cwd=str(self.workspace_root),
                 capture_output=True,
                 text=True,
-                encoding='utf-8',
-                errors='replace',
+                encoding="utf-8",
+                errors="replace",
                 timeout=60,
             )
 
@@ -305,9 +304,7 @@ class AutomationRunner:
             if overall_ok:
                 print_ok("All automated tasks completed successfully!")
             else:
-                print_warning(
-                    "Automation finished with issues. Review the warnings/errors above."
-                )
+                print_warning("Automation finished with issues. Review the warnings/errors above.")
             self.display_status()
             return overall_ok
 

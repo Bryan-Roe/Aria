@@ -227,9 +227,7 @@ class TestFetchSimilarMessages:
 
         with patch.dict(os.environ, {"QAI_DB_CONN": "dummy", "QAI_MEMORY_MIN_SIMILARITY": "-1"}):
             with patch("shared.chat_memory.pyodbc.connect", return_value=_FakeConn()):
-                result = cm.fetch_similar_messages(
-                    [1.0, 0.0, 0.0], top_k=1, session_id="s1"
-                )
+                result = cm.fetch_similar_messages([1.0, 0.0, 0.0], top_k=1, session_id="s1")
 
         assert len(result) == 1
         assert isinstance(result[0], dict)
@@ -259,9 +257,7 @@ class TestFetchSimilarMessages:
 
         with patch.dict(os.environ, {"QAI_DB_CONN": "dummy", "QAI_MEMORY_MIN_SIMILARITY": "-1"}):
             with patch("shared.chat_memory.pyodbc.connect", return_value=_FakeConn()):
-                result = cm.fetch_similar_messages(
-                    [1.0, 0.0, 0.0], top_k=5, session_id="session-a"
-                )
+                result = cm.fetch_similar_messages([1.0, 0.0, 0.0], top_k=5, session_id="session-a")
 
         assert [row["message_id"] for row in result] == ["keep"]
 

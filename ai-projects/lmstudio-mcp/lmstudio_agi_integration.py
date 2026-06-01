@@ -19,9 +19,7 @@ import json
 import logging
 from typing import Any, Dict, List, Optional
 
-from lmstudio_agent_integration import (LMStudioAgentClient,
-                                        get_lmstudio_agent_client,
-                                        get_lmstudio_agent_info)
+from lmstudio_agent_integration import LMStudioAgentClient, get_lmstudio_agent_client, get_lmstudio_agent_info
 
 _logger = logging.getLogger(__name__)
 
@@ -533,9 +531,7 @@ async def example_router_decision_logic() -> None:
         should_use = router.should_use_lmstudio(test["analysis"])
         decision = "✓ Use LM Studio" if should_use else "✗ Use fallback"
         print(f"  {test['name']}")
-        print(
-            f"    Domain: {test['analysis']['domain']}, Intent: {test['analysis']['intent']}"
-        )
+        print(f"    Domain: {test['analysis']['domain']}, Intent: {test['analysis']['intent']}")
         print(f"    Decision: {decision}\n")
 
 

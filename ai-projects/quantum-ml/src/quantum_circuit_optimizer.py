@@ -75,9 +75,7 @@ class CircuitCompiler:
         self.strategy = strategy or OptimizationStrategy()
         self.stats = defaultdict(CircuitStats)
 
-        logger.info(
-            f"CircuitCompiler initialized with level {self.strategy.compilation_level}"
-        )
+        logger.info(f"CircuitCompiler initialized with level {self.strategy.compilation_level}")
 
     def optimize_circuit(self, circuit_fn, n_qubits: int, circuit_id: str) -> Any:
         """
@@ -129,9 +127,7 @@ class CircuitCompiler:
         """Aggressive optimization: full circuit rewriting."""
         return circuit_fn
 
-    def analyze_circuit(
-        self, circuit_fn, n_qubits: int, circuit_id: str
-    ) -> CircuitStats:
+    def analyze_circuit(self, circuit_fn, n_qubits: int, circuit_id: str) -> CircuitStats:
         """
         Analyze circuit properties.
 
@@ -152,9 +148,7 @@ class CircuitCompiler:
         """Generate optimization report for all circuits."""
         report = {
             "total_circuits": len(self.stats),
-            "total_compilation_time": sum(
-                s.compilation_time for s in self.stats.values()
-            ),
+            "total_compilation_time": sum(s.compilation_time for s in self.stats.values()),
             "total_execution_time": sum(s.execution_time for s in self.stats.values()),
             "circuits": {},
         }
@@ -194,9 +188,7 @@ class BatchCircuitExecutor:
         self.cache_hits = 0
         self.cache_misses = 0
 
-        logger.info(
-            f"BatchCircuitExecutor: batch_size={max_batch_size}, parallel={enable_parallel}"
-        )
+        logger.info(f"BatchCircuitExecutor: batch_size={max_batch_size}, parallel={enable_parallel}")
 
     def execute_batch(
         self,
@@ -293,9 +285,7 @@ class AdaptiveCircuitScheduler:
         self.queued_circuits = []
         self.completed_circuits = 0
 
-        logger.info(
-            f"AdaptiveCircuitScheduler: max_concurrent={max_concurrent_circuits}"
-        )
+        logger.info(f"AdaptiveCircuitScheduler: max_concurrent={max_concurrent_circuits}")
 
     def schedule(
         self,
@@ -425,20 +415,14 @@ class QuantumClassicalPartitioner:
 
     def get_partition_report(self) -> Dict[str, Any]:
         """Get partitioning statistics."""
-        quantum_count = sum(
-            1 for d in self.partition_decisions if d["decision"] == "quantum"
-        )
+        quantum_count = sum(1 for d in self.partition_decisions if d["decision"] == "quantum")
         classical_count = len(self.partition_decisions) - quantum_count
 
         return {
             "total_decisions": len(self.partition_decisions),
             "quantum_count": quantum_count,
             "classical_count": classical_count,
-            "quantum_ratio": (
-                quantum_count / len(self.partition_decisions)
-                if self.partition_decisions
-                else 0.0
-            ),
+            "quantum_ratio": (quantum_count / len(self.partition_decisions) if self.partition_decisions else 0.0),
         }
 
 
@@ -467,9 +451,7 @@ if __name__ == "__main__":
     # Test partitioner
     test_data = torch.randn(4, 64)
     should_quantum = partitioner.should_use_quantum(test_data)
-    logger.info(
-        f"Partition decision for test data: {'quantum' if should_quantum else 'classical'}"
-    )
+    logger.info(f"Partition decision for test data: {'quantum' if should_quantum else 'classical'}")
 
     logger.info(f"Executor cache stats: {executor.get_cache_stats()}")
     logger.info(f"Scheduler stats: {scheduler.get_stats()}")

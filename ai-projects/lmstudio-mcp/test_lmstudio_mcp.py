@@ -76,9 +76,7 @@ async def main():
     print("Sending message to LM Studio...")
     print(f"Prompt: {test_messages[-1]['content']}\n")
 
-    result = await client.chat_completion(
-        messages=test_messages, temperature=0.5, max_tokens=256
-    )
+    result = await client.chat_completion(messages=test_messages, temperature=0.5, max_tokens=256)
 
     if result["success"]:
         print("✅ Chat completion successful:")

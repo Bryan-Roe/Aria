@@ -39,8 +39,9 @@ DEFAULT_CONFIG = resolve_config_path(REPO_ROOT, "autotrain")
 DATA_OUT = REPO_ROOT / "data_out" / "autotrain"
 STATUS_FILE = DATA_OUT / "status.json"
 
-HF_TRAIN_SCRIPT = REPO_ROOT / "ai-projects" / "lora-training" / \
-    "microsoft_phi-silica-3.6_v1" / "scripts" / "train_lora.py"
+HF_TRAIN_SCRIPT = (
+    REPO_ROOT / "ai-projects" / "lora-training" / "microsoft_phi-silica-3.6_v1" / "scripts" / "train_lora.py"
+)
 
 
 # ---------------------------------------------------------------------------
@@ -276,8 +277,7 @@ def validate_job(job: TrainJob) -> dict[str, Any]:
 
     if job.runner == "hf":
         if not HF_TRAIN_SCRIPT.exists():
-            missing.append(
-                f"train script not found: {HF_TRAIN_SCRIPT.relative_to(REPO_ROOT)}")
+            missing.append(f"train script not found: {HF_TRAIN_SCRIPT.relative_to(REPO_ROOT)}")
 
     if job.config:
         config_path = REPO_ROOT / job.config
@@ -362,29 +362,23 @@ def _build_status(jobs_info: list[dict[str, Any]]) -> dict[str, Any]:
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(
-        description="AutoTrain — LoRA fine-tuning orchestrator")
+    parser = argparse.ArgumentParser(description="AutoTrain — LoRA fine-tuning orchestrator")
     parser.add_argument(
         "--config",
         type=Path,
         default=DEFAULT_CONFIG,
         help=f"Path to YAML config (default: {DEFAULT_CONFIG})",
     )
-    parser.add_argument("--dry-run", action="store_true",
-                        help="Validate config only; do not execute")
-    parser.add_argument("--list", action="store_true",
-                        help="Print jobs as JSON and exit")
-    parser.add_argument("--run", action="store_true",
-                        help="Execute training jobs")
-    parser.add_argument("--job", metavar="NAME",
-                        help="Filter to a single job by name")
+    parser.add_argument("--dry-run", action="store_true", help="Validate config only; do not execute")
+    parser.add_argument("--list", action="store_true", help="Print jobs as JSON and exit")
+    parser.add_argument("--run", action="store_true", help="Execute training jobs")
+    parser.add_argument("--job", metavar="NAME", help="Filter to a single job by name")
 
     args = parser.parse_args(argv)
 
     config_path = Path(args.config)
     if not config_path.exists():
-        print(
-            f"Config not found: {config_path} — using empty job list", file=sys.stderr)
+        print(f"Config not found: {config_path} — using empty job list", file=sys.stderr)
         jobs: list[TrainJob] = []
     else:
         jobs = load_jobs(config_path)
@@ -392,13 +386,11 @@ def main(argv: list[str] | None = None) -> int:
     if args.job:
         jobs = [j for j in jobs if j.name == args.job]
         if not jobs:
-            print(
-                f"No job named '{args.job}' found in config", file=sys.stderr)
+            print(f"No job named '{args.job}' found in config", file=sys.stderr)
             return 1
 
     if args.list:
-        print(json.dumps([vars(j)
-              for j in jobs], indent=2, ensure_ascii=False))
+        print(json.dumps([vars(j) for j in jobs], indent=2, ensure_ascii=False))
         return 0
 
     if not (args.dry_run or args.run):
@@ -417,8 +409,7 @@ def main(argv: list[str] | None = None) -> int:
         if validation["status"] != "ok":
             print(f"  [warn] {job.name}: missing {validation['missing']}")
         else:
-            print(
-                f"  [ok]   {job.name} (runner={job.runner}, epochs={job.epochs})")
+            print(f"  [ok]   {job.name} (runner={job.runner}, epochs={job.epochs})")
 
         if args.dry_run and not args.run:
             jobs_info.append(
@@ -441,13 +432,11 @@ def main(argv: list[str] | None = None) -> int:
                 check=False,
             )
         except OSError as e:
-            jobs_info.append(
-                {"name": job.name, "status": "failed", "error": str(e), "returncode": None})
+            jobs_info.append({"name": job.name, "status": "failed", "error": str(e), "returncode": None})
             continue
 
         status = "ok" if result.returncode == 0 else "failed"
-        jobs_info.append({"name": job.name, "status": status,
-                         "returncode": result.returncode})
+        jobs_info.append({"name": job.name, "status": status, "returncode": result.returncode})
 
     status_payload = _build_status(jobs_info)
     _write_status(status_payload)

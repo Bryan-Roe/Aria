@@ -76,9 +76,7 @@ class CurriculumScheduler:
         self.warmup_stages = warmup_stages
         self.current_stage_idx = 0
 
-        logger.info(
-            f"CurriculumScheduler: {len(stages)} stages, {warmup_stages} warmup stages"
-        )
+        logger.info(f"CurriculumScheduler: {len(stages)} stages, {warmup_stages} warmup stages")
 
     def get_current_stage(self) -> TrainingStage:
         """Get current training stage."""
@@ -93,9 +91,7 @@ class CurriculumScheduler:
         """
         if self.current_stage_idx < len(self.stages) - 1:
             self.current_stage_idx += 1
-            logger.info(
-                f"Advanced to stage {self.current_stage_idx}: {self.get_current_stage().name}"
-            )
+            logger.info(f"Advanced to stage {self.current_stage_idx}: {self.get_current_stage().name}")
             return True
         return False
 
@@ -234,18 +230,14 @@ class AdaptiveQuantumRouter:
         if not self.routing_history:
             return {"quantum_ratio": 0.0, "total_decisions": 0}
 
-        quantum_count = sum(
-            1 for h in self.routing_history if h["decision"] == "quantum"
-        )
+        quantum_count = sum(1 for h in self.routing_history if h["decision"] == "quantum")
         total = len(self.routing_history)
 
         return {
             "quantum_ratio": quantum_count / total,
             "classical_ratio": (total - quantum_count) / total,
             "total_decisions": total,
-            "avg_quantum_prob": np.mean(
-                [h["probability"] for h in self.routing_history]
-            ),
+            "avg_quantum_prob": np.mean([h["probability"] for h in self.routing_history]),
         }
 
 
@@ -282,9 +274,7 @@ class HybridTrainingOrchestrator:
         self.best_loss = float("inf")
         self.global_step = 0
 
-        logger.info(
-            f"HybridTrainingOrchestrator initialized: {len(stages)} stages, device={device}"
-        )
+        logger.info(f"HybridTrainingOrchestrator initialized: {len(stages)} stages, device={device}")
 
     def train_stage(
         self,
@@ -303,9 +293,7 @@ class HybridTrainingOrchestrator:
         Returns:
             Stage metrics
         """
-        logger.info(
-            f"Starting stage: {stage.name} (quantum_ratio={stage.quantum_ratio:.2f})"
-        )
+        logger.info(f"Starting stage: {stage.name} (quantum_ratio={stage.quantum_ratio:.2f})")
 
         # Configure model for this stage
         self._configure_model_for_stage(stage)
@@ -364,12 +352,8 @@ class HybridTrainingOrchestrator:
                 epoch_loss += loss.item()
                 stage_metrics["total_loss"] += loss.item()
                 stage_metrics["total_batches"] += 1
-                stage_metrics[
-                    "quantum_execution_time"
-                ] += metrics.quantum_execution_time
-                stage_metrics[
-                    "classical_execution_time"
-                ] += metrics.classical_execution_time
+                stage_metrics["quantum_execution_time"] += metrics.quantum_execution_time
+                stage_metrics["classical_execution_time"] += metrics.classical_execution_time
 
                 # Logging
                 if batch_idx % 10 == 0:
@@ -381,9 +365,7 @@ class HybridTrainingOrchestrator:
 
                 # Update router policy based on performance
                 if batch_idx % 50 == 0 and batch_idx > 0:
-                    reward = -epoch_loss / (
-                        batch_idx + 1
-                    )  # negative avg loss as reward
+                    reward = -epoch_loss / (batch_idx + 1)  # negative avg loss as reward
                     self.router.update_policy(reward)
 
             # Validation
@@ -405,16 +387,10 @@ class HybridTrainingOrchestrator:
             "total_quantum_time": stage_metrics["quantum_execution_time"],
             "total_classical_time": stage_metrics["classical_execution_time"],
             "quantum_time_ratio": stage_metrics["quantum_execution_time"]
-            / (
-                stage_metrics["quantum_execution_time"]
-                + stage_metrics["classical_execution_time"]
-                + 1e-8
-            ),
+            / (stage_metrics["quantum_execution_time"] + stage_metrics["classical_execution_time"] + 1e-8),
         }
 
-        logger.info(
-            f"Stage {stage.name} complete: avg_loss={avg_metrics['avg_loss']:.4f}"
-        )
+        logger.info(f"Stage {stage.name} complete: avg_loss={avg_metrics['avg_loss']:.4f}")
 
         return avg_metrics
 
@@ -520,9 +496,7 @@ class HybridTrainingOrchestrator:
         with open(report_path, "w") as f:
             json.dump(report, f, indent=2)
 
-        logger.info(
-            f"✅ Training complete: {total_time:.2f}s, {self.global_step} steps"
-        )
+        logger.info(f"✅ Training complete: {total_time:.2f}s, {self.global_step} steps")
         logger.info(f"Report saved: {report_path}")
 
         return report
@@ -570,6 +544,4 @@ if __name__ == "__main__":
 
     logger.info(f"✅ Example training curriculum: {len(stages)} stages")
     for stage in stages:
-        logger.info(
-            f"  - {stage.name}: quantum_ratio={stage.quantum_ratio}, epochs={stage.num_epochs}"
-        )
+        logger.info(f"  - {stage.name}: quantum_ratio={stage.quantum_ratio}, epochs={stage.num_epochs}")

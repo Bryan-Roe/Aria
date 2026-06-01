@@ -36,9 +36,7 @@ class ChatProviderTests(unittest.TestCase):
             "OPENAI_API_KEY": os.environ.pop("OPENAI_API_KEY", None),
         }
         try:
-            provider, info = chat_providers.detect_provider(
-                explicit="local", model_override="offline-test-model"
-            )
+            provider, info = chat_providers.detect_provider(explicit="local", model_override="offline-test-model")
             self.assertIsInstance(provider, chat_providers.LocalEchoProvider)
             self.assertEqual(info.name, "local")
             self.assertEqual(info.model, "offline-test-model")
@@ -56,9 +54,7 @@ class ChatProviderTests(unittest.TestCase):
 
         self.assertIsInstance(reply, str)
         self.assertIn("[aria:", reply)
-        self.assertTrue(
-            any(tag in reply for tag in ["[aria:walk:right]", "[aria:wave]"])
-        )
+        self.assertTrue(any(tag in reply for tag in ["[aria:walk:right]", "[aria:wave]"]))
 
     def test_local_echo_question_mentions_live_provider(self) -> None:
         """Generic question in local mode should direct user to real providers."""
@@ -70,12 +66,7 @@ class ChatProviderTests(unittest.TestCase):
         self.assertIsInstance(reply, str)
         lowered = reply.lower()
         self.assertTrue("provider" in lowered or "offline" in lowered)
-        self.assertTrue(
-            any(
-                name in lowered
-                for name in ["openai", "azure", "agi", "lm studio", "ollama"]
-            )
-        )
+        self.assertTrue(any(name in lowered for name in ["openai", "azure", "agi", "lm studio", "ollama"]))
 
     def test_local_echo_autonomous_prompt_returns_actionable_plan(self) -> None:
         """Autonomous prompts should stay useful offline instead of repeating fallback warnings."""
@@ -92,12 +83,7 @@ class ChatProviderTests(unittest.TestCase):
         self.assertIsInstance(reply, str)
         lowered = reply.lower()
         self.assertIn("autonomous", lowered)
-        self.assertTrue(
-            any(
-                token in lowered
-                for token in ["plan", "next step", "review", "objective"]
-            )
-        )
+        self.assertTrue(any(token in lowered for token in ["plan", "next step", "review", "objective"]))
         self.assertNotIn("canned responses", lowered)
 
     def test_local_echo_summary_request_returns_ranked_extract(self) -> None:
@@ -118,9 +104,7 @@ class ChatProviderTests(unittest.TestCase):
 
         self.assertIsInstance(reply, str)
         self.assertIn("Local summary:", reply)
-        self.assertIn(
-            "Alpha release improves local summaries by ranking sentences.", reply
-        )
+        self.assertIn("Alpha release improves local summaries by ranking sentences.", reply)
         self.assertIn("It removes prompt boilerplate before scoring.", reply)
         self.assertNotIn("Summarize this", reply)
 
@@ -128,9 +112,7 @@ class ChatProviderTests(unittest.TestCase):
         """Offline mode should compute real answers for arithmetic questions."""
         provider = chat_providers.LocalEchoProvider(seed=5)
 
-        reply = provider.complete(
-            [{"role": "user", "content": "What is 12 * 7?"}], stream=False
-        )
+        reply = provider.complete([{"role": "user", "content": "What is 12 * 7?"}], stream=False)
 
         self.assertIsInstance(reply, str)
         self.assertIn("84", reply)
@@ -172,9 +154,7 @@ class ChatProviderTests(unittest.TestCase):
         messages = [{"role": "user", "content": "Hello"}]
 
         with tempfile.TemporaryDirectory() as tmp_dir:
-            with unittest.mock.patch(
-                "chat_cli.now_ts", return_value="20250101_010203_000000"
-            ):
+            with unittest.mock.patch("chat_cli.now_ts", return_value="20250101_010203_000000"):
                 first_path = save_conversation(messages, Path(tmp_dir))
                 second_path = save_conversation(messages, Path(tmp_dir))
 
@@ -211,10 +191,8 @@ class ChatProviderTests(unittest.TestCase):
                 model="local-model",
             )
 
-            self.assertEqual(captured.get("api_key"),
-                             "token-from-lm-api-token")
-            self.assertEqual(captured.get("base_url"),
-                             "http://127.0.0.1:1234/v1")
+            self.assertEqual(captured.get("api_key"), "token-from-lm-api-token")
+            self.assertEqual(captured.get("base_url"), "http://127.0.0.1:1234/v1")
         finally:
             chat_providers.OpenAI = old_openai
             if old_token is None:
@@ -338,9 +316,7 @@ class ChatProviderTests(unittest.TestCase):
             chat_providers._lm_studio_availability_cache["url"] = None
 
             with unittest.mock.patch("urllib.request.urlopen", _fake_urlopen):
-                available = chat_providers._check_lm_studio_available(
-                    "http://127.0.0.1:1234/v1"
-                )
+                available = chat_providers._check_lm_studio_available("http://127.0.0.1:1234/v1")
 
             self.assertTrue(available)
             self.assertEqual(captured.get("authorization"), "Bearer token-auth-header")
@@ -449,6 +425,7 @@ class AGIMultiAgentTests(unittest.TestCase):
 
     def test_dispatch_quantum_uses_analysis_model_path(self) -> None:
         """Quantum dispatch should pass analysis quantum_model_path as model_override."""
+
         class _Specialist:
             def complete(self, messages, stream=True):
                 return "quantum-ok"
@@ -478,13 +455,12 @@ class AGIMultiAgentTests(unittest.TestCase):
 
     def test_dispatch_quantum_uses_env_model_path(self) -> None:
         """Quantum dispatch should use QAI_QUANTUM_MODEL_PATH when analysis has none."""
+
         class _Specialist:
             def complete(self, messages, stream=True):
                 return "env-quantum-ok"
 
-        with unittest.mock.patch.dict(
-            os.environ, {"QAI_QUANTUM_MODEL_PATH": "/tmp/env-quantum-model"}, clear=False
-        ):
+        with unittest.mock.patch.dict(os.environ, {"QAI_QUANTUM_MODEL_PATH": "/tmp/env-quantum-model"}, clear=False):
             with unittest.mock.patch("agi_provider.detect_provider") as mocked_detect:
                 mocked_detect.return_value = (
                     _Specialist(),

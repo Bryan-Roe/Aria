@@ -72,9 +72,7 @@ class AzureQuantumIntegration:
                 credential=credential,
             )
 
-            logger.info(
-                f"Connected to Azure Quantum workspace: {self.azure_config['workspace_name']}"
-            )
+            logger.info(f"Connected to Azure Quantum workspace: {self.azure_config['workspace_name']}")
 
             # Initialize provider
             self.provider = AzureQuantumProvider(self.workspace)
@@ -215,9 +213,7 @@ class AzureQuantumIntegration:
 
         logger.info(f"Results saved to {filepath}")
 
-    def estimate_cost(
-        self, circuit: QuantumCircuit, backend_name: str, shots: int = 100
-    ) -> Dict:
+    def estimate_cost(self, circuit: QuantumCircuit, backend_name: str, shots: int = 100) -> Dict:
         """
         Estimate the cost of running a circuit.
 

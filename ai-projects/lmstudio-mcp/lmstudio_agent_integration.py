@@ -122,9 +122,7 @@ class LMStudioAgentClient:
             error = result.get("error", "Unknown error")
             raise RuntimeError(f"LM Studio error: {error}")
 
-    async def stream(
-        self, messages: List[Dict[str, str]], **kwargs
-    ) -> Generator[str, None, None]:
+    async def stream(self, messages: List[Dict[str, str]], **kwargs) -> Generator[str, None, None]:
         """
         Stream completion tokens.
 
@@ -243,9 +241,7 @@ def should_use_lmstudio(query: str) -> bool:
         return True
 
     # Privacy-focused queries
-    if any(
-        term in query_lower for term in ["private", "self-hosted", "local", "no cloud"]
-    ):
+    if any(term in query_lower for term in ["private", "self-hosted", "local", "no cloud"]):
         return True
 
     return False
@@ -322,11 +318,7 @@ async def example_agent_integration() -> None:
     print()
     print("Agent metadata:")
     info = get_lmstudio_agent_info()
-    print(
-        json.dumps(
-            {k: v for k, v in info.items() if k != "setup_instructions"}, indent=2
-        )
-    )
+    print(json.dumps({k: v for k, v in info.items() if k != "setup_instructions"}, indent=2))
     print()
 
 

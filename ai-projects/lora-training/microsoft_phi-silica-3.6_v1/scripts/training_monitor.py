@@ -53,9 +53,7 @@ class TrainingMonitor:
 
     def __init__(self, session_id: Optional[str] = None):
         self.session_id = session_id or f"training_{int(time.time())}"
-        self.session = TrainingSession(
-            session_id=self.session_id, start_time=datetime.now().isoformat()
-        )
+        self.session = TrainingSession(session_id=self.session_id, start_time=datetime.now().isoformat())
 
         self.log_dir = Path("data_out/training_logs")
         self.log_dir.mkdir(parents=True, exist_ok=True)
@@ -65,14 +63,10 @@ class TrainingMonitor:
 
         self.metrics_queue = queue.Queue()
         self.should_stop = threading.Event()
-        self.writer_thread = threading.Thread(
-            target=self._write_metrics_worker, daemon=True
-        )
+        self.writer_thread = threading.Thread(target=self._write_metrics_worker, daemon=True)
         self.writer_thread.start()
 
-    def log_metrics(
-        self, step: int, epoch: int, loss: float, learning_rate: float, **kwargs
-    ):
+    def log_metrics(self, step: int, epoch: int, loss: float, learning_rate: float, **kwargs):
         """Log training metrics"""
         metrics = TrainingMetrics(
             step=step,
@@ -133,36 +127,22 @@ class TrainingMonitor:
             return {}
 
         recent_losses = [m.loss for m in self.session.metrics[-100:]]
-        recent_throughputs = [
-            m.throughput for m in self.session.metrics[-100:] if m.throughput
-        ]
+        recent_throughputs = [m.throughput for m in self.session.metrics[-100:] if m.throughput]
 
         return {
             "total_steps": self.session.total_steps,
-            "current_loss": (
-                self.session.metrics[-1].loss if self.session.metrics else None
-            ),
+            "current_loss": (self.session.metrics[-1].loss if self.session.metrics else None),
             "best_loss": self.session.best_loss,
             "best_step": self.session.best_step,
-            "avg_recent_loss": (
-                sum(recent_losses) / len(recent_losses) if recent_losses else None
-            ),
-            "avg_throughput": (
-                sum(recent_throughputs) / len(recent_throughputs)
-                if recent_throughputs
-                else None
-            ),
+            "avg_recent_loss": (sum(recent_losses) / len(recent_losses) if recent_losses else None),
+            "avg_throughput": (sum(recent_throughputs) / len(recent_throughputs) if recent_throughputs else None),
             "duration": self._get_duration(),
         }
 
     def _get_duration(self) -> str:
         """Get training duration"""
         start = datetime.fromisoformat(self.session.start_time)
-        end = (
-            datetime.fromisoformat(self.session.end_time)
-            if self.session.end_time
-            else datetime.now()
-        )
+        end = datetime.fromisoformat(self.session.end_time) if self.session.end_time else datetime.now()
         duration = end - start
 
         hours = int(duration.total_seconds() // 3600)
@@ -270,9 +250,7 @@ class LiveDashboard:
         print("\n📊 Progress:")
         print(f"  Total Steps: {stats.get('total_steps', 0):,}")
         print(f"  Current Loss: {stats.get('current_loss', 'N/A')}")
-        print(
-            f"  Best Loss: {stats.get('best_loss', float('inf')):.4f} (step {stats.get('best_step', 0)})"
-        )
+        print(f"  Best Loss: {stats.get('best_loss', float('inf')):.4f} (step {stats.get('best_step', 0)})")
         print(f"  Avg Recent Loss: {stats.get('avg_recent_loss', 'N/A')}")
 
         if stats.get("avg_throughput"):
@@ -287,9 +265,7 @@ class LiveDashboard:
             print(f"  {'-'*8} {'-'*10} {'-'*12} {'-'*12}")
             for m in recent:
                 timestamp = m.timestamp.split("T")[1][:8]
-                print(
-                    f"  {m.step:<8} {m.loss:<10.4f} {m.learning_rate:<12.6f} {timestamp:<12}"
-                )
+                print(f"  {m.step:<8} {m.loss:<10.4f} {m.learning_rate:<12.6f} {timestamp:<12}")
 
         print("\n" + "=" * 80)
 

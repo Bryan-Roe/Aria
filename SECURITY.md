@@ -142,5 +142,3 @@ When a report is accepted, we may:
 ## Policy Updates
 
 This policy may evolve. Significant updates will be reflected in release notes, commit logs, or [this file](https://github.com/Bryan-Roe/Aria/blob/main/SECURITY.md). Always refer to the latest version here.
-
-

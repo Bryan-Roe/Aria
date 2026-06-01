@@ -9,8 +9,7 @@ from __future__ import annotations
 import warnings
 
 warnings.warn(
-    "Importing 'autotrain' from the repository root is deprecated. "
-    "Import from 'scripts.autotrain' instead.",
+    "Importing 'autotrain' from the repository root is deprecated. " "Import from 'scripts.autotrain' instead.",
     DeprecationWarning,
     stacklevel=2,
 )

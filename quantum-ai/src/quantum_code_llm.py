@@ -58,9 +58,7 @@ def _make_device(n_qubits: int):
     """Return (backend_label, qml.device) using the best available backend."""
     if _QISKIT_AER_AVAILABLE:
         try:
-            dev = qml.device(
-                "qiskit.aer", wires=n_qubits, backend="statevector_simulator"
-            )
+            dev = qml.device("qiskit.aer", wires=n_qubits, backend="statevector_simulator")
             return "qiskit.aer", dev
         except Exception:
             pass
@@ -132,9 +130,7 @@ class CodeTokenizer:
 
         self.vocab_size: int = idx
 
-    def encode(
-        self, text: str, add_bos: bool = True, add_eos: bool = True
-    ) -> List[int]:
+    def encode(self, text: str, add_bos: bool = True, add_eos: bool = True) -> List[int]:
         ids: List[int] = []
         if add_bos:
             ids.append(self.BOS)
@@ -303,9 +299,7 @@ class QuantumKernelAttention(nn.Module):
         scores = torch.matmul(q_q, k_q.transpose(-2, -1)) / self.scale  # (B, H, T, T)
 
         # Causal mask: prevent attending to future tokens
-        causal = torch.triu(
-            torch.ones(T, T, device=x.device, dtype=torch.bool), diagonal=1
-        )
+        causal = torch.triu(torch.ones(T, T, device=x.device, dtype=torch.bool), diagonal=1)
         scores = scores.masked_fill(causal.unsqueeze(0).unsqueeze(0), float("-inf"))
         if mask is not None:
             scores = scores.masked_fill(mask, float("-inf"))
@@ -380,15 +374,11 @@ class QuantumTransformerBlock(nn.Module):
     ) -> None:
         super().__init__()
         self.norm1 = nn.LayerNorm(d_model)
-        self.attn = QuantumKernelAttention(
-            d_model, n_heads, n_qubits, n_var_layers, device, dropout
-        )
+        self.attn = QuantumKernelAttention(d_model, n_heads, n_qubits, n_var_layers, device, dropout)
         self.norm2 = nn.LayerNorm(d_model)
         self.ffn = QuantumFFN(d_model, n_qubits, n_var_layers, device, dropout)
 
-    def forward(
-        self, x: torch.Tensor, mask: Optional[torch.Tensor] = None
-    ) -> torch.Tensor:
+    def forward(self, x: torch.Tensor, mask: Optional[torch.Tensor] = None) -> torch.Tensor:
         x = x + self.attn(self.norm1(x), mask)
         x = x + self.ffn(self.norm2(x))
         return x
@@ -429,9 +419,7 @@ class QuantumCodeLLM(nn.Module):
             self._backend_label, self._qdevice = "classical", None
         else:
             if not _PENNYLANE_AVAILABLE:
-                raise RuntimeError(
-                    "A non-classical backend was requested but PennyLane is not installed"
-                )
+                raise RuntimeError("A non-classical backend was requested but PennyLane is not installed")
             self._backend_label = config.backend
             self._qdevice = qml.device(config.backend, wires=config.n_qubits)
 
@@ -472,9 +460,7 @@ class QuantumCodeLLM(nn.Module):
             elif isinstance(m, nn.Embedding):
                 nn.init.normal_(m.weight, std=0.02)
 
-    def forward(
-        self, input_ids: torch.Tensor, mask: Optional[torch.Tensor] = None
-    ) -> torch.Tensor:
+    def forward(self, input_ids: torch.Tensor, mask: Optional[torch.Tensor] = None) -> torch.Tensor:
         """
         Args:
             input_ids : (B, T) token indices
@@ -528,9 +514,7 @@ class QuantumCodeLLM(nn.Module):
             if top_k > 0:
                 k = min(top_k, next_logits.shape[-1])
                 kth_val = torch.topk(next_logits, k).values[:, -1, None]
-                next_logits = next_logits.masked_fill(
-                    next_logits < kth_val, float("-inf")
-                )
+                next_logits = next_logits.masked_fill(next_logits < kth_val, float("-inf"))
 
             probs = F.softmax(next_logits, dim=-1)
             next_id = torch.multinomial(probs, num_samples=1)  # (1, 1)
@@ -713,10 +697,7 @@ class QuantumCodeTrainer:
                 if step % self.cfg.log_every == 0:
                     lr_now = self.scheduler.get_last_lr()[0]
                     perp = math.exp(min(loss.item(), 20))
-                    print(
-                        f"  step {step:>5d} | loss {loss.item():.4f} "
-                        f"| ppl {perp:.1f} | lr {lr_now:.2e}"
-                    )
+                    print(f"  step {step:>5d} | loss {loss.item():.4f} " f"| ppl {perp:.1f} | lr {lr_now:.2e}")
 
             avg_loss = epoch_loss / max(1, len(self.loader))
             elapsed = time.time() - t0
@@ -725,9 +706,7 @@ class QuantumCodeTrainer:
                 f"avg loss {avg_loss:.4f} | ppl {math.exp(min(avg_loss, 20)):.1f} "
                 f"| {elapsed:.1f}s"
             )
-            history.append(
-                {"epoch": epoch, "loss": avg_loss, "ppl": math.exp(min(avg_loss, 20))}
-            )
+            history.append({"epoch": epoch, "loss": avg_loss, "ppl": math.exp(min(avg_loss, 20))})
 
         return history
 

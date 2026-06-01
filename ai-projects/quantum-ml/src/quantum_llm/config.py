@@ -100,14 +100,10 @@ class QuantumLLMConfig:
         self.num_layers = _coerce_int(self.num_layers, default=2, minimum=1)
         self.top_k = _coerce_int(self.top_k, default=10, minimum=1)
 
-        self.temperature_blend = min(
-            1.0, max(0.0, _coerce_float(self.temperature_blend, default=0.3))
-        )
+        self.temperature_blend = min(1.0, max(0.0, _coerce_float(self.temperature_blend, default=0.3)))
         self.temperature = max(0.0, _coerce_float(self.temperature, default=0.7))
 
-        self.max_prompt_chars = _coerce_int(
-            self.max_prompt_chars, default=8000, minimum=1
-        )
+        self.max_prompt_chars = _coerce_int(self.max_prompt_chars, default=8000, minimum=1)
         self.max_tokens_cap = _coerce_int(self.max_tokens_cap, default=2048, minimum=1)
         self.max_tokens = _coerce_int(self.max_tokens, default=512, minimum=1)
         self.max_tokens = min(self.max_tokens, self.max_tokens_cap)

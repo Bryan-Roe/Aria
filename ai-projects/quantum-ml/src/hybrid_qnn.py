@@ -66,9 +66,7 @@ class QuantumLayer(nn.Module):
             expensive. Consider 'linear' or 'circular' patterns for better scalability.
         """
         # Amplitude encoding
-        qml.AmplitudeEmbedding(
-            features=inputs, wires=range(self.n_qubits), normalize=True, pad_with=0.0
-        )
+        qml.AmplitudeEmbedding(features=inputs, wires=range(self.n_qubits), normalize=True, pad_with=0.0)
 
         # Variational layers
         for layer in range(self.n_layers):
@@ -159,9 +157,7 @@ class HybridQNN(nn.Module):
             self.residual_proj = None
 
         # Quantum layer
-        self.quantum_layer = QuantumLayer(
-            n_qubits, n_quantum_layers, entanglement=self.entanglement
-        )
+        self.quantum_layer = QuantumLayer(n_qubits, n_quantum_layers, entanglement=self.entanglement)
 
         # Classical postprocessing with improved architecture
         decoder_layers = [
@@ -294,9 +290,7 @@ class QCNN(nn.Module):
     Quantum Convolutional Neural Network.
     """
 
-    def __init__(
-        self, input_dim: int, n_qubits: int = 4, n_filters: int = 2, output_dim: int = 1
-    ):
+    def __init__(self, input_dim: int, n_qubits: int = 4, n_filters: int = 2, output_dim: int = 1):
         """
         Initialize QCNN.
 
@@ -309,9 +303,7 @@ class QCNN(nn.Module):
         super().__init__()
 
         # Quantum convolutional layers
-        self.qconv_layers = nn.ModuleList(
-            [QuantumConvolutionalLayer(n_qubits, stride=2) for _ in range(n_filters)]
-        )
+        self.qconv_layers = nn.ModuleList([QuantumConvolutionalLayer(n_qubits, stride=2) for _ in range(n_filters)])
 
         # Calculate output size after convolutions
         conv_output_size = input_dim
@@ -374,9 +366,7 @@ class QuantumClassicalTrainer:
         self.gradient_clip_val = gradient_clip_val
 
         # Use AdamW optimizer with weight decay for better generalization
-        self.optimizer = torch.optim.AdamW(
-            model.parameters(), lr=learning_rate, weight_decay=0.01, betas=(0.9, 0.999)
-        )
+        self.optimizer = torch.optim.AdamW(model.parameters(), lr=learning_rate, weight_decay=0.01, betas=(0.9, 0.999))
 
         # Learning rate scheduler for adaptive training
         if use_scheduler:
@@ -449,9 +439,7 @@ class QuantumClassicalTrainer:
 
                 # Gradient clipping for stability
                 if self.gradient_clip_val > 0:
-                    torch.nn.utils.clip_grad_norm_(
-                        self.model.parameters(), self.gradient_clip_val
-                    )
+                    torch.nn.utils.clip_grad_norm_(self.model.parameters(), self.gradient_clip_val)
 
                 # Update weights
                 self.optimizer.step()
@@ -464,10 +452,7 @@ class QuantumClassicalTrainer:
 
             if (batch_idx + 1) % 10 == 0:
                 progress = (batch_idx + 1) / n_batches * 100
-                logger.debug(
-                    f"Batch {batch_idx + 1}/{n_batches} ({progress:.1f}%), "
-                    f"Loss: {loss.item():.4f}"
-                )
+                logger.debug(f"Batch {batch_idx + 1}/{n_batches} ({progress:.1f}%), " f"Loss: {loss.item():.4f}")
 
         avg_loss = total_loss / len(train_loader)
         self.train_losses.append(avg_loss)
@@ -631,9 +616,7 @@ def create_hybrid_model(
 
 if __name__ == "__main__":
     # Test the hybrid model
-    model = HybridQNN(
-        input_dim=10, hidden_dim=16, n_qubits=4, n_quantum_layers=2, output_dim=1
-    )
+    model = HybridQNN(input_dim=10, hidden_dim=16, n_qubits=4, n_quantum_layers=2, output_dim=1)
 
     # Test forward pass
     x = torch.randn(8, 10)  # Batch of 8 samples

@@ -42,9 +42,7 @@ def load_dataset(
     }
 
     if name not in datasets_map:
-        raise ValueError(
-            f"Unknown dataset: {name}. Available: {list(datasets_map.keys())}"
-        )
+        raise ValueError(f"Unknown dataset: {name}. Available: {list(datasets_map.keys())}")
 
     path = datasets_map[name]
     if not path.exists():

@@ -103,9 +103,7 @@ class CharacterTokenizer:
         Returns:
             Decoded text
         """
-        special_ids = (
-            {self.pad_id, self.bos_id, self.eos_id} if skip_special_tokens else set()
-        )
+        special_ids = {self.pad_id, self.bos_id, self.eos_id} if skip_special_tokens else set()
 
         chars = []
         for id in ids:
@@ -245,9 +243,7 @@ class MultiSourceDataset(Dataset):
 
         self.total_samples = sum(len(ds) for ds in self.datasets)
 
-        logger.info(
-            f"MultiSourceDataset: {len(data_sources)} sources, {self.total_samples} samples"
-        )
+        logger.info(f"MultiSourceDataset: {len(data_sources)} sources, {self.total_samples} samples")
 
     def _load_source(self, source: Dict[str, Any]) -> Dataset:
         """Load a single data source."""
@@ -400,14 +396,10 @@ class DatasetBuilder:
                 first_item = data[0]
                 if isinstance(first_item, dict) and "messages" in first_item:
                     logger.info(f"Detected chat format: {path}")
-                    return DatasetBuilder.from_chat_dataset(
-                        path, tokenizer, max_seq_length
-                    )
+                    return DatasetBuilder.from_chat_dataset(path, tokenizer, max_seq_length)
                 elif isinstance(first_item, dict) and "text" in first_item:
                     logger.info(f"Detected JSON format: {path}")
-                    return DatasetBuilder.from_json_file(
-                        path, tokenizer, max_seq_length
-                    )
+                    return DatasetBuilder.from_json_file(path, tokenizer, max_seq_length)
 
         # Default to text format
         logger.info(f"Using text format: {path}")

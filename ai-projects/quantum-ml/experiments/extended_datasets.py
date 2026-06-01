@@ -21,8 +21,7 @@ if str(project_root) not in sys.path:
     sys.path.insert(0, str(project_root))
 
 try:
-    from src.quantum_classifier import (HybridQuantumClassifier,
-                                        QuantumClassifier, train_quantum_model)
+    from src.quantum_classifier import HybridQuantumClassifier, QuantumClassifier, train_quantum_model
 except ModuleNotFoundError:
     # Fallback for environments without namespace package support
     sys.path.insert(0, str(project_root / "src"))
@@ -53,9 +52,7 @@ y_xor = np.logical_xor(X_xor[:, 0] > 0, X_xor[:, 1] > 0).astype(int)
 # Add noise
 X_xor += np.random.randn(n_samples, 2) * 0.3
 
-X_train, X_val, y_train, y_val = train_test_split(
-    X_xor, y_xor, test_size=0.2, random_state=42
-)
+X_train, X_val, y_train, y_val = train_test_split(X_xor, y_xor, test_size=0.2, random_state=42)
 
 scaler = StandardScaler()
 X_train = scaler.fit_transform(X_train)
@@ -70,9 +67,7 @@ print("Training quantum classifier on XOR...")
 
 qc_xor = QuantumClassifier()
 model_xor = HybridQuantumClassifier(input_dim=4, quantum_classifier=qc_xor)
-history_xor = train_quantum_model(
-    model_xor, X_train_padded, y_train, X_val_padded, y_val
-)
+history_xor = train_quantum_model(model_xor, X_train_padded, y_train, X_val_padded, y_val)
 
 print(f"\n✓ XOR Accuracy: {history_xor['val_acc'][-1]:.4f}")
 
@@ -138,9 +133,7 @@ def make_spirals(n_points=100, noise=0.2):
 
 X_spiral, y_spiral = make_spirals(n_points=100, noise=0.5)
 
-X_train, X_val, y_train, y_val = train_test_split(
-    X_spiral, y_spiral, test_size=0.2, random_state=42
-)
+X_train, X_val, y_train, y_val = train_test_split(X_spiral, y_spiral, test_size=0.2, random_state=42)
 
 scaler = StandardScaler()
 X_train = scaler.fit_transform(X_train)
@@ -151,9 +144,7 @@ X_val_padded = np.pad(X_val, ((0, 0), (0, 2)), mode="constant")
 print("Training quantum classifier on Spirals...")
 qc_spiral = QuantumClassifier()
 model_spiral = HybridQuantumClassifier(input_dim=4, quantum_classifier=qc_spiral)
-history_spiral = train_quantum_model(
-    model_spiral, X_train_padded, y_train, X_val_padded, y_val
-)
+history_spiral = train_quantum_model(model_spiral, X_train_padded, y_train, X_val_padded, y_val)
 
 print(f"\n✓ Spiral Accuracy: {history_spiral['val_acc'][-1]:.4f}")
 
@@ -206,9 +197,7 @@ X_imb, y_imb = make_classification(
     random_state=42,
 )
 
-X_train, X_val, y_train, y_val = train_test_split(
-    X_imb, y_imb, test_size=0.2, stratify=y_imb, random_state=42
-)
+X_train, X_val, y_train, y_val = train_test_split(X_imb, y_imb, test_size=0.2, stratify=y_imb, random_state=42)
 
 scaler = StandardScaler()
 X_train = scaler.fit_transform(X_train)
@@ -234,9 +223,7 @@ wine = load_wine()
 X_wine = wine.data
 y_wine = (wine.target == 0).astype(int)  # Class 0 vs rest
 
-X_train, X_val, y_train, y_val = train_test_split(
-    X_wine, y_wine, test_size=0.2, random_state=42
-)
+X_train, X_val, y_train, y_val = train_test_split(X_wine, y_wine, test_size=0.2, random_state=42)
 
 scaler = StandardScaler()
 X_train = scaler.fit_transform(X_train)
@@ -290,9 +277,7 @@ colors = ["#e74c3c", "#9b59b6", "#3498db", "#2ecc71"]
 for i, (dataset, history, color) in enumerate(zip(datasets, histories, colors)):
     axes[i].plot(history["train_loss"], label="Train Loss", alpha=0.7, linewidth=2)
     axes[i].plot(history["val_loss"], label="Val Loss", linewidth=2)
-    axes[i].set_title(
-        f'{dataset}: Acc={history["val_acc"][-1]:.3f}', fontsize=12, fontweight="bold"
-    )
+    axes[i].set_title(f'{dataset}: Acc={history["val_acc"][-1]:.3f}', fontsize=12, fontweight="bold")
     axes[i].set_xlabel("Epoch")
     axes[i].set_ylabel("Loss")
     axes[i].legend()

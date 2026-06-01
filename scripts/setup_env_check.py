@@ -270,9 +270,7 @@ def check_ai_token_health() -> bool:
 
     status_path = Path(__file__).parent.parent / "data_out" / "ai_token_status.json"
     if not status_path.exists():
-        print_warning(
-            "No token health status found. Run: python3 scripts/generate_ai_tokens.py"
-        )
+        print_warning("No token health status found. Run: python3 scripts/generate_ai_tokens.py")
         return True
 
     try:

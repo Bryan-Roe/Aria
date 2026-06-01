@@ -20,19 +20,13 @@ class QuantumIntegration:
         self.config = config
         self.workspace_root = Path(config["paths"]["workspace_root"])
         self.quantum_path = Path(config["paths"]["quantum_ai"])
-        self.results_dir = Path(
-            config["quantum"].get("results_dir") or (self.quantum_path / "results")
-        )
+        self.results_dir = Path(config["quantum"].get("results_dir") or (self.quantum_path / "results"))
         self.quantum_config = self._load_quantum_config()
 
     def _load_quantum_config(self) -> Dict[str, Any]:
         """Load quantum configuration from YAML"""
         configured = self.config["quantum"].get("config_file")
-        config_path = (
-            Path(configured)
-            if configured
-            else self.quantum_path / "config" / "quantum_config.yaml"
-        )
+        config_path = Path(configured) if configured else self.quantum_path / "config" / "quantum_config.yaml"
         if config_path.exists():
             with open(config_path) as f:
                 return yaml.safe_load(f)
@@ -74,9 +68,7 @@ class QuantumIntegration:
             return results
 
         # Find all JSON result files
-        json_files = sorted(
-            results_path.glob("*.json"), key=lambda p: p.stat().st_mtime, reverse=True
-        )[:limit]
+        json_files = sorted(results_path.glob("*.json"), key=lambda p: p.stat().st_mtime, reverse=True)[:limit]
 
         for json_file in json_files:
             try:
@@ -109,9 +101,9 @@ class QuantumIntegration:
             train_script = self.quantum_path / "train_custom_dataset.py"
 
             datasets_path = self.workspace_root / "datasets" / "quantum"
-            allowed_datasets = {
-                csv_file.stem for csv_file in datasets_path.glob("*.csv")
-            } if datasets_path.exists() else set()
+            allowed_datasets = (
+                {csv_file.stem for csv_file in datasets_path.glob("*.csv")} if datasets_path.exists() else set()
+            )
 
             if dataset not in allowed_datasets:
                 return {
@@ -137,9 +129,7 @@ class QuantumIntegration:
                 backend,
             ]
 
-            result = subprocess.run(
-                cmd, capture_output=True, text=True, cwd=str(self.quantum_path)
-            )
+            result = subprocess.run(cmd, capture_output=True, text=True, cwd=str(self.quantum_path))
 
             return {
                 "success": result.returncode == 0,
@@ -169,9 +159,7 @@ class QuantumIntegration:
 
         return datasets
 
-    async def get_circuit_info(
-        self, circuit_type: str = "variational"
-    ) -> Dict[str, Any]:
+    async def get_circuit_info(self, circuit_type: str = "variational") -> Dict[str, Any]:
         """Get information about quantum circuit types"""
         return {
             "circuit_type": circuit_type,
@@ -185,9 +173,7 @@ class QuantumIntegration:
             },
         }
 
-    async def run_autorun_job(
-        self, job_name: str, dry_run: bool = False
-    ) -> Dict[str, Any]:
+    async def run_autorun_job(self, job_name: str, dry_run: bool = False) -> Dict[str, Any]:
         """Run a quantum autorun job"""
         try:
             autorun_script = self.workspace_root / "scripts" / "quantum_autorun.py"
@@ -212,9 +198,7 @@ class QuantumIntegration:
             )
 
             # Load status file if it exists
-            status_file = (
-                self.workspace_root / "data_out" / "quantum_autorun" / "status.json"
-            )
+            status_file = self.workspace_root / "data_out" / "quantum_autorun" / "status.json"
             status_data = {}
             if status_file.exists():
                 with open(status_file) as f:

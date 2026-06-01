@@ -68,9 +68,7 @@ def main() -> int:
         print(f"Failed to read adapter_config.json: {e}", file=sys.stderr)
         return 5
 
-    base_model_id = adapter_cfg.get(
-        "base_model_name_or_path", "microsoft/Phi-3.5-mini-instruct"
-    )
+    base_model_id = adapter_cfg.get("base_model_name_or_path", "microsoft/Phi-3.5-mini-instruct")
     if base_model_id == "Phi-3.6-mini-instruct":
         base_model_id = "microsoft/Phi-3.5-mini-instruct"
 

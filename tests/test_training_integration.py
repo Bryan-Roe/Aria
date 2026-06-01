@@ -18,7 +18,7 @@ def make_config(tmp_path: Path):
 
     # create directories
     (workspace / "datasets" / "quantum").mkdir(parents=True, exist_ok=True)
-    (workspace / "datasets" / "chat" ).mkdir(parents=True, exist_ok=True)
+    (workspace / "datasets" / "chat").mkdir(parents=True, exist_ok=True)
     (workspace / "datasets" / "vision").mkdir(parents=True, exist_ok=True)
 
     (phi / "scripts").mkdir(parents=True, exist_ok=True)
@@ -36,6 +36,7 @@ def make_config(tmp_path: Path):
         "training": {"enabled": True},
     }
 
+
 def test_list_datasets(tmp_path: Path):
     cfg = make_config(tmp_path)
     # create some dataset files/dirs
@@ -51,6 +52,7 @@ def test_list_datasets(tmp_path: Path):
     assert "chat1" in datasets["chat"]
     assert "vis1" in datasets["vision"]
 
+
 def test_train_lora_invalid_dataset(tmp_path: Path):
     cfg = make_config(tmp_path)
     # no datasets created, so any dataset is invalid
@@ -59,6 +61,7 @@ def test_train_lora_invalid_dataset(tmp_path: Path):
     result = asyncio.run(ti.train_lora("nonexistent"))
     assert result["success"] is False
     assert result["error"] == "unknown_dataset"
+
 
 def test_train_lora_reject_path_like(tmp_path: Path):
     cfg = make_config(tmp_path)
@@ -71,6 +74,7 @@ def test_train_lora_reject_path_like(tmp_path: Path):
     result = asyncio.run(ti.train_lora("../etc/passwd"))
     assert result["success"] is False
     assert result["error"] == "invalid_dataset"
+
 
 def test_train_lora_calls_subprocess(tmp_path: Path):
     cfg = make_config(tmp_path)
@@ -107,6 +111,7 @@ def test_train_lora_calls_subprocess(tmp_path: Path):
     kwargs = mock_run.call_args[1]
     assert kwargs.get("cwd") == str(phi)
     assert "env" in kwargs
+
 
 def test_train_lora_timeout_handling(tmp_path: Path):
     cfg = make_config(tmp_path)

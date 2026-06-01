@@ -36,8 +36,7 @@ def run_server() -> None:
         from azure.ai.agentserver.agentframework import from_agent_framework
     except ImportError as exc:
         print(
-            "[ERROR] azure-ai-agentserver-agentframework is not installed.\n"
-            "Run: pip install -r requirements.txt",
+            "[ERROR] azure-ai-agentserver-agentframework is not installed.\n" "Run: pip install -r requirements.txt",
             file=sys.stderr,
         )
         raise SystemExit(1) from exc

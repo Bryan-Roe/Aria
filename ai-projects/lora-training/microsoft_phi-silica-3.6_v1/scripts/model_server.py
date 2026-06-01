@@ -103,11 +103,7 @@ class ModelServer:
 
         print("✓ Model loaded successfully")
         print(f"  Parameters: {self.model.num_parameters() / 1e9:.2f}B")
-        print(
-            f"  Memory: {torch.cuda.memory_allocated() / 1e9:.2f}GB"
-            if self.device == "cuda"
-            else ""
-        )
+        print(f"  Memory: {torch.cuda.memory_allocated() / 1e9:.2f}GB" if self.device == "cuda" else "")
 
     def generate(
         self,
@@ -122,9 +118,7 @@ class ModelServer:
         start_time = time.perf_counter()
 
         # Tokenize
-        inputs = self.tokenizer(
-            prompt, return_tensors="pt", truncation=True, max_length=2048
-        )
+        inputs = self.tokenizer(prompt, return_tensors="pt", truncation=True, max_length=2048)
         inputs = {k: v.to(self.device) for k, v in inputs.items()}
 
         # Generate
@@ -310,9 +304,7 @@ def main():
     import argparse
 
     parser = argparse.ArgumentParser(description="Model Serving API")
-    parser.add_argument(
-        "--model", type=str, default="data_out/lora_training", help="Path to model"
-    )
+    parser.add_argument("--model", type=str, default="data_out/lora_training", help="Path to model")
     parser.add_argument("--host", type=str, default="0.0.0.0", help="Server host")
     parser.add_argument("--port", type=int, default=8000, help="Server port")
     parser.add_argument("--workers", type=int, default=1, help="Number of workers")

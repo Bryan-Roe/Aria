@@ -13,7 +13,7 @@ permissions:
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
   HARDEN_RUNNER_SHA: 0634a2670c59f64b4a01f0f96f84700a4088b9f0  # v2.12.2
-  GITHUB_SCRIPT_SHA: 60a0d83039c74a4aee5435082ffcb1c3799cdea    # v7.0.1
+  GITHUB_SCRIPT_SHA: 60a0d83039c74a4aee543508d2ffcb1c3799cdea    # v7.0.1
 
 jobs:
   auto-merge:
@@ -27,7 +27,7 @@ jobs:
           disable-sudo: true
 
       - name: Auto-merge PRs labeled 'auto-merge'
-        uses: actions/github-script@60a0d83039c74a4aee5435082ffcb1c3799cdea
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |

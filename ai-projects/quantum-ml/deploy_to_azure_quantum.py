@@ -17,6 +17,7 @@ from datetime import datetime
 from pathlib import Path
 
 from qiskit import QuantumCircuit
+
 # Local import
 from src.azure_quantum_integration import AzureQuantumIntegration
 
@@ -31,9 +32,7 @@ def create_ghz(n_qubits=3):
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        description="Deploy a test circuit to Azure Quantum (simulator by default)"
-    )
+    parser = argparse.ArgumentParser(description="Deploy a test circuit to Azure Quantum (simulator by default)")
     parser.add_argument(
         "--backend",
         type=str,
@@ -46,9 +45,7 @@ def main():
         default=None,
         help="Number of shots (default: config value)",
     )
-    parser.add_argument(
-        "--qubits", type=int, default=3, help="Number of qubits in GHZ test circuit"
-    )
+    parser.add_argument("--qubits", type=int, default=3, help="Number of qubits in GHZ test circuit")
     args = parser.parse_args()
 
     print("=" * 70)
@@ -61,9 +58,7 @@ def main():
         workspace = azure.connect()
     except Exception as e:
         print(f"\n[ERROR] Failed to connect to Azure Quantum: {e}")
-        print(
-            "Ensure az login is complete and config/quantum_config.yaml is set correctly."
-        )
+        print("Ensure az login is complete and config/quantum_config.yaml is set correctly.")
         return
 
     # List backends
@@ -82,15 +77,11 @@ def main():
         print(qc.draw(output="text"))
     except Exception:
         # Fallback if Unicode rendering fails
-        print(
-            f"GHZ circuit: {args.qubits} qubits, Hadamard + {args.qubits-1} CNOTs + measurement"
-        )
+        print(f"GHZ circuit: {args.qubits} qubits, Hadamard + {args.qubits-1} CNOTs + measurement")
 
     # Submit job
     try:
-        job = azure.submit_circuit(
-            qc, backend_name=args.backend, shots=args.shots, job_name="ghz-validation"
-        )
+        job = azure.submit_circuit(qc, backend_name=args.backend, shots=args.shots, job_name="ghz-validation")
         results = azure.get_job_results(job)
 
         # Save

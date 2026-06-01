@@ -75,10 +75,7 @@ class JsonFormatter(logging.Formatter):
             record.exc_text = None
 
         doc: Dict[str, Any] = {
-            "timestamp": time.strftime(
-                "%Y-%m-%dT%H:%M:%S", time.gmtime(record.created)
-            )
-            + f".{int(record.msecs):03d}Z",
+            "timestamp": time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime(record.created)) + f".{int(record.msecs):03d}Z",
             "level": record.levelname,
             "logger": record.name,
             "message": record.message,
@@ -156,9 +153,7 @@ def configure_logging(
         # Remove existing stream handlers to avoid duplicates when running
         # under frameworks that add their own handlers (e.g. Azure Functions).
         for h in list(root.handlers):
-            if isinstance(h, logging.StreamHandler) and not isinstance(
-                h, logging.FileHandler
-            ):
+            if isinstance(h, logging.StreamHandler) and not isinstance(h, logging.FileHandler):
                 root.removeHandler(h)
 
         handler = logging.StreamHandler(stream or sys.stdout)

@@ -160,9 +160,7 @@ class QuantumNeuralNetwork:
         self.qnn = None
         self.weights = None
 
-        logger.info(
-            f"Initialized QuantumNeuralNetwork with {num_qubits} qubits, {layers} layers"
-        )
+        logger.info(f"Initialized QuantumNeuralNetwork with {num_qubits} qubits, {layers} layers")
 
     def build_circuit(self):
         """Build parameterized quantum circuit"""
@@ -252,9 +250,7 @@ if __name__ == "__main__":
     )
 
     # Split data
-    X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=0.2, random_state=42
-    )
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
     # Create and train quantum classifier
     qc = QuantumClassifier(num_features=4, num_qubits=4, reps=2)

@@ -78,8 +78,7 @@ def _pennylane_amplitude_transform(
     try:
         import pennylane as qml  # type: ignore  # noqa: PLC0415
     except ImportError:
-        logger.warning(
-            "PennyLane not available, using classical fallback")
+        logger.warning("PennyLane not available, using classical fallback")
         return _classical_amplitude_transform(embedding, params, num_qubits)
 
     dim = len(embedding)
@@ -94,8 +93,7 @@ def _pennylane_amplitude_transform(
 
     @qml.qnode(dev)
     def circuit(state_vec, params):
-        qml.AmplitudeEmbedding(
-            state_vec, wires=range(num_qubits), normalize=True)
+        qml.AmplitudeEmbedding(state_vec, wires=range(num_qubits), normalize=True)
         for layer in range(num_layers):
             for q in range(num_qubits):
                 idx = (layer * num_qubits + q) % len(params)
@@ -129,8 +127,7 @@ def _qiskit_amplitude_transform(
         from qiskit.circuit import ParameterVector  # type: ignore  # noqa: PLC0415
         from qiskit_aer import AerSimulator  # type: ignore  # noqa: PLC0415
     except ImportError:
-        logger.warning(
-            "Qiskit/AerSimulator not available, using classical fallback")
+        logger.warning("Qiskit/AerSimulator not available, using classical fallback")
         return _classical_amplitude_transform(embedding, params, num_qubits)
 
     dim = len(embedding)
@@ -158,8 +155,7 @@ def _qiskit_amplitude_transform(
         for q in range(n - 1):
             qc.cx(q, q + 1)
 
-    param_dict = {pv[i]: float(params[i % len(params)])
-                  for i in range(total_params)}
+    param_dict = {pv[i]: float(params[i % len(params)]) for i in range(total_params)}
     bound = qc.assign_parameters(param_dict)
 
     sim = AerSimulator(method="statevector")
@@ -231,22 +227,14 @@ class QuantumEmbeddingTransformer:
             Transformed embedding with the same shape as the input.
         """
         if embedding.ndim != 1:
-            raise ValueError(
-                f"Expected 1-D embedding, got shape {embedding.shape}"
-            )
+            raise ValueError(f"Expected 1-D embedding, got shape {embedding.shape}")
         embedding = embedding.astype(float)
 
         if self.effective_backend == "pennylane":
-            return _pennylane_amplitude_transform(
-                embedding, self._params, self.num_qubits, self.num_layers
-            )
+            return _pennylane_amplitude_transform(embedding, self._params, self.num_qubits, self.num_layers)
         if self.effective_backend == "qiskit":
-            return _qiskit_amplitude_transform(
-                embedding, self._params, self.num_qubits, self.num_layers
-            )
-        return _classical_amplitude_transform(
-            embedding, self._params, self.num_qubits
-        )
+            return _qiskit_amplitude_transform(embedding, self._params, self.num_qubits, self.num_layers)
+        return _classical_amplitude_transform(embedding, self._params, self.num_qubits)
 
     def update_params(self, params: np.ndarray) -> None:
         """Override the variational parameters (e.g. after training)."""

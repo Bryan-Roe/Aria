@@ -49,14 +49,17 @@ class LocalAGIProvider:
         except Exception:
             # Non-JSON fallback — stream characters or return string
             if stream:
+
                 def _char_gen():
                     for ch in str(raw):
                         yield ch
+
                 return _char_gen()
             return str(raw)
 
         # If streaming, yield structured dict chunks: analysis, steps, output tokens.
         if stream:
+
             def _gen():
                 try:
                     if isinstance(payload, dict):

@@ -10,17 +10,9 @@ import importlib.util
 import sys
 from pathlib import Path
 
-_CANONICAL = (
-    Path(__file__).resolve().parent
-    / "ai-projects"
-    / "chat-cli"
-    / "src"
-    / "token_utils.py"
-)
+_CANONICAL = Path(__file__).resolve().parent / "ai-projects" / "chat-cli" / "src" / "token_utils.py"
 
-_spec = importlib.util.spec_from_file_location(
-    "_canonical_token_utils_root", _CANONICAL
-)
+_spec = importlib.util.spec_from_file_location("_canonical_token_utils_root", _CANONICAL)
 if _spec is None or _spec.loader is None:
     raise ImportError(f"Unable to load canonical token utils: {_CANONICAL}")
 

@@ -55,9 +55,7 @@ def load_preset_dataset(name: str):
 def preprocess_data(X, y, n_qubits=4):
     """Preprocess data for quantum ML"""
     print(f"\n🔧 Preprocessing data (n_qubits={n_qubits})...")
-    X_train, X_val, y_train, y_val = train_test_split(
-        X, y, test_size=0.2, random_state=42, stratify=y
-    )
+    X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
 
     scaler = StandardScaler()
     X_train = scaler.fit_transform(X_train)
@@ -99,9 +97,7 @@ def create_quantum_circuit(n_qubits=4, n_layers=2):
         elif len(inputs) > target_dim:
             inputs = inputs[:target_dim]
 
-        qml.AmplitudeEmbedding(
-            features=inputs, wires=range(n_qubits), pad_with=0.0, normalize=True
-        )
+        qml.AmplitudeEmbedding(features=inputs, wires=range(n_qubits), pad_with=0.0, normalize=True)
 
         # Variational layers
         for layer in range(n_layers):
@@ -186,9 +182,7 @@ def train_quantum_model(
                 y_pred_sigmoid = 1 / (1 + np.exp(-y_pred))
 
                 # Binary cross-entropy loss
-                loss = -y_true * np.log(y_pred_sigmoid + 1e-8) - (1 - y_true) * np.log(
-                    1 - y_pred_sigmoid + 1e-8
-                )
+                loss = -y_true * np.log(y_pred_sigmoid + 1e-8) - (1 - y_true) * np.log(1 - y_pred_sigmoid + 1e-8)
                 batch_loss += loss
 
                 # Gradient (simplified - no autograd backprop through circuit)
@@ -218,9 +212,7 @@ def train_quantum_model(
             y_pred = np.dot(quantum_out, w_out) + b_out
             y_pred_sigmoid = 1 / (1 + np.exp(-y_pred))
             val_preds.append(1 if y_pred_sigmoid > 0.5 else 0)
-            val_loss += -y_true * np.log(y_pred_sigmoid + 1e-8) - (1 - y_true) * np.log(
-                1 - y_pred_sigmoid + 1e-8
-            )
+            val_loss += -y_true * np.log(y_pred_sigmoid + 1e-8) - (1 - y_true) * np.log(1 - y_pred_sigmoid + 1e-8)
 
         val_acc = np.mean(np.array(val_preds) == y_val)
         history["val_acc"].append(float(val_acc))
@@ -251,9 +243,7 @@ def train_quantum_model(
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        description="Train quantum circuit for specified duration"
-    )
+    parser = argparse.ArgumentParser(description="Train quantum circuit for specified duration")
     parser.add_argument(
         "--preset",
         type=str,
@@ -262,9 +252,7 @@ def main():
     )
     parser.add_argument("--n-qubits", type=int, default=4)
     parser.add_argument("--n-layers", type=int, default=2)
-    parser.add_argument(
-        "--duration", type=int, default=45, help="Training duration in minutes"
-    )
+    parser.add_argument("--duration", type=int, default=45, help="Training duration in minutes")
     parser.add_argument("--learning-rate", type=float, default=0.01)
     args = parser.parse_args()
 
@@ -273,9 +261,7 @@ def main():
     print("=" * 70)
 
     X, y = load_preset_dataset(args.preset)
-    print(
-        f"✅ Loaded dataset: {args.preset} ({X.shape[0]} samples, {X.shape[1]} features)"
-    )
+    print(f"✅ Loaded dataset: {args.preset} ({X.shape[0]} samples, {X.shape[1]} features)")
 
     X_train, X_val, y_train, y_val, scaler, pca = preprocess_data(X, y, args.n_qubits)
 

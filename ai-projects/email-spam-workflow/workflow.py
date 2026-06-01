@@ -54,9 +54,7 @@ def _get_required_env(name: str) -> str:
     value = os.environ.get(name, "").strip()
     if value:
         return value
-    raise ValueError(
-        f"{name} is not set. Add it to your .env file or environment variables."
-    )
+    raise ValueError(f"{name} is not set. Add it to your .env file or environment variables.")
 
 
 def _coerce_text(value: Any) -> str:

@@ -95,7 +95,7 @@ def test_agi_stream_http_sse(monkeypatch):
         for line in ev.splitlines():
             if line.startswith("data: "):
                 try:
-                    payload = json.loads(line[len("data: "):])
+                    payload = json.loads(line[len("data: ") :])
                 except Exception:
                     continue
                 delta = payload.get("delta")

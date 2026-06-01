@@ -1,4 +1,5 @@
 """Human feedback agent for recording operator guidance and optional bus broadcasts."""
+
 from __future__ import annotations
 
 from typing import Any, Dict, Optional
