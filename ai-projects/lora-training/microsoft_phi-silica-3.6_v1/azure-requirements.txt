@@ -8,4 +8,4 @@ azure-storage-blob>=12.29.0
 azure-monitor-opentelemetry>=1.8.8
 
 # Optional: For advanced features
-mlflow>=3.12.0
+mlflow>=3.13.0
