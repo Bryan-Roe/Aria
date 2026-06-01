@@ -164,9 +164,7 @@ def test_probe_with_local_dev_adapter_uses_long_request_timeout(
 
 @pytest.mark.unit
 def test_local_dev_adapter_command_uses_target_url_port() -> None:
-    command = smoke_module._local_dev_adapter_command(
-        "http://localhost:7072/api/ai/status"
-    )
+    command = smoke_module._local_dev_adapter_command("http://localhost:7072/api/ai/status")
 
     assert command == [
         sys.executable,
@@ -178,9 +176,7 @@ def test_local_dev_adapter_command_uses_target_url_port() -> None:
 
 @pytest.mark.unit
 def test_local_dev_adapter_command_defaults_to_7071_without_explicit_port() -> None:
-    command = smoke_module._local_dev_adapter_command(
-        "http://localhost/api/ai/status"
-    )
+    command = smoke_module._local_dev_adapter_command("http://localhost/api/ai/status")
 
     assert command == [
         sys.executable,

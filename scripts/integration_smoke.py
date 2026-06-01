@@ -344,7 +344,7 @@ def _probe_agi_endpoints(strict: bool) -> List[StepResult]:
                     payload=ep["payload"] or {},
                     timeout=LOCAL_DEV_ADAPTER_REQUEST_TIMEOUT_SEC,
                 )
-                ok = ep["required_key"] in body and "\"delta\"" in body
+                ok = ep["required_key"] in body and '"delta"' in body
                 if not ok:
                     raise ValueError("stream_missing_expected_sse_markers")
                 detail = "sse=[DONE]+delta"
@@ -430,6 +430,7 @@ def _probe_functions_endpoint(strict: bool) -> StepResult:
     name = "functions_ai_status_endpoint"
     start = time.perf_counter()
     url = "http://localhost:7071/api/ai/status"
+
     def _build_success_detail(payload: Dict[str, Any], source: str = "") -> Optional[str]:
         valid, detail = _validate_ai_status_payload(payload)
         if not valid:
@@ -623,9 +624,7 @@ def _validate_ai_routes_payload(payload: Dict[str, Any]) -> Optional[str]:
     if not isinstance(functions, list):
         return None
     route_names = {
-        item.get("route")
-        for item in functions
-        if isinstance(item, dict) and isinstance(item.get("route"), str)
+        item.get("route") for item in functions if isinstance(item, dict) and isinstance(item.get("route"), str)
     }
     missing = sorted(_REQUIRED_AI_ROUTE_NAMES - route_names)
     if missing:
