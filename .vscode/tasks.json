@@ -102,6 +102,26 @@
 			"problemMatcher": []
 		},
 		{
+			"label": "validate: mcp-setup",
+			"type": "shell",
+			"command": "bash",
+			"args": [
+				"-lc",
+				"\"${workspaceFolder}/.venv/bin/python\" scripts/validate_mcp_setup.py"
+			],
+			"problemMatcher": []
+		},
+		{
+			"label": "validate: mcp-setup-json",
+			"type": "shell",
+			"command": "bash",
+			"args": [
+				"-lc",
+				"\"${workspaceFolder}/.venv/bin/python\" scripts/validate_mcp_setup.py --json"
+			],
+			"problemMatcher": []
+		},
+		{
 			"label": "automate: core-files",
 			"type": "shell",
 			"command": "bash",

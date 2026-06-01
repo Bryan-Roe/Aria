@@ -11,7 +11,7 @@ applyTo: "ai-projects/quantum-ml/quantum_mcp_server.py"
 - Always test on FREE simulators before using paid QPU
 
 ## MCP Tools & Safety
-- Start MCP server: `python .\\quantum-ai\\quantum_mcp_server.py`.
+- Start MCP server: `.venv/bin/python ai-projects/quantum-ml/quantum_mcp_server.py`.
 - Available tools: `create_quantum_circuit`, `simulate_quantum_circuit`, `get_quantum_circuit_properties`, `connect_azure_quantum`, `list_quantum_backends`, `submit_quantum_job`, `estimate_quantum_cost`, `train_quantum_classifier`.
 - Safety limits enforced: ≤10 local qubits, default ≤1000 shots, 60s timeout per call, CircuitCache (LRU + TTL) to avoid recomputation.
 - Cost gate for Azure QPU: require `confirm_cost=true` (tool args) and set `azure_confirm_cost: true` in orchestrator YAML before real hardware.

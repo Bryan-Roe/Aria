@@ -61,7 +61,9 @@ def test_planner_agent_reports_missing_goal_without_invalid_steps() -> None:
 
     assert result["error"] == "No goal provided"
     assert result["plan"] == []
-    assert memory.last_of_type("plan_created")["data"]["error"] == "No goal provided"
+    plan_created = memory.last_of_type("plan_created")
+    assert plan_created is not None
+    assert plan_created["data"]["error"] == "No goal provided"
 
 
 def test_goal_evolution_agent_returns_goal() -> None:
@@ -78,7 +80,9 @@ def test_goal_evolution_agent_returns_goal() -> None:
 def test_llm_agent_uses_structured_core_client_output() -> None:
     agent = LLMAgent()
 
-    result = agent.execute(Task(type="llm", payload={"prompt": "Verify this design"}))
+    result = agent.execute(
+        Task(type="llm", payload={"prompt": "Verify this design"})
+    )
 
     assert result["output"] == "Simulated result for: Verify this design"
     assert result["analysis"] == "Processed: Verify this design"
@@ -90,7 +94,9 @@ def test_tool_agent_reports_available_tools_on_error() -> None:
     registry.register("echo", lambda text: text)
     agent = ToolAgent(registry)
 
-    result = agent.execute(Task(type="tool", payload={"tool": "missing", "args": {}}))
+    result = agent.execute(
+        Task(type="tool", payload={"tool": "missing", "args": {}})
+    )
 
     assert result["error"] == "Tool not found: missing"
     assert result["available_tools"] == ["echo"]
@@ -99,7 +105,9 @@ def test_tool_agent_reports_available_tools_on_error() -> None:
 def test_tool_agent_rejects_non_mapping_args() -> None:
     agent = ToolAgent()
 
-    result = agent.execute(Task(type="tool", payload={"tool": "anything", "args": ["x"]}))
+    result = agent.execute(
+        Task(type="tool", payload={"tool": "anything", "args": ["x"]})
+    )
 
     assert result["error"] == "Tool args must be a dictionary"
 
@@ -113,16 +121,30 @@ def test_router_prioritizes_matching_agent_types() -> None:
     registry.register(llm)
     router = TaskRouter(registry)
 
-    result = router.route(Task(type="plan", payload={"goal": "Investigate files"}))
+    result = router.route(
+        Task(type="plan", payload={"goal": "Investigate files"})
+    )
 
     assert result["agent"] == "planner_agent"
     assert result["candidates"][0]["agent"] == "planner_agent"
 
 
+def test_router_classifies_reflection_requests_for_reflection_agent() -> None:
+    runner = AriaRunner(config={"sleep_seconds": 0})
+
+    result = runner.router.route_text(
+        "Reflect on the last cycle and identify lessons"
+    )
+
+    assert result["agent"] == "reflection_agent"
+
+
 def test_training_agent_summary_tracks_signal_counts() -> None:
     agent = TrainingAgent()
 
-    train_result = agent.execute(Task(type="train", payload={"goal": "improve"}))
+    train_result = agent.execute(
+        Task(type="train", payload={"goal": "improve"})
+    )
     eval_result = agent.execute(Task(type="evaluate", payload={"score": 0.8}))
 
     assert train_result["summary"]["counts"]["train"] == 1
@@ -147,6 +169,7 @@ def test_runner_registers_default_tooling() -> None:
     tool_agent = runner.registry.get("tool_agent")
 
     assert tool_agent is not None
+    assert isinstance(tool_agent, ToolAgent)
     assert tool_agent.registry.has("inspect_context")
     assert tool_agent.registry.has("recent_events")
 
@@ -160,7 +183,10 @@ def test_runner_default_inspect_context_tool_uses_memory() -> None:
     result = tool_agent.execute(
         Task(
             type="tool",
-            payload={"tool": "inspect_context", "args": {"goal": "check status"}},
+            payload={
+                "tool": "inspect_context",
+                "args": {"goal": "check status"},
+            },
         )
     )
 
@@ -180,10 +206,14 @@ def test_runner_skips_invalid_plan_steps_and_records_reason() -> None:
             "agent": "planner_agent",
             "task_id": "planner",
             "goal": "bad plan",
-            "plan": [{"payload": {}}, "oops", {"type": "llm", "payload": {"prompt": "ok"}}],
+            "plan": [
+                {"payload": {}},
+                "oops",
+                {"type": "llm", "payload": {"prompt": "ok"}},
+            ],
         }
 
-    planner.execute = _bad_plan  # type: ignore[method-assign]
+    setattr(planner, "execute", _bad_plan)
 
     result = runner.run_once()
 
@@ -194,7 +224,7 @@ def test_runner_skips_invalid_plan_steps_and_records_reason() -> None:
 
 @pytest.mark.asyncio
 async def test_task_queue_processes_tasks_and_stops_cleanly() -> None:
-    queue = TaskQueue(max_workers=2)
+    queue: TaskQueue = TaskQueue(max_workers=2)
     processed: list[str] = []
 
     async def handler(task: str) -> None:

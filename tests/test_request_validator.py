@@ -197,6 +197,28 @@ class TestValidateFields:
         err = validate_fields({"temp": 0.7}, {"temp": {"type": (int, float), "min": 0, "max": 2}})
         assert err is None
 
+    def test_bool_rejected_for_int_field(self):
+        # bool is a subclass of int; it must not satisfy an int-typed field.
+        err = validate_fields({"n": True}, {"n": {"type": int}})
+        assert err is not None
+        assert "must be int" in err
+
+    def test_bool_rejected_for_numeric_union_field(self):
+        err = validate_fields({"temp": True}, {"temp": {"type": (int, float), "min": 0, "max": 2}})
+        assert err is not None
+        assert "|" in err
+
+    def test_bool_accepted_for_bool_field(self):
+        err = validate_fields({"flag": True}, {"flag": {"type": bool}})
+        assert err is None
+        err = validate_fields({"flag": False}, {"flag": {"type": bool}})
+        assert err is None
+
+    def test_int_rejected_for_bool_field(self):
+        err = validate_fields({"flag": 1}, {"flag": {"type": bool}})
+        assert err is not None
+        assert "must be bool" in err
+
 
 # ---------------------------------------------------------------------------
 # validate_request

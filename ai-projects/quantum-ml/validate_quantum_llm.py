@@ -91,17 +91,23 @@ class ComponentValidator:
             {
                 "name": "Advanced Quantum Components",
                 "import_path": "src.quantum_llm_advanced",
-                "description": "Circuit caching, adaptive layers, multi-scale attention",
+                "description": (
+                    "Circuit caching, adaptive layers, multi-scale attention"
+                ),
             },
             {
                 "name": "Circuit Optimizer",
                 "import_path": "src.quantum_circuit_optimizer",
-                "description": "Circuit compilation, batch execution, scheduling",
+                "description": (
+                    "Circuit compilation, batch execution, scheduling"
+                ),
             },
             {
                 "name": "Hybrid Trainer",
                 "import_path": "src.quantum_llm_hybrid_trainer",
-                "description": "Curriculum learning, adaptive routing, orchestration",
+                "description": (
+                    "Curriculum learning, adaptive routing, orchestration"
+                ),
             },
             {
                 "name": "Training Monitor",
@@ -125,7 +131,9 @@ class ComponentValidator:
         for component in components:
             logger.info(f"Testing: {component['name']}")
             logger.info(f"  Description: {component['description']}")
-            self.validate_component(component["name"], component["import_path"])
+            self.validate_component(
+                component["name"], component["import_path"]
+            )
             logger.info("")
 
         # Generate summary
@@ -270,7 +278,9 @@ def run_full_validation():
         assert config["batch_size"] == 32, "Config update failed"
 
         logger.info("✅ Configuration test PASSED")
-        functional_results.append({"test": "Configuration", "status": "✅ PASS"})
+        functional_results.append(
+            {"test": "Configuration", "status": "✅ PASS"}
+        )
     except Exception as e:
         logger.error(f"❌ Configuration test FAILED: {e}")
         functional_results.append(
@@ -323,13 +333,18 @@ def run_full_validation():
     logger.info("=" * 80)
 
     total_functional = len(functional_results)
-    passed_functional = sum(1 for r in functional_results if r["status"] == "✅ PASS")
+    passed_functional = sum(
+        1 for r in functional_results if r["status"] == "✅ PASS"
+    )
 
     for result in functional_results:
         status_str = result["status"]
         logger.info(f"{status_str} {result['test']}")
 
-    logger.info(f"\nFunctional Tests: {passed_functional}/{total_functional} passed")
+    logger.info(
+        f"\nFunctional Tests: {passed_functional}/"
+        f"{total_functional} passed"
+    )
     logger.info("=" * 80)
 
     # Combined summary
@@ -343,7 +358,10 @@ def run_full_validation():
         },
         "overall_status": (
             "✅ PASS"
-            if (import_summary["failed"] == 0 and passed_functional == total_functional)
+            if (
+                import_summary["failed"] == 0
+                and passed_functional == total_functional
+            )
             else "❌ SOME FAILURES"
         ),
     }
@@ -354,10 +372,14 @@ def run_full_validation():
 def generate_validation_report(summary: Dict[str, Any], output_path: Path):
     """Generate comprehensive validation report."""
 
+    status_text = summary.get(
+        "overall_status", summary.get("status", "Unknown")
+    )
+
     report_lines = [
         "# Quantum LLM Validation Report",
         f"\n**Generated:** {time.strftime('%Y-%m-%d %H:%M:%S')}",
-        f"\n**Status:** {summary.get('overall_status', summary.get('status', 'Unknown'))}",
+        f"\n**Status:** {status_text}",
         "\n---\n",
     ]
 
@@ -365,10 +387,14 @@ def generate_validation_report(summary: Dict[str, Any], output_path: Path):
     if "import_validation" in summary:
         import_val = summary["import_validation"]
         report_lines.append("\n## Import Validation\n")
-        report_lines.append(f"- Total Components: {import_val['total_components']}")
+        report_lines.append(
+            f"- Total Components: {import_val['total_components']}"
+        )
         report_lines.append(f"- Passed: {import_val['passed']}")
         report_lines.append(f"- Failed: {import_val['failed']}")
-        report_lines.append(f"- Success Rate: {import_val['success_rate']:.1%}")
+        report_lines.append(
+            f"- Success Rate: {import_val['success_rate']:.1%}"
+        )
         report_lines.append(f"- Total Time: {import_val['total_time']:.2f}s\n")
 
         report_lines.append("\n### Component Details\n")
@@ -399,22 +425,28 @@ def generate_validation_report(summary: Dict[str, Any], output_path: Path):
 
     if summary.get("overall_status") == "✅ PASS":
         report_lines.append(
-            "✅ **All validations passed!** The quantum LLM system is ready to use.\n"
+            "✅ **All validations passed!** The quantum LLM system is "
+            "ready to use.\n"
         )
         report_lines.append("**Next Steps:**")
         report_lines.append(
-            "- Run quick start: `python quantum_llm_quickstart.py --mode quick`"
+            "- Run quick start: `python quantum_llm_quickstart.py "
+            "--mode quick`"
         )
         report_lines.append("- Review documentation: `QUANTUM_LLM_README.md`")
         report_lines.append(
-            "- Configure for your use case: `config/quantum_llm_config_example.yaml`"
+            "- Configure for your use case: "
+            "`config/quantum_llm_config_example.yaml`"
         )
     else:
-        report_lines.append("⚠️ **Some validations failed.** Review errors above.\n")
+        report_lines.append(
+            "⚠️ **Some validations failed.** Review errors above.\n"
+        )
         report_lines.append("**Troubleshooting:**")
         report_lines.append("- Check Python version (3.8+ required)")
         report_lines.append(
-            "- Install dependencies: `pip install torch pennylane pyyaml numpy`"
+            "- Install dependencies: `pip install torch pennylane "
+            "pyyaml numpy`"
         )
         report_lines.append("- Verify file paths and imports")
 
@@ -434,7 +466,9 @@ def main():
     """Main entry point."""
     import argparse
 
-    parser = argparse.ArgumentParser(description="Quantum LLM Validation Suite")
+    parser = argparse.ArgumentParser(
+        description="Quantum LLM Validation Suite"
+    )
     parser.add_argument(
         "--quick", action="store_true", help="Quick validation (imports only)"
     )
@@ -442,7 +476,9 @@ def main():
         "--full", action="store_true", help="Full validation (imports + tests)"
     )
     parser.add_argument(
-        "--report-only", action="store_true", help="Generate report from last run"
+        "--report-only",
+        action="store_true",
+        help="Generate report from last run",
     )
     parser.add_argument(
         "--output",
@@ -478,13 +514,16 @@ def main():
     with open(json_path, "w") as f:
         json.dump(summary, f, indent=2)
     logger.info(f"📄 JSON report saved: {json_path}")
+    logger.info(f"📄 Markdown report saved: {report_path}")
 
     # Final status
     logger.info("\n" + "=" * 80)
     if summary.get("overall_status") == "✅ PASS":
         logger.info("🎉 VALIDATION SUCCESSFUL - QUANTUM LLM SYSTEM READY!")
     else:
-        logger.info("⚠️  VALIDATION COMPLETED WITH SOME FAILURES - REVIEW REPORT")
+        logger.info(
+            "⚠️  VALIDATION COMPLETED WITH SOME FAILURES - REVIEW REPORT"
+        )
     logger.info("=" * 80)
 
 

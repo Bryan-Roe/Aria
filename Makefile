@@ -13,7 +13,8 @@
 #   make format       # auto-format code
 # =============================================================================
 
-PYTHON       ?= python3
+VENV_PYTHON  := $(wildcard .venv/bin/python)
+PYTHON       ?= $(if $(VENV_PYTHON),$(VENV_PYTHON),python3)
 PIP          ?= $(PYTHON) -m pip
 PYTEST       ?= $(PYTHON) -m pytest
 RUFF         ?= $(PYTHON) -m ruff
@@ -27,8 +28,8 @@ GRADIO_PORT  ?= 7860
 GRADIO_SHARE ?= false
 
 .PHONY: all install install-qai dev start stop build test test-unit test-integration \
-        lint format type-check clean docker-build docker-dev start-gradio \
-        start-local-status start-qai help
+	lint format type-check clean docker-build docker-dev start-gradio \
+	start-local-status start-qai validate-mcp validate-mcp-json help
 
 # Default target
 all: lint test
@@ -119,6 +120,14 @@ smoke:
 	$(PYTHON) -c "from shared.config import get_settings; s = get_settings(); print('Active provider:', s.active_provider())"
 	$(PYTHON) -c "from shared.logging import configure_logging, get_logger; configure_logging(); get_logger('smoke').info('OK')"
 	@echo "✅ Smoke test passed."
+
+## Validate configured VS Code MCP stdio servers
+validate-mcp:
+	@$(PYTHON) scripts/validate_mcp_setup.py
+
+## Validate configured VS Code MCP stdio servers with JSON output
+validate-mcp-json:
+	@$(PYTHON) scripts/validate_mcp_setup.py --json
 
 # ---------------------------------------------------------------------------
 # Code quality

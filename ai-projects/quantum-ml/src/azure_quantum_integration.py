@@ -8,13 +8,64 @@ import logging
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-import yaml
-from azure.identity import DefaultAzureCredential
-from azure.quantum import Workspace
-from azure.quantum.qiskit import AzureQuantumProvider
-from qiskit import QuantumCircuit, transpile
+import yaml  # type: ignore[import-untyped]
+
+try:
+    from qiskit import QuantumCircuit, transpile
+except ImportError:  # pragma: no cover - optional Qiskit dependency
+    class QuantumCircuit:  # type: ignore[no-redef]
+        def __init__(self, n_qubits: int, n_clbits: int):
+            self.n_qubits = n_qubits
+            self.n_clbits = n_clbits
+
+        def h(self, *_args: Any, **_kwargs: Any) -> None:
+            return None
+
+        def cx(self, *_args: Any, **_kwargs: Any) -> None:
+            return None
+
+        def measure(self, *_args: Any, **_kwargs: Any) -> None:
+            return None
+
+    def transpile(circuit: Any, *args: Any, **kwargs: Any) -> Any:
+        return circuit
+
+azure_identity: Any = None
+azure_quantum: Any = None
+azure_quantum_qiskit: Any = None
+
+try:
+    import azure.identity as _azure_identity_mod
+    import azure.quantum as _azure_quantum_mod
+    import azure.quantum.qiskit as _azure_quantum_qiskit_mod
+except ImportError:  # pragma: no cover - optional Azure dependency
+    pass
+else:
+    azure_identity = _azure_identity_mod
+    azure_quantum = _azure_quantum_mod
+    azure_quantum_qiskit = _azure_quantum_qiskit_mod
+
+DefaultAzureCredential = (
+    azure_identity.DefaultAzureCredential if azure_identity else None
+)
+Workspace = azure_quantum.Workspace if azure_quantum else None
+AzureQuantumProvider = (
+    azure_quantum_qiskit.AzureQuantumProvider if azure_quantum_qiskit else None
+)
 
 logger = logging.getLogger(__name__)
+
+
+def _backend_name(backend: Any) -> str:
+    """
+    Return a backend name whether the SDK exposes it as a method or property.
+    """
+    name = getattr(backend, "name", None)
+    if callable(name):
+        return str(name())
+    if name is not None:
+        return str(name)
+    return str(backend)
 
 
 class AzureQuantumIntegration:
@@ -29,7 +80,8 @@ class AzureQuantumIntegration:
         Args:
             config_path: Path to configuration file
         """
-        # Handle both relative and absolute paths, and resolve from script location
+        # Handle both relative and absolute paths, and resolve from
+        # script location
         config_file = Path(config_path)
         if not config_file.is_absolute():
             # Try relative to quantum-ai directory
@@ -45,12 +97,12 @@ class AzureQuantumIntegration:
         self.azure_config = self.config["azure"]
         self.quantum_config = self.config["quantum"]
 
-        self.workspace: Optional[Workspace] = None
-        self.provider: Optional[AzureQuantumProvider] = None
+        self.workspace: Any = None
+        self.provider: Any = None
 
         logger.info("Azure Quantum Integration initialized")
 
-    def connect(self, credential: Optional[Any] = None) -> Workspace:
+    def connect(self, credential: Optional[Any] = None) -> Any:
         """
         Connect to Azure Quantum workspace.
 
@@ -60,6 +112,16 @@ class AzureQuantumIntegration:
         Returns:
             Connected workspace
         """
+        if (
+            Workspace is None
+            or AzureQuantumProvider is None
+            or DefaultAzureCredential is None
+        ):
+            raise ImportError(
+                "azure.quantum is not installed; Azure Quantum connection "
+                "is unavailable"
+            )
+
         if credential is None:
             credential = DefaultAzureCredential()
 
@@ -73,7 +135,8 @@ class AzureQuantumIntegration:
             )
 
             logger.info(
-                f"Connected to Azure Quantum workspace: {self.azure_config['workspace_name']}"
+                "Connected to Azure Quantum workspace: "
+                f"{self.azure_config['workspace_name']}"
             )
 
             # Initialize provider
@@ -93,10 +156,11 @@ class AzureQuantumIntegration:
             List of backend names
         """
         if self.provider is None:
-            raise RuntimeError("Not connected to Azure Quantum. Call connect() first.")
+            raise RuntimeError(
+                "Not connected to Azure Quantum. Call connect() first.")
 
         backends = self.provider.backends()
-        backend_names = [backend.name() for backend in backends]
+        backend_names = [_backend_name(backend) for backend in backends]
 
         logger.info(f"Available backends: {', '.join(backend_names)}")
         return backend_names
@@ -112,7 +176,8 @@ class AzureQuantumIntegration:
             Quantum backend
         """
         if self.provider is None:
-            raise RuntimeError("Not connected to Azure Quantum. Call connect() first.")
+            raise RuntimeError(
+                "Not connected to Azure Quantum. Call connect() first.")
 
         if backend_name is None:
             # Use provider from config
@@ -123,16 +188,16 @@ class AzureQuantumIntegration:
             preferred = None
             fallback = None
             for backend in backends:
-                name = backend.name().lower()
+                name = _backend_name(backend).lower()
                 if provider.lower() in name:
                     if "sim" in name or "simulator" in name:
-                        preferred = backend.name()
+                        preferred = _backend_name(backend)
                         break
                     # Track first provider match as fallback (likely QPU)
                     if fallback is None:
-                        fallback = backend.name()
+                        fallback = _backend_name(backend)
 
-            backend_name = preferred or fallback or backends[0].name()
+            backend_name = preferred or fallback or _backend_name(backends[0])
 
         backend = self.provider.get_backend(backend_name)
         logger.info(f"Using backend: {backend_name}")
@@ -159,7 +224,9 @@ class AzureQuantumIntegration:
             Job object
         """
         if shots is None:
-            shots = self.quantum_config["hardware"]["shots"]
+            shots_value = int(self.quantum_config["hardware"]["shots"])
+        else:
+            shots_value = int(shots)
 
         backend = self.get_backend(backend_name)
 
@@ -167,11 +234,13 @@ class AzureQuantumIntegration:
         transpiled_circuit = transpile(
             circuit,
             backend=backend,
-            optimization_level=self.quantum_config["hardware"]["optimization_level"],
+            optimization_level=(
+                self.quantum_config["hardware"]["optimization_level"]
+            ),
         )
 
         # Submit job
-        job = backend.run(transpiled_circuit, shots=shots)
+        job = backend.run(transpiled_circuit, shots=shots_value)
 
         if job_name:
             logger.info(f"Submitted job '{job_name}': {job.id()}")
@@ -196,7 +265,11 @@ class AzureQuantumIntegration:
         counts = result.get_counts()
         logger.info(f"Job completed. Results: {counts}")
 
-        return {"job_id": job.id(), "counts": counts, "success": result.success}
+        return {
+            "job_id": job.id(),
+            "counts": counts,
+            "success": result.success,
+        }
 
     def save_results(self, results: Dict, filename: str):
         """
@@ -239,7 +312,11 @@ class AzureQuantumIntegration:
                 "backend": backend_name,
                 "shots": shots,
                 "estimated_time_minutes": 5,  # Placeholder
-                "note": "Actual cost depends on Azure Quantum pricing for the selected provider",
+                "note": (
+                    "Actual cost depends on Azure Quantum pricing for the "
+                    "selected provider"
+                ),
+                "resolved_backend": _backend_name(backend),
             }
 
             logger.info(f"Cost estimation: {estimation}")
@@ -286,6 +363,10 @@ class QuantumJobManager:
         """
         if job_names is None:
             job_names = [f"job_{i}" for i in range(len(circuits))]
+        elif len(job_names) != len(circuits):
+            raise ValueError(
+                "job_names must match the number of circuits in the batch"
+            )
 
         jobs = []
         for circuit, name in zip(circuits, job_names):
@@ -329,7 +410,8 @@ class QuantumJobManager:
                 result = self.azure.get_job_results(job)
                 results[job_name] = result
             except Exception as e:
-                logger.warning(f"Could not get results for '{job_name}': {str(e)}")
+                logger.warning(
+                    f"Could not get results for '{job_name}': {str(e)}")
                 results[job_name] = {"error": str(e)}
 
         return results
@@ -388,4 +470,7 @@ if __name__ == "__main__":
         print("\nNote: To actually submit jobs, ensure you have:")
         print("1. Valid Azure credentials configured")
         print("2. An Azure Quantum workspace created")
-        print("3. Updated config/quantum_config.yaml with your workspace details")
+        print(
+            "3. Updated config/quantum_config.yaml with your workspace "
+            "details"
+        )

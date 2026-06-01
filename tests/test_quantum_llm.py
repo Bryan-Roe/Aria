@@ -283,6 +283,34 @@ class TestQuantumRouter:
         # Empty providers list falls back to default providers list
         assert result in ["azure", "openai", "lmstudio", "local"]
 
+    def test_route_exclusion_is_identity_stable(self):
+        """Excluding a non-winning provider must not change which provider wins.
+
+        Regression: scores were previously computed over the filtered candidate
+        list, so a provider's weight slice depended on its position after
+        exclusion rather than its identity. Excluding any non-winner reshuffled
+        the params and could flip the chosen provider.
+        """
+        r = self._make_router(providers=["azure", "openai", "lmstudio", "local"])
+        prompt = "Hello world, please route me."
+        winner = r.route(prompt)
+        # Pick any provider that is not the winner and exclude it.
+        non_winner = next(p for p in r.providers if p != winner)
+        assert r.route(prompt, exclude=[non_winner]) == winner
+
+    def test_route_matches_score_ranking(self):
+        """route() must return the highest-scoring non-excluded provider."""
+        r = self._make_router(providers=["azure", "openai", "lmstudio", "local"])
+        prompt = "What is the best provider for this query?"
+        _, scores = r.route_with_scores(prompt)
+        # No exclusion: route() should equal the global argmax provider.
+        expected = max(scores, key=lambda k: scores[k])
+        assert r.route(prompt) == expected
+        # Excluding the winner: route() should equal the best of the rest.
+        rest = {p: s for p, s in scores.items() if p != expected}
+        expected_runner_up = max(rest, key=lambda k: rest[k])
+        assert r.route(prompt, exclude=[expected]) == expected_runner_up
+
 
 # ===========================================================================
 # QuantumLLMPipeline tests (integration with classical fallback + mock provider)

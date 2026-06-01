@@ -10,9 +10,9 @@ and only permits a safe subset of numeric operations.
 from __future__ import annotations
 
 import ast
+import math
 import operator
 import re
-from typing import Optional
 
 # Only allow a small set of binary/unary numeric operators. Anything outside
 # this set (names, calls, attribute access, comprehensions, etc.) is rejected.
@@ -33,6 +33,11 @@ _UNARY_OPS = {
 
 # Cap exponents so an expression like ``9**9**9`` cannot hang the process.
 _MAX_POW_EXPONENT = 1000
+
+# Cap the estimated number of decimal digits in any power result. The exponent
+# cap alone is insufficient because nested powers (e.g. ``(10**1000)**1000``)
+# keep each individual exponent small while making the base astronomically large.
+_MAX_RESULT_DIGITS = 1000
 
 # Words people commonly use in place of arithmetic symbols.
 _WORD_REPLACEMENTS = (
@@ -60,6 +65,33 @@ _PREFIX_RE = re.compile(
 _MATH_ONLY_RE = re.compile(r"^[0-9\.\s+\-*/%()]+$")
 
 
+def _check_pow_bounds(base: float, exponent: float) -> None:
+    """Reject exponentiations that would build excessively large numbers.
+
+    Guards against two denial-of-service shapes:
+
+    * a single huge exponent (``2 ** 100000``), and
+    * nested powers that keep each exponent small while exploding the base
+      (``(10**1000)**1000`` would otherwise materialize a 10**1,000,000 integer).
+
+    The result size is estimated from ``|exponent| * log10(|base|)`` without
+    materializing the value, so the giant number is never actually computed.
+    """
+    if abs(exponent) > _MAX_POW_EXPONENT:
+        raise ValueError("Exponent too large")
+    abs_base = abs(base)
+    if exponent == 0 or abs_base <= 1:
+        return
+    try:
+        base_log10 = math.log10(abs_base)
+    except (ValueError, OverflowError):
+        # Base is an integer too large to convert to float; derive log10 from
+        # its bit length instead (log10(2) per bit).
+        base_log10 = base.bit_length() * math.log10(2)
+    if abs(exponent) * base_log10 > _MAX_RESULT_DIGITS:
+        raise ValueError("Result too large")
+
+
 class _SafeEvaluator(ast.NodeVisitor):
     """Evaluate a restricted arithmetic AST, rejecting anything unsafe."""
 
@@ -79,8 +111,8 @@ class _SafeEvaluator(ast.NodeVisitor):
             raise ValueError("Unsupported operator")
         left = self.visit(node.left)
         right = self.visit(node.right)
-        if op_type is ast.Pow and abs(right) > _MAX_POW_EXPONENT:
-            raise ValueError("Exponent too large")
+        if op_type is ast.Pow:
+            _check_pow_bounds(left, right)
         return _BIN_OPS[op_type](left, right)
 
     def visit_UnaryOp(self, node: ast.UnaryOp) -> float:
@@ -129,7 +161,7 @@ def _format_result(value: float) -> str:
     return str(value)
 
 
-def evaluate_arithmetic(text: str) -> Optional[str]:
+def evaluate_arithmetic(text: str) -> str | None:
     """Evaluate an arithmetic expression embedded in ``text``.
 
     Returns the formatted numeric result as a string, or ``None`` if the input
@@ -141,10 +173,10 @@ def evaluate_arithmetic(text: str) -> Optional[str]:
     try:
         tree = ast.parse(expr, mode="eval")
         result = _SafeEvaluator().visit(tree)
+        if isinstance(result, bool) or not isinstance(result, (int, float)):
+            return None
+        return _format_result(result)
     except ZeroDivisionError:
         return "undefined (division by zero)"
     except (ValueError, SyntaxError, TypeError, OverflowError):
         return None
-    if isinstance(result, bool) or not isinstance(result, (int, float)):
-        return None
-    return _format_result(result)

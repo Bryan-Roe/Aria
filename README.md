@@ -190,7 +190,14 @@ If your goal is to start building AI features quickly (providers, prompts, memor
    func host start
    curl http://localhost:7071/api/ai/status | python -m json.tool
    ```
-5. **Run fast validation before PRs**
+5. **Validate VS Code MCP wiring before agent/tool work**
+   ```bash
+   .venv/bin/python scripts/validate_mcp_setup.py
+   # or structured output for automation
+   .venv/bin/python scripts/validate_mcp_setup.py --json
+   ```
+   In VS Code you can also run the tasks `validate: mcp-setup` or `validate: mcp-setup-json`.
+6. **Run fast validation before PRs**
    ```bash
    python scripts/test_runner.py --unit
    ```
@@ -323,7 +330,7 @@ cd ai-projects/quantum-ml && ./start_dashboard.sh
 # Open http://localhost:5000
 
 # Start the MCP server (8 quantum tools)
-python ai-projects/quantum-ml/quantum_mcp_server.py
+.venv/bin/python ai-projects/quantum-ml/quantum_mcp_server.py
 ```
 
 **MCP tools:** `create_quantum_circuit`, `simulate_quantum_circuit`, `get_quantum_circuit_properties`, `connect_azure_quantum`, `list_quantum_backends`, `submit_quantum_job`, `estimate_quantum_cost`, `get_job_status`
@@ -372,7 +379,7 @@ An autonomous system where an LLM generates, validates, and sandboxes Python too
 ```bash
 cd ai-projects/llm-maker
 python examples/quick_start.py
-python llm_maker_mcp_server.py
+.venv/bin/python llm_maker_mcp_server.py
 ```
 
 Security: no dangerous imports, no filesystem or network access, no `eval` / `exec`, sandboxed execution with resource limits.

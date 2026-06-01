@@ -25,7 +25,7 @@ You are a quantum computing specialist for the Aria platform. You help design qu
 
 ```bash
 # Start the quantum MCP server
-python ai-projects/quantum-ml/quantum_mcp_server.py
+.venv/bin/python ai-projects/quantum-ml/quantum_mcp_server.py
 
 # Validate quantum config
 python scripts/quantum_autorun.py --dry-run

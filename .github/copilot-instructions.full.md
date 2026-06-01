@@ -57,7 +57,7 @@
 
 - Simulate locally first: `python scripts/quantum_autorun.py --job local_simulator`.
 - Real QPU jobs require `azure_confirm_cost: true` in `quantum_autorun.yaml` **and** a cost estimate via `estimate_quantum_cost`.
-- MCP server entry point: `python ai-projects/quantum-ml/quantum_mcp_server.py` (tools: `create_quantum_circuit`, `simulate_quantum_circuit`, `submit_quantum_job`, `estimate_quantum_cost`).
+- MCP server entry point: `.venv/bin/python ai-projects/quantum-ml/quantum_mcp_server.py` (tools: `create_quantum_circuit`, `simulate_quantum_circuit`, `submit_quantum_job`, `estimate_quantum_cost`).
 
 ---
 
@@ -104,7 +104,7 @@
 - LoRA readiness: adapter must contain `adapter_config.json` and `adapter_model.safetensors`. Use CLI: `python .\talk-to-ai\src\chat_cli.py --provider lora --model <adapter_dir>`.
 - Dataset convention (chat): `datasets/chat/<name>/{train.json,test.json}` with `[{"messages": [{"role": "user|assistant", "content": "..."}]}]`. Validate with `python .\scripts\validate_datasets.py --category chat`.
 - Quantum guardrails: always simulate locally (Qiskit Aer) before cloud; real QPU runs require `azure_confirm_cost: true` in `quantum_autorun.yaml`. Use `python .\scripts\quantum_autorun.py --job azure_ionq_simulator` first.
-- MCP server (quantum tools): `python .\quantum-ai\quantum_mcp_server.py`. Tools include `create_quantum_circuit`, `simulate_quantum_circuit`, `submit_quantum_job`, `estimate_quantum_cost` (see `ai-projects/quantum-ml/quantum_mcp_server.py`).
+- MCP server (quantum tools): `.venv/bin/python ai-projects/quantum-ml/quantum_mcp_server.py`. Tools include `create_quantum_circuit`, `simulate_quantum_circuit`, `submit_quantum_job`, `estimate_quantum_cost` (see `ai-projects/quantum-ml/quantum_mcp_server.py`).
 - Testing workflow: prefer `python .\scripts\test_runner.py --all` (fast) or VS Code Test Explorer (🧪). Pytest markers: `not slow and not azure` for local runs.
 - Azure storage/dev: Azurite databases present at root; Functions host can run offline. Configure speech TTS via `AZURE_SPEECH_KEY`/`AZURE_SPEECH_REGION` or enable local fallback with `QAI_ENABLE_LOCAL_TTS=true`.
 - Config precedence: YAML base < CLI flags < per-job YAML overrides < environment variables. Never hardcode secrets; use `local.settings.json` (dev) or Azure App Settings (prod).

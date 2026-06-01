@@ -73,7 +73,7 @@ Get-Process python*, func* | Select-Object ProcessName, Id, CPU, WorkingSet64
 - Check: `python scripts/status_dashboard.py`
 
 #### Quantum Pipeline
-- MCP server: `python ai-projects/quantum-ml/quantum_mcp_server.py`
+- MCP server: `.venv/bin/python ai-projects/quantum-ml/quantum_mcp_server.py`
 - Common: Qiskit not installed, Azure Quantum creds missing
 - Check: `curl http://localhost:7071/api/quantum/info | jq`
 

@@ -64,6 +64,12 @@ Right in VS Code terminal:
 # Validate setup
 python3 scripts/pre_commit_check.py
 
+# Validate MCP servers (human-readable)
+.venv/bin/python scripts/validate_mcp_setup.py
+
+# Validate MCP servers (JSON for automation)
+.venv/bin/python scripts/validate_mcp_setup.py --json
+
 # Run tests (Copilot can help fix failures!)
 python3 scripts/test_runner.py --unit
 
@@ -85,7 +91,7 @@ curl http://localhost:7071/api/ai/status | jq
 
 - **Chat not showing?** → Install GitHub Copilot Chat extension
 - **Agents missing?** → Reload VS Code (Ctrl+Shift+P → "Reload Window")
-- **MCP tools unavailable?** → Check `.vscode/mcp.json` is valid
+- **MCP tools unavailable?** → Run `validate: mcp-setup` or `.venv/bin/python scripts/validate_mcp_setup.py`
 
 ---
 

@@ -192,22 +192,40 @@ class QuantumRouter:
         features = _extract_prompt_features(prompt, latency_budget_ms)
 
         try:
+            # Always score the canonical provider set so that each provider uses
+            # its own weight vector. Scoring only the filtered ``candidates`` would
+            # make a provider's score depend on its position in the candidate list
+            # (i.e. which other providers were excluded) rather than its identity.
             if self.effective_backend == "pennylane":
                 scores = _pennylane_qaoa_scores(
-                    features, candidates, self._params, self.num_qubits
+                    features, self.providers, self._params, self.num_qubits
                 )
             else:
-                scores = _classical_score_providers(features, candidates, self._params)
+                scores = _classical_score_providers(
+                    features, self.providers, self._params
+                )
         except Exception as exc:  # noqa: BLE001
             logger.warning("QuantumRouter scoring failed (%s), using first provider", exc)
             return candidates[0]
 
-        best_idx = int(np.argmax(scores))
-        chosen = candidates[best_idx]
+        # Pick the highest-scoring provider that was not excluded. Iterating in
+        # canonical order with a strict ">" reproduces argmax tie-breaking
+        # (first occurrence wins).
+        exclude_set = set(exclude or [])
+        chosen = None
+        best_score = -np.inf
+        for provider, score in zip(self.providers, scores):
+            if provider in exclude_set:
+                continue
+            if score > best_score:
+                best_score = score
+                chosen = provider
+        if chosen is None:  # pragma: no cover - guarded by candidates check above
+            chosen = candidates[0]
         logger.debug(
             "QuantumRouter chose '%s' (scores=%s) for prompt length=%d",
             chosen,
-            scores.round(3).tolist(),
+            np.asarray(scores).round(3).tolist(),
             len(prompt),
         )
         return chosen

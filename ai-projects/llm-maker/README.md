@@ -75,7 +75,7 @@ if maker.validate_tool(tool):
 Start the LLM Maker MCP server:
 
 ```bash
-python llm_maker_mcp_server.py
+.venv/bin/python llm_maker_mcp_server.py
 ```
 
 Available MCP tools:

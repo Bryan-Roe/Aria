@@ -373,7 +373,7 @@ I'm getting test failures. Help me debug.
 - [ ] PYTHONPATH environment variables are set
 - [ ] Try starting servers manually:
   ```bash
-  python3 ai-projects/quantum-ml/quantum_mcp_server.py
+  .venv/bin/python ai-projects/quantum-ml/quantum_mcp_server.py
   ```
 
 ### Slow Performance

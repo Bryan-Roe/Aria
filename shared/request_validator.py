@@ -81,9 +81,14 @@ def validate_fields(body: dict, schema: dict[str, dict]) -> str | None:
 
         # Type check
         expected = rules.get("type")
-        if expected and not isinstance(value, expected):
+        if expected:
             type_name = expected.__name__ if isinstance(expected, type) else " | ".join(t.__name__ for t in expected)
-            return f"Field '{field}' must be {type_name}"
+            # bool is a subclass of int in Python, so isinstance(True, int) is True.
+            # Reject bool where it isn't explicitly allowed so numeric fields don't
+            # silently accept True/False as 1/0.
+            bool_allowed = bool in expected if isinstance(expected, tuple) else expected is bool
+            if not isinstance(value, expected) or (isinstance(value, bool) and not bool_allowed):
+                return f"Field '{field}' must be {type_name}"
 
         # Length checks (str / list)
         if isinstance(value, (str, list)):

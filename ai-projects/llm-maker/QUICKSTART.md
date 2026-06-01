@@ -63,7 +63,7 @@ else:
 Start the MCP server:
 
 ```bash
-python llm_maker_mcp_server.py
+.venv/bin/python llm_maker_mcp_server.py
 ```
 
 Then connect with an MCP client to use these tools:

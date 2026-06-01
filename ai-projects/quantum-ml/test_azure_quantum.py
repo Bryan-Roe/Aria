@@ -5,6 +5,7 @@ Submits the optimized quantum classifier to IonQ or other quantum backends
 
 from __future__ import annotations
 
+import argparse
 import logging
 import sys
 from datetime import datetime
@@ -45,6 +46,124 @@ logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
+
+
+def parse_args() -> argparse.Namespace:
+    """
+    Parse command-line options for safer, non-interactive runs.
+    """
+    parser = argparse.ArgumentParser(
+        description="Test Azure Quantum hardware and simulator backends"
+    )
+    parser.add_argument(
+        "--backend",
+        default=None,
+        help=(
+            "Backend to use. Defaults to ionq.simulator when running "
+            "non-interactively."
+        ),
+    )
+    parser.add_argument(
+        "--non-interactive",
+        action="store_true",
+        help=(
+            "Skip prompts and use simulator-first defaults. Safe for CI and "
+            "headless runs."
+        ),
+    )
+    parser.add_argument(
+        "--skip-hardware",
+        action="store_true",
+        help=(
+            "Skip paid hardware tests even if hardware backends are "
+            "available."
+        ),
+    )
+    parser.add_argument(
+        "--compare-simulator",
+        action="store_true",
+        help="Run the simulator-vs-hardware comparison test at the end.",
+    )
+    parser.add_argument(
+        "--shots",
+        type=int,
+        default=None,
+        help="Override the default shot count for the optimized circuit test.",
+    )
+    return parser.parse_args()
+
+
+def choose_backend(
+    backends: list[str],
+    requested_backend: Optional[str],
+    non_interactive: bool,
+    skip_hardware: bool,
+) -> tuple[str, bool]:
+    """
+    Pick a backend while keeping paid hardware opt-in.
+
+    Returns:
+        Tuple of (backend_name, allow_hardware_comparison).
+    """
+    def is_simulator_backend(backend_name: str) -> bool:
+        backend_name = backend_name.lower()
+        return "simulator" in backend_name or ".sim." in backend_name
+
+    def select_simulator_backend() -> str:
+        for backend_name in backends:
+            if backend_name == "ionq.simulator":
+                return backend_name
+        for backend_name in backends:
+            if is_simulator_backend(backend_name):
+                return backend_name
+        return "ionq.simulator"
+
+    if requested_backend:
+        if skip_hardware and not is_simulator_backend(requested_backend):
+            return select_simulator_backend(), False
+        return requested_backend, not is_simulator_backend(requested_backend)
+
+    if non_interactive or skip_hardware:
+        return select_simulator_backend(), False
+
+    simulator_backends = [b for b in backends if is_simulator_backend(b)]
+    hardware_backends = [b for b in backends if not is_simulator_backend(b)]
+
+    print("Available backends:")
+    print("\nSimulators (FREE - recommended for testing):")
+    for backend in simulator_backends:
+        print(f"  • {backend}")
+
+    if hardware_backends:
+        print("\nQuantum Hardware (PAID - requires credits):")
+        for backend in hardware_backends:
+            print(f"  • {backend}")
+
+    print("\nRecommended testing order:")
+    print("  1. Start with simulator (free, fast)")
+    print("  2. Test Bell state on hardware (low cost)")
+    print("  3. Run optimized circuit on hardware (verify 90% accuracy)\n")
+
+    print("Select backend for testing:")
+    print("  1. ionq.simulator (FREE - recommended)")
+    if hardware_backends:
+        print("  2. ionq.qpu (PAID - real quantum computer)")
+    print("  3. Skip hardware tests\n")
+
+    choice = input("Enter choice (1-3): ").strip()
+
+    if choice == "3":
+        return "ionq.simulator", False
+
+    if choice == "2" and hardware_backends:
+        print("\n⚠ Selected PAID hardware: ionq.qpu")
+        print("This will use quantum computing credits!")
+        confirm = input("Continue? (yes/no): ").strip().lower()
+        if confirm != "yes":
+            return "ionq.simulator", False
+        return "ionq.qpu", True
+
+    return "ionq.simulator", False
 
 
 def create_optimized_quantum_circuit(
@@ -102,7 +221,7 @@ def create_bell_state_test() -> QuantumCircuitType:
     return circuit
 
 
-def test_azure_quantum_connection():
+def run_azure_quantum_connection():
     """
     Test 1: Verify Azure Quantum connection and list backends.
     """
@@ -161,7 +280,7 @@ def test_azure_quantum_connection():
         return None, []
 
 
-def test_bell_state_on_hardware(
+def run_bell_state_on_hardware(
     azure: Any, backend_name: Optional[str] = None
 ):
     """
@@ -244,8 +363,8 @@ def test_bell_state_on_hardware(
         return None
 
 
-def test_optimized_circuit_on_hardware(
-    azure: Any, backend_name: Optional[str] = None
+def run_optimized_circuit_on_hardware(
+    azure: Any, backend_name: Optional[str] = None, shots: Optional[int] = None
 ):
     """
     Test 3: Run our optimized quantum classifier circuit on real hardware.
@@ -269,6 +388,9 @@ def test_optimized_circuit_on_hardware(
     print(f"  Entanglement: {entanglement}")
     print(f"  Learning Rate: {config['ml']['training']['learning_rate']}\n")
 
+    if shots is None:
+        shots = 500
+
     # Create circuit
     circuit = create_optimized_quantum_circuit(n_qubits, n_layers)
 
@@ -283,7 +405,7 @@ def test_optimized_circuit_on_hardware(
         # Estimate cost
         print("Estimating cost for optimized circuit...")
         cost_estimate = azure.estimate_cost(
-            circuit, backend_name or "ionq.simulator", shots=500
+            circuit, backend_name or "ionq.simulator", shots=shots
         )
         print(f"Cost Estimate: {cost_estimate}\n")
 
@@ -295,7 +417,7 @@ def test_optimized_circuit_on_hardware(
         job = azure.submit_circuit(
             circuit,
             backend_name=backend_name,
-            shots=500,
+            shots=shots,
             job_name=(
                 "optimized_classifier_"
                 f"{datetime.now().strftime('%Y%m%d_%H%M%S')}"
@@ -436,13 +558,15 @@ def main():
     """
     Main test suite for Azure Quantum hardware.
     """
+    args = parse_args()
+
     print("\n" + "=" * 70)
     print("  AZURE QUANTUM HARDWARE TEST SUITE")
     print("  Testing Optimized Quantum AI Configuration (90% Accuracy)")
     print("=" * 70)
 
     # Test 1: Connection
-    azure, backends = test_azure_quantum_connection()
+    azure, backends = run_azure_quantum_connection()
 
     if azure is None:
         print("\n⚠ Cannot proceed without Azure Quantum connection.")
@@ -452,7 +576,6 @@ def main():
         )
         return
 
-    # Select backend
     print("\n" + "=" * 70)
     print("  BACKEND SELECTION")
     print("=" * 70 + "\n")
@@ -461,66 +584,55 @@ def main():
         print("⚠ No backends available. Check workspace configuration.\n")
         return
 
-    # Recommend starting with simulator
-    simulator_backends = [b for b in backends if "simulator" in b.lower()]
-    hardware_backends = [b for b in backends if "simulator" not in b.lower()]
+    backend, allow_hardware_comparison = choose_backend(
+        backends=backends,
+        requested_backend=args.backend,
+        non_interactive=args.non_interactive,
+        skip_hardware=args.skip_hardware,
+    )
 
-    print("Available backends:")
-    print("\nSimulators (FREE - recommended for testing):")
-    for backend in simulator_backends:
-        print(f"  • {backend}")
-
-    if hardware_backends:
-        print("\nQuantum Hardware (PAID - requires credits):")
-        for backend in hardware_backends:
-            print(f"  • {backend}")
-
-    print("\nRecommended testing order:")
-    print("  1. Start with simulator (free, fast)")
-    print("  2. Test Bell state on hardware (low cost)")
-    print("  3. Run optimized circuit on hardware (verify 90% accuracy)\n")
-
-    # Ask user to select backend
-    print("Select backend for testing:")
-    print("  1. ionq.simulator (FREE - recommended)")
-    if hardware_backends:
-        print("  2. ionq.qpu (PAID - real quantum computer)")
-    print("  3. Skip hardware tests\n")
-
-    choice = input("Enter choice (1-3): ").strip()
-
-    if choice == "3":
-        print("\nSkipping hardware tests. Goodbye!\n")
-        return
-    elif choice == "2" and hardware_backends:
-        backend = "ionq.qpu"
-        print(f"\n⚠ Selected PAID hardware: {backend}")
-        print("This will use quantum computing credits!")
-        confirm = input("Continue? (yes/no): ").strip().lower()
-        if confirm != "yes":
-            print("\nTest cancelled.\n")
-            return
+    if args.non_interactive or args.skip_hardware:
+        print("Simulator-first mode enabled; hardware tests are skipped.\n")
     else:
-        backend = "ionq.simulator"
-
-    print(f"\nUsing backend: {backend}\n")
+        print(f"\nUsing backend: {backend}\n")
 
     # Test 2: Bell state
-    bell_results = test_bell_state_on_hardware(azure, backend)
+    bell_results = run_bell_state_on_hardware(azure, backend)
 
     if bell_results:
         print("✓ Bell state test completed successfully!\n")
 
         # Ask if user wants to continue with optimized circuit
-        proceed = input(
-            "Proceed with optimized circuit test? (yes/no): "
-        ).strip().lower()
+        proceed = (
+            "yes"
+            if args.non_interactive or args.skip_hardware
+            else input(
+                "Proceed with optimized circuit test? (yes/no): "
+            ).strip().lower()
+        )
         if proceed == "yes":
             # Test 3: Optimized circuit
-            opt_results = test_optimized_circuit_on_hardware(azure, backend)
+            opt_results = run_optimized_circuit_on_hardware(
+                azure,
+                backend,
+                shots=args.shots,
+            )
 
             if opt_results:
                 print("✓ Optimized circuit test completed successfully!\n")
+
+    if args.compare_simulator:
+        print("\n" + "=" * 70)
+        print("  SIMULATOR VS HARDWARE COMPARISON")
+        print("=" * 70 + "\n")
+
+        if allow_hardware_comparison and not args.skip_hardware:
+            compare_simulator_vs_hardware(azure)
+        else:
+            print(
+                "Skipping simulator-vs-hardware comparison because a paid "
+                "hardware backend was not selected.\n"
+            )
 
     # Summary
     print("\n" + "=" * 70)

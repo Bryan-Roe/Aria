@@ -1,10 +1,14 @@
 """Unit tests for scripts/system_health_check.py."""
 
+# ruff: noqa
+# flake8: noqa
+
 from __future__ import annotations
 
 import importlib.util
 import json
 from pathlib import Path
+from types import SimpleNamespace
 
 # ─── module loader ────────────────────────────────────────────────────────────
 
@@ -232,3 +236,107 @@ class TestRunAllChecks:
         # In any working Python env this should not be fail
         result = self.mod.check_python()
         assert result.status in ("ok", "warn")
+
+
+class TestCheckMcpServers:
+    def setup_method(self):
+        self.mod = _load()
+
+    def test_reports_stdio_validation_success(self, monkeypatch, tmp_path):
+        mod = self.mod
+        monkeypatch.setattr(mod, "REPO_ROOT", tmp_path)
+
+        vscode_dir = tmp_path / ".vscode"
+        vscode_dir.mkdir()
+        (vscode_dir / "mcp.json").write_text("{}", encoding="utf-8")
+
+        quantum_server = tmp_path / "ai-projects/quantum-ml/quantum_mcp_server.py"
+        quantum_server.parent.mkdir(parents=True)
+        quantum_server.write_text("", encoding="utf-8")
+
+        llm_server = tmp_path / "ai-projects/llm-maker/llm_maker_mcp_server.py"
+        llm_server.parent.mkdir(parents=True)
+        llm_server.write_text("", encoding="utf-8")
+
+        monkeypatch.setattr(
+            mod,
+            "import_module",
+            lambda name: SimpleNamespace(
+                load_mcp_config=lambda path: {
+                    "servers": {"quantum-ai": {}, "llm-maker": {}}
+                }
+            ),
+        )
+
+        venv_bin = tmp_path / ".venv/bin"
+        venv_bin.mkdir(parents=True)
+        (venv_bin / "python").write_text("", encoding="utf-8")
+        scripts_dir = tmp_path / "scripts"
+        scripts_dir.mkdir()
+        (scripts_dir / "validate_mcp_setup.py").write_text("", encoding="utf-8")
+
+        class Result:
+            returncode = 0
+            stdout = "quantum-ai: OK\nllm-maker: OK\ntask-complete: OK"
+            stderr = ""
+
+        monkeypatch.setattr(mod.subprocess, "run",
+                            lambda *args, **kwargs: Result())
+
+        result = mod.check_mcp_servers()
+
+        assert result.status == "ok"
+        assert any(sub.name == ".vscode/mcp.json" for sub in result.sub)
+        assert any(
+            sub.name == "MCP stdio validation" and sub.status == "ok"
+            for sub in result.sub
+        )
+
+    def test_reports_stdio_validation_failure(self, monkeypatch, tmp_path):
+        mod = self.mod
+        monkeypatch.setattr(mod, "REPO_ROOT", tmp_path)
+
+        vscode_dir = tmp_path / ".vscode"
+        vscode_dir.mkdir()
+        (vscode_dir / "mcp.json").write_text("{}", encoding="utf-8")
+
+        quantum_server = tmp_path / "ai-projects/quantum-ml/quantum_mcp_server.py"
+        quantum_server.parent.mkdir(parents=True)
+        quantum_server.write_text("", encoding="utf-8")
+
+        llm_server = tmp_path / "ai-projects/llm-maker/llm_maker_mcp_server.py"
+        llm_server.parent.mkdir(parents=True)
+        llm_server.write_text("", encoding="utf-8")
+
+        monkeypatch.setattr(
+            mod,
+            "import_module",
+            lambda name: SimpleNamespace(
+                load_mcp_config=lambda path: {"servers": {"quantum-ai": {}}}
+            ),
+        )
+
+        venv_bin = tmp_path / ".venv/bin"
+        venv_bin.mkdir(parents=True)
+        (venv_bin / "python").write_text("", encoding="utf-8")
+        scripts_dir = tmp_path / "scripts"
+        scripts_dir.mkdir()
+        (scripts_dir / "validate_mcp_setup.py").write_text("", encoding="utf-8")
+
+        class Result:
+            returncode = 1
+            stdout = ""
+            stderr = "quantum-ai: FAIL - handshake error"
+
+        monkeypatch.setattr(mod.subprocess, "run",
+                            lambda *args, **kwargs: Result())
+
+        result = mod.check_mcp_servers()
+
+        assert result.status == "fail"
+        assert any(
+            sub.name == "MCP stdio validation"
+            and sub.status == "fail"
+            and "handshake error" in sub.detail
+            for sub in result.sub
+        )

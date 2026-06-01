@@ -1,14 +1,14 @@
 {
-  "updated_at": "2026-06-01T17:15:02.452367+00:00",
-  "total_cycles": 10,
-  "successful_cycles": 7,
-  "failed_cycles": 3,
+  "updated_at": "2026-06-01T18:23:45.304656+00:00",
+  "total_cycles": 19,
+  "successful_cycles": 12,
+  "failed_cycles": 7,
   "last_cycle": {
-    "cycle": 10,
-    "started_at": "2026-06-01T17:12:53.804017+00:00",
-    "finished_at": "2026-06-01T17:15:02.451379+00:00",
-    "duration_sec": 128.66,
-    "succeeded": true,
+    "cycle": 19,
+    "started_at": "2026-06-01T18:20:46.984062+00:00",
+    "finished_at": "2026-06-01T18:23:45.304445+00:00",
+    "duration_sec": 178.33,
+    "succeeded": false,
     "steps": [
       {
         "name": "pre_commit_check",
@@ -16,10 +16,10 @@
           "/workspaces/Aria/.venv/bin/python",
           "scripts/pre_commit_check.py"
         ],
-        "returncode": 0,
-        "duration_sec": 103.08,
-        "succeeded": true,
-        "stdout_tail": "\n\u001b[1m\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u001b[0m\n\u001b[1m\u001b[96mQAI PRE-COMMIT VALIDATION\u001b[0m\n\u001b[1m\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u001b[0m\n\n\u001b[96m\u001b[1m[1/5] Running unit tests...\u001b[0m\n\u001b[92m\u2713 2531 tests passed\u001b[0m\n\n\u001b[96m\u001b[1m[2/5] Linting code...\u001b[0m\n\u001b[92m\u2713 No staged Python files to lint\u001b[0m\n\n\u001b[96m\u001b[1m[3/5] Security scan...\u001b[0m\n\u001b[92m\u2713 No security issues detected\u001b[0m\n\n\u001b[96m\u001b[1m[4/5] Git hygiene...\u001b[0m\n\u001b[92m\u2713 Git staging area looks clean\u001b[0m\n\n\u001b[96m\u001b[1m[5/5] Checking documentation...\u001b[0m\n\u001b[92m\u2713 All key documentation present\u001b[0m\n\n\u001b[1m\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u001b[0m\n\u001b[92m\u001b[1mRESULT: All checks passed \u2713 (5/5)\u001b[0m\n\u001b[1m\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u001b[0m\n\n",
+        "returncode": 1,
+        "duration_sec": 139.22,
+        "succeeded": false,
+        "stdout_tail": "\n\u001b[1m\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u001b[0m\n\u001b[1m\u001b[96mQAI PRE-COMMIT VALIDATION\u001b[0m\n\u001b[1m\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u001b[0m\n\n\u001b[96m\u001b[1m[1/5] Running unit tests...\u001b[0m\n\u001b[91m\u2717 Tests failed\u001b[0m\nures.py:826: in test_router_classifies_hypothesis_and_retrospect_intents\n    assert router.classify_intent(\"retrospect on last cycle\") == \"retrospect\"\nE   AssertionError: assert 'reflect' == 'retrospect'\nE     \nE     - retrospect\nE     + reflect\n=========================== short test summary info ============================\nFAILED tests/test_agi_features.py::test_router_classifies_hypothesis_and_retrospect_intents\n============ 1 failed, 2561 passed, 5 skipped in 130.09s (0:02:10) =============\n\n\n\u001b[96m\u001b[1m[2/5] Linting code...\u001b[0m\n\u001b[92m\u2713 No linting issues found\u001b[0m\n\n\u001b[96m\u001b[1m[3/5] Security scan...\u001b[0m\n\u001b[92m\u2713 No security issues detected\u001b[0m\n\n\u001b[96m\u001b[1m[4/5] Git hygiene...\u001b[0m\n\u001b[93m\u26a0 Found 7 git hygiene issues:\u001b[0m\n  Unwanted file: ai-projects/chat-cli/src/__pycache__/chat_providers.cpython-314.pyc\n  Unwanted file: ai-projects/chat-cli/src/__pycache__/test_chat_providers.cpython-314.pyc\n  Unwanted file: ai-projects/quantum-ml/__pycache__/quantum_mcp_server.cpython-314.pyc\n  Unwanted file: ai-projects/quantum-ml/src/__pycache__/azure_quantum_integration.cpython-314.pyc\n  Unwanted file: apps/aria/__pycache__/server.cpython-314.pyc\n\n\u001b[96m\u001b[1m[5/5] Checking documentation...\u001b[0m\n\u001b[92m\u2713 All key documentation present\u001b[0m\n\n\u001b[1m\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u001b[0m\n\u001b[91m\u001b[1mRESULT: Some checks failed (4/5 passed)\u001b[0m\n\u001b[1m\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u001b[0m\n\n",
         "stderr_tail": ""
       },
       {
@@ -30,10 +30,10 @@
           "--strict-endpoints"
         ],
         "returncode": 0,
-        "duration_sec": 25.57,
+        "duration_sec": 39.11,
         "succeeded": true,
-        "stdout_tail": "[integration_contract_gate] Running core_files_automation: python scripts/automate_core_files.py\n[core_automation] passed=True | files=32 | compile_failed=0 | status=/workspaces/Aria/data_out/core_automation/status.json\n[integration_contract_gate] Running integration_smoke: python scripts/integration_smoke.py\n[integration_smoke] Summary\npassed=True | succeeded=10/12 | warnings=0 | failed=1 | errors=0\noutput=/workspaces/Aria/data_out/integration_smoke/status.json\n[integration_contract_gate] Running integration_contract_tests: python scripts/ci_orchestrator.py --integration-contract-tests\n\n[ci] Running Integration Contract Unit Tests\n\n[ci] Results saved: /workspaces/Aria/data_out/ci_orchestrator/ci_results.json\n[ci] Summary: 1/1 passed\n[integration_contract_gate] Running validate_all: python scripts/ci_orchestrator.py --validate-all\n\n[ci] ========================================\n[ci] Validating All Orchestrators\n[ci] ========================================\n\n[ci] Validating: autotrain\n[ci] Validating: quantum_autorun\n[ci] Validating: evaluation_autorun\n\n[ci] Results saved: /workspaces/Aria/data_out/ci_orchestrator/ci_results.json\n[ci] Summary: 3/3 passed\n[integration_contract_gate] Strict mode: checking AI status endpoint: http://localhost:7071/api/ai/status\n[integration_contract_gate] AI status endpoint reachable: http://localhost:7071/api/ai/status\n",
-        "stderr_tail": ""
+        "stdout_tail": "[integration_contract_gate] Running core_files_automation: python scripts/automate_core_files.py\n[core_automation] passed=True | files=32 | compile_failed=0 | status=/workspaces/Aria/data_out/core_automation/status.json\n[integration_contract_gate] Running integration_smoke: python scripts/integration_smoke.py\n[integration_smoke] Summary\npassed=True | succeeded=10/12 | warnings=0 | failed=1 | errors=0\noutput=/workspaces/Aria/data_out/integration_smoke/status.json\n[integration_contract_gate] Running integration_contract_tests: python scripts/ci_orchestrator.py --integration-contract-tests\n\n[ci] Running Integration Contract Unit Tests\n\n[ci] Results saved: /workspaces/Aria/data_out/ci_orchestrator/ci_results.json\n[ci] Summary: 1/1 passed\n[integration_contract_gate] Running validate_all: python scripts/ci_orchestrator.py --validate-all\n\n[ci] ========================================\n[ci] Validating All Orchestrators\n[ci] ========================================\n\n[ci] Validating: autotrain\n[ci] Validating: quantum_autorun\n[ci] Validating: evaluation_autorun\n\n[ci] Results saved: /workspaces/Aria/data_out/ci_orchestrator/ci_results.json\n[ci] Summary: 3/3 passed\n[integration_contract_gate] Strict mode: checking AI status endpoint: http://localhost:7071/api/ai/status\n[integration_contract_gate] Attempt 1/30 \u2014 endpoint not ready yet; sleeping 1s\n[integration_contract_gate] Attempt 2/30 \u2014 endpoint not ready yet; sleeping 1s\n[integration_contract_gate] AI status endpoint reachable: http://localhost:7071/api/ai/status\n",
+        "stderr_tail": "curl: (28) Operation timed out after 5001 milliseconds with 0 bytes received\ncurl: (28) Operation timed out after 5000 milliseconds with 0 bytes received\n"
       }
     ]
   },
@@ -375,6 +375,312 @@
           "succeeded": true,
           "stdout_tail": "[integration_contract_gate] Running core_files_automation: python scripts/automate_core_files.py\n[core_automation] passed=True | files=32 | compile_failed=0 | status=/workspaces/Aria/data_out/core_automation/status.json\n[integration_contract_gate] Running integration_smoke: python scripts/integration_smoke.py\n[integration_smoke] Summary\npassed=True | succeeded=10/12 | warnings=0 | failed=1 | errors=0\noutput=/workspaces/Aria/data_out/integration_smoke/status.json\n[integration_contract_gate] Running integration_contract_tests: python scripts/ci_orchestrator.py --integration-contract-tests\n\n[ci] Running Integration Contract Unit Tests\n\n[ci] Results saved: /workspaces/Aria/data_out/ci_orchestrator/ci_results.json\n[ci] Summary: 1/1 passed\n[integration_contract_gate] Running validate_all: python scripts/ci_orchestrator.py --validate-all\n\n[ci] ========================================\n[ci] Validating All Orchestrators\n[ci] ========================================\n\n[ci] Validating: autotrain\n[ci] Validating: quantum_autorun\n[ci] Validating: evaluation_autorun\n\n[ci] Results saved: /workspaces/Aria/data_out/ci_orchestrator/ci_results.json\n[ci] Summary: 3/3 passed\n[integration_contract_gate] Strict mode: checking AI status endpoint: http://localhost:7071/api/ai/status\n[integration_contract_gate] AI status endpoint reachable: http://localhost:7071/api/ai/status\n",
           "stderr_tail": ""
+        }
+      ]
+    },
+    {
+      "cycle": 11,
+      "started_at": "2026-06-01T17:20:02.434287+00:00",
+      "finished_at": "2026-06-01T17:22:38.597712+00:00",
+      "duration_sec": 156.17,
+      "succeeded": true,
+      "steps": [
+        {
+          "name": "pre_commit_check",
+          "command": [
+            "/workspaces/Aria/.venv/bin/python",
+            "scripts/pre_commit_check.py"
+          ],
+          "returncode": 0,
+          "duration_sec": 115.92,
+          "succeeded": true,
+          "stdout_tail": "\n\u001b[1m\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u001b[0m\n\u001b[1m\u001b[96mQAI PRE-COMMIT VALIDATION\u001b[0m\n\u001b[1m\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u001b[0m\n\n\u001b[96m\u001b[1m[1/5] Running unit tests...\u001b[0m\n\u001b[92m\u2713 2533 tests passed\u001b[0m\n\n\u001b[96m\u001b[1m[2/5] Linting code...\u001b[0m\n\u001b[92m\u2713 No staged Python files to lint\u001b[0m\n\n\u001b[96m\u001b[1m[3/5] Security scan...\u001b[0m\n\u001b[92m\u2713 No security issues detected\u001b[0m\n\n\u001b[96m\u001b[1m[4/5] Git hygiene...\u001b[0m\n\u001b[92m\u2713 Git staging area looks clean\u001b[0m\n\n\u001b[96m\u001b[1m[5/5] Checking documentation...\u001b[0m\n\u001b[92m\u2713 All key documentation present\u001b[0m\n\n\u001b[1m\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u001b[0m\n\u001b[92m\u001b[1mRESULT: All checks passed \u2713 (5/5)\u001b[0m\n\u001b[1m\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u001b[0m\n\n",
+          "stderr_tail": ""
+        },
+        {
+          "name": "integration_contract_gate",
+          "command": [
+            "bash",
+            "scripts/integration_contract_gate.sh",
+            "--strict-endpoints"
+          ],
+          "returncode": 0,
+          "duration_sec": 40.26,
+          "succeeded": true,
+          "stdout_tail": "[integration_contract_gate] Running core_files_automation: python scripts/automate_core_files.py\n[core_automation] passed=True | files=32 | compile_failed=0 | status=/workspaces/Aria/data_out/core_automation/status.json\n[integration_contract_gate] Running integration_smoke: python scripts/integration_smoke.py\n[integration_smoke] Summary\npassed=True | succeeded=10/12 | warnings=0 | failed=1 | errors=0\noutput=/workspaces/Aria/data_out/integration_smoke/status.json\n[integration_contract_gate] Running integration_contract_tests: python scripts/ci_orchestrator.py --integration-contract-tests\n\n[ci] Running Integration Contract Unit Tests\n\n[ci] Results saved: /workspaces/Aria/data_out/ci_orchestrator/ci_results.json\n[ci] Summary: 1/1 passed\n[integration_contract_gate] Running validate_all: python scripts/ci_orchestrator.py --validate-all\n\n[ci] ========================================\n[ci] Validating All Orchestrators\n[ci] ========================================\n\n[ci] Validating: autotrain\n[ci] Validating: quantum_autorun\n[ci] Validating: evaluation_autorun\n\n[ci] Results saved: /workspaces/Aria/data_out/ci_orchestrator/ci_results.json\n[ci] Summary: 3/3 passed\n[integration_contract_gate] Strict mode: checking AI status endpoint: http://localhost:7071/api/ai/status\n[integration_contract_gate] Attempt 1/30 \u2014 endpoint not ready yet; sleeping 1s\n[integration_contract_gate] AI status endpoint reachable: http://localhost:7071/api/ai/status\n",
+          "stderr_tail": "curl: (28) Operation timed out after 5001 milliseconds with 0 bytes received\n"
+        }
+      ]
+    },
+    {
+      "cycle": 12,
+      "started_at": "2026-06-01T17:27:38.579249+00:00",
+      "finished_at": "2026-06-01T17:29:38.971307+00:00",
+      "duration_sec": 120.4,
+      "succeeded": true,
+      "steps": [
+        {
+          "name": "pre_commit_check",
+          "command": [
+            "/workspaces/Aria/.venv/bin/python",
+            "scripts/pre_commit_check.py"
+          ],
+          "returncode": 0,
+          "duration_sec": 95.51,
+          "succeeded": true,
+          "stdout_tail": "\n\u001b[1m\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u001b[0m\n\u001b[1m\u001b[96mQAI PRE-COMMIT VALIDATION\u001b[0m\n\u001b[1m\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u001b[0m\n\n\u001b[96m\u001b[1m[1/5] Running unit tests...\u001b[0m\n\u001b[92m\u2713 2540 tests passed\u001b[0m\n\n\u001b[96m\u001b[1m[2/5] Linting code...\u001b[0m\n\u001b[92m\u2713 No staged Python files to lint\u001b[0m\n\n\u001b[96m\u001b[1m[3/5] Security scan...\u001b[0m\n\u001b[92m\u2713 No security issues detected\u001b[0m\n\n\u001b[96m\u001b[1m[4/5] Git hygiene...\u001b[0m\n\u001b[92m\u2713 Git staging area looks clean\u001b[0m\n\n\u001b[96m\u001b[1m[5/5] Checking documentation...\u001b[0m\n\u001b[92m\u2713 All key documentation present\u001b[0m\n\n\u001b[1m\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u001b[0m\n\u001b[92m\u001b[1mRESULT: All checks passed \u2713 (5/5)\u001b[0m\n\u001b[1m\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u001b[0m\n\n",
+          "stderr_tail": ""
+        },
+        {
+          "name": "integration_contract_gate",
+          "command": [
+            "bash",
+            "scripts/integration_contract_gate.sh",
+            "--strict-endpoints"
+          ],
+          "returncode": 0,
+          "duration_sec": 24.89,
+          "succeeded": true,
+          "stdout_tail": "[integration_contract_gate] Running core_files_automation: python scripts/automate_core_files.py\n[core_automation] passed=True | files=32 | compile_failed=0 | status=/workspaces/Aria/data_out/core_automation/status.json\n[integration_contract_gate] Running integration_smoke: python scripts/integration_smoke.py\n[integration_smoke] Summary\npassed=True | succeeded=10/12 | warnings=0 | failed=1 | errors=0\noutput=/workspaces/Aria/data_out/integration_smoke/status.json\n[integration_contract_gate] Running integration_contract_tests: python scripts/ci_orchestrator.py --integration-contract-tests\n\n[ci] Running Integration Contract Unit Tests\n\n[ci] Results saved: /workspaces/Aria/data_out/ci_orchestrator/ci_results.json\n[ci] Summary: 1/1 passed\n[integration_contract_gate] Running validate_all: python scripts/ci_orchestrator.py --validate-all\n\n[ci] ========================================\n[ci] Validating All Orchestrators\n[ci] ========================================\n\n[ci] Validating: autotrain\n[ci] Validating: quantum_autorun\n[ci] Validating: evaluation_autorun\n\n[ci] Results saved: /workspaces/Aria/data_out/ci_orchestrator/ci_results.json\n[ci] Summary: 3/3 passed\n[integration_contract_gate] Strict mode: checking AI status endpoint: http://localhost:7071/api/ai/status\n[integration_contract_gate] AI status endpoint reachable: http://localhost:7071/api/ai/status\n",
+          "stderr_tail": ""
+        }
+      ]
+    },
+    {
+      "cycle": 13,
+      "started_at": "2026-06-01T17:34:38.955382+00:00",
+      "finished_at": "2026-06-01T17:37:45.254608+00:00",
+      "duration_sec": 186.31,
+      "succeeded": true,
+      "steps": [
+        {
+          "name": "pre_commit_check",
+          "command": [
+            "/workspaces/Aria/.venv/bin/python",
+            "scripts/pre_commit_check.py"
+          ],
+          "returncode": 0,
+          "duration_sec": 164.5,
+          "succeeded": true,
+          "stdout_tail": "\n\u001b[1m\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u001b[0m\n\u001b[1m\u001b[96mQAI PRE-COMMIT VALIDATION\u001b[0m\n\u001b[1m\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u001b[0m\n\n\u001b[96m\u001b[1m[1/5] Running unit tests...\u001b[0m\n\u001b[92m\u2713 2542 tests passed\u001b[0m\n\n\u001b[96m\u001b[1m[2/5] Linting code...\u001b[0m\n\u001b[92m\u2713 No staged Python files to lint\u001b[0m\n\n\u001b[96m\u001b[1m[3/5] Security scan...\u001b[0m\n\u001b[92m\u2713 No security issues detected\u001b[0m\n\n\u001b[96m\u001b[1m[4/5] Git hygiene...\u001b[0m\n\u001b[92m\u2713 Git staging area looks clean\u001b[0m\n\n\u001b[96m\u001b[1m[5/5] Checking documentation...\u001b[0m\n\u001b[92m\u2713 All key documentation present\u001b[0m\n\n\u001b[1m\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u001b[0m\n\u001b[92m\u001b[1mRESULT: All checks passed \u2713 (5/5)\u001b[0m\n\u001b[1m\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u001b[0m\n\n",
+          "stderr_tail": ""
+        },
+        {
+          "name": "integration_contract_gate",
+          "command": [
+            "bash",
+            "scripts/integration_contract_gate.sh",
+            "--strict-endpoints"
+          ],
+          "returncode": 0,
+          "duration_sec": 21.81,
+          "succeeded": true,
+          "stdout_tail": "[integration_contract_gate] Running core_files_automation: python scripts/automate_core_files.py\n[core_automation] passed=True | files=32 | compile_failed=0 | status=/workspaces/Aria/data_out/core_automation/status.json\n[integration_contract_gate] Running integration_smoke: python scripts/integration_smoke.py\n[integration_smoke] Summary\npassed=True | succeeded=10/12 | warnings=0 | failed=1 | errors=0\noutput=/workspaces/Aria/data_out/integration_smoke/status.json\n[integration_contract_gate] Running integration_contract_tests: python scripts/ci_orchestrator.py --integration-contract-tests\n\n[ci] Running Integration Contract Unit Tests\n\n[ci] Results saved: /workspaces/Aria/data_out/ci_orchestrator/ci_results.json\n[ci] Summary: 1/1 passed\n[integration_contract_gate] Running validate_all: python scripts/ci_orchestrator.py --validate-all\n\n[ci] ========================================\n[ci] Validating All Orchestrators\n[ci] ========================================\n\n[ci] Validating: autotrain\n[ci] Validating: quantum_autorun\n[ci] Validating: evaluation_autorun\n\n[ci] Results saved: /workspaces/Aria/data_out/ci_orchestrator/ci_results.json\n[ci] Summary: 3/3 passed\n[integration_contract_gate] Strict mode: checking AI status endpoint: http://localhost:7071/api/ai/status\n[integration_contract_gate] AI status endpoint reachable: http://localhost:7071/api/ai/status\n",
+          "stderr_tail": ""
+        }
+      ]
+    },
+    {
+      "cycle": 14,
+      "started_at": "2026-06-01T17:42:45.237088+00:00",
+      "finished_at": "2026-06-01T17:45:38.632376+00:00",
+      "duration_sec": 173.41,
+      "succeeded": true,
+      "steps": [
+        {
+          "name": "pre_commit_check",
+          "command": [
+            "/workspaces/Aria/.venv/bin/python",
+            "scripts/pre_commit_check.py"
+          ],
+          "returncode": 0,
+          "duration_sec": 146.6,
+          "succeeded": true,
+          "stdout_tail": "\n\u001b[1m\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u001b[0m\n\u001b[1m\u001b[96mQAI PRE-COMMIT VALIDATION\u001b[0m\n\u001b[1m\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u001b[0m\n\n\u001b[96m\u001b[1m[1/5] Running unit tests...\u001b[0m\n\u001b[92m\u2713 2545 tests passed\u001b[0m\n\n\u001b[96m\u001b[1m[2/5] Linting code...\u001b[0m\n\u001b[92m\u2713 No staged Python files to lint\u001b[0m\n\n\u001b[96m\u001b[1m[3/5] Security scan...\u001b[0m\n\u001b[92m\u2713 No security issues detected\u001b[0m\n\n\u001b[96m\u001b[1m[4/5] Git hygiene...\u001b[0m\n\u001b[92m\u2713 Git staging area looks clean\u001b[0m\n\n\u001b[96m\u001b[1m[5/5] Checking documentation...\u001b[0m\n\u001b[92m\u2713 All key documentation present\u001b[0m\n\n\u001b[1m\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u001b[0m\n\u001b[92m\u001b[1mRESULT: All checks passed \u2713 (5/5)\u001b[0m\n\u001b[1m\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u001b[0m\n\n",
+          "stderr_tail": ""
+        },
+        {
+          "name": "integration_contract_gate",
+          "command": [
+            "bash",
+            "scripts/integration_contract_gate.sh",
+            "--strict-endpoints"
+          ],
+          "returncode": 0,
+          "duration_sec": 26.81,
+          "succeeded": true,
+          "stdout_tail": "[integration_contract_gate] Running core_files_automation: python scripts/automate_core_files.py\n[core_automation] passed=True | files=32 | compile_failed=0 | status=/workspaces/Aria/data_out/core_automation/status.json\n[integration_contract_gate] Running integration_smoke: python scripts/integration_smoke.py\n[integration_smoke] Summary\npassed=True | succeeded=10/12 | warnings=0 | failed=1 | errors=0\noutput=/workspaces/Aria/data_out/integration_smoke/status.json\n[integration_contract_gate] Running integration_contract_tests: python scripts/ci_orchestrator.py --integration-contract-tests\n\n[ci] Running Integration Contract Unit Tests\n\n[ci] Results saved: /workspaces/Aria/data_out/ci_orchestrator/ci_results.json\n[ci] Summary: 1/1 passed\n[integration_contract_gate] Running validate_all: python scripts/ci_orchestrator.py --validate-all\n\n[ci] ========================================\n[ci] Validating All Orchestrators\n[ci] ========================================\n\n[ci] Validating: autotrain\n[ci] Validating: quantum_autorun\n[ci] Validating: evaluation_autorun\n\n[ci] Results saved: /workspaces/Aria/data_out/ci_orchestrator/ci_results.json\n[ci] Summary: 3/3 passed\n[integration_contract_gate] Strict mode: checking AI status endpoint: http://localhost:7071/api/ai/status\n[integration_contract_gate] AI status endpoint reachable: http://localhost:7071/api/ai/status\n",
+          "stderr_tail": ""
+        }
+      ]
+    },
+    {
+      "cycle": 15,
+      "started_at": "2026-06-01T17:50:38.615407+00:00",
+      "finished_at": "2026-06-01T17:53:47.208034+00:00",
+      "duration_sec": 188.61,
+      "succeeded": true,
+      "steps": [
+        {
+          "name": "pre_commit_check",
+          "command": [
+            "/workspaces/Aria/.venv/bin/python",
+            "scripts/pre_commit_check.py"
+          ],
+          "returncode": 0,
+          "duration_sec": 163.17,
+          "succeeded": true,
+          "stdout_tail": "\n\u001b[1m\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u001b[0m\n\u001b[1m\u001b[96mQAI PRE-COMMIT VALIDATION\u001b[0m\n\u001b[1m\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u001b[0m\n\n\u001b[96m\u001b[1m[1/5] Running unit tests...\u001b[0m\n\u001b[92m\u2713 2554 tests passed\u001b[0m\n\n\u001b[96m\u001b[1m[2/5] Linting code...\u001b[0m\n\u001b[92m\u2713 No staged Python files to lint\u001b[0m\n\n\u001b[96m\u001b[1m[3/5] Security scan...\u001b[0m\n\u001b[92m\u2713 No security issues detected\u001b[0m\n\n\u001b[96m\u001b[1m[4/5] Git hygiene...\u001b[0m\n\u001b[92m\u2713 Git staging area looks clean\u001b[0m\n\n\u001b[96m\u001b[1m[5/5] Checking documentation...\u001b[0m\n\u001b[92m\u2713 All key documentation present\u001b[0m\n\n\u001b[1m\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u001b[0m\n\u001b[92m\u001b[1mRESULT: All checks passed \u2713 (5/5)\u001b[0m\n\u001b[1m\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u001b[0m\n\n",
+          "stderr_tail": ""
+        },
+        {
+          "name": "integration_contract_gate",
+          "command": [
+            "bash",
+            "scripts/integration_contract_gate.sh",
+            "--strict-endpoints"
+          ],
+          "returncode": 0,
+          "duration_sec": 25.44,
+          "succeeded": true,
+          "stdout_tail": "[integration_contract_gate] Running core_files_automation: python scripts/automate_core_files.py\n[core_automation] passed=True | files=32 | compile_failed=0 | status=/workspaces/Aria/data_out/core_automation/status.json\n[integration_contract_gate] Running integration_smoke: python scripts/integration_smoke.py\n[integration_smoke] Summary\npassed=True | succeeded=10/12 | warnings=0 | failed=1 | errors=0\noutput=/workspaces/Aria/data_out/integration_smoke/status.json\n[integration_contract_gate] Running integration_contract_tests: python scripts/ci_orchestrator.py --integration-contract-tests\n\n[ci] Running Integration Contract Unit Tests\n\n[ci] Results saved: /workspaces/Aria/data_out/ci_orchestrator/ci_results.json\n[ci] Summary: 1/1 passed\n[integration_contract_gate] Running validate_all: python scripts/ci_orchestrator.py --validate-all\n\n[ci] ========================================\n[ci] Validating All Orchestrators\n[ci] ========================================\n\n[ci] Validating: autotrain\n[ci] Validating: quantum_autorun\n[ci] Validating: evaluation_autorun\n\n[ci] Results saved: /workspaces/Aria/data_out/ci_orchestrator/ci_results.json\n[ci] Summary: 3/3 passed\n[integration_contract_gate] Strict mode: checking AI status endpoint: http://localhost:7071/api/ai/status\n[integration_contract_gate] AI status endpoint reachable: http://localhost:7071/api/ai/status\n",
+          "stderr_tail": ""
+        }
+      ]
+    },
+    {
+      "cycle": 16,
+      "started_at": "2026-06-01T17:58:47.191467+00:00",
+      "finished_at": "2026-06-01T18:01:27.435655+00:00",
+      "duration_sec": 160.25,
+      "succeeded": false,
+      "steps": [
+        {
+          "name": "pre_commit_check",
+          "command": [
+            "/workspaces/Aria/.venv/bin/python",
+            "scripts/pre_commit_check.py"
+          ],
+          "returncode": 1,
+          "duration_sec": 135.5,
+          "succeeded": false,
+          "stdout_tail": "\n\u001b[1m\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u001b[0m\n\u001b[1m\u001b[96mQAI PRE-COMMIT VALIDATION\u001b[0m\n\u001b[1m\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u001b[0m\n\n\u001b[96m\u001b[1m[1/5] Running unit tests...\u001b[0m\n\u001b[91m\u2717 Tests failed\u001b[0m\nures.py:826: in test_router_classifies_hypothesis_and_retrospect_intents\n    assert router.classify_intent(\"retrospect on last cycle\") == \"retrospect\"\nE   AssertionError: assert 'reflect' == 'retrospect'\nE     \nE     - retrospect\nE     + reflect\n=========================== short test summary info ============================\nFAILED tests/test_agi_features.py::test_router_classifies_hypothesis_and_retrospect_intents\n============ 1 failed, 2558 passed, 5 skipped in 128.03s (0:02:08) =============\n\n\n\u001b[96m\u001b[1m[2/5] Linting code...\u001b[0m\n\u001b[92m\u2713 No staged Python files to lint\u001b[0m\n\n\u001b[96m\u001b[1m[3/5] Security scan...\u001b[0m\n\u001b[92m\u2713 No security issues detected\u001b[0m\n\n\u001b[96m\u001b[1m[4/5] Git hygiene...\u001b[0m\n\u001b[92m\u2713 Git staging area looks clean\u001b[0m\n\n\u001b[96m\u001b[1m[5/5] Checking documentation...\u001b[0m\n\u001b[92m\u2713 All key documentation present\u001b[0m\n\n\u001b[1m\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u001b[0m\n\u001b[91m\u001b[1mRESULT: Some checks failed (4/5 passed)\u001b[0m\n\u001b[1m\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u001b[0m\n\n",
+          "stderr_tail": ""
+        },
+        {
+          "name": "integration_contract_gate",
+          "command": [
+            "bash",
+            "scripts/integration_contract_gate.sh",
+            "--strict-endpoints"
+          ],
+          "returncode": 0,
+          "duration_sec": 24.76,
+          "succeeded": true,
+          "stdout_tail": "[integration_contract_gate] Running core_files_automation: python scripts/automate_core_files.py\n[core_automation] passed=True | files=32 | compile_failed=0 | status=/workspaces/Aria/data_out/core_automation/status.json\n[integration_contract_gate] Running integration_smoke: python scripts/integration_smoke.py\n[integration_smoke] Summary\npassed=True | succeeded=10/12 | warnings=0 | failed=1 | errors=0\noutput=/workspaces/Aria/data_out/integration_smoke/status.json\n[integration_contract_gate] Running integration_contract_tests: python scripts/ci_orchestrator.py --integration-contract-tests\n\n[ci] Running Integration Contract Unit Tests\n\n[ci] Results saved: /workspaces/Aria/data_out/ci_orchestrator/ci_results.json\n[ci] Summary: 1/1 passed\n[integration_contract_gate] Running validate_all: python scripts/ci_orchestrator.py --validate-all\n\n[ci] ========================================\n[ci] Validating All Orchestrators\n[ci] ========================================\n\n[ci] Validating: autotrain\n[ci] Validating: quantum_autorun\n[ci] Validating: evaluation_autorun\n\n[ci] Results saved: /workspaces/Aria/data_out/ci_orchestrator/ci_results.json\n[ci] Summary: 3/3 passed\n[integration_contract_gate] Strict mode: checking AI status endpoint: http://localhost:7071/api/ai/status\n[integration_contract_gate] AI status endpoint reachable: http://localhost:7071/api/ai/status\n",
+          "stderr_tail": ""
+        }
+      ]
+    },
+    {
+      "cycle": 17,
+      "started_at": "2026-06-01T18:06:27.409623+00:00",
+      "finished_at": "2026-06-01T18:08:38.347698+00:00",
+      "duration_sec": 130.95,
+      "succeeded": false,
+      "steps": [
+        {
+          "name": "pre_commit_check",
+          "command": [
+            "/workspaces/Aria/.venv/bin/python",
+            "scripts/pre_commit_check.py"
+          ],
+          "returncode": 1,
+          "duration_sec": 106.77,
+          "succeeded": false,
+          "stdout_tail": "\n\u001b[1m\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u001b[0m\n\u001b[1m\u001b[96mQAI PRE-COMMIT VALIDATION\u001b[0m\n\u001b[1m\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u001b[0m\n\n\u001b[96m\u001b[1m[1/5] Running unit tests...\u001b[0m\n\u001b[91m\u2717 Tests failed\u001b[0m\nures.py:826: in test_router_classifies_hypothesis_and_retrospect_intents\n    assert router.classify_intent(\"retrospect on last cycle\") == \"retrospect\"\nE   AssertionError: assert 'reflect' == 'retrospect'\nE     \nE     - retrospect\nE     + reflect\n=========================== short test summary info ============================\nFAILED tests/test_agi_features.py::test_router_classifies_hypothesis_and_retrospect_intents\n============ 1 failed, 2558 passed, 5 skipped in 101.84s (0:01:41) =============\n\n\n\u001b[96m\u001b[1m[2/5] Linting code...\u001b[0m\n\u001b[92m\u2713 No staged Python files to lint\u001b[0m\n\n\u001b[96m\u001b[1m[3/5] Security scan...\u001b[0m\n\u001b[92m\u2713 No security issues detected\u001b[0m\n\n\u001b[96m\u001b[1m[4/5] Git hygiene...\u001b[0m\n\u001b[92m\u2713 Git staging area looks clean\u001b[0m\n\n\u001b[96m\u001b[1m[5/5] Checking documentation...\u001b[0m\n\u001b[92m\u2713 All key documentation present\u001b[0m\n\n\u001b[1m\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u001b[0m\n\u001b[91m\u001b[1mRESULT: Some checks failed (4/5 passed)\u001b[0m\n\u001b[1m\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u001b[0m\n\n",
+          "stderr_tail": ""
+        },
+        {
+          "name": "integration_contract_gate",
+          "command": [
+            "bash",
+            "scripts/integration_contract_gate.sh",
+            "--strict-endpoints"
+          ],
+          "returncode": 0,
+          "duration_sec": 24.18,
+          "succeeded": true,
+          "stdout_tail": "[integration_contract_gate] Running core_files_automation: python scripts/automate_core_files.py\n[core_automation] passed=True | files=32 | compile_failed=0 | status=/workspaces/Aria/data_out/core_automation/status.json\n[integration_contract_gate] Running integration_smoke: python scripts/integration_smoke.py\n[integration_smoke] Summary\npassed=True | succeeded=10/12 | warnings=0 | failed=1 | errors=0\noutput=/workspaces/Aria/data_out/integration_smoke/status.json\n[integration_contract_gate] Running integration_contract_tests: python scripts/ci_orchestrator.py --integration-contract-tests\n\n[ci] Running Integration Contract Unit Tests\n\n[ci] Results saved: /workspaces/Aria/data_out/ci_orchestrator/ci_results.json\n[ci] Summary: 1/1 passed\n[integration_contract_gate] Running validate_all: python scripts/ci_orchestrator.py --validate-all\n\n[ci] ========================================\n[ci] Validating All Orchestrators\n[ci] ========================================\n\n[ci] Validating: autotrain\n[ci] Validating: quantum_autorun\n[ci] Validating: evaluation_autorun\n\n[ci] Results saved: /workspaces/Aria/data_out/ci_orchestrator/ci_results.json\n[ci] Summary: 3/3 passed\n[integration_contract_gate] Strict mode: checking AI status endpoint: http://localhost:7071/api/ai/status\n[integration_contract_gate] AI status endpoint reachable: http://localhost:7071/api/ai/status\n",
+          "stderr_tail": ""
+        }
+      ]
+    },
+    {
+      "cycle": 18,
+      "started_at": "2026-06-01T18:13:38.321831+00:00",
+      "finished_at": "2026-06-01T18:15:47.010351+00:00",
+      "duration_sec": 128.7,
+      "succeeded": false,
+      "steps": [
+        {
+          "name": "pre_commit_check",
+          "command": [
+            "/workspaces/Aria/.venv/bin/python",
+            "scripts/pre_commit_check.py"
+          ],
+          "returncode": 1,
+          "duration_sec": 110.3,
+          "succeeded": false,
+          "stdout_tail": "\n\u001b[1m\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u001b[0m\n\u001b[1m\u001b[96mQAI PRE-COMMIT VALIDATION\u001b[0m\n\u001b[1m\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u001b[0m\n\n\u001b[96m\u001b[1m[1/5] Running unit tests...\u001b[0m\n\u001b[91m\u2717 Tests failed\u001b[0m\nures.py:826: in test_router_classifies_hypothesis_and_retrospect_intents\n    assert router.classify_intent(\"retrospect on last cycle\") == \"retrospect\"\nE   AssertionError: assert 'reflect' == 'retrospect'\nE     \nE     - retrospect\nE     + reflect\n=========================== short test summary info ============================\nFAILED tests/test_agi_features.py::test_router_classifies_hypothesis_and_retrospect_intents\n============ 1 failed, 2558 passed, 5 skipped in 105.35s (0:01:45) =============\n\n\n\u001b[96m\u001b[1m[2/5] Linting code...\u001b[0m\n\u001b[92m\u2713 No staged Python files to lint\u001b[0m\n\n\u001b[96m\u001b[1m[3/5] Security scan...\u001b[0m\n\u001b[92m\u2713 No security issues detected\u001b[0m\n\n\u001b[96m\u001b[1m[4/5] Git hygiene...\u001b[0m\n\u001b[92m\u2713 Git staging area looks clean\u001b[0m\n\n\u001b[96m\u001b[1m[5/5] Checking documentation...\u001b[0m\n\u001b[92m\u2713 All key documentation present\u001b[0m\n\n\u001b[1m\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u001b[0m\n\u001b[91m\u001b[1mRESULT: Some checks failed (4/5 passed)\u001b[0m\n\u001b[1m\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u001b[0m\n\n",
+          "stderr_tail": ""
+        },
+        {
+          "name": "integration_contract_gate",
+          "command": [
+            "bash",
+            "scripts/integration_contract_gate.sh",
+            "--strict-endpoints"
+          ],
+          "returncode": 0,
+          "duration_sec": 18.41,
+          "succeeded": true,
+          "stdout_tail": "[integration_contract_gate] Running core_files_automation: python scripts/automate_core_files.py\n[core_automation] passed=True | files=32 | compile_failed=0 | status=/workspaces/Aria/data_out/core_automation/status.json\n[integration_contract_gate] Running integration_smoke: python scripts/integration_smoke.py\n[integration_smoke] Summary\npassed=True | succeeded=10/12 | warnings=0 | failed=1 | errors=0\noutput=/workspaces/Aria/data_out/integration_smoke/status.json\n[integration_contract_gate] Running integration_contract_tests: python scripts/ci_orchestrator.py --integration-contract-tests\n\n[ci] Running Integration Contract Unit Tests\n\n[ci] Results saved: /workspaces/Aria/data_out/ci_orchestrator/ci_results.json\n[ci] Summary: 1/1 passed\n[integration_contract_gate] Running validate_all: python scripts/ci_orchestrator.py --validate-all\n\n[ci] ========================================\n[ci] Validating All Orchestrators\n[ci] ========================================\n\n[ci] Validating: autotrain\n[ci] Validating: quantum_autorun\n[ci] Validating: evaluation_autorun\n\n[ci] Results saved: /workspaces/Aria/data_out/ci_orchestrator/ci_results.json\n[ci] Summary: 3/3 passed\n[integration_contract_gate] Strict mode: checking AI status endpoint: http://localhost:7071/api/ai/status\n[integration_contract_gate] AI status endpoint reachable: http://localhost:7071/api/ai/status\n",
+          "stderr_tail": ""
+        }
+      ]
+    },
+    {
+      "cycle": 19,
+      "started_at": "2026-06-01T18:20:46.984062+00:00",
+      "finished_at": "2026-06-01T18:23:45.304445+00:00",
+      "duration_sec": 178.33,
+      "succeeded": false,
+      "steps": [
+        {
+          "name": "pre_commit_check",
+          "command": [
+            "/workspaces/Aria/.venv/bin/python",
+            "scripts/pre_commit_check.py"
+          ],
+          "returncode": 1,
+          "duration_sec": 139.22,
+          "succeeded": false,
+          "stdout_tail": "\n\u001b[1m\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u001b[0m\n\u001b[1m\u001b[96mQAI PRE-COMMIT VALIDATION\u001b[0m\n\u001b[1m\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u001b[0m\n\n\u001b[96m\u001b[1m[1/5] Running unit tests...\u001b[0m\n\u001b[91m\u2717 Tests failed\u001b[0m\nures.py:826: in test_router_classifies_hypothesis_and_retrospect_intents\n    assert router.classify_intent(\"retrospect on last cycle\") == \"retrospect\"\nE   AssertionError: assert 'reflect' == 'retrospect'\nE     \nE     - retrospect\nE     + reflect\n=========================== short test summary info ============================\nFAILED tests/test_agi_features.py::test_router_classifies_hypothesis_and_retrospect_intents\n============ 1 failed, 2561 passed, 5 skipped in 130.09s (0:02:10) =============\n\n\n\u001b[96m\u001b[1m[2/5] Linting code...\u001b[0m\n\u001b[92m\u2713 No linting issues found\u001b[0m\n\n\u001b[96m\u001b[1m[3/5] Security scan...\u001b[0m\n\u001b[92m\u2713 No security issues detected\u001b[0m\n\n\u001b[96m\u001b[1m[4/5] Git hygiene...\u001b[0m\n\u001b[93m\u26a0 Found 7 git hygiene issues:\u001b[0m\n  Unwanted file: ai-projects/chat-cli/src/__pycache__/chat_providers.cpython-314.pyc\n  Unwanted file: ai-projects/chat-cli/src/__pycache__/test_chat_providers.cpython-314.pyc\n  Unwanted file: ai-projects/quantum-ml/__pycache__/quantum_mcp_server.cpython-314.pyc\n  Unwanted file: ai-projects/quantum-ml/src/__pycache__/azure_quantum_integration.cpython-314.pyc\n  Unwanted file: apps/aria/__pycache__/server.cpython-314.pyc\n\n\u001b[96m\u001b[1m[5/5] Checking documentation...\u001b[0m\n\u001b[92m\u2713 All key documentation present\u001b[0m\n\n\u001b[1m\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u001b[0m\n\u001b[91m\u001b[1mRESULT: Some checks failed (4/5 passed)\u001b[0m\n\u001b[1m\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u001b[0m\n\n",
+          "stderr_tail": ""
+        },
+        {
+          "name": "integration_contract_gate",
+          "command": [
+            "bash",
+            "scripts/integration_contract_gate.sh",
+            "--strict-endpoints"
+          ],
+          "returncode": 0,
+          "duration_sec": 39.11,
+          "succeeded": true,
+          "stdout_tail": "[integration_contract_gate] Running core_files_automation: python scripts/automate_core_files.py\n[core_automation] passed=True | files=32 | compile_failed=0 | status=/workspaces/Aria/data_out/core_automation/status.json\n[integration_contract_gate] Running integration_smoke: python scripts/integration_smoke.py\n[integration_smoke] Summary\npassed=True | succeeded=10/12 | warnings=0 | failed=1 | errors=0\noutput=/workspaces/Aria/data_out/integration_smoke/status.json\n[integration_contract_gate] Running integration_contract_tests: python scripts/ci_orchestrator.py --integration-contract-tests\n\n[ci] Running Integration Contract Unit Tests\n\n[ci] Results saved: /workspaces/Aria/data_out/ci_orchestrator/ci_results.json\n[ci] Summary: 1/1 passed\n[integration_contract_gate] Running validate_all: python scripts/ci_orchestrator.py --validate-all\n\n[ci] ========================================\n[ci] Validating All Orchestrators\n[ci] ========================================\n\n[ci] Validating: autotrain\n[ci] Validating: quantum_autorun\n[ci] Validating: evaluation_autorun\n\n[ci] Results saved: /workspaces/Aria/data_out/ci_orchestrator/ci_results.json\n[ci] Summary: 3/3 passed\n[integration_contract_gate] Strict mode: checking AI status endpoint: http://localhost:7071/api/ai/status\n[integration_contract_gate] Attempt 1/30 \u2014 endpoint not ready yet; sleeping 1s\n[integration_contract_gate] Attempt 2/30 \u2014 endpoint not ready yet; sleeping 1s\n[integration_contract_gate] AI status endpoint reachable: http://localhost:7071/api/ai/status\n",
+          "stderr_tail": "curl: (28) Operation timed out after 5001 milliseconds with 0 bytes received\ncurl: (28) Operation timed out after 5000 milliseconds with 0 bytes received\n"
         }
       ]
     }

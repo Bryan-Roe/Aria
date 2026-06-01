@@ -306,7 +306,14 @@ def validate_action(action: dict) -> tuple[bool, str]:
     if action_type in {"move", "throw", "drop"}:
         coordinate_fields = []
         if action_type == "move":
-            coordinate_fields.append(action.get("target"))
+            target = action.get("target")
+            # move supports a string object/named-position reference as an
+            # alternative to x/y coordinates (execute_aria_action resolves it).
+            if isinstance(target, str):
+                if not target.strip():
+                    return False, "move target string must be non-empty"
+            else:
+                coordinate_fields.append(target)
         elif action_type == "throw":
             coordinate_fields.append(action.get("target"))
         elif action_type == "drop":

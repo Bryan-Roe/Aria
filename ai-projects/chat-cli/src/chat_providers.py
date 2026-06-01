@@ -1382,7 +1382,7 @@ def detect_provider(
     """
     explicit_normalized = (explicit or "").strip().lower()
     force_local_echo = explicit_normalized in {"local_echo", "local-echo"}
-    provider_choice = (explicit or "auto").lower()
+    provider_choice = explicit_normalized or "auto"
     provider_choice = _PROVIDER_ALIASES.get(provider_choice, provider_choice)
 
     explicit_requested = bool(explicit and str(explicit).strip())

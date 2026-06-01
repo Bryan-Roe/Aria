@@ -17,9 +17,9 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from test_azure_quantum import (test_azure_quantum_connection,
-                                test_bell_state_on_hardware,
-                                test_optimized_circuit_on_hardware)
+from test_azure_quantum import (run_azure_quantum_connection,
+                                run_bell_state_on_hardware,
+                                run_optimized_circuit_on_hardware)
 
 
 def parse_args() -> argparse.Namespace:
@@ -50,7 +50,7 @@ def main() -> int:
     print("\n=== Non-interactive Azure Quantum Hardware Tests ===\n")
 
     # 1) Connect and list backends
-    azure, backends = test_azure_quantum_connection()
+    azure, backends = run_azure_quantum_connection()
     if azure is None:
         print("Cannot proceed without Azure Quantum connection.")
         return 1
@@ -63,7 +63,7 @@ def main() -> int:
 
     # 2) Run Bell state unless skipped
     if not args.skip_bell:
-        bell = test_bell_state_on_hardware(azure, args.backend)
+        bell = run_bell_state_on_hardware(azure, args.backend)
         if bell is None:
             print("Bell state test failed or produced no results.")
         else:
@@ -71,7 +71,7 @@ def main() -> int:
 
     # 3) Optionally run optimized circuit
     if args.optimized:
-        opt = test_optimized_circuit_on_hardware(azure, args.backend)
+        opt = run_optimized_circuit_on_hardware(azure, args.backend)
         if opt is None:
             print("Optimized circuit test failed or produced no results.")
         else:

@@ -52,6 +52,27 @@ def test_validate_action_sequence_accepts_basic_plan():
     assert reason == ""
 
 
+def test_validate_action_accepts_move_to_object_string_target():
+    # execute_aria_action supports moving to a named object; validation must allow it.
+    valid, reason = aria_server.validate_action({"action": "move", "target": "apple"})
+    assert valid is True
+    assert reason == ""
+
+
+def test_validate_action_rejects_empty_move_string_target():
+    valid, reason = aria_server.validate_action({"action": "move", "target": "   "})
+    assert valid is False
+    assert "non-empty" in reason
+
+
+def test_validate_action_still_rejects_out_of_bounds_move_coords():
+    valid, reason = aria_server.validate_action(
+        {"action": "move", "target": {"x": 1000, "y": 50}}
+    )
+    assert valid is False
+    assert "between 0 and 100" in reason
+
+
 def test_determine_position_come_here_command():
     tag = aria_server.determine_position_from_context("come here please")
     assert tag == "[aria:position:50:85]"

@@ -88,7 +88,7 @@ python .\scripts\quantum_autorun.py --job azure_ionq_simulator
 
 **MCP Server** (for AI agents):
 ```powershell
-python .\quantum-ai\quantum_mcp_server.py
+.venv\bin\python .\quantum-ai\quantum_mcp_server.py
 ```
 
 **Cost Gates**:

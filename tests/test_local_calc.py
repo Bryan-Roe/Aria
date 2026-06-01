@@ -55,6 +55,22 @@ class LocalCalcTests(unittest.TestCase):
     def test_huge_exponent_is_rejected(self) -> None:
         self.assertIsNone(evaluate_arithmetic("9 ** 9 ** 9"))
 
+    def test_single_huge_exponent_is_rejected(self) -> None:
+        self.assertIsNone(evaluate_arithmetic("2 ** 100000"))
+
+    def test_nested_powers_do_not_explode(self) -> None:
+        # Each individual exponent is small (<= _MAX_POW_EXPONENT) but the base
+        # grows astronomically; these must be rejected, not computed/hung.
+        self.assertIsNone(evaluate_arithmetic("(10**1000)**1000"))
+        self.assertIsNone(evaluate_arithmetic("((10**1000)**1000)**1000"))
+
+    def test_large_but_bounded_power_still_evaluates(self) -> None:
+        # ~1001 digits: under the result-size cap, so it is still answered and
+        # never raises (regression guard for the str() digit-limit crash).
+        result = evaluate_arithmetic("10 ** 1000")
+        self.assertIsNotNone(result)
+        self.assertEqual(result, "1" + "0" * 1000)
+
     def test_looks_like_arithmetic(self) -> None:
         self.assertTrue(looks_like_arithmetic("2 + 2"))
         self.assertFalse(looks_like_arithmetic("hello there"))

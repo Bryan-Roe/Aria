@@ -77,7 +77,7 @@ python scripts/train_and_promote.py --quick --auto-promote
 python ai-projects/chat-cli/src/chat_cli.py --provider local --once "Hello"
 
 # MCP Server (quantum tools)
-python ai-projects/quantum-ml/quantum_mcp_server.py
+.venv/bin/python ai-projects/quantum-ml/quantum_mcp_server.py
 
 # Testing
 pytest tests/ -m "not slow and not azure"

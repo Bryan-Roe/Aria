@@ -41,7 +41,19 @@ ollama pull mistral
 # Launch app → Download Model → Developer Tab → Start Server
 ```
 
-### 2. Run Agent
+### 2. Validate MCP Tooling
+
+Before relying on workspace MCP tools, verify the active stdio servers from `.vscode/mcp.json`:
+
+```bash
+.venv/bin/python scripts/validate_mcp_setup.py
+# JSON output for automation or debugging
+.venv/bin/python scripts/validate_mcp_setup.py --json
+```
+
+In VS Code, the same checks are available as tasks: `validate: mcp-setup` and `validate: mcp-setup-json`.
+
+### 3. Run Agent
 
 ```bash
 python scripts/autonomous_code_agent.py \
@@ -50,7 +62,7 @@ python scripts/autonomous_code_agent.py \
   --dry-run  # Analyze only, don't modify files
 ```
 
-### 3. Check Results
+### 4. Check Results
 
 ```bash
 cat data_out/autonomous_agent/status.json | python -m json.tool

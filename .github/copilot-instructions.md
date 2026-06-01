@@ -117,7 +117,7 @@ python scripts/automated_training_pipeline.py --quick  # Quick LoRA (TinyLlama)
 python scripts/train_and_promote.py --quick --auto-promote  # Train + auto-deploy
 
 # === MCP & TOOLS ===
-python ai-projects/quantum-ml/quantum_mcp_server.py       # Start quantum MCP server
+.venv/bin/python ai-projects/quantum-ml/quantum_mcp_server.py       # Start quantum MCP server
 
 # === MONITORING & DIAGNOSTICS ===
 curl http://localhost:7071/api/ai/status | jq # Comprehensive health check

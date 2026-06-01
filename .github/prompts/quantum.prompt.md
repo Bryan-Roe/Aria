@@ -21,7 +21,7 @@ python scripts/quantum_autorun.py --dry-run
 python scripts/quantum_autorun.py --job azure_ionq_simulator
 
 # MCP server (quantum tools)
-python ai-projects/quantum-ml/quantum_mcp_server.py
+.venv/bin/python ai-projects/quantum-ml/quantum_mcp_server.py
 
 # Interactive dashboard
 cd ai-projects/quantum-ml && ./start_dashboard.sh
