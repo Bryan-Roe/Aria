@@ -290,6 +290,32 @@ _AGENT_REGISTRY: Dict[str, Dict[str, Any]] = {
         ],
         "description": "Evaluates plans and responses against a quality rubric",
     },
+    "reasoning-chain-specialist": {
+        "domains": ["ai", "technical"],
+        "intents": ["explanation", "question", "reasoning"],
+        "provider": "agi",
+        "confidence_boost": 0.12,
+        "subtask_templates": [
+            "Identify the core question and key concepts",
+            "Break the problem into explicit reasoning steps",
+            "Evaluate each step and surface assumptions",
+            "Synthesise a confident conclusion from the chain",
+        ],
+        "description": "Multi-step chain-of-thought reasoning for complex questions",
+    },
+    "debate-specialist": {
+        "domains": ["ai", "technical"],
+        "intents": ["question", "reasoning"],
+        "provider": "agi",
+        "confidence_boost": 0.1,
+        "subtask_templates": [
+            "Identify the core claim or proposal",
+            "Generate devil's advocate counter-arguments",
+            "Surface structural weaknesses and edge cases",
+            "Provide a steelmanned defence and overall verdict",
+        ],
+        "description": "Stress-tests ideas with counter-arguments and devil's advocate analysis",
+    },
     "general": {
         "domains": [],
         "intents": [],

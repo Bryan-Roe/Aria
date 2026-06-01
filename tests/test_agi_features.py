@@ -456,3 +456,200 @@ def test_runner_routes_critique_task() -> None:
     assert result["agent"] == "critique_agent"
     assert "score" in result["result"]
 
+
+# ---------------------------------------------------------------------------
+# ReasoningAgent tests
+# ---------------------------------------------------------------------------
+
+def test_reasoning_agent_free_text() -> None:
+    from core.agents.reasoning_agent import ReasoningAgent
+    from core.memory.store import MemoryStore
+
+    agent = ReasoningAgent(MemoryStore())
+    task = Task(type="reason", payload={"question": "Why is the sky blue?"})
+    result = agent.execute(task)
+
+    assert result["agent"] == "reasoning_agent"
+    assert isinstance(result["steps"], list)
+    assert len(result["steps"]) >= 1
+    assert isinstance(result["conclusion"], str) and result["conclusion"]
+    assert 0.0 <= result["confidence"] <= 1.0
+
+
+def test_reasoning_agent_empty_question_fallback() -> None:
+    from core.agents.reasoning_agent import ReasoningAgent
+    from core.memory.store import MemoryStore
+
+    agent = ReasoningAgent(MemoryStore())
+    result = agent.execute(Task(type="reason", payload={}))
+
+    assert result["agent"] == "reasoning_agent"
+    assert result["steps"] == []
+    assert "No question provided" in result["conclusion"]
+    assert result["confidence"] == 0.0
+
+
+def test_reasoning_agent_alternate_payload_keys() -> None:
+    from core.agents.reasoning_agent import ReasoningAgent
+    from core.memory.store import MemoryStore
+
+    agent = ReasoningAgent(MemoryStore())
+    result = agent.execute(Task(type="explain", payload={"prompt": "Explain gradient descent."}))
+
+    assert result["agent"] == "reasoning_agent"
+    assert isinstance(result["steps"], list)
+    assert isinstance(result["conclusion"], str)
+
+
+def test_reasoning_agent_can_handle_types() -> None:
+    from core.agents.reasoning_agent import ReasoningAgent
+    from core.memory.store import MemoryStore
+
+    agent = ReasoningAgent(MemoryStore())
+    for t in ("reason", "explain", "chain_of_thought"):
+        assert agent.can_handle(Task(type=t, payload={}))
+    assert not agent.can_handle(Task(type="plan", payload={}))
+
+
+def test_reasoning_agent_writes_to_memory() -> None:
+    from core.agents.reasoning_agent import ReasoningAgent
+    from core.memory.store import MemoryStore
+
+    memory = MemoryStore()
+    agent = ReasoningAgent(memory)
+    agent.execute(Task(type="reason", payload={"question": "What is AGI?"}))
+
+    events = memory.last(5)
+    types_seen = [e.get("type") for e in events]
+    assert "reasoning_completed" in types_seen
+
+
+# ---------------------------------------------------------------------------
+# DebateAgent tests
+# ---------------------------------------------------------------------------
+
+def test_debate_agent_basic_challenge() -> None:
+    from core.agents.debate_agent import DebateAgent
+    from core.memory.store import MemoryStore
+
+    agent = DebateAgent(MemoryStore())
+    result = agent.execute(
+        Task(type="debate", payload={"claim": "AGI will be achieved within 10 years."})
+    )
+
+    assert result["agent"] == "debate_agent"
+    assert isinstance(result["counter_arguments"], list)
+    assert len(result["counter_arguments"]) >= 1
+    assert isinstance(result["weaknesses"], list)
+    assert isinstance(result["verdict"], str) and result["verdict"]
+
+
+def test_debate_agent_with_steelman() -> None:
+    from core.agents.debate_agent import DebateAgent
+    from core.memory.store import MemoryStore
+
+    agent = DebateAgent(MemoryStore())
+    result = agent.execute(
+        Task(type="debate", payload={"claim": "Open-source models are safer.", "steelman": True})
+    )
+
+    assert isinstance(result["steelman"], str) and result["steelman"]
+
+
+def test_debate_agent_without_steelman() -> None:
+    from core.agents.debate_agent import DebateAgent
+    from core.memory.store import MemoryStore
+
+    agent = DebateAgent(MemoryStore())
+    result = agent.execute(
+        Task(type="stress_test", payload={"text": "Caching always improves performance.", "steelman": False})
+    )
+
+    assert result["agent"] == "debate_agent"
+    assert result["steelman"] == ""
+
+
+def test_debate_agent_empty_claim_fallback() -> None:
+    from core.agents.debate_agent import DebateAgent
+    from core.memory.store import MemoryStore
+
+    agent = DebateAgent(MemoryStore())
+    result = agent.execute(Task(type="debate", payload={}))
+
+    assert result["agent"] == "debate_agent"
+    assert result["counter_arguments"] == []
+    assert "No claim provided" in result["verdict"]
+
+
+def test_debate_agent_can_handle_types() -> None:
+    from core.agents.debate_agent import DebateAgent
+    from core.memory.store import MemoryStore
+
+    agent = DebateAgent(MemoryStore())
+    for t in ("debate", "challenge", "stress_test"):
+        assert agent.can_handle(Task(type=t, payload={}))
+    assert not agent.can_handle(Task(type="critique", payload={}))
+
+
+def test_debate_agent_writes_to_memory() -> None:
+    from core.agents.debate_agent import DebateAgent
+    from core.memory.store import MemoryStore
+
+    memory = MemoryStore()
+    agent = DebateAgent(memory)
+    agent.execute(Task(type="challenge", payload={"proposal": "All data should be public."}))
+
+    events = memory.last(5)
+    types_seen = [e.get("type") for e in events]
+    assert "debate_completed" in types_seen
+
+
+# ---------------------------------------------------------------------------
+# Router intent classification for reasoning and debate
+# ---------------------------------------------------------------------------
+
+def test_router_classifies_reason_and_debate_intents() -> None:
+    from core.registry import AgentRegistry
+    from core.router import TaskRouter
+
+    router = TaskRouter(AgentRegistry())
+    assert router.classify_intent("reason through this problem") == "reason"
+    assert router.classify_intent("explain how neural networks work") == "reason"
+    assert router.classify_intent("chain of thought for this question") == "reason"
+    assert router.classify_intent("debate whether AGI is near") == "debate"
+    assert router.classify_intent("challenge this proposal") == "debate"
+    assert router.classify_intent("stress test this design") == "debate"
+
+
+# ---------------------------------------------------------------------------
+# Runner integration — registration and routing
+# ---------------------------------------------------------------------------
+
+def test_runner_registers_reasoning_and_debate_agents() -> None:
+    runner = AriaRunner(config={"sleep_seconds": 0})
+    assert runner.registry.get("reasoning_agent") is not None
+    assert runner.registry.get("debate_agent") is not None
+
+
+def test_runner_routes_reason_task() -> None:
+    runner = AriaRunner(config={"sleep_seconds": 0})
+
+    result = runner.router.route(
+        Task(type="reason", payload={"question": "Why does gradient descent converge?"})
+    )
+
+    assert result["agent"] == "reasoning_agent"
+    assert "steps" in result["result"]
+    assert "conclusion" in result["result"]
+
+
+def test_runner_routes_debate_task() -> None:
+    runner = AriaRunner(config={"sleep_seconds": 0})
+
+    result = runner.router.route(
+        Task(type="debate", payload={"claim": "Transformers will replace all classical NLP."})
+    )
+
+    assert result["agent"] == "debate_agent"
+    assert "counter_arguments" in result["result"]
+    assert "verdict" in result["result"]

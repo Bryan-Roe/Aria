@@ -14,6 +14,8 @@ from core.agents.llm_agent import LLMAgent
 from core.agents.planner_agent import PlannerAgent
 from core.agents.summarizer_agent import SummarizerAgent
 from core.agents.critique_agent import CritiqueAgent
+from core.agents.reasoning_agent import ReasoningAgent
+from core.agents.debate_agent import DebateAgent
 from core.agents.tool_agent import ToolAgent
 from core.agents.training_agent import TrainingAgent
 from core.bus import AgentBus
@@ -48,6 +50,8 @@ class AriaRunner:
         feedback = HumanFeedbackAgent(self.memory, self.bus)
         summarizer = SummarizerAgent(self.memory)
         critique = CritiqueAgent(self.memory)
+        reasoning = ReasoningAgent(self.memory)
+        debate = DebateAgent(self.memory)
 
         tool.registry.register("inspect_context", self._inspect_context)
         tool.registry.register("recent_events", self._recent_events)
@@ -63,6 +67,8 @@ class AriaRunner:
         self.registry.register(feedback)
         self.registry.register(summarizer)
         self.registry.register(critique)
+        self.registry.register(reasoning)
+        self.registry.register(debate)
 
     def _inspect_context(self, goal: str = "") -> Dict[str, Any]:
         return {"goal": goal, "event_counts": self.memory.count_by_type(), "recent_events": self.memory.last(5)}

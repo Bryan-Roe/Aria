@@ -87,6 +87,33 @@ class LLMClient:
                 "suggestions": ["Consider trimming the response for conciseness"],
             })
 
+        if "chain-of-thought reasoning engine" in system_prompt.lower():
+            excerpt = " ".join(prompt.split())[:100]
+            return json.dumps({
+                "steps": [
+                    f"1. Identify the core question in: {excerpt}",
+                    "2. Break the problem into smaller sub-problems",
+                    "3. Evaluate each sub-problem systematically",
+                ],
+                "conclusion": f"Based on the reasoning above, a well-structured answer can be formed for: {excerpt}",
+                "confidence": 0.8,
+            })
+
+        if "debate and critical-thinking engine" in system_prompt.lower():
+            excerpt = " ".join(prompt.split())[:80]
+            return json.dumps({
+                "counter_arguments": [
+                    f"The claim '{excerpt}' may not hold under different assumptions",
+                    "Evidence may be incomplete or biased",
+                ],
+                "weaknesses": [
+                    "Relies on unverified premises",
+                    "Does not account for edge cases",
+                ],
+                "steelman": f"The strongest case for '{excerpt}' rests on its core logic being sound under ideal conditions.",
+                "verdict": "The claim has merit but requires stronger evidence and broader scope.",
+            })
+
         return json.dumps(
             {
                 "analysis": f"Processed: {prompt}",
