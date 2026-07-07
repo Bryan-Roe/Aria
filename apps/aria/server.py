@@ -5,7 +5,6 @@ Serves the HTML/JS frontend and provides API endpoint for command generation
 """
 
 import datetime
-import hashlib
 import importlib.util
 import json
 import logging
