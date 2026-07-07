@@ -697,9 +697,9 @@ class MyHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
         for mid in model_ids:
             try:
                 # Synthetic metrics
-                inference_time = random.uniform(100, 1200)  # ms
-                memory_mb = random.uniform(200, 2000)
-                throughput = random.uniform(20, 300)  # tokens/sec
+                inference_time = random.uniform(100, 1200)  # noqa: S311  # ms
+                memory_mb = random.uniform(200, 2000)  # noqa: S311
+                throughput = random.uniform(20, 300)  # noqa: S311  # tokens/sec
                 # Score: lower time & memory, higher throughput
                 speed_score = max(0, min(100, (1200 - inference_time) / 12))
                 memory_score = max(0, min(100, (2000 - memory_mb) / 20))

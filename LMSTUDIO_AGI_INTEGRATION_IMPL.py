@@ -60,12 +60,16 @@ Need to add:
 def _check_lmstudio_available():
     """Check if LM Studio server is running and accessible."""
     import os
+    import urllib.parse
     import urllib.request
 
     base_url = os.getenv("LMSTUDIO_BASE_URL", "http://127.0.0.1:1234/v1")
+    parsed = urllib.parse.urlparse(base_url)
+    if parsed.scheme not in {"http", "https"}:
+        return False
     try:
-        request = urllib.request.Request(f"{base_url}/models")
-        with urllib.request.urlopen(request, timeout=2) as resp:
+        request = urllib.request.Request(f"{base_url}/models")  # noqa: S310
+        with urllib.request.urlopen(request, timeout=2) as resp:  # noqa: S310
             return resp.status == 200
     except Exception:
         return False

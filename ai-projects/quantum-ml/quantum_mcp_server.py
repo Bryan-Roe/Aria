@@ -728,8 +728,8 @@ def _create_circuit_sync(n_qubits: int, circuit_type: str, gates: list | None = 
         import random
 
         for _ in range(n_qubits * 2):
-            gate = random.choice(["h", "x", "y", "z", "rx", "ry", "rz"])
-            qubit = random.randint(0, n_qubits - 1)
+            gate = random.choice(["h", "x", "y", "z", "rx", "ry", "rz"])  # noqa: S311
+            qubit = random.randint(0, n_qubits - 1)  # noqa: S311
             if gate == "h":
                 circuit.h(qubit)
             elif gate == "x":

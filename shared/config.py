@@ -19,7 +19,7 @@ from functools import lru_cache
 from typing import Annotated
 
 _LOG = logging.getLogger(__name__)
-_DEFAULT_PROVIDER_PRIORITY = ["lmstudio", "ollama", "azure", "openai", "local"]
+_DEFAULT_PROVIDER_PRIORITY = ["lmstudio", "ollama", "azure", "openai", "groq", "local"]
 
 
 def _normalize_provider_priority(value: object) -> list[str]:
@@ -113,6 +113,11 @@ if _PYDANTIC_AVAILABLE:
         # OpenAI
         # ------------------------------------------------------------------
         openai_api_key: str | None = Field(default=None, alias="OPENAI_API_KEY")
+
+        # ------------------------------------------------------------------
+        # Groq
+        # ------------------------------------------------------------------
+        groq_api_key: str | None = Field(default=None, alias="GROQ_API_KEY")
 
         # ------------------------------------------------------------------
         # LM Studio / local inference
@@ -223,6 +228,11 @@ if _PYDANTIC_AVAILABLE:
             return bool(self.openai_api_key)
 
         @property
+        def groq_ready(self) -> bool:
+            """Return True when the Groq API key is set."""
+            return bool(self.groq_api_key)
+
+        @property
         def lmstudio_ready(self) -> bool:
             """Return True when an LM Studio URL is configured."""
             return bool(self.lmstudio_base_url and str(self.lmstudio_base_url).strip())
@@ -239,6 +249,7 @@ if _PYDANTIC_AVAILABLE:
                 "ollama": self.ollama_ready,
                 "azure": self.azure_openai_ready,
                 "openai": self.openai_ready,
+                "groq": self.groq_ready,
             }
             for name in self.provider_chain():
                 if checks.get(name, False):
@@ -256,6 +267,7 @@ if _PYDANTIC_AVAILABLE:
                 "provider_chain": self.provider_chain(),
                 "azure_openai_ready": self.azure_openai_ready,
                 "openai_ready": self.openai_ready,
+                "groq_ready": self.groq_ready,
                 "lmstudio_ready": self.lmstudio_ready,
                 "ollama_ready": self.ollama_ready,
                 "db_enabled": bool(self.db_connection_string),
@@ -277,6 +289,7 @@ else:
             self.azure_openai_deployment = os.environ.get("AZURE_OPENAI_DEPLOYMENT")
             self.azure_openai_api_version = os.environ.get("AZURE_OPENAI_API_VERSION", "2024-02-01")
             self.openai_api_key = os.environ.get("OPENAI_API_KEY")
+            self.groq_api_key = os.environ.get("GROQ_API_KEY")
             self.lmstudio_base_url = os.environ.get("LMSTUDIO_BASE_URL")
             self.ollama_base_url = os.environ.get("OLLAMA_BASE_URL")
             self.provider_priority = _normalize_provider_priority(
@@ -322,6 +335,10 @@ else:
             return bool(self.openai_api_key)
 
         @property
+        def groq_ready(self) -> bool:
+            return bool(self.groq_api_key)
+
+        @property
         def lmstudio_ready(self) -> bool:
             return bool(self.lmstudio_base_url and str(self.lmstudio_base_url).strip())
 
@@ -335,6 +352,7 @@ else:
                 "ollama": self.ollama_ready,
                 "azure": self.azure_openai_ready,
                 "openai": self.openai_ready,
+                "groq": self.groq_ready,
             }
             for name in self.provider_priority:
                 if checks.get(name, False):
@@ -350,6 +368,7 @@ else:
                 "provider_chain": self.provider_chain(),
                 "azure_openai_ready": self.azure_openai_ready,
                 "openai_ready": self.openai_ready,
+                "groq_ready": self.groq_ready,
                 "lmstudio_ready": self.lmstudio_ready,
                 "ollama_ready": self.ollama_ready,
                 "db_enabled": bool(self.db_connection_string),

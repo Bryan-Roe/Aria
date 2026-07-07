@@ -151,8 +151,8 @@ class MetricsLogger:
             "x-ms-date": rfc1123date,
             "Authorization": f"SharedKey {self.workspace_id}:{signature}",
         }
-        req = urllib.request.Request(url, data=body, headers=headers, method="POST")
-        with urllib.request.urlopen(req, timeout=10) as resp:  # nosec B310
+        req = urllib.request.Request(url, data=body, headers=headers, method="POST")  # noqa: S310
+        with urllib.request.urlopen(req, timeout=10) as resp:  # nosec B310  # noqa: S310
             # 200 or 202 expected
             if resp.status not in (200, 202):
                 raise RuntimeError(f"Azure ingestion failed with status {resp.status}")

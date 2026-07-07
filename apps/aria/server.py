@@ -930,7 +930,7 @@ def _sanitize_id(raw: str) -> str:
     empty after cleaning (e.g., a string that is entirely non-ASCII).
     """
     cleaned = re.sub(r"[^a-zA-Z0-9_]+", "_", raw.strip().lower())
-    return cleaned[:30] or f"obj_{random.randint(1000, 9999)}"
+    return cleaned[:30] or f"obj_{random.randint(1000, 9999)}"  # noqa: S311
 
 
 THEME_OBJECT_LIBRARY = {
@@ -1187,8 +1187,8 @@ def generate_world_fallback(theme: str, count: int) -> dict:
     for name, emoji in chosen:
         # Avoid overlapping positions (simple Poisson-ish attempt)
         for _attempt in range(10):
-            x = random.randint(10, 90)
-            y = random.randint(20, 80)
+            x = random.randint(10, 90)  # noqa: S311
+            y = random.randint(20, 80)  # noqa: S311
             if all(math.hypot(x - px, y - py) > 8 for px, py in used_positions):
                 used_positions.append((x, y))
                 break
@@ -1201,7 +1201,7 @@ def generate_world_fallback(theme: str, count: int) -> dict:
     environment = {
         "theme": theme,
         "generated_at": datetime.datetime.now(timezone.utc).isoformat() + "Z",
-        "seed": random.randint(100000, 999999),
+        "seed": random.randint(100000, 999999),  # noqa: S311
         "stage_bounds": {"width": 100, "height": 100},
     }
     stage_style = THEME_STAGE_STYLES.get(theme.lower())
@@ -1268,8 +1268,8 @@ def generate_world_with_llm(theme: str, count: int, provider) -> dict:
             object_id = val.get("id") or val.get("name") or key
             oid = _sanitize_id(object_id)
             pos = val.get("position", {})
-            x = int(max(0, min(100, pos.get("x", random.randint(10, 90)))))
-            y = int(max(0, min(100, pos.get("y", random.randint(20, 80)))))
+            x = int(max(0, min(100, pos.get("x", random.randint(10, 90)))))  # noqa: S311
+            y = int(max(0, min(100, pos.get("y", random.randint(20, 80)))))  # noqa: S311
             state = val.get("state", "on_stage")
             emoji = val.get("emoji", "✨")
             sanitized_objects[oid] = {
@@ -1396,7 +1396,7 @@ def determine_position_from_context(cmd: str) -> str:
     else:
         # Context-aware positioning: stay put if already in good position
         # or move to interesting area if idle
-        pos_hash = int(hashlib.md5(cmd.encode()).hexdigest()[:4], 16)
+        pos_hash = abs(hash(cmd))
         x = 30 + (pos_hash % 40)  # Random between 30-70%
         y = 60 + (pos_hash % 20)  # Random between 60-80%
         return f"[aria:position:{x}:{y}]"
@@ -2656,7 +2656,7 @@ def main():
             probe_host = "127.0.0.1"
             state_url = f"http://{probe_host}:{port}/api/aria/state"
             try:
-                with urllib.request.urlopen(state_url, timeout=1.0) as resp:
+                with urllib.request.urlopen(state_url, timeout=1.0) as resp:  # noqa: S310 - localhost probe only
                     payload = json.loads(resp.read().decode("utf-8"))
                 if isinstance(payload, dict) and "aria" in payload and "objects" in payload:
                     print(

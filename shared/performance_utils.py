@@ -346,7 +346,7 @@ def memoize_with_ttl(ttl_seconds: float = 60.0):
         def wrapper(*args, **kwargs):
             """Return a cached result when fresh, otherwise call *func*."""
             key_data = (args, tuple(sorted(kwargs.items())))
-            cache_key = hashlib.md5(str(key_data).encode()).hexdigest()
+            cache_key = hashlib.sha256(str(key_data).encode()).hexdigest()
 
             # Check if cached and not expired
             if cache_key in cache:

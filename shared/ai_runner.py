@@ -96,7 +96,13 @@ def run_chat_once(
     if idx != -1:
         reply = output[idx + len(marker) :].rstrip()
 
-    metadata = {"provider": provider}
+    output_decision = _safety.validate_output(reply)
+    if not output_decision.allowed:
+        raise RuntimeError(
+            f"Response blocked by safety middleware: {output_decision.reason} (flags: {list(output_decision.flags)})"
+        )
+
+    metadata: dict[str, str] = {"provider": provider, "output_risk": output_decision.risk_level}
     if model:
         metadata["model"] = model
 

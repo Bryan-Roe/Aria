@@ -307,12 +307,12 @@ class LocalLLMClient:
         }
 
         try:
-            req = urllib.request.Request(
+            req = urllib.request.Request(  # noqa: S310
                 url,
                 data=json_module.dumps(data).encode("utf-8"),
                 headers={"Content-Type": "application/json"},
             )
-            with urllib.request.urlopen(req, timeout=self.request_timeout_seconds) as response:
+            with urllib.request.urlopen(req, timeout=self.request_timeout_seconds) as response:  # noqa: S310
                 result = json_module.loads(response.read().decode("utf-8"))
                 return result.get("response", "").strip()
         except urllib.error.URLError as e:
@@ -332,12 +332,12 @@ class LocalLLMClient:
         }
 
         try:
-            req = urllib.request.Request(
+            req = urllib.request.Request(  # noqa: S310
                 url,
                 data=json_module.dumps(data).encode("utf-8"),
                 headers={"Content-Type": "application/json"},
             )
-            with urllib.request.urlopen(req, timeout=self.request_timeout_seconds) as response:
+            with urllib.request.urlopen(req, timeout=self.request_timeout_seconds) as response:  # noqa: S310
                 result = json_module.loads(response.read().decode("utf-8"))
                 choices = result.get("choices", [])
                 if choices:

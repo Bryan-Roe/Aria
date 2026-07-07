@@ -32,7 +32,7 @@ Your identity needs ``Azure AI User`` on the Foundry project scope.
 
 import os
 from importlib import import_module
-from typing import Protocol, cast
+from typing import Any, Protocol, cast
 
 from azure.core.exceptions import ResourceNotFoundError
 from azure.identity import DefaultAzureCredential
@@ -41,31 +41,36 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
-class _NamedResource(Protocol):
+class _NamedResource(Protocol):  # pylint: disable=too-few-public-methods
     name: str
     id: str
 
 
 class _MemoryStores(Protocol):
-    def get(self, *, name: str) -> _NamedResource: ...
+    def get(self, *, name: str) -> _NamedResource:
+        """Return a memory store by name."""
+        ...
+
     def create(
         self,
         *,
         name: str,
         description: str,
         definition: object,
-    ) -> _NamedResource: ...
+    ) -> _NamedResource:
+        """Create and return a memory store."""
+        ...
 
 
-class _ProjectBeta(Protocol):
+class _ProjectBeta(Protocol):  # pylint: disable=too-few-public-methods
     memory_stores: _MemoryStores
 
 
-class _ProjectClient(Protocol):
+class _ProjectClient(Protocol):  # pylint: disable=too-few-public-methods
     beta: _ProjectBeta
 
 
-def _load_projects_symbols() -> tuple[type[object], type[object], type[object]]:
+def _load_projects_symbols() -> tuple[Any, Any, Any]:
     """Load Azure AI Projects types only when the script runs."""
     try:
         projects_module = import_module("azure.ai.projects")
@@ -100,8 +105,7 @@ def main() -> None:
             allow_preview=True,
         ) as project,
     ):
-        project_client = cast(_ProjectClient, project)
-        memory_stores: _MemoryStores = project_client.beta.memory_stores
+        memory_stores: _MemoryStores = cast(_ProjectClient, project).beta.memory_stores
 
         try:
             existing: _NamedResource = memory_stores.get(name=memory_store_name)

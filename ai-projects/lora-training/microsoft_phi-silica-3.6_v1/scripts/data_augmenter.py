@@ -90,16 +90,16 @@ class TextAugmenter:
         """Apply augmentation techniques to text"""
         words = text.split()
 
-        if "synonym" in techniques and random.random() < self.config.synonym_replacement_prob:
+        if "synonym" in techniques and random.random() < self.config.synonym_replacement_prob:  # noqa: S311
             words = self._synonym_replacement(words)
 
-        if "insertion" in techniques and random.random() < self.config.random_insertion_prob:
+        if "insertion" in techniques and random.random() < self.config.random_insertion_prob:  # noqa: S311
             words = self._random_insertion(words)
 
-        if "swap" in techniques and random.random() < self.config.random_swap_prob:
+        if "swap" in techniques and random.random() < self.config.random_swap_prob:  # noqa: S311
             words = self._random_swap(words)
 
-        if "deletion" in techniques and random.random() < self.config.random_deletion_prob:
+        if "deletion" in techniques and random.random() < self.config.random_deletion_prob:  # noqa: S311
             words = self._random_deletion(words)
 
         return " ".join(words)
@@ -140,8 +140,8 @@ class TextAugmenter:
                 break
 
             # Insert a random word from the text
-            random_word = random.choice(words)
-            random_idx = random.randint(0, len(new_words))
+            random_word = random.choice(words)  # noqa: S311
+            random_idx = random.randint(0, len(new_words))  # noqa: S311
             new_words.insert(random_idx, random_word)
 
         return new_words
@@ -157,7 +157,7 @@ class TextAugmenter:
             if len(new_words) < 2:
                 break
 
-            idx1, idx2 = random.sample(range(len(new_words)), 2)
+            idx1, idx2 = random.sample(range(len(new_words)), 2)  # noqa: S311
             new_words[idx1], new_words[idx2] = new_words[idx2], new_words[idx1]
 
         return new_words
@@ -173,7 +173,7 @@ class TextAugmenter:
 
         new_words = []
         for word in words:
-            if random.random() > p:
+            if random.random() > p:  # noqa: S311
                 new_words.append(word)
 
         # Return original if all deleted
@@ -195,7 +195,7 @@ class TextAugmenter:
 
         lower_word = word.lower()
         if lower_word in synonyms:
-            synonym = random.choice(synonyms[lower_word])
+            synonym = random.choice(synonyms[lower_word])  # noqa: S311
             # Preserve capitalization
             if word[0].isupper():
                 synonym = synonym.capitalize()

@@ -171,10 +171,10 @@ def _effective_env(settings: dict[str, Any]) -> dict[str, str]:
 
 def _probe_url(url: str, headers: dict[str, str] | None = None, timeout: int = 5) -> tuple[int, Any]:
     """Return (status_code, parsed_json_or_None). Returns (-1, None) on connection error."""
-    req = urllib.request.Request(url, headers=headers or {})
+    req = urllib.request.Request(url, headers=headers or {})  # noqa: S310
     try:
         t0 = time.monotonic()
-        with urllib.request.urlopen(req, timeout=timeout) as resp:
+        with urllib.request.urlopen(req, timeout=timeout) as resp:  # noqa: S310
             raw = resp.read().decode("utf-8", errors="replace")
             elapsed_ms = (time.monotonic() - t0) * 1000
             try:

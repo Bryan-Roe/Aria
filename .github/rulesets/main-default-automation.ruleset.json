@@ -34,10 +34,6 @@
             }
         },
         {
-            // Merge queue: prevents the thundering-herd problem when many
-            // auto-merge labeled PRs all become mergeable simultaneously.
-            // Requires enabling the merge queue in repository Settings → General
-            // → Pull Requests → "Allow merge queue" (UI-only setting).
             "type": "merge_queue",
             "parameters": {
                 "check_response_timeout_minutes": 60,
@@ -49,18 +45,6 @@
                 "min_entries_to_merge_wait_minutes": 5
             }
         }
-
-        // Optional hardening rules (enable when policy-ready):
-        // ,{ "type": "required_linear_history" }
-        // ,{ "type": "required_signatures" }
     ],
-    "bypass_actors": [
-        // Preferred: keep empty for strict mode, OR define a tightly scoped audited bypass.
-        // Example team bypass (replace IDs/types with real values):
-        // {
-        //   "actor_id": 1234567,
-        //   "actor_type": "Team",
-        //   "bypass_mode": "pull_request"
-        // }
-    ]
+    "bypass_actors": []
 }

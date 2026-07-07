@@ -61,6 +61,13 @@ try:
 except AttributeError:
     pass
 
+# Conditionally export GroqProvider if available
+try:
+    GroqProvider = _canonical_module.GroqProvider
+    __all__.append("GroqProvider")
+except AttributeError:
+    pass
+
 # Conditionally export AGI provider using the same dynamic import pattern
 try:
     _agi_path = Path(__file__).resolve().parent.parent / "ai-projects" / "chat-cli" / "src" / "agi_provider.py"

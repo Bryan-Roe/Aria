@@ -233,6 +233,11 @@ def ask_quantum(
     base_url = (base_url or "").strip().rstrip("/")
     if not base_url:
         raise ValueError("Quantum base URL cannot be empty.")
+    from urllib.parse import urlparse as _urlparse
+
+    _parsed = _urlparse(base_url)
+    if _parsed.scheme not in {"http", "https"}:
+        raise ValueError(f"Quantum base URL scheme '{_parsed.scheme}' is not allowed; use http or https.")
 
     payload = {
         "prompt": prompt,
@@ -245,14 +250,14 @@ def ask_quantum(
         "temperature": temperature,
     }
 
-    req = urllib_request.Request(
+    req = urllib_request.Request(  # noqa: S310 - URL from configurable local endpoint
         f"{base_url}{QUANTUM_CHAT_PATH}",
         data=json.dumps(payload).encode("utf-8"),
         headers={"Content-Type": "application/json"},
         method="POST",
     )
 
-    with urllib_request.urlopen(req, timeout=timeout) as resp:
+    with urllib_request.urlopen(req, timeout=timeout) as resp:  # noqa: S310
         raw = resp.read().decode("utf-8", errors="replace").strip()
         if not raw:
             return ""

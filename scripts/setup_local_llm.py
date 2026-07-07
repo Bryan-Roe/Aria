@@ -87,7 +87,7 @@ def _start_ollama_if_needed() -> bool:
 
     probe_url = "http://127.0.0.1:11434/api/tags"
     try:
-        urllib.request.urlopen(probe_url, timeout=2)
+        urllib.request.urlopen(probe_url, timeout=2)  # noqa: S310
         return True
     except Exception:
         pass
@@ -108,7 +108,7 @@ def _start_ollama_if_needed() -> bool:
 
     for _ in range(20):
         try:
-            urllib.request.urlopen(probe_url, timeout=2)
+            urllib.request.urlopen(probe_url, timeout=2)  # noqa: S310
             print("Ollama server is running.")
             return True
         except Exception:

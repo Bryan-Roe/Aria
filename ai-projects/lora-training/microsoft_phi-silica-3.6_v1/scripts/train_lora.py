@@ -232,7 +232,7 @@ def _read_text_source(path_or_url: str) -> Iterable[str]:
         import urllib.request
 
         safe_url = _validated_remote_url(path_or_url)
-        with urllib.request.urlopen(safe_url) as resp:  # nosec B310
+        with urllib.request.urlopen(safe_url) as resp:  # nosec B310  # noqa: S310
             for line in resp.read().decode("utf-8").splitlines():
                 yield line
     else:
@@ -252,7 +252,7 @@ def parse_manifest(path_or_url: str) -> list[str]:
             import urllib.request
 
             safe_url = _validated_remote_url(path_or_url)
-            with urllib.request.urlopen(safe_url) as resp:  # nosec B310
+            with urllib.request.urlopen(safe_url) as resp:  # nosec B310  # noqa: S310
                 obj = _json.loads(resp.read().decode("utf-8"))
         else:
             with Path(path_or_url).open("r", encoding="utf-8") as f:

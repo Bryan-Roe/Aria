@@ -34,7 +34,7 @@ def _clean():
 
 
 class TestProviderPriorityChain:
-    """Provider detection should follow: lmstudio > ollama > azure > openai > local."""
+    """Provider detection should follow: lmstudio > ollama > azure > openai > groq > local."""
 
     def _clean_env(self) -> dict:
         """Return env with all provider keys stripped out."""
@@ -45,6 +45,7 @@ class TestProviderPriorityChain:
             "OPENAI_API_KEY",
             "LMSTUDIO_BASE_URL",
             "OLLAMA_BASE_URL",
+            "GROQ_API_KEY",
         }
         return {k: v for k, v in os.environ.items() if k not in strip}
 
@@ -115,6 +116,24 @@ class TestProviderPriorityChain:
             s = Settings()
             # api_version has a default, so azure should be ready when key/endpoint/deployment set
             assert s.azure_openai_ready is True
+
+    def test_groq_detected_when_key_is_set(self):
+        """Settings.active_provider() returns 'groq' when only GROQ_API_KEY is set."""
+        env = self._clean_env()
+        env["GROQ_API_KEY"] = "gsk-test"
+        with patch.dict(os.environ, env, clear=True):
+            s = Settings()
+            assert s.groq_ready is True
+            assert s.active_provider() == "groq"
+
+    def test_groq_not_selected_when_openai_present(self):
+        """OpenAI takes priority over Groq in the default chain."""
+        env = self._clean_env()
+        env["OPENAI_API_KEY"] = "sk-test"
+        env["GROQ_API_KEY"] = "gsk-test"
+        with patch.dict(os.environ, env, clear=True):
+            s = Settings()
+            assert s.active_provider() == "openai"
 
 
 # ---------------------------------------------------------------------------
@@ -215,3 +234,7 @@ class TestProviderReadinessFlags:
     def test_ollama_ready_is_bool(self):
         s = Settings()
         assert isinstance(s.ollama_ready, bool)
+
+    def test_groq_ready_is_bool(self):
+        s = Settings()
+        assert isinstance(s.groq_ready, bool)

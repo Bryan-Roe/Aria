@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 import pytest
@@ -55,3 +56,21 @@ def test_workflows_harden_runner_and_use_bash_shell(workflow_name: str) -> None:
     assert steps[0]["uses"] == EXPECTED_HARDEN_RUNNER_ACTION
     assert steps[0]["with"]["egress-policy"] == "audit"
     assert steps[0]["with"]["disable-sudo"] is True
+
+
+@pytest.mark.unit
+def test_ruleset_template_is_valid_json_with_required_merge_gate_check() -> None:
+    ruleset_path = Path(__file__).resolve().parents[1] / ".github" / "rulesets" / "main-default-automation.ruleset.json"
+    ruleset = json.loads(ruleset_path.read_text(encoding="utf-8"))
+
+    assert ruleset["target"] == "branch"
+    assert ruleset["enforcement"] == "active"
+
+    required_status_checks_rule = next(rule for rule in ruleset["rules"] if rule["type"] == "required_status_checks")
+    contexts = {
+        check["context"]
+        for check in required_status_checks_rule["parameters"]["required_status_checks"]
+        if isinstance(check, dict) and "context" in check
+    }
+
+    assert "Merge Gate / All Gates Passed" in contexts

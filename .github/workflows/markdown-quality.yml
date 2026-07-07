@@ -70,29 +70,105 @@ jobs:
         with:
           # Avoid leaving credentials on disk for subsequent steps.
           persist-credentials: false
-          # Shallow clone is sufficient for linting changed/all markdown files.
-          fetch-depth: 1
+          # Full history is required to diff against PR and push base commits.
+          fetch-depth: 0
+
+      - name: Select markdown targets
+        id: targets
+        env:
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+          EVENT_NAME: ${{ github.event_name }}
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha || '' }}
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha || '' }}
+          PUSH_BEFORE_SHA: ${{ github.event.before || '' }}
+          HEAD_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+
+          FILE_LIST="${RUNNER_TEMP}/markdown_targets.txt"
+          NULL_SHA="0000000000000000000000000000000000000000"
+          : > "$FILE_LIST"
+
+          is_markdown_target() {
+            local file="$1"
+
+            case "$file" in
+              *.md) ;;
+              *)
+                return 1
+                ;;
+            esac
+
+            case "$file" in
+              */node_modules/*|node_modules/*|*/.venv/*|.venv/*|*/venv/*|venv/*|*/.git/*|.git/*|*/dist/*|dist/*|*/build/*|build/*|*/.next/*|.next/*|*/.cache/*|.cache/*|data_out/*|mount/*|*/CHANGELOG.md|CHANGELOG.md)
+                return 1
+                ;;
+            esac
+
+            return 0
+          }
+
+          write_targets_from_diff() {
+            local base_sha="$1"
+            local head_sha="$2"
+            local diff_file="${RUNNER_TEMP}/changed_markdown_files.txt"
+
+            if ! git diff --name-only --diff-filter=ACMR -z "$base_sha" "$head_sha" > "$diff_file"; then
+              echo "::warning::Unable to diff ${base_sha}...${head_sha}; markdown linting will be skipped. Verify repository history is available and the base/head commits exist."
+              return 1
+            fi
+
+            while IFS= read -r -d '' file; do
+              # Skip entries that no longer exist in the working tree (for example, after renames).
+              [ -f "$file" ] || continue
+              is_markdown_target "$file" || continue
+              printf '%s\0' "$file" >> "$FILE_LIST"
+            done < "$diff_file"
+          }
+
+          if [ "$EVENT_NAME" = "pull_request" ] && [ -n "$PR_BASE_SHA" ] && [ -n "$PR_HEAD_SHA" ]; then
+            write_targets_from_diff "$PR_BASE_SHA" "$PR_HEAD_SHA" || true
+          elif [ "$EVENT_NAME" = "push" ] && [ -n "$PUSH_BEFORE_SHA" ] && [ "$PUSH_BEFORE_SHA" != "$NULL_SHA" ]; then
+            write_targets_from_diff "$PUSH_BEFORE_SHA" "$HEAD_SHA" || true
+          elif [ "$EVENT_NAME" = "workflow_dispatch" ]; then
+            git fetch --no-tags origin "$DEFAULT_BRANCH"
+            BASE_SHA="$(git merge-base "origin/$DEFAULT_BRANCH" "$HEAD_SHA")"
+            write_targets_from_diff "$BASE_SHA" "$HEAD_SHA" || true
+          fi
+
+          echo "file_list=$FILE_LIST" >> "$GITHUB_OUTPUT"
 
       - name: Lint Markdown files
         id: lint
-        uses: DavidAnson/markdownlint-cli2-action@6b51ade7a9e4a75a7ad929842dd298a3804ebe8b
-        with:
-          # Lint all repo markdown except generated/output and mounted volumes.
-          # Keep this list in sync with .markdownlintignore if present.
-          globs: |
-            **/*.md
-            !**/node_modules/**
-            !**/.venv/**
-            !**/venv/**
-            !**/.git/**
-            !**/dist/**
-            !**/build/**
-            !**/.next/**
-            !**/.cache/**
-            !data_out/**
-            !mount/**
-            !**/CHANGELOG.md
-          fix: ${{ github.event_name == 'workflow_dispatch' && inputs.fix == true }}
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+        run: |
+          set -euo pipefail
+
+          FILE_LIST="${{ steps.targets.outputs.file_list }}"
+
+          if [ -z "$FILE_LIST" ]; then
+            echo "No Markdown files changed for this run, or all changed Markdown files were excluded from linting."
+            exit 0
+          fi
+
+          if [ ! -f "$FILE_LIST" ] || [ ! -s "$FILE_LIST" ]; then
+            echo "No Markdown files changed for this run, or all changed Markdown files were excluded from linting."
+            exit 0
+          fi
+
+          # Read the NUL-delimited target list written by write_targets_from_diff.
+          mapfile -d '' -t markdown_files < "$FILE_LIST"
+
+          printf 'Linting markdown targets:\n'
+          printf ' - %s\n' "${markdown_files[@]}"
+
+          args=()
+          if [ "$EVENT_NAME" = "workflow_dispatch" ] && [ "${{ inputs.fix }}" = "true" ]; then
+            args+=(--fix)
+          fi
+
+          npx --yes markdownlint-cli2 "${args[@]}" "${markdown_files[@]}"
 
       - name: Generate auto-fix patch
         if: ${{ always() && github.event_name == 'workflow_dispatch' && inputs.fix == true }}

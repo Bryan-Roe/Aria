@@ -205,10 +205,13 @@ class ToolExecutor:
             exec_globals = self.safe_globals.copy()
             exec_locals = {}
 
-            # Execute code to define function
+            # Execute code to define function.
+            # Security: code has been compiled through RestrictedPython (when available),
+            # which enforces import guards and attribute access restrictions.
+            # The exec_globals namespace only exposes a curated safe-globals dict.
             try:
                 with self._timeout_context(self.timeout):
-                    exec(compiled_code, exec_globals, exec_locals)
+                    exec(compiled_code, exec_globals, exec_locals)  # noqa: S102
                     exec_globals.update(exec_locals)
             except ExecutionTimeout as e:
                 return {"success": False, "error": str(e), "error_type": "TimeoutError"}

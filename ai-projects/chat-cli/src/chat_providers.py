@@ -100,6 +100,15 @@ _ollama_availability_cache: dict[str, Any] = {
 _ollama_cache_lock = threading.RLock()
 _OLLAMA_CACHE_TTL_SECONDS = 30
 
+# Thread-safe cache for Groq availability checks
+_groq_availability_cache: dict[str, Any] = {
+    "available": None,
+    "checked_at": 0.0,
+    "url": None,
+}
+_groq_cache_lock = threading.RLock()
+_GROQ_CACHE_TTL_SECONDS = 30
+
 
 # Thread-safe cache for detect_provider results to reduce repeated provider
 # probing and client instantiation on hot API paths (e.g., /api/ai/status,
@@ -129,6 +138,8 @@ _PROVIDER_ALIASES: dict[str, str] = {
     "qai-quantum": "quantum",
     "quantum_llm": "quantum",
     "quantum-llm": "quantum",
+    "groq_api": "groq",
+    "groq-api": "groq",
 }
 
 _KNOWN_PROVIDER_CHOICES: set[str] = {
@@ -142,6 +153,7 @@ _KNOWN_PROVIDER_CHOICES: set[str] = {
     "agi",
     "qai",
     "quantum",
+    "groq",
 }
 
 
@@ -265,8 +277,8 @@ def _check_lmstudio_available(url: str) -> bool:
 
             base_url = url.removesuffix("/v1")
             models_endpoint_url = base_url + "/v1/models"
-            request = urllib.request.Request(models_endpoint_url, headers={"User-Agent": "QAI"})
-            urllib.request.urlopen(request, timeout=1)
+            request = urllib.request.Request(models_endpoint_url, headers={"User-Agent": "QAI"})  # noqa: S310
+            urllib.request.urlopen(request, timeout=1)  # noqa: S310 - configurable local endpoint
             return True
         except Exception:
             return False
@@ -1004,7 +1016,7 @@ class LMStudioProvider(BaseChatProvider):
         if lmstudio_api_key:
             headers["Authorization"] = f"Bearer {lmstudio_api_key}"
 
-        req = urllib.request.Request(
+        req = urllib.request.Request(  # noqa: S310 - URL from configurable local endpoint
             self._chat_completions_url(),
             data=json.dumps(payload).encode("utf-8"),
             headers=headers,
@@ -1247,6 +1259,126 @@ class OllamaProvider(BaseChatProvider):
             raise
 
 
+class GroqProvider(BaseChatProvider):
+    """Provider for the Groq cloud API (OpenAI-compatible endpoint).
+
+    Groq provides fast inference for open models (Llama, Mixtral, Gemma, etc.)
+    via an OpenAI-compatible REST API.  Requires the ``openai`` package and a
+    valid ``GROQ_API_KEY`` environment variable (or explicit *api_key* argument).
+
+    Default endpoint: https://api.groq.com/openai/v1
+    Configure via GROQ_BASE_URL environment variable.
+    """
+
+    def __init__(
+        self,
+        model: str = "llama-3.1-8b-instant",
+        api_key: str | None = None,
+        base_url: str = "https://api.groq.com/openai/v1",
+        temperature: float = 0.7,
+        max_output_tokens: int | None = None,
+    ):
+        """Initialize the Groq provider.
+
+        Args:
+            model: Groq model ID (e.g. ``"llama-3.1-8b-instant"``,
+                ``"mixtral-8x7b-32768"``).  Override with ``GROQ_MODEL``.
+            api_key: Groq API key.  Falls back to the ``GROQ_API_KEY``
+                environment variable when ``None``.
+            base_url: Groq OpenAI-compatible endpoint.  Defaults to the
+                standard Groq endpoint.  Override with ``GROQ_BASE_URL``.
+            temperature: Sampling temperature in ``[0, 2]``.
+            max_output_tokens: Maximum tokens to generate.
+
+        Raises:
+            RuntimeError: If the ``openai`` package is not installed.
+        """
+        if OpenAI is None:
+            raise RuntimeError("openai package not installed. Install 'openai' to use this provider.")
+        resolved_key = api_key or os.getenv("GROQ_API_KEY")
+        if not resolved_key:
+            raise RuntimeError("Groq provider requires GROQ_API_KEY to be set.")
+        self.client = OpenAI(base_url=base_url, api_key=resolved_key)
+        self.model = model
+        self.temperature = temperature
+        self.max_output_tokens = max_output_tokens
+        self.base_url = base_url
+
+    def complete(self, messages: list[RoleMessage], stream: bool = True) -> Iterable[str] | str:
+        """Complete using Groq and surface friendly error messages for common failures."""
+        try:
+            normalized_messages = self._normalize_messages_for_api(messages)
+            resp = self.client.chat.completions.create(
+                model=self.model,
+                messages=normalized_messages,
+                temperature=self.temperature,
+                max_tokens=self.max_output_tokens,
+                stream=stream,
+            )
+
+            if stream:
+                return self._handle_openai_streaming_response(resp)
+            else:
+                return self._handle_openai_non_streaming_response(resp)
+        except Exception as e:
+            error_msg = str(e).lower()
+
+            if "connection" in error_msg or "refused" in error_msg or "timeout" in error_msg:
+                suggestion = (
+                    f"❌ Cannot connect to Groq at {self.base_url}\n\n"
+                    f"Troubleshooting steps:\n"
+                    f"1. Check your internet connection\n"
+                    f"2. Verify GROQ_BASE_URL is correct (default: https://api.groq.com/openai/v1)\n"
+                    f"3. Check https://status.groq.com for service status\n\n"
+                    f"Set GROQ_BASE_URL environment variable if using a custom endpoint."
+                )
+                if stream:
+
+                    def gen_conn_err() -> Generator[str, None, None]:
+                        yield suggestion
+
+                    return gen_conn_err()
+                return suggestion
+
+            if "invalid_api_key" in error_msg or "authentication" in error_msg or "401" in error_msg:
+                suggestion = (
+                    "❌ Groq authentication failed.\n\n"
+                    "Troubleshooting steps:\n"
+                    "1. Check that GROQ_API_KEY is set and valid\n"
+                    "2. Get a key at https://console.groq.com/keys\n"
+                    "3. Re-run with --provider groq\n\n"
+                    "Example:\n"
+                    "export GROQ_API_KEY='<your-key>'"
+                )
+                if stream:
+
+                    def gen_auth_err() -> Generator[str, None, None]:
+                        yield suggestion
+
+                    return gen_auth_err()
+                return suggestion
+
+            if "model" in error_msg and ("not found" in error_msg or "does not exist" in error_msg):
+                suggestion = (
+                    f"❌ Model '{self.model}' not found on Groq.\n\n"
+                    f"Troubleshooting steps:\n"
+                    f"1. Check available models at https://console.groq.com/docs/models\n"
+                    f"2. Use --model flag to specify a valid model name\n"
+                    f"3. Set GROQ_MODEL environment variable\n\n"
+                    f"Popular models: llama-3.1-8b-instant, llama-3.3-70b-versatile, mixtral-8x7b-32768"
+                )
+                if stream:
+
+                    def gen_model_err() -> Generator[str, None, None]:
+                        yield suggestion
+
+                    return gen_model_err()
+                return suggestion
+
+            # Re-raise unexpected errors
+            raise
+
+
 class AzureOpenAIProvider(BaseChatProvider):
     """Provider for Azure-hosted OpenAI deployments.
 
@@ -1426,8 +1558,8 @@ def _check_lm_studio_available(server_url: str) -> bool:
         headers = {"User-Agent": "QAI"}
         if lmstudio_api_key:
             headers["Authorization"] = f"Bearer {lmstudio_api_key}"
-        request = urllib.request.Request(models_endpoint_url, headers=headers)
-        urllib.request.urlopen(request, timeout=healthcheck_timeout)
+        request = urllib.request.Request(models_endpoint_url, headers=headers)  # noqa: S310
+        urllib.request.urlopen(request, timeout=healthcheck_timeout)  # noqa: S310 - configurable local endpoint
         is_available = True
     except urllib.error.HTTPError as exc:
         # Endpoint is reachable but auth failed: count as available only when
@@ -1480,8 +1612,8 @@ def _check_ollama_available(server_url: str) -> bool:
         base_url = server_url.removesuffix("/v1")
         # Ollama uses /api/tags to list models
         tags_endpoint_url = base_url + "/api/tags"
-        request = urllib.request.Request(tags_endpoint_url, headers={"User-Agent": "QAI"})
-        urllib.request.urlopen(request, timeout=1)
+        request = urllib.request.Request(tags_endpoint_url, headers={"User-Agent": "QAI"})  # noqa: S310
+        urllib.request.urlopen(request, timeout=1)  # noqa: S310 - configurable local endpoint
         is_available = True
     except Exception:
         # Fallback: try OpenAI-compatible /v1/models endpoint
@@ -1491,8 +1623,8 @@ def _check_ollama_available(server_url: str) -> bool:
 
             base_url = server_url.removesuffix("/v1")
             models_endpoint_url = base_url + "/v1/models"
-            request = urllib.request.Request(models_endpoint_url, headers={"User-Agent": "QAI"})
-            urllib.request.urlopen(request, timeout=1)
+            request = urllib.request.Request(models_endpoint_url, headers={"User-Agent": "QAI"})  # noqa: S310
+            urllib.request.urlopen(request, timeout=1)  # noqa: S310 - configurable local endpoint
             is_available = True
         except Exception:
             is_available = False
@@ -1502,6 +1634,62 @@ def _check_ollama_available(server_url: str) -> bool:
         _ollama_availability_cache["available"] = is_available
         _ollama_availability_cache["checked_at"] = time.time()
         _ollama_availability_cache["url"] = server_url
+
+    return is_available
+
+
+def _check_groq_available(server_url: str) -> bool:
+    """Check if the Groq API is reachable with the configured API key.
+
+    Uses a thread-safe cache to avoid repeated HTTP requests within the TTL period.
+
+    Args:
+        server_url: Base URL for Groq OpenAI-compatible API (e.g.,
+            ``"https://api.groq.com/openai/v1"``).
+
+    Returns:
+        True if Groq is reachable and the API key is accepted, False otherwise.
+    """
+    # Check cache under lock
+    with _groq_cache_lock:
+        current_time = time.time()
+        if (
+            _groq_availability_cache["available"] is not None
+            and _groq_availability_cache["url"] == server_url
+            and (current_time - _groq_availability_cache["checked_at"]) < _GROQ_CACHE_TTL_SECONDS
+        ):
+            return _groq_availability_cache["available"]
+
+    # Perform HTTP check outside lock to avoid blocking other threads
+    is_available = False
+    groq_api_key = os.getenv("GROQ_API_KEY")
+    if not groq_api_key:
+        # No key configured — Groq cannot be available without authentication
+        with _groq_cache_lock:
+            _groq_availability_cache["available"] = False
+            _groq_availability_cache["checked_at"] = time.time()
+            _groq_availability_cache["url"] = server_url
+        return False
+
+    try:
+        import urllib.error
+        import urllib.request
+
+        models_url = server_url.rstrip("/") + "/models"
+        headers = {"User-Agent": "QAI", "Authorization": "Bearer " + groq_api_key}
+        request = urllib.request.Request(models_url, headers=headers)
+        urllib.request.urlopen(request, timeout=3)
+        is_available = True
+    except Exception:
+        # Any error (connection refused, 401/403 invalid key, timeout) means
+        # Groq is not available for auto-detection purposes.
+        is_available = False
+
+    # Update cache under lock
+    with _groq_cache_lock:
+        _groq_availability_cache["available"] = is_available
+        _groq_availability_cache["checked_at"] = time.time()
+        _groq_availability_cache["url"] = server_url
 
     return is_available
 
@@ -1541,6 +1729,9 @@ def _build_provider_detect_cache_key(
         os.getenv("AZURE_OPENAI_API_VERSION", "2024-08-01-preview"),
         bool(os.getenv("OPENAI_API_KEY")),
         os.getenv("OPENAI_MODEL", "gpt-4o-mini"),
+        bool(os.getenv("GROQ_API_KEY")),
+        os.getenv("GROQ_MODEL", "llama-3.1-8b-instant"),
+        os.getenv("GROQ_BASE_URL", "https://api.groq.com/openai/v1"),
     )
 
 
@@ -1613,6 +1804,7 @@ def detect_provider(
        * ``"azure"``    → :class:`AzureOpenAIProvider` (needs ``AZURE_OPENAI_API_KEY``,
          ``AZURE_OPENAI_ENDPOINT``, ``AZURE_OPENAI_DEPLOYMENT``).
        * ``"openai"``   → :class:`OpenAIProvider` (needs ``OPENAI_API_KEY``).
+       * ``"groq"``     → :class:`GroqProvider` (needs ``GROQ_API_KEY``).
        * ``"local"``    → probes LM Studio then Ollama; falls back to
          :class:`LocalEchoProvider`.
        * ``"local_echo"`` / ``"local-echo"`` → :class:`LocalEchoProvider` directly.
@@ -1623,11 +1815,12 @@ def detect_provider(
        * ``"lora"``     → :class:`LoraLocalProvider`; requires *model_override* path.
 
     2. **Auto mode** (``explicit=None`` or ``"auto"``) — probes in order:
-       LM Studio → Ollama → Azure OpenAI → OpenAI → :class:`LocalEchoProvider`.
+       LM Studio → Ollama → Azure OpenAI → OpenAI → Groq → :class:`LocalEchoProvider`.
 
-    Results for the ``auto``, ``local``, ``lmstudio``, ``ollama``, ``azure``, and
-    ``openai`` choices are cached for :data:`_PROVIDER_DETECT_CACHE_TTL_SECONDS`
-    seconds (default 5 s) to avoid repeated availability probes on hot paths.
+    Results for the ``auto``, ``local``, ``lmstudio``, ``ollama``, ``azure``,
+    ``openai``, and ``groq`` choices are cached for
+    :data:`_PROVIDER_DETECT_CACHE_TTL_SECONDS` seconds (default 5 s) to avoid
+    repeated availability probes on hot paths.
     Cache TTL can be tuned with ``QAI_PROVIDER_DETECT_CACHE_TTL``.
 
     Args:
@@ -1659,7 +1852,7 @@ def detect_provider(
     # Cache only non-special providers. AGI/Quantum/LoRA can be stateful or
     # model-path specific and are intentionally resolved fresh.
     cache_key: tuple[Any, ...] | None = None
-    if provider_choice in {"auto", "local", "lmstudio", "ollama", "azure", "openai"}:
+    if provider_choice in {"auto", "local", "lmstudio", "ollama", "azure", "openai", "groq"}:
         cache_key = _build_provider_detect_cache_key(provider_choice, model_override, temperature, max_output_tokens)
         cached = _get_cached_provider_detection(cache_key)
         if cached is not None:
@@ -1672,6 +1865,11 @@ def detect_provider(
     # Ollama config
     ollama_base_url = os.getenv("OLLAMA_BASE_URL", "http://127.0.0.1:11434/v1")
     ollama_model_name = os.getenv("OLLAMA_MODEL", "llama3.2")
+
+    # Groq config
+    groq_api_key = os.getenv("GROQ_API_KEY")
+    groq_model_name = os.getenv("GROQ_MODEL", "llama-3.1-8b-instant")
+    groq_base_url = os.getenv("GROQ_BASE_URL", "https://api.groq.com/openai/v1")
 
     # AGI config - advanced reasoning capabilities
     if provider_choice == "agi":
@@ -1816,6 +2014,19 @@ def detect_provider(
         )
         return _cache_provider_result(cache_key, provider, ProviderChoice(name="openai", model=selected_model))
 
+    if provider_choice == "groq":
+        if not groq_api_key:
+            raise RuntimeError("Groq selected but GROQ_API_KEY is not set.")
+        selected_model = model_override or groq_model_name
+        provider = GroqProvider(
+            model=selected_model,
+            api_key=groq_api_key,
+            base_url=groq_base_url,
+            temperature=temperature_setting,
+            max_output_tokens=max_output_tokens,
+        )
+        return _cache_provider_result(cache_key, provider, ProviderChoice(name="groq", model=selected_model))
+
     if provider_choice == "local":
         if force_local_echo:
             selected_model = model_override or "local-echo"
@@ -1891,6 +2102,18 @@ def detect_provider(
             max_output_tokens=max_output_tokens,
         )
         return _cache_provider_result(cache_key, provider, ProviderChoice(name="openai", model=selected_model))
+
+    # Check Groq after OpenAI in auto mode
+    if groq_api_key and _check_groq_available(groq_base_url):
+        selected_model = model_override or groq_model_name
+        provider = GroqProvider(
+            model=selected_model,
+            api_key=groq_api_key,
+            base_url=groq_base_url,
+            temperature=temperature_setting,
+            max_output_tokens=max_output_tokens,
+        )
+        return _cache_provider_result(cache_key, provider, ProviderChoice(name="groq", model=selected_model))
 
     # Fallback to local echo provider
     selected_model = model_override or "local-echo"

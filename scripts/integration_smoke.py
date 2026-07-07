@@ -190,7 +190,7 @@ def _fetch_local_functions_json(
     if payload is not None:
         data = json.dumps(payload).encode("utf-8")
         headers["Content-Type"] = "application/json"
-    req = Request(url=url, data=data, headers=headers, method=method)
+    req = Request(url=url, data=data, headers=headers, method=method)  # noqa: S310
     with urlopen(req, timeout=timeout) as resp:  # noqa: S310 - local probe
         return json.loads(resp.read().decode("utf-8"))
 
@@ -203,7 +203,7 @@ def _fetch_local_functions_sse(
 ) -> str:
     """Fetch raw SSE body text from local Functions endpoints."""
     data = json.dumps(payload).encode("utf-8")
-    req = Request(
+    req = Request(  # noqa: S310
         url=url,
         data=data,
         headers={"Content-Type": "application/json"},
@@ -226,7 +226,7 @@ def _fetch_local_functions_text(
     if payload is not None:
         data = json.dumps(payload).encode("utf-8")
         headers["Content-Type"] = "application/json"
-    req = Request(url=url, data=data, headers=headers, method=method)
+    req = Request(url=url, data=data, headers=headers, method=method)  # noqa: S310
     with urlopen(req, timeout=timeout) as resp:  # noqa: S310 - local probe
         return resp.read().decode("utf-8", errors="replace")
 
@@ -511,8 +511,8 @@ def _probe_chat_web_assets(strict: bool) -> StepResult:
     start = time.perf_counter()
     url = "http://localhost:7071/api/chat-web/static/agi_stream_utils.js"
     try:
-        req = Request(url, method="GET")
-        with urlopen(req, timeout=LOCAL_DEV_ADAPTER_REQUEST_TIMEOUT_SEC) as resp:
+        req = Request(url, method="GET")  # noqa: S310
+        with urlopen(req, timeout=LOCAL_DEV_ADAPTER_REQUEST_TIMEOUT_SEC) as resp:  # noqa: S310
             body = resp.read().decode("utf-8", errors="replace")
         if "AGIStreamUtils" not in body:
             raise ValueError("missing_AGIStreamUtils_marker")

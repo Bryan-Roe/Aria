@@ -1,0 +1,14 @@
+version: "2.1"
+
+jobs:
+    test:
+        docker:
+            - image: cimg/node:24.0-browsers
+        steps:
+            - checkout
+            - run: echo "Running example step, please edit this file"
+
+workflows:
+    main:
+        jobs:
+            - test

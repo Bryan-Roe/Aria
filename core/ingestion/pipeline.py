@@ -4,9 +4,12 @@ import csv
 import json
 from abc import ABC, abstractmethod
 from typing import Any
+from urllib.parse import urlparse
 from urllib.request import Request, urlopen
 
 from core.memory.store import MemoryStore
+
+_ALLOWED_SCHEMES = {"http", "https"}
 
 
 class DataSource(ABC):
@@ -49,13 +52,16 @@ class FileDataSource(DataSource):
 
 class HttpDataSource(DataSource):
     def __init__(self, url: str, headers: dict[str, str] | None = None, timeout: int = 10) -> None:
+        parsed = urlparse(url)
+        if parsed.scheme not in _ALLOWED_SCHEMES:
+            raise ValueError(f"URL scheme '{parsed.scheme}' is not allowed; use http or https.")
         self.url = url
         self.headers = headers or {}
         self.timeout = timeout
 
     def fetch(self) -> list[dict[str, Any]]:
-        request = Request(self.url, headers=self.headers)
-        with urlopen(request, timeout=self.timeout) as response:
+        request = Request(self.url, headers=self.headers)  # noqa: S310 - scheme validated in __init__
+        with urlopen(request, timeout=self.timeout) as response:  # noqa: S310
             data = json.loads(response.read().decode("utf-8"))
         if isinstance(data, list):
             return data
