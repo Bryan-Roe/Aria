@@ -1026,9 +1026,7 @@ class LMStudioProvider(BaseChatProvider):
         if stream:
 
             def _gen() -> Generator[str, None, None]:
-                with urllib.request.urlopen(
-                    req, timeout=timeout_seconds
-                ) as resp:  # noqa: S310 - local configurable endpoint
+                with urllib.request.urlopen(req, timeout=timeout_seconds) as resp:  # noqa: S310 - local configurable endpoint
                     for raw_line in resp:
                         line = raw_line.decode("utf-8", errors="replace").strip()
                         if not line or not line.startswith("data:"):
