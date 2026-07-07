@@ -7,16 +7,7 @@ from typing import TypeAlias
 
 import numpy as np
 
-
-JsonValue: TypeAlias = (
-    None
-    | bool
-    | int
-    | float
-    | str
-    | list["JsonValue"]
-    | dict[str, "JsonValue"]
-)
+JsonValue: TypeAlias = None | bool | int | float | str | list["JsonValue"] | dict[str, "JsonValue"]
 
 
 def set_seed(s: int | None) -> None:

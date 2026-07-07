@@ -1,17 +1,17 @@
 computeInfo:
-  driverCores: 8
-  driverMemory: 56GB
-  executorCores: 8
-  executorMaxCount: 3
-  executorMemory: 56GB
-  executorMinCount: 3
-  friendlyName: medium pool (32 vCores)
-  isExecutorAutoScale: false
-  nodeSize: medium
+    driverCores: 8
+    driverMemory: 56GB
+    executorCores: 8
+    executorMaxCount: 3
+    executorMemory: 56GB
+    executorMinCount: 3
+    friendlyName: medium pool (32 vCores)
+    isExecutorAutoScale: false
+    nodeSize: medium
 isDisabled: false
-jobDescription: ''
+jobDescription: ""
 jobName: graph
 jobPath: new-job.ipynb
 jobType: GraphNotebook
 scheduleConfig:
-  isEnabled: false
+    isEnabled: false
