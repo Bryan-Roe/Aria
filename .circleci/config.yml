@@ -1,146 +1,146 @@
 version: "2.1"
 
 executors:
-  python311:
-    docker:
-      - image: cimg/python:3.11
-    resource_class: medium
-    environment:
-      PIP_DISABLE_PIP_VERSION_CHECK: "1"
-      PIP_NO_PYTHON_VERSION_WARNING: "1"
-      PYTHONDONTWRITEBYTECODE: "1"
-      PYTHONUNBUFFERED: "1"
+    python311:
+        docker:
+            - image: cimg/python:3.11
+        resource_class: medium
+        environment:
+            PIP_DISABLE_PIP_VERSION_CHECK: "1"
+            PIP_NO_PYTHON_VERSION_WARNING: "1"
+            PYTHONDONTWRITEBYTECODE: "1"
+            PYTHONUNBUFFERED: "1"
 
 commands:
-  restore-pip-cache:
-    steps:
-      - restore_cache:
-          keys:
-            - pip-v1-{{ checksum "requirements-dev.txt" }}-{{ checksum "requirements.txt" }}
-            - pip-v1-{{ checksum "requirements-dev.txt" }}-
-            - pip-v1-
+    restore-pip-cache:
+        steps:
+            - restore_cache:
+                  keys:
+                      - pip-v1-{{ checksum "requirements-dev.txt" }}-{{ checksum "requirements.txt" }}
+                      - pip-v1-{{ checksum "requirements-dev.txt" }}-
+                      - pip-v1-
 
-  save-pip-cache:
-    steps:
-      - save_cache:
-          key: pip-v1-{{ checksum "requirements-dev.txt" }}-{{ checksum "requirements.txt" }}
-          paths:
-            - ~/.cache/pip
+    save-pip-cache:
+        steps:
+            - save_cache:
+                  key: pip-v1-{{ checksum "requirements-dev.txt" }}-{{ checksum "requirements.txt" }}
+                  paths:
+                      - ~/.cache/pip
 
-  install-dev-deps:
-    steps:
-      - run:
-          name: Install Python dependencies
-          command: |
-            python -m pip install --upgrade pip
-            pip install -r requirements-dev.txt
+    install-dev-deps:
+        steps:
+            - run:
+                  name: Install Python dependencies
+                  command: |
+                      python -m pip install --upgrade pip
+                      pip install -r requirements-dev.txt
 
 jobs:
-  lint:
-    executor: python311
-    steps:
-      - checkout
-      - restore-pip-cache
-      - install-dev-deps
-      - save-pip-cache
-      - run:
-          name: ruff
-          command: python -m ruff check tests shared scripts apps/aria/server.py
-      - run:
-          name: black (check)
-          command: python -m black --check tests shared scripts apps/aria/server.py
+    lint:
+        executor: python311
+        steps:
+            - checkout
+            - restore-pip-cache
+            - install-dev-deps
+            - save-pip-cache
+            - run:
+                  name: ruff
+                  command: python -m ruff check tests shared scripts apps/aria/server.py
+            - run:
+                  name: black (check)
+                  command: python -m black --check tests shared scripts apps/aria/server.py
 
-  type-check:
-    executor: python311
-    steps:
-      - checkout
-      - restore-pip-cache
-      - install-dev-deps
-      - save-pip-cache
-      - run:
-          name: mypy (advisory)
-          command: python -m mypy shared scripts function_app.py || true
+    type-check:
+        executor: python311
+        steps:
+            - checkout
+            - restore-pip-cache
+            - install-dev-deps
+            - save-pip-cache
+            - run:
+                  name: mypy (advisory)
+                  command: python -m mypy shared scripts function_app.py || true
 
-  pre-commit:
-    executor: python311
-    steps:
-      - checkout
-      - restore-pip-cache
-      - install-dev-deps
-      - save-pip-cache
-      - restore_cache:
-          keys:
-            - pre-commit-v1-{{ checksum ".pre-commit-config.yaml" }}
-            - pre-commit-v1-
-      - run:
-          name: pre-commit on changed files
-          command: |
-            if git rev-parse HEAD^ >/dev/null 2>&1; then
-              CHANGED=$(git diff --name-only --diff-filter=ACMRT HEAD^ HEAD --)
-            else
-              CHANGED=$(git diff-tree --no-commit-id --name-only -r HEAD)
-            fi
-            if [ -z "$CHANGED" ]; then
-              echo "No changed files; skipping."
-              exit 0
-            fi
-            pre-commit run --files $CHANGED --show-diff-on-failure --color=always
-      - save_cache:
-          key: pre-commit-v1-{{ checksum ".pre-commit-config.yaml" }}
-          paths:
-            - ~/.cache/pre-commit
+    pre-commit:
+        executor: python311
+        steps:
+            - checkout
+            - restore-pip-cache
+            - install-dev-deps
+            - save-pip-cache
+            - restore_cache:
+                  keys:
+                      - pre-commit-v1-{{ checksum ".pre-commit-config.yaml" }}
+                      - pre-commit-v1-
+            - run:
+                  name: pre-commit on changed files
+                  command: |
+                      if git rev-parse HEAD^ >/dev/null 2>&1; then
+                        CHANGED=$(git diff --name-only --diff-filter=ACMRT HEAD^ HEAD --)
+                      else
+                        CHANGED=$(git diff-tree --no-commit-id --name-only -r HEAD)
+                      fi
+                      if [ -z "$CHANGED" ]; then
+                        echo "No changed files; skipping."
+                        exit 0
+                      fi
+                      pre-commit run --files $CHANGED --show-diff-on-failure --color=always
+            - save_cache:
+                  key: pre-commit-v1-{{ checksum ".pre-commit-config.yaml" }}
+                  paths:
+                      - ~/.cache/pre-commit
 
-  unit-test:
-    executor: python311
-    parallelism: 2
-    steps:
-      - checkout
-      - restore-pip-cache
-      - install-dev-deps
-      - save-pip-cache
-      - run:
-          name: Run unit tests
-          environment:
-            CI: "true"
-            AZURE_CLIENT_ID: ""
-            AZURE_TENANT_ID: ""
-            AZURE_CLIENT_SECRET: ""
-            OPENAI_API_KEY: ""
-          command: |
-            mkdir -p data_out
-            TEST_FILES=$(circleci tests glob "tests/**/*.py" \
-              | grep -Ev "test_ui_(playwright|pyppeteer|selenium)\.py" \
-              | circleci tests split --split-by=timings)
-            python -m pytest $TEST_FILES \
-              -q --tb=short \
-              -m "not slow and not azure and not integration" \
-              --maxfail=1 \
-              --durations=10 \
-              --junitxml=data_out/junit-${CIRCLE_NODE_INDEX}.xml \
-              --cov=shared --cov=scripts \
-              --cov-report=xml:data_out/coverage-${CIRCLE_NODE_INDEX}.xml
-      - store_test_results:
-          path: data_out
-      - store_artifacts:
-          path: data_out
-          destination: test-output
+    unit-test:
+        executor: python311
+        parallelism: 2
+        steps:
+            - checkout
+            - restore-pip-cache
+            - install-dev-deps
+            - save-pip-cache
+            - run:
+                  name: Run unit tests
+                  environment:
+                      CI: "true"
+                      AZURE_CLIENT_ID: ""
+                      AZURE_TENANT_ID: ""
+                      AZURE_CLIENT_SECRET: ""
+                      OPENAI_API_KEY: ""
+                  command: |
+                      mkdir -p data_out
+                      TEST_FILES=$(circleci tests glob "tests/**/*.py" \
+                        | grep -Ev "test_ui_(playwright|pyppeteer|selenium)\.py" \
+                        | circleci tests split --split-by=timings)
+                      python -m pytest $TEST_FILES \
+                        -q --tb=short \
+                        -m "not slow and not azure and not integration" \
+                        --maxfail=1 \
+                        --durations=10 \
+                        --junitxml=data_out/junit-${CIRCLE_NODE_INDEX}.xml \
+                        --cov=shared --cov=scripts \
+                        --cov-report=xml:data_out/coverage-${CIRCLE_NODE_INDEX}.xml
+            - store_test_results:
+                  path: data_out
+            - store_artifacts:
+                  path: data_out
+                  destination: test-output
 
-  ci-gate:
-    docker:
-      - image: cimg/base:stable
-    resource_class: small
-    steps:
-      - run: echo "All required CI jobs passed."
+    ci-gate:
+        docker:
+            - image: cimg/base:stable
+        resource_class: small
+        steps:
+            - run: echo "All required CI jobs passed."
 
 workflows:
-  ci:
-    jobs:
-      - lint
-      - type-check
-      - pre-commit
-      - unit-test
-      - ci-gate:
-          requires:
+    ci:
+        jobs:
             - lint
-            - unit-test
+            - type-check
             - pre-commit
+            - unit-test
+            - ci-gate:
+                  requires:
+                      - lint
+                      - unit-test
+                      - pre-commit

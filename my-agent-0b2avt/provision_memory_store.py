@@ -75,10 +75,7 @@ def _load_projects_symbols() -> tuple[Any, Any, Any]:
     try:
         projects_module = import_module("azure.ai.projects")
     except ModuleNotFoundError as exc:
-        raise RuntimeError(
-            "Missing dependency 'azure-ai-projects'. "
-            "Install it before running this script."
-        ) from exc
+        raise RuntimeError("Missing dependency 'azure-ai-projects'. Install it before running this script.") from exc
 
     return (
         projects_module.AIProjectClient,
@@ -108,25 +105,14 @@ def main() -> None:
             allow_preview=True,
         ) as project,
     ):
-        memory_stores: _MemoryStores = cast(
-            _ProjectClient, project
-        ).beta.memory_stores
+        memory_stores: _MemoryStores = cast(_ProjectClient, project).beta.memory_stores
 
         try:
-            existing: _NamedResource = memory_stores.get(
-                name=memory_store_name
-            )
-            print(
-                "Memory store "
-                f"'{existing.name}' already exists "
-                f"(id={existing.id}); leaving as-is."
-            )
+            existing: _NamedResource = memory_stores.get(name=memory_store_name)
+            print(f"Memory store '{existing.name}' already exists (id={existing.id}); leaving as-is.")
             return
         except ResourceNotFoundError:
-            print(
-                "Memory store "
-                f"'{memory_store_name}' not found; creating it."
-            )
+            print(f"Memory store '{memory_store_name}' not found; creating it.")
 
         print(f"Creating memory store '{memory_store_name}'...")
         definition: object = memory_store_definition_cls(
@@ -136,32 +122,22 @@ def main() -> None:
                 chat_summary_enabled=False,
                 user_profile_enabled=True,
                 user_profile_details=(
-                    "Avoid irrelevant or sensitive data, "
-                    "such as age, finances, precise location, "
-                    "and credentials."
+                    "Avoid irrelevant or sensitive data, such as age, finances, precise location, and credentials."
                 ),
             ),
         )
         created: _NamedResource = memory_stores.create(
             name=memory_store_name,
-            description=(
-                "Memory store for the Agent Framework "
-                "foundry-hosted memory sample"
-            ),
+            description=("Memory store for the Agent Framework foundry-hosted memory sample"),
             definition=definition,
         )
-        print(
-            f"Created memory store '{created.name}' "
-            f"(id={created.id})."
-        )
+        print(f"Created memory store '{created.name}' (id={created.id}).")
 
         # Verify the store actually exists on the service by reading it back.
         # ``create`` returns the requested definition, but a follow-up
         # ``get`` confirms the store is persisted and reachable at runtime.
         try:
-            verified: _NamedResource = memory_stores.get(
-                name=memory_store_name
-            )
+            verified: _NamedResource = memory_stores.get(name=memory_store_name)
         except ResourceNotFoundError as exc:
             raise RuntimeError(
                 "Memory store "
@@ -169,11 +145,7 @@ def main() -> None:
                 "after creation; the service may not have "
                 "persisted it."
             ) from exc
-        print(
-            "Verified memory store "
-            f"'{verified.name}' is available on the service "
-            f"(id={verified.id})."
-        )
+        print(f"Verified memory store '{verified.name}' is available on the service (id={verified.id}).")
 
 
 if __name__ == "__main__":
