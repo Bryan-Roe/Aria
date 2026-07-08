@@ -3,7 +3,7 @@
 
 # Dataset downloading and processing
 datasets>=5.0.0        # Hugging Face datasets library
-tqdm>=4.68.3           # Progress bars for downloads
+tqdm>=4.68.4           # Progress bars for downloads
 
 # Optional: Data processing and analysis
 pandas>=2.2.0          # CSV/DataFrame operations
