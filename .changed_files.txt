@@ -2603,6 +2603,7 @@ tests/test_aria_index_provider_wiring.py
 tests/test_aria_server.py
 tests/test_aria_tags_extended.py
 tests/test_aria_tests_workflow.py
+tests/test_auto_assign_reviewers_workflow.py
 tests/test_auto_create_pr_workflow.py
 tests/test_auto_fix_workflow.py
 tests/test_auto_merge_workflow.py
