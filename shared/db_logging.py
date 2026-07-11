@@ -132,9 +132,7 @@ def _parse_quantum_summary() -> dict[str, Any]:
         return {}
 
 
-def log_quantum_run_safe(
-    job, result: dict[str, Any], dataset_name: str, log_path: str
-) -> dict[str, Any]:  # noqa: ANN001
+def log_quantum_run_safe(job, result: dict[str, Any], dataset_name: str, log_path: str) -> dict[str, Any]:  # noqa: ANN001
     """Best-effort quantum run logging; returns a skip/error dict on failure."""
     conn = _get_conn()
     if not conn:
