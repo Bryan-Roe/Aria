@@ -480,7 +480,7 @@ jobs:
             autofix
             auto-merge
             chore
-          sign-commits: false
+          sign-commits: true
           title: 'style: automated autofixes from CodeQL workflow'
           token: ${{ secrets.GITHUB_TOKEN }}
 

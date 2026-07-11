@@ -164,8 +164,7 @@ def print_architecture():
     """Display system architecture."""
     print("🏗️  Aria Platform Architecture")
     print()
-    print(
-        """
+    print("""
    Frontend Layer:
    ├─ Aria Web UI (http://localhost:8080)
    │  └─ Interactive 3D character with voice/text I/O
@@ -204,8 +203,7 @@ def print_architecture():
    ├─ Logs: data_out/*/
    ├─ Config: config/
    └─ Monitoring: status.json files
-    """
-    )
+    """)
 
 
 def main():
@@ -227,8 +225,7 @@ def main():
     print_architecture()
 
     print_header("Next Steps")
-    print(
-        """
+    print("""
 1️⃣  START BACKEND SERVICES
    $ func host start                    # Start Azure Functions on port 7071
    $ cd apps/aria && python server.py   # Start Aria server on port 8080
@@ -252,8 +249,7 @@ def main():
    • AUTONOMOUS_TRAINING_REPORT.md — Detailed training analysis
    • ARIA_QUICKREF.txt — Quick reference guide
    • .github/copilot-instructions.md — Complete architecture docs
-   """
-    )
+   """)
 
     print("=" * 70 + "\n")
 

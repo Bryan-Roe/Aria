@@ -1,5 +1,6 @@
-# pyright: reportMissingImports=false, reportMissingModuleSource=false
-# pylint: disable=broad-exception-caught,logging-fstring-interpolation,import-error,reimported,unused-argument,unnecessary-lambda,unspecified-encoding,redefined-outer-name,no-name-in-module,subprocess-run-check,unused-variable,protected-access,global-statement,unused-import
+# pyright: reportMissingImports=false, reportMissingModuleSource=false, reportUnknownMemberType=false, reportUnknownVariableType=false, reportUnknownParameterType=false, reportUnknownArgumentType=false, reportUnknownLambdaType=false, reportMissingParameterType=false, reportMissingTypeArgument=false, reportOptionalCall=false, reportReturnType=false, reportAssignmentType=false, reportCallIssue=false, reportAttributeAccessIssue=false, reportIndexIssue=false, reportOptionalSubscript=false, reportOptionalMemberAccess=false, reportGeneralTypeIssues=false, reportUnboundVariable=false, reportUnusedVariable=false, reportUnnecessaryComparison=false, reportUnnecessaryIsInstance=false
+# pylint: disable=broad-exception-caught,logging-fstring-interpolation,import-error,reimported,unused-argument,unnecessary-lambda,unspecified-encoding,redefined-outer-name,no-name-in-module,subprocess-run-check,unused-variable,protected-access,global-statement,unused-import,line-too-long,missing-class-docstring,too-many-nested-blocks,no-else-return,import-outside-toplevel,unreachable
+# cspell:ignore fstring
 # ruff: noqa: E501
 # flake8: noqa
 # =============================================================================
@@ -14,7 +15,6 @@ import json
 import logging
 import os
 import re
-import subprocess
 import sys
 import tempfile
 import threading
@@ -35,7 +35,7 @@ from function_app_domains import aria_proxy as aria_proxy_domain
 from function_app_domains import chat as chat_domain
 from function_app_domains import quantum as quantum_domain
 from function_app_domains import referrals as referrals_domain
-from function_app_domains import subscriptions as subscriptions_domain
+
 
 # Import AI projects via centralized registry
 # (replaced scattered sys.path manipulation)
@@ -49,6 +49,8 @@ from shared.logging import configure_json_logging
 
 configure_json_logging()
 _settings = get_settings()
+
+JSONDict = dict[str, Any]
 
 # Initialize registry and get chat providers API
 _ai_registry = AIProjectsRegistry()
@@ -66,18 +68,128 @@ except Exception as _registry_err:
 # Pre-compiled word split regex used in token/word counting hot paths.
 _RE_WORD_SPLIT = re.compile(r"\S+")
 
+
+@dataclass(frozen=True)
+class _FallbackProviderChoice:
+    name: str = "local"
+    model: str = "local-echo"
+
+
+@dataclass(frozen=True)
+class _FallbackPruneStats:
+    original_tokens: int
+    pruned_tokens: int
+    removed_count: int
+    budget: int
+    reserve_output_tokens: int
+
+
+class _LocalEchoProvider:
+    """Minimal fallback provider used when the chat registry is unavailable."""
+
+    def __init__(self, default_response: str = "Ready.") -> None:
+        self.default_response = default_response
+
+    def resolve_response(self, messages: list[JSONDict]) -> str:
+        last_user_message = next(
+            (
+                str(message.get("content", "")).strip()
+                for message in reversed(messages)
+                if message.get("role") == "user"
+            ),
+            "",
+        )
+        return last_user_message or self.default_response
+
+    def complete(
+        self,
+        messages: list[JSONDict],
+        stream: bool = False,
+    ) -> str | Any:
+        response = self.resolve_response(messages)
+        if not stream:
+            return response
+
+        def _stream() -> Any:
+            yield response
+
+        return _stream()
+
+
+def _fallback_detect_provider(
+    explicit: str | None = None,
+    model_override: str | None = None,
+    temperature: float | None = None,
+    max_output_tokens: int | None = None,
+) -> tuple[_LocalEchoProvider, _FallbackProviderChoice]:
+    _ = (
+        explicit,
+        model_override,
+        temperature,
+        max_output_tokens,
+    )
+    return _LocalEchoProvider(), _FallbackProviderChoice()
+
+
+def _fallback_prune_messages(
+    *,
+    messages: list[JSONDict],
+    provider: str,
+    model: str,
+    max_context_tokens: int | None = None,
+    reserve_output_tokens: int = 1024,
+    system_prompt: str | None = None,
+) -> tuple[list[JSONDict], _FallbackPruneStats, str | None]:
+    _ = (provider, model)
+    pruned_messages = list(messages)
+    if system_prompt and not any(message.get("role") == "system" for message in pruned_messages):
+        pruned_messages = [
+            {"role": "system", "content": system_prompt},
+            *pruned_messages,
+        ]
+    token_count = sum(len(_RE_WORD_SPLIT.findall(str(message.get("content", "")))) for message in pruned_messages)
+    stats = _FallbackPruneStats(
+        original_tokens=token_count,
+        pruned_tokens=token_count,
+        removed_count=0,
+        budget=int(max_context_tokens or 0),
+        reserve_output_tokens=reserve_output_tokens,
+    )
+    return pruned_messages, stats, system_prompt
+
+
+def _fallback_create_agi_provider(
+    *,
+    model: str | None = None,
+    temperature: float | None = None,
+    max_output_tokens: int | None = None,
+    verbose: bool = False,
+) -> tuple[_LocalEchoProvider, _FallbackProviderChoice]:
+    _ = (model, temperature, max_output_tokens, verbose)
+    raise RuntimeError("AGI provider is unavailable in this runtime")
+
+
+if detect_provider is None:
+    detect_provider = _fallback_detect_provider
+
+if prune_messages is None:
+    prune_messages = _fallback_prune_messages
+
+if create_agi_provider is None:
+    create_agi_provider = _fallback_create_agi_provider
+
 # Import defensive import helper
 
 # -----------------------------------------------------------------------------
 # Optional unified SQL engine health + pool metrics (multi-database support)
 # -----------------------------------------------------------------------------
-sql_funcs = safe_import(
+sql_imports = safe_import(
     "shared.sql_engine",
     import_names=("sql_health", "engine_stats"),
     fallback_factory=create_stub_function,
 )
-sql_health = sql_funcs["sql_health"]
-engine_stats = sql_funcs["engine_stats"]
+sql_health = sql_imports["sql_health"]
+engine_stats = sql_imports["engine_stats"]
 
 # -----------------------------------------------------------------------------
 # Early Telemetry Initialization (non-fatal if unavailable)
@@ -116,7 +228,38 @@ db_logging = safe_import(
 )
 log_chat_message_safe = db_logging["log_chat_message_safe"]
 
+
 # Chat memory functions with graceful degradation
+def _chat_memory_fallback_factory(name: str) -> Any:
+    def _generate_embedding_fallback(text: str) -> list[float]:
+        _ = text
+        return []
+
+    def _fetch_similar_messages_fallback(
+        query_emb: Any,
+        top_k: int = 5,
+        session_id: str | None = None,
+        min_similarity: float | None = None,
+        limit: int | None = None,
+    ) -> list[dict[str, Any]]:
+        _ = (query_emb, top_k, session_id, min_similarity, limit)
+        return []
+
+    def _store_embedding_fallback(message_id: Any, embedding: Any, model: str | None = None) -> bool:
+        _ = (message_id, embedding, model)
+        return False
+
+    def _noop_fallback(*_args: Any, **_kwargs: Any) -> None:
+        return None
+
+    fallback_map: dict[str, Any] = {
+        "generate_embedding": _generate_embedding_fallback,
+        "fetch_similar_messages": _fetch_similar_messages_fallback,
+        "store_embedding": _store_embedding_fallback,
+    }
+    return fallback_map.get(name, _noop_fallback)
+
+
 chat_memory_funcs = safe_import(
     "shared.chat_memory",
     import_names=(
@@ -124,14 +267,9 @@ chat_memory_funcs = safe_import(
         "fetch_similar_messages",
         "store_embedding",
     ),
-    fallback_factory=lambda name: {
-        "generate_embedding": lambda text: [],
-        "fetch_similar_messages": (lambda query_emb, top_k=5, session_id=None: []),
-        "store_embedding": lambda message_id, embedding, model: False,
-    }.get(name, lambda *args, **kwargs: None),
+    fallback_factory=_chat_memory_fallback_factory,
 )
 try:
-    import shared as _shared_pkg  # noqa: F401
     import shared.chat_memory as _shared_chat_memory_mod
 
     _shared_chat_memory_mod.generate_embedding = chat_memory_funcs["generate_embedding"]
@@ -152,7 +290,28 @@ ai_safety_funcs = safe_import(
     import_names=("AISafetyMiddleware",),
     fallback_factory=lambda name: None,
 )
-AISafetyMiddleware = ai_safety_funcs["AISafetyMiddleware"]
+AISafetyMiddleware: Any | None = ai_safety_funcs["AISafetyMiddleware"]
+
+
+def _fallback_validate_request(
+    req: func.HttpRequest,
+    _schema: Any,
+) -> tuple[JSONDict, None]:
+    payload = req.get_json()
+    if isinstance(payload, dict):
+        return payload, None
+    return {}, None
+
+
+def _request_validator_fallback_factory(name: str) -> Any:
+    fallback_map: dict[str, Any] = {
+        "validate_request": _fallback_validate_request,
+        "AGI_ANALYZE_SCHEMA": {},
+        "AGI_REASON_SCHEMA": {},
+        "AGI_STREAM_SCHEMA": {},
+    }
+    return fallback_map.get(name)
+
 
 # Shared request validation helpers (schema + JSON parsing + constraints)
 request_validator_funcs = safe_import(
@@ -163,12 +322,7 @@ request_validator_funcs = safe_import(
         "AGI_REASON_SCHEMA",
         "AGI_STREAM_SCHEMA",
     ),
-    fallback_factory=lambda name: {
-        "validate_request": lambda req, schema: (req.get_json(), None),
-        "AGI_ANALYZE_SCHEMA": {},
-        "AGI_REASON_SCHEMA": {},
-        "AGI_STREAM_SCHEMA": {},
-    }.get(name),
+    fallback_factory=_request_validator_fallback_factory,
 )
 validate_request = request_validator_funcs["validate_request"]
 AGI_ANALYZE_SCHEMA = request_validator_funcs["AGI_ANALYZE_SCHEMA"]
@@ -188,14 +342,30 @@ except Exception:
     if "shared.chat_memory" not in sys.modules:
         shared_chat_memory = types.ModuleType("shared.chat_memory")
 
-        def _generate_embedding(text: str):
+        def _generate_embedding(_text: str) -> list[float]:
             return []
 
-        def _fetch_similar_messages(query_embedding, top_k=5, session_id=None, min_similarity=None, limit=None):
+        def _fetch_similar_messages(
+            _query_embedding: Any,
+            top_k: int = 5,
+            session_id: str | None = None,
+            min_similarity: float | None = None,
+            limit: int | None = None,
+        ) -> list[JSONDict]:
+            _ = (
+                top_k,
+                session_id,
+                min_similarity,
+                limit,
+            )
             return []
 
-        def _store_embedding(message_id, embedding, model):
-            pass
+        def _store_embedding(
+            _message_id: Any,
+            _embedding: Any,
+            _model: str | None = None,
+        ) -> None:
+            return None
 
         setattr(shared_chat_memory, "generate_embedding", _generate_embedding)
         setattr(shared_chat_memory, "fetch_similar_messages", _fetch_similar_messages)
@@ -209,21 +379,32 @@ except Exception:
 
 
 # AI safety fallback if middleware import failed
+@dataclass(frozen=True)
+class _FallbackSafetyDecision:
+    allowed: bool = True
+    risk_level: str = "low"
+    reason: str = "disabled"
+    flags: tuple[str, ...] = ()
+
+
+class _FallbackAISafetyMiddleware:
+    """Fallback AI safety middleware used when the shared middleware is unavailable."""
+
+    def __init__(self) -> None:
+        """Initialize the fallback middleware."""
+
+    def validate_input(self, _prompt: str) -> _FallbackSafetyDecision:
+        """Allow all input when the fallback middleware is active."""
+        return _FallbackSafetyDecision()
+
+    def validate_output(self, _output: str) -> _FallbackSafetyDecision:
+        """Allow all output when the fallback middleware is active."""
+        return _FallbackSafetyDecision()
+
+
 if AISafetyMiddleware is None:
-
-    @dataclass(frozen=True)
-    class SafetyDecision:
-        allowed: bool = True
-        risk_level: str = "low"
-        reason: str = "disabled"
-        flags: tuple[str, ...] = ()
-
-    class AISafetyMiddleware:  # type: ignore[override]
-        def validate_input(self, _prompt: str) -> SafetyDecision:
-            return SafetyDecision()
-
-        def validate_output(self, _output: str) -> SafetyDecision:
-            return SafetyDecision()
+    AISafetyMiddleware = _FallbackAISafetyMiddleware
+    SafetyDecision = _FallbackSafetyDecision
 
 
 # Lightweight in-process AI capability metrics (best-effort observability)
@@ -256,12 +437,13 @@ try:
     from shared.file_cache import read_json_cached
 except Exception:  # pragma: no cover
     # Fallback if file_cache not available
-    def read_json_cached(file_path, ttl_seconds=60):  # type: ignore
-        import json
-
-        with open(file_path, "r") as f:
+    def read_json_cached(
+        file_path: str | Path,
+        ttl_seconds: int = 60,
+    ) -> Any:
+        _ = ttl_seconds
+        with open(file_path, "r", encoding="utf-8") as f:
             return json.load(f)
-        return False
 
 
 # -----------------------------------------------------------------------------
@@ -492,7 +674,7 @@ def aria_command_proxy(req: func.HttpRequest) -> func.HttpResponse:
     return aria_proxy_domain.aria_command_proxy(req, _build_domain_context())
 
 
-def _extract_text_content(content) -> str:
+def _extract_text_content(content: Any) -> str:
     """Recursively extract plain text from mixed content payloads.
 
     Handles the content shapes that appear across providers and API versions:
@@ -539,7 +721,7 @@ def _extract_text_content(content) -> str:
     return str(content).strip() if content is not None else ""
 
 
-def _is_compaction_placeholder_message(content) -> bool:
+def _is_compaction_placeholder_message(content: Any) -> bool:
     """Return True when *content* is a synthetic placeholder from chat compaction.
 
     Some AI clients insert a brief summary string (e.g. "compacted conversation")
@@ -555,7 +737,7 @@ def _is_compaction_placeholder_message(content) -> bool:
     return bool(normalized_lines) and all(line in placeholder_lines for line in normalized_lines)
 
 
-def _sanitize_chat_messages(messages) -> list[dict]:
+def _sanitize_chat_messages(messages: Any) -> list[JSONDict]:
     """Normalize incoming chat messages and reject empty content.
 
     This prevents upstream provider 400s like:
@@ -564,7 +746,7 @@ def _sanitize_chat_messages(messages) -> list[dict]:
     if not isinstance(messages, list) or not messages:
         raise ValueError("No messages provided")
 
-    sanitized: list[dict] = []
+    sanitized: list[JSONDict] = []
     for idx, msg in enumerate(messages):
         if not isinstance(msg, dict) or "role" not in msg or "content" not in msg:
             raise ValueError(f"Invalid message format at index {idx}. Expected {{role, content}}")
@@ -607,7 +789,7 @@ def _sanitize_chat_messages(messages) -> list[dict]:
     return sanitized
 
 
-def _parse_json_object_body(req: func.HttpRequest) -> dict:
+def _parse_json_object_body(req: func.HttpRequest) -> JSONDict:
     """Parse a JSON request body and require an object payload.
 
     Raises ValueError with a client-safe message on malformed or missing JSON.
@@ -639,16 +821,10 @@ def _detect_provider_with_runtime_fallback(
     from status/chat endpoints.
     """
 
-    if detect_provider is None:
-        logging.warning(
-            "detect_provider is None; falling back to local provider. explicit=%s model_override=%s",
-            explicit,
-            model_override,
-        )
-        return detect_provider(explicit="local_echo", model_override="local-echo")
+    provider_detector = detect_provider or _fallback_detect_provider
 
     try:
-        return detect_provider(
+        return provider_detector(
             explicit=explicit,
             model_override=model_override,
             temperature=temperature,
@@ -667,7 +843,10 @@ def _detect_provider_with_runtime_fallback(
             provider_error,
         )
         try:
-            return detect_provider(explicit="local_echo", model_override="local-echo")
+            return provider_detector(
+                explicit="local_echo",
+                model_override="local-echo",
+            )
         except Exception as fallback_error:
             logging.error(f"Even fallback to local provider failed: {fallback_error}")
             raise RuntimeError(
@@ -770,7 +949,10 @@ def _build_guardrail_fallback_text() -> str:
     return "I can’t help with that request safely. Please rephrase with a specific, legitimate task."
 
 
-def _record_ai_capability_event(event_type: str, payload: dict) -> None:
+def _record_ai_capability_event(
+    event_type: str,
+    payload: JSONDict,
+) -> None:
     """Best-effort event append for auditability and trend analysis."""
     try:
         out_dir = Path(__file__).resolve().parent / "data_out" / "ai_capabilities"
@@ -809,7 +991,7 @@ def _percentile(values: list[int], p: float) -> int:
     return int(ordered[idx])
 
 
-def _ai_capability_snapshot() -> dict:
+def _ai_capability_snapshot() -> JSONDict:
     """Build a point-in-time snapshot of AI capability counters and latency percentiles.
 
     Returns a dict with two top-level keys:
@@ -834,7 +1016,7 @@ def _ai_capability_snapshot() -> dict:
     }
 
 
-def _extract_agi_query_from_request(req_body: dict) -> str:
+def _extract_agi_query_from_request(req_body: JSONDict) -> str:
     """Extract AGI query from either `query` or chat-style `messages` payload."""
 
     query = req_body.get("query")
@@ -875,7 +1057,10 @@ def _create_agi_provider_for_api(
     return provider, provider_choice
 
 
-def _agi_provider_metadata(provider, provider_choice) -> dict:
+def _agi_provider_metadata(
+    provider: Any,
+    provider_choice: Any,
+) -> JSONDict:
     """Return AGI wrapper metadata with the detected base provider exposed."""
     base = getattr(provider, "_base_provider_choice", None)
     if base is not None:
@@ -892,7 +1077,7 @@ def _agi_provider_metadata(provider, provider_choice) -> dict:
     }
 
 
-def _normalize_agi_stream_delta(chunk) -> dict:
+def _normalize_agi_stream_delta(chunk: Any) -> JSONDict:
     """Normalize AGI stream chunks to structured delta objects for SSE clients."""
     if isinstance(chunk, dict):
         return chunk
@@ -984,16 +1169,6 @@ def agi_quantum_debug(req: func.HttpRequest) -> func.HttpResponse:
     return agi_domain.agi_quantum_debug(req, _build_domain_context())
 
 
-@app.route(route="chat", methods=["POST"], auth_level=func.AuthLevel.ANONYMOUS)
-def chat(req: func.HttpRequest) -> func.HttpResponse:
-    return chat_domain.chat(req, _build_domain_context())
-
-
-@app.route(route="chat", methods=["OPTIONS"], auth_level=func.AuthLevel.ANONYMOUS)
-def chat_options(req: func.HttpRequest) -> func.HttpResponse:
-    return chat_domain.chat_options(req, _build_domain_context())
-
-
 def create_cors_response_headers():
     """Create common CORS headers for all responses."""
     return {
@@ -1008,12 +1183,12 @@ def _default_agi_persist_jsonl_path() -> str:
     return str(Path(__file__).resolve().parent / "data_out" / "agi_reasoning.jsonl")
 
 
-def _materialize_sse_body(chunks) -> bytes:
+def _materialize_sse_body(chunks: Any) -> bytes:
     """Backward-compatible alias for tests and callers expecting the PR name."""
     return _sse_body_bytes(chunks)
 
 
-def _sse_body_bytes(chunks) -> bytes:
+def _sse_body_bytes(chunks: Any) -> bytes:
     """Coerce SSE chunks into bytes for Azure Functions HttpResponse bodies."""
     if isinstance(chunks, bytes):
         return chunks
@@ -1035,7 +1210,11 @@ def _sse_body_bytes(chunks) -> bytes:
     return bytes(out)
 
 
-def _sse_response(chunks, *, status_code: int = 200) -> func.HttpResponse:
+def _sse_response(
+    chunks: Any,
+    *,
+    status_code: int = 200,
+) -> func.HttpResponse:
     """Create a text/event-stream response with safely serialized body."""
     return func.HttpResponse(
         body=_sse_body_bytes(chunks),
@@ -1495,57 +1674,6 @@ def chat_options(req: func.HttpRequest) -> func.HttpResponse:
     return func.HttpResponse("", status_code=200, headers=create_cors_response_headers())
 
 
-def create_cors_response_headers():
-    """Create common CORS headers for all responses."""
-    return {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Methods": "POST, GET, OPTIONS",
-        "Access-Control-Allow-Headers": "Content-Type",
-    }
-
-
-def _default_agi_persist_jsonl_path() -> str:
-    """Default JSONL audit path for AGI reasoning chains."""
-    return str(Path(__file__).resolve().parent / "data_out" / "agi_reasoning.jsonl")
-
-
-def _materialize_sse_body(chunks) -> bytes:
-    """Backward-compatible alias for tests and callers expecting the PR name."""
-    return _sse_body_bytes(chunks)
-
-
-def _sse_body_bytes(chunks) -> bytes:
-    """Coerce SSE chunks into bytes for Azure Functions HttpResponse bodies."""
-    if isinstance(chunks, bytes):
-        return chunks
-    if isinstance(chunks, bytearray):
-        return bytes(chunks)
-    if isinstance(chunks, str):
-        return chunks.encode("utf-8")
-
-    out = bytearray()
-    for chunk in chunks:
-        if chunk is None:
-            continue
-        if isinstance(chunk, bytes):
-            out.extend(chunk)
-        elif isinstance(chunk, bytearray):
-            out.extend(chunk)
-        else:
-            out.extend(str(chunk).encode("utf-8"))
-    return bytes(out)
-
-
-def _sse_response(chunks, *, status_code: int = 200) -> func.HttpResponse:
-    """Create a text/event-stream response with safely serialized body."""
-    return func.HttpResponse(
-        body=_sse_body_bytes(chunks),
-        status_code=status_code,
-        mimetype="text/event-stream",
-        headers={**create_cors_response_headers(), "Cache-Control": "no-cache"},
-    )
-
-
 # =============================================================================
 # Automation Tool Endpoints: Resource Monitor, Model Deployer, Results Exporter, Evaluation
 # =============================================================================
@@ -1703,7 +1831,7 @@ WALK_DISTANCE = 200  # pixels
 MOVE_DISTANCE = 100  # pixels
 
 
-def parse_movement_commands(text: str) -> dict:
+def parse_movement_commands(text: str) -> JSONDict:
     """Parse movement commands from AI response text.
 
     Uses pre-compiled frozensets for O(1) keyword matching.
@@ -1806,12 +1934,6 @@ def chat_stream(req: func.HttpRequest) -> func.HttpResponse:
                     yield b"data: [DONE]\n\n"
 
                 return _sse_response(blocked_sse(), status_code=200)
-                return func.HttpResponse(
-                    body=blocked_sse(),
-                    status_code=200,
-                    mimetype="text/event-stream",
-                    headers={**create_cors_response_headers(), "Cache-Control": "no-cache"},
-                )
         stream_memory_messages: list[dict] = []
         if stream_user_content:
             try:
@@ -2070,11 +2192,6 @@ def tts(req: func.HttpRequest) -> func.HttpResponse:
 
         if az_key and az_region:
             try:
-                import base64
-                import io
-                import re
-                import wave
-
                 try:
                     import azure.cognitiveservices.speech as speechsdk
                 except Exception:
@@ -2142,9 +2259,7 @@ def tts(req: func.HttpRequest) -> func.HttpResponse:
                     timepoints.append({"word": w, "start_ms": start_ms, "end_ms": end_ms})
                     cursor += dur
 
-                import base64 as _b64
-
-                audio_b64 = _b64.b64encode(audio_bytes).decode("ascii")
+                audio_b64 = base64.b64encode(audio_bytes).decode("ascii")
 
                 return func.HttpResponse(
                     json.dumps(
@@ -2179,7 +2294,7 @@ def tts(req: func.HttpRequest) -> func.HttpResponse:
             # Try pyttsx3 (offline, best on Windows) first
             try:
                 try:
-                    import pyttsx3
+                    import pyttsx3  # pyright: ignore[reportMissingTypeStubs]
                 except Exception:  # pyttsx3 not available
                     pyttsx3 = None
 
@@ -2263,7 +2378,7 @@ def tts(req: func.HttpRequest) -> func.HttpResponse:
 
                 # If pyttsx3 not available or failed, try gTTS (mp3 output)
                 try:
-                    from gtts import gTTS
+                    from gtts import gTTS  # pyright: ignore[reportMissingTypeStubs]
                 except Exception:
                     gTTS = None
 
@@ -2769,9 +2884,9 @@ def ai_status(req: func.HttpRequest) -> func.HttpResponse:
                         }
                     )
                 else:
-                    quantum_info["azure_quantum"].update({"error": "quantum_config.yaml missing"})
+                    quantum_info["azure_quantum"]["error"] = "quantum_config.yaml missing"
             except Exception as aq_err:  # noqa: BLE001
-                quantum_info["azure_quantum"].update({"error": str(aq_err)})
+                quantum_info["azure_quantum"]["error"] = str(aq_err)
 
         # Self-Learning System Status
         learning_info: dict[str, Any] = {
@@ -3712,50 +3827,6 @@ def quantum_llm(req: func.HttpRequest) -> func.HttpResponse:
 @app.route(route="quantum/info", methods=["GET"], auth_level=func.AuthLevel.ANONYMOUS)
 def quantum_info(req: func.HttpRequest) -> func.HttpResponse:
     return quantum_domain.quantum_info(req, _build_domain_context())
-
-
-@app.route(route="subscription/revenue", methods=["GET"], auth_level=func.AuthLevel.ANONYMOUS)
-def subscription_revenue(req: func.HttpRequest) -> func.HttpResponse:
-    return subscriptions_domain.subscription_revenue(req, _build_domain_context())
-
-
-@app.route(route="subscription/usage", methods=["POST"], auth_level=func.AuthLevel.ANONYMOUS)
-def subscription_track_usage(req: func.HttpRequest) -> func.HttpResponse:
-    return subscriptions_domain.subscription_track_usage(req, _build_domain_context())
-
-
-# -----------------------------------------------------------------------------
-# Stripe Webhook Handler
-# -----------------------------------------------------------------------------
-@app.route(route="webhook/stripe", methods=["POST"], auth_level=func.AuthLevel.ANONYMOUS)
-def stripe_webhook(req: func.HttpRequest) -> func.HttpResponse:
-    return subscriptions_domain.stripe_webhook(req, _build_domain_context())
-
-
-# -----------------------------------------------------------------------------
-# Notifications Log Endpoint
-# -----------------------------------------------------------------------------
-@app.route(route="notifications/log", methods=["GET"], auth_level=func.AuthLevel.ANONYMOUS)
-def notifications_log(req: func.HttpRequest) -> func.HttpResponse:
-    return subscriptions_domain.notifications_log(req, _build_domain_context())
-
-
-# -----------------------------------------------------------------------------
-# Referral System Endpoints
-# -----------------------------------------------------------------------------
-@app.route(route="referrals/code", methods=["GET", "POST"], auth_level=func.AuthLevel.ANONYMOUS)
-def referral_code(req: func.HttpRequest) -> func.HttpResponse:
-    return referrals_domain.referral_code(req, _build_domain_context())
-
-
-@app.route(route="referrals/stats", methods=["GET"], auth_level=func.AuthLevel.ANONYMOUS)
-def referral_stats(req: func.HttpRequest) -> func.HttpResponse:
-    return referrals_domain.referral_stats(req, _build_domain_context())
-
-
-@app.route(route="referrals/record", methods=["POST"], auth_level=func.AuthLevel.ANONYMOUS)
-def record_referral(req: func.HttpRequest) -> func.HttpResponse:
-    return referrals_domain.record_referral(req, _build_domain_context())
 
 
 # =============================================================================

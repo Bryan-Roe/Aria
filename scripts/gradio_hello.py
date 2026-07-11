@@ -1036,8 +1036,7 @@ initial_provider_info, initial_status_info = provider_status_snapshot("auto")
 
 with gr.Blocks() as demo:
     with gr.Column(elem_id="appCard"):
-        gr.HTML(
-            """
+        gr.HTML("""
             <div class="hero-banner">
                 <div style="display:flex;align-items:center;gap:14px;">
                     <span style="font-size:2.4rem;line-height:1;filter:drop-shadow(0 2px 6px rgba(20,83,45,0.16));">🌿</span>
@@ -1053,8 +1052,7 @@ with gr.Blocks() as demo:
                     <span class="pill">🎙️&nbsp;TTS support</span>
                 </div>
             </div>
-            """
-        )
+            """)
 
         with gr.Row(equal_height=False):
             with gr.Column(scale=7, elem_id="surfaceBlock", elem_classes=["surface-card"]):

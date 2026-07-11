@@ -377,8 +377,7 @@ def fetch_similar_messages(
                     (scoped_session_id,),
                 )
             else:
-                cur.execute(
-                    """
+                cur.execute("""
                     SELECT
                         e.message_id,
                         e.embedding_vector,
@@ -388,8 +387,7 @@ def fetch_similar_messages(
                     FROM embeddings e
                     LEFT JOIN chat_messages cm ON cm.message_id = e.message_id
                     LEFT JOIN messages m ON m.message_id = e.message_id
-                    """
-                )
+                    """)
             rows = cur.fetchall()
             has_joined_metadata = True
         except Exception:

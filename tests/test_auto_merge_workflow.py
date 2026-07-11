@@ -78,6 +78,16 @@ def test_auto_merge_has_check_run_trigger() -> None:
     )
 
 
+def test_auto_merge_has_schedule_trigger() -> None:
+    wf = _load_auto_merge()
+    assert "schedule" in _get_triggers(wf), "auto-merge.yml must trigger on schedule for open PR finishing sweeps"
+
+
+def test_auto_merge_has_workflow_dispatch_trigger() -> None:
+    wf = _load_auto_merge()
+    assert "workflow_dispatch" in _get_triggers(wf), "auto-merge.yml must support manual dispatch for open PR finishing"
+
+
 def test_auto_merge_check_run_trigger_on_completed() -> None:
     wf = _load_auto_merge()
     check_run = _get_triggers(wf)["check_run"]
@@ -121,6 +131,11 @@ def test_auto_merge_has_bot_approve_job() -> None:
     assert "bot-approve" in wf["jobs"], "auto-merge.yml must have a 'bot-approve' job"
 
 
+def test_auto_merge_has_finish_open_prs_job() -> None:
+    wf = _load_auto_merge()
+    assert "finish-open-prs" in wf["jobs"], "auto-merge.yml must have a 'finish-open-prs' job"
+
+
 # ---------------------------------------------------------------------------
 # prepare-github-actions-pr — auto-ready + label for github-actions[bot]
 # ---------------------------------------------------------------------------
@@ -149,7 +164,7 @@ def test_prepare_job_adds_autofix_label_and_marks_ready() -> None:
     steps = wf["jobs"]["prepare-github-actions-pr"]["steps"]
     script_step = next(step for step in steps if step.get("name") == "Ready PR and apply autofix label")
     script = script_step["with"]["script"]
-    assert "labels: 'autofix'" in script, "prepare job must add the autofix label when missing"
+    assert "labels: ['autofix']" in script, "prepare job must add the autofix label when missing"
     assert "markPullRequestReadyForReview" in script, "prepare job must mark draft PRs ready for review"
 
 
@@ -278,6 +293,28 @@ def test_bot_approve_allowlist_defined_in_env() -> None:
 
 
 # ---------------------------------------------------------------------------
+# finish-open-prs job — scheduled/manual open PR finishing
+# ---------------------------------------------------------------------------
+
+
+def test_finish_open_prs_runs_only_on_schedule_or_dispatch() -> None:
+    wf = _load_auto_merge()
+    job_if = wf["jobs"]["finish-open-prs"].get("if", "")
+    assert "github.event_name == 'schedule'" in job_if, "finish-open-prs must run on schedule events"
+    assert "github.event_name == 'workflow_dispatch'" in job_if, "finish-open-prs must run on workflow_dispatch events"
+
+
+def test_finish_open_prs_merges_via_squash() -> None:
+    wf = _load_auto_merge()
+    steps = wf["jobs"]["finish-open-prs"]["steps"]
+    script_step = next((step for step in steps if step.get("name") == "Merge eligible open PRs"), None)
+    assert script_step is not None, "finish-open-prs must include the 'Merge eligible open PRs' step"
+    script = script_step["with"]["script"]
+    assert "pulls.list" in script, "finish-open-prs must enumerate open pull requests"
+    assert "merge_method: 'squash'" in script, "finish-open-prs must squash-merge eligible pull requests"
+
+
+# ---------------------------------------------------------------------------
 # auto-merge-on-ci.yml — is now a stub, not watching AGI smoke
 # ---------------------------------------------------------------------------
 
@@ -376,3 +413,9 @@ def test_eligibility_action_checks_changes_requested() -> None:
     action_path = ACTIONS_DIR / "check-auto-merge-eligibility" / "action.yml"
     content = action_path.read_text(encoding="utf-8")
     assert "CHANGES_REQUESTED" in content, "eligibility action must block on CHANGES_REQUESTED reviews"
+
+
+def test_auto_merge_workflow_has_no_trailing_whitespace() -> None:
+    workflow_path = WORKFLOWS_DIR / "auto-merge.yml"
+    for line_number, line in enumerate(workflow_path.read_text(encoding="utf-8").splitlines(), start=1):
+        assert line == line.rstrip(), f"auto-merge.yml contains trailing whitespace on line {line_number}"

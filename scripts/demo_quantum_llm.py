@@ -95,8 +95,7 @@ def demonstrate_quantum_llm_integration():
     # 4. Show workflow
     print("\n\n🔄 Training Workflow:")
     print("-" * 80)
-    print(
-        """
+    print("""
     Autonomous Training Cycle (every 30 minutes):
     ├── 1. Discover datasets (quantum, chat, vision)
     ├── 2. Download new datasets if needed
@@ -122,14 +121,12 @@ def demonstrate_quantum_llm_integration():
     - Quantum feature encoding for richer representations
     - Hybrid quantum-classical architecture
     - Cost-aware execution (local simulator vs Azure Quantum)
-    """
-    )
+    """)
 
     # 5. Show command examples
     print("\n📝 Usage Examples:")
     print("-" * 80)
-    print(
-        """
+    print("""
     # Active Training (single run)
     python scripts/quantum_llm_trainer.py \\
       --dataset datasets/chat/aria_chat \\
@@ -150,14 +147,12 @@ def demonstrate_quantum_llm_integration():
     # Full Repository Automation
     python scripts/repo_automation.py --start
     # (Includes quantum LLM training in the full automation suite)
-    """
-    )
+    """)
 
     # 6. Show benefits
     print("\n\n✨ Key Benefits:")
     print("-" * 80)
-    print(
-        """
+    print("""
     1. Quantum Advantage:
        - Exponential feature space (2^n for n qubits)
        - Novel attention optimization patterns
@@ -182,8 +177,7 @@ def demonstrate_quantum_llm_integration():
        - Track quantum circuit executions
        - Monitor quantum advantage ratio
        - Detailed metrics and logging
-    """
-    )
+    """)
 
     # 7. Show status
     print("\n\n📊 Current Status:")

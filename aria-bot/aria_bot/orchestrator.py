@@ -17,17 +17,19 @@ from __future__ import annotations
 
 import json
 import logging
+import os
 import time
 from collections.abc import Sequence
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
+from typing import Any, Protocol, cast
 
-from .analyzer import Analyzer, Finding
+from .analyzer import Analyzer
 from .commit_system import CommitSystem
 from .defaults import DEFAULT_MAX_PLANS
-from .executor import ExecutionResult, Executor
-from .planner import Planner, UpgradePlan
+from .executor import Executor
+from .planner import Planner
 from .risk_manager import RiskManager
 from .validator import Validator
 
@@ -36,6 +38,62 @@ _logger = logging.getLogger(__name__)
 # The orchestrator is stateless across runs but always writes its status
 # to the same well-known location for observability.
 _DEFAULT_STATUS_PATH = Path("data_out") / "aria_bot" / "status.json"
+
+JsonDict = dict[str, Any]
+
+
+class _ValidationResult(Protocol):  # pylint: disable=too-few-public-methods
+    @property
+    def ok(self) -> bool:
+        """Validation success flag."""
+        ...
+
+    def to_dict(self) -> JsonDict:
+        """Serialize validation output to a JSON-compatible mapping."""
+        ...
+
+
+class _FindingLike(Protocol):  # pylint: disable=too-few-public-methods
+    @property
+    def kind(self) -> str:
+        """Finding kind identifier."""
+        ...
+
+    def to_dict(self) -> JsonDict:
+        """Serialize finding output to a JSON-compatible mapping."""
+        ...
+
+
+class _PlanLike(Protocol):  # pylint: disable=too-few-public-methods
+    @property
+    def path(self) -> Path:
+        """Planned target path."""
+        ...
+
+    @property
+    def kinds(self) -> Sequence[str]:
+        """Kinds covered by this plan."""
+        ...
+
+    def to_dict(self) -> JsonDict:
+        """Serialize plan output to a JSON-compatible mapping."""
+        ...
+
+
+class _ExecutionLike(Protocol):  # pylint: disable=too-few-public-methods
+    @property
+    def applied(self) -> bool:
+        """Whether this execution applied changes."""
+        ...
+
+    @property
+    def plan(self) -> _PlanLike:
+        """Plan executed for this result."""
+        ...
+
+    def to_dict(self) -> JsonDict:
+        """Serialize execution output to a JSON-compatible mapping."""
+        ...
 
 
 @dataclass
@@ -72,8 +130,8 @@ class OrchestratorConfig:
 
 
 @dataclass
-class CycleResult:
-    """Aggregated, JSON-serialisable outcome of one aria-bot cycle.
+class CycleResult:  # pylint: disable=too-many-instance-attributes
+    """Aggregated, JSON-serializable outcome of one aria-bot cycle.
 
     Produced by ``Orchestrator.run()`` and written to ``status.json``.
 
@@ -89,10 +147,11 @@ class CycleResult:
                           (applied ones have ``applied=True``).
         validation_ok:    ``True`` when post-execution validation passed (or no
                           files were modified).
-        validation:       Serialised ``Validator`` result dict.
+        validation:       Serialized ``Validator`` result dict.
         commit_sha:       The resulting git commit SHA, or ``None`` when no
                           commit was made.
-        notes:            Human-readable log notes appended throughout the cycle.
+        notes:            Human-readable log notes appended throughout
+                  the cycle.
     """
 
     started_at: str
@@ -100,20 +159,20 @@ class CycleResult:
     duration_seconds: float
     apply: bool
     commit: bool
-    findings: list[Finding] = field(default_factory=list)
-    plans: list[UpgradePlan] = field(default_factory=list)
-    executions: list[ExecutionResult] = field(default_factory=list)
+    findings: Sequence[_FindingLike] = field(default_factory=list)
+    plans: Sequence[_PlanLike] = field(default_factory=list)
+    executions: Sequence[_ExecutionLike] = field(default_factory=list)
     validation_ok: bool = True
-    validation: dict = field(default_factory=dict)
+    validation: JsonDict = field(default_factory=dict[str, Any])
     commit_sha: str | None = None
-    notes: list[str] = field(default_factory=list)
+    notes: list[str] = field(default_factory=list[str])
 
     def _state(
         self,
-        applied: list[ExecutionResult],
-        skipped: list[ExecutionResult],
+        applied: Sequence[_ExecutionLike],
+        skipped: Sequence[_ExecutionLike],
     ) -> str:
-        """Derive a concise state string for the ``status.json`` ``"state"`` field."""
+        """Derive a concise state for ``status.json`` ``"state"``."""
         if not self.apply:
             return "dry_run"
         if self.validation_ok is False:
@@ -124,8 +183,8 @@ class CycleResult:
             return "no_changes"
         return "idle"
 
-    def to_dict(self) -> dict:
-        """Serialise the cycle result to a plain dict for ``status.json``.
+    def to_dict(self) -> JsonDict:  # pylint: disable=too-many-locals
+        """Serialize the cycle result to a plain dict for ``status.json``.
 
         The returned dict mirrors the schema consumed by dashboards and CI
         checks: top-level scalar summaries, per-kind breakdowns, path lists,
@@ -207,7 +266,7 @@ class CycleResult:
             "validation_targets": validation_targets,
             "summary": summary,
             "validation_ok": self.validation_ok,
-            "validation": self.validation,
+            "validation": dict(self.validation),
             "commit_sha": self.commit_sha,
             "notes": list(self.notes),
         }
@@ -224,11 +283,12 @@ class Orchestrator:
 
     config: OrchestratorConfig
 
+    # pylint: disable=too-many-locals
     def run(self) -> CycleResult:
         """Execute one full cycle: analyse → plan → execute → validate → (commit).
 
-        Writes a ``status.json`` to ``config.resolve_status_path()`` regardless
-        of outcome so dashboards always have fresh data.
+        Writes a ``status.json`` to ``config.resolve_status_path()``
+        regardless of outcome so dashboards always have fresh data.
 
         Returns:
             A ``CycleResult`` containing findings, plans, execution outcomes,
@@ -240,8 +300,14 @@ class Orchestrator:
         repo_root = Path(self.config.repo_root).resolve()
         risk = RiskManager(repo_root=repo_root)
         analyzer = Analyzer(risk_manager=risk)
-        planner = Planner(risk_manager=risk, max_plans=self.config.max_plans)
-        executor = Executor(risk_manager=risk, dry_run=not self.config.apply)
+        planner = Planner(
+            risk_manager=risk,
+            max_plans=self.config.max_plans,
+        )
+        executor = Executor(
+            risk_manager=risk,
+            dry_run=not self.config.apply,
+        )
         validator = Validator(repo_root=repo_root)
         commits = CommitSystem(repo_root=repo_root)
 
@@ -249,22 +315,38 @@ class Orchestrator:
 
         _logger.info("aria-bot: scanning repository at %s", repo_root)
         scan_paths = self._resolve_paths(analyzer) if self.config.paths else None
-        findings = analyzer.scan(paths=scan_paths)
+        findings = cast(
+            list[_FindingLike],
+            list(analyzer.scan(paths=scan_paths)),
+        )
         _logger.info("aria-bot: %d finding(s)", len(findings))
 
-        plans = planner.build_plans(findings)
+        plans = cast(
+            list[_PlanLike],
+            list(planner.build_plans(cast(Any, findings))),
+        )
         _logger.info("aria-bot: %d plan(s) after risk filter", len(plans))
 
-        executions = executor.execute(plans)
+        executions = cast(
+            list[_ExecutionLike],
+            list(executor.execute(cast(Any, plans))),
+        )
         applied_paths = [e.plan.path for e in executions if e.applied]
         skipped_paths = [e.plan.path for e in executions if not e.applied]
 
         # Only validate when files were actually modified — dry-runs and
         # no-op cycles have nothing to validate.
+        validation: _ValidationResult
         if applied_paths:
-            validation = validator.validate(applied_paths)
+            validation = cast(
+                _ValidationResult,
+                validator.validate(applied_paths),
+            )
         else:
-            validation = validator.validate(changed_paths=[])
+            validation = cast(
+                _ValidationResult,
+                validator.validate(changed_paths=[]),
+            )
         notes.append(
             f"execution summary: {len(executions)} plan(s), {len(applied_paths)} applied, {len(skipped_paths)} skipped"
         )
@@ -314,9 +396,7 @@ class Orchestrator:
             if not p.is_absolute():
                 p = repo_root / p
             if p.is_dir():
-                import os
-
-                for root, _dirs, files in os.walk(p):
+                for root, _, files in os.walk(p):
                     for name in files:
                         fp = Path(root, name)
                         if fp.suffix.lower() in wanted:
@@ -327,7 +407,7 @@ class Orchestrator:
                 _logger.debug("--paths target does not exist: %s", p)
         return result
 
-    def _commit_message(self, executions: list[ExecutionResult]) -> str:
+    def _commit_message(self, executions: Sequence[_ExecutionLike]) -> str:
         # Only called when at least one execution applied; defend against
         # accidental misuse by future callers.
         applied = [e for e in executions if e.applied]
@@ -355,6 +435,7 @@ class Orchestrator:
             )
 
 
+# pylint: disable=too-many-arguments
 def run_cycle(
     repo_root: Path,
     *,
@@ -364,7 +445,7 @@ def run_cycle(
     status_path: Path | None = None,
     paths: Sequence[Path] | None = None,
 ) -> CycleResult:
-    """Convenience entry point that builds an ``OrchestratorConfig`` and runs one cycle.
+    """Build an ``OrchestratorConfig`` and run one cycle.
 
     Preferred over constructing ``Orchestrator`` directly in the CLI and tests.
 

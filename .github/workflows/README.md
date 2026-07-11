@@ -157,6 +157,7 @@ Auto-merge is controlled by `.github/workflows/auto-merge.yml` (consolidated fro
 | `disable` | `pull_request` last matching label removed | Disables native auto-merge |
 | `merge-on-gate-pass` | `check_run` completed for `All Gates Passed` | Evaluates all associated PRs: checks label, draft, fork, conflicts, and review state; squash-merges eligible PRs and posts results |
 | `bot-approve` | `pull_request` with auto-merge label, or any same-repo `github-actions[bot]` PR | Approves PRs authored by bot actors listed in `BOT_APPROVE_ALLOWLIST` using `AUTO_MERGE_APPROVE_TOKEN`; `github-actions[bot]` bypasses the repo-variable gate |
+| `finish-open-prs` | `schedule` (every 30 min) or manual dispatch | Sweeps open PRs, verifies labels/checks/reviews/mergeability, and squash-merges eligible PRs (supports dry-run + max PR cap inputs) |
 
 **Eligibility requirements** (enforced by `merge-on-gate-pass` and codified in `.github/actions/check-auto-merge-eligibility/action.yml`):
 - PR is not a draft
