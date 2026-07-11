@@ -520,6 +520,7 @@ tests/test_chat_web_embedded_script.py
 tests/test_ci_orchestrator_integration_baseline.py
 tests/test_cleanup_artifacts.py
 tests/test_cleanup_query_metrics.py
+tests/test_code_coverage_workflow.py
 tests/test_codeql_workflow_paths_ignore.py
 tests/test_config.py
 tests/test_config_paths.py

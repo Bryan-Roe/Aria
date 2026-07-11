@@ -291,6 +291,7 @@
 .github/workflows/stale.yml
 .github/workflows/summary.yml
 .github/workflows/telemetry-trigger.yml
+.github/workflows/test-reviewer-assignment.yml
 .github/workflows/test-watcher.yml
 .github/workflows/training-health-report.yml
 .github/workflows/workflow-validation.yml
