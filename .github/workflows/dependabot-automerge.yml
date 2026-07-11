@@ -52,6 +52,8 @@ jobs:
       PR_NUMBER: ${{ github.event.pull_request.number }}
       REPO: ${{ github.repository }}
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      WAIT_MAX_ATTEMPTS: "60"
+      WAIT_SLEEP_SECONDS: "10"
 
     steps:
       - name: Harden the runner (Audit all outbound calls)
@@ -115,8 +117,16 @@ jobs:
         run: |
           set -euo pipefail
 
-          max_attempts=60
-          sleep_seconds=10
+          max_attempts="${WAIT_MAX_ATTEMPTS}"
+          sleep_seconds="${WAIT_SLEEP_SECONDS}"
+          if [[ ! "${max_attempts}" =~ ^[0-9]+$ || "${max_attempts}" -le 0 ]]; then
+            echo "WAIT_MAX_ATTEMPTS must be a positive integer (got '${max_attempts}')."
+            exit 1
+          fi
+          if [[ ! "${sleep_seconds}" =~ ^[0-9]+$ || "${sleep_seconds}" -le 0 ]]; then
+            echo "WAIT_SLEEP_SECONDS must be a positive integer (got '${sleep_seconds}')."
+            exit 1
+          fi
 
           for attempt in $(seq 1 "${max_attempts}"); do
             checks_json="$(gh pr view "$PR_URL" --json statusCheckRollup --jq '.statusCheckRollup')"
@@ -140,6 +150,28 @@ jobs:
               ]
               | length
             ' <<< "$checks_json")"
+            failing_summary="$(jq -r '
+              [
+                .[]?
+                | select(
+                    (
+                      .__typename == "CheckRun" and
+                      (
+                        ["failure", "cancelled", "timed_out", "action_required", "startup_failure", "stale"]
+                        | index((.conclusion // "" | ascii_downcase))
+                      ) != null
+                    ) or (
+                      .__typename == "StatusContext" and
+                      (["failure", "error"] | index((.state // "" | ascii_downcase))) != null
+                    )
+                  )
+                | if .__typename == "CheckRun"
+                  then "\(.name): \(.conclusion // "unknown")"
+                  else "\(.context): \(.state // "unknown")"
+                  end
+              ]
+              | join(", ")
+            ' <<< "$checks_json")"
             pending_count="$(jq '
               [
                 .[]?
@@ -157,7 +189,7 @@ jobs:
             ' <<< "$checks_json")"
 
             if [[ "${failing_count}" -gt 0 ]]; then
-              echo "One or more required checks failed before merge."
+              echo "One or more required checks failed before merge: ${failing_summary:-unknown checks}."
               exit 1
             fi
 

@@ -14,7 +14,9 @@ def _load_workflow() -> dict:
 
 
 def _step(workflow: dict, step_name: str) -> dict:
-    return next(step for step in workflow["jobs"]["automerge"]["steps"] if step.get("name") == step_name)
+    step = next((entry for entry in workflow["jobs"]["automerge"]["steps"] if entry.get("name") == step_name), None)
+    assert step is not None, f"Expected step '{step_name}' in dependabot-automerge workflow"
+    return step
 
 
 def test_dependabot_automerge_timeout_is_ten_minutes() -> None:
