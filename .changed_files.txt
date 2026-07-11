@@ -286,6 +286,7 @@
 .github/workflows/auto-validation.yml
 .github/workflows/autofix.yml
 .github/workflows/autonomous-evolver.yml
+.github/workflows/azure-webapps-node.yml
 .github/workflows/azureml-train.yml
 .github/workflows/broken-links.yml
 .github/workflows/ci-pipeline.yml
@@ -302,6 +303,8 @@
 .github/workflows/devcontainer-ci.yml
 .github/workflows/e2e-tests.yml
 .github/workflows/experiment-runner.yml
+.github/workflows/github_workflows_autofix-maintenance.yml
+.github/workflows/github_workflows_autofix-pr.yml
 .github/workflows/gradio-focused-tests.yml
 .github/workflows/integration-contract-gate.yml
 .github/workflows/labeler.yml
@@ -330,6 +333,7 @@
 .github/workflows/stdio.cpp
 .github/workflows/summary.yml
 .github/workflows/telemetry-trigger.yml
+.github/workflows/test-reviewer-assignment.yml
 .github/workflows/test-watcher.yml
 .github/workflows/training-health-report.yml
 .github/workflows/workflow-validation.yml
@@ -1071,6 +1075,7 @@ aria-bot/aria_bot/cli.py
 aria-bot/aria_bot/commit_system.py
 aria-bot/aria_bot/defaults.py
 aria-bot/aria_bot/executor.py
+aria-bot/aria_bot/extract_helpers.py
 aria-bot/aria_bot/from collections.py
 aria-bot/aria_bot/orchestrator.py
 aria-bot/aria_bot/planner.py
@@ -2630,6 +2635,7 @@ tests/test_chat_web_embedded_script.py
 tests/test_ci_orchestrator_integration_baseline.py
 tests/test_cleanup_artifacts.py
 tests/test_cleanup_query_metrics.py
+tests/test_code_coverage_workflow.py
 tests/test_codeql_workflow_paths_ignore.py
 tests/test_config.py
 tests/test_config_paths.py
