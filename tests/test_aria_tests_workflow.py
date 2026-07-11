@@ -24,6 +24,16 @@ def test_e2e_tests_workflow_uses_pyppeteer_bundled_chromium() -> None:
 
     assert "python -m pyppeteer install" not in content
     assert _DOWNLOAD_CMD in content
-    assert "if apt-get install -y chromium; then" in content
-    assert "elif apt-get install -y chromium-browser; then" in content
+    assert "if apt_get install -y --fix-missing chromium; then" in content
+    assert "elif apt_get install -y --fix-missing chromium-browser; then" in content
     assert 'ln -sf "$(command -v chromium-browser)" /usr/bin/chromium' in content
+
+
+@pytest.mark.unit
+def test_e2e_tests_workflow_retries_apt_downloads_for_containerized_chrome() -> None:
+    workflow_path = Path(__file__).resolve().parents[1] / ".github" / "workflows" / "e2e-tests.yml"
+    content = workflow_path.read_text(encoding="utf-8")
+
+    assert 'apt-get -o Acquire::Retries=3 "$@"' in content
+    assert "apt_get install -y --fix-missing chromium" in content
+    assert "apt_get install -y --fix-missing chromium-browser" in content
