@@ -24,6 +24,7 @@ ai-projects/chat-cli/src/chat_cli.py
 ai-projects/chat-cli/src/chat_providers.py
 ai-projects/chat-cli/src/local_agi_provider.py
 ai-projects/chat-cli/src/lora_infer_bridge.py
+ai-projects/chat-cli/src/quantum_agent_selector.py
 ai-projects/chat-cli/src/quantum_provider.py
 ai-projects/chat-cli/src/test_chat_cli.py
 ai-projects/chat-cli/src/test_chat_providers.py
@@ -720,6 +721,7 @@ tests/test_watch_continuous_automation.py
 tests/test_web_app_security.py
 tests/test_workflow_validation_workflow.py
 tests/test_writer_reviewer_prototype_workflow.py
+tests/unit/__init__.py
 tests/unit/test_aria_schema_endpoint.py
 tests/unit/test_aria_schema_in_sync.py
 tests/unit/test_chat_cli_no_stream.py
