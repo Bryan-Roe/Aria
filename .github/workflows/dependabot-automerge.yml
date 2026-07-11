@@ -8,8 +8,11 @@
 #           - Production dependency minor bumps are flagged for manual review.
 #           - Workflow runs only for PRs authored by dependabot[bot].
 #           - Token permissions are scoped to the minimum required.
+# Notes   : - If the target branch uses a merge queue, the built-in GITHUB_TOKEN
+#             may be unable to enqueue the PR for auto-merge; use a GitHub App
+#             token or PAT stored in GitHub Secrets if needed.
 # Triggers: pull_request events (opened / synchronize / reopened / ready_for_review)
-# Refs    : https://docs.github.com/en/code-security/dependabot/working-with-dependabot/automating-dependabot-with-github-actions
+# Refs    : https://docs.github.com/en/code-security/tutorials/secure-your-dependencies/automate-dependabot-with-actions
 # =============================================================================
 
 name: Dependabot Auto-merge
@@ -18,14 +21,13 @@ on:
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
 
-# Cancel superseded runs on the same PR to save CI minutes.
 concurrency:
   group: dependabot-automerge-${{ github.event.pull_request.number }}
   cancel-in-progress: true
 
-# Default to read-only; the job elevates to writes only where needed.
 permissions:
   contents: read
+  pull-requests: read
 
 jobs:
   automerge:
@@ -33,9 +35,6 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
 
-    # Hard guard: only Dependabot PRs, skip drafts, and ignore forked repos.
-    # `pull_request.user.login` is more reliable than `github.actor`
-    # (which can change on re-runs by humans).
     if: >-
       github.event.pull_request.user.login == 'dependabot[bot]' &&
       github.event.pull_request.draft == false &&
@@ -47,6 +46,8 @@ jobs:
 
     env:
       PR_URL: ${{ github.event.pull_request.html_url }}
+      PR_NUMBER: ${{ github.event.pull_request.number }}
+      REPO: ${{ github.repository }}
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     steps:
@@ -68,48 +69,58 @@ jobs:
           DEP_TYPE: ${{ steps.metadata.outputs.dependency-type }}
         run: |
           set -euo pipefail
+
+          # Policy:
+          # - Always allow semver patch updates.
+          # - Allow semver minor updates only for direct development or indirect dependencies.
+          # - Require manual review for direct production dependency minor updates and all majors.
           automerge="false"
+
           case "${UPDATE_TYPE}" in
             version-update:semver-patch)
               automerge="true"
               ;;
             version-update:semver-minor)
-              # Conservative: auto-merge minor bumps only for dev / indirect deps.
               if [[ "${DEP_TYPE}" == "direct:development" || "${DEP_TYPE}" == "indirect" ]]; then
                 automerge="true"
               fi
               ;;
           esac
-          echo "automerge=${automerge}" >> "$GITHUB_OUTPUT"
-          echo "Decision: automerge=${automerge} (update-type=${UPDATE_TYPE}, dependency-type=${DEP_TYPE})"
 
-      - name: Authenticate GitHub CLI
-        # Ensure gh is authenticated before any subsequent gh commands (approve/merge/comment).
+          echo "automerge=${automerge}" >> "$GITHUB_OUTPUT"
+          echo "Decision: automerge=${automerge} (update-type=${UPDATE_TYPE:-unset}, dependency-type=${DEP_TYPE:-unset})"
+
+      - name: Read PR state
+        id: pr_state
         run: |
           set -euo pipefail
-          if ! command -v gh >/dev/null 2>&1; then
-            echo "gh CLI not found on runner; aborting" >&2
-            exit 1
-          fi
-          echo "$GH_TOKEN" | gh auth login --with-token
+
+          auto_merge_enabled="$(gh pr view "$PR_URL" --json autoMergeRequest --jq '.autoMergeRequest != null')"
+          review_state="$(gh pr view "$PR_URL" --json reviews --jq '[.reviews[]? | select(.author.login == "github-actions[bot]" and .state == "APPROVED")] | length > 0')"
+
+          echo "auto_merge_enabled=${auto_merge_enabled}" >> "$GITHUB_OUTPUT"
+          echo "already_approved=${review_state}" >> "$GITHUB_OUTPUT"
 
       - name: Approve PR
-        if: steps.gate.outputs.automerge == 'true'
+        if: steps.gate.outputs.automerge == 'true' && steps.pr_state.outputs.already_approved != 'true'
         run: |
           set -euo pipefail
           gh pr review --approve "$PR_URL"
 
       - name: Enable auto-merge (squash)
-        if: steps.gate.outputs.automerge == 'true'
+        if: steps.gate.outputs.automerge == 'true' && steps.pr_state.outputs.auto_merge_enabled != 'true'
         run: |
           set -euo pipefail
-          # Enable GitHub auto-merge (squash). GitHub will wait for required checks if needed.
           gh pr merge --auto --squash --delete-branch "$PR_URL"
 
       - name: Comment on major updates
         if: steps.metadata.outputs.update-type == 'version-update:semver-major'
         run: |
-          gh pr comment "$PR_URL" --body "$(cat <<'EOF'
+          set -euo pipefail
+
+          existing_comments="$(gh pr view "$PR_URL" --json comments --jq '[.comments[]? | select(.author.login == "github-actions[bot]" and (.body | contains("Major version update detected")))] | length')"
+          if [[ "${existing_comments}" -eq 0 ]]; then
+            gh pr comment "$PR_URL" --body "$(cat <<'EOF'
           ⚠️ **Major version update detected — manual review required.**
 
           This PR will not be auto-merged. Please:
@@ -117,7 +128,8 @@ jobs:
           - Run the full test suite locally if needed.
           - Approve and merge manually once verified.
           EOF
-          )"
+            )"
+          fi
 
       - name: Comment on skipped non-major updates
         if: >-
@@ -125,10 +137,15 @@ jobs:
           steps.metadata.outputs.update-type != 'version-update:semver-major' &&
           steps.metadata.outputs.update-type != ''
         run: |
-          gh pr comment "$PR_URL" --body "$(cat <<'EOF'
+          set -euo pipefail
+
+          existing_comments="$(gh pr view "$PR_URL" --json comments --jq '[.comments[]? | select(.author.login == "github-actions[bot]" and (.body | contains("not auto-merged")))] | length')"
+          if [[ "${existing_comments}" -eq 0 ]]; then
+            gh pr comment "$PR_URL" --body "$(cat <<'EOF'
           ℹ️ This Dependabot update was **not auto-merged** (production dependency or non-trivial change). Manual review requested.
           EOF
-          )"
+            )"
+          fi
 
       - name: Job summary
         if: always()
@@ -139,17 +156,21 @@ jobs:
           PREV: ${{ steps.metadata.outputs.previous-version }}
           NEW: ${{ steps.metadata.outputs.new-version }}
           AUTOMERGE: ${{ steps.gate.outputs.automerge }}
+          AUTO_MERGE_ENABLED: ${{ steps.pr_state.outputs.auto_merge_enabled }}
+          ALREADY_APPROVED: ${{ steps.pr_state.outputs.already_approved }}
         run: |
           {
             echo "## Dependabot Auto-merge"
             echo ""
-            echo "| Field              | Value |"
-            echo "|--------------------|-------|"
-            echo "| Package(s)         | ${PKG:-_n/a_} |"
-            echo "| Update type        | ${UPDATE_TYPE:-_n/a_} |"
-            echo "| Dependency type    | ${DEP_TYPE:-_n/a_} |"
-            echo "| Previous version   | ${PREV:-_n/a_} |"
-            echo "| New version        | ${NEW:-_n/a_} |"
-            echo "| Auto-merge enabled | ${AUTOMERGE:-false} |"
-            echo "| PR                 | ${PR_URL} |"
+            echo "| Field                | Value |"
+            echo "|----------------------|-------|"
+            echo "| Package(s)           | ${PKG:-_n/a_} |"
+            echo "| Update type          | ${UPDATE_TYPE:-_n/a_} |"
+            echo "| Dependency type      | ${DEP_TYPE:-_n/a_} |"
+            echo "| Previous version     | ${PREV:-_n/a_} |"
+            echo "| New version          | ${NEW:-_n/a_} |"
+            echo "| Policy auto-merge    | ${AUTOMERGE:-false} |"
+            echo "| Auto-merge already on| ${AUTO_MERGE_ENABLED:-false} |"
+            echo "| Already approved     | ${ALREADY_APPROVED:-false} |"
+            echo "| PR                   | ${PR_URL} |"
           } >> "$GITHUB_STEP_SUMMARY"
