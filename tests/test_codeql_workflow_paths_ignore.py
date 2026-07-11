@@ -50,9 +50,9 @@ def test_codeql_c_cpp_uses_buildless_mode() -> None:
         entry for entry in workflow["jobs"]["analyze"]["strategy"]["matrix"]["include"] if entry["language"] == "c-cpp"
     )
 
-    assert (
-        c_cpp_entry["build-mode"] == "none"
-    ), "The c-cpp CodeQL lane must stay buildless so it does not invoke the repo root Makefile via autobuild."
+    assert c_cpp_entry["build-mode"] == "none", (
+        "The c-cpp CodeQL lane must stay buildless so it does not invoke the repo root Makefile via autobuild."
+    )
 
 
 @pytest.mark.unit
@@ -172,6 +172,6 @@ def test_codeql_config_has_document_start_and_no_trailing_whitespace() -> None:
     content = config_path.read_text(encoding="utf-8")
 
     assert content.startswith("---\n"), "CodeQL config must keep its YAML document start marker."
-    assert all(
-        line == line.rstrip() for line in content.splitlines()
-    ), "CodeQL config should not contain trailing whitespace."
+    assert all(line == line.rstrip() for line in content.splitlines()), (
+        "CodeQL config should not contain trailing whitespace."
+    )

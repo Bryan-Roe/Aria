@@ -21,10 +21,7 @@ with report.open("w", encoding="utf-8") as f:
                 if isinstance(node, ast.Import):
                     for imported_name in node.names:
                         imports.append(imported_name.name)
-                elif (
-                    isinstance(node, ast.ImportFrom)
-                    and node.module is not None
-                ):
+                elif isinstance(node, ast.ImportFrom) and node.module is not None:
                     imports.append(node.module)
 
             f.write(f"## {path}\n")

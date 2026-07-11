@@ -198,9 +198,7 @@ class CycleResult:  # pylint: disable=too-many-instance-attributes
 
         finding_kinds: dict[str, int] = {}
         for finding in self.findings:
-            finding_kinds[finding.kind] = (
-                finding_kinds.get(finding.kind, 0) + 1
-            )
+            finding_kinds[finding.kind] = finding_kinds.get(finding.kind, 0) + 1
 
         plan_kinds: dict[str, int] = {}
         for plan in self.plans:
@@ -210,10 +208,7 @@ class CycleResult:  # pylint: disable=too-many-instance-attributes
         def _format_kind_summary(kind_counts: dict[str, int]) -> str:
             if not kind_counts:
                 return "none"
-            return ", ".join(
-                f"{kind}={count}"
-                for kind, count in sorted(kind_counts.items())
-            )
+            return ", ".join(f"{kind}={count}" for kind, count in sorted(kind_counts.items()))
 
         counts = {
             "findings": len(self.findings),
@@ -319,9 +314,7 @@ class Orchestrator:
         notes: list[str] = []
 
         _logger.info("aria-bot: scanning repository at %s", repo_root)
-        scan_paths = (
-            self._resolve_paths(analyzer) if self.config.paths else None
-        )
+        scan_paths = self._resolve_paths(analyzer) if self.config.paths else None
         findings = cast(
             list[_FindingLike],
             list(analyzer.scan(paths=scan_paths)),
@@ -355,10 +348,7 @@ class Orchestrator:
                 validator.validate(changed_paths=[]),
             )
         notes.append(
-            "execution summary: "
-            f"{len(executions)} plan(s), "
-            f"{len(applied_paths)} applied, "
-            f"{len(skipped_paths)} skipped"
+            f"execution summary: {len(executions)} plan(s), {len(applied_paths)} applied, {len(skipped_paths)} skipped"
         )
         if not validation.ok:
             notes.append("validation failed; skipping commit")
@@ -366,19 +356,11 @@ class Orchestrator:
             notes.append(f"validated {len(applied_paths)} applied path(s)")
 
         commit_sha: str | None = None
-        if (
-            self.config.apply
-            and self.config.commit
-            and validation.ok
-            and applied_paths
-        ):
+        if self.config.apply and self.config.commit and validation.ok and applied_paths:
             message = self._commit_message(executions)
             commit_sha = commits.commit(applied_paths, message)
             if commit_sha is None:
-                notes.append(
-                    "commit step produced no SHA "
-                    "(nothing staged or git unavailable)"
-                )
+                notes.append("commit step produced no SHA (nothing staged or git unavailable)")
         elif not self.config.apply:
             notes.append("dry-run: no files were modified")
         elif not applied_paths:
