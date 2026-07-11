@@ -73,9 +73,9 @@ def test_auto_merge_has_pull_request_trigger() -> None:
 
 def test_auto_merge_has_check_run_trigger() -> None:
     wf = _load_auto_merge()
-    assert "check_run" in _get_triggers(
-        wf
-    ), "auto-merge.yml must trigger on check_run events so it fires when 'All Gates Passed' completes"
+    assert "check_run" in _get_triggers(wf), (
+        "auto-merge.yml must trigger on check_run events so it fires when 'All Gates Passed' completes"
+    )
 
 
 def test_auto_merge_check_run_trigger_on_completed() -> None:
@@ -161,17 +161,17 @@ def test_prepare_job_adds_autofix_label_and_marks_ready() -> None:
 def test_merge_on_gate_pass_filters_check_run_event() -> None:
     wf = _load_auto_merge()
     job_if = wf["jobs"]["merge-on-gate-pass"].get("if", "")
-    assert (
-        "github.event_name == 'check_run'" in job_if
-    ), "merge-on-gate-pass must filter on github.event_name == 'check_run'"
+    assert "github.event_name == 'check_run'" in job_if, (
+        "merge-on-gate-pass must filter on github.event_name == 'check_run'"
+    )
 
 
 def test_merge_on_gate_pass_filters_all_gates_passed_name() -> None:
     wf = _load_auto_merge()
     job_if = wf["jobs"]["merge-on-gate-pass"].get("if", "")
-    assert (
-        "All Gates Passed" in job_if
-    ), "merge-on-gate-pass must filter on check_run.name == 'All Gates Passed' (the canonical fan-in job name from merge-gate.yml)"
+    assert "All Gates Passed" in job_if, (
+        "merge-on-gate-pass must filter on check_run.name == 'All Gates Passed' (the canonical fan-in job name from merge-gate.yml)"
+    )
 
 
 def test_merge_on_gate_pass_filters_success_conclusion() -> None:
@@ -195,9 +195,9 @@ def test_merge_on_gate_pass_has_write_permissions() -> None:
 def test_enable_job_guards_against_forks() -> None:
     wf = _load_auto_merge()
     job_if = wf["jobs"]["enable"].get("if", "")
-    assert (
-        "head.repo.full_name == github.repository" in job_if
-    ), "enable job must guard against fork PRs by checking head.repo.full_name == github.repository"
+    assert "head.repo.full_name == github.repository" in job_if, (
+        "enable job must guard against fork PRs by checking head.repo.full_name == github.repository"
+    )
 
 
 def test_enable_job_guards_against_drafts() -> None:
@@ -209,9 +209,9 @@ def test_enable_job_guards_against_drafts() -> None:
 def test_enable_job_fires_on_pull_request_event() -> None:
     wf = _load_auto_merge()
     job_if = wf["jobs"]["enable"].get("if", "")
-    assert (
-        "github.event_name == 'pull_request'" in job_if
-    ), "enable job must check github.event_name == 'pull_request' to avoid running on check_run events"
+    assert "github.event_name == 'pull_request'" in job_if, (
+        "enable job must check github.event_name == 'pull_request' to avoid running on check_run events"
+    )
 
 
 # ---------------------------------------------------------------------------
