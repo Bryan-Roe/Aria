@@ -1,20 +1,21 @@
+name: Auto Merge
+
 # =============================================================================
 # Auto Merge — Label-triggered and gate-triggered PR merge automation
 # =============================================================================
 # yamllint disable rule:key-ordering
 # Purpose:
 #   • a-prepare-github-actions-pr — converts same-repo github-actions[bot] PRs to
-#                                 ready-for-review and ensures they carry the
-#                                 `autofix` label so the existing auto-merge
-#                                 pipeline can take over.
-#   • b-enable             — arms GitHub native auto-merge when `auto-merge` or
-#                          `autofix` label is present on a same-repo PR.
-#   • bot-approve        — optionally approves allowlisted bot-authored PRs
-#                          using a dedicated PAT from a different identity.
-#   • disable            — disables native auto-merge when the last matching
-#                          label is removed.
+#     ready-for-review and ensures they carry the `autofix` label so the existing
+#     auto-merge pipeline can take over.
+#   • b-enable — arms GitHub native auto-merge when `auto-merge` or `autofix`
+#     label is present on a same-repo PR.
+#   • bot-approve — optionally approves allowlisted bot-authored PRs using a
+#     dedicated PAT from a different identity.
+#   • disable — disables native auto-merge when the last matching label is removed.
 #   • merge-on-gate-pass — when the `All Gates Passed` check succeeds, evaluates
-#                          associated PRs and merges eligible labeled PRs.
+#     associated PRs and merges eligible labeled PRs.
+#   • finish-open-prs — scheduled/manual sweep that merges already-eligible open PRs.
 #
 # Merge strategy : squash
 # Fork PRs       : skipped
@@ -42,13 +43,14 @@ on:
         required: false
         type: number
 
-      name: Auto Merge
+env:
+  AUTO_MERGE_LABELS: auto-merge autofix
+  BLOCKED_AUTO_MERGE_LABELS: no-auto-merge blocked needs-manual-review
+  BOT_APPROVE_ALLOWLIST: github-actions[bot] copilot-swe-agent[bot]
 
 concurrency:
-  (
-    contains(github.event.pull_request.labels.*.name, 'auto-merge') ||
-    contains(github.event.pull_request.labels.*.name, 'autofix')
-  )
+  group: auto-merge-${{ github.event.pull_request.number || github.event.check_run.id || github.run_id }}
+  cancel-in-progress: false
 
 jobs:
   a-prepare-github-actions-pr:
@@ -62,6 +64,7 @@ jobs:
       contents: read
       pull-requests: write
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - name: Harden runner
         uses: step-security/harden-runner@0634a2670c59f64b4a01f0f96f84700a4088b9f0
@@ -137,6 +140,7 @@ jobs:
       contents: read
       pull-requests: write
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - name: Harden runner
         uses: step-security/harden-runner@0634a2670c59f64b4a01f0f96f84700a4088b9f0
@@ -174,13 +178,14 @@ jobs:
         name: Post informational comment
         run: |
           set -euo pipefail
-          gh pr comment "$PR_NUMBER" --body \
-            "🤖 **Auto-merge armed** (label: \`${LABEL}\`)
+          gh pr comment "$PR_NUMBER" --body "$(cat <<EOF
+          🤖 **Auto-merge armed** (label: \`${LABEL}\`)
 
           This PR is configured for squash auto-merge and will merge once GitHub's repository merge requirements are satisfied, including required checks, approvals, mergeability, and any branch protections.
 
-          Remove the \`auto-merge\` or \`autofix\` label to cancel."
-        timeout-minutes: 5
+          Remove the \`auto-merge\` or \`autofix\` label to cancel.
+          EOF
+          )"
 
   bot-approve:
     if: >-
@@ -200,6 +205,7 @@ jobs:
     permissions:
       pull-requests: write
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - name: Harden runner
         uses: step-security/harden-runner@0634a2670c59f64b4a01f0f96f84700a4088b9f0
@@ -277,6 +283,7 @@ jobs:
     permissions:
       pull-requests: write
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - name: Harden runner
         uses: step-security/harden-runner@0634a2670c59f64b4a01f0f96f84700a4088b9f0
@@ -293,7 +300,6 @@ jobs:
         run: |
           set -euo pipefail
           gh pr merge --disable-auto "$PR_NUMBER" || echo "Auto-merge was already disabled."
-    timeout-minutes: 5
 
   merge-on-gate-pass:
     if: >-
@@ -307,6 +313,7 @@ jobs:
       contents: write
       pull-requests: write
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - name: Harden runner
         uses: step-security/harden-runner@0634a2670c59f64b4a01f0f96f84700a4088b9f0
@@ -318,26 +325,61 @@ jobs:
 
       - name: Merge eligible PRs
         uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea
+        env:
+          AUTO_MERGE_LABELS: ${{ env.AUTO_MERGE_LABELS }}
+          BLOCKED_AUTO_MERGE_LABELS: ${{ env.BLOCKED_AUTO_MERGE_LABELS }}
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const checkRun = context.payload.check_run;
             const prs = checkRun.pull_requests || [];
             const autoMergeLabels = new Set((process.env.AUTO_MERGE_LABELS || '').split(/\s+/).filter(Boolean));
+            const blockedLabels = new Set((process.env.BLOCKED_AUTO_MERGE_LABELS || '').split(/\s+/).filter(Boolean));
             const summaryRows = [];
             const thisRepo = context.payload.repository.full_name;
             let mergedCount = 0;
 
             function latestReviewStates(reviews) {
               const latestByUser = new Map();
-              for (const r of reviews || []) {
-                const login = r.user?.login;
+              for (const review of reviews || []) {
+                const login = review.user?.login;
                 if (!login) continue;
-                const ts = Date.parse(r.submitted_at || r.updated_at || '') || 0;
+                const ts = Date.parse(review.submitted_at || review.updated_at || '') || 0;
                 const prev = latestByUser.get(login);
-                if (!prev || ts >= prev.ts) latestByUser.set(login, { state: r.state, ts });
+                if (!prev || ts >= prev.ts) latestByUser.set(login, { state: review.state, ts });
               }
-              return [...latestByUser.values()].map((x) => x.state);
+              return [...latestByUser.values()].map((entry) => entry.state);
+            }
+
+            function hasAnyLabel(pr, allowedLabels) {
+              const names = (pr.labels || []).map((label) => label.name);
+              return names.some((name) => allowedLabels.has(name));
+            }
+
+            function hasBlockedLabel(pr, blocked) {
+              const names = new Set((pr.labels || []).map((label) => label.name));
+              return [...blocked].some((name) => names.has(name));
+            }
+
+            async function getStableMergeability(prNumber, retries = 3) {
+              for (let attempt = 0; attempt < retries; attempt += 1) {
+                const { data: prData } = await github.rest.pulls.get({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  pull_number: prNumber,
+                });
+                if (prData.mergeable !== null) return prData;
+                if (attempt < retries - 1) {
+                  await new Promise((resolve) => setTimeout(resolve, 2000));
+                }
+              }
+
+              const { data: prData } = await github.rest.pulls.get({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: prNumber,
+              });
+              return prData;
             }
 
             if (!prs.length) {
@@ -347,17 +389,15 @@ jobs:
 
             for (const pr of prs) {
               const prNumber = pr.number;
+              const prData = await getStableMergeability(prNumber);
 
-              const { data: prData } = await github.rest.pulls.get({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                pull_number: prNumber,
-              });
-
-              const labelNames = (prData.labels || []).map((label) => label.name);
-              const hasAutoMergeLabel = labelNames.some((n) => autoMergeLabels.has(n));
-              if (!hasAutoMergeLabel) {
+              if (!hasAnyLabel(prData, autoMergeLabels)) {
                 summaryRows.push(`| #${prNumber} | ⊘ skipped (no label) |`);
+                continue;
+              }
+
+              if (hasBlockedLabel(prData, blockedLabels)) {
+                summaryRows.push(`| #${prNumber} | ⊘ skipped (blocked label) |`);
                 continue;
               }
 
@@ -427,7 +467,6 @@ jobs:
               .addRaw(`${header}\n${body}`)
               .addRaw(`\n\nMerged: ${mergedCount}`)
               .write();
-    timeout-minutes: 15
 
   finish-open-prs:
     name: Finish Open PRs
@@ -439,6 +478,7 @@ jobs:
       contents: write
       issues: write
       pull-requests: write
+    timeout-minutes: 15
     steps:
       - name: Harden runner
         uses: step-security/harden-runner@0634a2670c59f64b4a01f0f96f84700a4088b9f0
@@ -452,13 +492,14 @@ jobs:
         uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea
         env:
           AUTO_MERGE_LABELS: ${{ env.AUTO_MERGE_LABELS }}
+          BLOCKED_AUTO_MERGE_LABELS: ${{ env.BLOCKED_AUTO_MERGE_LABELS }}
           MAX_PRS: ${{ inputs.max_prs || '20' }}
           DRY_RUN: ${{ inputs.dry_run || 'false' }}
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const autoMergeLabels = new Set((process.env.AUTO_MERGE_LABELS || '').split(/\s+/).filter(Boolean));
-            // MAX_PRS and DRY_RUN are pre-defaulted via GitHub expression (inputs.max_prs || '20', etc.)
+            const blockedLabels = new Set((process.env.BLOCKED_AUTO_MERGE_LABELS || '').split(/\s+/).filter(Boolean));
             const maxPRs = parseInt(process.env.MAX_PRS, 10);
             const dryRun = process.env.DRY_RUN === 'true';
             const thisRepo = context.payload.repository.full_name;
@@ -467,14 +508,45 @@ jobs:
 
             function latestReviewStates(reviews) {
               const latestByUser = new Map();
-              for (const r of reviews || []) {
-                const login = r.user?.login;
+              for (const review of reviews || []) {
+                const login = review.user?.login;
                 if (!login) continue;
-                const ts = Date.parse(r.submitted_at || r.updated_at || '') || 0;
+                const ts = Date.parse(review.submitted_at || review.updated_at || '') || 0;
                 const prev = latestByUser.get(login);
-                if (!prev || ts >= prev.ts) latestByUser.set(login, { state: r.state, ts });
+                if (!prev || ts >= prev.ts) latestByUser.set(login, { state: review.state, ts });
               }
-              return [...latestByUser.values()].map((x) => x.state);
+              return [...latestByUser.values()].map((entry) => entry.state);
+            }
+
+            function hasAnyLabel(pr, allowedLabels) {
+              const names = (pr.labels || []).map((label) => label.name);
+              return names.some((name) => allowedLabels.has(name));
+            }
+
+            function hasBlockedLabel(pr, blocked) {
+              const names = new Set((pr.labels || []).map((label) => label.name));
+              return [...blocked].some((name) => names.has(name));
+            }
+
+            async function getStableMergeability(prNumber, retries = 3) {
+              for (let attempt = 0; attempt < retries; attempt += 1) {
+                const { data: prData } = await github.rest.pulls.get({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  pull_number: prNumber,
+                });
+                if (prData.mergeable !== null) return prData;
+                if (attempt < retries - 1) {
+                  await new Promise((resolve) => setTimeout(resolve, 2000));
+                }
+              }
+
+              const { data: prData } = await github.rest.pulls.get({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: prNumber,
+              });
+              return prData;
             }
 
             const { data: openPRs } = await github.rest.pulls.list({
@@ -492,10 +564,13 @@ jobs:
             for (const prData of openPRs.slice(0, maxPRs)) {
               const prNumber = prData.number;
 
-              const labelNames = (prData.labels || []).map((label) => label.name);
-              const hasAutoMergeLabel = labelNames.some((n) => autoMergeLabels.has(n));
-              if (!hasAutoMergeLabel) {
+              if (!hasAnyLabel(prData, autoMergeLabels)) {
                 summaryRows.push(`| #${prNumber} | ⊘ skipped (no label) |`);
+                continue;
+              }
+
+              if (hasBlockedLabel(prData, blockedLabels)) {
+                summaryRows.push(`| #${prNumber} | ⊘ skipped (blocked label) |`);
                 continue;
               }
 
@@ -509,11 +584,7 @@ jobs:
                 continue;
               }
 
-              const { data: fullPR } = await github.rest.pulls.get({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                pull_number: prNumber,
-              });
+              const fullPR = await getStableMergeability(prNumber);
 
               const { data: reviews } = await github.rest.pulls.listReviews({
                 owner: context.repo.owner,
@@ -571,4 +642,3 @@ jobs:
               .addRaw(`${header}\n${body}`)
               .addRaw(`\n\nMerged: ${mergedCount}${dryRun ? ' (dry-run)' : ''}`)
               .write();
-    timeout-minutes: 15

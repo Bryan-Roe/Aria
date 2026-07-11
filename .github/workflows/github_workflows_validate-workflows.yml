@@ -1,0 +1,19 @@
+name: Validate Workflows
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/*.yml"
+      - ".github/workflows/*.yaml"
+  push:
+    paths:
+      - ".github/workflows/*.yml"
+      - ".github/workflows/*.yaml"
+
+jobs:
+  actionlint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run actionlint
+        uses: raven-actions/actionlint@v2
