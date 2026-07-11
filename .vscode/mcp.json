@@ -1,133 +1,154 @@
 {
-	// Prompted values used by one or more servers below.
-	"inputs": [
-		{
-			"id": "GITHUB_HOST",
-			"type": "promptString",
-			"description": "GitHub host for GitHub MCP server (use github.com for public GitHub, or your GHES host, e.g. github.company.com)",
-			"default": "github.com",
-			"password": false
-		},
-		{
-			"id": "GITHUB_TOKEN",
-			"type": "promptString",
-			"description": "Optional GitHub PAT for GitHub MCP server (recommended scopes: repo, read:org, read:user). Leave empty for public-only access with stricter rate limits.",
-			"default": "",
-			"password": true
-		},
-		{
-			"id": "PROMPTS_API_KEY",
-			"type": "promptString",
-			"description": "Optional API key for authenticated requests (enables save_prompt tool)",
-			"default": "",
-			"password": true
-		},
-		{
-			"id": "PROMPTS_QUERY",
-			"type": "promptString",
-			"description": "Optional query string to filter prompts (e.g., users=a,b&categories=c,d&tags=e,f)",
-			"default": "",
-			"password": false
-		}
-	],
-	// MCP server definitions for this workspace.
-	"servers": {
-		// Local project MCP servers
-		"llm-maker": {
-			"args": [
-				"${workspaceFolder}/ai-projects/llm-maker/llm_maker_mcp_server.py"
-			],
-			"command": "${workspaceFolder}/.venv/bin/python",
-			"cwd": "${workspaceFolder}/ai-projects/llm-maker",
-			"env": {
-				"ENABLE_TELEMETRY": "true",
-				"LOG_LEVEL": "INFO",
-				"MAX_CONTEXT_TOKENS": "128000",
-				"MAX_WORKERS": "8",
-				"PYTHONDONTWRITEBYTECODE": "1",
-				"PYTHONPATH": "${workspaceFolder}/ai-projects/llm-maker:${workspaceFolder}",
-				"PYTHONUNBUFFERED": "1",
-				"QAI_SQL_POOL_SIZE": "10",
-				"RESERVE_OUTPUT_TOKENS": "4096"
-			},
-			"type": "stdio"
-		},
-		"quantum-ai": {
-			"args": [
-				"${workspaceFolder}/ai-projects/quantum-ml/quantum_mcp_server.py"
-			],
-			"command": "${workspaceFolder}/.venv/bin/python",
-			"cwd": "${workspaceFolder}/ai-projects/quantum-ml",
-			"env": {
-				"ENABLE_TELEMETRY": "true",
-				"LOG_LEVEL": "INFO",
-				"MAX_CONTEXT_TOKENS": "128000",
-				"MAX_WORKERS": "8",
-				"PYTHONDONTWRITEBYTECODE": "1",
-				"PYTHONPATH": "${workspaceFolder}/ai-projects/quantum-ml:${workspaceFolder}",
-				"PYTHONUNBUFFERED": "1",
-				"QAI_SQL_POOL_SIZE": "10",
-				"RESERVE_OUTPUT_TOKENS": "4096"
-			},
-			"type": "stdio"
-		},
-		"task-complete": {
-			"args": [
-				"${workspaceFolder}/scripts/task_complete_mcp_server.py"
-			],
-			"command": "${workspaceFolder}/.venv/bin/python",
-			"cwd": "${workspaceFolder}/scripts",
-			"env": {
-				"ENABLE_TELEMETRY": "true",
-				"LOG_LEVEL": "INFO",
-				"MAX_WORKERS": "4",
-				"PYTHONDONTWRITEBYTECODE": "1",
-				"PYTHONPATH": "${workspaceFolder}/scripts:${workspaceFolder}",
-				"PYTHONUNBUFFERED": "1"
-			},
-			"type": "stdio"
-		},
-		// External MCP servers
-		// Uses npx (non-Docker) launcher.
-		"io.github.github/github-mcp-server": {
-			"args": [
-				"-y",
-				"@modelcontextprotocol/server-github"
-			],
-			"command": "npx",
-			"cwd": "${workspaceFolder}",
-			"env": {
-				"GH_HOST": "${input:GITHUB_HOST}",
-				"GH_TOKEN": "${input:GITHUB_TOKEN}",
-				"GITHUB_PERSONAL_ACCESS_TOKEN": "${input:GITHUB_TOKEN}",
-				"GITHUB_TOKEN": "${input:GITHUB_TOKEN}"
-			},
-			"type": "stdio"
-		},
-		"io.github.f/prompts.chat-mcp": {
-			"args": [
-				"-y",
-				"@fkadev/prompts.chat-mcp@1.0.9"
-			],
-			"command": "npx",
-			"cwd": "${workspaceFolder}",
-			"env": {
-				"PROMPTS_API_KEY": "${input:PROMPTS_API_KEY}",
-				"PROMPTS_QUERY": "${input:PROMPTS_QUERY}"
-			},
-			"type": "stdio"
-		},
-		"microsoft/markitdown": {
-			"args": [
-				"markitdown-mcp@0.0.1a4"
-			],
-			"command": "uvx",
-			"cwd": "${workspaceFolder}",
-			"type": "stdio"
-		},
-		"microsoftdocs/mcp": {
-			"type": "http",
-			"url": "https://learn.microsoft.com/api/mcp"
-		}
-	}
+  // Prompted values used by one or more servers below.
+  "inputs": [
+    {
+      "id": "PYTHON_CMD",
+      "type": "promptString",
+      "description": "Python executable path for local MCP servers (example: ${workspaceFolder}/.venv/bin/python on macOS/Linux, ${workspaceFolder}\\.venv\\Scripts\\python.exe on Windows)",
+      "default": "${workspaceFolder}/.venv/bin/python",
+      "password": false
+    },
+    {
+      "id": "GITHUB_HOST",
+      "type": "promptString",
+      "description": "GitHub host for GitHub MCP server (use github.com for public GitHub, or your GHES host, e.g. github.company.com)",
+      "default": "github.com",
+      "password": false
+    },
+    {
+      "id": "GITHUB_TOKEN",
+      "type": "promptString",
+      "description": "Optional GitHub PAT for GitHub MCP server (recommended scopes: repo, read:org, read:user). Leave empty for public-only access with stricter rate limits.",
+      "default": "",
+      "password": true
+    },
+    {
+      "id": "PROMPTS_API_KEY",
+      "type": "promptString",
+      "description": "Optional API key for authenticated requests (enables save_prompt tool)",
+      "default": "",
+      "password": true
+    },
+    {
+      "id": "PROMPTS_QUERY",
+      "type": "promptString",
+      "description": "Optional query string to filter prompts (e.g., users=a,b&categories=c,d&tags=e,f)",
+      "default": "",
+      "password": false
+    }
+  ],
+
+  // MCP server definitions for this workspace.
+  "servers": {
+    // Local project MCP servers
+    "llm-maker": {
+      "type": "stdio",
+      "command": "${input:PYTHON_CMD}",
+      "args": [
+        "${workspaceFolder}/ai-projects/llm-maker/llm_maker_mcp_server.py"
+      ],
+      "cwd": "${workspaceFolder}/ai-projects/llm-maker",
+      "env": {
+        "ENABLE_TELEMETRY": "true",
+        "LOG_LEVEL": "INFO",
+        "MAX_CONTEXT_TOKENS": "128000",
+        "RESERVE_OUTPUT_TOKENS": "4096",
+        "MAX_WORKERS": "8",
+        "QAI_SQL_POOL_SIZE": "10",
+        "PYTHONDONTWRITEBYTECODE": "1",
+        "PYTHONUNBUFFERED": "1",
+        "PYTHONPATH": "${workspaceFolder}/ai-projects/llm-maker:${workspaceFolder}"
+      }
+    },
+
+    "quantum-ai": {
+      "type": "stdio",
+      "command": "${input:PYTHON_CMD}",
+      "args": [
+        "${workspaceFolder}/ai-projects/quantum-ml/quantum_mcp_server.py"
+      ],
+      "cwd": "${workspaceFolder}/ai-projects/quantum-ml",
+      "env": {
+        "ENABLE_TELEMETRY": "true",
+        "LOG_LEVEL": "INFO",
+        "MAX_CONTEXT_TOKENS": "128000",
+        "RESERVE_OUTPUT_TOKENS": "4096",
+        "MAX_WORKERS": "8",
+        "QAI_SQL_POOL_SIZE": "10",
+        "PYTHONDONTWRITEBYTECODE": "1",
+        "PYTHONUNBUFFERED": "1",
+        "PYTHONPATH": "${workspaceFolder}/ai-projects/quantum-ml:${workspaceFolder}"
+      }
+    },
+
+    "task-complete": {
+      "type": "stdio",
+      "command": "${input:PYTHON_CMD}",
+      "args": [
+        "${workspaceFolder}/scripts/task_complete_mcp_server.py"
+      ],
+      "cwd": "${workspaceFolder}/scripts",
+      "env": {
+        "ENABLE_TELEMETRY": "true",
+        "LOG_LEVEL": "INFO",
+        "MAX_WORKERS": "4",
+        "PYTHONDONTWRITEBYTECODE": "1",
+        "PYTHONUNBUFFERED": "1",
+        "PYTHONPATH": "${workspaceFolder}/scripts:${workspaceFolder}"
+      }
+    },
+
+    // External MCP servers
+    "io.github.github/github-mcp-server": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-github@latest"
+      ],
+      "cwd": "${workspaceFolder}",
+      "env": {
+        "GH_HOST": "${input:GITHUB_HOST}",
+        "GH_TOKEN": "${input:GITHUB_TOKEN}"
+      }
+    },
+
+    "io.github.f/prompts.chat-mcp": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@fkadev/prompts.chat-mcp@1.0.9"
+      ],
+      "cwd": "${workspaceFolder}",
+      "env": {
+        "PROMPTS_API_KEY": "${input:PROMPTS_API_KEY}",
+        "PROMPTS_QUERY": "${input:PROMPTS_QUERY}"
+      }
+    },
+
+    "microsoft/markitdown": {
+      "type": "stdio",
+      "command": "uvx",
+      "args": [
+        "markitdown-mcp@0.0.1a4"
+      ],
+      "cwd": "${workspaceFolder}"
+    },
+
+    "microsoftdocs/mcp": {
+      "type": "http",
+      "url": "https://learn.microsoft.com/api/mcp"
+    },
+
+    // Optional generic fetch server
+    "fetch": {
+      "type": "stdio",
+      "command": "uvx",
+      "args": [
+        "mcp-server-fetch"
+      ],
+      "cwd": "${workspaceFolder}"
+    }
+  }
 }
