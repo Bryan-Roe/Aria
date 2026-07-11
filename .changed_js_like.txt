@@ -184,6 +184,7 @@
 .github/prompts/traceback-to-test.prompt.md
 .github/prompts/train.prompt.md
 .github/rulesets/main-default-automation.ruleset.json
+.github/secret_scanning.yml
 .github/skills/agi-reasoning-debug-workflow/SKILL.md
 .github/skills/ai-agent-implementation-workflow/SKILL.md
 .github/skills/ai-feature-planning-workflow/SKILL.md
@@ -236,7 +237,9 @@
 .github/workflows/aria-bot-tests.yml
 .github/workflows/aria-tests.yml
 .github/workflows/artifact-lifecycle.yml
+.github/workflows/attestation.yml
 .github/workflows/auto-assign-reviewers.yml
+.github/workflows/auto-complete-bot-prs.yml
 .github/workflows/auto-create-pr.yml
 .github/workflows/auto-finish-pr.yml
 .github/workflows/auto-fix.yml
@@ -249,11 +252,9 @@
 .github/workflows/broken-links.yml
 .github/workflows/ci-pipeline.yml
 .github/workflows/ci.yml
-.github/workflows/circleci.yml
 .github/workflows/code-coverage.yml
 .github/workflows/code-quality.yml
 .github/workflows/codeql-analysis.yml
-.github/workflows/codeql-config.yml
 .github/workflows/codeql.yml
 .github/workflows/copilot-setup-steps.yml
 .github/workflows/dataset-integrity.yml
@@ -320,6 +321,7 @@
 .vscode/tasks.json
 .vscode/test-profiles.json
 AGENTS.md
+AGI.prompt.yml
 AI.prompt.yml
 AI/README.md
 CHANGELOG.md
