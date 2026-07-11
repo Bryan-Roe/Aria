@@ -502,7 +502,7 @@ void scroll(Image_ img, int dx, int dy) {
   } else if (dx < 0) {
     dx = -dx;
     if (dx < w)
-      memmove(img->pix(), img->pix(dx, 0), (w - dx) * bh);
+      memmove(img->pix(), img->pix(dx, 0), static_cast<size_t>(w - dx) * static_cast<size_t>(bh));
     else
       dx = w;
     memset(img->pix(w - dx, 0), 0, dx * bh);
