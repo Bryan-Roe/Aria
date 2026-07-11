@@ -10,10 +10,10 @@ name: OSSAR
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   pull_request:
     # The branches below must be a subset of the branches above
-    branches: [ "main" ]
+    branches: ["main"]
   schedule:
     - cron: '37 7 * * 0'
 
@@ -31,8 +31,8 @@ jobs:
     runs-on: windows-latest
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
     # Ensure a compatible version of dotnet is installed.
     # The [Microsoft Security Code Analysis CLI](https://aka.ms/mscadocs) is built with dotnet v3.1.201.
@@ -45,12 +45,12 @@ jobs:
     #     dotnet-version: '3.1.x'
 
       # Run open source static analysis tools
-    - name: Run OSSAR
-      uses: github/ossar-action@v1
-      id: ossar
+      - name: Run OSSAR
+        uses: github/ossar-action@v1
+        id: ossar
 
-      # Upload results to the Security tab
-    - name: Upload OSSAR results
-      uses: github/codeql-action/upload-sarif@v3
-      with:
-        sarif_file: ${{ steps.ossar.outputs.sarifFile }}
+        # Upload results to the Security tab
+      - name: Upload OSSAR results
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: ${{ steps.ossar.outputs.sarifFile }}
