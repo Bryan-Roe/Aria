@@ -11,6 +11,7 @@ concurrency:
 permissions:
   contents: read
   issues: write
+  models: read
 
 jobs:
   summary:
@@ -24,6 +25,7 @@ jobs:
           egress-policy: block
           allowed-endpoints: |
             api.github.com:443
+            models.github.ai:443
             models.inference.ai.azure.com:443
             github.com:443
 
