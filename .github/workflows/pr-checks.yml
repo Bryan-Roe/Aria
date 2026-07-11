@@ -3,6 +3,10 @@ name: PR Checks
 on:
   pull_request:
     types: [opened, synchronize, reopened, edited, ready_for_review]
+    # Skip CI for docs-only PRs; tune patterns to your repo norms.
+    paths-ignore:
+      - '**/*.md'
+      - 'docs/**'
 
 # Cancel superseded runs for the same PR. Fall back to ref if the PR
 # number is unavailable on the event payload for any reason.
@@ -18,7 +22,7 @@ env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
   HARDEN_RUNNER_SHA: 0634a2670c59f64b4a01f0f96f84700a4088b9f0  # v2.12.2
   CHECKOUT_SHA: 11bd71901bbe5b1630ceea73d27597364c9af683      # v4.2.2
-  GITHUB_SCRIPT_SHA: 60a0d83039c74a4aee543508d2ffcb1c3799cdea    # v7.0.1
+  GITHUB_SCRIPT_SHA: 60a0d83039c74a4aee543508d2ffcb1c3799cdea  # v7.0.1
 
 defaults:
   run:
@@ -125,7 +129,7 @@ jobs:
           BODY_LENGTH=0
 
           # Treat null/whitespace-only body as failure up front.
-          if [[ -z "${PR_BODY// /}" ]]; then
+          if [[ -z "$(printf '%s' "$PR_BODY" | tr -d '[:space:]')" ]]; then
             ERRORS+=("PR description is empty. Please fill in the PR template.")
             FAILED=1
           else
@@ -179,6 +183,9 @@ jobs:
     if: github.event.pull_request.draft == false
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    permissions:
+      contents: read
+      pull-requests: read
     steps:
       - name: Harden runner
         uses: step-security/harden-runner@0634a2670c59f64b4a01f0f96f84700a4088b9f0

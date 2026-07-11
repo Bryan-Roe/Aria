@@ -1,25 +1,6 @@
-# cspell:ignore pyproject ACMRT
-
-name: "Autofix (Lint/Format)"
+name: "Autofix (Maintenance)"
 
 on:
-  pull_request:
-    branches: ["main"]
-    paths:
-      - "**/*.py"
-      - "**/*.{js,jsx,ts,tsx,mjs,cjs,json,yml,yaml,md,css,scss,html}"
-      - "**/*.{c,cc,cpp,cxx,h,hh,hpp,hxx}"
-      - "package.json"
-      - "package-lock.json"
-      - "requirements*.txt"
-      - "pyproject.toml"
-      - ".ruff.toml"
-      - "ruff.toml"
-      - ".eslintrc*"
-      - "eslint.config.*"
-      - ".prettierrc*"
-      - ".prettierignore"
-    types: [opened, reopened, synchronize, ready_for_review, edited]
   push:
     branches: ["main"]
     paths:
@@ -41,31 +22,33 @@ on:
   workflow_dispatch:
     inputs:
       allow_unsafe_fixes:
-        default: false
         description: "Allow potentially unsafe fixes (ruff --unsafe-fixes) for manual/scheduled runs"
         type: boolean
+        default: false
       open_autofix_pr:
-        default: true
         description: "Open PR for push/schedule/manual runs when fixes exist"
         type: boolean
-      run_autofix:
         default: true
+      run_autofix:
         description: "Run autofixers"
         type: boolean
+        default: true
+
+permissions:
+  contents: read
 
 concurrency:
-  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
-  group: autofix-${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.head_ref || github.ref }}
+  group: autofix-maintenance-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
 
 jobs:
   autofix:
     if: >-
       github.event_name != 'workflow_dispatch' || inputs.run_autofix
-    name: Autofix
-    permissions:
-      contents: write
-      pull-requests: write
+    name: Autofix maintenance
     runs-on: ubuntu-latest
+    timeout-minutes: 30
+
     steps:
       - name: Harden runner
         uses: step-security/harden-runner@0634a2670c59f64b4a01f0f96f84700a4088b9f0
@@ -73,49 +56,17 @@ jobs:
           disable-sudo: false
           egress-policy: audit
 
-      - env:
-          EVENT_NAME: ${{ github.event_name }}
-          PR_HEAD_REF: ${{ github.event.pull_request.head.ref }}
-          PR_HEAD_REPO: ${{ github.event.pull_request.head.repo.full_name }}
-          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
-          REF_NAME: ${{ github.ref_name }}
-          REPOSITORY: ${{ github.repository }}
-        id: ref
-        name: Determine checkout ref
-        run: |
-          set -euo pipefail
-          {
-            if [ "$EVENT_NAME" = "pull_request" ]; then
-              echo "ref=$PR_HEAD_SHA"
-              echo "push_ref=$PR_HEAD_REF"
-              echo "repo=$PR_HEAD_REPO"
-              if [ "$PR_HEAD_REPO" = "$REPOSITORY" ]; then
-                echo "can_push=true"
-              else
-                echo "can_push=false"
-              fi
-            else
-              echo "ref=$REF_NAME"
-              echo "push_ref=$REF_NAME"
-              echo "repo=$REPOSITORY"
-              echo "can_push=false"
-            fi
-          } >> "$GITHUB_OUTPUT"
-        shell: bash
-
       - name: Checkout repository
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
           fetch-depth: 0
           persist-credentials: true
-          ref: ${{ steps.ref.outputs.ref }}
-          repository: ${{ steps.ref.outputs.repo }}
 
       - name: Set up Python
         uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
         with:
-          cache: "pip"
           python-version: "3.12"
+          cache: "pip"
 
       - name: Set up Node.js
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
@@ -125,19 +76,16 @@ jobs:
       - name: Cache npm
         uses: actions/cache@1bd1e32a3bdc45362d1e726936510720a7c30a57
         with:
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
           path: |
             ~/.npm
             ~/.cache
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
             ${{ runner.os }}-node-
 
-      - env:
-          BASE_SHA: ${{ github.event.pull_request.base.sha }}
-          EVENT_NAME: ${{ github.event_name }}
-          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
-        id: changed
-        name: Compute changed files scope
+      - id: scope
+        name: Build maintenance file scope
+        shell: bash
         run: |
           set -euo pipefail
           : > .changed_files.txt
@@ -145,11 +93,7 @@ jobs:
           : > .changed_js_like.txt
           : > .changed_c_like.txt
 
-          if [ "$EVENT_NAME" = "pull_request" ]; then
-            git diff --name-only --diff-filter=ACMRT "$BASE_SHA" "$HEAD_SHA" > .changed_files.txt || true
-          else
-            git ls-files > .changed_files.txt || true
-          fi
+          git ls-files > .changed_files.txt || true
 
           grep -E '\.py$' .changed_files.txt > .changed_py.txt || true
           grep -E '\.(js|jsx|ts|tsx|mjs|cjs|json|yml|yaml|md|css|scss|html)$' .changed_files.txt > .changed_js_like.txt || true
@@ -159,9 +103,9 @@ jobs:
           echo "py_count=$(wc -l < .changed_py.txt | tr -d ' ')" >> "$GITHUB_OUTPUT"
           echo "js_count=$(wc -l < .changed_js_like.txt | tr -d ' ')" >> "$GITHUB_OUTPUT"
           echo "c_count=$(wc -l < .changed_c_like.txt | tr -d ' ')" >> "$GITHUB_OUTPUT"
-        shell: bash
 
       - name: Install autofix tooling
+        shell: bash
         run: |
           set -euo pipefail
           python -m pip install --upgrade pip
@@ -178,18 +122,33 @@ jobs:
             npm install --global --no-fund --no-audit prettier@3
           fi
 
-          if [ "${{ steps.changed.outputs.c_count }}" != "0" ]; then
+          if [ "${{ steps.scope.outputs.c_count }}" != "0" ]; then
             sudo DEBIAN_FRONTEND=noninteractive apt-get update -qq
             sudo DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends clang-format
           fi
-        shell: bash
 
-      - continue-on-error: true
-        name: Run ruff fixes
+      - name: Log tool versions
+        shell: bash
         run: |
           set -euo pipefail
-          if [ "${{ steps.changed.outputs.py_count }}" = "0" ]; then
-            echo "No changed Python files; skipping ruff."
+          python --version
+          node --version
+          npm --version
+          ruff --version
+          if [ -f package.json ]; then
+            npx --no-install prettier --version || true
+            npx --no-install eslint --version || true
+          else
+            prettier --version || true
+          fi
+
+      - name: Run ruff fixes
+        continue-on-error: true
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ "${{ steps.scope.outputs.py_count }}" = "0" ]; then
+            echo "No Python files; skipping ruff."
             exit 0
           fi
 
@@ -206,14 +165,14 @@ jobs:
             xargs -r ruff check --fix --exit-zero < .changed_py.txt
           fi
           xargs -r ruff format < .changed_py.txt
-        shell: bash
 
-      - continue-on-error: true
-        name: Run eslint fixes (if configured)
+      - name: Run eslint fixes (if configured)
+        continue-on-error: true
+        shell: bash
         run: |
           set -euo pipefail
-          if [ "${{ steps.changed.outputs.js_count }}" = "0" ]; then
-            echo "No changed JS/TS/etc files; skipping eslint."
+          if [ "${{ steps.scope.outputs.js_count }}" = "0" ]; then
+            echo "No JS/TS/etc files; skipping eslint."
             exit 0
           fi
           if [ -f package.json ] && npx --no-install eslint --version >/dev/null 2>&1; then
@@ -221,14 +180,14 @@ jobs:
           else
             echo "eslint not available; skipping."
           fi
-        shell: bash
 
-      - continue-on-error: true
-        name: Run prettier write
+      - name: Run prettier write
+        continue-on-error: true
+        shell: bash
         run: |
           set -euo pipefail
-          if [ "${{ steps.changed.outputs.js_count }}" = "0" ] && [ "${{ steps.changed.outputs.py_count }}" = "0" ] && [ "${{ steps.changed.outputs.c_count }}" = "0" ]; then
-            echo "No changed files in configured sets; skipping prettier."
+          if [ "${{ steps.scope.outputs.all_count }}" = "0" ]; then
+            echo "No repository files found; skipping prettier."
             exit 0
           fi
 
@@ -237,14 +196,14 @@ jobs:
           else
             xargs -r prettier --write --ignore-unknown < .changed_files.txt || true
           fi
-        shell: bash
 
-      - continue-on-error: true
-        name: Run clang-format (C/C++)
+      - name: Run clang-format (C/C++)
+        continue-on-error: true
+        shell: bash
         run: |
           set -euo pipefail
-          if [ "${{ steps.changed.outputs.c_count }}" = "0" ]; then
-            echo "No changed C/C++ files; skipping clang-format."
+          if [ "${{ steps.scope.outputs.c_count }}" = "0" ]; then
+            echo "No C/C++ files; skipping clang-format."
             exit 0
           fi
           if command -v clang-format >/dev/null 2>&1; then
@@ -255,25 +214,25 @@ jobs:
           else
             echo "clang-format not installed; skipping."
           fi
-        shell: bash
 
       - name: Revert workflow file changes
+        shell: bash
         run: |
           set -euo pipefail
           git restore --staged --worktree -- .github/workflows || true
-        shell: bash
 
-      - continue-on-error: true
-        name: Verify formatter/linter state
+      - name: Verify formatter/linter state
+        continue-on-error: true
+        shell: bash
         run: |
           set -euo pipefail
 
-          if [ "${{ steps.changed.outputs.py_count }}" != "0" ]; then
+          if [ "${{ steps.scope.outputs.py_count }}" != "0" ]; then
             xargs -r ruff check < .changed_py.txt || true
             xargs -r ruff format --check < .changed_py.txt || true
           fi
 
-          if [ "${{ steps.changed.outputs.js_count }}" != "0" ]; then
+          if [ "${{ steps.scope.outputs.js_count }}" != "0" ]; then
             if [ -f package.json ] && npx --no-install eslint --version >/dev/null 2>&1; then
               xargs -r npx eslint --ext .js,.jsx,.ts,.tsx < .changed_js_like.txt || true
             fi
@@ -283,10 +242,10 @@ jobs:
               xargs -r prettier --check --ignore-unknown < .changed_files.txt || true
             fi
           fi
-        shell: bash
 
       - id: diff
         name: Detect changes
+        shell: bash
         run: |
           set -euo pipefail
           if git diff --quiet --exit-code; then
@@ -295,50 +254,23 @@ jobs:
             echo "changed=true" >> "$GITHUB_OUTPUT"
             git --no-pager diff --stat
           fi
-        shell: bash
 
-      - env:
-          PUSH_REF: ${{ steps.ref.outputs.push_ref }}
-        if: steps.diff.outputs.changed == 'true' && github.event_name == 'pull_request' && steps.ref.outputs.can_push == 'true'
-        name: Commit and push fixes to same-repo PR branch
-        run: |
-          set -euo pipefail
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -A
-          git commit -m "ci(style): apply automated autofixes (ruff/eslint/prettier/clang-format)" || echo "No commit created"
-          if git ls-remote --heads origin "$PUSH_REF" | grep -q .; then
-            git push origin "HEAD:$PUSH_REF"
-          else
-            echo "PR branch '$PUSH_REF' no longer exists; skipping push."
-          fi
-        shell: bash
-
-      - if: steps.diff.outputs.changed == 'true' && github.event_name == 'pull_request' && steps.ref.outputs.can_push == 'false'
-        name: Create patch for fork PR
-        run: |
-          set -euo pipefail
-          git diff > autofix.patch || true
-        shell: bash
-
-      - if: steps.diff.outputs.changed == 'true' && github.event_name == 'pull_request' && steps.ref.outputs.can_push == 'false'
-        name: Upload patch artifact for fork PR
-        uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08
-        with:
-          name: autofix-patch
-          path: autofix.patch
-          retention-days: 14
-
-      - if: >-
+      - name: Create follow-up PR for autofixes
+        if: >-
           steps.diff.outputs.changed == 'true' &&
           github.repository == 'Bryan-Roe/Aria' &&
           (github.event_name == 'push' ||
            github.event_name == 'schedule' ||
            (github.event_name == 'workflow_dispatch' && inputs.open_autofix_pr))
-        name: Open follow-up PR on push/schedule/manual
+        permissions:
+          contents: write
+          pull-requests: write
         uses: step-security/create-pull-request@50c103da2b9ca12cd5bc013fc6931051a5aa872b # v8.1.1
         with:
           base: ${{ github.ref_name }}
+          branch: chore/autofix-${{ github.run_id }}
+          commit-message: "ci(style): apply automated autofixes"
+          title: "ci(style): automated lint/format autofixes"
           body: |
             Automated lint/format updates from workflow run #${{ github.run_id }}.
 
@@ -347,18 +279,11 @@ jobs:
             - ruff format
             - eslint --fix (if configured)
             - prettier --write
-            - clang-format (if changed C/C++ files exist)
-          branch: chore/autofix-${{ github.run_id }}
-          commit-message: "ci(style): apply automated autofixes"
-          delete-branch: true
+            - clang-format (if C/C++ files exist)
           labels: |
             automated
             autofix
             chore
+          delete-branch: true
           sign-commits: false
-          title: "ci(style): automated lint/format autofixes"
           token: ${{ secrets.GITHUB_TOKEN }}
-    timeout-minutes: 20
-
-permissions:
-  contents: read

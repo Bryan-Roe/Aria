@@ -23,8 +23,8 @@ for _name, _value in _canonical.__dict__.items():
         continue
     globals()[_name] = _value
 
-# Expose __all__ so the shim satisfies hasattr checks and star-imports.
-__all__ = list(getattr(_canonical, "__all__", []))
+if hasattr(_canonical, "__all__"):
+    __all__ = _canonical.__all__
 
 # Mirror the canonical module so downstream monkeypatches affect one object.
 sys.modules[__name__] = _canonical

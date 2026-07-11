@@ -15,6 +15,7 @@ import logging
 import sys
 from collections.abc import Sequence
 from pathlib import Path
+from typing import Any, cast
 
 from .defaults import DEFAULT_MAX_PLANS
 from .orchestrator import run_cycle
@@ -74,6 +75,7 @@ def _build_parser() -> argparse.ArgumentParser:
 
 
 def main(argv: Sequence[str] | None = None) -> int:
+    """Run one CLI cycle and return the process exit code."""
     args = _build_parser().parse_args(argv)
     logging.basicConfig(
         level=getattr(logging, str(args.log_level).upper(), logging.INFO),
@@ -109,8 +111,11 @@ def main(argv: Sequence[str] | None = None) -> int:
     )
 
     if not args.quiet:
-        payload = result.to_dict()
-        summary = {
+        payload: dict[str, Any] = cast(
+            dict[str, Any],
+            cast(Any, result).to_dict(),
+        )
+        summary: dict[str, Any] = {
             "status_text": payload["status_text"],
             "totals": payload["totals"],
             "validation_ok": result.validation_ok,

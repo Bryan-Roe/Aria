@@ -320,15 +320,11 @@ name: CI
 # Canonical PR validation runs through merge-gate.yml.
 # This workflow is for branch CI and manual validation runs.
 # cspell:words PYTHONDONTWRITEBYTECODE PYTHONUNBUFFERED elif pyppeteer
-'on':
-  push:
-    branches:
-      - main
-    paths-ignore:
-      - 'docs/**'
-      - '**/*.md'
-      - '.gitignore'
-      - 'LICENSE'
+on:
+  merge_group:
+    branches: [main]
+  pull_request:
+    branches: [main]
   workflow_dispatch:
 
 permissions:

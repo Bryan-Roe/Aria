@@ -1752,11 +1752,35 @@
                     return
                 }
 
-                currentDoc = path
-                saveLastDoc(path)
-                highlightSidebar(path)
+                let normalizedPath = String(path).trim()
+                try {
+                    normalizedPath = decodeURIComponent(normalizedPath)
+                } catch (_) {
+                    // Keep original value if decoding fails
+                }
+
+                const docExists = docsIndex.some(doc => doc.path === normalizedPath)
+                if (!docExists) {
+                    heroArea.innerHTML = `
+                <div class="breadcrumb"><span>Docs</span><span>›</span><span>Not found</span></div>
+                <h2>Document not found</h2>
+                <p>The requested document does not exist in this documentation set.</p>
+            `
+                    contentArea.innerHTML = `
+                <div class="loading-card">
+                    <p>Unable to load the requested document.</p>
+                </div>
+            `
+                    return
+                }
+
+                const safePath = normalizedPath
+
+                currentDoc = safePath
+                saveLastDoc(safePath)
+                highlightSidebar(safePath)
                 closeSidebarMobile()
-                history.pushState(null, "", `#${encodeURIComponent(path)}`)
+                history.pushState(null, "", `#${encodeURIComponent(safePath)}`)
 
                 heroArea.innerHTML = `
                 <div class="breadcrumb"><span>Docs</span><span>›</span><span>Loading</span></div>
@@ -1772,13 +1796,13 @@
             `
 
                 try {
-                    const response = await fetch(path, { cache: "no-store" })
+                    const response = await fetch(safePath, { cache: "no-store" })
                     if (!response.ok) {
                         throw new Error(`HTTP ${response.status}`)
                     }
 
                     const markdown = await response.text()
-                    const meta = findDocMeta(path)
+                    const meta = findDocMeta(safePath)
                     const html = marked.parse(markdown, {
                         gfm: true,
                         breaks: true,
@@ -1790,6 +1814,7 @@
                         },
                     })
 
+                    const githubDocPath = encodeURI(safePath)
                     heroArea.innerHTML = `
                     <div class="breadcrumb">
                         <span>Docs</span>
@@ -1799,7 +1824,7 @@
                         <span>${meta.title}</span>
                     </div>
                     <h2>${meta.title}</h2>
-                    <p>${meta.category} documentation. <a href="https://github.com/Bryan-Roe/Aria/blob/main/docs/${path}" target="_blank" rel="noreferrer">View source on GitHub</a>.</p>
+                    <p>${meta.category} documentation. <a href="https://github.com/Bryan-Roe/Aria/blob/main/docs/${githubDocPath}" target="_blank" rel="noreferrer">View source on GitHub</a>.</p>
                 `
 
                     contentArea.innerHTML = `<article class="content-markdown">${html}</article>`

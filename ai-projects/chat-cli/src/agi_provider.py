@@ -1,5 +1,5 @@
 # flake8: noqa: E501
-# pylint: disable=line-too-long,broad-exception-caught
+# pylint: disable=line-too-long,broad-exception-caught,too-many-lines
 
 """
 AGI (Artificial General Intelligence) Enhanced Chat Provider.
@@ -51,14 +51,14 @@ import math
 import os
 import re
 import time
-from collections.abc import Callable, Generator, Iterable
+from collections.abc import Generator, Iterable
 from dataclasses import dataclass, field
 from typing import Any, Protocol, TypedDict, cast, runtime_checkable
 
 import chat_providers as _chat_providers
 
 try:
-    from quantum_agent_selector import QuantumAgentSelector  # pylint: disable=invalid-name
+    from quantum_agent_selector import QuantumAgentSelector  # pylint: disable=invalid-name,import-error
 except Exception:  # pragma: no cover - optional experimental module
     QuantumAgentSelector = None  # type: ignore[assignment]  # pylint: disable=invalid-name
 
@@ -104,20 +104,24 @@ class RoutingPattern(TypedDict, total=False):
     last_seen: float
 
 
-class _QuantumAgentSelectorProtocol(Protocol):
+class _QuantumAgentSelectorProtocol(Protocol):  # pylint: disable=too-few-public-methods
     """Typed interface for optional quantum-assisted agent routing."""
 
-    def enabled(self) -> bool: ...
+    def enabled(self) -> bool:
+        """Return whether quantum routing is currently enabled."""
+        raise NotImplementedError
 
     def select(
         self,
         *,
         candidate_scores: dict[str, float],
         learned_agent: str | None,
-    ) -> tuple[str, dict[str, Any]]: ...
+    ) -> tuple[str, dict[str, Any]]:
+        """Choose an agent and return ``(agent_name, metadata)``."""
+        raise NotImplementedError
 
 
-class BaseChatProvider:
+class BaseChatProvider:  # pylint: disable=too-few-public-methods
     """Minimal chat provider interface used by AGIProvider."""
 
     temperature: float | None
@@ -130,6 +134,7 @@ class BaseChatProvider:
         messages: list[RoleMessage],
         stream: bool = True,
     ) -> Iterable[str] | str:
+        """Return a complete response string or a token iterable."""
         _ = (messages, stream)
         raise NotImplementedError
 
@@ -150,11 +155,9 @@ def detect_provider(
     max_output_tokens: int | None = None,
 ) -> tuple[BaseChatProvider, ProviderChoice]:
     """Dispatch to the installed chat_providers implementation."""
-    candidate_obj = getattr(_chat_providers, "detect_provider", None)
-    if not callable(candidate_obj):
+    candidate = getattr(_chat_providers, "detect_provider", None)
+    if not callable(candidate):
         raise ImportError("chat_providers.detect_provider is unavailable")
-
-    candidate: Callable[..., tuple[BaseChatProvider, ProviderChoice]] = candidate_obj
 
     result = candidate(
         explicit=explicit,
@@ -162,7 +165,15 @@ def detect_provider(
         temperature=temperature,
         max_output_tokens=max_output_tokens,
     )
-    return result
+    if not isinstance(result, tuple):
+        raise TypeError("chat_providers.detect_provider returned an invalid result")
+    result_tuple = cast(tuple[Any, ...], result)
+    if len(result_tuple) != 2:
+        raise TypeError("chat_providers.detect_provider returned an invalid result")
+
+    provider = result_tuple[0]
+    choice = result_tuple[1]
+    return cast(BaseChatProvider, provider), cast(ProviderChoice, choice)
 
 
 # ---------------------------------------------------------------------------
@@ -242,7 +253,7 @@ class ContextInterface(MemoryInterface, Protocol):
 
 
 @runtime_checkable
-class EnvironmentInterface(Protocol):
+class EnvironmentInterface(Protocol):  # pylint: disable=too-few-public-methods
     """Structural protocol for AGI environment adapters.
 
     An environment adapter provides the AGI provider with read/write access to
@@ -477,7 +488,7 @@ _AGENT_REGISTRY: dict[str, dict[str, Any]] = {
 # ---------------------------------------------------------------------------
 # Sanitization helpers
 # ---------------------------------------------------------------------------
-def _sanitize_input(text: str, max_length: int = MAX_INPUT_LENGTH) -> str:
+def _sanitize_input(text: object, max_length: int = MAX_INPUT_LENGTH) -> str:
     """Sanitize user input to reduce injection and control-char issues."""
     if not isinstance(text, str):
         return ""
@@ -485,7 +496,7 @@ def _sanitize_input(text: str, max_length: int = MAX_INPUT_LENGTH) -> str:
     return re.sub(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]", "", truncated_text)
 
 
-def _sanitize_for_logging(text: str, max_length: int = 200) -> str:
+def _sanitize_for_logging(text: object, max_length: int = 200) -> str:
     """Sanitize data before writing to logs."""
     if not isinstance(text, str):
         return "[invalid]"
@@ -495,24 +506,25 @@ def _sanitize_for_logging(text: str, max_length: int = 200) -> str:
     return html.escape(out)
 
 
-def _coerce_routing_pattern(value: Any) -> RoutingPattern | None:
+def _coerce_routing_pattern(value: object) -> RoutingPattern | None:
     """Return a typed routing-pattern dict when *value* matches the schema."""
     if not isinstance(value, dict):
         return None
+    value_dict = cast(dict[str, object], value)
 
-    agent = value.get("agent")
-    count = value.get("count")
+    agent = value_dict.get("agent")
+    count = value_dict.get("count")
     if not isinstance(agent, str) or not isinstance(count, int):
         return None
 
     pattern: RoutingPattern = {"agent": agent, "count": count}
-    domain = value.get("domain")
+    domain = value_dict.get("domain")
     if isinstance(domain, str):
         pattern["domain"] = domain
-    intent = value.get("intent")
+    intent = value_dict.get("intent")
     if isinstance(intent, str):
         pattern["intent"] = intent
-    last_seen = value.get("last_seen")
+    last_seen = value_dict.get("last_seen")
     if isinstance(last_seen, (int, float)):
         pattern["last_seen"] = float(last_seen)
     return pattern
@@ -1385,7 +1397,7 @@ class _AGIProviderReasoningMixin:
 
 
 @dataclass(slots=True)
-class _AGIProviderRuntimeState:
+class _AGIProviderRuntimeState:  # pylint: disable=too-few-public-methods
     """Mutable runtime state for AGIProvider."""
 
     base_provider: BaseChatProvider | None
@@ -1476,6 +1488,7 @@ class AGIProvider(_AGIProviderReasoningMixin, BaseChatProvider):
 
     @property
     def base_provider(self) -> BaseChatProvider | None:
+        """Return the configured base provider, if any."""
         return self._runtime.base_provider
 
     @base_provider.setter
@@ -1484,6 +1497,7 @@ class AGIProvider(_AGIProviderReasoningMixin, BaseChatProvider):
 
     @property
     def enable_self_reflection(self) -> bool:
+        """Return whether post-response self-reflection is enabled."""
         return self._runtime.enable_self_reflection
 
     @enable_self_reflection.setter
@@ -1492,6 +1506,7 @@ class AGIProvider(_AGIProviderReasoningMixin, BaseChatProvider):
 
     @property
     def verbose(self) -> bool:
+        """Return whether reasoning traces are prepended to responses."""
         return self._runtime.verbose
 
     @verbose.setter
@@ -1508,6 +1523,7 @@ class AGIProvider(_AGIProviderReasoningMixin, BaseChatProvider):
 
     @property
     def persistence(self) -> Any | None:
+        """Return the optional persistence backend instance."""
         return self._runtime.persistence
 
     @persistence.setter
@@ -1758,7 +1774,7 @@ class AGIProvider(_AGIProviderReasoningMixin, BaseChatProvider):
         try:
             provider = self._get_base_provider()
             # Apply agent-aware temperature: deterministic domains run cooler.
-            _AGENT_TEMPERATURES: dict[str, float] = {
+            agent_temperatures: dict[str, float] = {
                 "quantum-specialist": 0.3,
                 "code-specialist": 0.2,
                 "ai-specialist": 0.5,
@@ -1775,10 +1791,10 @@ class AGIProvider(_AGIProviderReasoningMixin, BaseChatProvider):
             original_temp = getattr(provider, "temperature", None)
             temperature_overridden = False
             try:
-                if selected_agent in _AGENT_TEMPERATURES:
+                if selected_agent in agent_temperatures:
                     temperature_overridden = _set_provider_temperature(
                         provider,
-                        _AGENT_TEMPERATURES[selected_agent],
+                        agent_temperatures[selected_agent],
                     )
                 result = provider.complete(enhanced_messages, stream=False)
             finally:
