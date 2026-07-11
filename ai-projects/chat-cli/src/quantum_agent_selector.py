@@ -1,13 +1,18 @@
 from __future__ import annotations
-import os, random, time
+
+import os
+import random
+import time
 from dataclasses import dataclass
 from enum import Enum
 from typing import Any
+
 
 class QuantumSolverBackend(str, Enum):
     SIMULATOR = "simulator"
     CLASSICAL = "classical"
     HYBRID = "hybrid"
+
 
 @dataclass(slots=True)
 class QuantumAgentSelectorConfig:
@@ -20,29 +25,35 @@ class QuantumAgentSelectorConfig:
     debug: bool = False
 
     @classmethod
-    def from_env(cls) -> "QuantumAgentSelectorConfig":
+    def from_env(cls) -> QuantumAgentSelectorConfig:
         raw = (os.getenv("QUANTUM_AGENT_SOLVER_BACKEND", "simulator") or "simulator").strip().lower()
         try:
             backend = QuantumSolverBackend(raw)
         except ValueError:
             backend = QuantumSolverBackend.SIMULATOR
         return cls(
-            enabled=(os.getenv("ENABLE_QUANTUM_AGENT_SELECTION", "false").strip().lower() in {"1","true","yes"}),
+            enabled=(os.getenv("ENABLE_QUANTUM_AGENT_SELECTION", "false").strip().lower() in {"1", "true", "yes"}),
             backend=backend,
             timeout_ms=max(1, int(os.getenv("QUANTUM_SOLVER_TIMEOUT_MS", "200"))),
             num_reads=max(1, int(os.getenv("QUANTUM_AGENT_NUM_READS", "64"))),
             penalty_scale=float(os.getenv("QUANTUM_AGENT_PENALTY_SCALE", "10.0")),
             max_cost=float(os.getenv("MAX_QUANTUM_AGENT_COST", "0.1")),
-            debug=(os.getenv("QUANTUM_AGENT_DEBUG", "false").strip().lower() in {"1","true","yes"}),
+            debug=(os.getenv("QUANTUM_AGENT_DEBUG", "false").strip().lower() in {"1", "true", "yes"}),
         )
+
 
 class QuantumAgentSelector:
     def __init__(self, config: QuantumAgentSelectorConfig | None = None) -> None:
         self.config = config or QuantumAgentSelectorConfig.from_env()
         self._metrics: dict[str, Any] = {
-            "total_calls": 0, "quantum_calls": 0, "classical_fallback_calls": 0,
-            "timeouts": 0, "errors": 0, "last_backend": self.config.backend.value,
-            "last_latency_ms": 0.0, "last_reason": "init",
+            "total_calls": 0,
+            "quantum_calls": 0,
+            "classical_fallback_calls": 0,
+            "timeouts": 0,
+            "errors": 0,
+            "last_backend": self.config.backend.value,
+            "last_latency_ms": 0.0,
+            "last_reason": "init",
         }
 
     def enabled(self) -> bool:
@@ -89,7 +100,9 @@ class QuantumAgentSelector:
             t *= 0.995
         return best
 
-    def select(self, *, candidate_scores: dict[str, float], learned_agent: str | None = None, timeout_ms: int | None = None):
+    def select(
+        self, *, candidate_scores: dict[str, float], learned_agent: str | None = None, timeout_ms: int | None = None
+    ):
         self._metrics["total_calls"] += 1
         ordered = sorted([a for a, s in candidate_scores.items() if float(s) > 0.0])
         if not ordered:

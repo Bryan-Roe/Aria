@@ -1166,18 +1166,19 @@ class TestAgiEndpoints:
         assert data["status"] == "error"
         assert "validation error" in data["error"].lower()
 
-
-# ===========================================================================
-# Quantum LLM endpoint tests — /api/quantum/llm
-# ===========================================================================
+    # ===========================================================================
+    # Quantum LLM endpoint tests — /api/quantum/llm
+    # ===========================================================================
     def test_agi_quantum_debug_endpoint(self, app_module, monkeypatch):
         class _FakeAgiProvider:
             def __init__(self):
                 class _Selector:
                     def enabled(self):
                         return True
+
                     def get_metrics(self):
                         return {"total_calls": 3, "quantum_calls": 2}
+
                 self._quantum_agent_selector = _Selector()
                 self._last_quantum_agent_meta = {"mode": "quantum", "backend": "simulator"}
                 self.base_provider = None
