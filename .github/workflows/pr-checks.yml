@@ -15,10 +15,17 @@ permissions:
   contents: read
 
 env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
-  HARDEN_RUNNER_SHA: 0634a2670c59f64b4a01f0f96f84700a4088b9f0  # v2.12.2
-  CHECKOUT_SHA: 11bd71901bbe5b1630ceea73d27597364c9af683      # v4.2.2
-  GITHUB_SCRIPT_SHA: 60a0d83039c74a4aee543508d2ffcb1c3799cdea  # v7.0.1
+  # Keep pinned SHAs for supply-chain integrity.
+  HARDEN_RUNNER_SHA: 0634a2670c59f64b4a01f0f96f84700a4088b9f0 # v2.12.2
+  CHECKOUT_SHA: 11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+  GITHUB_SCRIPT_SHA: 60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
+
+  # Policy thresholds (single source of truth).
+  MIN_DESCRIPTION_LENGTH: '100'
+  MIN_TITLE_LENGTH: '12'
+  LARGE_FILES_THRESHOLD: '50'
+  LARGE_LINES_THRESHOLD: '1000'
+  LARGE_DELETIONS_THRESHOLD: '1000'
 
 defaults:
   run:
@@ -93,9 +100,6 @@ jobs:
     permissions:
       contents: read
       pull-requests: read
-    env:
-      MIN_DESCRIPTION_LENGTH: '100'
-      MIN_TITLE_LENGTH: '12'
     steps:
       - name: Harden runner
         uses: step-security/harden-runner@0634a2670c59f64b4a01f0f96f84700a4088b9f0
@@ -109,6 +113,9 @@ jobs:
           PR_TITLE: ${{ github.event.pull_request.title }}
         run: |
           set -euo pipefail
+
+          PR_TITLE="${PR_TITLE:-}"
+          PR_BODY="${PR_BODY:-}"
 
           UNFILLED_PATTERNS=(
             "What does this change do"
@@ -124,7 +131,7 @@ jobs:
           BODY_LENGTH=0
 
           # Remove HTML comments from templates before validation.
-          CLEAN_BODY="$(printf '%s' "${PR_BODY:-}" | perl -0777 -pe 's/<!--.*?-->//gs')"
+          CLEAN_BODY="$(printf '%s' "$PR_BODY" | perl -0777 -pe 's/<!--.*?-->//gs')"
 
           if [[ -z "$(printf '%s' "$CLEAN_BODY" | tr -d '[:space:]')" ]]; then
             ERRORS+=("PR description is empty. Please fill in the PR template.")
@@ -137,7 +144,7 @@ jobs:
               fi
             done
 
-            BODY_LENGTH=$(printf '%s' "$CLEAN_BODY" | wc -c | tr -d ' ')
+            BODY_LENGTH="$(printf '%s' "$CLEAN_BODY" | wc -c | tr -d ' ')"
             if (( BODY_LENGTH < MIN_DESCRIPTION_LENGTH )); then
               ERRORS+=("PR description is too short (${BODY_LENGTH} chars, minimum ${MIN_DESCRIPTION_LENGTH}). Please fill in Summary, Changes, and Testing.")
               FAILED=1
@@ -194,9 +201,6 @@ jobs:
       - name: Check PR size
         id: size
         uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea
-        env:
-          LARGE_FILES_THRESHOLD: '50'
-          LARGE_LINES_THRESHOLD: '1000'
         with:
           script: |
             const prNumber = context.payload.pull_request.number;
@@ -223,9 +227,14 @@ jobs:
 
             const largeFilesThreshold = Number(process.env.LARGE_FILES_THRESHOLD || '50');
             const largeLinesThreshold = Number(process.env.LARGE_LINES_THRESHOLD || '1000');
+            const largeDeletionsThreshold = Number(process.env.LARGE_DELETIONS_THRESHOLD || '1000');
 
-            if (filesChanged > largeFilesThreshold || additions > largeLinesThreshold) {
-              core.warning(`Large PR detected (${filesChanged} files, ${additions} additions). Consider splitting it for easier review.`);
+            if (
+              filesChanged > largeFilesThreshold ||
+              additions > largeLinesThreshold ||
+              deletions > largeDeletionsThreshold
+            ) {
+              core.warning(`Large PR detected (${filesChanged} files, +${additions}/-${deletions}). Consider splitting it for easier review.`);
               core.setOutput('pr_size', 'large');
             } else {
               core.info('✓ PR size looks good');
@@ -250,10 +259,11 @@ jobs:
       - name: Label PR based on files changed
         uses: actions/labeler@634933edcd8ababfe52f92936142cc22ac488b1b
         with:
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          repo-token: ${{ github.token }}
           configuration-path: .github/labeler.yml
           sync-labels: true
 
+  # Branch protection target: require this single job.
   policy-gate:
     name: PR Policy Gate
     if: always() && github.event.pull_request.draft == false
@@ -269,10 +279,13 @@ jobs:
           echo "description-check=${{ needs.description-check.result }}"
           echo "size-check=${{ needs.size-check.result }}"
 
-          for result in \
-            "${{ needs.validate.result }}" \
-            "${{ needs.description-check.result }}" \
-            "${{ needs.size-check.result }}"; do
+          required_results=(
+            "${{ needs.validate.result }}"
+            "${{ needs.description-check.result }}"
+            "${{ needs.size-check.result }}"
+          )
+
+          for result in "${required_results[@]}"; do
             if [[ "$result" != "success" ]]; then
               echo "::error::Required check failed or was not successful: $result"
               exit 1
