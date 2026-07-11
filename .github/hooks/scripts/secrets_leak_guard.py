@@ -220,17 +220,17 @@ def main() -> None:
         sys.exit(0)
 
     path_hint = f" in `{file_path}`" if file_path else ""
-    secret_hint = f" ({', '.join(findings)})" if findings else ""  # lgtm[py/clear-text-logging-sensitive-data]
+    finding_count_hint = f" ({len(findings)} pattern(s))" if findings else ""
     if _BLOCK:
         print(
-            f"🛑  SECRETS BLOCKED: Detected possible hardcoded secret{secret_hint}{path_hint}. "  # lgtm[py/clear-text-logging-sensitive-data]
+            f"🛑  SECRETS BLOCKED: Detected possible hardcoded secret{finding_count_hint}{path_hint}. "
             "Move credentials to environment variables or local.settings.json.",
             file=sys.stderr,
         )
         sys.exit(1)
     else:
         print(
-            f"⚠️  SECRETS WARNING: Possible hardcoded secret detected{secret_hint}{path_hint}. "  # lgtm[py/clear-text-logging-sensitive-data]
+            f"⚠️  SECRETS WARNING: Possible hardcoded secret detected{finding_count_hint}{path_hint}. "
             "Verify this is not a real credential. Use env vars or local.settings.json for secrets."
         )
     sys.exit(0)

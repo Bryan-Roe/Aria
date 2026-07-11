@@ -1537,25 +1537,20 @@ with gr.Blocks() as demo:
         def _safe_session_path(filename):
             if not filename or not isinstance(filename, str):
                 return None
-            if os.path.isabs(filename):
+            # Only allow plain safe filenames with approved extensions.
+            if not re.fullmatch(r"[A-Za-z0-9_.-]+\.(json|md|txt)", filename):
                 return None
-            # Only allow plain file names from the session list; no directory components.
-            if os.path.basename(filename) != filename:
-                return None
-            if not filename.endswith((".json", ".md", ".txt")):
-                return None
-            base = os.path.realpath(CONV_DIR)
-            candidate = os.path.realpath(os.path.join(base, filename))
+            base = Path(CONV_DIR).resolve()
+            candidate = (base / filename).resolve()
             try:
-                if os.path.commonpath([base, candidate]) != base:
-                    return None
+                candidate.relative_to(base)
             except ValueError:
                 return None
-            return candidate
+            return str(candidate)
 
         def load_session(filename):
             path = _safe_session_path(filename)
-            if not path:
+            if not path or not os.path.isfile(path):
                 return [], []
             try:
                 with open(path, encoding="utf-8") as f:
