@@ -34,6 +34,7 @@ def test_e2e_tests_workflow_retries_apt_downloads_for_containerized_chrome() -> 
     workflow_path = Path(__file__).resolve().parents[1] / ".github" / "workflows" / "e2e-tests.yml"
     content = workflow_path.read_text(encoding="utf-8")
 
-    assert 'apt-get -o Acquire::Retries=3 "$@"' in content
+    assert content.count("apt_get() {") == 2
+    assert content.count('apt-get -o Acquire::Retries=3 "$@"') == 2
     assert "apt_get install -y --fix-missing chromium" in content
     assert "apt_get install -y --fix-missing chromium-browser" in content
