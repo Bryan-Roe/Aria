@@ -3,18 +3,18 @@
 # =============================================================================
 # yamllint disable rule:key-ordering
 # Purpose:
-#   • prepare-github-actions-pr — converts same-repo github-actions[bot] PRs to
+#   • a-prepare-github-actions-pr — converts same-repo github-actions[bot] PRs to
 #                                 ready-for-review and ensures they carry the
 #                                 `autofix` label so the existing auto-merge
 #                                 pipeline can take over.
-#   • enable             — arms GitHub native auto-merge when `auto-merge` or
+#   • b-enable             — arms GitHub native auto-merge when `auto-merge` or
 #                          `autofix` label is present on a same-repo PR.
+#   • bot-approve        — optionally approves allowlisted bot-authored PRs
+#                          using a dedicated PAT from a different identity.
 #   • disable            — disables native auto-merge when the last matching
 #                          label is removed.
 #   • merge-on-gate-pass — when the `All Gates Passed` check succeeds, evaluates
 #                          associated PRs and merges eligible labeled PRs.
-#   • bot-approve        — optionally approves allowlisted bot-authored PRs
-#                          using a dedicated PAT from a different identity.
 #
 # Merge strategy : squash
 # Fork PRs       : skipped
@@ -22,65 +22,52 @@
 # =============================================================================
 
 name: Auto Merge
-
-on:
-  pull_request:
-    types: [opened, synchronize, reopened, ready_for_review, labeled, unlabeled]
-  merge_group:
+on: # yamllint disable-line rule:truthy
   check_run:
     types: [completed]
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review, labeled, unlabeled]
   schedule:
     - cron: "0 * * * *"
   workflow_dispatch:
     inputs:
-      max_prs:
-        description: "Maximum eligible PRs to process this run"
-        default: "20"
-        required: false
-        type: number
       dry_run:
-        description: "Evaluate eligibility without merging"
         default: false
+        description: "Evaluate eligibility without merging"
         required: false
         type: boolean
+      max_prs:
+        default: "20"
+        description: "Maximum eligible PRs to process this run"
+        required: false
+        type: number
 
 concurrency:
-  cancel-in-progress: false
-  group: >-
-    auto-merge-${{
-      github.event.pull_request.number || github.event.check_run.id || github.run_id
-    }}
-
-permissions:
-  contents: read
-
-env:
-  AUTO_MERGE_LABELS: "auto-merge autofix"
-  BOT_APPROVE_ALLOWLIST: "github-actions[bot] copilot-swe-agent[bot]"
+  (
+    contains(github.event.pull_request.labels.*.name, 'auto-merge') ||
+    contains(github.event.pull_request.labels.*.name, 'autofix')
+  )
 
 jobs:
-  prepare-github-actions-pr:
-    # FIX 1: removed the stray empty `if: >-` line that preceded `name:`,
-    # which caused "Map keys must be unique" / "'if' is already defined".
-    name: Prepare github-actions PR
+  a-prepare-github-actions-pr:
     if: >-
       github.event_name == 'pull_request' &&
       github.event.pull_request.head.repo.full_name == github.repository &&
       github.event.pull_request.user.login == 'github-actions[bot]' &&
       github.event.action != 'unlabeled'
-    runs-on: ubuntu-latest
+    name: Prepare github-actions PR
     permissions:
       contents: read
-      issues: write
       pull-requests: write
+    runs-on: ubuntu-latest
     steps:
       - name: Harden runner
         uses: step-security/harden-runner@0634a2670c59f64b4a01f0f96f84700a4088b9f0
         with:
-          disable-sudo: true
-          egress-policy: block
           allowed-endpoints: >
             api.github.com:443
+          disable-sudo: true
+          egress-policy: block
 
       - env:
           AUTO_MERGE_LABELS: ${{ env.AUTO_MERGE_LABELS }}
@@ -125,8 +112,7 @@ jobs:
 
             core.info(`Marked PR #${pr.number} ready for review.`);
 
-  enable:
-    name: Enable Auto-Merge
+  b-enable:
     if: >-
       github.event_name == 'pull_request' &&
       github.event.pull_request.head.repo.full_name == github.repository &&
@@ -144,35 +130,35 @@ jobs:
           )
         )
       )
-    runs-on: ubuntu-latest
+    name: Enable Auto-Merge
     permissions:
       contents: read
-      # FIX #5: issues: write removed — gh pr merge/comment only needs pull-requests: write
       pull-requests: write
+    runs-on: ubuntu-latest
     steps:
       - name: Harden runner
         uses: step-security/harden-runner@0634a2670c59f64b4a01f0f96f84700a4088b9f0
         with:
-          egress-policy: block
           allowed-endpoints: >
             api.github.com:443
           disable-sudo: true
+          egress-policy: block
 
-      - name: Check if auto-merge already enabled
-        id: state
-        env:
+      - env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
+        id: state
+        name: Check if auto-merge already enabled
         run: |
           set -euo pipefail
           enabled="$(gh pr view "$PR_NUMBER" --json autoMergeRequest --jq '.autoMergeRequest != null')"
           echo "enabled=$enabled" >> "$GITHUB_OUTPUT"
 
-      - name: Enable auto-merge (squash)
-        if: steps.state.outputs.enabled != 'true'
-        env:
+      - env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
+        if: steps.state.outputs.enabled != 'true'
+        name: Enable auto-merge (squash)
         run: |
           set -euo pipefail
           gh pr merge --auto --squash "$PR_NUMBER"
@@ -194,8 +180,90 @@ jobs:
           Remove the \`auto-merge\` or \`autofix\` label to cancel."
         timeout-minutes: 5
 
+  bot-approve:
+    if: >-
+      github.event_name == 'pull_request' &&
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      github.event.pull_request.draft == false &&
+      vars[env.AUTO_MERGE_BOT_APPROVE_VAR] == 'true' &&
+      (
+        github.event.pull_request.user.login == 'github-actions[bot]' ||
+        github.event.pull_request.user.login == 'copilot-swe-agent[bot]'
+      ) &&
+      (
+        contains(github.event.pull_request.labels.*.name, 'auto-merge') ||
+        contains(github.event.pull_request.labels.*.name, 'autofix')
+      )
+    name: Bot-Approve PR
+    permissions:
+      pull-requests: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: Harden runner
+        uses: step-security/harden-runner@0634a2670c59f64b4a01f0f96f84700a4088b9f0
+        with:
+          allowed-endpoints: >
+            api.github.com:443
+          disable-sudo: true
+          egress-policy: block
+
+      - env:
+          BOT_APPROVE_ALLOWLIST: ${{ env.BOT_APPROVE_ALLOWLIST }}
+          HAS_APPROVE_TOKEN: ${{ secrets[env.AUTO_MERGE_APPROVE_TOKEN_SECRET] != '' }}
+        name: Approve if bot-authored PR
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea
+        with:
+          github-token: ${{ secrets[env.AUTO_MERGE_APPROVE_TOKEN_SECRET] || secrets.GITHUB_TOKEN }}
+          script: |
+            function latestReviewStates(reviews) {
+              const latestByUser = new Map();
+              for (const r of reviews || []) {
+                const login = r.user?.login;
+                if (!login) continue;
+                const ts = Date.parse(r.submitted_at || r.updated_at || '') || 0;
+                const prev = latestByUser.get(login);
+                if (!prev || ts >= prev.ts) latestByUser.set(login, { state: r.state, ts });
+              }
+              return [...latestByUser.values()].map((x) => x.state);
+            }
+
+            const allowlist = (process.env.BOT_APPROVE_ALLOWLIST || '').split(/\s+/).filter(Boolean);
+            const author = context.payload.pull_request.user.login;
+
+            if (!allowlist.includes(author)) {
+              core.info(`PR author '${author}' is not in BOT_APPROVE_ALLOWLIST; skipping.`);
+              return;
+            }
+
+            if (process.env.HAS_APPROVE_TOKEN !== 'true') {
+              core.warning('AUTO_MERGE_APPROVE_TOKEN secret is not set; skipping bot-approve.');
+              return;
+            }
+
+            const prNumber = context.payload.pull_request.number;
+            const { data: reviews } = await github.rest.pulls.listReviews({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: prNumber,
+            });
+            const states = latestReviewStates(reviews);
+
+            if (states.includes('CHANGES_REQUESTED')) {
+              core.info(`PR #${prNumber}: has active changes requested; not approving.`);
+              return;
+            }
+
+            await github.rest.pulls.createReview({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: prNumber,
+              event: 'APPROVE',
+              body: 'Auto-approval for allowlisted bot-authored PR.',
+            });
+
+            core.info(`Approved PR #${prNumber}.`);
+
   disable:
-    name: Disable Auto-Merge
     if: >-
       github.event_name == 'pull_request' &&
       github.event.pull_request.head.repo.full_name == github.repository &&
@@ -203,42 +271,40 @@ jobs:
       (github.event.label.name == 'auto-merge' || github.event.label.name == 'autofix') &&
       !contains(github.event.pull_request.labels.*.name, 'auto-merge') &&
       !contains(github.event.pull_request.labels.*.name, 'autofix')
-    runs-on: ubuntu-latest
+    name: Disable Auto-Merge
     permissions:
-      contents: read
-      # FIX #6: issues: write removed
       pull-requests: write
+    runs-on: ubuntu-latest
     steps:
       - name: Harden runner
         uses: step-security/harden-runner@0634a2670c59f64b4a01f0f96f84700a4088b9f0
         with:
-          disable-sudo: true
           allowed-endpoints: >
             api.github.com:443
+          disable-sudo: true
           egress-policy: block
 
-      - name: Disable auto-merge (no-op safe)
-        env:
+      - env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
+        name: Disable auto-merge (no-op safe)
         run: |
           set -euo pipefail
           gh pr merge --disable-auto "$PR_NUMBER" || echo "Auto-merge was already disabled."
     timeout-minutes: 5
 
   merge-on-gate-pass:
-    name: Merge on Gate Pass
     if: >-
       github.event_name == 'check_run' &&
       github.event.check_run.name == 'All Gates Passed' &&
       github.event.check_run.conclusion == 'success' &&
       github.event.check_run.app.slug == 'github-actions' &&
-      github.event.check_run.check_suite.head_repository.full_name == github.repository
-    runs-on: ubuntu-latest
+      github.event.repository.full_name == github.repository
+    name: Merge on Gate Pass
     permissions:
       contents: write
-      issues: write
       pull-requests: write
+    runs-on: ubuntu-latest
     steps:
       - name: Harden runner
         uses: step-security/harden-runner@0634a2670c59f64b4a01f0f96f84700a4088b9f0
@@ -361,86 +427,26 @@ jobs:
               .write();
     timeout-minutes: 15
 
-  bot-approve:
-    name: Bot-Approve PR
-    if: >-
-      github.event_name == 'pull_request' &&
-      github.event.pull_request.head.repo.full_name == github.repository &&
-      github.event.pull_request.draft == false &&
-      vars['AUTO_MERGE_BOT_APPROVE'] == 'true' &&
-      (
-        github.event.pull_request.user.login == 'github-actions[bot]' ||
-        github.event.pull_request.user.login == 'copilot-swe-agent[bot]'
-      ) &&
-      (
-        contains(github.event.pull_request.labels.*.name, 'auto-merge') ||
-        contains(github.event.pull_request.labels.*.name, 'autofix')
-      )
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      pull-requests: write
-    steps:
-      - name: Harden runner
-        uses: step-security/harden-runner@0634a2670c59f64b4a01f0f96f84700a4088b9f0
-        with:
-          disable-sudo: true
-          egress-policy: block
-          allowed-endpoints: >
-            api.github.com:443
+name: Auto Merge
+on: # yamllint disable-line rule:truthy
+  check_run:
+    types: [completed]
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review, labeled, unlabeled]
+  schedule:
+    - cron: "0 * * * *"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        default: false
+        description: "Evaluate eligibility without merging"
+        required: false
+        type: boolean
+      max_prs:
+        default: "20"
+        description: "Maximum eligible PRs to process this run"
+        required: false
+        type: number
 
-      - name: Approve if bot-authored PR
-        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea
-        env:
-          BOT_APPROVE_ALLOWLIST: ${{ env.BOT_APPROVE_ALLOWLIST }}
-          HAS_APPROVE_TOKEN: ${{ secrets.AUTO_MERGE_APPROVE_TOKEN != '' }}
-        with:
-          github-token: ${{ secrets.AUTO_MERGE_APPROVE_TOKEN || secrets.GITHUB_TOKEN }}
-          script: |
-            function latestReviewStates(reviews) {
-              const latestByUser = new Map();
-              for (const r of reviews || []) {
-                const login = r.user?.login;
-                if (!login) continue;
-                const ts = Date.parse(r.submitted_at || r.updated_at || '') || 0;
-                const prev = latestByUser.get(login);
-                if (!prev || ts >= prev.ts) latestByUser.set(login, { state: r.state, ts });
-              }
-              return [...latestByUser.values()].map((x) => x.state);
-            }
-
-            const allowlist = (process.env.BOT_APPROVE_ALLOWLIST || '').split(/\s+/).filter(Boolean);
-            const author = context.payload.pull_request.user.login;
-
-            if (!allowlist.includes(author)) {
-              core.info(`PR author '${author}' is not in BOT_APPROVE_ALLOWLIST; skipping.`);
-              return;
-            }
-
-            if (process.env.HAS_APPROVE_TOKEN !== 'true') {
-              core.warning('AUTO_MERGE_APPROVE_TOKEN secret is not set; skipping bot-approve.');
-              return;
-            }
-
-            const prNumber = context.payload.pull_request.number;
-            const { data: reviews } = await github.rest.pulls.listReviews({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              pull_number: prNumber,
-            });
-            const states = latestReviewStates(reviews);
-
-            if (states.includes('CHANGES_REQUESTED')) {
-              core.info(`PR #${prNumber}: has active changes requested; not approving.`);
-              return;
-            }
-
-            await github.rest.pulls.createReview({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              pull_number: prNumber,
-              event: 'APPROVE',
-              body: 'Auto-approval for allowlisted bot-authored PR.',
-            });
-
-            core.info(`Approved PR #${prNumber}.`);
+permissions:
+  contents: read

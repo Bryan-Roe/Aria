@@ -175,7 +175,9 @@ task_complete.json
 *_heartbeat.json
 *_state.json
 *_status.json
-
+core.*
+core.*
+actions-runner/*
 # Root-level local cleanup artifacts
 .git_status_*.tmp
 .status_after_reset.tmp
