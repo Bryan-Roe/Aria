@@ -1,6 +1,6 @@
 messages:
-  - role: system
-    content: AGI
-  - role: user
-    content: you are AGI
+    - role: system
+      content: AGI
+    - role: user
+      content: you are AGI
 model: mistral-ai/codestral-2501
