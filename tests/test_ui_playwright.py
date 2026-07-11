@@ -141,9 +141,9 @@ def test_client_add_pickup_and_drag_updates_server():
 
             # wait for server to report it
             obj = wait_for_object(unique_name, timeout=5.0)
-            assert (
-                obj is not None
-            ), f"Server didn't report new object {unique_name}: {requests.get(SERVER_URL + '/api/aria/state').text}"
+            assert obj is not None, (
+                f"Server didn't report new object {unique_name}: {requests.get(SERVER_URL + '/api/aria/state').text}"
+            )
 
             # Now pick the object up using client function
             page.evaluate("(name) => pickUpObject(name)", unique_name)
