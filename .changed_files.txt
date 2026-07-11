@@ -1745,7 +1745,6 @@ docs/training/FAST_TRAINING_GUIDE.md
 docs/training/TRAINING_STARTED.md
 docs/training/TRAINING_TAB_ENHANCEMENTS.md
 docs/training/TRAINING_VALIDATION_RESULTS.md
-dotnet-install.sh
 examples/ai_starters/README.md
 examples/ai_starters/agent_with_tools.py
 examples/ai_starters/ai-sql.dbcnb
@@ -2502,6 +2501,7 @@ scripts/test_repo_automation.py
 scripts/test_runner.py
 scripts/test_watcher.py
 scripts/train_quantum_llm_chat.py
+scripts/train_with_early_stopping.py
 scripts/training/__init__.py
 scripts/training/train_vision.py
 scripts/training_analytics.py
@@ -2540,6 +2540,7 @@ shared/core/module_registry.py
 shared/cosmos_client.py
 shared/db_logging.py
 shared/domain/__init__.py
+shared/early_stopping.py
 shared/email_notifications.py
 shared/evaluation_utils.py
 shared/file_cache.py
@@ -2850,6 +2851,7 @@ tests/unit/test_chat_cli_no_stream.py
 tests/unit/test_circuit_cache.py
 tests/unit/test_devcontainer_json.py
 tests/unit/test_fallback_gesture_parser.py
+tests/unit/test_hello_world.py
 tests/unit/test_lm_studio_analyzer.py
 tests/unit/test_local_settings.py
 tests/unit/test_quantum_llm_components.py
