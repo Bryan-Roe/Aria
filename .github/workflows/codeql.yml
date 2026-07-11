@@ -458,7 +458,7 @@ jobs:
            github.event_name == 'schedule' ||
            (github.event_name == 'workflow_dispatch' && inputs.open_autofix_pr))
         name: Open autofix follow-up PR
-        uses: peter-evans/create-pull-request@67ccf781d68cd99b580ae25a5c18a1cc84ffff1f
+        uses: step-security/create-pull-request@50c103da2b9ca12cd5bc013fc6931051a5aa872b # v8.1.1
         with:
           base: ${{ github.ref_name }}
           body: |

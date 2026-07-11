@@ -248,7 +248,7 @@ jobs:
 
       - name: Download previous successful baseline
         id: download-prev
-        uses: dawidd6/action-download-artifact@bf251b5aa9c2f7eeb574a96ee720e24f801b7c11
+        uses: step-security/action-download-artifact@c6bd982a00a1e17ae718c69072a24d976ac86042 # v12.0.1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           workflow: nightly-regression.yml

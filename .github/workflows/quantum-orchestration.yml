@@ -121,7 +121,7 @@ jobs:
 
       - name: Azure Login
         if: env.HAS_AZURE_CREDENTIALS == 'true'
-        uses: azure/login@a457da9ea143d694b1b9c7c869ebb04ebe844ef5
+        uses: step-security/azure-login@2393b732d3c663799479b7a94f7109a44fc0d8d6 # v3.0.0
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 

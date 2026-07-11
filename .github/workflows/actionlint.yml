@@ -60,7 +60,7 @@ jobs:
           fetch-depth: 1
 
       - name: Setup ShellCheck (pinned)
-        uses: ludeeus/action-shellcheck@00cae500b08a931fb5698e11e79bfbd38e612a38 # 2.0.0
+        uses: step-security/action-shellcheck@93e3a10f8992244473b1c679f7736a92f197445b # v2.0.0
         with:
           version: ${{ env.SHELLCHECK_VERSION }}
           # Exclude vendored third-party scripts (dotnet-install.sh is the
@@ -73,7 +73,7 @@ jobs:
           severity: error
 
       - name: Run actionlint
-        uses: reviewdog/action-actionlint@6fb7acc99f4a1008869fa8a0f09cfca740837d9d # v1.72.0
+        uses: step-security/action-actionlint@c3aa382d371c6b05513ae5907d4f77713e21813c # v1.72.0
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           fail_on_error: true

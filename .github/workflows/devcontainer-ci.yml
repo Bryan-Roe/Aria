@@ -35,6 +35,6 @@ jobs:
           fetch-depth: 1
 
       - name: Build and test devcontainer
-        uses: devcontainers/ci@b63b30de439b47a52267f241112c5b453b673db5
+        uses: step-security/devcontainers-ci@0094b8e872472da5a2e1cb8ce3c59c66fff26175 # v0.3.1900000450
         with:
           runCmd: "python scripts/test_runner.py --unit"
