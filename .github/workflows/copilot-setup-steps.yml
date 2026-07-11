@@ -175,7 +175,7 @@ jobs:
           }
 
           if [ "${INCLUDE_ALL}" = "true" ]; then
-            add_default_targets
+            load_default_targets
           elif [ "${EVENT_NAME}" = "pull_request" ] && [ -n "${PR_BASE_SHA}" ] && [ -n "${PR_HEAD_SHA}" ]; then
             load_changed_targets "${PR_BASE_SHA}" "${PR_HEAD_SHA}" || load_default_targets
           elif [ "${EVENT_NAME}" = "push" ] && [ -n "${PUSH_BEFORE_SHA}" ] && [ "${PUSH_BEFORE_SHA}" != "${NULL_SHA}" ]; then
