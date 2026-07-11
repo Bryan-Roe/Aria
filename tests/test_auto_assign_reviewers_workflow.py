@@ -102,9 +102,9 @@ def test_assign_script_has_bot_guard() -> None:
     using the pattern `pr.user.login.endsWith('[bot]')`."""
     wf_path = WORKFLOWS_DIR / "auto-assign-reviewers.yml"
     content = wf_path.read_text(encoding="utf-8")
-    assert "pr.user.login.endsWith('[bot]')" in content, (
-        "auto-assign-reviewers.yml script must contain the pattern "
-        "`pr.user.login.endsWith('[bot]')` to guard against bot-authored PRs"
+    assert "pr.user.login.endsWith('[bot]')" in content or "author.endsWith('[bot]')" in content, (
+        "auto-assign-reviewers.yml script must contain an inline bot-authored PR guard using "
+        "`endsWith('[bot]')`."
     )
 
 

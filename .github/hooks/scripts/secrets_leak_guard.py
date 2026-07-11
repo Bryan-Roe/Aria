@@ -221,17 +221,18 @@ def main() -> None:
 
     path_hint = f" in `{file_path}`" if file_path else ""
     finding_count_hint = f" ({len(findings)} pattern(s))" if findings else ""
+    finding_names_hint = f": {', '.join(dict.fromkeys(findings))}" if findings else ""
     if _BLOCK:
         print(
-            f"🛑  SECRETS BLOCKED: Detected possible hardcoded secret{finding_count_hint}{path_hint}. "
-            "Move credentials to environment variables or local.settings.json.",
+            f"🛑  SECRETS BLOCKED: Detected possible hardcoded secret{finding_count_hint}{path_hint}"
+            f"{finding_names_hint}. Move credentials to environment variables or local.settings.json.",
             file=sys.stderr,
         )
         sys.exit(1)
     else:
         print(
-            f"⚠️  SECRETS WARNING: Possible hardcoded secret detected{finding_count_hint}{path_hint}. "
-            "Verify this is not a real credential. Use env vars or local.settings.json for secrets."
+            f"⚠️  SECRETS WARNING: Possible hardcoded secret detected{finding_count_hint}{path_hint}"
+            f"{finding_names_hint}. Verify this is not a real credential. Use env vars or local.settings.json for secrets."
         )
     sys.exit(0)
 

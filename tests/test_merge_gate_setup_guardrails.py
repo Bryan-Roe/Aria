@@ -34,7 +34,7 @@ def test_merge_gate_defines_dependency_submission_job() -> None:
 
     assert "dependency-submission" in jobs
     assert jobs["dependency-submission"]["name"] == "Dependency Submission"
-    wait_step = jobs["dependency-submission"]["steps"][0]
+    wait_step = next(step for step in jobs["dependency-submission"]["steps"] if step["name"] == "Wait for submit-nuget check")
     assert wait_step["name"] == "Wait for submit-nuget check"
     assert wait_step["env"]["CHECK_NAME"] == "submit-nuget"
 

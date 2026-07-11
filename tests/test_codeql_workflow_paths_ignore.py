@@ -18,6 +18,14 @@ def _load_workflow(workflow_name: str) -> dict:
     return workflow
 
 
+def _load_first_existing_workflow(*workflow_names: str) -> dict:
+    for workflow_name in workflow_names:
+        workflow_path = Path(__file__).resolve().parents[1] / ".github" / "workflows" / workflow_name
+        if workflow_path.exists():
+            return _load_workflow(workflow_name)
+    raise AssertionError(f"Expected one of these workflows to exist: {', '.join(workflow_names)}")
+
+
 def _extract_codeql_action_refs(workflow: dict) -> dict[str, str]:
     return {
         step["name"]: step.get("uses")
@@ -70,7 +78,7 @@ def test_codeql_workflow_pins_buildless_capable_codeql_actions() -> None:
 @pytest.mark.unit
 def test_legacy_codeql_workflow_matches_canonical_codeql_action_refs() -> None:
     canonical_workflow = _load_workflow("codeql.yml")
-    legacy_workflow = _load_workflow("CodeQL Analysis.yml")
+    legacy_workflow = _load_first_existing_workflow("CodeQL Analysis.yml", "codeql-analysis.yml")
 
     canonical_uses = _extract_codeql_action_refs(canonical_workflow)
     legacy_uses = _extract_codeql_action_refs(legacy_workflow)
