@@ -58,9 +58,7 @@ else:
 
 logger = logging.getLogger(__name__)
 
-JsonValue = (
-    dict[str, Any] | list[Any] | str | int | float | bool | None
-)
+JsonValue = dict[str, Any] | list[Any] | str | int | float | bool | None
 
 
 def _apply_cors_headers(
@@ -74,12 +72,7 @@ def _apply_cors_headers(
 
 def _safe_log_label(value: str) -> str:
     """Strip control chars from user-influenced values before logging."""
-    return (
-        str(value)
-        .split("?", 1)[0]
-        .replace("\n", "")
-        .replace("\r", "")[:120]
-    )
+    return str(value).split("?", 1)[0].replace("\n", "").replace("\r", "")[:120]
 
 
 def _coerce_bytes(value: Any) -> bytes:
@@ -127,10 +120,7 @@ def _load_env_file() -> None:
 
 def _install_azure_functions_shim() -> Any:  # pylint: disable=too-many-statements
     """Install a lightweight azure.functions shim for local development."""
-    logger.debug(
-        "azure.functions not found; installing lightweight shim "
-        "for local dev adapter"
-    )
+    logger.debug("azure.functions not found; installing lightweight shim for local dev adapter")
     fake_mod: Any = types.ModuleType("azure.functions")
 
     class AuthLevel:
@@ -145,10 +135,7 @@ def _install_azure_functions_shim() -> Any:  # pylint: disable=too-many-statemen
             self.url = kwargs.get("url", "/")
             self.params = dict(kwargs.get("params") or {})
             self.route_params = dict(kwargs.get("route_params") or {})
-            self.headers = {
-                k.lower(): v
-                for k, v in dict(kwargs.get("headers") or {}).items()
-            }
+            self.headers = {k.lower(): v for k, v in dict(kwargs.get("headers") or {}).items()}
             self._body = _coerce_bytes(kwargs.get("body"))
             self._json_cache: JsonValue | None = None
 
@@ -288,10 +275,7 @@ def _azure_to_flask(resp: Any) -> Any:
             flask_resp.headers[k] = v
     except Exception:
         # best-effort fallback for unexpected header shapes
-        logger.debug(
-            "Unexpected header shape when converting azure "
-            "HttpResponse to Flask Response"
-        )
+        logger.debug("Unexpected header shape when converting azure HttpResponse to Flask Response")
 
     return flask_resp
 
@@ -308,10 +292,7 @@ def _build_local_http_request(
     try:
         from azure.functions import HttpRequest as ShimHttpRequest  # type: ignore
     except (ImportError, AttributeError) as exc:
-        raise RuntimeError(
-            "No HttpRequest implementation available "
-            "for local dev adapter"
-        ) from exc
+        raise RuntimeError("No HttpRequest implementation available for local dev adapter") from exc
 
     req_factory = cast(Callable[..., Any], ShimHttpRequest)
     try:
@@ -345,10 +326,7 @@ def _call_function_handler(
     body_bytes = _coerce_bytes(body)
 
     request_headers = dict(headers or {})
-    if body is not None and not any(
-        k.lower() == "content-type"
-        for k in request_headers
-    ):
+    if body is not None and not any(k.lower() == "content-type" for k in request_headers):
         request_headers["Content-Type"] = "application/json"
 
     if isinstance(req_cls, type) or callable(req_cls):
@@ -591,6 +569,7 @@ def create_app() -> Any:
 
     # Aria character endpoints (if available)
     try:
+
         @app.get("/api/aria/state")
         def aria_state_route():  # pyright: ignore[reportUnusedFunction]
             azure_resp = _call_function_handler("aria_get_state", "GET", "/api/aria/state")
@@ -715,13 +694,7 @@ def run_stdlib_server(
                 return
 
             length = int(self.headers.get("Content-Length", "0") or 0)
-            body = (
-                self.rfile.read(length)
-                if length
-                else _json_body(
-                    {"query": "local dev adapter smoke"}
-                )
-            )
+            body = self.rfile.read(length) if length else _json_body({"query": "local dev adapter smoke"})
             self._serve_parts(route_map[path], request_body=body)
 
         # pylint: disable=arguments-differ
@@ -753,21 +726,15 @@ def check_status_endpoints() -> int:  # pylint: disable=broad-exception-caught
         ),
         (
             "POST /api/agi/analyze",
-            lambda: get_agi_analyze_parts(
-                _json_body({"query": "adapter analyze check"})
-            ),
+            lambda: get_agi_analyze_parts(_json_body({"query": "adapter analyze check"})),
         ),
         (
             "POST /api/agi/reason",
-            lambda: get_agi_reason_parts(
-                _json_body({"query": "adapter reason check"})
-            ),
+            lambda: get_agi_reason_parts(_json_body({"query": "adapter reason check"})),
         ),
         (
             "POST /api/agi/stream",
-            lambda: get_agi_stream_parts(
-                _json_body({"query": "adapter stream check"})
-            ),
+            lambda: get_agi_stream_parts(_json_body({"query": "adapter stream check"})),
         ),
     )
     errors: list[str] = []
@@ -838,11 +805,7 @@ def main(argv: list[str] | None = None) -> None:
     if args.check:
         raise SystemExit(check_status_endpoints())
 
-    print(
-        "Starting local dev adapter for "
-        "/api/ai/status and /api/agi/status "
-        f"on http://{args.host}:{args.port}"
-    )
+    print(f"Starting local dev adapter for /api/ai/status and /api/agi/status on http://{args.host}:{args.port}")
 
     if has_flask:
         app = create_app()
