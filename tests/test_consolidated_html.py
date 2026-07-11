@@ -82,9 +82,9 @@ class TestHyperparamCardPlacement:
         assert gpu_ready_pos != -1, "GPU Ready pill not found"
 
         # The hyperopt container should come AFTER the GPU ready pill
-        assert (
-            card_pos > gpu_ready_pos
-        ), "hyperoptContainer appears before/inside the status-pills header block; it should be in the Tools tab"
+        assert card_pos > gpu_ready_pos, (
+            "hyperoptContainer appears before/inside the status-pills header block; it should be in the Tools tab"
+        )
 
     def test_card_near_anomaly_detector(self, html_text):
         """Hyperopt card should appear shortly after the Anomaly Detector card."""
@@ -94,9 +94,9 @@ class TestHyperparamCardPlacement:
         assert hyperopt_pos != -1, "Hyperparameter Optimizer card not found"
         assert hyperopt_pos > anomaly_pos, "Hyperparameter Optimizer card should come after Anomaly Detector"
         # They should be reasonably close (within 2000 chars)
-        assert (
-            hyperopt_pos - anomaly_pos < 2000
-        ), "Hyperparameter Optimizer card is suspiciously far from Anomaly Detector"
+        assert hyperopt_pos - anomaly_pos < 2000, (
+            "Hyperparameter Optimizer card is suspiciously far from Anomaly Detector"
+        )
 
     def test_status_pills_has_three_pills(self, html_text):
         """Header status-pills block should contain exactly 3 .status-pill divs."""
@@ -152,9 +152,9 @@ class TestJsFunctionScope:
         # The closing brace line of loadConfig is exactly "        }" (8 spaces + "}")
         # Accept either 8-space or 12-space indent closing brace (depends on script tag indentation)
         close_lines = [line for line in between if re.match(r"^(?:        |            )\}$", line)]
-        assert (
-            len(close_lines) >= 1
-        ), "loadConfig() does not appear to close before startHyperparamOptimization — functions may still be nested"
+        assert len(close_lines) >= 1, (
+            "loadConfig() does not appear to close before startHyperparamOptimization — functions may still be nested"
+        )
 
 
 # ---------------------------------------------------------------------------
@@ -179,9 +179,9 @@ class TestVramCalculatorImpl:
 
     def test_handles_no_gpu(self, html_text):
         """There should be error/warning handling for the no-GPU response path."""
-        assert (
-            "data.error" in html_text or "data.available" in html_text
-        ), "VRAM calculator should handle error/available=false from API"
+        assert "data.error" in html_text or "data.available" in html_text, (
+            "VRAM calculator should handle error/available=false from API"
+        )
 
 
 # ---------------------------------------------------------------------------
