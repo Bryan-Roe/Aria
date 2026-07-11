@@ -276,6 +276,7 @@
 .github/workflows/artifact-lifecycle.yml
 .github/workflows/auto-assign-reviewers.yml
 .github/workflows/auto-create-pr.yml
+.github/workflows/auto-finish-pr.yml
 .github/workflows/auto-fix.yml
 .github/workflows/auto-merge-on-ci.yml
 .github/workflows/auto-merge.yml
