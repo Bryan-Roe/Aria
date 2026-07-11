@@ -86,7 +86,7 @@ def test_devcontainer_lock_json_no_trailing_data() -> None:
     _assert_no_trailing_data(lock_path, content)
 
 
-def test_duplicate_test_basenames_in_subdirectories_are_package_scoped() -> None:
+def test_nested_duplicate_tests_have_package_scope() -> None:
     """Nested duplicate test filenames must live in packages to avoid pytest import mismatches."""
     tests_dir = Path(__file__).resolve().parent
     grouped_paths: dict[str, list[Path]] = {}
