@@ -1,100 +1,100 @@
 version: 2
 
 _defaults: &defaults
-  schedule:
-    interval: "daily"
-    time: "04:00"
-    timezone: "UTC"
-  labels:
-    - "dependencies"
-    - "autofix"
-  assignees:
-    - "Bryan-Roe"
-  reviewers:
-    - "Bryan-Roe" # or team slug if desired
-  allow:
-    - dependency-type: "direct"
-    - dependency-type: "indirect"
-  rebase-strategy: "auto"
-  open-pull-requests-limit: 5
-  cooldown:
-    default-days: 2
-    semver-major-days: 14
-    semver-minor-days: 3
-    semver-patch-days: 1
-  commit-message:
-    include: "scope"
-  pull-request-branch-name:
-    separator: "-"
+    schedule:
+        interval: "daily"
+        time: "04:00"
+        timezone: "UTC"
+    labels:
+        - "dependencies"
+        - "autofix"
+    assignees:
+        - "Bryan-Roe"
+    reviewers:
+        - "Bryan-Roe" # or team slug if desired
+    allow:
+        - dependency-type: "direct"
+        - dependency-type: "indirect"
+    rebase-strategy: "auto"
+    open-pull-requests-limit: 5
+    cooldown:
+        default-days: 2
+        semver-major-days: 14
+        semver-minor-days: 3
+        semver-patch-days: 1
+    commit-message:
+        include: "scope"
+    pull-request-branch-name:
+        separator: "-"
 
 updates:
-  # GitHub Actions (keep frequent)
-  - package-ecosystem: "github-actions"
-    directory: "/"
-    <<: *defaults
-    open-pull-requests-limit: 7
-    commit-message:
-      prefix: "deps(actions)"
-    groups:
-      actions-minor-patch:
-        update-types:
-          - "minor"
-          - "patch"
-        patterns:
-          - "*"
-      actions-major:
-        update-types:
-          - "major"
-        patterns:
-          - "*"
+    # GitHub Actions (keep frequent)
+    - package-ecosystem: "github-actions"
+      directory: "/"
+      <<: *defaults
+      open-pull-requests-limit: 7
+      commit-message:
+          prefix: "deps(actions)"
+      groups:
+          actions-minor-patch:
+              update-types:
+                  - "minor"
+                  - "patch"
+              patterns:
+                  - "*"
+          actions-major:
+              update-types:
+                  - "major"
+              patterns:
+                  - "*"
 
-  # Root Python deps (critical)
-  - package-ecosystem: "pip"
-    directory: "/"
-    <<: *defaults
-    open-pull-requests-limit: 7
-    commit-message:
-      prefix: "deps(pip)"
-    ignore:
-      - dependency-name: "*"
-        update-types:
-          - "version-update:semver-major"
-    groups:
-      pip-runtime:
-        patterns:
-          - "fastapi"
-          - "uvicorn*"
-          - "pydantic*"
-          - "sqlalchemy*"
-          - "httpx*"
-      pip-ai-sdk:
-        patterns:
-          - "openai*"
-          - "azure-*"
-          - "langchain*"
-      pip-dev-tools:
-        patterns:
-          - "pytest*"
-          - "ruff*"
-          - "mypy*"
-          - "black"
-          - "isort"
-      pip-other:
-        patterns:
-          - "*"
+    # Root Python deps (critical)
+    - package-ecosystem: "pip"
+      directory: "/"
+      <<: *defaults
+      open-pull-requests-limit: 7
+      commit-message:
+          prefix: "deps(pip)"
+      ignore:
+          - dependency-name: "*"
+            update-types:
+                - "version-update:semver-major"
+      groups:
+          pip-runtime:
+              patterns:
+                  - "fastapi"
+                  - "uvicorn*"
+                  - "pydantic*"
+                  - "sqlalchemy*"
+                  - "httpx*"
+          pip-ai-sdk:
+              patterns:
+                  - "openai*"
+                  - "azure-*"
+                  - "langchain*"
+          pip-dev-tools:
+              patterns:
+                  - "pytest*"
+                  - "ruff*"
+                  - "mypy*"
+                  - "black"
+                  - "isort"
+          pip-other:
+              patterns:
+                  - "*"
 
-  # Low-risk/experimental subtree: weekly
-  - package-ecosystem: "pip"
-    directory: "/notebooks"
-    <<: *defaults
-    schedule:
-      interval: "weekly"
-      day: "sunday"
-      time: "04:00"
-      timezone: "UTC"
-    commit-message:
-      prefix: "deps(notebooks)"
-    groups:
-      notebooks-deps:
-        patterns:
-          - "*"
+    # Low-risk/experimental subtree: weekly
+    - package-ecosystem: "pip"
+      directory: "/notebooks"
+      <<: *defaults
+      schedule:
+          interval: "weekly"
+          day: "sunday"
+          time: "04:00"
+          timezone: "UTC"
+      commit-message:
+          prefix: "deps(notebooks)"
+      groups:
+          notebooks-deps:
+              patterns:
+                  - "*"
