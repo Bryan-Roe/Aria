@@ -398,6 +398,7 @@ scripts/test_repo_automation.py
 scripts/test_runner.py
 scripts/test_watcher.py
 scripts/train_quantum_llm_chat.py
+scripts/train_with_early_stopping.py
 scripts/training/__init__.py
 scripts/training/train_vision.py
 scripts/training_analytics.py
@@ -433,6 +434,7 @@ shared/core/module_registry.py
 shared/cosmos_client.py
 shared/db_logging.py
 shared/domain/__init__.py
+shared/early_stopping.py
 shared/email_notifications.py
 shared/evaluation_utils.py
 shared/file_cache.py
@@ -559,6 +561,7 @@ tests/test_evaluation_utils.py
 tests/test_fast_validate.py
 tests/test_file_cache.py
 tests/test_function_app_endpoints.py
+tests/test_function_app_routes.py
 tests/test_generate_ai_tokens.py
 tests/test_git_commit_hygiene_hook.py
 tests/test_github_actions_dataset.py
@@ -732,6 +735,7 @@ tests/unit/test_chat_cli_no_stream.py
 tests/unit/test_circuit_cache.py
 tests/unit/test_devcontainer_json.py
 tests/unit/test_fallback_gesture_parser.py
+tests/unit/test_hello_world.py
 tests/unit/test_lm_studio_analyzer.py
 tests/unit/test_local_settings.py
 tests/unit/test_quantum_llm_components.py

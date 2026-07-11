@@ -261,7 +261,11 @@
 .github/workflows/copilot-setup-steps.yml
 .github/workflows/dataset-integrity.yml
 .github/workflows/default-github-automation.yml
+.github/workflows/dependabot-auto-approve.yml
+.github/workflows/dependabot-auto-label.yml
+.github/workflows/dependabot-auto-merge.yml
 .github/workflows/dependabot-automerge.yml
+.github/workflows/dependabot-fetch-metadata.yml
 .github/workflows/dependency-review.yml
 .github/workflows/devcontainer-ci.yml
 .github/workflows/docs.yml
@@ -922,6 +926,7 @@ docs/training/TRAINING_STARTED.md
 docs/training/TRAINING_TAB_ENHANCEMENTS.md
 docs/training/TRAINING_VALIDATION_RESULTS.md
 examples/ai_starters/README.md
+exports/all_orchestrators.json
 functions/http_ai_provider_probe/function.json
 functions/http_ai_routes/function.json
 functions/http_ai_runner/function.json

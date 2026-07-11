@@ -14,7 +14,6 @@ if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
 
 from quantum_code_llm import (  # noqa: E402
-    CodeDataset,
     CodeTokenizer,
     QuantumCodeLLM,
     QuantumCodeLLMConfig,
