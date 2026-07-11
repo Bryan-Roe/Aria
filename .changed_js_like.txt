@@ -237,6 +237,7 @@
 .github/workflows/aria-tests.yml
 .github/workflows/artifact-lifecycle.yml
 .github/workflows/auto-assign-reviewers.yml
+.github/workflows/auto-complete-bot-prs.yml
 .github/workflows/auto-create-pr.yml
 .github/workflows/auto-finish-pr.yml
 .github/workflows/auto-fix.yml

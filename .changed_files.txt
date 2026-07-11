@@ -275,6 +275,7 @@
 .github/workflows/aria-tests.yml
 .github/workflows/artifact-lifecycle.yml
 .github/workflows/auto-assign-reviewers.yml
+.github/workflows/auto-complete-bot-prs.yml
 .github/workflows/auto-create-pr.yml
 .github/workflows/auto-finish-pr.yml
 .github/workflows/auto-fix.yml
@@ -2828,6 +2829,7 @@ tests/test_watch_continuous_automation.py
 tests/test_web_app_security.py
 tests/test_workflow_validation_workflow.py
 tests/test_writer_reviewer_prototype_workflow.py
+tests/unit/__init__.py
 tests/unit/test_aria_schema_endpoint.py
 tests/unit/test_aria_schema_in_sync.py
 tests/unit/test_chat_cli_no_stream.py
