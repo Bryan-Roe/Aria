@@ -1,25 +1,55 @@
-# This workflow uses actions that are not certified by GitHub.
-# They are provided by a third-party and are governed by
-# separate terms of service, privacy policy, and support
-# documentation.
+# Dependabot PR automation: fetches metadata, labels, auto-approves minor/patch,
+# and auto-merges patch updates.
+# Action docs: https://github.com/dependabot/fetch-metadata
 name: Dependabot fetch metadata
-on: pull_request
+
+on: pull_request_target   # gives GITHUB_TOKEN write access on Dependabot PRs
 
 permissions:
   pull-requests: write
   issues: write
+  contents: write          # required for auto-merge
+
+concurrency:
+  group: dependabot-${{ github.event.pull_request.number }}
+  cancel-in-progress: false  # don't cancel; let each PR finish independently
 
 jobs:
   dependabot:
     runs-on: ubuntu-latest
-    if: github.event.pull_request.user.login == 'dependabot[bot]' && github.repository == 'owner/my_repo'
+    # Only run for Dependabot PRs in this repo
+    if: >
+      github.event.pull_request.user.login == 'dependabot[bot]' &&
+      github.repository == 'Bryan-Roe/Aria'
     steps:
-      - name: Dependabot metadata
+      - name: Fetch Dependabot metadata
         id: metadata
-        uses: dependabot/fetch-metadata@d7267f607e9d3fb96fc2fbe83e0af444713e90b7
+        uses: dependabot/fetch-metadata@d7267f607e9d3fb96fc2fbe83e0af444713e90b7 # v2.3.0
         with:
           github-token: "${{ secrets.GITHUB_TOKEN }}"
-      # The following properties are now available:
-      #  - steps.metadata.outputs.dependency-names
-      #  - steps.metadata.outputs.dependency-type
-      #  - steps.metadata.outputs.update-type
+
+      # Auto-approve minor and patch updates (low risk)
+      - name: Auto-approve minor and patch updates
+        if: >
+          steps.metadata.outputs.update-type == 'version-update:semver-patch' ||
+          steps.metadata.outputs.update-type == 'version-update:semver-minor'
+        run: gh pr review --approve "$PR_URL"
+        env:
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # Auto-merge patch updates only (safest automation boundary)
+      - name: Enable auto-merge for patch updates
+        if: steps.metadata.outputs.update-type == 'version-update:semver-patch'
+        run: gh pr merge --auto --squash "$PR_URL"
+        env:
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # Label major updates for manual review
+      - name: Label major updates for review
+        if: steps.metadata.outputs.update-type == 'version-update:semver-major'
+        run: gh pr edit "$PR_URL" --add-label "dependencies,major-update"
+        env:
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
