@@ -8,7 +8,9 @@
 #           - Production dependency minor bumps are flagged for manual review.
 #           - Workflow runs only for PRs authored by dependabot[bot].
 #           - Token permissions are scoped to the minimum required.
-# Notes   : - If the target branch uses a merge queue, the built-in GITHUB_TOKEN
+# Notes   : - This workflow explicitly waits for status checks to pass before
+#             enabling auto-merge.
+#           - If the target branch uses a merge queue, the built-in GITHUB_TOKEN
 #             may be unable to enqueue the PR for auto-merge; use a GitHub App
 #             token or PAT stored in GitHub Secrets if needed.
 # Triggers: pull_request events (opened / synchronize / reopened / ready_for_review)
@@ -33,7 +35,7 @@ jobs:
   automerge:
     name: Auto-merge minor / patch updates
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 10
 
     if: >-
       github.event.pull_request.user.login == 'dependabot[bot]' &&
@@ -90,7 +92,51 @@ jobs:
           echo "automerge=${automerge}" >> "$GITHUB_OUTPUT"
           echo "Decision: automerge=${automerge} (update-type=${UPDATE_TYPE:-unset}, dependency-type=${DEP_TYPE:-unset})"
 
+      - name: Wait for required status checks
+        if: steps.gate.outputs.automerge == 'true'
+        run: |
+          set -euo pipefail
+
+          max_wait_seconds=600
+          poll_interval_seconds=15
+          waited=0
+
+          while true; do
+            totals="$(gh pr view "$PR_URL" --json statusCheckRollup --jq '
+              [(.statusCheckRollup[]? | (.conclusion // .state // .status // "PENDING") | ascii_upcase)] as $states
+              | {
+                  total: ($states | length),
+                  pending: ($states | map(select(. == "PENDING" or . == "IN_PROGRESS" or . == "QUEUED" or . == "REQUESTED" or . == "WAITING" or . == "EXPECTED")) | length),
+                  failed: ($states | map(select(. == "FAILURE" or . == "FAILED" or . == "TIMED_OUT" or . == "CANCELLED" or . == "ACTION_REQUIRED" or . == "STARTUP_FAILURE" or . == "STALE" or . == "ERROR")) | length)
+                }')"
+
+            total_checks="$(jq -r '.total' <<<"$totals")"
+            pending_checks="$(jq -r '.pending' <<<"$totals")"
+            failed_checks="$(jq -r '.failed' <<<"$totals")"
+
+            echo "Status checks: total=${total_checks}, pending=${pending_checks}, failed=${failed_checks} (waited ${waited}s/${max_wait_seconds}s)"
+
+            if [[ "${failed_checks}" -gt 0 ]]; then
+              echo "Required status checks failed. Not enabling auto-merge."
+              exit 1
+            fi
+
+            if [[ "${total_checks}" -gt 0 && "${pending_checks}" -eq 0 ]]; then
+              echo "All required status checks passed."
+              break
+            fi
+
+            if [[ "${waited}" -ge "${max_wait_seconds}" ]]; then
+              echo "Timed out waiting for required status checks."
+              exit 1
+            fi
+
+            sleep "${poll_interval_seconds}"
+            waited=$((waited + poll_interval_seconds))
+          done
+
       - name: Read PR state
+        if: steps.gate.outputs.automerge == 'true'
         id: pr_state
         run: |
           set -euo pipefail
@@ -111,7 +157,21 @@ jobs:
         if: steps.gate.outputs.automerge == 'true' && steps.pr_state.outputs.auto_merge_enabled != 'true'
         run: |
           set -euo pipefail
-          gh pr merge --auto --squash --delete-branch "$PR_URL"
+
+          for attempt in 1 2 3; do
+            if gh pr merge --auto --squash --delete-branch "$PR_URL"; then
+              echo "Auto-merge enabled on attempt ${attempt}."
+              exit 0
+            fi
+
+            if [[ "${attempt}" -lt 3 ]]; then
+              echo "Auto-merge attempt ${attempt} failed; retrying in 5 seconds..."
+              sleep 5
+            fi
+          done
+
+          echo "Failed to enable auto-merge after 3 attempts."
+          exit 1
 
       - name: Comment on major updates
         if: steps.metadata.outputs.update-type == 'version-update:semver-major'
