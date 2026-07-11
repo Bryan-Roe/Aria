@@ -362,6 +362,17 @@ class HyperparameterOptimizer {
         const container = document.getElementById("hyperoptContainer")
         if (!container) return
 
+        const escapeHtml = value =>
+            String(value)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#39;")
+
+        const safeStrategy = escapeHtml(this.strategy)
+        const safeMaxTrials = escapeHtml(this.maxTrials)
+
         container.innerHTML = `
             <div class="card">
                 <div class="card-header">
@@ -370,7 +381,7 @@ class HyperparameterOptimizer {
                 </div>
                 <div style="padding:20px">
                     <div class="alert alert-info">
-                        Running ${this.strategy} optimization with ${this.maxTrials} trials...
+                        Running ${safeStrategy} optimization with ${safeMaxTrials} trials...
                     </div>
                     <div id="trialsProgress"></div>
                     <div id="currentBest" style="margin-top:20px"></div>
