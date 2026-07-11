@@ -207,9 +207,11 @@ class TestGetEndpoints:
 
     def test_health_uses_settings_provider_without_runtime_detection(self, app_module, monkeypatch):
         """GET /api/health should not call expensive detect_provider probes."""
-        monkeypatch.setattr(
-            app_module, "detect_provider", lambda *_args, **_kwargs: (_ for _ in ()).throw(RuntimeError())
-        )
+
+        def _raise_runtime_error(*_args, **_kwargs):
+            raise RuntimeError()
+
+        monkeypatch.setattr(app_module, "detect_provider", _raise_runtime_error)
         monkeypatch.setattr(type(app_module._settings), "active_provider", lambda self: "local")
 
         req = _mock_request("GET")

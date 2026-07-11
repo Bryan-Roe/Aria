@@ -482,7 +482,11 @@ _APP_ROOT = Path(__file__).resolve().parent
 
 @lru_cache(maxsize=32)
 def _read_static_text_cached(path_str: str, mtime_ns: int) -> str:
-    _ = mtime_ns
+    """Read static text file content with mtime-sensitive memoization.
+
+    mtime_ns is intentionally part of the cache key so cache entries are
+    invalidated automatically when the underlying file changes.
+    """
     with open(path_str, encoding="utf-8") as f:
         return f.read()
 
@@ -502,7 +506,7 @@ def _serve_chat_static_asset(
     try:
         stat = file_path.stat()
         content = _read_static_text_cached(str(file_path), stat.st_mtime_ns)
-    except Exception as e:  # noqa: BLE001
+    except (OSError, UnicodeDecodeError) as e:
         logging.error("Error serving %s: %s", relative_path, e)
         return func.HttpResponse(f"{error_prefix}{str(e)}{error_suffix}", status_code=500, mimetype=mimetype)
 
@@ -1998,8 +2002,11 @@ def chat_stream(req: func.HttpRequest) -> func.HttpResponse:
 
                 # We'll stream both textual deltas and token-level events when possible.
                 # Keep this bounded per chunk to avoid repeated full-history rescans.
+                # Bounded guardrail scans reduce repeated full-history checks
+                # while still periodically scanning full output for cross-chunk patterns.
                 guardrail_window_chars = 2000
                 guardrail_full_scan_interval_chars = 400
+                movement_scan_window_chars = 512
 
                 # Try to use tiktoken for token-level tokenization when available
                 enc = None
@@ -2062,7 +2069,9 @@ def chat_stream(req: func.HttpRequest) -> func.HttpResponse:
 
                     # Check for movement commands on a bounded rolling window.
                     if not movement_commands_sent and len(cumulative_text) > 20:
-                        movement_scan_text = (movement_scan_text + chunk_text)[-512:]
+                        # Movement command phrases are short, so a bounded tail
+                        # is enough to preserve cross-chunk matching.
+                        movement_scan_text = (movement_scan_text + chunk_text)[-movement_scan_window_chars:]
                         movement_data = parse_movement_commands(movement_scan_text)
                         if movement_data.get("commands"):
                             movement_event = json.dumps(movement_data)
@@ -2096,6 +2105,7 @@ def chat_stream(req: func.HttpRequest) -> func.HttpResponse:
                         word_matches = list(_RE_WORD_SPLIT.finditer(combined_text))
                         emit_count = len(word_matches)
                         if word_matches and combined_text and not combined_text[-1].isspace():
+                            # Keep the trailing partial word for the next chunk.
                             emit_count -= 1
                             word_carry = combined_text[word_matches[-1].start() :]
                         else:
