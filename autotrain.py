@@ -26,5 +26,8 @@ for _name, _value in _canonical.__dict__.items():
         continue
     globals()[_name] = _value
 
+if hasattr(_canonical, "__all__"):
+    __all__ = _canonical.__all__
+
 # Mirror the canonical module so downstream monkeypatches affect one object.
 sys.modules[__name__] = _canonical
