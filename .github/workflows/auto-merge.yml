@@ -23,9 +23,10 @@
 
 name: Auto Merge
 
-on: # yamllint disable-line rule:truthy
+on:
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review, labeled, unlabeled]
+  merge_group:
   check_run:
     types: [completed]
   schedule:
