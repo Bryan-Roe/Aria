@@ -537,6 +537,16 @@ def safe_session_name(session_name: str | None) -> str:
     return safe[:64] or "session"
 
 
+def build_safe_conv_path(filename_only: str) -> Path:
+    conv_root = CONV_DIR.resolve()
+    candidate = (conv_root / filename_only).resolve()
+    try:
+        candidate.relative_to(conv_root)
+    except ValueError as exc:
+        raise ValueError("Invalid session path") from exc
+    return candidate
+
+
 def save_conversation_json(hist_state: list[dict[str, Any]], session_name: str = "session") -> str:
     ensure_conv_dir()
     ts = int(time.time())
@@ -560,10 +570,7 @@ def save_conversation_markdown(hist_state: list[dict[str, Any]], session_name: s
     safe_name = safe_session_name(session_name)
     if Path(safe_name).name != safe_name:
         raise ValueError("Invalid session path")
-    conv_root = CONV_DIR.resolve()
-    filename = (CONV_DIR / f"{safe_name}_{ts}.md").resolve()
-    if filename.parent != conv_root:
-        raise ValueError("Invalid session path")
+    filename = build_safe_conv_path(f"{safe_name}_{ts}.md")
     with filename.open("w", encoding="utf-8") as f:
         for entry in hist_state:
             f.write(f"### User - {entry.get('user_ts', '')}\n")
