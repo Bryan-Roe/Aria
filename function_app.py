@@ -8,6 +8,7 @@
 # =============================================================================
 import asyncio
 import base64
+from functools import lru_cache
 import hmac
 import importlib.util as _iu
 import io
@@ -36,12 +37,12 @@ from function_app_domains import chat as chat_domain
 from function_app_domains import quantum as quantum_domain
 from function_app_domains import referrals as referrals_domain
 
-
 # Import AI projects via centralized registry
 # (replaced scattered sys.path manipulation)
 from shared.agi_backend_status import build_agi_backend_status
 from shared.config import get_settings
 from shared.core.module_registry import AIProjectsRegistry
+from shared.http_utils import create_no_cache_headers
 from shared.import_helpers import create_stub_function, safe_import
 from shared.json_utils import load_status_json
 from shared.runtime_env import build_venv_info
@@ -476,6 +477,41 @@ except Exception:  # pragma: no cover - library optional
     _tracer = None  # type: ignore
 
 app = func.FunctionApp()
+_APP_ROOT = Path(__file__).resolve().parent
+
+
+@lru_cache(maxsize=32)
+def _read_static_text_cached(path_str: str, mtime_ns: int) -> str:
+    _ = mtime_ns
+    with open(path_str, encoding="utf-8") as f:
+        return f.read()
+
+
+def _serve_chat_static_asset(
+    relative_path: str,
+    *,
+    mimetype: str,
+    not_found_content: str,
+    error_prefix: str,
+    error_suffix: str = "",
+) -> func.HttpResponse:
+    file_path = _APP_ROOT / relative_path
+    if not file_path.exists():
+        return func.HttpResponse(not_found_content, status_code=404, mimetype=mimetype)
+
+    try:
+        stat = file_path.stat()
+        content = _read_static_text_cached(str(file_path), stat.st_mtime_ns)
+    except Exception as e:  # noqa: BLE001
+        logging.error("Error serving %s: %s", relative_path, e)
+        return func.HttpResponse(f"{error_prefix}{str(e)}{error_suffix}", status_code=500, mimetype=mimetype)
+
+    return func.HttpResponse(
+        content,
+        status_code=200,
+        mimetype=mimetype,
+        headers=create_no_cache_headers(),
+    )
 
 
 # =============================================================================
@@ -486,136 +522,63 @@ app = func.FunctionApp()
 @app.route(route="chat-web", methods=["GET"], auth_level=func.AuthLevel.ANONYMOUS)
 def serve_chat_web(req: func.HttpRequest) -> func.HttpResponse:
     """Serve the chat web interface HTML"""
-    try:
-        html_path = Path(__file__).resolve().parent / "apps" / "chat" / "index.html"
-
-        if html_path.exists():
-            with open(html_path, "r", encoding="utf-8") as f:
-                html_content = f.read()
-
-            return func.HttpResponse(
-                html_content,
-                status_code=200,
-                mimetype="text/html",
-                headers={
-                    "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
-                    "Pragma": "no-cache",
-                    "Expires": "0",
-                },
-            )
-        else:
-            return func.HttpResponse(
-                f"<h1>Error</h1><p>Chat interface not found at {html_path}</p>",
-                status_code=404,
-                mimetype="text/html",
-            )
-    except Exception as e:
-        logging.error(f"Error serving chat web: {str(e)}")
-        return func.HttpResponse(f"<h1>Error</h1><p>{str(e)}</p>", status_code=500, mimetype="text/html")
+    _ = req
+    return _serve_chat_static_asset(
+        "apps/chat/index.html",
+        mimetype="text/html",
+        not_found_content=f"<h1>Error</h1><p>Chat interface not found at {_APP_ROOT / 'apps' / 'chat' / 'index.html'}</p>",
+        error_prefix="<h1>Error</h1><p>",
+        error_suffix="</p>",
+    )
 
 
 @app.route(route="chat-web/chat.js", methods=["GET"], auth_level=func.AuthLevel.ANONYMOUS)
 def serve_chat_js(req: func.HttpRequest) -> func.HttpResponse:
     """Serve the chat JavaScript file"""
-    try:
-        js_path = Path(__file__).resolve().parent / "apps" / "chat" / "chat.js"
-
-        if js_path.exists():
-            with open(js_path, "r", encoding="utf-8") as f:
-                js_content = f.read()
-
-            return func.HttpResponse(
-                js_content,
-                status_code=200,
-                mimetype="application/javascript",
-                headers={
-                    "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
-                    "Pragma": "no-cache",
-                    "Expires": "0",
-                },
-            )
-        else:
-            return func.HttpResponse(
-                f"// Error: JavaScript file not found at {js_path}",
-                status_code=404,
-                mimetype="application/javascript",
-            )
-    except Exception as e:
-        logging.error(f"Error serving chat.js: {str(e)}")
-        return func.HttpResponse(f"// Error: {str(e)}", status_code=500, mimetype="application/javascript")
+    _ = req
+    return _serve_chat_static_asset(
+        "apps/chat/chat.js",
+        mimetype="application/javascript",
+        not_found_content=f"// Error: JavaScript file not found at {_APP_ROOT / 'apps' / 'chat' / 'chat.js'}",
+        error_prefix="// Error: ",
+    )
 
 
 @app.route(route="chat-web/static/agi_stream_utils.js", methods=["GET"], auth_level=func.AuthLevel.ANONYMOUS)
 def serve_agi_stream_utils(req: func.HttpRequest) -> func.HttpResponse:
     """Serve AGI SSE parsing utilities for chat-web clients."""
-    try:
-        js_path = Path(__file__).resolve().parent / "apps" / "chat" / "static" / "agi_stream_utils.js"
-
-        if js_path.exists():
-            with open(js_path, "r", encoding="utf-8") as f:
-                js_content = f.read()
-
-            return func.HttpResponse(
-                js_content,
-                status_code=200,
-                mimetype="application/javascript",
-                headers={
-                    "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
-                    "Pragma": "no-cache",
-                    "Expires": "0",
-                },
-            )
-
-        return func.HttpResponse(
-            f"// Error: JavaScript file not found at {js_path}",
-            status_code=404,
-            mimetype="application/javascript",
-        )
-    except Exception as e:
-        logging.error(f"Error serving agi_stream_utils.js: {str(e)}")
-        return func.HttpResponse(f"// Error: {str(e)}", status_code=500, mimetype="application/javascript")
+    _ = req
+    return _serve_chat_static_asset(
+        "apps/chat/static/agi_stream_utils.js",
+        mimetype="application/javascript",
+        not_found_content=f"// Error: JavaScript file not found at {_APP_ROOT / 'apps' / 'chat' / 'static' / 'agi_stream_utils.js'}",
+        error_prefix="// Error: ",
+    )
 
 
 @app.route(route="chat-web/global-upgrade.js", methods=["GET"], auth_level=func.AuthLevel.ANONYMOUS)
 def serve_chat_global_upgrade_js(req: func.HttpRequest) -> func.HttpResponse:
     """Serve shared global-upgrade script for chat-web."""
-    try:
-        js_path = Path(__file__).resolve().parent / "apps" / "global-upgrade.js"
-        if not js_path.exists():
-            return func.HttpResponse(
-                "// Error: global-upgrade.js not found", status_code=404, mimetype="application/javascript"
-            )
-        with open(js_path, "r", encoding="utf-8") as f:
-            js_content = f.read()
-        return func.HttpResponse(
-            js_content,
-            status_code=200,
-            mimetype="application/javascript",
-            headers={"Cache-Control": "no-store, no-cache, must-revalidate, max-age=0"},
-        )
-    except Exception as e:
-        logging.error(f"Error serving global-upgrade.js: {str(e)}")
-        return func.HttpResponse(f"// Error: {str(e)}", status_code=500, mimetype="application/javascript")
+    _ = req
+    return _serve_chat_static_asset(
+        "apps/global-upgrade.js",
+        mimetype="application/javascript",
+        not_found_content="// Error: global-upgrade.js not found",
+        error_prefix="// Error: ",
+    )
 
 
 @app.route(route="chat-web/global-upgrade.css", methods=["GET"], auth_level=func.AuthLevel.ANONYMOUS)
 def serve_chat_global_upgrade_css(req: func.HttpRequest) -> func.HttpResponse:
     """Serve shared global-upgrade stylesheet for chat-web."""
-    try:
-        css_path = Path(__file__).resolve().parent / "apps" / "global-upgrade.css"
-        if not css_path.exists():
-            return func.HttpResponse("/* Error: global-upgrade.css not found */", status_code=404, mimetype="text/css")
-        with open(css_path, "r", encoding="utf-8") as f:
-            css_content = f.read()
-        return func.HttpResponse(
-            css_content,
-            status_code=200,
-            mimetype="text/css",
-            headers={"Cache-Control": "no-store, no-cache, must-revalidate, max-age=0"},
-        )
-    except Exception as e:
-        logging.error(f"Error serving global-upgrade.css: {str(e)}")
-        return func.HttpResponse(f"/* Error: {str(e)} */", status_code=500, mimetype="text/css")
+    _ = req
+    return _serve_chat_static_asset(
+        "apps/global-upgrade.css",
+        mimetype="text/css",
+        not_found_content="/* Error: global-upgrade.css not found */",
+        error_prefix="/* Error: ",
+        error_suffix=" */",
+    )
 
 
 # =============================================================================
@@ -1722,10 +1685,16 @@ def resource_monitor_status(req: func.HttpRequest) -> func.HttpResponse:
 def model_deployer_status(req: func.HttpRequest) -> func.HttpResponse:
     """Return model deployer registry status."""
     try:
-        reg_path = Path(__file__).resolve().parent / "deployed_models" / "model_registry.json"
+        reg_path = _APP_ROOT / "deployed_models" / "model_registry.json"
         if reg_path.exists():
-            with open(reg_path, "r") as f:
-                data = json.load(f)
+            data = read_json_cached(reg_path, ttl_seconds=30)
+            if data is None:
+                return func.HttpResponse(
+                    json.dumps({"error": "Failed to load registry"}),
+                    status_code=500,
+                    mimetype="application/json",
+                    headers=create_cors_response_headers(),
+                )
             return func.HttpResponse(
                 json.dumps(data),
                 status_code=200,
@@ -1752,10 +1721,16 @@ def model_deployer_status(req: func.HttpRequest) -> func.HttpResponse:
 def results_export(req: func.HttpRequest) -> func.HttpResponse:
     """Return latest results export (all orchestrators)."""
     try:
-        res_path = Path(__file__).resolve().parent / "exports" / "all_orchestrators.json"
+        res_path = _APP_ROOT / "exports" / "all_orchestrators.json"
         if res_path.exists():
-            with open(res_path, "r") as f:
-                data = json.load(f)
+            data = read_json_cached(res_path, ttl_seconds=30)
+            if data is None:
+                return func.HttpResponse(
+                    json.dumps({"error": "Failed to load results"}),
+                    status_code=500,
+                    mimetype="application/json",
+                    headers=create_cors_response_headers(),
+                )
             return func.HttpResponse(
                 json.dumps(data),
                 status_code=200,
@@ -1782,10 +1757,16 @@ def results_export(req: func.HttpRequest) -> func.HttpResponse:
 def evaluation_results(req: func.HttpRequest) -> func.HttpResponse:
     """Return latest batch evaluation results."""
     try:
-        eval_path = Path(__file__).resolve().parent / "data_out" / "evaluation_results.json"
+        eval_path = _APP_ROOT / "data_out" / "evaluation_results.json"
         if eval_path.exists():
-            with open(eval_path, "r") as f:
-                data = json.load(f)
+            data = read_json_cached(eval_path, ttl_seconds=30)
+            if data is None:
+                return func.HttpResponse(
+                    json.dumps({"error": "Failed to load evaluation results"}),
+                    status_code=500,
+                    mimetype="application/json",
+                    headers=create_cors_response_headers(),
+                )
             return func.HttpResponse(
                 json.dumps(data),
                 status_code=200,
@@ -2015,8 +1996,10 @@ def chat_stream(req: func.HttpRequest) -> func.HttpResponse:
                 }
                 yield (f"event: meta\ndata: {json.dumps(pre)}\n\n").encode("utf-8")
 
-                # We'll stream both textual deltas and token-level events when possible
-                import re
+                # We'll stream both textual deltas and token-level events when possible.
+                # Keep this bounded per chunk to avoid repeated full-history rescans.
+                guardrail_window_chars = 2000
+                guardrail_full_scan_interval_chars = 400
 
                 # Try to use tiktoken for token-level tokenization when available
                 enc = None
@@ -2033,19 +2016,25 @@ def chat_stream(req: func.HttpRequest) -> func.HttpResponse:
                     enc = None
 
                 cumulative_text = ""
-                prev_token_count = 0
-                prev_word_count = 0
                 token_index = 0
                 movement_commands_sent = False
+                movement_scan_text = ""
+                word_carry = ""
+                last_full_guardrail_check_len = 0
 
                 for chunk in gen:
                     if not chunk:
                         continue
-                    next_text = cumulative_text + str(chunk)
+                    chunk_text = str(chunk)
+                    next_text = cumulative_text + chunk_text
                     if guardrails_enabled:
-                        # Validate on cumulative output so cross-chunk patterns
-                        # are still detected in streaming mode.
-                        output_decision = _ai_safety.validate_output(next_text)
+                        # Validate every chunk against a bounded trailing window and
+                        # periodically against the full cumulative output.
+                        scan_text = next_text[-guardrail_window_chars:]
+                        if (len(next_text) - last_full_guardrail_check_len) >= guardrail_full_scan_interval_chars:
+                            scan_text = next_text
+                            last_full_guardrail_check_len = len(next_text)
+                        output_decision = _ai_safety.validate_output(scan_text)
                         if not output_decision.allowed:
                             _AI_CAPABILITY_COUNTERS["safety_blocked_output"] += 1
                             _record_ai_capability_event(
@@ -2058,22 +2047,23 @@ def chat_stream(req: func.HttpRequest) -> func.HttpResponse:
                                     "flags": list(getattr(output_decision, "flags", ()) or ()),
                                 },
                             )
-                            chunk = _build_guardrail_fallback_text()
-                            payload = json.dumps({"delta": chunk})
+                            blocked_text = _build_guardrail_fallback_text()
+                            payload = json.dumps({"delta": blocked_text})
                             yield (f"data: {payload}\n\n").encode("utf-8")
                             yield b"data: [DONE]\n\n"
                             return
 
                     # Raw textual delta (keep for compatibility)
-                    payload = json.dumps({"delta": chunk})
+                    payload = json.dumps({"delta": chunk_text})
                     yield (f"data: {payload}\n\n").encode("utf-8")
 
                     # Accumulate for tokenization; note: chunk may be partial
                     cumulative_text = next_text
 
-                    # Check for movement commands periodically
+                    # Check for movement commands on a bounded rolling window.
                     if not movement_commands_sent and len(cumulative_text) > 20:
-                        movement_data = parse_movement_commands(cumulative_text)
+                        movement_scan_text = (movement_scan_text + chunk_text)[-512:]
+                        movement_data = parse_movement_commands(movement_scan_text)
                         if movement_data.get("commands"):
                             movement_event = json.dumps(movement_data)
                             yield (f"event: movement\ndata: {movement_event}\n\n").encode("utf-8")
@@ -2082,44 +2072,56 @@ def chat_stream(req: func.HttpRequest) -> func.HttpResponse:
                     # Token-level events: prefer byte tokenization (tiktoken) when available
                     if enc is not None:
                         try:
-                            tok_ids = enc.encode(cumulative_text)
-                            new_ids = tok_ids[prev_token_count:]
-                            if new_ids:
-                                for tid in new_ids:
-                                    try:
-                                        txt = enc.decode([tid])
-                                    except Exception:
-                                        txt = ""
-                                    evt = json.dumps(
-                                        {
-                                            "token_index": token_index,
-                                            "token": txt,
-                                            "cumulative": cumulative_text,
-                                        }
-                                    )
-                                    yield (f"event: token\ndata: {evt}\n\n").encode("utf-8")
-                                    token_index += 1
-                                prev_token_count = len(tok_ids)
-                        except Exception:
-                            # degrade to word-level if full tokenization fails
-                            enc = None
-
-                    if enc is None:
-                        # fallback: emit word-level token events (split by whitespace)
-                        words = list(re.finditer(r"\S+", cumulative_text))
-                        if len(words) > prev_word_count:
-                            for w in words[prev_word_count:]:
-                                token_text = w.group(0)
+                            for tid in enc.encode(chunk_text):
+                                try:
+                                    txt = enc.decode([tid])
+                                except Exception:
+                                    txt = ""
                                 evt = json.dumps(
                                     {
                                         "token_index": token_index,
-                                        "token": token_text,
+                                        "token": txt,
                                         "cumulative": cumulative_text,
                                     }
                                 )
                                 yield (f"event: token\ndata: {evt}\n\n").encode("utf-8")
                                 token_index += 1
-                            prev_word_count = len(words)
+                        except Exception:
+                            # degrade to word-level if full tokenization fails
+                            enc = None
+
+                    if enc is None:
+                        # fallback: emit word-level token events incrementally
+                        combined_text = f"{word_carry}{chunk_text}"
+                        word_matches = list(_RE_WORD_SPLIT.finditer(combined_text))
+                        emit_count = len(word_matches)
+                        if word_matches and combined_text and not combined_text[-1].isspace():
+                            emit_count -= 1
+                            word_carry = combined_text[word_matches[-1].start() :]
+                        else:
+                            word_carry = ""
+
+                        for w in word_matches[:emit_count]:
+                            token_text = w.group(0)
+                            evt = json.dumps(
+                                {
+                                    "token_index": token_index,
+                                    "token": token_text,
+                                    "cumulative": cumulative_text,
+                                }
+                            )
+                            yield (f"event: token\ndata: {evt}\n\n").encode("utf-8")
+                            token_index += 1
+
+                if enc is None and word_carry.strip():
+                    evt = json.dumps(
+                        {
+                            "token_index": token_index,
+                            "token": word_carry.strip(),
+                            "cumulative": cumulative_text,
+                        }
+                    )
+                    yield (f"event: token\ndata: {evt}\n\n").encode("utf-8")
 
                 # Back-compat done event (legacy clients).
                 yield b"event: done\ndata: {}\n\n"
@@ -2494,9 +2496,9 @@ def start_backend(req: func.HttpRequest) -> func.HttpResponse:
 @app.route(route="health", methods=["GET"], auth_level=func.AuthLevel.ANONYMOUS)
 def health(req: func.HttpRequest) -> func.HttpResponse:
     """Minimal health endpoint safe for probes and load balancers."""
+    _ = req
     try:
-        _, provider_choice = detect_provider(None)
-        active_provider = getattr(provider_choice, "name", "unknown")
+        active_provider = _settings.active_provider()
     except (TypeError, ValueError, AttributeError, RuntimeError) as exc:
         logging.debug("health provider detection failed: %s", exc)
         active_provider = "unknown"

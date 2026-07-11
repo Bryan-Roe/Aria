@@ -205,6 +205,55 @@ class TestGetEndpoints:
         assert data["status"] == "ok"
         assert "settings" in data
 
+    def test_health_uses_settings_provider_without_runtime_detection(self, app_module, monkeypatch):
+        """GET /api/health should not call expensive detect_provider probes."""
+        monkeypatch.setattr(
+            app_module, "detect_provider", lambda *_args, **_kwargs: (_ for _ in ()).throw(RuntimeError())
+        )
+        monkeypatch.setattr(type(app_module._settings), "active_provider", lambda self: "local")
+
+        req = _mock_request("GET")
+        resp = app_module.health(req)
+
+        assert resp.status_code == 200
+        data = json.loads(resp.get_body())
+        assert data["provider"] == "local"
+
+    @pytest.mark.parametrize(
+        ("endpoint_name", "expected_ttl", "file_suffix"),
+        [
+            ("model_deployer_status", 30, "deployed_models/model_registry.json"),
+            ("results_export", 30, "exports/all_orchestrators.json"),
+            ("evaluation_results", 30, "data_out/evaluation_results.json"),
+        ],
+    )
+    def test_file_backed_endpoints_use_read_json_cached(
+        self,
+        app_module,
+        monkeypatch,
+        endpoint_name: str,
+        expected_ttl: int,
+        file_suffix: str,
+    ):
+        """File-backed monitoring endpoints should use shared JSON cache helper."""
+        called: dict[str, object] = {}
+        endpoint = getattr(app_module, endpoint_name)
+        target = app_module._APP_ROOT / file_suffix
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text('{"ok": true}', encoding="utf-8")
+
+        def _fake_read_json_cached(path, ttl_seconds=0):
+            called["path"] = str(path)
+            called["ttl_seconds"] = ttl_seconds
+            return {"ok": True}
+
+        monkeypatch.setattr(app_module, "read_json_cached", _fake_read_json_cached)
+
+        resp = endpoint(_mock_request("GET"))
+        assert resp.status_code == 200
+        assert called["ttl_seconds"] == expected_ttl
+        assert str(called["path"]).endswith(file_suffix)
+
     def test_ai_status_uses_shared_status_loader_without_leaking_metadata(self, app_module, monkeypatch):
         """GET /api/ai/status should strip shared loader metadata from payloads."""
         with app_module._AI_STATUS_CACHE_LOCK:
@@ -859,6 +908,54 @@ class TestPostValidation:
         assert '"delta": "Hello"' in body_text or '"delta": " world"' in body_text
         assert "data: [DONE]" in body_text
 
+    def test_chat_stream_tiktoken_encodes_chunk_deltas(self, app_module, monkeypatch):
+        """Streaming tokenization should encode each chunk delta instead of cumulative text."""
+
+        class _FakeProvider:
+            def complete(self, messages, stream=False):
+                assert stream is True
+                yield "Hello"
+                yield " world"
+
+        encode_inputs: list[str] = []
+
+        class _FakeEncoding:
+            def encode(self, text):
+                encode_inputs.append(text)
+                return [ord(c) for c in text]
+
+            def decode(self, token_ids):
+                return "".join(chr(i) for i in token_ids)
+
+        fake_tiktoken = types.SimpleNamespace(
+            encoding_for_model=lambda _model: _FakeEncoding(),
+            get_encoding=lambda _name: _FakeEncoding(),
+        )
+
+        monkeypatch.setitem(sys.modules, "tiktoken", fake_tiktoken)
+        monkeypatch.setattr(
+            app_module,
+            "_detect_provider_with_runtime_fallback",
+            lambda **kwargs: (
+                _FakeProvider(),
+                types.SimpleNamespace(name="local", model="local-echo"),
+            ),
+        )
+        monkeypatch.setattr(app_module, "generate_embedding", lambda text: [])
+        monkeypatch.setattr(
+            app_module,
+            "fetch_similar_messages",
+            lambda query_emb, top_k=5, session_id=None, min_similarity=0.0: [],
+        )
+
+        captured: dict = {"sse_body": b""}
+        _capture_sse_http_response(monkeypatch, app_module, captured)
+        req = _mock_request("POST", body={"messages": [{"role": "user", "content": "say hi"}]})
+        resp = app_module.chat_stream(req)
+
+        assert resp.status_code == 200
+        assert encode_inputs == ["Hello", " world"]
+
     def test_tts_no_text(self, app_module):
         """POST /api/tts with no text field → 400."""
         req = _mock_request("POST", body={})
@@ -878,6 +975,18 @@ class TestChatWebAssets:
         body = resp.get_body().decode("utf-8")
         assert "AGIStreamUtils" in body
         assert resp.mimetype == "application/javascript"
+
+    def test_static_asset_reader_caches_by_path_and_mtime(self, app_module):
+        asset_path = app_module._APP_ROOT / "apps" / "chat" / "chat.js"
+        stat = asset_path.stat()
+        app_module._read_static_text_cached.cache_clear()
+
+        first = app_module._read_static_text_cached(str(asset_path), stat.st_mtime_ns)
+        second = app_module._read_static_text_cached(str(asset_path), stat.st_mtime_ns)
+
+        assert first == second
+        cache_info = app_module._read_static_text_cached.cache_info()
+        assert cache_info.hits >= 1
 
 
 # ===========================================================================
