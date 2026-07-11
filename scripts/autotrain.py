@@ -167,6 +167,8 @@ def _norm_relpath(value: str | None) -> str | None:
     if norm.startswith("..") or norm == "..":
         return None
     return norm
+
+
 def load_config(path: Path) -> dict[str, Any]:
     if not path.exists():
         return {"jobs": []}
