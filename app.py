@@ -31,10 +31,7 @@ DEFAULT_TIMEOUT_ENV = os.getenv("OPENAI_TIMEOUT", "60")
 MAX_PROMPT_CHARS = 10_000
 MAX_SYSTEM_PROMPT_CHARS = 4_000
 MAX_MODEL_NAME_CHARS = 128
-SYSTEM_PROMPT = (
-    "You are a concise AI coding assistant. Return practical, "
-    "code-focused responses."
-)
+SYSTEM_PROMPT = "You are a concise AI coding assistant. Return practical, code-focused responses."
 QUANTUM_CHAT_PATH = "/api/quantum-llm/chat"
 
 EXIT_OK = 0
@@ -123,8 +120,7 @@ def _validate_prompt(prompt: str, *, max_chars: int = MAX_PROMPT_CHARS) -> str:
         raise ValueError("Prompt cannot be empty.")
     if len(normalized) > max_chars:
         raise ValueError(
-            f"Prompt is too long ({len(normalized)} chars). "
-            f"Maximum supported length is {max_chars} chars."
+            f"Prompt is too long ({len(normalized)} chars). Maximum supported length is {max_chars} chars."
         )
     return normalized
 
@@ -151,10 +147,7 @@ def _validate_model_name(model: str) -> str:
             f"Maximum supported length is {MAX_MODEL_NAME_CHARS} chars."
         )
     if not re.fullmatch(r"[A-Za-z0-9._:-]+", normalized):
-        raise ValueError(
-            "Model contains unsupported characters. Allowed: letters, "
-            "digits, '.', '_', ':', '-'."
-        )
+        raise ValueError("Model contains unsupported characters. Allowed: letters, digits, '.', '_', ':', '-'.")
     return normalized
 
 
@@ -248,14 +241,10 @@ def ask_quantum(
     base_url = (base_url or "").strip().rstrip("/")
     if not base_url:
         raise ValueError("Quantum base URL cannot be empty.")
-    from urllib.parse import urlparse as _urlparse
 
     _parsed = _urlparse(base_url)
     if _parsed.scheme not in {"http", "https"}:
-        raise ValueError(
-            f"Quantum base URL scheme '{_parsed.scheme}' is not allowed; "
-            "use http or https."
-        )
+        raise ValueError(f"Quantum base URL scheme '{_parsed.scheme}' is not allowed; use http or https.")
 
     payload = {
         "prompt": prompt,
@@ -328,11 +317,7 @@ def ask_local(prompt: str, *, system_prompt: str = SYSTEM_PROMPT) -> str:
         )
 
     if "explain" in lower or "what is" in lower:
-        sentences = [
-            s.strip()
-            for s in ptext.replace("\n", " ").split(".")
-            if s.strip()
-        ]
+        sentences = [s.strip() for s in ptext.replace("\n", " ").split(".") if s.strip()]
         expl = sentences[0] if sentences else ptext
         return (
             "[Local fallback explanation]\n\n"
@@ -381,10 +366,7 @@ def _build_parser() -> argparse.ArgumentParser:
         "--temperature",
         type=float,
         default=DEFAULT_TEMPERATURE,
-        help=(
-            f"Sampling temperature from 0.0 to 2.0 "
-            f"(default: {DEFAULT_TEMPERATURE})."
-        ),
+        help=(f"Sampling temperature from 0.0 to 2.0 (default: {DEFAULT_TEMPERATURE})."),
     )
     parser.add_argument(
         "--system",
@@ -523,8 +505,7 @@ def main(argv: list[str] | None = None) -> int:
             print(ask_local(prompt, system_prompt=args.system))
             return EXIT_OK
         print(
-            "Error: the 'openai' package is not installed. "
-            "Install it with: pip install openai",
+            "Error: the 'openai' package is not installed. Install it with: pip install openai",
             file=sys.stderr,
         )
         return EXIT_USAGE
