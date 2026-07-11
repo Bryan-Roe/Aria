@@ -2,121 +2,121 @@ version: 2.1
 
 # ── Executors ──────────────────────────────────────────────────────────────────
 executors:
-  python:
-    docker:
-      - image: cimg/python:3.11
-    resource_class: bryan-roe/class
-    environment:
-      PIP_DISABLE_PIP_VERSION_CHECK: "1"
-      PIP_NO_PYTHON_VERSION_WARNING: "1"
-      PYTHONDONTWRITEBYTECODE: "1"
-      PYTHONUNBUFFERED: "1"
+    python:
+        docker:
+            - image: cimg/python:3.11
+        resource_class: bryan-roe/class
+        environment:
+            PIP_DISABLE_PIP_VERSION_CHECK: "1"
+            PIP_NO_PYTHON_VERSION_WARNING: "1"
+            PYTHONDONTWRITEBYTECODE: "1"
+            PYTHONUNBUFFERED: "1"
 
 # ── Reusable commands ──────────────────────────────────────────────────────────
 commands:
-  restore-pip-cache:
-    steps:
-      - restore_cache:
-          keys:
-            - pip-v2-{{ checksum "requirements-dev.txt" }}-{{ checksum "requirements.txt" }}
-            - pip-v2-{{ checksum "requirements-dev.txt" }}-
-            - pip-v2-
+    restore-pip-cache:
+        steps:
+            - restore_cache:
+                  keys:
+                      - pip-v2-{{ checksum "requirements-dev.txt" }}-{{ checksum "requirements.txt" }}
+                      - pip-v2-{{ checksum "requirements-dev.txt" }}-
+                      - pip-v2-
 
-  save-pip-cache:
-    steps:
-      - save_cache:
-          key: pip-v2-{{ checksum "requirements-dev.txt" }}-{{ checksum "requirements.txt" }}
-          paths:
-            - ~/.cache/pip
+    save-pip-cache:
+        steps:
+            - save_cache:
+                  key: pip-v2-{{ checksum "requirements-dev.txt" }}-{{ checksum "requirements.txt" }}
+                  paths:
+                      - ~/.cache/pip
 
-  install-deps:
-    steps:
-      - run:
-          name: Install Python dependencies
-          command: |
-            pip install --upgrade pip
-            pip install -r requirements-dev.txt
+    install-deps:
+        steps:
+            - run:
+                  name: Install Python dependencies
+                  command: |
+                      pip install --upgrade pip
+                      pip install -r requirements-dev.txt
 
 # ── Jobs ───────────────────────────────────────────────────────────────────────
 jobs:
-  lint:
-    executor: python
-    steps:
-      - checkout
-      - restore-pip-cache
-      - install-deps
-      - save-pip-cache
-      - run:
-          name: ruff lint
-          command: python -m ruff check tests shared scripts apps/aria/server.py
-      - run:
-          name: black format check
-          command: python -m black --check tests shared scripts apps/aria/server.py
+    lint:
+        executor: python
+        steps:
+            - checkout
+            - restore-pip-cache
+            - install-deps
+            - save-pip-cache
+            - run:
+                  name: ruff lint
+                  command: python -m ruff check tests shared scripts apps/aria/server.py
+            - run:
+                  name: black format check
+                  command: python -m black --check tests shared scripts apps/aria/server.py
 
-  type-check:
-    executor: python
-    steps:
-      - checkout
-      - restore-pip-cache
-      - install-deps
-      - save-pip-cache
-      - run:
-          name: mypy (advisory)
-          command: python -m mypy shared scripts function_app.py || true
+    type-check:
+        executor: python
+        steps:
+            - checkout
+            - restore-pip-cache
+            - install-deps
+            - save-pip-cache
+            - run:
+                  name: mypy (advisory)
+                  command: python -m mypy shared scripts function_app.py || true
 
-  unit-test:
-    executor: python
-    steps:
-      - checkout
-      - restore-pip-cache
-      - install-deps
-      - save-pip-cache
-      - run:
-          name: Run unit tests
-          environment:
-            CI: "true"
-            AZURE_CLIENT_ID: ""
-            AZURE_TENANT_ID: ""
-            AZURE_CLIENT_SECRET: ""
-            OPENAI_API_KEY: ""
-          command: |
-            mkdir -p data_out
-            python -m pytest tests \
-              -q --tb=short \
-              -m "not slow and not azure and not integration" \
-              --ignore=tests/test_ui_playwright.py \
-              --ignore=tests/test_ui_pyppeteer.py \
-              --ignore=tests/test_ui_selenium.py \
-              -n auto \
-              --maxfail=5 \
-              --durations=10 \
-              --junitxml=data_out/junit.xml \
-              --cov=shared --cov=scripts \
-              --cov-report=xml:data_out/coverage.xml \
-              --cov-report=term-missing
-      - store_test_results:
-          path: data_out
-      - store_artifacts:
-          path: data_out
-          destination: test-output
+    unit-test:
+        executor: python
+        steps:
+            - checkout
+            - restore-pip-cache
+            - install-deps
+            - save-pip-cache
+            - run:
+                  name: Run unit tests
+                  environment:
+                      CI: "true"
+                      AZURE_CLIENT_ID: ""
+                      AZURE_TENANT_ID: ""
+                      AZURE_CLIENT_SECRET: ""
+                      OPENAI_API_KEY: ""
+                  command: |
+                      mkdir -p data_out
+                      python -m pytest tests \
+                        -q --tb=short \
+                        -m "not slow and not azure and not integration" \
+                        --ignore=tests/test_ui_playwright.py \
+                        --ignore=tests/test_ui_pyppeteer.py \
+                        --ignore=tests/test_ui_selenium.py \
+                        -n auto \
+                        --maxfail=5 \
+                        --durations=10 \
+                        --junitxml=data_out/junit.xml \
+                        --cov=shared --cov=scripts \
+                        --cov-report=xml:data_out/coverage.xml \
+                        --cov-report=term-missing
+            - store_test_results:
+                  path: data_out
+            - store_artifacts:
+                  path: data_out
+                  destination: test-output
 
-  ci-gate:
-    docker:
-      - image: cimg/base:stable
-    resource_class: bryan-roe/class
-    steps:
-      - run:
-          name: All CI checks passed
-          command: echo "All required CI jobs passed."
+    ci-gate:
+        docker:
+            - image: cimg/base:stable
+        resource_class: bryan-roe/class
+        steps:
+            - run:
+                  name: All CI checks passed
+                  command: echo "All required CI jobs passed."
 
 # ── Workflow ───────────────────────────────────────────────────────────────────
 workflows:
-  ci:
-    jobs:
-      - lint
-      - type-check
-      - unit-test
-      - ci-gate:
-          requires:
+    ci:
+        jobs:
             - lint
+            - type-check
             - unit-test
+            - ci-gate:
+                  requires:
+                      - lint
+                      - unit-test
