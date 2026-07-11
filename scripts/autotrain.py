@@ -45,9 +45,6 @@ HF_TRAIN_SCRIPT = (
 
 __all__ = ["load_config", "load_jobs", "validate_job", "build_command", "main"]
 
-
-__all__ = ["load_config", "load_jobs", "validate_job", "build_command", "main"]
-
 # ---------------------------------------------------------------------------
 # Data model
 # ---------------------------------------------------------------------------
@@ -170,11 +167,6 @@ def _norm_relpath(value: str | None) -> str | None:
     if norm.startswith("..") or norm == "..":
         return None
     return norm
-
-
-__all__ = ["load_config", "load_jobs", "validate_job", "build_command", "main"]
-
-
 def load_config(path: Path) -> dict[str, Any]:
     if not path.exists():
         return {"jobs": []}
