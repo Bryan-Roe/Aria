@@ -422,11 +422,8 @@ class CodeAgent:
 
         file_patterns_note = f"Likely search patterns: {', '.join(file_hints)}\n" if file_hints else ""
 
-        prompt = (
-            (f"{specialized_intro}\n\n" if specialized_intro else "")
-            + f"""Python repo task: {task_description}
+        prompt = (f"{specialized_intro}\n\n" if specialized_intro else "") + f"""Python repo task: {task_description}
 {file_patterns_note}Return a short 3-step plan and key risk only."""
-        )
 
         _LOGGER.info(f"Planning task [{task_category}]: {task_description}")
         reasoning = self._llm_query(prompt, max_tokens=MAX_TASK_TOKENS)

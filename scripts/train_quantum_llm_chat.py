@@ -83,8 +83,7 @@ class SimpleCharDataset(Dataset):
 
 def get_training_text():
     """Get sample training text about quantum computing and AI."""
-    return (
-        """
+    return """
 Quantum computing uses quantum mechanics to process information in fundamentally new ways.
 Unlike classical computers that use bits, quantum computers use qubits that can exist in superposition.
 This means a qubit can be both zero and one simultaneously, enabling parallel computation.
@@ -110,9 +109,7 @@ Quantum attention mechanisms can potentially discover patterns classical systems
 Research continues to explore the boundaries of what quantum computing can achieve.
 As quantum hardware improves, practical quantum machine learning applications will emerge.
 The combination of quantum physics and artificial intelligence opens exciting new possibilities.
-"""
-        * 20
-    )  # Repeat for more training data
+""" * 20  # Repeat for more training data
 
 
 def _build_quantum_llm(model_cls, args, vocab_size: int):

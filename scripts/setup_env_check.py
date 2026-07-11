@@ -352,8 +352,7 @@ def print_next_steps() -> None:
     """Print recommended next steps."""
     print_section("Next Steps")
 
-    print(
-        f"""
+    print(f"""
 {BOLD}1. Start Services:{RESET}
    • Ollama:    ollama serve
    • LM Studio: lm-studio (GUI application)
@@ -377,8 +376,7 @@ def print_next_steps() -> None:
     • Quick start:     cat QUICK_START_AUTOMATION.md
     • Automation:      cat AUTOMATION_RUNNER.md
     • Watch status:    python3 scripts/watch_continuous_automation.py
-"""
-    )
+""")
 
 
 def main() -> int:

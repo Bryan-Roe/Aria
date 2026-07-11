@@ -35,9 +35,9 @@ def test_auto_execute_settings_persistence_wiring_present() -> None:
     assert "aria-autoexec-use-llm" in html, "Auto-execute should persist use-llm toggle"
     assert "aria-autoexec-show-state" in html, "Auto-execute should persist show-state toggle"
     assert "restoreAutoExecuteSettings()" in html, "Auto-execute should restore saved settings on load"
-    assert "persistAutoExecuteSettings(provider, model, useLlm, showState)" in html, (
-        "Auto-execute should persist settings before requests"
-    )
+    assert (
+        "persistAutoExecuteSettings(provider, model, useLlm, showState)" in html
+    ), "Auto-execute should persist settings before requests"
 
 
 def test_auto_execute_quantum_toolbar_and_presets() -> None:

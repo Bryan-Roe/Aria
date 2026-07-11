@@ -87,9 +87,9 @@ def test_orchestrator_health_aggregates_autonomous_training(app_module: ModuleTy
     orchestrators = data["orchestrator_health"]["orchestrators"]
 
     # If status file exists, should be included
-    assert "autonomous_training" in orchestrators, (
-        "autonomous_training orchestrator missing despite status file present."
-    )
+    assert (
+        "autonomous_training" in orchestrators
+    ), "autonomous_training orchestrator missing despite status file present."
     orch = orchestrators["autonomous_training"]
     assert "status" in orch
     assert "cycles_completed" in orch or "error" in orch
