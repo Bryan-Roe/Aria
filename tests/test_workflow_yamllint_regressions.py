@@ -3,6 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
+import yaml
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -21,7 +22,10 @@ def test_code_coverage_workflow_no_triple_blank_before_permissions() -> None:
 @pytest.mark.unit
 def test_dataset_integrity_harden_runner_with_block_indentation() -> None:
     content = _read(".github/workflows/dataset-integrity.yml")
-    assert content.count("with:\n                  egress-policy: audit") == 3
+    bad_indent = "with:\n                egress-policy: audit"
+    good_indent = "with:\n                  egress-policy: audit"
+    assert bad_indent not in content
+    assert content.count(good_indent) == 3
 
 
 @pytest.mark.unit
@@ -36,11 +40,21 @@ def test_workflow_files_end_with_newline() -> None:
 @pytest.mark.unit
 def test_ossar_workflow_steps_and_branch_spacing_regression() -> None:
     content = _read(".github/workflows/ossar.yml")
-    assert 'branches: ["main"]' in content
-    assert "    steps:\n      - name: Checkout repository" in content
+    workflow = yaml.safe_load(content)
+    triggers = workflow["on"] if "on" in workflow else workflow[True]
+    steps = workflow["jobs"]["OSSAR-Scan"]["steps"]
+
+    assert triggers["push"]["branches"] == ["main"]
+    assert triggers["pull_request"]["branches"] == ["main"]
+    assert steps[0]["name"] == "Checkout repository"
 
 
 @pytest.mark.unit
 def test_summary_workflow_has_no_trailing_whitespace() -> None:
     content = _read(".github/workflows/summary.yml")
-    assert all(line == line.rstrip(" \t") for line in content.splitlines())
+    trailing_ws_lines = [
+        line_number
+        for line_number, line in enumerate(content.splitlines(), start=1)
+        if line != line.rstrip(" \t")
+    ]
+    assert not trailing_ws_lines, f"Trailing whitespace found on lines: {trailing_ws_lines}"
