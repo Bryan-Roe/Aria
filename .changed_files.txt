@@ -1,2 +1,7 @@
+.changed_files.txt
+.changed_js_like.txt
+.changed_py.txt
+.github/workflows/dependabot-automerge.yml
 .github/workflows/pr-checks.yml
 scripts/gradio_hello.py
+tests/test_dependabot_automerge_workflow.py
