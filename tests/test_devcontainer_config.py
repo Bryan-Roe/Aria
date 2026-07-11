@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+from collections import defaultdict
 from pathlib import Path
 
 import pytest
@@ -84,3 +85,24 @@ def test_devcontainer_lock_json_no_trailing_data() -> None:
         pytest.skip("devcontainer-lock.json not present")
     content = lock_path.read_text(encoding="utf-8")
     _assert_no_trailing_data(lock_path, content)
+
+
+def test_duplicate_test_basenames_in_subdirectories_are_package_scoped() -> None:
+    """Nested duplicate test filenames must live in packages to avoid pytest import mismatches."""
+    tests_dir = Path(__file__).resolve().parent
+    grouped_paths: dict[str, list[Path]] = defaultdict(list)
+
+    for path in tests_dir.rglob("test_*.py"):
+        grouped_paths[path.name].append(path)
+
+    duplicate_groups = [paths for paths in grouped_paths.values() if len(paths) > 1]
+    assert duplicate_groups, "Expected at least one duplicate test basename coverage case"
+
+    for paths in duplicate_groups:
+        for path in paths:
+            if path.parent == tests_dir:
+                continue
+            assert (path.parent / "__init__.py").exists(), (
+                f"{path.relative_to(tests_dir)} duplicates a test module basename and must stay in a package "
+                "to avoid pytest collection import mismatches in CI."
+            )
