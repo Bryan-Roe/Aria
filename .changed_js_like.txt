@@ -922,6 +922,7 @@ docs/training/TRAINING_STARTED.md
 docs/training/TRAINING_TAB_ENHANCEMENTS.md
 docs/training/TRAINING_VALIDATION_RESULTS.md
 examples/ai_starters/README.md
+exports/all_orchestrators.json
 functions/http_ai_provider_probe/function.json
 functions/http_ai_routes/function.json
 functions/http_ai_runner/function.json
