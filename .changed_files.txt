@@ -13,6 +13,10 @@
 .azureml/job_multi_20251125T012559Z.yaml
 .azureml/job_multi_20251125T055919Z.yaml
 .azurite/AzuriteConfig
+.changed_c_like.txt
+.changed_files.txt
+.changed_js_like.txt
+.changed_py.txt
 .circleci/cci-agent-setup.yml
 .circleci/config.yml
 .cursor/agents/agents-memory-updater.md
