@@ -107,16 +107,14 @@ class RoutingPattern(TypedDict, total=False):
 class _QuantumAgentSelectorProtocol(Protocol):
     """Typed interface for optional quantum-assisted agent routing."""
 
-    def enabled(self) -> bool:
-        ...
+    def enabled(self) -> bool: ...
 
     def select(
         self,
         *,
         candidate_scores: dict[str, float],
         learned_agent: str | None,
-    ) -> tuple[str, dict[str, Any]]:
-        ...
+    ) -> tuple[str, dict[str, Any]]: ...
 
 
 class BaseChatProvider:
@@ -1471,9 +1469,7 @@ class AGIProvider(_AGIProviderReasoningMixin, BaseChatProvider):
         self.reasoning_depth = min(max(1, reasoning_depth), 5)
         self.context: ContextInterface = AGIContext()
         self._quantum_agent_selector = (
-            cast(_QuantumAgentSelectorProtocol, QuantumAgentSelector())
-            if QuantumAgentSelector is not None
-            else None
+            cast(_QuantumAgentSelectorProtocol, QuantumAgentSelector()) if QuantumAgentSelector is not None else None
         )
         self._last_quantum_agent_meta: dict[str, Any] = {}
         self._last_agent_used: str | None = None
