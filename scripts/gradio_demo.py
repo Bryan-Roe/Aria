@@ -890,7 +890,8 @@ def auto_improve_daemon():
 with gr.Blocks() as demo:
     # Theme injection element + toggle
     theme_css = gr.HTML(value=LIGHT_CSS)
-    hero_banner = gr.HTML(value=f"""
+    hero_banner = gr.HTML(
+        value=f"""
         <div class="hero-banner">
             <div class="hero-title">QAI Gradio Demo</div>
             <p class="hero-subtitle">A polished chat workspace for QAI session management, exports, and lightweight automation experiments.</p>
@@ -904,7 +905,8 @@ with gr.Blocks() as demo:
                 <span class="pill">Auto-improve</span>
             </div>
         </div>
-        """)
+        """
+    )
     with gr.Row(elem_classes=["surface-card"]):
         with gr.Column(scale=4):
             gr.Markdown(
