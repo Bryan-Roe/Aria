@@ -1,1 +1,2 @@
 scripts/gradio_hello.py
+tests/test_dependabot_automerge_workflow.py
