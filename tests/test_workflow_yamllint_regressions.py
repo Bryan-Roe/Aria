@@ -22,8 +22,8 @@ def test_code_coverage_workflow_no_triple_blank_before_permissions() -> None:
 @pytest.mark.unit
 def test_dataset_integrity_harden_runner_with_block_indentation() -> None:
     content = _read(".github/workflows/dataset-integrity.yml")
-    bad_indent = "with:\n                egress-policy: audit"
-    good_indent = "with:\n                  egress-policy: audit"
+    bad_indent = "with:\n                egress-policy: audit"  # 16 leading spaces on egress-policy
+    good_indent = "with:\n                  egress-policy: audit"  # 18 leading spaces on egress-policy
     assert bad_indent not in content
     assert content.count(good_indent) == 3
 
@@ -41,7 +41,8 @@ def test_workflow_files_end_with_newline() -> None:
 def test_ossar_workflow_steps_and_branch_spacing_regression() -> None:
     content = _read(".github/workflows/ossar.yml")
     workflow = yaml.safe_load(content)
-    triggers = workflow["on"] if "on" in workflow else workflow[True]
+    triggers = workflow.get("on", workflow.get(True))
+    assert triggers is not None, "Expected workflow triggers under key 'on' (or YAML-1.1 boolean True fallback)."
     steps = workflow["jobs"]["OSSAR-Scan"]["steps"]
 
     assert triggers["push"]["branches"] == ["main"]
