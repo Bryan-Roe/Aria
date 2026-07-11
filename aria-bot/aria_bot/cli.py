@@ -24,35 +24,23 @@ from .orchestrator import run_cycle
 def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="aria_bot",
-        description=(
-            "Run one self-modifying repository cycle "
-            "(rules-based, deterministic)."
-        ),
+        description=("Run one self-modifying repository cycle (rules-based, deterministic)."),
     )
     parser.add_argument(
         "--repo-root",
         type=Path,
         default=Path.cwd(),
-        help=(
-            "Repository root to operate on "
-            "(default: current working directory)."
-        ),
+        help=("Repository root to operate on (default: current working directory)."),
     )
     parser.add_argument(
         "--apply",
         action="store_true",
-        help=(
-            "Actually write fixes to disk. "
-            "Without this flag the run is dry-run."
-        ),
+        help=("Actually write fixes to disk. Without this flag the run is dry-run."),
     )
     parser.add_argument(
         "--commit",
         action="store_true",
-        help=(
-            "Create a local git commit for applied changes "
-            "(requires --apply)."
-        ),
+        help=("Create a local git commit for applied changes (requires --apply)."),
     )
     parser.add_argument(
         "--max-plans",
@@ -71,10 +59,7 @@ def _build_parser() -> argparse.ArgumentParser:
         type=Path,
         nargs="+",
         default=None,
-        help=(
-            "Target specific files or directories instead of "
-            "scanning the entire repo."
-        ),
+        help=("Target specific files or directories instead of scanning the entire repo."),
     )
     parser.add_argument(
         "--quiet",

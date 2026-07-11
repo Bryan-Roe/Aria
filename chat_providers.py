@@ -11,10 +11,7 @@ import importlib.util
 import sys
 from pathlib import Path
 
-_CANONICAL = (
-    Path(__file__).resolve().parent
-    / "ai-projects" / "chat-cli" / "src" / "chat_providers.py"
-)
+_CANONICAL = Path(__file__).resolve().parent / "ai-projects" / "chat-cli" / "src" / "chat_providers.py"
 
 _spec = importlib.util.spec_from_file_location(
     "_canonical_chat_providers_root",

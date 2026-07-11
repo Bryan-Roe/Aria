@@ -80,9 +80,9 @@ def test_assign_job_skips_bot_authored_prs_at_job_level() -> None:
     """The job-level `if` must filter out [bot] authors so the job never runs for bots."""
     wf = _load_auto_assign()
     job_if = wf["jobs"]["assign"].get("if", "")
-    assert (
-        "[bot]" in job_if
-    ), "assign job must exclude bot-authored PRs at the job level using endsWith(...user.login, '[bot]') or similar"
+    assert "[bot]" in job_if, (
+        "assign job must exclude bot-authored PRs at the job level using endsWith(...user.login, '[bot]') or similar"
+    )
 
 
 def test_assign_job_if_uses_endswith_for_bot() -> None:
@@ -102,18 +102,18 @@ def test_assign_script_has_bot_guard() -> None:
     using the pattern `pr.user.login.endsWith('[bot]')`."""
     wf_path = WORKFLOWS_DIR / "auto-assign-reviewers.yml"
     content = wf_path.read_text(encoding="utf-8")
-    assert (
-        "pr.user.login.endsWith('[bot]')" in content or "author.endsWith('[bot]')" in content
-    ), "auto-assign-reviewers.yml script must contain an inline bot-authored PR guard using `endsWith('[bot]')`."
+    assert "pr.user.login.endsWith('[bot]')" in content or "author.endsWith('[bot]')" in content, (
+        "auto-assign-reviewers.yml script must contain an inline bot-authored PR guard using `endsWith('[bot]')`."
+    )
 
 
 def test_assign_script_skips_bot_with_log_message() -> None:
     wf_path = WORKFLOWS_DIR / "auto-assign-reviewers.yml"
     content = wf_path.read_text(encoding="utf-8")
     assert "bot" in content.lower(), "script must log a message when skipping bot PRs"
-    assert (
-        "skipping reviewer" in content.lower() or "skip" in content.lower()
-    ), "script must log that it is skipping reviewer assignment for bot PRs"
+    assert "skipping reviewer" in content.lower() or "skip" in content.lower(), (
+        "script must log that it is skipping reviewer assignment for bot PRs"
+    )
 
 
 # ---------------------------------------------------------------------------
