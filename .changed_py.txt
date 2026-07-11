@@ -547,6 +547,7 @@ tests/test_database_integration.py
 tests/test_dataset_write_guard_hook.py
 tests/test_db_logging.py
 tests/test_dependabot_alert_gate_hook.py
+tests/test_dependabot_automerge_workflow.py
 tests/test_devcontainer_config.py
 tests/test_docstring_audit_agent.py
 tests/test_dry_run_reminder_hook.py
