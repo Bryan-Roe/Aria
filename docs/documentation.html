@@ -1814,12 +1814,30 @@
                     <p>The hub could not fetch ${path}. You can still open the source directly on GitHub.</p>
                 `
 
-                    contentArea.innerHTML = `
-                    <div class="error-card">
-                        <p><strong>Load failed:</strong> ${error.message}</p>
-                        <p><a href="https://github.com/Bryan-Roe/Aria/blob/main/docs/${path}" target="_blank" rel="noreferrer">Open the document on GitHub</a></p>
-                    </div>
-                `
+                    const errorCard = document.createElement("div")
+                    errorCard.className = "error-card"
+
+                    const loadFailed = document.createElement("p")
+                    const strong = document.createElement("strong")
+                    strong.textContent = "Load failed:"
+                    loadFailed.appendChild(strong)
+                    loadFailed.appendChild(
+                        document.createTextNode(` ${error.message}`),
+                    )
+
+                    const linkParagraph = document.createElement("p")
+                    const link = document.createElement("a")
+                    link.href = `https://github.com/Bryan-Roe/Aria/blob/main/docs/${encodeURIComponent(path)}`
+                    link.target = "_blank"
+                    link.rel = "noreferrer"
+                    link.textContent = "Open the document on GitHub"
+                    linkParagraph.appendChild(link)
+
+                    errorCard.appendChild(loadFailed)
+                    errorCard.appendChild(linkParagraph)
+
+                    contentArea.textContent = ""
+                    contentArea.appendChild(errorCard)
                 }
             }
 
