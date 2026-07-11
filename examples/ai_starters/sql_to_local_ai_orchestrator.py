@@ -101,7 +101,7 @@ def _rows_from_cursor(cursor: Any, max_rows: int) -> list[dict]:
             elif hasattr(row, "keys"):
                 normalized.append(dict(row))
             else:
-                normalized.append(dict(zip(columns, row)))
+                normalized.append(dict(zip(columns, row, strict=False)))
         return normalized
 
     return [dict(row) for row in rows]

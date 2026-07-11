@@ -381,7 +381,7 @@ def main():
 
     # Execute based on mode
     if args.mode == "compare":
-        comparison = compare_implementations()
+        compare_implementations()
 
     elif args.mode == "upgrade":
         upgrade_existing_system()

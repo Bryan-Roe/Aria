@@ -432,11 +432,11 @@ class AGIMultiAgentTests(unittest.TestCase):
         self.assertEqual(agent, "general")
         self.assertEqual(score, 0.0)
 
-
     def test_quantum_selector_can_override_when_enabled(self) -> None:
         class _FakeSelector:
             def enabled(self):
                 return True
+
             def select(self, *, candidate_scores, learned_agent=None):
                 if candidate_scores.get("code-specialist", 0.0) > 0:
                     return "code-specialist", {"mode": "quantum", "backend": "simulator", "latency_ms": 1.0}
@@ -453,6 +453,7 @@ class AGIMultiAgentTests(unittest.TestCase):
         class _BrokenSelector:
             def enabled(self):
                 return True
+
             def select(self, *, candidate_scores, learned_agent=None):
                 raise RuntimeError("boom")
 

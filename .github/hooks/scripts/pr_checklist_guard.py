@@ -21,7 +21,6 @@ import json
 import os
 import subprocess
 import sys
-from typing import Any
 
 # ---------------------------------------------------------------------------
 # PR Checklist (from .github/copilot-instructions.md)
@@ -113,10 +112,9 @@ def main() -> None:
     raw = sys.stdin.read().strip()
 
     # Parse but tolerate missing/empty payload (Stop payloads may be sparse).
-    payload: dict[str, Any] = {}
     if raw:
         try:
-            payload = json.loads(raw)
+            json.loads(raw)
         except json.JSONDecodeError:
             pass
 

@@ -106,7 +106,7 @@ def show_website_options():
     print("WEBSITE GENERATOR - AVAILABLE TEMPLATES")
     print("=" * 70)
 
-    for idx, (key, info) in enumerate(WEBSITE_TEMPLATES_INFO.items(), 1):
+    for idx, (_key, info) in enumerate(WEBSITE_TEMPLATES_INFO.items(), 1):
         print(f"\n{idx}. {info['name'].upper()}")
         print(f"   Description: {info['description']}")
         print(f"   Pages: {', '.join(info['pages'])}")

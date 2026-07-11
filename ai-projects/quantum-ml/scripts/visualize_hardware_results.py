@@ -141,7 +141,7 @@ def plot_counts_bar(counts: dict[str, int], title: str, out_path: Path, top_n: i
     ax.set_title(title)
     ax.set_xlabel("Measurement state")
     ax.set_ylabel("Counts")
-    for i, (x, v, p) in enumerate(zip(disp_labels, values, perc)):
+    for i, (_x, v, p) in enumerate(zip(disp_labels, values, perc, strict=False)):
         ax.text(i, v, f"{p:.1f}%", ha="center", va="bottom", fontsize=8)
     plt.xticks(rotation=45)
     fig.savefig(out_path)
@@ -418,7 +418,7 @@ def main() -> int:
 
     # Summary entanglement chart for 2-qubit results
     if entanglement_summary:
-        labels, ratios = zip(*entanglement_summary)
+        labels, ratios = zip(*entanglement_summary, strict=False)
         fig, ax = plt.subplots(figsize=(8, 4))
         ax.bar(labels, ratios, color="#E45756")
         ax.set_title("Entanglement Quality (2-qubit Bell state)")

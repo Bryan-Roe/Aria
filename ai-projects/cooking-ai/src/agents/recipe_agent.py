@@ -82,7 +82,7 @@ class RecipeAgent:
             {"role": "user", "content": user_content},
         ]
         # Stricter JSON mode with up to 2 retries
-        for attempt in range(2):
+        for _attempt in range(2):
             raw = self.provider.complete(messages, json_mode=True)
             data, err = parse_and_validate(raw, json_schema)
             if data is not None:

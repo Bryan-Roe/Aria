@@ -63,7 +63,7 @@ print("\n4. Monitoring training progress...")
 print("   (Press Ctrl+C to stop)\n")
 
 try:
-    for i in range(60):  # Monitor for up to 60 seconds
+    for _i in range(60):  # Monitor for up to 60 seconds
         response = requests.get(f"{BASE_URL}/api/train/status/{session_id}", timeout=REQUEST_TIMEOUT)
         status = response.json()
 

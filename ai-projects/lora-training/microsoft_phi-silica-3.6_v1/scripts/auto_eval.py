@@ -290,7 +290,7 @@ class AutomaticEvaluator:
             try:
                 scorer = rouge_scorer.RougeScorer(["rouge1", "rouge2", "rougeL"], use_stemmer=True)
                 totals = {"rouge1": 0.0, "rouge2": 0.0, "rougeL": 0.0}
-                for hyp, ref in zip(preds, refs):
+                for hyp, ref in zip(preds, refs, strict=False):
                     scores = scorer.score(ref, hyp)
                     for k in totals:
                         totals[k] += scores[k].fmeasure

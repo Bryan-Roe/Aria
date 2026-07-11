@@ -55,7 +55,7 @@ def main():
     # Connect
     azure = AzureQuantumIntegration()
     try:
-        workspace = azure.connect()
+        azure.connect()
     except Exception as e:
         print(f"\n[ERROR] Failed to connect to Azure Quantum: {e}")
         print("Ensure az login is complete and config/quantum_config.yaml is set correctly.")

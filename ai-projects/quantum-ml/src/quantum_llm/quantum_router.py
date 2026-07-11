@@ -211,7 +211,7 @@ class QuantumRouter:
         exclude_set = set(exclude or [])
         chosen = None
         best_score = -np.inf
-        for provider, score in zip(self.providers, scores):
+        for provider, score in zip(self.providers, scores, strict=False):
             if provider in exclude_set:
                 continue
             if score > best_score:
@@ -250,6 +250,6 @@ class QuantumRouter:
             logger.warning("QuantumRouter scoring failed (%s)", exc)
             scores_arr = np.zeros(len(self.providers))
 
-        scores = {p: float(s) for p, s in zip(self.providers, scores_arr)}
+        scores = {p: float(s) for p, s in zip(self.providers, scores_arr, strict=False)}
         chosen = max(scores, key=lambda k: scores[k])
         return chosen, scores

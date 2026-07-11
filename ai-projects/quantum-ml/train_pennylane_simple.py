@@ -153,7 +153,7 @@ def train_quantum_model(
 
     while time.time() < end_time:
         epoch += 1
-        epoch_start = time.time()
+        time.time()
 
         # Shuffle training data
         indices = np.random.permutation(len(X_train))
@@ -172,11 +172,11 @@ def train_quantum_model(
             batch_y = y_shuffled[i : i + batch_size]
 
             batch_loss = 0.0
-            grad_weights = np.zeros_like(weights)
+            np.zeros_like(weights)
             grad_w_out = np.zeros_like(w_out)
             grad_b_out = 0.0
 
-            for x, y_true in zip(batch_X, batch_y):
+            for x, y_true in zip(batch_X, batch_y, strict=False):
                 # Forward pass
                 quantum_out = circuit(x, weights)
                 y_pred = np.dot(quantum_out, w_out) + b_out
@@ -208,7 +208,7 @@ def train_quantum_model(
         # Validation
         val_preds = []
         val_loss = 0.0
-        for x, y_true in zip(X_val, y_val):
+        for x, y_true in zip(X_val, y_val, strict=False):
             quantum_out = circuit(x, weights)
             y_pred = np.dot(quantum_out, w_out) + b_out
             y_pred_sigmoid = 1 / (1 + np.exp(-y_pred))

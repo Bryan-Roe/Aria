@@ -111,7 +111,6 @@ class AzureMLLoRATrainer:
             Environment configuration
         """
         # Use curated PyTorch environment as base
-        base_env = "azureml://registries/azureml/environments/acft-hf-nlp-gpu/versions/63"
 
         # Create custom environment with additional dependencies
         env = Environment(
@@ -204,7 +203,7 @@ class AzureMLLoRATrainer:
             Submitted job
         """
         # Get dataset
-        dataset = self.ml_client.data.get(dataset_name, label="latest")
+        self.ml_client.data.get(dataset_name, label="latest")
 
         # Prepare training script directory
         script_dir = Path(__file__).parent / "scripts"
@@ -356,7 +355,7 @@ def main():
             print("Error: --job-name required for model registration")
             return
         print("\n=== Registering model ===")
-        model = trainer.register_model(job_name=args.job_name, model_name=args.model_name)
+        trainer.register_model(job_name=args.job_name, model_name=args.model_name)
         print("\n✓ Model registered!")
 
 

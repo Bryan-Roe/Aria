@@ -51,8 +51,7 @@ class LocalAGIProvider:
             if stream:
 
                 def _char_gen():
-                    for ch in str(raw):
-                        yield ch
+                    yield from str(raw)
 
                 return _char_gen()
             return str(raw)

@@ -317,7 +317,7 @@ def generate_comparison_plots(all_results):
     bars = ax3.barh(model_names, avg_accuracies, color=colors, edgecolor="black")
 
     # Add value labels
-    for i, (bar, acc) in enumerate(zip(bars, avg_accuracies)):
+    for i, (bar, acc) in enumerate(zip(bars, avg_accuracies, strict=False)):
         ax3.text(acc + 0.5, i, f"{acc:.2f}%", va="center", fontweight="bold")
 
     ax3.set_xlabel("Average Test Accuracy (%)", fontweight="bold")
@@ -342,7 +342,7 @@ def generate_comparison_plots(all_results):
     )
 
     # Add value labels
-    for i, (bar, adv) in enumerate(zip(bars, advantages)):
+    for i, (bar, adv) in enumerate(zip(bars, advantages, strict=False)):
         x_pos = adv + (0.5 if adv > 0 else -0.5)
         ax4.text(x_pos, i, f"{adv:+.2f}%", va="center", fontweight="bold")
 
@@ -395,7 +395,7 @@ def generate_markdown_report(all_results, accuracy_matrix, avg_accuracies):
     report.append("\n## Detailed Results by Dataset\n")
 
     datasets = list(DATASETS.keys())
-    for i, dataset in enumerate(datasets):
+    for _i, dataset in enumerate(datasets):
         report.append(f"\n### {dataset.replace('_', ' ').title()}\n")
 
         dataset_results = [r for r in all_results if r["dataset"] == dataset]

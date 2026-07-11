@@ -277,7 +277,7 @@ datasets = ["XOR", "Spiral", "Imbalanced", "Wine"]
 histories = [history_xor, history_spiral, history_imb, history_wine]
 colors = ["#e74c3c", "#9b59b6", "#3498db", "#2ecc71"]
 
-for i, (dataset, history, color) in enumerate(zip(datasets, histories, colors)):
+for i, (dataset, history, _color) in enumerate(zip(datasets, histories, colors, strict=False)):
     axes[i].plot(history["train_loss"], label="Train Loss", alpha=0.7, linewidth=2)
     axes[i].plot(history["val_loss"], label="Val Loss", linewidth=2)
     axes[i].set_title(f"{dataset}: Acc={history['val_acc'][-1]:.3f}", fontsize=12, fontweight="bold")

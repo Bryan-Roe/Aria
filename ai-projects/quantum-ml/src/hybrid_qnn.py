@@ -429,7 +429,6 @@ class QuantumClassicalTrainer:
                 output = self.model(data)
 
                 # Compute loss
-                original_target = target
                 if isinstance(self.criterion, nn.BCEWithLogitsLoss):
                     target = target.float().unsqueeze(1)
                 loss = self.criterion(output, target)

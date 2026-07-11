@@ -346,7 +346,7 @@ class QuantumJobManager:
             raise ValueError("job_names must match the number of circuits in the batch")
 
         jobs = []
-        for circuit, name in zip(circuits, job_names):
+        for circuit, name in zip(circuits, job_names, strict=False):
             job = self.azure.submit_circuit(circuit, backend_name, shots, name)
             self.jobs[name] = job
             jobs.append(job)

@@ -89,7 +89,7 @@ def create_test_circuit(n_qubits, n_layers, params):
 
     # Variational layers with trained parameters
     param_idx = 0
-    for layer in range(n_layers):
+    for _layer in range(n_layers):
         # Rotation layer
         for qubit in range(n_qubits):
             qc.ry(params[param_idx], qubit)
@@ -116,7 +116,7 @@ def main():
 
     # Load config
     with open("config/quantum_config.yaml") as f:
-        config = yaml.safe_load(f)
+        yaml.safe_load(f)
 
     # Connect to Azure
     print("🔗 Connecting to Azure Quantum...")

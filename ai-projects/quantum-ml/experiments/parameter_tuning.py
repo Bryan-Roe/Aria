@@ -110,7 +110,7 @@ ax1.grid(True, alpha=0.3)
 ax1.set_ylim([0, 1])
 
 # Add value labels
-for x, y in zip(layers, accuracies):
+for x, y in zip(layers, accuracies, strict=False):
     ax1.text(x, y + 0.02, f"{y:.3f}", ha="center", fontsize=10, fontweight="bold")
 
 # Training curves for all layers
@@ -225,7 +225,7 @@ ax1.set_title("Impact of Entanglement Pattern", fontsize=14, fontweight="bold")
 ax1.set_ylim([0, 1])
 ax1.grid(True, axis="y", alpha=0.3)
 
-for bar, acc in zip(bars, ent_accs):
+for bar, acc in zip(bars, ent_accs, strict=False):
     height = bar.get_height()
     ax1.text(
         bar.get_x() + bar.get_width() / 2.0,

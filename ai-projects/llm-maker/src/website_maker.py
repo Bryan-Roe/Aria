@@ -394,7 +394,7 @@ Only include files that need to be updated. Keep the same structure and style un
             pattern2 = r"```([^\n]+\.(html|css|js))\n(.*?)```"
             matches2 = re.findall(pattern2, text, re.DOTALL | re.IGNORECASE)
 
-            for filename, ext, content in matches2:
+            for filename, _ext, content in matches2:
                 filename = filename.strip()
                 files[filename] = content.strip()
 
@@ -405,7 +405,7 @@ Only include files that need to be updated. Keep the same structure and style un
             )
             matches3 = re.findall(pattern3, text, re.DOTALL | re.IGNORECASE)
 
-            for filename, ext, content in matches3:
+            for filename, _ext, content in matches3:
                 filename = filename.strip()
                 files[filename] = content.strip()
 
@@ -498,7 +498,7 @@ def create_website_cli():
     update_parser.add_argument("--provider", help="AI provider")
 
     # List command
-    list_parser = subparsers.add_parser("list", help="List all websites")
+    subparsers.add_parser("list", help="List all websites")
 
     # Delete command
     delete_parser = subparsers.add_parser("delete", help="Delete a website")

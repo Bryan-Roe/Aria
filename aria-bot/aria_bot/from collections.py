@@ -33,4 +33,4 @@ def _extract_assistant_text(payload: Any) -> str:
         if parts:
             return "".join(parts)
 
-    text_raw = first.get("text")
+    first.get("text")

@@ -76,7 +76,7 @@ class QuantumLayer(nn.Module):
 
         # Variational layers
         weight_idx = 0
-        for layer in range(self.num_layers):
+        for _layer in range(self.num_layers):
             # Rotation gates
             for i in range(self.num_qubits):
                 qc.rx(weights[weight_idx], i)

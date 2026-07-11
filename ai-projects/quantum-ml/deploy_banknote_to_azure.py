@@ -334,7 +334,7 @@ def main():
 
     # Save report
     if analysis:
-        report_path = save_deployment_report(analysis, backend, job.id)
+        save_deployment_report(analysis, backend, job.id)
 
     # Final summary
     print("\n" + "=" * 70)

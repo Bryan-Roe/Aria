@@ -147,7 +147,7 @@ def run_hpo_sweep(dataset_name: str, param_grid: dict) -> list[dict]:
     print(f"Parameter grid: {param_grid}\n")
 
     for i, combo in enumerate(itertools.product(*values), 1):
-        config = dict(zip(keys, combo))
+        config = dict(zip(keys, combo, strict=False))
 
         print(f"\n[{i}/{total_configs}] Testing config: {config}")
 
@@ -233,8 +233,8 @@ def plot_hpo_results(all_results: dict, output_path: str = "results/hpo_comparis
         configs = [f"C{i + 1}" for i in range(len(results))]
 
         # Sort by accuracy
-        sorted_pairs = sorted(zip(accs, configs), reverse=True)
-        accs_sorted, configs_sorted = zip(*sorted_pairs)
+        sorted_pairs = sorted(zip(accs, configs, strict=False), reverse=True)
+        accs_sorted, configs_sorted = zip(*sorted_pairs, strict=False)
 
         # Plot top 10
         top_n = min(10, len(accs_sorted))
@@ -300,7 +300,7 @@ def main():
         all_results[dataset] = results
 
     # Save report
-    report = save_hpo_report(all_results)
+    save_hpo_report(all_results)
 
     # Plot results
     plot_hpo_results(all_results)

@@ -274,7 +274,7 @@ def main():
     )
 
     augmenter = TextAugmenter(config)
-    stats = augmenter.augment_dataset(args.input, args.output, techniques=args.techniques)
+    augmenter.augment_dataset(args.input, args.output, techniques=args.techniques)
 
     print(f"\n✓ Augmented dataset saved to {args.output}")
 

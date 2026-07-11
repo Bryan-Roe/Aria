@@ -155,7 +155,7 @@ def demo_sampler_directly():
     print("\nSampling 20 times with blend_factor=0.3:")
 
     samples = []
-    for i in range(20):
+    for _i in range(20):
         idx = sampler.sample(logits, blend_factor=0.3, seed=None)
         samples.append(idx)
 
@@ -188,7 +188,7 @@ def demo_circuit_cache_directly():
     # Retrieve and access patterns
     print("Accessing 3 times each...")
     for i in range(3):
-        for j in range(3):
+        for _j in range(3):
             params = np.array([float(i) * 0.1, float(i) * 0.2])
             cache.get(params, num_qubits=2)
 

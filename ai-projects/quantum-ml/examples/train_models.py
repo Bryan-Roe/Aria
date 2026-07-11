@@ -184,7 +184,7 @@ ax.set_ylim([0, 1])
 ax.grid(True, axis="y", alpha=0.3)
 
 # Add value labels on bars
-for bar, acc in zip(bars, accuracies):
+for bar, acc in zip(bars, accuracies, strict=False):
     height = bar.get_height()
     ax.text(
         bar.get_x() + bar.get_width() / 2.0,

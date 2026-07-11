@@ -257,7 +257,7 @@ def main():
     # Load model
     device = "cuda" if torch.cuda.is_available() else "cpu"
     model = AutoModelForCausalLM.from_pretrained(args.model).to(device)
-    tokenizer = AutoTokenizer.from_pretrained(args.model)
+    AutoTokenizer.from_pretrained(args.model)
 
     # Load dataset (simplified)
     # In practice, you'd load and prepare your actual dataset
@@ -268,7 +268,7 @@ def main():
     criterion = torch.nn.CrossEntropyLoss()
 
     # Run LR finder
-    lr_finder = LearningRateFinder(model, optimizer, criterion, device)
+    LearningRateFinder(model, optimizer, criterion, device)
 
     # You would pass your actual train_loader here
     print("\nTo use LR finder in your training script:")

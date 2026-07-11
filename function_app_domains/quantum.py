@@ -496,8 +496,7 @@ def quantum_llm_stream(req, ctx):
                         results.append(chunk)
                     return results
 
-                for chunk in loop.run_until_complete(_collect()):
-                    yield chunk
+                yield from loop.run_until_complete(_collect())
             finally:
                 loop.close()
 

@@ -241,7 +241,7 @@ class DatasetAnalyzer:
 
         distribution = defaultdict(int)
         for count in token_counts:
-            for i, (low, high) in enumerate(zip(bins[:-1], bins[1:])):
+            for i, (low, high) in enumerate(zip(bins[:-1], bins[1:], strict=False)):
                 if low < count <= high:
                     distribution[labels[i]] += 1
                     break
@@ -394,7 +394,7 @@ def main():
     analyzer = DatasetAnalyzer()
 
     if args.compare:
-        results = analyzer.compare_datasets(args.compare)
+        analyzer.compare_datasets(args.compare)
     elif args.dataset:
         stats = analyzer.analyze(
             args.dataset,

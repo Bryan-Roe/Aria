@@ -250,7 +250,7 @@ class MultiScaleQuantumAttention(nn.Module):
         self.qubit_counts = []
         self.scales = []
 
-        for i, n_qubits in enumerate(qubit_counts):
+        for _i, n_qubits in enumerate(qubit_counts):
             self.qubit_counts.append(n_qubits)
             self.scales.append(1.0 / math.sqrt(n_qubits))
 
@@ -453,7 +453,7 @@ class QuantumErrorMitigation(nn.Module):
         """
         outputs = []
 
-        for scale in noise_scales:
+        for _scale in noise_scales:
             # In practice, this would modify circuit noise parameters
             # For now, we approximate with multiple samples
             out = quantum_layer(x)

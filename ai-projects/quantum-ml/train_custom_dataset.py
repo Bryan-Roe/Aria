@@ -372,7 +372,7 @@ def main(argv: list[str] | None = None):
     """Main training pipeline"""
     parser = argparse.ArgumentParser(description="Train Hybrid Quantum-Classical model on CSV or preset dataset")
     src_root = Path(__file__).parent
-    default_results = src_root / "results"
+    src_root / "results"
     parser.add_argument("--csv", type=str, help="Path to CSV file containing dataset")
     parser.add_argument(
         "--preset",

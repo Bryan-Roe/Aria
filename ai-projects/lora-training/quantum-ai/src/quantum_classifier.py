@@ -179,7 +179,7 @@ class QuantumNeuralNetwork:
 
         # Variational layers
         weight_idx = 0
-        for layer in range(self.layers):
+        for _layer in range(self.layers):
             # Rotation layer
             for i in range(self.num_qubits):
                 qc.rx(weights[weight_idx], i)

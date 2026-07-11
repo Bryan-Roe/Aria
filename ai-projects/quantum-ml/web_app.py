@@ -245,7 +245,7 @@ def create_quantum_circuit(n_qubits, n_layers):
 def compute_loss(circuit, X, y, weights):
     """Compute loss with proper gradient tracking"""
     total_loss = 0.0
-    for xi, yi in zip(X, y):
+    for xi, yi in zip(X, y, strict=False):
         expectation = circuit(xi, weights)
         prediction = np.mean(expectation)
         target = 2 * yi - 1  # Map {0,1} to {-1,1}
@@ -506,7 +506,7 @@ def train_model(session: TrainingSession):
             # Validation
             val_predictions = []
             val_loss = 0.0
-            for xi, yi in zip(X_val, y_val):
+            for xi, yi in zip(X_val, y_val, strict=False):
                 expectation = circuit(xi, weights)
                 prediction = np.mean(expectation)
                 val_loss += (prediction - (2 * yi - 1)) ** 2
@@ -1042,7 +1042,7 @@ def load_checkpoint():
             return jsonify({"error": "Checkpoint file not found"}), 404
 
         checkpoint = np.load(str(resolved_path), allow_pickle=False)
-        weights = checkpoint["weights"]
+        checkpoint["weights"]
         epoch = int(checkpoint["epoch"])
         try:
             config_value = checkpoint["config"]

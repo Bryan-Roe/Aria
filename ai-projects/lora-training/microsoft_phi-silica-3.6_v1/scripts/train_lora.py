@@ -592,7 +592,7 @@ def main():
                         roles = msgs.get("role", [])[i] if "role" in msgs else None
                         contents = msgs.get("content", [])[i] if "content" in msgs else None
                         if isinstance(roles, list) and isinstance(contents, list) and len(roles) == len(contents):
-                            for r, c in zip(roles, contents):
+                            for r, c in zip(roles, contents, strict=False):
                                 sample_messages.append({"role": r, "content": c})
                         else:
                             # Fallback: try to rebuild from a generic list of dicts if present

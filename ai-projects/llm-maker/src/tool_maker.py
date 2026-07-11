@@ -281,7 +281,7 @@ Feedback: {feedback}
 
 Generate an improved version of the function."""
 
-        for attempt in range(max_attempts):
+        for _attempt in range(max_attempts):
             code = self._generate_code(prompt)
 
             if code:

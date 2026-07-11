@@ -340,7 +340,7 @@ class TrainingDashboard:
         self.metrics_aggregator.add_snapshot(snapshot)
 
         # Update performance metrics
-        perf_metrics = self.performance_monitor.get_current_performance()
+        self.performance_monitor.get_current_performance()
 
         # Check if it's time for a dashboard update
         if time.time() - self.last_update >= self.update_interval:
