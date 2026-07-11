@@ -356,11 +356,26 @@ class HyperparameterOptimizer {
     }
 
     /**
+     * Escape HTML special characters in dynamic text
+     */
+    escapeHtml(value) {
+        return String(value)
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#39;")
+    }
+
+    /**
      * Show optimization UI
      */
     showOptimizationUI() {
         const container = document.getElementById("hyperoptContainer")
         if (!container) return
+
+        const safeStrategy = this.escapeHtml(this.strategy)
+        const safeMaxTrials = this.escapeHtml(this.maxTrials)
 
         container.innerHTML = `
             <div class="card">
@@ -370,7 +385,7 @@ class HyperparameterOptimizer {
                 </div>
                 <div style="padding:20px">
                     <div class="alert alert-info">
-                        Running ${this.strategy} optimization with ${this.maxTrials} trials...
+                        Running ${safeStrategy} optimization with ${safeMaxTrials} trials...
                     </div>
                     <div id="trialsProgress"></div>
                     <div id="currentBest" style="margin-top:20px"></div>
