@@ -26,8 +26,13 @@ env:
   HARDEN_RUNNER_SHA: 0634a2670c59f64b4a01f0f96f84700a4088b9f0 # v2.12.2
 jobs:
   assign:
-    # Skip drafts early to avoid noisy assignments
-    if: ${{ github.event.pull_request.draft == false }}
+    # Skip drafts and bot-authored PRs early to avoid noisy assignments.
+    # Bot-authored PRs (github-actions[bot], dependabot[bot], copilot bots, etc.)
+    # use the auto-merge pipeline for merging; requesting human review on them
+    # creates a pending-review state that blocks auto-merge from completing.
+    if: >-
+      github.event.pull_request.draft == false &&
+      !endsWith(github.event.pull_request.user.login, '[bot]')
     runs-on: ubuntu-latest
 
     steps:
@@ -50,6 +55,13 @@ jobs:
 
             if (pr.draft) {
               core.info('PR is a draft; skipping reviewer assignment.');
+              return;
+            }
+
+            // Guard: skip bot-authored PRs — they are handled by the auto-merge
+            // pipeline and do not need human review requests.
+            if (pr.user && pr.user.login && pr.user.login.endsWith('[bot]')) {
+              core.info(`PR #${pr.number} is authored by bot '${pr.user.login}'; skipping reviewer assignment.`);
               return;
             }
 
