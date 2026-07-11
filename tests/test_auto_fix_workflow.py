@@ -32,9 +32,9 @@ def test_auto_fix_detect_step_does_not_create_detect_output_txt() -> None:
     """detect_output.txt must not be created as it would be unintentionally committed."""
     workflow = _load_workflow()
     step = next(step for step in workflow["jobs"]["autofix"]["steps"] if step["name"] == "Detect safe Python targets")
-    assert (
-        "detect_output.txt" not in step["run"]
-    ), "detect_output.txt must not be written to disk; write to $GITHUB_OUTPUT directly to avoid committing it"
+    assert "detect_output.txt" not in step["run"], (
+        "detect_output.txt must not be written to disk; write to $GITHUB_OUTPUT directly to avoid committing it"
+    )
     assert "GITHUB_OUTPUT" in step["run"], "Must write outputs directly to $GITHUB_OUTPUT"
 
 
