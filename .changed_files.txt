@@ -1,6 +1,2 @@
-.changed_files.txt
-.changed_py.txt
-aria-bot/aria_bot/cli.py
-aria-bot/aria_bot/orchestrator.py
-function_app.py
-tools/repo_cleanup/generate_dependency_graph.py
+.github/workflows/pr-checks.yml
+scripts/gradio_hello.py
