@@ -293,7 +293,7 @@ else:
             self.lmstudio_base_url = os.environ.get("LMSTUDIO_BASE_URL")
             self.ollama_base_url = os.environ.get("OLLAMA_BASE_URL")
             self.provider_priority = _normalize_provider_priority(
-                os.environ.get("QAI_PROVIDER_PRIORITY", "lmstudio,ollama,azure,openai,local")
+                os.environ.get("QAI_PROVIDER_PRIORITY", ",".join(_DEFAULT_PROVIDER_PRIORITY))
             )
             self.db_connection_string = os.environ.get("QAI_DB_CONN")
             self.sql_pool_size = int(os.environ.get("QAI_SQL_POOL_SIZE", "10"))

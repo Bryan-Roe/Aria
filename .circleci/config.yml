@@ -1,151 +1,131 @@
-# cspell:ignore PYTHONDONTWRITEBYTECODE PYTHONUNBUFFERED ACMRT pyppeteer
-commands:
-  install-dev-deps:
-    steps:
-      - run:
-          command: |
-            python -m pip install --upgrade pip
-            pip install -r requirements-dev.txt
-          name: Install Python dependencies
-
-  restore-pip-cache:
-    steps:
-      - restore_cache:
-          keys:
-            - pip-v1-{{ checksum "requirements-dev.txt" }}-{{ checksum "requirements.txt" }}
-            - pip-v1-{{ checksum "requirements-dev.txt" }}-
-            - pip-v1-
-
-  save-pip-cache:
-    steps:
-      - save_cache:
-          key: pip-v1-{{ checksum "requirements-dev.txt" }}-{{ checksum "requirements.txt" }}
-          paths:
-            - ~/.cache/pip
+version: 2.1
 
 executors:
-  python311:
+  python:
     docker:
       - image: cimg/python:3.11
+    resource_class: bryan-roe/class
     environment:
-      PIP_DISABLE_PIP_VERSION_CHECK: '1'
-      PIP_NO_PYTHON_VERSION_WARNING: '1'
-      PYTHONDONTWRITEBYTECODE: '1'
-      PYTHONUNBUFFERED: '1'
-    resource_class: medium
+      PIP_DISABLE_PIP_VERSION_CHECK: "1"
+      PIP_NO_PYTHON_VERSION_WARNING: "1"
+      PYTHONDONTWRITEBYTECODE: "1"
+      PYTHONUNBUFFERED: "1"
+      PATH: /home/circleci/venv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
-# Define a job to be invoked later in a workflow.
-# Define a job to be invoked later in a workflow.
-# See: https://circleci.com/docs/guides/orchestrate/jobs-steps/#jobs-overview & https://circleci.com/docs/reference/configuration-reference/#jobs
-jobs:
-    docker:
-      - image: cimg/base:stable
-    resource_class: small
+commands:
+  restore-venv-cache:
     steps:
-      - run: echo "All required CI jobs passed."
-
-  lint:
-    executor: python311
-    steps:
-      - checkout
-      - restore-pip-cache
-      - install-dev-deps
-      - save-pip-cache
-      - run:
-          command: python -m ruff check tests shared scripts apps/aria/server.py
-          name: ruff
-      - run:
-          command: python -m black --check tests shared scripts apps/aria/server.py
-          name: black (check)
-
-  pre-commit:
-    executor: python311
-    steps:
-      - checkout
-      - restore-pip-cache
-      - install-dev-deps
-      - save-pip-cache
       - restore_cache:
           keys:
-            - pre-commit-v1-{{ checksum ".pre-commit-config.yaml" }}
-            - pre-commit-v1-
-      - run:
-          command: |
-            if git rev-parse HEAD^ >/dev/null 2>&1; then
-              CHANGED=$(git diff --name-only --diff-filter=ACMRT HEAD^ HEAD --)
-            else
-              CHANGED=$(git diff-tree --no-commit-id --name-only -r HEAD)
-            fi
-            if [ -z "$CHANGED" ]; then
-              echo "No changed files; skipping."
-              exit 0
-            fi
-            pre-commit run --files $CHANGED --show-diff-on-failure --color=always
-          name: pre-commit on changed files
+            - venv-v1-{{ checksum "requirements-dev.txt" }}-{{ checksum "requirements.txt" }}
+            - venv-v1-{{ checksum "requirements-dev.txt" }}-
+            - venv-v1-
+
+  save-venv-cache:
+    steps:
       - save_cache:
-          key: pre-commit-v1-{{ checksum ".pre-commit-config.yaml" }}
+          key: venv-v1-{{ checksum "requirements-dev.txt" }}-{{ checksum "requirements.txt" }}
           paths:
-            - ~/.cache/pre-commit
+            - ~/venv
+
+jobs:
+  setup:
+    executor: python
+    steps:
+      - checkout
+      - restore-venv-cache
+      - run:
+          name: Create virtualenv and install dependencies
+          command: |
+            python -m venv ~/venv
+            pip install -q -r requirements-dev.txt
+      - save-venv-cache
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - venv
+            - project
+
+  lint:
+    executor: python
+    steps:
+      - attach_workspace:
+          at: ~/
+      - run:
+          name: ruff lint
+          command: python -m ruff check tests shared scripts apps/aria/server.py
+      - run:
+          name: black format check
+          command: python -m black --check tests shared scripts apps/aria/server.py
 
   type-check:
-    executor: python311
+    executor: python
     steps:
-      - checkout
-      - restore-pip-cache
-      - install-dev-deps
-      - save-pip-cache
+      - attach_workspace:
+          at: ~/
       - run:
-          command: python -m mypy shared scripts function_app.py || true
           name: mypy (advisory)
+          command: python -m mypy shared scripts function_app.py || true
 
   unit-test:
-    executor: python311
-    parallelism: 2
+    executor: python
     steps:
-      - checkout
-      - restore-pip-cache
-      - install-dev-deps
-      - save-pip-cache
+      - attach_workspace:
+          at: ~/
       - run:
+          name: Run unit tests
+          no_output_timeout: 10m
+          environment:
+            CI: "true"
+            AZURE_CLIENT_ID: ""
+            AZURE_TENANT_ID: ""
+            AZURE_CLIENT_SECRET: ""
+            OPENAI_API_KEY: ""
           command: |
             mkdir -p data_out
-            TEST_FILES=$(circleci tests glob "tests/**/*.py" \
-              | grep -Ev "test_ui_(playwright|pyppeteer|selenium)\.py" \
-              | circleci tests split --split-by=timings)
-            python -m pytest $TEST_FILES \
+            python -m pytest tests \
               -q --tb=short \
               -m "not slow and not azure and not integration" \
-              --maxfail=1 \
+              --ignore=tests/test_ui_playwright.py \
+              --ignore=tests/test_ui_pyppeteer.py \
+              --ignore=tests/test_ui_selenium.py \
+              -n auto \
+              --maxfail=5 \
               --durations=10 \
-              --junitxml=data_out/junit-${CIRCLE_NODE_INDEX}.xml \
+              --junitxml=data_out/junit.xml \
               --cov=shared --cov=scripts \
-              --cov-report=xml:data_out/coverage-${CIRCLE_NODE_INDEX}.xml
-          environment:
-            AZURE_CLIENT_ID: ''
-            AZURE_CLIENT_SECRET: ''
-            AZURE_TENANT_ID: ''
-            CI: 'true'
-            OPENAI_API_KEY: ''
-          name: Run unit tests
+              --cov-report=xml:data_out/coverage.xml \
+              --cov-report=term-missing
       - store_test_results:
           path: data_out
       - store_artifacts:
-          destination: test-output
           path: data_out
+          destination: test-output
 
-version: '2.1'
+  ci-gate:
+    docker:
+      - image: cimg/base:stable
+    resource_class: bryan-roe/class
+    steps:
+      - run:
+          name: All CI checks passed
+          command: echo "All required CI jobs passed."
 
 workflows:
   ci:
     jobs:
-      - lint
-workflows:
-  build-workflow:
-    jobs:
-      - lint
-      - type-check
-      - unit-test
+      - setup
+      - lint:
+          requires:
+            - setup
+      - type-check:
+          requires:
+            - setup
+      - unit-test:
+          requires:
+            - setup
       - ci-gate:
           requires:
             - lint
+            - type-check
             - unit-test

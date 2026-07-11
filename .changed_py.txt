@@ -495,6 +495,7 @@ tests/test_aria_bot_root_shim.py
 tests/test_aria_command_presets.py
 tests/test_aria_index_provider_wiring.py
 tests/test_aria_server.py
+tests/test_aria_tags_extended.py
 tests/test_aria_tests_workflow.py
 tests/test_auto_create_pr_workflow.py
 tests/test_auto_fix_workflow.py
@@ -567,6 +568,7 @@ tests/test_gradio_webhook_ui.py
 tests/test_groq_provider.py
 tests/test_http_ai_status_function.py
 tests/test_http_utils.py
+tests/test_http_utils_extended.py
 tests/test_hypothesis_agent.py
 tests/test_ignore_verify.py
 tests/test_import_helpers.py
@@ -575,6 +577,7 @@ tests/test_integration_smoke_schema.py
 tests/test_job_queue.py
 tests/test_job_yaml_schema.py
 tests/test_json_utils.py
+tests/test_json_utils_load_status.py
 tests/test_keep_working_config.py
 tests/test_lmstudio_agi_integration.py
 tests/test_lmstudio_agi_integration_impl.py
@@ -583,10 +586,13 @@ tests/test_lmstudio_http_fallback.py
 tests/test_lmstudio_mcp_agi_tools.py
 tests/test_local_agi_sse_integration.py
 tests/test_local_calc.py
+tests/test_local_calc_extended.py
 tests/test_local_dev_adapter-v2.py
 tests/test_local_dev_adapter.py
 tests/test_local_dev_adapter_http.py
+tests/test_local_settings.py
 tests/test_local_summary.py
+tests/test_local_summary_extended.py
 tests/test_lora_adapter_completeness_guard_hook.py
 tests/test_lora_cleanup.py
 tests/test_markdown_links_no_root_relative.py
@@ -654,6 +660,7 @@ tests/test_reflection_agent.py
 tests/test_regex_optimizations.py
 tests/test_repair_data_out_status.py
 tests/test_request_validator.py
+tests/test_request_validator_agi.py
 tests/test_requirements_security_gate_hook.py
 tests/test_resource_monitor.py
 tests/test_root_shims.py
@@ -663,6 +670,7 @@ tests/test_run_continuous_automation.py
 tests/test_run_main_if_referenced.py
 tests/test_run_repo_agents.py
 tests/test_runtime_env.py
+tests/test_runtime_env_extended.py
 tests/test_scope_drift_guard_hook.py
 tests/test_scorecard_workflow.py
 tests/test_script_utils.py
@@ -673,6 +681,7 @@ tests/test_setup_env_check.py
 tests/test_setup_monetization.py
 tests/test_setup_verify_workflow_wiring.py
 tests/test_shared_config.py
+tests/test_shared_logging.py
 tests/test_site_bundle_validation_workflow.py
 tests/test_sql_engine_extended.py
 tests/test_sql_integration.py
@@ -683,6 +692,7 @@ tests/test_status_dashboard.py
 tests/test_status_freshness_agent.py
 tests/test_status_schema.py
 tests/test_status_schema_fixtures.py
+tests/test_stripe_webhooks.py
 tests/test_subscription_manager.py
 tests/test_system_health_check.py
 tests/test_task_complete_stub.py
