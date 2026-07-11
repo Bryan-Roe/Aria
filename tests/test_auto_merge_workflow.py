@@ -78,6 +78,16 @@ def test_auto_merge_has_check_run_trigger() -> None:
     )
 
 
+def test_auto_merge_has_schedule_trigger() -> None:
+    wf = _load_auto_merge()
+    assert "schedule" in _get_triggers(wf), "auto-merge.yml must trigger on schedule for open PR finishing sweeps"
+
+
+def test_auto_merge_has_workflow_dispatch_trigger() -> None:
+    wf = _load_auto_merge()
+    assert "workflow_dispatch" in _get_triggers(wf), "auto-merge.yml must support manual dispatch for open PR finishing"
+
+
 def test_auto_merge_check_run_trigger_on_completed() -> None:
     wf = _load_auto_merge()
     check_run = _get_triggers(wf)["check_run"]
@@ -119,6 +129,11 @@ def test_auto_merge_has_merge_on_gate_pass_job() -> None:
 def test_auto_merge_has_bot_approve_job() -> None:
     wf = _load_auto_merge()
     assert "bot-approve" in wf["jobs"], "auto-merge.yml must have a 'bot-approve' job"
+
+
+def test_auto_merge_has_finish_open_prs_job() -> None:
+    wf = _load_auto_merge()
+    assert "finish-open-prs" in wf["jobs"], "auto-merge.yml must have a 'finish-open-prs' job"
 
 
 # ---------------------------------------------------------------------------
@@ -275,6 +290,27 @@ def test_bot_approve_allowlist_defined_in_env() -> None:
     allowlist = env["BOT_APPROVE_ALLOWLIST"]
     assert "github-actions[bot]" in allowlist, "github-actions[bot] must be in BOT_APPROVE_ALLOWLIST"
     assert "copilot-swe-agent[bot]" in allowlist, "copilot-swe-agent[bot] must be in BOT_APPROVE_ALLOWLIST"
+
+
+# ---------------------------------------------------------------------------
+# finish-open-prs job — scheduled/manual open PR finishing
+# ---------------------------------------------------------------------------
+
+
+def test_finish_open_prs_runs_only_on_schedule_or_dispatch() -> None:
+    wf = _load_auto_merge()
+    job_if = wf["jobs"]["finish-open-prs"].get("if", "")
+    assert "github.event_name == 'schedule'" in job_if, "finish-open-prs must run on schedule events"
+    assert "github.event_name == 'workflow_dispatch'" in job_if, "finish-open-prs must run on workflow_dispatch events"
+
+
+def test_finish_open_prs_merges_via_squash() -> None:
+    wf = _load_auto_merge()
+    steps = wf["jobs"]["finish-open-prs"]["steps"]
+    script_step = next(step for step in steps if step.get("name") == "Merge eligible open PRs")
+    script = script_step["with"]["script"]
+    assert "pulls.list" in script, "finish-open-prs must enumerate open pull requests"
+    assert "merge_method: 'squash'" in script, "finish-open-prs must squash-merge eligible pull requests"
 
 
 # ---------------------------------------------------------------------------

@@ -27,11 +27,25 @@ on:
     types: [opened, synchronize, reopened, ready_for_review, labeled, unlabeled]
   check_run:
     types: [completed]
+  schedule:
+    - cron: "*/30 * * * *"
+  workflow_dispatch:
+    inputs:
+      max_prs:
+        description: "Maximum eligible PRs to process this run"
+        required: false
+        type: number
+        default: 20
+      dry_run:
+        description: "Evaluate eligibility without merging"
+        required: false
+        type: boolean
+        default: false
 
 concurrency:
   group: >-
     auto-merge-${{
-      github.event.pull_request.number || github.event.check_run.id
+      github.event.pull_request.number || github.event.check_run.id || github.run_id
     }}
   cancel-in-progress: false
 
@@ -407,3 +421,191 @@ jobs:
             });
 
             core.info(`✅ Approved PR #${prNumber} (author: ${author}).`);
+
+  finish-open-prs:
+    name: Finish Open PRs
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+    steps:
+      - name: Harden runner
+        uses: step-security/harden-runner@0634a2670c59f64b4a01f0f96f84700a4088b9f0
+        with:
+          disable-sudo: true
+          egress-policy: audit
+
+      - name: Merge eligible open PRs
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const inputs = context.payload.inputs || {};
+            const maxPrs = Number(inputs.max_prs || 20);
+            const dryRun = String(inputs.dry_run || 'false') === 'true';
+            const labelsAllowlist = new Set(['auto-merge', 'autofix', 'automerge']);
+            const blockedMergeableStates = new Set(['dirty', 'blocked', 'behind', 'draft', 'unknown', 'unstable']);
+            const summaryRows = [];
+            let mergedCount = 0;
+            let reviewedCount = 0;
+
+            async function listOpenPulls() {
+              const pulls = [];
+              for (let page = 1; page <= 10; page += 1) {
+                const { data } = await github.rest.pulls.list({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  state: 'open',
+                  base: 'main',
+                  sort: 'updated',
+                  direction: 'desc',
+                  per_page: 100,
+                  page,
+                });
+
+                if (!data.length) {
+                  break;
+                }
+
+                pulls.push(...data);
+              }
+              return pulls;
+            }
+
+            function hasFailingChecks(combined, runs) {
+              if (combined.state === 'failure' || combined.state === 'error') {
+                return true;
+              }
+
+              return runs.some((run) => {
+                if (run.status !== 'completed') {
+                  return false;
+                }
+                return ['failure', 'timed_out', 'cancelled', 'action_required', 'startup_failure', 'stale'].includes(
+                  run.conclusion || ''
+                );
+              });
+            }
+
+            function hasPendingChecks(combined, runs) {
+              if (!['success', 'neutral'].includes(combined.state || '')) {
+                return true;
+              }
+              return runs.some((run) => run.status !== 'completed');
+            }
+
+            const pulls = await listOpenPulls();
+            core.info(`Discovered ${pulls.length} open PR(s).`);
+
+            for (const pull of pulls) {
+              if (reviewedCount >= maxPrs) {
+                core.info(`Reached processing cap (${maxPrs}); stopping.`);
+                break;
+              }
+
+              const prNumber = pull.number;
+              reviewedCount += 1;
+
+              const { data: prData } = await github.rest.pulls.get({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: prNumber,
+              });
+
+              const labelNames = (prData.labels || []).map((label) => label.name);
+              const hasMergeLabel = labelNames.some((name) => labelsAllowlist.has(name));
+              if (!hasMergeLabel) {
+                summaryRows.push(`| #${prNumber} | ⊘ skipped (no auto-merge label) |`);
+                continue;
+              }
+
+              if (prData.draft) {
+                summaryRows.push(`| #${prNumber} | ⊘ skipped (draft) |`);
+                continue;
+              }
+
+              if (!prData.head.repo || prData.head.repo.full_name !== context.payload.repository.full_name) {
+                summaryRows.push(`| #${prNumber} | ⊘ skipped (fork/deleted fork) |`);
+                continue;
+              }
+
+              const mergeableState = (prData.mergeable_state || 'unknown').toLowerCase();
+              if (prData.mergeable !== true || blockedMergeableStates.has(mergeableState)) {
+                summaryRows.push(`| #${prNumber} | ⏳ blocked (${mergeableState}) |`);
+                continue;
+              }
+
+              const { data: combinedStatus } = await github.rest.repos.getCombinedStatusForRef({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                ref: prData.head.sha,
+              });
+
+              const { data: checks } = await github.rest.checks.listForRef({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                ref: prData.head.sha,
+                per_page: 100,
+              });
+
+              const checkRuns = checks.check_runs || [];
+              if (hasFailingChecks(combinedStatus, checkRuns)) {
+                summaryRows.push(`| #${prNumber} | ⊘ skipped (failing checks) |`);
+                continue;
+              }
+
+              if (hasPendingChecks(combinedStatus, checkRuns)) {
+                summaryRows.push(`| #${prNumber} | ⏳ waiting (checks pending) |`);
+                continue;
+              }
+
+              const { data: reviews } = await github.rest.pulls.listReviews({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: prNumber,
+              });
+
+              const hasApproval = reviews.some((review) => review.state === 'APPROVED');
+              const hasChangesRequested = reviews.some((review) => review.state === 'CHANGES_REQUESTED');
+
+              if (hasChangesRequested) {
+                summaryRows.push(`| #${prNumber} | ⊘ skipped (changes requested) |`);
+                continue;
+              }
+
+              if (!hasApproval) {
+                summaryRows.push(`| #${prNumber} | ⊘ skipped (no approval) |`);
+                continue;
+              }
+
+              if (dryRun) {
+                summaryRows.push(`| #${prNumber} | ✅ eligible (dry-run) |`);
+                continue;
+              }
+
+              try {
+                await github.rest.pulls.merge({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  pull_number: prNumber,
+                  merge_method: 'squash',
+                });
+                mergedCount += 1;
+                summaryRows.push(`| #${prNumber} | ✅ merged |`);
+              } catch (error) {
+                const message = error instanceof Error ? error.message : String(error);
+                summaryRows.push(`| #${prNumber} | ❌ merge failed — ${message} |`);
+              }
+            }
+
+            const header = '| PR | Result |\n|-----|--------|';
+            const body = summaryRows.length ? summaryRows.join('\n') : '| — | _No open PRs reviewed._ |';
+
+            await core.summary
+              .addHeading('Finish Open PRs Results', 2)
+              .addRaw(`${header}\n${body}`)
+              .addRaw(`\n\nMerged: ${mergedCount}`)
+              .write();
