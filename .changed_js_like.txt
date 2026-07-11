@@ -248,6 +248,7 @@
 .github/workflows/auto-validation.yml
 .github/workflows/autofix.yml
 .github/workflows/autonomous-evolver.yml
+.github/workflows/azure-webapps-node.yml
 .github/workflows/azureml-train.yml
 .github/workflows/broken-links.yml
 .github/workflows/ci-pipeline.yml
@@ -291,6 +292,7 @@
 .github/workflows/stale.yml
 .github/workflows/summary.yml
 .github/workflows/telemetry-trigger.yml
+.github/workflows/test-reviewer-assignment.yml
 .github/workflows/test-watcher.yml
 .github/workflows/training-health-report.yml
 .github/workflows/workflow-validation.yml

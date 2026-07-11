@@ -147,10 +147,7 @@ def _fallback_prune_messages(
             {"role": "system", "content": system_prompt},
             *pruned_messages,
         ]
-    token_count = sum(
-        len(_RE_WORD_SPLIT.findall(str(message.get("content", ""))))
-        for message in pruned_messages
-    )
+    token_count = sum(len(_RE_WORD_SPLIT.findall(str(message.get("content", "")))) for message in pruned_messages)
     stats = _FallbackPruneStats(
         original_tokens=token_count,
         pruned_tokens=token_count,
@@ -230,6 +227,7 @@ db_logging = safe_import(
     fallback_factory=lambda name: None,
 )
 log_chat_message_safe = db_logging["log_chat_message_safe"]
+
 
 # Chat memory functions with graceful degradation
 def _chat_memory_fallback_factory(name: str) -> Any:
@@ -313,6 +311,7 @@ def _request_validator_fallback_factory(name: str) -> Any:
         "AGI_STREAM_SCHEMA": {},
     }
     return fallback_map.get(name)
+
 
 # Shared request validation helpers (schema + JSON parsing + constraints)
 request_validator_funcs = safe_import(
