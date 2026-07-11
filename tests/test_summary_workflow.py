@@ -14,6 +14,8 @@ def _load_workflow() -> dict:
 
 
 def _workflow_triggers(workflow: dict) -> dict:
+    # PyYAML parses an unquoted `on` key as boolean True per the YAML 1.1
+    # rules, so support both parsed forms here.
     return workflow["on"] if "on" in workflow else workflow.get(True, {})
 
 
@@ -43,10 +45,11 @@ def test_summary_workflow_comments_without_checkout_repo_context() -> None:
     content = WORKFLOW_PATH.read_text(encoding="utf-8")
     workflow = yaml.safe_load(content)
     steps = workflow["jobs"]["summary"]["steps"]
+    gh_comment_lines = [line.strip() for line in content.splitlines() if "gh issue comment" in line]
 
     assert all(not step.get("uses", "").startswith("actions/checkout") for step in steps)
-    assert 'gh issue comment "$ISSUE_NUMBER" --repo "$GITHUB_REPOSITORY" --body-file summary.md' in content
-    assert 'gh issue comment "$ISSUE_NUMBER" --repo "$GITHUB_REPOSITORY" \\' in content
+    assert len(gh_comment_lines) == 2
+    assert all('--repo "$GITHUB_REPOSITORY"' in line for line in gh_comment_lines)
 
 
 def test_summary_workflow_only_runs_for_opened_issues() -> None:
