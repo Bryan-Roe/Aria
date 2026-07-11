@@ -307,7 +307,8 @@ def test_finish_open_prs_runs_only_on_schedule_or_dispatch() -> None:
 def test_finish_open_prs_merges_via_squash() -> None:
     wf = _load_auto_merge()
     steps = wf["jobs"]["finish-open-prs"]["steps"]
-    script_step = next(step for step in steps if step.get("name") == "Merge eligible open PRs")
+    script_step = next((step for step in steps if step.get("name") == "Merge eligible open PRs"), None)
+    assert script_step is not None, "finish-open-prs must include the 'Merge eligible open PRs' step"
     script = script_step["with"]["script"]
     assert "pulls.list" in script, "finish-open-prs must enumerate open pull requests"
     assert "merge_method: 'squash'" in script, "finish-open-prs must squash-merge eligible pull requests"

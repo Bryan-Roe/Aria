@@ -440,21 +440,34 @@ jobs:
 
       - name: Merge eligible open PRs
         uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea
+        env:
+          MAX_PRS: ${{ github.event_name == 'workflow_dispatch' && inputs.max_prs || 20 }}
+          DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run || 'false' }}
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const inputs = context.payload.inputs || {};
-            const maxPrs = Number(inputs.max_prs || 20);
-            const dryRun = String(inputs.dry_run || 'false') === 'true';
-            const labelsAllowlist = new Set(['auto-merge', 'autofix', 'automerge']);
+            const maxPrs = Number(process.env.MAX_PRS || 20);
+            const dryRun = String(process.env.DRY_RUN || 'false') === 'true';
+            // Safety cap: discover enough PRs for the cap while bounding API calls.
+            const maxPaginationPages = Math.max(1, Math.min(10, Math.ceil(maxPrs / 100) + 1));
+            const labelsAllowlist = new Set(['auto-merge', 'autofix']);
             const blockedMergeableStates = new Set(['dirty', 'blocked', 'behind', 'draft', 'unknown', 'unstable']);
+            const failingConclusions = new Set([
+              'failure',
+              'timed_out',
+              'cancelled',
+              'action_required',
+              'startup_failure',
+              'stale',
+            ]);
+            const thisRepo = `${context.repo.owner}/${context.repo.repo}`;
             const summaryRows = [];
             let mergedCount = 0;
             let reviewedCount = 0;
 
             async function listOpenPulls() {
               const pulls = [];
-              for (let page = 1; page <= 10; page += 1) {
+              for (let page = 1; page <= maxPaginationPages; page += 1) {
                 const { data } = await github.rest.pulls.list({
                   owner: context.repo.owner,
                   repo: context.repo.repo,
@@ -475,6 +488,26 @@ jobs:
               return pulls;
             }
 
+            async function listCheckRuns(ref) {
+              const runs = [];
+              for (let page = 1; page <= maxPaginationPages; page += 1) {
+                const { data } = await github.rest.checks.listForRef({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  ref,
+                  per_page: 100,
+                  page,
+                });
+
+                const pageRuns = data.check_runs || [];
+                runs.push(...pageRuns);
+                if (!pageRuns.length || pageRuns.length < 100) {
+                  break;
+                }
+              }
+              return runs;
+            }
+
             function hasFailingChecks(combined, runs) {
               if (combined.state === 'failure' || combined.state === 'error') {
                 return true;
@@ -484,9 +517,7 @@ jobs:
                 if (run.status !== 'completed') {
                   return false;
                 }
-                return ['failure', 'timed_out', 'cancelled', 'action_required', 'startup_failure', 'stale'].includes(
-                  run.conclusion || ''
-                );
+                return failingConclusions.has(run.conclusion || '');
               });
             }
 
@@ -509,6 +540,11 @@ jobs:
               const prNumber = pull.number;
               reviewedCount += 1;
 
+              if (!pull.head?.repo || pull.head.repo.full_name !== thisRepo) {
+                summaryRows.push(`| #${prNumber} | ⊘ skipped (fork/deleted fork) |`);
+                continue;
+              }
+
               const { data: prData } = await github.rest.pulls.get({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
@@ -527,11 +563,6 @@ jobs:
                 continue;
               }
 
-              if (!prData.head.repo || prData.head.repo.full_name !== context.payload.repository.full_name) {
-                summaryRows.push(`| #${prNumber} | ⊘ skipped (fork/deleted fork) |`);
-                continue;
-              }
-
               const mergeableState = (prData.mergeable_state || 'unknown').toLowerCase();
               if (prData.mergeable !== true || blockedMergeableStates.has(mergeableState)) {
                 summaryRows.push(`| #${prNumber} | ⏳ blocked (${mergeableState}) |`);
@@ -544,14 +575,7 @@ jobs:
                 ref: prData.head.sha,
               });
 
-              const { data: checks } = await github.rest.checks.listForRef({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                ref: prData.head.sha,
-                per_page: 100,
-              });
-
-              const checkRuns = checks.check_runs || [];
+              const checkRuns = await listCheckRuns(prData.head.sha);
               if (hasFailingChecks(combinedStatus, checkRuns)) {
                 summaryRows.push(`| #${prNumber} | ⊘ skipped (failing checks) |`);
                 continue;
@@ -601,7 +625,7 @@ jobs:
               }
             }
 
-            const header = '| PR | Result |\n|-----|--------|';
+            const header = '| PR  | Result |\n|-----|--------|';
             const body = summaryRows.length ? summaryRows.join('\n') : '| — | _No open PRs reviewed._ |';
 
             await core.summary
