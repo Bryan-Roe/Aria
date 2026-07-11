@@ -1,130 +1,38 @@
-name: Code Coverage
-
-on:
-  push:
-    branches: [main, master]
-  pull_request:
-    branches: [main, master]
-
 concurrency:
-  group: coverage-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
-
-permissions:
-  contents: read
-
+  group: coverage-${{ github.workflow }}-${{ github.ref }}
 jobs:
-  root-tests:
-    name: Root tests (py${{ matrix.python-version }})
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        python-version: ["3.11", "3.12"]
-
-    steps:
-      - name: Harden runner (restrict egress)
-        uses: step-security/harden-runner@bf7454d06d71f1098171f2acdf0cd4708d7b5920
-        with:
-          egress-policy: block
-          allowed-endpoints: >
-            github.com:443
-            api.github.com:443
-            pypi.org:443
-            files.pythonhosted.org:443
-            codecov.io:443
-
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
-
-      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
-        with:
-          python-version: ${{ matrix.python-version }}
-          cache: pip
-
-      - name: Install deps
-        run: |
-          python -m pip install --upgrade pip setuptools wheel
-          python -m pip install -r requirements.txt
-          python -m pip install pytest pytest-cov coverage[toml]
-
-      - name: Run tests with coverage data
-        env:
-          COVERAGE_FILE: .coverage.root.py${{ matrix.python-version }}
-        run: |
-          pytest tests/ \
-            --cov=. \
-            --cov-branch \
-            --cov-report=xml:coverage-root-py${{ matrix.python-version }}.xml \
-            --cov-report=term \
-            -v
-
-      - name: Upload root coverage artifacts
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
-        with:
-          name: coverage-root-py${{ matrix.python-version }}
-          path: |
-            .coverage.root.py${{ matrix.python-version }}
-            coverage-root-py${{ matrix.python-version }}.xml
-
-  quantum-ml-tests:
-    name: Quantum ML tests
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
-      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
-        with:
-          python-version: "3.12"
-          cache: pip
-          cache-dependency-path: ai-projects/quantum-ml/requirements.txt
-
-      - name: Install deps
-        working-directory: ai-projects/quantum-ml
-        run: |
-          python -m pip install --upgrade pip
-          python -m pip install -r requirements.txt
-          python -m pip install pytest pytest-cov coverage[toml]
-
-      - name: Run tests
-        working-directory: ai-projects/quantum-ml
-        env:
-          COVERAGE_FILE: ../../.coverage.quantum-ml
-        run: |
-          pytest tests/ \
-            --cov=src \
-            --cov-branch \
-            --cov-report=xml:../../coverage-quantum-ml.xml \
-            --cov-report=term \
-            -v
-
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
-        with:
-          name: coverage-quantum-ml
-          path: |
-            .coverage.quantum-ml
-            coverage-quantum-ml.xml
-
   chat-cli-tests:
     name: Chat CLI tests
     runs-on: ubuntu-latest
     steps:
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@bf7454d06d71f1098171f2acdf0cd4708d7b5920 # v2.20.0
+        with:
+          egress-policy: audit
+
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+
       - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
         with:
-          python-version: "3.12"
           cache: pip
           cache-dependency-path: ai-projects/chat-cli/requirements.txt
+          python-version: "3.12"
 
       - name: Install deps
-        working-directory: ai-projects/chat-cli
         run: |
           python -m pip install --upgrade pip
           python -m pip install -r requirements.txt
           python -m pip install pytest pytest-cov coverage[toml]
-
-      - name: Run tests
         working-directory: ai-projects/chat-cli
-        env:
+
+
+      - env:
           COVERAGE_FILE: ../../.coverage.chat-cli
+        name: Run tests
         run: |
           pytest tests/ \
             --cov=src \
@@ -132,6 +40,8 @@ jobs:
             --cov-report=xml:../../coverage-chat-cli.xml \
             --cov-report=term \
             -v
+        working-directory: ai-projects/chat-cli
+
 
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
@@ -139,30 +49,39 @@ jobs:
           path: |
             .coverage.chat-cli
             coverage-chat-cli.xml
-
+    timeout-minutes: 20
   phi-tests:
+    continue-on-error: true
     name: Phi tests (optional)
     runs-on: ubuntu-latest
-    continue-on-error: true
     steps:
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@bf7454d06d71f1098171f2acdf0cd4708d7b5920 # v2.20.0
+        with:
+          egress-policy: audit
+
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+
       - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
         with:
-          python-version: "3.12"
           cache: pip
           cache-dependency-path: AI/microsoft_phi-silica-3.6_v1/requirements.txt
+          python-version: "3.12"
 
       - name: Install deps
-        working-directory: AI/microsoft_phi-silica-3.6_v1
         run: |
           python -m pip install --upgrade pip
           python -m pip install -r requirements.txt
           python -m pip install pytest pytest-cov coverage[toml]
-
-      - name: Run tests (optional)
         working-directory: AI/microsoft_phi-silica-3.6_v1
-        env:
+
+
+      - env:
           COVERAGE_FILE: ../../.coverage.phi
+        name: Run tests (optional)
         run: |
           pytest tests/ \
             --cov=. \
@@ -170,25 +89,19 @@ jobs:
             --cov-report=xml:../../coverage-phi.xml \
             --cov-report=term \
             -v
+        working-directory: AI/microsoft_phi-silica-3.6_v1
 
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
-        if: always()
+
+      - if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
+          if-no-files-found: ignore
           name: coverage-phi
           path: |
             .coverage.phi
             coverage-phi.xml
-          if-no-files-found: ignore
 
-  coverage-aggregate:
-    name: Aggregate & publish coverage
-    runs-on: ubuntu-latest
-    needs: [root-tests, quantum-ml-tests, chat-cli-tests, phi-tests]
-    permissions:
-      contents: read
-      pull-requests: write
 
-    steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
 
       - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
@@ -219,14 +132,14 @@ jobs:
       - name: Upload to Codecov
         uses: step-security/codecov-action@db5c3605ff3c9dc7f0b2791e6bea84a561bacab8
         with:
+          fail_ci_if_error: false
           files: coverage.xml
           flags: unittests
           name: codecov-combined
-          fail_ci_if_error: false
           verbose: true
 
-      - name: Upsert PR coverage comment
-        if: github.event_name == 'pull_request'
+      - if: github.event_name == 'pull_request'
+        name: Upsert PR coverage comment
         uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea
         with:
           script: |
@@ -265,3 +178,114 @@ jobs:
                 body
               });
             }
+
+    timeout-minutes: 20
+  quantum-ml-tests:
+    name: Quantum ML tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@bf7454d06d71f1098171f2acdf0cd4708d7b5920 # v2.20.0
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          cache: pip
+          cache-dependency-path: ai-projects/quantum-ml/requirements.txt
+          python-version: "3.12"
+
+      - name: Install deps
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+          python -m pip install pytest pytest-cov coverage[toml]
+        working-directory: ai-projects/quantum-ml
+
+
+      - env:
+          COVERAGE_FILE: ../../.coverage.quantum-ml
+        name: Run tests
+        run: |
+          pytest tests/ \
+            --cov=src \
+            --cov-branch \
+            --cov-report=xml:../../coverage-quantum-ml.xml \
+            --cov-report=term \
+            -v
+        working-directory: ai-projects/quantum-ml
+
+
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: coverage-quantum-ml
+          path: |
+            .coverage.quantum-ml
+            coverage-quantum-ml.xml
+    timeout-minutes: 20
+  root-tests:
+    name: Root tests (py${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+    steps:
+      - name: Harden runner (audit outbound calls)
+        uses: step-security/harden-runner@bf7454d06d71f1098171f2acdf0cd4708d7b5920
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          cache: pip
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install deps
+        run: |
+          python -m pip install --upgrade pip setuptools wheel
+          python -m pip install -r requirements.txt
+          python -m pip install pytest pytest-cov coverage[toml]
+
+      - env:
+          COVERAGE_FILE: .coverage.root.py${{ matrix.python-version }}
+        name: Run tests with coverage data
+        run: |
+          pytest tests/ \
+            --cov=. \
+            --cov-branch \
+            --cov-report=xml:coverage-root-py${{ matrix.python-version }}.xml \
+            --cov-report=term \
+            -v
+
+
+      - name: Upload root coverage artifacts
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: coverage-root-py${{ matrix.python-version }}
+          path: |
+            .coverage.root.py${{ matrix.python-version }}
+            coverage-root-py${{ matrix.python-version }}.xml
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12"]
+    timeout-minutes: 20
+name: Code Coverage
+on:
+  pull_request:
+    branches: [main, dev]
+  push:
+    branches: [main, dev]
+  workflow_dispatch:
+
+
+
+permissions:
+  contents: read

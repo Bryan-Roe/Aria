@@ -413,3 +413,9 @@ def test_eligibility_action_checks_changes_requested() -> None:
     action_path = ACTIONS_DIR / "check-auto-merge-eligibility" / "action.yml"
     content = action_path.read_text(encoding="utf-8")
     assert "CHANGES_REQUESTED" in content, "eligibility action must block on CHANGES_REQUESTED reviews"
+
+
+def test_auto_merge_workflow_has_no_trailing_whitespace() -> None:
+    workflow_path = WORKFLOWS_DIR / "auto-merge.yml"
+    for line_number, line in enumerate(workflow_path.read_text(encoding="utf-8").splitlines(), start=1):
+        assert line == line.rstrip(), f"auto-merge.yml contains trailing whitespace on line {line_number}"

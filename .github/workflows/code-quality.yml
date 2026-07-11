@@ -1,89 +1,26 @@
-name: Code Quality
-
-on:
-  push:
-    branches: [main, dev]
-  pull_request:
-    branches: [main, dev]
-  workflow_dispatch:
-
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
-  HARDEN_RUNNER_SHA: 0634a2670c59f64b4a01f0f96f84700a4088b9f0 # v2.12.2
-  CHECKOUT_SHA: 11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-  UPLOAD_ARTIFACT_SHA: 65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 # v4.6.0
-  PYTHON_UNBUFFERED: '1'
-  PYTHONDONTWRITEBYTECODE: '1'
-  PIP_DISABLE_PIP_VERSION_CHECK: '1'
-
-permissions:
-  contents: read
-
+# cspell:words PYTHONDONTWRITEBYTECODE
 concurrency:
-  group: quality-${{ github.ref }}
   cancel-in-progress: true
+  group: quality-${{ github.workflow }}-${{ github.ref }}
 
 defaults:
   run:
     shell: bash
 
+env:
+  CHECKOUT_SHA: 11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
+  HARDEN_RUNNER_SHA: 0634a2670c59f64b4a01f0f96f84700a4088b9f0 # v2.12.2
+  PIP_DISABLE_PIP_VERSION_CHECK: '1'
+  PYTHON_UNBUFFERED: '1'
+  PYTHONDONTWRITEBYTECODE: '1'
+  UPLOAD_ARTIFACT_SHA: 65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 # v4.6.0
+
 jobs:
-  lint:
-    name: Lint and Format Check
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    steps:
-      - name: Harden runner
-        uses: step-security/harden-runner@0634a2670c59f64b4a01f0f96f84700a4088b9f0
-        with:
-          egress-policy: audit
-
-      - name: Checkout code
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
-        with:
-          persist-credentials: false
-          fetch-depth: 1
-
-      - name: Setup Python
-        uses: ./.github/actions/setup-python-env
-        with:
-          install-requirements: 'false'
-          extra-packages: 'flake8 black isort mypy'
-
-      - name: Run flake8 (blocking — syntax errors)
-        run: |
-          set -euo pipefail
-          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-
-      - name: Run flake8 (advisory — style warnings)
-        run: |
-          set -euo pipefail
-          flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics --exclude=venv,venv_*,__pycache__,.git,data_out,mount,__blobstorage__,__queuestorage__
-        continue-on-error: true
-
-      - name: Check code formatting with black
-        run: |
-          set -euo pipefail
-          black --check --diff --exclude="(venv|venv_.*|__pycache__|\.git|data_out|mount|__blobstorage__|__queuestorage__)" .
-        continue-on-error: true
-
-      - name: Check import sorting with isort
-        run: |
-          set -euo pipefail
-          isort --check-only --diff --skip-glob="venv*" --skip-glob="data_out*" --skip-glob="mount*" .
-        continue-on-error: true
-
-      - name: Type check with mypy (optional)
-        run: |
-          set -euo pipefail
-          mypy --install-types --non-interactive --ignore-missing-imports --exclude="(venv|venv_.*|data_out|mount)" . || echo "MyPy check completed with warnings"
-        continue-on-error: true
-
   autofix:
+    if: github.event_name == 'workflow_dispatch' || github.event_name == 'pull_request'
     name: Auto-fix (black + isort + autopep8)
     runs-on: ubuntu-latest
-    timeout-minutes: 10
-    if: github.event_name == 'workflow_dispatch' || github.event_name == 'pull_request'
     steps:
       - name: Harden runner
         uses: step-security/harden-runner@0634a2670c59f64b4a01f0f96f84700a4088b9f0
@@ -93,14 +30,14 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
-          persist-credentials: false
           fetch-depth: 1
+          persist-credentials: false
 
       - name: Setup Python
         uses: ./.github/actions/setup-python-env
         with:
-          install-requirements: 'false'
           extra-packages: 'black isort autopep8'
+          install-requirements: 'false'
 
       - name: Apply formatting fixes
         run: |
@@ -125,21 +62,21 @@ jobs:
             } > autofix-summary.txt
           fi
 
-      - name: Upload autofix patch
-        if: always()
+      - if: always()
+        name: Upload autofix patch
         uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08
         with:
+          if-no-files-found: ignore
           name: autofix-patch
           path: |
             autofix.patch
             autofix-summary.txt
-          if-no-files-found: ignore
           retention-days: 14
-
-  security-check:
-    name: Security Dependency Check
-    runs-on: ubuntu-latest
     timeout-minutes: 10
+
+  lint:
+    name: Lint and Type Check
+    runs-on: ubuntu-latest
     steps:
       - name: Harden runner
         uses: step-security/harden-runner@0634a2670c59f64b4a01f0f96f84700a4088b9f0
@@ -149,22 +86,73 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
-          persist-credentials: false
           fetch-depth: 1
+          persist-credentials: false
+
+      - name: Setup Python
+        uses: ./.github/actions/setup-python-env
+        with:
+          extra-packages: 'flake8 black isort mypy'
+          install-requirements: 'false'
+
+      - name: Run flake8 (blocking — syntax errors)
+        run: |
+          set -euo pipefail
+          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+
+      - continue-on-error: true
+        name: Run flake8 (advisory — style warnings)
+        run: |
+          set -euo pipefail
+          flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics --exclude=venv,venv_*,__pycache__,.git,data_out,mount,__blobstorage__,__queuestorage__
+
+      - continue-on-error: true
+        name: Check code formatting with black
+        run: |
+          set -euo pipefail
+          black --check --diff --exclude="(venv|venv_.*|__pycache__|\.git|data_out|mount|__blobstorage__|__queuestorage__)" .
+
+      - continue-on-error: true
+        name: Check import sorting with isort
+        run: |
+          set -euo pipefail
+          isort --check-only --diff --skip-glob="venv*" --skip-glob="data_out*" --skip-glob="mount*" .
+
+      - continue-on-error: true
+        name: Type check with mypy (optional)
+        run: |
+          set -euo pipefail
+          mypy --install-types --non-interactive --ignore-missing-imports --exclude="(venv|venv_.*|data_out|mount)" . || echo "MyPy check completed with warnings"
+    timeout-minutes: 12
+
+  security-check:
+    name: Security Dependency Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Harden runner
+        uses: step-security/harden-runner@0634a2670c59f64b4a01f0f96f84700a4088b9f0
+        with:
+          egress-policy: audit
+
+      - name: Checkout code
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          fetch-depth: 1
+          persist-credentials: false
 
       - name: Setup Python
         uses: ./.github/actions/setup-python-env
         with:
           extra-packages: 'pip-audit'
 
-      - name: Check dependencies for vulnerabilities
+      - continue-on-error: true
+        name: Check dependencies for vulnerabilities
         run: |
           set -euo pipefail
           pip-audit --format json --output safety-report.json || echo "Vulnerability check completed with findings"
-        continue-on-error: true
 
-      - name: Generate security summary
-        if: always()
+      - if: always()
+        name: Generate security summary
         run: |
           set -euo pipefail
           {
@@ -179,11 +167,24 @@ jobs:
             fi
           } >> "$GITHUB_STEP_SUMMARY"
 
-      - name: Upload safety report
-        if: always()
+      - if: always()
+        name: Upload safety report
         uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08
         with:
+          if-no-files-found: ignore
           name: security-report
           path: safety-report.json
-          if-no-files-found: ignore
           retention-days: 14
+    timeout-minutes: 10
+
+name: Code Quality
+
+on:
+  pull_request:
+    branches: [main, dev]
+  push:
+    branches: [main, dev]
+  workflow_dispatch:
+
+permissions:
+  contents: read

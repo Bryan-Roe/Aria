@@ -1,49 +1,167 @@
 # Aria Autonomous Evolver
 # Improved workflow: clearer steps, outputs, conditional dispatch, pinned action versions, concurrency and minimal permissions.
 
-name: Aria Autonomous Evolver
-
-on:
-  workflow_run:
-    workflows: ["Aria Telemetry Trigger Engine"]
-    types:
-      - completed
-  workflow_dispatch:
-    inputs:
-      force_evolution:
-        description: "Force evolution dispatch regardless of computed metrics"
-        required: false
-        default: "false"
-      fitness_threshold:
-        description: "Trigger threshold: fitness must be greater than this value (0-100)"
-        required: false
-        default: "60"
-      stability_threshold:
-        description: "Trigger threshold: stability must be lower than this value (0-100)"
-        required: false
-        default: "70"
-
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: false
-
-permissions:
-  contents: write
+  group: ${{ github.workflow }}-${{ github.ref }}
 
 env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
   CHECKOUT_SHA: 11bd71901bbe5b1630ceea73d27597364c9af683      # v4.2.2
-  SETUP_NODE_SHA: 49933ea5288caeca8642d1e84afbd3f7d6820020      # v4.4.0
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
   GITHUB_SCRIPT_SHA: f28e40c7f34bde8b3046d885e986cb6290c5673b    # v7
+  SETUP_NODE_SHA: 49933ea5288caeca8642d1e84afbd3f7d6820020      # v4.4.0
 
 jobs:
-  validate-inputs:
-    name: Validate workflow inputs
-    runs-on: ubuntu-latest
-    if: github.event_name == 'workflow_dispatch'
+  evolve:
     defaults:
       run:
         shell: bash
+    if: always() && (github.event_name == 'workflow_dispatch' || (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main'))
+    name: Evaluate & optionally trigger evolution
+    runs-on: ubuntu-latest
+    steps:
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@bf7454d06d71f1098171f2acdf0cd4708d7b5920 # v2.20.0
+        with:
+          egress-policy: audit
+
+      - name: Checkout repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          fetch-depth: 0
+
+      - env:
+          FITNESS_THRESHOLD: ${{ inputs.fitness_threshold || '60' }}
+          FORCE_EVOLUTION: ${{ inputs.force_evolution || 'false' }}
+          STABILITY_THRESHOLD: ${{ inputs.stability_threshold || '70' }}
+          TELEMETRY_CONCLUSION: ${{ github.event.workflow.run.conclusion }}
+        id: evaluate
+        name: Evaluate evolution conditions
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const { owner, repo } = context.repo;
+
+            function parseThreshold(value, name) {
+              const parsed = Number(value);
+              if (!Number.isFinite(parsed) || parsed < 0 || parsed > 100) {
+                throw new Error(`Invalid ${name}: ${value}. Must be a number between 0 and 100.`);
+              }
+              return parsed;
+            }
+
+            const fitnessThreshold = parseThreshold(process.env.FITNESS_THRESHOLD, 'FITNESS_THRESHOLD');
+            const stabilityThreshold = parseThreshold(process.env.STABILITY_THRESHOLD, 'STABILITY_THRESHOLD');
+
+            const forceEvolutionStr = String(process.env.FORCE_EVOLUTION || 'false').toLowerCase().trim();
+            if (!['true', 'false'].includes(forceEvolutionStr)) {
+              throw new Error(`Invalid FORCE_EVOLUTION: ${process.env.FORCE_EVOLUTION}. Must be 'true' or 'false'.`);
+            }
+            const forceEvolution = forceEvolutionStr === 'true';
+
+            const runsResponse = await github.rest.actions.listWorkflowRunsForRepo({
+              owner,
+              repo,
+              branch: 'main',
+              status: 'completed',
+              per_page: 50
+            });
+
+            const telemetryRuns = runsResponse.data.workflow_runs
+              .filter((run) => run.name === 'Aria Telemetry Trigger Engine' && run.head_branch === 'main')
+              .slice(0, 10);
+
+            const completedRuns = telemetryRuns.filter((run) => typeof run.conclusion === 'string');
+
+            let fitness = 0;
+            let stability = 100;
+            let telemetryConclusion = process.env.TELEMETRY_CONCLUSION || 'n/a';
+
+            if (completedRuns.length > 0) {
+              const successful = completedRuns.filter((run) => run.conclusion === 'success').length;
+              const problematic = completedRuns.filter((run) =>
+                ['failure', 'cancelled', 'timed_out', 'action_required'].includes(run.conclusion)
+              ).length;
+
+              fitness = (successful / completedRuns.length) * 100;
+              stability = (problematic / completedRuns.length) * 100;
+              telemetryConclusion = completedRuns[0].conclusion || telemetryConclusion;
+            } else if (context.eventName === 'workflow_run') {
+              telemetryConclusion = process.env.TELEMETRY_CONCLUSION || 'n/a';
+              fitness = telemetryConclusion === 'success' ? 100 : 0;
+              stability = telemetryConclusion === 'success' ? 0 : 100;
+            }
+
+            const triggered = forceEvolution || (fitness > fitnessThreshold && stability < stabilityThreshold);
+            const reason = forceEvolution
+              ? 'forced'
+              : `fitness>${fitnessThreshold} && stability<${stabilityThreshold}`;
+
+            core.info('Evaluating evolution readiness...');
+            core.info(`telemetry conclusion: ${telemetryConclusion}`);
+            core.info(`fitness: ${fitness.toFixed(2)}`);
+            core.info(`stability: ${stability.toFixed(2)}`);
+            core.info(`fitness threshold: ${fitnessThreshold}`);
+            core.info(`stability threshold: ${stabilityThreshold}`);
+            core.info(`evolution triggered: ${triggered}`);
+            core.info(`reason: ${reason}`);
+
+            core.setOutput('evolution_triggered', String(triggered));
+            core.setOutput('fitness', fitness.toFixed(4));
+            core.setOutput('stability', stability.toFixed(4));
+            core.setOutput('reason', reason);
+
+      - if: ${{ steps.evaluate.outputs.evolution_triggered != 'true' }}
+        name: Log result when no evolution required
+        run: |
+          echo "No evolution required this cycle."
+          echo "fitness=${{ steps.evaluate.outputs.fitness }}"
+          echo "stability=${{ steps.evaluate.outputs.stability }}"
+
+      - env:
+          FITNESS: ${{ steps.evaluate.outputs.fitness }}
+          REASON: ${{ steps.evaluate.outputs.reason }}
+          STABILITY: ${{ steps.evaluate.outputs.stability }}
+        if: ${{ steps.evaluate.outputs.evolution_triggered == 'true' }}
+        name: Trigger experiment fork signal (repository_dispatch)
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            try {
+              await github.rest.repos.createDispatchEvent({
+                owner,
+                repo,
+                event_type: 'aria-evolution-triggered',
+                client_payload: {
+                  source_workflow: context.workflow,
+                  trigger: 'autonomous-evolver',
+                  evaluated: {
+                    fitness: process.env.FITNESS || null,
+                    stability: process.env.STABILITY || null,
+                    reason: process.env.REASON || null
+                  }
+                }
+              });
+              core.info('repository_dispatch aria-evolution-triggered sent successfully.');
+            } catch (error) {
+              const details = {
+                message: error?.message || String(error),
+                status: error?.status || null
+              };
+              core.setFailed(`Failed to dispatch aria-evolution-triggered event to ${owner}/${repo}: ${JSON.stringify(details)}`);
+            }
+
+  validate-inputs:
+    defaults:
+      run:
+        shell: bash
+    if: github.event_name == 'workflow_dispatch'
+    name: Validate workflow inputs
+    runs-on: ubuntu-latest
     steps:
       - name: Harden the runner (Audit all outbound calls)
         uses: step-security/harden-runner@bf7454d06d71f1098171f2acdf0cd4708d7b5920 # v2.20.0
@@ -77,153 +195,28 @@ jobs:
           validate_threshold "${{ inputs.stability_threshold }}" "stability_threshold"
           echo "✓ All inputs validated successfully"
 
-  evolve:
-    name: Evaluate & optionally trigger evolution
-    runs-on: ubuntu-latest
-    needs: [validate-inputs]
-    if: always() && (github.event_name == 'workflow_dispatch' || (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main'))
-    defaults:
-      run:
-        shell: bash
+name: Aria Autonomous Evolver
 
-    steps:
-      - name: Harden the runner (Audit all outbound calls)
-        uses: step-security/harden-runner@bf7454d06d71f1098171f2acdf0cd4708d7b5920 # v2.20.0
-        with:
-          egress-policy: audit
+"on":
+  workflow_dispatch:
+    inputs:
+      fitness_threshold:
+        default: "60"
+        description: "Trigger threshold: fitness must be greater than this value (0-100)"
+        required: false
+      force_evolution:
+        default: "false"
+        description: "Force evolution dispatch regardless of computed metrics"
+        required: false
+      stability_threshold:
+        default: "70"
+        description: "Trigger threshold: stability must be lower than this value (0-100)"
+        required: false
+  workflow_run:
+    types:
+      - completed
+    workflows: ["Aria Telemetry Trigger Engine"]
 
-      - name: Checkout repository
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
-        with:
-          fetch-depth: 0
-
-      - name: Setup Node.js
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
-        with:
-          node-version: "24"
-
-      - name: Evaluate evolution conditions
-        id: evaluate
-        run: |
-          set -euo pipefail
-          node <<'NODE'
-          const fs = require('fs');
-          const path = require('path');
-
-          try {
-            // Validate environment
-            const githubOutput = process.env.GITHUB_OUTPUT;
-            if (!githubOutput || !fs.existsSync(path.dirname(githubOutput))) {
-              throw new Error('GITHUB_OUTPUT environment variable not set or invalid');
-            }
-
-            // Parse and validate inputs
-            const fitness = Math.random() * 100;
-            const stability = Math.random() * 100;
-
-            const parsedFitnessThreshold = Number(process.env.FITNESS_THRESHOLD);
-            const parsedStabilityThreshold = Number(process.env.STABILITY_THRESHOLD);
-
-            if (!Number.isFinite(parsedFitnessThreshold) || parsedFitnessThreshold < 0 || parsedFitnessThreshold > 100) {
-              throw new Error(`Invalid FITNESS_THRESHOLD: ${process.env.FITNESS_THRESHOLD}. Must be a number between 0 and 100.`);
-            }
-            if (!Number.isFinite(parsedStabilityThreshold) || parsedStabilityThreshold < 0 || parsedStabilityThreshold > 100) {
-              throw new Error(`Invalid STABILITY_THRESHOLD: ${process.env.STABILITY_THRESHOLD}. Must be a number between 0 and 100.`);
-            }
-
-            const fitnessThreshold = parsedFitnessThreshold;
-            const stabilityThreshold = parsedStabilityThreshold;
-
-            const forceEvolutionStr = (process.env.FORCE_EVOLUTION || 'false').toLowerCase().trim();
-            if (!['true', 'false'].includes(forceEvolutionStr)) {
-              throw new Error(`Invalid FORCE_EVOLUTION: ${process.env.FORCE_EVOLUTION}. Must be 'true' or 'false'.`);
-            }
-            const forceEvolution = forceEvolutionStr === 'true';
-            const telemetryConclusion = process.env.TELEMETRY_CONCLUSION || 'n/a';
-
-            const triggered = forceEvolution || (fitness > fitnessThreshold && stability < stabilityThreshold);
-            const reason = forceEvolution
-              ? 'forced'
-              : `fitness>${fitnessThreshold} && stability<${stabilityThreshold}`;
-
-            console.log('Evaluating evolution readiness...');
-            console.log('telemetry conclusion:', telemetryConclusion);
-            console.log('fitness:', fitness.toFixed(2));
-            console.log('stability:', stability.toFixed(2));
-            console.log('fitness threshold:', fitnessThreshold);
-            console.log('stability threshold:', stabilityThreshold);
-            console.log('evolution triggered:', triggered);
-            console.log('reason:', reason);
-
-            const out = [];
-            out.push(`evolution_triggered=${triggered}`);
-            out.push(`fitness=${fitness.toFixed(4)}`);
-            out.push(`stability=${stability.toFixed(4)}`);
-            out.push(`reason=${reason}`);
-
-            fs.appendFileSync(githubOutput, out.join('\n') + '\n');
-            console.log('✓ Evaluation outputs written successfully');
-          } catch (error) {
-            console.error('Fatal error during evaluation:', error.message);
-            process.exit(1);
-          }
-          NODE
-        env:
-          NODE_OPTIONS: "--no-warnings"
-          TELEMETRY_CONCLUSION: ${{ github.event.workflow_run.conclusion }}
-          FORCE_EVOLUTION: ${{ inputs.force_evolution || 'false' }}
-          FITNESS_THRESHOLD: ${{ inputs.fitness_threshold || '60' }}
-          STABILITY_THRESHOLD: ${{ inputs.stability_threshold || '70' }}
-
-      - name: Log result when no evolution required
-        if: ${{ steps.evaluate.outputs.evolution_triggered != 'true' }}
-        run: |
-          echo "No evolution required this cycle."
-          echo "fitness=${{ steps.evaluate.outputs.fitness }}"
-          echo "stability=${{ steps.evaluate.outputs.stability }}"
-
-      - name: Trigger experiment fork signal (repository_dispatch)
-        if: ${{ steps.evaluate.outputs.evolution_triggered == 'true' }}
-        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const owner = context.repo.owner;
-            const repo = context.repo.repo;
-            try {
-              // Create a repository dispatch event so other workflows or automation can react.
-              // Event type: 'aria-evolution-triggered'
-              await github.rest.repos.createDispatchEvent({
-                owner,
-                repo,
-                event_type: 'aria-evolution-triggered',
-                client_payload: {
-                  source_workflow: context.workflow,
-                  trigger: 'autonomous-evolver',
-                  evaluated: {
-                    fitness: process.env.FITNESS || null,
-                    stability: process.env.STABILITY || null,
-                    reason: process.env.REASON || null
-                  }
-                }
-              });
-              core.info('repository_dispatch aria-evolution-triggered sent successfully.');
-            } catch (error) {
-              const details = {
-                message: error?.message || String(error),
-                status: error?.status || null
-              };
-              core.setFailed(`Failed to dispatch aria-evolution-triggered event to ${owner}/${repo}: ${JSON.stringify(details)}`);
-            }
-        env:
-          FITNESS: ${{ steps.evaluate.outputs.fitness }}
-          STABILITY: ${{ steps.evaluate.outputs.stability }}
-          REASON: ${{ steps.evaluate.outputs.reason }}
-
-      - name: Finalize
-        run: |
-          echo "Evolution evaluation finished."
-          echo "evolution_triggered=${{ steps.evaluate.outputs.evolution_triggered }}"
-          echo "fitness=${{ steps.evaluate.outputs.fitness }}"
-          echo "stability=${{ steps.evaluate.outputs.stability }}"
-          echo "reason=${{ steps.evaluate.outputs.reason }}"
+permissions:
+  actions: read
+  contents: write

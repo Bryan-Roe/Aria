@@ -3,14 +3,14 @@ name: PR Checks
 on:
   pull_request:
     types: [opened, synchronize, reopened, edited, ready_for_review]
+    paths-ignore:
+      - '**/*.md'
+      - 'docs/**'
 
-# Cancel superseded runs for the same PR. Fall back to ref if the PR
-# number is unavailable on the event payload for any reason.
 concurrency:
   group: pr-checks-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
-# Default to least-privilege at the workflow level; jobs opt-in to more.
 permissions:
   contents: read
 
@@ -18,7 +18,7 @@ env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
   HARDEN_RUNNER_SHA: 0634a2670c59f64b4a01f0f96f84700a4088b9f0  # v2.12.2
   CHECKOUT_SHA: 11bd71901bbe5b1630ceea73d27597364c9af683      # v4.2.2
-  GITHUB_SCRIPT_SHA: 60a0d83039c74a4aee543508d2ffcb1c3799cdea    # v7.0.1
+  GITHUB_SCRIPT_SHA: 60a0d83039c74a4aee543508d2ffcb1c3799cdea  # v7.0.1
 
 defaults:
   run:
@@ -27,7 +27,6 @@ defaults:
 jobs:
   validate:
     name: Quick Validation
-    # Skip drafts to save CI minutes; they re-run on `ready_for_review`.
     if: github.event.pull_request.draft == false
     runs-on: ubuntu-latest
     permissions:
@@ -96,6 +95,7 @@ jobs:
       pull-requests: read
     env:
       MIN_DESCRIPTION_LENGTH: '100'
+      MIN_TITLE_LENGTH: '12'
     steps:
       - name: Harden runner
         uses: step-security/harden-runner@0634a2670c59f64b4a01f0f96f84700a4088b9f0
@@ -110,7 +110,6 @@ jobs:
         run: |
           set -euo pipefail
 
-          # Patterns that indicate the PR template was not filled out.
           UNFILLED_PATTERNS=(
             "What does this change do"
             "List of user-visible changes"
@@ -124,27 +123,37 @@ jobs:
           ERRORS=()
           BODY_LENGTH=0
 
-          # Treat null/whitespace-only body as failure up front.
-          if [[ -z "${PR_BODY// /}" ]]; then
+          # Remove HTML comments from templates before validation.
+          CLEAN_BODY="$(printf '%s' "${PR_BODY:-}" | perl -0777 -pe 's/<!--.*?-->//gs')"
+
+          if [[ -z "$(printf '%s' "$CLEAN_BODY" | tr -d '[:space:]')" ]]; then
             ERRORS+=("PR description is empty. Please fill in the PR template.")
             FAILED=1
           else
             for pattern in "${UNFILLED_PATTERNS[@]}"; do
-              if grep -qF -- "$pattern" <<<"$PR_BODY"; then
+              if grep -qF -- "$pattern" <<<"$CLEAN_BODY"; then
                 ERRORS+=("PR description still contains unfilled placeholder: '$pattern'")
                 FAILED=1
               fi
             done
 
-            # Use printf to avoid `echo`'s trailing newline inflating the count by 1.
-            BODY_LENGTH=$(printf '%s' "$PR_BODY" | wc -c | tr -d ' ')
+            BODY_LENGTH=$(printf '%s' "$CLEAN_BODY" | wc -c | tr -d ' ')
             if (( BODY_LENGTH < MIN_DESCRIPTION_LENGTH )); then
-              ERRORS+=("PR description is too short (${BODY_LENGTH} chars, minimum ${MIN_DESCRIPTION_LENGTH}). Please fill in the Summary, Changes, and Testing sections.")
+              ERRORS+=("PR description is too short (${BODY_LENGTH} chars, minimum ${MIN_DESCRIPTION_LENGTH}). Please fill in Summary, Changes, and Testing.")
               FAILED=1
             fi
           fi
 
-          # Reject obviously default/generated PR titles.
+          if [[ "$PR_TITLE" =~ ^(fixup!|squash!) ]]; then
+            ERRORS+=("PR title starts with 'fixup!' or 'squash!'. Please use a reviewer-friendly title.")
+            FAILED=1
+          fi
+
+          if (( ${#PR_TITLE} < MIN_TITLE_LENGTH )); then
+            ERRORS+=("PR title is too short (${#PR_TITLE} chars, minimum ${MIN_TITLE_LENGTH}).")
+            FAILED=1
+          fi
+
           if [[ "$PR_TITLE" =~ ^([Pp]ending\ [Cc]hanges|[Ee]xported\ from\ ([Yy]our\ )?[Cc]odespace|[Cc]odespace[-\ ]|[Uu]ntitled|[Dd]raft|[Ww][Ii][Pp])(:|\ |$) ]]; then
             ERRORS+=("PR title looks like a default/generated name: '${PR_TITLE}'. Please use a descriptive title.")
             FAILED=1
@@ -160,13 +169,6 @@ jobs:
               for err in "${ERRORS[@]}"; do
                 echo "- ${err}"
               done
-              echo
-              echo "Please update the PR with:"
-              echo "- **Summary**: What changed and why (1–3 sentences)"
-              echo "- **Changes**: Bullet list of user-visible changes"
-              echo "- **Testing**: Commands run and their outcomes"
-              echo
-              echo "See the PR template for a filled-in example."
             } >> "$GITHUB_STEP_SUMMARY"
             exit 1
           fi
@@ -179,6 +181,9 @@ jobs:
     if: github.event.pull_request.draft == false
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    permissions:
+      contents: read
+      pull-requests: read
     steps:
       - name: Harden runner
         uses: step-security/harden-runner@0634a2670c59f64b4a01f0f96f84700a4088b9f0
@@ -206,10 +211,6 @@ jobs:
             const additions = files.reduce((sum, f) => sum + (f.additions || 0), 0);
             const deletions = files.reduce((sum, f) => sum + (f.deletions || 0), 0);
 
-            core.info(`Files changed: ${filesChanged}`);
-            core.info(`Lines added:   ${additions}`);
-            core.info(`Lines deleted: ${deletions}`);
-
             await core.summary
               .addHeading('PR Size', 2)
               .addTable([
@@ -233,7 +234,6 @@ jobs:
 
   label-pr:
     name: Auto-label PR
-    # Labeler needs write perms; skip for forks where GITHUB_TOKEN is read-only.
     if: github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
     timeout-minutes: 5
@@ -248,8 +248,35 @@ jobs:
           disable-sudo: true
 
       - name: Label PR based on files changed
-        uses: actions/labeler@634933edcd8ababfe52f92936142cc22ac488b1b  # v6
+        uses: actions/labeler@634933edcd8ababfe52f92936142cc22ac488b1b
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           configuration-path: .github/labeler.yml
           sync-labels: true
+
+  policy-gate:
+    name: PR Policy Gate
+    if: always() && github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+    needs: [validate, description-check, size-check]
+    permissions:
+      contents: read
+    steps:
+      - name: Enforce required checks
+        run: |
+          set -euo pipefail
+          echo "validate=${{ needs.validate.result }}"
+          echo "description-check=${{ needs.description-check.result }}"
+          echo "size-check=${{ needs.size-check.result }}"
+
+          for result in \
+            "${{ needs.validate.result }}" \
+            "${{ needs.description-check.result }}" \
+            "${{ needs.size-check.result }}"; do
+            if [[ "$result" != "success" ]]; then
+              echo "::error::Required check failed or was not successful: $result"
+              exit 1
+            fi
+          done
+
+          echo "✓ All required PR checks passed."
