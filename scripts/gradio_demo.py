@@ -1524,12 +1524,16 @@ with gr.Blocks() as demo:
             outputs=[export_file, status],
         )
 
-        def list_sessions():
+        def _list_session_files():
             ensure_conv_dir()
             files = []
             for fname in sorted(os.listdir(CONV_DIR)):
-                if fname.endswith((".json", ".md", ".txt")):
+                if re.fullmatch(r"[A-Za-z0-9_.-]+\.(json|md|txt)", fname):
                     files.append(fname)
+            return files
+
+        def list_sessions():
+            files = _list_session_files()
             return gr.update(choices=files, value=files[0] if files else None)
 
         refresh_sessions_btn.click(list_sessions, outputs=[saved_sessions])
@@ -1567,17 +1571,25 @@ with gr.Blocks() as demo:
         load_session_btn.click(load_session, inputs=[saved_sessions], outputs=[chatbot, hist_state])
 
         def delete_session(filename):
+            files = _list_session_files()
+            if filename not in files:
+                return gr.update(choices=files, value=files[0] if files else None)
+
             path = _safe_session_path(filename)
             if not path:
-                return gr.update()
+                return gr.update(choices=files, value=files[0] if files else None)
+
+            resolved = Path(path).resolve()
+            base = Path(CONV_DIR).resolve()
+            if resolved.parent != base or not resolved.is_file():
+                return gr.update(choices=files, value=files[0] if files else None)
+
             try:
-                os.remove(path)
+                os.remove(str(resolved))
             except Exception:
                 pass
-            files = []
-            for fname in sorted(os.listdir(CONV_DIR)):
-                if fname.endswith((".json", ".md", ".txt")):
-                    files.append(fname)
+
+            files = _list_session_files()
             return gr.update(choices=files, value=files[0] if files else None)
 
         delete_session_btn.click(delete_session, inputs=[saved_sessions], outputs=[saved_sessions])
