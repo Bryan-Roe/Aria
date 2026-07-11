@@ -103,27 +103,37 @@ jobs:
 
           while true; do
             totals="$(gh pr view "$PR_URL" --json statusCheckRollup --jq '
-              [(.statusCheckRollup[]? | (.conclusion // .state // .status // "PENDING") | ascii_upcase)] as $states
+              ["PENDING", "IN_PROGRESS", "QUEUED", "REQUESTED", "WAITING", "EXPECTED"] as $pending_states
+              | ["FAILURE", "FAILED", "TIMED_OUT", "CANCELLED", "ACTION_REQUIRED", "STARTUP_FAILURE", "STALE", "ERROR"] as $failed_states
+              | ["SUCCESS", "NEUTRAL", "SKIPPED"] as $success_states
+              | [(.statusCheckRollup[]? | (.conclusion // .state // .status // "PENDING") | ascii_upcase)] as $states
               | {
                   total: ($states | length),
-                  pending: ($states | map(select(. == "PENDING" or . == "IN_PROGRESS" or . == "QUEUED" or . == "REQUESTED" or . == "WAITING" or . == "EXPECTED")) | length),
-                  failed: ($states | map(select(. == "FAILURE" or . == "FAILED" or . == "TIMED_OUT" or . == "CANCELLED" or . == "ACTION_REQUIRED" or . == "STARTUP_FAILURE" or . == "STALE" or . == "ERROR")) | length)
+                  pending: ($states | map(select(. as $state | $pending_states | index($state))) | length),
+                  failed: ($states | map(select(. as $state | $failed_states | index($state))) | length),
+                  successful: ($states | map(select(. as $state | $success_states | index($state))) | length)
                 }')"
 
             total_checks="$(jq -r '.total' <<<"$totals")"
             pending_checks="$(jq -r '.pending' <<<"$totals")"
             failed_checks="$(jq -r '.failed' <<<"$totals")"
+            successful_checks="$(jq -r '.successful' <<<"$totals")"
 
-            echo "Status checks: total=${total_checks}, pending=${pending_checks}, failed=${failed_checks} (waited ${waited}s/${max_wait_seconds}s)"
+            echo "Status checks: total=${total_checks}, pending=${pending_checks}, failed=${failed_checks}, successful=${successful_checks} (waited ${waited}s/${max_wait_seconds}s)"
 
             if [[ "${failed_checks}" -gt 0 ]]; then
               echo "Required status checks failed. Not enabling auto-merge."
               exit 1
             fi
 
-            if [[ "${total_checks}" -gt 0 && "${pending_checks}" -eq 0 ]]; then
+            if [[ "${total_checks}" -gt 0 && "${pending_checks}" -eq 0 && "${successful_checks}" -eq "${total_checks}" ]]; then
               echo "All required status checks passed."
               break
+            fi
+
+            if [[ "${total_checks}" -gt 0 && "${pending_checks}" -eq 0 ]]; then
+              echo "Status checks reached a non-pending state but not all were successful."
+              exit 1
             fi
 
             if [[ "${waited}" -ge "${max_wait_seconds}" ]]; then
