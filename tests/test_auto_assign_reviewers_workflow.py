@@ -103,8 +103,7 @@ def test_assign_script_has_bot_guard() -> None:
     wf_path = WORKFLOWS_DIR / "auto-assign-reviewers.yml"
     content = wf_path.read_text(encoding="utf-8")
     assert "pr.user.login.endsWith('[bot]')" in content or "author.endsWith('[bot]')" in content, (
-        "auto-assign-reviewers.yml script must contain an inline bot-authored PR guard using "
-        "`endsWith('[bot]')`."
+        "auto-assign-reviewers.yml script must contain an inline bot-authored PR guard using `endsWith('[bot]')`."
     )
 
 
