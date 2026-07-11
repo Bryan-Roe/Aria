@@ -1,131 +1,131 @@
 version: 2.1
 
 executors:
-  python:
-    docker:
-      - image: cimg/python:3.11
-    resource_class: bryan-roe/class
-    environment:
-      PIP_DISABLE_PIP_VERSION_CHECK: "1"
-      PIP_NO_PYTHON_VERSION_WARNING: "1"
-      PYTHONDONTWRITEBYTECODE: "1"
-      PYTHONUNBUFFERED: "1"
-      PATH: /home/circleci/venv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+    python:
+        docker:
+            - image: cimg/python:3.11
+        resource_class: bryan-roe/class
+        environment:
+            PIP_DISABLE_PIP_VERSION_CHECK: "1"
+            PIP_NO_PYTHON_VERSION_WARNING: "1"
+            PYTHONDONTWRITEBYTECODE: "1"
+            PYTHONUNBUFFERED: "1"
+            PATH: /home/circleci/venv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
 commands:
-  restore-venv-cache:
-    steps:
-      - restore_cache:
-          keys:
-            - venv-v1-{{ checksum "requirements-dev.txt" }}-{{ checksum "requirements.txt" }}
-            - venv-v1-{{ checksum "requirements-dev.txt" }}-
-            - venv-v1-
+    restore-venv-cache:
+        steps:
+            - restore_cache:
+                  keys:
+                      - venv-v1-{{ checksum "requirements-dev.txt" }}-{{ checksum "requirements.txt" }}
+                      - venv-v1-{{ checksum "requirements-dev.txt" }}-
+                      - venv-v1-
 
-  save-venv-cache:
-    steps:
-      - save_cache:
-          key: venv-v1-{{ checksum "requirements-dev.txt" }}-{{ checksum "requirements.txt" }}
-          paths:
-            - ~/venv
+    save-venv-cache:
+        steps:
+            - save_cache:
+                  key: venv-v1-{{ checksum "requirements-dev.txt" }}-{{ checksum "requirements.txt" }}
+                  paths:
+                      - ~/venv
 
 jobs:
-  setup:
-    executor: python
-    steps:
-      - checkout
-      - restore-venv-cache
-      - run:
-          name: Create virtualenv and install dependencies
-          command: |
-            python -m venv ~/venv
-            pip install -q -r requirements-dev.txt
-      - save-venv-cache
-      - persist_to_workspace:
-          root: ~/
-          paths:
-            - venv
-            - project
+    setup:
+        executor: python
+        steps:
+            - checkout
+            - restore-venv-cache
+            - run:
+                  name: Create virtualenv and install dependencies
+                  command: |
+                      python -m venv ~/venv
+                      pip install -q -r requirements-dev.txt
+            - save-venv-cache
+            - persist_to_workspace:
+                  root: ~/
+                  paths:
+                      - venv
+                      - project
 
-  lint:
-    executor: python
-    steps:
-      - attach_workspace:
-          at: ~/
-      - run:
-          name: ruff lint
-          command: python -m ruff check tests shared scripts apps/aria/server.py
-      - run:
-          name: black format check
-          command: python -m black --check tests shared scripts apps/aria/server.py
+    lint:
+        executor: python
+        steps:
+            - attach_workspace:
+                  at: ~/
+            - run:
+                  name: ruff lint
+                  command: python -m ruff check tests shared scripts apps/aria/server.py
+            - run:
+                  name: black format check
+                  command: python -m black --check tests shared scripts apps/aria/server.py
 
-  type-check:
-    executor: python
-    steps:
-      - attach_workspace:
-          at: ~/
-      - run:
-          name: mypy (advisory)
-          command: python -m mypy shared scripts function_app.py || true
+    type-check:
+        executor: python
+        steps:
+            - attach_workspace:
+                  at: ~/
+            - run:
+                  name: mypy (advisory)
+                  command: python -m mypy shared scripts function_app.py || true
 
-  unit-test:
-    executor: python
-    steps:
-      - attach_workspace:
-          at: ~/
-      - run:
-          name: Run unit tests
-          no_output_timeout: 10m
-          environment:
-            CI: "true"
-            AZURE_CLIENT_ID: ""
-            AZURE_TENANT_ID: ""
-            AZURE_CLIENT_SECRET: ""
-            OPENAI_API_KEY: ""
-          command: |
-            mkdir -p data_out
-            python -m pytest tests \
-              -q --tb=short \
-              -m "not slow and not azure and not integration" \
-              --ignore=tests/test_ui_playwright.py \
-              --ignore=tests/test_ui_pyppeteer.py \
-              --ignore=tests/test_ui_selenium.py \
-              -n auto \
-              --maxfail=5 \
-              --durations=10 \
-              --junitxml=data_out/junit.xml \
-              --cov=shared --cov=scripts \
-              --cov-report=xml:data_out/coverage.xml \
-              --cov-report=term-missing
-      - store_test_results:
-          path: data_out
-      - store_artifacts:
-          path: data_out
-          destination: test-output
+    unit-test:
+        executor: python
+        steps:
+            - attach_workspace:
+                  at: ~/
+            - run:
+                  name: Run unit tests
+                  no_output_timeout: 10m
+                  environment:
+                      CI: "true"
+                      AZURE_CLIENT_ID: ""
+                      AZURE_TENANT_ID: ""
+                      AZURE_CLIENT_SECRET: ""
+                      OPENAI_API_KEY: ""
+                  command: |
+                      mkdir -p data_out
+                      python -m pytest tests \
+                        -q --tb=short \
+                        -m "not slow and not azure and not integration" \
+                        --ignore=tests/test_ui_playwright.py \
+                        --ignore=tests/test_ui_pyppeteer.py \
+                        --ignore=tests/test_ui_selenium.py \
+                        -n auto \
+                        --maxfail=5 \
+                        --durations=10 \
+                        --junitxml=data_out/junit.xml \
+                        --cov=shared --cov=scripts \
+                        --cov-report=xml:data_out/coverage.xml \
+                        --cov-report=term-missing
+            - store_test_results:
+                  path: data_out
+            - store_artifacts:
+                  path: data_out
+                  destination: test-output
 
-  ci-gate:
-    docker:
-      - image: cimg/base:stable
-    resource_class: bryan-roe/class
-    steps:
-      - run:
-          name: All CI checks passed
-          command: echo "All required CI jobs passed."
+    ci-gate:
+        docker:
+            - image: cimg/base:stable
+        resource_class: bryan-roe/class
+        steps:
+            - run:
+                  name: All CI checks passed
+                  command: echo "All required CI jobs passed."
 
 workflows:
-  ci:
-    jobs:
-      - setup
-      - lint:
-          requires:
+    ci:
+        jobs:
             - setup
-      - type-check:
-          requires:
-            - setup
-      - unit-test:
-          requires:
-            - setup
-      - ci-gate:
-          requires:
-            - lint
-            - type-check
-            - unit-test
+            - lint:
+                  requires:
+                      - setup
+            - type-check:
+                  requires:
+                      - setup
+            - unit-test:
+                  requires:
+                      - setup
+            - ci-gate:
+                  requires:
+                      - lint
+                      - type-check
+                      - unit-test
