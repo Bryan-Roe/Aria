@@ -10,8 +10,6 @@
 #   docker compose -f docker-compose.dev.yml down
 # =============================================================================
 
-version: "3.9"
-
 # Shared environment variables for all services (safe local-dev defaults).
 # Override any value by creating a .env file in the repo root.
 x-common-env: &common-env

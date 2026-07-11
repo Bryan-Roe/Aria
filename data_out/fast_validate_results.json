@@ -57,17 +57,16 @@
         }
       },
       "speed": "instant",
-      "age_seconds": 8607440.185,
-      "age_hours": 2390.956
+      "age_seconds": 8977929.309,
+      "age_hours": 2493.869
     },
     {
       "check": "Dependencies",
       "status": "missing_deps",
-      "present": [
-        "yaml"
-      ],
+      "present": [],
       "missing": [
         "pytest",
+        "yaml",
         "flask",
         "azure.functions"
       ],

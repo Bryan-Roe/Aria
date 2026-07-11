@@ -137,6 +137,16 @@ class ChatIntegration:
             if normalized_provider not in self.allowed_providers:
                 return {"success": False, "error": f"Unsupported provider: {normalized_provider}"}
 
+            provider_arg_map = {
+                "local": "local",
+                "openai": "openai",
+                "azure": "azure",
+                "lora": "lora",
+            }
+            provider_arg = provider_arg_map.get(normalized_provider)
+            if provider_arg is None:
+                return {"success": False, "error": f"Unsupported provider: {normalized_provider}"}
+
             if not isinstance(message, str):
                 return {"success": False, "error": "Message must be a string"}
             message = message.strip()
@@ -155,7 +165,7 @@ class ChatIntegration:
                 sys.executable,
                 str(chat_script),
                 "--provider",
-                normalized_provider,
+                provider_arg,
                 "--once",
             ]
 
