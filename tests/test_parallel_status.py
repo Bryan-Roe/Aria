@@ -38,6 +38,6 @@ def test_parallel_status_structure():
                     # diversity_avg must equal score
                     assert entry.get("diversity_avg") == entry.get("score"), "alias score mismatch"
                 if metric == "perplexity_improvement" and "perplexity_improvement" in entry:
-                    assert (
-                        pytest.approx(entry["perplexity_improvement"], rel=1e-3) == entry["score"]
-                    ), "improvement score mismatch"
+                    assert pytest.approx(entry["perplexity_improvement"], rel=1e-3) == entry["score"], (
+                        "improvement score mismatch"
+                    )
