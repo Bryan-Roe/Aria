@@ -1537,11 +1537,15 @@ with gr.Blocks() as demo:
         def _safe_session_path(filename):
             if not filename or not isinstance(filename, str):
                 return None
+            # Normalize to basename and reject any path components from user input.
+            safe_name = Path(filename).name
+            if safe_name != filename:
+                return None
             # Only allow plain safe filenames with approved extensions.
-            if not re.fullmatch(r"[A-Za-z0-9_.-]+\.(json|md|txt)", filename):
+            if not re.fullmatch(r"[A-Za-z0-9_.-]+\.(json|md|txt)", safe_name):
                 return None
             base = Path(CONV_DIR).resolve()
-            candidate = (base / filename).resolve()
+            candidate = (base / safe_name).resolve()
             try:
                 candidate.relative_to(base)
             except ValueError:
