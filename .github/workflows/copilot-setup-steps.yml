@@ -76,11 +76,15 @@ jobs:
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with:
           node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: .github/workflows/copilot-setup-steps.yml
 
       - name: Setup Python
         uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
         with:
           python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+          cache-dependency-path: .github/workflows/copilot-setup-steps.yml
 
       - name: Install linters
         run: |
@@ -137,7 +141,7 @@ jobs:
             return 1
           }
 
-          add_default_targets() {
+          load_default_targets() {
             while IFS= read -r -d '' file; do
               candidate_files+=("$file")
             done < <(find .github -type f \( -iname '*.yml' -o -iname '*.yaml' \) -print0 | sort -z)
@@ -171,15 +175,16 @@ jobs:
           }
 
           if [ "${INCLUDE_ALL}" = "true" ]; then
-            add_default_targets
+            load_default_targets
           elif [ "${EVENT_NAME}" = "pull_request" ] && [ -n "${PR_BASE_SHA}" ] && [ -n "${PR_HEAD_SHA}" ]; then
-            load_changed_targets "${PR_BASE_SHA}" "${PR_HEAD_SHA}" || add_default_targets
+            load_changed_targets "${PR_BASE_SHA}" "${PR_HEAD_SHA}" || load_default_targets
           elif [ "${EVENT_NAME}" = "push" ] && [ -n "${PUSH_BEFORE_SHA}" ] && [ "${PUSH_BEFORE_SHA}" != "${NULL_SHA}" ]; then
-            load_changed_targets "${PUSH_BEFORE_SHA}" "${HEAD_SHA}" || add_default_targets
+            load_changed_targets "${PUSH_BEFORE_SHA}" "${HEAD_SHA}" || load_default_targets
           else
-            add_default_targets
+            load_default_targets
           fi
 
+          # Requires bash 4+ for associative arrays.
           declare -A seen=()
 
           for file in "${candidate_files[@]}"; do
@@ -194,9 +199,7 @@ jobs:
               printf '%s\0' "$file" >> "$YAML_LIST_FILE"
             fi
 
-            if is_markdown_target "$file"; then
-              printf '%s\0' "$file" >> "$MD_LIST_FILE"
-            fi
+            is_markdown_target "$file" && printf '%s\0' "$file" >> "$MD_LIST_FILE"
           done
 
           yaml_count="$(tr -cd '\0' < "$YAML_LIST_FILE" | wc -c | tr -d ' ')"
