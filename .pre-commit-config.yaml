@@ -44,3 +44,23 @@ repos:
             language: python
             files: ^(docs/|.*\.md$)
             description: "If docs reference `scripts/`, ensure they include the CLI sys.path guidance"
+    - repo: https://github.com/gitleaks/gitleaks
+      rev: v8.16.3
+      hooks:
+          - id: gitleaks
+    - repo: https://github.com/jumanjihouse/pre-commit-hooks
+      rev: 3.0.0
+      hooks:
+          - id: shellcheck
+    - repo: https://github.com/pocc/pre-commit-hooks
+      rev: v1.3.5
+      hooks:
+          - id: cpplint
+    - repo: https://github.com/pre-commit/mirrors-eslint
+      rev: v8.38.0
+      hooks:
+          - id: eslint
+    - repo: https://github.com/pylint-dev/pylint
+      rev: v2.17.2
+      hooks:
+          - id: pylint

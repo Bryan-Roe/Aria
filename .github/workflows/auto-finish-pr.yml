@@ -22,6 +22,11 @@ jobs:
     timeout-minutes: 10
 
     steps:
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@bf7454d06d71f1098171f2acdf0cd4708d7b5920 # v2.20.0
+        with:
+          egress-policy: audit
+
       - name: Wait for required checks to complete
         uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea
         with:
