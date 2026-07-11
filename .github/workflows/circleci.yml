@@ -1,7 +1,6 @@
-version: "2.1"
-
-executors:
-  python311:
+    version: "2.1"
+    executors:
+    python311:
     docker:
       - image: cimg/python:3.11
     resource_class: medium
@@ -16,8 +15,8 @@ executors:
       AZURE_CLIENT_SECRET: ""
       OPENAI_API_KEY: ""
 
-commands:
-  restore-pip-cache:
+    commands:
+    restore-pip-cache:
     steps:
       - restore_cache:
           keys:
@@ -25,14 +24,14 @@ commands:
             - pip-v1-{{ checksum "requirements-dev.txt" }}-
             - pip-v1-
 
-  save-pip-cache:
+    save-pip-cache:
     steps:
       - save_cache:
           key: pip-v1-{{ checksum "requirements-dev.txt" }}-{{ checksum "requirements.txt" }}
           paths:
             - ~/.cache/pip
 
-  install-dev-deps:
+    install-dev-deps:
     steps:
       - run:
           name: Install Python dependencies
@@ -40,8 +39,8 @@ commands:
             python -m pip install --upgrade pip
             python -m pip install -r requirements-dev.txt
 
-jobs:
-  lint:
+    jobs:
+    lint:
     executor: python311
     steps:
       - checkout
@@ -55,7 +54,7 @@ jobs:
           name: Black (check)
           command: python -m black --check tests shared scripts apps/aria/server.py function_app.py
 
-  type-check:
+    type-check:
     executor: python311
     steps:
       - checkout
@@ -66,7 +65,7 @@ jobs:
           name: Mypy
           command: python -m mypy shared scripts function_app.py
 
-  pre-commit:
+    pre-commit:
     executor: python311
     steps:
       - checkout
@@ -86,7 +85,7 @@ jobs:
           paths:
             - ~/.cache/pre-commit
 
-  unit-test:
+    unit-test:
     executor: python311
     parallelism: 2
     steps:
@@ -122,7 +121,7 @@ jobs:
           path: data_out
           destination: test-output
 
-  ci-gate:
+    ci-gate:
     docker:
       - image: cimg/base:stable
     resource_class: small
@@ -130,9 +129,8 @@ jobs:
       - run:
           name: CI gate
           command: echo "All required CI jobs passed."
-
-workflows:
-  ci:
+          workflows:
+          ci:
     jobs:
       - lint
       - type-check

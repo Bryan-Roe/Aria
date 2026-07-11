@@ -1,6 +1,5 @@
 version: 2.1
 
-# ── Executors ──────────────────────────────────────────────────────────────────
 executors:
     python:
         docker:
@@ -11,41 +10,47 @@ executors:
             PIP_NO_PYTHON_VERSION_WARNING: "1"
             PYTHONDONTWRITEBYTECODE: "1"
             PYTHONUNBUFFERED: "1"
+            PATH: /home/circleci/venv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
-# ── Reusable commands ──────────────────────────────────────────────────────────
 commands:
-    restore-pip-cache:
+    restore-venv-cache:
         steps:
             - restore_cache:
                   keys:
-                      - pip-v2-{{ checksum "requirements-dev.txt" }}-{{ checksum "requirements.txt" }}
-                      - pip-v2-{{ checksum "requirements-dev.txt" }}-
-                      - pip-v2-
+                      - venv-v1-{{ checksum "requirements-dev.txt" }}-{{ checksum "requirements.txt" }}
+                      - venv-v1-{{ checksum "requirements-dev.txt" }}-
+                      - venv-v1-
 
-    save-pip-cache:
+    save-venv-cache:
         steps:
             - save_cache:
-                  key: pip-v2-{{ checksum "requirements-dev.txt" }}-{{ checksum "requirements.txt" }}
+                  key: venv-v1-{{ checksum "requirements-dev.txt" }}-{{ checksum "requirements.txt" }}
                   paths:
-                      - ~/.cache/pip
+                      - ~/venv
 
-    install-deps:
-        steps:
-            - run:
-                  name: Install Python dependencies
-                  command: |
-                      pip install --upgrade pip
-                      pip install -r requirements-dev.txt
-
-# ── Jobs ───────────────────────────────────────────────────────────────────────
 jobs:
-    lint:
+    setup:
         executor: python
         steps:
             - checkout
-            - restore-pip-cache
-            - install-deps
-            - save-pip-cache
+            - restore-venv-cache
+            - run:
+                  name: Create virtualenv and install dependencies
+                  command: |
+                      python -m venv ~/venv
+                      pip install -q -r requirements-dev.txt
+            - save-venv-cache
+            - persist_to_workspace:
+                  root: ~/
+                  paths:
+                      - venv
+                      - project
+
+    lint:
+        executor: python
+        steps:
+            - attach_workspace:
+                  at: ~/
             - run:
                   name: ruff lint
                   command: python -m ruff check tests shared scripts apps/aria/server.py
@@ -56,10 +61,8 @@ jobs:
     type-check:
         executor: python
         steps:
-            - checkout
-            - restore-pip-cache
-            - install-deps
-            - save-pip-cache
+            - attach_workspace:
+                  at: ~/
             - run:
                   name: mypy (advisory)
                   command: python -m mypy shared scripts function_app.py || true
@@ -67,12 +70,11 @@ jobs:
     unit-test:
         executor: python
         steps:
-            - checkout
-            - restore-pip-cache
-            - install-deps
-            - save-pip-cache
+            - attach_workspace:
+                  at: ~/
             - run:
                   name: Run unit tests
+                  no_output_timeout: 10m
                   environment:
                       CI: "true"
                       AZURE_CLIENT_ID: ""
@@ -109,14 +111,21 @@ jobs:
                   name: All CI checks passed
                   command: echo "All required CI jobs passed."
 
-# ── Workflow ───────────────────────────────────────────────────────────────────
 workflows:
     ci:
         jobs:
-            - lint
-            - type-check
-            - unit-test
+            - setup
+            - lint:
+                  requires:
+                      - setup
+            - type-check:
+                  requires:
+                      - setup
+            - unit-test:
+                  requires:
+                      - setup
             - ci-gate:
                   requires:
                       - lint
+                      - type-check
                       - unit-test

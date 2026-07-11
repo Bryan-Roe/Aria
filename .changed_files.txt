@@ -1,0 +1,5 @@
+.changed_c_like.txt
+.changed_files.txt
+.changed_js_like.txt
+.changed_py.txt
+.github/hooks/scripts/secrets_leak_guard.py

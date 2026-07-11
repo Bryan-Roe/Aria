@@ -1,0 +1,149 @@
+name: Auto-finish PR
+
+on:
+  pull_request:
+    types: [labeled, synchronize, reopened, ready_for_review]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  cancel-in-progress: true
+  group: auto-finish-pr-${{ github.event.pull_request.number }}
+
+jobs:
+  finish:
+    if: >-
+      github.event.pull_request.draft == false &&
+      contains(github.event.pull_request.labels.*.name, 'automerge') &&
+      !endsWith(github.event.pull_request.user.login, '[bot]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@bf7454d06d71f1098171f2acdf0cd4708d7b5920 # v2.20.0
+        with:
+          egress-policy: audit
+
+      - name: Wait for required checks to complete
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const pr = context.payload.pull_request;
+            const sha = pr.head.sha;
+
+            async function sleep(ms) {
+              return new Promise(resolve => setTimeout(resolve, ms));
+            }
+
+            async function getCombinedStatus() {
+              const status = await github.rest.repos.getCombinedStatusForRef({
+                owner, repo, ref: sha
+              });
+              return status.data;
+            }
+
+            async function getCheckRuns() {
+              const checks = await github.rest.checks.listForRef({
+                owner, repo, ref: sha, per_page: 100
+              });
+              return checks.data.check_runs || [];
+            }
+
+            function hasFailure(combined, runs) {
+              if (combined.state === 'failure' || combined.state === 'error') return true;
+              return runs.some(r =>
+                r.status === 'completed' &&
+                (r.conclusion === 'failure' ||
+                 r.conclusion === 'timed_out' ||
+                 r.conclusion === 'cancelled' ||
+                 r.conclusion === 'action_required' ||
+                 r.conclusion === 'startup_failure' ||
+                 r.conclusion === 'stale')
+              );
+            }
+
+            function allCompletedSuccessfully(combined, runs) {
+              const combinedOk = (combined.state === 'success' || combined.state === 'neutral');
+              const incomplete = runs.some(r => r.status !== 'completed');
+              const badConclusion = runs.some(r =>
+                r.status === 'completed' &&
+                !['success', 'neutral', 'skipped'].includes(r.conclusion || '')
+              );
+              return combinedOk && !incomplete && !badConclusion;
+            }
+
+            const maxAttempts = 30; // ~10 minutes at 20s interval
+            const intervalMs = 20000;
+
+            for (let i = 1; i <= maxAttempts; i++) {
+              const [combined, runs] = await Promise.all([getCombinedStatus(), getCheckRuns()]);
+              core.info(`Attempt ${i}/${maxAttempts}: combined=${combined.state}, checkRuns=${runs.length}`);
+
+              if (hasFailure(combined, runs)) {
+                core.setFailed('One or more required checks failed/cancelled.');
+                return;
+              }
+
+              if (allCompletedSuccessfully(combined, runs)) {
+                core.info('All checks completed successfully.');
+                return;
+              }
+
+              await sleep(intervalMs);
+            }
+
+            core.setFailed('Timed out waiting for checks to complete successfully.');
+
+      - name: Approve PR as github-actions[bot]
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const pr = context.payload.pull_request;
+            await github.rest.pulls.createReview({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: pr.number,
+              event: 'APPROVE',
+              body: 'Auto-approved by github-actions[bot] after required checks passed.',
+            });
+            core.info(`Approved PR #${pr.number}`);
+
+      - name: Merge PR (squash)
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const pr = context.payload.pull_request;
+
+            // Refresh PR state before merge
+            const { data: fresh } = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: pr.number,
+            });
+
+            if (fresh.mergeable === false) {
+              core.setFailed('PR is not mergeable (conflicts or blocked).');
+              return;
+            }
+
+            if (fresh.state !== 'open') {
+              core.info(`PR is not open (state=${fresh.state}); skipping merge.`);
+              return;
+            }
+
+            await github.rest.pulls.merge({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: pr.number,
+              merge_method: 'squash',
+            });
+
+            core.info(`Merged PR #${pr.number}`);

@@ -5,6 +5,9 @@ on:
   schedule:
     - cron: '0 5 * * 1'
 
+permissions:
+  contents: read
+
 jobs:
   governance:
     runs-on: ubuntu-latest
@@ -14,11 +17,16 @@ jobs:
       pull-requests: write
 
     steps:
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@bf7454d06d71f1098171f2acdf0cd4708d7b5920 # v2.20.0
+        with:
+          egress-policy: audit
+
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
 
       - name: Setup Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
         with:
           python-version: '3.11'
 
@@ -45,7 +53,7 @@ jobs:
           echo 'Automated governance completed successfully.' >> docs/reports/governance-summary.md
 
       - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v7
+        uses: peter-evans/create-pull-request@22a9089034f40e5a961c8808d113e2c98fb63676 # v7.0.11
         with:
           commit-message: automated repo governance updates
           branch: automated/repo-governance
