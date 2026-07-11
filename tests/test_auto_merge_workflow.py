@@ -164,7 +164,7 @@ def test_prepare_job_adds_autofix_label_and_marks_ready() -> None:
     steps = wf["jobs"]["prepare-github-actions-pr"]["steps"]
     script_step = next(step for step in steps if step.get("name") == "Ready PR and apply autofix label")
     script = script_step["with"]["script"]
-    assert "labels: 'autofix'" in script, "prepare job must add the autofix label when missing"
+    assert "labels: ['autofix']" in script, "prepare job must add the autofix label when missing"
     assert "markPullRequestReadyForReview" in script, "prepare job must mark draft PRs ready for review"
 
 
