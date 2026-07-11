@@ -40,7 +40,7 @@ CANDIDATE_RESULT ?= /home/vscode/.aitk/evals/foundry/eval_f5ba66e749794172942de2
 REPORT_OUTPUT ?= data_out/pr_review_eval_comparison_report.md
 REPORT_OUTPUT_LATEST ?= data_out/pr_review_eval_comparison_report_latest.md
 
-.PHONY: all install install-qai dev start stop build test test-fast test-fast-changed test-unit test-unit-changed test-integration verify-fast verify-changed verify-changed-full \
+.PHONY: all install install-qai dev dev-local start stop build test test-fast test-fast-changed test-unit test-unit-changed test-integration verify-fast verify-changed verify-changed-full \
 	lint lint-fast lint-changed format format-changed type-check type-check-changed clean docker-build docker-dev start-gradio \
 	start-local-status start-functions-clean restart-functions-clean start-qai \
 	validate-mcp validate-mcp-json validate-mcp-config \
@@ -97,6 +97,15 @@ install-prod:
 ## Start all services via Docker Compose (Aria web UI + Azure Functions)
 dev:
 	$(COMPOSE) -f docker-compose.dev.yml up --build
+
+## Start all services locally without Docker (Aria on :8080 + local status on :7071)
+## Both processes run in the foreground; Ctrl-C stops both.
+dev-local:
+	@echo "🚀 Starting Aria (port $(ARIA_PORT)) and local status adapter (port $(FUNC_PORT)) without Docker..."
+	@trap 'kill 0' INT TERM; \
+	$(PYTHON) apps/aria/server.py --port $(ARIA_PORT) & \
+	$(PYTHON) local_dev_adapter.py --port $(FUNC_PORT) & \
+	wait
 
 ## Start Aria web server locally (without Docker)
 start:

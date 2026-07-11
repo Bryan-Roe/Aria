@@ -1258,10 +1258,24 @@ with gr.Blocks() as demo:
 
         refresh_sessions_btn.click(refresh_sessions, outputs=[saved_sessions])
 
-        def load_session(filename: str):
+        def safe_session_path(filename: str) -> Path | None:
             if not filename:
+                return None
+            candidate = Path(filename)
+            if candidate.is_absolute() or candidate.name != filename or candidate.suffix.lower() != ".json":
+                return None
+            try:
+                base = CONV_DIR.resolve()
+                full = (base / candidate).resolve()
+                full.relative_to(base)
+            except Exception:
+                return None
+            return full
+
+        def load_session(filename: str):
+            path = safe_session_path(filename)
+            if path is None:
                 return [], []
-            path = CONV_DIR / filename
             try:
                 with path.open("r", encoding="utf-8") as f:
                     data = json.load(f)
@@ -1272,9 +1286,10 @@ with gr.Blocks() as demo:
         load_session_btn.click(load_session, inputs=[saved_sessions], outputs=[chatbot, hist_state])
 
         def delete_session(filename: str):
-            if filename:
+            path = safe_session_path(filename)
+            if path is not None:
                 try:
-                    (CONV_DIR / filename).unlink(missing_ok=True)
+                    path.unlink(missing_ok=True)
                 except Exception:
                     pass
             files = list_json_sessions()
