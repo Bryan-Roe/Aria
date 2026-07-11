@@ -18,8 +18,10 @@ import os
 import re
 import sys
 import typing
+from collections.abc import Iterable
 from urllib import error as urllib_error
 from urllib import request as urllib_request
+from urllib.parse import urlparse as _urlparse
 
 logger = logging.getLogger("aria.app")
 
@@ -29,7 +31,10 @@ DEFAULT_TIMEOUT_ENV = os.getenv("OPENAI_TIMEOUT", "60")
 MAX_PROMPT_CHARS = 10_000
 MAX_SYSTEM_PROMPT_CHARS = 4_000
 MAX_MODEL_NAME_CHARS = 128
-SYSTEM_PROMPT = "You are a concise AI coding assistant. Return practical, code-focused responses."
+SYSTEM_PROMPT = (
+    "You are a concise AI coding assistant. Return practical, "
+    "code-focused responses."
+)
 QUANTUM_CHAT_PATH = "/api/quantum-llm/chat"
 
 EXIT_OK = 0
@@ -86,9 +91,11 @@ try:
 except Exception:  # pragma: no cover - fallback
 
     def is_summary_request(text: str) -> bool:
+        _ = text
         return False
 
     def summarize_text(text: str, *, max_sentences: int = 3, max_chars: int = 420) -> str:
+        _ = (text, max_sentences, max_chars)
         return ""
 
 
@@ -116,7 +123,8 @@ def _validate_prompt(prompt: str, *, max_chars: int = MAX_PROMPT_CHARS) -> str:
         raise ValueError("Prompt cannot be empty.")
     if len(normalized) > max_chars:
         raise ValueError(
-            f"Prompt is too long ({len(normalized)} chars). Maximum supported length is {max_chars} chars."
+            f"Prompt is too long ({len(normalized)} chars). "
+            f"Maximum supported length is {max_chars} chars."
         )
     return normalized
 
@@ -143,7 +151,10 @@ def _validate_model_name(model: str) -> str:
             f"Maximum supported length is {MAX_MODEL_NAME_CHARS} chars."
         )
     if not re.fullmatch(r"[A-Za-z0-9._:-]+", normalized):
-        raise ValueError("Model contains unsupported characters. Allowed: letters, digits, '.', '_', ':', '-'")
+        raise ValueError(
+            "Model contains unsupported characters. Allowed: letters, "
+            "digits, '.', '_', ':', '-'."
+        )
     return normalized
 
 
@@ -161,9 +172,9 @@ def _extract_text(resp: typing.Any) -> str:
         return output_text.strip()
 
     parts: list[str] = []
-    output: typing.Iterable[typing.Any] = getattr(resp, "output", None) or []
+    output: Iterable[typing.Any] = getattr(resp, "output", None) or []
     for item in output:
-        contents: typing.Iterable[typing.Any] = getattr(item, "content", None) or []
+        contents: Iterable[typing.Any] = getattr(item, "content", None) or []
         for content in contents:
             content_type = getattr(content, "type", "")
             if content_type not in {"output_text", "text"}:
@@ -183,6 +194,7 @@ def _extract_quantum_text(payload: typing.Any) -> str:
         return payload.strip()
 
     if isinstance(payload, dict):
+        payload_dict = typing.cast(dict[str, typing.Any], payload)
         for key in (
             "output_text",
             "text",
@@ -190,24 +202,27 @@ def _extract_quantum_text(payload: typing.Any) -> str:
             "completion",
             "message",
         ):
-            value = payload.get(key)
+            value = payload_dict.get(key)
             if isinstance(value, str) and value.strip():
                 return value.strip()
 
-        choices = payload.get("choices")
+        choices = payload_dict.get("choices")
         if isinstance(choices, list) and choices:
-            first = choices[0]
+            choices_list = typing.cast(list[typing.Any], choices)
+            first = choices_list[0]
             if isinstance(first, dict):
-                message = first.get("message")
+                first_dict = typing.cast(dict[str, typing.Any], first)
+                message = first_dict.get("message")
                 if isinstance(message, dict):
-                    content = message.get("content")
+                    message_dict = typing.cast(dict[str, typing.Any], message)
+                    content = message_dict.get("content")
                     if isinstance(content, str) and content.strip():
                         return content.strip()
-                text = first.get("text")
+                text = first_dict.get("text")
                 if isinstance(text, str) and text.strip():
                     return text.strip()
 
-        data = payload.get("data")
+        data = payload_dict.get("data")
         if isinstance(data, dict):
             nested = _extract_quantum_text(data)
             if nested:
@@ -237,7 +252,10 @@ def ask_quantum(
 
     _parsed = _urlparse(base_url)
     if _parsed.scheme not in {"http", "https"}:
-        raise ValueError(f"Quantum base URL scheme '{_parsed.scheme}' is not allowed; use http or https.")
+        raise ValueError(
+            f"Quantum base URL scheme '{_parsed.scheme}' is not allowed; "
+            "use http or https."
+        )
 
     payload = {
         "prompt": prompt,
@@ -250,7 +268,8 @@ def ask_quantum(
         "temperature": temperature,
     }
 
-    req = urllib_request.Request(  # noqa: S310 - URL from configurable local endpoint
+    req = urllib_request.Request(
+        # noqa: S310 - URL from configurable local endpoint
         f"{base_url}{QUANTUM_CHAT_PATH}",
         data=json.dumps(payload).encode("utf-8"),
         headers={"Content-Type": "application/json"},
@@ -309,7 +328,11 @@ def ask_local(prompt: str, *, system_prompt: str = SYSTEM_PROMPT) -> str:
         )
 
     if "explain" in lower or "what is" in lower:
-        sentences = [s.strip() for s in ptext.replace("\n", " ").split(".") if s.strip()]
+        sentences = [
+            s.strip()
+            for s in ptext.replace("\n", " ").split(".")
+            if s.strip()
+        ]
         expl = sentences[0] if sentences else ptext
         return (
             "[Local fallback explanation]\n\n"
@@ -344,15 +367,30 @@ def _build_parser() -> argparse.ArgumentParser:
         prog="aria-app",
         description="Minimal multi-provider AI CLI for Aria.",
     )
-    parser.add_argument("prompt", nargs="*", help="Prompt text. If omitted, reads from stdin.")
-    parser.add_argument("--model", default=DEFAULT_MODEL, help=f"Model name (default: {DEFAULT_MODEL}).")
+    parser.add_argument(
+        "prompt",
+        nargs="*",
+        help="Prompt text. If omitted, reads from stdin.",
+    )
+    parser.add_argument(
+        "--model",
+        default=DEFAULT_MODEL,
+        help=f"Model name (default: {DEFAULT_MODEL}).",
+    )
     parser.add_argument(
         "--temperature",
         type=float,
         default=DEFAULT_TEMPERATURE,
-        help=(f"Sampling temperature from 0.0 to 2.0 (default: {DEFAULT_TEMPERATURE})."),
+        help=(
+            f"Sampling temperature from 0.0 to 2.0 "
+            f"(default: {DEFAULT_TEMPERATURE})."
+        ),
     )
-    parser.add_argument("--system", default=SYSTEM_PROMPT, help="Override the system prompt.")
+    parser.add_argument(
+        "--system",
+        default=SYSTEM_PROMPT,
+        help="Override the system prompt.",
+    )
     parser.add_argument(
         "--provider",
         choices=("auto", "openai", "quantum", "local"),
@@ -380,7 +418,10 @@ def _handle_provider_error(
     system: str,
 ) -> int:
     if local_fallback:
-        print(f"{type(exc).__name__} ({exc}); using local fallback.", file=sys.stderr)
+        print(
+            f"{type(exc).__name__} ({exc}); using local fallback.",
+            file=sys.stderr,
+        )
         print(ask_local(prompt, system_prompt=system))
         return EXIT_OK
     print(f"{err_msg}: {exc}", file=sys.stderr)
@@ -477,12 +518,13 @@ def main(argv: list[str] | None = None) -> int:
         )
         return EXIT_AUTH
 
-    if OpenAI is None:
+    if _OpenAIClass is None:
         if args.local_fallback:
             print(ask_local(prompt, system_prompt=args.system))
             return EXIT_OK
         print(
-            "Error: the 'openai' package is not installed. Install it with: pip install openai",
+            "Error: the 'openai' package is not installed. "
+            "Install it with: pip install openai",
             file=sys.stderr,
         )
         return EXIT_USAGE
