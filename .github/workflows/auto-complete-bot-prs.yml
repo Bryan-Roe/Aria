@@ -1,0 +1,202 @@
+# =============================================================================
+# Auto-Complete Bot PRs — enable auto-merge for eligible bot autofix PRs
+# =============================================================================
+# Purpose:
+#   Automatically enables GitHub native auto-merge (squash + delete-branch)
+#   for pull requests that are:
+#     • authored by github-actions[bot]
+#     • labeled with 'autofix' or 'automated'
+#     • open, non-draft, and from the same repository (no forks)
+#
+#   Once auto-merge is enabled, GitHub will merge the PR as soon as all
+#   branch-protection requirements (required checks, approvals, etc.) pass.
+#
+# Trigger       : pull_request_target (safe — no untrusted code checkout)
+#                 workflow_dispatch    (manual re-run / backfill)
+# Merge strategy: squash + delete-branch
+# Fork PRs      : skipped (base.repo.full_name guard)
+# Security      : least-privilege permissions; only GITHUB_TOKEN used
+# =============================================================================
+
+name: Auto-Complete Bot PRs
+
+on:
+  pull_request_target:
+    types: [opened, reopened, synchronize, ready_for_review, labeled]
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: "PR number to enable auto-merge on (manual trigger)"
+        required: true
+        type: number
+
+# Prevent concurrent runs for the same PR to avoid race conditions.
+concurrency:
+  group: auto-complete-bot-prs-${{ github.event.pull_request.number || inputs.pr_number }}
+  cancel-in-progress: false
+
+# Workflow-level read-only default; individual jobs escalate only as needed.
+permissions:
+  contents: read
+
+jobs:
+  enable-auto-merge:
+    name: Enable auto-merge for eligible bot PR
+    # -------------------------------------------------------------------------
+    # Eligibility pre-checks (evaluated by GitHub Actions before the job runs):
+    #   1. Event must be pull_request_target (skip on manual dispatch at job level)
+    #   2. PR must be open (not merged/closed)
+    #   3. PR must not be a draft
+    #   4. PR author must be github-actions[bot]
+    #   5. PR must originate from the same repository (no forks / cross-repo PRs)
+    #   6. PR must carry the 'autofix' or 'automated' label
+    # For workflow_dispatch the same checks are performed inside the steps.
+    # -------------------------------------------------------------------------
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (
+        github.event_name == 'pull_request_target' &&
+        github.event.pull_request.state == 'open' &&
+        github.event.pull_request.draft == false &&
+        github.event.pull_request.user.login == 'github-actions[bot]' &&
+        github.event.pull_request.base.repo.full_name == github.repository &&
+        (
+          contains(github.event.pull_request.labels.*.name, 'autofix') ||
+          contains(github.event.pull_request.labels.*.name, 'automated')
+        )
+      )
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      # -----------------------------------------------------------------------
+      # Harden the runner — audit outbound network, no sudo needed.
+      # -----------------------------------------------------------------------
+      - name: Harden runner
+        uses: step-security/harden-runner@0634a2670c59f64b4a01f0f96f84700a4088b9f0
+        with:
+          disable-sudo: true
+          egress-policy: audit
+
+      # -----------------------------------------------------------------------
+      # Resolve the PR number for both trigger types.
+      # -----------------------------------------------------------------------
+      - name: Resolve PR number
+        id: pr
+        env:
+          EVENT_PR_NUMBER: ${{ github.event.pull_request.number }}
+          DISPATCH_PR_NUMBER: ${{ inputs.pr_number }}
+        run: |
+          set -euo pipefail
+          if [[ -n "${EVENT_PR_NUMBER:-}" ]]; then
+            echo "number=${EVENT_PR_NUMBER}" >> "$GITHUB_OUTPUT"
+          else
+            echo "number=${DISPATCH_PR_NUMBER}" >> "$GITHUB_OUTPUT"
+          fi
+
+      # -----------------------------------------------------------------------
+      # For workflow_dispatch: re-check all eligibility criteria because the
+      # job-level `if` condition only covers pull_request_target events.
+      # -----------------------------------------------------------------------
+      - name: Verify eligibility (dispatch path)
+        if: github.event_name == 'workflow_dispatch'
+        id: dispatch-guard
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ steps.pr.outputs.number }}
+        run: |
+          set -euo pipefail
+
+          pr_json="$(gh pr view "$PR_NUMBER" \
+            --json number,state,isDraft,author,headRepository,labels \
+            --repo "$GITHUB_REPOSITORY")"
+
+          state="$(jq -r '.state' <<< "$pr_json")"
+          is_draft="$(jq -r '.isDraft' <<< "$pr_json")"
+          author="$(jq -r '.author.login' <<< "$pr_json")"
+          # `.headRepository` is null for deleted forks; `// ""` produces an empty
+          # string, which is never a valid GitHub nameWithOwner (requires "owner/repo").
+          head_repo="$(jq -r '.headRepository.nameWithOwner // ""' <<< "$pr_json")"
+          has_label="$(jq -r '
+            [.labels[].name] | any(. == "autofix" or . == "automated")
+          ' <<< "$pr_json")"
+
+          SKIP=false
+
+          if [[ "$state" != "OPEN" ]]; then
+            echo "⊘ Skipping: PR #${PR_NUMBER} is not open (state=${state})."
+            SKIP=true
+          fi
+
+          if [[ "$is_draft" == "true" ]]; then
+            echo "⊘ Skipping: PR #${PR_NUMBER} is a draft."
+            SKIP=true
+          fi
+
+          if [[ "$author" != "github-actions[bot]" ]]; then
+            echo "⊘ Skipping: PR #${PR_NUMBER} author '${author}' is not github-actions[bot]."
+            SKIP=true
+          fi
+
+          if [[ -z "$head_repo" ]]; then
+            echo "⊘ Skipping: PR #${PR_NUMBER} head repository is unavailable or inaccessible (e.g. deleted fork or API error)."
+            SKIP=true
+          elif [[ "$head_repo" != "$GITHUB_REPOSITORY" ]]; then
+            echo "⊘ Skipping: PR #${PR_NUMBER} head repo '${head_repo}' != '${GITHUB_REPOSITORY}' (fork PR)."
+            SKIP=true
+          fi
+
+          if [[ "$has_label" != "true" ]]; then
+            echo "⊘ Skipping: PR #${PR_NUMBER} does not have 'autofix' or 'automated' label."
+            SKIP=true
+          fi
+
+          echo "skip=${SKIP}" >> "$GITHUB_OUTPUT"
+
+      # -----------------------------------------------------------------------
+      # Check whether auto-merge is already armed to avoid a redundant call.
+      # -----------------------------------------------------------------------
+      - name: Check if auto-merge already enabled
+        id: state
+        if: >-
+          github.event_name != 'workflow_dispatch' ||
+          steps.dispatch-guard.outputs.skip != 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ steps.pr.outputs.number }}
+        run: |
+          set -euo pipefail
+          enabled="$(gh pr view "$PR_NUMBER" \
+            --json autoMergeRequest \
+            --jq '.autoMergeRequest != null' \
+            --repo "$GITHUB_REPOSITORY")"
+          echo "enabled=${enabled}" >> "$GITHUB_OUTPUT"
+          if [[ "$enabled" == "true" ]]; then
+            echo "ℹ️ Auto-merge is already enabled for PR #${PR_NUMBER}; nothing to do."
+          fi
+
+      # -----------------------------------------------------------------------
+      # Enable auto-merge: squash strategy + delete the head branch on merge.
+      # Uses only the built-in GITHUB_TOKEN — no external secrets required.
+      # -----------------------------------------------------------------------
+      - name: Enable auto-merge (squash, delete-branch)
+        if: >-
+          steps.state.outputs.enabled == 'false' &&
+          (
+            github.event_name != 'workflow_dispatch' ||
+            steps.dispatch-guard.outputs.skip != 'true'
+          )
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ steps.pr.outputs.number }}
+        run: |
+          set -euo pipefail
+          gh pr merge "$PR_NUMBER" \
+            --auto \
+            --squash \
+            --delete-branch \
+            --repo "$GITHUB_REPOSITORY"
+          echo "✅ Auto-merge enabled for PR #${PR_NUMBER} (squash, delete-branch)."
