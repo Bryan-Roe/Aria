@@ -6,15 +6,15 @@ import pytest
 import yaml
 
 pytestmark = pytest.mark.unit
+WORKFLOW_PATH = Path(__file__).resolve().parents[1] / ".github" / "workflows" / "summary.yml"
 
 
 def _load_workflow() -> dict:
-    workflow_path = Path(__file__).resolve().parents[1] / ".github" / "workflows" / "summary.yml"
-    return yaml.safe_load(workflow_path.read_text(encoding="utf-8"))
+    return yaml.safe_load(WORKFLOW_PATH.read_text(encoding="utf-8"))
 
 
 def _workflow_triggers(workflow: dict) -> dict:
-    return workflow.get("on") or workflow.get(True, {})
+    return workflow["on"] if "on" in workflow else workflow.get(True, {})
 
 
 def test_summary_workflow_retains_required_permissions() -> None:
@@ -40,12 +40,11 @@ def test_summary_workflow_allows_github_models_endpoint() -> None:
 
 
 def test_summary_workflow_comments_without_checkout_repo_context() -> None:
-    workflow_path = Path(__file__).resolve().parents[1] / ".github" / "workflows" / "summary.yml"
-    content = workflow_path.read_text(encoding="utf-8")
+    content = WORKFLOW_PATH.read_text(encoding="utf-8")
     workflow = yaml.safe_load(content)
     steps = workflow["jobs"]["summary"]["steps"]
 
-    assert all(step.get("uses") != "actions/checkout@v4" for step in steps)
+    assert all(not step.get("uses", "").startswith("actions/checkout") for step in steps)
     assert 'gh issue comment "$ISSUE_NUMBER" --repo "$GITHUB_REPOSITORY" --body-file summary.md' in content
     assert 'gh issue comment "$ISSUE_NUMBER" --repo "$GITHUB_REPOSITORY" \\' in content
 
