@@ -43,7 +43,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          
+
           # Priority: dispatch input > release tag inference > auto-discovery
           if [[ -n "${{ github.event.inputs.artifact_path }}" ]]; then
             ARTIFACT_PATH="${{ github.event.inputs.artifact_path }}"
@@ -108,7 +108,7 @@ jobs:
           ARTIFACT_TYPE: ${{ needs.resolve-artifact.outputs.artifact_type }}
         run: |
           set -euo pipefail
-          
+
           # Build SLSA v1.0 compliant provenance
           cat > provenance.json <<'EOFPROV'
           {
@@ -155,7 +155,7 @@ jobs:
             }
           }
           EOFPROV
-          
+
           echo "provenance_path=provenance.json" >> "$GITHUB_OUTPUT"
           python3 -c "import json; json.load(open('provenance.json')); print('✓ Valid SLSA v1.0 JSON')"
 
@@ -165,7 +165,7 @@ jobs:
           ARTIFACT_HASH: ${{ needs.resolve-artifact.outputs.artifact_hash }}
         run: |
           set -euo pipefail
-          
+
           # Parse and verify provenance matches the artifact
           PROVENANCE_HASH=$(python3 -c "
           import json
@@ -173,12 +173,12 @@ jobs:
               data = json.load(f)
               print(data['subject'][0]['digest']['sha256'])
           ")
-          
+
           if [[ "$PROVENANCE_HASH" != "$ARTIFACT_HASH" ]]; then
             echo "::error::Attestation hash mismatch: $PROVENANCE_HASH != $ARTIFACT_HASH"
             exit 1
           fi
-          
+
           echo "✓ Attestation integrity verified"
 
       - name: Upload SLSA provenance
@@ -194,10 +194,10 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          
+
           TAG="${{ github.event.release.tag_name }}"
           RELEASE_ID="${{ github.event.release.id }}"
-          
+
           # Upload provenance as release asset
           gh release upload "$TAG" provenance.json \
             --clobber \
@@ -217,15 +217,15 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          
+
           python3 << 'EOFVERIFY'
           import json
           import sys
           from datetime import datetime
-          
+
           with open('provenance.json') as f:
               prov = json.load(f)
-          
+
           # SLSA v1.0 required fields
           required_fields = {
               'version': (int, [1]),
@@ -234,7 +234,7 @@ jobs:
               'subject': (list, None),
               'predicate': (dict, None),
           }
-          
+
           errors = []
           for field, (expected_type, allowed_values) in required_fields.items():
               if field not in prov:
@@ -243,24 +243,24 @@ jobs:
                   errors.append(f"Invalid type for {field}: {type(prov[field]).__name__}")
               elif allowed_values and prov[field] not in allowed_values:
                   errors.append(f"Invalid value for {field}: {prov[field]}")
-          
+
           # Verify subject has digest
           if prov.get('subject'):
               for subj in prov['subject']:
                   if 'digest' not in subj or 'sha256' not in subj.get('digest', {}):
                       errors.append("Subject missing sha256 digest")
-          
+
           # Verify predicate structure
           pred = prov.get('predicate', {})
           if 'buildDefinition' not in pred or 'runDetails' not in pred:
               errors.append("Predicate missing buildDefinition or runDetails")
-          
+
           if errors:
               print("✗ SLSA v1.0 compliance check failed:")
               for err in errors:
                   print(f"  - {err}")
               sys.exit(1)
-          
+
           print("✓ SLSA v1.0 provenance verified")
           print(f"  Subjects: {len(prov['subject'])}")
           print(f"  Builder: {pred.get('runDetails', {}).get('builder', {}).get('id', 'N/A')}")
