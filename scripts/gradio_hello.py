@@ -558,7 +558,12 @@ def save_conversation_markdown(hist_state: list[dict[str, Any]], session_name: s
     ensure_conv_dir()
     ts = int(time.time())
     safe_name = safe_session_name(session_name)
-    filename = CONV_DIR / f"{safe_name}_{ts}.md"
+    if Path(safe_name).name != safe_name:
+        raise ValueError("Invalid session path")
+    conv_root = CONV_DIR.resolve()
+    filename = (CONV_DIR / f"{safe_name}_{ts}.md").resolve()
+    if filename.parent != conv_root:
+        raise ValueError("Invalid session path")
     with filename.open("w", encoding="utf-8") as f:
         for entry in hist_state:
             f.write(f"### User - {entry.get('user_ts', '')}\n")
