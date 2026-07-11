@@ -17,12 +17,7 @@ from pathlib import Path
 from typing import Any, cast
 
 # Add to path
-SRC_DIR = (
-    Path(__file__).parent
-    / "ai-projects"
-    / "llm-maker"
-    / "src"
-)
+SRC_DIR = Path(__file__).parent / "ai-projects" / "llm-maker" / "src"
 sys.path.insert(0, str(SRC_DIR))
 
 templates_module = importlib.import_module("code_generation_templates")
@@ -209,10 +204,7 @@ def show_documentation():
     print("-" * MENU_WIDTH)
     print("\n📚 Main Documentation:")
     print("  • .github/CODE_GENERATION_GUIDE.md")
-    print(
-        "    Complete guide with API reference, examples, "
-        "troubleshooting"
-    )
+    print("    Complete guide with API reference, examples, troubleshooting")
 
     print("\n📁 Source Code:")
     print("  • ai-projects/llm-maker/src/tool_maker.py")
@@ -242,21 +234,12 @@ def show_quick_reference():
     print("\n1️⃣  GENERATE A PYTHON FUNCTION")
     print("    @llm-maker Generate a function that [what it should do]")
     print("\n    Examples:")
-    print(
-        "    • @llm-maker Generate a function "
-        "that validates email addresses"
-    )
-    print(
-        "    • @llm-maker Generate a function "
-        "that converts degrees to radians"
-    )
+    print("    • @llm-maker Generate a function that validates email addresses")
+    print("    • @llm-maker Generate a function that converts degrees to radians")
     print("    • @llm-maker Generate a function that extracts URLs from text")
 
     print("\n2️⃣  GENERATE A WEBSITE")
-    print(
-        "    @llm-maker Build a [style] [type] "
-        "website with pages: [page list]"
-    )
+    print("    @llm-maker Build a [style] [type] website with pages: [page list]")
     print("\n    Examples:")
     print("    • @llm-maker Build a modern portfolio website with pages:")
     print("      index, about, contact")
@@ -309,10 +292,7 @@ def main():
             show_quick_reference()
         elif choice == "0":
             print("\n👋 Thanks for using Aria Code Generation!")
-            print(
-                "   Remember: Use @llm-maker in Copilot Chat "
-                "for interactive generation\n"
-            )
+            print("   Remember: Use @llm-maker in Copilot Chat for interactive generation\n")
             break
         else:
             print("Invalid choice. Please try again.")
