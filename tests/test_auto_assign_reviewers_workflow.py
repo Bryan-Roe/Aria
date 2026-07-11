@@ -81,8 +81,7 @@ def test_assign_job_skips_bot_authored_prs_at_job_level() -> None:
     wf = _load_auto_assign()
     job_if = wf["jobs"]["assign"].get("if", "")
     assert "[bot]" in job_if, (
-        "assign job must exclude bot-authored PRs at the job level using "
-        "endsWith(...user.login, '[bot]') or similar"
+        "assign job must exclude bot-authored PRs at the job level using endsWith(...user.login, '[bot]') or similar"
     )
 
 
@@ -90,9 +89,7 @@ def test_assign_job_if_uses_endswith_for_bot() -> None:
     """The job-level `if` must use endsWith to detect [bot] suffix."""
     wf = _load_auto_assign()
     job_if = wf["jobs"]["assign"].get("if", "")
-    assert "endsWith" in job_if, (
-        "assign job if-condition must use endsWith(...user.login, '[bot]') to exclude bots"
-    )
+    assert "endsWith" in job_if, "assign job if-condition must use endsWith(...user.login, '[bot]') to exclude bots"
 
 
 # ---------------------------------------------------------------------------
