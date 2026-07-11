@@ -97,12 +97,15 @@ jobs:
         run: |
           set -euo pipefail
 
+          # Keep in sync with job timeout-minutes (10 minutes = 600 seconds).
           max_wait_seconds=600
           poll_interval_seconds=15
           waited=0
 
           while true; do
             totals="$(gh pr view "$PR_URL" --json statusCheckRollup --jq '
+              # statusCheckRollup can surface check-run conclusions or status-context states.
+              # We classify states into pending / failed / successful buckets for gating.
               ["PENDING", "IN_PROGRESS", "QUEUED", "REQUESTED", "WAITING", "EXPECTED"] as $pending_states
               | ["FAILURE", "FAILED", "TIMED_OUT", "CANCELLED", "ACTION_REQUIRED", "STARTUP_FAILURE", "STALE", "ERROR"] as $failed_states
               | ["SUCCESS", "NEUTRAL", "SKIPPED"] as $success_states

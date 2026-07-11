@@ -60,6 +60,7 @@ def test_major_update_comment_dedup_query_uses_complete_length_filter() -> None:
     workflow = _load_workflow()
     step = _get_step(workflow, "Comment on major updates")
     run = step.get("run", "")
+    # Regression guard: this jq expression was previously truncated mid-token.
     assert "gh pr view \"$PR_URL\" --json comments --jq" in run
     assert "contains(\"Major version update detected\")" in run
     assert "| length')" in run
