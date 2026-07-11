@@ -2,13 +2,16 @@
 # Dependabot Auto-merge
 # =============================================================================
 # Purpose : Automatically approve and enable auto-merge for Dependabot PRs that
-#           contain only minor / patch updates, once all required CI checks pass.
+#           contain only minor / patch updates, after required CI checks complete
+#           successfully.
 # Security: - Major version bumps are never auto-approved; a comment is posted
 #             requesting manual review.
 #           - Production dependency minor bumps are flagged for manual review.
 #           - Workflow runs only for PRs authored by dependabot[bot].
 #           - Token permissions are scoped to the minimum required.
-# Notes   : - If the target branch uses a merge queue, the built-in GITHUB_TOKEN
+# Notes   : - This workflow explicitly waits for PR status checks to pass/fail
+#             before enabling auto-merge.
+#           - If the target branch uses a merge queue, the built-in GITHUB_TOKEN
 #             may be unable to enqueue the PR for auto-merge; use a GitHub App
 #             token or PAT stored in GitHub Secrets if needed.
 # Triggers: pull_request events (opened / synchronize / reopened / ready_for_review)
@@ -33,7 +36,7 @@ jobs:
   automerge:
     name: Auto-merge minor / patch updates
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 10
 
     if: >-
       github.event.pull_request.user.login == 'dependabot[bot]' &&
@@ -107,18 +110,105 @@ jobs:
           set -euo pipefail
           gh pr review --approve "$PR_URL"
 
+      - name: Wait for required status checks
+        if: steps.gate.outputs.automerge == 'true' && steps.pr_state.outputs.auto_merge_enabled != 'true'
+        run: |
+          set -euo pipefail
+
+          max_attempts=60
+          sleep_seconds=10
+
+          for attempt in $(seq 1 "${max_attempts}"); do
+            checks_json="$(gh pr view "$PR_URL" --json statusCheckRollup --jq '.statusCheckRollup')"
+
+            total_count="$(jq 'length' <<< "$checks_json")"
+            failing_count="$(jq '
+              [
+                .[]?
+                | select(
+                    (
+                      .__typename == "CheckRun" and
+                      (
+                        ["failure", "cancelled", "timed_out", "action_required", "startup_failure", "stale"]
+                        | index((.conclusion // "" | ascii_downcase))
+                      ) != null
+                    ) or (
+                      .__typename == "StatusContext" and
+                      (["failure", "error"] | index((.state // "" | ascii_downcase))) != null
+                    )
+                  )
+              ]
+              | length
+            ' <<< "$checks_json")"
+            pending_count="$(jq '
+              [
+                .[]?
+                | select(
+                    (
+                      .__typename == "CheckRun" and
+                      ((.status // "" | ascii_downcase) != "completed")
+                    ) or (
+                      .__typename == "StatusContext" and
+                      (["pending", "expected"] | index((.state // "" | ascii_downcase))) != null
+                    )
+                  )
+              ]
+              | length
+            ' <<< "$checks_json")"
+
+            if [[ "${failing_count}" -gt 0 ]]; then
+              echo "One or more required checks failed before merge."
+              exit 1
+            fi
+
+            if [[ "${total_count}" -eq 0 || "${pending_count}" -eq 0 ]]; then
+              echo "Status checks are complete (total=${total_count}, pending=${pending_count})."
+              break
+            fi
+
+            if [[ "${attempt}" -eq "${max_attempts}" ]]; then
+              echo "Timed out waiting for required status checks (pending=${pending_count})."
+              exit 1
+            fi
+
+            echo "Waiting for required status checks... attempt ${attempt}/${max_attempts} (pending=${pending_count})"
+            sleep "${sleep_seconds}"
+          done
+
       - name: Enable auto-merge (squash)
         if: steps.gate.outputs.automerge == 'true' && steps.pr_state.outputs.auto_merge_enabled != 'true'
         run: |
           set -euo pipefail
-          gh pr merge --auto --squash --delete-branch "$PR_URL"
+          for attempt in 1 2 3; do
+            if gh pr merge --auto --squash --delete-branch "$PR_URL"; then
+              echo "Auto-merge enabled."
+              exit 0
+            fi
+
+            if [[ "${attempt}" -lt 3 ]]; then
+              echo "Auto-merge attempt ${attempt} failed; retrying in 5 seconds..."
+              sleep 5
+            fi
+          done
+
+          echo "Failed to enable auto-merge after 3 attempts."
+          exit 1
 
       - name: Comment on major updates
         if: steps.metadata.outputs.update-type == 'version-update:semver-major'
         run: |
           set -euo pipefail
 
-          existing_comments="$(gh pr view "$PR_URL" --json comments --jq '[.comments[]? | select(.author.login == "github-actions[bot]" and (.body | contains("Major version update detected")))] | length')"
+          existing_comments="$(gh pr view "$PR_URL" --json comments --jq '
+            [
+              .comments[]?
+              | select(
+                  .author.login == "github-actions[bot]" and
+                  (.body | contains("Major version update detected"))
+                )
+            ]
+            | length
+          ')"
           if [[ "${existing_comments}" -eq 0 ]]; then
             gh pr comment "$PR_URL" --body "$(cat <<'EOF'
           ⚠️ **Major version update detected — manual review required.**
@@ -139,7 +229,16 @@ jobs:
         run: |
           set -euo pipefail
 
-          existing_comments="$(gh pr view "$PR_URL" --json comments --jq '[.comments[]? | select(.author.login == "github-actions[bot]" and (.body | contains("not auto-merged")))] | length')"
+          existing_comments="$(gh pr view "$PR_URL" --json comments --jq '
+            [
+              .comments[]?
+              | select(
+                  .author.login == "github-actions[bot]" and
+                  (.body | contains("not auto-merged"))
+                )
+            ]
+            | length
+          ')"
           if [[ "${existing_comments}" -eq 0 ]]; then
             gh pr comment "$PR_URL" --body "$(cat <<'EOF'
           ℹ️ This Dependabot update was **not auto-merged** (production dependency or non-trivial change). Manual review requested.
