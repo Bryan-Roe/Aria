@@ -215,59 +215,59 @@ updates:
     - package-ecosystem: pip
       directory: /AI
       schedule:
-        interval: daily
+          interval: daily
 
     - package-ecosystem: docker
       directory: /ai-projects/email-spam-workflow
       schedule:
-        interval: daily
+          interval: daily
 
     - package-ecosystem: pip
       directory: /ai-projects/email-spam-workflow
       schedule:
-        interval: daily
+          interval: daily
 
     - package-ecosystem: docker
       directory: /ai-projects/my-agent-230a13f1
       schedule:
-        interval: daily
+          interval: daily
 
     - package-ecosystem: pip
       directory: /ai-projects/my-agent-230a13f1
       schedule:
-        interval: daily
+          interval: daily
 
     - package-ecosystem: docker
       directory: /ai-projects/writer-reviewer-workflow
       schedule:
-        interval: daily
+          interval: daily
 
     - package-ecosystem: docker
       directory: /my-agent-0b2avt
       schedule:
-        interval: daily
+          interval: daily
 
     - package-ecosystem: pip
       directory: /my-agent-0b2avt
       schedule:
-        interval: daily
+          interval: daily
 
     - package-ecosystem: docker
       directory: /my-agent-gsi62a
       schedule:
-        interval: daily
+          interval: daily
 
     - package-ecosystem: nuget
       directory: /my-agent-gsi62a
       schedule:
-        interval: daily
+          interval: daily
 
     - package-ecosystem: pip
       directory: /notebooks
       schedule:
-        interval: daily
+          interval: daily
 
     - package-ecosystem: nuget
       directory: /web/monetization/sk-process-framework/dotnet/ProductDocumentation
       schedule:
-        interval: daily
+          interval: daily
