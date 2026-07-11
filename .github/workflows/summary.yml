@@ -31,10 +31,13 @@ jobs:
 
       - name: Sanitize issue inputs
         id: sanitize
+        env:
+          ISSUE_TITLE: ${{ github.event.issue.title }}
+          ISSUE_BODY: ${{ github.event.issue.body }}
         run: |
           # Escape special chars and truncate to prevent injection/token limits
-          TITLE=$(echo "${{ github.event.issue.title }}" | head -c 200 | jq -Rs .)
-          BODY=$(echo "${{ github.event.issue.body }}" | head -c 1000 | jq -Rs .)
+          TITLE=$(echo "$ISSUE_TITLE" | head -c 200 | jq -Rs .)
+          BODY=$(echo "$ISSUE_BODY" | head -c 1000 | jq -Rs .)
           echo "title=$TITLE" >> "$GITHUB_OUTPUT"
           echo "body=$BODY" >> "$GITHUB_OUTPUT"
 
