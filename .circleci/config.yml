@@ -1,12 +1,12 @@
 version: 2.1
 jobs:
-  build:
-    docker:
-      - image: cimg/base:current
-    resource_class: bryan-roe/class
-    steps:
-      - run: echo "Hi I'm on a Container Runner!"
+    build:
+        docker:
+            - image: cimg/base:current
+        resource_class: bryan-roe/class
+        steps:
+            - run: echo "Hi I'm on a Container Runner!"
 workflows:
-  build-workflow:
-    jobs:
-      - build
+    build-workflow:
+        jobs:
+            - build
