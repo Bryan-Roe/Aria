@@ -28,7 +28,6 @@ Quick start
 from __future__ import annotations
 
 import importlib.util
-import logging
 import math
 import random
 import time
@@ -61,10 +60,8 @@ _pennylane_available = qml is not None
 _qiskit_aer_available = False
 if _pennylane_available:
     _qiskit_aer_available = (
-        importlib.util.find_spec("pennylane_qiskit") is not None
-        and importlib.util.find_spec("qiskit_aer") is not None
+        importlib.util.find_spec("pennylane_qiskit") is not None and importlib.util.find_spec("qiskit_aer") is not None
     )
-
 
 
 def _make_device(n_qubits: int) -> tuple[str, Any | None]:

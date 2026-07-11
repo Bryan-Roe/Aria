@@ -1,135 +1,143 @@
 version: 2
 
 _defaults: &defaults
-  schedule:
-    interval: "daily"
-    time: "04:00"
-    timezone: "UTC"
-  labels:
-    - "dependencies"
-    - "autofix"
-  assignees:
-    - "Bryan-Roe"
-  reviewers:
-    - "Bryan-Roe"
-  allow:
-    - dependency-type: "direct"
-    - dependency-type: "indirect"
-  rebase-strategy: "auto"
-  open-pull-requests-limit: 5
-  cooldown:
-    default-days: 2
-    semver-major-days: 14
-    semver-minor-days: 3
-    semver-patch-days: 1
-  commit-message:
-    include: "scope"
-  pull-request-branch-name:
-    separator: "-"
-  versioning-strategy: "increase"
-  # target-branch: "main" # uncomment if you want explicit targeting
+    schedule:
+        interval: "daily"
+        time: "04:00"
+        timezone: "UTC"
+    labels:
+        - "dependencies"
+        - "autofix"
+    assignees:
+        - "Bryan-Roe"
+    reviewers:
+        - "Bryan-Roe"
+    allow:
+        - dependency-type: "direct"
+        - dependency-type: "indirect"
+    rebase-strategy: "auto"
+    open-pull-requests-limit: 5
+    cooldown:
+        default-days: 2
+        semver-major-days: 14
+        semver-minor-days: 3
+        semver-patch-days: 1
+    commit-message:
+        include: "scope"
+    pull-request-branch-name:
+        separator: "-"
+    versioning-strategy: "increase"
+    # target-branch: "main" # uncomment if you want explicit targeting
 
 _python_defaults: &python_defaults
-  <<: *defaults
-  package-ecosystem: "pip"
-  ignore:
-    - dependency-name: "*"
-      update-types:
-        - "version-update:semver-major"
-  exclude-paths:
-    - ".venv/**"
-    - "venv/**"
-    - "**/__pycache__/**"
-    - "**/.ipynb_checkpoints/**"
-    - "build/**"
-    - "dist/**"
-    - "vendor/**"
+    <<: *defaults
+    package-ecosystem: "pip"
+    ignore:
+        - dependency-name: "*"
+          update-types:
+              - "version-update:semver-major"
+    exclude-paths:
+        - ".venv/**"
+        - "venv/**"
+        - "**/__pycache__/**"
+        - "**/.ipynb_checkpoints/**"
+        - "build/**"
+        - "dist/**"
+        - "vendor/**"
 
 updates:
-  - package-ecosystem: "github-actions"
-    directory: "/"
-    <<: *defaults
-    open-pull-requests-limit: 6
-    commit-message:
-      prefix: "deps(actions)"
-    groups:
-      actions-minor-patch:
-        update-types: ["minor", "patch"]
-        patterns: ["*"]
-      actions-major:
-        update-types: ["major"]
-        patterns: ["*"]
+    - package-ecosystem: "github-actions"
+      directory: "/"
+      <<: *defaults
+      open-pull-requests-limit: 6
+      commit-message:
+          prefix: "deps(actions)"
+      groups:
+          actions-minor-patch:
+              update-types: ["minor", "patch"]
+              patterns: ["*"]
+          actions-major:
+              update-types: ["major"]
+              patterns: ["*"]
 
-  - <<: *python_defaults
-    directory: "/"
-    open-pull-requests-limit: 7
-    commit-message:
-      prefix: "deps(pip)"
-    groups:
-      pip-runtime:
-        patterns: ["fastapi", "uvicorn*", "pydantic*", "sqlalchemy*", "httpx*"]
-      pip-ai-sdk:
-        patterns: ["openai*", "azure-*", "langchain*"]
-      pip-dev-tools:
-        dependency-type: "development"
-        patterns: ["pytest*", "ruff*", "mypy*", "black", "isort"]
-      pip-other:
-        patterns: ["*"]
-    # Optional: known volatile/heavy packages
-    # ignore:
-    #   - dependency-name: "torch*"
-    #     update-types: ["version-update:semver-minor", "version-update:semver-patch"]
+    - <<: *python_defaults
+      directory: "/"
+      open-pull-requests-limit: 7
+      commit-message:
+          prefix: "deps(pip)"
+      groups:
+          pip-runtime:
+              patterns:
+                  ["fastapi", "uvicorn*", "pydantic*", "sqlalchemy*", "httpx*"]
+          pip-ai-sdk:
+              patterns: ["openai*", "azure-*", "langchain*"]
+          pip-dev-tools:
+              dependency-type: "development"
+              patterns: ["pytest*", "ruff*", "mypy*", "black", "isort"]
+          pip-other:
+              patterns: ["*"]
+      # Optional: known volatile/heavy packages
+      # ignore:
+      #   - dependency-name: "torch*"
+      #     update-types: ["version-update:semver-minor", "version-update:semver-patch"]
 
-  - <<: *python_defaults
-    directory: "/ai-projects/quantum-ml"
-    commit-message:
-      prefix: "deps(quantum-ml)"
-    groups:
-      quantum-runtime:
-        patterns: ["numpy*", "scipy*", "pandas*", "httpx*", "pydantic*"]
-      quantum-dev-tools:
-        dependency-type: "development"
-        patterns: ["pytest*", "ruff*", "mypy*"]
-      quantum-other:
-        patterns: ["*"]
+    - <<: *python_defaults
+      directory: "/ai-projects/quantum-ml"
+      commit-message:
+          prefix: "deps(quantum-ml)"
+      groups:
+          quantum-runtime:
+              patterns: ["numpy*", "scipy*", "pandas*", "httpx*", "pydantic*"]
+          quantum-dev-tools:
+              dependency-type: "development"
+              patterns: ["pytest*", "ruff*", "mypy*"]
+          quantum-other:
+              patterns: ["*"]
 
-  - <<: *python_defaults
-    directory: "/ai-projects/chat-cli"
-    commit-message:
-      prefix: "deps(chat-cli)"
-    groups:
-      chat-runtime:
-        patterns: ["openai*", "azure-*", "httpx*", "pydantic*"]
-      chat-dev-tools:
-        dependency-type: "development"
-        patterns: ["pytest*", "ruff*", "mypy*"]
-      chat-other:
-        patterns: ["*"]
+    - <<: *python_defaults
+      directory: "/ai-projects/chat-cli"
+      commit-message:
+          prefix: "deps(chat-cli)"
+      groups:
+          chat-runtime:
+              patterns: ["openai*", "azure-*", "httpx*", "pydantic*"]
+          chat-dev-tools:
+              dependency-type: "development"
+              patterns: ["pytest*", "ruff*", "mypy*"]
+          chat-other:
+              patterns: ["*"]
 
-  - <<: *python_defaults
-    directory: "/AI/microsoft_phi-silica-3.6_v1"
-    schedule:
-      interval: "weekly"
-      day: "sunday"
-      time: "04:00"
-      timezone: "UTC"
-    commit-message:
-      prefix: "deps(phi-lora)"
-    groups:
-      phi-runtime:
-        patterns: ["transformers*", "datasets*", "accelerate*", "peft*", "torch*"]
-      phi-other:
-        patterns: ["*"]
+    - <<: *python_defaults
+      directory: "/AI/microsoft_phi-silica-3.6_v1"
+      schedule:
+          interval: "weekly"
+          day: "sunday"
+          time: "04:00"
+          timezone: "UTC"
+      commit-message:
+          prefix: "deps(phi-lora)"
+      groups:
+          phi-runtime:
+              patterns:
+                  [
+                      "transformers*",
+                      "datasets*",
+                      "accelerate*",
+                      "peft*",
+                      "torch*",
+                  ]
+          phi-other:
+              patterns: ["*"]
 
-  - <<: *python_defaults
-    directory: "/notebooks"
-    schedule:
-      interval: "weekly"
-      day: "sunday"
-      time: "04:00"
-      timezone: "UTC"
-    commit-message:
-      prefix: "deps(notebooks)"
-    groups:
-      notebooks-deps:
-        patterns: ["*"]
+    - <<: *python_defaults
+      directory: "/notebooks"
+      schedule:
+          interval: "weekly"
+          day: "sunday"
+          time: "04:00"
+          timezone: "UTC"
+      commit-message:
+          prefix: "deps(notebooks)"
+      groups:
+          notebooks-deps:
+              patterns: ["*"]
