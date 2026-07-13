@@ -3,7 +3,7 @@
 
 # Core ML frameworks
 torch>=2.13.0
-transformers>=5.13.0
+transformers>=5.13.1
 peft>=0.19.1
 datasets>=5.0.0
 accelerate>=1.14.0
