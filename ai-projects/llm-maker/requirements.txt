@@ -8,7 +8,7 @@ ast-grep-py>=0.44.1
 astroid>=4.1.2
 
 # Sandboxed Execution
-RestrictedPython>=8.3
+RestrictedPython>=8.4
 
 # MCP Server (Model Context Protocol)
 mcp>=1.28.1
