@@ -12,5 +12,5 @@ numpy>=1.26.4          # Numerical operations
 scikit-learn>=1.7.2    # ML datasets and preprocessing
 
 # Optional: Advanced formats
-pyarrow>=24.0.0        # Parquet file support
+pyarrow>=25.0.0        # Parquet file support
 h5py>=3.16.0            # HDF5 file support
