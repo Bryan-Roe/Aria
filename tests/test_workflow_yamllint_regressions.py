@@ -5,7 +5,6 @@ from pathlib import Path
 import pytest
 import yaml
 
-
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
 
@@ -54,8 +53,6 @@ def test_ossar_workflow_steps_and_branch_spacing_regression() -> None:
 def test_summary_workflow_has_no_trailing_whitespace() -> None:
     content = _read(".github/workflows/summary.yml")
     trailing_ws_lines = [
-        line_number
-        for line_number, line in enumerate(content.splitlines(), start=1)
-        if line != line.rstrip(" \t")
+        line_number for line_number, line in enumerate(content.splitlines(), start=1) if line != line.rstrip(" \t")
     ]
     assert not trailing_ws_lines, f"Trailing whitespace found on lines: {trailing_ws_lines}"
