@@ -726,7 +726,9 @@ tests/test_vision_inference.py
 tests/test_vram_calculator.py
 tests/test_watch_continuous_automation.py
 tests/test_web_app_security.py
+tests/test_workflow_lint_blockers.py
 tests/test_workflow_validation_workflow.py
+tests/test_workflow_yamllint_regressions.py
 tests/test_writer_reviewer_prototype_workflow.py
 tests/unit/__init__.py
 tests/unit/test_aria_schema_endpoint.py
