@@ -119,6 +119,7 @@
 .github/agents/vision-ai.agent.md
 .github/appmod/assessment/reports/dotnet-assessment-config.yaml
 .github/codeql/codeql-config.yml
+.github/codeql/extensions/codeql-pack.yml
 .github/copilot-instructions.full.md
 .github/copilot-instructions.md
 .github/copilot.yml
@@ -223,6 +224,7 @@
 .github/prompts/train.prompt.md
 .github/rulesets/main-default-automation.ruleset.json
 .github/secret_scanning.yml
+.github/security/sensitive-files.txt
 .github/skills/agi-reasoning-debug-workflow/SKILL.md
 .github/skills/ai-agent-implementation-workflow/SKILL.md
 .github/skills/ai-feature-planning-workflow/SKILL.md
@@ -319,6 +321,7 @@
 .github/workflows/markdown-quality.yml
 .github/workflows/merge-gate.yml
 .github/workflows/nightly-regression.yml
+.github/workflows/ossar.yml
 .github/workflows/pages.yml
 .github/workflows/platform-health-daily.yml
 .github/workflows/pr-checks.yml
@@ -2848,7 +2851,9 @@ tests/test_vision_inference.py
 tests/test_vram_calculator.py
 tests/test_watch_continuous_automation.py
 tests/test_web_app_security.py
+tests/test_workflow_lint_blockers.py
 tests/test_workflow_validation_workflow.py
+tests/test_workflow_yamllint_regressions.py
 tests/test_writer_reviewer_prototype_workflow.py
 tests/unit/__init__.py
 tests/unit/test_aria_schema_endpoint.py
