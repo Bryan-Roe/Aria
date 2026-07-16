@@ -18,9 +18,14 @@ jobs:
     if: github.event.pull_request.user.login == 'dependabot[bot]' && github.repository == 'Bryan-Roe/Aria'
 
     steps:
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@bf7454d06d71f1098171f2acdf0cd4708d7b5920 # v2.20.0
+        with:
+          egress-policy: audit
+
       - name: Dependabot metadata
         id: metadata
-        uses: dependabot/fetch-metadata@d7267f607e9d3fb96fc2fbe83e0af444713e90b7
+        uses: step-security/dependabot-fetch-metadata@bf8fb6e0be0a711c669dc236de6e7f7374ba626e # v3.1.0
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
