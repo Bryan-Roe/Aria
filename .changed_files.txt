@@ -2,7 +2,10 @@
 .changed_files.txt
 .changed_js_like.txt
 .changed_py.txt
+.github/codeql/extensions/codeql-pack.yml
 dataset-requirements.txt
 docs/docs_requirements.txt
 pyproject.toml
 requirements-dev.txt
+tests/test_workflow_lint_blockers.py
+tests/test_workflow_yamllint_regressions.py
