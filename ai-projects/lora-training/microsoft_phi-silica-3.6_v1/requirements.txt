@@ -1,7 +1,7 @@
 # Fine-tuning requirements for microsoft_phi-silica-3.6_v1
 pyyaml>=6.0.3
 datasets>=5.0.0
-transformers>=5.13.0
+transformers>=5.14.1
 peft>=0.19.1
 accelerate>=1.14.0
 tqdm>=4.68.4
