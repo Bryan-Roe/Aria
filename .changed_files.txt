@@ -1,3 +1,7 @@
+.changed_c_like.txt
+.changed_files.txt
+.changed_js_like.txt
+.changed_py.txt
 .github/codeql/extensions/codeql-pack.yml
 ai-projects/lora-training/quantum-ai/requirements.txt
 tests/test_workflow_lint_blockers.py
