@@ -1,3 +1,7 @@
+.changed_c_like.txt
+.changed_files.txt
+.changed_js_like.txt
+.changed_py.txt
 constraints.txt
 dataset-requirements.txt
 docs/docs_requirements.txt
