@@ -3,14 +3,14 @@
 
 # Core ML frameworks
 torch>=2.13.0
-transformers>=5.13.0
+transformers>=5.14.1
 peft>=0.19.1
 datasets>=5.0.0
 accelerate>=1.14.0
 
 # Utilities
 pyyaml>=6.0.3
-tqdm>=4.68.4
+tqdm>=4.69.0
 
 # Optional: Quantization support (for 4bit/8bit training)
 # Uncomment if using use_4bit or use_8bit in config:

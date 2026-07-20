@@ -1,5 +1,5 @@
 # Azure Machine Learning SDK
-azure-ai-ml>=1.34.0
+azure-ai-ml>=1.34.1
 azure-identity>=1.25.3
 azure-core>=1.41.0
 
