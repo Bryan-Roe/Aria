@@ -22,7 +22,7 @@ azure-core>=1.41.0,<2.0.0
 
 # Data Processing & Visualization
 pandas>=3.0.3,<4.0.0
-matplotlib>=3.11.0,<4.0.0
+matplotlib>=3.11.1,<4.0.0
 scikit-learn>=1.9.0,<2.0.0
 seaborn==0.13.2
 
@@ -38,7 +38,7 @@ black>=26.5.1,<27.0.0
 # Model Context Protocol (MCP) Server
 mcp>=1.28.1
 pydantic>=2.13.4
-anyio>=4.14.1
+anyio>=4.14.2
 
 # (Removed) pip-check-duplicates was referenced but no distribution exists.
 # If dependency insight is needed, install pipdeptree instead:
