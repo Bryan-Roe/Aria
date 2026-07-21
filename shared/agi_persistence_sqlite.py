@@ -34,7 +34,8 @@ class SQLiteAGIPersistence:
             self._conn.execute("PRAGMA synchronous=NORMAL;")
         except Exception:
             pass
-        self._conn.execute("""
+        self._conn.execute(
+            """
             CREATE TABLE IF NOT EXISTS agi_events (
                 id TEXT PRIMARY KEY,
                 ts REAL,
@@ -42,7 +43,8 @@ class SQLiteAGIPersistence:
                 meta TEXT,
                 payload TEXT
             )
-            """)
+            """
+        )
         self._conn.commit()
 
     def write_reasoning_chain(self, chain: list[dict[str, Any]], meta: dict[str, Any] | None = None) -> str:

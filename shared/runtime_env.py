@@ -71,7 +71,8 @@ def probe_python_packages(
             "error": f"Python executable not found: {python}",
         }
 
-    code = dedent(f"""
+    code = dedent(
+        f"""
         import importlib.metadata as md
         import importlib.util
         import json
@@ -86,7 +87,8 @@ def probe_python_packages(
                 vers[m] = None
 
         print(json.dumps({{'available': avail, 'versions': vers}}))
-        """).strip()
+        """
+    ).strip()
 
     try:
         proc = subprocess.run(
