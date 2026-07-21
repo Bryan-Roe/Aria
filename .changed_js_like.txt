@@ -95,6 +95,7 @@
 .github/agents/vision-ai.agent.md
 .github/appmod/assessment/reports/dotnet-assessment-config.yaml
 .github/codeql/codeql-config.yml
+.github/codeql/extensions/codeql-pack.yml
 .github/copilot-instructions.full.md
 .github/copilot-instructions.md
 .github/copilot.yml
@@ -280,6 +281,7 @@
 .github/workflows/markdown-quality.yml
 .github/workflows/merge-gate.yml
 .github/workflows/nightly-regression.yml
+.github/workflows/ossar.yml
 .github/workflows/pages.yml
 .github/workflows/platform-health-daily.yml
 .github/workflows/pr-checks.yml
