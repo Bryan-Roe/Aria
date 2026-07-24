@@ -54,7 +54,7 @@ similar = fetch_similar_messages(embedding, top_k=5)
 
 # 3. Inject as system context
 for i, msg in enumerate(similar):
-    messages.insert(1, {"role": "system", "content": f"[Memory #{i+1}] {msg['content']}"})
+    messages.insert(1, {"role": "system", "content": f"[Memory #{i + 1}] {msg['content']}"})
 
 # 4. Prune to fit context window
 messages, stats, sys_msg = prune_messages(messages, provider, model, max_tokens)
