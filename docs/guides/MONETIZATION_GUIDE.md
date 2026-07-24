@@ -100,11 +100,7 @@ Core features:
 - Persistent storage
 
 ```python
-from shared.subscription_manager import (
-    get_subscription_manager,
-    SubscriptionTier,
-    Feature
-)
+from shared.subscription_manager import get_subscription_manager, SubscriptionTier, Feature
 
 manager = get_subscription_manager()
 subscription = manager.get_subscription(user_id)
@@ -115,7 +111,7 @@ if subscription.has_feature(Feature.QUANTUM_COMPUTING):
     pass
 
 # Track usage
-if manager.track_usage(user_id, 'quantum_jobs', 1):
+if manager.track_usage(user_id, "quantum_jobs", 1):
     # Usage allowed, proceed
     pass
 else:
@@ -168,11 +164,11 @@ New endpoints added:
 ```python
 # Before executing a quantum job
 manager = get_subscription_manager()
-if not manager.track_usage(user_id, 'quantum_jobs', 1):
+if not manager.track_usage(user_id, "quantum_jobs", 1):
     return {
         "error": "Quantum job limit exceeded",
         "upgrade_url": "/pricing.html",
-        "current_tier": subscription.tier.value
+        "current_tier": subscription.tier.value,
     }
 
 # Proceed with quantum job
@@ -192,7 +188,7 @@ manager.upgrade_subscription(
     tier=SubscriptionTier.PRO,
     duration_days=30,
     payment_method="stripe",
-    stripe_subscription_id=stripe_sub_id
+    stripe_subscription_id=stripe_sub_id,
 )
 ```
 
