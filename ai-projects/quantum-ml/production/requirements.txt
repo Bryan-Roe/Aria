@@ -24,7 +24,7 @@ pennylane-lightning==0.45.0
 
 # === Production servers / deployment ===
 gunicorn==26.0.0          # WSGI server for Flask
-gevent==26.5.0            # Optional async worker for gunicorn (worker-class 'gevent')
+gevent==26.7.0            # Optional async worker for gunicorn (worker-class 'gevent')
 
 # === Monitoring & logging ===
 python-json-logger==4.1.0
