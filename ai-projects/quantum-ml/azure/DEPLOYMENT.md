@@ -153,7 +153,7 @@ workspace = Workspace(
     subscription_id="<your-subscription-id>",
     resource_group="rg-quantum-ai",
     name="quantum-ai-workspace",
-    credential=credential
+    credential=credential,
 )
 
 print(f"Connected to workspace: {workspace.name}")

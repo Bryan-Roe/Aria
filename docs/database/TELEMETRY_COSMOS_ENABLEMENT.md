@@ -58,12 +58,14 @@ curl http://localhost:7071/api/ai/status | jq '.telemetry'
 from opentelemetry import trace
 from azure.monitor.opentelemetry import configure_azure_monitor
 
+
 def init_telemetry():
     conn_str = os.getenv("APPLICATIONINSIGHTS_CONNECTION_STRING")
     if conn_str:
         configure_azure_monitor(connection_string=conn_str)
         return True
     return False
+
 
 def is_enabled() -> bool:
     return bool(os.getenv("APPLICATIONINSIGHTS_CONNECTION_STRING"))
@@ -73,6 +75,7 @@ def is_enabled() -> bool:
 
 ```python
 from opentelemetry import trace
+
 _tracer = trace.get_tracer("qai.functions")
 
 with _tracer.start_as_current_span("chat_request") as span:
@@ -229,6 +232,7 @@ curl -X POST http://localhost:7071/api/chat -H "Content-Type: application/json" 
 
 ```python
 from azure.cosmos import CosmosClient
+
 
 class QAICosmosClient:
     def __init__(self):
@@ -440,6 +444,7 @@ Set `QAI_ENABLE_COSMOS=false` or remove the environment variable. The system wil
 
     ```python
     from opentelemetry.sdk.trace.sampling import TraceIdRatioBased
+
     sampler = TraceIdRatioBased(0.1)  # 10% sampling
     ```
 

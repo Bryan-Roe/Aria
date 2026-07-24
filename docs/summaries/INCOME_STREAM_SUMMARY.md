@@ -134,7 +134,7 @@ if subscription.has_feature(Feature.QUANTUM_COMPUTING):
     pass
 
 # Track usage
-if manager.track_usage(user_id, 'quantum_jobs', 1):
+if manager.track_usage(user_id, "quantum_jobs", 1):
     # Usage allowed
     run_quantum_job()
 else:
