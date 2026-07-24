@@ -53,43 +53,43 @@ ARIA_ACTIONS = {
     "move": {
         "params": ["target", "speed"],
         "description": "Move Aria to a target position or object",
-        "example": {"action": "move", "target": {"x": 50, "y": 30}, "speed": "normal"}
+        "example": {"action": "move", "target": {"x": 50, "y": 30}, "speed": "normal"},
     },
     "say": {
         "params": ["text", "emotion"],
         "description": "Make Aria speak with optional emotion",
-        "example": {"action": "say", "text": "Hello!", "emotion": "happy"}
+        "example": {"action": "say", "text": "Hello!", "emotion": "happy"},
     },
     "pickup": {
         "params": ["object_id"],
         "description": "Pick up an object from the stage",
-        "example": {"action": "pickup", "object_id": "apple"}
+        "example": {"action": "pickup", "object_id": "apple"},
     },
     "drop": {
         "params": ["position"],
         "description": "Drop currently held object at position",
-        "example": {"action": "drop", "position": {"x": 50, "y": 30}}
+        "example": {"action": "drop", "position": {"x": 50, "y": 30}},
     },
     "throw": {
         "params": ["target", "force"],
         "description": "Throw held object toward target",
-        "example": {"action": "throw", "target": {"x": 70, "y": 40}, "force": "medium"}
+        "example": {"action": "throw", "target": {"x": 70, "y": 40}, "force": "medium"},
     },
     "gesture": {
         "params": ["gesture_type"],
         "description": "Perform a gesture animation",
-        "example": {"action": "gesture", "gesture_type": "wave"}
+        "example": {"action": "gesture", "gesture_type": "wave"},
     },
     "look": {
         "params": ["target"],
         "description": "Look at a target position or object",
-        "example": {"action": "look", "target": "apple"}
+        "example": {"action": "look", "target": "apple"},
     },
     "wait": {
         "params": ["duration"],
         "description": "Wait for specified duration in seconds",
-        "example": {"action": "wait", "duration": 2.0}
-    }
+        "example": {"action": "wait", "duration": 2.0},
+    },
 }
 ```
 
@@ -267,22 +267,19 @@ The global `stage_state` dict tracks:
 
 ```python
 stage_state = {
-    'aria': {
-        'position': {'x': 15, 'y': 20},    # % coordinates (0-100)
-        'expression': 'neutral',            # facial expression
-        'held_object': None,                # currently held object ID
-        'facing': 'right'                   # left or right
+    "aria": {
+        "position": {"x": 15, "y": 20},  # % coordinates (0-100)
+        "expression": "neutral",  # facial expression
+        "held_object": None,  # currently held object ID
+        "facing": "right",  # left or right
     },
-    'objects': {
-        'apple': {
-            'position': {'x': 55, 'y': 35},
-            'state': 'on_table'             # on_table, held, dropped, thrown
+    "objects": {
+        "apple": {
+            "position": {"x": 55, "y": 35},
+            "state": "on_table",  # on_table, held, dropped, thrown
         }
     },
-    'environment': {
-        'table': {'position': {'x': 60, 'y': 20}},
-        'stage_bounds': {'width': 100, 'height': 100}
-    }
+    "environment": {"table": {"position": {"x": 60, "y": 20}}, "stage_bounds": {"width": 100, "height": 100}},
 }
 ```
 

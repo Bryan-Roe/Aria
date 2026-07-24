@@ -305,11 +305,9 @@ Requests follow OpenAI API format:
 ```python
 from lmstudio_mcp_server import LMStudioClient
 
+
 async def main():
-    client = LMStudioClient(
-        base_url="http://127.0.0.1:1234/v1",
-        model="mistral-7b"
-    )
+    client = LMStudioClient(base_url="http://127.0.0.1:1234/v1", model="mistral-7b")
 
     # List models
     models = await client.list_models()
@@ -317,12 +315,10 @@ async def main():
 
     # Send chat message
     result = await client.chat_completion(
-        messages=[
-            {"role": "user", "content": "Explain quantum computing"}
-        ],
-        temperature=0.7
+        messages=[{"role": "user", "content": "Explain quantum computing"}], temperature=0.7
     )
-    print(result['message'])
+    print(result["message"])
+
 
 asyncio.run(main())
 ```

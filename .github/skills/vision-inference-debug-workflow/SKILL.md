@@ -74,11 +74,13 @@ All inputs are resized and normalized before inference:
 
 ```python
 # Required preprocessing pipeline:
-transform = transforms.Compose([
-    transforms.Resize((64, 64)),    # ← MUST match training resolution
-    transforms.ToTensor(),
-    transforms.Normalize(...)       # ← MUST use same mean/std as training
-])
+transform = transforms.Compose(
+    [
+        transforms.Resize((64, 64)),  # ← MUST match training resolution
+        transforms.ToTensor(),
+        transforms.Normalize(...),  # ← MUST use same mean/std as training
+    ]
+)
 # Input tensor shape: (1, C, H, W) = (1, 3, 64, 64)
 
 # If resolution doesn't match: wrong AdaptiveAvgPool2d output → wrong Linear layer shape
@@ -94,11 +96,13 @@ vi = VisionInference()
 
 # Option A — PIL Image:
 from PIL import Image
+
 img = Image.open("test.jpg")
 result = vi.predict(img)
 
 # Option B — Base64 string:
 import base64
+
 with open("test.jpg", "rb") as f:
     b64 = base64.b64encode(f.read()).decode()
 result = vi.predict_base64(b64)
@@ -132,6 +136,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # If CUDA OOM error: force CPU
 import os
+
 os.environ["CUDA_VISIBLE_DEVICES"] = ""
 vi = VisionInference()
 
