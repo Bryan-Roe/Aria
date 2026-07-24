@@ -62,6 +62,7 @@ az quantum workspace show --resource-group rg-quantum-ai --workspace-name quantu
 
 ```python
 from azure.quantum import Workspace
+
 workspace = Workspace(...)
 targets = workspace.get_targets()
 ```

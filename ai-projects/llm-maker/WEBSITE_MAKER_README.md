@@ -387,14 +387,14 @@ import requests
 
 # Create website
 response = requests.post(
-    'http://localhost:8090/api/websites',
+    "http://localhost:8090/api/websites",
     json={
-        'name': 'my-site',
-        'description': 'A portfolio website...',
-        'style': 'modern',
-        'pages': ['index', 'about'],
-        'features': ['responsive design']
-    }
+        "name": "my-site",
+        "description": "A portfolio website...",
+        "style": "modern",
+        "pages": ["index", "about"],
+        "features": ["responsive design"],
+    },
 )
 
 result = response.json()
@@ -445,14 +445,10 @@ curl -X POST http://localhost:8090/api/websites \
 from website_maker import WebsiteMaker
 
 # Use specific provider
-maker = WebsiteMaker(provider_name='azure')  # or 'openai', 'local'
+maker = WebsiteMaker(provider_name="azure")  # or 'openai', 'local'
 
 # Create website
-result = maker.create_website(
-    name='my-site',
-    description='...',
-    style='modern'
-)
+result = maker.create_website(name="my-site", description="...", style="modern")
 ```
 
 ### Batch Generation
@@ -463,9 +459,9 @@ from website_maker import WebsiteMaker
 maker = WebsiteMaker()
 
 websites = [
-    {'name': 'site1', 'description': '...', 'style': 'modern'},
-    {'name': 'site2', 'description': '...', 'style': 'minimal'},
-    {'name': 'site3', 'description': '...', 'style': 'creative'}
+    {"name": "site1", "description": "...", "style": "modern"},
+    {"name": "site2", "description": "...", "style": "minimal"},
+    {"name": "site3", "description": "...", "style": "creative"},
 ]
 
 for site_config in websites:

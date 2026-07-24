@@ -135,9 +135,9 @@ This agent works with the AGI provider system in this codebase:
 
 ```python
 # Key classes (ai-projects/chat-cli/src/agi_provider.py)
-AGIProvider        # Wraps base LLM with reasoning capabilities
-AGIContext         # Memory: conversation_history, reasoning_chains, goals, learned_patterns
-ReasoningStep      # step_type, content, confidence, metadata
+AGIProvider  # Wraps base LLM with reasoning capabilities
+AGIContext  # Memory: conversation_history, reasoning_chains, goals, learned_patterns
+ReasoningStep  # step_type, content, confidence, metadata
 
 # Factory
 create_agi_provider(
@@ -148,7 +148,7 @@ create_agi_provider(
     enable_self_reflection=True,
     enable_task_decomposition=True,
     reasoning_depth=3,
-    verbose=False
+    verbose=False,
 )
 ```
 

@@ -83,31 +83,23 @@ import asyncio
 from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
 
+
 async def main():
-    server_params = StdioServerParameters(
-        command="python",
-        args=["quantum_mcp_server.py"],
-        env={}
-    )
+    server_params = StdioServerParameters(command="python", args=["quantum_mcp_server.py"], env={})
 
     async with stdio_client(server_params) as (read, write):
         async with ClientSession(read, write) as session:
             await session.initialize()
 
             # Create a Bell state circuit
-            result = await session.call_tool(
-                "create_quantum_circuit",
-                {"n_qubits": 2, "circuit_type": "bell"}
-            )
+            result = await session.call_tool("create_quantum_circuit", {"n_qubits": 2, "circuit_type": "bell"})
             print(result.content[0].text)
 
             # Simulate it
             circuit_id = "..."  # Extract from result
-            sim_result = await session.call_tool(
-                "simulate_quantum_circuit",
-                {"circuit_id": circuit_id, "shots": 1024}
-            )
+            sim_result = await session.call_tool("simulate_quantum_circuit", {"circuit_id": circuit_id, "shots": 1024})
             print(sim_result.content[0].text)
+
 
 asyncio.run(main())
 ```
@@ -118,23 +110,11 @@ asyncio.run(main())
 
 ```python
 # Create a GHZ state (3-qubit entanglement)
-result = await session.call_tool(
-    "create_quantum_circuit",
-    {
-        "n_qubits": 3,
-        "circuit_type": "ghz"
-    }
-)
+result = await session.call_tool("create_quantum_circuit", {"n_qubits": 3, "circuit_type": "ghz"})
 
 # Extract circuit ID from result
 # Then simulate with 10,000 shots
-sim_result = await session.call_tool(
-    "simulate_quantum_circuit",
-    {
-        "circuit_id": "<circuit-id>",
-        "shots": 10000
-    }
-)
+sim_result = await session.call_tool("simulate_quantum_circuit", {"circuit_id": "<circuit-id>", "shots": 10000})
 ```
 
 ### 2. Train a Quantum Machine Learning Model
@@ -143,13 +123,7 @@ sim_result = await session.call_tool(
 # Train on the Iris dataset with quantum circuit
 result = await session.call_tool(
     "train_quantum_classifier",
-    {
-        "dataset": "iris",
-        "n_qubits": 4,
-        "n_layers": 2,
-        "epochs": 100,
-        "entanglement": "linear"
-    }
+    {"dataset": "iris", "n_qubits": 4, "n_layers": 2, "epochs": 100, "entanglement": "linear"},
 )
 ```
 
@@ -159,11 +133,7 @@ result = await session.call_tool(
 # Connect to Azure
 await session.call_tool(
     "connect_azure_quantum",
-    {
-        "subscription_id": "<your-sub-id>",
-        "resource_group": "rg-quantum-ai",
-        "workspace_name": "quantum-ai-workspace"
-    }
+    {"subscription_id": "<your-sub-id>", "resource_group": "rg-quantum-ai", "workspace_name": "quantum-ai-workspace"},
 )
 
 # List available backends
@@ -171,36 +141,19 @@ backends = await session.call_tool("list_quantum_backends", {})
 
 # Estimate cost
 cost = await session.call_tool(
-    "estimate_quantum_cost",
-    {
-        "circuit_id": "<circuit-id>",
-        "backend_name": "ionq.simulator",
-        "shots": 100
-    }
+    "estimate_quantum_cost", {"circuit_id": "<circuit-id>", "backend_name": "ionq.simulator", "shots": 100}
 )
 
 # Submit job
 job = await session.call_tool(
-    "submit_quantum_job",
-    {
-        "circuit_id": "<circuit-id>",
-        "backend_name": "ionq.simulator",
-        "shots": 500
-    }
+    "submit_quantum_job", {"circuit_id": "<circuit-id>", "backend_name": "ionq.simulator", "shots": 500}
 )
 ```
 
 ### 4. Grover Search for Marked States
 
 ```python
-grover = await session.call_tool(
-    "grover_search",
-    {
-        "n_qubits": 3,
-        "marked_states": [5],
-        "shots": 2000
-    }
-)
+grover = await session.call_tool("grover_search", {"n_qubits": 3, "marked_states": [5], "shots": 2000})
 ```
 
 ### 5. Execute Enhanced Variational Circuit
@@ -208,22 +161,14 @@ grover = await session.call_tool(
 ```python
 vqc = await session.call_tool(
     "run_variational_circuit",
-    {
-        "input_vector": [0.1, 0.2, -0.3, 0.4],
-        "encoding": "hybrid",
-        "entanglement": "pyramid",
-        "n_layers": 3
-    }
+    {"input_vector": [0.1, 0.2, -0.3, 0.4], "encoding": "hybrid", "entanglement": "pyramid", "n_layers": 3},
 )
 ```
 
 ### 6. Visualize a Cached Circuit
 
 ```python
-viz = await session.call_tool(
-    "visualize_cached_circuit",
-    {"circuit_id": "<circuit-id>", "style": "mpl"}
-)
+viz = await session.call_tool("visualize_cached_circuit", {"circuit_id": "<circuit-id>", "style": "mpl"})
 ```
 
 ## Tool Reference

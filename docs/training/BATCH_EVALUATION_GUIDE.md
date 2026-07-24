@@ -277,6 +277,7 @@ def compute_custom_metric(texts: List[str]) -> float:
     # Your metric logic here
     return score
 
+
 # Add to evaluation:
 if "custom" in metrics:
     results["custom"] = compute_custom_metric(texts)
