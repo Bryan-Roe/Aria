@@ -16,8 +16,18 @@ applyTo: "**/subscription_manager.py"
 
 ```python
 # 10 gatable features:
-BASIC_CHAT, ARIA_CHARACTER, QUANTUM_COMPUTING, ADVANCED_TRAINING,
-WEBSITE_MAKER, API_ACCESS, CUSTOM_MODELS, PRIORITY_SUPPORT,
+(
+    BASIC_CHAT,
+    ARIA_CHARACTER,
+    QUANTUM_COMPUTING,
+    ADVANCED_TRAINING,
+)
+(
+    WEBSITE_MAKER,
+    API_ACCESS,
+    CUSTOM_MODELS,
+    PRIORITY_SUPPORT,
+)
 ANALYTICS_DASHBOARD, BATCH_PROCESSING
 ```
 
@@ -34,21 +44,21 @@ if not sub.has_feature(Feature.QUANTUM_COMPUTING):
     return HttpResponse("Upgrade to PRO for quantum access", status_code=403)
 
 # Usage limit check
-if not sub.check_limit('quantum_jobs'):
+if not sub.check_limit("quantum_jobs"):
     return HttpResponse("Monthly quota exceeded", status_code=429)
 
 # Track usage
-sub.increment_usage('quantum_jobs')
+sub.increment_usage("quantum_jobs")
 
 # Usage reporting
-pct = sub.get_usage_percentage('chat_messages')  # → 0.0 to 1.0
+pct = sub.get_usage_percentage("chat_messages")  # → 0.0 to 1.0
 ```
 
 ## Subscription Lifecycle
 
 ```python
-sub.is_active()         # Check if subscription is current
-sub.reset_usage()       # Called monthly to reset counters
+sub.is_active()  # Check if subscription is current
+sub.reset_usage()  # Called monthly to reset counters
 ```
 
 ## Storage

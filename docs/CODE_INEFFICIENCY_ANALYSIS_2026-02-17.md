@@ -27,15 +27,15 @@ def compute_gradient(circuit, X, y, weights, use_parameter_shift=True):
 
     if use_parameter_shift:
         shift = np.pi / 2
-        for i in range(weights.shape[0]):           # Layer loop
-            for j in range(weights.shape[1]):       # Qubit loop
-                for k in range(weights.shape[2]):   # Gate loop
-                    weights_plus = weights.copy()   # O(n) copy operation
+        for i in range(weights.shape[0]):  # Layer loop
+            for j in range(weights.shape[1]):  # Qubit loop
+                for k in range(weights.shape[2]):  # Gate loop
+                    weights_plus = weights.copy()  # O(n) copy operation
                     weights_minus = weights.copy()  # O(n) copy operation
                     weights_plus[i, j, k] += shift
                     weights_minus[i, j, k] -= shift
-                    loss_plus = compute_loss(circuit, X, y, weights_plus)   # O(batch_size)
-                    loss_minus = compute_loss(circuit, X, y, weights_minus) # O(batch_size)
+                    loss_plus = compute_loss(circuit, X, y, weights_plus)  # O(batch_size)
+                    loss_minus = compute_loss(circuit, X, y, weights_minus)  # O(batch_size)
                     grad[i, j, k] = (loss_plus - loss_minus) / 2
     # ... similar pattern in finite differences fallback (lines 238-244)
 ```
@@ -93,19 +93,19 @@ Multiple API endpoints repeatedly read and parse the same JSON files:
 
 ```python
 # get_job_progress() - line 273
-with open(status_file, 'r') as f:
+with open(status_file, "r") as f:
     data = json.load(f)
 
 # get_job_metrics() - line 319
-with open(status_file, 'r') as f:
+with open(status_file, "r") as f:
     data = json.load(f)  # READS SAME FILE AGAIN
 
 # get_job_details() - line 495
-with open(status_file, 'r') as f:
+with open(status_file, "r") as f:
     data = json.load(f)  # READS SAME FILE AGAIN
 
 # get_job_logs() - line 517
-with open(status_file, 'r') as f:
+with open(status_file, "r") as f:
     data = json.load(f)  # READS SAME FILE AGAIN
 ```
 
@@ -128,6 +128,7 @@ from pathlib import Path
 _file_cache = {}
 _FILE_CACHE_TTL = 5  # seconds
 
+
 def _load_json_cached(filepath: Path) -> dict:
     """Load JSON with TTL-based caching"""
     now = time.time()
@@ -140,7 +141,7 @@ def _load_json_cached(filepath: Path) -> dict:
 
     # Cache miss or expired - read file
     try:
-        with open(filepath, 'r') as f:
+        with open(filepath, "r") as f:
             data = json.load(f)
         _file_cache[cache_key] = (data, now)
         return data
@@ -150,9 +151,10 @@ def _load_json_cached(filepath: Path) -> dict:
             return _file_cache[cache_key][0]
         raise
 
+
 # Usage in all methods:
 def get_job_progress(self, job_id):
-    status_file = root_dir / 'data_out' / 'autotrain' / 'status.json'
+    status_file = root_dir / "data_out" / "autotrain" / "status.json"
     data = _load_json_cached(status_file)  # Cached!
     # ... rest of logic
 ```
@@ -228,6 +230,7 @@ _DOMAIN_KEYWORDS = {
     "aria": frozenset(["aria", "move", "animation", "character"]),
     "technical": frozenset(["code", "program", "api", "function", "database"]),
 }
+
 
 def _analyze_query_optimized(query: str) -> dict:
     """Optimized query analysis with single-pass word extraction"""
@@ -367,10 +370,10 @@ def get_global_stats():
             accuracies.append(session.best_val_acc)
 
     return {
-        'active_sessions': active_count,
-        'completed_sessions': completed_count,
-        'total_epochs': total_epochs,
-        'avg_accuracy': np.mean(accuracies) if accuracies else 0.0,
+        "active_sessions": active_count,
+        "completed_sessions": completed_count,
+        "total_epochs": total_epochs,
+        "avg_accuracy": np.mean(accuracies) if accuracies else 0.0,
     }
 ```
 
@@ -396,9 +399,9 @@ Creates intermediate lists when only counting:
 
 ```python
 # Line 700-701
-health['checks']['datasets'] = {
-    'exists': datasets_dir.exists(),
-    'count': len(list(datasets_dir.glob('*/train.json')))  # Creates full list!
+health["checks"]["datasets"] = {
+    "exists": datasets_dir.exists(),
+    "count": len(list(datasets_dir.glob("*/train.json"))),  # Creates full list!
 }
 
 # Line 761
@@ -414,9 +417,9 @@ Use generator expressions with sum():
 
 ```python
 # Optimized counting without intermediate lists
-health['checks']['datasets'] = {
-    'exists': datasets_dir.exists(),
-    'count': sum(1 for _ in datasets_dir.glob('*/train.json'))  # Generator!
+health["checks"]["datasets"] = {
+    "exists": datasets_dir.exists(),
+    "count": sum(1 for _ in datasets_dir.glob("*/train.json")),  # Generator!
 }
 
 dataset_count = sum(1 for d in datasets_dir.iterdir() if d.is_dir())
@@ -459,6 +462,7 @@ from collections import deque, defaultdict
 _request_timestamps = defaultdict(deque)
 _MAX_REQUESTS = 100
 _WINDOW_SECONDS = 60
+
 
 def check_rate_limit(client_ip: str) -> bool:
     """Check if client is within rate limit"""
@@ -587,6 +591,7 @@ def test_gradient_optimization():
     grad_optimized = compute_gradient_optimized(circuit, X, y, weights)
 
     np.testing.assert_allclose(grad_manual, grad_optimized, rtol=1e-5)
+
 
 def test_gradient_performance():
     """Benchmark gradient computation speedup"""
