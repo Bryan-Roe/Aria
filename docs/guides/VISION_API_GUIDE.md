@@ -176,29 +176,23 @@ import base64
 import requests
 
 # Load and encode image
-with open('test.jpg', 'rb') as f:
-    image_base64 = base64.b64encode(f.read()).decode('utf-8')
+with open("test.jpg", "rb") as f:
+    image_base64 = base64.b64encode(f.read()).decode("utf-8")
 
 # Single inference
-response = requests.post(
-    'http://localhost:7071/api/vision/infer',
-    json={'image': image_base64}
-)
+response = requests.post("http://localhost:7071/api/vision/infer", json={"image": image_base64})
 result = response.json()
 print(f"Predicted: {result['label']} ({result['confidence']:.2%})")
 
 # Batch inference
-with open('test2.jpg', 'rb') as f:
-    image2_base64 = base64.b64encode(f.read()).decode('utf-8')
+with open("test2.jpg", "rb") as f:
+    image2_base64 = base64.b64encode(f.read()).decode("utf-8")
 
-response = requests.post(
-    'http://localhost:7071/api/vision/batch-infer',
-    json={'images': [image_base64, image2_base64]}
-)
+response = requests.post("http://localhost:7071/api/vision/batch-infer", json={"images": [image_base64, image2_base64]})
 results = response.json()
 print(f"Analyzed {results['count']} images")
-for i, r in enumerate(results['results']):
-    print(f"  Image {i+1}: {r['label']} ({r['confidence']:.2%})")
+for i, r in enumerate(results["results"]):
+    print(f"  Image {i + 1}: {r['label']} ({r['confidence']:.2%})")
 ```
 
 ## CLI Testing

@@ -207,22 +207,23 @@ The system checks providers in this order:
 Run this to verify key packages are installed:
 
 ```python
-python3 << 'EOF'
+python3 << "EOF"
 import sys
+
 critical = {
-    'torch': '2.8+',
-    'transformers': 'latest',
-    'qiskit': '1.3+',
-    'peft': 'latest',
-    'azure-openai': 'latest',
-    'azure-quantum': '1.0+',
-    'mcp': '1.0+'
+    "torch": "2.8+",
+    "transformers": "latest",
+    "qiskit": "1.3+",
+    "peft": "latest",
+    "azure-openai": "latest",
+    "azure-quantum": "1.0+",
+    "mcp": "1.0+",
 }
 
 missing = []
 for pkg, version in critical.items():
     try:
-        __import__(pkg.replace('-', '_'))
+        __import__(pkg.replace("-", "_"))
         print(f"✓ {pkg:<20} installed")
     except ImportError:
         print(f"✗ {pkg:<20} MISSING")
