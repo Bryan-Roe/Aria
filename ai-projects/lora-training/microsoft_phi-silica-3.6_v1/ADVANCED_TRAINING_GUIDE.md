@@ -71,11 +71,7 @@ Results saved to `data_out/evaluation_results/`:
 from scripts.auto_eval import AutomaticEvaluator
 
 evaluator = AutomaticEvaluator()
-metrics = evaluator.evaluate_model(
-    model_path="data_out/lora_training",
-    test_dataset="test.jsonl",
-    num_samples=100
-)
+metrics = evaluator.evaluate_model(model_path="data_out/lora_training", test_dataset="test.jsonl", num_samples=100)
 print(f"Perplexity: {metrics.perplexity:.2f}")
 ```
 
@@ -199,11 +195,11 @@ python scripts\semantic_pruning.py \
 from scripts.semantic_pruning import PruningConfig, SemanticPruner
 
 config = PruningConfig(
-    similarity_threshold=0.95,   # Higher = more aggressive
-    min_length=10,               # Minimum words
-    max_length=2048,             # Maximum words
-    quality_threshold=0.3,       # 0.0-1.0 scale
-    target_reduction=0.3         # Target 30% reduction
+    similarity_threshold=0.95,  # Higher = more aggressive
+    min_length=10,  # Minimum words
+    max_length=2048,  # Maximum words
+    quality_threshold=0.3,  # 0.0-1.0 scale
+    target_reduction=0.3,  # Target 30% reduction
 )
 
 pruner = SemanticPruner(config)

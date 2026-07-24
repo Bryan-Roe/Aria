@@ -22,8 +22,10 @@
 
 ```python
 score = 0.0
-if domain in agent_config.get("domains", []): score += 0.5
-if intent in agent_config.get("intents", []): score += 0.3
+if domain in agent_config.get("domains", []):
+    score += 0.5
+if intent in agent_config.get("intents", []):
+    score += 0.3
 if score > 0.0:
     score += agent_config.get("confidence_boost", 0.0) * confidence
     # learned pattern bonus (time-decay 24h half-life)
