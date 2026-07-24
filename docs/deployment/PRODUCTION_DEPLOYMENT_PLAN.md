@@ -308,13 +308,16 @@ def rank_for_production(results):
 ```python
 # api/quantum_inference.py
 from fastapi import FastAPI
+
 app = FastAPI()
+
 
 @app.post("/predict/{model_id}")
 async def predict(model_id: str, features: List[float]):
     model = load_model(model_id)
     result = model.predict(features)
     return {"prediction": result, "confidence": model.confidence}
+
 
 # Deploy with:
 # uvicorn api.quantum_inference:app --host 0.0.0.0 --port 8000

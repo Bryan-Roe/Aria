@@ -47,10 +47,12 @@ import asyncio
 pipeline = QuantumLLMPipeline()
 
 # Non-streaming completion
-result = asyncio.run(pipeline.generate(
-    prompt="What is quantum computing?",
-    provider="auto",  # auto-detect or specify azure/openai/lmstudio/local
-))
+result = asyncio.run(
+    pipeline.generate(
+        prompt="What is quantum computing?",
+        provider="auto",  # auto-detect or specify azure/openai/lmstudio/local
+    )
+)
 print(result)
 # Output: {
 #   "response": "...",
@@ -62,10 +64,12 @@ print(result)
 #   "quantum_augmented": True
 # }
 
+
 # Streaming completion
 async def stream_example():
     async for chunk in pipeline.stream("Tell me about quantum entanglement"):
         print(chunk, end="", flush=True)
+
 
 asyncio.run(stream_example())
 ```
@@ -111,12 +115,12 @@ export QUANTUM_LLM_CACHE_TTL_SECONDS=3600
 from ai_projects.quantum_ml.src.quantum_llm import QuantumLLMConfig, QuantumLLMPipeline
 
 config = QuantumLLMConfig(
-    backend="classical",           # "auto", "qiskit", "pennylane", "classical"
+    backend="classical",  # "auto", "qiskit", "pennylane", "classical"
     num_qubits=4,
     shots=512,
     num_layers=2,
     top_k=10,
-    temperature_blend=0.3,         # 0 = classical, 1 = quantum
+    temperature_blend=0.3,  # 0 = classical, 1 = quantum
     provider="auto",
     model="gpt-4",
     temperature=0.7,
@@ -346,8 +350,8 @@ The module includes LRU caching with TTL expiration to avoid recomputing identic
 
 ```python
 config = QuantumLLMConfig(
-    cache_enabled=True,        # Enable caching
-    cache_max_size=256,        # Max 256 cached circuits
+    cache_enabled=True,  # Enable caching
+    cache_max_size=256,  # Max 256 cached circuits
     cache_ttl_seconds=3600.0,  # Expire after 1 hour
 )
 pipeline = QuantumLLMPipeline(config=config)
@@ -464,6 +468,7 @@ export LOG_LEVEL=DEBUG
 
 ```python
 import logging
+
 logging.basicConfig(level=logging.DEBUG)
 ```
 
@@ -475,6 +480,7 @@ Track pipeline performance:
 import time
 import asyncio
 
+
 async def benchmark():
     pipeline = QuantumLLMPipeline()
     times = []
@@ -485,9 +491,10 @@ async def benchmark():
         t1 = time.monotonic()
         times.append((t1 - t0) * 1000)
 
-    print(f"Mean: {sum(times)/len(times):.1f}ms")
+    print(f"Mean: {sum(times) / len(times):.1f}ms")
     print(f"Min: {min(times):.1f}ms")
     print(f"Max: {max(times):.1f}ms")
+
 
 asyncio.run(benchmark())
 ```
