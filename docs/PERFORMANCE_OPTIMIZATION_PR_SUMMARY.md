@@ -39,9 +39,11 @@ def validate():
     onclick = re.findall(r'onclick=["\']([^"\']+)["\']', content)
     ids = re.findall(r'id=["\']([^"\']+)["\']', content)
 
+
 # After (optimized)
 _RE_ONCLICK = re.compile(r'onclick=["\']([^"\']+)["\']')
 _RE_IDS = re.compile(r'id=["\']([^"\']+)["\']')
+
 
 def validate():
     onclick = _RE_ONCLICK.findall(content)
