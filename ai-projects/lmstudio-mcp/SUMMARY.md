@@ -156,10 +156,12 @@ python quickstart.py
 ```python
 # Existing provider way
 from shared.chat_providers import LMStudioProvider
+
 provider = LMStudioProvider(base_url="http://127.0.0.1:1234/v1")
 
 # New MCP way
 from lmstudio_mcp_server import LMStudioClient
+
 client = LMStudioClient(base_url="http://127.0.0.1:1234/v1")
 await client.chat_completion(messages=[...])
 ```

@@ -35,12 +35,12 @@ python -m chat_cli --provider lmstudio "Tell me about AI"
 from lmstudio_agent_integration import get_lmstudio_agent_client
 import asyncio
 
+
 async def main():
     client = get_lmstudio_agent_client()
-    response = await client.complete([
-        {"role": "user", "content": "Hello"}
-    ])
+    response = await client.complete([{"role": "user", "content": "Hello"}])
     print(response)
+
 
 asyncio.run(main())
 ```
@@ -169,6 +169,7 @@ python -m chat_cli --provider lmstudio "test"
 
 ```python
 from lmstudio_agent_integration import register_lmstudio_agent
+
 register_lmstudio_agent(_AGENT_REGISTRY)
 ```
 
