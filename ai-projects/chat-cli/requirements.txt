@@ -1,2 +1,2 @@
-openai>=2.45.0
+openai>=2.46.0
 colorama>=0.4.6

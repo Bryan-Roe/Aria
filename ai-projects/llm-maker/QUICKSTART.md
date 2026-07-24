@@ -32,7 +32,7 @@ tool = maker.create_tool(
     name="calculate_factorial",
     description="Calculate the factorial of a number",
     parameters={"n": "int"},
-    return_type="int"
+    return_type="int",
 )
 
 # Register it
@@ -47,13 +47,9 @@ from llm_maker import ToolExecutor
 executor = ToolExecutor()
 
 # Execute the tool
-result = executor.execute(
-    code=tool.code,
-    function_name="calculate_factorial",
-    args={"n": 5}
-)
+result = executor.execute(code=tool.code, function_name="calculate_factorial", args={"n": 5})
 
-if result['success']:
+if result["success"]:
     print(f"Result: {result['result']}")
 else:
     print(f"Error: {result['error']}")
@@ -87,11 +83,7 @@ tool = maker.create_tool(
     description="Calculate the nth Fibonacci number",
     parameters={"n": "int"},
     return_type="int",
-    examples=[
-        {"input": {"n": 0}, "output": 0},
-        {"input": {"n": 1}, "output": 1},
-        {"input": {"n": 10}, "output": 55}
-    ]
+    examples=[{"input": {"n": 0}, "output": 0}, {"input": {"n": 1}, "output": 1}, {"input": {"n": 10}, "output": 55}],
 )
 ```
 
@@ -99,10 +91,7 @@ tool = maker.create_tool(
 
 ```python
 tool = maker.create_tool(
-    name="word_count",
-    description="Count words in a text string",
-    parameters={"text": "str"},
-    return_type="int"
+    name="word_count", description="Count words in a text string", parameters={"text": "str"}, return_type="int"
 )
 ```
 
@@ -113,7 +102,7 @@ tool = maker.create_tool(
     name="filter_dict",
     description="Filter dictionary by list of keys",
     parameters={"data": "dict", "keys": "list"},
-    return_type="dict"
+    return_type="dict",
 )
 ```
 

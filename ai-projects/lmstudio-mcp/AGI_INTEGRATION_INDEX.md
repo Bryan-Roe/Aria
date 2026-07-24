@@ -79,9 +79,7 @@ from agi_provider import AGIProvider
 agi = AGIProvider()
 
 # Automatically routes to LM Studio for technical content
-response = agi.complete([
-    {"role": "user", "content": "Explain neural networks"}
-])
+response = agi.complete([{"role": "user", "content": "Explain neural networks"}])
 
 print(response)
 ```
@@ -124,6 +122,7 @@ print(response)
 
 ```python
 from agi_provider import detect_provider, AGIProvider
+
 provider, _ = detect_provider("lmstudio")
 agi = AGIProvider(base_provider=provider)
 ```
@@ -132,6 +131,7 @@ agi = AGIProvider(base_provider=provider)
 
 ```python
 from lmstudio_agi_integration import get_lmstudio_agent_registry_entry
+
 _AGENT_REGISTRY["lmstudio-local"] = get_lmstudio_agent_registry_entry()
 ```
 
@@ -139,6 +139,7 @@ _AGENT_REGISTRY["lmstudio-local"] = get_lmstudio_agent_registry_entry()
 
 ```python
 from lmstudio_agi_integration import AGILMStudioRouter
+
 router = AGILMStudioRouter()
 # Manual routing decisions
 ```
@@ -147,6 +148,7 @@ router = AGILMStudioRouter()
 
 ```python
 from lmstudio_agi_integration import decompose_task_with_lmstudio
+
 subtasks = await decompose_task_with_lmstudio(complex_task)
 ```
 
@@ -208,6 +210,7 @@ python agi_provider_examples.py
 
 ```python
 from lmstudio_agi_integration import AGILMStudioRouter
+
 router = AGILMStudioRouter()
 
 # Test different analyses
