@@ -1,5 +1,5 @@
 # Minimal deps; local mode works with stdlib only
 # Cloud providers use OpenAI SDK compatible with GitHub Models
-openai>=2.45.0
+openai>=2.46.0
 jsonschema>=4.26.0
 pytest>=9.1.1

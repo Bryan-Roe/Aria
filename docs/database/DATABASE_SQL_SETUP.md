@@ -108,6 +108,7 @@ delete_value("last_model")
 
 ```python
 from shared.sql_engine import quick_query
+
 rows = quick_query("SELECT TOP 5 * FROM QuantumTrainingRuns ORDER BY CreatedAt DESC")
 for r in rows:
     print(r)
@@ -119,6 +120,7 @@ for r in rows:
 
 ```python
 from shared.sql_engine import quick_query
+
 rows = quick_query("SELECT 1", simulate_delay=0.6)  # sleeps 0.6s before execution
 ```
 
@@ -397,8 +399,8 @@ _ENGINE = create_engine(
     url,
     pool_pre_ping=True,
     pool_recycle=1800,
-    pool_size=30,        # Override
-    max_overflow=10,     # Override
+    pool_size=30,  # Override
+    max_overflow=10,  # Override
     future=True,
 )
 ```

@@ -63,12 +63,14 @@ import torch
 # 1. LOAD YOUR DATA
 # ============================================
 
+
 # Option A: From CSV
 def load_from_csv(filepath):
     df = pd.read_csv(filepath)
-    X = df.drop('label', axis=1).values  # All columns except 'label'
-    y = df['label'].values
+    X = df.drop("label", axis=1).values  # All columns except 'label'
+    y = df["label"].values
     return X, y
+
 
 # Option B: From NumPy
 def load_from_numpy(X_file, y_file):
@@ -76,15 +78,19 @@ def load_from_numpy(X_file, y_file):
     y = np.load(y_file)
     return X, y
 
+
 # Option C: Manual arrays
 def create_manual_data():
-    X = np.array([
-        [1.0, 2.0, 3.0, 4.0],
-        [2.0, 3.0, 4.0, 5.0],
-        # ... your data ...
-    ])
+    X = np.array(
+        [
+            [1.0, 2.0, 3.0, 4.0],
+            [2.0, 3.0, 4.0, 5.0],
+            # ... your data ...
+        ]
+    )
     y = np.array([0, 1, ...])  # Your labels
     return X, y
+
 
 # ============================================
 # 2. LOAD YOUR ACTUAL DATA (CHANGE THIS!)
@@ -106,10 +112,11 @@ print(f"Classes: {np.unique(y)}")
 
 # Split into train/validation
 X_train, X_val, y_train, y_val = train_test_split(
-    X, y,
+    X,
+    y,
     test_size=0.2,
     random_state=42,
-    stratify=y  # Keeps class balance
+    stratify=y,  # Keeps class balance
 )
 
 # Standardize features (IMPORTANT for quantum circuits!)
@@ -134,6 +141,7 @@ if n_features < n_qubits:
 elif n_features > n_qubits:
     # Use PCA to reduce
     from sklearn.decomposition import PCA
+
     pca = PCA(n_components=n_qubits)
     X_train = pca.fit_transform(X_train)
     X_val = pca.transform(X_val)
@@ -153,21 +161,15 @@ print(f"Created model with {n_qubits} qubits")
 # ============================================
 
 print("\nStarting training...")
-history = train_quantum_model(
-    model=model,
-    X_train=X_train,
-    y_train=y_train,
-    X_val=X_val,
-    y_val=y_val
-)
+history = train_quantum_model(model=model, X_train=X_train, y_train=y_train, X_val=X_val, y_val=y_val)
 
 # ============================================
 # 6. EVALUATE RESULTS
 # ============================================
 
-print("\n" + "="*50)
+print("\n" + "=" * 50)
 print("TRAINING COMPLETE!")
-print("="*50)
+print("=" * 50)
 print(f"Final Training Loss: {history['train_loss'][-1]:.4f}")
 print(f"Final Validation Loss: {history['val_loss'][-1]:.4f}")
 print(f"Final Validation Accuracy: {history['val_acc'][-1]:.4f}")
@@ -183,12 +185,14 @@ print("\nModel saved to: results/my_quantum_model.pt")
 
 # Save scaler for inference
 import joblib
+
 joblib.dump(scaler, "results/scaler.pkl")
 print("Scaler saved to: results/scaler.pkl")
 
 # ============================================
 # 8. MAKE PREDICTIONS ON NEW DATA
 # ============================================
+
 
 def predict_new_data(new_X, model, scaler):
     """Predict on new unseen data"""
@@ -213,6 +217,7 @@ def predict_new_data(new_X, model, scaler):
             predictions = (predictions > 0.5).float()
 
     return predictions.numpy()
+
 
 # Example: Predict on validation set
 predictions = predict_new_data(X_val, model, scaler)
@@ -259,17 +264,18 @@ from hybrid_qnn import HybridQNN, QuantumClassicalTrainer
 
 # Example: Load from CSV
 df = pd.read_csv("your_data.csv")
-X = df.drop('label', axis=1).values
-y = df['label'].values
+X = df.drop("label", axis=1).values
+y = df["label"].values
 
 # Or create sample data
 from sklearn.datasets import make_classification
+
 X, y = make_classification(
     n_samples=500,
     n_features=10,
     n_informative=8,
     n_classes=3,  # Multi-class!
-    random_state=42
+    random_state=42,
 )
 
 print(f"Data: {X.shape[0]} samples, {X.shape[1]} features, {len(np.unique(y))} classes")
@@ -279,9 +285,7 @@ print(f"Data: {X.shape[0]} samples, {X.shape[1]} features, {len(np.unique(y))} c
 # ============================================
 
 # Split
-X_train, X_val, y_train, y_val = train_test_split(
-    X, y, test_size=0.2, random_state=42, stratify=y
-)
+X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
 
 # Scale
 scaler = StandardScaler()
@@ -289,14 +293,8 @@ X_train = scaler.fit_transform(X_train)
 X_val = scaler.transform(X_val)
 
 # Create data loaders
-train_dataset = TensorDataset(
-    torch.FloatTensor(X_train),
-    torch.LongTensor(y_train)
-)
-val_dataset = TensorDataset(
-    torch.FloatTensor(X_val),
-    torch.LongTensor(y_val)
-)
+train_dataset = TensorDataset(torch.FloatTensor(X_train), torch.LongTensor(y_train))
+val_dataset = TensorDataset(torch.FloatTensor(X_val), torch.LongTensor(y_val))
 
 train_loader = DataLoader(train_dataset, batch_size=32, shuffle=True)
 val_loader = DataLoader(val_dataset, batch_size=32, shuffle=False)
@@ -306,12 +304,12 @@ val_loader = DataLoader(val_dataset, batch_size=32, shuffle=False)
 # ============================================
 
 model = HybridQNN(
-    input_dim=X.shape[1],      # Your number of features
-    hidden_dim=32,              # Classical hidden layer size
-    num_qubits=4,               # Quantum circuit size
-    quantum_layers=2,           # Quantum depth (optimal!)
+    input_dim=X.shape[1],  # Your number of features
+    hidden_dim=32,  # Classical hidden layer size
+    num_qubits=4,  # Quantum circuit size
+    quantum_layers=2,  # Quantum depth (optimal!)
     output_dim=len(np.unique(y)),  # Number of classes
-    dropout=0.2
+    dropout=0.2,
 )
 
 print(model)
@@ -323,13 +321,13 @@ print(model)
 trainer = QuantumClassicalTrainer(
     model=model,
     learning_rate=0.01,
-    device='cpu'  # or 'cuda' if you have GPU
+    device="cpu",  # or 'cuda' if you have GPU
 )
 
 trainer.train(
     train_loader=train_loader,
     val_loader=val_loader,
-    num_epochs=50  # Adjust based on convergence
+    num_epochs=50,  # Adjust based on convergence
 )
 
 # ============================================
@@ -385,7 +383,8 @@ print("Model saved!")
 
     ```python
     from sklearn.impute import SimpleImputer
-    imputer = SimpleImputer(strategy='mean')
+
+    imputer = SimpleImputer(strategy="mean")
     X = imputer.fit_transform(X)
     ```
 
@@ -393,6 +392,7 @@ print("Model saved!")
 
     ```python
     from imblearn.over_sampling import SMOTE
+
     smote = SMOTE(random_state=42)
     X, y = smote.fit_resample(X, y)
     ```
@@ -401,6 +401,7 @@ print("Model saved!")
 
     ```python
     from sklearn.preprocessing import RobustScaler
+
     scaler = RobustScaler()
     X = scaler.fit_transform(X)
     ```
@@ -416,10 +417,10 @@ print("Model saved!")
 df = pd.read_csv("patient_data.csv")
 
 # Features: age, blood_pressure, cholesterol, glucose, BMI
-X = df[['age', 'bp', 'cholesterol', 'glucose', 'bmi']].values
+X = df[["age", "bp", "cholesterol", "glucose", "bmi"]].values
 
 # Label: 0=healthy, 1=disease
-y = df['diagnosis'].values
+y = df["diagnosis"].values
 
 # Preprocess
 scaler = StandardScaler()
@@ -427,6 +428,7 @@ X_scaled = scaler.fit_transform(X)
 
 # Pad to 4 features (we have 5, so PCA)
 from sklearn.decomposition import PCA
+
 pca = PCA(n_components=4)
 X_reduced = pca.fit_transform(X_scaled)
 
@@ -441,11 +443,12 @@ X_reduced = pca.fit_transform(X_scaled)
 df = pd.read_csv("transactions.csv")
 
 # Features: amount, time, merchant_category, etc.
-X = df.drop(['fraud'], axis=1).values
-y = df['fraud'].values  # 0=legitimate, 1=fraud
+X = df.drop(["fraud"], axis=1).values
+y = df["fraud"].values  # 0=legitimate, 1=fraud
 
 # Handle imbalance (fraud is rare!)
 from imblearn.over_sampling import SMOTE
+
 smote = SMOTE(random_state=42)
 X_balanced, y_balanced = smote.fit_resample(X, y)
 
@@ -458,6 +461,7 @@ X_balanced, y_balanced = smote.fit_resample(X, y)
 ```python
 # Load small images (e.g., MNIST digits)
 from sklearn.datasets import load_digits
+
 digits = load_digits()
 
 X = digits.data  # 8x8 images flattened to 64 features
@@ -491,6 +495,7 @@ print(f"Explained variance: {pca.explained_variance_ratio_.sum():.2%}")
 ```python
 # Always standardize!
 from sklearn.preprocessing import StandardScaler
+
 scaler = StandardScaler()
 X = scaler.fit_transform(X)
 
@@ -499,6 +504,7 @@ print(np.bincount(y))
 
 # If imbalanced, use SMOTE
 from imblearn.over_sampling import SMOTE
+
 X, y = SMOTE().fit_resample(X, y)
 ```
 
@@ -521,6 +527,7 @@ epochs = 50  # instead of 100
 
 # Sample your data
 from sklearn.utils import resample
+
 X_sample, y_sample = resample(X, y, n_samples=500, random_state=42)
 ```
 
@@ -576,10 +583,10 @@ print(f"Class distribution: {np.bincount(y)}")
 # Plot training curves
 import matplotlib.pyplot as plt
 
-plt.plot(history['train_loss'], label='Train Loss')
-plt.plot(history['val_loss'], label='Val Loss')
+plt.plot(history["train_loss"], label="Train Loss")
+plt.plot(history["val_loss"], label="Val Loss")
 plt.legend()
-plt.savefig('results/training_curve.png')
+plt.savefig("results/training_curve.png")
 ```
 
 ### 4. Compare to Classical Baseline
@@ -612,8 +619,8 @@ print(f"Quantum: {quantum_acc:.2%}")
 1. **Save model & scaler**
 
     ```python
-    torch.save(model.state_dict(), 'model.pt')
-    joblib.dump(scaler, 'scaler.pkl')
+    torch.save(model.state_dict(), "model.pt")
+    joblib.dump(scaler, "scaler.pkl")
     ```
 
 2. **Create inference script**
