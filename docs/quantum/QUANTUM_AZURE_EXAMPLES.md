@@ -148,12 +148,14 @@ python .\scripts\analyze_quantum_results.py
 # ai-projects/quantum-ml/create_test_circuit.py
 from qiskit import QuantumCircuit
 
+
 def create_bell_state():
     qc = QuantumCircuit(2, 2)
     qc.h(0)
     qc.cx(0, 1)
     qc.measure([0, 1], [0, 1])
     return qc
+
 
 if __name__ == "__main__":
     circuit = create_bell_state()
@@ -270,11 +272,7 @@ results = []
 for job in jobs:
     cmd = ["python", "scripts/evaluation/quantum_autorun.py", "--job", job]
     proc = subprocess.run(cmd, capture_output=True, text=True)
-    results.append({
-        "job": job,
-        "status": "success" if proc.returncode == 0 else "failed",
-        "output": proc.stdout
-    })
+    results.append({"job": job, "status": "success" if proc.returncode == 0 else "failed", "output": proc.stdout})
 
 # Save batch results
 with open("data_out/batch_results.json", "w") as f:
