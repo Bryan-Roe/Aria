@@ -42,16 +42,16 @@ jobs = [j for j in jobs if set(j.tags) & tags_set]
 
 ```python
 # Before (12 separate if statements)
-if '[aria:walk:left]' in lower_text or 'walk left' in lower_text:
-    commands.append({'action': 'walk', 'direction': 'left', 'distance': 200})
-if '[aria:walk:right]' in lower_text or 'walk right' in lower_text:
-    commands.append({'action': 'walk', 'direction': 'right', 'distance': 200})
+if "[aria:walk:left]" in lower_text or "walk left" in lower_text:
+    commands.append({"action": "walk", "direction": "left", "distance": 200})
+if "[aria:walk:right]" in lower_text or "walk right" in lower_text:
+    commands.append({"action": "walk", "direction": "right", "distance": 200})
 # ... 10 more
 
 # After (data-driven, single loop)
 _COMMAND_PATTERNS = (
-    (('[aria:walk:left]', 'walk left'), {'action': 'walk', 'direction': 'left', 'distance': 200}),
-    (('[aria:walk:right]', 'walk right'), {'action': 'walk', 'direction': 'right', 'distance': 200}),
+    (("[aria:walk:left]", "walk left"), {"action": "walk", "direction": "left", "distance": 200}),
+    (("[aria:walk:right]", "walk right"), {"action": "walk", "direction": "right", "distance": 200}),
     # ...
 )
 for patterns, command in _COMMAND_PATTERNS:
