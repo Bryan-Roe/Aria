@@ -220,8 +220,8 @@ _ENGINE = create_engine(
     url,
     pool_pre_ping=True,
     pool_recycle=1800,
-    pool_size=30,        # Override default (5)
-    max_overflow=10,     # Override default (10)
+    pool_size=30,  # Override default (5)
+    max_overflow=10,  # Override default (10)
     future=True,
 )
 ```

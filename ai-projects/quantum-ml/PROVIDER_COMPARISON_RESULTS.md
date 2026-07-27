@@ -279,14 +279,14 @@ Shots: 1000
 
 ```python
 # H decomposition
-qc.rz(np.pi/2, q)
-qc.rx(np.pi/2, q)
-qc.rz(np.pi/2, q)
+qc.rz(np.pi / 2, q)
+qc.rx(np.pi / 2, q)
+qc.rz(np.pi / 2, q)
 
 # CX decomposition
-qc.rx(np.pi/2, control)
-qc.rzz(np.pi/2, control, target)
-qc.rx(-np.pi/2, control)
+qc.rx(np.pi / 2, control)
+qc.rzz(np.pi / 2, control, target)
+qc.rx(-np.pi / 2, control)
 ```
 
 - **Works on:** None tested ✅
@@ -304,12 +304,12 @@ qc.rx(-np.pi/2, control)
 ```python
 # H decomposition
 qc.rz(np.pi, q)
-qc.rx(np.pi/2, q)
+qc.rx(np.pi / 2, q)
 
 # CX decomposition
-qc.rz(np.pi/2, target)
+qc.rz(np.pi / 2, target)
 qc.cz(control, target)
-qc.rz(-np.pi/2, target)
+qc.rz(-np.pi / 2, target)
 ```
 
 - **Works on:** Not directly tested on Rigetti (standard worked)
@@ -415,7 +415,7 @@ qc.rz(-np.pi/2, target)
 ```python
 def compute_entropy(counts):
     total = sum(counts.values())
-    p = [v/total for v in counts.values() if v > 0]
+    p = [v / total for v in counts.values() if v > 0]
     return -sum(p_i * np.log2(p_i) for p_i in p)
 ```
 
