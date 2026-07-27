@@ -11,7 +11,7 @@ Quick reference for common performance anti-patterns and their fixes in the Aria
 ❌ **SLOW - Creates list every time:**
 
 ```python
-if any(k in cmd for k in ['jump', 'leap', 'hop']):
+if any(k in cmd for k in ["jump", "leap", "hop"]):
     do_something()
 ```
 
@@ -19,11 +19,11 @@ if any(k in cmd for k in ['jump', 'leap', 'hop']):
 
 ```python
 # For small sets, tuple is fastest
-if any(k in cmd for k in ('jump', 'leap', 'hop')):
+if any(k in cmd for k in ("jump", "leap", "hop")):
     do_something()
 
 # For repeated checks or large sets, use module-level constant
-_JUMP_KEYWORDS = frozenset(['jump', 'leap', 'hop'])
+_JUMP_KEYWORDS = frozenset(["jump", "leap", "hop"])
 if any(k in cmd for k in _JUMP_KEYWORDS):
     do_something()
 ```
@@ -161,7 +161,7 @@ for key, values in data.items():
 ❌ **SLOW - Manual tracking:**
 
 ```python
-best_value = float('-inf')
+best_value = float("-inf")
 best_item = None
 
 for item in items:
@@ -300,6 +300,7 @@ grep -n "sum(.*).*len(" *.py
 ```python
 import time
 
+
 def benchmark(func, *args, iterations=1000):
     """Benchmark a function."""
     # Warm-up
@@ -312,13 +313,14 @@ def benchmark(func, *args, iterations=1000):
         func(*args)
     elapsed = time.perf_counter() - start
 
-    print(f"{func.__name__}: {elapsed:.3f}s total, {elapsed/iterations*1000:.3f}ms avg")
+    print(f"{func.__name__}: {elapsed:.3f}s total, {elapsed / iterations * 1000:.3f}ms avg")
     return elapsed
+
 
 # Usage
 old_time = benchmark(old_function, test_data)
 new_time = benchmark(new_function, test_data)
-print(f"Speedup: {old_time/new_time:.2f}x")
+print(f"Speedup: {old_time / new_time:.2f}x")
 ```
 
 ---
@@ -368,7 +370,7 @@ result = expensive_function()
 
 profiler.disable()
 stats = pstats.Stats(profiler)
-stats.sort_stats('cumulative')
+stats.sort_stats("cumulative")
 stats.print_stats(10)  # Top 10 slowest
 ```
 

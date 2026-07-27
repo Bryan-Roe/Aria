@@ -102,6 +102,8 @@
     ```python
     _cache = {}
     _TTL = 5
+
+
     def cached_load(key):
         now = time.time()
         if key in _cache and (now - _cache[key][1]) < _TTL:

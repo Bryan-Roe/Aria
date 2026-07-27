@@ -12,13 +12,14 @@ This document describes performance optimizations implemented in the Aria codeba
 
 ```python
 # ❌ BAD: Loads entire file into memory
-with open(log_file, 'r') as f:
+with open(log_file, "r") as f:
     all_lines = f.readlines()
     return all_lines[-20:]  # Only need last 20 lines
 
 # ✅ GOOD: Memory-efficient with deque
 from collections import deque
-with open(log_file, 'r') as f:
+
+with open(log_file, "r") as f:
     return list(deque(f, maxlen=20))  # Only keeps last 20 lines
 ```
 
@@ -45,6 +46,7 @@ def load_all_records(file_path):
         for line in f:
             records.append(json.loads(line))
     return records
+
 
 # ✅ GOOD: Yields records one at a time
 def load_records(file_path):
@@ -115,10 +117,7 @@ def _tail_lines(path: Path, max_lines: int) -> List[str]:
 
 ```python
 with ThreadPoolExecutor(max_workers=3) as executor:
-    futures = {
-        executor.submit(evaluate_model, task): task
-        for task in tasks
-    }
+    futures = {executor.submit(evaluate_model, task): task for task in tasks}
 
     for future in as_completed(futures):
         result = future.result()
@@ -170,12 +169,11 @@ for result in results:
 ```python
 # ❌ BAD: Sequential subprocess calls
 for script in scripts:
-    subprocess.run(['python', script])  # Blocks until complete
+    subprocess.run(["python", script])  # Blocks until complete
 
 # ✅ GOOD: Parallel execution
 with ThreadPoolExecutor() as executor:
-    futures = [executor.submit(subprocess.run, ['python', s])
-               for s in scripts]
+    futures = [executor.submit(subprocess.run, ["python", s]) for s in scripts]
     results = [f.result() for f in futures]
 ```
 
@@ -227,9 +225,7 @@ python scripts/training_analytics.py
 async def run_training_cycle():
     # Concurrent dataset downloads
     results = await asyncio.gather(
-        download_dataset('dataset1'),
-        download_dataset('dataset2'),
-        download_dataset('dataset3')
+        download_dataset("dataset1"), download_dataset("dataset2"), download_dataset("dataset3")
     )
 
     # Sequential training (GPU bound)
@@ -267,6 +263,7 @@ if output_path.exists():
 
 ```python
 from functools import lru_cache
+
 
 @lru_cache(maxsize=128)
 def expensive_computation(param):

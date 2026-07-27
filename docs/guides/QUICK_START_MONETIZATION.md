@@ -132,22 +132,19 @@ else:
 
 ```python
 # Before running expensive operation
-if manager.track_usage(user_id, 'quantum_jobs', 1):
+if manager.track_usage(user_id, "quantum_jobs", 1):
     # Usage within limits
     result = run_quantum_job()
 else:
     # Limit exceeded
-    return {
-        "error": "Quantum job limit exceeded",
-        "upgrade_url": "/pricing.html"
-    }
+    return {"error": "Quantum job limit exceeded", "upgrade_url": "/pricing.html"}
 ```
 
 ### Check Remaining Usage
 
 ```python
 subscription = manager.get_subscription(user_id)
-percentage = subscription.get_usage_percentage('quantum_jobs')
+percentage = subscription.get_usage_percentage("quantum_jobs")
 
 if percentage > 80:
     # Send notification: approaching limit
