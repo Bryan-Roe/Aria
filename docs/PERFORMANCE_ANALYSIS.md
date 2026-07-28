@@ -33,12 +33,12 @@ This report identifies **15 performance improvement opportunities** across the A
 
 ```python
 # Current implementation - creates new list for EVERY check
-if any(k in cmd for k in ['jump', 'leap', 'hop']):
-    return '[aria:position:50:60]'
-elif any(k in cmd for k in ['dance', 'spin', 'twirl']):
-    return '[aria:position:50:50]'
-elif any(k in cmd for k in ['wave', 'greet', 'hello', 'hi']):
-    return '[aria:position:30:70]'
+if any(k in cmd for k in ["jump", "leap", "hop"]):
+    return "[aria:position:50:60]"
+elif any(k in cmd for k in ["dance", "spin", "twirl"]):
+    return "[aria:position:50:50]"
+elif any(k in cmd for k in ["wave", "greet", "hello", "hi"]):
+    return "[aria:position:30:70]"
 # ... 15 more similar checks
 ```
 
@@ -107,7 +107,10 @@ def store_embedding(message_id: Optional[str], embedding: Sequence[float], model
         blob = _serialize_f32(embedding)
         cursor.execute(
             "INSERT INTO dbo.ChatMessageEmbeddings ...",
-            message_id, model or "unknown-model", len(embedding), blob,
+            message_id,
+            model or "unknown-model",
+            len(embedding),
+            blob,
         )
         conn.commit()
         return True
@@ -152,7 +155,7 @@ def store_embeddings_batch(embeddings: List[Tuple[str, Sequence[float], str]]) -
         # Bulk insert - single transaction
         cursor.executemany(
             "INSERT INTO dbo.ChatMessageEmbeddings (MessageId, EmbeddingModel, EmbeddingDim, EmbeddingVector) VALUES (?,?,?,?)",
-            values
+            values,
         )
         conn.commit()
         return len(values)
@@ -160,6 +163,7 @@ def store_embeddings_batch(embeddings: List[Tuple[str, Sequence[float], str]]) -
         return 0
     finally:
         conn.close()
+
 
 # Keep single-insert API for backward compatibility
 def store_embedding(message_id: Optional[str], embedding: Sequence[float], model: str) -> bool:
@@ -215,11 +219,7 @@ class BatchEvaluator:
     def compare_models(self, model_ids: List[str]) -> Dict:
         """Compare specific models side-by-side (optimized)."""
         # O(1) lookup per model = O(n) total
-        comparison = [
-            self._results_index[model_id]
-            for model_id in model_ids
-            if model_id in self._results_index
-        ]
+        comparison = [self._results_index[model_id] for model_id in model_ids if model_id in self._results_index]
 
         return {
             "models": [r.model_id for r in comparison],
@@ -232,7 +232,7 @@ class BatchEvaluator:
                     "duration": r.duration,
                 }
                 for r in comparison
-            ]
+            ],
         }
 ```
 
@@ -279,10 +279,7 @@ for epochs, accuracies in epoch_performance.items():
 
 ```python
 # Even better: find max in one pass
-best_epochs, best_avg = max(
-    epoch_performance.items(),
-    key=lambda item: statistics.mean(item[1])
-)
+best_epochs, best_avg = max(epoch_performance.items(), key=lambda item: statistics.mean(item[1]))
 ```
 
 **Expected improvement:** 20-30% faster, more robust
@@ -299,9 +296,9 @@ best_epochs, best_avg = max(
 
 ```python
 report = []
-report.append("\n" + "="*80)
+report.append("\n" + "=" * 80)
 report.append("AUTONOMOUS TRAINING ANALYTICS REPORT")
-report.append("="*80 + "\n")
+report.append("=" * 80 + "\n")
 ```
 
 Later in the code (not shown but referenced in analysis):
@@ -384,11 +381,7 @@ def aggregate_results(self) -> Dict:
             failed.append(r)
 
     # Rank succeeded models
-    ranked = sorted(
-        succeeded,
-        key=lambda r: r.metrics.get("accuracy", r.metrics.get("perplexity", 0)),
-        reverse=True
-    )
+    ranked = sorted(succeeded, key=lambda r: r.metrics.get("accuracy", r.metrics.get("perplexity", 0)), reverse=True)
 
     # ... use already-built 'failed' list ...
 
@@ -401,7 +394,7 @@ def aggregate_results(self) -> Dict:
         "best_model": ranked[0].model_id if ranked else None,
         "results": [r.__dict__ for r in self.results],
         "ranking": [...],
-        "failed_models": [r.__dict__ for r in failed]  # Use existing list
+        "failed_models": [r.__dict__ for r in failed],  # Use existing list
     }
 ```
 
@@ -462,6 +455,7 @@ def _validate_tts_request(req_body: Dict) -> Tuple[Optional[str], Optional[Dict]
     }
     return (None, params)
 
+
 def _try_azure_tts(text: str, voice: str, rate: str, pitch: str) -> Optional[bytes]:
     """Attempt Azure TTS synthesis.
 
@@ -471,6 +465,7 @@ def _try_azure_tts(text: str, voice: str, rate: str, pitch: str) -> Optional[byt
     # Azure TTS logic here
     pass
 
+
 def _try_local_tts(text: str) -> Optional[bytes]:
     """Attempt local TTS fallback.
 
@@ -479,6 +474,7 @@ def _try_local_tts(text: str) -> Optional[bytes]:
     """
     # Local TTS logic here
     pass
+
 
 @app.route(route="tts", methods=["POST"])
 def tts(req: func.HttpRequest) -> func.HttpResponse:
@@ -499,7 +495,7 @@ def tts(req: func.HttpRequest) -> func.HttpResponse:
     if audio:
         return func.HttpResponse(
             body=json.dumps({"audio_base64": base64.b64encode(audio).decode(), "format": "mp3"}),
-            mimetype="application/json"
+            mimetype="application/json",
         )
 
     # Fallback to local
@@ -507,7 +503,7 @@ def tts(req: func.HttpRequest) -> func.HttpResponse:
     if audio:
         return func.HttpResponse(
             body=json.dumps({"audio_base64": base64.b64encode(audio).decode(), "format": "wav"}),
-            mimetype="application/json"
+            mimetype="application/json",
         )
 
     return func.HttpResponse("TTS failed", status_code=500)
@@ -545,6 +541,7 @@ for r in rows:
 ```python
 import numpy as np
 
+
 def retrieve_similar(query_embedding: Sequence[float], top_k: int = 5) -> List[Dict]:
     """Retrieve similar messages (vectorized)."""
     # ... fetch rows ...
@@ -558,11 +555,13 @@ def retrieve_similar(query_embedding: Sequence[float], top_k: int = 5) -> List[D
     for r in rows:
         emb = _deserialize_f32(r.EmbeddingVector, r.EmbeddingDim)
         embeddings.append(emb)
-        metadata.append({
-            "message_id": r.MessageId,
-            "content": r.Content,
-            "embedding_model": r.EmbeddingModel,
-        })
+        metadata.append(
+            {
+                "message_id": r.MessageId,
+                "content": r.Content,
+                "embedding_model": r.EmbeddingModel,
+            }
+        )
 
     # Vectorized cosine similarity (all at once)
     query_np = np.array(query_embedding)
@@ -670,12 +669,7 @@ if result["status"] not in SUCCESSFUL_STATUSES:
 
 ```python
 # Every status request spawns subprocess to check venv
-proc = subprocess.run(
-    [str(venv_python), "-c", code],
-    capture_output=True,
-    text=True,
-    timeout=12
-)
+proc = subprocess.run([str(venv_python), "-c", code], capture_output=True, text=True, timeout=12)
 ```
 
 **Why it's slow:**
@@ -690,6 +684,7 @@ proc = subprocess.run(
 import time
 from functools import lru_cache
 
+
 @lru_cache(maxsize=1)
 def _get_venv_info(venv_path: str, cache_time: float) -> Dict:
     """Get venv info with caching (5-minute TTL).
@@ -702,6 +697,7 @@ def _get_venv_info(venv_path: str, cache_time: float) -> Dict:
 
     # ... subprocess logic ...
     return venv_info
+
 
 def ai_status(req: func.HttpRequest) -> func.HttpResponse:
     # ...
@@ -912,10 +908,13 @@ Example benchmark structure:
 ```python
 import time
 
+
 def benchmark_keyword_lookup():
     """Benchmark command keyword lookups."""
     commands = [
-        "jump high", "dance around", "wave hello",
+        "jump high",
+        "dance around",
+        "wave hello",
         # ... 100 test commands
     ]
 
@@ -930,7 +929,7 @@ def benchmark_keyword_lookup():
     elapsed = time.perf_counter() - start
 
     print(f"Processed {len(commands)} commands in {elapsed:.3f}s")
-    print(f"Average: {elapsed/len(commands)*1000:.2f}ms per command")
+    print(f"Average: {elapsed / len(commands) * 1000:.2f}ms per command")
 ```
 
 ---

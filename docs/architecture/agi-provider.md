@@ -88,10 +88,12 @@ can replace `AGIContext` without inheriting from it:
 ```python
 from agi_provider import MemoryInterface, AGIProvider
 
+
 class RedisMemory:
     def add_message(self, message): ...
     def add_reasoning_chain(self, chain): ...
     def get_relevant_context(self, query) -> str: ...
+
 
 assert isinstance(RedisMemory(), MemoryInterface)  # True
 ```
@@ -156,12 +158,12 @@ event loop:
 import asyncio
 from agi_provider import create_agi_provider
 
+
 async def main():
     provider, _ = create_agi_provider()
-    response = await provider.async_complete(
-        [{"role": "user", "content": "Explain LoRA fine-tuning"}]
-    )
+    response = await provider.async_complete([{"role": "user", "content": "Explain LoRA fine-tuning"}])
     print(response)
+
 
 asyncio.run(main())
 ```

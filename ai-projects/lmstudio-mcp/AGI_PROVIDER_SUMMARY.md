@@ -144,10 +144,7 @@ subtasks = await decompose_task_with_lmstudio(task, domain="ai")
 # Each subtask uses appropriate agent
 for subtask in subtasks:
     # LM Studio provides technical reasoning
-    reasoning = await reason_with_lmstudio_chain_of_thought(
-        subtask['task'],
-        depth=3
-    )
+    reasoning = await reason_with_lmstudio_chain_of_thought(subtask["task"], depth=3)
     # Other agents handle specialized aspects
 ```
 
@@ -260,12 +257,10 @@ agi = AGIProvider(
     enable_chain_of_thought=True,
     enable_self_reflection=True,
     enable_task_decomposition=True,
-
     # Reasoning parameters
     reasoning_depth=3,
     temperature=0.7,
     max_output_tokens=2048,
-
     # Verbosity
     verbose=True,
 )
@@ -279,8 +274,8 @@ agi = AGIProvider(
 router = AGILMStudioRouter(fallback_provider="agi")
 
 # Health management
-await router.ensure_healthy()                    # Check LM Studio
-router.should_use_lmstudio(query_analysis)     # Decide routing
+await router.ensure_healthy()  # Check LM Studio
+router.should_use_lmstudio(query_analysis)  # Decide routing
 
 # Execution
 await router.route_query(query, messages, analysis)
@@ -296,12 +291,7 @@ subtasks = await decompose_task_with_lmstudio(task, domain="ai")
 reasoning = await reason_with_lmstudio_chain_of_thought(query, depth=3)
 
 # Integrated completion
-response = await complete_with_lmstudio_routing(
-    agi_provider,
-    messages,
-    stream=True,
-    prefer_lmstudio=False
-)
+response = await complete_with_lmstudio_routing(agi_provider, messages, stream=True, prefer_lmstudio=False)
 ```
 
 ### Registry Integration
@@ -380,11 +370,10 @@ python lmstudio_mcp_server.py
 
 ```python
 from agi_provider import AGIProvider
+
 agi = AGIProvider()
 
-response = agi.complete([
-    {"role": "user", "content": "Explain neural networks"}
-])
+response = agi.complete([{"role": "user", "content": "Explain neural networks"}])
 # Automatically routes to LM Studio for technical content
 ```
 
@@ -427,6 +416,7 @@ Test routing:
 
 ```python
 from lmstudio_agi_integration import AGILMStudioRouter
+
 router = AGILMStudioRouter()
 # Test with different query analyses
 ```

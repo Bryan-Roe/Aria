@@ -34,9 +34,9 @@ pruned_msgs, stats, system_msg = prune_messages(
     messages,
     provider,
     model,
-    max_context_tokens=None,      # Auto-detect from model
-    reserve_output_tokens=1024,    # Reserve for response
-    system_prompt=None
+    max_context_tokens=None,  # Auto-detect from model
+    reserve_output_tokens=1024,  # Reserve for response
+    system_prompt=None,
 )
 ```
 
@@ -51,11 +51,11 @@ pruned_msgs, stats, system_msg = prune_messages(
 
 ```python
 {
-    "original_tokens": int,       # Total before pruning
-    "pruned_tokens": int,         # Total after pruning
-    "removed_count": int,         # Messages removed
-    "budget": int,                # Context window budget
-    "reserve_output_tokens": int  # Reserved for response
+    "original_tokens": int,  # Total before pruning
+    "pruned_tokens": int,  # Total after pruning
+    "removed_count": int,  # Messages removed
+    "budget": int,  # Context window budget
+    "reserve_output_tokens": int,  # Reserved for response
 }
 ```
 
