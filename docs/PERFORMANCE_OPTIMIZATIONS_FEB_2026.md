@@ -112,10 +112,10 @@ The original code had 12 separate `if` statements, each checking multiple patter
 lower_text = text.lower()
 commands = []
 
-if '[aria:walk:left]' in lower_text or 'walk left' in lower_text:
-    commands.append({'action': 'walk', 'direction': 'left', 'distance': 200})
-if '[aria:walk:right]' in lower_text or 'walk right' in lower_text:
-    commands.append({'action': 'walk', 'direction': 'right', 'distance': 200})
+if "[aria:walk:left]" in lower_text or "walk left" in lower_text:
+    commands.append({"action": "walk", "direction": "left", "distance": 200})
+if "[aria:walk:right]" in lower_text or "walk right" in lower_text:
+    commands.append({"action": "walk", "direction": "right", "distance": 200})
 # ... 10 more similar checks
 ```
 
@@ -133,10 +133,11 @@ Pre-define a command pattern lookup table at module level:
 ```python
 # Command pattern lookup table for O(1) matching
 _COMMAND_PATTERNS = (
-    (('[aria:walk:left]', 'walk left'), {'action': 'walk', 'direction': 'left', 'distance': 200}),
-    (('[aria:walk:right]', 'walk right'), {'action': 'walk', 'direction': 'right', 'distance': 200}),
+    (("[aria:walk:left]", "walk left"), {"action": "walk", "direction": "left", "distance": 200}),
+    (("[aria:walk:right]", "walk right"), {"action": "walk", "direction": "right", "distance": 200}),
     # ... all patterns
 )
+
 
 def parse_movement_commands(text: str) -> dict:
     """Parse movement commands from AI response text using optimized pattern matching"""
@@ -148,7 +149,7 @@ def parse_movement_commands(text: str) -> dict:
         if any(pattern in lower_text for pattern in patterns):
             commands.append(command)
 
-    return {'commands': commands} if commands else {}
+    return {"commands": commands} if commands else {}
 ```
 
 Benefits:
@@ -263,9 +264,9 @@ def compute_gradient(circuit, X, y, weights, use_parameter_shift=True):
 
     if use_parameter_shift:
         shift = np.pi / 2
-        for i in range(weights.shape[0]):           # Layer
-            for j in range(weights.shape[1]):       # Qubit
-                for k in range(weights.shape[2]):   # Rotation parameter
+        for i in range(weights.shape[0]):  # Layer
+            for j in range(weights.shape[1]):  # Qubit
+                for k in range(weights.shape[2]):  # Rotation parameter
                     # Shift parameter and compute loss twice
                     weights_plus = weights.copy()
                     weights_minus = weights.copy()

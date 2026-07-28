@@ -186,13 +186,13 @@ watch -n 5 'cat data_out/autonomous_training_status.json | python -m json.tool' 
 ```python
 # State machine: discovery → collection → training → analysis → optimization → deployment
 async def run_single_cycle(cycle_number):
-    await discover_datasets()           # Scan datasets/, catalog by category
-    await download_new_datasets()       # Download if below min_datasets threshold
+    await discover_datasets()  # Scan datasets/, catalog by category
+    await download_new_datasets()  # Download if below min_datasets threshold
     epochs = await select_optimal_epochs()  # Adaptive: increase if accuracy < 0.70 or plateau
-    results = await train_cycle(epochs) # Distributed training with multiprocessing
+    results = await train_cycle(epochs)  # Distributed training with multiprocessing
     await analyze_performance(results)  # Track metrics, detect degradation
-    await optimization_cycle()          # Hyperparameter tuning (if enabled)
-    await deployment_cycle()            # Auto-deploy if accuracy > 0.90 (if enabled)
+    await optimization_cycle()  # Hyperparameter tuning (if enabled)
+    await deployment_cycle()  # Auto-deploy if accuracy > 0.90 (if enabled)
 ```
 
 **Process management:**

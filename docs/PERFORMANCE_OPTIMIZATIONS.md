@@ -86,7 +86,7 @@ def _get_process_list(self) -> List[psutil.Process]:
         if current_time - self._process_cache_time < self._process_cache_ttl:
             return self._process_cache
 
-    self._process_cache = list(psutil.process_iter(['pid', 'name', 'cmdline']))
+    self._process_cache = list(psutil.process_iter(["pid", "name", "cmdline"]))
     self._process_cache_time = current_time
     return self._process_cache
 ```
@@ -147,16 +147,16 @@ class BatchEvaluator:
 
 ```python
 # Before (3 passes):
-succeeded = sum(1 for r in results if r.status == 'succeeded')
-skipped = sum(1 for r in results if r.status == 'skipped')
-failed = sum(1 for r in results if r.status == 'failed')
+succeeded = sum(1 for r in results if r.status == "succeeded")
+skipped = sum(1 for r in results if r.status == "skipped")
+failed = sum(1 for r in results if r.status == "failed")
 
 # After (1 pass):
 succeeded = skipped = failed = 0
 for r in results:
-    if r.status == 'succeeded':
+    if r.status == "succeeded":
         succeeded += 1
-    elif r.status == 'skipped':
+    elif r.status == "skipped":
         skipped += 1
     else:
         failed += 1
@@ -194,6 +194,7 @@ All optimizations have been validated:
 
     ```python
     import time
+
     start = time.time()
     # expensive operation
     logger.debug(f"Operation took {time.time() - start:.2f}s")
