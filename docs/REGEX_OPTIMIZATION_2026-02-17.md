@@ -46,7 +46,7 @@ Based on benchmark tests (see `tests/test_regex_optimizations.py`):
 
 ```python
 _RE_ONCLICK = re.compile(r'onclick=["\']([^"\']+)["\']')
-_RE_FUNC_NAMES = re.compile(r'([a-zA-Z_][a-zA-Z0-9_]*)\s*\(')
+_RE_FUNC_NAMES = re.compile(r"([a-zA-Z_][a-zA-Z0-9_]*)\s*\(")
 _RE_ELEMENT_IDS = re.compile(r'id=["\']([^"\']+)["\']')
 _RE_GET_BY_ID = re.compile(r"getElementById\(['\"]([^'\"]+)['\"]\)")
 _RE_FETCH_CALLS = re.compile(r"fetch\(['\"]([^'\"]+)['\"]\)")
@@ -66,13 +66,13 @@ _RE_FETCH_CALLS = re.compile(r"fetch\(['\"]([^'\"]+)['\"]\)")
 **Patterns Compiled**:
 
 ```python
-_RE_CONSOLE_LOG = re.compile(r'console\.log\([^)]+\)')
+_RE_CONSOLE_LOG = re.compile(r"console\.log\([^)]+\)")
 _RE_GET_BY_ID = re.compile(r"getElementById\(['\"]([^'\"]+)['\"]\)")
 _RE_QUERY_SELECTOR = re.compile(r"querySelector\(['\"]([^'\"]+)['\"]\)")
 _RE_ELEMENT_IDS = re.compile(r'id=["\']([^"\']+)["\']')
-_RE_ASYNC_FUNCTION = re.compile(r'async\s+function')
-_RE_AWAIT = re.compile(r'\bawait\s+')
-_RE_EVENT_LISTENER = re.compile(r'addEventListener\s*\(')
+_RE_ASYNC_FUNCTION = re.compile(r"async\s+function")
+_RE_AWAIT = re.compile(r"\bawait\s+")
+_RE_EVENT_LISTENER = re.compile(r"addEventListener\s*\(")
 _RE_FETCH_CALLS = re.compile(r"fetch\(['\"]([^'\"]+)['\"]\)")
 _RE_LOCALSTORAGE = re.compile(r"localStorage\.(getItem|setItem|removeItem)\(['\"]([^'\"]+)['\"]\)")
 _RE_ONCLICK = re.compile(r'onclick=["\']([^"\']+)["\']')
@@ -114,8 +114,8 @@ _RE_WORD_SPLIT = re.compile(r"\S+")
 **Patterns Compiled**:
 
 ```python
-_RE_HTML_TAGS = re.compile(r'<[^<]+?>')
-_RE_WHITESPACE = re.compile(r'\s+')
+_RE_HTML_TAGS = re.compile(r"<[^<]+?>")
+_RE_WHITESPACE = re.compile(r"\s+")
 ```
 
 **Impact**:
@@ -201,8 +201,8 @@ Examples:
 import re
 
 # Pre-compile regex patterns for performance
-_RE_PATTERN_1 = re.compile(r'...')
-_RE_PATTERN_2 = re.compile(r'...')
+_RE_PATTERN_1 = re.compile(r"...")
+_RE_PATTERN_2 = re.compile(r"...")
 
 # ... rest of module code
 ```

@@ -270,7 +270,7 @@ elif action_type == 'new_action':
 3. Add parsing in `parse_with_fallback()`:
 
 ```python
-if 'trigger_word' in command_lower:
+if "trigger_word" in command_lower:
     actions.append({"action": "new_action", "param1": "..."})
 ```
 
@@ -282,6 +282,7 @@ if 'trigger_word' in command_lower:
 
 ```python
 from aria_web.server import action_parser
+
 actions = action_parser.parse("your command", use_llm=False)
 ```
 
@@ -289,8 +290,9 @@ actions = action_parser.parse("your command", use_llm=False)
 
 ```python
 from aria_web.server import execute_aria_action, stage_state
+
 result = execute_aria_action({"action": "move", "target": {"x": 50, "y": 50}})
-print(stage_state['aria']['position'])  # Should be updated
+print(stage_state["aria"]["position"])  # Should be updated
 ```
 
 **Test API**:

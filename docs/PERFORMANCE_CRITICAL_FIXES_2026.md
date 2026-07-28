@@ -132,6 +132,7 @@ _conn_cache = {}
 _conn_lock = threading.Lock()
 _MAX_CONN_AGE_SECONDS = 300  # 5 minutes
 
+
 def _get_conn():
     """Get or create a cached DB connection."""
     thread_id = threading.current_thread().ident
@@ -160,6 +161,7 @@ def _get_conn():
         new_conn = pyodbc.connect(conn_str, timeout=4)
         _conn_cache[thread_id] = (new_conn, current_time)
         return new_conn
+
 
 # Usage (connection NOT closed - stays in cache)
 def store_embedding(message_id, embedding, model):
