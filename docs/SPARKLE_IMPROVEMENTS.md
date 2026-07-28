@@ -19,9 +19,9 @@ Enhanced the Aria character system's sparkle visual effects with performance opt
 - **Benefit**: Faster keyword matching, consistent with existing patterns in codebase
 
 ```python
-SPARKLE_KEYWORDS = frozenset(['sparkle', 'sparkles', 'glitter', 'shimmer', 'shine'])
-GLOW_KEYWORDS = frozenset(['glow', 'glowing', 'radiate', 'illuminate'])
-HEARTS_KEYWORDS = frozenset(['hearts', 'heart', 'love'])
+SPARKLE_KEYWORDS = frozenset(["sparkle", "sparkles", "glitter", "shimmer", "shine"])
+GLOW_KEYWORDS = frozenset(["glow", "glowing", "radiate", "illuminate"])
+HEARTS_KEYWORDS = frozenset(["hearts", "heart", "love"])
 ```
 
 #### requestAnimationFrame for DOM Manipulation
