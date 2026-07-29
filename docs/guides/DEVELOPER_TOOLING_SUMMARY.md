@@ -162,10 +162,7 @@ log_file = latest / "stdout.log"  # Path: fast_fail/last_run.json/stdout.log (in
 
 ```python
 # FIXED: Filter to directories only
-job_dirs = [
-    p for p in (REPO_ROOT / "data_out" / "autotrain" / "fast_fail").glob("*")
-    if p.is_dir()
-]
+job_dirs = [p for p in (REPO_ROOT / "data_out" / "autotrain" / "fast_fail").glob("*") if p.is_dir()]
 latest = max(job_dirs, key=lambda p: p.name)  # Now picks timestamp dir
 log_file = latest / "stdout.log"  # Path: fast_fail/20251121T051213Z/stdout.log (valid)
 ```
