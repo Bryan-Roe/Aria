@@ -261,6 +261,7 @@ print(f"Current best model: {status['best_accuracy']:.2%}")
 import azure.functions as func
 from scripts.autonomous_training_orchestrator import AutonomousTrainingOrchestrator
 
+
 async def main(req: func.HttpRequest):
     orchestrator = AutonomousTrainingOrchestrator()
     await orchestrator.run_once()
@@ -274,7 +275,7 @@ async def main(req: func.HttpRequest):
 from scripts.autonomous_training_orchestrator import AutonomousTrainingOrchestrator
 
 orchestrator = AutonomousTrainingOrchestrator()
-best_accuracy = orchestrator.status['best_accuracy']
+best_accuracy = orchestrator.status["best_accuracy"]
 # Deploy to quantum hardware if threshold met
 ```
 
@@ -361,7 +362,7 @@ import sys
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 if str(REPO_ROOT) not in sys.path:
-  sys.path.insert(0, str(REPO_ROOT))
+    sys.path.insert(0, str(REPO_ROOT))
 
 from shared.json_utils import load_status_json
 ```

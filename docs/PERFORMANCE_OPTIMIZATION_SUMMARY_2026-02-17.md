@@ -15,10 +15,10 @@ This document summarizes the performance optimizations implemented to address sl
 **Before**:
 
 ```python
-if any(k in cmd for k in ['jump', 'leap', 'hop']):
-    return '[aria:position:50:60]'
-elif any(k in cmd for k in ['dance', 'spin', 'twirl']):
-    return '[aria:position:50:50]'
+if any(k in cmd for k in ["jump", "leap", "hop"]):
+    return "[aria:position:50:60]"
+elif any(k in cmd for k in ["dance", "spin", "twirl"]):
+    return "[aria:position:50:50]"
 # ... 18+ more similar checks
 ```
 
@@ -26,17 +26,19 @@ elif any(k in cmd for k in ['dance', 'spin', 'twirl']):
 
 ```python
 # Pre-compiled keyword sets at module level
-JUMP_KEYWORDS = frozenset(['jump', 'leap', 'hop'])
-DANCE_KEYWORDS = frozenset(['dance', 'spin', 'twirl'])
+JUMP_KEYWORDS = frozenset(["jump", "leap", "hop"])
+DANCE_KEYWORDS = frozenset(["dance", "spin", "twirl"])
 # ... 20 more sets
+
 
 def _contains_any_keyword(text: str, keywords: frozenset) -> bool:
     """Check if text contains any keyword from set. O(1) per keyword check."""
     return any(kw in text for kw in keywords)
 
+
 # Usage
 if _contains_any_keyword(cmd, JUMP_KEYWORDS):
-    return '[aria:position:50:60]'
+    return "[aria:position:50:60]"
 ```
 
 **Impact**:
@@ -128,25 +130,19 @@ def store_embedding(...):
 **Before**:
 
 ```python
-tags = re.findall(r'\[aria:[^\]]+\]', response)  # COMPILED EVERY TIME
-say_match = re.search(
-    r"(?:\b(?:say|announce|shout|speak|tell)\b)...",
-    command, flags=re.I
-)  # COMPILED EVERY TIME
+tags = re.findall(r"\[aria:[^\]]+\]", response)  # COMPILED EVERY TIME
+say_match = re.search(r"(?:\b(?:say|announce|shout|speak|tell)\b)...", command, flags=re.I)  # COMPILED EVERY TIME
 ```
 
 **After**:
 
 ```python
 # Pre-compiled at module level
-_RE_JSON_BLOCK = re.compile(r'\[.*\]', re.DOTALL)
-_RE_ARIA_TAGS = re.compile(r'\[aria:[^\]]+\]')
-_RE_SAY_COMMAND = re.compile(
-    r"(?:\b(?:say|announce|shout|speak|tell)\b)...",
-    re.IGNORECASE
-)
-_RE_SANITIZE_BRACKETS = re.compile(r'\]')
-_RE_COORDINATES = re.compile(r'(\d{1,3})%?.*?(\d{1,3})%?')
+_RE_JSON_BLOCK = re.compile(r"\[.*\]", re.DOTALL)
+_RE_ARIA_TAGS = re.compile(r"\[aria:[^\]]+\]")
+_RE_SAY_COMMAND = re.compile(r"(?:\b(?:say|announce|shout|speak|tell)\b)...", re.IGNORECASE)
+_RE_SANITIZE_BRACKETS = re.compile(r"\]")
+_RE_COORDINATES = re.compile(r"(\d{1,3})%?.*?(\d{1,3})%?")
 
 # Usage
 tags = _RE_ARIA_TAGS.findall(response)  # USES COMPILED PATTERN
@@ -173,16 +169,17 @@ say_match = _RE_SAY_COMMAND.search(command)  # USES COMPILED PATTERN
 ```python
 words = [w for msg in assistant_messages for w in msg.split()]  # FULL LIST IN MEMORY
 if words:
-    diversity = len(set(words))/len(words)
+    diversity = len(set(words)) / len(words)
 ```
 
 **After**:
 
 ```python
 from itertools import chain
+
 words = list(chain.from_iterable(msg.split() for msg in assistant_messages))  # STREAMING
 if words:
-    diversity = len(set(words))/len(words)
+    diversity = len(set(words)) / len(words)
 ```
 
 **Impact**:

@@ -33,25 +33,27 @@ python scripts/benchmark_performance.py
 
 ```python
 from shared.performance_utils import (
-    tail_file,              # Memory-efficient log tailing
-    stream_jsonl,           # Generator-based JSONL reading
-    find_json_in_output,    # Fast JSON extraction
-    FileCache,              # In-memory file caching
-    timeit,                 # Function timing decorator
-    memoize_with_ttl        # Time-based memoization
+    tail_file,  # Memory-efficient log tailing
+    stream_jsonl,  # Generator-based JSONL reading
+    find_json_in_output,  # Fast JSON extraction
+    FileCache,  # In-memory file caching
+    timeit,  # Function timing decorator
+    memoize_with_ttl,  # Time-based memoization
 )
 
 # Example: Tail a log file
 logs = tail_file(Path("training.log"), max_lines=50)
 
 # Example: Extract JSON from subprocess
-result = subprocess.run(['./script'], capture_output=True, text=True)
-metrics = find_json_in_output(result.stdout, key='metrics')
+result = subprocess.run(["./script"], capture_output=True, text=True)
+metrics = find_json_in_output(result.stdout, key="metrics")
+
 
 # Example: Time a function
 @timeit
 def expensive_operation():
     pass
+
 
 # Example: Cache with TTL
 @memoize_with_ttl(ttl_seconds=300)
@@ -66,7 +68,7 @@ def fetch_config():
 **Before:**
 
 ```python
-with open(log_file, 'r') as f:
+with open(log_file, "r") as f:
     all_lines = f.readlines()  # Loads entire file!
     return all_lines[-20:]
 ```
@@ -75,6 +77,7 @@ with open(log_file, 'r') as f:
 
 ```python
 from shared.performance_utils import tail_file
+
 return tail_file(log_file, max_lines=20)  # Only keeps 20 lines in memory
 ```
 
@@ -94,7 +97,8 @@ for line in output.splitlines():  # Parse all lines
 
 ```python
 from shared.performance_utils import find_json_in_output
-return find_json_in_output(output, key='metrics', search_from_end=True)
+
+return find_json_in_output(output, key="metrics", search_from_end=True)
 ```
 
 ### 3. JSONL Streaming (1.1x faster, 1.2 MB saved)
@@ -102,7 +106,7 @@ return find_json_in_output(output, key='metrics', search_from_end=True)
 **Before:**
 
 ```python
-with open('data.jsonl', 'r') as f:
+with open("data.jsonl", "r") as f:
     all_records = [json.loads(line) for line in f]  # Loads all into memory
 for record in all_records:
     process(record)
@@ -112,7 +116,8 @@ for record in all_records:
 
 ```python
 from shared.performance_utils import stream_jsonl
-for record in stream_jsonl(Path('data.jsonl')):  # Streams one at a time
+
+for record in stream_jsonl(Path("data.jsonl")):  # Streams one at a time
     process(record)
 ```
 

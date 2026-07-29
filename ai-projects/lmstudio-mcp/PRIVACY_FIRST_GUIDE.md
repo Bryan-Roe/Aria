@@ -120,22 +120,22 @@ Local Results Only
 ### Classification Types
 
 ```python
-PII                 # Personally identifiable: names, SSN, email
-HEALTH              # Medical records, diagnoses
-FINANCIAL           # Bank accounts, credit cards, salary
-PROPRIETARY         # Trade secrets, code, designs
-LEGAL               # Contracts, litigation documents
-CREDENTIALS         # Passwords, API keys, tokens
+PII  # Personally identifiable: names, SSN, email
+HEALTH  # Medical records, diagnoses
+FINANCIAL  # Bank accounts, credit cards, salary
+PROPRIETARY  # Trade secrets, code, designs
+LEGAL  # Contracts, litigation documents
+CREDENTIALS  # Passwords, API keys, tokens
 ```
 
 ### Privacy Levels
 
 ```python
-PUBLIC              # No constraints
-INTERNAL            # Organizational, not confidential
-CONFIDENTIAL        # Sensitive but not regulated
-RESTRICTED          # Highly sensitive, regulated
-ENCRYPTED           # Encrypted at rest
+PUBLIC  # No constraints
+INTERNAL  # Organizational, not confidential
+CONFIDENTIAL  # Sensitive but not regulated
+RESTRICTED  # Highly sensitive, regulated
+ENCRYPTED  # Encrypted at rest
 ```
 
 ## Implementation Guide
@@ -181,7 +181,7 @@ print(result)
 # Check audit trail
 compliance = await processor.verify_privacy_compliance()
 
-if compliance['compliant']:
+if compliance["compliant"]:
     print("✓ All processing stayed local")
 else:
     print("✗ Cloud processing detected!")
@@ -492,6 +492,7 @@ with open(KEY_PATH, "rb") as f:
 ```python
 import shutil
 
+
 # Securely delete sensitive files
 def secure_delete(file_path):
     """Overwrite file content before deletion."""
@@ -501,6 +502,7 @@ def secure_delete(file_path):
         f.write(os.urandom(length))
 
     os.remove(file_path)
+
 
 secure_delete("sensitive_data.txt")
 ```
@@ -517,11 +519,13 @@ BLOCKED_PATTERNS = [
     r"https?://(.*\.)?amazonaws\.com",
 ]
 
+
 def check_network_requests(log_data):
     for pattern in BLOCKED_PATTERNS:
         if re.search(pattern, log_data):
             alert("✗ Cloud API attempt detected!")
             raise SecurityError("Privacy violation: cloud API detected")
+
 
 # Monitor outbound connections
 # Use tools like tcpdump, netstat, or network policy engine
@@ -544,6 +548,7 @@ def analyze_audit_log():
             severity="critical",
         )
         notify_security_team()
+
 
 analyze_audit_log()
 ```
