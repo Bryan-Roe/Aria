@@ -1,7 +1,7 @@
 # QAI Integration Service Requirements
 
 # Web Framework
-fastapi>=0.139.0
+fastapi>=0.140.13
 uvicorn[standard]>=0.51.0
 pydantic>=2.13.4
 pydantic-settings>=2.14.2
