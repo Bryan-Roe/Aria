@@ -200,11 +200,8 @@ Response:
 Output JSON only: {"result": <score>, "reason": "<explanation>"}
 """
 
-@evals.evaluator(CustomPromptEvaluatorConfig(
-    name="professionalism",
-    prompt=custom_prompt,
-    threshold=3
-))
+
+@evals.evaluator(CustomPromptEvaluatorConfig(name="professionalism", prompt=custom_prompt, threshold=3))
 def test_professionalism(self, evaluator_results: EvaluatorResults):
     assert evaluator_results.professionalism.result == "pass"
 ```
@@ -216,17 +213,15 @@ Implement evaluation logic in Python for deterministic checks:
 ```python
 from pytest_agent_evals import CustomCodeEvaluatorConfig
 
+
 def check_response_length(sample: dict, item: dict) -> float:
     """Check if response meets minimum length requirements."""
     response = sample.get("output_text", "")
     min_length = 50
     return 1.0 if len(response) >= min_length else 0.0
 
-@evals.evaluator(CustomCodeEvaluatorConfig(
-    name="response_length",
-    grader=check_response_length,
-    threshold=0.5
-))
+
+@evals.evaluator(CustomCodeEvaluatorConfig(name="response_length", grader=check_response_length, threshold=0.5))
 def test_response_length(self, evaluator_results: EvaluatorResults):
     assert evaluator_results.response_length.result == "pass"
 ```

@@ -90,16 +90,15 @@ python -m chat_cli --provider lmstudio "Explain neural networks"
 import asyncio
 from lmstudio_agent_integration import get_lmstudio_agent_client
 
+
 async def main():
     client = get_lmstudio_agent_client()
 
     response = await client.complete(
-        messages=[
-            {"role": "system", "content": "You are helpful."},
-            {"role": "user", "content": "Hello!"}
-        ]
+        messages=[{"role": "system", "content": "You are helpful."}, {"role": "user", "content": "Hello!"}]
     )
     print(response)
+
 
 asyncio.run(main())
 ```
@@ -118,11 +117,7 @@ base_provider, _ = detect_provider("lmstudio")
 
 # Use with reasoning
 agi = AGIProvider(base_provider=base_provider)
-response = agi.reason(
-    "Explain quantum computing",
-    decompose=True,
-    trace=True
-)
+response = agi.reason("Explain quantum computing", decompose=True, trace=True)
 ```
 
 ## Agent System Integration Points
@@ -152,7 +147,7 @@ Registered agent with capabilities:
         "temperature_control": True,
         "token_budgeting": True,
         "model_switching": True,
-    }
+    },
 }
 ```
 
@@ -231,9 +226,9 @@ LMSTUDIO_MAX_TOKENS=2048                       # Max response tokens
 # Override defaults in code
 response = await client.complete(
     messages=[...],
-    model="llama-13b",          # Use different model
-    temperature=0.3,             # Deterministic mode
-    max_tokens=512              # Shorter responses
+    model="llama-13b",  # Use different model
+    temperature=0.3,  # Deterministic mode
+    max_tokens=512,  # Shorter responses
 )
 ```
 
@@ -374,6 +369,7 @@ Add endpoint for LM Studio chat:
 
 ```python
 from lmstudio_agent_integration import get_lmstudio_agent_client
+
 
 @app.route(route="api/chat", methods=["POST"])
 async def chat_endpoint(req):
