@@ -115,7 +115,7 @@ result = await processor.process_sensitive_data(
 
 ```python
 compliance = await processor.verify_privacy_compliance()
-print(compliance['message'])  # "All recent processing stayed local"
+print(compliance["message"])  # "All recent processing stayed local"
 ```
 
 ### 4. Use with Multi-Agent Reasoning

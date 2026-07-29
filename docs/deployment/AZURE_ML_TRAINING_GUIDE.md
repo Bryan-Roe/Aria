@@ -116,7 +116,7 @@ ml_client = MLClient(
     credential=DefaultAzureCredential(),
     subscription_id="<your-subscription-id>",
     resource_group_name="<your-resource-group>",
-    workspace_name="<your-workspace-name>"
+    workspace_name="<your-workspace-name>",
 )
 
 # Configure training job
@@ -126,7 +126,7 @@ job = command(
     environment="azureml://registries/azureml/environments/sklearn-1.5/labels/latest",
     compute="cpu-cluster",
     display_name="phi-lora-training",
-    experiment_name="lora-finetuning"
+    experiment_name="lora-finetuning",
 )
 
 # Submit job

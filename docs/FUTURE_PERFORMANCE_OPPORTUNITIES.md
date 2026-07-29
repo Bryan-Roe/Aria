@@ -16,7 +16,7 @@ This document identifies potential performance improvements found during code an
 for c in classes:
     folder = self.root / c
     for f in folder.iterdir():
-        if f.suffix.lower() in ('.png', '.jpg', '.jpeg'):
+        if f.suffix.lower() in (".png", ".jpg", ".jpeg"):
             self.samples.append((f, self.class_to_idx[c]))
 ```
 
@@ -24,8 +24,8 @@ for c in classes:
 
 ```python
 # Use rglob for cleaner recursive traversal
-for img_path in self.root.rglob('*'):
-    if img_path.suffix.lower() in ('.png', '.jpg', '.jpeg'):
+for img_path in self.root.rglob("*"):
+    if img_path.suffix.lower() in (".png", ".jpg", ".jpeg"):
         class_name = img_path.parent.name
         if class_name in self.class_to_idx:
             self.samples.append((img_path, self.class_to_idx[class_name]))
@@ -62,13 +62,16 @@ Implement circuit result caching for identical inputs:
 from functools import lru_cache
 import hashlib
 
+
 def make_hashable_key(arr):
     return hashlib.sha256(arr.tobytes()).hexdigest()
+
 
 # Use a session-level cache
 @lru_cache(maxsize=1000)
 def cached_circuit_eval(x_hash, weights_hash):
     return circuit(x_array, weights_array)
+
 
 for xi, yi in zip(X_val, y_val):
     x_hash = make_hashable_key(xi)
