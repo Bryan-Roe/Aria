@@ -466,6 +466,7 @@ Get-Content data_out\aria_models\aria_direct\training.log | Select-String "loss"
 ```python
 # Test parser directly
 from function_app import parse_movement_commands
+
 test_text = "I'll move Aria left! [aria:move:left]"
 print(parse_movement_commands(test_text))
 ```
