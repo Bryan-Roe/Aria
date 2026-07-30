@@ -535,11 +535,10 @@ Register-ScheduledTask -Action $action -Trigger $trigger -TaskName "AutoTraining
 # Add webhook notification on cycle completion
 import requests
 
+
 def send_slack_notification(status):
     webhook_url = "https://hooks.slack.com/services/YOUR/WEBHOOK/URL"
-    message = {
-        "text": f"Training Cycle Complete: {status['best_accuracy']:.2%} accuracy"
-    }
+    message = {"text": f"Training Cycle Complete: {status['best_accuracy']:.2%} accuracy"}
     requests.post(webhook_url, json=message)
 ```
 

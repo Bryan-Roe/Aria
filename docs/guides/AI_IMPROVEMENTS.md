@@ -82,9 +82,9 @@ Comprehensive improvements applied across all AI components to enhance performan
 **Advanced Generation Parameters**:
 
 ```python
-top_p: float = 0.9          # Nucleus sampling (90th percentile)
-top_k: int = 50             # Top-K sampling
-repetition_penalty: 1.1     # Reduces repetitive text
+top_p: float = 0.9  # Nucleus sampling (90th percentile)
+top_k: int = 50  # Top-K sampling
+repetition_penalty: 1.1  # Reduces repetitive text
 ```
 
 **Benefits**:
@@ -179,11 +179,11 @@ ml:
 # Enhanced LoRA initialization
 provider = LoraLocalProvider(
     adapter_dir="path/to/adapter",
-    temperature=0.7,          # Creativity level
-    top_p=0.9,                # Nucleus sampling
-    top_k=50,                 # Top-K sampling
-    repetition_penalty=1.1,   # Reduce repetition
-    max_new_tokens=256        # Max response length
+    temperature=0.7,  # Creativity level
+    top_p=0.9,  # Nucleus sampling
+    top_k=50,  # Top-K sampling
+    repetition_penalty=1.1,  # Reduce repetition
+    max_new_tokens=256,  # Max response length
 )
 ```
 
@@ -240,9 +240,9 @@ provider = LoraLocalProvider(
     adapter_dir,
     temperature=0.7,
     max_new_tokens=256,
-    top_p=0.9,              # Add these for better quality
+    top_p=0.9,  # Add these for better quality
     top_k=50,
-    repetition_penalty=1.1
+    repetition_penalty=1.1,
 )
 ```
 

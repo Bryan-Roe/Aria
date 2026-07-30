@@ -271,8 +271,10 @@ def _get_text_encoder(provider: str, model: Optional[str]) -> Callable[[str], in
     if AutoTokenizer is not None and mdl:
         try:
             tok = AutoTokenizer.from_pretrained(model, use_fast=True)  # SLOW!
+
             def _count(text: str) -> int:
                 return len(tok.encode(text or ""))
+
             return _count
         except Exception:
             pass
@@ -282,6 +284,7 @@ def _get_text_encoder(provider: str, model: Optional[str]) -> Callable[[str], in
 
 ```python
 from functools import lru_cache
+
 
 @lru_cache(maxsize=8)
 def _get_cached_tokenizer(model: str):
@@ -328,9 +331,11 @@ def _cosine(a: Sequence[float], b: Sequence[float]) -> float:
 ```python
 try:
     import numpy as np
+
     _HAS_NUMPY = True
 except ImportError:
     _HAS_NUMPY = False
+
 
 def _cosine(a: Sequence[float], b: Sequence[float]) -> float:
     if not a or not b or len(a) != len(b):
@@ -394,6 +399,7 @@ def generate_embedding(text: str) -> List[float]:
 ```python
 _embedding_clients: Dict[str, Any] = {}
 
+
 def _get_embedding_client(provider: str) -> Any:
     """Get or create a cached embedding client."""
     if provider in _embedding_clients:
@@ -447,7 +453,7 @@ def validate_jsonl(self, filepath: Path, verbose: bool = False) -> Dict:
 
 ```python
 def validate_jsonl(self, filepath: Path, verbose: bool = False) -> Dict:
-    with open(filepath, 'r', encoding='utf-8') as f:
+    with open(filepath, "r", encoding="utf-8") as f:
         for i, line in enumerate(f, 1):  # STREAMS LINE BY LINE
             line = line.strip()
             # ... validate line
@@ -478,6 +484,7 @@ try:
     # Quick health check for LM Studio
     import urllib.request
     import urllib.error
+
     req = urllib.request.Request(lms_url.replace("/v1", "") + "/v1/models", headers={"User-Agent": "QAI"})
     urllib.request.urlopen(req, timeout=1)  # BLOCKS FOR 1 SECOND ON EVERY CALL
     # ... use LM Studio
@@ -490,6 +497,7 @@ except (urllib.error.URLError, Exception):
 ```python
 _lmstudio_cache = {"available": None, "checked_at": 0}
 _LMSTUDIO_CACHE_TTL = 30  # seconds
+
 
 def _check_lmstudio_available(url: str) -> bool:
     """Check LM Studio availability with caching."""
