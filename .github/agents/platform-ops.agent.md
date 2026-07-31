@@ -55,9 +55,9 @@ ANALYTICS_DASHBOARD, BATCH_PROCESSING
 sub = manager.get_subscription(user_id)
 if not sub.has_feature(Feature.QUANTUM_COMPUTING):
     return 403  # Upgrade required
-if not sub.check_limit('quantum_jobs'):
+if not sub.check_limit("quantum_jobs"):
     return 429  # Usage limit reached
-sub.increment_usage('quantum_jobs')
+sub.increment_usage("quantum_jobs")
 ```
 
 ### Storage

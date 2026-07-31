@@ -230,10 +230,7 @@ background: linear-gradient(135deg, #ff6b6b 0%, #4ecdc4 100%);
 Edit `function_app.py`, add to the messages array:
 
 ```python
-messages.insert(0, {
-    "role": "system",
-    "content": "You are a friendly cooking assistant."
-})
+messages.insert(0, {"role": "system", "content": "You are a friendly cooking assistant."})
 ```
 
 ### Add Authentication

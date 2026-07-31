@@ -423,6 +423,7 @@ import json
 import sys
 from pathlib import Path
 
+
 def analyze_codebase():
     """Analyze codebase structure"""
     result = {
@@ -433,6 +434,7 @@ def analyze_codebase():
     }
     return result
 
+
 def analyze_performance():
     """Analyze recent performance metrics"""
     result = {
@@ -441,6 +443,7 @@ def analyze_performance():
         # ... metrics
     }
     return result
+
 
 if __name__ == "__main__":
     if len(sys.argv) > 1:
