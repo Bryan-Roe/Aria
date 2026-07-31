@@ -50,11 +50,7 @@ python quantum_llm_quickstart.py --mode generate --model data_out/quantum_llm_qu
 from quantum_llm_advanced import MultiScaleQuantumAttention
 
 # Creates 4 attention heads with 2, 3, 4, and 6 qubits
-attention = MultiScaleQuantumAttention(
-    d_model=128,
-    n_heads=4,
-    n_qubits_per_head=[2, 3, 4, 6]
-)
+attention = MultiScaleQuantumAttention(d_model=128, n_heads=4, n_qubits_per_head=[2, 3, 4, 6])
 ```
 
 **Benefits:**
@@ -106,11 +102,7 @@ cache = QuantumCircuitCache(cache_size=1000)
 ```python
 from quantum_llm_advanced import QuantumPromptTuning
 
-prompt_tuner = QuantumPromptTuning(
-    d_model=128,
-    n_qubits=4,
-    n_prompts=10
-)
+prompt_tuner = QuantumPromptTuning(d_model=128, n_qubits=4, n_prompts=10)
 ```
 
 **Benefits:**
@@ -451,8 +443,8 @@ config["optimization_level"] = 2
 # Adaptive batch sizing across stages
 stages = [
     TrainingStage(..., batch_size=16),  # Classical
-    TrainingStage(..., batch_size=8),   # Transition
-    TrainingStage(..., batch_size=4),   # Full quantum
+    TrainingStage(..., batch_size=8),  # Transition
+    TrainingStage(..., batch_size=4),  # Full quantum
 ]
 ```
 

@@ -350,9 +350,8 @@ python .\benchmark_all_datasets.py
 import torch
 from src.hybrid_qnn import HybridQNN
 
-model = HybridQNN(input_dim=4, hidden_dim=16, n_qubits=4,
-                  n_quantum_layers=2, output_dim=2)
-model.load_state_dict(torch.load('results/ionosphere_model.pt'))
+model = HybridQNN(input_dim=4, hidden_dim=16, n_qubits=4, n_quantum_layers=2, output_dim=2)
+model.load_state_dict(torch.load("results/ionosphere_model.pt"))
 model.eval()
 ```
 

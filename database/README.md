@@ -178,7 +178,8 @@ conn_str = (
 conn = pyodbc.connect(conn_str)
 cursor = conn.cursor()
 
-cursor.execute("""
+cursor.execute(
+    """
   DECLARE @RunId UNIQUEIDENTIFIER;
   EXEC sp_LogQuantumTrainingRun
     @JobName = ?,
@@ -195,8 +196,20 @@ cursor.execute("""
     @Status = ?,
     @RunId = @RunId OUTPUT;
   SELECT @RunId;
-""", 'heart_quick', 'heart_disease', 'qiskit_aer', 4, 2, 'linear',
-               0.01, 10, 16, 0.85, 45.2, 'completed')
+""",
+    "heart_quick",
+    "heart_disease",
+    "qiskit_aer",
+    4,
+    2,
+    "linear",
+    0.01,
+    10,
+    16,
+    0.85,
+    45.2,
+    "completed",
+)
 
 run_id = cursor.fetchone()[0]
 conn.commit()
@@ -216,7 +229,8 @@ def log_to_database(job_config, results):
     conn = pyodbc.connect(DB_CONNECTION_STRING)
     cursor = conn.cursor()
 
-    cursor.execute("""
+    cursor.execute(
+        """
     DECLARE @RunId UNIQUEIDENTIFIER;
     EXEC sp_LogQuantumTrainingRun
       @JobName = ?, @DatasetName = ?, @Backend = ?,
@@ -225,11 +239,23 @@ def log_to_database(job_config, results):
       @TestAccuracy = ?, @TestLoss = ?, @ExecutionTimeSeconds = ?,
       @StatusJsonPath = ?, @ResultsJsonPath = ?,
       @Status = ?, @RunId = @RunId OUTPUT;
-  """, job_config['name'], job_config['dataset'], job_config['backend'],
-        job_config['n_qubits'], job_config['n_layers'], job_config['entanglement'],
-        job_config['learning_rate'], job_config['epochs'], job_config['batch_size'],
-        results['test_accuracy'], results['test_loss'], results['execution_time'],
-        results['status_json_path'], results['results_json_path'], 'completed')
+  """,
+        job_config["name"],
+        job_config["dataset"],
+        job_config["backend"],
+        job_config["n_qubits"],
+        job_config["n_layers"],
+        job_config["entanglement"],
+        job_config["learning_rate"],
+        job_config["epochs"],
+        job_config["batch_size"],
+        results["test_accuracy"],
+        results["test_loss"],
+        results["execution_time"],
+        results["status_json_path"],
+        results["results_json_path"],
+        "completed",
+    )
 
     conn.commit()
 ```
@@ -265,13 +291,21 @@ async def chat_endpoint(req: func.HttpRequest) -> func.HttpResponse:
     # Log conversation
     conn = get_db_connection()
     cursor = conn.cursor()
-    cursor.execute("""
+    cursor.execute(
+        """
     DECLARE @ConvId UNIQUEIDENTIFIER, @MsgId UNIQUEIDENTIFIER;
     EXEC sp_LogChatConversation
       @SessionId = ?, @Provider = ?, @Model = ?,
       @Role = ?, @Content = ?, @TotalTokens = ?,
       @ConversationId = @ConvId OUTPUT, @MessageId = @MsgId OUTPUT;
-  """, session_id, provider, model, 'user', user_message, token_count)
+  """,
+        session_id,
+        provider,
+        model,
+        "user",
+        user_message,
+        token_count,
+    )
     conn.commit()
 ```
 
