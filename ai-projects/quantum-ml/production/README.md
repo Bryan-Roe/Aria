@@ -318,7 +318,7 @@ python train_custom_dataset.py --preset banknote --epochs 25
 Change port in `banknote_api.py`:
 
 ```python
-app.run(host='0.0.0.0', port=8081)  # Use different port
+app.run(host="0.0.0.0", port=8081)  # Use different port
 ```
 
 ### Import Errors
@@ -347,7 +347,7 @@ pytest test_api.py -v
 ### Enable Debug Mode
 
 ```python
-app.run(host='0.0.0.0', port=8080, debug=True)
+app.run(host="0.0.0.0", port=8080, debug=True)
 ```
 
 ## License

@@ -31,7 +31,7 @@ The agent accepts any provider matching this protocol — no inheritance require
 ```python
 # _invoke() implements 2-retry:
 try:
-    response = provider.complete(messages, json_mode=True)   # Attempt structured output
+    response = provider.complete(messages, json_mode=True)  # Attempt structured output
     return json.loads(response)
 except:
     response = provider.complete(messages, json_mode=False)  # Fallback: free text
