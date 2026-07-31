@@ -63,11 +63,11 @@ if not sub.has_feature(Feature.QUANTUM_COMPUTING):
     return func.HttpResponse("Upgrade to PRO for quantum access", status_code=403)
 
 # 2. Usage limit SECOND (returns 429)
-if not sub.check_limit('quantum_jobs'):
+if not sub.check_limit("quantum_jobs"):
     return func.HttpResponse("Monthly quantum job quota exceeded", status_code=429)
 
 # 3. Track usage AFTER confirming capacity
-sub.increment_usage('quantum_jobs')
+sub.increment_usage("quantum_jobs")
 ```
 
 **Critical order**: `has_feature()` → `check_limit()` → work → `increment_usage()`.
@@ -80,7 +80,7 @@ ENTERPRISE tier has no limits — `check_limit()` always returns `True` for ENTE
 ```python
 sub = mgr.get_subscription("enterprise-user-id")
 print(sub.tier)  # → "ENTERPRISE"
-print(sub.check_limit('quantum_jobs'))  # → True (unlimited)
+print(sub.check_limit("quantum_jobs"))  # → True (unlimited)
 ```
 
 ### Step 4 — Verify Response Codes
@@ -103,7 +103,7 @@ Check fields: `tier`, `usage_counts`, `active`, `reset_date`.
 
 ```python
 sub.reset_usage()  # Resets all counters; called monthly
-sub.is_active()    # Returns False if subscription expired
+sub.is_active()  # Returns False if subscription expired
 ```
 
 If counters are stuck after month rollover, call `reset_usage()` manually or restart the host to trigger reload.

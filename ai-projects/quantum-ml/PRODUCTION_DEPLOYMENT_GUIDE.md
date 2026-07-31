@@ -259,9 +259,7 @@ quantum:
     ```python
     deployer = QuantumAzureMLDeployment()
     run = deployer.submit_training_job(
-        script_path='train_azure_ml.py',
-        experiment_name='quantum-8qubit',
-        arguments={'n_qubits': 8, 'epochs': 100}
+        script_path="train_azure_ml.py", experiment_name="quantum-8qubit", arguments={"n_qubits": 8, "epochs": 100}
     )
     ```
 
@@ -269,19 +267,14 @@ quantum:
 
     ```python
     model = deployer.register_model(
-        model_path='outputs/quantum_model.pt',
-        model_name='quantum-classifier-8q',
-        tags={'qubits': '8', 'accuracy': '97.5%'}
+        model_path="outputs/quantum_model.pt", model_name="quantum-classifier-8q", tags={"qubits": "8", "accuracy": "97.5%"}
     )
     ```
 
 3. **REST API Deployment**
 
     ```python
-    service = deployer.deploy_inference_endpoint(
-        model_name='quantum-classifier-8q',
-        service_name='quantum-api'
-    )
+    service = deployer.deploy_inference_endpoint(model_name="quantum-classifier-8q", service_name="quantum-api")
     # Access at: service.scoring_uri
     ```
 

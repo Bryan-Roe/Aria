@@ -141,13 +141,7 @@ import torch
 from torch.utils.data import DataLoader, TensorDataset
 
 # Create hybrid model
-model = HybridQNN(
-    input_dim=8,
-    hidden_dim=16,
-    num_qubits=4,
-    quantum_layers=2,
-    output_dim=3
-)
+model = HybridQNN(input_dim=8, hidden_dim=16, num_qubits=4, quantum_layers=2, output_dim=3)
 
 # Prepare data loaders
 train_loader = DataLoader(train_dataset, batch_size=16, shuffle=True)
@@ -179,7 +173,7 @@ backends = azure_qm.list_backends()
 print(f"Available backends: {backends}")
 
 # Run on quantum hardware/simulator
-result = azure_qm.run_circuit(qc, shots=1000, backend_name='ionq.simulator')
+result = azure_qm.run_circuit(qc, shots=1000, backend_name="ionq.simulator")
 print(f"Results: {result['counts']}")
 ```
 
