@@ -199,10 +199,10 @@ export LMSTUDIO_MODEL="local-model"
 Edit [autonomous_code_agent.py](./scripts/autonomous_code_agent.py):
 
 ```python
-MAX_FILE_SIZE = 100_000          # bytes
-MAX_CHANGES_PER_FILE = 5         # per file
-MAX_TASK_TOKENS = 2000           # planning budget
-MIN_TEST_PASSING_RATE = 0.8      # 80% required
+MAX_FILE_SIZE = 100_000  # bytes
+MAX_CHANGES_PER_FILE = 5  # per file
+MAX_TASK_TOKENS = 2000  # planning budget
+MIN_TEST_PASSING_RATE = 0.8  # 80% required
 ```
 
 ## Usage Examples

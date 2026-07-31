@@ -279,8 +279,8 @@ Edit in `scripts/notification_system.py`:
 class TrainingNotifier:
     def __init__(self):
         self.milestones = {
-            'loss_threshold': 0.5,  # Notify when loss drops below this
-            'epoch_interval': 5      # Notify every N epochs
+            "loss_threshold": 0.5,  # Notify when loss drops below this
+            "epoch_interval": 5,  # Notify every N epochs
         }
 ```
 
@@ -289,14 +289,14 @@ class TrainingNotifier:
 ```python
 # More frequent updates
 self.milestones = {
-    'loss_threshold': 0.3,  # Lower threshold
-    'epoch_interval': 1     # Every epoch
+    "loss_threshold": 0.3,  # Lower threshold
+    "epoch_interval": 1,  # Every epoch
 }
 
 # Less frequent (production)
 self.milestones = {
-    'loss_threshold': 0.1,  # Very low threshold
-    'epoch_interval': 10    # Every 10 epochs
+    "loss_threshold": 0.1,  # Very low threshold
+    "epoch_interval": 10,  # Every 10 epochs
 }
 ```
 
@@ -357,6 +357,7 @@ pip install win10toast
 
 ```python
 from scripts.notification_system import NotificationManager
+
 notifier = NotificationManager()
 print(f"System: {notifier.system}")
 print(f"Enabled: {notifier.enabled}")

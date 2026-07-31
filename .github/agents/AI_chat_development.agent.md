@@ -166,6 +166,7 @@ Chat conversation → data_out/self_learning/*.jsonl
 
 ```python
 from shared.subscription_manager import get_subscription_manager, Feature
+
 sub = mgr.get_subscription(user_id)
 if not sub.has_feature(Feature.BASIC_CHAT):
     return 403

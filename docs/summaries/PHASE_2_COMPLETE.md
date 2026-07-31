@@ -235,10 +235,7 @@ referral_system = get_referral_system()
 
 # When user signs up with referral code
 result = referral_system.record_referral(
-    referrer_code="USER1234AB",
-    new_user_id="new_user_456",
-    tier="pro",
-    subscription_value=49.00
+    referrer_code="USER1234AB", new_user_id="new_user_456", tier="pro", subscription_value=49.00
 )
 
 # Returns: {"success": True, "commission": 9.80, ...}
@@ -253,11 +250,7 @@ email_system = get_email_system()
 
 # When usage reaches 80%
 email_system.notify_usage_warning(
-    user_email="user@example.com",
-    resource="chat_messages",
-    percentage=85.0,
-    current=850,
-    limit=1000
+    user_email="user@example.com", resource="chat_messages", percentage=85.0, current=850, limit=1000
 )
 ```
 
@@ -271,8 +264,8 @@ handler = get_webhook_handler()
 # Process webhook event
 result = handler.handle_webhook(
     payload=request.body,
-    signature=request.headers['Stripe-Signature'],
-    webhook_secret=os.environ['STRIPE_WEBHOOK_SECRET']
+    signature=request.headers["Stripe-Signature"],
+    webhook_secret=os.environ["STRIPE_WEBHOOK_SECRET"],
 )
 
 # Automatically updates subscriptions and sends notifications
