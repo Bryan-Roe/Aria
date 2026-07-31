@@ -92,16 +92,12 @@ from ai_projects.llm_maker.src.tool_maker import ToolMaker
 
 maker = ToolMaker()
 code = maker.create_tool(
-    'validate_email',
-    'Validates email format using regex',
-    {'email': 'str'},
-    {'is_valid': 'bool'},
-    max_attempts=3
+    "validate_email", "Validates email format using regex", {"email": "str"}, {"is_valid": "bool"}, max_attempts=3
 )
 
 # Use the generated code:
 exec(code)
-print(validate_email('user@example.com'))  # True
+print(validate_email("user@example.com"))  # True
 ```
 
 ### Example 2: Generate Data Processing Function
@@ -109,15 +105,15 @@ print(validate_email('user@example.com'))  # True
 ```python
 maker = ToolMaker()
 code = maker.create_tool(
-    'parse_csv_line',
-    'Parse a CSV line into a list of values',
-    {'line': 'str', 'delimiter': 'str'},
-    {'values': 'list'},
-    max_attempts=3
+    "parse_csv_line",
+    "Parse a CSV line into a list of values",
+    {"line": "str", "delimiter": "str"},
+    {"values": "list"},
+    max_attempts=3,
 )
 
 exec(code)
-print(parse_csv_line('a,b,c', ','))  # ['a', 'b', 'c']
+print(parse_csv_line("a,b,c", ","))  # ['a', 'b', 'c']
 ```
 
 ### Example 3: Generate Static Website
@@ -127,17 +123,15 @@ from ai_projects.llm_maker.src.website_maker import WebsiteMaker
 
 maker = WebsiteMaker()
 result = maker.create_website(
-    'blog-template',
-    ['index.html', 'post.html', 'about.html'],
-    'A minimalist blog template with dark mode'
+    "blog-template", ["index.html", "post.html", "about.html"], "A minimalist blog template with dark mode"
 )
 
 # Check result
-print(result['files'].keys())  # dict_keys(['index.html', 'style.css', ...])
+print(result["files"].keys())  # dict_keys(['index.html', 'style.css', ...])
 
 # Write files
-for filename, content in result['files'].items():
-    with open(f"build/{filename}", 'w') as f:
+for filename, content in result["files"].items():
+    with open(f"build/{filename}", "w") as f:
         f.write(content)
 ```
 
@@ -164,12 +158,7 @@ Generate a validated Python function.
 **Example:**
 
 ```python
-code = maker.create_tool(
-    'reverse_string',
-    'Reverses a string',
-    {'text': 'str'},
-    {'reversed': 'str'}
-)
+code = maker.create_tool("reverse_string", "Reverses a string", {"text": "str"}, {"reversed": "str"})
 ```
 
 ### WebsiteMaker
@@ -193,12 +182,10 @@ Generate a complete static website.
 
 ```python
 result = maker.create_website(
-    'landing-page',
-    ['index.html', 'features.html'],
-    'Marketing landing page for SaaS product'
+    "landing-page", ["index.html", "features.html"], "Marketing landing page for SaaS product"
 )
 
-for filename, content in result['files'].items():
+for filename, content in result["files"].items():
     print(f"Generated {filename}: {len(content)} bytes")
 ```
 
@@ -225,12 +212,7 @@ http, pickle, threading, multiprocessing, ctypes, cffi
 **Request (fails):**
 
 ```python
-code = maker.create_tool(
-    'list_files',
-    'List files in directory',
-    {'path': 'str'},
-    {'files': 'list'}
-)
+code = maker.create_tool("list_files", "List files in directory", {"path": "str"}, {"files": "list"})
 # ERROR: os import not allowed
 ```
 
@@ -238,11 +220,7 @@ code = maker.create_tool(
 
 ```python
 code = maker.create_tool(
-    'extract_numbers',
-    'Extract all numbers from text',
-    {'text': 'str'},
-    {'numbers': 'list'},
-    max_attempts=3
+    "extract_numbers", "Extract all numbers from text", {"text": "str"}, {"numbers": "list"}, max_attempts=3
 )
 # Uses regex instead of os/file operations
 ```
@@ -287,12 +265,7 @@ The agent will:
 maker = ToolMaker()
 
 # Phone number validator
-code = maker.create_tool(
-    'validate_phone',
-    'Validate US phone number format',
-    {'phone': 'str'},
-    {'is_valid': 'bool'}
-)
+code = maker.create_tool("validate_phone", "Validate US phone number format", {"phone": "str"}, {"is_valid": "bool"})
 ```
 
 ### Use Case 2: Text Processing
@@ -300,10 +273,7 @@ code = maker.create_tool(
 ```python
 # Extract hashtags from text
 code = maker.create_tool(
-    'extract_hashtags',
-    'Extract all hashtags from social media text',
-    {'text': 'str'},
-    {'hashtags': 'list'}
+    "extract_hashtags", "Extract all hashtags from social media text", {"text": "str"}, {"hashtags": "list"}
 )
 ```
 
@@ -312,10 +282,10 @@ code = maker.create_tool(
 ```python
 # Calculate compound interest
 code = maker.create_tool(
-    'compound_interest',
-    'Calculate compound interest',
-    {'principal': 'float', 'rate': 'float', 'years': 'float'},
-    {'amount': 'float'}
+    "compound_interest",
+    "Calculate compound interest",
+    {"principal": "float", "rate": "float", "years": "float"},
+    {"amount": "float"},
 )
 ```
 
@@ -323,12 +293,7 @@ code = maker.create_tool(
 
 ```python
 # Generate slug from title
-code = maker.create_tool(
-    'slugify',
-    'Convert title to URL-friendly slug',
-    {'title': 'str'},
-    {'slug': 'str'}
-)
+code = maker.create_tool("slugify", "Convert title to URL-friendly slug", {"title": "str"}, {"slug": "str"})
 ```
 
 ### Use Case 5: Static Sites
@@ -338,9 +303,9 @@ maker = WebsiteMaker()
 
 # Documentation site
 result = maker.create_website(
-    'api-docs',
-    ['index.html', 'getting-started.html', 'reference.html', 'examples.html'],
-    'API documentation with navigation and code examples'
+    "api-docs",
+    ["index.html", "getting-started.html", "reference.html", "examples.html"],
+    "API documentation with navigation and code examples",
 )
 ```
 
@@ -365,10 +330,10 @@ result = maker.create_website(
 
 ```python
 code = maker.create_tool(
-    'my_func',
-    'Does X',
-    {'input_value': 'str'},  # Exact name matters
-    {'output_result': 'str'}
+    "my_func",
+    "Does X",
+    {"input_value": "str"},  # Exact name matters
+    {"output_result": "str"},
 )
 ```
 
@@ -391,9 +356,9 @@ code = maker.create_tool(
 
 ```python
 result = maker.create_website(
-    'simple-site',
-    ['index.html'],  # Start with single page
-    'A simple single-page site'
+    "simple-site",
+    ["index.html"],  # Start with single page
+    "A simple single-page site",
 )
 ```
 
@@ -406,11 +371,11 @@ from ai_projects.llm_maker.src.tool_maker import ToolMaker
 
 maker = ToolMaker()
 code = maker.create_tool(
-    'my_function',
-    'Does something',
-    {'input': 'str'},
-    {'output': 'str'},
-    max_attempts=5  # Increase retries
+    "my_function",
+    "Does something",
+    {"input": "str"},
+    {"output": "str"},
+    max_attempts=5,  # Increase retries
 )
 ```
 
@@ -418,9 +383,9 @@ code = maker.create_tool(
 
 ```python
 functions_to_generate = [
-    ('add', 'Add two numbers', {'a': 'int', 'b': 'int'}, {'sum': 'int'}),
-    ('multiply', 'Multiply numbers', {'a': 'int', 'b': 'int'}, {'product': 'int'}),
-    ('divide', 'Divide two numbers', {'a': 'int', 'b': 'int'}, {'quotient': 'float'}),
+    ("add", "Add two numbers", {"a": "int", "b": "int"}, {"sum": "int"}),
+    ("multiply", "Multiply numbers", {"a": "int", "b": "int"}, {"product": "int"}),
+    ("divide", "Divide two numbers", {"a": "int", "b": "int"}, {"quotient": "float"}),
 ]
 
 maker = ToolMaker()

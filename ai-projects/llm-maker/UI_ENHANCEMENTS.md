@@ -76,11 +76,10 @@ GET http://localhost:8090/api/tools
 ```python
 import requests
 
-requests.post('http://localhost:8090/api/tools', json={
-    'name': 'my_tool',
-    'description': 'What it does',
-    'parameters': {'x': 'int'}
-})
+requests.post(
+    "http://localhost:8090/api/tools",
+    json={"name": "my_tool", "description": "What it does", "parameters": {"x": "int"}},
+)
 ```
 
 ## User Benefits

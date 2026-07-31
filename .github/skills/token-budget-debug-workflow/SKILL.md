@@ -52,10 +52,10 @@ from token_utils import count_messages_tokens
 ```python
 # Known context windows:
 MODEL_DEFAULTS = {
-    "gpt-4o":          128_000,
-    "gpt-3.5-turbo":   16_384,
-    "azure_default":   16_384,
-    "phi":              4_096,
+    "gpt-4o": 128_000,
+    "gpt-3.5-turbo": 16_384,
+    "azure_default": 16_384,
+    "phi": 4_096,
 }
 
 # If the wrong default is applied, token budget will be too small/large
@@ -70,9 +70,9 @@ pruned_msgs, stats, system_msg = prune_messages(
     messages,
     provider="azure",
     model="gpt-4o",
-    max_context_tokens=None,       # None = auto-detect from model
-    reserve_output_tokens=1024,    # Always reserve for response
-    system_prompt=None
+    max_context_tokens=None,  # None = auto-detect from model
+    reserve_output_tokens=1024,  # Always reserve for response
+    system_prompt=None,
 )
 
 print(stats)
