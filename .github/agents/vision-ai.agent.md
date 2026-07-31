@@ -66,21 +66,16 @@ Search order for `.pt` files:
 Checkpoint format:
 
 ```python
-{
-    'model_state_dict': state_dict,
-    'class_names': ['happy', 'sad', ...],
-    'epoch': int,
-    'accuracy': float
-}
+{"model_state_dict": state_dict, "class_names": ["happy", "sad", ...], "epoch": int, "accuracy": float}
 ```
 
 ### VisionInference API
 
 ```python
-vi = VisionInference()                    # Auto-loads latest checkpoint
-result = vi.predict(pil_image)            # → {label, confidence, scores}
-result = vi.predict_base64(b64_string)    # → same
-result = vi.predict_file(file_path)       # → same
+vi = VisionInference()  # Auto-loads latest checkpoint
+result = vi.predict(pil_image)  # → {label, confidence, scores}
+result = vi.predict_base64(b64_string)  # → same
+result = vi.predict_file(file_path)  # → same
 ```
 
 ## Integration with Aria

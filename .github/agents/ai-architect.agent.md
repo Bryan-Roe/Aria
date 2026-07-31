@@ -112,6 +112,7 @@ class NewProvider(BaseChatProvider):
         else:
             return self.client.generate(messages)
 
+
 # Wire into detection chain in shared/chat_providers.py
 ```
 
@@ -144,7 +145,7 @@ from shared.subscription_manager import get_subscription_manager, Feature
 sub = mgr.get_subscription(user_id)
 if not sub.has_feature(Feature.QUANTUM_COMPUTING):
     return HttpResponse("Upgrade required", status_code=403)
-if not sub.track_usage('quantum_jobs', amount=1):
+if not sub.track_usage("quantum_jobs", amount=1):
     return HttpResponse("Usage limit reached", status_code=429)
 ```
 

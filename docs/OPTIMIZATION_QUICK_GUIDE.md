@@ -10,11 +10,11 @@
 
 ```python
 # BEFORE
-count = len(list(directory.glob('*.json')))
+count = len(list(directory.glob("*.json")))
 count = len([d for d in dir.iterdir() if d.is_dir()])
 
 # AFTER
-count = sum(1 for _ in directory.glob('*.json'))
+count = sum(1 for _ in directory.glob("*.json"))
 count = sum(1 for d in dir.iterdir() if d.is_dir())
 ```
 
@@ -45,10 +45,13 @@ avg_acc = np.mean([s.best_val_acc for s in sessions.values() if s.best_val_acc >
 active = completed = total_epochs = 0
 accuracies = []
 for s in sessions.values():
-    if s.status == "training": active += 1
-    elif s.status == "completed": completed += 1
+    if s.status == "training":
+        active += 1
+    elif s.status == "completed":
+        completed += 1
     total_epochs += s.current_epoch
-    if s.best_val_acc > 0: accuracies.append(s.best_val_acc)
+    if s.best_val_acc > 0:
+        accuracies.append(s.best_val_acc)
 avg_acc = np.mean(accuracies) if accuracies else 0.0
 ```
 
@@ -66,9 +69,11 @@ from typing import Dict, Tuple, Any
 _file_cache: Dict[str, Tuple[Any, float]] = {}
 _FILE_CACHE_TTL = 5  # seconds
 
+
 def _load_json_cached(filepath: Path) -> dict:
     """Load JSON file with TTL-based caching"""
     import json
+
     now = time.time()
     cache_key = str(filepath)
 
@@ -80,7 +85,7 @@ def _load_json_cached(filepath: Path) -> dict:
 
     # Read file
     try:
-        with open(filepath, 'r') as f:
+        with open(filepath, "r") as f:
             data = json.load(f)
         _file_cache[cache_key] = (data, now)
         return data
@@ -89,6 +94,7 @@ def _load_json_cached(filepath: Path) -> dict:
         if cache_key in _file_cache:
             return _file_cache[cache_key][0]
         raise
+
 
 # Replace all instances of:
 #   with open(status_file, 'r') as f:
@@ -116,6 +122,7 @@ _DOMAIN_KEYWORDS = {
     "aria": frozenset(["aria", "move", "animation", "character"]),
     "technical": frozenset(["code", "program", "api", "function", "database"]),
 }
+
 
 # In _analyze_query function, replace multiple any() calls with:
 def _analyze_query_optimized(query: str) -> dict:
@@ -192,6 +199,7 @@ _request_timestamps = defaultdict(deque)
 _MAX_REQUESTS = 100
 _WINDOW_SECONDS = 60
 
+
 def check_rate_limit(client_ip: str) -> bool:
     """Check if client is within rate limit using deque"""
     now = time.time()
@@ -206,6 +214,7 @@ def check_rate_limit(client_ip: str) -> bool:
 
     timestamps.append(now)
     return True
+
 
 # Replace list filtering with deque-based check
 ```
@@ -236,8 +245,10 @@ def compute_gradient_optimized(circuit, X, y, weights):
     except Exception as e:
         # Fallback to manual parameter-shift if autograd fails
         import warnings
+
         warnings.warn(f"Autograd failed ({e}), using manual gradient")
         return compute_gradient(circuit, X, y, weights, use_parameter_shift=True)
+
 
 # In training loop, replace:
 #   grad = compute_gradient(circuit, X_batch, y_batch, weights)
@@ -260,6 +271,7 @@ For each optimization:
 ```python
 import time
 import numpy as np
+
 
 def benchmark_optimization(old_func, new_func, *args, iterations=100):
     """Compare performance of old vs new implementation"""
@@ -287,8 +299,8 @@ def benchmark_optimization(old_func, new_func, *args, iterations=100):
         assert result_old == result_new, "Results don't match!"
 
     speedup = time_old / time_new
-    print(f"Old: {time_old*1000:.2f}ms")
-    print(f"New: {time_new*1000:.2f}ms")
+    print(f"Old: {time_old * 1000:.2f}ms")
+    print(f"New: {time_new * 1000:.2f}ms")
     print(f"Speedup: {speedup:.1f}x")
 
     return speedup
