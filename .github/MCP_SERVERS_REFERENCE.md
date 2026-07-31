@@ -446,11 +446,13 @@ from mcp.types import Tool, TextContent
 
 server = Server("my-server")
 
+
 @server.call_tool()
 async def call_tool(name: str, arguments: dict) -> TextContent:
     if name == "hello":
         return TextContent(text=f"Hello {arguments['name']}")
     return TextContent(text="Unknown tool")
+
 
 if __name__ == "__main__":
     server.run()
