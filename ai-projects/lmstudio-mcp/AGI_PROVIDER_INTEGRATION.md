@@ -51,9 +51,7 @@ provider, choice = detect_provider("lmstudio")
 agi = AGIProvider(base_provider=provider)
 
 # Use AGI reasoning with LM Studio backend
-response = agi.complete([
-    {"role": "user", "content": "Explain generators in Python"}
-])
+response = agi.complete([{"role": "user", "content": "Explain generators in Python"}])
 ```
 
 ### Level 2: Agent Registry Integration
@@ -69,9 +67,7 @@ _AGENT_REGISTRY["lmstudio-local"] = get_lmstudio_agent_registry_entry()
 
 # AGI provider now routes to LM Studio for suitable queries
 agi = AGIProvider()
-response = agi.complete([
-    {"role": "user", "content": "Write a Python decorator"}
-])
+response = agi.complete([{"role": "user", "content": "Write a Python decorator"}])
 # Routes to lmstudio because: domain=technical, intent=coding
 ```
 
@@ -113,10 +109,7 @@ subtasks = await decompose_task_with_lmstudio(task, domain="ai")
 
 # Reason through implementation
 for subtask in subtasks:
-    reasoning = await reason_with_lmstudio_chain_of_thought(
-        subtask['task'],
-        depth=3
-    )
+    reasoning = await reason_with_lmstudio_chain_of_thought(subtask["task"], depth=3)
     print(f"Subtask: {subtask['task']}")
     print(f"Reasoning: {reasoning['conclusion']}")
 ```
@@ -140,9 +133,7 @@ from agi_provider import AGIProvider
 agi = AGIProvider()
 
 # Automatically routes to LM Studio for suitable queries
-response = agi.complete([
-    {"role": "user", "content": "Explain neural networks"}
-])
+response = agi.complete([{"role": "user", "content": "Explain neural networks"}])
 
 print(response)
 ```
@@ -168,9 +159,7 @@ The AGI provider chains reasoning steps. LM Studio participates:
 agi = AGIProvider(enable_chain_of_thought=True)
 
 # Generates multi-step reasoning
-response = agi.complete([
-    {"role": "user", "content": "Why does deep learning work?"}
-])
+response = agi.complete([{"role": "user", "content": "Why does deep learning work?"}])
 
 # Reasoning chain is tracked:
 # 1. Understand question
@@ -192,9 +181,7 @@ Complex tasks are broken into subtasks:
 #   - Documentation: Technical writer
 
 agi = AGIProvider(enable_task_decomposition=True)
-response = agi.complete([
-    {"role": "user", "content": "Implement a RAG system"}
-])
+response = agi.complete([{"role": "user", "content": "Implement a RAG system"}])
 ```
 
 ### Self-Reflection
@@ -204,9 +191,7 @@ AGI provider reviews and improves responses:
 ```python
 agi = AGIProvider(enable_self_reflection=True)
 
-response = agi.complete([
-    {"role": "user", "content": "Explain LSTM networks"}
-])
+response = agi.complete([{"role": "user", "content": "Explain LSTM networks"}])
 
 # Process:
 # 1. LM Studio generates initial response
@@ -283,19 +268,15 @@ export LMSTUDIO_MAX_TOKENS=2048
 agi = AGIProvider(
     # Base provider (LM Studio or other)
     base_provider=None,  # Auto-detect
-
     # Reasoning features
     enable_chain_of_thought=True,
     enable_self_reflection=True,
     enable_task_decomposition=True,
-
     # Reasoning depth (1-5)
     reasoning_depth=3,
-
     # Output control
     temperature=0.7,
     max_output_tokens=2048,
-
     # Verbosity
     verbose=False,
 )
@@ -325,21 +306,13 @@ response = await router.route_query(query, messages, analysis)
 entry = get_lmstudio_agent_registry_entry()
 
 # Complete with LM Studio routing
-response = await complete_with_lmstudio_routing(
-    agi_provider,
-    messages,
-    stream=True,
-    prefer_lmstudio=False
-)
+response = await complete_with_lmstudio_routing(agi_provider, messages, stream=True, prefer_lmstudio=False)
 
 # Decompose task into subtasks
 subtasks = await decompose_task_with_lmstudio(task, domain="technical")
 
 # Generate reasoning chain
-reasoning = await reason_with_lmstudio_chain_of_thought(
-    query,
-    depth=3
-)
+reasoning = await reason_with_lmstudio_chain_of_thought(query, depth=3)
 ```
 
 ## Examples
@@ -352,9 +325,7 @@ from agi_provider import AGIProvider
 agi = AGIProvider()
 
 # Query perfect for LM Studio (domain=technical)
-response = agi.complete([
-    {"role": "user", "content": "Explain backpropagation in neural networks"}
-])
+response = agi.complete([{"role": "user", "content": "Explain backpropagation in neural networks"}])
 
 # Flow:
 # 1. Query analyzed: technical domain, explanation intent
@@ -369,15 +340,10 @@ print(response)
 ```python
 from agi_provider import AGIProvider
 
-agi = AGIProvider(
-    enable_task_decomposition=True,
-    enable_self_reflection=True
-)
+agi = AGIProvider(enable_task_decomposition=True, enable_self_reflection=True)
 
 # Perfect for code specialist + LM Studio
-response = agi.complete([
-    {"role": "user", "content": "Write a Python async decorator with error handling"}
-])
+response = agi.complete([{"role": "user", "content": "Write a Python async decorator with error handling"}])
 
 # Flow:
 # 1. Analyzed: coding intent, technical domain
@@ -399,10 +365,7 @@ from lmstudio_agi_integration import (
 task = "Build a recommendation system using collaborative filtering"
 
 # LM Studio decomposes
-subtasks = await decompose_task_with_lmstudio(
-    task,
-    domain="ai"
-)
+subtasks = await decompose_task_with_lmstudio(task, domain="ai")
 # Returns:
 # 1. Understand collaborative filtering
 # 2. Design data structures
@@ -415,10 +378,7 @@ for subtask in subtasks:
     print(f"\nSubtask: {subtask['task']}")
 
     # Get reasoning from LM Studio
-    reasoning = await reason_with_lmstudio_chain_of_thought(
-        subtask['task'],
-        depth=2
-    )
+    reasoning = await reason_with_lmstudio_chain_of_thought(subtask["task"], depth=2)
     print(f"Analysis: {reasoning['conclusion']}")
 ```
 
@@ -433,10 +393,10 @@ agi = AGIProvider()
 
 # Different queries, different routing decisions
 queries = [
-    "Explain quantum entanglement",      # → quantum-specialist
-    "Write a sorting algorithm",         # → lmstudio-local (coding)
-    "What is the weather?",              # → general agent
-    "Optimize this function locally",    # → lmstudio-local (local mention)
+    "Explain quantum entanglement",  # → quantum-specialist
+    "Write a sorting algorithm",  # → lmstudio-local (coding)
+    "What is the weather?",  # → general agent
+    "Optimize this function locally",  # → lmstudio-local (local mention)
 ]
 
 for query in queries:

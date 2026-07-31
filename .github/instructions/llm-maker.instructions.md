@@ -56,7 +56,7 @@ for attempt in range(max_attempts):  # default: 3
     "success": True,
     "files": {"index.html": "...", "style.css": "...", "script.js": "..."},
     "path": "ai-projects/generated_sites/{name}/",
-    "metadata": {"created_at": "...", "pages": [...], "features": [...]}
+    "metadata": {"created_at": "...", "pages": [...], "features": [...]},
 }
 ```
 

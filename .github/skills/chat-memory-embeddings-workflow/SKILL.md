@@ -39,6 +39,7 @@ Diagnose which tier is active:
 
 ```python
 from shared.chat_memory import generate_embedding
+
 emb = generate_embedding("test")
 print(f"Dimension: {len(emb) if emb else 'None — all providers failed'}")
 ```
@@ -57,6 +58,7 @@ If `QAI_DB_CONN` is unset, `generate_embedding()` and `store_embedding()` degrad
 
 ```python
 from shared.chat_memory import generate_embedding, fetch_similar_messages
+
 q = generate_embedding("What is quantum computing?")
 results = fetch_similar_messages(q, top_k=5, session_id="test-session")
 print(results)
@@ -86,7 +88,7 @@ Correct injection order:
 embedding = generate_embedding(user_text)
 similar = fetch_similar_messages(embedding, top_k=5, session_id=session_id)
 for i, msg in enumerate(similar):
-    messages.insert(1, {"role": "system", "content": f"[Memory #{i+1}] {msg['content']}"})
+    messages.insert(1, {"role": "system", "content": f"[Memory #{i + 1}] {msg['content']}"})
 # Then prune AFTER injecting memories
 messages, stats, sys_msg = prune_messages(messages, provider, model, max_tokens)
 ```
