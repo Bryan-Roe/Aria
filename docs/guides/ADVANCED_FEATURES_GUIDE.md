@@ -144,11 +144,7 @@ from scripts.job_queue import JobQueue, JobPriority
 queue = JobQueue()
 
 # Add high-priority job
-queue.add_job(
-    name="urgent_training",
-    config={...},
-    priority=JobPriority.HIGH
-)
+queue.add_job(name="urgent_training", config={...}, priority=JobPriority.HIGH)
 ```
 
 Priority order: `CRITICAL` > `HIGH` > `NORMAL` > `LOW`
@@ -158,11 +154,7 @@ Priority order: `CRITICAL` > `HIGH` > `NORMAL` > `LOW`
 ```python
 # Job 2 won't start until Job 1 completes
 job1 = queue.add_job(name="preprocess", config={...})
-job2 = queue.add_job(
-    name="train",
-    config={...},
-    dependencies=[job1]
-)
+job2 = queue.add_job(name="train", config={...}, dependencies=[job1])
 ```
 
 #### **Automatic Retry**
@@ -221,7 +213,7 @@ prep_job = queue.add_job(
     name="preprocess_dataset",
     config={"action": "clean", "dataset": "mixed_chat"},
     priority=JobPriority.HIGH,
-    estimated_duration=300  # 5 minutes
+    estimated_duration=300,  # 5 minutes
 )
 
 # 2. Train model (depends on preprocessing)
@@ -230,7 +222,7 @@ train_job = queue.add_job(
     config={"epochs": 3, "dataset": "mixed_chat"},
     priority=JobPriority.NORMAL,
     dependencies=[prep_job],
-    estimated_duration=1800  # 30 minutes
+    estimated_duration=1800,  # 30 minutes
 )
 
 # 3. Evaluate model (depends on training)
@@ -239,7 +231,7 @@ eval_job = queue.add_job(
     config={"model": "phi35_v2"},
     priority=JobPriority.NORMAL,
     dependencies=[train_job],
-    estimated_duration=600  # 10 minutes
+    estimated_duration=600,  # 10 minutes
 )
 
 # Get next job to execute

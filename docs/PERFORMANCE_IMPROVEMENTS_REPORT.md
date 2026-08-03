@@ -78,9 +78,12 @@ if any(x.get("role") == "user" for x in window) and \
 has_user = has_assistant = False
 for x in window:
     role = x.get("role")
-    if role == "user": has_user = True
-    elif role == "assistant": has_assistant = True
-    if has_user and has_assistant: break
+    if role == "user":
+        has_user = True
+    elif role == "assistant":
+        has_assistant = True
+    if has_user and has_assistant:
+        break
 ```
 
 **Impact:** 50% reduction in window traversal
@@ -171,6 +174,7 @@ if durations:
 
 ```python
 import statistics
+
 if durations:
     avg = statistics.mean(durations)
 ```
@@ -309,11 +313,11 @@ for compiled_pattern, desc in _FILE_OPERATION_PATTERNS:
 ```python
 # ❌ DON'T: Compile in loop
 for item in items:
-    if re.search(r'pattern', item):
+    if re.search(r"pattern", item):
         ...
 
 # ✅ DO: Compile once
-PATTERN = re.compile(r'pattern')
+PATTERN = re.compile(r"pattern")
 for item in items:
     if PATTERN.search(item):
         ...
@@ -349,15 +353,15 @@ result = "".join(parts)
 
 ```python
 # ❌ DON'T: Multiple passes
-count_a = sum(1 for x in items if x.type == 'a')
-count_b = sum(1 for x in items if x.type == 'b')
+count_a = sum(1 for x in items if x.type == "a")
+count_b = sum(1 for x in items if x.type == "b")
 total = sum(x.value for x in items)
 
 # ✅ DO: Single pass
-counts = {'a': 0, 'b': 0, 'total': 0}
+counts = {"a": 0, "b": 0, "total": 0}
 for x in items:
     counts[x.type] += 1
-    counts['total'] += x.value
+    counts["total"] += x.value
 ```
 
 ---
@@ -384,9 +388,9 @@ python -m py_compile scripts/*.py dashboard/app.py function_app.py
 
 ```python
 import extract_chat_logs_dataset  # ✓
-import status_dashboard          # ✓
-import job_queue                 # ✓
-import tool_validator            # ✓
+import status_dashboard  # ✓
+import job_queue  # ✓
+import tool_validator  # ✓
 # All imports successful
 ```
 
