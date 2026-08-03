@@ -34,13 +34,7 @@ Hybrid quantum-classical neural networks with configurable depth:
 from src.hybrid_qnn import HybridQNN
 import torch
 
-model = HybridQNN(
-  input_dim=10,
-  hidden_dim=16,
-  n_qubits=4,
-  n_quantum_layers=2,
-  output_dim=1
-)
+model = HybridQNN(input_dim=10, hidden_dim=16, n_qubits=4, n_quantum_layers=2, output_dim=1)
 output = model(torch.randn(8, 10))
 ```
 
@@ -370,6 +364,7 @@ model = HybridQuantumClassifier(input_dim=4, quantum_classifier=qc)
 
 # Train the model
 from src.quantum_classifier import train_quantum_model
+
 history = train_quantum_model(model, X_train, y_train, X_val, y_val)
 
 print(f"Final accuracy: {history['val_acc'][-1]:.4f}")
@@ -382,13 +377,7 @@ from src.hybrid_qnn import HybridQNN
 import torch
 
 # Create hybrid model
-model = HybridQNN(
-    input_dim=10,
-    hidden_dim=16,
-    n_qubits=4,
-    n_quantum_layers=2,
-    output_dim=1
-)
+model = HybridQNN(input_dim=10, hidden_dim=16, n_qubits=4, n_quantum_layers=2, output_dim=1)
 
 # Forward pass
 x = torch.randn(8, 10)  # Batch of 8 samples
