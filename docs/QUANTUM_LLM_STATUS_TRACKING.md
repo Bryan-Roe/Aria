@@ -55,8 +55,8 @@ status = get_quantum_llm_status()
 status = get_quantum_llm_status(output_dir="data_out/custom_training")
 
 # Check if inference ready
-if status['inference_ready']:
-    checkpoint = status['checkpoint_path']
+if status["inference_ready"]:
+    checkpoint = status["checkpoint_path"]
     # Load and use model
 ```
 
@@ -73,7 +73,7 @@ data = {
     "status": "completed",
     "epochs_completed": 5,
     "best_loss": 0.089,
-    "checkpoint_path": "data_out/quantum_llm_training/best_quantum_llm.pt"
+    "checkpoint_path": "data_out/quantum_llm_training/best_quantum_llm.pt",
 }
 
 write_quantum_llm_status(data, output_dir="data_out/quantum_llm_training")
@@ -168,12 +168,12 @@ from quantum_llm_trainer import get_quantum_llm_status
 
 status = get_quantum_llm_status()
 
-if status['checkpoint_exists'] and status['inference_ready']:
-    path = status['checkpoint_path']
+if status["checkpoint_exists"] and status["inference_ready"]:
+    path = status["checkpoint_path"]
     print(f"✓ Checkpoint ready at: {path}")
 else:
     print("✗ Checkpoint not ready")
-    if error := status.get('last_error'):
+    if error := status.get("last_error"):
         print(f"  Error: {error}")
 ```
 
@@ -182,7 +182,7 @@ else:
 When using passive training mode:
 
 ```python
-trainer = QuantumEnhancedLLMTrainer(config={'passive': True})
+trainer = QuantumEnhancedLLMTrainer(config={"passive": True})
 await trainer.run_passive_training_loop()
 ```
 
@@ -247,13 +247,12 @@ python scripts/quantum_llm_status_check.py --json | jq '.status_file_exists'
 # In function_app.py
 from quantum_llm_trainer import get_quantum_llm_status
 
+
 @app.route(route="api/quantum-llm-ready", methods=["GET"])
 def quantum_ready(req):
     status = get_quantum_llm_status()
     return func.HttpResponse(
-        json.dumps({"ready": status["inference_ready"]}),
-        status_code=200,
-        mimetype="application/json"
+        json.dumps({"ready": status["inference_ready"]}), status_code=200, mimetype="application/json"
     )
 ```
 

@@ -214,7 +214,7 @@ By default, server binds to `0.0.0.0` allowing remote access.
 For local-only, change to `127.0.0.1`:
 
 ```python
-host = '127.0.0.1'  # localhost only
+host = "127.0.0.1"  # localhost only
 ```
 
 ### Production Deployment
