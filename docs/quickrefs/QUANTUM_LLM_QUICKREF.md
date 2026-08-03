@@ -84,7 +84,7 @@ from quantum_llm_advanced import MultiScaleQuantumAttention
 attention = MultiScaleQuantumAttention(
     d_model=128,
     n_heads=4,
-    n_qubits_per_head=[2, 3, 4, 6]  # Different scales
+    n_qubits_per_head=[2, 3, 4, 6],  # Different scales
 )
 ```
 
@@ -115,11 +115,7 @@ stages = [
 ```python
 from quantum_llm_monitor import TrainingDashboard
 
-dashboard = TrainingDashboard(
-    output_dir=Path("data_out/dashboard"),
-    update_interval=10,
-    enable_alerts=True
-)
+dashboard = TrainingDashboard(output_dir=Path("data_out/dashboard"), update_interval=10, enable_alerts=True)
 ```
 
 ---

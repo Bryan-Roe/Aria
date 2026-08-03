@@ -505,8 +505,8 @@ notifier = NotificationManager()
 notifier.send_notification(
     title="Title",
     message="Message body",
-    icon="info",     # info/success/warning/error
-    duration=10      # seconds
+    icon="info",  # info/success/warning/error
+    duration=10,  # seconds
 )
 
 # Training events
@@ -590,6 +590,7 @@ updateNotificationUI()
 ```python
 # Add notification support
 from scripts.notification_system import NotificationManager
+
 notifier = NotificationManager()
 
 # Before job

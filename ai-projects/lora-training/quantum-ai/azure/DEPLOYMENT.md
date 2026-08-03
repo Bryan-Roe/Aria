@@ -90,7 +90,7 @@ azure_qm = AzureQuantumManager()
 azure_qm.connect()
 
 # Estimate cost
-cost = azure_qm.estimate_cost(circuit, backend_name='ionq.qpu')
+cost = azure_qm.estimate_cost(circuit, backend_name="ionq.qpu")
 print(cost)
 ```
 
