@@ -52,9 +52,7 @@ from agi_provider import detect_provider
 provider, choice = detect_provider(provider_choice="lmstudio")
 
 # Use with simple message
-response = provider.complete([
-    {"role": "user", "content": "Explain neural networks"}
-])
+response = provider.complete([{"role": "user", "content": "Explain neural networks"}])
 ```
 
 ## Agent Integration
@@ -98,6 +96,7 @@ Route to LM Studio with custom logic:
 ```python
 from lmstudio_agent_integration import should_use_lmstudio
 
+
 def select_provider(query: str):
     if should_use_lmstudio(query):
         return "lmstudio"
@@ -112,6 +111,7 @@ def select_provider(query: str):
 import asyncio
 from lmstudio_agent_integration import get_lmstudio_agent_client
 
+
 async def main():
     client = get_lmstudio_agent_client()
 
@@ -125,13 +125,11 @@ async def main():
 
     # Send message
     response = await client.complete(
-        messages=[
-            {"role": "system", "content": "You are helpful."},
-            {"role": "user", "content": "Hello!"}
-        ],
-        temperature=0.7
+        messages=[{"role": "system", "content": "You are helpful."}, {"role": "user", "content": "Hello!"}],
+        temperature=0.7,
     )
     print(f"Response: {response}")
+
 
 asyncio.run(main())
 ```
@@ -153,7 +151,7 @@ agi = AGIProvider(base_provider=base_provider)
 response = agi.reason(
     "Explain quantum entanglement in simple terms",
     trace=True,  # Show reasoning
-    decompose=True  # Break into subtasks
+    decompose=True,  # Break into subtasks
 )
 print(response)
 ```
@@ -164,6 +162,7 @@ print(response)
 from lmstudio_agent_integration import get_lmstudio_agent_client
 import asyncio
 
+
 async def multi_agent_workflow():
     client = get_lmstudio_agent_client()
 
@@ -171,22 +170,23 @@ async def multi_agent_workflow():
     tech_response = await client.complete(
         messages=[
             {"role": "system", "content": "You are a technical expert."},
-            {"role": "user", "content": "What is machine learning?"}
+            {"role": "user", "content": "What is machine learning?"},
         ],
-        temperature=0.3  # Deterministic
+        temperature=0.3,  # Deterministic
     )
 
     # Agent 2: Simplification
     simple_response = await client.complete(
         messages=[
             {"role": "system", "content": "Simplify complex technical content."},
-            {"role": "user", "content": f"Simplify: {tech_response}"}
+            {"role": "user", "content": f"Simplify: {tech_response}"},
         ],
-        temperature=0.5
+        temperature=0.5,
     )
 
     print("Technical:", tech_response)
     print("Simplified:", simple_response)
+
 
 asyncio.run(multi_agent_workflow())
 ```
@@ -197,6 +197,7 @@ asyncio.run(multi_agent_workflow())
 from lmstudio_agent_integration import get_lmstudio_agent_client
 import asyncio
 
+
 async def compare_models():
     client = get_lmstudio_agent_client()
 
@@ -206,11 +207,10 @@ async def compare_models():
     # Compare responses from different models
     for model in models:
         response = await client.complete(
-            messages=[{"role": "user", "content": "What is AI?"}],
-            model=model,
-            max_tokens=256
+            messages=[{"role": "user", "content": "What is AI?"}], model=model, max_tokens=256
         )
         print(f"\n{model}:\n{response}")
+
 
 asyncio.run(compare_models())
 ```
@@ -240,17 +240,14 @@ from lmstudio_agent_integration import LMStudioAgentClient
 
 # Custom configuration
 client = LMStudioAgentClient(
-    base_url="http://192.168.1.100:1234/v1",
-    model="mistral-7b",
-    temperature=0.5,
-    max_tokens=4096
+    base_url="http://192.168.1.100:1234/v1", model="mistral-7b", temperature=0.5, max_tokens=4096
 )
 
 # Use with custom settings
 response = await client.complete(
     messages=[...],
     temperature=0.3,  # Override default
-    max_tokens=512    # Override default
+    max_tokens=512,  # Override default
 )
 ```
 
@@ -263,6 +260,7 @@ response = await client.complete(
 from lmstudio_agent_integration import get_lmstudio_agent_client
 import asyncio
 
+
 @app.route(route="api/chat", methods=["POST"])
 async def chat(req: func.HttpRequest) -> func.HttpResponse:
     body = req.get_json()
@@ -274,10 +272,7 @@ async def chat(req: func.HttpRequest) -> func.HttpResponse:
         messages = body.get("messages", [])
         response = await client.complete(messages)
 
-        return func.HttpResponse(
-            json.dumps({"response": response}),
-            status_code=200
-        )
+        return func.HttpResponse(json.dumps({"response": response}), status_code=200)
 ```
 
 ## Troubleshooting
