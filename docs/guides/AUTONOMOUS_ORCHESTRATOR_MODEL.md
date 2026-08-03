@@ -119,9 +119,11 @@ import yaml
 # Optional: Ray for distributed execution
 try:
     import ray
+
     RAY_AVAILABLE = True
 except ImportError:
     RAY_AVAILABLE = False
+
 
 class AutonomousOrchestrator:
     """
@@ -152,7 +154,7 @@ class AutonomousOrchestrator:
             "datasets_discovered": 0,
             "datasets_trained": 0,
             "models_deployed": 0,
-            "errors": []
+            "errors": [],
         }
 
     def _load_config(self) -> Dict:
@@ -223,16 +225,17 @@ class AutonomousOrchestrator:
         cmd = [
             sys.executable,
             str(benchmark_script),
-            "--datasets-dir", str(datasets_dir),
-            "--workers", str(max_workers),
-            "--epochs", str(epochs)
+            "--datasets-dir",
+            str(datasets_dir),
+            "--workers",
+            str(max_workers),
+            "--epochs",
+            str(epochs),
         ]
 
         # Execute training (async subprocess)
         process = await asyncio.create_subprocess_exec(
-            *cmd,
-            stdout=asyncio.subprocess.PIPE,
-            stderr=asyncio.subprocess.PIPE
+            *cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
         )
 
         stdout, stderr = await process.communicate()
@@ -248,11 +251,13 @@ class AutonomousOrchestrator:
     def _save_status(self):
         """Persist orchestrator status to JSON."""
         import json
+
         status_file = Path("data_out/autonomous_training_status.json")
         status_file.parent.mkdir(parents=True, exist_ok=True)
 
-        with open(status_file, 'w') as f:
+        with open(status_file, "w") as f:
             json.dump(self.status, f, indent=2)
+
 
 # CLI Entry Point
 if __name__ == "__main__":
@@ -280,6 +285,7 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 
+
 def train_single_dataset(args) -> Dict:
     """
     Train model on single dataset (worker function).
@@ -299,9 +305,7 @@ def train_single_dataset(args) -> Dict:
         y = df.iloc[:, -1].values
 
         # Split
-        X_train, X_test, y_train, y_test = train_test_split(
-            X, y, test_size=0.2, random_state=42
-        )
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
         # Train
         model = RandomForestClassifier(n_estimators=100, random_state=42)
@@ -310,26 +314,13 @@ def train_single_dataset(args) -> Dict:
         # Evaluate
         accuracy = accuracy_score(y_test, model.predict(X_test))
 
-        return {
-            "dataset": dataset_path.name,
-            "accuracy": accuracy,
-            "status": "success",
-            "samples": len(df)
-        }
+        return {"dataset": dataset_path.name, "accuracy": accuracy, "status": "success", "samples": len(df)}
 
     except Exception as e:
-        return {
-            "dataset": dataset_path.name,
-            "status": "failed",
-            "error": str(e)
-        }
+        return {"dataset": dataset_path.name, "status": "failed", "error": str(e)}
 
-def train_all_datasets(
-    datasets_dir: Path,
-    workers: int,
-    epochs: int,
-    output_dir: Path
-) -> List[Dict]:
+
+def train_all_datasets(datasets_dir: Path, workers: int, epochs: int, output_dir: Path) -> List[Dict]:
     """
     Train models on all datasets using multiprocessing.
 
@@ -355,6 +346,7 @@ def train_all_datasets(
 
     return results
 
+
 if __name__ == "__main__":
     import argparse
 
@@ -365,18 +357,14 @@ if __name__ == "__main__":
     parser.add_argument("--output-dir", default="data_out/benchmark")
     args = parser.parse_args()
 
-    results = train_all_datasets(
-        Path(args.datasets_dir),
-        args.workers,
-        args.epochs,
-        Path(args.output_dir)
-    )
+    results = train_all_datasets(Path(args.datasets_dir), args.workers, args.epochs, Path(args.output_dir))
 
     # Save results
     import json
+
     output_file = Path(args.output_dir) / "results.json"
     output_file.parent.mkdir(parents=True, exist_ok=True)
-    with open(output_file, 'w') as f:
+    with open(output_file, "w") as f:
         json.dump(results, f, indent=2)
 ```
 
@@ -387,6 +375,7 @@ if __name__ == "__main__":
 from qiskit import QuantumCircuit
 from qiskit_aer import AerSimulator
 from azure.quantum import Workspace
+
 
 class QuantumMLBackend:
     """
@@ -402,9 +391,7 @@ class QuantumMLBackend:
 
         if backend_type == "azure":
             self.workspace = Workspace(
-                subscription_id="YOUR_SUBSCRIPTION_ID",
-                resource_group="YOUR_RESOURCE_GROUP",
-                name="YOUR_WORKSPACE_NAME"
+                subscription_id="YOUR_SUBSCRIPTION_ID", resource_group="YOUR_RESOURCE_GROUP", name="YOUR_WORKSPACE_NAME"
             )
 
     def create_variational_circuit(self, n_qubits: int, n_layers: int) -> QuantumCircuit:
@@ -564,6 +551,7 @@ training:
 ```python
 import mlflow
 
+
 class AutonomousOrchestrator:
     async def train_models(self):
         with mlflow.start_run():
@@ -583,6 +571,7 @@ class AutonomousOrchestrator:
 from rich.live import Live
 from rich.table import Table
 
+
 def create_status_table(orchestrator):
     table = Table(title="Training Status")
     table.add_column("Metric", style="cyan")
@@ -593,6 +582,7 @@ def create_status_table(orchestrator):
     table.add_row("Models Deployed", str(orchestrator.status["models_deployed"]))
 
     return table
+
 
 # Use in orchestrator
 with Live(create_status_table(self), refresh_per_second=1):
@@ -633,6 +623,7 @@ except Exception as e:
 
 ```python
 import psutil
+
 
 def check_resources():
     cpu_percent = psutil.cpu_percent()

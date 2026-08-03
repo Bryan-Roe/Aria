@@ -56,8 +56,10 @@ from uuid import uuid4  # ADD THIS
 try:  # noqa: SIM105
     from shared.db_logging import log_chat_message_safe  # type: ignore
 except Exception:  # noqa: BLE001
+
     def log_chat_message_safe(*_a, **_kw):  # type: ignore
         return {"success": False, "skipped": True}
+
 
 # Add talk-to-ai to path so we can import chat_providers
 talk_to_ai_path = Path(__file__).resolve().parent / "talk-to-ai" / "src"
@@ -69,82 +71,82 @@ sys.path.insert(0, str(talk_to_ai_path))
 **FIND:**
 
 ```python
-        # Get completion (non-streaming for HTTP simplicity)
-        result = provider.complete(pruned_messages, stream=False)
+# Get completion (non-streaming for HTTP simplicity)
+result = provider.complete(pruned_messages, stream=False)
 
-        # If result is still a generator, consume it
-        if hasattr(result, '__iter__') and not isinstance(result, str):
-            result = ''.join(result)
+# If result is still a generator, consume it
+if hasattr(result, "__iter__") and not isinstance(result, str):
+    result = "".join(result)
 
-        response_data = {
-            "response": result,
-            "provider": info.name,
-            "model": info.model,
-            "pruning": {
-                "original_tokens": stats.original_tokens,
-                "pruned_tokens": stats.pruned_tokens,
-                "removed_count": stats.removed_count,
-                "budget": stats.budget,
-                "reserve_output_tokens": stats.reserve_output_tokens,
-            }
-        }
+response_data = {
+    "response": result,
+    "provider": info.name,
+    "model": info.model,
+    "pruning": {
+        "original_tokens": stats.original_tokens,
+        "pruned_tokens": stats.pruned_tokens,
+        "removed_count": stats.removed_count,
+        "budget": stats.budget,
+        "reserve_output_tokens": stats.reserve_output_tokens,
+    },
+}
 ```
 
 **REPLACE WITH:**
 
 ```python
-        # Get completion (non-streaming for HTTP simplicity)
-        result = provider.complete(pruned_messages, stream=False)
+# Get completion (non-streaming for HTTP simplicity)
+result = provider.complete(pruned_messages, stream=False)
 
-        # If result is still a generator, consume it
-        if hasattr(result, '__iter__') and not isinstance(result, str):
-            result = ''.join(result)
+# If result is still a generator, consume it
+if hasattr(result, "__iter__") and not isinstance(result, str):
+    result = "".join(result)
 
-        # Session handling (client may pass session_id to maintain conversation linkage)
-        session_id = req_body.get("session_id") or req.headers.get("X-Session-Id") or str(uuid4())
+# Session handling (client may pass session_id to maintain conversation linkage)
+session_id = req_body.get("session_id") or req.headers.get("X-Session-Id") or str(uuid4())
 
-        # Log latest user message (last in list) BEFORE assistant reply
-        try:
-            if messages:
-                last_user = messages[-1]
-                if last_user.get("role") == "user":
-                    log_chat_message_safe(
-                        session_id=session_id,
-                        provider=info.name,
-                        model=info.model,
-                        role="user",
-                        content=str(last_user.get("content", ""))[:4000],  # truncate safety
-                    )
-        except Exception as e:  # noqa: BLE001
-            logging.warning(f"User chat log skipped: {e}")
-
-        # Log assistant reply
-        try:
-            log_resp = log_chat_message_safe(
+# Log latest user message (last in list) BEFORE assistant reply
+try:
+    if messages:
+        last_user = messages[-1]
+        if last_user.get("role") == "user":
+            log_chat_message_safe(
                 session_id=session_id,
                 provider=info.name,
                 model=info.model,
-                role="assistant",
-                content=str(result)[:8000],  # truncate safety
+                role="user",
+                content=str(last_user.get("content", ""))[:4000],  # truncate safety
             )
-        except Exception as e:  # noqa: BLE001
-            logging.warning(f"Assistant chat log skipped: {e}")
-            log_resp = {"success": False}
+except Exception as e:  # noqa: BLE001
+    logging.warning(f"User chat log skipped: {e}")
 
-        response_data = {
-            "response": result,
-            "provider": info.name,
-            "model": info.model,
-            "session_id": session_id,
-            "conversation_id": log_resp.get("conversation_id"),
-            "pruning": {
-                "original_tokens": stats.original_tokens,
-                "pruned_tokens": stats.pruned_tokens,
-                "removed_count": stats.removed_count,
-                "budget": stats.budget,
-                "reserve_output_tokens": stats.reserve_output_tokens,
-            }
-        }
+# Log assistant reply
+try:
+    log_resp = log_chat_message_safe(
+        session_id=session_id,
+        provider=info.name,
+        model=info.model,
+        role="assistant",
+        content=str(result)[:8000],  # truncate safety
+    )
+except Exception as e:  # noqa: BLE001
+    logging.warning(f"Assistant chat log skipped: {e}")
+    log_resp = {"success": False}
+
+response_data = {
+    "response": result,
+    "provider": info.name,
+    "model": info.model,
+    "session_id": session_id,
+    "conversation_id": log_resp.get("conversation_id"),
+    "pruning": {
+        "original_tokens": stats.original_tokens,
+        "pruned_tokens": stats.pruned_tokens,
+        "removed_count": stats.removed_count,
+        "budget": stats.budget,
+        "reserve_output_tokens": stats.reserve_output_tokens,
+    },
+}
 ```
 
 **Step 3:** In the `chat_stream()` function (around line 280), add session handling:

@@ -104,15 +104,10 @@ from scripts.lr_finder import LearningRateFinder
 lr_finder = LearningRateFinder(model, optimizer, criterion)
 
 # Run range test
-results = lr_finder.range_test(
-    train_loader,
-    start_lr=1e-7,
-    end_lr=10.0,
-    num_iter=100
-)
+results = lr_finder.range_test(train_loader, start_lr=1e-7, end_lr=10.0, num_iter=100)
 
 # Use suggested LR
-suggested_lr = results['suggested_lr']
+suggested_lr = results["suggested_lr"]
 print(f"Suggested LR: {suggested_lr:.2e}")
 ```
 
@@ -191,18 +186,16 @@ API Examples:
 import requests
 
 # Single generation
-response = requests.post("http://localhost:8000/generate", json={
-    "prompt": "Explain quantum computing",
-    "max_tokens": 100,
-    "temperature": 0.7
-})
+response = requests.post(
+    "http://localhost:8000/generate",
+    json={"prompt": "Explain quantum computing", "max_tokens": 100, "temperature": 0.7},
+)
 print(response.json()["text"])
 
 # Batch generation
-response = requests.post("http://localhost:8000/batch", json={
-    "prompts": ["Question 1", "Question 2", "Question 3"],
-    "max_tokens": 50
-})
+response = requests.post(
+    "http://localhost:8000/batch", json={"prompts": ["Question 1", "Question 2", "Question 3"], "max_tokens": 50}
+)
 print(response.json()["results"])
 ```
 
@@ -417,6 +410,7 @@ For existing projects:
 
     ```python
     from scripts.training_monitor import TrainingMonitor
+
     monitor = TrainingMonitor()
     # Add logging calls in training loop
     ```
