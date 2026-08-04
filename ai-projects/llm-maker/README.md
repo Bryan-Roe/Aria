@@ -60,7 +60,7 @@ tool = maker.create_tool(
     name="calculate_fibonacci",
     description="Calculate the nth Fibonacci number",
     parameters={"n": "int"},
-    return_type="int"
+    return_type="int",
 )
 
 # Validate the tool
