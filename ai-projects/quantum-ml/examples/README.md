@@ -240,6 +240,7 @@ In `train_models.py`, replace data generation:
 
 ```python
 from sklearn.datasets import make_blobs, make_classification
+
 X, y = make_blobs(n_samples=200, centers=2, random_state=42)
 ```
 

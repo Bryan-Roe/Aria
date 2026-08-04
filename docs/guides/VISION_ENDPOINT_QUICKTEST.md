@@ -15,13 +15,10 @@ import base64
 import requests
 
 # Test with any image
-with open('test_image.jpg', 'rb') as f:
+with open("test_image.jpg", "rb") as f:
     img_b64 = base64.b64encode(f.read()).decode()
 
-response = requests.post(
-    'http://localhost:7071/api/vision/infer',
-    json={'image': img_b64}
-)
+response = requests.post("http://localhost:7071/api/vision/infer", json={"image": img_b64})
 
 print(response.json())
 ```
