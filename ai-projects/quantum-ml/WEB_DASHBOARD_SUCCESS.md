@@ -207,7 +207,7 @@ GET  /api/results/:file         # Get detailed results
 Edit `web_app.py` last line:
 
 ```python
-app.run(host='0.0.0.0', port=5001, debug=True, threaded=True)
+app.run(host="0.0.0.0", port=5001, debug=True, threaded=True)
 ```
 
 ### Add Custom Dataset
@@ -221,9 +221,9 @@ Edit `create_quantum_circuit()` in `web_app.py`:
 
 ```python
 def create_quantum_circuit(n_qubits, n_layers):
-    dev = qml.device('default.qubit', wires=n_qubits)
+    dev = qml.device("default.qubit", wires=n_qubits)
 
-    @qml.qnode(dev, interface='autograd')
+    @qml.qnode(dev, interface="autograd")
     def circuit(inputs, weights):
         # Your custom quantum circuit here
         qml.AmplitudeEmbedding(features=inputs, wires=range(n_qubits))

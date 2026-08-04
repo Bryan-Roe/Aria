@@ -70,6 +70,7 @@ if _any_word_in_text(_JUMP_KEYWORDS, cmd):
 ```python
 _connection_pool = []
 
+
 def _get_conn():
     """Get connection from pool or create new one."""
     # Try to reuse existing connection
@@ -90,6 +91,7 @@ def _get_conn():
 
     # Create new connection
     return pyodbc.connect(conn_str, timeout=4)
+
 
 def _return_conn(conn):
     """Return connection to pool for reuse."""
@@ -142,7 +144,7 @@ for model_id in model_ids:
 ```python
 # OLD: Memory = file size (potentially GB)
 lines = f.readlines()
-return {'logs': ''.join(lines[-500:])}
+return {"logs": "".join(lines[-500:])}
 ```
 
 **Solution**: Block-based streaming for large files
@@ -152,10 +154,10 @@ return {'logs': ''.join(lines[-500:])}
 if file_size <= 65536:
     # Small files: fast in-memory read
     lines = f.readlines()
-    return {'logs': ''.join(lines[-500:])}
+    return {"logs": "".join(lines[-500:])}
 else:
     # Large files: stream backwards in 32KB blocks
-    with open(log_file, 'rb') as f:
+    with open(log_file, "rb") as f:
         f.seek(0, 2)  # End
         # Read backwards until we have 500 lines
         # ... (see implementation for details)
@@ -229,11 +231,11 @@ for name in status_map:
 
 ```python
 # ❌ Avoid: Repeated any() with list comprehensions
-if any(word in text for word in ['jump', 'leap', 'hop']):
+if any(word in text for word in ["jump", "leap", "hop"]):
     pass
 
 # ✅ Use: Pre-compiled frozensets with set operations
-_KEYWORDS = frozenset(['jump', 'leap', 'hop'])
+_KEYWORDS = frozenset(["jump", "leap", "hop"])
 if _any_word_in_text(_KEYWORDS, text):
     pass
 ```
@@ -275,7 +277,7 @@ lines = f.readlines()
 process_last_n(lines[-100:])
 
 # ✅ Use: Stream or block-based reading for large files
-if file_size < 64*1024:
+if file_size < 64 * 1024:
     lines = f.readlines()  # Fast path for small files
 else:
     lines = stream_tail(f, 100)  # Efficient for large files

@@ -42,8 +42,8 @@ This comprehensive work package includes:
 # Users can now tune caching behavior per environment
 config = QuantumLLMConfig(
     cache_enabled=True,
-    cache_max_size=512,      # Larger cache for high-traffic services
-    cache_ttl_seconds=300,   # Shorter TTL for real-time updates
+    cache_max_size=512,  # Larger cache for high-traffic services
+    cache_ttl_seconds=300,  # Shorter TTL for real-time updates
 )
 ```
 

@@ -29,12 +29,14 @@ result = vi.predict(img)
 from functools import lru_cache
 import hashlib
 
+
 @lru_cache(maxsize=50)
 def _fetch_image_cached(url: str, cache_buster: str = None):
     """Fetch image with LRU cache. cache_buster allows invalidation."""
     response = requests.get(url, timeout=10)
     response.raise_for_status()
     return response.content
+
 
 # Usage
 image_bytes = _fetch_image_cached(image_url)
@@ -68,6 +70,7 @@ def _cosine(a: Sequence[float], b: Sequence[float]) -> float:
         return 0.0
     return dot / (na * nb)
 
+
 # Loop over all embeddings
 for r in rows:
     emb = _deserialize_f32(r.EmbeddingVector, dim)
@@ -79,9 +82,11 @@ for r in rows:
 ```python
 try:
     import numpy as np
+
     _HAS_NUMPY = True
 except ImportError:
     _HAS_NUMPY = False
+
 
 def _cosine_batch(query: Sequence[float], embeddings: List[Sequence[float]]) -> List[float]:
     """Vectorized cosine similarity using NumPy if available."""
@@ -135,6 +140,7 @@ import time
 _file_cache = {}
 _CACHE_TTL = 10  # seconds
 
+
 def _exists_cached(path: str) -> bool:
     """Check file existence with 10s TTL cache."""
     now = time.time()
@@ -180,8 +186,10 @@ To identify the next set of optimizations, consider:
 import time
 import functools
 
+
 def timed(func):
     """Decorator to measure and log function execution time."""
+
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
         start = time.perf_counter()
@@ -190,6 +198,7 @@ def timed(func):
         if duration > 0.1:  # Log slow operations
             print(f"⚠️ {func.__name__} took {duration:.3f}s")
         return result
+
     return wrapper
 ```
 
@@ -206,6 +215,7 @@ Apply to:
 # In shared/sql_engine.py or wherever SQL is executed
 import time
 import logging
+
 
 def execute_with_timing(cursor, query, *args):
     start = time.perf_counter()
@@ -239,17 +249,17 @@ Look for functions with:
 Consider adding `/api/performance/metrics` endpoint:
 
 ```python
-@app.route('/api/performance/metrics')
+@app.route("/api/performance/metrics")
 def performance_metrics():
     return {
         "connection_pool": {
             "size": len(_connection_pool),
             "max_size": _MAX_POOL_SIZE,
-            "utilization": len(_connection_pool) / _MAX_POOL_SIZE
+            "utilization": len(_connection_pool) / _MAX_POOL_SIZE,
         },
         "keyword_cache_hits": _keyword_cache_hits,  # If implemented
-        "regex_pattern_count": len([k for k in globals() if k.startswith('_RE_')]),
-        "recent_slow_operations": get_slow_operations_log()
+        "regex_pattern_count": len([k for k in globals() if k.startswith("_RE_")]),
+        "recent_slow_operations": get_slow_operations_log(),
     }
 ```
 
