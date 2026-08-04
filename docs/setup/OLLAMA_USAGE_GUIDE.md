@@ -207,13 +207,11 @@ from openai import OpenAI
 
 client = OpenAI(
     base_url="http://127.0.0.1:11434/v1",
-    api_key="ollama"  # Dummy key, not validated
+    api_key="ollama",  # Dummy key, not validated
 )
 
 response = client.chat.completions.create(
-    model="tinyllama",
-    messages=[{"role": "user", "content": "Hello!"}],
-    max_tokens=100
+    model="tinyllama", messages=[{"role": "user", "content": "Hello!"}], max_tokens=100
 )
 
 print(response.choices[0].message.content)

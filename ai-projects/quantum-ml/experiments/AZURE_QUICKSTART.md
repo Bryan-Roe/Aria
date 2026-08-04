@@ -173,12 +173,7 @@ azure = AzureQuantumIntegration()
 workspace = azure.connect()
 
 # Submit to IonQ simulator (FREE)
-job = azure.submit_circuit(
-    circuit=circuit,
-    shots=100,
-    job_name="my_first_quantum_job",
-    backend="ionq.simulator"
-)
+job = azure.submit_circuit(circuit=circuit, shots=100, job_name="my_first_quantum_job", backend="ionq.simulator")
 
 print(f"Job submitted: {job.id}")
 

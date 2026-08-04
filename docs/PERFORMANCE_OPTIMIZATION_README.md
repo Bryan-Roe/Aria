@@ -79,11 +79,13 @@ Performance Benchmark:
 
 ```python
 # Define keyword sets at module level
-_ACTION_KEYWORDS = frozenset(['jump', 'run', 'dance'])
+_ACTION_KEYWORDS = frozenset(["jump", "run", "dance"])
+
 
 def _any_word_in_text(keywords: frozenset, text: str) -> bool:
     """Fast O(n) keyword matching using set intersection."""
     return bool(keywords & set(text.split()))
+
 
 # Usage
 if _any_word_in_text(_ACTION_KEYWORDS, user_command):
@@ -94,6 +96,7 @@ if _any_word_in_text(_ACTION_KEYWORDS, user_command):
 
 ```python
 _connection_pool = []
+
 
 def _get_conn():
     """Get connection from pool or create new."""
@@ -109,6 +112,7 @@ def _get_conn():
             except Exception:
                 pass
     return create_new_connection()
+
 
 def _return_conn(conn):
     """Return connection to pool."""
@@ -143,7 +147,7 @@ def read_tail(filepath: Path, max_lines: int = 500):
             return f.readlines()[-max_lines:]
 
     # Large file: stream backwards
-    with open(filepath, 'rb') as f:
+    with open(filepath, "rb") as f:
         f.seek(0, 2)  # End
         remaining = f.tell()
         chunks = []
@@ -155,8 +159,8 @@ def read_tail(filepath: Path, max_lines: int = 500):
             remaining -= block_size
 
             # Check if we have enough lines
-            decoded = b''.join(chunks).decode('utf-8', errors='ignore')
-            if decoded.count('\n') >= max_lines:
+            decoded = b"".join(chunks).decode("utf-8", errors="ignore")
+            if decoded.count("\n") >= max_lines:
                 break
 
         return decoded.splitlines(keepends=True)[-max_lines:]

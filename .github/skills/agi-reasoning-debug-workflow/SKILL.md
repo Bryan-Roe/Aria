@@ -87,9 +87,9 @@ If decomposition steps don't match intent, check `_decompose_task()` intent dete
 ### Step 6 — Inspect memory limits
 
 ```python
-MAX_HISTORY_SIZE    = 50   # conversation_history entries — prune if exceeded
+MAX_HISTORY_SIZE = 50  # conversation_history entries — prune if exceeded
 MAX_REASONING_CHAINS = 10  # ReasoningStep records — old chains are dropped
-MAX_GOALS           = 5    # active goals in AGIContext
+MAX_GOALS = 5  # active goals in AGIContext
 
 # If reasoning feels repetitive: MAX_REASONING_CHAINS may be saturated
 # Clear via: agi_provider.context.reasoning_chains.clear()

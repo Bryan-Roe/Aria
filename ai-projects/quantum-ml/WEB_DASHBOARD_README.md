@@ -215,7 +215,7 @@ If port 5000 is busy:
 
 ```python
 # Edit web_app.py, change last line:
-app.run(host='0.0.0.0', port=5001, debug=True, threaded=True)
+app.run(host="0.0.0.0", port=5001, debug=True, threaded=True)
 ```
 
 ### Dependencies Not Found
@@ -257,9 +257,9 @@ Edit `create_quantum_circuit()` in `web_app.py`:
 
 ```python
 def create_quantum_circuit(n_qubits, n_layers):
-    dev = qml.device('default.qubit', wires=n_qubits)
+    dev = qml.device("default.qubit", wires=n_qubits)
 
-    @qml.qnode(dev, interface='autograd')
+    @qml.qnode(dev, interface="autograd")
     def circuit(inputs, weights):
         # Your custom circuit here
         # Example: Add RX rotation layer
@@ -286,18 +286,21 @@ Use the REST API programmatically:
 import requests
 
 # Start training
-response = requests.post('http://localhost:5000/api/train/start', json={
-    'dataset': 'heart',
-    'n_qubits': 4,
-    'n_layers': 2,
-    'learning_rate': 0.01,
-    'duration_minutes': 10,
-    'batch_size': 32
-})
-session_id = response.json()['session_id']
+response = requests.post(
+    "http://localhost:5000/api/train/start",
+    json={
+        "dataset": "heart",
+        "n_qubits": 4,
+        "n_layers": 2,
+        "learning_rate": 0.01,
+        "duration_minutes": 10,
+        "batch_size": 32,
+    },
+)
+session_id = response.json()["session_id"]
 
 # Poll status
-status = requests.get(f'http://localhost:5000/api/train/status/{session_id}').json()
+status = requests.get(f"http://localhost:5000/api/train/status/{session_id}").json()
 print(f"Epoch {status['current_epoch']}, Accuracy: {status['best_val_acc']}")
 ```
 
