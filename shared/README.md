@@ -43,6 +43,7 @@ detect_provider = chat_api.detect_provider
 # In function_app.py:
 try:
     from shared.infrastructure.sql_engine import sql_health
+
     db_available = True
 except ImportError:
     db_available = False
@@ -97,7 +98,8 @@ except ImportError:
 # In function_app.py or endpoints:
 try:
     from shared.premium.subscription_manager import check_subscription
-    feature_available = check_subscription(user_id, 'quantum_jobs')
+
+    feature_available = check_subscription(user_id, "quantum_jobs")
 except ImportError:
     feature_available = False
 ```
@@ -173,7 +175,7 @@ Each tier should have a clear `__init__.py` that exports public APIs:
 # shared/domain/__init__.py
 from .chat_providers import detect_provider, BaseChatProvider
 
-__all__ = ['detect_provider', 'BaseChatProvider']
+__all__ = ["detect_provider", "BaseChatProvider"]
 ```
 
 ---
@@ -189,6 +191,7 @@ from token_utils import prune_messages
 
 # ✓ New: use registry
 from shared.core.module_registry import AIProjectsRegistry
+
 registry = AIProjectsRegistry()
 chat_api = registry.chat_cli()
 detect_provider = chat_api.detect_provider
@@ -199,12 +202,13 @@ prune_messages = chat_api.token_utils.prune_messages
 
 ```python
 # ❌ Old: scattered sys.path
-sys.path.insert(0, 'ai-projects/chat-cli/src')
-sys.path.insert(0, 'ai-projects/quantum-ml/src')
+sys.path.insert(0, "ai-projects/chat-cli/src")
+sys.path.insert(0, "ai-projects/quantum-ml/src")
 
 # ✓ New: centralized registration
 from shared.core.module_registry import AIProjectsRegistry
-AIProjectsRegistry.register_paths(['chat-cli', 'quantum-ml'])
+
+AIProjectsRegistry.register_paths(["chat-cli", "quantum-ml"])
 ```
 
 ---

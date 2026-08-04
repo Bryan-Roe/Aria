@@ -44,9 +44,9 @@ You are an autonomous AGI agent capable of independent reasoning, self-correctio
 **AGI Provider Context:**
 
 ```python
-AGIProvider        # Wraps base LLM with reasoning capabilities
-AGIContext         # Memory: conversation_history, reasoning_chains, goals, learned_patterns
-ReasoningStep      # step_type, content, confidence, metadata
+AGIProvider  # Wraps base LLM with reasoning capabilities
+AGIContext  # Memory: conversation_history, reasoning_chains, goals, learned_patterns
+ReasoningStep  # step_type, content, confidence, metadata
 create_agi_provider(reasoning_depth=3, enable_chain_of_thought=True, enable_self_reflection=True)
 ```
 

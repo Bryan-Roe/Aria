@@ -110,7 +110,7 @@ result = maker.create_website(
     name="my-portfolio",
     description="Personal portfolio with about and contact pages",
     pages=["index", "about", "contact"],
-    features=["responsive", "dark-mode"]
+    features=["responsive", "dark-mode"],
 )
 # result = {
 #   "success": True,

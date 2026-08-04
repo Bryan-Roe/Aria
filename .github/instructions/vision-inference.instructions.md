@@ -17,10 +17,10 @@ class TinyConvNet(nn.Module):
 ## Inference Pipeline
 
 ```python
-vi = VisionInference()                      # Auto-loads latest checkpoint
-result = vi.predict(pil_image)              # PIL Image input
-result = vi.predict_base64(b64_string)      # Base64 string input
-result = vi.predict_file(file_path)         # File path input
+vi = VisionInference()  # Auto-loads latest checkpoint
+result = vi.predict(pil_image)  # PIL Image input
+result = vi.predict_base64(b64_string)  # Base64 string input
+result = vi.predict_file(file_path)  # File path input
 # Returns: {label: str, confidence: float, scores: Dict[str, float]}
 ```
 
@@ -41,12 +41,7 @@ Search order for `.pt` files:
 Checkpoint format:
 
 ```python
-{
-    'model_state_dict': OrderedDict,
-    'class_names': ['happy', 'sad', ...],
-    'epoch': int,
-    'accuracy': float
-}
+{"model_state_dict": OrderedDict, "class_names": ["happy", "sad", ...], "epoch": int, "accuracy": float}
 ```
 
 ## Coding Conventions

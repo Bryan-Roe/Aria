@@ -184,10 +184,7 @@ python -c "from batch_evaluator import BatchEvaluator"
 ### Using Performance Utilities
 
 ```python
-from shared.performance_utils import (
-    tail_file, stream_jsonl, find_json_in_output,
-    FileCache, timeit, memoize_with_ttl
-)
+from shared.performance_utils import tail_file, stream_jsonl, find_json_in_output, FileCache, timeit, memoize_with_ttl
 
 # Memory-efficient log tailing
 logs = tail_file(Path("training.log"), max_lines=50)
@@ -197,14 +194,16 @@ for record in stream_jsonl(Path("data.jsonl")):
     process(record)
 
 # Extract JSON from subprocess output
-result = subprocess.run(['./script'], capture_output=True, text=True)
-metrics = find_json_in_output(result.stdout, key='metrics')
+result = subprocess.run(["./script"], capture_output=True, text=True)
+metrics = find_json_in_output(result.stdout, key="metrics")
+
 
 # Time expensive functions
 @timeit
 def expensive_operation():
     # work here
     pass
+
 
 # Cache with TTL
 @memoize_with_ttl(ttl_seconds=300)

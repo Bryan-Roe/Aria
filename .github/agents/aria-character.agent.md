@@ -95,9 +95,9 @@ Aria uses `[aria:action:param]` tags embedded in text responses:
 
 ```python
 stage_state = {
-    'aria': {'position': {'x': 15, 'y': 20}, 'expression': 'neutral', 'held_object': None, 'facing': 'right'},
-    'objects': {},       # Dynamic object registry
-    'environment': {'table': {...}, 'stage_bounds': {'width': 100, 'height': 100}}
+    "aria": {"position": {"x": 15, "y": 20}, "expression": "neutral", "held_object": None, "facing": "right"},
+    "objects": {},  # Dynamic object registry
+    "environment": {"table": {...}, "stage_bounds": {"width": 100, "height": 100}},
 }
 ```
 

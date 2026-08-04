@@ -290,10 +290,10 @@ export LMSTUDIO_MODEL="local-model"
 Edit [autonomous_code_agent.py](./scripts/autonomous_code_agent.py):
 
 ```python
-MAX_FILE_SIZE = 100_000              # Max bytes to read
-MAX_CHANGES_PER_FILE = 5             # File modification limit
-MAX_TASK_TOKENS = 2000               # Planning token budget
-MIN_TEST_PASSING_RATE = 0.8          # 80% tests must pass
+MAX_FILE_SIZE = 100_000  # Max bytes to read
+MAX_CHANGES_PER_FILE = 5  # File modification limit
+MAX_TASK_TOKENS = 2000  # Planning token budget
+MIN_TEST_PASSING_RATE = 0.8  # 80% tests must pass
 ```
 
 ## Features
@@ -488,7 +488,7 @@ import sys
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 if str(REPO_ROOT) not in sys.path:
-  sys.path.insert(0, str(REPO_ROOT))
+    sys.path.insert(0, str(REPO_ROOT))
 
 # Now safe to import local packages, e.g.:
 from shared.json_utils import load_status_json
