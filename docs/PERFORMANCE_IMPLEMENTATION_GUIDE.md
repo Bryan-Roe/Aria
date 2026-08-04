@@ -43,17 +43,17 @@ Add this near the top of the file, after imports:
 # Performance optimization: Pre-compile action keywords
 # Used by _extract_action_position() - converts ~20 list creations per call to 0
 _ACTION_KEYWORDS = {
-    'jump': (('jump', 'leap', 'hop'), '[aria:position:50:60]'),
-    'dance': (('dance', 'spin', 'twirl'), '[aria:position:50:50]'),
-    'wave': (('wave', 'greet', 'hello', 'hi'), '[aria:position:30:70]'),
-    'look': (('look', 'see', 'watch', 'observe'), None),  # Special handling
-    'sit': (('sit', 'rest', 'relax'), None),  # Special handling
-    'run': (('run', 'race', 'sprint'), '[aria:position:85:70]'),
-    'hide': (('hide', 'crouch', 'duck'), '[aria:position:10:75]'),
-    'present': (('present', 'show', 'display'), '[aria:position:50:50]'),
-    'think': (('think', 'wonder', 'ponder'), '[aria:position:25:50]'),
-    'walk_left': (('walk left', 'go left', 'left'), '[aria:position:20:70]'),
-    'walk_right': (('walk right', 'go right', 'right'), '[aria:position:80:70]'),
+    "jump": (("jump", "leap", "hop"), "[aria:position:50:60]"),
+    "dance": (("dance", "spin", "twirl"), "[aria:position:50:50]"),
+    "wave": (("wave", "greet", "hello", "hi"), "[aria:position:30:70]"),
+    "look": (("look", "see", "watch", "observe"), None),  # Special handling
+    "sit": (("sit", "rest", "relax"), None),  # Special handling
+    "run": (("run", "race", "sprint"), "[aria:position:85:70]"),
+    "hide": (("hide", "crouch", "duck"), "[aria:position:10:75]"),
+    "present": (("present", "show", "display"), "[aria:position:50:50]"),
+    "think": (("think", "wonder", "ponder"), "[aria:position:25:50]"),
+    "walk_left": (("walk left", "go left", "left"), "[aria:position:20:70]"),
+    "walk_right": (("walk right", "go right", "right"), "[aria:position:80:70]"),
 }
 ```
 
@@ -68,46 +68,47 @@ def _extract_action_position(cmd: str, world_state: Dict) -> Optional[str]:
     Uses pre-compiled keyword tuples to avoid creating lists on every call.
     """
     # Get table position for context-dependent positioning
-    table_pos = {'x': 60, 'y': 50}  # Default
-    for obj_name, obj_data in world_state.get('objects', {}).items():
-        if 'table' in obj_name.lower():
-            if isinstance(obj_data, dict) and 'position' in obj_data:
-                table_pos = obj_data['position']
+    table_pos = {"x": 60, "y": 50}  # Default
+    for obj_name, obj_data in world_state.get("objects", {}).items():
+        if "table" in obj_name.lower():
+            if isinstance(obj_data, dict) and "position" in obj_data:
+                table_pos = obj_data["position"]
                 break
 
     # Check for objects in command (pickup/drop context)
-    for obj_name, obj_data in world_state.get('objects', {}).items():
+    for obj_name, obj_data in world_state.get("objects", {}).items():
         if obj_name.lower() in cmd:
-            if any(word in cmd for word in ('pick', 'get', 'grab', 'take')):
-                obj_pos = obj_data.get('position', {})
-                if isinstance(obj_pos, dict) and 'x' in obj_pos and 'y' in obj_pos:
-                    return f'[aria:position:{max(10, obj_pos["x"] - 10)}:{obj_pos["y"] + 10}]'
+            if any(word in cmd for word in ("pick", "get", "grab", "take")):
+                obj_pos = obj_data.get("position", {})
+                if isinstance(obj_pos, dict) and "x" in obj_pos and "y" in obj_pos:
+                    return f"[aria:position:{max(10, obj_pos['x'] - 10)}:{obj_pos['y'] + 10}]"
 
     # Action-based positioning (optimized with pre-compiled keywords)
     for action, (keywords, position) in _ACTION_KEYWORDS.items():
         if any(k in cmd for k in keywords):
             # Handle special cases
-            if action == 'look' and 'table' in cmd:
-                return '[aria:position:40:60]'
-            elif action == 'look':
-                return '[aria:position:20:40]'
-            elif action == 'sit':
-                return f'[aria:position:{table_pos["x"] - 5}:{table_pos["y"] + 35}]'
+            if action == "look" and "table" in cmd:
+                return "[aria:position:40:60]"
+            elif action == "look":
+                return "[aria:position:20:40]"
+            elif action == "sit":
+                return f"[aria:position:{table_pos['x'] - 5}:{table_pos['y'] + 35}]"
 
             # Return standard position
             if position:
                 return position
 
     # Handle add/create commands
-    if any(word in cmd for word in ('add', 'create', 'spawn')):
-        return f'[aria:position:{table_pos["x"] - 15}:{table_pos["y"] + 20}]'
+    if any(word in cmd for word in ("add", "create", "spawn")):
+        return f"[aria:position:{table_pos['x'] - 15}:{table_pos['y'] + 20}]"
 
     # Default: context-aware positioning
     import hashlib
+
     pos_hash = int(hashlib.md5(cmd.encode()).hexdigest()[:4], 16)
     x = 30 + (pos_hash % 40)
     y = 50 + ((pos_hash // 40) % 30)
-    return f'[aria:position:{x}:{y}]'
+    return f"[aria:position:{x}:{y}]"
 ```
 
 #### Step 3: Test the changes
@@ -119,11 +120,17 @@ def test_keyword_performance():
     import time
 
     test_commands = [
-        "jump high", "dance around", "wave hello", "look at table",
-        "sit down", "run fast", "hide quickly", "think deeply"
+        "jump high",
+        "dance around",
+        "wave hello",
+        "look at table",
+        "sit down",
+        "run fast",
+        "hide quickly",
+        "think deeply",
     ] * 100  # 800 total commands
 
-    world_state = {'objects': {'table': {'position': {'x': 60, 'y': 50}}}}
+    world_state = {"objects": {"table": {"position": {"x": 60, "y": 50}}}}
 
     start = time.perf_counter()
     for cmd in test_commands:
@@ -131,7 +138,8 @@ def test_keyword_performance():
     elapsed = time.perf_counter() - start
 
     print(f"Processed {len(test_commands)} commands in {elapsed:.3f}s")
-    print(f"Average: {elapsed/len(test_commands)*1000:.2f}ms per command")
+    print(f"Average: {elapsed / len(test_commands) * 1000:.2f}ms per command")
+
 
 # Run test
 test_keyword_performance()
@@ -183,11 +191,7 @@ Replace lines 305-312:
 def compare_models(self, model_ids: List[str]) -> Dict:
     """Compare specific models side-by-side (optimized O(1) lookup)."""
     # O(1) lookup per model instead of O(n) linear search
-    comparison = [
-        self._results_index[model_id]
-        for model_id in model_ids
-        if model_id in self._results_index
-    ]
+    comparison = [self._results_index[model_id] for model_id in model_ids if model_id in self._results_index]
 
     return {
         "models": [r.model_id for r in comparison],
@@ -201,7 +205,7 @@ def compare_models(self, model_ids: List[str]) -> Dict:
                 "error": r.error,
             }
             for r in comparison
-        ]
+        ],
     }
 ```
 
@@ -224,7 +228,7 @@ def test_compare_performance():
             status="succeeded",
             metrics={"accuracy": 0.85},
             duration=10.0,
-            error=None
+            error=None,
         )
         evaluator.add_result(result)
 
@@ -237,7 +241,7 @@ def test_compare_performance():
     elapsed = time.perf_counter() - start
 
     print(f"100 comparisons in {elapsed:.3f}s")
-    print(f"Average: {elapsed/100*1000:.2f}ms per comparison")
+    print(f"Average: {elapsed / 100 * 1000:.2f}ms per comparison")
 ```
 
 Expected: <1ms per comparison (vs 10-50ms before for large result sets)
@@ -326,12 +330,7 @@ def store_embeddings_batch(embeddings: List[Tuple[str, Sequence[float], str]]) -
             if not message_id or not embedding:
                 continue
             blob = _serialize_f32(embedding)
-            values.append((
-                message_id,
-                model or "unknown-model",
-                len(embedding),
-                blob
-            ))
+            values.append((message_id, model or "unknown-model", len(embedding), blob))
 
         if not values:
             return 0
@@ -341,7 +340,7 @@ def store_embeddings_batch(embeddings: List[Tuple[str, Sequence[float], str]]) -
             """INSERT INTO dbo.ChatMessageEmbeddings
                (MessageId, EmbeddingModel, EmbeddingDim, EmbeddingVector)
                VALUES (?,?,?,?)""",
-            values
+            values,
         )
         conn.commit()
         return len(values)
@@ -433,12 +432,7 @@ def _get_venv_info_cached(venv_path: str, cache_slot: int) -> Dict:
     Cache invalidates every 5 minutes via cache_slot parameter.
     """
     venv_python = Path(venv_path)
-    venv_info = {
-        "path": str(venv_python),
-        "exists": venv_python.exists(),
-        "packages": {},
-        "error": None
-    }
+    venv_info = {"path": str(venv_python), "exists": venv_python.exists(), "packages": {}, "error": None}
 
     if not venv_info["exists"]:
         return venv_info
@@ -453,12 +447,7 @@ def _get_venv_info_cached(venv_path: str, cache_slot: int) -> Dict:
             "\n\ttry:\n\t\tvers[m]=md.version(m)\n\texcept Exception:\n\t\tvers[m]=None;"
             "print(json.dumps({'available':avail,'versions':vers}))"
         )
-        proc = subprocess.run(
-            [str(venv_python), "-c", code],
-            capture_output=True,
-            text=True,
-            timeout=12
-        )
+        proc = subprocess.run([str(venv_python), "-c", code], capture_output=True, text=True, timeout=12)
 
         if proc.returncode == 0:
             data = json.loads(proc.stdout.strip() or "{}")
@@ -492,6 +481,7 @@ venv_info = _get_venv_info_cached(str(venv_python), current_cache_slot)
 # Test cache performance
 import time
 
+
 def test_venv_cache():
     """Test venv info caching."""
     # First call (cache miss)
@@ -506,7 +496,8 @@ def test_venv_cache():
 
     print(f"First call (miss): {elapsed1:.3f}s")
     print(f"Second call (hit): {elapsed2:.3f}s")
-    print(f"Speedup: {elapsed1/elapsed2:.0f}x")
+    print(f"Speedup: {elapsed1 / elapsed2:.0f}x")
+
 
 test_venv_cache()
 ```
@@ -528,6 +519,7 @@ from scripts.batch_evaluator import BatchEvaluator, EvaluationResult
 from aria_web.server import _extract_action_position
 from shared.chat_memory import store_embeddings_batch
 
+
 class TestPerformanceOptimizations:
     """Test performance improvements."""
 
@@ -538,11 +530,7 @@ class TestPerformanceOptimizations:
         # Add 100 results
         for i in range(100):
             result = EvaluationResult(
-                model_id=f"model_{i}",
-                model_type="test",
-                status="succeeded",
-                metrics={"acc": 0.9},
-                duration=1.0
+                model_id=f"model_{i}", model_type="test", status="succeeded", metrics={"acc": 0.9}, duration=1.0
             )
             evaluator.add_result(result)
 
@@ -571,10 +559,7 @@ class TestPerformanceOptimizations:
 
     def test_batch_embedding_storage(self):
         """Test batch embedding API."""
-        embeddings = [
-            (f"msg_{i}", [0.1] * 128, "test-model")
-            for i in range(10)
-        ]
+        embeddings = [(f"msg_{i}", [0.1] * 128, "test-model") for i in range(10)]
 
         start = time.perf_counter()
         count = store_embeddings_batch(embeddings)
@@ -614,13 +599,8 @@ import time
 import statistics
 from typing import Callable, List
 
-def benchmark(
-    name: str,
-    func: Callable,
-    *args,
-    iterations: int = 100,
-    warmup: int = 10
-) -> float:
+
+def benchmark(name: str, func: Callable, *args, iterations: int = 100, warmup: int = 10) -> float:
     """Benchmark a function."""
     # Warm-up
     for _ in range(warmup):
@@ -638,12 +618,13 @@ def benchmark(
     std_dev = statistics.stdev(times) if len(times) > 1 else 0
 
     print(f"{name}:")
-    print(f"  Mean: {mean_time*1000:.3f}ms")
-    print(f"  StdDev: {std_dev*1000:.3f}ms")
-    print(f"  Min: {min(times)*1000:.3f}ms")
-    print(f"  Max: {max(times)*1000:.3f}ms")
+    print(f"  Mean: {mean_time * 1000:.3f}ms")
+    print(f"  StdDev: {std_dev * 1000:.3f}ms")
+    print(f"  Min: {min(times) * 1000:.3f}ms")
+    print(f"  Max: {max(times) * 1000:.3f}ms")
 
     return mean_time
+
 
 if __name__ == "__main__":
     print("Performance Optimization Benchmarks")

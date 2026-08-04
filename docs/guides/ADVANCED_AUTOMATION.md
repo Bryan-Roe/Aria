@@ -498,7 +498,7 @@ Auto-scheduler disables jobs after consecutive failures:
 
 ```python
 max_consecutive_failures: 3  # Disable after 3 failures
-notify_on_failure: true      # Send notification
+notify_on_failure: true  # Send notification
 ```
 
 ## Monitoring & Notifications
