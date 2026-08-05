@@ -67,7 +67,7 @@ The script already uses the Wine dataset for demo. Modify `load_your_data()` to 
 # In train_custom_dataset.py, replace the demo code with:
 df = pd.read_csv("../datasets/quantum/heart_disease.csv")
 X = df.iloc[:, :-1].values  # All features except last
-y = df.iloc[:, -1].values   # Last column as label
+y = df.iloc[:, -1].values  # Last column as label
 return X, y
 ```
 
