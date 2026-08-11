@@ -4,14 +4,14 @@
 # Already installed in parent: openai, azure-openai
 
 # Code Safety and Analysis
-ast-grep-py>=0.44.1
-astroid>=4.1.2
+ast-grep-py>=0.45.1
+astroid>=4.3.0
 
 # Sandboxed Execution
-RestrictedPython>=8.3
+RestrictedPython>=8.4
 
 # MCP Server (Model Context Protocol)
-mcp>=1.28.1
+mcp>=2.0.0
 
 # Utilities
 pyyaml>=6.0.3
