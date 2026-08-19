@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=83.0.0", "wheel>=0.47.0"]
+requires = ["setuptools>=84.0.0", "wheel>=0.48.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -9,7 +9,7 @@ description = "Aria — Interactive AI Character Platform"
 requires-python = ">=3.10"
 dependencies = [
   "pydantic>=2.13.4",
-  "pydantic-settings>=2.14.2",
+  "pydantic-settings>=2.15.0",
   "tenacity>=9.1.4",
 ]
 
@@ -20,13 +20,13 @@ dev = [
   "pytest-asyncio>=1.4.0",
   "pytest-xdist>=3.8.0",
   "watchdog>=6.0.0",
-  "pre-commit>=4.6.0",
-  "ruff>=0.15.21",
+  "pre-commit>=4.6.2",
+  "ruff>=0.16.3",
   "black>=26.5.1",
   "isort>=8.0.1",
-  "mypy>=2.2.0",
+  "mypy>=2.3.1",
   "pydantic>=2.13.4",
-  "pydantic-settings>=2.14.2",
+  "pydantic-settings>=2.15.0",
   "tenacity>=9.1.4",
 ]
 
